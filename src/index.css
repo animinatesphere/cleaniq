@@ -17,11 +17,16 @@
     --foreground: #0f172a;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
 }
 
@@ -32,16 +37,30 @@
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
 
+  .glass-dark {
+    background: rgba(0, 59, 42, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
   .btn-primary {
-    @apply px-6 py-3 rounded-full bg-primary text-white font-semibold transition-all hover:bg-primary-dark hover:scale-105 active:scale-95 shadow-lg shadow-primary/20;
+    @apply px-6 py-3 rounded-full bg-primary text-white font-bold transition-all hover:bg-primary-dark hover:scale-105 active:scale-95 shadow-xl shadow-primary/20 flex items-center justify-center gap-2;
   }
 
   .btn-secondary {
-    @apply px-6 py-3 rounded-full bg-secondary text-primary font-semibold transition-all hover:bg-secondary/80 hover:scale-105 active:scale-95 shadow-lg shadow-secondary/20;
+    @apply px-6 py-3 rounded-full bg-secondary text-primary font-bold transition-all hover:bg-secondary/80 hover:scale-105 active:scale-95 shadow-xl shadow-secondary/20 flex items-center justify-center gap-2;
   }
 
   .section-padding {
     @apply py-20 px-6 md:px-12 lg:px-24;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+  }
+
+  .card-hover {
+    @apply transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10;
   }
 }
 
@@ -61,4 +80,14 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #003B2A;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
