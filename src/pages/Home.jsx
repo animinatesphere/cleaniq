@@ -4,7 +4,7 @@ import { ShieldCheck, Leaf, Clock, Users, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useRegion } from "../context/RegionContext";
 import log from "../assets/Cleaniq services/1st Post.jpg";
-import log1 from "../assets/Cleaniq services/2nd Post.jpg";
+import log1 from "../assets/Cleaniq services/2nd post.jpg";
 import log2 from "../assets/Cleaniq services/3rd Post.jpg";
 import log3 from "../assets/Cleaniq services/4th Post.jpg";
 import log4 from "../assets/Cleaniq services/5th Post.jpg";
