@@ -18,7 +18,8 @@ const Booking = () => {
     postcode: '',
     serviceType: 'Classic One-off', // Classic Regular, Classic One-off, Deep Clean
     frequency: 'Once', // Weekly, Fortnightly, Monthly, Once
-    duration: 2, // hours
+    propertySize: '1 Bed Flat', // New field for NG
+    duration: 2, // hours (for UK)
     extras: [],
     hasPets: false,
     date: '',
@@ -32,22 +33,37 @@ const Booking = () => {
 
   const [totalPrice, setTotalPrice] = useState(0);
 
-  // Pricing Logic (Wecasa-inspired)
+  // Pricing Logic (Region-aware)
   useEffect(() => {
-    let hourlyRate = region.id === 'UK' ? 18 : 8000;
-    
-    if (formData.serviceType === 'Deep Clean') hourlyRate += (region.id === 'UK' ? 10 : 5000);
-    if (formData.serviceType === 'Classic Regular') hourlyRate -= (region.id === 'UK' ? 2 : 1000);
+    let total = 0;
 
-    let total = hourlyRate * formData.duration;
+    if (region.id === 'UK') {
+      // UK: Hourly Pricing
+      let hourlyRate = 18;
+      if (formData.serviceType === 'Deep Clean') hourlyRate += 10;
+      if (formData.serviceType === 'Classic Regular') hourlyRate -= 2;
+      total = hourlyRate * formData.duration;
+    } else {
+      // Nigeria: Property-based Flat Rates
+      const flatRates = {
+        '1 Bed Flat': 15000,
+        '2 Bed Flat': 22000,
+        '3 Bed House': 35000,
+        '4 Bed House': 45000,
+        '5+ Bed House': 60000
+      };
+      total = flatRates[formData.propertySize] || 15000;
+      
+      if (formData.serviceType === 'Deep Clean') total *= 1.5;
+    }
 
     // Extra costs
     formData.extras.forEach(extra => {
       const extraPrices = {
-        'Ironing': region.id === 'UK' ? 5 : 2000,
-        'Cleaning Products': region.id === 'UK' ? 3 : 1500,
-        'Inside Fridge': region.id === 'UK' ? 12 : 5000,
-        'Inside Oven': region.id === 'UK' ? 15 : 7000,
+        'Ironing': region.id === 'UK' ? 5 : 5000,
+        'Cleaning Products': region.id === 'UK' ? 3 : 3000,
+        'Inside Fridge': region.id === 'UK' ? 12 : 7000,
+        'Inside Oven': region.id === 'UK' ? 15 : 10000,
       };
       total += (extraPrices[extra] || 0);
     });
@@ -234,44 +250,69 @@ const Booking = () => {
 
                 {step === 4 && (
                   <div className="space-y-8">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">How many hours?</h1>
+                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">
+                      {region.id === 'UK' ? 'How many hours?' : 'Property size?'}
+                    </h1>
                     
-                    <div className="flex items-center justify-center gap-8 bg-slate-50 p-10 rounded-[40px] border-2 border-slate-100">
-                      <button 
-                        onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 0.5)})}
-                        className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center text-primary hover:scale-110 active:scale-90 transition-all border border-slate-100"
-                      >
-                        <Minus size={32} />
-                      </button>
-                      <div className="text-center min-w-[120px]">
-                        <span className="text-6xl font-black text-primary-dark">{formData.duration}</span>
-                        <span className="text-2xl font-bold text-slate-400 ml-2">h</span>
-                      </div>
-                      <button 
-                        onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 0.5)})}
-                        className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center text-primary hover:scale-110 active:scale-90 transition-all border border-slate-100"
-                      >
-                        <Plus size={32} />
-                      </button>
-                    </div>
+                    {region.id === 'UK' ? (
+                      <>
+                        <div className="flex items-center justify-center gap-8 bg-slate-50 p-10 rounded-[40px] border-2 border-slate-100">
+                          <button 
+                            onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 0.5)})}
+                            className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center text-primary hover:scale-110 active:scale-90 transition-all border border-slate-100"
+                          >
+                            <Minus size={32} />
+                          </button>
+                          <div className="text-center min-w-[120px]">
+                            <span className="text-6xl font-black text-primary-dark">{formData.duration}</span>
+                            <span className="text-2xl font-bold text-slate-400 ml-2">h</span>
+                          </div>
+                          <button 
+                            onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 0.5)})}
+                            className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center text-primary hover:scale-110 active:scale-90 transition-all border border-slate-100"
+                          >
+                            <Plus size={32} />
+                          </button>
+                        </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {[
-                        { h: 2, label: '1 Bed Flat' },
-                        { h: 3, label: '2 Bed Home' },
-                        { h: 4, label: '3 Bed Home' },
-                        { h: 5, label: 'Large Villa' }
-                      ].map(sug => (
-                        <button 
-                          key={sug.h}
-                          onClick={() => setFormData({...formData, duration: sug.h})}
-                          className={`p-4 rounded-2xl border-2 text-center transition-all ${formData.duration === sug.h ? 'border-primary bg-primary text-white' : 'border-slate-100 bg-white text-slate-500'}`}
-                        >
-                          <div className="text-lg font-black">{sug.h}h</div>
-                          <div className="text-[10px] uppercase font-bold opacity-70">{sug.label}</div>
-                        </button>
-                      ))}
-                    </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {[
+                            { h: 2, label: '1 Bed Flat' },
+                            { h: 3, label: '2 Bed Home' },
+                            { h: 4, label: '3 Bed Home' },
+                            { h: 5, label: 'Large Villa' }
+                          ].map(sug => (
+                            <button 
+                              key={sug.h}
+                              onClick={() => setFormData({...formData, duration: sug.h})}
+                              className={`p-4 rounded-2xl border-2 text-center transition-all ${formData.duration === sug.h ? 'border-primary bg-primary text-white' : 'border-slate-100 bg-white text-slate-500'}`}
+                            >
+                              <div className="text-lg font-black">{sug.h}h</div>
+                              <div className="text-[10px] uppercase font-bold opacity-70">{sug.label}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="grid gap-4">
+                        {[
+                          '1 Bed Flat', 
+                          '2 Bed Flat', 
+                          '3 Bed House', 
+                          '4 Bed House', 
+                          '5+ Bed House'
+                        ].map(size => (
+                          <div 
+                            key={size}
+                            onClick={() => setFormData({...formData, propertySize: size})}
+                            className={`selection-card p-6 flex-row items-center justify-between ${formData.propertySize === size ? 'selection-card-active' : 'selection-card-inactive'}`}
+                          >
+                            <span className="text-xl font-bold">{size}</span>
+                            {formData.propertySize === size && <CheckCircle2 className="text-primary" size={24} />}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -433,8 +474,12 @@ const Booking = () => {
                   <span className="font-bold text-primary-dark">{formData.serviceType}</span>
                 </div>
                 <div className="basket-item">
-                  <span className="text-slate-500 font-medium">Duration</span>
-                  <span className="font-bold text-primary-dark">{formData.duration}h</span>
+                  <span className="text-slate-500 font-medium">
+                    {region.id === 'UK' ? 'Duration' : 'Size'}
+                  </span>
+                  <span className="font-bold text-primary-dark">
+                    {region.id === 'UK' ? `${formData.duration}h` : formData.propertySize}
+                  </span>
                 </div>
                 <div className="basket-item">
                   <span className="text-slate-500 font-medium">Frequency</span>

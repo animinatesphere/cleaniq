@@ -10,7 +10,12 @@ export const regions = {
     symbol: '£',
     locale: 'en-GB',
     paymentGateways: ['stripe'],
-    basePrice: 20, // Example base price in GBP
+    basePrice: 20,
+    contact: {
+      phone: '+44 7752 476368',
+      email: 'hello@cleaniq.co.uk',
+      address: 'First Floor, Swan Buildings, 20 Swan St, Manchester M4 5JW, United Kingdom'
+    }
   },
   NG: {
     id: 'NG',
@@ -19,18 +24,28 @@ export const regions = {
     symbol: '₦',
     locale: 'en-NG',
     paymentGateways: ['paystack', 'flutterwave'],
-    basePrice: 15000, // Example base price in NGN
+    basePrice: 15000,
+    contact: {
+      phone: '+234 801 234 5678',
+      email: 'hello@cleaniq.com.ng',
+      address: 'Lagos Office: Victoria Island, Lagos, Nigeria'
+    }
   }
 };
 
 export const RegionProvider = ({ children }) => {
   const [region, setRegion] = useState(() => {
     const saved = localStorage.getItem('cleaniq_region');
-    return saved ? JSON.parse(saved) : regions.UK;
+    if (saved) {
+      const savedData = JSON.parse(saved);
+      // Ensure we get the latest data for the saved region ID
+      return regions[savedData.id] || regions.UK;
+    }
+    return regions.UK;
   });
 
   useEffect(() => {
-    localStorage.setItem('cleaniq_region', JSON.stringify(region));
+    localStorage.setItem('cleaniq_region', JSON.stringify({ id: region.id }));
   }, [region]);
 
   const toggleRegion = (regionId) => {

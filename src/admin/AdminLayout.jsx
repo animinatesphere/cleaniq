@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Calendar, Users, 
-  Settings, LogOut, ChevronRight, Sparkles 
+  Settings, LogOut, ChevronRight, ShieldCheck 
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -21,10 +21,10 @@ const AdminLayout = () => {
       <aside className="w-64 bg-primary text-white p-6 flex flex-col fixed h-full">
         <div className="flex items-center gap-3 mb-12">
           <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-            <Sparkles className="text-primary" size={24} />
+            <ShieldCheck className="text-primary" size={24} />
           </div>
           <div>
-            <h1 className="font-bold text-lg leading-none uppercase tracking-widest">CLEANIQ</h1>
+            <h1 className="font-bold text-lg leading-none uppercase tracking-widest">CLEANIQ SERVICES</h1>
             <span className="text-[10px] text-secondary font-bold uppercase">Admin Console</span>
           </div>
         </div>

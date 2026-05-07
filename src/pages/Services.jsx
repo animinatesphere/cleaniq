@@ -87,8 +87,7 @@ const Services = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-3xl md:text-6xl font-black text-primary-dark mb-4 md:6 leading-tight md:leading-[1.1]"
           >
-            Premium Solutions for{" "}
-            <span className="text-secondary">Spotless</span> Spaces
+            Professional Cleaning <span className="text-secondary">Solutions</span> for Your Space
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -124,8 +123,8 @@ const Services = () => {
                     {service.title}
                   </h2>
                   <p className="text-slate-600 leading-relaxed mb-6 md:8 text-sm md:text-base font-medium">
-                    Our {service.title.toLowerCase()} is designed for those who
-                    value precision and reliability. We use only eco-friendly,
+                    Our {service.title.toLowerCase()} provides the ultimate deep clean for those who
+                    value precision and reliability. From end of tenancy cleaning to regular domestic maintenance, we use only eco-friendly,
                     non-toxic products to ensure a safe environment for your
                     family or employees.
                   </p>

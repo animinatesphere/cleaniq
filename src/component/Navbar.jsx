@@ -40,7 +40,7 @@ const Navbar = () => {
             whileHover={{ rotate: 5, scale: 1.05 }}
             className="relative"
           >
-            <img src={logo} alt="CLEANIQ" className="w-auto h-7 md:h-10 transition-all duration-300 brightness-100" />
+            <img src={logo} alt="CLEANIQ SERVICES" className="w-auto h-7 md:h-10 transition-all duration-300 brightness-100" />
           </motion.div>
         </Link>
 
@@ -130,7 +130,7 @@ const Navbar = () => {
             >
               <div className="p-6 md:p-8 flex flex-col h-full">
                 <div className="flex justify-between items-center mb-10 md:12">
-                   <img src={logo} alt="CLEANIQ" className="h-7 w-auto" />
+                   <img src={logo} alt="CLEANIQ SERVICES" className="h-7 w-auto" />
                    <button onClick={() => setIsOpen(false)} className="text-white/60 hover:text-white p-2">
                      <X size={24} />
                    </button>

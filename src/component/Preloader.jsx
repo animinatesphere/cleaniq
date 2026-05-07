@@ -56,7 +56,7 @@ const Preloader = () => {
               {/* Main Logo */}
               <img 
                 src={logo} 
-                alt="CLEANIQ" 
+                alt="CLEANIQ SERVICES" 
                 className="h-12 md:h-20 w-auto relative z-10"
               />
               
