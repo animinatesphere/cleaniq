@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ShieldCheck, 
-  Leaf, 
-  Clock, 
-  Users, 
-  ArrowRight, 
-  ChevronDown, 
-  Star, 
+import {
+  ShieldCheck,
+  Leaf,
+  Clock,
+  Users,
+  ArrowRight,
+  ChevronDown,
+  // Star,
   CheckCircle,
   Calendar,
-  Heart,
-  Home as HomeIcon
+  // Heart,
+  Home as HomeIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useRegion } from "../context/RegionContext";
@@ -65,37 +65,37 @@ const Home = () => {
     {
       name: "Nina H.",
       text: "They pay close attention to dust and pet hair, and the results are noticeable. I'm breathing better and living better.",
-      rating: 5
+      rating: 5,
     },
     {
       name: "Alan R.",
       text: "As someone with mobility issues, cleaning became nearly impossible. Home Troops gave me my independence back. They're always respectful and thorough.",
-      rating: 5
+      rating: 5,
     },
     {
       name: "Tina W.",
       text: "I was hesitant about hiring cleaners, but CLEANIQ made me feel comfortable from the first booking. They never miss a detail.",
-      rating: 5
-    }
+      rating: 5,
+    },
   ];
 
   const faqs = [
     {
       q: "What is your satisfaction guarantee?",
-      a: "If you're not completely satisfied with your clean, just notify us within 48 hours and we'll make it right. Your happiness is our priority."
+      a: "If you're not completely satisfied with your clean, just notify us within 48 hours and we'll make it right. Your happiness is our priority.",
     },
     {
       q: "Do you bring your own supplies?",
-      a: "Yes! We provide all eco-friendly cleaning products and equipment. You don't need to lift a finger or provide anything unless you have specific product requests."
+      a: "Yes! We provide all eco-friendly cleaning products and equipment. You don't need to lift a finger or provide anything unless you have specific product requests.",
     },
     {
       q: "Are your cleaners vetted?",
-      a: "Absolutely. All our cleaning professionals are fully vetted, background-checked, and extensively trained to maintain our high standards of quality and trust."
+      a: "Absolutely. All our cleaning professionals are fully vetted, background-checked, and extensively trained to maintain our high standards of quality and trust.",
     },
     {
       q: "Are your pet friendly?",
-      a: "We are 100% pet-friendly! Just let us know if you have furry friends so we can make any necessary adjustments to our visit."
-    }
+      a: "We are 100% pet-friendly! Just let us know if you have furry friends so we can make any necessary adjustments to our visit.",
+    },
   ];
 
   const containerVariants = {
@@ -103,14 +103,18 @@ const Home = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15
-      }
-    }
+        staggerChildren: 0.15,
+      },
+    },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
   };
 
   return (
@@ -126,7 +130,7 @@ const Home = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white shadow-xl shadow-primary/5 text-primary font-black text-[10px] md:text-sm mb-8 border border-primary/5"
@@ -135,20 +139,32 @@ const Home = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
               </span>
-              EXCEPTIONAL CLEANING IN {region.id === 'UK' ? 'UNITED KINGDOM' : 'NIGERIA'}
+              EXCEPTIONAL CLEANING IN{" "}
+              {region.id === "UK" ? "UNITED KINGDOM" : "NIGERIA"}
             </motion.div>
             <h1 className="text-4xl md:text-6xl lg:text-8xl font-black text-primary-dark leading-[1.1] md:leading-[0.9] mb-8 tracking-tighter">
-              A Home that<br />
-              <span className="text-secondary drop-shadow-sm">Feels Like Home.</span>
+            Professional Cleaning in Manchester
+              <br />
+              <span className="text-secondary drop-shadow-sm">
+                Feels Like Home.
+              </span>
             </h1>
             <p className="text-base md:text-xl text-slate-600 mb-10 max-w-lg leading-relaxed font-medium">
-              We take care of the cleaning, so you can spend your time on what matters most. Simple, reliable, and thorough care for your living space.
+              We take care of the cleaning, so you can spend your time on what
+              matters most. Simple, reliable, and thorough care for your living
+              space.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
-              <Link to="/booking" className="btn-primary px-10 py-5 text-lg shadow-2xl shadow-primary/30">
+              <Link
+                to="/booking"
+                className="btn-primary px-10 py-5 text-lg shadow-2xl shadow-primary/30"
+              >
                 Book Your Clean <ArrowRight size={20} />
               </Link>
-              <Link to="/services" className="px-8 py-5 rounded-full border-2 border-primary/10 text-primary font-bold text-center hover:bg-white hover:border-primary transition-all shadow-sm">
+              <Link
+                to="/services"
+                className="px-8 py-5 rounded-full border-2 border-primary/10 text-primary font-bold text-center hover:bg-white hover:border-primary transition-all shadow-sm"
+              >
                 Explore Services
               </Link>
             </div>
@@ -161,16 +177,20 @@ const Home = () => {
             className="relative"
           >
             <div className="rounded-[40px] md:rounded-[60px] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,59,42,0.25)] relative group aspect-[4/5] lg:aspect-auto">
-              <img 
-                src="https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8TW9kZXJuJTIwQ2xlYW4lMjBJbnRlcmlvcnxlbnwwfHwwfHx8MA%3D%3D" 
-                alt="Modern Premium Interior" 
+              <img
+                src="https://images.unsplash.com/photo-1544457070-4cd773b4d71e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8TW9kZXJuJTIwQ2xlYW4lMjBJbnRlcmlvcnxlbnwwfHwwfHx8MA%3D%3D"
+                alt="Modern Premium Interior"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/40 to-transparent" />
-              
-              <motion.div 
+
+              <motion.div
                 animate={{ y: [0, -15, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
                 className="absolute bottom-6 left-6 md:bottom-10 md:left-10 glass p-5 md:p-8 rounded-[24px] md:rounded-[32px] shadow-2xl hidden sm:block border-white/50"
               >
                 <div className="flex items-center gap-3 md:gap-4">
@@ -178,8 +198,12 @@ const Home = () => {
                     <ShieldCheck size={20} className="md:w-7 md:h-7" />
                   </div>
                   <div>
-                    <div className="text-lg md:text-xl font-black text-primary-dark line-height-1">48h Guarantee</div>
-                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Satisfaction Assured</div>
+                    <div className="text-lg md:text-xl font-black text-primary-dark line-height-1">
+                      48h Guarantee
+                    </div>
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                      Satisfaction Assured
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -192,7 +216,7 @@ const Home = () => {
       <section className="section-padding bg-white relative">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-16 md:20">
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -200,18 +224,19 @@ const Home = () => {
             >
               The CLEANIQ <span className="text-secondary">Process</span>
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
               className="text-base md:text-lg text-slate-600 font-medium px-4"
             >
-              Premium service doesn't have to be complicated. We've streamlined everything for your convenience.
+              Premium service doesn't have to be complicated. We've streamlined
+              everything for your convenience.
             </motion.p>
           </div>
 
-          <motion.div 
+          <motion.div
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -227,7 +252,9 @@ const Home = () => {
                 <div className="w-16 h-16 md:w-20 md:h-20 rounded-[22px] md:rounded-[28px] bg-primary flex items-center justify-center shadow-2xl shadow-primary/20 mx-auto mb-6 md:8 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
                   {step.icon}
                 </div>
-                <h3 className="text-xl md:text-2xl font-bold text-primary-dark mb-3 md:4">{step.title}</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-primary-dark mb-3 md:4">
+                  {step.title}
+                </h3>
                 <p className="text-slate-500 font-medium leading-relaxed max-w-[260px] mx-auto text-sm md:text-base">
                   {step.desc}
                 </p>
@@ -245,7 +272,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:16 gap-6 md:8">
             <div className="max-w-2xl">
-              <motion.h2 
+              <motion.h2
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -255,15 +282,23 @@ const Home = () => {
                 <span className="text-secondary">Every Environment</span>
               </motion.h2>
               <p className="text-base md:text-lg text-slate-600 font-medium">
-                Our services are built on the foundations of precision, health, and absolute reliability.
+                Our services are built on the foundations of precision, health,
+                and absolute reliability.
               </p>
             </div>
-            <Link to="/services" className="text-primary font-black flex items-center gap-2 group border-b-2 border-primary/10 pb-1 text-sm md:text-base">
-              View Full Menu <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
+            <Link
+              to="/services"
+              className="text-primary font-black flex items-center gap-2 group border-b-2 border-primary/10 pb-1 text-sm md:text-base"
+            >
+              View Full Menu{" "}
+              <ArrowRight
+                size={18}
+                className="transition-transform group-hover:translate-x-2"
+              />
             </Link>
           </div>
 
-          <motion.div 
+          <motion.div
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -308,13 +343,25 @@ const Home = () => {
             </h2>
             <div className="space-y-6 md:8">
               {[
-                { title: "Vetted Professionals", desc: "Rigorous background checks and extensive training." },
-                { title: "Customized Strategy", desc: "Tailored cleaning plans that adapt to your lifestyle." },
-                { title: "Eco-Safe Standards", desc: "Non-toxic, premium products safe for pets and planet." },
-                { title: "Elite Support", desc: "Dedicated account management and swift response times." }
+                {
+                  title: "Vetted Professionals",
+                  desc: "Rigorous background checks and extensive training.",
+                },
+                {
+                  title: "Customized Strategy",
+                  desc: "Tailored cleaning plans that adapt to your lifestyle.",
+                },
+                {
+                  title: "Eco-Safe Standards",
+                  desc: "Non-toxic, premium products safe for pets and planet.",
+                },
+                {
+                  title: "Elite Support",
+                  desc: "Dedicated account management and swift response times.",
+                },
               ].map((item, i) => (
-                <motion.div 
-                  key={i} 
+                <motion.div
+                  key={i}
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
@@ -325,8 +372,12 @@ const Home = () => {
                     <CheckCircle size={20} className="md:w-6 md:h-6" />
                   </div>
                   <div>
-                    <h4 className="text-lg md:text-xl font-bold mb-1">{item.title}</h4>
-                    <p className="text-white/60 font-medium text-sm md:text-base">{item.desc}</p>
+                    <h4 className="text-lg md:text-xl font-bold mb-1">
+                      {item.title}
+                    </h4>
+                    <p className="text-white/60 font-medium text-sm md:text-base">
+                      {item.desc}
+                    </p>
                   </div>
                 </motion.div>
               ))}
@@ -381,7 +432,7 @@ const Home = () => {
       <section className="section-padding bg-slate-50">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12 md:20">
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -393,7 +444,7 @@ const Home = () => {
 
           <div className="space-y-4">
             {faqs.map((faq, i) => (
-              <motion.div 
+              <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -405,8 +456,12 @@ const Home = () => {
                   onClick={() => setActiveFaq(activeFaq === i ? null : i)}
                   className="w-full p-6 md:p-8 text-left flex justify-between items-center hover:bg-slate-50 transition-all group"
                 >
-                  <span className="font-bold text-primary-dark text-base md:text-xl group-hover:text-primary transition-colors pr-4">{faq.q}</span>
-                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${activeFaq === i ? 'bg-primary text-white rotate-180' : 'bg-slate-50 text-secondary'}`}>
+                  <span className="font-bold text-primary-dark text-base md:text-xl group-hover:text-primary transition-colors pr-4">
+                    {faq.q}
+                  </span>
+                  <div
+                    className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${activeFaq === i ? "bg-primary text-white rotate-180" : "bg-slate-50 text-secondary"}`}
+                  >
                     <ChevronDown size={18} className="md:w-5 md:h-5" />
                   </div>
                 </button>
@@ -439,18 +494,27 @@ const Home = () => {
           >
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5" />
             <div className="absolute top-0 right-0 w-64 h-64 md:w-96 md:h-96 bg-secondary/10 rounded-full blur-[100px] md:blur-[120px] -mr-32 -mt-32 md:-mr-48 md:-mt-48" />
-            
+
             <div className="relative z-10 max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-7xl font-black mb-8 md:10 leading-tight tracking-tight">Step into a <span className="text-secondary">Pristine</span> Life.</h2>
+              <h2 className="text-3xl md:text-7xl font-black mb-8 md:10 leading-tight tracking-tight">
+                Step into a <span className="text-secondary">Pristine</span>{" "}
+                Life.
+              </h2>
               <p className="text-lg md:text-2xl text-white/70 mb-10 md:14 leading-relaxed font-medium px-4">
-                Experience Nigeria's most trusted premium cleaning service. No stress, no mess—just absolute perfection.
+                Experience Nigeria's most trusted premium cleaning service. No
+                stress, no mess—just absolute perfection.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4 md:6">
-                <Link to="/booking" className="btn-secondary px-8 md:12 py-5 md:6 text-lg md:xl shadow-2xl shadow-secondary/20">
+                <Link
+                  to="/booking"
+                  className="btn-secondary px-8 md:12 py-5 md:6 text-lg md:xl shadow-2xl shadow-secondary/20"
+                >
                   Book Your First Clean <ArrowRight size={22} />
                 </Link>
               </div>
-              <p className="mt-10 md:12 text-[10px] md:text-sm font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/30">Trusted by hundreds of families and local businesses</p>
+              <p className="mt-10 md:12 text-[10px] md:text-sm font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/30">
+                Trusted by hundreds of families and local businesses
+              </p>
             </div>
           </motion.div>
         </div>
@@ -460,4 +524,3 @@ const Home = () => {
 };
 
 export default Home;
-
