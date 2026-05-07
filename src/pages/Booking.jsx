@@ -264,8 +264,8 @@ const Booking = () => {
                             <Minus size={32} />
                           </button>
                           <div className="text-center min-w-[120px]">
-                            <span className="text-6xl font-black text-primary-dark">{formData.duration}</span>
-                            <span className="text-2xl font-bold text-slate-400 ml-2">h</span>
+                            <span className="text-4xl md:text-6xl font-black text-primary-dark">{formData.duration}</span>
+                            <span className="text-xl md:text-2xl font-bold text-slate-400 ml-2">h</span>
                           </div>
                           <button 
                             onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 0.5)})}

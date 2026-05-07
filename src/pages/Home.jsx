@@ -54,7 +54,7 @@ const Home = () => {
               {region.id === "UK" ? "TOP-RATED CLEANERS IN MANCHESTER" : "EXCEPTIONAL CLEANING IN LAGOS & ABUJA"}
             </div>
             
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-primary-dark leading-[1.05] mb-8 tracking-tighter">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-primary-dark leading-[1.1] mb-8 tracking-tighter">
               {region.id === "UK" ? "Best Professional House Cleaning in" : "Top-Rated Home & Office Cleaning in"}
               <br />
               <span className="text-primary bg-clip-text">
@@ -63,7 +63,7 @@ const Home = () => {
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-lg leading-relaxed font-medium">
-              We take care of the {region.id === "UK" ? "domestic chores" : "thorough cleaning"}, so you can spend your time on what matters most. Reliable, vetted, and meticulous care for your space.
+              We provide the most reliable {region.id === "UK" ? "housekeeping and domestic services" : "professional maid and janitorial services"}. Whether you need a regular weekly clean or specialized Airbnb cleaning, our vetted pros handle the meticulous care of your space.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
@@ -120,7 +120,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Our Services</h2>
-            <h3 className="text-4xl md:text-6xl font-black text-primary-dark tracking-tighter mb-6">
+            <h3 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter mb-6">
               Tailored cleaning for {region.id === "UK" ? "Manchester living" : "Nigerian homes & offices"}
             </h3>
             <p className="text-lg text-slate-500 font-medium">Whether it's a {region.id === "UK" ? "weekly domestic clean" : "regular maintenance"} or a deep seasonal refresh, we have the right pros for you.</p>
@@ -141,10 +141,10 @@ const Home = () => {
                 keyword: 'Expert office cleaning'
               },
               { 
-                title: 'Deep Cleaning', 
-                desc: 'Intensive deep cleaning services for a total home refresh.', 
+                title: 'Deep & Airbnb Clean', 
+                desc: 'Specialized deep cleaning and Airbnb turnover services for a total refresh.', 
                 icon: <Zap size={32}/>,
-                keyword: 'Professional deep cleaning'
+                keyword: 'Airbnb and deep cleaning'
               }
             ].map((service, idx) => (
               <motion.div 
@@ -183,11 +183,13 @@ const Home = () => {
             </div>
             <div className="order-1 lg:order-2">
               <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Our Mission</h2>
-              <h3 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tighter mb-8">
+              <h3 className="text-3xl md:text-4xl lg:text-5xl font-black text-primary-dark tracking-tighter mb-8">
                 We believe a clean home is a <span className="text-primary italic">happy home.</span>
               </h3>
               <p className="text-lg text-slate-600 font-medium leading-relaxed mb-8">
-                CleanIQ Services was born from a simple idea: that everyone deserves a spotless sanctuary without the stress of finding reliable help. Whether you're in the heart of Manchester or the bustling streets of Lagos, our mission remains the same—to connect you with the most professional, vetted cleaners in your community.
+              <p className="text-lg text-slate-600 font-medium leading-relaxed mb-8">
+                CleanIQ Services was born from a simple idea: that everyone deserves a spotless sanctuary. We specialize in {region.id === 'UK' ? 'end of tenancy, deep cleans, and reliable domestic help' : 'post-construction cleaning, office janitorial, and thorough home maintenance'}. Our mission remains the same—to connect you with the most professional, background-checked cleaners in your community.
+              </p>
               </p>
               <div className="grid grid-cols-2 gap-6">
                 <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
@@ -208,7 +210,7 @@ const Home = () => {
       <section className="py-24 md:py-32 bg-slate-50/50">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">The Process</h2>
-          <h3 className="text-4xl md:text-5xl font-black text-primary-dark mb-20 tracking-tighter">Reliable domestic cleaning in 3 simple steps</h3>
+          <h3 className="text-3xl md:text-5xl font-black text-primary-dark mb-20 tracking-tighter">Reliable domestic cleaning in 3 simple steps</h3>
           
           <div className="grid md:grid-cols-3 gap-12 relative">
             <div className="absolute top-1/4 left-0 w-full h-0.5 bg-slate-100 hidden md:block" />
@@ -235,7 +237,7 @@ const Home = () => {
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-20">
             <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">FAQ</h2>
-            <h3 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tighter">
+            <h3 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter">
               Common questions
             </h3>
           </div>
@@ -306,7 +308,7 @@ const Home = () => {
       {/* CTA Section */}
       <section className="py-24 bg-secondary/10 relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-          <h2 className="text-4xl md:text-7xl font-black text-primary-dark tracking-tighter mb-8">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-primary-dark tracking-tighter mb-8">
             Ready to experience a cleaner home?
           </h2>
           <p className="text-xl text-slate-600 mb-12 font-medium">Join 2,000+ happy customers today.</p>
@@ -322,7 +324,9 @@ const Home = () => {
           <div>
             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4">Professional Cleaning Services</h4>
             <p className="text-sm leading-relaxed">
-              CleanIQ Services is your premier choice for high-quality cleaning across {region.id === "UK" ? "Greater Manchester" : "Lagos & Abuja"}. We specialize in house cleaning, end of tenancy, and office janitorial services.
+            <p className="text-slate-400 max-w-2xl mx-auto leading-relaxed text-sm md:text-base font-medium">
+              CleanIQ Services is your premier choice for high-quality {region.id === "UK" ? "house cleaning and professional housekeeping" : "residential and commercial cleaning"} across {region.id === "UK" ? "Greater Manchester" : "Lagos & Abuja"}. We specialize in deep cleaning, move-in/move-out services, Airbnb management cleaning, and office janitorial solutions.
+            </p>
             </p>
           </div>
           <div>

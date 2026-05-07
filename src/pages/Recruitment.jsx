@@ -81,7 +81,7 @@ const Recruitment = () => {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-6">
             Join our elite team
           </div>
-          <h1 className="text-4xl md:text-7xl font-black text-primary-dark mb-6 tracking-tighter leading-tight">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-primary-dark mb-6 tracking-tighter leading-tight">
             Help us redefine <br />
             <span className="text-primary italic">professionalism.</span>
           </h1>

@@ -85,7 +85,7 @@ const Services = () => {
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl md:text-6xl font-black text-primary-dark mb-4 md:6 leading-tight md:leading-[1.1]"
+            className="text-3xl md:text-5xl font-black text-primary-dark mb-4 md:6 leading-tight md:leading-[1.1]"
           >
             Professional Cleaning <span className="text-secondary">Solutions</span> for Your Space
           </motion.h1>
@@ -189,7 +189,7 @@ const Services = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-2xl md:text-6xl font-black mb-6 md:8 leading-tight tracking-tight"
+              className="text-2xl md:text-5xl font-black mb-6 md:8 leading-tight tracking-tight"
             >
               100% Eco-Friendly <br className="hidden md:block" />
               <span className="text-secondary">Cleaning Solutions</span>
