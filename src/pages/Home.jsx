@@ -141,10 +141,10 @@ const Home = () => {
                 keyword: 'Expert office cleaning'
               },
               { 
-                title: 'Deep & Airbnb Clean', 
-                desc: 'Specialized deep cleaning and Airbnb turnover services for a total refresh.', 
+                title: 'Deep  Clean', 
+                desc: 'Specialized deep cleaning services for a total refresh.', 
                 icon: <Zap size={32}/>,
-                keyword: 'Airbnb and deep cleaning'
+                keyword: 'Deep and  cleaning'
               }
             ].map((service, idx) => (
               <motion.div 
@@ -277,7 +277,7 @@ const Home = () => {
           <div className="bg-slate-900 rounded-[48px] p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px]" />
             <div className="max-w-2xl relative z-10">
-              <h2 className="text-3xl md:text-5xl font-black mb-6 tracking-tighter">Become a CleanIQ Services Pro</h2>
+              <h2 className="text-3xl md:text-5xl font-black mb-6 tracking-tighter">Become a CleanIq Services Pro</h2>
               <p className="text-xl text-slate-400 font-medium leading-relaxed mb-8">
                 {region.id === 'UK' 
                   ? "Are you a professional cleaner in Manchester? Join our platform today. We require all pros to have a valid DBS check for customer safety."
@@ -289,7 +289,7 @@ const Home = () => {
                 </div>
                 <div>
                   <p className="font-bold">
-                    {region.id === 'UK' ? "DBS Required" : "CV Required"}
+                    {region.id === 'UK' ? "Apply Now" : "Apply Now"}
                   </p>
                   <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Application Requirement</p>
                 </div>
@@ -297,7 +297,7 @@ const Home = () => {
             </div>
             <div className="relative z-10 w-full md:w-auto">
               <Link to="/recruitment" className="btn-secondary py-5 px-10 text-lg w-full md:w-auto flex items-center justify-center gap-3">
-                {region.id === 'UK' ? "Apply with DBS" : "Submit your CV"}
+                {region.id === 'UK' ? "Apply Now" : "Apply Now"}
                 <ArrowRight size={20} />
               </Link>
             </div>
@@ -313,7 +313,7 @@ const Home = () => {
           </h2>
           <p className="text-xl text-slate-600 mb-12 font-medium">Join 2,000+ happy customers today.</p>
           <Link to="/booking" className="btn-primary py-6 px-12 text-xl shadow-2xl shadow-primary/30">
-            Book My Cleaning Now
+            Book  Now
           </Link>
         </div>
       </section>

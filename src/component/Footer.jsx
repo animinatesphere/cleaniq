@@ -103,10 +103,10 @@ const Footer = () => {
                 <ShieldCheck size={16} /> Verified Quality
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-                Our cleaners are fully vetted, background-checked, and trained to CLEANIQ SERVICES's institutional standards.
+                Our cleaners are fully vetted, background-checked, and trained to cleaniq service institutional standards.
               </p>
               <Link to="/booking" className="block text-center bg-white text-primary-dark font-black text-[10px] uppercase tracking-widest py-3 rounded-xl hover:bg-secondary transition-colors">
-                Book a Premium Clean
+                Book a Professional Clean
               </Link>
             </div>
           </div>
