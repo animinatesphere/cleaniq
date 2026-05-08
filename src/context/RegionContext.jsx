@@ -13,7 +13,7 @@ export const regions = {
     basePrice: 20,
     contact: {
       phone: '+44 7752 476368',
-      email: 'hello@cleaniq.co.uk',
+      email: 'info@cleaniqservices.com',
       address: 'First Floor, Swan Buildings, 20 Swan St, Manchester M4 5JW, United Kingdom'
     }
   },

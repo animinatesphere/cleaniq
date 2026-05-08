@@ -59,7 +59,7 @@ const Home = () => {
               <br />
               <span className="text-primary bg-clip-text">
                 {region.id === "UK" ? "Manchester" : "Lagos & Abuja"}
-              </span>
+              </span>.
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-lg leading-relaxed font-medium">
@@ -81,7 +81,7 @@ const Home = () => {
                   <div className="flex text-secondary mb-0.5">
                     {[1, 2, 3, 4, 5].map(i => <Star key={i} size={14} fill="currentColor" />)}
                   </div>
-                  <p className="text-[10px] font-black text-primary-dark uppercase tracking-widest">4.9/5 from 2k+ users</p>
+                  <p className="text-[10px] font-black text-primary-dark uppercase tracking-widest">4.9/5 from 2k+ users.</p>
                 </div>
               </div>
             </div>
@@ -193,23 +193,26 @@ const Home = () => {
             <div className="order-1 lg:order-2">
               <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Our Mission</h2>
               <h3 className="text-3xl md:text-4xl lg:text-5xl font-black text-primary-dark tracking-tighter mb-8">
-                We believe a clean home is a <span className="text-primary italic">happy home.</span>
+                Exceptional, <span className="text-primary italic">eco-conscious</span> cleaning.
               </h3>
               <p className="text-lg text-slate-600 font-medium leading-relaxed mb-8">
-              <p className="text-lg text-slate-600 font-medium leading-relaxed mb-8">
-                CleaniqServices was born from a simple idea: that everyone deserves a spotless sanctuary. We specialize in {region.id === 'UK' ? 'end of tenancy, deep cleans, and reliable domestic help' : 'post-construction cleaning, office janitorial, and thorough home maintenance'}. Our mission remains the same—to connect you with the most professional, background-checked cleaners in your community.
+                Our mission is to provide exceptional, eco-conscious cleaning services that enhance the 
+                quality of living and working environments, grounded in professionalism, integrity, and 
+                trust. Based in Manchester, we've redefined what clean means through precision and sustainability.
               </p>
-              </p>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
+              <div className="flex flex-col sm:flex-row gap-6 mb-10">
+                <div className="flex-1 p-6 rounded-3xl bg-slate-50 border border-slate-100">
                   <p className="text-3xl font-black text-primary mb-1">500+</p>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Pros</p>
                 </div>
-                <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
+                <div className="flex-1 p-6 rounded-3xl bg-slate-50 border border-slate-100">
                   <p className="text-3xl font-black text-primary mb-1">98%</p>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Satisfaction Rate</p>
                 </div>
               </div>
+              <Link to="/about" className="inline-flex items-center gap-2 font-black text-primary hover:gap-4 transition-all">
+                Learn More About Us <ArrowRight size={18} />
+              </Link>
             </div>
           </div>
         </div>
@@ -219,7 +222,7 @@ const Home = () => {
       <section className="py-24 md:py-32 bg-slate-50/50">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">The Process</h2>
-          <h3 className="text-3xl md:text-5xl font-black text-primary-dark mb-20 tracking-tighter">Reliable domestic cleaning in 3 simple steps</h3>
+          <h3 className="text-3xl md:text-5xl font-black text-primary-dark mb-20 tracking-tighter">Reliable domestic cleaning in 3 simple steps.</h3>
           
           <div className="grid md:grid-cols-3 gap-12 relative">
             <div className="absolute top-1/4 left-0 w-full h-0.5 bg-slate-100 hidden md:block" />
@@ -247,7 +250,7 @@ const Home = () => {
           <div className="text-center mb-20">
             <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">FAQ</h2>
             <h3 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter">
-              Common questions
+              Common questions.
             </h3>
           </div>
           
@@ -286,7 +289,7 @@ const Home = () => {
           <div className="bg-slate-900 rounded-[48px] p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px]" />
             <div className="max-w-2xl relative z-10">
-              <h2 className="text-3xl md:text-5xl font-black mb-6 tracking-tighter">Become a Cleaniq Services Pro</h2>
+              <h2 className="text-3xl md:text-5xl font-black mb-6 tracking-tighter">Become a Cleaniq Services Pro.</h2>
               <p className="text-xl text-slate-400 font-medium leading-relaxed mb-8">
                 {region.id === 'UK' 
                   ? "Are you a professional cleaner in Manchester? Join our platform today. We require all pros to have a valid DBS check for customer safety."
@@ -322,7 +325,7 @@ const Home = () => {
           </h2>
           <p className="text-xl text-slate-600 mb-12 font-medium">Join 2,000+ happy customers today.</p>
           <Link to="/booking" className="btn-primary py-6 px-12 text-xl shadow-2xl shadow-primary/30">
-            Book  Now
+            Book Now
           </Link>
         </div>
       </section>

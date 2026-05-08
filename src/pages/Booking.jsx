@@ -517,7 +517,7 @@ const Booking = () => {
                 <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                   <CreditCard size={20} />
                 </div>
-                <h2 className="text-xl font-black text-primary-dark uppercase tracking-tight">My Basket</h2>
+                <h2 className="text-xl font-black text-primary-dark uppercase tracking-tight">My Basket.</h2>
               </div>
 
               <div className="space-y-1 mb-8 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">

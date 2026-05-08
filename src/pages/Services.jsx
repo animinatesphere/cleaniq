@@ -26,58 +26,62 @@ const Services = () => {
       icon: <HomeIcon className="text-secondary" size={40} />,
       image: me1,
       features: [
-        "Dusting of all surfaces",
-        "Vacuuming & Mopping",
-        "Kitchen degreasing",
-        "Bathroom sanitization",
-        "Bed making & tidying",
-        "Trash removal",
+        "Dusting of all surfaces.",
+        "Vacuuming & Mopping.",
+        "Kitchen degreasing.",
+        "Bathroom sanitization.",
+        "Bed making & tidying.",
+        "Trash removal.",
       ],
+      description: "Regular and deep-cleaning services designed to refresh homes and create a serene, organized living environment.",
       pricing: region.id === "UK" ? "From £20/hr" : `From ${region.symbol}15,000`,
     },
     {
       id: "commercial",
-      title: "Office & Commercial",
+      title: "Office & Commercial Cleaning",
       icon: <Briefcase className="text-secondary" size={40} />,
       image: me3,
       features: [
-        "Workstation sanitization",
-        "Communal area cleaning",
-        "Restroom maintenance",
-        "Window cleaning",
-        "Carpet deep clean",
-        "Disinfection services",
+        "Workstation sanitization.",
+        "Communal area cleaning.",
+        "Restroom maintenance.",
+        "Window cleaning.",
+        "Carpet deep clean.",
+        "Disinfection services.",
       ],
+      description: "Professional cleaning for offices and business spaces, maintaining hygiene, order, and productivity.",
       pricing: region.id === "UK" ? "Custom Quotes" : "Custom Quotes",
     },
     {
       id: "move",
-      title: "Move-In / Move-Out",
+      title: "Move-In / Move-Out Cleaning",
       icon: <Trash2 className="text-secondary" size={40} />,
       image: me2,
       features: [
-        "Inside cabinets & drawers",
-        "Baseboard scrubbing",
-        "Door frame cleaning",
-        "Wall spot cleaning",
-        "Appliance deep clean",
-        "End-of-tenancy guarantee",
+        "Inside cabinets & drawers.",
+        "Baseboard scrubbing.",
+        "Door frame cleaning.",
+        "Wall spot cleaning.",
+        "Appliance deep clean.",
+        "End-of-tenancy guarantee.",
       ],
+      description: "Detailed cleaning for relocations and end-of-tenancy needs, ensuring spaces are spotless and move-in ready.",
       pricing: region.id === "UK" ? "From £60" : `From ${region.symbol}25,000`,
     },
     {
-      id: "airbnb",
-      title: "Airbnb & Short-let",
-      icon: <Star className="text-secondary" size={40} />,
+      id: "eco",
+      title: "Eco-Friendly Cleaning Solutions",
+      icon: <Leaf className="text-secondary" size={40} />,
       image: airbnbImg,
       features: [
-        "Rapid turnover cleaning",
-        "Linen & towel service",
-        "Guest amenity restocking",
-        "Damage reporting & photos",
-        "Key exchange support",
-        "High-touch point sanitization",
+        "Sustainable, non-toxic products.",
+        "Pet and child safe.",
+        "Biodegradable solutions.",
+        "High-efficiency equipment.",
+        "Health-focused results.",
+        "Environmental protection.",
       ],
+      description: "Use of sustainable, non-toxic products that protect both clients and the environment without compromising on effectiveness.",
       pricing: region.id === "UK" ? "From £35" : `From ${region.symbol}15,000`,
     },
   ];
@@ -105,7 +109,7 @@ const Services = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-3xl md:text-5xl font-black text-primary-dark mb-4 md:6 leading-tight md:leading-[1.1]"
           >
-            Professional Cleaning <span className="text-secondary">Solutions</span> for Your Space
+            Professional Cleaning <span className="text-secondary">Solutions</span> for Your Space.
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -138,13 +142,10 @@ const Services = () => {
                 </motion.div>
                 <div>
                   <h2 className="text-2xl md:text-4xl font-bold text-primary-dark mb-4 md:6 tracking-tight">
-                    {service.title}
+                    {service.title}.
                   </h2>
                   <p className="text-slate-600 leading-relaxed mb-6 md:8 text-sm md:text-base font-medium">
-                    Our {service.title.toLowerCase()} provides the ultimate deep clean for those who
-                    value precision and reliability. From end of tenancy cleaning to regular domestic maintenance, we use only eco-friendly,
-                    non-toxic products to ensure a safe environment for your
-                    family or employees.
+                    {service.description}
                   </p>
 
                   <motion.div 
@@ -210,7 +211,7 @@ const Services = () => {
               className="text-2xl md:text-5xl font-black mb-6 md:8 leading-tight tracking-tight"
             >
               100% Eco-Friendly <br className="hidden md:block" />
-              <span className="text-secondary">Cleaning Solutions</span>
+              <span className="text-secondary">Cleaning Solutions.</span>
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}

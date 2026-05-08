@@ -5,6 +5,7 @@ import Footer from './component/Footer';
 import ScrollToTop from './component/ScrollToTop';
 import Preloader from './component/Preloader';
 import Home from './pages/Home';
+import About from './pages/About';
 import Booking from './pages/Booking';
 import Recruitment from './pages/Recruitment';
 import Services from './pages/Services';
@@ -25,6 +26,7 @@ function App() {
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/recruitment" element={<Recruitment />} />
           <Route path="/services" element={<Services />} />

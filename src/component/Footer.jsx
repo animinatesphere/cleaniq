@@ -28,18 +28,22 @@ const Footer = () => {
               <img src={logo2} alt="CLEANIQ SERVICES" className="h-8 md:h-10 w-auto" />
             </div>
             <p className="text-slate-400 leading-relaxed font-medium text-sm">
-              Providing premium, eco-friendly cleaning solutions for modern homes and professional workspaces. Excellence in every detail.
+              CLEANIQ Services is a premium cleaning solutions company based in Manchester, United 
+              Kingdom, offering trusted, eco-friendly, and efficient cleaning services.
             </p>
-            <div className="flex gap-4">
-              {[Globe, Users, MessageSquare].map((Icon, i) => (
-                <a 
-                  key={i} 
-                  href="#" 
-                  className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-secondary hover:border-secondary hover:bg-secondary/10 transition-all duration-300"
-                >
-                  <Icon size={18} />
-                </a>
-              ))}
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-4">
+                {[Globe, Users, MessageSquare].map((Icon, i) => (
+                  <a 
+                    key={i} 
+                    href="#" 
+                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-secondary hover:border-secondary hover:bg-secondary/10 transition-all duration-300"
+                  >
+                    <Icon size={18} />
+                  </a>
+                ))}
+              </div>
+              <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Follow us: @cleaniqservices</p>
             </div>
           </div>
 
@@ -51,7 +55,7 @@ const Footer = () => {
                 { label: "Book Service", path: "/booking" },
                 { label: "Our Services", path: "/services" },
                 { label: "Join Team", path: "/recruitment" },
-                { label: "About Us", path: "/" },
+                { label: "About Us", path: "/about" },
               ].map((link) => (
                 <li key={link.label}>
                   <Link 

@@ -79,7 +79,7 @@ const Recruitment = () => {
           className="text-center mb-16"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-6">
-            Join our elite team
+            Join our elite team.
           </div>
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-primary-dark mb-6 tracking-tighter leading-tight">
             Help us redefine <br />
@@ -122,7 +122,7 @@ const Recruitment = () => {
                     <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
                       <User size={24} />
                     </div>
-                    <h3 className="text-2xl font-black text-primary-dark tracking-tight">Personal Details</h3>
+                    <h3 className="text-2xl font-black text-primary-dark tracking-tight">Personal Details.</h3>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
@@ -194,7 +194,7 @@ const Recruitment = () => {
                     <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
                       <Briefcase size={24} />
                     </div>
-                    <h3 className="text-2xl font-black text-primary-dark tracking-tight">Professional Experience</h3>
+                    <h3 className="text-2xl font-black text-primary-dark tracking-tight">Professional Experience.</h3>
                   </div>
 
                   <div className="space-y-4">
@@ -256,7 +256,7 @@ const Recruitment = () => {
                     <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
                       <FileText size={24} />
                     </div>
-                    <h3 className="text-2xl font-black text-primary-dark tracking-tight">Identity & Verification</h3>
+                    <h3 className="text-2xl font-black text-primary-dark tracking-tight">Identity & Verification.</h3>
                   </div>
 
                   <div className="space-y-6">
@@ -349,9 +349,9 @@ const Recruitment = () => {
         {/* Benefits Section */}
         <div className="mt-24 grid md:grid-cols-3 gap-8">
           {[
-            { icon: <Building size={24}/>, title: 'Flexible Hours', desc: 'Choose when and where you want to work.' },
-            { icon: <Award size={24}/>, title: 'Premium Pay', desc: 'Industry-leading rates for top-tier professionals.' },
-            { icon: <ShieldCheck size={24}/>, title: 'Vetted Quality', desc: 'Join a network of the highest rated pros.' }
+            { icon: <Building size={24}/>, title: 'Flexible Hours.', desc: 'Choose when and where you want to work.' },
+            { icon: <Award size={24}/>, title: 'Premium Pay.', desc: 'Industry-leading rates for top-tier professionals.' },
+            { icon: <ShieldCheck size={24}/>, title: 'Vetted Quality.', desc: 'Join a network of the highest rated pros.' }
           ].map((benefit, i) => (
             <div key={i} className="text-center p-8">
               <div className="w-14 h-14 rounded-2xl bg-primary/5 text-primary flex items-center justify-center mx-auto mb-6">
