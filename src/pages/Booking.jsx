@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRegion } from '../context/RegionContext';
+import { Link } from 'react-router-dom';
 import { 
   ChevronRight, ChevronLeft, Calendar, User, 
   CreditCard, Home as HomeIcon, Briefcase, 
   Trash2, Plus, Minus, CheckCircle2, MapPin, 
-  Clock, Info, ShieldCheck, Heart
+  Clock, Info, ShieldCheck, Heart,Star
 } from 'lucide-react';
 
 const Booking = () => {
   const { region } = useRegion();
   const [step, setStep] = useState(1);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [isNavSticky, setIsNavSticky] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -40,8 +42,9 @@ const Booking = () => {
     if (region.id === 'UK') {
       // UK: Hourly Pricing
       let hourlyRate = 18;
-      if (formData.serviceType === 'Deep Clean') hourlyRate += 10;
+      if (formData.serviceType === 'Deep Clean') hourlyRate += 12;
       if (formData.serviceType === 'Classic Regular') hourlyRate -= 2;
+      if (formData.serviceType === 'Airbnb Cleaning') hourlyRate += 5;
       total = hourlyRate * formData.duration;
     } else {
       // Nigeria: Property-based Flat Rates
@@ -54,7 +57,8 @@ const Booking = () => {
       };
       total = flatRates[formData.propertySize] || 15000;
       
-      if (formData.serviceType === 'Deep Clean') total *= 1.5;
+      if (formData.serviceType === 'Deep Clean') total *= 1.8;
+      if (formData.serviceType === 'Airbnb Cleaning') total *= 1.3;
     }
 
     // Extra costs
@@ -127,6 +131,53 @@ const Booking = () => {
   useEffect(() => {
     setPage([step, step > page ? 1 : -1]);
   }, [step]);
+
+  if (isSubmitted) {
+    return (
+      <div className="pt-32 pb-20 min-h-screen bg-slate-50 flex items-center justify-center px-6">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-2xl w-full bg-white rounded-[60px] p-8 md:p-16 text-center shadow-2xl border-8 border-white"
+        >
+          <div className="w-24 h-24 bg-primary rounded-[32px] flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-primary/30 rotate-12">
+            <CheckCircle2 size={48} className="text-white -rotate-12" />
+          </div>
+          
+          <h1 className="text-4xl md:text-5xl font-black text-primary-dark mb-6 tracking-tighter">Booking Confirmed!</h1>
+          <p className="text-lg text-slate-500 font-medium mb-12 leading-relaxed">
+            Your professional cleaner is now being assigned. We've sent a confirmation email to <span className="text-primary font-bold">{formData.email}</span> with all the details.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-4 mb-12 text-left">
+            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Service</p>
+              <p className="font-bold text-primary-dark">{formData.serviceType}</p>
+            </div>
+            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Scheduled For</p>
+              <p className="font-bold text-primary-dark">{new Date(formData.date).toLocaleDateString()} @ {formData.timeSlot}</p>
+            </div>
+            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Address</p>
+              <p className="font-bold text-primary-dark truncate">{formData.address}</p>
+            </div>
+            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Paid</p>
+              <p className="font-bold text-primary-dark">{region.symbol}{totalPrice}</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link to="/" className="btn-primary flex-1 py-5">Back to Home</Link>
+            <button onClick={() => window.print()} className="btn-secondary px-8 py-5 flex items-center justify-center gap-2">
+              <Info size={20} /> Print Receipt
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-24 min-h-screen bg-white pb-32">
@@ -201,7 +252,8 @@ const Booking = () => {
                       {[
                         { id: 'Classic Regular', title: 'Classic regular', desc: 'The same pro, every week or two.', icon: <Heart size={24}/> },
                         { id: 'Classic One-off', title: 'Classic one-off', desc: 'A thorough clean whenever you need.', icon: <HomeIcon size={24}/> },
-                        { id: 'Deep Clean', title: 'Deep clean', desc: 'For moving or seasonal refreshment.', icon: <Trash2 size={24}/> }
+                        { id: 'Deep Clean', title: 'Deep clean', desc: 'For moving or seasonal refreshment.', icon: <Trash2 size={24}/> },
+                        { id: 'Airbnb Cleaning', title: 'Airbnb turnover', desc: 'Guest-ready cleaning between stays.', icon: <Star size={24}/> }
                       ].map((type) => (
                         <div 
                           key={type.id}
@@ -511,7 +563,7 @@ const Booking = () => {
 
               <div className="hidden md:block mt-8">
                 <button 
-                  onClick={() => step === 8 ? alert('Booking Confirmed!') : nextStep()}
+                  onClick={() => step === 8 ? setIsSubmitted(true) : nextStep()}
                   className="w-full py-5 bg-primary text-white rounded-2xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
                   {step === 8 ? 'Confirm Booking' : 'Next Step'} <ChevronRight size={20} />
@@ -548,7 +600,7 @@ const Booking = () => {
               </button>
             )}
             <button 
-              onClick={() => step === 8 ? alert('Booking Confirmed!') : nextStep()}
+              onClick={() => step === 8 ? setIsSubmitted(true) : nextStep()}
               className="px-8 h-12 bg-primary text-white rounded-xl font-black text-sm shadow-xl shadow-primary/20 flex items-center justify-center gap-2 whitespace-nowrap"
             >
               {step === 8 ? 'Confirm' : 'Next'} <ChevronRight size={16} />

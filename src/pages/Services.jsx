@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   CheckCircle2,
@@ -10,12 +11,14 @@ import {
   Trash2,
   ShieldCheck,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useRegion } from "../context/RegionContext";
 import me1 from "../assets/image0.jpeg";
 import me2 from "../assets/image1.jpeg";
 import me3 from "../assets/Cleaniq services/4th Post.jpg";
+import airbnbImg from "../assets/airbnb_cleaning_service.png";
 
 const Services = () => {
+  const { region } = useRegion();
   const serviceDetails = [
     {
       id: "residential",
@@ -30,7 +33,7 @@ const Services = () => {
         "Bed making & tidying",
         "Trash removal",
       ],
-      pricing: "From £20/hr",
+      pricing: region.id === "UK" ? "From £20/hr" : `From ${region.symbol}15,000`,
     },
     {
       id: "commercial",
@@ -45,7 +48,7 @@ const Services = () => {
         "Carpet deep clean",
         "Disinfection services",
       ],
-      pricing: "Custom Quotes",
+      pricing: region.id === "UK" ? "Custom Quotes" : "Custom Quotes",
     },
     {
       id: "move",
@@ -60,7 +63,22 @@ const Services = () => {
         "Appliance deep clean",
         "End-of-tenancy guarantee",
       ],
-      pricing: "Flat rates available",
+      pricing: region.id === "UK" ? "From £60" : `From ${region.symbol}25,000`,
+    },
+    {
+      id: "airbnb",
+      title: "Airbnb & Short-let",
+      icon: <Star className="text-secondary" size={40} />,
+      image: airbnbImg,
+      features: [
+        "Rapid turnover cleaning",
+        "Linen & towel service",
+        "Guest amenity restocking",
+        "Damage reporting & photos",
+        "Key exchange support",
+        "High-touch point sanitization",
+      ],
+      pricing: region.id === "UK" ? "From £35" : `From ${region.symbol}15,000`,
     },
   ];
 
@@ -159,7 +177,7 @@ const Services = () => {
                 </div>
               </div>
 
-              <div className="lg:w-1/2 w-full aspect-video md:aspect-[4/3] rounded-[32px] md:rounded-[48px] relative overflow-hidden group shadow-2xl">
+              <div className="lg:w-1/2 w-full aspect-video md:aspect-4/3 rounded-[32px] md:rounded-[48px] relative overflow-hidden group shadow-2xl">
                 <img 
                   src={service.image} 
                   alt={service.title} 

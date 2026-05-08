@@ -23,7 +23,7 @@ const Preloader = () => {
             opacity: 0,
             transition: { duration: 0.8, ease: "easeInOut" }
           }}
-          className="fixed inset-0 z-[9999] bg-primary flex flex-col items-center justify-center overflow-hidden"
+          className="fixed inset-0 z-9999 bg-primary flex flex-col items-center justify-center overflow-hidden"
         >
           {/* Background Decorative Rings */}
           <motion.div 
@@ -71,7 +71,7 @@ const Preloader = () => {
                   ease: "easeInOut",
                   delay: 0.5
                 }}
-                className="absolute inset-0 z-20 bg-gradient-to-r from-transparent via-white/30 to-transparent w-full h-full skew-x-[-20deg]"
+                className="absolute inset-0 z-20 bg-linear-to-r from-transparent via-white/30 to-transparent w-full h-full skew-x-[-20deg]"
               />
             </motion.div>
 
@@ -91,7 +91,7 @@ const Preloader = () => {
               transition={{ delay: 0.5 }}
               className="mt-4 text-[10px] md:text-xs font-black text-white/40 uppercase tracking-[0.4em] italic"
             >
-              Excellence in Motion
+              Precision cleaning genuine care
             </motion.span>
           </div>
         </motion.div>
