@@ -89,9 +89,9 @@ const Preloader = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="mt-4 text-[10px] md:text-xs font-black text-white/40 uppercase tracking-[0.4em] italic"
+              className="mt-4 text-[10px] md:text-xs font-black text-white/40  tracking-[0.4em] italic"
             >
-              Precision cleaning ,genuine care
+              Precision cleaning, genuine care
             </motion.span>
           </div>
         </motion.div>
