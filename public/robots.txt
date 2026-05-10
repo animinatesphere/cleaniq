@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://cleaniq.services/sitemap.xml
+Sitemap: https://cleaniqservices.com/sitemap.xml
