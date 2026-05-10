@@ -6,22 +6,23 @@ import {
   ChevronRight, ChevronLeft, Calendar, User, 
   CreditCard, Home as HomeIcon, Briefcase, 
   Trash2, Plus, Minus, CheckCircle2, MapPin, 
-  Clock, Info, ShieldCheck, Heart,Star
+  Clock, Info, ShieldCheck, Heart, Star,
+  Search, Sparkles, Zap
 } from 'lucide-react';
 
 const Booking = () => {
   const { region } = useRegion();
   const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isNavSticky, setIsNavSticky] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   
   const [formData, setFormData] = useState({
     address: '',
     postcode: '',
-    serviceType: 'Classic One-off', // Classic Regular, Classic One-off, Deep Clean
-    frequency: 'Once', // Weekly, Fortnightly, Monthly, Once
-    propertySize: '1 Bed Flat', // New field for NG
-    duration: 2, // hours (for UK)
+    serviceType: 'Classic One-off', 
+    frequency: 'Once', 
+    propertySize: '1 Bed Flat', 
+    duration: 2, 
     extras: [],
     hasPets: false,
     date: '',
@@ -35,19 +36,19 @@ const Booking = () => {
 
   const [totalPrice, setTotalPrice] = useState(0);
 
-  // Pricing Logic (Region-aware)
+  // Pricing Logic (Updated with User Rates)
   useEffect(() => {
     let total = 0;
 
     if (region.id === 'UK') {
-      // UK: Hourly Pricing
-      let hourlyRate = 18;
-      if (formData.serviceType === 'Deep Clean') hourlyRate += 12;
-      if (formData.serviceType === 'Classic Regular') hourlyRate -= 2;
-      if (formData.serviceType === 'Airbnb Cleaning') hourlyRate += 5;
-      total = hourlyRate * formData.duration;
+      const rates = {
+        'Classic Regular': 17.90,
+        'Classic One-off': 20.90,
+        'Deep Clean': 24.90,
+        'Holiday Rental': 21.90
+      };
+      total = (rates[formData.serviceType] || 20.90) * formData.duration;
     } else {
-      // Nigeria: Property-based Flat Rates
       const flatRates = {
         '1 Bed Flat': 15000,
         '2 Bed Flat': 22000,
@@ -56,12 +57,10 @@ const Booking = () => {
         '5+ Bed House': 60000
       };
       total = flatRates[formData.propertySize] || 15000;
-      
       if (formData.serviceType === 'Deep Clean') total *= 1.8;
-      if (formData.serviceType === 'Airbnb Cleaning') total *= 1.3;
+      if (formData.serviceType === 'Holiday Rental') total *= 1.3;
     }
 
-    // Extra costs
     formData.extras.forEach(extra => {
       const extraPrices = {
         'Ironing': region.id === 'UK' ? 5 : 5000,
@@ -72,11 +71,10 @@ const Booking = () => {
       total += (extraPrices[extra] || 0);
     });
 
-    // Frequency Discount
     if (formData.frequency === 'Weekly') total *= 0.9;
     if (formData.frequency === 'Fortnightly') total *= 0.95;
 
-    setTotalPrice(Math.round(total));
+    setTotalPrice(Math.round(total * 100) / 100);
   }, [formData, region]);
 
   const toggleExtra = (extra) => {
@@ -109,28 +107,26 @@ const Booking = () => {
     { id: 8, title: 'Payment' },
   ];
 
-  const slideVariants = {
-    enter: (direction) => ({
-      x: direction > 0 ? 100 : -100,
-      opacity: 0
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1
-    },
-    exit: (direction) => ({
-      zIndex: 0,
-      x: direction < 0 ? 100 : -100,
-      opacity: 0
-    })
-  };
-
   const [[page, direction], setPage] = useState([step, 0]);
 
   useEffect(() => {
     setPage([step, step > page ? 1 : -1]);
   }, [step]);
+
+  // Mock address suggestions
+  const suggestions = [
+    "12 Baker Street, London NW1 6XE",
+    "45 Deansgate, Manchester M3 2AY",
+    "88 Salford Quays, Salford M50 3AZ",
+    "Plot 45, Lekki Phase 1, Lagos",
+    "Central Business District, Abuja"
+  ];
+
+  const selectAddress = (addr) => {
+    setFormData({...formData, address: addr});
+    setShowSuggestions(false);
+    setTimeout(() => nextStep(), 300);
+  };
 
   if (isSubmitted) {
     return (
@@ -143,36 +139,15 @@ const Booking = () => {
           <div className="w-24 h-24 bg-primary rounded-[32px] flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-primary/30 rotate-12">
             <CheckCircle2 size={48} className="text-white -rotate-12" />
           </div>
-          
           <h1 className="text-4xl md:text-5xl font-black text-primary-dark mb-6 tracking-tighter">Booking Confirmed!</h1>
-          <p className="text-lg text-slate-500 font-medium mb-12 leading-relaxed">
-            Your professional cleaner is now being assigned. We've sent a confirmation email to <span className="text-primary font-bold">{formData.email}</span> with all the details.
-          </p>
-
           <div className="grid md:grid-cols-2 gap-4 mb-12 text-left">
-            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Service</p>
-              <p className="font-bold text-primary-dark">{formData.serviceType}</p>
-            </div>
-            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Scheduled For</p>
-              <p className="font-bold text-primary-dark">{new Date(formData.date).toLocaleDateString()} @ {formData.timeSlot}</p>
-            </div>
-            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Address</p>
-              <p className="font-bold text-primary-dark truncate">{formData.address}</p>
-            </div>
             <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Paid</p>
               <p className="font-bold text-primary-dark">{region.symbol}{totalPrice}</p>
             </div>
           </div>
-
           <div className="flex flex-col sm:flex-row gap-4">
             <Link to="/" className="btn-primary flex-1 py-5">Back to Home</Link>
-            <button onClick={() => window.print()} className="btn-secondary px-8 py-5 flex items-center justify-center gap-2">
-              <Info size={20} /> Print Receipt
-            </button>
           </div>
         </motion.div>
       </div>
@@ -180,94 +155,190 @@ const Booking = () => {
   }
 
   return (
-    <div className="pt-24 min-h-screen bg-white pb-32">
+    <div className="pt-24 min-h-screen bg-[#FCFCFD] pb-32">
       <div className="max-w-6xl mx-auto px-4 md:px-6">
         
-        {/* Simple Progress Bar */}
-        <div className="w-full h-1.5 bg-slate-100 rounded-full mb-8 md:mb-12 overflow-hidden">
-          <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: `${(step / 8) * 100}%` }}
-            className="h-full bg-primary"
-          />
+        {/* Minimized Progress Header */}
+        <div className="flex flex-col items-center mb-16">
+          <div className="flex items-center gap-2 mb-4">
+            {steps.map((s) => (
+              <div 
+                key={s.id} 
+                className={`h-1.5 rounded-full transition-all duration-500 ${
+                  s.id === step ? 'w-8 bg-primary' : 
+                  s.id < step ? 'w-3 bg-primary/40' : 'w-2 bg-slate-200'
+                }`}
+              />
+            ))}
+          </div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Step {step} of 8</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-12 items-start">
           
-          {/* Main Form Area */}
           <div className="lg:col-span-2 min-h-[500px]">
             <AnimatePresence mode="wait" custom={direction}>
               <motion.div
                 key={step}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  x: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.2 }
-                }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
               >
                 {step === 1 && (
-                  <div className="space-y-6">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">Where should we clean?</h1>
-                    <p className="text-slate-500 text-lg">Enter your address to see availability in your area.</p>
-                    
-                    <div className="space-y-4">
-                      <div className="relative group">
-                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={24} />
-                        <input 
-                          type="text"
-                          placeholder="Street address and number"
-                          className="w-full p-5 pl-14 rounded-2xl border-2 border-slate-100 focus:border-primary focus:outline-none text-lg font-medium transition-all bg-slate-50/50"
-                          value={formData.address}
-                          onChange={(e) => setFormData({...formData, address: e.target.value})}
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <input 
-                          type="text"
-                          placeholder={region.id === 'UK' ? "Postcode" : "Postal Code"}
-                          className="w-full p-5 rounded-2xl border-2 border-slate-100 focus:border-primary focus:outline-none text-lg font-medium transition-all bg-slate-50/50"
-                          value={formData.postcode}
-                          onChange={(e) => setFormData({...formData, postcode: e.target.value})}
-                        />
-                      </div>
+                  <div className="max-w-xl mx-auto text-center space-y-8 py-10">
+                    <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center mx-auto shadow-inner">
+                      <MapPin size={40} />
+                    </div>
+                    <div>
+                      <h1 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tight mb-4">Find your professional.</h1>
+                      <p className="text-slate-500 text-lg">Enter your address to see availability in your area.</p>
                     </div>
                     
-                    <div className="p-6 bg-primary/5 rounded-3xl border border-primary/10 flex gap-4">
-                      <ShieldCheck className="text-primary shrink-0" size={24} />
-                      <p className="text-sm text-slate-600 leading-relaxed">
-                        Your address is used only to find professionals nearby. We never share your details without a confirmed booking.
-                      </p>
+                    <div className="relative group">
+                      <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
+                        <Search size={24} />
+                      </div>
+                      <input 
+                        type="text"
+                        placeholder="Type your address..."
+                        className="w-full p-8 pl-16 rounded-[32px] border-none shadow-2xl shadow-slate-200 focus:ring-4 focus:ring-primary/10 focus:outline-none text-xl font-bold transition-all bg-white"
+                        value={formData.address}
+                        onChange={(e) => {
+                          setFormData({...formData, address: e.target.value});
+                          setShowSuggestions(e.target.value.length > 2);
+                        }}
+                      />
+                      
+                      {/* Suggestions Dropdown */}
+                      <AnimatePresence>
+                        {showSuggestions && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="absolute top-full left-0 right-0 mt-4 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 text-left"
+                          >
+                            {suggestions.map((addr, i) => (
+                              <button 
+                                key={i}
+                                onClick={() => selectAddress(addr)}
+                                className="w-full p-6 hover:bg-slate-50 flex items-center gap-4 text-slate-700 font-bold border-b border-slate-50 last:border-none transition-colors"
+                              >
+                                <MapPin size={18} className="text-slate-300" />
+                                {addr}
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
                 )}
 
                 {step === 2 && (
-                  <div className="space-y-6">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">What type of cleaning?</h1>
-                    <div className="grid gap-4">
+                  <div className="space-y-8">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Sparkles className="text-secondary" size={20} />
+                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Service Selection</span>
+                    </div>
+                    <h1 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tight">What type of cleaning?</h1>
+                    
+                    <div className="grid gap-6">
                       {[
-                        { id: 'Classic Regular', title: 'Classic regular', desc: 'The same pro, every week or two.', icon: <Heart size={24}/> },
-                        { id: 'Classic One-off', title: 'Classic one-off', desc: 'A thorough clean whenever you need.', icon: <HomeIcon size={24}/> },
-                        { id: 'Deep Clean', title: 'Deep clean', desc: 'For moving or seasonal refreshment.', icon: <Trash2 size={24}/> },
-                        { id: 'Airbnb Cleaning', title: 'Airbnb turnover', desc: 'Guest-ready cleaning between stays.', icon: <Star size={24}/> }
+                        { 
+                          id: 'Classic Regular', 
+                          title: 'Classic regular cleaning', 
+                          price: '£17.90/h', 
+                          oldPrice: '£20.90/h',
+                          bullets: [
+                            'No obligation, stop or pause at any time free of charge',
+                            'The same cleaner each time, subject to your approval after your first session',
+                            'Window cleaning included',
+                            'Ironing available on request'
+                          ],
+                          icon: <Heart />
+                        },
+                        { 
+                          id: 'Classic One-off', 
+                          title: 'Classic one-off cleaning', 
+                          price: '£20.90/h', 
+                          bullets: [
+                            'For only one session',
+                            'Window cleaning included',
+                            'Ironing available on request'
+                          ],
+                          icon: <HomeIcon />
+                        },
+                        { 
+                          id: 'Deep Clean', 
+                          title: 'Deep cleaning', 
+                          price: '£24.90/h', 
+                          bullets: [
+                            'For a spring clean',
+                            'Window cleaning included',
+                            'Household cleaning products can be supplied on request'
+                          ],
+                          icon: <Trash2 />
+                        },
+                        { 
+                          id: 'Holiday Rental', 
+                          title: 'Holiday rental cleaning', 
+                          price: '£21.90/h', 
+                          bullets: [
+                            'For Airbnb & holiday rentals',
+                            'Get the place ready for your next guests',
+                            'Window cleaning included',
+                            'Please provide a washing machine, dryer, and detergent if on-site linen and towel washing is required'
+                          ],
+                          icon: <Zap />
+                        }
                       ].map((type) => (
                         <div 
                           key={type.id}
                           onClick={() => setFormData({...formData, serviceType: type.id, frequency: type.id === 'Classic Regular' ? 'Weekly' : 'Once'})}
-                          className={`selection-card p-6 flex-row items-center gap-6 ${formData.serviceType === type.id ? 'selection-card-active' : 'selection-card-inactive'}`}
+                          className={`p-1 rounded-[32px] transition-all duration-500 cursor-pointer ${
+                            formData.serviceType === type.id 
+                            ? 'bg-gradient-to-br from-primary to-primary-dark shadow-xl shadow-primary/20 scale-[1.02]' 
+                            : 'bg-white border border-slate-200 hover:border-primary/30'
+                          }`}
                         >
-                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${formData.serviceType === type.id ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
-                            {type.icon}
+                          <div className="bg-inherit rounded-[31px] p-8">
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-4">
+                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${formData.serviceType === type.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-primary'}`}>
+                                  {type.icon}
+                                </div>
+                                <h3 className={`text-xl md:text-2xl font-black ${formData.serviceType === type.id ? 'text-white' : 'text-primary-dark'}`}>
+                                  {type.title}
+                                </h3>
+                              </div>
+                              <div className="text-right">
+                                {type.oldPrice && <span className={`text-sm line-through block ${formData.serviceType === type.id ? 'text-white/50' : 'text-slate-400'}`}>{type.oldPrice}</span>}
+                                <span className={`text-2xl font-black ${formData.serviceType === type.id ? 'text-white' : 'text-primary'}`}>{type.price}</span>
+                              </div>
+                            </div>
+
+                            <AnimatePresence>
+                              {formData.serviceType === type.id && (
+                                <motion.div 
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="pt-6 border-t border-white/10 space-y-3">
+                                    {type.bullets.map((b, i) => (
+                                      <div key={i} className="flex items-start gap-3 text-sm font-medium text-white/80">
+                                        <CheckCircle2 size={16} className="text-secondary shrink-0 mt-0.5" />
+                                        {b}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
-                          <div className="flex-1">
-                            <h3 className="text-xl font-bold">{type.title}</h3>
-                            <p className="text-sm opacity-70">{type.desc}</p>
-                          </div>
-                          {formData.serviceType === type.id && <CheckCircle2 className="text-primary" size={24} />}
                         </div>
                       ))}
                     </div>
@@ -287,7 +358,7 @@ const Booking = () => {
                         <div 
                           key={freq.id}
                           onClick={() => setFormData({...formData, frequency: freq.id})}
-                          className={`selection-card p-6 flex-row items-center justify-between ${formData.frequency === freq.id ? 'selection-card-active' : 'selection-card-inactive'}`}
+                          className={`selection-card p-8 flex-row items-center justify-between ${formData.frequency === freq.id ? 'selection-card-active' : 'selection-card-inactive'}`}
                         >
                           <span className="text-xl font-bold">{freq.title}</span>
                           <div className="flex items-center gap-3">
@@ -307,53 +378,27 @@ const Booking = () => {
                     </h1>
                     
                     {region.id === 'UK' ? (
-                      <>
-                        <div className="flex items-center justify-center gap-8 bg-slate-50 p-10 rounded-[40px] border-2 border-slate-100">
-                          <button 
-                            onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 0.5)})}
-                            className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center text-primary hover:scale-110 active:scale-90 transition-all border border-slate-100"
-                          >
-                            <Minus size={32} />
-                          </button>
-                          <div className="text-center min-w-[120px]">
-                            <span className="text-4xl md:text-6xl font-black text-primary-dark">{formData.duration}</span>
-                            <span className="text-xl md:text-2xl font-bold text-slate-400 ml-2">h</span>
-                          </div>
-                          <button 
-                            onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 0.5)})}
-                            className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center text-primary hover:scale-110 active:scale-90 transition-all border border-slate-100"
-                          >
-                            <Plus size={32} />
-                          </button>
+                      <div className="flex items-center justify-center gap-8 bg-white p-12 rounded-[48px] border border-slate-100 shadow-xl shadow-slate-100/50">
+                        <button 
+                          onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 0.5)})}
+                          className="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all"
+                        >
+                          <Minus size={32} />
+                        </button>
+                        <div className="text-center min-w-[120px]">
+                          <span className="text-6xl md:text-8xl font-black text-primary-dark tracking-tighter">{formData.duration}</span>
+                          <span className="text-2xl font-bold text-slate-300 ml-2">h</span>
                         </div>
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          {[
-                            { h: 2, label: '1 Bed Flat' },
-                            { h: 3, label: '2 Bed Home' },
-                            { h: 4, label: '3 Bed Home' },
-                            { h: 5, label: 'Large Villa' }
-                          ].map(sug => (
-                            <button 
-                              key={sug.h}
-                              onClick={() => setFormData({...formData, duration: sug.h})}
-                              className={`p-4 rounded-2xl border-2 text-center transition-all ${formData.duration === sug.h ? 'border-primary bg-primary text-white' : 'border-slate-100 bg-white text-slate-500'}`}
-                            >
-                              <div className="text-lg font-black">{sug.h}h</div>
-                              <div className="text-[10px] uppercase font-bold opacity-70">{sug.label}</div>
-                            </button>
-                          ))}
-                        </div>
-                      </>
+                        <button 
+                          onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 0.5)})}
+                          className="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all"
+                        >
+                          <Plus size={32} />
+                        </button>
+                      </div>
                     ) : (
                       <div className="grid gap-4">
-                        {[
-                          '1 Bed Flat', 
-                          '2 Bed Flat', 
-                          '3 Bed House', 
-                          '4 Bed House', 
-                          '5+ Bed House'
-                        ].map(size => (
+                        {['1 Bed Flat', '2 Bed Flat', '3 Bed House', '4 Bed House', '5+ Bed House'].map(size => (
                           <div 
                             key={size}
                             onClick={() => setFormData({...formData, propertySize: size})}
@@ -381,14 +426,14 @@ const Booking = () => {
                         <div 
                           key={extra.id}
                           onClick={() => toggleExtra(extra.id)}
-                          className={`selection-card p-5 flex-row items-center gap-4 ${formData.extras.includes(extra.id) ? 'selection-card-active' : 'selection-card-inactive'}`}
+                          className={`selection-card p-6 flex-row items-center gap-4 ${formData.extras.includes(extra.id) ? 'selection-card-active' : 'selection-card-inactive'}`}
                         >
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${formData.extras.includes(extra.id) ? 'bg-primary text-white' : 'bg-slate-50 text-slate-400'}`}>
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${formData.extras.includes(extra.id) ? 'bg-primary text-white' : 'bg-slate-50 text-slate-400'}`}>
                             {extra.icon}
                           </div>
                           <span className="font-bold">{extra.id}</span>
                           <div className="ml-auto">
-                            {formData.extras.includes(extra.id) ? <CheckCircle2 size={20}/> : <Plus size={20} className="opacity-30"/>}
+                            {formData.extras.includes(extra.id) ? <CheckCircle2 size={24}/> : <Plus size={24} className="opacity-10"/>}
                           </div>
                         </div>
                       ))}
@@ -397,21 +442,19 @@ const Booking = () => {
                 )}
 
                 {step === 6 && (
-                  <div className="space-y-6">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">Any pets?</h1>
-                    <p className="text-slate-500 text-lg">We need to know for our cleaners who might have allergies.</p>
-                    <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-8 py-10">
+                    <h1 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tight text-center">Any pets?</h1>
+                    <div className="grid grid-cols-2 gap-6 max-w-lg mx-auto">
                       {[
-                        { id: true, label: 'Yes', sub: 'I have pets' },
-                        { id: false, label: 'No', sub: 'No pets here' }
+                        { id: true, label: 'Yes' },
+                        { id: false, label: 'No' }
                       ].map((opt) => (
                         <div 
                           key={String(opt.id)}
                           onClick={() => setFormData({...formData, hasPets: opt.id})}
-                          className={`selection-card p-10 items-center justify-center text-center ${formData.hasPets === opt.id ? 'selection-card-active' : 'selection-card-inactive'}`}
+                          className={`selection-card p-12 items-center justify-center text-center ${formData.hasPets === opt.id ? 'selection-card-active shadow-2xl' : 'selection-card-inactive'}`}
                         >
-                          <span className="text-3xl font-black mb-1">{opt.label}</span>
-                          <span className="text-sm opacity-70 font-medium">{opt.sub}</span>
+                          <span className="text-4xl font-black">{opt.label}</span>
                         </div>
                       ))}
                     </div>
@@ -420,89 +463,39 @@ const Booking = () => {
 
                 {step === 7 && (
                   <div className="space-y-8">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                      <div>
-                        <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">When should we come?</h1>
-                        <p className="text-slate-500 text-lg mt-2">Select a date that works best for you.</p>
-                      </div>
-                      <div className="flex items-center gap-2 text-primary font-bold bg-primary/5 px-4 py-2 rounded-xl border border-primary/10">
-                        <Calendar size={20} />
-                        <span>Next 30 Days</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-8">
-                      <CustomCalendar 
-                        selectedDate={formData.date} 
-                        onSelect={(date) => setFormData({...formData, date})} 
-                      />
-
-                      <div className="space-y-4">
-                        <label className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-3 block">Arrival window</label>
-                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                          {['08:00', '10:30', '13:00', '15:30', '18:00'].map(slot => (
-                            <button
-                              key={slot}
-                              onClick={() => setFormData({...formData, timeSlot: slot})}
-                              className={`p-4 rounded-2xl border-2 font-black transition-all flex flex-col items-center gap-1 ${
-                                formData.timeSlot === slot 
-                                  ? 'border-primary bg-primary text-white shadow-lg shadow-primary/20 scale-105' 
-                                  : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200'
-                              }`}
-                            >
-                              <Clock size={16} className={formData.timeSlot === slot ? 'text-white' : 'text-slate-300'} />
-                              <span className="text-sm">{slot}</span>
-                            </button>
-                          ))}
-                        </div>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center mt-4">
-                          Pro Tip: Morning slots usually have the best availability!
-                        </p>
-                      </div>
+                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">When should we come?</h1>
+                    <CustomCalendar 
+                      selectedDate={formData.date} 
+                      onSelect={(date) => setFormData({...formData, date})} 
+                    />
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                      {['08:00', '10:30', '13:00', '15:30', '18:00'].map(slot => (
+                        <button
+                          key={slot}
+                          onClick={() => setFormData({...formData, timeSlot: slot})}
+                          className={`p-5 rounded-2xl border-2 font-black transition-all ${
+                            formData.timeSlot === slot 
+                              ? 'border-primary bg-primary text-white' 
+                              : 'border-slate-100 bg-white text-slate-500'
+                          }`}
+                        >
+                          {slot}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
 
                 {step === 8 && (
                   <div className="space-y-8">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">Almost done!</h1>
-                    <p className="text-slate-500 text-lg">Please provide your contact details to finalize the booking.</p>
+                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">Personal Details</h1>
                     <div className="grid gap-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input 
-                          placeholder="First Name" 
-                          className="w-full p-4 rounded-xl border-2 border-slate-100 focus:border-primary focus:outline-none transition-all"
-                          value={formData.firstName}
-                          onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                        />
-                        <input 
-                          placeholder="Last Name" 
-                          className="w-full p-4 rounded-xl border-2 border-slate-100 focus:border-primary focus:outline-none transition-all"
-                          value={formData.lastName}
-                          onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                        />
+                      <div className="grid grid-cols-2 gap-4">
+                        <input placeholder="First Name" className="booking-input" value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})} />
+                        <input placeholder="Last Name" className="booking-input" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})} />
                       </div>
-                      <input 
-                        placeholder="Email Address" 
-                        className="w-full p-4 rounded-xl border-2 border-slate-100 focus:border-primary focus:outline-none transition-all"
-                        value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        type="email"
-                      />
-                      <input 
-                        placeholder="Phone Number" 
-                        className="w-full p-4 rounded-xl border-2 border-slate-100 focus:border-primary focus:outline-none transition-all"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                        type="tel"
-                      />
-                      <textarea 
-                        placeholder="Special instructions for the pro..." 
-                        rows="3" 
-                        className="w-full p-4 rounded-xl border-2 border-slate-100 focus:border-primary focus:outline-none transition-all resize-none"
-                        value={formData.specialInstructions}
-                        onChange={(e) => setFormData({...formData, specialInstructions: e.target.value})}
-                      />
+                      <input placeholder="Email Address" className="booking-input" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} type="email" />
+                      <input placeholder="Phone Number" className="booking-input" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} type="tel" />
                     </div>
                   </div>
                 )}
@@ -510,70 +503,47 @@ const Booking = () => {
             </AnimatePresence>
           </div>
 
-          {/* Basket Sidebar */}
+          {/* Sticky Basket Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-[32px] p-6 md:p-8 border-2 border-slate-50 shadow-2xl shadow-slate-200/50 sticky top-28">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                  <CreditCard size={20} />
-                </div>
-                <h2 className="text-xl font-black text-primary-dark uppercase tracking-tight">My Basket.</h2>
-              </div>
+            <div className="bg-white rounded-[40px] p-8 border border-slate-100 shadow-2xl shadow-slate-200/50 sticky top-28">
+              <h2 className="text-2xl font-black text-primary-dark mb-8 flex items-center gap-2">
+                <div className="w-2 h-8 bg-primary rounded-full" /> My Clean.
+              </h2>
 
-              <div className="space-y-1 mb-8 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
-                <div className="basket-item">
-                  <span className="text-slate-500 font-medium">Service</span>
-                  <span className="font-bold text-primary-dark">{formData.serviceType}</span>
+              <div className="space-y-4 mb-10">
+                <div className="flex justify-between items-center group">
+                  <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Service</span>
+                  <span className="font-black text-primary-dark">{formData.serviceType}</span>
                 </div>
-                <div className="basket-item">
-                  <span className="text-slate-500 font-medium">
-                    {region.id === 'UK' ? 'Duration' : 'Size'}
-                  </span>
-                  <span className="font-bold text-primary-dark">
-                    {region.id === 'UK' ? `${formData.duration}h` : formData.propertySize}
-                  </span>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">{region.id === 'UK' ? 'Duration' : 'Size'}</span>
+                  <span className="font-black text-primary-dark">{region.id === 'UK' ? `${formData.duration}h` : formData.propertySize}</span>
                 </div>
-                <div className="basket-item">
-                  <span className="text-slate-500 font-medium">Frequency</span>
-                  <span className="font-bold text-primary-dark">{formData.frequency}</span>
-                </div>
-                {formData.extras.map(e => (
-                  <div key={e} className="basket-item">
-                    <span className="text-slate-500 font-medium text-xs">+ {e}</span>
-                    <span className="font-bold text-primary-dark text-xs">Included</span>
-                  </div>
-                ))}
                 {formData.date && (
-                  <div className="basket-item">
-                    <span className="text-slate-500 font-medium">Scheduled</span>
-                    <span className="font-bold text-primary-dark">{new Date(formData.date).toLocaleDateString()}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Schedule</span>
+                    <span className="font-black text-primary-dark">{new Date(formData.date).toLocaleDateString()}</span>
                   </div>
                 )}
               </div>
 
-              <div className="pt-6 border-t-2 border-dashed border-slate-100">
-                <div className="flex justify-between items-end mb-4">
-                  <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Total</span>
+              <div className="pt-8 border-t border-slate-100">
+                <div className="flex justify-between items-end mb-8">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total cost</span>
                   <div className="text-right">
-                    <span className="text-3xl md:text-4xl font-black text-primary">{region.symbol}{totalPrice}</span>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mt-1">VAT Included</p>
+                    <span className="text-4xl font-black text-primary tracking-tighter">{region.symbol}{totalPrice}</span>
                   </div>
                 </div>
-              </div>
-
-              <div className="hidden md:block mt-8">
                 <button 
                   onClick={() => step === 8 ? setIsSubmitted(true) : nextStep()}
-                  className="w-full py-5 bg-primary text-white rounded-2xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
+                  disabled={step === 1 && !formData.address}
+                  className="w-full py-6 bg-primary text-white rounded-3xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:grayscale"
                 >
-                  {step === 8 ? 'Confirm Booking' : 'Next Step'} <ChevronRight size={20} />
+                  {step === 8 ? 'Confirm Booking' : 'Continue'}
                 </button>
                 {step > 1 && (
-                  <button 
-                    onClick={prevStep}
-                    className="w-full py-4 mt-3 text-slate-400 font-bold hover:text-primary transition-colors flex items-center justify-center gap-2"
-                  >
-                    <ChevronLeft size={18} /> Previous
+                  <button onClick={prevStep} className="w-full mt-4 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-primary transition-colors">
+                    Go Back
                   </button>
                 )}
               </div>
@@ -582,135 +552,54 @@ const Booking = () => {
 
         </div>
       </div>
-
-      {/* Sticky Bottom Nav (Mobile) */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-xl border-t border-slate-100 md:hidden z-50">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex-1">
-             <span className="text-[10px] font-black text-slate-400 uppercase block tracking-wider">Estimated Total</span>
-             <span className="text-xl font-black text-primary">{region.symbol}{totalPrice}</span>
-          </div>
-          <div className="flex gap-2">
-            {step > 1 && (
-              <button 
-                onClick={prevStep}
-                className="w-12 h-12 rounded-xl border-2 border-slate-100 flex items-center justify-center text-slate-400"
-              >
-                <ChevronLeft size={24} />
-              </button>
-            )}
-            <button 
-              onClick={() => step === 8 ? setIsSubmitted(true) : nextStep()}
-              className="px-8 h-12 bg-primary text-white rounded-xl font-black text-sm shadow-xl shadow-primary/20 flex items-center justify-center gap-2 whitespace-nowrap"
-            >
-              {step === 8 ? 'Confirm' : 'Next'} <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
 
 const CustomCalendar = ({ selectedDate, onSelect }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
-
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
-  
   const days = [];
   const totalDays = daysInMonth(year, month);
   const offset = firstDayOfMonth(year, month);
-
-  // Fill empty slots for previous month
-  for (let i = 0; i < offset; i++) {
-    days.push(null);
-  }
-
-  // Fill actual days
-  for (let i = 1; i <= totalDays; i++) {
-    days.push(new Date(year, month, i));
-  }
-
-  const isSelected = (date) => {
-    if (!date || !selectedDate) return false;
-    const d = new Date(date);
-    const s = new Date(selectedDate);
-    return d.toDateString() === s.toDateString();
-  };
-
-  const isToday = (date) => {
-    if (!date) return false;
-    return new Date(date).toDateString() === new Date().toDateString();
-  };
-
+  for (let i = 0; i < offset; i++) days.push(null);
+  for (let i = 1; i <= totalDays; i++) days.push(new Date(year, month, i));
+  const isSelected = (date) => date && selectedDate && new Date(date).toDateString() === new Date(selectedDate).toDateString();
+  const isToday = (date) => date && new Date(date).toDateString() === new Date().toDateString();
   const isPast = (date) => {
     if (!date) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return date < today;
   };
-
-  const monthNames = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
   return (
-    <div className="bg-white rounded-3xl border-2 border-slate-50 p-6 shadow-xl shadow-slate-100/50">
+    <div className="bg-white rounded-[40px] border border-slate-100 p-8 shadow-xl shadow-slate-100/50">
       <div className="flex items-center justify-between mb-8">
-        <h3 className="text-xl font-black text-primary-dark">
-          {monthNames[month]} <span className="text-slate-300 font-bold ml-1">{year}</span>
-        </h3>
+        <h3 className="text-2xl font-black text-primary-dark">{monthNames[month]} {year}</h3>
         <div className="flex gap-2">
-          <button 
-            onClick={() => setCurrentMonth(new Date(year, month - 1))}
-            className="w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center hover:bg-slate-50 transition-colors"
-          >
-            <ChevronLeft size={20} className="text-slate-400" />
-          </button>
-          <button 
-            onClick={() => setCurrentMonth(new Date(year, month + 1))}
-            className="w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center hover:bg-slate-50 transition-colors"
-          >
-            <ChevronRight size={20} className="text-slate-400" />
-          </button>
+          <button onClick={() => setCurrentMonth(new Date(year, month - 1))} className="w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center hover:bg-slate-50"><ChevronLeft size={20} /></button>
+          <button onClick={() => setCurrentMonth(new Date(year, month + 1))} className="w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center hover:bg-slate-50"><ChevronRight size={20} /></button>
         </div>
       </div>
-
-      <div className="grid grid-cols-7 gap-1 md:gap-2 text-center mb-4">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-          <div key={d} className="text-[10px] font-black uppercase tracking-widest text-slate-300 py-2">
-            {d}
-          </div>
-        ))}
+      <div className="grid grid-cols-7 gap-2 text-center mb-4">
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => <div key={d} className="text-[10px] font-black text-slate-300 uppercase">{d}</div>)}
       </div>
-
-      <div className="grid grid-cols-7 gap-1 md:gap-2">
+      <div className="grid grid-cols-7 gap-2">
         {days.map((date, idx) => {
           if (!date) return <div key={`empty-${idx}`} />;
-          
           const disabled = isPast(date);
           const active = isSelected(date);
           const today = isToday(date);
-
           return (
-            <button
-              key={idx}
-              disabled={disabled}
-              onClick={() => onSelect(date.toISOString().split('T')[0])}
-              className={`
-                aspect-square rounded-xl md:rounded-2xl flex flex-col items-center justify-center transition-all relative
-                ${active ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105 z-10' : ''}
-                ${!active && !disabled ? 'hover:bg-primary/5 text-primary-dark font-bold' : ''}
-                ${disabled ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}
-                ${today && !active ? 'border-2 border-primary/20' : ''}
-              `}
+            <button key={idx} disabled={disabled} onClick={() => onSelect(date.toISOString().split('T')[0])}
+              className={`aspect-square rounded-2xl flex items-center justify-center text-sm font-black transition-all ${active ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/20' : 'hover:bg-primary/5'} ${disabled ? 'opacity-10 cursor-not-allowed' : 'cursor-pointer'} ${today && !active ? 'text-primary border-2 border-primary/10' : ''}`}
             >
-              <span className="text-sm md:text-lg">{date.getDate()}</span>
-              {today && !active && <div className="w-1 h-1 bg-primary rounded-full absolute bottom-2" />}
+              {date.getDate()}
             </button>
           );
         })}

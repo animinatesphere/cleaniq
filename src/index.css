@@ -72,15 +72,19 @@
   }
 
   .selection-card {
-    @apply p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col gap-2;
+    @apply p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col gap-2 bg-white;
   }
 
   .selection-card-active {
-    @apply border-primary bg-primary/5 text-primary shadow-sm;
+    @apply border-primary bg-primary/5 text-primary shadow-lg shadow-primary/5;
   }
 
   .selection-card-inactive {
     @apply border-slate-100 bg-white hover:border-slate-200 text-slate-500;
+  }
+
+  .booking-input {
+    @apply w-full p-6 rounded-2xl border-2 border-slate-100 focus:border-primary focus:outline-none transition-all font-bold text-slate-700 bg-slate-50/30 focus:bg-white;
   }
 
   .custom-scrollbar {
