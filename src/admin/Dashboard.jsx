@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, Users, Calendar, 
   DollarSign, ArrowUpRight, ArrowDownRight,
@@ -6,25 +6,68 @@ import {
 } from 'lucide-react';
 
 const Dashboard = () => {
-  const stats = [
-    { title: 'Total Revenue', value: '£12,450', change: '+12.5%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
-    { title: 'Active Bookings', value: '48', change: '+5.2%', isUp: true, icon: <Calendar className="text-blue-500" /> },
-    { title: 'New Applicants', value: '12', change: '-2.4%', isUp: false, icon: <Users className="text-orange-500" /> },
-    { title: 'Avg Rating', value: '4.9/5', change: '+0.1%', isUp: true, icon: <TrendingUp className="text-purple-500" /> },
-  ];
+  const [data, setData] = useState({
+    bookings: [],
+    applicants: [],
+    stats: [
+      { title: 'Total Revenue', value: '£0', change: '0%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
+      { title: 'Active Bookings', value: '0', change: '0%', isUp: true, icon: <Calendar className="text-blue-500" /> },
+      { title: 'New Applicants', value: '0', change: '0%', isUp: false, icon: <Users className="text-orange-500" /> },
+      { title: 'Avg Rating', value: '5.0/5', change: '0%', isUp: true, icon: <TrendingUp className="text-purple-500" /> },
+    ]
+  });
 
-  const recentBookings = [
-    { id: 'BK-7821', name: 'Sarah Wilson', service: 'Deep Clean', date: 'May 12', status: 'Confirmed', amount: '£120', region: 'UK', color: 'bg-emerald-100 text-emerald-700' },
-    { id: 'BK-7822', name: 'Chidi Okafor', service: 'Regular Home', date: 'May 13', status: 'Pending', amount: '₦45,000', region: 'NG', color: 'bg-amber-100 text-amber-700' },
-    { id: 'BK-7823', name: 'Emma Thompson', service: 'Move-out', date: 'May 14', status: 'Completed', amount: '£180', region: 'UK', color: 'bg-slate-100 text-slate-700' },
-    { id: 'BK-7824', name: 'Afolabi Musa', service: 'Office', date: 'May 15', status: 'In Progress', amount: '₦120,000', region: 'NG', color: 'bg-blue-100 text-blue-700' },
-  ];
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const [bookingsRes, applicantsRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/bookings`),
+          fetch(`${import.meta.env.VITE_API_URL}/recruitment`)
+        ]);
+        
+        const bookings = await bookingsRes.json();
+        const applicants = await applicantsRes.json();
+
+        // Calculate Revenue
+        const ukRevenue = bookings
+          .filter(b => b.region === 'UK')
+          .reduce((sum, b) => sum + b.payment.amount, 0);
+        
+        setData({
+          bookings: bookings.slice(0, 4).map(b => ({
+            id: b.bookingId,
+            name: `${b.customer.firstName} ${b.customer.lastName}`,
+            service: b.service,
+            date: new Date(b.schedule.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+            status: b.status,
+            amount: `${b.region === 'UK' ? '£' : '₦'}${b.payment.amount}`,
+            region: b.region,
+            color: b.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+          })),
+          applicants: applicants.slice(0, 3).map(a => ({
+            name: a.fullName,
+            role: a.experience,
+            location: a.city
+          })),
+          stats: [
+            { title: 'Total Revenue (UK)', value: `£${ukRevenue}`, change: '+100%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
+            { title: 'Active Bookings', value: bookings.length.toString(), change: '+100%', isUp: true, icon: <Calendar className="text-blue-500" /> },
+            { title: 'New Applicants', value: applicants.length.toString(), change: '+100%', isUp: true, icon: <Users className="text-orange-500" /> },
+            { title: 'Avg Rating', value: '5.0/5', change: '+0%', isUp: true, icon: <TrendingUp className="text-purple-500" /> },
+          ]
+        });
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      }
+    };
+    fetchDashboardData();
+  }, []);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, i) => (
+        {data.stats.map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 group">
             <div className="flex justify-between items-start mb-6">
               <div className="p-3 bg-slate-50 rounded-2xl group-hover:bg-primary/10 transition-colors">
@@ -66,7 +109,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {recentBookings.map((item, i) => (
+                {data.bookings.map((item, i) => (
                   <tr key={i} className="group hover:bg-slate-50/80 transition-colors">
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-3">
@@ -134,11 +177,7 @@ const Dashboard = () => {
               <span className="bg-primary/10 text-primary text-[10px] font-black px-2.5 py-1 rounded-full uppercase">3 New</span>
             </div>
             <div className="space-y-5">
-              {[
-                { name: 'David Adewale', role: 'Full-time Cleaner', location: 'Lagos, NG' },
-                { name: 'Lucy Harrison', role: 'Part-time Cleaner', location: 'Manchester, UK' },
-                { name: 'Olamide Bello', role: 'Specialist Cleaner', location: 'Abuja, NG' },
-              ].map((app, i) => (
+              {data.applicants.map((app, i) => (
                 <div key={i} className="flex items-center gap-4 group cursor-pointer">
                   <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-all">
                     <UserCheck size={20} />

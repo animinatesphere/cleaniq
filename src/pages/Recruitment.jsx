@@ -33,9 +33,42 @@ const Recruitment = () => {
     setStep(s => s - 1);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    
+    const data = new FormData();
+    // Files
+    if (formData.cv) data.append('cv', formData.cv);
+    if (formData.idDocument) data.append('idDocument', formData.idDocument);
+    
+    // Other data
+    const applicantData = {
+      fullName: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      city: formData.city,
+      experience: formData.experience,
+      hasTransport: formData.hasTransport,
+      region: region.id,
+    };
+    
+    data.append('data', JSON.stringify(applicantData));
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/recruitment`, {
+        method: 'POST',
+        body: data, // Fetch handles multipart/form-data for FormData automatically
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+      } else {
+        alert('Application failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      alert('Network error. Please check your connection.');
+    }
   };
 
   if (submitted) {
@@ -264,13 +297,17 @@ const Recruitment = () => {
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Valid Id</label>
                       <div className="relative group">
-                        <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                        <div className="p-10 border-2 border-dashed border-slate-200 rounded-[40px] flex flex-col items-center justify-center gap-4 bg-white group-hover:border-primary group-hover:bg-primary/5 transition-all">
-                          <div className="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-white group-hover:text-primary transition-all">
-                            <Upload size={32} />
+                        <input 
+                          type="file" 
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                          onChange={(e) => setFormData({...formData, idDocument: e.target.files[0]})}
+                        />
+                        <div className={`p-10 border-2 border-dashed rounded-[40px] flex flex-col items-center justify-center gap-4 transition-all ${formData.idDocument ? 'border-primary bg-primary/5' : 'border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5'}`}>
+                          <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${formData.idDocument ? 'bg-white text-primary' : 'bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary'}`}>
+                            {formData.idDocument ? <CheckCircle2 size={32} /> : <Upload size={32} />}
                           </div>
                           <div className="text-center">
-                            <p className="font-black text-primary-dark">Upload Valid ID</p>
+                            <p className="font-black text-primary-dark">{formData.idDocument ? formData.idDocument.name : 'Upload Valid ID'}</p>
                             <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Required for identity verification</p>
                           </div>
                         </div>
@@ -292,13 +329,17 @@ const Recruitment = () => {
                           />
                         </div> */}
                         <div className="relative group">
-                          <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                          <div className="p-10 border-2 border-dashed border-slate-200 rounded-[40px] flex flex-col items-center justify-center gap-4 bg-white group-hover:border-primary group-hover:bg-primary/5 transition-all">
-                            <div className="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-white group-hover:text-primary transition-all">
-                              <Upload size={32} />
+                          <input 
+                            type="file" 
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                            onChange={(e) => setFormData({...formData, cv: e.target.files[0]})}
+                          />
+                          <div className={`p-10 border-2 border-dashed rounded-[40px] flex flex-col items-center justify-center gap-4 transition-all ${formData.cv ? 'border-primary bg-primary/5' : 'border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5'}`}>
+                            <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${formData.cv ? 'bg-white text-primary' : 'bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary'}`}>
+                              {formData.cv ? <CheckCircle2 size={32} /> : <Upload size={32} />}
                             </div>
                             <div className="text-center">
-                              <p className="font-black text-primary-dark">Upload CV</p>
+                              <p className="font-black text-primary-dark">{formData.cv ? formData.cv.name : 'Upload CV'}</p>
                               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">PDF or JPEG (Max 5MB)</p>
                             </div>
                           </div>
@@ -310,13 +351,17 @@ const Recruitment = () => {
                           Please upload your latest Curriculum Vitae (CV) highlighting your professional history and references.
                         </p>
                         <div className="relative group">
-                          <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                          <div className="p-10 border-2 border-dashed border-slate-200 rounded-[40px] flex flex-col items-center justify-center gap-4 bg-white group-hover:border-primary group-hover:bg-primary/5 transition-all">
-                            <div className="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-white group-hover:text-primary transition-all">
-                              <Upload size={32} />
+                          <input 
+                            type="file" 
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                            onChange={(e) => setFormData({...formData, cv: e.target.files[0]})}
+                          />
+                          <div className={`p-10 border-2 border-dashed rounded-[40px] flex flex-col items-center justify-center gap-4 transition-all ${formData.cv ? 'border-primary bg-primary/5' : 'border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5'}`}>
+                            <div className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${formData.cv ? 'bg-white text-primary' : 'bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary'}`}>
+                              {formData.cv ? <CheckCircle2 size={32} /> : <Upload size={32} />}
                             </div>
                             <div className="text-center">
-                              <p className="font-black text-primary-dark">Tap to upload CV</p>
+                              <p className="font-black text-primary-dark">{formData.cv ? formData.cv.name : 'Tap to upload CV'}</p>
                               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">PDF or Word Doc (Max 5MB)</p>
                             </div>
                           </div>

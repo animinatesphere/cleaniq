@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, Filter, UserCheck, 
   FileText, Mail, Phone, MapPin, 
@@ -8,14 +8,35 @@ import {
 
 const Applicants = () => {
   const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [applicants, setApplicants] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const applicants = [
-    { id: 'APP-101', name: 'David Adewale', email: 'david.a@gmail.com', phone: '+234 801 234 5678', role: 'Full-time Cleaner', location: 'Lagos, Nigeria', appliedDate: 'May 10, 2026', status: 'Applied', docs: 3 },
-    { id: 'APP-102', name: 'Lucy Harrison', email: 'lucy.h@example.co.uk', phone: '+44 7700 900123', role: 'Part-time Cleaner', location: 'Manchester, UK', appliedDate: 'May 09, 2026', status: 'Interviewing', docs: 4 },
-    { id: 'APP-103', name: 'Olamide Bello', email: 'o.bello@live.com', phone: '+234 905 111 2222', role: 'Specialist Cleaner', location: 'Abuja, Nigeria', appliedDate: 'May 08, 2026', status: 'Background Check', docs: 5 },
-    { id: 'APP-104', name: 'James Smith', email: 'j.smith@outlook.com', phone: '+44 7890 123456', role: 'Full-time Cleaner', location: 'Salford, UK', appliedDate: 'May 07, 2026', status: 'Applied', docs: 2 },
-    { id: 'APP-105', name: 'Blessing Udoh', email: 'blessing.u@gmail.com', phone: '+234 812 345 6789', role: 'Regular Cleaner', location: 'Lagos, Nigeria', appliedDate: 'May 06, 2026', status: 'Hired', docs: 6 },
-  ];
+  useEffect(() => {
+    const fetchApplicants = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/recruitment`);
+        const data = await response.json();
+        setApplicants(data.map(a => ({
+          id: a._id.substring(0, 8),
+          name: a.fullName,
+          email: a.email,
+          phone: a.phone,
+          role: a.experience,
+          location: a.city,
+          appliedDate: new Date(a.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+          status: a.status,
+          docs: (a.cvPath ? 1 : 0) + (a.idPath ? 1 : 0),
+          cvUrl: a.cvPath ? `${import.meta.env.VITE_API_URL.replace('/api', '')}/${a.cvPath}` : null,
+          idUrl: a.idPath ? `${import.meta.env.VITE_API_URL.replace('/api', '')}/${a.idPath}` : null,
+        })));
+      } catch (error) {
+        console.error('Error fetching applicants:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchApplicants();
+  }, []);
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -181,25 +202,44 @@ const Applicants = () => {
               <div className="space-y-4">
                 <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Submitted Documents</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {[
-                    { name: 'ID / Passport Copy', size: '2.4 MB', type: 'PDF' },
-                    { name: 'Proof of Address', size: '1.8 MB', type: 'JPG' },
-                    { name: 'DBS Certificate', size: '3.1 MB', type: 'PDF' },
-                    { name: 'Reference Letter', size: '1.2 MB', type: 'DOCX' },
-                  ].map((doc, i) => (
-                    <div key={i} className="p-4 rounded-2xl bg-white border border-slate-200 flex items-center justify-between group hover:border-primary/30 transition-all cursor-pointer">
+                  {selectedApplicant.cvUrl && (
+                    <a 
+                      href={selectedApplicant.cvUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="p-4 rounded-2xl bg-white border border-slate-200 flex items-center justify-between group hover:border-primary/30 transition-all cursor-pointer"
+                    >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
                           <FileText size={16} />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-slate-700 leading-none">{doc.name}</p>
-                          <p className="text-[10px] text-slate-400 font-medium mt-1">{doc.type} • {doc.size}</p>
+                          <p className="text-xs font-bold text-slate-700 leading-none">Curriculum Vitae (CV)</p>
+                          <p className="text-[10px] text-slate-400 font-medium mt-1">View File</p>
                         </div>
                       </div>
                       <Download size={14} className="text-slate-300 group-hover:text-primary transition-colors" />
-                    </div>
-                  ))}
+                    </a>
+                  )}
+                  {selectedApplicant.idUrl && (
+                    <a 
+                      href={selectedApplicant.idUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="p-4 rounded-2xl bg-white border border-slate-200 flex items-center justify-between group hover:border-primary/30 transition-all cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
+                          <FileText size={16} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-slate-700 leading-none">Identity Document</p>
+                          <p className="text-[10px] text-slate-400 font-medium mt-1">View File</p>
+                        </div>
+                      </div>
+                      <Download size={14} className="text-slate-300 group-hover:text-primary transition-colors" />
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

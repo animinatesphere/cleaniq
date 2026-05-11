@@ -146,6 +146,53 @@ const Booking = () => {
     setTimeout(() => nextStep(), 300);
   };
 
+  const handleBooking = async () => {
+    const bookingPayload = {
+      bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
+      customer: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+      },
+      service: formData.serviceType,
+      details: {
+        address: formData.address,
+        frequency: formData.frequency,
+        duration: formData.duration,
+        extras: formData.extras,
+        hasPets: formData.hasPets,
+      },
+      schedule: {
+        date: formData.date,
+        timeSlot: formData.timeSlot,
+      },
+      payment: {
+        amount: totalPrice,
+        currency: region.id === 'UK' ? 'GBP' : 'NGN',
+        method: region.id === 'UK' ? 'Stripe' : 'Paystack',
+      },
+      region: region.id,
+    };
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingPayload),
+      });
+
+      if (response.ok) {
+        setIsSubmitted(true);
+      } else {
+        alert('Booking failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      alert('Network error. Please check your connection.');
+    }
+  };
+
   if (isSubmitted) {
     return (
       <div className="pt-32 pb-20 min-h-screen bg-slate-50 flex items-center justify-center px-6">
@@ -630,7 +677,7 @@ const Booking = () => {
                       </div>
                     </div>
                     <button 
-                      onClick={() => setIsSubmitted(true)}
+                      onClick={handleBooking}
                       className="btn-primary w-full py-6 text-xl shadow-2xl shadow-primary/30 mt-4 group"
                     >
                       Confirm & Pay {region.symbol}{totalPrice}

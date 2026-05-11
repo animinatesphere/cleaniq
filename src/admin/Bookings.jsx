@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, Filter, Download, MoreVertical, 
   Eye, Calendar, Clock, MapPin, 
@@ -8,14 +8,34 @@ import {
 
 const Bookings = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const bookings = [
-    { id: 'BK-7821', customer: 'Sarah Wilson', email: 'sarah.w@example.com', service: 'Deep Cleaning', date: 'May 12, 2026', time: '10:00 AM', status: 'Confirmed', amount: '£120', address: '12 Baker St, Manchester', region: 'UK' },
-    { id: 'BK-7822', customer: 'Chidi Okafor', email: 'chidi.o@gmail.com', service: 'Regular Home Clean', date: 'May 13, 2026', time: '02:00 PM', status: 'Pending', amount: '₦45,000', address: 'Plot 45, Lekki Phase 1, Lagos', region: 'NG' },
-    { id: 'BK-7823', customer: 'Emma Thompson', email: 'emma.t@outlook.com', service: 'End of Tenancy', date: 'May 14, 2026', time: '09:00 AM', status: 'Completed', amount: '£180', address: '45 Deansgate, Manchester', region: 'UK' },
-    { id: 'BK-7824', customer: 'Afolabi Musa', email: 'musa.afolabi@live.com', service: 'Office Janitorial', date: 'May 15, 2026', time: '08:00 AM', status: 'In Progress', amount: '₦120,000', address: 'Central Business District, Abuja', region: 'NG' },
-    { id: 'BK-7825', customer: 'James Knight', email: 'j.knight@example.com', service: 'After Party Clean', date: 'May 16, 2026', time: '11:00 AM', status: 'Cancelled', amount: '£95', address: '88 Salford Quays, Manchester', region: 'UK' },
-  ];
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`);
+        const data = await response.json();
+        setBookings(data.map(b => ({
+          id: b.bookingId,
+          customer: `${b.customer.firstName} ${b.customer.lastName}`,
+          email: b.customer.email,
+          service: b.service,
+          date: new Date(b.schedule.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+          time: b.schedule.timeSlot,
+          status: b.status,
+          amount: `${b.region === 'UK' ? '£' : '₦'}${b.payment.amount}`,
+          address: b.details.address,
+          region: b.region
+        })));
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBookings();
+  }, []);
 
   const getStatusStyle = (status) => {
     switch (status) {
