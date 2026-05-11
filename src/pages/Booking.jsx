@@ -15,6 +15,7 @@ const Booking = () => {
   const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
   
   const [formData, setFormData] = useState({
     address: '',
@@ -113,14 +114,34 @@ const Booking = () => {
     setPage([step, step > page ? 1 : -1]);
   }, [step]);
 
-  // Mock address suggestions
-  const suggestions = [
-    "12 Baker Street, London NW1 6XE",
-    "45 Deansgate, Manchester M3 2AY",
-    "88 Salford Quays, Salford M50 3AZ",
-    "Plot 45, Lekki Phase 1, Lagos",
-    "Central Business District, Abuja"
-  ];
+  // Address Suggestions Logic (Photon API - High Performance Map Suggestions)
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (formData.address.length < 3) {
+        setAddressSuggestions([]);
+        return;
+      }
+      try {
+        // Querying for addresses globally but Photon is very fast for UK/Nigeria
+        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(formData.address)}&limit=5`);
+        const data = await response.json();
+        const formatted = data.features.map(f => {
+          const { name, street, housenumber, city, postcode, country } = f.properties;
+          // Format based on available properties
+          const main = [housenumber, street, name].filter(Boolean).join(" ");
+          const details = [city, postcode, country].filter(Boolean).join(", ");
+          return main ? `${main}, ${details}` : details;
+        });
+        // Filter unique and limit
+        setAddressSuggestions([...new Set(formatted)].slice(0, 5));
+      } catch (err) {
+        console.error("Suggestions fetch error:", err);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(timeoutId);
+  }, [formData.address]);
 
   const selectAddress = (addr) => {
     setFormData({...formData, address: addr});
@@ -219,16 +240,23 @@ const Booking = () => {
                             exit={{ opacity: 0, y: -10 }}
                             className="absolute top-full left-0 right-0 mt-4 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 text-left"
                           >
-                            {suggestions.map((addr, i) => (
+                            {addressSuggestions.map((addr, i) => (
                               <button 
                                 key={i}
                                 onClick={() => selectAddress(addr)}
                                 className="w-full p-6 hover:bg-slate-50 flex items-center gap-4 text-slate-700 font-bold border-b border-slate-50 last:border-none transition-colors"
                               >
-                                <MapPin size={18} className="text-slate-300" />
-                                {addr}
+                                <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center shrink-0">
+                                  <MapPin size={16} className="text-primary" />
+                                </div>
+                                <span className="text-sm md:text-base line-clamp-1">{addr}</span>
                               </button>
                             ))}
+                            {addressSuggestions.length === 0 && (
+                              <div className="p-10 text-center text-slate-400 font-medium italic">
+                                Search for your address...
+                              </div>
+                            )}
                           </motion.div>
                         )}
                       </AnimatePresence>
