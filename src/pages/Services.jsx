@@ -23,8 +23,9 @@ const Services = () => {
     {
       id: "residential",
       title: "Residential Cleaning",
+      tag: "Reliable domestic cleaners",
       icon: <HomeIcon className="text-secondary" size={40} />,
-      image: me1,
+      image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2000&auto=format&fit=crop",
       features: [
         "Dusting of all surfaces.",
         "Vacuuming & Mopping.",
@@ -33,14 +34,15 @@ const Services = () => {
         "Bed making & tidying.",
         "Trash removal.",
       ],
-      description: "Regular and deep-cleaning services designed to refresh homes and create a serene, organized living environment.",
+      description: "Reliable, weekly or bi-weekly cleaning for your home.",
       pricing: region.id === "UK" ? "From £20/hr" : `From ${region.symbol}15,000`,
     },
     {
       id: "commercial",
-      title: "Office & Commercial Cleaning",
+      title: "Office Cleaning",
+      tag: "Expert office cleaning",
       icon: <Briefcase className="text-secondary" size={40} />,
-      image: me3,
+      image: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2000&auto=format&fit=crop",
       features: [
         "Workstation sanitization.",
         "Communal area cleaning.",
@@ -49,14 +51,15 @@ const Services = () => {
         "Carpet deep clean.",
         "Disinfection services.",
       ],
-      description: "Professional cleaning for offices and business spaces, maintaining hygiene, order, and productivity.",
-      pricing: region.id === "UK" ? "Custom Quotes" : "Custom Quotes",
+      description: "Professional janitorial services for your workspace.",
+      pricing: "Custom Quotes",
     },
     {
       id: "move",
-      title: "Move-In / Move-Out Cleaning",
+      title: "Deep Clean",
+      tag: "Deep cleaning",
       icon: <Trash2 className="text-secondary" size={40} />,
-      image: me2,
+      image: "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?q=80&w=2000&auto=format&fit=crop",
       features: [
         "Inside cabinets & drawers.",
         "Baseboard scrubbing.",
@@ -65,23 +68,24 @@ const Services = () => {
         "Appliance deep clean.",
         "End-of-tenancy guarantee.",
       ],
-      description: "Detailed cleaning for relocations and end-of-tenancy needs, ensuring spaces are spotless and move-in ready.",
+      description: "Specialized deep cleaning services for a total refresh.",
       pricing: region.id === "UK" ? "From £60" : `From ${region.symbol}25,000`,
     },
     {
-      id: "eco",
-      title: "Eco-Friendly Cleaning Solutions",
-      icon: <Leaf className="text-secondary" size={40} />,
-      image: airbnbImg,
+      id: "airbnb",
+      title: "Airbnb Cleaning",
+      tag: "Short-let specialist",
+      icon: <Star className="text-secondary" size={40} />,
+      image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2000&auto=format&fit=crop",
       features: [
-        "Sustainable, non-toxic products.",
-        "Pet and child safe.",
-        "Biodegradable solutions.",
-        "High-efficiency equipment.",
-        "Health-focused results.",
-        "Environmental protection.",
+        "Turnover Specialist",
+        "Linen Management",
+        "5-Star Prep",
+        "Guest Ready Check",
+        "Inventory Monitoring",
+        "Eco-Friendly Supplies",
       ],
-      description: "Use of sustainable, non-toxic products that protect both clients and the environment without compromising on effectiveness.",
+      description: "Professional turnover services for your short-let rental.",
       pricing: region.id === "UK" ? "From £35" : `From ${region.symbol}15,000`,
     },
   ];
@@ -141,6 +145,9 @@ const Services = () => {
                   {React.cloneElement(service.icon, { size: window.innerWidth < 768 ? 32 : 40 })}
                 </motion.div>
                 <div>
+                  <div className="text-[10px] md:text-xs font-black text-secondary uppercase tracking-[0.3em] mb-2 md:3">
+                    {service.tag}
+                  </div>
                   <h2 className="text-2xl md:text-4xl font-bold text-primary-dark mb-4 md:6 tracking-tight">
                     {service.title}.
                   </h2>
