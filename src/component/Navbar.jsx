@@ -33,7 +33,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-500 ${isScrolled ? 'top-0 glass-dark py-2 md:py-3 shadow-2xl shadow-black/20' : 'top-[52px] bg-primary py-4 md:py-6'}`}>
+    <nav className={`fixed w-full z-50 transition-all duration-500 ${isScrolled ? 'top-0 glass-dark py-2 md:py-3 shadow-2xl shadow-black/20' : 'top-[80px] md:top-[52px] bg-primary py-4 md:py-6'}`}>
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
