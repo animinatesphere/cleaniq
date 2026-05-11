@@ -25,10 +25,10 @@ const Footer = () => {
           {/* Brand Column */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <img src={logo2} alt="CLEANIQ SERVICES" className="h-8 md:h-10 w-auto" />
+              <img src={logo2} alt="Cleaniq Services" className="h-8 md:h-10 w-auto" />
             </div>
             <p className="text-slate-400 leading-relaxed font-medium text-sm">
-              CLEANIQ Services is a premium cleaning solutions company based in Manchester, United 
+              Cleaniq Services is a premium cleaning solutions company based in Manchester, United 
               Kingdom, offering trusted, eco-friendly, and efficient cleaning services.
             </p>
             <div className="flex flex-col gap-4">
@@ -107,7 +107,7 @@ const Footer = () => {
                 <ShieldCheck size={16} /> Verified Quality
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-                Our cleaners are fully vetted, background-checked, and trained to cleaniq service institutional standards.
+                Our cleaners are fully vetted, background-checked, and trained to Cleaniq service institutional standards.
               </p>
               <Link to="/booking" className="block text-center bg-white text-primary-dark font-black text-[10px] uppercase tracking-widest py-3 rounded-xl hover:bg-secondary transition-colors">
                 Book a Professional Clean
@@ -119,7 +119,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest">
-            © 2026 CLEANIQ SERVICES. PROUDLY ECO-CONSCIOUS.
+            © 2026 Cleaniq Services. PROUDLY ECO-CONSCIOUS.
           </p>
           <div className="flex gap-6">
             {["Privacy", "Terms", "Cookies"].map((label) => (

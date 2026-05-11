@@ -36,7 +36,7 @@ const Home = () => {
   return (
     <div className="overflow-x-hidden bg-white">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center pt-28 pb-20 overflow-hidden">
+      <section className="relative min-h-screen flex items-center pt-40 pb-20 overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 rounded-l-[150px] hidden lg:block" />
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-secondary/10 rounded-full blur-[100px]" />
         

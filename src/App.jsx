@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './component/Navbar';
+import TopNav from './component/TopNav';
 import Footer from './component/Footer';
 import ScrollToTop from './component/ScrollToTop';
 import Preloader from './component/Preloader';
@@ -26,6 +27,7 @@ function App() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {!isAdminPath && <Preloader />}
       <ScrollToTop />
+      {!isAdminPath && <TopNav />}
       {!isAdminPath && <Navbar />}
       
       <main className="grow">

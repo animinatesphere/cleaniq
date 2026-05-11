@@ -33,7 +33,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-500 ${isScrolled ? 'glass-dark py-2 md:py-3 shadow-2xl shadow-black/20' : 'bg-primary py-4 md:py-6'}`}>
+    <nav className={`fixed w-full z-50 transition-all duration-500 ${isScrolled ? 'top-0 glass-dark py-2 md:py-3 shadow-2xl shadow-black/20' : 'top-[52px] bg-primary py-4 md:py-6'}`}>
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
@@ -41,7 +41,7 @@ const Navbar = () => {
             whileHover={{ rotate: 5, scale: 1.05 }}
             className="relative"
           >
-            <img src={logo} alt="CLEANIQ SERVICES" className="w-auto h-7 md:h-10 transition-all duration-300 brightness-100" />
+            <img src={logo} alt="Cleaniq Services" className="w-auto h-7 md:h-10 transition-all duration-300 brightness-100" />
           </motion.div>
         </Link>
 

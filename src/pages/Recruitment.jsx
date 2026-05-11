@@ -56,7 +56,7 @@ const Recruitment = () => {
           </motion.div>
           <h2 className="text-3xl md:text-4xl font-black text-primary-dark mb-4 tracking-tighter">Application Sent!</h2>
           <p className="text-slate-500 mb-10 leading-relaxed font-medium">
-            Thanks for your interest in joining CleanIQ Services. Our recruitment team will review your {region.id === 'UK' ? 'DBS' : 'CV'} and get back to you shortly.
+            Thanks for your interest in joining Cleaniq Services. Our recruitment team will review your {region.id === 'UK' ? 'DBS' : 'CV'} and get back to you shortly.
           </p>
           <Link 
             to="/"
@@ -328,7 +328,7 @@ const Recruitment = () => {
                   <div className="p-8 rounded-[40px] bg-primary/5 border border-primary/10 flex gap-6">
                     <ShieldCheck className="text-primary shrink-0" size={24} />
                     <p className="text-sm text-slate-600 font-medium leading-relaxed">
-                      "I confirm that all information provided is accurate and authorize CleanIQ Services to conduct necessary background verification in accordance with {region.id === 'UK' ? 'GDPR' : 'NDPR'} regulations."
+                      "I confirm that all information provided is accurate and authorize Cleaniq Services to conduct necessary background verification in accordance with {region.id === 'UK' ? 'GDPR' : 'NDPR'} regulations."
                     </p>
                   </div>
 
