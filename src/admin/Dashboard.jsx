@@ -32,6 +32,14 @@ const Dashboard = () => {
         const ukRevenue = bookings
           .filter(b => b.region === 'UK')
           .reduce((sum, b) => sum + b.payment.amount, 0);
+
+        const ngRevenue = bookings
+          .filter(b => b.region === 'NG')
+          .reduce((sum, b) => sum + b.payment.amount, 0);
+        
+        const totalRevenue = ukRevenue + ngRevenue;
+        const ukPercent = totalRevenue > 0 ? Math.round((ukRevenue / totalRevenue) * 100) : 0;
+        const ngPercent = totalRevenue > 0 ? 100 - ukPercent : 0;
         
         setData({
           bookings: bookings.slice(0, 4).map(b => ({
@@ -49,6 +57,11 @@ const Dashboard = () => {
             role: a.experience,
             location: a.city
           })),
+          marketSplit: [
+            { name: 'United Kingdom', revenue: `£${ukRevenue}`, percent: ukPercent, color: 'bg-secondary' },
+            { name: 'Nigeria', revenue: `₦${ngRevenue}`, percent: ngPercent, color: 'bg-white/20' },
+          ],
+          totalApplicants: applicants.length,
           stats: [
             { title: 'Total Revenue (UK)', value: `£${ukRevenue}`, change: '+100%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
             { title: 'Active Bookings', value: bookings.length.toString(), change: '+100%', isUp: true, icon: <Calendar className="text-blue-500" /> },
@@ -153,10 +166,10 @@ const Dashboard = () => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000" />
             <h3 className="text-xl font-bold mb-8 relative z-10">Market Split</h3>
             <div className="space-y-6 relative z-10">
-              {[
-                { name: 'United Kingdom', revenue: '£8,450', percent: 65, color: 'bg-secondary' },
-                { name: 'Nigeria', revenue: '₦4,000,000', percent: 35, color: 'bg-white/20' },
-              ].map((region, i) => (
+              {(data.marketSplit || [
+                { name: 'United Kingdom', revenue: '£0', percent: 0, color: 'bg-secondary' },
+                { name: 'Nigeria', revenue: '₦0', percent: 0, color: 'bg-white/20' },
+              ]).map((region, i) => (
                 <div key={i} className="space-y-2">
                   <div className="flex justify-between items-end">
                     <p className="text-sm font-medium text-slate-300">{region.name}</p>
@@ -174,7 +187,7 @@ const Dashboard = () => {
           <div className="bg-white border border-slate-200 p-8 rounded-[40px] shadow-sm">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black text-primary-dark">New Applicants</h3>
-              <span className="bg-primary/10 text-primary text-[10px] font-black px-2.5 py-1 rounded-full uppercase">3 New</span>
+              <span className="bg-primary/10 text-primary text-[10px] font-black px-2.5 py-1 rounded-full uppercase">{data.totalApplicants || 0} Total</span>
             </div>
             <div className="space-y-5">
               {data.applicants.map((app, i) => (

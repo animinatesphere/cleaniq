@@ -15,6 +15,7 @@ const AdminLayout = () => {
     { name: 'Bookings', path: '/admin/bookings', icon: <Calendar size={20} /> },
     { name: 'Applicants', path: '/admin/applicants', icon: <Users size={20} /> },
     { name: 'Customers', path: '/admin/customers', icon: <User size={20} /> },
+    { name: 'Services', path: '/admin/services', icon: <ShieldCheck size={20} /> },
     { name: 'Settings', path: '/admin/settings', icon: <Settings size={20} /> },
   ];
 

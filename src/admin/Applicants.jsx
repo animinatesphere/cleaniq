@@ -54,9 +54,9 @@ const Applicants = () => {
       {/* Header Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { title: 'Total Applicants', value: '124', icon: <Users size={20} className="text-blue-500" /> },
-          { title: 'In Review', value: '18', icon: <Clock size={20} className="text-amber-500" /> },
-          { title: 'Hired This Month', value: '6', icon: <CheckCircle2 size={20} className="text-emerald-500" /> },
+          { title: 'Total Applicants', value: applicants.length, icon: <Users size={20} className="text-blue-500" /> },
+          { title: 'In Review', value: applicants.filter(a => a.status === 'Applied').length, icon: <Clock size={20} className="text-amber-500" /> },
+          { title: 'Hired Total', value: applicants.filter(a => a.status === 'Hired').length, icon: <CheckCircle2 size={20} className="text-emerald-500" /> },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm flex items-center justify-between">
             <div>

@@ -26,9 +26,11 @@ app.get('/api/health', (req, res) => {
 // Import Routes
 const bookingRoutes = require('./routes/bookings');
 const recruitmentRoutes = require('./routes/recruitment');
+const serviceRoutes = require('./routes/services');
 
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/recruitment', recruitmentRoutes);
+app.use('/api/services', serviceRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);

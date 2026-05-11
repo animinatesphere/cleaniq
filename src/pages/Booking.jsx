@@ -36,30 +36,40 @@ const Booking = () => {
   });
 
   const [totalPrice, setTotalPrice] = useState(0);
+  const [dynamicRates, setDynamicRates] = useState({});
+  const [loadingRates, setLoadingRates] = useState(true);
 
-  // Pricing Logic (Updated with User Rates)
+  // Fetch Dynamic Rates from VPS
+  useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${region.id}`);
+        const data = await response.json();
+        
+        const ratesObj = {};
+        data.forEach(service => {
+          ratesObj[service.name] = service.rate;
+        });
+        setDynamicRates(ratesObj);
+      } catch (error) {
+        console.error('Error fetching dynamic rates:', error);
+      } finally {
+        setLoadingRates(false);
+      }
+    };
+    fetchRates();
+  }, [region.id]);
+
+  // Pricing Logic (Using Dynamic Rates)
   useEffect(() => {
     let total = 0;
 
     if (region.id === 'UK') {
-      const rates = {
-        'Classic Regular': 17.90,
-        'Classic One-off': 20.90,
-        'Deep Clean': 24.90,
-        'Holiday Rental': 21.90
-      };
-      total = (rates[formData.serviceType] || 20.90) * formData.duration;
+      const rate = dynamicRates[formData.serviceType] || 0;
+      total = rate * formData.duration;
     } else {
-      const flatRates = {
-        '1 Bed Flat': 15000,
-        '2 Bed Flat': 22000,
-        '3 Bed House': 35000,
-        '4 Bed House': 45000,
-        '5+ Bed House': 60000
-      };
-      total = flatRates[formData.propertySize] || 15000;
-      if (formData.serviceType === 'Deep Clean') total *= 1.8;
-      if (formData.serviceType === 'Holiday Rental') total *= 1.3;
+      const rate = dynamicRates[formData.propertySize] || 0;
+      total = rate;
     }
 
     formData.extras.forEach(extra => {

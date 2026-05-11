@@ -134,7 +134,7 @@ const Bookings = () => {
           </table>
         </div>
         <div className="p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
-          <p className="text-sm text-slate-500 font-medium">Showing <span className="text-primary-dark font-bold">5</span> of <span className="text-primary-dark font-bold">124</span> bookings</p>
+          <p className="text-sm text-slate-500 font-medium">Showing <span className="text-primary-dark font-bold">{bookings.length}</span> of <span className="text-primary-dark font-bold">{bookings.length}</span> bookings</p>
           <div className="flex items-center gap-2">
             <button className="p-2 rounded-xl border border-slate-200 text-slate-400 hover:bg-white transition-all disabled:opacity-50" disabled>
               <ChevronLeft size={18} />
