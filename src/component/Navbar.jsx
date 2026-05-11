@@ -41,7 +41,7 @@ const Navbar = () => {
             whileHover={{ rotate: 5, scale: 1.05 }}
             className="relative"
           >
-            <img src={logo} alt="Cleaniq Services" className="w-auto h-7 md:h-10 transition-all duration-300 brightness-100" />
+            <img src={logo} alt="Cleaniq Services" className="w-auto h-14 md:h-16 transition-all duration-300 brightness-100" />
           </motion.div>
         </Link>
 

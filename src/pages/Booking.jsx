@@ -497,37 +497,92 @@ const Booking = () => {
                 )}
 
                 {step === 7 && (
-                  <div className="space-y-6">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight mb-8">When should we come?</h1>
-                    <div className="space-y-8">
-                      <div>
-                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-4">Select Date</label>
-                        <input 
-                          type="date" 
-                          className="w-full p-6 rounded-[32px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold text-lg"
-                          onChange={(e) => setFormData({...formData, date: e.target.value})}
-                        />
+                  <div className="max-w-2xl mx-auto space-y-10 py-4">
+                    <div className="text-center">
+                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-6">
+                        Scheduling
                       </div>
+                      <h1 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tight mb-4">When should we come?</h1>
+                      <p className="text-slate-500 font-medium">Select a date and time that works best for you.</p>
+                    </div>
+
+                    <div className="space-y-8">
+                      {/* Date Selection */}
                       <div>
-                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-4">Preferred Time</label>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {['Morning', 'Afternoon', 'Evening'].map(time => (
+                        <div className="flex items-center justify-between mb-4 px-2">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Date</label>
+                          <span className="text-[10px] font-bold text-primary bg-primary/5 px-3 py-1 rounded-full uppercase tracking-widest">Next 14 Days</span>
+                        </div>
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-3">
+                          {Array.from({ length: 14 }).map((_, i) => {
+                            const d = new Date();
+                            d.setDate(d.getDate() + i + 1);
+                            const isSelected = formData.date === d.toISOString().split('T')[0];
+                            const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+                            const dayNum = d.getDate();
+                            const monthName = d.toLocaleDateString('en-US', { month: 'short' });
+                            
+                            return (
+                              <button
+                                key={i}
+                                onClick={() => setFormData({...formData, date: d.toISOString().split('T')[0]})}
+                                className={`flex flex-col items-center justify-center p-4 rounded-3xl border-2 transition-all duration-300 ${
+                                  isSelected 
+                                  ? 'border-primary bg-primary text-white shadow-lg shadow-primary/20 scale-105' 
+                                  : 'border-slate-100 bg-white hover:border-primary/20 text-slate-600'
+                                }`}
+                              >
+                                <span className={`text-[10px] font-black uppercase mb-1 ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>{dayName}</span>
+                                <span className="text-lg font-black tracking-tighter leading-none mb-1">{dayNum}</span>
+                                <span className={`text-[9px] font-bold uppercase tracking-widest ${isSelected ? 'text-white/40' : 'text-slate-300'}`}>{monthName}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Time Selection */}
+                      <div>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-4 px-2">Preferred Time Slot</label>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          {[
+                            { id: 'Morning', label: 'Morning', time: '8:00 AM - 12:00 PM', icon: <Sparkles /> },
+                            { id: 'Afternoon', label: 'Afternoon', time: '12:00 PM - 4:00 PM', icon: <Zap /> },
+                            { id: 'Evening', label: 'Evening', time: '4:00 PM - 8:00 PM', icon: <Clock /> },
+                          ].map((slot) => (
                             <button
-                              key={time}
-                              onClick={() => setFormData({...formData, timeSlot: time})}
-                              className={`p-4 rounded-2xl border-2 font-bold transition-all ${
-                                formData.timeSlot === time 
-                                ? 'border-primary bg-primary/5 text-primary' 
-                                : 'border-slate-100 hover:border-primary/20'
+                              key={slot.id}
+                              onClick={() => setFormData({...formData, timeSlot: slot.id})}
+                              className={`flex flex-col items-center p-6 rounded-[32px] border-2 transition-all duration-300 group ${
+                                formData.timeSlot === slot.id 
+                                ? 'border-primary bg-primary text-white shadow-lg shadow-primary/20' 
+                                : 'border-slate-100 bg-white hover:border-primary/20'
                               }`}
                             >
-                              {time}
+                              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-4 transition-colors ${
+                                formData.timeSlot === slot.id ? 'bg-white/10 text-white' : 'bg-primary/5 text-primary'
+                              }`}>
+                                {React.cloneElement(slot.icon, { size: 20 })}
+                              </div>
+                              <span className="font-black text-sm mb-1">{slot.label}</span>
+                              <span className={`text-[9px] font-bold uppercase tracking-widest ${
+                                formData.timeSlot === slot.id ? 'text-white/50' : 'text-slate-400'
+                              }`}>{slot.time}</span>
                             </button>
                           ))}
                         </div>
                       </div>
                     </div>
-                    <button onClick={nextStep} className="btn-primary w-full py-6 text-lg mt-8">Final Step</button>
+
+                    <button 
+                      onClick={nextStep} 
+                      disabled={!formData.date || !formData.timeSlot}
+                      className={`btn-primary w-full py-6 text-lg mt-8 shadow-2xl transition-all ${
+                        (!formData.date || !formData.timeSlot) ? 'opacity-50 cursor-not-allowed grayscale' : 'shadow-primary/30 hover:scale-[1.02]'
+                      }`}
+                    >
+                      Continue to Final Step
+                    </button>
                   </div>
                 )}
 
@@ -599,64 +654,88 @@ const Booking = () => {
           </div>
 
           {/* Booking Summary Sidebar */}
-          <div className="lg:sticky lg:top-32">
+          <div className={`lg:sticky lg:top-32 transition-all duration-700 ${step === 1 ? 'opacity-0 pointer-events-none translate-y-10' : 'opacity-100 translate-y-0'}`}>
             <div className="bg-white rounded-[48px] p-8 md:p-10 shadow-2xl border-4 border-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16" />
               <h2 className="text-2xl font-black text-primary-dark mb-8 tracking-tight">Your Basket.</h2>
               
               <div className="space-y-6 mb-10">
-                <div className="flex justify-between items-start group">
-                  <div className="flex gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
-                      <Sparkles size={18} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Service</p>
-                      <p className="font-bold text-slate-700">{formData.serviceType}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-start group">
-                  <div className="flex gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
-                      <Clock size={18} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration</p>
-                      <p className="font-bold text-slate-700">{formData.duration} Hours</p>
-                    </div>
-                  </div>
-                </div>
-
-                {formData.extras.length > 0 && (
+                {formData.address && (
                   <div className="flex justify-between items-start group">
                     <div className="flex gap-4">
                       <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
-                        <Plus size={18} />
+                        <MapPin size={18} />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Extras</p>
-                        <p className="font-bold text-slate-700 text-sm leading-tight">
-                          {formData.extras.join(', ')}
-                        </p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</p>
+                        <p className="font-bold text-slate-700 text-sm line-clamp-1">{formData.address}</p>
                       </div>
                     </div>
                   </div>
                 )}
+
+                {step > 2 && (
+                  <>
+                    <div className="flex justify-between items-start group">
+                      <div className="flex gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
+                          <Sparkles size={18} />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Service</p>
+                          <p className="font-bold text-slate-700">{formData.serviceType}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-start group">
+                      <div className="flex gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
+                          <Clock size={18} />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration</p>
+                          <p className="font-bold text-slate-700">{formData.duration} Hours</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {formData.extras.length > 0 && (
+                      <div className="flex justify-between items-start group">
+                        <div className="flex gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
+                            <Plus size={18} />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Extras</p>
+                            <p className="font-bold text-slate-700 text-sm leading-tight">
+                              {formData.extras.join(', ')}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
-              <div className="pt-8 border-t border-slate-100 flex justify-between items-center">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Total Price</p>
-                  <p className="text-4xl font-black text-primary-dark tracking-tighter">
-                    {region.symbol}{totalPrice}
-                  </p>
+              {step > 2 ? (
+                <div className="pt-8 border-t border-slate-100 flex justify-between items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Total Price</p>
+                    <p className="text-4xl font-black text-primary-dark tracking-tighter">
+                      {region.symbol}{totalPrice}
+                    </p>
+                  </div>
+                  <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary">
+                    <Zap size={28} className="fill-current" />
+                  </div>
                 </div>
-                <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary">
-                  <Zap size={28} className="fill-current" />
+              ) : (
+                <div className="pt-8 border-t border-slate-50 text-center">
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Select service to see price</p>
                 </div>
-              </div>
+              )}
             </div>
             
             <div className="mt-8 px-6 space-y-4">
