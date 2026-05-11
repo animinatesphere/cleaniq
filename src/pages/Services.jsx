@@ -79,11 +79,11 @@ const Services = () => {
       image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2000&auto=format&fit=crop",
       features: [
         "Turnover Specialist",
-        "Linen Management",
+        "Please provide a washing machine,dryer and detergent if on-site linen and towel washing is  required ",
         "5-Star Prep",
         "Guest Ready Check",
         "Inventory Monitoring",
-        "Eco-Friendly Supplies",
+        "Consumable Supplies",
       ],
       description: "Professional turnover services for your short-let rental.",
       pricing: region.id === "UK" ? "From £35" : `From ${region.symbol}15,000`,

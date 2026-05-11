@@ -122,17 +122,14 @@ const Booking = () => {
         return;
       }
       try {
-        // Querying for addresses globally but Photon is very fast for UK/Nigeria
         const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(formData.address)}&limit=5`);
         const data = await response.json();
         const formatted = data.features.map(f => {
           const { name, street, housenumber, city, postcode, country } = f.properties;
-          // Format based on available properties
           const main = [housenumber, street, name].filter(Boolean).join(" ");
           const details = [city, postcode, country].filter(Boolean).join(", ");
           return main ? `${main}, ${details}` : details;
         });
-        // Filter unique and limit
         setAddressSuggestions([...new Set(formatted)].slice(0, 5));
       } catch (err) {
         console.error("Suggestions fetch error:", err);
@@ -174,6 +171,61 @@ const Booking = () => {
       </div>
     );
   }
+
+  const serviceOptions = [
+    { 
+      id: 'Classic Regular', 
+      title: 'Residential Cleaning', 
+      tag: 'Reliable domestic cleaners',
+      price: region.id === 'UK' ? '£17.90/h' : `${region.symbol}15,000`, 
+      bullets: [
+        'Reliable, weekly or bi-weekly cleaning for your home',
+        'The same vetted cleaner each time',
+        'Dusting, vacuuming, mopping & sanitization',
+        'No long-term commitment'
+      ],
+      icon: <Heart />
+    },
+    { 
+      id: 'Deep Clean', 
+      title: 'Deep Clean', 
+      tag: 'Deep cleaning',
+      price: region.id === 'UK' ? '£24.90/h' : `${region.symbol}25,000`, 
+      bullets: [
+        'Specialized deep cleaning for a total refresh',
+        'Inside cabinets, baseboards & door frames',
+        'Appliance deep clean included',
+        'Perfect for move-in/move-out needs'
+      ],
+      icon: <Zap />
+    },
+    { 
+      id: 'Holiday Rental', 
+      title: 'Airbnb Cleaning', 
+      tag: 'Short-let specialist',
+      price: region.id === 'UK' ? '£21.90/h' : `${region.symbol}20,000`, 
+      bullets: [
+        'Professional turnover services for short-let rentals',
+        'Linen management & Guest-ready prep',
+        'Inventory monitoring & supply restocking',
+        '5-star hospitality standard'
+      ],
+      icon: <Star />
+    },
+    { 
+      id: 'Office Cleaning', 
+      title: 'Office Cleaning', 
+      tag: 'Expert office cleaning',
+      price: 'Custom Quotes', 
+      bullets: [
+        'Professional janitorial services for workspaces',
+        'Workstation sanitization & restroom care',
+        'Communal area cleaning & maintenance',
+        'Flexible scheduling for businesses'
+      ],
+      icon: <Briefcase />
+    },
+  ];
 
   return (
     <div className="pt-24 min-h-screen bg-[#FCFCFD] pb-32">
@@ -231,7 +283,6 @@ const Booking = () => {
                         }}
                       />
                       
-                      {/* Suggestions Dropdown */}
                       <AnimatePresence>
                         {showSuggestions && (
                           <motion.div 
@@ -273,101 +324,58 @@ const Booking = () => {
                     <h1 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tight">What type of cleaning?</h1>
                     
                     <div className="grid gap-6">
-                      {[
-                        { 
-                          id: 'Classic Regular', 
-                          title: 'Classic regular cleaning', 
-                          price: '£17.90/h', 
-                          oldPrice: '£20.90/h',
-                          bullets: [
-                            'No obligation, stop or pause at any time free of charge',
-                            'The same cleaner each time, subject to your approval after your first session',
-                            'Window cleaning included',
-                            'Ironing available on request'
-                          ],
-                          icon: <Heart />
-                        },
-                        { 
-                          id: 'Classic One-off', 
-                          title: 'Classic one-off cleaning', 
-                          price: '£20.90/h', 
-                          bullets: [
-                            'For only one session',
-                            'Window cleaning included',
-                            'Ironing available on request'
-                          ],
-                          icon: <HomeIcon />
-                        },
-                        { 
-                          id: 'Deep Clean', 
-                          title: 'Deep cleaning', 
-                          price: '£24.90/h', 
-                          bullets: [
-                            'For a spring clean',
-                            'Window cleaning included',
-                            'Household cleaning products can be supplied on request'
-                          ],
-                          icon: <Trash2 />
-                        },
-                        { 
-                          id: 'Holiday Rental', 
-                          title: 'Holiday rental cleaning', 
-                          price: '£21.90/h', 
-                          bullets: [
-                            'For Airbnb & holiday rentals',
-                            'Get the place ready for your next guests',
-                            'Window cleaning included',
-                            'Please provide a washing machine, dryer, and detergent if on-site linen and towel washing is required'
-                          ],
-                          icon: <Zap />
-                        }
-                      ].map((type) => (
-                        <div 
-                          key={type.id}
-                          onClick={() => setFormData({...formData, serviceType: type.id, frequency: type.id === 'Classic Regular' ? 'Weekly' : 'Once'})}
-                          className={`p-1 rounded-[32px] transition-all duration-500 cursor-pointer ${
-                            formData.serviceType === type.id 
-                            ? 'bg-gradient-to-br from-primary to-primary-dark shadow-xl shadow-primary/20 scale-[1.02]' 
-                            : 'bg-white border border-slate-200 hover:border-primary/30'
+                      {serviceOptions.map((s) => (
+                        <button
+                          key={s.id}
+                          onClick={() => {
+                            setFormData({...formData, serviceType: s.id});
+                            nextStep();
+                          }}
+                          className={`group text-left rounded-[40px] border-2 transition-all duration-500 relative overflow-hidden ${
+                            formData.serviceType === s.id 
+                            ? 'border-primary bg-primary text-white shadow-2xl shadow-primary/20 scale-[1.02]' 
+                            : 'border-slate-100 bg-white hover:border-primary/20 hover:shadow-xl'
                           }`}
                         >
-                          <div className="bg-inherit rounded-[31px] p-8">
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center gap-4">
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${formData.serviceType === type.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-primary'}`}>
-                                  {type.icon}
+                          <div className="p-8">
+                            <div className="flex items-center justify-between mb-6">
+                              <div className="flex items-center gap-6">
+                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${
+                                  formData.serviceType === s.id ? 'bg-white/10 text-white' : 'bg-primary/5 text-primary'
+                                }`}>
+                                  {React.cloneElement(s.icon, { size: 32 })}
                                 </div>
-                                <h3 className={`text-xl md:text-2xl font-black ${formData.serviceType === type.id ? 'text-white' : 'text-primary-dark'}`}>
-                                  {type.title}
-                                </h3>
+                                <div>
+                                  <div className={`text-[10px] font-black uppercase tracking-widest mb-1 ${
+                                    formData.serviceType === s.id ? 'text-white/60' : 'text-secondary'
+                                  }`}>
+                                    {s.tag}
+                                  </div>
+                                  <h3 className="text-xl md:text-2xl font-black tracking-tight">{s.title}.</h3>
+                                </div>
                               </div>
                               <div className="text-right">
-                                {type.oldPrice && <span className={`text-sm line-through block ${formData.serviceType === type.id ? 'text-white/50' : 'text-slate-400'}`}>{type.oldPrice}</span>}
-                                <span className={`text-2xl font-black ${formData.serviceType === type.id ? 'text-white' : 'text-primary'}`}>{type.price}</span>
+                                <span className={`text-2xl font-black block ${
+                                  formData.serviceType === s.id ? 'text-white' : 'text-primary'
+                                }`}>{s.price}</span>
+                                <span className={`text-[10px] font-bold uppercase tracking-widest ${
+                                  formData.serviceType === s.id ? 'text-white/40' : 'text-slate-400'
+                                }`}>Starting Price</span>
                               </div>
                             </div>
 
-                            <AnimatePresence>
-                              {formData.serviceType === type.id && (
-                                <motion.div 
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: 'auto', opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  className="overflow-hidden"
-                                >
-                                  <div className="pt-6 border-t border-white/10 space-y-3">
-                                    {type.bullets.map((b, i) => (
-                                      <div key={i} className="flex items-start gap-3 text-sm font-medium text-white/80">
-                                        <CheckCircle2 size={16} className="text-secondary shrink-0 mt-0.5" />
-                                        {b}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
+                            <div className={`pt-6 border-t ${formData.serviceType === s.id ? 'border-white/10' : 'border-slate-100'} space-y-3`}>
+                              {s.bullets.map((b, i) => (
+                                <div key={i} className={`flex items-start gap-3 text-sm font-medium ${
+                                  formData.serviceType === s.id ? 'text-white/80' : 'text-slate-500'
+                                }`}>
+                                  <CheckCircle2 size={16} className={formData.serviceType === s.id ? 'text-secondary shrink-0 mt-0.5' : 'text-primary shrink-0 mt-0.5'} />
+                                  {b}
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -379,258 +387,290 @@ const Booking = () => {
                     <div className="grid gap-4">
                       {[
                         { id: 'Weekly', title: 'Once a week', badge: 'Save 10%' },
-                        { id: 'Fortnightly', title: 'Every two weeks', badge: 'Save 5%' },
-                        { id: 'Monthly', title: 'Once a month', badge: null },
-                        { id: 'Once', title: 'Just this once', badge: null }
+                        { id: 'Fortnightly', title: 'Every 2 weeks', badge: 'Save 5%' },
+                        { id: 'Once', title: 'Just once' },
                       ].map((freq) => (
-                        <div 
+                        <button
                           key={freq.id}
-                          onClick={() => setFormData({...formData, frequency: freq.id})}
-                          className={`selection-card p-8 flex-row items-center justify-between ${formData.frequency === freq.id ? 'selection-card-active' : 'selection-card-inactive'}`}
+                          onClick={() => {
+                            setFormData({...formData, frequency: freq.id});
+                            nextStep();
+                          }}
+                          className={`p-8 rounded-[32px] border-2 text-left transition-all flex justify-between items-center ${
+                            formData.frequency === freq.id 
+                            ? 'border-primary bg-primary/5 text-primary ring-4 ring-primary/5' 
+                            : 'border-slate-100 hover:border-primary/20'
+                          }`}
                         >
                           <span className="text-xl font-bold">{freq.title}</span>
-                          <div className="flex items-center gap-3">
-                            {freq.badge && <span className="text-xs font-black bg-secondary text-primary px-3 py-1 rounded-full uppercase">{freq.badge}</span>}
-                            {formData.frequency === freq.id && <CheckCircle2 className="text-primary" size={24} />}
-                          </div>
-                        </div>
+                          {freq.badge && (
+                            <span className="bg-secondary/20 text-primary text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                              {freq.badge}
+                            </span>
+                          )}
+                        </button>
                       ))}
                     </div>
                   </div>
                 )}
 
                 {step === 4 && (
-                  <div className="space-y-8">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">
-                      {region.id === 'UK' ? 'How many hours?' : 'Property size?'}
-                    </h1>
-                    
-                    {region.id === 'UK' ? (
-                      <div className="flex items-center justify-center gap-8 bg-white p-12 rounded-[48px] border border-slate-100 shadow-xl shadow-slate-100/50">
-                        <button 
-                          onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 0.5)})}
-                          className="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all"
-                        >
-                          <Minus size={32} />
-                        </button>
-                        <div className="text-center min-w-[120px]">
-                          <span className="text-6xl md:text-8xl font-black text-primary-dark tracking-tighter">{formData.duration}</span>
-                          <span className="text-2xl font-bold text-slate-300 ml-2">h</span>
-                        </div>
-                        <button 
-                          onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 0.5)})}
-                          className="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all"
-                        >
-                          <Plus size={32} />
-                        </button>
+                  <div className="space-y-6">
+                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">How many hours?</h1>
+                    <div className="flex items-center justify-center gap-12 py-10 bg-white rounded-[40px] shadow-xl border border-slate-50">
+                      <button 
+                        onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 0.5)})}
+                        className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-lg active:scale-90"
+                      >
+                        <Minus size={24} />
+                      </button>
+                      <div className="text-center">
+                        <span className="text-7xl font-black text-primary-dark tracking-tighter">{formData.duration}</span>
+                        <span className="text-xl font-bold text-slate-400 ml-2 uppercase tracking-widest">Hrs</span>
                       </div>
-                    ) : (
-                      <div className="grid gap-4">
-                        {['1 Bed Flat', '2 Bed Flat', '3 Bed House', '4 Bed House', '5+ Bed House'].map(size => (
-                          <div 
-                            key={size}
-                            onClick={() => setFormData({...formData, propertySize: size})}
-                            className={`selection-card p-6 flex-row items-center justify-between ${formData.propertySize === size ? 'selection-card-active' : 'selection-card-inactive'}`}
-                          >
-                            <span className="text-xl font-bold">{size}</span>
-                            {formData.propertySize === size && <CheckCircle2 className="text-primary" size={24} />}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                      <button 
+                        onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 0.5)})}
+                        className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-lg active:scale-90"
+                      >
+                        <Plus size={24} />
+                      </button>
+                    </div>
+                    <button onClick={nextStep} className="btn-primary w-full py-6 text-lg mt-8">Continue</button>
                   </div>
                 )}
 
                 {step === 5 && (
                   <div className="space-y-6">
                     <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">Any extras?</h1>
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                       {[
-                        { id: 'Ironing', icon: <Info size={20}/> },
-                        { id: 'Cleaning Products', icon: <ShieldCheck size={20}/> },
-                        { id: 'Inside Fridge', icon: <Plus size={20}/> },
-                        { id: 'Inside Oven', icon: <Plus size={20}/> },
+                        'Ironing', 'Cleaning Products', 'Inside Fridge', 'Inside Oven'
                       ].map((extra) => (
-                        <div 
-                          key={extra.id}
-                          onClick={() => toggleExtra(extra.id)}
-                          className={`selection-card p-6 flex-row items-center gap-4 ${formData.extras.includes(extra.id) ? 'selection-card-active' : 'selection-card-inactive'}`}
+                        <button
+                          key={extra}
+                          onClick={() => toggleExtra(extra)}
+                          className={`p-6 rounded-[32px] border-2 text-center transition-all flex flex-col items-center gap-4 ${
+                            formData.extras.includes(extra) 
+                            ? 'border-primary bg-primary/5 text-primary ring-4 ring-primary/5' 
+                            : 'border-slate-100 hover:border-primary/20 bg-white'
+                          }`}
                         >
-                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${formData.extras.includes(extra.id) ? 'bg-primary text-white' : 'bg-slate-50 text-slate-400'}`}>
-                            {extra.icon}
+                          <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center">
+                            <Plus size={20} className={formData.extras.includes(extra) ? 'rotate-45 transition-transform' : ''} />
                           </div>
-                          <span className="font-bold">{extra.id}</span>
-                          <div className="ml-auto">
-                            {formData.extras.includes(extra.id) ? <CheckCircle2 size={24}/> : <Plus size={24} className="opacity-10"/>}
-                          </div>
-                        </div>
+                          <span className="font-bold text-sm">{extra}</span>
+                        </button>
                       ))}
                     </div>
+                    <button onClick={nextStep} className="btn-primary w-full py-6 text-lg mt-8">Continue</button>
                   </div>
                 )}
 
                 {step === 6 && (
-                  <div className="space-y-8 py-10">
-                    <h1 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tight text-center">Any pets?</h1>
-                    <div className="grid grid-cols-2 gap-6 max-w-lg mx-auto">
-                      {[
-                        { id: true, label: 'Yes' },
-                        { id: false, label: 'No' }
-                      ].map((opt) => (
-                        <div 
-                          key={String(opt.id)}
-                          onClick={() => setFormData({...formData, hasPets: opt.id})}
-                          className={`selection-card p-12 items-center justify-center text-center ${formData.hasPets === opt.id ? 'selection-card-active shadow-2xl' : 'selection-card-inactive'}`}
-                        >
-                          <span className="text-4xl font-black">{opt.label}</span>
-                        </div>
-                      ))}
+                  <div className="space-y-6 text-center">
+                    <div className="w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-8">
+                      <Heart size={48} />
                     </div>
-                  </div>
-                )}
-
-                {step === 7 && (
-                  <div className="space-y-8">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">When should we come?</h1>
-                    <CustomCalendar 
-                      selectedDate={formData.date} 
-                      onSelect={(date) => setFormData({...formData, date})} 
-                    />
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                      {['08:00', '10:30', '13:00', '15:30', '18:00'].map(slot => (
+                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">Any pets?</h1>
+                    <div className="flex gap-4">
+                      {[
+                        { label: 'Yes', value: true },
+                        { label: 'No', value: false }
+                      ].map((opt) => (
                         <button
-                          key={slot}
-                          onClick={() => setFormData({...formData, timeSlot: slot})}
-                          className={`p-5 rounded-2xl border-2 font-black transition-all ${
-                            formData.timeSlot === slot 
-                              ? 'border-primary bg-primary text-white' 
-                              : 'border-slate-100 bg-white text-slate-500'
+                          key={opt.label}
+                          onClick={() => {
+                            setFormData({...formData, hasPets: opt.value});
+                            nextStep();
+                          }}
+                          className={`flex-1 p-8 rounded-[32px] border-2 text-xl font-bold transition-all ${
+                            formData.hasPets === opt.value 
+                            ? 'border-primary bg-primary text-white' 
+                            : 'border-slate-100 hover:border-primary/20 bg-white text-slate-400'
                           }`}
                         >
-                          {slot}
+                          {opt.label}
                         </button>
                       ))}
                     </div>
                   </div>
                 )}
 
+                {step === 7 && (
+                  <div className="space-y-6">
+                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight mb-8">When should we come?</h1>
+                    <div className="space-y-8">
+                      <div>
+                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-4">Select Date</label>
+                        <input 
+                          type="date" 
+                          className="w-full p-6 rounded-[32px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold text-lg"
+                          onChange={(e) => setFormData({...formData, date: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest block mb-4">Preferred Time</label>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {['Morning', 'Afternoon', 'Evening'].map(time => (
+                            <button
+                              key={time}
+                              onClick={() => setFormData({...formData, timeSlot: time})}
+                              className={`p-4 rounded-2xl border-2 font-bold transition-all ${
+                                formData.timeSlot === time 
+                                ? 'border-primary bg-primary/5 text-primary' 
+                                : 'border-slate-100 hover:border-primary/20'
+                              }`}
+                            >
+                              {time}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <button onClick={nextStep} className="btn-primary w-full py-6 text-lg mt-8">Final Step</button>
+                  </div>
+                )}
+
                 {step === 8 && (
                   <div className="space-y-8">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">Personal Details</h1>
-                    <div className="grid gap-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <input placeholder="First Name" className="booking-input" value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})} />
-                        <input placeholder="Last Name" className="booking-input" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})} />
+                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">Your Details.</h1>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">First Name</label>
+                        <input 
+                          type="text" 
+                          placeholder="John"
+                          className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold"
+                          onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                        />
                       </div>
-                      <input placeholder="Email Address" className="booking-input" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} type="email" />
-                      <input placeholder="Phone Number" className="booking-input" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} type="tel" />
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Last Name</label>
+                        <input 
+                          type="text" 
+                          placeholder="Doe"
+                          className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold"
+                          onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                        />
+                      </div>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Email Address</label>
+                        <input 
+                          type="email" 
+                          placeholder="john@example.com"
+                          className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold"
+                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        />
+                      </div>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Phone Number</label>
+                        <input 
+                          type="tel" 
+                          placeholder="+44"
+                          className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold"
+                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        />
+                      </div>
                     </div>
+                    <button 
+                      onClick={() => setIsSubmitted(true)}
+                      className="btn-primary w-full py-6 text-xl shadow-2xl shadow-primary/30 mt-4 group"
+                    >
+                      Confirm & Pay {region.symbol}{totalPrice}
+                      <Zap size={20} className="fill-current group-hover:scale-125 transition-transform" />
+                    </button>
+                    <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                      Secure Payment Powered by Stripe & Paystack
+                    </p>
                   </div>
                 )}
               </motion.div>
             </AnimatePresence>
+            
+            {step > 1 && (
+              <button 
+                onClick={prevStep}
+                className="mt-12 flex items-center gap-2 text-slate-400 hover:text-primary transition-colors font-black text-xs uppercase tracking-widest group"
+              >
+                <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                Go Back
+              </button>
+            )}
           </div>
 
-          {/* Sticky Basket Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-[40px] p-8 border border-slate-100 shadow-2xl shadow-slate-200/50 sticky top-28">
-              <h2 className="text-2xl font-black text-primary-dark mb-8 flex items-center gap-2">
-                <div className="w-2 h-8 bg-primary rounded-full" /> My Clean.
-              </h2>
+          {/* Booking Summary Sidebar */}
+          <div className="lg:sticky lg:top-32">
+            <div className="bg-white rounded-[48px] p-8 md:p-10 shadow-2xl border-4 border-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16" />
+              <h2 className="text-2xl font-black text-primary-dark mb-8 tracking-tight">Your Basket.</h2>
+              
+              <div className="space-y-6 mb-10">
+                <div className="flex justify-between items-start group">
+                  <div className="flex gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
+                      <Sparkles size={18} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Service</p>
+                      <p className="font-bold text-slate-700">{formData.serviceType}</p>
+                    </div>
+                  </div>
+                </div>
 
-              <div className="space-y-4 mb-10">
-                <div className="flex justify-between items-center group">
-                  <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Service</span>
-                  <span className="font-black text-primary-dark">{formData.serviceType}</span>
+                <div className="flex justify-between items-start group">
+                  <div className="flex gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
+                      <Clock size={18} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration</p>
+                      <p className="font-bold text-slate-700">{formData.duration} Hours</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">{region.id === 'UK' ? 'Duration' : 'Size'}</span>
-                  <span className="font-black text-primary-dark">{region.id === 'UK' ? `${formData.duration}h` : formData.propertySize}</span>
-                </div>
-                {formData.date && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Schedule</span>
-                    <span className="font-black text-primary-dark">{new Date(formData.date).toLocaleDateString()}</span>
+
+                {formData.extras.length > 0 && (
+                  <div className="flex justify-between items-start group">
+                    <div className="flex gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
+                        <Plus size={18} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Extras</p>
+                        <p className="font-bold text-slate-700 text-sm leading-tight">
+                          {formData.extras.join(', ')}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
 
-              <div className="pt-8 border-t border-slate-100">
-                <div className="flex justify-between items-end mb-8">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total cost</span>
-                  <div className="text-right">
-                    <span className="text-4xl font-black text-primary tracking-tighter">{region.symbol}{totalPrice}</span>
-                  </div>
+              <div className="pt-8 border-t border-slate-100 flex justify-between items-center">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Total Price</p>
+                  <p className="text-4xl font-black text-primary-dark tracking-tighter">
+                    {region.symbol}{totalPrice}
+                  </p>
                 </div>
-                <button 
-                  onClick={() => step === 8 ? setIsSubmitted(true) : nextStep()}
-                  disabled={step === 1 && !formData.address}
-                  className="w-full py-6 bg-primary text-white rounded-3xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:grayscale"
-                >
-                  {step === 8 ? 'Confirm Booking' : 'Continue'}
-                </button>
-                {step > 1 && (
-                  <button onClick={prevStep} className="w-full mt-4 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-primary transition-colors">
-                    Go Back
-                  </button>
-                )}
+                <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary">
+                  <Zap size={28} className="fill-current" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 px-6 space-y-4">
+              <div className="flex items-center gap-4 text-slate-400">
+                <ShieldCheck size={20} className="text-secondary" />
+                <span className="text-[10px] font-bold uppercase tracking-widest leading-tight">Vetted & Insured Pros Only</span>
+              </div>
+              <div className="flex items-center gap-4 text-slate-400">
+                <Heart size={20} className="text-secondary" />
+                <span className="text-[10px] font-bold uppercase tracking-widest leading-tight">100% Satisfaction Guarantee</span>
               </div>
             </div>
           </div>
-
         </div>
-      </div>
-    </div>
-  );
-};
-
-const CustomCalendar = ({ selectedDate, onSelect }) => {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-  const days = [];
-  const totalDays = daysInMonth(year, month);
-  const offset = firstDayOfMonth(year, month);
-  for (let i = 0; i < offset; i++) days.push(null);
-  for (let i = 1; i <= totalDays; i++) days.push(new Date(year, month, i));
-  const isSelected = (date) => date && selectedDate && new Date(date).toDateString() === new Date(selectedDate).toDateString();
-  const isToday = (date) => date && new Date(date).toDateString() === new Date().toDateString();
-  const isPast = (date) => {
-    if (!date) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date < today;
-  };
-  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-  return (
-    <div className="bg-white rounded-[40px] border border-slate-100 p-8 shadow-xl shadow-slate-100/50">
-      <div className="flex items-center justify-between mb-8">
-        <h3 className="text-2xl font-black text-primary-dark">{monthNames[month]} {year}</h3>
-        <div className="flex gap-2">
-          <button onClick={() => setCurrentMonth(new Date(year, month - 1))} className="w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center hover:bg-slate-50"><ChevronLeft size={20} /></button>
-          <button onClick={() => setCurrentMonth(new Date(year, month + 1))} className="w-10 h-10 rounded-xl border border-slate-100 flex items-center justify-center hover:bg-slate-50"><ChevronRight size={20} /></button>
-        </div>
-      </div>
-      <div className="grid grid-cols-7 gap-2 text-center mb-4">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => <div key={d} className="text-[10px] font-black text-slate-300 uppercase">{d}</div>)}
-      </div>
-      <div className="grid grid-cols-7 gap-2">
-        {days.map((date, idx) => {
-          if (!date) return <div key={`empty-${idx}`} />;
-          const disabled = isPast(date);
-          const active = isSelected(date);
-          const today = isToday(date);
-          return (
-            <button key={idx} disabled={disabled} onClick={() => onSelect(date.toISOString().split('T')[0])}
-              className={`aspect-square rounded-2xl flex items-center justify-center text-sm font-black transition-all ${active ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/20' : 'hover:bg-primary/5'} ${disabled ? 'opacity-10 cursor-not-allowed' : 'cursor-pointer'} ${today && !active ? 'text-primary border-2 border-primary/10' : ''}`}
-            >
-              {date.getDate()}
-            </button>
-          );
-        })}
       </div>
     </div>
   );
