@@ -110,7 +110,8 @@ const Footer = () => {
                 Our cleaners are fully vetted, background-checked, and trained to Cleaniq service institutional standards.
               </p>
               <Link to="/booking" className="block text-center bg-white text-primary-dark font-black text-[10px] uppercase tracking-widest py-3 rounded-xl hover:bg-secondary transition-colors">
-                Book a Professional Clean
+                <button >Book a Professional Clean</button>
+                
               </Link>
             </div>
           </div>

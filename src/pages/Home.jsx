@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useRegion } from '../context/RegionContext';
+import air1 from "../assets/karl-joshua-bernal-QtPG6tfUJp8-unsplash.jpg"
+import air2 from "../assets/vitaly-gariev-2NcTLdFHpH8-unsplash.jpg"
 import { 
   CheckCircle2, Star, ShieldCheck, Clock, 
   Home as HomeIcon, Briefcase, 
@@ -95,7 +97,7 @@ const Home = () => {
           >
             <div className="relative z-10 rounded-[60px] overflow-hidden shadow-2xl border-8 border-white bg-slate-100">
               <img 
-                src="https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?q=80&w=2000&auto=format&fit=crop" 
+                src={air1} 
                 alt="Professional cleaning service"
                 className="w-full h-[400px] lg:h-[600px] object-cover"
               />
@@ -183,7 +185,7 @@ const Home = () => {
             <div className="order-2 lg:order-1 relative">
               <div className="relative z-10 rounded-[48px] overflow-hidden shadow-2xl">
                 <img 
-                  src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=2000&auto=format&fit=crop" 
+                  src={air2} 
                   alt="Our Team"
                   className="w-full h-[500px] object-cover"
                 />
