@@ -205,10 +205,12 @@ const Booking = () => {
       tag: 'Short-let specialist',
       price: region.id === 'UK' ? '£21.90/h' : `${region.symbol}20,000`, 
       bullets: [
-        'Professional turnover services for short-let rentals',
-        'Linen management & Guest-ready prep',
-        'Inventory monitoring & supply restocking',
-        '5-star hospitality standard'
+       "Turnover Specialist",
+        "5-Star Prep",
+        "Guest Ready Check",
+        "Inventory Monitoring",
+        "Consumable Supplies",
+         "Please provide a washing machine,dryer and detergent if on-site linen and towel washing is  required ",
       ],
       icon: <Star />
     },
