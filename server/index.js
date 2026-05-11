@@ -8,7 +8,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['https://www.cleaniqservices.com', 'https://cleaniqservices.com', 'http://localhost:5173'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -27,10 +31,12 @@ app.get('/api/health', (req, res) => {
 const bookingRoutes = require('./routes/bookings');
 const recruitmentRoutes = require('./routes/recruitment');
 const serviceRoutes = require('./routes/services');
+const customerRoutes = require('./routes/customers');
 
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/recruitment', recruitmentRoutes);
 app.use('/api/services', serviceRoutes);
+app.use('/api/customers', customerRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);

@@ -1,19 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, Filter, User, 
   Mail, MapPin, Calendar, 
   ChevronRight, MoreVertical,
-  Star, CreditCard, ShoppingBag
+  Star, CreditCard, ShoppingBag,
+  RefreshCcw
 } from 'lucide-react';
 
 const Customers = () => {
-  const customers = [
-    { id: 'CUS-501', name: 'Sarah Wilson', email: 'sarah.w@example.com', location: 'Manchester, UK', bookings: 12, spend: '£1,450', joined: 'Jan 2026', rating: 4.9 },
-    { id: 'CUS-502', name: 'Chidi Okafor', email: 'chidi.o@gmail.com', location: 'Lagos, Nigeria', bookings: 8, spend: '₦320,000', joined: 'Feb 2026', rating: 5.0 },
-    { id: 'CUS-503', name: 'Emma Thompson', email: 'emma.t@outlook.com', location: 'Manchester, UK', bookings: 15, spend: '£2,100', joined: 'Dec 2025', rating: 4.8 },
-    { id: 'CUS-504', name: 'Afolabi Musa', email: 'musa.afolabi@live.com', location: 'Abuja, Nigeria', bookings: 5, spend: '₦580,000', joined: 'Mar 2026', rating: 4.7 },
-    { id: 'CUS-505', name: 'James Knight', email: 'j.knight@example.com', location: 'Salford, UK', bookings: 3, spend: '£380', joined: 'Apr 2026', rating: 4.5 },
-  ];
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/customers`);
+        const data = await response.json();
+        setCustomers(data.map((c, i) => ({
+          id: `CUS-${1000 + i}`,
+          name: `${c.firstName} ${c.lastName}`,
+          email: c.email,
+          phone: c.phone,
+          bookings: c.totalBookings,
+          spend: `${c.region === 'UK' ? '£' : '₦'}${c.totalSpent.toLocaleString()}`,
+          joined: new Date(c.lastBooking).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
+          region: c.region,
+          rating: 5.0 // Static for now
+        })));
+      } catch (error) {
+        console.error('Error fetching customers:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCustomers();
+  }, []);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -49,69 +70,84 @@ const Customers = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {customers.map((cus) => (
-                <tr key={cus.id} className="group hover:bg-slate-50/50 transition-colors">
-                  <td className="px-8 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-all">
-                        <User size={20} />
-                      </div>
-                      <div>
-                        <p className="font-bold text-primary-dark group-hover:text-primary transition-colors">{cus.name}</p>
-                        <div className="flex items-center gap-3">
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{cus.id}</p>
-                          <span className="text-slate-200">•</span>
-                          <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase">
-                            <MapPin size={10} /> {cus.location.split(',')[1]}
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">
+                    <RefreshCcw size={32} className="animate-spin mx-auto mb-4" />
+                    Loading Clients...
+                  </td>
+                </tr>
+              ) : customers.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">
+                    No customers found yet.
+                  </td>
+                </tr>
+              ) : (
+                customers.map((cus) => (
+                  <tr key={cus.id} className="group hover:bg-slate-50/50 transition-colors">
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-11 h-11 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-all">
+                          <User size={20} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-primary-dark group-hover:text-primary transition-colors">{cus.name}</p>
+                          <div className="flex items-center gap-3">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{cus.id}</p>
+                            <span className="text-slate-200">•</span>
+                            <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase">
+                              <MapPin size={10} /> {cus.region === 'UK' ? 'UK' : 'NG'}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-6">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
-                        <ShoppingBag size={14} />
+                    </td>
+                    <td className="px-4 py-6">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+                          <ShoppingBag size={14} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-primary-dark">{cus.bookings}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Bookings</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-black text-primary-dark">{cus.bookings}</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">Bookings</p>
+                    </td>
+                    <td className="px-4 py-6">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+                          <CreditCard size={14} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-primary-dark">{cus.spend}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Total Spend</p>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-6">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
-                        <CreditCard size={14} />
+                    </td>
+                    <td className="px-4 py-6">
+                      <div className="flex items-center gap-1.5 text-sm text-slate-600 font-medium">
+                        <Calendar size={14} className="text-slate-400" />
+                        {cus.joined}
                       </div>
-                      <div>
-                        <p className="text-sm font-black text-primary-dark">{cus.spend}</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">Total Spend</p>
+                    </td>
+                    <td className="px-4 py-6">
+                      <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-0.5">
+                          <Star size={14} className="text-amber-400 fill-amber-400" />
+                          <span className="text-sm font-black text-primary-dark">{cus.rating}</span>
+                        </div>
+                        <span className="text-xs text-slate-400 font-medium">avg.</span>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-6">
-                    <div className="flex items-center gap-1.5 text-sm text-slate-600 font-medium">
-                      <Calendar size={14} className="text-slate-400" />
-                      {cus.joined}
-                    </div>
-                  </td>
-                  <td className="px-4 py-6">
-                    <div className="flex items-center gap-1.5">
-                      <div className="flex items-center gap-0.5">
-                        <Star size={14} className="text-amber-400 fill-amber-400" />
-                        <span className="text-sm font-black text-primary-dark">{cus.rating}</span>
-                      </div>
-                      <span className="text-xs text-slate-400 font-medium">avg.</span>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <button className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all">
-                      <ChevronRight size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <button className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all">
+                        <ChevronRight size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
