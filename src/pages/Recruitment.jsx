@@ -238,7 +238,7 @@ const Recruitment = () => {
                        <ChevronLeft size={20} /> Back
                     </button>
                     <button type="button" onClick={nextStep} className="btn-primary flex-1 py-5 text-lg flex items-center justify-center gap-2">
-                      {region.id === 'UK' ? 'DBS Verification' : 'CV Upload'} <ChevronRight size={20} />
+                      {region.id === 'UK' ? 'Continue' : 'CV Upload'} <ChevronRight size={20} />
                     </button>
                   </div>
                 </motion.div>
@@ -262,7 +262,7 @@ const Recruitment = () => {
                   <div className="space-y-6">
                     {/* Common Passport Section */}
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Valid Passport (Both Regions)</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Valid Id</label>
                       <div className="relative group">
                         <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                         <div className="p-10 border-2 border-dashed border-slate-200 rounded-[40px] flex flex-col items-center justify-center gap-4 bg-white group-hover:border-primary group-hover:bg-primary/5 transition-all">
@@ -270,7 +270,7 @@ const Recruitment = () => {
                             <Upload size={32} />
                           </div>
                           <div className="text-center">
-                            <p className="font-black text-primary-dark">Upload Passport Photo Page</p>
+                            <p className="font-black text-primary-dark">Upload Valid ID</p>
                             <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Required for identity verification</p>
                           </div>
                         </div>
@@ -280,8 +280,8 @@ const Recruitment = () => {
                     {/* Regional Specific Section */}
                     {region.id === 'UK' ? (
                       <div className="space-y-6 pt-6 border-t border-slate-100">
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">DBS Certificate Number</label>
+                        {/* <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload CV</label>
                           <input 
                             required
                             type="text" 
@@ -290,7 +290,7 @@ const Recruitment = () => {
                             value={formData.dbsNumber}
                             onChange={e => setFormData({...formData, dbsNumber: e.target.value})}
                           />
-                        </div>
+                        </div> */}
                         <div className="relative group">
                           <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                           <div className="p-10 border-2 border-dashed border-slate-200 rounded-[40px] flex flex-col items-center justify-center gap-4 bg-white group-hover:border-primary group-hover:bg-primary/5 transition-all">
@@ -298,7 +298,7 @@ const Recruitment = () => {
                               <Upload size={32} />
                             </div>
                             <div className="text-center">
-                              <p className="font-black text-primary-dark">Upload DBS Certificate</p>
+                              <p className="font-black text-primary-dark">Upload CV</p>
                               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">PDF or JPEG (Max 5MB)</p>
                             </div>
                           </div>

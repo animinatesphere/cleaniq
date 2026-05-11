@@ -95,7 +95,7 @@ const Home = () => {
           >
             <div className="relative z-10 rounded-[60px] overflow-hidden shadow-2xl border-8 border-white bg-slate-100">
               <img 
-                src="https://images.unsplash.com/photo-1584622781564-1d987f7333c1?q=80&w=2000&auto=format&fit=crop" 
+                src="https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?q=80&w=2000&auto=format&fit=crop" 
                 alt="Professional cleaning service"
                 className="w-full h-[400px] lg:h-[600px] object-cover"
               />
