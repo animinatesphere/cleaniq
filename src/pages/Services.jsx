@@ -59,7 +59,7 @@ const Services = () => {
       title: "Deep Clean",
       tag: "Deep cleaning",
       icon: <Trash2 className="text-secondary" size={40} />,
-      image: "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?q=80&w=2000&auto=format&fit=crop",
+      image: airbnbImg,
       features: [
         "Inside cabinets & drawers.",
         "Baseboard scrubbing.",
