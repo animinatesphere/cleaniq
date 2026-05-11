@@ -104,7 +104,7 @@ const Services = () => {
   };
 
   return (
-    <div className="pt-32 pb-20 bg-slate-50 min-h-screen overflow-x-hidden">
+    <div className="pt-42 pb-20 bg-slate-50 min-h-screen overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 md:20">
