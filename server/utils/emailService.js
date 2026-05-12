@@ -16,16 +16,22 @@ const transporter = nodemailer.createTransport({
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
+    console.log(`📧 Attempting to send email to: ${to}...`);
     const info = await transporter.sendMail({
       from: `"CleanIQ Services" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,
     });
-    console.log('Email sent: %s', info.messageId);
+    console.log('✅ Email sent successfully! MessageID:', info.messageId);
     return true;
   } catch (error) {
-    console.error('Email Error:', error);
+    console.error('❌ EMAIL ERROR DETAILS:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response
+    });
     return false;
   }
 };
