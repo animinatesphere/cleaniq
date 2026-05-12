@@ -17,6 +17,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+const { sendEmail, templates } = require('../utils/emailService');
+
 // GET all applicants (Admin)
 router.get('/', async (req, res) => {
   try {
@@ -42,6 +44,14 @@ router.post('/', upload.fields([
     });
 
     const newApplicant = await applicant.save();
+    
+    // Send "Application Received" Email
+    await sendEmail({
+      to: newApplicant.email,
+      subject: `Application Received: ${newApplicant.experience}`,
+      html: templates.applicantReceived(newApplicant.fullName, newApplicant.experience)
+    });
+
     res.status(201).json(newApplicant);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -58,6 +68,16 @@ router.put('/:id/status', async (req, res) => {
       { new: true }
     );
     if (!applicant) return res.status(404).json({ message: 'Applicant not found' });
+    
+    // If Hired, send "Congratulations" Email
+    if (status === 'Hired') {
+      await sendEmail({
+        to: applicant.email,
+        subject: "Congratulations! Welcome to CleanIQ Services 🎉",
+        html: templates.hiredAlert(applicant.fullName)
+      });
+    }
+
     res.json(applicant);
   } catch (err) {
     res.status(400).json({ message: err.message });

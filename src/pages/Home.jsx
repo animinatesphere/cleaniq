@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useRegion } from '../context/RegionContext';
@@ -8,12 +8,36 @@ import {
   CheckCircle2, Star, ShieldCheck, Clock, 
   Home as HomeIcon, Briefcase, 
   ArrowRight, Users, Heart, Zap, Plus,
-  ChevronDown
+  ChevronDown, MessageSquare
 } from 'lucide-react';
 
 const Home = () => {
   const { region } = useRegion();
   const [activeFaq, setActiveFaq] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [revRes, servRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/reviews`),
+          fetch(`${import.meta.env.VITE_API_URL}/services?region=${region.id}`)
+        ]);
+        const revData = await revRes.json();
+        const servData = await servRes.json();
+        
+        setReviews(revData.filter(r => r.status === 'Approved').slice(0, 3));
+        setServices(servData.slice(0, 4));
+      } catch (err) {
+        console.error('Error fetching live data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [region.id]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -126,49 +150,25 @@ const Home = () => {
               Tailored cleaning for {region.id === "UK" ? "Manchester living" : "Nigerian homes & offices"}
             </h3>
             <p className="text-lg text-slate-500 font-medium">
-              Whether it's a {region.id === "UK" ? "weekly domestic clean" : "regular maintenance"} or a deep seasonal refresh, we have the right pros for you.
-              {region.id === "NG" && <span className="block mt-2 text-primary font-bold text-sm">Proudly paying above the Nigerian living wage.</span>}
+              Check our professional rates and book your cleaner in seconds.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { 
-                title: 'Residential Cleaning', 
-                desc: 'Reliable, weekly or bi-weekly cleaning for your home.', 
-                icon: <HomeIcon size={32}/>,
-                keyword: 'Reliable domestic cleaners'
-              },
-              { 
-                title: 'Office Cleaning', 
-                desc: 'Professional janitorial services for your workspace.', 
-                icon: <Briefcase size={32}/>,
-                keyword: 'Expert office cleaning'
-              },
-              { 
-                title: 'Deep Clean', 
-                desc: 'Specialized deep cleaning services for a total refresh.', 
-                icon: <Zap size={32}/>,
-                keyword: 'Deep cleaning'
-              },
-              { 
-                title: 'Airbnb Cleaning', 
-                desc: 'Professional turnover services for your short-let rental.', 
-                icon: <Star size={32}/>,
-                keyword: 'Short-let specialist'
-              }
-            ].map((service, idx) => (
+            {services.map((service, idx) => (
               <motion.div 
                 key={idx}
                 whileHover={{ y: -10 }}
                 className="p-10 rounded-[40px] bg-white border-2 border-slate-50 shadow-xl shadow-slate-100/50 hover:border-primary/20 transition-all"
               >
                 <div className="w-16 h-16 rounded-2xl bg-primary/5 text-primary flex items-center justify-center mb-8">
-                  {service.icon}
+                  {idx % 2 === 0 ? <HomeIcon size={32}/> : <Zap size={32}/>}
                 </div>
-                <h4 className="text-xs font-black text-primary uppercase tracking-widest mb-2">{service.keyword}</h4>
-                <h5 className="text-2xl font-black text-primary-dark mb-4 tracking-tight">{service.title}</h5>
-                <p className="text-slate-500 font-medium leading-relaxed mb-8">{service.desc}</p>
+                <h4 className="text-xs font-black text-primary uppercase tracking-widest mb-2">{service.type} Service</h4>
+                <h5 className="text-2xl font-black text-primary-dark mb-4 tracking-tight">{service.name}</h5>
+                <p className="text-3xl font-black text-primary mb-6">
+                  {region.id === 'UK' ? '£' : '₦'}{service.rate}<span className="text-sm text-slate-400 font-bold">/{service.type === 'hourly' ? 'hr' : 'flat'}</span>
+                </p>
                 <Link to="/booking" className="inline-flex items-center gap-2 font-black text-primary hover:gap-4 transition-all">
                   Book Now <ArrowRight size={18} />
                 </Link>
@@ -216,6 +216,54 @@ const Home = () => {
                 Learn More About Us <ArrowRight size={18} />
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-24 md:py-32 bg-slate-900 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[100px] -mr-48 -mt-48" />
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+            <div className="max-w-2xl">
+              <h2 className="text-[10px] font-black text-secondary uppercase tracking-[0.4em] mb-4">Customer Trust</h2>
+              <h3 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
+                What our clients are saying about CleanIQ.
+              </h3>
+            </div>
+            <div className="flex gap-2">
+              <div className="px-6 py-3 rounded-2xl bg-white/5 border border-white/10">
+                <p className="text-2xl font-black text-white">4.9/5</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase">Average Rating</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {reviews.length > 0 ? reviews.map((review, i) => (
+              <div key={i} className="p-10 rounded-[40px] bg-white/5 border border-white/10 backdrop-blur-sm">
+                <div className="flex text-secondary mb-6">
+                  {[...Array(review.rating)].map((_, j) => <Star key={j} size={18} fill="currentColor" />)}
+                </div>
+                <p className="text-lg text-slate-300 font-medium leading-relaxed mb-8">
+                  "{review.comment}"
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary font-black">
+                    {review.customerName.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-white">{review.customerName}</p>
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Verified Customer</p>
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <div className="col-span-3 py-20 text-center text-slate-500 font-bold uppercase tracking-widest text-sm">
+                <MessageSquare size={48} className="mx-auto mb-4 opacity-20" />
+                Approved reviews will appear here soon.
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -337,11 +385,11 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12">
           <div>
             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4">Professional Cleaning Services</h4>
-            <p className="text-sm leading-relaxed">
-            <p className="text-slate-400 max-w-2xl mx-auto leading-relaxed text-sm md:text-base font-medium">
-              Cleaniq Services is your premier choice for high-quality {region.id === "UK" ? "house cleaning and professional housekeeping" : "residential and commercial cleaning"} across {region.id === "UK" ? "Greater Manchester" : "Lagos & Abuja"}. We specialize in deep cleaning, move-in/move-out services, Airbnb management cleaning, and office janitorial solutions.
-            </p>
-            </p>
+            <div className="text-sm leading-relaxed">
+              <p className="text-slate-400 max-w-2xl mx-auto leading-relaxed text-sm md:text-base font-medium">
+                Cleaniq Services is your premier choice for high-quality {region.id === "UK" ? "house cleaning and professional housekeeping" : "residential and commercial cleaning"} across {region.id === "UK" ? "Greater Manchester" : "Lagos & Abuja"}. We specialize in deep cleaning, move-in/move-out services, Airbnb management cleaning, and office janitorial solutions.
+              </p>
+            </div>
           </div>
           <div>
             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4">Local Impact</h4>
