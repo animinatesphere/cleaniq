@@ -10,6 +10,11 @@ import {
   Clock, Info, ShieldCheck, Heart, Star,
   Search, Sparkles, Zap
 } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import StripePayment from '../component/StripePayment';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const Booking = () => {
   const { region } = useRegion();
@@ -62,15 +67,40 @@ const Booking = () => {
     fetchRates();
   }, [region.id]);
 
-  // Pricing Logic (Using Dynamic Rates)
+  // Pricing Logic (Fallback rates ensure price always updates)
   useEffect(() => {
     let total = 0;
 
+    // Fallback rates in case VPS /api/services is unreachable
+    const fallbackUK = {
+      'Classic Regular': 17.90,
+      'Deep Clean': 24.90,
+      'Holiday Rental': 21.90,
+      'Office Cleaning': 19.90,
+      'Classic One-off': 17.90,
+    };
+    const fallbackNG = {
+      'Classic Regular': 15000,
+      'Deep Clean': 25000,
+      'Holiday Rental': 20000,
+      'Office Cleaning': 18000,
+      '1 Bed Flat': 15000,
+      '2 Bed Flat': 20000,
+      '3 Bed Flat': 25000,
+      '4+ Bed House': 35000,
+    };
+
     if (region.id === 'UK') {
-      const rate = dynamicRates[formData.serviceType] || 0;
-      total = rate * formData.duration;
+      // Use dynamic rate from VPS if available, otherwise fallback
+      const rate = dynamicRates[formData.serviceType] 
+        || fallbackUK[formData.serviceType] 
+        || 17.90;
+      total = rate * (formData.duration || 2);
     } else {
-      const rate = dynamicRates[formData.propertySize] || 0;
+      const rate = dynamicRates[formData.propertySize] 
+        || fallbackNG[formData.propertySize] 
+        || fallbackNG[formData.serviceType]
+        || 15000;
       total = rate;
     }
 
@@ -88,7 +118,7 @@ const Booking = () => {
     if (formData.frequency === 'Fortnightly') total *= 0.95;
 
     setTotalPrice(Math.round(total * 100) / 100);
-  }, [formData, region]);
+  }, [formData, region, dynamicRates]);
 
   const toggleExtra = (extra) => {
     setFormData(prev => ({
@@ -172,8 +202,7 @@ const Booking = () => {
     setTimeout(() => nextStep(), 300);
   };
 
-  const handleBooking = async () => {
-    setIsSubmitting(true);
+  const handlePaymentSuccess = async (paymentIntent) => {
     const bookingPayload = {
       bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
       customer: {
@@ -198,10 +227,12 @@ const Booking = () => {
         amount: totalPrice,
         currency: region.id === 'UK' ? 'GBP' : 'NGN',
         method: region.id === 'UK' ? 'Stripe' : 'Paystack',
+        transactionId: paymentIntent.id
       },
       region: region.id,
     };
 
+    setIsSubmitting(true);
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
         method: 'POST',
@@ -212,11 +243,10 @@ const Booking = () => {
       if (response.ok) {
         setIsSubmitted(true);
       } else {
-        alert('Booking failed. Please try again.');
+        alert('Payment successful, but failed to save booking. Please contact support.');
       }
     } catch (error) {
-      console.error('Error submitting booking:', error);
-      alert('Network error. Please check your connection.');
+      console.error('Error saving booking:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -671,7 +701,7 @@ const Booking = () => {
                 {step === 8 && (
                   <div className="space-y-8">
                     <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">Your Details.</h1>
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="grid md:grid-cols-2 gap-6 mb-8">
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">First Name</label>
                         <input 
@@ -709,16 +739,17 @@ const Booking = () => {
                         />
                       </div>
                     </div>
-                    <button 
-                      onClick={handleBooking}
-                      className="btn-primary w-full py-6 text-xl shadow-2xl shadow-primary/30 mt-4 group"
-                    >
-                      Confirm & Pay {region.symbol}{totalPrice}
-                      <Zap size={20} className="fill-current group-hover:scale-125 transition-transform" />
-                    </button>
-                    <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                      Secure Payment Powered by Stripe & Paystack
-                    </p>
+
+                    <div className="h-px bg-slate-100 w-full mb-8" />
+                    
+                    <Elements stripe={stripePromise}>
+                      <StripePayment 
+                        amount={totalPrice}
+                        currency={region.id === 'UK' ? 'GBP' : 'NGN'}
+                        customerInfo={formData}
+                        onPaymentSuccess={handlePaymentSuccess}
+                      />
+                    </Elements>
                   </div>
                 )}
               </motion.div>

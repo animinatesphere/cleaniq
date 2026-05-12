@@ -16,19 +16,35 @@ const Bookings = () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`);
         const data = await response.json();
-        setBookings(data.map(b => ({
-          id: b.bookingId,
-          customer: `${b.customer.firstName} ${b.customer.lastName}`,
-          email: b.customer.email,
-          phone: b.customer.phone,
-          service: b.service,
-          date: new Date(b.schedule.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-          time: b.schedule.timeSlot,
-          status: b.status,
-          amount: `${b.region === 'UK' ? '£' : '₦'}${b.payment.amount}`,
-          address: b.details.address,
-          region: b.region
-        })));
+        setBookings(data.map(b => {
+          // Safely parse date - handle "YYYY-MM-DD" strings and full ISO timestamps
+          let displayDate = 'Date TBC';
+          if (b.schedule?.date) {
+            // Append T00:00:00 to avoid UTC timezone shifting plain date strings
+            const raw = b.schedule.date.includes('T') 
+              ? b.schedule.date 
+              : `${b.schedule.date}T00:00:00`;
+            const parsed = new Date(raw);
+            if (!isNaN(parsed)) {
+              displayDate = parsed.toLocaleDateString('en-GB', { 
+                day: 'numeric', month: 'short', year: 'numeric' 
+              });
+            }
+          }
+          return {
+            id: b.bookingId,
+            customer: `${b.customer.firstName} ${b.customer.lastName}`,
+            email: b.customer.email,
+            phone: b.customer.phone,
+            service: b.service,
+            date: displayDate,
+            time: b.schedule?.timeSlot || 'Time TBC',
+            status: b.status,
+            amount: `${b.region === 'UK' ? '£' : '₦'}${b.payment.amount}`,
+            address: b.details.address,
+            region: b.region
+          };
+        }));
       } catch (error) {
         console.error('Error fetching bookings:', error);
       } finally {
