@@ -134,15 +134,17 @@ const Booking = () => {
         return;
       }
       try {
-        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(formData.address)}&limit=5`);
+        const countryCode = region.id === 'UK' ? 'gb' : 'ng';
+        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(formData.address)}&limit=10&lang=en&location_bias_scale=0.5&filter=countrycode:${countryCode}`);
         const data = await response.json();
+        
         const formatted = data.features.map(f => {
-          const { name, street, housenumber, city, postcode, country } = f.properties;
-          const main = [housenumber, street, name].filter(Boolean).join(" ");
-          const details = [city, postcode, country].filter(Boolean).join(", ");
-          return main ? `${main}, ${details}` : details;
+          const { name, street, housenumber, city, postcode, state } = f.properties;
+          const parts = [housenumber, street || name, city, postcode, state].filter(Boolean);
+          return parts.join(", ");
         });
-        setAddressSuggestions([...new Set(formatted)].slice(0, 5));
+        
+        setAddressSuggestions([...new Set(formatted)]);
       } catch (err) {
         console.error("Suggestions fetch error:", err);
       }
