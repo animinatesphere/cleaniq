@@ -81,7 +81,10 @@ const Bookings = () => {
           <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all">
             <Filter size={18} /> Filters
           </button>
-          <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 ml-auto md:ml-0">
+          <button 
+            onClick={downloadCSV}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 ml-auto md:ml-0"
+          >
             <Download size={18} /> Export
           </button>
         </div>

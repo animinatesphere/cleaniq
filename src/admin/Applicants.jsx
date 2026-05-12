@@ -38,6 +38,30 @@ const Applicants = () => {
     fetchApplicants();
   }, []);
 
+  const downloadCSV = () => {
+    if (applicants.length === 0) return;
+    
+    // Headers
+    const headers = ["ID", "Full Name", "Email", "Phone", "Role/Experience", "Location", "Applied Date", "Status"];
+    
+    // Rows
+    const rows = applicants.map(a => [
+      a.id, a.name, a.email, a.phone, `"${a.role.replace(/"/g, '""')}"`, a.location, a.appliedDate, a.status
+    ]);
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n" 
+      + rows.map(e => e.join(",")).join("\n");
+      
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `cleaniq_applicants_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const getStatusStyle = (status) => {
     switch (status) {
       case 'Applied': return 'bg-blue-50 text-blue-700 border-blue-100';
@@ -83,8 +107,11 @@ const Applicants = () => {
             <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all">
               <Filter size={18} /> Region
             </button>
-            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all">
-              <Clock size={18} /> Status
+            <button 
+              onClick={downloadCSV}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
+            >
+              <Download size={18} /> Export CSV
             </button>
           </div>
         </div>
