@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import LoadingOverlay from '../component/LoadingOverlay';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRegion } from '../context/RegionContext';
 import { 
@@ -12,6 +13,7 @@ const Recruitment = () => {
   const { region } = useRegion();
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -35,6 +37,7 @@ const Recruitment = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     const data = new FormData();
     // Files
@@ -68,6 +71,8 @@ const Recruitment = () => {
     } catch (error) {
       console.error('Error submitting application:', error);
       alert('Network error. Please check your connection.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -104,6 +109,7 @@ const Recruitment = () => {
 
   return (
     <div className="pt-32 pb-20 px-6 min-h-screen bg-white">
+      {isSubmitting && <LoadingOverlay message="Sending your application..." />}
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
         <motion.div 

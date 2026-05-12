@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LoadingOverlay from '../component/LoadingOverlay';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRegion } from '../context/RegionContext';
 import { Link } from 'react-router-dom';
@@ -36,6 +37,7 @@ const Booking = () => {
   });
 
   const [totalPrice, setTotalPrice] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [dynamicRates, setDynamicRates] = useState({});
   const [loadingRates, setLoadingRates] = useState(true);
 
@@ -157,6 +159,7 @@ const Booking = () => {
   };
 
   const handleBooking = async () => {
+    setIsSubmitting(true);
     const bookingPayload = {
       bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
       customer: {
@@ -200,6 +203,8 @@ const Booking = () => {
     } catch (error) {
       console.error('Error submitting booking:', error);
       alert('Network error. Please check your connection.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -288,6 +293,7 @@ const Booking = () => {
 
   return (
     <div className="pt-24 min-h-screen bg-[#FCFCFD] pb-32">
+      {isSubmitting && <LoadingOverlay message="Confirming your booking..." />}
       <div className="max-w-6xl mx-auto px-4 md:px-6">
         
         {/* Minimized Progress Header */}
@@ -325,6 +331,9 @@ const Booking = () => {
                     <div>
                       <h1 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tight mb-4">Find your professional.</h1>
                       <p className="text-slate-500 text-lg">Enter your address to see availability in your area.</p>
+                      <p className="mt-4 text-[11px] font-black text-primary uppercase tracking-widest flex items-center justify-center gap-2">
+                        <span>🕵️</span> To easily find your address, enter it in: number, street, city, postcode
+                      </p>
                     </div>
                     
                     <div className="relative group">
