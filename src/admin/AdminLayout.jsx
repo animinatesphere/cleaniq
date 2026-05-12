@@ -5,10 +5,22 @@ import {
   Settings, LogOut, ChevronRight, ShieldCheck,
   Menu, X, Search, Bell, User
 } from 'lucide-react';
+import Login from './Login';
 
 const AdminLayout = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('adminToken'));
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    setIsAuthenticated(false);
+  };
+
+  if (!isAuthenticated) {
+    return <Login onLogin={() => setIsAuthenticated(true)} />;
+  }
 
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
@@ -83,7 +95,10 @@ const AdminLayout = () => {
               <span className="text-xs font-bold text-white uppercase tracking-wider">Live & Secure</span>
             </div>
           </div>
-          <button className="flex items-center gap-3 w-full p-4 text-slate-400 hover:text-red-400 transition-colors group">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full p-4 text-slate-400 hover:text-red-400 transition-colors group"
+          >
             <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
             <span className="font-bold text-sm">Logout</span>
           </button>

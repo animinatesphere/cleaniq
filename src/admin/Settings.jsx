@@ -142,6 +142,81 @@ const Settings = () => {
             </div>
           )}
 
+          {activeTab === 'security' && (
+            <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden">
+              <div className="p-8 border-b border-slate-100 bg-slate-50/50">
+                <h3 className="text-xl font-black text-primary-dark tracking-tight">Security & Access</h3>
+                <p className="text-sm text-slate-500 font-medium">Manage your admin credentials</p>
+              </div>
+              <div className="p-8 space-y-6">
+                <div className="p-6 rounded-3xl bg-amber-50 border border-amber-100">
+                  <div className="flex gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                      <Shield size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-amber-900">Account Protection</h4>
+                      <p className="text-xs text-amber-700/80 mt-1 leading-relaxed">
+                        Changing your password will instantly log you out of all other devices. Make sure to use a strong, unique password.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6 pt-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Username</label>
+                    <input 
+                      type="text" 
+                      value={localStorage.getItem('adminUser') || 'cleaniqadmin'} 
+                      disabled
+                      className="w-full p-5 rounded-[24px] bg-slate-50 border-2 border-transparent font-bold text-slate-400 cursor-not-allowed"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">New Password</label>
+                    <input 
+                      id="new-password-input"
+                      type="password" 
+                      placeholder="••••••••"
+                      className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold"
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  onClick={async () => {
+                    const newPassword = document.getElementById('new-password-input').value;
+                    if (!newPassword) return alert('Please enter a new password');
+                    
+                    try {
+                      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/change-password`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                          username: localStorage.getItem('adminUser') || 'cleaniqadmin', 
+                          newPassword 
+                        })
+                      });
+                      if (response.ok) {
+                        alert('Password updated successfully! Please login again.');
+                        localStorage.removeItem('adminToken');
+                        window.location.reload();
+                      } else {
+                        alert('Failed to update password');
+                      }
+                    } catch (err) {
+                      alert('Connection error');
+                    }
+                  }}
+                  className="btn-primary w-full py-5 text-sm uppercase tracking-[0.2em] shadow-xl shadow-primary/20"
+                >
+                  Update Admin Password
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="flex justify-end gap-4">
             <button className="px-8 py-4 rounded-2xl border border-slate-200 text-sm font-black text-slate-400 hover:bg-slate-50 transition-all uppercase tracking-widest">
               Discard Changes

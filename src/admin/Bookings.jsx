@@ -20,6 +20,7 @@ const Bookings = () => {
           id: b.bookingId,
           customer: `${b.customer.firstName} ${b.customer.lastName}`,
           email: b.customer.email,
+          phone: b.customer.phone,
           service: b.service,
           date: new Date(b.schedule.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
           time: b.schedule.timeSlot,
@@ -94,7 +95,8 @@ const Bookings = () => {
                       </div>
                       <div>
                         <p className="font-bold text-primary-dark group-hover:text-primary transition-colors">{booking.customer}</p>
-                        <p className="text-xs text-slate-400 font-medium">{booking.email}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{booking.email}</p>
+                        <p className="text-[10px] text-primary font-black uppercase tracking-widest">{booking.phone}</p>
                       </div>
                     </div>
                   </td>
