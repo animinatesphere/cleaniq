@@ -134,15 +134,27 @@ const Booking = () => {
         return;
       }
       try {
-        const countryCode = region.id === 'UK' ? 'gb' : 'ng';
-        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(formData.address)}&limit=10&lang=en&location_bias_scale=0.5&filter=countrycode:${countryCode}`);
+        // Photon API - use bbox for UK region bias, no invalid filter param
+        const ukBbox = '-7.57216793459,49.959999905,1.68153079591,58.6350001085';
+        const ngBbox = '2.6917,4.2406,14.6800,13.8659';
+        const bbox = region.id === 'UK' ? ukBbox : ngBbox;
+        
+        const response = await fetch(
+          `https://photon.komoot.io/api/?q=${encodeURIComponent(formData.address)}&limit=8&lang=en&bbox=${bbox}`
+        );
         const data = await response.json();
+        
+        // Safety guard - API might not return features
+        if (!data.features) {
+          setAddressSuggestions([]);
+          return;
+        }
         
         const formatted = data.features.map(f => {
           const { name, street, housenumber, city, postcode, state } = f.properties;
           const parts = [housenumber, street || name, city, postcode, state].filter(Boolean);
           return parts.join(", ");
-        });
+        }).filter(Boolean);
         
         setAddressSuggestions([...new Set(formatted)]);
       } catch (err) {
