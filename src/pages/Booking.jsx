@@ -332,7 +332,7 @@ const Booking = () => {
                       <h1 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tight mb-4">Find your professional.</h1>
                       <p className="text-slate-500 text-lg">Enter your address to see availability in your area.</p>
                       <p className="mt-4 text-[11px] font-black text-primary uppercase tracking-widest flex items-center justify-center gap-2">
-                        <span>🕵️</span> To easily find your address, enter it in: number, street, city, postcode
+                         To easily find your address, enter it in: number, street, city, postcode
                       </p>
                     </div>
                     
