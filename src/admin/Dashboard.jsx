@@ -48,7 +48,7 @@ const Dashboard = () => {
             service: b.service,
             date: new Date(b.schedule.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
             status: b.status,
-            amount: `${b.region === 'UK' ? '£' : '₦'}${b.payment.amount}`,
+            amount: `${b.region === 'UK' ? '£' : '₦'}${b.payment.amount.toLocaleString(undefined, { minimumFractionDigits: b.region === 'UK' ? 2 : 0, maximumFractionDigits: 2 })}`,
             region: b.region,
             color: b.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
           })),
@@ -58,12 +58,12 @@ const Dashboard = () => {
             location: a.city
           })),
           marketSplit: [
-            { name: 'United Kingdom', revenue: `£${ukRevenue}`, percent: ukPercent, color: 'bg-secondary' },
-            { name: 'Nigeria', revenue: `₦${ngRevenue}`, percent: ngPercent, color: 'bg-white/20' },
+            { name: 'United Kingdom', revenue: `£${ukRevenue.toFixed(2)}`, percent: ukPercent, color: 'bg-secondary' },
+            { name: 'Nigeria', revenue: `₦${ngRevenue.toLocaleString()}`, percent: ngPercent, color: 'bg-white/20' },
           ],
           totalApplicants: applicants.length,
           stats: [
-            { title: 'Total Revenue (UK)', value: `£${ukRevenue}`, change: '+100%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
+            { title: 'Total Revenue (UK)', value: `£${ukRevenue.toFixed(2)}`, change: '+100%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
             { title: 'Active Bookings', value: bookings.length.toString(), change: '+100%', isUp: true, icon: <Calendar className="text-blue-500" /> },
             { title: 'New Applicants', value: applicants.length.toString(), change: '+100%', isUp: true, icon: <Users className="text-orange-500" /> },
             { title: 'Avg Rating', value: '5.0/5', change: '+0%', isUp: true, icon: <TrendingUp className="text-purple-500" /> },
