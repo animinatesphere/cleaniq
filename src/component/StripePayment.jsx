@@ -85,13 +85,25 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
 
   return (
     <div className="space-y-6">
-      <div className="p-6 rounded-[32px] border-2 border-slate-100 bg-slate-50/50">
-        <div className="flex items-center gap-3 mb-4">
-          <ShieldCheck className="text-primary" size={20} />
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Secure Card Entry</span>
+      <div className="p-8 rounded-[40px] bg-white border-4 border-primary/10 shadow-xl shadow-primary/5">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <ShieldCheck size={24} />
+            </div>
+            <div>
+              <h4 className="text-sm font-black text-primary-dark uppercase tracking-tight">Secure Payment</h4>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Powered by Stripe</p>
+            </div>
+          </div>
+          <div className="flex gap-1">
+            <div className="w-8 h-5 bg-slate-100 rounded-md" />
+            <div className="w-8 h-5 bg-slate-100 rounded-md" />
+            <div className="w-8 h-5 bg-slate-100 rounded-md" />
+          </div>
         </div>
         
-        <div className="bg-white p-5 rounded-2xl border border-slate-200">
+        <div className="p-5 rounded-2xl bg-slate-50 border-2 border-slate-100 focus-within:border-primary/30 transition-all">
           <CardElement options={cardElementOptions} />
         </div>
       </div>
@@ -106,24 +118,25 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
       <button
         disabled={!stripe || processing || !clientSecret}
         onClick={handleSubmit}
-        className="btn-primary w-full py-6 text-xl shadow-2xl shadow-primary/30 group disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full btn-primary py-6 text-xl shadow-2xl shadow-primary/20 group disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
       >
         {processing ? (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 justify-center">
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            Processing...
+            Verifying Card...
           </div>
         ) : (
-          <>
-            Pay {currency === 'GBP' ? '£' : '₦'}{amount} & Confirm
+          <div className="flex items-center justify-center gap-3">
+            <span>Pay {currency === 'GBP' ? '£' : '₦'}{amount} & Book Now</span>
             <Zap size={20} className="fill-current group-hover:scale-125 transition-transform" />
-          </>
+          </div>
         )}
       </button>
       
-      <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-        Encrypted by 256-bit SSL Security
-      </p>
+      <div className="flex items-center justify-center gap-6 opacity-40 grayscale group-hover:grayscale-0 transition-all">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-4" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6" />
+      </div>
     </div>
   );
 };

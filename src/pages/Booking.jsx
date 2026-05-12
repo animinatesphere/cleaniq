@@ -226,7 +226,7 @@ const Booking = () => {
       payment: {
         amount: totalPrice,
         currency: region.id === 'UK' ? 'GBP' : 'NGN',
-        method: region.id === 'UK' ? 'Stripe' : 'Paystack',
+        method: 'Stripe',
         transactionId: paymentIntent.id
       },
       region: region.id,
