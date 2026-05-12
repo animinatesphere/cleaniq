@@ -65,6 +65,21 @@ const Bookings = () => {
     }
   };
 
+  const downloadCSV = () => {
+    if (bookings.length === 0) return;
+    const headers = ['Booking ID', 'Customer', 'Email', 'Phone', 'Service', 'Date', 'Time', 'Status', 'Amount', 'Address', 'Region'];
+    const rows = bookings.map(b => [
+      b.id, b.customer, b.email, b.phone, b.service, b.date, b.time, b.status, b.amount, `"${b.address?.replace(/"/g, '""')}"`, b.region
+    ]);
+    const csv = 'data:text/csv;charset=utf-8,' + headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n');
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csv));
+    link.setAttribute('download', `cleaniq_bookings_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Search and Filters */}
