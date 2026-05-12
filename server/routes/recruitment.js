@@ -48,4 +48,30 @@ router.post('/', upload.fields([
   }
 });
 
+// UPDATE applicant status (Admin)
+router.put('/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    const applicant = await Applicant.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+    if (!applicant) return res.status(404).json({ message: 'Applicant not found' });
+    res.json(applicant);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// DELETE applicant (Admin)
+router.delete('/:id', async (req, res) => {
+  try {
+    await Applicant.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Applicant deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
