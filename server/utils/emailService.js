@@ -1,12 +1,20 @@
 const { Resend } = require('resend');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Safety: Initialize Resend only if key exists, otherwise use a dummy
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY) 
+  : null;
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
+    if (!resend) {
+      console.error('❌ EMAIL ERROR: RESEND_API_KEY is missing in .env');
+      return false;
+    }
+
     console.log(`📧 Resend: Attempting to send email to: ${to}...`);
     const { data, error } = await resend.emails.send({
-      from: 'CleanIQ Services <onboarding@resend.dev>', // We will change this to info@cleaniqservices.com once verified
+      from: 'CleanIQ Services <onboarding@resend.dev>',
       to,
       subject,
       html,
@@ -25,7 +33,7 @@ const sendEmail = async ({ to, subject, html }) => {
   }
 };
 
-// Email Templates
+// Templates
 const templates = {
   bookingConfirmation: (customerName, bookingId, date, time, amount, currency) => `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden;">
@@ -45,12 +53,8 @@ const templates = {
             <p style="margin: 0; font-size: 14px;"><strong>Amount Paid:</strong> ${currency === 'GBP' ? '£' : '₦'}${amount}</p>
           </div>
         </div>
-        <p>Our professional cleaning team will arrive at your location on the scheduled date. If you need to make any changes, please contact us.</p>
+        <p>Our professional cleaning team will arrive at your location on the scheduled date.</p>
         <a href="https://cleaniqservices.com" style="display: inline-block; background-color: #6EE7B7; color: #0F172A; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: bold; margin-top: 20px;">Visit Our Website</a>
-      </div>
-      <div style="background-color: #f1f5f9; padding: 24px; text-align: center; font-size: 12px; color: #64748b;">
-        <p>&copy; 2024 CleanIQ Services. All rights reserved.</p>
-        <p>UK & Nigeria Premium Cleaning Services</p>
       </div>
     </div>
   `,
@@ -63,8 +67,6 @@ const templates = {
       <div style="padding: 40px; color: #1e293b; line-height: 1.6;">
         <h2 style="font-size: 20px; margin-top: 0;">Hello ${applicantName},</h2>
         <p>We've received your application for the <strong>${role}</strong> position at CleanIQ Services.</p>
-        <p>Our team is currently reviewing your profile and documents. If your experience matches our requirements, we will contact you for an interview.</p>
-        <p>Thank you for your interest in joining our team!</p>
       </div>
     </div>
   `,
@@ -74,8 +76,6 @@ const templates = {
       <div style="padding: 40px; color: #1e293b; line-height: 1.6;">
         <h2 style="font-size: 24px; margin-top: 0; color: #0F172A;">Congratulations ${applicantName}! 🎉</h2>
         <p>We are thrilled to inform you that you have been <strong>HIRED</strong> to join the CleanIQ Services team.</p>
-        <p>You have demonstrated the professionalism and dedication we look for in our service providers. We will be in touch shortly with your onboarding details and next steps.</p>
-        <p>Welcome to the family!</p>
       </div>
     </div>
   `
