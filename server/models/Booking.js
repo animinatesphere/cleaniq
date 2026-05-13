@@ -18,6 +18,7 @@ const bookingSchema = new mongoose.Schema({
     duration: Number,
     extras: [String],
     hasPets: Boolean,
+    notes: String,
   },
   schedule: {
     date: Date,

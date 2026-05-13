@@ -218,6 +218,7 @@ const Booking = () => {
         duration: formData.duration,
         extras: formData.extras,
         hasPets: formData.hasPets,
+        notes: formData.specialInstructions,
       },
       schedule: {
         date: formData.date,
@@ -736,6 +737,14 @@ const Booking = () => {
                           placeholder="+44"
                           className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold"
                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        />
+                      </div>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Special Instructions / Notes</label>
+                        <textarea 
+                          placeholder="Key under the mat, please focus on the kitchen, pets in the house, etc."
+                          className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold h-32 resize-none"
+                          onChange={(e) => setFormData({...formData, specialInstructions: e.target.value})}
                         />
                       </div>
                     </div>

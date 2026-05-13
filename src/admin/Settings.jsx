@@ -3,7 +3,7 @@ import {
   Globe, Shield, 
   Save, RefreshCw, Plus, Trash2,
   Sliders, Star, Edit3, X, Check,
-  Megaphone, Send, Mail
+  Megaphone, Send, Key
 } from 'lucide-react';
 
 const Settings = () => {
@@ -16,6 +16,7 @@ const Settings = () => {
   const [newService, setNewService] = useState({ name: '', rate: '', region: 'UK', type: 'Cleaning' });
   const [broadcast, setBroadcast] = useState({ subject: '', message: '' });
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
+  const [passwordData, setPasswordData] = useState({ newPassword: '' });
 
   useEffect(() => {
     fetchData();
@@ -38,6 +39,35 @@ const Settings = () => {
     }
   };
 
+  const handleUpdateService = async (id) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/services/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editServiceData)
+      });
+      if (res.ok) {
+        setEditingServiceId(null);
+        fetchData();
+      }
+    } catch (err) { alert('Error updating'); }
+  };
+
+  const handleAddService = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/services`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newService)
+      });
+      if (res.ok) {
+        setNewService({ name: '', rate: '', region: 'UK', type: 'Cleaning' });
+        fetchData();
+      }
+    } catch (err) { alert('Error adding'); }
+  };
+
   const handleSendBroadcast = async () => {
     if (!broadcast.subject || !broadcast.message) return alert('Please fill in both fields');
     setSendingBroadcast(true);
@@ -48,24 +78,11 @@ const Settings = () => {
         body: JSON.stringify(broadcast)
       });
       if (res.ok) {
-        alert('Broadcast sent successfully to all customers!');
+        alert('Broadcast sent!');
         setBroadcast({ subject: '', message: '' });
       }
-    } catch (err) { alert('Failed to send broadcast'); }
+    } catch (err) { alert('Failed'); }
     finally { setSendingBroadcast(false); }
-  };
-
-  // ... (Other functions remain same)
-  const handleAddService = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/services`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newService)
-      });
-      if (res.ok) { fetchData(); setNewService({ name: '', rate: '', region: 'UK' }); }
-    } catch (err) { alert('Error adding'); }
   };
 
   const tabs = [
@@ -93,84 +110,87 @@ const Settings = () => {
 
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          {activeTab === 'marketing' && (
-            <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm space-y-6">
-              <div className="flex items-center gap-4 mb-2">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                  <Megaphone size={24} />
+          {activeTab === 'services' && (
+            <div className="space-y-6">
+              <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm">
+                <h3 className="text-xl font-black text-primary-dark mb-6">Add Service</h3>
+                <form onSubmit={handleAddService} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input type="text" placeholder="Service Name" value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" required />
+                  <input type="number" placeholder="Rate" value={newService.rate} onChange={e => setNewService({...newService, rate: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" required />
+                  <select value={newService.region} onChange={e => setNewService({...newService, region: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold">
+                    <option value="UK">UK (GBP)</option>
+                    <option value="NG">NG (NGN)</option>
+                  </select>
+                  <button type="submit" className="btn-primary py-4 rounded-2xl font-black uppercase"><Plus size={18} /> Add</button>
+                </form>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden">
+                <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                  <h3 className="text-xl font-black text-primary-dark">Service List</h3>
+                  <RefreshCw size={18} className={loading ? 'animate-spin' : ''} onClick={fetchData} />
                 </div>
-                <div>
-                  <h3 className="text-xl font-black text-primary-dark">Broadcast Center</h3>
-                  <p className="text-sm text-slate-500">Send an email to all registered customers</p>
+                <div className="p-8 space-y-4">
+                  {services.map((s) => (
+                    <div key={s._id} className="p-6 rounded-3xl border border-slate-100 bg-white flex items-center justify-between group">
+                      <div className="flex-1">
+                        {editingServiceId === s._id ? (
+                          <div className="flex flex-wrap gap-3">
+                            <input type="text" value={editServiceData.name} onChange={e => setEditServiceData({...editServiceData, name: e.target.value})} className="p-2 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm" />
+                            <input type="number" value={editServiceData.rate} onChange={e => setEditServiceData({...editServiceData, rate: e.target.value})} className="p-2 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm w-24" />
+                            <button onClick={() => handleUpdateService(s._id)} className="p-2 bg-primary text-white rounded-xl"><Check size={18}/></button>
+                            <button onClick={() => setEditingServiceId(null)} className="p-2 bg-slate-200 text-slate-600 rounded-xl"><X size={18}/></button>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="font-bold text-primary-dark">{s.name}</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{s.region} • {s.region === 'UK' ? '£' : '₦'}{s.rate}/hr</p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => { setEditingServiceId(s._id); setEditServiceData(s); }} className="p-3 text-slate-300 hover:text-primary hover:bg-primary/10 rounded-2xl"><Edit3 size={18}/></button>
+                        <button onClick={async () => { if(window.confirm('Delete?')){ await fetch(`${import.meta.env.VITE_API_URL}/services/${s._id}`, {method: 'DELETE'}); fetchData(); } }} className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-2xl"><Trash2 size={18}/></button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              
+            </div>
+          )}
+
+          {activeTab === 'marketing' && (
+            <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm space-y-6">
+              <h3 className="text-xl font-black text-primary-dark">Marketing Broadcast</h3>
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Email Subject</label>
-                  <input 
-                    type="text" placeholder="e.g. New Year Special Discount!"
-                    value={broadcast.subject} onChange={e => setBroadcast({...broadcast, subject: e.target.value})}
-                    className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Message</label>
-                  <textarea 
-                    placeholder="Type your announcement here..."
-                    value={broadcast.message} onChange={e => setBroadcast({...broadcast, message: e.target.value})}
-                    className="w-full p-6 rounded-3xl bg-slate-50 border border-slate-100 font-bold h-48 resize-none"
-                  />
-                </div>
-                <button 
-                  disabled={sendingBroadcast}
-                  onClick={handleSendBroadcast}
-                  className="w-full py-5 rounded-3xl bg-primary text-white font-black uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50"
-                >
-                  {sendingBroadcast ? 'Sending...' : <><Send size={20} /> Send Broadcast Now</>}
+                <input type="text" placeholder="Email Subject" value={broadcast.subject} onChange={e => setBroadcast({...broadcast, subject: e.target.value})} className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" />
+                <textarea placeholder="Your Message..." value={broadcast.message} onChange={e => setBroadcast({...broadcast, message: e.target.value})} className="w-full p-6 rounded-3xl bg-slate-50 border border-slate-100 font-bold h-48 resize-none" />
+                <button disabled={sendingBroadcast} onClick={handleSendBroadcast} className="w-full py-5 rounded-3xl bg-primary text-white font-black uppercase tracking-widest flex items-center justify-center gap-3 disabled:opacity-50">
+                  {sendingBroadcast ? 'Sending...' : <><Send size={20} /> Send Broadcast</>}
                 </button>
               </div>
             </div>
           )}
 
-          {activeTab === 'services' && (
-            <div className="space-y-6">
-              <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm">
-                <h3 className="text-xl font-black text-primary-dark mb-6 text-center">Manage Services</h3>
-                <form onSubmit={handleAddService} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input type="text" placeholder="Service Name" value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" required />
-                  <input type="number" placeholder="Rate" value={newService.rate} onChange={e => setNewService({...newService, rate: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" required />
-                  <button type="submit" className="btn-primary col-span-full py-4 rounded-2xl font-black uppercase"><Plus size={18} /> Add Service</button>
-                </form>
+          {activeTab === 'security' && (
+            <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center"><Key size={24}/></div>
+                <h3 className="text-xl font-black text-primary-dark">Security Settings</h3>
               </div>
-              {/* Service List UI... */}
               <div className="space-y-4">
-                {services.map(s => (
-                  <div key={s._id} className="p-6 bg-white border border-slate-200 rounded-3xl flex justify-between items-center">
-                    <div>
-                      <p className="font-bold text-primary-dark">{s.name}</p>
-                      <p className="text-xs text-slate-400">{s.region} • {s.region === 'UK' ? '£' : '₦'}{s.rate}</p>
-                    </div>
-                    <button onClick={async () => { if(window.confirm('Delete?')){ await fetch(`${import.meta.env.VITE_API_URL}/services/${s._id}`, {method: 'DELETE'}); fetchData(); } }} className="p-3 text-rose-400 hover:bg-rose-50 rounded-xl"><Trash2 size={18}/></button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'reviews' && (
-            <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm">
-              <h3 className="text-xl font-black text-primary-dark mb-6">Moderation</h3>
-              <div className="space-y-4">
-                {reviews.map(r => (
-                  <div key={r._id} className="p-6 border border-slate-100 rounded-3xl">
-                    <p className="font-bold">{r.customerName}</p>
-                    <p className="text-sm text-slate-500 italic mb-4">"{r.comment}"</p>
-                    <div className="flex gap-2">
-                      <button onClick={async () => { await fetch(`${import.meta.env.VITE_API_URL}/reviews/${r._id}`, {method: 'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status:'Approved'})}); fetchData(); }} className="flex-1 py-2 bg-emerald-50 text-emerald-600 rounded-xl font-bold text-xs">Approve</button>
-                    </div>
-                  </div>
-                ))}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">New Password</label>
+                  <input type="password" placeholder="••••••••" value={passwordData.newPassword} onChange={e => setPasswordData({newPassword: e.target.value})} className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold" />
+                </div>
+                <button onClick={async () => {
+                  const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/change-password`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: localStorage.getItem('adminUser'), newPassword: passwordData.newPassword })
+                  });
+                  if (res.ok) { alert('Password updated! Logging out...'); localStorage.clear(); window.location.reload(); }
+                }} className="btn-primary w-full py-5 rounded-3xl text-sm uppercase font-black tracking-widest">Update Password</button>
               </div>
             </div>
           )}
