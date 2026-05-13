@@ -1,37 +1,26 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.office365.com',
-  port: 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    ciphers: 'SSLv3',
-    rejectUnauthorized: false
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    console.log(`📧 Attempting to send email to: ${to}...`);
-    const info = await transporter.sendMail({
-      from: `"CleanIQ Services" <${process.env.EMAIL_USER}>`,
+    console.log(`📧 Resend: Attempting to send email to: ${to}...`);
+    const { data, error } = await resend.emails.send({
+      from: 'CleanIQ Services <onboarding@resend.dev>', // We will change this to info@cleaniqservices.com once verified
       to,
       subject,
       html,
     });
-    console.log('✅ Email sent successfully! MessageID:', info.messageId);
+
+    if (error) {
+      console.error('❌ RESEND ERROR:', error);
+      return false;
+    }
+
+    console.log('✅ Email sent successfully! ID:', data.id);
     return true;
   } catch (error) {
-    console.error('❌ EMAIL ERROR DETAILS:', {
-      message: error.message,
-      code: error.code,
-      command: error.command,
-      response: error.response
-    });
+    console.error('❌ CRITICAL EMAIL ERROR:', error);
     return false;
   }
 };

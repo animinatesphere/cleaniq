@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   TrendingUp, Users, Calendar, 
   DollarSign, ArrowUpRight, ArrowDownRight,
-  Clock, MapPin, CheckCircle2, UserCheck
+  Clock, MapPin, CheckCircle2, UserCheck,
+  ChevronRight
 } from 'lucide-react';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState({
     bookings: [],
     applicants: [],
     stats: [
-      { title: 'Total Revenue', value: '£0', change: '0%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
-      { title: 'Active Bookings', value: '0', change: '0%', isUp: true, icon: <Calendar className="text-blue-500" /> },
+      { title: 'Total Revenue (UK)', value: '£0.00', change: '0%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
+      { title: 'Total Revenue (NG)', value: '₦0', change: '0%', isUp: true, icon: <DollarSign className="text-blue-500" /> },
+      { title: 'Active Bookings', value: '0', change: '0%', isUp: true, icon: <Calendar className="text-indigo-500" /> },
       { title: 'New Applicants', value: '0', change: '0%', isUp: false, icon: <Users className="text-orange-500" /> },
-      { title: 'Avg Rating', value: '5.0/5', change: '0%', isUp: true, icon: <TrendingUp className="text-purple-500" /> },
     ]
   });
 
@@ -37,13 +40,16 @@ const Dashboard = () => {
           .filter(b => b.region === 'NG')
           .reduce((sum, b) => sum + b.payment.amount, 0);
         
-        const totalRevenue = ukRevenue + ngRevenue;
-        const ukPercent = totalRevenue > 0 ? Math.round((ukRevenue / totalRevenue) * 100) : 0;
-        const ngPercent = totalRevenue > 0 ? 100 - ukPercent : 0;
+        // Calculate Percentages for Market Split
+        // We use a base comparison to show the ratio
+        const totalGBPVal = ukRevenue + (ngRevenue / 2000); // Rough conversion for ratio only
+        const ukPercent = totalGBPVal > 0 ? Math.round((ukRevenue / totalGBPVal) * 100) : 50;
+        const ngPercent = 100 - ukPercent;
         
         setData({
-          bookings: bookings.slice(0, 4).map(b => ({
+          bookings: bookings.slice(0, 5).map(b => ({
             id: b.bookingId,
+            mongoId: b._id,
             name: `${b.customer.firstName} ${b.customer.lastName}`,
             service: b.service,
             date: new Date(b.schedule.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
@@ -52,10 +58,11 @@ const Dashboard = () => {
             region: b.region,
             color: b.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
           })),
-          applicants: applicants.slice(0, 3).map(a => ({
+          applicants: applicants.slice(0, 4).map(a => ({
+            id: a._id,
             name: a.fullName,
             role: a.experience,
-            location: a.city
+            location: a.city || 'N/A'
           })),
           marketSplit: [
             { name: 'United Kingdom', revenue: `£${ukRevenue.toFixed(2)}`, percent: ukPercent, color: 'bg-secondary' },
@@ -63,10 +70,10 @@ const Dashboard = () => {
           ],
           totalApplicants: applicants.length,
           stats: [
-            { title: 'Total Revenue (UK)', value: `£${ukRevenue.toFixed(2)}`, change: '+100%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
-            { title: 'Active Bookings', value: bookings.length.toString(), change: '+100%', isUp: true, icon: <Calendar className="text-blue-500" /> },
+            { title: 'Total Revenue (UK)', value: `£${ukRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, change: '+100%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
+            { title: 'Total Revenue (NG)', value: `₦${ngRevenue.toLocaleString()}`, change: '+100%', isUp: true, icon: <DollarSign className="text-blue-500" /> },
+            { title: 'Active Bookings', value: bookings.length.toString(), change: '+100%', isUp: true, icon: <Calendar className="text-indigo-500" /> },
             { title: 'New Applicants', value: applicants.length.toString(), change: '+100%', isUp: true, icon: <Users className="text-orange-500" /> },
-            { title: 'Avg Rating', value: '5.0/5', change: '+0%', isUp: true, icon: <TrendingUp className="text-purple-500" /> },
           ]
         });
       } catch (error) {
@@ -93,7 +100,7 @@ const Dashboard = () => {
             </div>
             <div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{stat.title}</p>
-              <h3 className="text-3xl font-black text-primary-dark tracking-tight">{stat.value}</h3>
+              <h3 className="text-2xl font-black text-primary-dark tracking-tight">{stat.value}</h3>
             </div>
           </div>
         ))}
@@ -107,8 +114,11 @@ const Dashboard = () => {
               <h3 className="text-xl font-black text-primary-dark tracking-tight">Active Operations</h3>
               <p className="text-sm text-slate-500 font-medium">Real-time booking monitor</p>
             </div>
-            <button className="px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-bold text-primary-dark hover:bg-slate-50 hover:border-primary/30 transition-all shadow-sm">
-              View All Bookings
+            <button 
+              onClick={() => navigate('/admin/bookings')}
+              className="px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-bold text-primary-dark hover:bg-slate-50 hover:border-primary/30 transition-all shadow-sm flex items-center gap-2"
+            >
+              View All <ChevronRight size={16} />
             </button>
           </div>
           <div className="overflow-x-auto">
@@ -123,7 +133,11 @@ const Dashboard = () => {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {data.bookings.map((item, i) => (
-                  <tr key={i} className="group hover:bg-slate-50/80 transition-colors">
+                  <tr 
+                    key={i} 
+                    onClick={() => navigate(`/admin/bookings?id=${item.mongoId}`)}
+                    className="group hover:bg-slate-50/80 transition-colors cursor-pointer"
+                  >
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs ${item.region === 'UK' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
@@ -154,6 +168,13 @@ const Dashboard = () => {
                     </td>
                   </tr>
                 ))}
+                {data.bookings.length === 0 && (
+                  <tr>
+                    <td colSpan="4" className="px-8 py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">
+                      No active bookings yet.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -166,10 +187,7 @@ const Dashboard = () => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000" />
             <h3 className="text-xl font-bold mb-8 relative z-10">Market Split</h3>
             <div className="space-y-6 relative z-10">
-              {(data.marketSplit || [
-                { name: 'United Kingdom', revenue: '£0', percent: 0, color: 'bg-secondary' },
-                { name: 'Nigeria', revenue: '₦0', percent: 0, color: 'bg-white/20' },
-              ]).map((region, i) => (
+              {(data.marketSplit || []).map((region, i) => (
                 <div key={i} className="space-y-2">
                   <div className="flex justify-between items-end">
                     <p className="text-sm font-medium text-slate-300">{region.name}</p>
@@ -191,23 +209,33 @@ const Dashboard = () => {
             </div>
             <div className="space-y-5">
               {data.applicants.map((app, i) => (
-                <div key={i} className="flex items-center gap-4 group cursor-pointer">
+                <div 
+                  key={i} 
+                  onClick={() => navigate('/admin/applicants')}
+                  className="flex items-center gap-4 group cursor-pointer hover:translate-x-1 transition-transform"
+                >
                   <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-all">
                     <UserCheck size={20} />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-bold text-primary-dark leading-tight">{app.name}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{app.role}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate max-w-[100px]">{app.role}</p>
                   </div>
                   <div className="text-right">
                     <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                      <MapPin size={10} /> {app.location.split(',')[1]}
+                      <MapPin size={10} /> {app.location}
                     </div>
                   </div>
                 </div>
               ))}
+              {data.applicants.length === 0 && (
+                <p className="text-center py-10 text-slate-400 font-bold uppercase tracking-widest text-[10px]">No new applications</p>
+              )}
             </div>
-            <button className="w-full mt-8 py-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-500 hover:bg-primary hover:text-white hover:border-primary transition-all uppercase tracking-widest">
+            <button 
+              onClick={() => navigate('/admin/applicants')}
+              className="w-full mt-8 py-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-500 hover:bg-primary hover:text-white hover:border-primary transition-all uppercase tracking-widest"
+            >
               Review Applications
             </button>
           </div>

@@ -20,7 +20,12 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
         const response = await fetch(`${import.meta.env.VITE_API_URL}/payments/create-intent`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount, currency }),
+          body: JSON.stringify({ 
+            amount, 
+            currency,
+            customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
+            service: customerInfo.serviceType
+          }),
         });
         const data = await response.json();
         if (data.clientSecret) {
