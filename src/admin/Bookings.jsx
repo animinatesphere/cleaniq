@@ -312,7 +312,7 @@ const Bookings = () => {
                       </div>
                       <div className="space-y-1">
                         <label className="text-[10px] font-black text-slate-400 ml-4">Amount Paid ({editData.region === 'UK' ? '£' : '₦'})</label>
-                        <input type="number" value={editData.payment.amount} onChange={(e) => setEditData({...editData, payment: {...editData.payment, amount: e.target.value}})} className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" />
+                        <input type="number" value={editData.payment?.amount} onChange={(e) => setEditData({...editData, payment: {...editData.payment, amount: e.target.value}})} className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" />
                       </div>
                     </div>
                     <div className="space-y-1">
@@ -320,8 +320,12 @@ const Bookings = () => {
                       <textarea value={editData.details.address} onChange={(e) => setEditData({...editData, details: {...editData.details, address: e.target.value}})} className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold h-24 resize-none" />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black text-slate-400 ml-4">Internal Notes / Instructions</label>
-                      <textarea value={editData.details.notes} onChange={(e) => setEditData({...editData, details: {...editData.details, notes: e.target.value}})} className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold h-24 resize-none" />
+                      <label className="text-[10px] font-black text-slate-400 ml-4 uppercase tracking-widest">Special Instructions / Notes</label>
+                      <textarea 
+                        value={editData.details?.notes || ''} 
+                        onChange={(e) => setEditData({...editData, details: {...editData.details, notes: e.target.value}})} 
+                        className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold h-24 resize-none" 
+                      />
                     </div>
                   </div>
                 </div>
