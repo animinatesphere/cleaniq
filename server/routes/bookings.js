@@ -25,9 +25,15 @@ router.delete('/all/delete', async (req, res) => {
 });
 
 // POST a new booking
+// POST a new booking
 router.post('/', async (req, res) => {
-  const booking = new Booking(req.body);
   try {
+    const booking = new Booking(req.body);
+    // Explicitly set Mixed fields to bypass potential strict schema stripping
+    booking.set('details', req.body.details);
+    booking.set('property', req.body.property);
+    booking.set('meta', req.body.meta);
+    
     const newBooking = await booking.save();
     
     // Send Confirmation Email to Customer

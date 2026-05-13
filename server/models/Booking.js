@@ -12,14 +12,8 @@ const bookingSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  details: {
-    address: String,
-    frequency: String,
-    duration: Number,
-    extras: [String],
-    hasPets: Boolean,
-    notes: String,
-  },
+  details: mongoose.Schema.Types.Mixed,
+  property: mongoose.Schema.Types.Mixed,
   schedule: {
     date: Date,
     timeSlot: String,
@@ -34,6 +28,7 @@ const bookingSchema = new mongoose.Schema({
   region: String,
   status: { type: String, default: 'Confirmed' },
   createdAt: { type: Date, default: Date.now },
+  meta: mongoose.Schema.Types.Mixed // Catch-all for future expansions
 });
 
 module.exports = mongoose.model('Booking', bookingSchema);

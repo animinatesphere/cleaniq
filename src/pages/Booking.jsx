@@ -8,7 +8,9 @@ import {
   CreditCard, Home as HomeIcon, Briefcase, 
   Trash2, Plus, Minus, CheckCircle2, MapPin, 
   Clock, Info, ShieldCheck, Heart, Star,
-  Search, Sparkles, Zap
+  Search, Sparkles, Zap, Shield, HelpCircle,
+  ArrowRight, Truck, Key, Car, Layout, Coffee,
+  Waves, Refrigerator, Wind
 } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
@@ -16,24 +18,146 @@ import StripePayment from '../component/StripePayment';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
+const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+  const startDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
+  const handlePrevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+  const handleNextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+  const days = [];
+  const totalDays = daysInMonth(currentMonth.getFullYear(), currentMonth.getMonth());
+  const startDay = startDayOfMonth(currentMonth.getFullYear(), currentMonth.getMonth());
+  for (let i = 0; i < startDay; i++) days.push(null);
+  for (let i = 1; i <= totalDays; i++) days.push(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i));
+  const isToday = (date) => { if (!date) return false; const today = new Date(); return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear(); };
+  const isSelected = (date) => { if (!date || !selectedDate) return false; const sel = new Date(selectedDate); return date.getDate() === sel.getDate() && date.getMonth() === sel.getMonth() && date.getFullYear() === sel.getFullYear(); };
+  const isPast = (date) => { if (!date) return false; const today = new Date(); today.setHours(0,0,0,0); return date < today; };
+  const isBooked = (date) => { if (!date) return false; const dStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; return bookedDates.includes(dStr); };
+
+  return (
+    <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
+      <div className="flex justify-between items-center mb-8">
+        <h3 className="font-black text-primary-dark tracking-tighter text-lg">{currentMonth.toLocaleString('default', { month: 'long' })} <span className="text-primary">{currentMonth.getFullYear()}</span></h3>
+        <div className="flex gap-2">
+          <button onClick={handlePrevMonth} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"><ChevronLeft size={20} /></button>
+          <button onClick={handleNextMonth} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"><ChevronRight size={20} /></button>
+        </div>
+      </div>
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (<div key={d} className="text-[10px] font-black text-slate-300 uppercase text-center py-2">{d}</div>))}
+      </div>
+      <div className="grid grid-cols-7 gap-2">
+        {days.map((date, i) => {
+          const booked = isBooked(date);
+          const past = isPast(date);
+          const disabled = booked || past;
+          return (
+            <div key={i} className="aspect-square">
+              {date ? (
+                <button disabled={disabled} onClick={() => onDateSelect(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`)} className={`w-full h-full rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative group ${disabled ? 'opacity-20 cursor-not-allowed grayscale' : 'hover:scale-110 active:scale-95'} ${isSelected(date) ? 'bg-primary text-white shadow-lg shadow-primary/30 z-10' : 'bg-slate-50 text-slate-600 hover:bg-primary/10 hover:text-primary'}`}>
+                  <span className="text-sm font-black">{date.getDate()}</span>
+                  {booked && <span className="text-[7px] font-black uppercase text-rose-500 absolute top-1">Taken</span>}
+                  {isToday(date) && !isSelected(date) && <div className="w-1 h-1 rounded-full absolute bottom-2 bg-primary" />}
+                </button>
+              ) : <div className="w-full h-full" />}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const Booking = () => {
   const { region } = useRegion();
+
+  const serviceOptions = [
+    { 
+      id: 'Residential Cleaning', 
+      title: 'Residential Cleaning', 
+      tag: 'Reliable domestic cleaners',
+      bullets: [
+        "Dusting of all surfaces.",
+        "Vacuuming & Mopping.",
+        "Kitchen degreasing.",
+        "Bathroom sanitization.",
+        "Bed making & tidying.",
+        "Trash removal.",
+      ],
+      icon: <Heart />
+    },
+    { 
+      id: 'Deep Clean', 
+      title: 'Deep Clean', 
+      tag: 'Deep cleaning',
+      bullets: [
+        "Inside cabinets & drawers.",
+        "Baseboard scrubbing.",
+        "Door frame cleaning.",
+        "Wall spot cleaning.",
+        "Appliance deep clean.",
+        "End-of-tenancy guarantee.",
+      ],
+      icon: <Zap />
+    },
+    { 
+      id: 'Airbnb Cleaning', 
+      title: 'Airbnb Cleaning', 
+      tag: 'Short-let specialist',
+      bullets: [
+        "Linen & towel change.",
+        "Guest amenity restock.",
+        "Photo-verified check.",
+        "Damage reporting.",
+        "Inventory monitoring.",
+        "5-star turnover prep.",
+      ],
+      icon: <Star />
+    },
+    { 
+      id: 'Office Cleaning', 
+      title: 'Office Cleaning', 
+      tag: 'Expert office cleaning',
+      bullets: [
+        "Workstation sanitization.",
+        "Communal area cleaning.",
+        "Restroom maintenance.",
+        "Window cleaning.",
+        "Carpet deep clean.",
+        "Disinfection services.",
+      ],
+      icon: <Briefcase />
+    },
+  ];
+
   const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [bookedDates, setBookedDates] = useState([]);
   
   const [formData, setFormData] = useState({
     address: '',
+    addressLine2: '',
     postcode: '',
-    serviceType: 'Residential Cleaning', 
+    serviceType: '', 
     frequency: 'Once', 
-    propertySize: '1 Bed Flat', 
-    duration: 2, 
-    extras: [],
-    hasPets: false,
+    duration: 2,
+    property: {
+      bedrooms: 1,
+      bathrooms: 0,
+      cloakrooms: 0,
+      kitchens: 0,
+      utilityRooms: 0,
+      receptionRooms: 0,
+      conservatories: 0
+    },
+    extras: {}, 
+    parking: 'Available on-site',
+    keyAccess: 'I will be home',
     date: '',
     timeSlot: '',
+    preferredTime: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -48,69 +172,74 @@ const Booking = () => {
 
   // Fetch Dynamic Rates from VPS
   useEffect(() => {
+    const fetchExistingBookings = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`);
+        const data = await response.json();
+        // Convert dates to YYYY-MM-DD reliably, handling various string formats
+        const dates = data
+          .filter(b => b.schedule?.date)
+          .map(b => {
+            const d = new Date(b.schedule.date);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          });
+        console.log('Booked Dates Loaded:', dates);
+        setBookedDates([...new Set(dates)]); 
+      } catch (err) { console.error('Error fetching booked dates:', err); }
+    };
+
     const fetchRates = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${region.id}`);
         const data = await response.json();
-        
         const ratesObj = {};
-        data.forEach(service => {
-          ratesObj[service.name] = service.rate;
-        });
+        data.forEach(service => { ratesObj[service.name] = service.rate; });
         setDynamicRates(ratesObj);
-      } catch (error) {
-        console.error('Error fetching dynamic rates:', error);
-      } finally {
-        setLoadingRates(false);
-      }
+      } catch (error) { console.error('Error fetching rates:', error); } finally { setLoadingRates(false); }
     };
+    
+    fetchExistingBookings();
     fetchRates();
   }, [region.id]);
 
-  // Pricing Logic
+  // Pricing Logic - Comprehensive Engine
   useEffect(() => {
-    let total = 0;
-
-    // Fallback rates
-    const fallbackUK = {
-      'Residential Cleaning': 17.90,
-      'Deep Clean': 24.90,
-      'Airbnb Cleaning': 21.90,
-      'Office Cleaning': 19.90,
-    };
-    const fallbackNG = {
-      'Residential Cleaning': 15000,
-      'Deep Clean': 25000,
-      'Airbnb Cleaning': 20000,
-      'Office Cleaning': 18000,
-      '1 Bed Flat': 15000,
-      '2 Bed Flat': 20000,
-      '3 Bed Flat': 25000,
-      '4+ Bed House': 35000,
-    };
-
-    if (region.id === 'UK') {
-      const rate = dynamicRates[formData.serviceType] 
-        || fallbackUK[formData.serviceType] 
-        || 17.90;
-      total = rate * (formData.duration || 2);
-    } else {
-      // In NG, we use property size if it's residential, otherwise service type
-      const rateKey = (formData.serviceType === 'Residential Cleaning') ? formData.propertySize : formData.serviceType;
-      const rate = dynamicRates[rateKey] 
-        || fallbackNG[rateKey] 
-        || 15000;
-      total = rate;
+    if (!formData.serviceType) {
+      setTotalPrice(0);
+      return;
     }
 
-    formData.extras.forEach(extra => {
-      const extraPrices = {
-        'Ironing': region.id === 'UK' ? 5 : 5000,
-        'Cleaning Products': region.id === 'UK' ? 3 : 3000,
-        'Inside Fridge': region.id === 'UK' ? 12 : 7000,
-        'Inside Oven': region.id === 'UK' ? 15 : 10000,
-      };
-      total += (extraPrices[extra] || 0);
+    let total = 0;
+    const fallbackUK = { 
+      'Residential Cleaning': 17.90, 'Deep Clean': 24.90, 'Airbnb Cleaning': 21.90, 'Office Cleaning': 19.90,
+      'Bedroom': 15, 'Bathroom': 12, 'Cloakroom': 8, 'Kitchen': 15, 'Utility Room': 10, 'Reception Room': 12, 'Conservatory': 15,
+      'American fridge freeze': 15, 'Carpet(s) Cleaning': 30, 'Double Oven Cleaning': 20, 'Fridge and freezer': 18, 'Range Oven Cleaning': 25, 'Single fridge': 10, 'Single Oven Cleaning': 15, 'Venetian Blinds': 5
+    };
+    const fallbackNG = { 
+      'Residential Cleaning': 15000, 'Deep Clean': 25000, 'Airbnb Cleaning': 20000, 'Office Cleaning': 18000,
+      'Bedroom': 5000, 'Bathroom': 4000, 'Cloakroom': 2500, 'Kitchen': 6000, 'Utility Room': 3000, 'Reception Room': 5000, 'Conservatory': 7000,
+      'American fridge freeze': 8000, 'Carpet(s) Cleaning': 15000, 'Double Oven Cleaning': 12000, 'Fridge and freezer': 10000, 'Range Oven Cleaning': 15000, 'Single fridge': 5000, 'Single Oven Cleaning': 8000, 'Venetian Blinds': 3000
+    };
+
+    const rates = region.id === 'UK' ? fallbackUK : fallbackNG;
+
+    // Base Service Rate (Multiplied by Duration if UK/Hourly)
+    const baseRate = dynamicRates[formData.serviceType] || rates[formData.serviceType] || 20;
+    if (region.id === 'UK') {
+      total += baseRate * (formData.duration || 2);
+    } else {
+      total += baseRate; // Flat rate for NG
+    }
+
+    // Room Rates
+    const roomMap = { bedrooms: 'Bedroom', bathrooms: 'Bathroom', cloakrooms: 'Cloakroom', kitchens: 'Kitchen', utilityRooms: 'Utility Room', receptionRooms: 'Reception Room', conservatories: 'Conservatory' };
+    Object.entries(formData.property).forEach(([key, qty]) => {
+      total += (rates[roomMap[key]] || 0) * qty;
+    });
+
+    // Extra Rates
+    Object.entries(formData.extras).forEach(([name, qty]) => {
+      total += (rates[name] || 0) * qty;
     });
 
     if (formData.frequency === 'Weekly') total *= 0.9;
@@ -119,120 +248,87 @@ const Booking = () => {
     setTotalPrice(Math.round(total * 100) / 100);
   }, [formData, region, dynamicRates]);
 
-  const toggleExtra = (extra) => {
-    setFormData(prev => ({
-      ...prev,
-      extras: prev.extras.includes(extra) 
-        ? prev.extras.filter(e => e !== extra) 
-        : [...prev.extras, extra]
-    }));
+  const updateRoom = (room, delta) => {
+    setFormData(prev => ({ ...prev, property: { ...prev.property, [room]: Math.max(0, prev.property[room] + delta) } }));
   };
 
-  const nextStep = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setStep(s => Math.min(s + 1, 8));
+  const updateExtra = (name, delta) => {
+    setFormData(prev => {
+      const current = prev.extras[name] || 0;
+      const next = Math.max(0, current + delta);
+      return { ...prev, extras: { ...prev.extras, [name]: next } };
+    });
   };
-  
-  const prevStep = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setStep(s => Math.max(s - 1, 1));
-  };
+
+  const nextStep = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); setStep(s => Math.min(s + 1, 8)); };
+  const prevStep = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); setStep(s => Math.max(s - 1, 1)); };
 
   const steps = [
-    { id: 1, title: 'Location' },
+    { id: 1, title: 'Address' },
     { id: 2, title: 'Service' },
-    { id: 3, title: 'Frequency' },
-    { id: 4, title: 'Duration' },
+    { id: 3, title: 'Your Home' },
+    { id: 4, title: 'Hours' },
     { id: 5, title: 'Extras' },
-    { id: 6, title: 'Pets' },
+    { id: 6, title: 'Logistics' },
     { id: 7, title: 'Schedule' },
     { id: 8, title: 'Payment' },
   ];
 
-  const [[page, direction], setPage] = useState([step, 0]);
-
-  useEffect(() => {
-    setPage([step, step > page ? 1 : -1]);
-  }, [step]);
-
-  // Address Suggestions Logic (Photon API - High Performance Map Suggestions)
+  // Address Suggestions Logic
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (formData.address.length < 3) {
-        setAddressSuggestions([]);
-        return;
-      }
+      if (formData.address.length < 3) { setAddressSuggestions([]); return; }
       try {
-        // Photon API - use bbox for UK region bias, no invalid filter param
         const ukBbox = '-7.57216793459,49.959999905,1.68153079591,58.6350001085';
         const ngBbox = '2.6917,4.2406,14.6800,13.8659';
-        const bbox = region.id === 'UK' ? ukBbox : ngBbox;
-        
-        const response = await fetch(
-          `https://photon.komoot.io/api/?q=${encodeURIComponent(formData.address)}&limit=8&lang=en&bbox=${bbox}`
-        );
+        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(formData.address)}&limit=8&lang=en&bbox=${region.id === 'UK' ? ukBbox : ngBbox}`);
         const data = await response.json();
-        
-        // Safety guard - API might not return features
-        if (!data.features) {
-          setAddressSuggestions([]);
-          return;
-        }
-        
+        if (!data.features) { setAddressSuggestions([]); return; }
         const formatted = data.features.map(f => {
           const { name, street, housenumber, city, postcode, state } = f.properties;
-          const parts = [housenumber, street || name, city, postcode, state].filter(Boolean);
-          return parts.join(", ");
+          return [housenumber, street || name, city, postcode, state].filter(Boolean).join(", ");
         }).filter(Boolean);
-        
         setAddressSuggestions([...new Set(formatted)]);
-      } catch (err) {
-        console.error("Suggestions fetch error:", err);
-      }
+      } catch (err) { console.error("Suggestions fetch error:", err); }
     };
-
     const timeoutId = setTimeout(fetchSuggestions, 300);
     return () => clearTimeout(timeoutId);
-  }, [formData.address]);
+  }, [formData.address, region.id]);
 
-  const selectAddress = (addr) => {
-    setFormData({...formData, address: addr});
-    setShowSuggestions(false);
-    setTimeout(() => nextStep(), 300);
-  };
+  const selectAddress = (addr) => { setFormData({...formData, address: addr}); setShowSuggestions(false); };
 
   const handlePaymentSuccess = async (paymentIntent) => {
+    if (!formData.serviceType) {
+      console.error('Submission Blocked: Service type is missing.');
+      alert('Please select a service type before completing your booking.');
+      return;
+    }
+
     const bookingPayload = {
       bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
-      customer: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
+      customer: { 
+        firstName: formData.firstName || 'Customer', 
+        lastName: formData.lastName || 'User', 
+        email: formData.email || 'pending@cleaniq.com', 
+        phone: formData.phone || '000' 
       },
       service: formData.serviceType,
-      details: {
-        address: formData.address,
-        frequency: formData.frequency,
-        duration: formData.duration,
-        extras: formData.extras,
-        hasPets: formData.hasPets,
-        notes: formData.specialInstructions,
+      details: { 
+        address: `${formData.address}${formData.addressLine2 ? ', ' + formData.addressLine2 : ''}${formData.postcode ? ', ' + formData.postcode : ''}`, 
+        frequency: formData.frequency, 
+        duration: formData.duration, 
+        extras: [
+          ...Object.entries(formData.extras).filter(([_, q]) => q > 0).map(([n, q]) => `${n} (x${q})`),
+          `DATA_ROOMS: ${formData.property.bedrooms} Bed, ${formData.property.bathrooms} Bath, ${formData.property.kitchens} Kit`,
+          `DATA_PARKING: ${formData.parking}`,
+          `DATA_ACCESS: ${formData.keyAccess}`,
+          `DATA_NOTES: ${formData.specialInstructions || 'None'}`
+        ]
       },
-      schedule: {
-        date: formData.date,
-        timeSlot: formData.timeSlot,
-        preferredTime: formData.preferredTime,
-      },
-      payment: {
-        amount: totalPrice,
-        currency: region.id === 'UK' ? 'GBP' : 'NGN',
-        method: 'Stripe',
-        transactionId: paymentIntent.id
-      },
-      region: region.id,
+      schedule: { date: formData.date, timeSlot: formData.timeSlot, preferredTime: formData.preferredTime },
+      payment: { amount: totalPrice, currency: region.id === 'UK' ? 'GBP' : 'NGN', method: 'Stripe', transactionId: paymentIntent.id },
+      region: region.id
     };
-
     setIsSubmitting(true);
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
@@ -240,261 +336,75 @@ const Booking = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingPayload),
       });
-
-      if (response.ok) {
-        setIsSubmitted(true);
-      } else {
-        alert('Payment successful, but failed to save booking. Please contact support.');
-      }
-    } catch (error) {
-      console.error('Error saving booking:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
+      if (response.ok) setIsSubmitted(true);
+    } catch (error) { console.error('Error saving booking:', error); } finally { setIsSubmitting(false); }
   };
 
   if (isSubmitted) {
     return (
-      <div className="pt-32 pb-20 min-h-screen bg-slate-50 flex items-center justify-center px-6">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="max-w-2xl w-full bg-white rounded-[60px] p-8 md:p-16 text-center shadow-2xl border-8 border-white"
-        >
-          <div className="w-24 h-24 bg-primary rounded-[32px] flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-primary/30 rotate-12">
-            <CheckCircle2 size={48} className="text-white -rotate-12" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-black text-primary-dark mb-6 tracking-tighter">Booking Confirmed!</h1>
-          <div className="grid md:grid-cols-2 gap-4 mb-12 text-left">
-            <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Paid</p>
-              <p className="font-bold text-primary-dark">{region.symbol}{totalPrice}</p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link to="/" className="btn-primary flex-1 py-5">Back to Home</Link>
-          </div>
+      <div className="pt-40 pb-20 min-h-screen bg-white flex items-center justify-center px-6 text-center">
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+          <div className="w-20 h-20 bg-primary rounded-[24px] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-primary/20 rotate-12"><CheckCircle2 size={40} className="text-white -rotate-12" /></div>
+          <h1 className="text-4xl font-black text-primary-dark mb-4 tracking-tighter">Confirmed!</h1>
+          <p className="text-slate-500 font-bold mb-10">Check your email for confirmation.</p>
+          <Link to="/" className="btn-primary inline-flex px-10 py-4 rounded-full text-sm">Return Home</Link>
         </motion.div>
       </div>
     );
   }
 
-  const serviceOptions = [
-    { 
-      id: 'Residential Cleaning', 
-      title: 'Residential Cleaning', 
-      tag: 'Reliable domestic cleaners',
-      price: dynamicRates['Residential Cleaning'] 
-        ? `${region.symbol}${dynamicRates['Residential Cleaning']}${region.id === 'UK' ? '/h' : ''}`
-        : (region.id === 'UK' ? '£17.90/h' : `${region.symbol}15,000`), 
-      bullets: [
-        'Reliable, weekly or bi-weekly cleaning for your home',
-        'The same vetted cleaner each time',
-        'Dusting, vacuuming, mopping & sanitization',
-        'No long-term commitment'
-      ],
-      icon: <Heart />
-    },
-    { 
-      id: 'Deep Clean', 
-      title: 'Deep Clean', 
-      tag: 'Deep cleaning',
-      price: dynamicRates['Deep Clean'] 
-        ? `${region.symbol}${dynamicRates['Deep Clean']}${region.id === 'UK' ? '/h' : ''}`
-        : (region.id === 'UK' ? '£24.90/h' : `${region.symbol}25,000`), 
-      bullets: [
-        'Specialized deep cleaning for a total refresh',
-        'Inside cabinets, baseboards & door frames',
-        'Appliance deep clean included',
-        'Perfect for move-in/move-out needs'
-      ],
-      icon: <Zap />
-    },
-    { 
-      id: 'Airbnb Cleaning', 
-      title: 'Airbnb Cleaning', 
-      tag: 'Short-let specialist',
-      price: dynamicRates['Airbnb Cleaning'] 
-        ? `${region.symbol}${dynamicRates['Airbnb Cleaning']}${region.id === 'UK' ? '/h' : ''}`
-        : (region.id === 'UK' ? '£21.90/h' : `${region.symbol}20,000`), 
-      bullets: [
-        'Turnover Specialist',
-        '5-Star Prep',
-        'Guest Ready Check',
-        'Inventory Monitoring',
-        'Consumable Supplies',
-        'Laundry services provided if on-site facilities available',
-      ],
-      icon: <Star />
-    },
-    { 
-      id: 'Office Cleaning', 
-      title: 'Office Cleaning', 
-      tag: 'Expert office cleaning',
-      price: dynamicRates['Office Cleaning'] 
-        ? `${region.symbol}${dynamicRates['Office Cleaning']}${region.id === 'UK' ? '/h' : ''}`
-        : 'Custom Quotes', 
-      bullets: [
-        'Professional janitorial services for workspaces',
-        'Workstation sanitization & restroom care',
-        'Communal area cleaning & maintenance',
-        'Flexible scheduling for businesses'
-      ],
-      icon: <Briefcase />
-    },
-  ];
-
   return (
-    <div className="pt-24 min-h-screen bg-[#FCFCFD] pb-32">
-      {isSubmitting && <LoadingOverlay message="Confirming your booking..." />}
-      <div className="max-w-6xl mx-auto px-4 md:px-6">
+    <div className="pt-32 min-h-screen bg-[#F8FAFC] pb-32">
+      {isSubmitting && <LoadingOverlay message="Confirming..." />}
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
         
-        {/* Minimized Progress Header */}
-        <div className="flex flex-col items-center mb-16">
-          <div className="flex items-center gap-2 mb-4">
-            {steps.map((s) => (
-              <div 
-                key={s.id} 
-                className={`h-1.5 rounded-full transition-all duration-500 ${
-                  s.id === step ? 'w-8 bg-primary' : 
-                  s.id < step ? 'w-3 bg-primary/40' : 'w-2 bg-slate-200'
-                }`}
-              />
-            ))}
-          </div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Step {step} of 8</p>
+        {/* Progress Bar */}
+        <div className="flex justify-between items-center mb-10 bg-white p-3 md:p-5 rounded-[24px] shadow-sm border border-slate-100 overflow-x-auto no-scrollbar sticky top-24 z-40">
+          {steps.map((s, idx) => (
+            <div key={s.id} className="flex items-center shrink-0">
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-300 ${step === s.id ? 'bg-primary text-white shadow-md' : s.id < step ? 'text-primary' : 'text-slate-400'}`}>
+                <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-[9px] ${step === s.id ? 'bg-white/20' : s.id < step ? 'bg-primary/10' : 'bg-slate-100'}`}>
+                  {s.id < step ? <CheckCircle2 size={12}/> : s.id}
+                </div>
+                <span className="font-black text-[8px] uppercase tracking-widest hidden sm:block">{s.title}</span>
+              </div>
+              {idx < steps.length - 1 && <ChevronRight size={12} className="mx-2 text-slate-200" />}
+            </div>
+          ))}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-12 items-start">
-          
-          <div className="lg:col-span-2 min-h-[500px]">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-              >
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+          <div className="lg:col-span-8">
+            <AnimatePresence mode="wait">
+              <motion.div key={step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="bg-white rounded-[40px] p-8 md:p-10 shadow-lg border border-slate-100 min-h-[600px] relative pb-24">
+                
                 {step === 1 && (
-                  <div className="max-w-xl mx-auto text-center space-y-8 py-10">
-                    <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center mx-auto shadow-inner">
-                      <MapPin size={40} />
-                    </div>
-                    <div>
-                      <h1 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tight mb-4">Find your professional.</h1>
-                      <p className="text-slate-500 text-lg">Enter your address to see availability in your area.</p>
-                      <p className="mt-4 text-[11px] font-black text-primary uppercase tracking-widest flex items-center justify-center gap-2">
-                         To easily find your address, enter it in: number, street, city, postcode
-                      </p>
-                    </div>
-                    
-                    <div className="relative group">
-                      <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
-                        <Search size={24} />
+                  <div className="space-y-8 animate-in fade-in">
+                    <div><h1 className="text-3xl font-black text-primary-dark tracking-tight">Where are we cleaning?</h1><p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Provide your property address</p></div>
+                    <div className="space-y-4">
+                      <div className="relative group">
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={20} />
+                        <input className="w-full p-6 pl-14 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" placeholder="Address Line 1 (start typing to search...)" value={formData.address} onChange={(e) => { setFormData({...formData, address: e.target.value}); setShowSuggestions(true); }}/>
+                        <AnimatePresence>{showSuggestions && addressSuggestions.length > 0 && (<motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden text-left">{addressSuggestions.map((addr, i) => (<button key={i} onClick={() => selectAddress(addr)} className="w-full p-4 text-left hover:bg-slate-50 flex items-center gap-3 border-b border-slate-50 text-xs font-bold text-slate-600"><MapPin size={14} className="text-primary"/>{addr}</button>))}</motion.div>)}</AnimatePresence>
                       </div>
-                      <input 
-                        type="text"
-                        placeholder="Type your address..."
-                        className="w-full p-8 pl-16 rounded-[32px] border-none shadow-2xl shadow-slate-200 focus:ring-4 focus:ring-primary/10 focus:outline-none text-xl font-bold transition-all bg-white"
-                        value={formData.address}
-                        onChange={(e) => {
-                          setFormData({...formData, address: e.target.value});
-                          setShowSuggestions(e.target.value.length > 2);
-                        }}
-                      />
-                      
-                      <AnimatePresence>
-                        {showSuggestions && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="absolute top-full left-0 right-0 mt-4 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 text-left"
-                          >
-                            {addressSuggestions.map((addr, i) => (
-                              <button 
-                                key={i}
-                                onClick={() => selectAddress(addr)}
-                                className="w-full p-6 hover:bg-slate-50 flex items-center gap-4 text-slate-700 font-bold border-b border-slate-50 last:border-none transition-colors"
-                              >
-                                <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center shrink-0">
-                                  <MapPin size={16} className="text-primary" />
-                                </div>
-                                <span className="text-sm md:text-base line-clamp-1">{addr}</span>
-                              </button>
-                            ))}
-                            {addressSuggestions.length === 0 && (
-                              <div className="p-10 text-center text-slate-400 font-medium italic">
-                                Search for your address...
-                              </div>
-                            )}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                      <input className="w-full p-6 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" placeholder="Address Line 2 (Apartment, Suite, Flat no. — optional)" value={formData.addressLine2} onChange={(e) => setFormData({...formData, addressLine2: e.target.value})}/>
+                      <input className="w-full p-6 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" placeholder="Postcode / ZIP" value={formData.postcode} onChange={(e) => setFormData({...formData, postcode: e.target.value})}/>
                     </div>
                   </div>
                 )}
 
                 {step === 2 && (
-                  <div className="space-y-8">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Sparkles className="text-secondary" size={20} />
-                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Service Selection</span>
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tight">What type of cleaning?</h1>
-                    
-                    <div className="grid gap-6">
+                  <div className="space-y-8 animate-in fade-in duration-500">
+                    <h1 className="text-4xl font-black text-primary-dark tracking-tight">What type of cleaning?</h1>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {serviceOptions.map((s) => (
-                        <button
-                          key={s.id}
-                          onClick={() => {
-                            setFormData({...formData, serviceType: s.id});
-                            nextStep();
-                          }}
-                          className={`group text-left rounded-[40px] border-2 transition-all duration-500 relative overflow-hidden ${
-                            formData.serviceType === s.id 
-                            ? 'border-primary bg-primary text-white shadow-2xl shadow-primary/20 scale-[1.02]' 
-                            : 'border-slate-100 bg-white hover:border-primary/20 hover:shadow-xl'
-                          }`}
-                        >
-                          <div className="p-8">
-                            <div className="flex items-center justify-between mb-6">
-                              <div className="flex items-center gap-6">
-                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${
-                                  formData.serviceType === s.id ? 'bg-white/10 text-white' : 'bg-primary/5 text-primary'
-                                }`}>
-                                  {React.cloneElement(s.icon, { size: 32 })}
-                                </div>
-                                <div>
-                                  <div className={`text-[10px] font-black uppercase tracking-widest mb-1 ${
-                                    formData.serviceType === s.id ? 'text-white/60' : 'text-secondary'
-                                  }`}>
-                                    {s.tag}
-                                  </div>
-                                  <h3 className="text-xl md:text-2xl font-black tracking-tight">{s.title}.</h3>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <span className={`text-2xl font-black block ${
-                                  formData.serviceType === s.id ? 'text-white' : 'text-primary'
-                                }`}>{s.price}</span>
-                                <span className={`text-[10px] font-bold uppercase tracking-widest ${
-                                  formData.serviceType === s.id ? 'text-white/40' : 'text-slate-400'
-                                }`}>Starting Price</span>
-                              </div>
-                            </div>
-
-                            <div className={`pt-6 border-t ${formData.serviceType === s.id ? 'border-white/10' : 'border-slate-100'} space-y-3`}>
-                              {s.bullets.map((b, i) => (
-                                <div key={i} className={`flex items-start gap-3 text-sm font-medium ${
-                                  formData.serviceType === s.id ? 'text-white/80' : 'text-slate-500'
-                                }`}>
-                                  <CheckCircle2 size={16} className={formData.serviceType === s.id ? 'text-secondary shrink-0 mt-0.5' : 'text-primary shrink-0 mt-0.5'} />
-                                  {b}
-                                </div>
-                              ))}
-                            </div>
+                        <button key={s.id} onClick={() => { setFormData({...formData, serviceType: s.id}); nextStep(); }} className={`flex flex-col items-center p-8 rounded-[40px] border-4 transition-all duration-500 group relative overflow-hidden ${formData.serviceType === s.id ? 'border-primary bg-primary/5 shadow-2xl shadow-primary/10' : 'border-slate-50 bg-white hover:border-primary/20'}`}>
+                          <div className={`w-20 h-20 rounded-[32px] flex items-center justify-center mb-6 transition-all duration-500 ${formData.serviceType === s.id ? 'bg-primary text-white scale-110 shadow-lg' : 'bg-primary/5 text-primary group-hover:scale-110'}`}>{React.cloneElement(s.icon, { size: 32 })}</div>
+                          <p className={`font-black text-2xl mb-1 tracking-tighter ${formData.serviceType === s.id ? 'text-primary' : 'text-primary-dark'}`}>{s.title}</p>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">{s.tag}</p>
+                          <div className="mb-6"><span className="text-xl font-black text-primary-dark">{region.symbol}{dynamicRates[s.id] || (region.id === 'UK' ? (s.id === 'Deep Clean' ? 24.90 : 17.90) : (s.id === 'Deep Clean' ? 25000 : 15000))}</span>{region.id === 'UK' && <span className="text-[10px] font-bold text-slate-400 ml-1">/ hr</span>}</div>
+                          <div className="space-y-3 w-full text-left">
+                            {s.bullets.map((bullet, idx) => (<div key={idx} className="flex items-center gap-3"><div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${formData.serviceType === s.id ? 'bg-primary/20 text-primary' : 'bg-slate-50 text-slate-300'}`}><CheckCircle2 size={12} /></div><p className="text-xs font-bold text-slate-500">{bullet}</p></div>))}
                           </div>
                         </button>
                       ))}
@@ -503,416 +413,138 @@ const Booking = () => {
                 )}
 
                 {step === 3 && (
-                  <div className="space-y-6">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">How often?</h1>
+                  <div className="space-y-8 animate-in fade-in">
+                    <div><h1 className="text-3xl font-black text-primary-dark tracking-tight">Tell us about your home</h1><p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Select number of rooms</p></div>
                     <div className="grid gap-4">
                       {[
-                        { id: 'Weekly', title: 'Once a week', badge: 'Save 10%' },
-                        { id: 'Fortnightly', title: 'Every 2 weeks', badge: 'Save 5%' },
-                        { id: 'Once', title: 'Just once' },
-                      ].map((freq) => (
-                        <button
-                          key={freq.id}
-                          onClick={() => {
-                            setFormData({...formData, frequency: freq.id});
-                            nextStep();
-                          }}
-                          className={`p-8 rounded-[32px] border-2 text-left transition-all flex justify-between items-center ${
-                            formData.frequency === freq.id 
-                            ? 'border-primary bg-primary/5 text-primary ring-4 ring-primary/5' 
-                            : 'border-slate-100 hover:border-primary/20'
-                          }`}
-                        >
-                          <span className="text-xl font-bold">{freq.title}</span>
-                          {freq.badge && (
-                            <span className="bg-secondary/20 text-primary text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
-                              {freq.badge}
-                            </span>
-                          )}
-                        </button>
+                        { label: 'Bedroom(s)', field: 'bedrooms', icon: <HomeIcon size={18}/> },
+                        { label: 'Bathroom(s) / En-Suite(s)', field: 'bathrooms', icon: <Waves size={18}/> },
+                        { label: 'Cloakroom Toilet(s)', field: 'cloakrooms', icon: <Info size={18}/> },
+                        { label: 'Kitchen(s)', field: 'kitchens', icon: <Coffee size={18}/> },
+                        { label: 'Utility Room(s)', field: 'utilityRooms', icon: <Truck size={18}/> },
+                        { label: 'Reception Room(s)', field: 'receptionRooms', icon: <Layout size={18}/> },
+                        { label: 'Conservatory(ies)', field: 'conservatories', icon: <Wind size={18}/> },
+                      ].map(item => (
+                        <div key={item.field} className="flex items-center justify-between p-4 px-6 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/20 transition-all">
+                          <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">{item.icon}</div><span className="font-bold text-sm text-primary-dark">{item.label}</span></div>
+                          <div className="flex items-center gap-6">
+                            <button onClick={() => updateRoom(item.field, -1)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Minus size={16}/></button>
+                            <span className="text-lg font-black text-primary-dark w-4 text-center">{formData.property[item.field]}</span>
+                            <button onClick={() => updateRoom(item.field, 1)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Plus size={16}/></button>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </div>
                 )}
 
                 {step === 4 && (
-                  <div className="space-y-6">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">How many hours?</h1>
-                    <div className="flex items-center justify-center gap-12 py-10 bg-white rounded-[40px] shadow-xl border border-slate-50">
-                      <button 
-                        onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 0.5)})}
-                        className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-lg active:scale-90"
-                      >
-                        <Minus size={24} />
-                      </button>
-                      <div className="text-center">
-                        <span className="text-7xl font-black text-primary-dark tracking-tighter">{formData.duration}</span>
-                        <span className="text-xl font-bold text-slate-400 ml-2 uppercase tracking-widest">Hrs</span>
+                  <div className="space-y-12 animate-in fade-in py-10">
+                    <div className="text-center"><h1 className="text-4xl font-black text-primary-dark tracking-tight mb-4">How many hours?</h1><p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Select the duration of your clean</p></div>
+                    <div className="max-w-md mx-auto">
+                      <div className="bg-slate-50 p-10 rounded-[40px] border border-slate-100 flex items-center justify-between">
+                        <button onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 1)})} className="w-16 h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Minus size={24}/></button>
+                        <div className="text-center"><span className="text-6xl font-black text-primary-dark">{formData.duration}</span><p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mt-2">Hours</p></div>
+                        <button onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 1)})} className="w-16 h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Plus size={24}/></button>
                       </div>
-                      <button 
-                        onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 0.5)})}
-                        className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-lg active:scale-90"
-                      >
-                        <Plus size={24} />
-                      </button>
+                      <div className="mt-10 grid grid-cols-3 gap-4">
+                        {['Once', 'Weekly', 'Fortnightly'].map(f => (
+                          <button key={f} onClick={() => setFormData({...formData, frequency: f})} className={`p-6 rounded-3xl border-2 font-black text-sm transition-all ${formData.frequency === f ? 'border-primary bg-primary text-white shadow-xl shadow-primary/20' : 'border-slate-50 bg-slate-50'}`}>{f}</button>
+                        ))}
+                      </div>
                     </div>
-                    <button onClick={nextStep} className="btn-primary w-full py-6 text-lg mt-8">Continue</button>
                   </div>
                 )}
 
                 {step === 5 && (
-                  <div className="space-y-6">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">Any extras?</h1>
-                    <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-8 animate-in fade-in">
+                    <div><h1 className="text-3xl font-black text-primary-dark tracking-tight">Extra Services</h1><p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Select additional options</p></div>
+                    <div className="grid md:grid-cols-2 gap-4">
                       {[
-                        'Ironing', 'Cleaning Products', 'Inside Fridge', 'Inside Oven'
-                      ].map((extra) => (
-                        <button
-                          key={extra}
-                          onClick={() => toggleExtra(extra)}
-                          className={`p-6 rounded-[32px] border-2 text-center transition-all flex flex-col items-center gap-4 ${
-                            formData.extras.includes(extra) 
-                            ? 'border-primary bg-primary/5 text-primary ring-4 ring-primary/5' 
-                            : 'border-slate-100 hover:border-primary/20 bg-white'
-                          }`}
-                        >
-                          <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center">
-                            <Plus size={20} className={formData.extras.includes(extra) ? 'rotate-45 transition-transform' : ''} />
-                          </div>
-                          <span className="font-bold text-sm">{extra}</span>
-                        </button>
+                        { name: 'American fridge freeze', icon: <Refrigerator /> }, { name: 'Carpet(s) Cleaning', icon: <Sparkles /> }, { name: 'Double Oven Cleaning', icon: <Zap /> }, { name: 'Fridge and freezer', icon: <Refrigerator /> }, { name: 'Range Oven Cleaning', icon: <Zap /> }, { name: 'Single fridge', icon: <Refrigerator /> }, { name: 'Single Oven Cleaning', icon: <Zap /> }, { name: 'Venetian Blinds', icon: <Layout /> },
+                      ].map(extra => (
+                        <div key={extra.name} className={`p-4 px-6 rounded-2xl border-2 flex items-center justify-between transition-all ${formData.extras[extra.name] > 0 ? 'border-primary bg-primary/5' : 'border-slate-50 bg-slate-50'}`}>
+                          <div className="flex items-center gap-4"><div className={`w-10 h-10 rounded-xl flex items-center justify-center ${formData.extras[extra.name] > 0 ? 'bg-primary text-white' : 'bg-white text-slate-400 shadow-sm'}`}>{React.cloneElement(extra.icon, { size: 18 })}</div><span className="font-bold text-[11px] text-primary-dark max-w-[110px] leading-tight">{extra.name}</span></div>
+                          <div className="flex items-center gap-3 bg-white rounded-xl p-1.5 border border-slate-100"><button onClick={() => updateExtra(extra.name, -1)} className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400"><Minus size={12}/></button><span className="font-black text-xs w-4 text-center">{formData.extras[extra.name] || 0}</span><button onClick={() => updateExtra(extra.name, 1)} className="w-7 h-7 rounded-lg bg-primary text-white flex items-center justify-center"><Plus size={12}/></button></div>
+                        </div>
                       ))}
                     </div>
-                    <button onClick={nextStep} className="btn-primary w-full py-6 text-lg mt-8">Continue</button>
                   </div>
                 )}
 
                 {step === 6 && (
-                  <div className="space-y-6 text-center">
-                    <div className="w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-8">
-                      <Heart size={48} />
-                    </div>
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">Any pets?</h1>
-                    <div className="flex gap-4">
-                      {[
-                        { label: 'Yes', value: true },
-                        { label: 'No', value: false }
-                      ].map((opt) => (
-                        <button
-                          key={opt.label}
-                          onClick={() => {
-                            setFormData({...formData, hasPets: opt.value});
-                            nextStep();
-                          }}
-                          className={`flex-1 p-8 rounded-[32px] border-2 text-xl font-bold transition-all ${
-                            formData.hasPets === opt.value 
-                            ? 'border-primary bg-primary text-white' 
-                            : 'border-slate-100 hover:border-primary/20 bg-white text-slate-400'
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
+                  <div className="space-y-8 animate-in fade-in">
+                    <div><h1 className="text-3xl font-black text-primary-dark tracking-tight">Logistics</h1><p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Help our team get access</p></div>
+                    <div className="grid gap-6">
+                      <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Parking Situation</label><div className="grid grid-cols-2 gap-3">{['Available on-site', 'Street parking', 'Paid parking nearby', 'No parking'].map(p => (<button key={p} onClick={() => setFormData({...formData, parking: p})} className={`p-4 rounded-xl border-2 font-bold text-xs transition-all text-left ${formData.parking === p ? 'border-primary bg-primary text-white' : 'border-slate-50 bg-slate-50'}`}>{p}</button>))}</div></div>
+                      <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Key / Entry Access</label><div className="grid grid-cols-2 gap-3">{['I will be home', 'Key under mat', 'Lockbox / Key safe', 'Building concierge'].map(k => (<button key={k} onClick={() => setFormData({...formData, keyAccess: k})} className={`p-4 rounded-xl border-2 font-bold text-xs transition-all text-left ${formData.keyAccess === k ? 'border-primary bg-primary text-white' : 'border-slate-50 bg-slate-50'}`}>{k}</button>))}</div></div>
+                      <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Special Instructions (optional)</label><textarea className="w-full p-5 rounded-2xl bg-slate-50 border-none outline-none font-bold text-sm resize-none h-28" placeholder="e.g. Ring bell twice, dog on premises, focus on kitchen..." value={formData.specialInstructions} onChange={(e) => setFormData({...formData, specialInstructions: e.target.value})}/></div>
                     </div>
                   </div>
                 )}
 
                 {step === 7 && (
-                  <div className="max-w-2xl mx-auto space-y-10 py-4">
-                    <div className="text-center">
-                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-6">
-                        Scheduling
-                      </div>
-                      <h1 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tight mb-4">When should we come?</h1>
-                      <p className="text-slate-500 font-medium">Select a date and time that works best for you.</p>
+                  <div className="space-y-8 animate-in fade-in">
+                    <div><h1 className="text-3xl font-black text-primary-dark tracking-tight">Scheduling.</h1><p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Select your preferred date</p></div>
+                    <CustomCalendar selectedDate={formData.date} onDateSelect={(date) => setFormData({...formData, date})} bookedDates={bookedDates} />
+                    <div className="grid grid-cols-3 gap-3 mt-6">
+                      {['Morning', 'Afternoon', 'Evening'].map(slot => (<button key={slot} onClick={() => setFormData({...formData, timeSlot: slot})} className={`p-4 rounded-xl border-2 font-black text-xs transition-all ${formData.timeSlot === slot ? 'border-primary bg-primary text-white shadow-lg' : 'border-slate-50 bg-slate-50'}`}>{slot}</button>))}
                     </div>
-
-                    <div className="space-y-8">
-                      {/* Date Selection */}
-                      <div>
-                        <div className="flex items-center justify-between mb-4 px-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Date</label>
-                          <span className="text-[10px] font-bold text-primary bg-primary/5 px-3 py-1 rounded-full uppercase tracking-widest">Next 14 Days</span>
-                        </div>
-                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-3">
-                          {Array.from({ length: 14 }).map((_, i) => {
-                            const d = new Date();
-                            d.setDate(d.getDate() + i + 1);
-                            const isSelected = formData.date === d.toISOString().split('T')[0];
-                            const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
-                            const dayNum = d.getDate();
-                            const monthName = d.toLocaleDateString('en-US', { month: 'short' });
-                            
-                            return (
-                              <button
-                                key={i}
-                                onClick={() => setFormData({...formData, date: d.toISOString().split('T')[0]})}
-                                className={`flex flex-col items-center justify-center p-4 rounded-3xl border-2 transition-all duration-300 ${
-                                  isSelected 
-                                  ? 'border-primary bg-primary text-white shadow-lg shadow-primary/20 scale-105' 
-                                  : 'border-slate-100 bg-white hover:border-primary/20 text-slate-600'
-                                }`}
-                              >
-                                <span className={`text-[10px] font-black uppercase mb-1 ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>{dayName}</span>
-                                <span className="text-lg font-black tracking-tighter leading-none mb-1">{dayNum}</span>
-                                <span className={`text-[9px] font-bold uppercase tracking-widest ${isSelected ? 'text-white/40' : 'text-slate-300'}`}>{monthName}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
+                    {formData.timeSlot && (
+                      <div className="bg-primary/5 p-6 rounded-[24px] border border-primary/10 text-center animate-in slide-in-from-bottom-2">
+                        <label className="text-[9px] font-black text-primary uppercase tracking-widest block mb-3">Do you have a specific arrival time in mind?</label>
+                        <input placeholder="e.g. 9:30 AM" className="w-full p-4 px-6 rounded-xl bg-white border border-primary/20 outline-none font-bold text-xs text-center" value={formData.preferredTime} onChange={(e) => setFormData({...formData, preferredTime: e.target.value})}/>
                       </div>
-
-                      {/* Time Selection */}
-                      <div className="space-y-6">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block px-2">Preferred Time Slot</label>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          {[
-                            { id: 'Morning', label: 'Morning', time: '8:00 AM - 12:00 PM', icon: <Sparkles /> },
-                            { id: 'Afternoon', label: 'Afternoon', time: '12:00 PM - 4:00 PM', icon: <Zap /> },
-                            { id: 'Evening', label: 'Evening', time: '4:00 PM - 8:00 PM', icon: <Clock /> },
-                          ].map((slot) => (
-                            <button
-                              key={slot.id}
-                              onClick={() => setFormData({...formData, timeSlot: slot.id})}
-                              className={`flex flex-col items-center p-6 rounded-[32px] border-2 transition-all duration-300 group ${
-                                formData.timeSlot === slot.id 
-                                ? 'border-primary bg-primary text-white shadow-lg shadow-primary/20' 
-                                : 'border-slate-100 bg-white hover:border-primary/20'
-                              }`}
-                            >
-                              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-4 transition-colors ${
-                                formData.timeSlot === slot.id ? 'bg-white/10 text-white' : 'bg-primary/5 text-primary'
-                              }`}>
-                                {React.cloneElement(slot.icon, { size: 20 })}
-                              </div>
-                              <span className="font-black text-sm mb-1">{slot.label}</span>
-                              <span className={`text-[9px] font-bold uppercase tracking-widest ${
-                                formData.timeSlot === slot.id ? 'text-white/50' : 'text-slate-400'
-                              }`}>{slot.time}</span>
-                            </button>
-                          ))}
-                        </div>
-
-                        {formData.timeSlot && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 10 }} 
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-primary/5 p-6 rounded-[32px] border border-primary/10"
-                          >
-                            <label className="text-[10px] font-black text-primary uppercase tracking-widest block mb-3">Any specific time in the {formData.timeSlot}?</label>
-                            <div className="relative">
-                              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary">
-                                <Clock size={18} />
-                              </div>
-                              <input 
-                                type="text" 
-                                placeholder="e.g. 9:30 AM, ASAP, or 10:00 AM please"
-                                value={formData.preferredTime || ''}
-                                onChange={(e) => setFormData({...formData, preferredTime: e.target.value})}
-                                className="w-full p-4 pl-12 rounded-2xl bg-white border border-primary/20 focus:border-primary focus:outline-none font-bold text-sm text-primary-dark"
-                              />
-                            </div>
-                            <p className="mt-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
-                              We'll do our best to arrive at your requested time within the selected window.
-                            </p>
-                          </motion.div>
-                        )}
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={nextStep} 
-                      disabled={!formData.date || !formData.timeSlot}
-                      className={`btn-primary w-full py-6 text-lg mt-8 shadow-2xl transition-all ${
-                        (!formData.date || !formData.timeSlot) ? 'opacity-50 cursor-not-allowed grayscale' : 'shadow-primary/30 hover:scale-[1.02]'
-                      }`}
-                    >
-                      Continue to Final Step
-                    </button>
+                    )}
                   </div>
                 )}
 
                 {step === 8 && (
-                  <div className="space-y-8">
-                    <h1 className="text-3xl md:text-4xl font-black text-primary-dark tracking-tight">Your Details.</h1>
-                    <div className="grid md:grid-cols-2 gap-6 mb-8">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">First Name</label>
-                        <input 
-                          type="text" 
-                          placeholder="John"
-                          className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold"
-                          onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Last Name</label>
-                        <input 
-                          type="text" 
-                          placeholder="Doe"
-                          className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold"
-                          onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                        />
-                      </div>
-                      <div className="md:col-span-2 space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Email Address</label>
-                        <input 
-                          type="email" 
-                          placeholder="john@example.com"
-                          className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold"
-                          onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        />
-                      </div>
-                      <div className="md:col-span-2 space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Phone Number</label>
-                        <input 
-                          type="tel" 
-                          placeholder="+44"
-                          className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold"
-                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                        />
-                      </div>
-                      <div className="md:col-span-2 space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Special Instructions / Notes</label>
-                        <textarea 
-                          placeholder="Key under the mat, please focus on the kitchen, pets in the house, etc."
-                          className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold h-32 resize-none"
-                          onChange={(e) => setFormData({...formData, specialInstructions: e.target.value})}
-                        />
-                      </div>
+                  <div className="space-y-8 animate-in fade-in">
+                    <h1 className="text-3xl font-black text-primary-dark tracking-tight">Your Details & Payment.</h1>
+                    <div className="grid md:grid-cols-2 gap-4 mb-6">
+                      <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm" placeholder="First Name" value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})}/>
+                      <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm" placeholder="Last Name" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})}/>
+                      <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm md:col-span-2" placeholder="Email Address" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}/>
+                      <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm md:col-span-2" placeholder="Phone Number" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})}/>
                     </div>
-
-                    <div className="h-px bg-slate-100 w-full mb-8" />
+                    <div className="bg-primary/5 p-6 rounded-[32px] border border-primary/10 mb-6"><p className="text-sm font-bold text-primary-dark mb-3">Booking: <span className="text-primary">{formData.serviceType}</span> on <span className="text-primary">{formData.date}</span> at <span className="text-primary">{formData.address}</span></p><div className="flex items-center gap-3 text-[10px] font-black text-primary uppercase tracking-widest"><ShieldCheck size={18} />Securely processed by Stripe</div></div>
+                    <Elements stripe={stripePromise}><StripePayment amount={totalPrice} currency={region.id === 'UK' ? 'GBP' : 'NGN'} customerInfo={formData} onPaymentSuccess={handlePaymentSuccess} /></Elements>
                     
-                    <Elements stripe={stripePromise}>
-                      <StripePayment 
-                        amount={totalPrice}
-                        currency={region.id === 'UK' ? 'GBP' : 'NGN'}
-                        customerInfo={formData}
-                        onPaymentSuccess={handlePaymentSuccess}
-                      />
-                    </Elements>
-
-                    {/* TEMPORARY TEST BUTTON */}
-                    {/* <div className="mt-8 pt-8 border-t border-slate-100">
+                    {/* Developer Test Mode */}
+                    <div className="mt-8 pt-8 border-t border-slate-100">
                       <button 
-                        onClick={() => handlePaymentSuccess({ id: "TEST_FREE_BOOKING_" + Date.now() })}
-                        className="w-full py-4 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 font-black text-xs hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2"
+                        onClick={() => handlePaymentSuccess({ id: `TEST-${Date.now()}` })}
+                        className="w-full py-4 rounded-2xl bg-slate-50 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 hover:text-slate-600 transition-all border-2 border-dashed border-slate-200"
                       >
-                        🛠️ RUN FREE TEST BOOKING (No Payment Required)
+                        Dev: Submit Without Paying (TEST MODE)
                       </button>
-                      <p className="text-center text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">Testing emails & database. Remove before going live.</p>
-                    </div> */}
+                    </div>
                   </div>
                 )}
+
+                <div className="absolute bottom-8 left-8 right-8 flex justify-between items-center pointer-events-none">{step > 1 ? (<button onClick={prevStep} className="pointer-events-auto flex items-center gap-2 text-slate-400 hover:text-primary transition-all font-black text-[9px] uppercase tracking-widest group"><ChevronLeft size={18} className="group-hover:-translate-x-1 transition-all" />Go Back</button>) : <div/>}{step < 8 && (<button onClick={nextStep} className="pointer-events-auto flex items-center gap-4 bg-primary text-white px-8 py-4 rounded-full font-black text-xs shadow-xl shadow-primary/20 hover:scale-105 transition-all group">Next Step <ArrowRight size={18} className="group-hover:translate-x-1 transition-all" /></button>)}</div>
               </motion.div>
             </AnimatePresence>
-            
-            {step > 1 && (
-              <button 
-                onClick={prevStep}
-                className="mt-12 flex items-center gap-2 text-slate-400 hover:text-primary transition-colors font-black text-xs uppercase tracking-widest group"
-              >
-                <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                Go Back
-              </button>
-            )}
           </div>
 
-          {/* Booking Summary Sidebar */}
-          <div className={`lg:sticky lg:top-32 transition-all duration-700 ${step === 1 ? 'opacity-0 pointer-events-none translate-y-10' : 'opacity-100 translate-y-0'}`}>
-            <div className="bg-white rounded-[48px] p-8 md:p-10 shadow-2xl border-4 border-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16" />
-              <h2 className="text-2xl font-black text-primary-dark mb-8 tracking-tight">Your Basket.</h2>
-              
-              <div className="space-y-6 mb-10">
-                {formData.address && (
-                  <div className="flex justify-between items-start group">
-                    <div className="flex gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
-                        <MapPin size={18} />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</p>
-                        <p className="font-bold text-slate-700 text-sm line-clamp-1">{formData.address}</p>
-                      </div>
-                    </div>
+          <div className="lg:col-span-4 lg:sticky lg:top-32 space-y-6">
+            <div className="bg-white rounded-[40px] p-8 shadow-xl border-4 border-white relative overflow-hidden">
+              <div className="space-y-6 mb-8 text-xs max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                <div className="flex gap-3"><div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 shrink-0"><MapPin size={14}/></div><div><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Address</p><p className="font-bold text-slate-700 leading-tight">{formData.address || 'Address not set'}</p></div></div>
+                <div className="flex gap-3"><div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 shrink-0"><Zap size={14}/></div><div className="flex-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Service Breakdown</p><p className="font-bold text-slate-700 mb-2">{formData.serviceType || 'Selection required'}</p>
+                  <div className="space-y-2">
+                    {formData.duration > 0 && <div className="flex justify-between items-center text-[10px] bg-amber-50 p-2 rounded-lg border border-amber-100"><span className="font-bold text-amber-600">Hours</span><span className="font-black text-amber-700">{formData.duration}h</span></div>}
+                    {Object.entries(formData.property).map(([key, qty]) => qty > 0 ? (<div key={key} className="flex justify-between items-center text-[10px] bg-slate-50 p-2 rounded-lg border border-slate-100"><span className="font-bold text-slate-500 capitalize">{key.replace(/([A-Z])/g, ' $1')}</span><span className="font-black text-primary">x{qty}</span></div>) : null)}
+                    {Object.entries(formData.extras).map(([name, qty]) => qty > 0 ? (<div key={name} className="flex justify-between items-center text-[10px] bg-primary/5 p-2 rounded-lg border border-primary/10"><span className="font-bold text-primary-dark">{name}</span><span className="font-black text-primary">x{qty}</span></div>) : null)}
                   </div>
-                )}
-
-                {step > 2 && (
-                  <>
-                    <div className="flex justify-between items-start group">
-                      <div className="flex gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
-                          <Sparkles size={18} />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Service</p>
-                          <p className="font-bold text-slate-700">{formData.serviceType}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-start group">
-                      <div className="flex gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
-                          <Clock size={18} />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration</p>
-                          <p className="font-bold text-slate-700">{formData.duration} Hours</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {formData.extras.length > 0 && (
-                      <div className="flex justify-between items-start group">
-                        <div className="flex gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary">
-                            <Plus size={18} />
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Extras</p>
-                            <p className="font-bold text-slate-700 text-sm leading-tight">
-                              {formData.extras.join(', ')}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
+                </div></div>
               </div>
-
-              {step > 2 ? (
-                <div className="pt-8 border-t border-slate-100 flex justify-between items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Total Price</p>
-                    <p className="text-4xl font-black text-primary-dark tracking-tighter">
-                      {region.symbol}{totalPrice}
-                    </p>
-                  </div>
-                  <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary">
-                    <Zap size={28} className="fill-current" />
-                  </div>
-                </div>
-              ) : (
-                <div className="pt-8 border-t border-slate-50 text-center">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Select service to see price</p>
-                </div>
-              )}
+              <div className="pt-6 border-t border-slate-100 flex justify-between items-center"><div><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Estimated Total</p><p className="text-3xl font-black text-primary-dark tracking-tighter">{region.symbol}{totalPrice}</p></div><div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary"><ShieldCheck size={28} className="fill-current" /></div></div>
             </div>
-            
-            <div className="mt-8 px-6 space-y-4">
-              <div className="flex items-center gap-4 text-slate-400">
-                <ShieldCheck size={20} className="text-secondary" />
-                <span className="text-[10px] font-bold uppercase tracking-widest leading-tight">Vetted & Insured Pros Only</span>
-              </div>
-              <div className="flex items-center gap-4 text-slate-400">
-                <Heart size={20} className="text-secondary" />
-                <span className="text-[10px] font-bold uppercase tracking-widest leading-tight">100% Satisfaction Guarantee</span>
-              </div>
+            <div className="space-y-3">
+              <div className="bg-white rounded-3xl p-5 border border-slate-100 flex items-center justify-between shadow-sm"><div className="flex items-center gap-3"><div className="w-8 h-8 bg-[#4285F4]/10 rounded-lg flex items-center justify-center"><Star className="text-[#4285F4] fill-current" size={16} /></div><div><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Excellent</p><p className="text-[11px] font-black text-primary-dark">4.9/5 on Google</p></div></div><div className="flex gap-0.5">{[1,2,3,4,5].map(i => <Star key={i} size={8} className="text-amber-400 fill-current" />)}</div></div>
+              <div className="bg-primary-dark rounded-[32px] p-6 text-white space-y-4 shadow-lg"><div className="flex items-center gap-3"><Shield size={16}/><p className="text-[10px] font-black uppercase tracking-widest">Fully Insured</p></div><div className="flex items-center gap-3"><User size={16}/><p className="text-[10px] font-black uppercase tracking-widest">Vetted Pros</p></div></div>
             </div>
           </div>
         </div>

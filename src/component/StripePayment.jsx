@@ -132,7 +132,7 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
           </div>
         ) : (
           <div className="flex items-center justify-center gap-3">
-            <span>Pay {currency === 'GBP' ? '£' : '₦'}{amount} & Book Now</span>
+           Confirm Payment
             <Zap size={20} className="fill-current group-hover:scale-125 transition-transform" />
           </div>
         )}
