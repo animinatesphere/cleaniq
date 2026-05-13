@@ -39,4 +39,27 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Update customer info across all their bookings
+router.put('/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+    const { firstName, lastName, phone } = req.body;
+    
+    const result = await Booking.updateMany(
+      { "customer.email": email },
+      { 
+        $set: { 
+          "customer.firstName": firstName,
+          "customer.lastName": lastName,
+          "customer.phone": phone
+        } 
+      }
+    );
+    
+    res.json({ message: 'Customer info updated across all bookings', modifiedCount: result.modifiedCount });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 module.exports = router;

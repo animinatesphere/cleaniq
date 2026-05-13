@@ -58,7 +58,32 @@ router.post('/', upload.fields([
   }
 });
 
-// UPDATE applicant status (Admin)
+// UPDATE applicant (Admin - Full Edit)
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedApplicant = await Applicant.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!updatedApplicant) return res.status(404).json({ message: 'Applicant not found' });
+    
+    // If status was changed to Hired in the update, send email
+    if (req.body.status === 'Hired') {
+      await sendEmail({
+        to: updatedApplicant.email,
+        subject: "Congratulations! Welcome to CleanIQ Services 🎉",
+        html: templates.hiredAlert(updatedApplicant.fullName)
+      });
+    }
+
+    res.json(updatedApplicant);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// UPDATE applicant status (Admin - Status Only)
 router.put('/:id/status', async (req, res) => {
   try {
     const { status } = req.body;

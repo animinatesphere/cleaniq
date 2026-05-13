@@ -768,7 +768,7 @@ const Booking = () => {
                     </Elements>
 
                     {/* TEMPORARY TEST BUTTON */}
-                    {/* <div className="mt-8 pt-8 border-t border-slate-100">
+                    <div className="mt-8 pt-8 border-t border-slate-100">
                       <button 
                         onClick={() => handlePaymentSuccess({ id: "TEST_FREE_BOOKING_" + Date.now() })}
                         className="w-full py-4 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 font-black text-xs hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2"
@@ -776,7 +776,7 @@ const Booking = () => {
                         🛠️ RUN FREE TEST BOOKING (No Payment Required)
                       </button>
                       <p className="text-center text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">Testing emails & database. Remove before going live.</p>
-                    </div> */}
+                    </div>
                   </div>
                 )}
               </motion.div>
