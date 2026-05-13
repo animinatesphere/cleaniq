@@ -13,6 +13,17 @@ router.get('/', async (req, res) => {
   }
 });
 
+// DELETE ALL bookings (Admin) - IMPORTANT: Must be above /:id
+router.delete('/all/delete', async (req, res) => {
+  try {
+    console.log('☢️ CLEARING ALL BOOKINGS...');
+    await Booking.deleteMany({});
+    res.json({ message: 'All bookings cleared successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // POST a new booking
 router.post('/', async (req, res) => {
   const booking = new Booking(req.body);
@@ -71,22 +82,12 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE a booking (Admin)
+// DELETE a single booking (Admin)
 router.delete('/:id', async (req, res) => {
   try {
     const booking = await Booking.findByIdAndDelete(req.params.id);
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
     res.json({ message: 'Booking deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// DELETE ALL bookings (Admin) - USE WITH CAUTION
-router.delete('/all/delete', async (req, res) => {
-  try {
-    await Booking.deleteMany({});
-    res.json({ message: 'All bookings cleared successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
