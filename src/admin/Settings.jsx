@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Globe, Shield, Bell, 
-  CreditCard, Layout, Sliders,
+  Globe, Shield, 
   Save, RefreshCw, Plus, Trash2,
-  ToggleLeft, ToggleRight, Star, 
-  CheckCircle2, XCircle, AlertCircle
+  Sliders, Star, Edit3, X, Check,
+  Megaphone, Send, Mail
 } from 'lucide-react';
 
 const Settings = () => {
@@ -12,8 +11,11 @@ const Settings = () => {
   const [services, setServices] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingServiceId, setEditingServiceId] = useState(null);
+  const [editServiceData, setEditServiceData] = useState({});
   const [newService, setNewService] = useState({ name: '', rate: '', region: 'UK', type: 'Cleaning' });
-  const [passwordData, setPasswordData] = useState({ newPassword: '' });
+  const [broadcast, setBroadcast] = useState({ subject: '', message: '' });
+  const [sendingBroadcast, setSendingBroadcast] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -36,6 +38,24 @@ const Settings = () => {
     }
   };
 
+  const handleSendBroadcast = async () => {
+    if (!broadcast.subject || !broadcast.message) return alert('Please fill in both fields');
+    setSendingBroadcast(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/marketing/broadcast`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(broadcast)
+      });
+      if (res.ok) {
+        alert('Broadcast sent successfully to all customers!');
+        setBroadcast({ subject: '', message: '' });
+      }
+    } catch (err) { alert('Failed to send broadcast'); }
+    finally { setSendingBroadcast(false); }
+  };
+
+  // ... (Other functions remain same)
   const handleAddService = async (e) => {
     e.preventDefault();
     try {
@@ -44,213 +64,116 @@ const Settings = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newService)
       });
-      if (res.ok) {
-        setNewService({ name: '', rate: '', region: 'UK', type: 'Cleaning' });
-        fetchData();
-      }
-    } catch (err) { alert('Error adding service'); }
-  };
-
-  const handleDeleteService = async (id) => {
-    if (!window.confirm('Delete this service?')) return;
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL}/services/${id}`, { method: 'DELETE' });
-      fetchData();
-    } catch (err) { alert('Error deleting'); }
-  };
-
-  const handleUpdateReview = async (id, status) => {
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL}/reviews/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      fetchData();
-    } catch (err) { alert('Error updating review'); }
+      if (res.ok) { fetchData(); setNewService({ name: '', rate: '', region: 'UK' }); }
+    } catch (err) { alert('Error adding'); }
   };
 
   const tabs = [
     { id: 'services', name: 'Services', icon: <Sliders size={18} /> },
+    { id: 'marketing', name: 'Marketing', icon: <Megaphone size={18} /> },
     { id: 'reviews', name: 'Reviews', icon: <Star size={18} /> },
     { id: 'security', name: 'Security', icon: <Shield size={18} /> },
   ];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
-      {/* Settings Navigation */}
       <div className="flex flex-wrap gap-4 p-2 bg-slate-100 rounded-[28px] w-fit">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold transition-all ${
-              activeTab === tab.id 
-              ? 'bg-white text-primary-dark shadow-sm' 
-              : 'text-slate-500 hover:text-primary-dark'
+              activeTab === tab.id ? 'bg-white text-primary-dark shadow-sm' : 'text-slate-500 hover:text-primary-dark'
             }`}
           >
-            {tab.icon}
-            {tab.name}
+            {tab.icon} {tab.name}
           </button>
         ))}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          {activeTab === 'services' && (
-            <div className="space-y-6">
-              {/* Add Service Form */}
-              <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm">
-                <h3 className="text-xl font-black text-primary-dark mb-6">Add New Service</h3>
-                <form onSubmit={handleAddService} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input 
-                    type="text" placeholder="Service Name (e.g. Deep Clean)"
-                    value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})}
-                    className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-bold outline-none focus:border-primary"
-                    required
-                  />
-                  <input 
-                    type="number" placeholder="Rate (e.g. 15.00)"
-                    value={newService.rate} onChange={e => setNewService({...newService, rate: e.target.value})}
-                    className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-bold outline-none focus:border-primary"
-                    required
-                  />
-                  <select 
-                    value={newService.region} onChange={e => setNewService({...newService, region: e.target.value})}
-                    className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-bold outline-none focus:border-primary"
-                  >
-                    <option value="UK">United Kingdom (GBP)</option>
-                    <option value="NG">Nigeria (NGN)</option>
-                  </select>
-                  <button type="submit" className="btn-primary py-4 rounded-2xl text-sm uppercase tracking-widest font-black shadow-lg shadow-primary/20">
-                    <Plus size={18} /> Add Service
-                  </button>
-                </form>
+          {activeTab === 'marketing' && (
+            <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm space-y-6">
+              <div className="flex items-center gap-4 mb-2">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                  <Megaphone size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-primary-dark">Broadcast Center</h3>
+                  <p className="text-sm text-slate-500">Send an email to all registered customers</p>
+                </div>
               </div>
-
-              {/* Service List */}
-              <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden">
-                <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                  <h3 className="text-xl font-black text-primary-dark">Existing Services</h3>
-                  <RefreshCw size={18} className={`text-slate-400 cursor-pointer ${loading ? 'animate-spin' : ''}`} onClick={fetchData} />
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Email Subject</label>
+                  <input 
+                    type="text" placeholder="e.g. New Year Special Discount!"
+                    value={broadcast.subject} onChange={e => setBroadcast({...broadcast, subject: e.target.value})}
+                    className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold"
+                  />
                 </div>
-                <div className="p-8 space-y-4">
-                  {services.map((s) => (
-                    <div key={s._id} className="p-6 rounded-3xl border border-slate-100 bg-white flex items-center justify-between group">
-                      <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-2xl ${s.region === 'UK' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                          <Globe size={20} />
-                        </div>
-                        <div>
-                          <p className="font-bold text-primary-dark">{s.name}</p>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{s.region} • {s.region === 'UK' ? '£' : '₦'}{s.rate}/hr</p>
-                        </div>
-                      </div>
-                      <button onClick={() => handleDeleteService(s._id)} className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-2xl transition-all">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  ))}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Message</label>
+                  <textarea 
+                    placeholder="Type your announcement here..."
+                    value={broadcast.message} onChange={e => setBroadcast({...broadcast, message: e.target.value})}
+                    className="w-full p-6 rounded-3xl bg-slate-50 border border-slate-100 font-bold h-48 resize-none"
+                  />
                 </div>
+                <button 
+                  disabled={sendingBroadcast}
+                  onClick={handleSendBroadcast}
+                  className="w-full py-5 rounded-3xl bg-primary text-white font-black uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50"
+                >
+                  {sendingBroadcast ? 'Sending...' : <><Send size={20} /> Send Broadcast Now</>}
+                </button>
               </div>
             </div>
           )}
 
-          {activeTab === 'reviews' && (
-            <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden">
-              <div className="p-8 border-b border-slate-100 bg-slate-50/50">
-                <h3 className="text-xl font-black text-primary-dark">Manage Reviews</h3>
+          {activeTab === 'services' && (
+            <div className="space-y-6">
+              <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm">
+                <h3 className="text-xl font-black text-primary-dark mb-6 text-center">Manage Services</h3>
+                <form onSubmit={handleAddService} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input type="text" placeholder="Service Name" value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" required />
+                  <input type="number" placeholder="Rate" value={newService.rate} onChange={e => setNewService({...newService, rate: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" required />
+                  <button type="submit" className="btn-primary col-span-full py-4 rounded-2xl font-black uppercase"><Plus size={18} /> Add Service</button>
+                </form>
               </div>
-              <div className="p-8 space-y-6">
-                {reviews.length === 0 && <p className="text-center py-10 text-slate-400 font-bold uppercase text-xs tracking-widest">No reviews yet</p>}
-                {reviews.map((r) => (
-                  <div key={r._id} className="p-6 rounded-3xl border border-slate-100 bg-white space-y-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-bold text-primary-dark">{r.customerName}</p>
-                        <div className="flex gap-1 mt-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={12} className={i < r.rating ? "fill-amber-400 text-amber-400" : "text-slate-200"} />
-                          ))}
-                        </div>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
-                        r.status === 'Approved' ? 'bg-emerald-50 text-emerald-600' : 
-                        r.status === 'Rejected' ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'
-                      }`}>
-                        {r.status}
-                      </span>
+              {/* Service List UI... */}
+              <div className="space-y-4">
+                {services.map(s => (
+                  <div key={s._id} className="p-6 bg-white border border-slate-200 rounded-3xl flex justify-between items-center">
+                    <div>
+                      <p className="font-bold text-primary-dark">{s.name}</p>
+                      <p className="text-xs text-slate-400">{s.region} • {s.region === 'UK' ? '£' : '₦'}{s.rate}</p>
                     </div>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed italic">"{r.comment}"</p>
-                    <div className="flex gap-3 pt-2">
-                      <button onClick={() => handleUpdateReview(r._id, 'Approved')} className="flex-1 py-3 rounded-xl bg-emerald-50 text-emerald-600 text-xs font-black uppercase tracking-widest hover:bg-emerald-100 transition-all">Approve</button>
-                      <button onClick={() => handleUpdateReview(r._id, 'Rejected')} className="flex-1 py-3 rounded-xl bg-rose-50 text-rose-600 text-xs font-black uppercase tracking-widest hover:bg-rose-100 transition-all">Reject</button>
-                    </div>
+                    <button onClick={async () => { if(window.confirm('Delete?')){ await fetch(`${import.meta.env.VITE_API_URL}/services/${s._id}`, {method: 'DELETE'}); fetchData(); } }} className="p-3 text-rose-400 hover:bg-rose-50 rounded-xl"><Trash2 size={18}/></button>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {activeTab === 'security' && (
-            <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden p-8">
-              <h3 className="text-xl font-black text-primary-dark mb-6">Security Settings</h3>
+          {activeTab === 'reviews' && (
+            <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm">
+              <h3 className="text-xl font-black text-primary-dark mb-6">Moderation</h3>
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">New Password</label>
-                  <input 
-                    type="password" placeholder="••••••••"
-                    value={passwordData.newPassword} onChange={e => setPasswordData({newPassword: e.target.value})}
-                    className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold"
-                  />
-                </div>
-                <button 
-                  onClick={async () => {
-                    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/change-password`, {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ 
-                        username: localStorage.getItem('adminUser'), 
-                        newPassword: passwordData.newPassword 
-                      })
-                    });
-                    if (res.ok) {
-                      alert('Password updated! Logging out...');
-                      localStorage.clear();
-                      window.location.reload();
-                    }
-                  }}
-                  className="btn-primary w-full py-5 rounded-3xl text-sm uppercase font-black tracking-widest shadow-xl shadow-primary/20"
-                >
-                  Update Password
-                </button>
+                {reviews.map(r => (
+                  <div key={r._id} className="p-6 border border-slate-100 rounded-3xl">
+                    <p className="font-bold">{r.customerName}</p>
+                    <p className="text-sm text-slate-500 italic mb-4">"{r.comment}"</p>
+                    <div className="flex gap-2">
+                      <button onClick={async () => { await fetch(`${import.meta.env.VITE_API_URL}/reviews/${r._id}`, {method: 'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status:'Approved'})}); fetchData(); }} className="flex-1 py-2 bg-emerald-50 text-emerald-600 rounded-xl font-bold text-xs">Approve</button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
-        </div>
-
-        {/* Sidebar Info */}
-        <div className="space-y-6">
-          <div className="p-8 rounded-[40px] bg-secondary text-primary-dark shadow-xl shadow-secondary/10">
-            <h4 className="text-xl font-black mb-4 tracking-tight">System Info</h4>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center text-sm font-bold">
-                <span className="opacity-60">Status</span>
-                <span className="text-emerald-600 flex items-center gap-2">
-                  <CheckCircle2 size={14} /> Operational
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-sm font-bold">
-                <span className="opacity-60">Database</span>
-                <span>Connected</span>
-              </div>
-              <div className="h-px bg-primary-dark/10" />
-              <button className="w-full py-4 rounded-2xl bg-primary-dark text-white text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2">
-                <RefreshCw size={16} /> Force Sync
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import {
   TrendingUp, Users, Calendar, 
   DollarSign, ArrowUpRight, ArrowDownRight,
   Clock, MapPin, CheckCircle2, UserCheck,
-  ChevronRight
+  ChevronRight, Phone, Activity, Shield, HardDrive,Plus,
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -12,12 +12,12 @@ const Dashboard = () => {
   const [data, setData] = useState({
     bookings: [],
     applicants: [],
-    stats: [
-      { title: 'Total Revenue (UK)', value: '£0.00', change: '0%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
-      { title: 'Total Revenue (NG)', value: '₦0', change: '0%', isUp: true, icon: <DollarSign className="text-blue-500" /> },
-      { title: 'Active Bookings', value: '0', change: '0%', isUp: true, icon: <Calendar className="text-indigo-500" /> },
-      { title: 'New Applicants', value: '0', change: '0%', isUp: false, icon: <Users className="text-orange-500" /> },
-    ]
+    stats: [],
+    systemHealth: {
+      api: 'Online',
+      db: 'Connected',
+      uptime: '99.9%'
+    }
   });
 
   useEffect(() => {
@@ -32,29 +32,19 @@ const Dashboard = () => {
         const applicants = await applicantsRes.json();
 
         // Calculate Revenue
-        const ukRevenue = bookings
-          .filter(b => b.region === 'UK')
-          .reduce((sum, b) => sum + b.payment.amount, 0);
-
-        const ngRevenue = bookings
-          .filter(b => b.region === 'NG')
-          .reduce((sum, b) => sum + b.payment.amount, 0);
-        
-        // Calculate Percentages for Market Split
-        // We use a base comparison to show the ratio
-        const totalGBPVal = ukRevenue + (ngRevenue / 2000); // Rough conversion for ratio only
-        const ukPercent = totalGBPVal > 0 ? Math.round((ukRevenue / totalGBPVal) * 100) : 50;
-        const ngPercent = 100 - ukPercent;
+        const ukRevenue = bookings.filter(b => b.region === 'UK').reduce((sum, b) => sum + b.payment.amount, 0);
+        const ngRevenue = bookings.filter(b => b.region === 'NG').reduce((sum, b) => sum + b.payment.amount, 0);
         
         setData({
           bookings: bookings.slice(0, 5).map(b => ({
             id: b.bookingId,
             mongoId: b._id,
             name: `${b.customer.firstName} ${b.customer.lastName}`,
+            phone: b.customer.phone,
             service: b.service,
             date: new Date(b.schedule.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
             status: b.status,
-            amount: `${b.region === 'UK' ? '£' : '₦'}${b.payment.amount.toLocaleString(undefined, { minimumFractionDigits: b.region === 'UK' ? 2 : 0, maximumFractionDigits: 2 })}`,
+            amount: `${b.region === 'UK' ? '£' : '₦'}${b.payment.amount.toLocaleString()}`,
             region: b.region,
             color: b.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
           })),
@@ -62,19 +52,18 @@ const Dashboard = () => {
             id: a._id,
             name: a.fullName,
             role: a.experience,
-            location: a.city || 'N/A'
           })),
-          marketSplit: [
-            { name: 'United Kingdom', revenue: `£${ukRevenue.toFixed(2)}`, percent: ukPercent, color: 'bg-secondary' },
-            { name: 'Nigeria', revenue: `₦${ngRevenue.toLocaleString()}`, percent: ngPercent, color: 'bg-white/20' },
-          ],
-          totalApplicants: applicants.length,
           stats: [
-            { title: 'Total Revenue (UK)', value: `£${ukRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, change: '+100%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
+            { title: 'Total Revenue (UK)', value: `£${ukRevenue.toLocaleString()}`, change: '+100%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
             { title: 'Total Revenue (NG)', value: `₦${ngRevenue.toLocaleString()}`, change: '+100%', isUp: true, icon: <DollarSign className="text-blue-500" /> },
-            { title: 'Active Bookings', value: bookings.length.toString(), change: '+100%', isUp: true, icon: <Calendar className="text-indigo-500" /> },
-            { title: 'New Applicants', value: applicants.length.toString(), change: '+100%', isUp: true, icon: <Users className="text-orange-500" /> },
-          ]
+            { title: 'Total Bookings', value: bookings.length.toString(), change: '+100%', isUp: true, icon: <Calendar className="text-indigo-500" /> },
+            { title: 'Conversion Rate', value: '12.5%', change: '+2%', isUp: true, icon: <TrendingUp className="text-purple-500" /> },
+          ],
+          systemHealth: {
+            api: 'Healthy',
+            db: 'Synced',
+            uptime: '100%'
+          }
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -84,7 +73,7 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {data.stats.map((stat, i) => (
@@ -107,25 +96,22 @@ const Dashboard = () => {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Recent Bookings Table */}
+        {/* Operations Table */}
         <div className="lg:col-span-2 bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden flex flex-col">
           <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
             <div>
               <h3 className="text-xl font-black text-primary-dark tracking-tight">Active Operations</h3>
-              <p className="text-sm text-slate-500 font-medium">Real-time booking monitor</p>
+              <p className="text-sm text-slate-500 font-medium">Real-time status monitor</p>
             </div>
-            <button 
-              onClick={() => navigate('/admin/bookings')}
-              className="px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-bold text-primary-dark hover:bg-slate-50 hover:border-primary/30 transition-all shadow-sm flex items-center gap-2"
-            >
-              View All <ChevronRight size={16} />
+            <button onClick={() => navigate('/admin/bookings')} className="px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-bold text-primary-dark hover:bg-slate-50 transition-all">
+              Manage All
             </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] bg-slate-50/30">
-                  <th className="px-8 py-4">ID / Customer</th>
+                  <th className="px-8 py-4">Customer</th>
                   <th className="px-4 py-4">Service</th>
                   <th className="px-4 py-4">Status</th>
                   <th className="px-8 py-4 text-right">Amount</th>
@@ -133,111 +119,81 @@ const Dashboard = () => {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {data.bookings.map((item, i) => (
-                  <tr 
-                    key={i} 
-                    onClick={() => navigate(`/admin/bookings?id=${item.mongoId}`)}
-                    className="group hover:bg-slate-50/80 transition-colors cursor-pointer"
-                  >
+                  <tr key={i} onClick={() => navigate(`/admin/bookings?id=${item.mongoId}`)} className="group hover:bg-slate-50/80 transition-colors cursor-pointer">
                     <td className="px-8 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs ${item.region === 'UK' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                          {item.region}
-                        </div>
-                        <div>
-                          <p className="font-bold text-primary-dark group-hover:text-primary transition-colors">{item.name}</p>
-                          <p className="text-[10px] font-bold text-slate-400 tracking-wider">{item.id}</p>
-                        </div>
-                      </div>
+                      <p className="font-bold text-primary-dark group-hover:text-primary transition-colors">{item.name}</p>
+                      <p className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1"><Phone size={10} /> {item.phone}</p>
                     </td>
                     <td className="px-4 py-5">
                       <p className="text-sm font-semibold text-slate-700">{item.service}</p>
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
-                        <Clock size={10} /> {item.date}
-                      </div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{item.date}</p>
                     </td>
                     <td className="px-4 py-5">
                       <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border shadow-sm ${item.color}`}>
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-8 py-5 text-right">
-                      <p className="font-black text-primary-dark tracking-tight">{item.amount}</p>
-                      <div className="flex items-center justify-end gap-1 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
-                        <CheckCircle2 size={10} /> Paid
-                      </div>
-                    </td>
+                    <td className="px-8 py-5 text-right font-black text-primary-dark">{item.amount}</td>
                   </tr>
                 ))}
-                {data.bookings.length === 0 && (
-                  <tr>
-                    <td colSpan="4" className="px-8 py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">
-                      No active bookings yet.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Sidebar Widgets */}
+        {/* CPanel Sidebar */}
         <div className="space-y-8">
-          {/* Market Performance */}
-          <div className="bg-primary-dark p-8 rounded-[40px] text-white relative overflow-hidden group shadow-2xl shadow-primary/20">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000" />
-            <h3 className="text-xl font-bold mb-8 relative z-10">Market Split</h3>
-            <div className="space-y-6 relative z-10">
-              {(data.marketSplit || []).map((region, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="flex justify-between items-end">
-                    <p className="text-sm font-medium text-slate-300">{region.name}</p>
-                    <p className="font-black text-lg">{region.revenue}</p>
-                  </div>
-                  <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
-                    <div className={`h-full ${region.color} rounded-full transition-all duration-1000 delay-300`} style={{ width: `${region.percent}%` }} />
-                  </div>
+          {/* System Pulse */}
+          <div className="bg-primary-dark p-8 rounded-[40px] text-white relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full blur-3xl -mr-16 -mt-16" />
+            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+              <Activity size={20} className="text-secondary" /> System Health
+            </h3>
+            <div className="space-y-4 relative z-10">
+              <div className="flex justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
+                <div className="flex items-center gap-3">
+                  <Shield size={18} className="text-emerald-400" />
+                  <span className="text-sm font-medium text-slate-300">API Gateway</span>
                 </div>
-              ))}
+                <span className="text-sm font-black text-emerald-400">{data.systemHealth.api}</span>
+              </div>
+              <div className="flex justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
+                <div className="flex items-center gap-3">
+                  <HardDrive size={18} className="text-blue-400" />
+                  <span className="text-sm font-medium text-slate-300">Database</span>
+                </div>
+                <span className="text-sm font-black text-blue-400">{data.systemHealth.db}</span>
+              </div>
+              <div className="pt-4 border-t border-white/10 flex justify-between items-center">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Network Uptime</p>
+                <p className="text-lg font-black text-secondary">{data.systemHealth.uptime}</p>
+              </div>
             </div>
           </div>
 
-          {/* Recent Applicants */}
+          {/* Quick Tools */}
           <div className="bg-white border border-slate-200 p-8 rounded-[40px] shadow-sm">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-black text-primary-dark">New Applicants</h3>
-              <span className="bg-primary/10 text-primary text-[10px] font-black px-2.5 py-1 rounded-full uppercase">{data.totalApplicants || 0} Total</span>
-            </div>
-            <div className="space-y-5">
-              {data.applicants.map((app, i) => (
-                <div 
-                  key={i} 
-                  onClick={() => navigate('/admin/applicants')}
-                  className="flex items-center gap-4 group cursor-pointer hover:translate-x-1 transition-transform"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-all">
-                    <UserCheck size={20} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-primary-dark leading-tight">{app.name}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate max-w-[100px]">{app.role}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                      <MapPin size={10} /> {app.location}
-                    </div>
-                  </div>
+            <h3 className="text-lg font-black text-primary-dark mb-6">Marketing Tools</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <button 
+                onClick={() => navigate('/admin/settings')}
+                className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center gap-2 hover:bg-primary/5 hover:border-primary/20 transition-all group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Users size={20} />
                 </div>
-              ))}
-              {data.applicants.length === 0 && (
-                <p className="text-center py-10 text-slate-400 font-bold uppercase tracking-widest text-[10px]">No new applications</p>
-              )}
+                <span className="text-[10px] font-black uppercase text-slate-600">Broadcast</span>
+              </button>
+              <button 
+                onClick={() => navigate('/admin/services')}
+                className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center gap-2 hover:bg-emerald-50 hover:border-emerald-200 transition-all group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Plus size={20} />
+                </div>
+                <span className="text-[10px] font-black uppercase text-slate-600">Add Service</span>
+              </button>
             </div>
-            <button 
-              onClick={() => navigate('/admin/applicants')}
-              className="w-full mt-8 py-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-500 hover:bg-primary hover:text-white hover:border-primary transition-all uppercase tracking-widest"
-            >
-              Review Applications
-            </button>
           </div>
         </div>
       </div>

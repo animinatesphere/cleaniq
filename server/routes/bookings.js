@@ -56,4 +56,40 @@ router.post('/', async (req, res) => {
   }
 });
 
+// UPDATE a booking (Admin)
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
+    res.json(updatedBooking);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// DELETE a booking (Admin)
+router.delete('/:id', async (req, res) => {
+  try {
+    const booking = await Booking.findByIdAndDelete(req.params.id);
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    res.json({ message: 'Booking deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// DELETE ALL bookings (Admin) - USE WITH CAUTION
+router.delete('/all/delete', async (req, res) => {
+  try {
+    await Booking.deleteMany({});
+    res.json({ message: 'All bookings cleared successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
