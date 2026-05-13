@@ -222,6 +222,7 @@ const Booking = () => {
       schedule: {
         date: formData.date,
         timeSlot: formData.timeSlot,
+        preferredTime: formData.preferredTime,
       },
       payment: {
         amount: totalPrice,
@@ -662,8 +663,8 @@ const Booking = () => {
                       </div>
 
                       {/* Time Selection */}
-                      <div>
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-4 px-2">Preferred Time Slot</label>
+                      <div className="space-y-6">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block px-2">Preferred Time Slot</label>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           {[
                             { id: 'Morning', label: 'Morning', time: '8:00 AM - 12:00 PM', icon: <Sparkles /> },
@@ -691,6 +692,31 @@ const Booking = () => {
                             </button>
                           ))}
                         </div>
+
+                        {formData.timeSlot && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 10 }} 
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-primary/5 p-6 rounded-[32px] border border-primary/10"
+                          >
+                            <label className="text-[10px] font-black text-primary uppercase tracking-widest block mb-3">Any specific time in the {formData.timeSlot}?</label>
+                            <div className="relative">
+                              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary">
+                                <Clock size={18} />
+                              </div>
+                              <input 
+                                type="text" 
+                                placeholder="e.g. 9:30 AM, ASAP, or 10:00 AM please"
+                                value={formData.preferredTime || ''}
+                                onChange={(e) => setFormData({...formData, preferredTime: e.target.value})}
+                                className="w-full p-4 pl-12 rounded-2xl bg-white border border-primary/20 focus:border-primary focus:outline-none font-bold text-sm text-primary-dark"
+                              />
+                            </div>
+                            <p className="mt-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                              We'll do our best to arrive at your requested time within the selected window.
+                            </p>
+                          </motion.div>
+                        )}
                       </div>
                     </div>
 
