@@ -23,6 +23,7 @@ const bookingSchema = new mongoose.Schema({
   schedule: {
     date: Date,
     timeSlot: String,
+    preferredTime: String,
   },
   payment: {
     amount: Number,
