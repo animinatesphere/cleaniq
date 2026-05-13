@@ -26,7 +26,7 @@ const Booking = () => {
   const [formData, setFormData] = useState({
     address: '',
     postcode: '',
-    serviceType: 'Classic One-off', 
+    serviceType: 'Residential Cleaning', 
     frequency: 'Once', 
     propertySize: '1 Bed Flat', 
     duration: 2, 
@@ -67,22 +67,21 @@ const Booking = () => {
     fetchRates();
   }, [region.id]);
 
-  // Pricing Logic (Fallback rates ensure price always updates)
+  // Pricing Logic
   useEffect(() => {
     let total = 0;
 
-    // Fallback rates in case VPS /api/services is unreachable
+    // Fallback rates
     const fallbackUK = {
-      'Classic Regular': 17.90,
+      'Residential Cleaning': 17.90,
       'Deep Clean': 24.90,
-      'Holiday Rental': 21.90,
+      'Airbnb Cleaning': 21.90,
       'Office Cleaning': 19.90,
-      'Classic One-off': 17.90,
     };
     const fallbackNG = {
-      'Classic Regular': 15000,
+      'Residential Cleaning': 15000,
       'Deep Clean': 25000,
-      'Holiday Rental': 20000,
+      'Airbnb Cleaning': 20000,
       'Office Cleaning': 18000,
       '1 Bed Flat': 15000,
       '2 Bed Flat': 20000,
@@ -91,15 +90,15 @@ const Booking = () => {
     };
 
     if (region.id === 'UK') {
-      // Use dynamic rate from VPS if available, otherwise fallback
       const rate = dynamicRates[formData.serviceType] 
         || fallbackUK[formData.serviceType] 
         || 17.90;
       total = rate * (formData.duration || 2);
     } else {
-      const rate = dynamicRates[formData.propertySize] 
-        || fallbackNG[formData.propertySize] 
-        || fallbackNG[formData.serviceType]
+      // In NG, we use property size if it's residential, otherwise service type
+      const rateKey = (formData.serviceType === 'Residential Cleaning') ? formData.propertySize : formData.serviceType;
+      const rate = dynamicRates[rateKey] 
+        || fallbackNG[rateKey] 
         || 15000;
       total = rate;
     }
@@ -281,10 +280,12 @@ const Booking = () => {
 
   const serviceOptions = [
     { 
-      id: 'Classic Regular', 
+      id: 'Residential Cleaning', 
       title: 'Residential Cleaning', 
       tag: 'Reliable domestic cleaners',
-      price: region.id === 'UK' ? '£17.90/h' : `${region.symbol}15,000`, 
+      price: dynamicRates['Residential Cleaning'] 
+        ? `${region.symbol}${dynamicRates['Residential Cleaning']}${region.id === 'UK' ? '/h' : ''}`
+        : (region.id === 'UK' ? '£17.90/h' : `${region.symbol}15,000`), 
       bullets: [
         'Reliable, weekly or bi-weekly cleaning for your home',
         'The same vetted cleaner each time',
@@ -297,7 +298,9 @@ const Booking = () => {
       id: 'Deep Clean', 
       title: 'Deep Clean', 
       tag: 'Deep cleaning',
-      price: region.id === 'UK' ? '£24.90/h' : `${region.symbol}25,000`, 
+      price: dynamicRates['Deep Clean'] 
+        ? `${region.symbol}${dynamicRates['Deep Clean']}${region.id === 'UK' ? '/h' : ''}`
+        : (region.id === 'UK' ? '£24.90/h' : `${region.symbol}25,000`), 
       bullets: [
         'Specialized deep cleaning for a total refresh',
         'Inside cabinets, baseboards & door frames',
@@ -307,17 +310,19 @@ const Booking = () => {
       icon: <Zap />
     },
     { 
-      id: 'Holiday Rental', 
+      id: 'Airbnb Cleaning', 
       title: 'Airbnb Cleaning', 
       tag: 'Short-let specialist',
-      price: region.id === 'UK' ? '£21.90/h' : `${region.symbol}20,000`, 
+      price: dynamicRates['Airbnb Cleaning'] 
+        ? `${region.symbol}${dynamicRates['Airbnb Cleaning']}${region.id === 'UK' ? '/h' : ''}`
+        : (region.id === 'UK' ? '£21.90/h' : `${region.symbol}20,000`), 
       bullets: [
-       "Turnover Specialist",
-        "5-Star Prep",
-        "Guest Ready Check",
-        "Inventory Monitoring",
-        "Consumable Supplies",
-         "Please provide a washing machine,dryer and detergent if on-site linen and towel washing is  required ",
+        'Turnover Specialist',
+        '5-Star Prep',
+        'Guest Ready Check',
+        'Inventory Monitoring',
+        'Consumable Supplies',
+        'Laundry services provided if on-site facilities available',
       ],
       icon: <Star />
     },
@@ -325,7 +330,9 @@ const Booking = () => {
       id: 'Office Cleaning', 
       title: 'Office Cleaning', 
       tag: 'Expert office cleaning',
-      price: 'Custom Quotes', 
+      price: dynamicRates['Office Cleaning'] 
+        ? `${region.symbol}${dynamicRates['Office Cleaning']}${region.id === 'UK' ? '/h' : ''}`
+        : 'Custom Quotes', 
       bullets: [
         'Professional janitorial services for workspaces',
         'Workstation sanitization & restroom care',
@@ -761,7 +768,7 @@ const Booking = () => {
                     </Elements>
 
                     {/* TEMPORARY TEST BUTTON */}
-                    {/* <div className="mt-8 pt-8 border-t border-slate-100">
+                    <div className="mt-8 pt-8 border-t border-slate-100">
                       <button 
                         onClick={() => handlePaymentSuccess({ id: "TEST_FREE_BOOKING_" + Date.now() })}
                         className="w-full py-4 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 font-black text-xs hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2"
@@ -769,7 +776,7 @@ const Booking = () => {
                         🛠️ RUN FREE TEST BOOKING (No Payment Required)
                       </button>
                       <p className="text-center text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">Testing emails & database. Remove before going live.</p>
-                    </div> */}
+                    </div>
                   </div>
                 )}
               </motion.div>
