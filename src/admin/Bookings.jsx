@@ -287,7 +287,7 @@ const Bookings = () => {
   return (
     <div className="space-y-6 pb-20 relative">
       {statusMessage.text && (
-        <div className="fixed top-10 right-10 z-[100] px-8 py-5 rounded-[32px] border shadow-2xl bg-primary-dark text-white font-black text-sm uppercase tracking-widest animate-in slide-in-from-right">
+        <div className="fixed top-10 right-10 z-100 px-8 py-5 rounded-[32px] border shadow-2xl bg-primary-dark text-white font-black text-sm uppercase tracking-widest animate-in slide-in-from-right">
           {statusMessage.text}
         </div>
       )}
@@ -365,7 +365,7 @@ const Bookings = () => {
       )}
 
       {selectedBooking && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md" onClick={() => setSelectedBooking(null)} />
           <div className="relative w-full max-w-4xl bg-white rounded-[48px] shadow-2xl overflow-hidden border-4 border-white flex flex-col max-h-[90vh]">
             <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">

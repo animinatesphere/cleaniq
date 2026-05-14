@@ -4,7 +4,7 @@ import logo from "../assets/lOGO.png";
 
 const LoadingOverlay = ({ message = "Processing your request..." }) => {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-primary-dark/80 backdrop-blur-md">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-primary-dark/80 backdrop-blur-md">
       <div className="flex flex-col items-center">
         <div className="relative">
           {/* Animated Glow Ring */}

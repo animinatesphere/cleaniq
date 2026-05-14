@@ -3,7 +3,7 @@ import React from 'react'
 
 const TopNav = () => {
   return (
-    <div className="bg-black text-white/90 py-2 md:h-[52px] flex items-center border-b border-white/5 fixed top-0 w-full z-[60] font-sans">
+    <div className="bg-black text-white/90 py-2 md:h-[52px] flex items-center border-b border-white/5 fixed top-0 w-full z-60 font-sans">
       <div className="max-w-7xl mx-auto px-4 md:px-8 w-full">
         <div className="flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
           {/* Left Side: Contact Info */}

@@ -108,7 +108,7 @@ const Applicants = () => {
       {/* Notifications - Fixed to viewport for maximum visibility */}
       {statusMessage.text && (
         <div 
-          className={`fixed top-10 right-10 z-[9999] px-8 py-5 rounded-[32px] border shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex items-center gap-4 font-black text-sm uppercase tracking-widest transition-all duration-500 transform translate-x-0 ${
+          className={`fixed top-10 right-10 z-9999 px-8 py-5 rounded-[32px] border shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex items-center gap-4 font-black text-sm uppercase tracking-widest transition-all duration-500 transform translate-x-0 ${
             statusMessage.type === 'success' 
             ? 'bg-emerald-500 text-white border-emerald-400' 
             : 'bg-rose-500 text-white border-rose-400'
@@ -225,7 +225,7 @@ const Applicants = () => {
 
       {/* Applicant Detail/Edit Modal */}
       {selectedApplicant && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md" onClick={() => setSelectedApplicant(null)} />
           <div className="relative w-full max-w-2xl bg-white rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border-4 border-white">
             

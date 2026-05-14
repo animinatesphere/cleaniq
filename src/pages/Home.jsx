@@ -394,7 +394,7 @@ useEffect(() => {
             className="w-full h-full object-cover"
           />
           {/* Dark overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
           {/* Label */}
           <div className="absolute bottom-8 left-8">
             <p className="text-xs font-black text-white/60 uppercase tracking-widest mb-1">Now showing</p>
@@ -474,7 +474,7 @@ useEffect(() => {
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
           {/* Caption */}
           <div className="absolute bottom-6 left-6">
             <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">{item.tag}</span>
