@@ -14,7 +14,7 @@ const sendEmail = async ({ to, subject, html }) => {
 
     console.log(`📧 Resend: Attempting to send email to: ${to}...`);
     const { data, error } = await resend.emails.send({
-      from: 'CleanIQ Services <onboarding@resend.dev>',
+      from: 'CleanIQ Services <info@cleaniqservices.com>',
       to,
       subject,
       html,
@@ -77,6 +77,31 @@ const templates = {
         <h2 style="font-size: 24px; margin-top: 0; color: #0F172A;">Congratulations ${applicantName}! 🎉</h2>
         <p>We are thrilled to inform you that you have been <strong>HIRED</strong> to join the CleanIQ Services team.</p>
       </div>
+    </div>
+  `,
+
+  adminNewApplicantAlert: (applicantName, role, email, phone) => `
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color: #0F172A;">New Application Received!</h2>
+      <p><strong>Applicant:</strong> ${applicantName}</p>
+      <p><strong>Role:</strong> ${role}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Phone:</strong> ${phone}</p>
+      <hr />
+      <a href="https://cleaniqservices.com/admin/recruitment" style="display: inline-block; padding: 10px 20px; background: #0F172A; color: white; text-decoration: none; border-radius: 5px;">View Application</a>
+    </div>
+  `,
+
+  adminNewBookingAlert: (bookingId, customerName, service, amount, currency, address) => `
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color: #0F172A;">New Booking Received!</h2>
+      <p><strong>Booking ID:</strong> ${bookingId}</p>
+      <p><strong>Customer:</strong> ${customerName}</p>
+      <p><strong>Service:</strong> ${service}</p>
+      <p><strong>Amount:</strong> ${currency === 'GBP' ? '£' : '₦'}${amount}</p>
+      <p><strong>Location:</strong> ${address}</p>
+      <hr />
+      <a href="https://cleaniqservices.com/admin/bookings" style="display: inline-block; padding: 10px 20px; background: #0F172A; color: white; text-decoration: none; border-radius: 5px;">View in Dashboard</a>
     </div>
   `
 };

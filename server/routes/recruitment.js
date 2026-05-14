@@ -45,11 +45,23 @@ router.post('/', upload.fields([
 
     const newApplicant = await applicant.save();
     
-    // Send "Application Received" Email
+    // Send "Application Received" Email to Applicant
     await sendEmail({
       to: newApplicant.email,
       subject: `Application Received: ${newApplicant.experience}`,
       html: templates.applicantReceived(newApplicant.fullName, newApplicant.experience)
+    });
+
+    // Send Alert Email to Admin
+    await sendEmail({
+      to: process.env.EMAIL_USER,
+      subject: `🚨 New Application: ${newApplicant.fullName}`,
+      html: templates.adminNewApplicantAlert(
+        newApplicant.fullName,
+        newApplicant.experience,
+        newApplicant.email,
+        newApplicant.phone
+      )
     });
 
     res.status(201).json(newApplicant);
