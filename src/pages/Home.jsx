@@ -1,9 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useRegion } from '../context/RegionContext';
 import air1 from "../assets/karl-joshua-bernal-QtPG6tfUJp8-unsplash.jpg"
 import air2 from "../assets/vitaly-gariev-2NcTLdFHpH8-unsplash.jpg"
+import residentialImg from "../assets/residential.jpg"
+import officeImg from "../assets/office.jpg"
+import deepcleanImg from "../assets/deepclean.jpg"
+import airbnbImg from "../assets/airbnb.jpg"
+import bento1 from "../assets/bento1.jpg"
+import bento2 from "../assets/bento2.jpg"
+import bento3 from "../assets/bento3.jpg"
+import bento4 from "../assets/bento4.jpg"
+import strip1 from "../assets/strip1.jpg"
+import strip2 from "../assets/strip2.jpg"
+import strip3 from "../assets/strip3.jpg"
+import strip4 from "../assets/strip4.jpg"
+import strip5 from "../assets/strip5.jpg"
+import grid1 from "../assets/grid1.jpg"
+import grid2 from "../assets/grid2.jpg"
+import grid3 from "../assets/grid3.jpg"
 import { 
   CheckCircle2, Star, ShieldCheck, Clock, 
   Home as HomeIcon, Briefcase, 
@@ -14,7 +30,21 @@ import {
 const Home = () => {
   const { region } = useRegion();
   const [activeFaq, setActiveFaq] = useState(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+const slides = [
+  { src: strip1, label: "Living Room" },
+  { src: strip2, label: "Kitchen" },
+  { src: strip3, label: "Bathroom" },
+  { src: strip4, label: "Office" },
+  { src: strip5, label: "Bedroom" },
+];
 
+useEffect(() => {
+  const timer = setInterval(() => {
+    setActiveSlide((prev) => (prev + 1) % slides.length);
+  }, 5000);
+  return () => clearInterval(timer);
+}, []);
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -133,46 +163,63 @@ const Home = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { 
-                title: 'Residential Cleaning', 
-                desc: 'Reliable, weekly or bi-weekly cleaning for your home.', 
-                icon: <HomeIcon size={32}/>,
-                keyword: 'Reliable domestic cleaners'
-              },
-              { 
-                title: 'Office Cleaning', 
-                desc: 'Professional janitorial services for your workspace.', 
-                icon: <Briefcase size={32}/>,
-                keyword: 'Expert office cleaning'
-              },
-              { 
-                title: 'Deep Clean', 
-                desc: 'Specialized deep cleaning services for a total refresh.', 
-                icon: <Zap size={32}/>,
-                keyword: 'Deep cleaning'
-              },
-              { 
-                title: 'Airbnb Cleaning', 
-                desc: 'Professional turnover services for your short-let rental.', 
-                icon: <Star size={32}/>,
-                keyword: 'Short-let specialist'
-              }
+             { 
+  title: 'Residential Cleaning', 
+  desc: 'Reliable, weekly or bi-weekly cleaning for your home.', 
+  icon: <HomeIcon size={32}/>,
+  keyword: 'Reliable domestic cleaners',
+  image: residentialImg   // 👈 add this
+},
+{ 
+  title: 'Office Cleaning', 
+  desc: 'Professional janitorial services for your workspace.', 
+  icon: <Briefcase size={32}/>,
+  keyword: 'Expert office cleaning',
+  image: officeImg   // 👈 add this
+},
+{ 
+  title: 'Deep Clean', 
+  desc: 'Specialized deep cleaning services for a total refresh.', 
+  icon: <Zap size={32}/>,
+  keyword: 'Deep cleaning',
+  image: deepcleanImg   // 👈 add this
+},
+{ 
+  title: 'Airbnb Cleaning', 
+  desc: 'Professional turnover services for your short-let rental.', 
+  icon: <Star size={32}/>,
+  keyword: 'Short-let specialist',
+  image: airbnbImg   // 👈 add this
+}
             ].map((service, idx) => (
-              <motion.div 
-                key={idx}
-                whileHover={{ y: -10 }}
-                className="p-10 rounded-[40px] bg-white border-2 border-slate-50 shadow-xl shadow-slate-100/50 hover:border-primary/20 transition-all"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-primary/5 text-primary flex items-center justify-center mb-8">
-                  {service.icon}
-                </div>
-                <h4 className="text-xs font-black text-primary uppercase tracking-widest mb-2">{service.keyword}</h4>
-                <h5 className="text-2xl font-black text-primary-dark mb-4 tracking-tight">{service.title}</h5>
-                <p className="text-slate-500 font-medium leading-relaxed mb-8">{service.desc}</p>
-                <Link to="/booking" className="inline-flex items-center gap-2 font-black text-primary hover:gap-4 transition-all">
-                  Book Now <ArrowRight size={18} />
-                </Link>
-              </motion.div>
+            <motion.div 
+  key={idx}
+  whileHover={{ y: -10 }}
+  className="rounded-[40px] bg-white border-2 border-slate-100 shadow-lg hover:shadow-xl hover:border-primary/20 transition-all overflow-hidden"
+>
+  {/* Colored top bar with image */}
+  <div className="h-56 bg-primary/5 overflow-hidden relative">
+    <img 
+      src={service.image} 
+      alt={service.title}
+      className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-700"
+    />
+    {/* Icon badge floating over image */}
+    <div className="absolute bottom-4 left-4 w-12 h-12 rounded-2xl bg-white shadow-lg text-primary flex items-center justify-center">
+      {service.icon}
+    </div>
+  </div>
+
+  {/* Content below */}
+  <div className="p-8">
+    <h4 className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">{service.keyword}</h4>
+    <h5 className="text-2xl font-black text-primary-dark mb-3 tracking-tight">{service.title}</h5>
+    <p className="text-slate-500 font-medium leading-relaxed text-sm mb-6">{service.desc}</p>
+    <Link to="/booking" className="inline-flex items-center gap-2 font-black text-primary hover:gap-4 transition-all">
+      Book Now <ArrowRight size={18} />
+    </Link>
+  </div>
+</motion.div>
             ))}
           </div>
         </div>
@@ -245,7 +292,42 @@ const Home = () => {
           </div>
         </div>
       </section>
+      
+    {/* bento page */}
+   
+   <section className="py-24 bg-white">
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="text-center mb-16">
+      <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Gallery</h2>
+      <h3 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter">
+        Clean spaces, happy faces.
+      </h3>
+    </div>
 
+    <div className="grid grid-cols-2 md:grid-cols-3 grid-rows-2 gap-4 h-[600px]">
+      {/* Big left image */}
+      <div className="col-span-1 row-span-2 rounded-[32px] overflow-hidden">
+        <img src={bento1} alt="clean home" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+      </div>
+      {/* Top middle */}
+      <div className="rounded-[32px] overflow-hidden">
+        <img src={bento2} alt="clean kitchen" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+      </div>
+      {/* Top right */}
+      <div className="rounded-[32px] overflow-hidden">
+        <img src={bento3} alt="clean bathroom" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+      </div>
+      {/* Bottom middle + right spanning */}
+      <div className="col-span-2 rounded-[32px] overflow-hidden">
+        <img src={bento4} alt="clean office" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+      </div>
+    </div>
+  </div>
+</section>
+    {/* bento page */}
+   
+   
+   
       {/* FAQ Section */}
       <section className="py-24 md:py-32 bg-white">
         <div className="max-w-4xl mx-auto px-6">
@@ -284,7 +366,59 @@ const Home = () => {
           </div>
         </div>
       </section>
+            {/* srtip page */}
 
+    <section className="py-24 bg-slate-50">
+  <div className="max-w-7xl mx-auto px-6 mb-12">
+    <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Our Work</h2>
+    <h3 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter">
+      Spaces we've transformed.
+    </h3>
+  </div>
+
+  {/* Slideshow */}
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="relative rounded-[40px] overflow-hidden h-[500px]">
+      
+      {/* All images stacked, only active one visible */}
+      {slides.map((item, i) => (
+        <div
+          key={i}
+          className={`absolute inset-0 transition-opacity duration-1000 ${
+            i === activeSlide ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <img
+            src={item.src}
+            alt={item.label}
+            className="w-full h-full object-cover"
+          />
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          {/* Label */}
+          <div className="absolute bottom-8 left-8">
+            <p className="text-xs font-black text-white/60 uppercase tracking-widest mb-1">Now showing</p>
+            <p className="text-3xl font-black text-white">{item.label}</p>
+          </div>
+        </div>
+      ))}
+
+      {/* Dot indicators */}
+      <div className="absolute bottom-8 right-8 flex gap-2">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveSlide(i)}
+            className={`h-2 rounded-full transition-all duration-500 ${
+              i === activeSlide ? "w-8 bg-white" : "w-2 bg-white/40"
+            }`}
+          />
+        ))}
+      </div>
+
+    </div>
+  </div>
+</section>
       {/* Join the Team Section */}
       <section className="py-24 bg-white border-t border-slate-50">
         <div className="max-w-7xl mx-auto px-6">
@@ -318,7 +452,39 @@ const Home = () => {
           </div>
         </div>
       </section>
+<section className="py-24 bg-white">
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="text-center mb-16">
+      <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Before & After</h2>
+      <h3 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter">
+        The Cleaniq difference.
+      </h3>
+    </div>
 
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {[
+        { src: grid1, title: "Deep Kitchen Clean", tag: "Residential" },
+        { src: grid2, title: "Office Refresh", tag: "Commercial" },
+        { src: grid3, title: "Airbnb Turnover", tag: "Short-let" },
+      ].map((item, i) => (
+        <div key={i} className="group rounded-[32px] overflow-hidden shadow-xl relative h-80">
+          <img 
+            src={item.src}
+            alt={item.title}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          />
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+          {/* Caption */}
+          <div className="absolute bottom-6 left-6">
+            <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">{item.tag}</span>
+            <p className="text-xl font-black text-white">{item.title}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
       {/* CTA Section */}
       <section className="py-24 bg-secondary/10 relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
