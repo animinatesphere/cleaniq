@@ -40,28 +40,14 @@ router.post('/', async (req, res) => {
     await sendEmail({
       to: newBooking.customer.email,
       subject: "Your CleanIQ Booking is Confirmed!",
-      html: templates.bookingConfirmation(
-        newBooking.customer.firstName,
-        newBooking.bookingId,
-        new Date(newBooking.schedule.date).toDateString(),
-        newBooking.schedule.timeSlot,
-        newBooking.payment.amount,
-        newBooking.payment.currency
-      )
+      html: templates.bookingConfirmation(newBooking)
     });
 
     // Send Alert Email to Admin
     await sendEmail({
       to: process.env.EMAIL_USER,
       subject: `🚨 New Booking: ${newBooking.bookingId}`,
-      html: templates.adminNewBookingAlert(
-        newBooking.bookingId,
-        `${newBooking.customer.firstName} ${newBooking.customer.lastName}`,
-        newBooking.service,
-        newBooking.payment.amount,
-        newBooking.payment.currency,
-        newBooking.details.address
-      )
+      html: templates.adminNewBookingAlert(newBooking)
     });
 
     res.status(201).json(newBooking);

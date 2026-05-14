@@ -130,6 +130,7 @@ useEffect(() => {
                 src={air1} 
                 alt="Professional cleaning service"
                 className="w-full h-[400px] lg:h-[600px] object-cover"
+                fetchpriority="high"
               />
             </div>
             <div className="absolute -bottom-10 -left-10 bg-white p-8 rounded-[32px] shadow-2xl shadow-primary/10 z-20 border border-slate-50 hidden md:block">
@@ -203,6 +204,8 @@ useEffect(() => {
       src={service.image} 
       alt={service.title}
       className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-700"
+      loading="lazy"
+      decoding="async"
     />
     {/* Icon badge floating over image */}
     <div className="absolute bottom-4 left-4 w-12 h-12 rounded-2xl bg-white shadow-lg text-primary flex items-center justify-center">
@@ -235,6 +238,8 @@ useEffect(() => {
                   src={air2} 
                   alt="Our Team"
                   className="w-full h-[500px] object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-secondary/20 rounded-full blur-3xl" />
@@ -307,19 +312,19 @@ useEffect(() => {
     <div className="grid grid-cols-2 md:grid-cols-3 grid-rows-2 gap-4 h-[600px]">
       {/* Big left image */}
       <div className="col-span-1 row-span-2 rounded-[32px] overflow-hidden">
-        <img src={bento1} alt="clean home" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+        <img src={bento1} alt="clean home" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
       </div>
       {/* Top middle */}
       <div className="rounded-[32px] overflow-hidden">
-        <img src={bento2} alt="clean kitchen" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+        <img src={bento2} alt="clean kitchen" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
       </div>
       {/* Top right */}
       <div className="rounded-[32px] overflow-hidden">
-        <img src={bento3} alt="clean bathroom" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+        <img src={bento3} alt="clean bathroom" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
       </div>
       {/* Bottom middle + right spanning */}
       <div className="col-span-2 rounded-[32px] overflow-hidden">
-        <img src={bento4} alt="clean office" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+        <img src={bento4} alt="clean office" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
       </div>
     </div>
   </div>
@@ -392,6 +397,7 @@ useEffect(() => {
             src={item.src}
             alt={item.label}
             className="w-full h-full object-cover"
+            loading="lazy"
           />
           {/* Dark overlay */}
           <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
@@ -472,6 +478,7 @@ useEffect(() => {
             src={item.src}
             alt={item.title}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            loading="lazy"
           />
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
