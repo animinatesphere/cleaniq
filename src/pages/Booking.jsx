@@ -35,18 +35,18 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   const isBooked = (date) => { if (!date) return false; const dStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; return bookedDates.includes(dStr); };
 
   return (
-    <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
-      <div className="flex justify-between items-center mb-8">
-        <h3 className="font-black text-primary-dark tracking-tighter text-lg">{currentMonth.toLocaleString('default', { month: 'long' })} <span className="text-primary">{currentMonth.getFullYear()}</span></h3>
-        <div className="flex gap-2">
-          <button onClick={handlePrevMonth} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"><ChevronLeft size={20} /></button>
-          <button onClick={handleNextMonth} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"><ChevronRight size={20} /></button>
+    <div className="bg-white rounded-[24px] md:rounded-[32px] p-4 md:p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
+      <div className="flex justify-between items-center mb-6 md:mb-8">
+        <h3 className="font-black text-primary-dark tracking-tighter text-base md:text-lg">{currentMonth.toLocaleString('default', { month: 'long' })} <span className="text-primary">{currentMonth.getFullYear()}</span></h3>
+        <div className="flex gap-1 md:gap-2">
+          <button onClick={handlePrevMonth} className="p-1.5 md:p-2 rounded-lg md:xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"><ChevronLeft size={18} /></button>
+          <button onClick={handleNextMonth} className="p-1.5 md:p-2 rounded-lg md:xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"><ChevronRight size={18} /></button>
         </div>
       </div>
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (<div key={d} className="text-[10px] font-black text-slate-300 uppercase text-center py-2">{d}</div>))}
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (<div key={d} className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase text-center py-2">{d}</div>))}
       </div>
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-7 gap-1 md:gap-2">
         {days.map((date, i) => {
           const booked = isBooked(date);
           const past = isPast(date);
@@ -54,10 +54,10 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
           return (
             <div key={i} className="aspect-square">
               {date ? (
-                <button disabled={disabled} onClick={() => onDateSelect(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`)} className={`w-full h-full rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative group ${disabled ? 'opacity-20 cursor-not-allowed grayscale' : 'hover:scale-110 active:scale-95'} ${isSelected(date) ? 'bg-primary text-white shadow-lg shadow-primary/30 z-10' : 'bg-slate-50 text-slate-600 hover:bg-primary/10 hover:text-primary'}`}>
-                  <span className="text-sm font-black">{date.getDate()}</span>
-                  {booked && <span className="text-[7px] font-black uppercase text-rose-500 absolute top-1">Taken</span>}
-                  {isToday(date) && !isSelected(date) && <div className="w-1 h-1 rounded-full absolute bottom-2 bg-primary" />}
+                <button disabled={disabled} onClick={() => onDateSelect(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`)} className={`w-full h-full rounded-xl md:rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative group ${disabled ? 'opacity-20 cursor-not-allowed grayscale' : 'hover:scale-110 active:scale-95'} ${isSelected(date) ? 'bg-primary text-white shadow-lg shadow-primary/30 z-10' : 'bg-slate-50 text-slate-600 hover:bg-primary/10 hover:text-primary'}`}>
+                  <span className="text-xs md:text-sm font-black">{date.getDate()}</span>
+                  {booked && <span className="text-[6px] md:text-[7px] font-black uppercase text-rose-500 absolute top-0.5 md:top-1">Taken</span>}
+                  {isToday(date) && !isSelected(date) && <div className="w-0.5 h-0.5 md:w-1 md:h-1 rounded-full absolute bottom-1.5 md:bottom-2 bg-primary" />}
                 </button>
               ) : <div className="w-full h-full" />}
             </div>
@@ -359,16 +359,16 @@ const Booking = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         
         {/* Progress Bar */}
-        <div className="flex justify-between items-center mb-10 bg-white p-3 md:p-5 rounded-[24px] shadow-sm border border-slate-100 overflow-x-auto no-scrollbar sticky top-24 z-40">
+        <div className="flex justify-between items-center mb-6 md:mb-10 bg-white p-2 md:p-5 rounded-[20px] md:rounded-[24px] shadow-sm border border-slate-100 overflow-x-auto no-scrollbar sticky top-20 md:top-24 z-40">
           {steps.map((s, idx) => (
             <div key={s.id} className="flex items-center shrink-0">
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-300 ${step === s.id ? 'bg-primary text-white shadow-md' : s.id < step ? 'text-primary' : 'text-slate-400'}`}>
-                <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-[9px] ${step === s.id ? 'bg-white/20' : s.id < step ? 'bg-primary/10' : 'bg-slate-100'}`}>
-                  {s.id < step ? <CheckCircle2 size={12}/> : s.id}
+                <div className={`w-5 h-5 md:w-6 md:h-6 rounded-lg flex items-center justify-center font-black text-[8px] md:text-[9px] ${step === s.id ? 'bg-white/20' : s.id < step ? 'bg-primary/10' : 'bg-slate-100'}`}>
+                  {s.id < step ? <CheckCircle2 size={10}/> : s.id}
                 </div>
-                <span className="font-black text-[8px] uppercase tracking-widest hidden sm:block">{s.title}</span>
+                <span className="font-black text-[7px] md:text-[8px] uppercase tracking-widest hidden xs:block">{s.title}</span>
               </div>
-              {idx < steps.length - 1 && <ChevronRight size={12} className="mx-2 text-slate-200" />}
+              {idx < steps.length - 1 && <ChevronRight size={10} className="mx-1 md:mx-2 text-slate-200" />}
             </div>
           ))}
         </div>
@@ -376,7 +376,8 @@ const Booking = () => {
         <div className="grid lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-8">
             <AnimatePresence mode="wait">
-              <motion.div key={step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="bg-white rounded-[40px] p-8 md:p-10 shadow-lg border border-slate-100 min-h-[600px] relative pb-24">
+              <motion.div key={step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-10 shadow-lg border border-slate-100 min-h-[500px] md:min-h-[600px] flex flex-col relative overflow-hidden">
+                <div className="flex-1 pb-20 md:pb-24">
                 
                 {step === 1 && (
                   <div className="space-y-8 animate-in fade-in">
@@ -396,13 +397,13 @@ const Booking = () => {
                 {step === 2 && (
                   <div className="space-y-8 animate-in fade-in duration-500">
                     <h1 className="text-4xl font-black text-primary-dark tracking-tight">What type of cleaning?</h1>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       {serviceOptions.map((s) => (
-                        <button key={s.id} onClick={() => { setFormData({...formData, serviceType: s.id}); nextStep(); }} className={`flex flex-col items-center p-8 rounded-[40px] border-4 transition-all duration-500 group relative overflow-hidden ${formData.serviceType === s.id ? 'border-primary bg-primary/5 shadow-2xl shadow-primary/10' : 'border-slate-50 bg-white hover:border-primary/20'}`}>
-                          <div className={`w-20 h-20 rounded-[32px] flex items-center justify-center mb-6 transition-all duration-500 ${formData.serviceType === s.id ? 'bg-primary text-white scale-110 shadow-lg' : 'bg-primary/5 text-primary group-hover:scale-110'}`}>{React.cloneElement(s.icon, { size: 32 })}</div>
-                          <p className={`font-black text-2xl mb-1 tracking-tighter ${formData.serviceType === s.id ? 'text-primary' : 'text-primary-dark'}`}>{s.title}</p>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">{s.tag}</p>
-                          <div className="mb-6"><span className="text-xl font-black text-primary-dark">{region.symbol}{dynamicRates[s.id] || (region.id === 'UK' ? (s.id === 'Deep Clean' ? 24.90 : 17.90) : (s.id === 'Deep Clean' ? 25000 : 15000))}</span>{region.id === 'UK' && <span className="text-[10px] font-bold text-slate-400 ml-1">/ hr</span>}</div>
+                        <button key={s.id} onClick={() => { setFormData({...formData, serviceType: s.id}); nextStep(); }} className={`flex flex-col items-center p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-4 transition-all duration-500 group relative overflow-hidden ${formData.serviceType === s.id ? 'border-primary bg-primary/5 shadow-2xl shadow-primary/10' : 'border-slate-50 bg-white hover:border-primary/20'}`}>
+                          <div className={`w-16 h-16 md:w-20 md:h-20 rounded-[24px] md:rounded-[32px] flex items-center justify-center mb-4 md:mb-6 transition-all duration-500 ${formData.serviceType === s.id ? 'bg-primary text-white scale-110 shadow-lg' : 'bg-primary/5 text-primary group-hover:scale-110'}`}>{React.cloneElement(s.icon, { size: 28 })}</div>
+                          <p className={`font-black text-xl md:text-2xl mb-1 tracking-tighter ${formData.serviceType === s.id ? 'text-primary' : 'text-primary-dark'}`}>{s.title}</p>
+                          <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">{s.tag}</p>
+                          <div className="mb-4 md:mb-6"><span className="text-lg md:text-xl font-black text-primary-dark">{region.symbol}{dynamicRates[s.id] || (region.id === 'UK' ? (s.id === 'Deep Clean' ? 24.90 : 17.90) : (s.id === 'Deep Clean' ? 25000 : 15000))}</span>{region.id === 'UK' && <span className="text-[10px] font-bold text-slate-400 ml-1">/ hr</span>}</div>
                           <div className="space-y-3 w-full text-left">
                             {s.bullets.map((bullet, idx) => (<div key={idx} className="flex items-center gap-3"><div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${formData.serviceType === s.id ? 'bg-primary/20 text-primary' : 'bg-slate-50 text-slate-300'}`}><CheckCircle2 size={12} /></div><p className="text-xs font-bold text-slate-500">{bullet}</p></div>))}
                           </div>
@@ -425,12 +426,12 @@ const Booking = () => {
                         { label: 'Reception Room(s)', field: 'receptionRooms', icon: <Layout size={18}/> },
                         { label: 'Conservatory(ies)', field: 'conservatories', icon: <Wind size={18}/> },
                       ].map(item => (
-                        <div key={item.field} className="flex items-center justify-between p-4 px-6 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/20 transition-all">
-                          <div className="flex items-center gap-4"><div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">{item.icon}</div><span className="font-bold text-sm text-primary-dark">{item.label}</span></div>
-                          <div className="flex items-center gap-6">
-                            <button onClick={() => updateRoom(item.field, -1)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Minus size={16}/></button>
-                            <span className="text-lg font-black text-primary-dark w-4 text-center">{formData.property[item.field]}</span>
-                            <button onClick={() => updateRoom(item.field, 1)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Plus size={16}/></button>
+                        <div key={item.field} className="flex items-center justify-between p-3 md:p-4 px-4 md:px-6 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/20 transition-all">
+                          <div className="flex items-center gap-3 md:gap-4"><div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">{React.cloneElement(item.icon, { size: 16 })}</div><span className="font-bold text-xs md:text-sm text-primary-dark">{item.label}</span></div>
+                          <div className="flex items-center gap-3 md:gap-6">
+                            <button onClick={() => updateRoom(item.field, -1)} className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Minus size={14}/></button>
+                            <span className="text-base md:text-lg font-black text-primary-dark w-4 text-center">{formData.property[item.field]}</span>
+                            <button onClick={() => updateRoom(item.field, 1)} className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Plus size={14}/></button>
                           </div>
                         </div>
                       ))}
@@ -442,12 +443,12 @@ const Booking = () => {
                   <div className="space-y-12 animate-in fade-in py-10">
                     <div className="text-center"><h1 className="text-4xl font-black text-primary-dark tracking-tight mb-4">How many hours?</h1><p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Select the duration of your clean</p></div>
                     <div className="max-w-md mx-auto">
-                      <div className="bg-slate-50 p-10 rounded-[40px] border border-slate-100 flex items-center justify-between">
-                        <button onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 1)})} className="w-16 h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Minus size={24}/></button>
-                        <div className="text-center"><span className="text-6xl font-black text-primary-dark">{formData.duration}</span><p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mt-2">Hours</p></div>
-                        <button onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 1)})} className="w-16 h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Plus size={24}/></button>
+                      <div className="bg-slate-50 p-6 md:p-10 rounded-[32px] md:rounded-[40px] border border-slate-100 flex items-center justify-between">
+                        <button onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 1)})} className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Minus size={20}/></button>
+                        <div className="text-center"><span className="text-4xl md:text-6xl font-black text-primary-dark">{formData.duration}</span><p className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em] mt-1 md:mt-2">Hours</p></div>
+                        <button onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 1)})} className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Plus size={20}/></button>
                       </div>
-                      <div className="mt-10 grid grid-cols-3 gap-4">
+                      <div className="mt-6 md:mt-10 grid grid-cols-3 gap-2 md:gap-4">
                         {['Once', 'Weekly', 'Fortnightly'].map(f => (
                           <button key={f} onClick={() => setFormData({...formData, frequency: f})} className={`p-6 rounded-3xl border-2 font-black text-sm transition-all ${formData.frequency === f ? 'border-primary bg-primary text-white shadow-xl shadow-primary/20' : 'border-slate-50 bg-slate-50'}`}>{f}</button>
                         ))}
@@ -476,8 +477,8 @@ const Booking = () => {
                   <div className="space-y-8 animate-in fade-in">
                     <div><h1 className="text-3xl font-black text-primary-dark tracking-tight">Logistics</h1><p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Help our team get access</p></div>
                     <div className="grid gap-6">
-                      <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Parking Situation</label><div className="grid grid-cols-2 gap-3">{['Available on-site', 'Street parking', 'Paid parking nearby', 'No parking'].map(p => (<button key={p} onClick={() => setFormData({...formData, parking: p})} className={`p-4 rounded-xl border-2 font-bold text-xs transition-all text-left ${formData.parking === p ? 'border-primary bg-primary text-white' : 'border-slate-50 bg-slate-50'}`}>{p}</button>))}</div></div>
-                      <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Key / Entry Access</label><div className="grid grid-cols-2 gap-3">{['I will be home', 'Key under mat', 'Lockbox / Key safe', 'Building concierge'].map(k => (<button key={k} onClick={() => setFormData({...formData, keyAccess: k})} className={`p-4 rounded-xl border-2 font-bold text-xs transition-all text-left ${formData.keyAccess === k ? 'border-primary bg-primary text-white' : 'border-slate-50 bg-slate-50'}`}>{k}</button>))}</div></div>
+                      <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Parking Situation</label><div className="grid grid-cols-1 xs:grid-cols-2 gap-3">{['Available on-site', 'Street parking', 'Paid parking nearby', 'No parking'].map(p => (<button key={p} onClick={() => setFormData({...formData, parking: p})} className={`p-4 rounded-xl border-2 font-bold text-xs transition-all text-left ${formData.parking === p ? 'border-primary bg-primary text-white' : 'border-slate-50 bg-slate-50'}`}>{p}</button>))}</div></div>
+                      <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Key / Entry Access</label><div className="grid grid-cols-1 xs:grid-cols-2 gap-3">{['I will be home', 'Key under mat', 'Lockbox / Key safe', 'Building concierge'].map(k => (<button key={k} onClick={() => setFormData({...formData, keyAccess: k})} className={`p-4 rounded-xl border-2 font-bold text-xs transition-all text-left ${formData.keyAccess === k ? 'border-primary bg-primary text-white' : 'border-slate-50 bg-slate-50'}`}>{k}</button>))}</div></div>
                       <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Special Instructions (optional)</label><textarea className="w-full p-5 rounded-2xl bg-slate-50 border-none outline-none font-bold text-sm resize-none h-28" placeholder="e.g. Ring bell twice, dog on premises, focus on kitchen..." value={formData.specialInstructions} onChange={(e) => setFormData({...formData, specialInstructions: e.target.value})}/></div>
                     </div>
                   </div>
@@ -523,7 +524,21 @@ const Booking = () => {
                   </div>
                 )}
 
-                <div className="absolute bottom-8 left-8 right-8 flex justify-between items-center pointer-events-none">{step > 1 ? (<button onClick={prevStep} className="pointer-events-auto flex items-center gap-2 text-slate-400 hover:text-primary transition-all font-black text-[9px] uppercase tracking-widest group"><ChevronLeft size={18} className="group-hover:-translate-x-1 transition-all" />Go Back</button>) : <div/>}{step < 8 && (<button onClick={nextStep} className="pointer-events-auto flex items-center gap-4 bg-primary text-white px-8 py-4 rounded-full font-black text-xs shadow-xl shadow-primary/20 hover:scale-105 transition-all group">Next Step <ArrowRight size={18} className="group-hover:translate-x-1 transition-all" /></button>)}</div>
+                </div>
+
+                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 bg-white/80 backdrop-blur-sm border-t border-slate-50 flex justify-between items-center pointer-events-none">
+                  {step > 1 ? (
+                    <button onClick={prevStep} className="pointer-events-auto flex items-center gap-2 text-slate-400 hover:text-primary transition-all font-black text-[9px] uppercase tracking-widest group">
+                      <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-all" />
+                      <span className="hidden xs:inline">Go Back</span>
+                    </button>
+                  ) : <div/>}
+                  {step < 8 && (
+                    <button onClick={nextStep} className="pointer-events-auto flex items-center gap-3 md:gap-4 bg-primary text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-black text-[10px] md:text-xs shadow-xl shadow-primary/20 hover:scale-105 transition-all group">
+                      Next Step <ArrowRight size={18} className="group-hover:translate-x-1 transition-all" />
+                    </button>
+                  )}
+                </div>
               </motion.div>
             </AnimatePresence>
           </div>

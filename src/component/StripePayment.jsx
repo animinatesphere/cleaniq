@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-  CardElement,
+  CardNumberElement,
+  CardExpiryElement,
+  CardCvcElement,
   useStripe,
   useElements
 } from '@stripe/react-stripe-js';
@@ -53,7 +55,7 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
 
     const payload = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
-        card: elements.getElement(CardElement),
+        card: elements.getElement(CardNumberElement),
         billing_details: {
           name: `${customerInfo.firstName} ${customerInfo.lastName}`,
           email: customerInfo.email,
@@ -75,7 +77,7 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
   const cardElementOptions = {
     style: {
       base: {
-        fontSize: '18px',
+        fontSize: '16px',
         color: '#1a1a1a',
         fontFamily: 'Inter, sans-serif',
         '::placeholder': {
@@ -108,8 +110,21 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
           </div>
         </div>
         
-        <div className="p-5 rounded-2xl bg-slate-50 border-2 border-slate-100 focus-within:border-primary/30 transition-all">
-          <CardElement options={cardElementOptions} />
+        <div className="space-y-4">
+          <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus-within:border-primary/30 transition-all">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Card Number</label>
+            <CardNumberElement options={cardElementOptions} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus-within:border-primary/30 transition-all">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Expiry Date</label>
+              <CardExpiryElement options={cardElementOptions} />
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus-within:border-primary/30 transition-all">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">CVC</label>
+              <CardCvcElement options={cardElementOptions} />
+            </div>
+          </div>
         </div>
       </div>
 
