@@ -144,9 +144,9 @@ const Booking = () => {
     postcode: '',
     serviceType: preSelectedService || '', 
     frequency: 'Once', 
-    duration: 2,
+    duration: 0,
     property: {
-      bedrooms: 1,
+      bedrooms: 0,
       bathrooms: 0,
       cloakrooms: 0,
       kitchens: 0,
@@ -170,6 +170,7 @@ const Booking = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dynamicRates, setDynamicRates] = useState({});
+  const [servicesList, setServicesList] = useState([]);
   const [loadingRates, setLoadingRates] = useState(true);
 
   // Fetch Dynamic Rates from VPS
@@ -194,6 +195,7 @@ const Booking = () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${region.id}`);
         const data = await response.json();
+        setServicesList(data);
         const ratesObj = {};
         data.forEach(service => { ratesObj[service.name] = service.rate; });
         setDynamicRates(ratesObj);
@@ -228,7 +230,7 @@ const Booking = () => {
     // Base Service Rate (Multiplied by Duration if UK/Hourly)
     const baseRate = dynamicRates[formData.serviceType] || rates[formData.serviceType] || 20;
     if (region.id === 'UK') {
-      total += baseRate * (formData.duration || 2);
+      total += baseRate * formData.duration;
     } else {
       total += baseRate; // Flat rate for NG
     }
@@ -236,12 +238,13 @@ const Booking = () => {
     // Room Rates
     const roomMap = { bedrooms: 'Bedroom', bathrooms: 'Bathroom', cloakrooms: 'Cloakroom', kitchens: 'Kitchen', utilityRooms: 'Utility Room', receptionRooms: 'Reception Room', conservatories: 'Conservatory' };
     Object.entries(formData.property).forEach(([key, qty]) => {
-      total += (rates[roomMap[key]] || 0) * qty;
+      const roomName = roomMap[key];
+      total += (dynamicRates[roomName] || rates[roomName] || 0) * qty;
     });
 
     // Extra Rates
     Object.entries(formData.extras).forEach(([name, qty]) => {
-      total += (rates[name] || 0) * qty;
+      total += (dynamicRates[name] || rates[name] || 0) * qty;
     });
 
     if (formData.frequency === 'Weekly') total *= 0.9;
@@ -458,7 +461,7 @@ const Booking = () => {
                     <div className="text-center"><h1 className="text-4xl font-black text-primary-dark tracking-tight mb-4">How many hours?</h1><p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Select the duration of your clean</p></div>
                     <div className="max-w-md mx-auto">
                       <div className="bg-slate-50 p-6 md:p-10 rounded-[32px] md:rounded-[40px] border border-slate-100 flex items-center justify-between">
-                        <button onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 1)})} className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Minus size={20}/></button>
+                        <button onClick={() => setFormData({...formData, duration: Math.max(0, formData.duration - 1)})} className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Minus size={20}/></button>
                         <div className="text-center"><span className="text-4xl md:text-6xl font-black text-primary-dark">{formData.duration}</span><p className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em] mt-1 md:mt-2">Hours</p></div>
                         <button onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 1)})} className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Plus size={20}/></button>
                       </div>
@@ -475,14 +478,17 @@ const Booking = () => {
                   <div className="space-y-8 animate-in fade-in">
                     <div><h1 className="text-3xl font-black text-primary-dark tracking-tight">Extra Services</h1><p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Select additional options</p></div>
                     <div className="grid md:grid-cols-2 gap-4">
-                      {[
-                        { name: 'American fridge freeze', icon: <Refrigerator /> }, { name: 'Carpet(s) Cleaning', icon: <Sparkles /> }, { name: 'Double Oven Cleaning', icon: <Zap /> }, { name: 'Fridge and freezer', icon: <Refrigerator /> }, { name: 'Range Oven Cleaning', icon: <Zap /> }, { name: 'Single fridge', icon: <Refrigerator /> }, { name: 'Single Oven Cleaning', icon: <Zap /> }, { name: 'Venetian Blinds', icon: <Layout /> },
-                      ].map(extra => (
-                        <div key={extra.name} className={`p-4 px-6 rounded-2xl border-2 flex items-center justify-between transition-all ${formData.extras[extra.name] > 0 ? 'border-primary bg-primary/5' : 'border-slate-50 bg-slate-50'}`}>
-                          <div className="flex items-center gap-4"><div className={`w-10 h-10 rounded-xl flex items-center justify-center ${formData.extras[extra.name] > 0 ? 'bg-primary text-white' : 'bg-white text-slate-400 shadow-sm'}`}>{React.cloneElement(extra.icon, { size: 18 })}</div><span className="font-bold text-[11px] text-primary-dark max-w-[110px] leading-tight">{extra.name}</span></div>
-                          <div className="flex items-center gap-3 bg-white rounded-xl p-1.5 border border-slate-100"><button onClick={() => updateExtra(extra.name, -1)} className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400"><Minus size={12}/></button><span className="font-black text-xs w-4 text-center">{formData.extras[extra.name] || 0}</span><button onClick={() => updateExtra(extra.name, 1)} className="w-7 h-7 rounded-lg bg-primary text-white flex items-center justify-center"><Plus size={12}/></button></div>
-                        </div>
-                      ))}
+                      {servicesList
+                        .filter(s => !['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning', 'Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'].includes(s.name))
+                        .map(extra => {
+                          const iconMap = { 'American fridge freeze': <Refrigerator />, 'Carpet(s) Cleaning': <Sparkles />, 'Double Oven Cleaning': <Zap />, 'Fridge and freezer': <Refrigerator />, 'Range Oven Cleaning': <Zap />, 'Single fridge': <Refrigerator />, 'Single Oven Cleaning': <Zap />, 'Venetian Blinds': <Layout /> };
+                          return (
+                            <div key={extra._id} className={`p-4 px-6 rounded-2xl border-2 flex items-center justify-between transition-all ${formData.extras[extra.name] > 0 ? 'border-primary bg-primary/5' : 'border-slate-50 bg-slate-50'}`}>
+                              <div className="flex items-center gap-4"><div className={`w-10 h-10 rounded-xl flex items-center justify-center ${formData.extras[extra.name] > 0 ? 'bg-primary text-white' : 'bg-white text-slate-400 shadow-sm'}`}>{iconMap[extra.name] || <Plus size={18}/>}</div><span className="font-bold text-[11px] text-primary-dark max-w-[110px] leading-tight">{extra.name}</span></div>
+                              <div className="flex items-center gap-3 bg-white rounded-xl p-1.5 border border-slate-100"><button onClick={() => updateExtra(extra.name, -1)} className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400"><Minus size={12}/></button><span className="font-black text-xs w-4 text-center">{formData.extras[extra.name] || 0}</span><button onClick={() => updateExtra(extra.name, 1)} className="w-7 h-7 rounded-lg bg-primary text-white flex items-center justify-center"><Plus size={12}/></button></div>
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
                 )}
