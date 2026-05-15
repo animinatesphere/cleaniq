@@ -14,7 +14,7 @@ const sendEmail = async ({ to, subject, html }) => {
 
     console.log(`📧 Resend: Attempting to send email to: ${to}...`);
     const { data, error } = await resend.emails.send({
-      from: 'CleanIQ Services <info@cleaniqservices.com>',
+      from: 'Cleaniq Services <info@cleaniqservices.com>',
       to,
       subject,
       html,
@@ -40,7 +40,7 @@ const templates = {
       <div style="background-color: #0F172A; padding: 40px; text-align: center;">
         <img src="https://cleaniqservices.com/preview.jpg" alt="CleanIQ Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
         <h1 style="color: #6EE7B7; margin: 0; font-size: 28px; letter-spacing: -1px;">Booking Confirmed!</h1>
-        <p style="color: #94a3b8; margin-top: 10px; font-weight: 500;">Thank you for choosing CleanIQ Services</p>
+        <p style="color: #94a3b8; margin-top: 10px; font-weight: 500;">Thank you for choosing Cleaniq Services</p>
       </div>
       <div style="padding: 40px; color: #1e293b; line-height: 1.6;">
         <h2 style="font-size: 20px; margin-top: 0; color: #0F172A;">Hi ${booking.customer.firstName},</h2>
@@ -85,7 +85,7 @@ const templates = {
         </div>
       </div>
       <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #f1f5f9;">
-        <p style="margin: 0; font-size: 12px; color: #94a3b8;">&copy; 2026 CleanIQ Services. All rights reserved.</p>
+        <p style="margin: 0; font-size: 12px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
       </div>
     </div>
   `,
@@ -93,12 +93,12 @@ const templates = {
   applicantReceived: (applicantName, role) => `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
       <div style="background-color: #0F172A; padding: 40px; text-align: center;">
-        <img src="https://cleaniqservices.com/preview.jpg" alt="CleanIQ Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
         <h1 style="color: #6EE7B7; margin: 0; font-size: 24px;">Application Received</h1>
       </div>
       <div style="padding: 40px; color: #1e293b; line-height: 1.6;">
         <h2 style="font-size: 20px; margin-top: 0; color: #0F172A;">Hello ${applicantName},</h2>
-        <p>Thank you for your interest in joining the CleanIQ team. We've received your application for the <strong>${role}</strong> position.</p>
+        <p>Thank you for your interest in joining the Cleaniq team. We've received your application for the <strong>${role}</strong> position.</p>
         <p>Our recruitment team will review your profile and get back to you if your skills match our current needs.</p>
         <div style="margin-top: 30px; padding: 20px; background-color: #f8fafc; border-radius: 16px; border: 1px solid #f1f5f9; text-align: center;">
           <p style="margin: 0; font-size: 14px; color: #64748b;">Status: <strong>Under Review</strong></p>
@@ -115,7 +115,7 @@ const templates = {
       </div>
       <div style="padding: 40px; color: #1e293b; line-height: 1.6; text-align: center;">
         <h2 style="font-size: 24px; margin-top: 0; color: #0F172A;">Congratulations ${applicantName}!</h2>
-        <p style="font-size: 16px;">We are thrilled to inform you that you have been <strong>HIRED</strong> to join CleanIQ Services.</p>
+        <p style="font-size: 16px;">We are thrilled to inform you that you have been <strong>HIRED</strong> to join Cleaniq Services.</p>
         <p>Expect an onboarding email from our HR department shortly.</p>
       </div>
     </div>
