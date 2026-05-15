@@ -32,6 +32,22 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Update a service by ID
+router.put('/:id', async (req, res) => {
+  try {
+    const { name, region, rate, type, description } = req.body;
+    const service = await Service.findByIdAndUpdate(
+      req.params.id,
+      { name, region, rate, type, description, updatedAt: Date.now() },
+      { new: true }
+    );
+    if (!service) return res.status(404).json({ message: 'Service not found' });
+    res.json(service);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // Delete a service
 router.delete('/:id', async (req, res) => {
   try {

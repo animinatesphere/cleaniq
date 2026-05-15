@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import LoadingOverlay from '../component/LoadingOverlay';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRegion } from '../context/RegionContext';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { 
   ChevronRight, ChevronLeft, Calendar, User, 
   CreditCard, Home as HomeIcon, Briefcase, 
@@ -70,6 +70,8 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
 
 const Booking = () => {
   const { region } = useRegion();
+  const [searchParams] = useSearchParams();
+  const preSelectedService = searchParams.get('service');
 
   const serviceOptions = [
     { 
@@ -140,7 +142,7 @@ const Booking = () => {
     address: '',
     addressLine2: '',
     postcode: '',
-    serviceType: '', 
+    serviceType: preSelectedService || '', 
     frequency: 'Once', 
     duration: 2,
     property: {
@@ -260,8 +262,20 @@ const Booking = () => {
     });
   };
 
-  const nextStep = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); setStep(s => Math.min(s + 1, 8)); };
-  const prevStep = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); setStep(s => Math.max(s - 1, 1)); };
+  const nextStep = () => { 
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    setStep(s => {
+      if (s === 1 && preSelectedService) return 3;
+      return Math.min(s + 1, 8);
+    }); 
+  };
+  const prevStep = () => { 
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    setStep(s => {
+      if (s === 3 && preSelectedService) return 1;
+      return Math.max(s - 1, 1);
+    }); 
+  };
 
   const steps = [
     { id: 1, title: 'Address' },
@@ -513,14 +527,14 @@ const Booking = () => {
                     <Elements stripe={stripePromise}><StripePayment amount={totalPrice} currency={region.id === 'UK' ? 'GBP' : 'NGN'} customerInfo={formData} onPaymentSuccess={handlePaymentSuccess} /></Elements>
                     
                     {/* Developer Test Mode */}
-                    {/* <div className="mt-8 pt-8 border-t border-slate-100">
+                    <div className="mt-8 pt-8 border-t border-slate-100">
                       <button 
                         onClick={() => handlePaymentSuccess({ id: `TEST-${Date.now()}` })}
                         className="w-full py-4 rounded-2xl bg-slate-50 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 hover:text-slate-600 transition-all border-2 border-dashed border-slate-200"
                       >
                         Dev: Submit Without Paying (TEST MODE)
                       </button>
-                    </div> */}
+                    </div>
                   </div>
                 )}
 

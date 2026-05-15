@@ -41,8 +41,8 @@ const Settings = () => {
 
   const handleUpdateService = async (id) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/services/${id}`, {
-        method: 'PUT',
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/services`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editServiceData)
       });

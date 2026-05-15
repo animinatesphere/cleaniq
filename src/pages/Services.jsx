@@ -202,7 +202,7 @@ const Services = () => {
                   </motion.div>
 
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 md:6">
-                    <Link to="/booking" className="btn-primary w-full sm:w-auto text-center py-4">
+                    <Link to={`/booking?service=${encodeURIComponent(service.dbName)}`} className="btn-primary w-full sm:w-auto text-center py-4">
                       Book Service
                     </Link>
                     <span className="text-primary font-black text-xl md:text-2xl text-center">
