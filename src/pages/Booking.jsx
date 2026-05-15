@@ -18,6 +18,65 @@ import StripePayment from '../component/StripePayment';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
+const serviceOptions = [
+  { 
+    id: 'Residential Cleaning', 
+    title: 'Residential Cleaning', 
+    tag: 'Reliable domestic cleaners',
+    bullets: [
+      "Dusting of all surfaces.",
+      "Vacuuming & Mopping.",
+      "Kitchen degreasing.",
+      "Bathroom sanitization.",
+      "Bed making & tidying.",
+      "Trash removal.",
+    ],
+    icon: <Heart />
+  },
+  { 
+    id: 'Deep Clean', 
+    title: 'Deep Clean', 
+    tag: 'Deep cleaning',
+    bullets: [
+      "Inside cabinets & drawers.",
+      "Baseboard scrubbing.",
+      "Door frame cleaning.",
+      "Wall spot cleaning.",
+      "Appliance deep clean.",
+      "End-of-tenancy guarantee.",
+    ],
+    icon: <Zap />
+  },
+  { 
+    id: 'Airbnb Cleaning', 
+    title: 'Airbnb Cleaning', 
+    tag: 'Short-let specialist',
+    bullets: [
+      "Linen & towel change.",
+      "Guest amenity restock.",
+      "Photo-verified check.",
+      "Damage reporting.",
+      "Inventory monitoring.",
+      "5-star turnover prep.",
+    ],
+    icon: <Star />
+  },
+  { 
+    id: 'Office Cleaning', 
+    title: 'Office Cleaning', 
+    tag: 'Expert office cleaning',
+    bullets: [
+      "Workstation sanitization.",
+      "Communal area cleaning.",
+      "Restroom maintenance.",
+      "Window cleaning.",
+      "Carpet deep clean.",
+      "Disinfection services.",
+    ],
+    icon: <Briefcase />
+  },
+];
+
 const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
@@ -72,65 +131,6 @@ const Booking = () => {
   const { region } = useRegion();
   const [searchParams] = useSearchParams();
   const preSelectedService = searchParams.get('service');
-
-  const serviceOptions = [
-    { 
-      id: 'Residential Cleaning', 
-      title: 'Residential Cleaning', 
-      tag: 'Reliable domestic cleaners',
-      bullets: [
-        "Dusting of all surfaces.",
-        "Vacuuming & Mopping.",
-        "Kitchen degreasing.",
-        "Bathroom sanitization.",
-        "Bed making & tidying.",
-        "Trash removal.",
-      ],
-      icon: <Heart />
-    },
-    { 
-      id: 'Deep Clean', 
-      title: 'Deep Clean', 
-      tag: 'Deep cleaning',
-      bullets: [
-        "Inside cabinets & drawers.",
-        "Baseboard scrubbing.",
-        "Door frame cleaning.",
-        "Wall spot cleaning.",
-        "Appliance deep clean.",
-        "End-of-tenancy guarantee.",
-      ],
-      icon: <Zap />
-    },
-    { 
-      id: 'Airbnb Cleaning', 
-      title: 'Airbnb Cleaning', 
-      tag: 'Short-let specialist',
-      bullets: [
-        "Linen & towel change.",
-        "Guest amenity restock.",
-        "Photo-verified check.",
-        "Damage reporting.",
-        "Inventory monitoring.",
-        "5-star turnover prep.",
-      ],
-      icon: <Star />
-    },
-    { 
-      id: 'Office Cleaning', 
-      title: 'Office Cleaning', 
-      tag: 'Expert office cleaning',
-      bullets: [
-        "Workstation sanitization.",
-        "Communal area cleaning.",
-        "Restroom maintenance.",
-        "Window cleaning.",
-        "Carpet deep clean.",
-        "Disinfection services.",
-      ],
-      icon: <Briefcase />
-    },
-  ];
 
   const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -195,9 +195,39 @@ const Booking = () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${region.id}&t=${Date.now()}`);
         const data = await response.json();
-        setServicesList(data);
+        
+        // Define fallback extras to ensure they always show up
+        const fallbackExtras = region.id === 'UK' ? [
+          { name: 'American fridge freeze', rate: 15 },
+          { name: 'Carpet(s) Cleaning', rate: 30 },
+          { name: 'Double Oven Cleaning', rate: 20 },
+          { name: 'Fridge and freezer', rate: 18 },
+          { name: 'Range Oven Cleaning', rate: 25 },
+          { name: 'Single fridge', rate: 10 },
+          { name: 'Single Oven Cleaning', rate: 15 },
+          { name: 'Venetian Blinds', rate: 5 }
+        ] : [
+          { name: 'American fridge freeze', rate: 8000 },
+          { name: 'Carpet(s) Cleaning', rate: 15000 },
+          { name: 'Double Oven Cleaning', rate: 12000 },
+          { name: 'Fridge and freezer', rate: 10000 },
+          { name: 'Range Oven Cleaning', rate: 15000 },
+          { name: 'Single fridge', rate: 5000 },
+          { name: 'Single Oven Cleaning', rate: 8000 },
+          { name: 'Venetian Blinds', rate: 3000 }
+        ];
+
+        // Merge DB data with fallbacks (DB takes priority)
+        const combined = [...data];
+        fallbackExtras.forEach(fallback => {
+          if (!data.some(s => s.name.toLowerCase().trim() === fallback.name.toLowerCase().trim())) {
+            combined.push({ _id: `fallback-${fallback.name}`, ...fallback, type: 'flat' });
+          }
+        });
+
+        setServicesList(combined);
         const ratesObj = {};
-        data.forEach(service => { ratesObj[service.name.trim()] = service.rate; });
+        combined.forEach(service => { ratesObj[service.name.trim()] = service.rate; });
         setDynamicRates(ratesObj);
       } catch (error) { console.error('Error fetching rates:', error); } finally { setLoadingRates(false); }
     };
@@ -479,12 +509,27 @@ const Booking = () => {
                     <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Extra Services</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Select additional options</p></div>
                     <div className="grid md:grid-cols-2 gap-4">
                       {servicesList
-                        .filter(s => !['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning', 'Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'].includes(s.name))
+                        .filter(s => {
+                          const baseServices = [...serviceOptions.map(o => o.id), 'Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory', '1 Bed Flat', '2 Bed Flat', '3 Bed House', '4 Bed House', '5+ Bed House'];
+                          const isBase = baseServices.some(base => base.toLowerCase().trim() === s.name.toLowerCase().trim());
+                          if (!isBase) console.log('Showing Extra:', s.name);
+                          return !isBase;
+                        })
                         .map(extra => {
-                          const iconMap = { 'American fridge freeze': <Refrigerator />, 'Carpet(s) Cleaning': <Sparkles />, 'Double Oven Cleaning': <Zap />, 'Fridge and freezer': <Refrigerator />, 'Range Oven Cleaning': <Zap />, 'Single fridge': <Refrigerator />, 'Single Oven Cleaning': <Zap />, 'Venetian Blinds': <Layout /> };
+                          const iconMap = { 
+                            'american fridge freeze': <Refrigerator />, 
+                            'carpet(s) cleaning': <Sparkles />, 
+                            'double oven cleaning': <Zap />, 
+                            'fridge and freezer': <Refrigerator />, 
+                            'range oven cleaning': <Zap />, 
+                            'single fridge': <Refrigerator />, 
+                            'single oven cleaning': <Zap />, 
+                            'venetian blinds': <Layout /> 
+                          };
+                          const icon = iconMap[extra.name.toLowerCase().trim()] || <Plus size={18}/>;
                           return (
                             <div key={extra._id} className={`p-4 px-6 rounded-2xl border-2 flex items-center justify-between transition-all ${formData.extras[extra.name] > 0 ? 'border-primary bg-primary/5' : 'border-slate-50 bg-slate-50'}`}>
-                              <div className="flex items-center gap-4"><div className={`w-10 h-10 rounded-xl flex items-center justify-center ${formData.extras[extra.name] > 0 ? 'bg-primary text-white' : 'bg-white text-slate-400 shadow-sm'}`}>{iconMap[extra.name] || <Plus size={18}/>}</div><span className="font-bold text-[11px] text-primary-dark max-w-[110px] leading-tight">{extra.name}</span></div>
+                              <div className="flex items-center gap-4"><div className={`w-10 h-10 rounded-xl flex items-center justify-center ${formData.extras[extra.name] > 0 ? 'bg-primary text-white' : 'bg-white text-slate-400 shadow-sm'}`}>{icon}</div><span className="font-bold text-[11px] text-primary-dark max-w-[110px] leading-tight">{extra.name}</span></div>
                               <div className="flex items-center gap-3 bg-white rounded-xl p-1.5 border border-slate-100"><button onClick={() => updateExtra(extra.name, -1)} className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400"><Minus size={12}/></button><span className="font-black text-xs w-4 text-center">{formData.extras[extra.name] || 0}</span><button onClick={() => updateExtra(extra.name, 1)} className="w-7 h-7 rounded-lg bg-primary text-white flex items-center justify-center"><Plus size={12}/></button></div>
                             </div>
                           );
