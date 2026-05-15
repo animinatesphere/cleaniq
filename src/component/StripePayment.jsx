@@ -53,10 +53,10 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
   useEffect(() => {
     if (stripe && amount > 0) {
       const pr = stripe.paymentRequest({
-        country: 'GB',
+        country: currency.toUpperCase() === 'GBP' ? 'GB' : 'NG',
         currency: currency.toLowerCase(),
         total: {
-          label: `CleanIQ - ${customerInfo.serviceType}`,
+          label: `Cleaniq - ${customerInfo.serviceType}`,
           amount: Math.round(amount * 100),
         },
         requestPayerName: true,

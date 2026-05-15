@@ -336,10 +336,10 @@ const Booking = () => {
         duration: formData.duration, 
         extras: [
           ...Object.entries(formData.extras).filter(([_, q]) => q > 0).map(([n, q]) => `${n} (x${q})`),
-          `DATA_ROOMS: ${formData.property.bedrooms} Bed, ${formData.property.bathrooms} Bath, ${formData.property.kitchens} Kit`,
-          `DATA_PARKING: ${formData.parking}`,
-          `DATA_ACCESS: ${formData.keyAccess}`,
-          `DATA_NOTES: ${formData.specialInstructions || 'None'}`
+          `Property: ${formData.property.bedrooms} Bed, ${formData.property.bathrooms} Bath, ${formData.property.kitchens} Kitchen`,
+          `Parking: ${formData.parking}`,
+          `Entry: ${formData.keyAccess}`,
+          `Instructions: ${formData.specialInstructions || 'None'}`
         ]
       },
       schedule: { date: formData.date, timeSlot: formData.timeSlot, preferredTime: formData.preferredTime },

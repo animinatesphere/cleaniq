@@ -28,14 +28,14 @@ router.post('/broadcast', async (req, res) => {
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden;">
             <div style="background: #0F172A; padding: 30px; text-align: center; color: white;">
-              <h1 style="margin: 0; color: #6EE7B7;">CleanIQ Services</h1>
+              <h1 style="margin: 0; color: #6EE7B7;">Cleaniq Services</h1>
             </div>
             <div style="padding: 40px; color: #334155; line-height: 1.6;">
               <h2 style="color: #0F172A;">Important Announcement</h2>
               <p style="white-space: pre-wrap;">${message}</p>
               <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;" />
               <p style="font-size: 12px; color: #94a3b8; text-align: center;">
-                You received this because you are a valued CleanIQ customer.
+                You received this because you are a valued Cleaniq customer.
                 <br />UK & Nigeria Premium Cleaning Services
               </p>
             </div>

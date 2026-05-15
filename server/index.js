@@ -24,7 +24,7 @@ mongoose.connect(MONGODB_URI)
 
 // Routes (To be added)
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'CleanIQ API is running' });
+  res.json({ status: 'OK', message: 'Cleaniq API is running' });
 });
 
 // Import Routes

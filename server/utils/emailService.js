@@ -38,7 +38,7 @@ const templates = {
   bookingConfirmation: (booking) => `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
       <div style="background-color: #0F172A; padding: 40px; text-align: center;">
-        <img src="https://cleaniqservices.com/preview.jpg" alt="CleanIQ Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
         <h1 style="color: #6EE7B7; margin: 0; font-size: 28px; letter-spacing: -1px;">Booking Confirmed!</h1>
         <p style="color: #94a3b8; margin-top: 10px; font-weight: 500;">Thank you for choosing Cleaniq Services</p>
       </div>
@@ -60,7 +60,7 @@ const templates = {
               <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()} @ ${booking.schedule.timeSlot} ${booking.schedule.preferredTime ? '(' + booking.schedule.preferredTime + ')' : ''}</p>
             </div>
             <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: bold;">LOCATION</p>
+              <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: bold;">SERVICE ADDRESS</p>
               <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}</p>
             </div>
           </div>
@@ -110,7 +110,7 @@ const templates = {
   hiredAlert: (applicantName) => `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #6EE7B7; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
       <div style="background-color: #0F172A; padding: 40px; text-align: center;">
-        <img src="https://cleaniqservices.com/preview.jpg" alt="CleanIQ Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
         <h1 style="color: #6EE7B7; margin: 0; font-size: 28px;">Welcome to the Team! 🎉</h1>
       </div>
       <div style="padding: 40px; color: #1e293b; line-height: 1.6; text-align: center;">
@@ -124,7 +124,7 @@ const templates = {
   adminNewApplicantAlert: (applicantName, role, email, phone) => `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0F172A; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
       <div style="background-color: #0F172A; padding: 30px; text-align: center;">
-        <img src="https://cleaniqservices.com/preview.jpg" alt="CleanIQ Logo" style="width: 100px; height: auto; margin-bottom: 10px; border-radius: 8px;" />
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: auto; margin-bottom: 10px; border-radius: 8px;" />
         <h1 style="color: #6EE7B7; margin: 0; font-size: 24px;">New Worker Application 👷‍♂️</h1>
       </div>
       <div style="padding: 30px; color: #1e293b;">
@@ -144,7 +144,7 @@ const templates = {
   adminNewBookingAlert: (booking) => `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0F172A; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
       <div style="background-color: #0F172A; padding: 30px; text-align: center;">
-        <img src="https://cleaniqservices.com/preview.jpg" alt="CleanIQ Logo" style="width: 100px; height: auto; margin-bottom: 10px; border-radius: 8px;" />
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: auto; margin-bottom: 10px; border-radius: 8px;" />
         <h1 style="color: #6EE7B7; margin: 0; font-size: 24px;">New Booking Received! 🚨</h1>
       </div>
       <div style="padding: 30px; color: #1e293b; line-height: 1.5;">
@@ -163,7 +163,7 @@ const templates = {
         <p style="margin: 5px 0; font-size: 14px;"><strong>Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Email:</strong> ${booking.customer.email}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Phone:</strong> ${booking.customer.phone}</p>
-        <p style="margin: 5px 0; font-size: 14px;"><strong>Address:</strong> ${booking.details.address}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Service Address:</strong> ${booking.details.address}</p>
 
         <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Service Details</h3>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
@@ -172,7 +172,7 @@ const templates = {
         <p style="margin: 5px 0; font-size: 14px;"><strong>Frequency:</strong> ${booking.details.frequency}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Duration:</strong> ${booking.details.duration} Hours</p>
 
-        <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Requirements & Extras</h3>
+        <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Requirements & Property Details</h3>
         <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
           ${booking.details.extras.map(e => `<li style="margin-bottom: 5px;">${e}</li>`).join('')}
         </ul>

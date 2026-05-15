@@ -84,7 +84,7 @@ router.put('/:id', async (req, res) => {
     if (req.body.status === 'Hired') {
       await sendEmail({
         to: updatedApplicant.email,
-        subject: "Congratulations! Welcome to CleanIQ Services 🎉",
+        subject: "Congratulations! Welcome to Cleaniq Services 🎉",
         html: templates.hiredAlert(updatedApplicant.fullName)
       });
     }
@@ -110,7 +110,7 @@ router.put('/:id/status', async (req, res) => {
     if (status === 'Hired') {
       await sendEmail({
         to: applicant.email,
-        subject: "Congratulations! Welcome to CleanIQ Services 🎉",
+        subject: "Congratulations! Welcome to Cleaniq Services 🎉",
         html: templates.hiredAlert(applicant.fullName)
       });
     }

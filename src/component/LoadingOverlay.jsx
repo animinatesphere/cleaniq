@@ -17,7 +17,7 @@ const LoadingOverlay = ({ message = "Processing your request..." }) => {
           {/* Pulsing Logo */}
           <motion.img 
             src={logo} 
-            alt="CLEANIQ" 
+            alt="Cleaniq" 
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
             className="w-32 h-auto relative z-10"

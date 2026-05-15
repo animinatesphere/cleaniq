@@ -131,7 +131,7 @@ const Navbar = () => {
             >
               <div className="p-6 md:p-8 flex flex-col h-full">
                 <div className="flex justify-between items-center mb-10 md:12">
-                   <img src={logo} alt="CLEANIQ SERVICES" className="h-7 w-auto" />
+                   <img src={logo} alt="Cleaniq Services" className="h-7 w-auto" />
                    <button onClick={() => setIsOpen(false)} className="text-white/60 hover:text-white p-2">
                      <X size={24} />
                    </button>
@@ -161,7 +161,7 @@ const Navbar = () => {
                   <div className="h-px bg-white/10 w-full" />
                   
                   <div className="space-y-4">
-                    <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Market Region</span>
+                    <h1 className="font-black text-lg leading-none uppercase tracking-tighter">Cleaniq</h1><span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Market Region</span>
                     <div className="flex gap-2">
                       {Object.values(regions).map((r) => (
                         <button

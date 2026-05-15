@@ -99,7 +99,7 @@ const About = () => {
             </div>
             <h2 className="text-3xl font-black mb-6 tracking-tight">Our Vision.</h2>
             <p className="text-lg text-white/80 font-medium leading-relaxed">
-              Our vision is to establish CLEANIQ as Manchester’s most trusted and recognizable 
+              Our vision is to establish Cleaniq as Manchester’s most trusted and recognizable 
               household name in eco-friendly cleaning, defined by innovation, reliability, and 
               superior service.
             </p>

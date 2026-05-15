@@ -39,7 +39,7 @@ router.post('/', async (req, res) => {
     // Send Confirmation Email to Customer
     await sendEmail({
       to: newBooking.customer.email,
-      subject: "Your CleanIQ Booking is Confirmed!",
+      subject: "Your Cleaniq Booking is Confirmed!",
       html: templates.bookingConfirmation(newBooking)
     });
 

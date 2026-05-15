@@ -19,7 +19,7 @@ router.post('/create-intent', async (req, res) => {
         enabled: true,
       },
       metadata: {
-        company: 'CleanIQ Services',
+        company: 'Cleaniq Services',
         customer: customerName || 'Unknown',
         service: service || 'Cleaning Service'
       }
