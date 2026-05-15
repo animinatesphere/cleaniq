@@ -4,7 +4,8 @@ import {
   CardExpiryElement,
   CardCvcElement,
   useStripe,
-  useElements
+  useElements,
+  PaymentRequestButtonElement
 } from '@stripe/react-stripe-js';
 import { Zap, AlertCircle, ShieldCheck } from 'lucide-react';
 
@@ -14,6 +15,9 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
   const [error, setError] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
+  const [paymentRequest, setPaymentRequest] = useState(null);
+  const [canMakePayment, setCanMakePayment] = useState(false);
+  const [billingPostcode, setBillingPostcode] = useState(customerInfo.postcode || '');
 
   // Create PaymentIntent as soon as the component loads
   useEffect(() => {
@@ -45,6 +49,45 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
     }
   }, [amount, currency]);
 
+  // Handle Payment Request (Apple Pay / Google Pay)
+  useEffect(() => {
+    if (stripe && amount > 0) {
+      const pr = stripe.paymentRequest({
+        country: 'GB',
+        currency: currency.toLowerCase(),
+        total: {
+          label: `CleanIQ - ${customerInfo.serviceType}`,
+          amount: Math.round(amount * 100),
+        },
+        requestPayerName: true,
+        requestPayerEmail: true,
+      });
+
+      pr.canMakePayment().then(result => {
+        if (result) {
+          setPaymentRequest(pr);
+          setCanMakePayment(true);
+        }
+      });
+
+      pr.on('paymentmethod', async (ev) => {
+        const { error: confirmError } = await stripe.confirmCardPayment(
+          clientSecret,
+          { payment_method: ev.paymentMethod.id },
+          { handleActions: false }
+        );
+
+        if (confirmError) {
+          ev.complete('fail');
+          setError(`Payment failed: ${confirmError.message}`);
+        } else {
+          ev.complete('success');
+          onPaymentSuccess(ev.paymentMethod);
+        }
+      });
+    }
+  }, [stripe, amount, clientSecret]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -60,6 +103,9 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
           name: `${customerInfo.firstName} ${customerInfo.lastName}`,
           email: customerInfo.email,
           phone: customerInfo.phone,
+          address: {
+            postal_code: billingPostcode
+          }
         },
       },
     });
@@ -109,6 +155,16 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
             <div className="w-8 h-5 bg-slate-100 rounded-md" />
           </div>
         </div>
+
+        {canMakePayment && paymentRequest && (
+          <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+            <PaymentRequestButtonElement options={{ paymentRequest }} />
+            <div className="relative mt-8 mb-4">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
+              <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest text-slate-400 bg-white px-4">Or pay with card</div>
+            </div>
+          </div>
+        )}
         
         <div className="space-y-4">
           <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus-within:border-primary/30 transition-all">
@@ -124,6 +180,16 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">CVC</label>
               <CardCvcElement options={cardElementOptions} />
             </div>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 focus-within:border-primary/30 transition-all">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Billing Postcode</label>
+            <input 
+              type="text" 
+              placeholder="e.g. M4 5JW" 
+              className="w-full bg-transparent border-none outline-none font-bold text-sm text-primary-dark placeholder:text-slate-300"
+              value={billingPostcode}
+              onChange={(e) => setBillingPostcode(e.target.value)}
+            />
           </div>
         </div>
       </div>
