@@ -95,7 +95,7 @@ const AdminLayout = () => {
               <ShieldCheck className="text-primary-dark" size={24} />
             </div>
             <div>
-              <h1 className="font-black text-lg leading-none uppercase tracking-tighter">CLEANIQ</h1>
+              <h1 className="font-black text-lg leading-none uppercase tracking-tighter">Cleaniq</h1>
               <span className="text-[10px] text-secondary font-bold uppercase tracking-widest">Admin Panel</span>
             </div>
           </div>
