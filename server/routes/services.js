@@ -7,8 +7,22 @@ router.get('/', async (req, res) => {
   try {
     const { region } = req.query;
     const filter = region ? { region } : {};
-    const services = await Service.find(filter);
-    res.json(services);
+    // Sort by updatedAt desc to get newest first
+    const services = await Service.find(filter).sort({ updatedAt: -1 });
+    
+    // Deduplicate by trimmed name
+    const uniqueServices = [];
+    const seenNames = new Set();
+    
+    services.forEach(s => {
+      const trimmedName = s.name.trim();
+      if (!seenNames.has(trimmedName)) {
+        seenNames.add(trimmedName);
+        uniqueServices.push(s);
+      }
+    });
+    
+    res.json(uniqueServices);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -18,10 +32,11 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { name, region, rate, type, description } = req.body;
+    const trimmedName = name?.trim();
     
     // Find existing or create new
     let service = await Service.findOneAndUpdate(
-      { name, region },
+      { name: trimmedName, region },
       { rate, type, description, updatedAt: Date.now() },
       { new: true, upsert: true }
     );

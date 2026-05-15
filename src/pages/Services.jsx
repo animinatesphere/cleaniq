@@ -24,10 +24,10 @@ const Services = () => {
   React.useEffect(() => {
     const fetchRates = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${region.id}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${region.id}&t=${Date.now()}`);
         const data = await response.json();
         const ratesObj = {};
-        data.forEach(service => { ratesObj[service.name] = service.rate; });
+        data.forEach(service => { ratesObj[service.name.trim()] = service.rate; });
         setDynamicRates(ratesObj);
       } catch (error) { console.error('Error fetching rates:', error); }
     };
@@ -51,8 +51,8 @@ const Services = () => {
         "Trash removal.",
       ],
       description: "Reliable, weekly or bi-weekly cleaning for your home.",
-      pricing: dynamicRates["Residential Cleaning"] 
-        ? `From ${region.symbol}${dynamicRates["Residential Cleaning"]}${region.id === 'UK' ? '/hr' : ''}`
+      pricing: dynamicRates["Residential Cleaning".trim()] 
+        ? `From ${region.symbol}${dynamicRates["Residential Cleaning".trim()]}${region.id === 'UK' ? '/hr' : ''}`
         : (region.id === "UK" ? "From £17.90/hr" : `From ${region.symbol}15,000`),
     },
     {
@@ -71,8 +71,8 @@ const Services = () => {
         "Disinfection services.",
       ],
       description: "Professional janitorial services for your workspace.",
-      pricing: dynamicRates["Office Cleaning"] 
-        ? `From ${region.symbol}${dynamicRates["Office Cleaning"]}${region.id === 'UK' ? '/hr' : ''}`
+      pricing: dynamicRates["Office Cleaning".trim()] 
+        ? `From ${region.symbol}${dynamicRates["Office Cleaning".trim()]}${region.id === 'UK' ? '/hr' : ''}`
         : "Custom Quotes",
     },
     {
@@ -91,8 +91,8 @@ const Services = () => {
         "End-of-tenancy guarantee.",
       ],
       description: "Specialized deep cleaning services for a total refresh.",
-      pricing: dynamicRates["Deep Clean"] 
-        ? `From ${region.symbol}${dynamicRates["Deep Clean"]}${region.id === 'UK' ? '/hr' : ''}`
+      pricing: dynamicRates["Deep Clean".trim()] 
+        ? `From ${region.symbol}${dynamicRates["Deep Clean".trim()]}${region.id === 'UK' ? '/hr' : ''}`
         : (region.id === "UK" ? "From £24.90/hr" : `From ${region.symbol}25,000`),
     },
     {
@@ -111,8 +111,8 @@ const Services = () => {
         "Consumable Supplies",
       ],
       description: "Professional turnover services for your short-let rental.",
-      pricing: dynamicRates["Airbnb Cleaning"] 
-        ? `From ${region.symbol}${dynamicRates["Airbnb Cleaning"]}${region.id === 'UK' ? '/hr' : ''}`
+      pricing: dynamicRates["Airbnb Cleaning".trim()] 
+        ? `From ${region.symbol}${dynamicRates["Airbnb Cleaning".trim()]}${region.id === 'UK' ? '/hr' : ''}`
         : (region.id === "UK" ? "From £21.90/hr" : `From ${region.symbol}20,000`),
     },
   ];

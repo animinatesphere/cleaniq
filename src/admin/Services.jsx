@@ -40,7 +40,7 @@ const ServicesManagement = () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/services`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...service, region: activeRegion })
+        body: JSON.stringify({ ...service, name: service.name.trim(), region: activeRegion })
       });
       if (response.ok) {
         setMessage({ type: 'success', text: `"${service.name}" updated successfully!` });
@@ -60,13 +60,13 @@ const ServicesManagement = () => {
 
   const handleAddFeature = async () => {
     if (!newFeature.name || !newFeature.rate) return;
-    await saveService({ ...newFeature, region: activeRegion });
+    await saveService({ ...newFeature, name: newFeature.name.trim(), region: activeRegion });
     setNewFeature({ name: '', rate: '', type: 'flat' });
   };
 
   // Grouping services for the UI
   const categories = {
-    'Base Services': services.filter(s => ['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning'].includes(s.name)),
+    'Base Services': services.filter(s => ['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning'].includes(s.name.trim())),
     'Property Rooms': services.filter(s => ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'].includes(s.name)),
     'Extra Add-ons': services.filter(s => !['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning', 'Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'].includes(s.name))
   };

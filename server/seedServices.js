@@ -1,15 +1,16 @@
 const mongoose = require('mongoose');
 const Service = require('./models/Service');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/cleaniq';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/cleaniq';
 
 const initialServices = [
   // UK Services (Hourly)
-  { name: 'Classic Regular', region: 'UK', rate: 17.90, type: 'hourly', description: 'Regular recurring home cleaning service' },
+  { name: 'Residential Cleaning', region: 'UK', rate: 17.90, type: 'hourly', description: 'Regular recurring home cleaning service' },
   { name: 'Classic One-off', region: 'UK', rate: 20.90, type: 'hourly', description: 'One-time home cleaning session' },
   { name: 'Deep Clean', region: 'UK', rate: 24.90, type: 'hourly', description: 'Thorough deep cleaning of your entire home' },
-  { name: 'Holiday Rental', region: 'UK', rate: 21.90, type: 'hourly', description: 'Specialist Airbnb & holiday rental cleaning' },
+  { name: 'Airbnb Cleaning', region: 'UK', rate: 21.90, type: 'hourly', description: 'Specialist Airbnb & holiday rental cleaning' },
   { name: 'Office Cleaning', region: 'UK', rate: 19.90, type: 'hourly', description: 'Professional office and commercial cleaning' },
   
   // Nigeria Services (Flat Rates)

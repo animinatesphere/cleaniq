@@ -44,7 +44,7 @@ const Settings = () => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/services`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editServiceData)
+        body: JSON.stringify({ ...editServiceData, name: editServiceData.name.trim() })
       });
       if (res.ok) {
         setEditingServiceId(null);
@@ -59,7 +59,7 @@ const Settings = () => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/services`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newService)
+        body: JSON.stringify({ ...newService, name: newService.name.trim() })
       });
       if (res.ok) {
         setNewService({ name: '', rate: '', region: 'UK', type: 'Cleaning' });

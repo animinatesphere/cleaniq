@@ -193,11 +193,11 @@ const Booking = () => {
 
     const fetchRates = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${region.id}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${region.id}&t=${Date.now()}`);
         const data = await response.json();
         setServicesList(data);
         const ratesObj = {};
-        data.forEach(service => { ratesObj[service.name] = service.rate; });
+        data.forEach(service => { ratesObj[service.name.trim()] = service.rate; });
         setDynamicRates(ratesObj);
       } catch (error) { console.error('Error fetching rates:', error); } finally { setLoadingRates(false); }
     };
@@ -228,7 +228,7 @@ const Booking = () => {
     const rates = region.id === 'UK' ? fallbackUK : fallbackNG;
 
     // Base Service Rate (Multiplied by Duration if UK/Hourly)
-    const baseRate = dynamicRates[formData.serviceType] || rates[formData.serviceType] || 20;
+    const baseRate = dynamicRates[formData.serviceType.trim()] || rates[formData.serviceType.trim()] || 20;
     if (region.id === 'UK') {
       total += baseRate * formData.duration;
     } else {
@@ -239,12 +239,12 @@ const Booking = () => {
     const roomMap = { bedrooms: 'Bedroom', bathrooms: 'Bathroom', cloakrooms: 'Cloakroom', kitchens: 'Kitchen', utilityRooms: 'Utility Room', receptionRooms: 'Reception Room', conservatories: 'Conservatory' };
     Object.entries(formData.property).forEach(([key, qty]) => {
       const roomName = roomMap[key];
-      total += (dynamicRates[roomName] || rates[roomName] || 0) * qty;
+      total += (dynamicRates[roomName.trim()] || rates[roomName.trim()] || 0) * qty;
     });
 
     // Extra Rates
     Object.entries(formData.extras).forEach(([name, qty]) => {
-      total += (dynamicRates[name] || rates[name] || 0) * qty;
+      total += (dynamicRates[name.trim()] || rates[name.trim()] || 0) * qty;
     });
 
     if (formData.frequency === 'Weekly') total *= 0.9;
@@ -420,7 +420,7 @@ const Booking = () => {
                           <div className={`w-16 h-16 md:w-20 md:h-20 rounded-[24px] md:rounded-[32px] flex items-center justify-center mb-4 md:mb-6 transition-all duration-500 ${formData.serviceType === s.id ? 'bg-primary text-white scale-110 shadow-lg' : 'bg-primary/5 text-primary group-hover:scale-110'}`}>{React.cloneElement(s.icon, { size: 28 })}</div>
                           <p className={`font-black text-xl md:text-2xl mb-1 tracking-tighter ${formData.serviceType === s.id ? 'text-primary' : 'text-primary-dark'}`}>{s.title}</p>
                           <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">{s.tag}</p>
-                          <div className="mb-4 md:mb-6"><span className="text-lg md:text-xl font-black text-primary-dark">{region.symbol}{dynamicRates[s.id] || (region.id === 'UK' ? (s.id === 'Deep Clean' ? 24.90 : 17.90) : (s.id === 'Deep Clean' ? 25000 : 15000))}</span>{region.id === 'UK' && <span className="text-[10px] font-bold text-slate-400 ml-1">/ hr</span>}</div>
+                          <div className="mb-4 md:mb-6"><span className="text-lg md:text-xl font-black text-primary-dark">{region.symbol}{dynamicRates[s.id.trim()] || (region.id === 'UK' ? (s.id === 'Deep Clean' ? 24.90 : 17.90) : (s.id === 'Deep Clean' ? 25000 : 15000))}</span>{region.id === 'UK' && <span className="text-[10px] font-bold text-slate-400 ml-1">/ hr</span>}</div>
                           <div className="space-y-3 w-full text-left">
                             {s.bullets.map((bullet, idx) => (<div key={idx} className="flex items-center gap-3"><div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${formData.serviceType === s.id ? 'bg-primary/20 text-primary' : 'bg-slate-50 text-slate-300'}`}><CheckCircle2 size={12} /></div><p className="text-xs font-bold text-slate-500">{bullet}</p></div>))}
                           </div>
