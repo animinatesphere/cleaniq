@@ -144,16 +144,8 @@ const Booking = () => {
     postcode: '',
     serviceType: preSelectedService || '', 
     frequency: 'Once', 
-    duration: 0,
-    property: {
-      bedrooms: 0,
-      bathrooms: 0,
-      cloakrooms: 0,
-      kitchens: 0,
-      utilityRooms: 0,
-      receptionRooms: 0,
-      conservatories: 0
-    },
+    duration: 2,
+    property: {}, 
     extras: {}, 
     parking: 'Available on-site',
     keyAccess: 'I will be home',
@@ -195,39 +187,9 @@ const Booking = () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${region.id}&t=${Date.now()}`);
         const data = await response.json();
-        
-        // Define fallback extras to ensure they always show up
-        const fallbackExtras = region.id === 'UK' ? [
-          { name: 'American fridge freeze', rate: 15 },
-          { name: 'Carpet(s) Cleaning', rate: 30 },
-          { name: 'Double Oven Cleaning', rate: 20 },
-          { name: 'Fridge and freezer', rate: 18 },
-          { name: 'Range Oven Cleaning', rate: 25 },
-          { name: 'Single fridge', rate: 10 },
-          { name: 'Single Oven Cleaning', rate: 15 },
-          { name: 'Venetian Blinds', rate: 5 }
-        ] : [
-          { name: 'American fridge freeze', rate: 8000 },
-          { name: 'Carpet(s) Cleaning', rate: 15000 },
-          { name: 'Double Oven Cleaning', rate: 12000 },
-          { name: 'Fridge and freezer', rate: 10000 },
-          { name: 'Range Oven Cleaning', rate: 15000 },
-          { name: 'Single fridge', rate: 5000 },
-          { name: 'Single Oven Cleaning', rate: 8000 },
-          { name: 'Venetian Blinds', rate: 3000 }
-        ];
-
-        // Merge DB data with fallbacks (DB takes priority)
-        const combined = [...data];
-        fallbackExtras.forEach(fallback => {
-          if (!data.some(s => s.name.toLowerCase().trim() === fallback.name.toLowerCase().trim())) {
-            combined.push({ _id: `fallback-${fallback.name}`, ...fallback, type: 'flat' });
-          }
-        });
-
-        setServicesList(combined);
+        setServicesList(data);
         const ratesObj = {};
-        combined.forEach(service => { ratesObj[service.name.trim()] = service.rate; });
+        data.forEach(service => { ratesObj[service.name.trim()] = service.rate; });
         setDynamicRates(ratesObj);
       } catch (error) { console.error('Error fetching rates:', error); } finally { setLoadingRates(false); }
     };
@@ -265,12 +227,14 @@ const Booking = () => {
       total += baseRate; // Flat rate for NG
     }
 
-    // Room Rates
+    // Room Rates - Removed as per user request (rooms are informational only)
+    /*
     const roomMap = { bedrooms: 'Bedroom', bathrooms: 'Bathroom', cloakrooms: 'Cloakroom', kitchens: 'Kitchen', utilityRooms: 'Utility Room', receptionRooms: 'Reception Room', conservatories: 'Conservatory' };
     Object.entries(formData.property).forEach(([key, qty]) => {
       const roomName = roomMap[key];
       total += (dynamicRates[roomName.trim()] || rates[roomName.trim()] || 0) * qty;
     });
+    */
 
     // Extra Rates
     Object.entries(formData.extras).forEach(([name, qty]) => {
@@ -283,8 +247,12 @@ const Booking = () => {
     setTotalPrice(Math.round(total * 100) / 100);
   }, [formData, region, dynamicRates]);
 
-  const updateRoom = (room, delta) => {
-    setFormData(prev => ({ ...prev, property: { ...prev.property, [room]: Math.max(0, prev.property[room] + delta) } }));
+  const updateRoom = (name, delta) => {
+    setFormData(prev => {
+      const current = prev.property[name] || 0;
+      const next = Math.max(0, current + delta);
+      return { ...prev, property: { ...prev.property, [name]: next } };
+    });
   };
 
   const updateExtra = (name, delta) => {
@@ -366,7 +334,7 @@ const Booking = () => {
         duration: formData.duration, 
         extras: [
           ...Object.entries(formData.extras).filter(([_, q]) => q > 0).map(([n, q]) => `${n} (x${q})`),
-          `Property: ${formData.property.bedrooms} Bed, ${formData.property.bathrooms} Bath, ${formData.property.kitchens} Kitchen`,
+          ...Object.entries(formData.property).filter(([_, q]) => q > 0).map(([n, q]) => `${n} (x${q})`),
           `Parking: ${formData.parking}`,
           `Entry: ${formData.keyAccess}`,
           `Instructions: ${formData.specialInstructions || 'None'}`
@@ -464,24 +432,21 @@ const Booking = () => {
                   <div className="space-y-6 md:space-y-8 animate-in fade-in">
                     <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Tell us about your home</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Select number of rooms</p></div>
                     <div className="grid gap-4">
-                      {[
-                        { label: 'Bedroom(s)', field: 'bedrooms', icon: <HomeIcon size={18}/> },
-                        { label: 'Bathroom(s) / En-Suite(s)', field: 'bathrooms', icon: <Waves size={18}/> },
-                        { label: 'Cloakroom Toilet(s)', field: 'cloakrooms', icon: <Info size={18}/> },
-                        { label: 'Kitchen(s)', field: 'kitchens', icon: <Coffee size={18}/> },
-                        { label: 'Utility Room(s)', field: 'utilityRooms', icon: <Truck size={18}/> },
-                        { label: 'Reception Room(s)', field: 'receptionRooms', icon: <Layout size={18}/> },
-                        { label: 'Conservatory(ies)', field: 'conservatories', icon: <Wind size={18}/> },
-                      ].map(item => (
-                        <div key={item.field} className="flex items-center justify-between p-3 md:p-4 px-4 md:px-6 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/20 transition-all">
-                          <div className="flex items-center gap-3 md:gap-4"><div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">{React.cloneElement(item.icon, { size: 16 })}</div><span className="font-bold text-xs md:text-sm text-primary-dark">{item.label}</span></div>
-                          <div className="flex items-center gap-3 md:gap-6">
-                            <button onClick={() => updateRoom(item.field, -1)} className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Minus size={14}/></button>
-                            <span className="text-base md:text-lg font-black text-primary-dark w-4 text-center">{formData.property[item.field]}</span>
-                            <button onClick={() => updateRoom(item.field, 1)} className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Plus size={14}/></button>
-                          </div>
-                        </div>
-                      ))}
+                      {servicesList
+                        .filter(s => ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'].includes(s.name))
+                        .map(room => {
+                          const roomIconMap = { 'Bedroom': <HomeIcon size={18}/>, 'Bathroom': <Waves size={18}/>, 'Cloakroom': <Info size={18}/>, 'Kitchen': <Coffee size={18}/>, 'Utility Room': <Truck size={18}/>, 'Reception Room': <Layout size={18}/>, 'Conservatory': <Wind size={18}/> };
+                          return (
+                            <div key={room._id} className="flex items-center justify-between p-3 md:p-4 px-4 md:px-6 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/20 transition-all">
+                              <div className="flex items-center gap-3 md:gap-4"><div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">{roomIconMap[room.name] || <HomeIcon size={18}/>}</div><span className="font-bold text-xs md:text-sm text-primary-dark">{room.name}</span></div>
+                              <div className="flex items-center gap-3 md:gap-6">
+                                <button onClick={() => updateRoom(room.name, -1)} className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Minus size={14}/></button>
+                                <span className="text-base md:text-lg font-black text-primary-dark w-4 text-center">{formData.property[room.name] || 0}</span>
+                                <button onClick={() => updateRoom(room.name, 1)} className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Plus size={14}/></button>
+                              </div>
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
                 )}
@@ -491,8 +456,8 @@ const Booking = () => {
                     <div className="text-center"><h1 className="text-xl md:text-4xl font-extrabold text-primary-dark tracking-tight mb-2 md:mb-4">How many hours?</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[10px] tracking-widest">Select the duration of your clean</p></div>
                     <div className="max-w-md mx-auto">
                       <div className="bg-slate-50 p-6 md:p-10 rounded-[32px] md:rounded-[40px] border border-slate-100 flex items-center justify-between">
-                        <button onClick={() => setFormData({...formData, duration: Math.max(0, formData.duration - 1)})} className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Minus size={20}/></button>
-                        <div className="text-center"><span className="text-4xl md:text-6xl font-black text-primary-dark">{formData.duration}</span><p className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em] mt-1 md:mt-2">Hours</p></div>
+                        <button onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 1)})} className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Minus size={20}/></button>
+                        <div className="text-center"><span className="text-4xl md:text-6xl font-black text-primary-dark">{formData.duration}</span><p className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em] mt-1 md:mt-2">Hours (2h min)</p></div>
                         <button onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 1)})} className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Plus size={20}/></button>
                       </div>
                       <div className="mt-6 md:mt-10 grid grid-cols-3 gap-2 md:gap-4">
@@ -511,8 +476,9 @@ const Booking = () => {
                       {servicesList
                         .filter(s => {
                           const baseServices = [...serviceOptions.map(o => o.id), 'Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory', '1 Bed Flat', '2 Bed Flat', '3 Bed House', '4 Bed House', '5+ Bed House'];
-                          const isBase = baseServices.some(base => base.toLowerCase().trim() === s.name.toLowerCase().trim());
-                          if (!isBase) console.log('Showing Extra:', s.name);
+                          // Clean names for comparison (remove dots, special chars, etc)
+                          const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                          const isBase = baseServices.some(base => clean(base) === clean(s.name));
                           return !isBase;
                         })
                         .map(extra => {
@@ -578,14 +544,14 @@ const Booking = () => {
                     <Elements stripe={stripePromise}><StripePayment amount={totalPrice} currency={region.id === 'UK' ? 'GBP' : 'NGN'} customerInfo={formData} onPaymentSuccess={handlePaymentSuccess} /></Elements>
                     
                     {/* Developer Test Mode */}
-                    <div className="mt-8 pt-8 border-t border-slate-100">
+                    {/* <div className="mt-8 pt-8 border-t border-slate-100">
                       <button 
                         onClick={() => handlePaymentSuccess({ id: `TEST-${Date.now()}` })}
                         className="w-full py-4 rounded-2xl bg-slate-50 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 hover:text-slate-600 transition-all border-2 border-dashed border-slate-200"
                       >
                         Dev: Submit Without Paying (TEST MODE)
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                 )}
 
@@ -615,7 +581,7 @@ const Booking = () => {
                 <div className="flex gap-3"><div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 shrink-0"><Zap size={14}/></div><div className="flex-1"><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Service Breakdown</p><p className="font-bold text-slate-700 mb-2">{formData.serviceType || 'Selection required'}</p>
                   <div className="space-y-2">
                     {formData.duration > 0 && <div className="flex justify-between items-center text-[10px] bg-amber-50 p-2 rounded-lg border border-amber-100"><span className="font-bold text-amber-600">Hours</span><span className="font-black text-amber-700">{formData.duration}h</span></div>}
-                    {Object.entries(formData.property).map(([key, qty]) => qty > 0 ? (<div key={key} className="flex justify-between items-center text-[10px] bg-slate-50 p-2 rounded-lg border border-slate-100"><span className="font-bold text-slate-500 capitalize">{key.replace(/([A-Z])/g, ' $1')}</span><span className="font-black text-primary">x{qty}</span></div>) : null)}
+                    {Object.entries(formData.property).map(([name, qty]) => qty > 0 ? (<div key={name} className="flex justify-between items-center text-[10px] bg-slate-50 p-2 rounded-lg border border-slate-100"><span className="font-bold text-slate-500">{name}</span><span className="font-black text-primary">x{qty}</span></div>) : null)}
                     {Object.entries(formData.extras).map(([name, qty]) => qty > 0 ? (<div key={name} className="flex justify-between items-center text-[10px] bg-primary/5 p-2 rounded-lg border border-primary/10"><span className="font-bold text-primary-dark">{name}</span><span className="font-black text-primary">x{qty}</span></div>) : null)}
                   </div>
                 </div></div>
