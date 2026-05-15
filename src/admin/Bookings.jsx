@@ -216,46 +216,53 @@ const Bookings = () => {
 
   const getPropertyData = (b) => {
     if (!b) return {};
-    const keys = ['bedrooms', 'bathrooms', 'cloakrooms', 'kitchens', 'utilityRooms', 'receptionRooms', 'conservatories'];
     const data = {};
-    keys.forEach(k => { data[k] = b.property?.[k] || b.meta?.property?.[k] || b.details?.[k] || 0; });
     const extras = b.details?.extras;
+    const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'];
+    
     if (Array.isArray(extras)) {
-      const roomTag = extras.find(e => typeof e === 'string' && (e.includes('DATA_ROOMS:') || e.includes('🏠 ROOMS:')));
-      if (roomTag) {
-        const parts = roomTag.split(':')[1].split(',');
-        parts.forEach(p => {
-          const val = parseInt(p.trim().split(' ')[0]);
-          if (p.includes('Bed')) data.bedrooms = val;
-          if (p.includes('Bath')) data.bathrooms = val;
-          if (p.includes('Kit')) data.kitchens = val;
-        });
-      }
+      extras.forEach(item => {
+        if (typeof item === 'string') {
+          roomNames.forEach(rn => {
+            if (item.toLowerCase().includes(rn.toLowerCase())) {
+              const qtyMatch = item.match(/\(x(\d+)\)/);
+              data[rn] = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+            }
+          });
+        }
+      });
     }
     return data;
   };
 
   const getExtrasData = (b) => {
     if (!b) return {};
-    const e = b.meta?.extras || b.details?.extras;
-    if (e && typeof e === 'object' && !Array.isArray(e)) return e;
-    if (Array.isArray(e)) {
-      const filtered = {};
-      e.forEach(item => { if (typeof item === 'string' && !item.includes('DATA_') && !item.includes('🏠') && !item.includes('🚗') && !item.includes('🔑') && !item.includes('📝')) filtered[item] = 1; });
-      return filtered;
+    const data = {};
+    const extras = b.details?.extras;
+    const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory', 'Parking', 'Entry', 'Instructions'];
+    
+    if (Array.isArray(extras)) {
+      extras.forEach(item => {
+        if (typeof item === 'string') {
+          const isRoomOrLogistics = roomNames.some(rn => item.toLowerCase().includes(rn.toLowerCase()));
+          if (!isRoomOrLogistics) {
+            const name = item.split(' (x')[0];
+            const qtyMatch = item.match(/\(x(\d+)\)/);
+            data[name] = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+          }
+        }
+      });
     }
-    return {};
+    return data;
   };
 
   const getNotes = (b) => {
     if (!b) return '';
-    // Look for various note fields
     const baseNotes = b.details?.notes || b.notes || b.meta?.notes || b.specialInstructions || '';
     if (baseNotes) return baseNotes;
     
-    // Look for hidden note tag in extras array
     if (Array.isArray(b.details?.extras)) {
-      const noteTag = b.details.extras.find(e => typeof e === 'string' && (e.includes('DATA_NOTES:') || e.includes('📝 NOTE:')));
+      const noteTag = b.details.extras.find(e => typeof e === 'string' && (e.includes('Instructions:') || e.includes('DATA_NOTES:') || e.includes('📝 NOTE:')));
       if (noteTag) return noteTag.split(':')[1].trim();
     }
     return '';
@@ -339,7 +346,7 @@ const Bookings = () => {
                     </td>
                     <td className="px-4 py-6">
                       <p className="text-sm font-bold text-slate-700">{b.service}</p>
-                      <p className="text-[10px] text-primary font-black uppercase tracking-tighter">{getPropertyData(b).bedrooms || 0} Bed • {b.details?.duration || 0}h Clean</p>
+                      <p className="text-[10px] text-primary font-black uppercase tracking-tighter">{getPropertyData(b)['Bedroom'] || 0} Bed • {b.details?.duration || 0}h Clean</p>
                     </td>
                     <td className="px-4 py-6 text-sm font-bold text-slate-700">
                       {new Date(b.schedule?.date).toLocaleDateString()}<br/>

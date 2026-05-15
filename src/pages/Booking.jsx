@@ -187,9 +187,56 @@ const Booking = () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${region.id}&t=${Date.now()}`);
         const data = await response.json();
-        setServicesList(data);
+        
+        // Safety Fallbacks (UK)
+        const fallbackExtrasUK = [
+          { name: 'American fridge freeze', rate: 15 },
+          { name: 'Carpet(s) Cleaning', rate: 30 },
+          { name: 'Double Oven Cleaning', rate: 20 },
+          { name: 'Fridge and freezer', rate: 18 },
+          { name: 'Range Oven Cleaning', rate: 25 },
+          { name: 'Single fridge', rate: 10 },
+          { name: 'Single Oven Cleaning', rate: 15 },
+          { name: 'Venetian Blinds', rate: 5 }
+        ];
+
+        // Safety Fallbacks (NG)
+        const fallbackExtrasNG = [
+          { name: 'American fridge freeze', rate: 8000 },
+          { name: 'Carpet(s) Cleaning', rate: 15000 },
+          { name: 'Double Oven Cleaning', rate: 12000 },
+          { name: 'Fridge and freezer', rate: 10000 },
+          { name: 'Range Oven Cleaning', rate: 15000 },
+          { name: 'Single fridge', rate: 5000 },
+          { name: 'Single Oven Cleaning', rate: 8000 },
+          { name: 'Venetian Blinds', rate: 3000 }
+        ];
+
+        const fallbackRooms = [
+          { name: 'Bedroom', rate: 0 },
+          { name: 'Bathroom', rate: 0 },
+          { name: 'Cloakroom', rate: 0 },
+          { name: 'Kitchen', rate: 0 },
+          { name: 'Utility Room', rate: 0 },
+          { name: 'Reception Room', rate: 0 },
+          { name: 'Conservatory', rate: 0 }
+        ];
+
+        const fallbacks = [...(region.id === 'UK' ? fallbackExtrasUK : fallbackExtrasNG), ...fallbackRooms];
+        
+        // Merge DB data with fallbacks (DB entries always override fallbacks)
+        const combined = [...data];
+        const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+        
+        fallbacks.forEach(fb => {
+          if (!data.some(db => clean(db.name) === clean(fb.name))) {
+            combined.push({ _id: `fallback-${fb.name}`, ...fb, type: 'flat' });
+          }
+        });
+
+        setServicesList(combined);
         const ratesObj = {};
-        data.forEach(service => { ratesObj[service.name.trim()] = service.rate; });
+        combined.forEach(service => { ratesObj[service.name.trim()] = service.rate; });
         setDynamicRates(ratesObj);
       } catch (error) { console.error('Error fetching rates:', error); } finally { setLoadingRates(false); }
     };
@@ -433,7 +480,11 @@ const Booking = () => {
                     <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Tell us about your home</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Select number of rooms</p></div>
                     <div className="grid gap-4">
                       {servicesList
-                        .filter(s => ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'].includes(s.name))
+                        .filter(s => {
+                          const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'];
+                          const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                          return roomNames.some(rn => clean(rn) === clean(s.name));
+                        })
                         .map(room => {
                           const roomIconMap = { 'Bedroom': <HomeIcon size={18}/>, 'Bathroom': <Waves size={18}/>, 'Cloakroom': <Info size={18}/>, 'Kitchen': <Coffee size={18}/>, 'Utility Room': <Truck size={18}/>, 'Reception Room': <Layout size={18}/>, 'Conservatory': <Wind size={18}/> };
                           return (
@@ -544,14 +595,14 @@ const Booking = () => {
                     <Elements stripe={stripePromise}><StripePayment amount={totalPrice} currency={region.id === 'UK' ? 'GBP' : 'NGN'} customerInfo={formData} onPaymentSuccess={handlePaymentSuccess} /></Elements>
                     
                     {/* Developer Test Mode */}
-                    {/* <div className="mt-8 pt-8 border-t border-slate-100">
+                    <div className="mt-8 pt-8 border-t border-slate-100">
                       <button 
                         onClick={() => handlePaymentSuccess({ id: `TEST-${Date.now()}` })}
                         className="w-full py-4 rounded-2xl bg-slate-50 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 hover:text-slate-600 transition-all border-2 border-dashed border-slate-200"
                       >
                         Dev: Submit Without Paying (TEST MODE)
                       </button>
-                    </div> */}
+                    </div>
                   </div>
                 )}
 

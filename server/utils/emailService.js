@@ -15,13 +15,13 @@ const sendEmail = async ({ to, subject, html }) => {
     console.log(`📧 Resend: Attempting to send email to: ${to}...`);
     const { data, error } = await resend.emails.send({
       from: 'Cleaniq Services <info@cleaniqservices.com>',
-      to,
-      subject,
-      html,
+      to: to,
+      subject: subject,
+      html: html,
     });
 
     if (error) {
-      console.error('❌ RESEND ERROR:', error);
+      console.error('❌ RESEND ERROR DETAILS:', JSON.stringify(error, null, 2));
       return false;
     }
 
