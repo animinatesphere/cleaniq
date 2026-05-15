@@ -362,7 +362,7 @@ const Booking = () => {
       <div className="pt-40 pb-20 min-h-screen bg-white flex items-center justify-center px-6 text-center">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
           <div className="w-20 h-20 bg-primary rounded-[24px] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-primary/20 rotate-12"><CheckCircle2 size={40} className="text-white -rotate-12" /></div>
-          <h1 className="text-4xl font-black text-primary-dark mb-4 tracking-tighter">Confirmed!</h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-primary-dark mb-4 tracking-tighter">Confirmed!</h1>
           <p className="text-slate-500 font-bold mb-10">Check your email for confirmation.</p>
           <Link to="/" className="btn-primary inline-flex px-10 py-4 rounded-full text-sm">Return Home</Link>
         </motion.div>
@@ -393,12 +393,12 @@ const Booking = () => {
         <div className="grid lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-8">
             <AnimatePresence mode="wait">
-              <motion.div key={step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-10 shadow-lg border border-slate-100 min-h-[500px] md:min-h-[600px] flex flex-col relative overflow-hidden">
+              <motion.div key={step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="bg-white rounded-[24px] md:rounded-[40px] p-5 md:p-10 shadow-lg border border-slate-100 min-h-[450px] md:min-h-[600px] flex flex-col relative overflow-hidden">
                 <div className="flex-1 pb-20 md:pb-24">
                 
                 {step === 1 && (
-                  <div className="space-y-8 animate-in fade-in">
-                    <div><h1 className="text-3xl font-black text-primary-dark tracking-tight">Where are we cleaning?</h1><p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Provide your property address</p></div>
+                  <div className="space-y-6 md:space-y-8 animate-in fade-in">
+                    <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Where are we cleaning?</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Provide your property address</p></div>
                     <div className="space-y-4">
                       <div className="relative group">
                         <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={20} />
@@ -412,8 +412,8 @@ const Booking = () => {
                 )}
 
                 {step === 2 && (
-                  <div className="space-y-8 animate-in fade-in duration-500">
-                    <h1 className="text-4xl font-black text-primary-dark tracking-tight">What type of cleaning?</h1>
+                  <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
+                    <h1 className="text-2xl md:text-4xl font-extrabold text-primary-dark tracking-tight">What type of cleaning?</h1>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       {serviceOptions.map((s) => (
                         <button key={s.id} onClick={() => { setFormData({...formData, serviceType: s.id}); nextStep(); }} className={`flex flex-col items-center p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-4 transition-all duration-500 group relative overflow-hidden ${formData.serviceType === s.id ? 'border-primary bg-primary/5 shadow-2xl shadow-primary/10' : 'border-slate-50 bg-white hover:border-primary/20'}`}>
@@ -431,8 +431,8 @@ const Booking = () => {
                 )}
 
                 {step === 3 && (
-                  <div className="space-y-8 animate-in fade-in">
-                    <div><h1 className="text-3xl font-black text-primary-dark tracking-tight">Tell us about your home</h1><p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Select number of rooms</p></div>
+                  <div className="space-y-6 md:space-y-8 animate-in fade-in">
+                    <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Tell us about your home</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Select number of rooms</p></div>
                     <div className="grid gap-4">
                       {[
                         { label: 'Bedroom(s)', field: 'bedrooms', icon: <HomeIcon size={18}/> },
@@ -457,8 +457,8 @@ const Booking = () => {
                 )}
 
                 {step === 4 && (
-                  <div className="space-y-12 animate-in fade-in py-10">
-                    <div className="text-center"><h1 className="text-4xl font-black text-primary-dark tracking-tight mb-4">How many hours?</h1><p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Select the duration of your clean</p></div>
+                  <div className="space-y-8 md:space-y-12 animate-in fade-in py-6 md:py-10">
+                    <div className="text-center"><h1 className="text-xl md:text-4xl font-extrabold text-primary-dark tracking-tight mb-2 md:mb-4">How many hours?</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[10px] tracking-widest">Select the duration of your clean</p></div>
                     <div className="max-w-md mx-auto">
                       <div className="bg-slate-50 p-6 md:p-10 rounded-[32px] md:rounded-[40px] border border-slate-100 flex items-center justify-between">
                         <button onClick={() => setFormData({...formData, duration: Math.max(0, formData.duration - 1)})} className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Minus size={20}/></button>
@@ -475,8 +475,8 @@ const Booking = () => {
                 )}
 
                 {step === 5 && (
-                  <div className="space-y-8 animate-in fade-in">
-                    <div><h1 className="text-3xl font-black text-primary-dark tracking-tight">Extra Services</h1><p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Select additional options</p></div>
+                  <div className="space-y-6 md:space-y-8 animate-in fade-in">
+                    <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Extra Services</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Select additional options</p></div>
                     <div className="grid md:grid-cols-2 gap-4">
                       {servicesList
                         .filter(s => !['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning', 'Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'].includes(s.name))
@@ -494,8 +494,8 @@ const Booking = () => {
                 )}
 
                 {step === 6 && (
-                  <div className="space-y-8 animate-in fade-in">
-                    <div><h1 className="text-3xl font-black text-primary-dark tracking-tight">Logistics</h1><p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Help our team get access</p></div>
+                  <div className="space-y-6 md:space-y-8 animate-in fade-in">
+                    <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Logistics</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Help our team get access</p></div>
                     <div className="grid gap-6">
                       <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Parking Situation</label><div className="grid grid-cols-1 xs:grid-cols-2 gap-3">{['Available on-site', 'Street parking', 'Paid parking nearby', 'No parking'].map(p => (<button key={p} onClick={() => setFormData({...formData, parking: p})} className={`p-4 rounded-xl border-2 font-bold text-xs transition-all text-left ${formData.parking === p ? 'border-primary bg-primary text-white' : 'border-slate-50 bg-slate-50'}`}>{p}</button>))}</div></div>
                       <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Key / Entry Access</label><div className="grid grid-cols-1 xs:grid-cols-2 gap-3">{['I will be home', 'Key under mat', 'Lockbox / Key safe', 'Building concierge'].map(k => (<button key={k} onClick={() => setFormData({...formData, keyAccess: k})} className={`p-4 rounded-xl border-2 font-bold text-xs transition-all text-left ${formData.keyAccess === k ? 'border-primary bg-primary text-white' : 'border-slate-50 bg-slate-50'}`}>{k}</button>))}</div></div>
@@ -505,8 +505,8 @@ const Booking = () => {
                 )}
 
                 {step === 7 && (
-                  <div className="space-y-8 animate-in fade-in">
-                    <div><h1 className="text-3xl font-black text-primary-dark tracking-tight">Scheduling.</h1><p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Select your preferred date</p></div>
+                  <div className="space-y-6 md:space-y-8 animate-in fade-in">
+                    <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Scheduling.</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Select your preferred date</p></div>
                     <CustomCalendar selectedDate={formData.date} onDateSelect={(date) => setFormData({...formData, date})} bookedDates={bookedDates} />
                     <div className="grid grid-cols-3 gap-3 mt-6">
                       {['Morning', 'Afternoon', 'Evening'].map(slot => (<button key={slot} onClick={() => setFormData({...formData, timeSlot: slot})} className={`p-4 rounded-xl border-2 font-black text-xs transition-all ${formData.timeSlot === slot ? 'border-primary bg-primary text-white shadow-lg' : 'border-slate-50 bg-slate-50'}`}>{slot}</button>))}
@@ -521,8 +521,8 @@ const Booking = () => {
                 )}
 
                 {step === 8 && (
-                  <div className="space-y-8 animate-in fade-in">
-                    <h1 className="text-3xl font-black text-primary-dark tracking-tight">Your Details & Payment.</h1>
+                  <div className="space-y-6 md:space-y-8 animate-in fade-in">
+                    <h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Your Details & Payment.</h1>
                     <div className="grid md:grid-cols-2 gap-4 mb-6">
                       <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm" placeholder="First Name" value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})}/>
                       <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm" placeholder="Last Name" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})}/>
@@ -575,11 +575,11 @@ const Booking = () => {
                   </div>
                 </div></div>
               </div>
-              <div className="pt-6 border-t border-slate-100 flex justify-between items-center"><div><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Estimated Total</p><p className="text-3xl font-black text-primary-dark tracking-tighter">{region.symbol}{totalPrice}</p></div><div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary"><ShieldCheck size={28} className="fill-current" /></div></div>
+              <div className="pt-6 border-t border-slate-100 flex justify-between items-center"><div><p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Estimated Total</p><p className="text-2xl md:text-3xl font-extrabold text-primary-dark tracking-tighter">{region.symbol}{totalPrice}</p></div><div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary"><ShieldCheck size={28} className="fill-current" /></div></div>
             </div>
             <div className="space-y-3">
-              <div className="bg-white rounded-3xl p-5 border border-slate-100 flex items-center justify-between shadow-sm"><div className="flex items-center gap-3"><div className="w-8 h-8 bg-[#4285F4]/10 rounded-lg flex items-center justify-center"><Star className="text-[#4285F4] fill-current" size={16} /></div><div><p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Excellent</p><p className="text-[11px] font-black text-primary-dark">4.9/5 on Google</p></div></div><div className="flex gap-0.5">{[1,2,3,4,5].map(i => <Star key={i} size={8} className="text-amber-400 fill-current" />)}</div></div>
-              <div className="bg-primary-dark rounded-[32px] p-6 text-white space-y-4 shadow-lg"><div className="flex items-center gap-3"><Shield size={16}/><p className="text-[10px] font-black uppercase tracking-widest">Fully Insured</p></div><div className="flex items-center gap-3"><User size={16}/><p className="text-[10px] font-black uppercase tracking-widest">Vetted Pros</p></div></div>
+              <div className="bg-white rounded-3xl p-5 border border-slate-100 flex items-center justify-between shadow-sm"><div className="flex items-center gap-3"><div className="w-8 h-8 bg-[#4285F4]/10 rounded-lg flex items-center justify-center"><Star className="text-[#4285F4] fill-current" size={16} /></div><div><p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Excellent</p><p className="text-[11px] font-bold text-primary-dark">4.9/5 on Google</p></div></div><div className="flex gap-0.5">{[1,2,3,4,5].map(i => <Star key={i} size={8} className="text-amber-400 fill-current" />)}</div></div>
+              <div className="bg-primary-dark rounded-[32px] p-6 text-white space-y-4 shadow-lg"><div className="flex items-center gap-3"><Shield size={16}/><p className="text-[10px] font-bold uppercase tracking-widest">Fully Insured</p></div><div className="flex items-center gap-3"><User size={16}/><p className="text-[10px] font-bold uppercase tracking-widest">Vetted Pros</p></div></div>
             </div>
           </div>
         </div>

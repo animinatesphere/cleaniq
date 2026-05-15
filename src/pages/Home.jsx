@@ -86,7 +86,7 @@ useEffect(() => {
               {region.id === "UK" ? "TOP-RATED CLEANERS IN MANCHESTER" : "EXCEPTIONAL CLEANING IN LAGOS & ABUJA"}
             </div>
             
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-primary-dark leading-[1.1] mb-8 tracking-tighter">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-dark leading-[1.1] mb-8 tracking-tighter">
               {region.id === "UK" ? "Best Professional House Cleaning in" : "Top-Rated Home & Office Cleaning in"}
               <br />
               <span className="text-primary bg-clip-text">
@@ -152,8 +152,8 @@ useEffect(() => {
       <section className="py-24 md:py-32 relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Our Services</h2>
-            <h3 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter mb-6">
+            <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-4">Our Services</h2>
+            <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark tracking-tighter mb-6">
               Tailored cleaning for {region.id === "UK" ? "Manchester living" : "Nigerian homes & offices"}
             </h3>
             <p className="text-lg text-slate-500 font-medium">
@@ -245,8 +245,8 @@ useEffect(() => {
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-secondary/20 rounded-full blur-3xl" />
             </div>
             <div className="order-1 lg:order-2">
-              <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Our Mission</h2>
-              <h3 className="text-3xl md:text-4xl lg:text-5xl font-black text-primary-dark tracking-tighter mb-8">
+              <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-4">Our Mission</h2>
+              <h3 className="text-2xl md:text-4xl lg:text-5xl font-extrabold text-primary-dark tracking-tighter mb-8">
                 Exceptional, <span className="text-primary italic">eco-conscious</span> cleaning.
               </h3>
               <p className="text-lg text-slate-600 font-medium leading-relaxed mb-8">
@@ -275,8 +275,8 @@ useEffect(() => {
       {/* How it Works Section */}
       <section className="py-24 md:py-32 bg-slate-50/50">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">The Process</h2>
-          <h3 className="text-3xl md:text-5xl font-black text-primary-dark mb-20 tracking-tighter">Reliable domestic cleaning in 3 simple steps.</h3>
+          <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-4">The Process</h2>
+          <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark mb-16 md:mb-20 tracking-tighter">Reliable domestic cleaning in 3 simple steps.</h3>
           
           <div className="grid md:grid-cols-3 gap-12 relative">
             <div className="absolute top-1/4 left-0 w-full h-0.5 bg-slate-100 hidden md:block" />
@@ -303,8 +303,8 @@ useEffect(() => {
    <section className="py-24 bg-white">
   <div className="max-w-7xl mx-auto px-6">
     <div className="text-center mb-16">
-      <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Gallery</h2>
-      <h3 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter">
+      <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-4">Gallery</h2>
+      <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark tracking-tighter">
         Clean spaces, happy faces.
       </h3>
     </div>
@@ -431,7 +431,7 @@ useEffect(() => {
           <div className="bg-slate-900 rounded-[48px] p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px]" />
             <div className="max-w-2xl relative z-10">
-              <h2 className="text-3xl md:text-5xl font-black mb-6 tracking-tighter">Become a Cleaniq Services Pro.</h2>
+              <h2 className="text-2xl md:text-5xl font-extrabold mb-6 tracking-tighter">Become a Cleaniq Services Pro.</h2>
               <p className="text-xl text-slate-400 font-medium leading-relaxed mb-8">
                 {region.id === 'UK' 
                   ? "Are you a professional cleaner in Manchester? Join our platform today. We require all pros to have a valid DBS check for customer safety."
@@ -495,7 +495,7 @@ useEffect(() => {
       {/* CTA Section */}
       <section className="py-24 bg-secondary/10 relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-primary-dark tracking-tighter mb-8">
+          <h2 className="text-2xl md:text-5xl lg:text-6xl font-extrabold text-primary-dark tracking-tighter mb-8">
             Ready to experience a cleaner home?
           </h2>
           <p className="text-xl text-slate-600 mb-12 font-medium">Join 2,000+ happy customers today.</p>

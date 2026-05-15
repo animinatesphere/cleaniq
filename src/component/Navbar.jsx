@@ -147,7 +147,7 @@ const Navbar = () => {
                     >
                       <Link
                         to={link.path}
-                        className={`text-xl md:text-2xl font-black block tracking-tight ${
+                        className={`text-xl md:text-2xl font-bold block tracking-tight ${
                           location.pathname === link.path ? 'text-secondary' : 'text-white'
                         }`}
                       >
@@ -161,7 +161,7 @@ const Navbar = () => {
                   <div className="h-px bg-white/10 w-full" />
                   
                   <div className="space-y-4">
-                    <h1 className="font-black text-lg leading-none uppercase tracking-tighter">Cleaniq</h1><span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Market Region</span>
+                    <h1 className="font-extrabold text-lg leading-none uppercase tracking-tighter text-white">Cleaniq</h1><span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Market Region</span>
                     <div className="flex gap-2">
                       {Object.values(regions).map((r) => (
                         <button

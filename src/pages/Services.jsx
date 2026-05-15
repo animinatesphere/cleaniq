@@ -162,7 +162,7 @@ const Services = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
-              className={`flex flex-col lg:flex-row gap-8 lg:gap-16 items-center p-6 md:p-12 rounded-[40px] md:rounded-[60px] glass overflow-hidden relative shadow-xl shadow-primary/5 ${i % 2 !== 0 ? "lg:flex-row-reverse" : ""}`}
+              className={`flex flex-col lg:flex-row gap-8 lg:gap-16 items-center p-5 md:p-12 rounded-[32px] md:rounded-[60px] glass overflow-hidden relative shadow-xl shadow-primary/5 ${i % 2 !== 0 ? "lg:flex-row-reverse" : ""}`}
             >
               <div className="lg:w-1/2 space-y-6 md:8">
                 <motion.div 
@@ -242,7 +242,7 @@ const Services = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-2xl md:text-5xl font-black mb-6 md:8 leading-tight tracking-tight"
+              className="text-xl md:text-5xl font-extrabold mb-4 md:8 leading-tight tracking-tight"
             >
               100% Eco-Friendly <br className="hidden md:block" />
               <span className="text-secondary">Cleaning Solutions.</span>

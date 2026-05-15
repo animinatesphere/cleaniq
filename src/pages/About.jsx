@@ -35,10 +35,10 @@ const About = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-black text-primary-dark mb-10 tracking-tighter leading-[1.1]"
+            className="text-3xl md:text-6xl lg:text-7xl font-extrabold text-primary-dark mb-10 tracking-tighter leading-[1.1]"
           >
             A premium cleaning <br />
-            <span className="text-primary italic text-6xl md:text-8xl">lifestyle.</span>
+            <span className="text-primary italic text-5xl md:text-8xl">lifestyle.</span>
           </motion.h1>
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -79,7 +79,7 @@ const About = () => {
             <div className="w-16 h-16 rounded-2xl bg-secondary/20 text-primary flex items-center justify-center mb-8">
               <Target size={32} />
             </div>
-            <h2 className="text-3xl font-black text-primary-dark mb-6 tracking-tight">Our Mission.</h2>
+            <h2 className="text-2xl font-bold text-primary-dark mb-6 tracking-tight">Our Mission.</h2>
             <p className="text-lg text-slate-600 font-medium leading-relaxed">
               Our mission is to provide exceptional, eco-conscious cleaning services that enhance the 
               quality of living and working environments, grounded in professionalism, integrity, and 
@@ -97,7 +97,7 @@ const About = () => {
             <div className="w-16 h-16 rounded-2xl bg-white/10 text-secondary flex items-center justify-center mb-8">
               <Eye size={32} />
             </div>
-            <h2 className="text-3xl font-black mb-6 tracking-tight">Our Vision.</h2>
+            <h2 className="text-2xl font-bold mb-6 tracking-tight">Our Vision.</h2>
             <p className="text-lg text-white/80 font-medium leading-relaxed">
               Our vision is to establish Cleaniq as Manchester’s most trusted and recognizable 
               household name in eco-friendly cleaning, defined by innovation, reliability, and 
@@ -110,9 +110,9 @@ const About = () => {
       {/* Core Values */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Values</h2>
-            <h3 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter">Our Core Values.</h3>
+          <div className="text-center mb-16 md:mb-20">
+            <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-4">Values</h2>
+            <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark tracking-tighter">Our Core Values.</h3>
           </div>
 
           <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-8">
@@ -147,7 +147,7 @@ const About = () => {
         <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 skew-x-12 transform translate-x-1/2" />
         <div className="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-20 items-center">
           <div>
-            <h2 className="text-3xl md:text-5xl font-black mb-12 tracking-tighter">The Cleaniq Advantage?</h2>
+            <h2 className="text-2xl md:text-5xl font-extrabold mb-8 md:12 tracking-tighter">The Cleaniq Advantage?</h2>
             <div className="space-y-6">
               {[
                 'Trained, vetted, and reliable cleaning professionals',
@@ -165,8 +165,8 @@ const About = () => {
               ))}
             </div>
           </div>
-          <div className="bg-white/10 backdrop-blur-xl p-12 rounded-[60px] border border-white/20">
-            <h2 className="text-3xl font-black mb-8 tracking-tight">The Cleaniq Standard.</h2>
+          <div className="bg-white/10 backdrop-blur-xl p-8 md:p-12 rounded-[40px] md:rounded-[60px] border border-white/20">
+            <h2 className="text-2xl font-bold mb-8 tracking-tight">The Cleaniq Standard.</h2>
             <p className="text-xl text-white/80 leading-relaxed font-medium">
               We’ve redefined what clean means. At Cleaniq, every service upholds our standard of 
               precision, care, and sustainability — ensuring your environment feels as good as it looks.
@@ -178,10 +178,10 @@ const About = () => {
       {/* Contact Section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="bg-slate-900 rounded-[60px] p-12 md:p-20 text-white relative overflow-hidden">
+          <div className="bg-slate-900 rounded-[40px] md:rounded-[60px] p-8 md:p-20 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-[100px] -mr-48 -mt-48" />
             <div className="max-w-2xl">
-              <h2 className="text-3xl md:text-5xl font-black mb-12 tracking-tighter">Get in Touch.</h2>
+              <h2 className="text-3xl md:text-5xl font-extrabold mb-10 md:12 tracking-tighter">Get in Touch.</h2>
               <div className="space-y-8">
                 <div className="flex items-center gap-6">
                   <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-secondary">
