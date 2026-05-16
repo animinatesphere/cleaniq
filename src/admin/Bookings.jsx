@@ -218,7 +218,7 @@ const Bookings = () => {
     if (!b) return {};
     const data = {};
     const extras = b.details?.extras;
-    const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'];
+    const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory', 'Living Room'];
     
     if (Array.isArray(extras)) {
       extras.forEach(item => {
@@ -239,7 +239,7 @@ const Bookings = () => {
     if (!b) return {};
     const data = {};
     const extras = b.details?.extras;
-    const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory', 'Parking', 'Entry', 'Instructions'];
+    const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory', 'Living Room', 'Parking', 'Entry', 'Instructions'];
     
     if (Array.isArray(extras)) {
       extras.forEach(item => {

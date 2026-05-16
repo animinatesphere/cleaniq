@@ -70,7 +70,7 @@ const ServicesManagement = () => {
 
   const categories = (() => {
     const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-    const baseNames = ['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning'];
+    const baseNames = ['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning', 'End of Tenancy'];
     const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'];
 
     return {

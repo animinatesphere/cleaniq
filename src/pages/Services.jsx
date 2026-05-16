@@ -9,6 +9,7 @@ import {
   Home as HomeIcon,
   Briefcase,
   Trash2,
+  Truck,
   ShieldCheck,
 } from "lucide-react";
 import { useRegion } from "../context/RegionContext";
@@ -16,6 +17,7 @@ import me1 from "../assets/image0.jpeg";
 import me2 from "../assets/image1.jpeg";
 import me3 from "../assets/Cleaniq services/4th Post.jpg";
 import airbnbImg from "../assets/airbnb_cleaning_service.png";
+import moveOutImg from "C:/Users/HP/.gemini/antigravity/brain/13ee3f1b-4a89-44ad-ba08-66eae60c5b3d/end_of_tenancy_cleaning_1778930299693.png";
 
 const Services = () => {
   const { region } = useRegion();
@@ -114,6 +116,26 @@ const Services = () => {
       pricing: dynamicRates["Airbnb Cleaning".trim()] 
         ? `From ${region.symbol}${dynamicRates["Airbnb Cleaning".trim()]}${region.id === 'UK' ? '/hr' : ''}`
         : (region.id === "UK" ? "From £21.90/hr" : `From ${region.symbol}20,000`),
+    },
+    {
+      id: "tenancy",
+      title: "End of Tenancy",
+      dbName: "End of Tenancy",
+      tag: "Moving out/in clean",
+      icon: <Truck className="text-secondary" size={40} />,
+      image: moveOutImg,
+      features: [
+        "Full property deep clean.",
+        "Inside all appliances.",
+        "Window & frame cleaning.",
+        "Carpet steam cleaning.",
+        "Deposit back guarantee.",
+        "Move-in ready finish.",
+      ],
+      description: "Comprehensive move-in/move-out cleaning with a deposit-back guarantee.",
+      pricing: dynamicRates["End of Tenancy".trim()] 
+        ? `From ${region.symbol}${dynamicRates["End of Tenancy".trim()]}${region.id === 'UK' ? '/hr' : ''}`
+        : (region.id === "UK" ? "From £29.90/hr" : `From ${region.symbol}30,000`),
     },
   ];
 

@@ -4,7 +4,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/cleaniq';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/cleaniq';
 
 const initialServices = [
   // UK Services (Hourly)
@@ -13,6 +13,7 @@ const initialServices = [
   { name: 'Deep Clean', region: 'UK', rate: 24.90, type: 'hourly', description: 'Thorough deep cleaning of your entire home' },
   { name: 'Airbnb Cleaning', region: 'UK', rate: 21.90, type: 'hourly', description: 'Specialist Airbnb & holiday rental cleaning' },
   { name: 'Office Cleaning', region: 'UK', rate: 19.90, type: 'hourly', description: 'Professional office and commercial cleaning' },
+  { name: 'End of Tenancy', region: 'UK', rate: 29.90, type: 'hourly', description: 'Deep cleaning for move-in/move-out with deposit guarantee' },
   
   // Nigeria Services (Flat Rates)
   { name: '1 Bed Flat', region: 'NG', rate: 15000, type: 'flat', description: '1 bedroom apartment cleaning' },
@@ -20,6 +21,7 @@ const initialServices = [
   { name: '3 Bed House', region: 'NG', rate: 35000, type: 'flat', description: '3 bedroom house cleaning' },
   { name: '4 Bed House', region: 'NG', rate: 45000, type: 'flat', description: '4 bedroom house cleaning' },
   { name: '5+ Bed House', region: 'NG', rate: 60000, type: 'flat', description: '5+ bedroom large house cleaning' },
+  { name: 'End of Tenancy', region: 'NG', rate: 30000, type: 'flat', description: 'Deep cleaning for move-in/move-out with deposit guarantee' },
 
   // UK Extras (Flat Rate)
   { name: 'American fridge freeze', region: 'UK', rate: 15, type: 'flat', description: 'Deep clean for American style fridge freezer' },
@@ -31,6 +33,12 @@ const initialServices = [
   { name: 'Single Oven Cleaning', region: 'UK', rate: 15, type: 'flat', description: 'Standard oven cleaning' },
   { name: 'Venetian Blinds', region: 'UK', rate: 5, type: 'flat', description: 'Meticulous cleaning of venetian blinds' },
 
+  // Rooms (Informational)
+  { name: 'Bedroom', region: 'UK', rate: 0, type: 'flat', description: 'Informational room count' },
+  { name: 'Bathroom', region: 'UK', rate: 0, type: 'flat', description: 'Informational room count' },
+  { name: 'Kitchen', region: 'UK', rate: 0, type: 'flat', description: 'Informational room count' },
+  { name: 'Living Room', region: 'UK', rate: 0, type: 'flat', description: 'Informational room count' },
+
   // Nigeria Extras (Flat Rate)
   { name: 'American fridge freeze', region: 'NG', rate: 8000, type: 'flat', description: 'Deep clean for American style fridge freezer' },
   { name: 'Carpet(s) Cleaning', region: 'NG', rate: 15000, type: 'flat', description: 'Professional carpet cleaning per room' },
@@ -40,6 +48,12 @@ const initialServices = [
   { name: 'Single fridge', region: 'NG', rate: 5000, type: 'flat', description: 'Standard single fridge cleaning' },
   { name: 'Single Oven Cleaning', region: 'NG', rate: 8000, type: 'flat', description: 'Standard oven cleaning' },
   { name: 'Venetian Blinds', region: 'NG', rate: 3000, type: 'flat', description: 'Meticulous cleaning of venetian blinds' },
+
+  // Rooms (Informational)
+  { name: 'Bedroom', region: 'NG', rate: 0, type: 'flat', description: 'Informational room count' },
+  { name: 'Bathroom', region: 'NG', rate: 0, type: 'flat', description: 'Informational room count' },
+  { name: 'Kitchen', region: 'NG', rate: 0, type: 'flat', description: 'Informational room count' },
+  { name: 'Living Room', region: 'NG', rate: 0, type: 'flat', description: 'Informational room count' },
 ];
 
 async function seed() {

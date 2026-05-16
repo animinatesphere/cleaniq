@@ -8,7 +8,7 @@ import {
   CreditCard, Home as HomeIcon, Briefcase, 
   Trash2, Plus, Minus, CheckCircle2, MapPin, 
   Clock, Info, ShieldCheck, Heart, Star,
-  Search, Sparkles, Zap, Shield, HelpCircle,
+  Search, Sparkles, Zap, Shield, HelpCircle, AlertCircle,
   ArrowRight, Truck, Key, Car, Layout, Coffee,
   Waves, Refrigerator, Wind
 } from 'lucide-react';
@@ -74,6 +74,20 @@ const serviceOptions = [
       "Disinfection services.",
     ],
     icon: <Briefcase />
+  },
+  { 
+    id: 'End of Tenancy', 
+    title: 'End of Tenancy', 
+    tag: 'Moving out/in clean',
+    bullets: [
+      "Full property deep clean.",
+      "Inside all appliances.",
+      "Window & frame cleaning.",
+      "Carpet steam cleaning.",
+      "Deposit back guarantee.",
+      "Move-in ready finish.",
+    ],
+    icon: <Truck />
   },
 ];
 
@@ -164,6 +178,12 @@ const Booking = () => {
   const [dynamicRates, setDynamicRates] = useState({});
   const [servicesList, setServicesList] = useState([]);
   const [loadingRates, setLoadingRates] = useState(true);
+  const [notification, setNotification] = useState(null);
+
+  const showNotification = (message, type = 'error') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 4000);
+  };
 
   // Fetch Dynamic Rates from VPS
   useEffect(() => {
@@ -311,29 +331,46 @@ const Booking = () => {
   };
 
   const nextStep = () => { 
+    // Validation
+    if (step === 1) {
+      if (!formData.address || !formData.postcode) {
+        showNotification('Please provide your address and postcode.');
+        return;
+      }
+      if (!formData.serviceType) {
+        showNotification('Please select a service type.');
+        return;
+      }
+    }
+    if (step === 2) {
+      const totalRooms = Object.values(formData.property).reduce((a, b) => a + b, 0);
+      if (totalRooms === 0) {
+        showNotification('Please select at least one room or area.');
+        return;
+      }
+    }
+    if (step === 3) {
+      if (!formData.parking || !formData.keyAccess) {
+        showNotification('Please select parking and access options.');
+        return;
+      }
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
     setStep(s => {
-      if (s === 1 && preSelectedService) return 3;
-      return Math.min(s + 1, 8);
+      return Math.min(s + 1, 4);
     }); 
   };
   const prevStep = () => { 
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
-    setStep(s => {
-      if (s === 3 && preSelectedService) return 1;
-      return Math.max(s - 1, 1);
-    }); 
+    setStep(s => Math.max(s - 1, 1)); 
   };
 
   const steps = [
-    { id: 1, title: 'Address' },
-    { id: 2, title: 'Service' },
-    { id: 3, title: 'Your Home' },
-    { id: 4, title: 'Hours' },
-    { id: 5, title: 'Extras' },
-    { id: 6, title: 'Logistics' },
-    { id: 7, title: 'Schedule' },
-    { id: 8, title: 'Payment' },
+    { id: 1, title: 'Location' },
+    { id: 2, title: 'Home & Hours' },
+    { id: 3, title: 'Add-ons' },
+    { id: 4, title: 'Payment' },
   ];
 
   // Address Suggestions Logic
@@ -362,7 +399,7 @@ const Booking = () => {
   const handlePaymentSuccess = async (paymentIntent) => {
     if (!formData.serviceType) {
       console.error('Submission Blocked: Service type is missing.');
-      alert('Please select a service type before completing your booking.');
+      showNotification('Please select a service type before completing your booking.');
       return;
     }
 
@@ -442,167 +479,203 @@ const Booking = () => {
                 <div className="flex-1 pb-20 md:pb-24">
                 
                 {step === 1 && (
-                  <div className="space-y-6 md:space-y-8 animate-in fade-in">
-                    <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Where are we cleaning?</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Provide your property address</p></div>
-                    <div className="space-y-4">
-                      <div className="relative group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={20} />
-                        <input className="w-full p-6 pl-14 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" placeholder="Address Line 1 (start typing to search...)" value={formData.address} onChange={(e) => { setFormData({...formData, address: e.target.value}); setShowSuggestions(true); }}/>
-                        <AnimatePresence>{showSuggestions && addressSuggestions.length > 0 && (<motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden text-left">{addressSuggestions.map((addr, i) => (<button key={i} onClick={() => selectAddress(addr)} className="w-full p-4 text-left hover:bg-slate-50 flex items-center gap-3 border-b border-slate-50 text-xs font-bold text-slate-600"><MapPin size={14} className="text-primary"/>{addr}</button>))}</motion.div>)}</AnimatePresence>
+                  <div className="space-y-10 animate-in fade-in">
+                    <div className="space-y-6">
+                      <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Where are we cleaning?</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Provide your property address</p></div>
+                      <div className="space-y-4">
+                        <div className="relative group">
+                          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={20} />
+                          <input className="w-full p-6 pl-14 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" placeholder="Address Line 1 (start typing to search...)" value={formData.address} onChange={(e) => { setFormData({...formData, address: e.target.value}); setShowSuggestions(true); }}/>
+                          <AnimatePresence>{showSuggestions && addressSuggestions.length > 0 && (<motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden text-left">{addressSuggestions.map((addr, i) => (<button key={i} onClick={() => selectAddress(addr)} className="w-full p-4 text-left hover:bg-slate-50 flex items-center gap-3 border-b border-slate-50 text-xs font-bold text-slate-600"><MapPin size={14} className="text-primary"/>{addr}</button>))}</motion.div>)}</AnimatePresence>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <input className="w-full p-6 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" placeholder="Address Line 2 (optional)" value={formData.addressLine2} onChange={(e) => setFormData({...formData, addressLine2: e.target.value})}/>
+                          <input className="w-full p-6 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" placeholder="Postcode / ZIP" value={formData.postcode} onChange={(e) => setFormData({...formData, postcode: e.target.value})}/>
+                        </div>
                       </div>
-                      <input className="w-full p-6 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" placeholder="Address Line 2 (Apartment, Suite, Flat no. — optional)" value={formData.addressLine2} onChange={(e) => setFormData({...formData, addressLine2: e.target.value})}/>
-                      <input className="w-full p-6 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" placeholder="Postcode / ZIP" value={formData.postcode} onChange={(e) => setFormData({...formData, postcode: e.target.value})}/>
                     </div>
-                  </div>
-                )}
 
-                {step === 2 && (
-                  <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
-                    <h1 className="text-2xl md:text-4xl font-extrabold text-primary-dark tracking-tight">What type of cleaning?</h1>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                      {serviceOptions.map((s) => (
-                        <button key={s.id} onClick={() => { setFormData({...formData, serviceType: s.id}); nextStep(); }} className={`flex flex-col items-center p-6 md:p-8 rounded-[32px] md:rounded-[40px] border-4 transition-all duration-500 group relative overflow-hidden ${formData.serviceType === s.id ? 'border-primary bg-primary/5 shadow-2xl shadow-primary/10' : 'border-slate-50 bg-white hover:border-primary/20'}`}>
-                          <div className={`w-16 h-16 md:w-20 md:h-20 rounded-[24px] md:rounded-[32px] flex items-center justify-center mb-4 md:mb-6 transition-all duration-500 ${formData.serviceType === s.id ? 'bg-primary text-white scale-110 shadow-lg' : 'bg-primary/5 text-primary group-hover:scale-110'}`}>{React.cloneElement(s.icon, { size: 28 })}</div>
-                          <p className={`font-black text-xl md:text-2xl mb-1 tracking-tighter ${formData.serviceType === s.id ? 'text-primary' : 'text-primary-dark'}`}>{s.title}</p>
-                          <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">{s.tag}</p>
-                          <div className="mb-4 md:mb-6"><span className="text-lg md:text-xl font-black text-primary-dark">{region.symbol}{dynamicRates[s.id.trim()] || (region.id === 'UK' ? (s.id === 'Deep Clean' ? 24.90 : 17.90) : (s.id === 'Deep Clean' ? 25000 : 15000))}</span>{region.id === 'UK' && <span className="text-[10px] font-bold text-slate-400 ml-1">/ hr</span>}</div>
-                          <div className="space-y-3 w-full text-left">
-                            {s.bullets.map((bullet, idx) => (<div key={idx} className="flex items-center gap-3"><div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${formData.serviceType === s.id ? 'bg-primary/20 text-primary' : 'bg-slate-50 text-slate-300'}`}><CheckCircle2 size={12} /></div><p className="text-xs font-bold text-slate-500">{bullet}</p></div>))}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {step === 3 && (
-                  <div className="space-y-6 md:space-y-8 animate-in fade-in">
-                    <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Tell us about your home</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Select number of rooms</p></div>
-                    <div className="grid gap-4">
-                      {servicesList
-                        .filter(s => {
-                          const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'];
-                          const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-                          return roomNames.some(rn => clean(rn) === clean(s.name));
-                        })
-                        .map(room => {
-                          const roomIconMap = { 'Bedroom': <HomeIcon size={18}/>, 'Bathroom': <Waves size={18}/>, 'Cloakroom': <Info size={18}/>, 'Kitchen': <Coffee size={18}/>, 'Utility Room': <Truck size={18}/>, 'Reception Room': <Layout size={18}/>, 'Conservatory': <Wind size={18}/> };
-                          return (
-                            <div key={room._id} className="flex items-center justify-between p-3 md:p-4 px-4 md:px-6 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary/20 transition-all">
-                              <div className="flex items-center gap-3 md:gap-4"><div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">{roomIconMap[room.name] || <HomeIcon size={18}/>}</div><span className="font-bold text-xs md:text-sm text-primary-dark">{room.name}</span></div>
-                              <div className="flex items-center gap-3 md:gap-6">
-                                <button onClick={() => updateRoom(room.name, -1)} className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Minus size={14}/></button>
-                                <span className="text-base md:text-lg font-black text-primary-dark w-4 text-center">{formData.property[room.name] || 0}</span>
-                                <button onClick={() => updateRoom(room.name, 1)} className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Plus size={14}/></button>
-                              </div>
+                    <div className="pt-10 border-t border-slate-100">
+                      <h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight mb-8">What type of cleaning?</h1>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {serviceOptions.map((s) => (
+                          <button key={s.id} onClick={() => { setFormData({...formData, serviceType: s.id}); }} className={`flex flex-col items-center p-6 rounded-[32px] border-4 transition-all duration-300 ${formData.serviceType === s.id ? 'border-primary bg-primary/5 shadow-xl shadow-primary/10' : 'border-slate-50 bg-white hover:border-primary/20'}`}>
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${formData.serviceType === s.id ? 'bg-primary text-white shadow-lg' : 'bg-primary/5 text-primary'}`}>{React.cloneElement(s.icon, { size: 24 })}</div>
+                            <p className={`font-black text-lg tracking-tighter ${formData.serviceType === s.id ? 'text-primary' : 'text-primary-dark'}`}>{s.title}</p>
+                            <div className="mt-1 mb-4"><span className="text-base font-black text-primary-dark">{region.symbol}{dynamicRates[s.id.trim()] || (region.id === 'UK' ? (s.id === 'Deep Clean' ? 24.90 : 17.90) : (s.id === 'Deep Clean' ? 25000 : 15000))}</span>{region.id === 'UK' && <span className="text-[10px] font-bold text-slate-400 ml-1">/ hr</span>}</div>
+                            
+                            <div className="space-y-2 w-full text-left pt-4 border-t border-slate-100">
+                              {s.bullets.map((bullet, idx) => (
+                                <div key={idx} className="flex items-center gap-2">
+                                  <CheckCircle2 size={12} className={formData.serviceType === s.id ? 'text-primary' : 'text-slate-300'} />
+                                  <p className="text-[10px] font-bold text-slate-500">{bullet}</p>
+                                </div>
+                              ))}
                             </div>
-                          );
-                        })}
-                    </div>
-                  </div>
-                )}
-
-                {step === 4 && (
-                  <div className="space-y-8 md:space-y-12 animate-in fade-in py-6 md:py-10">
-                    <div className="text-center"><h1 className="text-xl md:text-4xl font-extrabold text-primary-dark tracking-tight mb-2 md:mb-4">How many hours?</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[10px] tracking-widest">Select the duration of your clean</p></div>
-                    <div className="max-w-md mx-auto">
-                      <div className="bg-slate-50 p-6 md:p-10 rounded-[32px] md:rounded-[40px] border border-slate-100 flex items-center justify-between">
-                        <button onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 1)})} className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Minus size={20}/></button>
-                        <div className="text-center"><span className="text-4xl md:text-6xl font-black text-primary-dark">{formData.duration}</span><p className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em] mt-1 md:mt-2">Hours (2h min)</p></div>
-                        <button onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 1)})} className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Plus size={20}/></button>
-                      </div>
-                      <div className="mt-6 md:mt-10 grid grid-cols-3 gap-2 md:gap-4">
-                        {['Once', 'Weekly', 'Fortnightly'].map(f => (
-                          <button key={f} onClick={() => setFormData({...formData, frequency: f})} className={`p-6 rounded-3xl border-2 font-black text-sm transition-all ${formData.frequency === f ? 'border-primary bg-primary text-white shadow-xl shadow-primary/20' : 'border-slate-50 bg-slate-50'}`}>{f}</button>
+                          </button>
                         ))}
                       </div>
                     </div>
                   </div>
                 )}
 
-                {step === 5 && (
-                  <div className="space-y-6 md:space-y-8 animate-in fade-in">
-                    <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Extra Services</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Select additional options</p></div>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {servicesList
-                        .filter(s => {
-                          const baseServices = [...serviceOptions.map(o => o.id), 'Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory', '1 Bed Flat', '2 Bed Flat', '3 Bed House', '4 Bed House', '5+ Bed House'];
-                          // Clean names for comparison (remove dots, special chars, etc)
-                          const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-                          const isBase = baseServices.some(base => clean(base) === clean(s.name));
-                          return !isBase;
-                        })
-                        .map(extra => {
-                          const iconMap = { 
-                            'american fridge freeze': <Refrigerator />, 
-                            'carpet(s) cleaning': <Sparkles />, 
-                            'double oven cleaning': <Zap />, 
-                            'fridge and freezer': <Refrigerator />, 
-                            'range oven cleaning': <Zap />, 
-                            'single fridge': <Refrigerator />, 
-                            'single oven cleaning': <Zap />, 
-                            'venetian blinds': <Layout /> 
-                          };
-                          const icon = iconMap[extra.name.toLowerCase().trim()] || <Plus size={18}/>;
-                          return (
-                            <div key={extra._id} className={`p-4 px-6 rounded-2xl border-2 flex items-center justify-between transition-all ${formData.extras[extra.name] > 0 ? 'border-primary bg-primary/5' : 'border-slate-50 bg-slate-50'}`}>
-                              <div className="flex items-center gap-4"><div className={`w-10 h-10 rounded-xl flex items-center justify-center ${formData.extras[extra.name] > 0 ? 'bg-primary text-white' : 'bg-white text-slate-400 shadow-sm'}`}>{icon}</div><span className="font-bold text-[11px] text-primary-dark max-w-[110px] leading-tight">{extra.name}</span></div>
-                              <div className="flex items-center gap-3 bg-white rounded-xl p-1.5 border border-slate-100"><button onClick={() => updateExtra(extra.name, -1)} className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400"><Minus size={12}/></button><span className="font-black text-xs w-4 text-center">{formData.extras[extra.name] || 0}</span><button onClick={() => updateExtra(extra.name, 1)} className="w-7 h-7 rounded-lg bg-primary text-white flex items-center justify-center"><Plus size={12}/></button></div>
+                {step === 2 && (
+                  <div className="space-y-10 animate-in fade-in">
+                    <div className="grid md:grid-cols-2 gap-10">
+                      <div>
+                        <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Tell us about your home</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Select number of rooms</p></div>
+                        <div className="grid gap-3 mt-6">
+                          {[
+                            { name: 'Bedroom',     icon: <HomeIcon size={18}/> },
+                            { name: 'Bathroom',    icon: <Waves size={18}/> },
+                            { name: 'Kitchen',     icon: <Coffee size={18}/> },
+                            { name: 'Living Room', icon: <Layout size={18}/> },
+                          ].map(room => (
+                            <div key={room.name} className="flex items-center justify-between p-3 px-5 rounded-2xl bg-slate-50 border border-slate-100">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">{room.icon}</div>
+                                <span className="font-bold text-xs text-primary-dark">{room.name}</span>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <button onClick={() => updateRoom(room.name, -1)} className="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Minus size={14}/></button>
+                                <span className="text-base font-black text-primary-dark w-4 text-center">{formData.property[room.name] || 0}</span>
+                                <button onClick={() => updateRoom(room.name, 1)} className="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Plus size={14}/></button>
+                              </div>
                             </div>
-                          );
-                        })}
-                    </div>
-                  </div>
-                )}
-
-                {step === 6 && (
-                  <div className="space-y-6 md:space-y-8 animate-in fade-in">
-                    <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Logistics</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Help our team get access</p></div>
-                    <div className="grid gap-6">
-                      <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Parking Situation</label><div className="grid grid-cols-1 xs:grid-cols-2 gap-3">{['Available on-site', 'Street parking', 'Paid parking nearby', 'No parking'].map(p => (<button key={p} onClick={() => setFormData({...formData, parking: p})} className={`p-4 rounded-xl border-2 font-bold text-xs transition-all text-left ${formData.parking === p ? 'border-primary bg-primary text-white' : 'border-slate-50 bg-slate-50'}`}>{p}</button>))}</div></div>
-                      <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Key / Entry Access</label><div className="grid grid-cols-1 xs:grid-cols-2 gap-3">{['I will be home', 'Key under mat', 'Lockbox / Key safe', 'Building concierge'].map(k => (<button key={k} onClick={() => setFormData({...formData, keyAccess: k})} className={`p-4 rounded-xl border-2 font-bold text-xs transition-all text-left ${formData.keyAccess === k ? 'border-primary bg-primary text-white' : 'border-slate-50 bg-slate-50'}`}>{k}</button>))}</div></div>
-                      <div className="space-y-2"><label className="text-[9px] font-black text-slate-400 ml-4 uppercase tracking-widest">Special Instructions (optional)</label><textarea className="w-full p-5 rounded-2xl bg-slate-50 border-none outline-none font-bold text-sm resize-none h-28" placeholder="e.g. Ring bell twice, dog on premises, focus on kitchen..." value={formData.specialInstructions} onChange={(e) => setFormData({...formData, specialInstructions: e.target.value})}/></div>
-                    </div>
-                  </div>
-                )}
-
-                {step === 7 && (
-                  <div className="space-y-6 md:space-y-8 animate-in fade-in">
-                    <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Scheduling.</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Select your preferred date</p></div>
-                    <CustomCalendar selectedDate={formData.date} onDateSelect={(date) => setFormData({...formData, date})} bookedDates={bookedDates} />
-                    <div className="grid grid-cols-3 gap-3 mt-6">
-                      {['Morning', 'Afternoon', 'Evening'].map(slot => (<button key={slot} onClick={() => setFormData({...formData, timeSlot: slot})} className={`p-4 rounded-xl border-2 font-black text-xs transition-all ${formData.timeSlot === slot ? 'border-primary bg-primary text-white shadow-lg' : 'border-slate-50 bg-slate-50'}`}>{slot}</button>))}
-                    </div>
-                    {formData.timeSlot && (
-                      <div className="bg-primary/5 p-6 rounded-[24px] border border-primary/10 text-center animate-in slide-in-from-bottom-2">
-                        <label className="text-[9px] font-black text-primary uppercase tracking-widest block mb-3">Do you have a specific arrival time in mind?</label>
-                        <input placeholder="e.g. 9:30 AM" className="w-full p-4 px-6 rounded-xl bg-white border border-primary/20 outline-none font-bold text-xs text-center" value={formData.preferredTime} onChange={(e) => setFormData({...formData, preferredTime: e.target.value})}/>
+                          ))}
+                        </div>
                       </div>
-                    )}
+
+                      <div className="bg-slate-50 p-8 rounded-[40px] border border-slate-100 flex flex-col justify-center">
+                        <div className="text-center mb-8">
+                          <h2 className="text-xl font-extrabold text-primary-dark tracking-tight">How long?</h2>
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Select hours for the cleaning</p>
+                        </div>
+                        <div className="flex items-center justify-center gap-8 mb-8">
+                          <button onClick={() => setFormData({...formData, duration: Math.max(2, formData.duration - 1)})} className="w-14 h-14 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Minus size={20}/></button>
+                          <div className="text-center"><span className="text-5xl font-black text-primary-dark">{formData.duration}</span><p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mt-1">Hours</p></div>
+                          <button onClick={() => setFormData({...formData, duration: Math.min(8, formData.duration + 1)})} className="w-14 h-14 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary shadow-lg hover:bg-primary hover:text-white transition-all"><Plus size={20}/></button>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          {['Once', 'Weekly', 'Fortnightly'].map(f => (
+                            <button key={f} onClick={() => setFormData({...formData, frequency: f})} className={`py-4 rounded-2xl border-2 font-black text-xs transition-all ${formData.frequency === f ? 'border-primary bg-primary text-white shadow-lg shadow-primary/20' : 'border-white bg-white'}`}>{f}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
-                {step === 8 && (
-                  <div className="space-y-6 md:space-y-8 animate-in fade-in">
-                    <h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Your Details & Payment.</h1>
-                    <div className="grid md:grid-cols-2 gap-4 mb-6">
-                      <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm" placeholder="First Name" value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})}/>
-                      <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm" placeholder="Last Name" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})}/>
-                      <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm md:col-span-2" placeholder="Email Address" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}/>
-                      <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm md:col-span-2" placeholder="Phone Number" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})}/>
+                {step === 3 && (
+                  <div className="space-y-10 animate-in fade-in">
+                    <div className="grid md:grid-cols-2 gap-10">
+                      <div>
+                        <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Extras Services</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Select additional options</p></div>
+                        <div className="grid gap-3 mt-6">
+                          {servicesList
+                            .filter(s => {
+                              const baseServices = [...serviceOptions.map(o => o.id), 'Bedroom', 'Bathroom', 'Kitchen', 'Living Room', 'Cloakroom', 'Utility Room', 'Reception Room', 'Conservatory', '1 Bed Flat', '2 Bed Flat', '3 Bed House', '4 Bed House', '5+ Bed House'];
+                              const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                              return !baseServices.some(base => clean(base) === clean(s.name));
+                            })
+                            .map(extra => {
+                              const iconMap = { 'american fridge freeze': <Refrigerator />, 'carpet(s) cleaning': <Sparkles />, 'double oven cleaning': <Zap />, 'fridge and freezer': <Refrigerator />, 'range oven cleaning': <Zap />, 'single fridge': <Refrigerator />, 'single oven cleaning': <Zap />, 'venetian blinds': <Wind /> };
+                              const cleanName = extra.name.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+                              return (
+                                <div key={extra._id} className="flex items-center justify-between p-3 px-5 rounded-2xl bg-slate-50 border border-slate-100">
+                                  <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">{iconMap[cleanName] || <Plus size={16}/>}</div><div><p className="font-bold text-xs text-primary-dark">{extra.name}</p><p className="text-[8px] font-bold text-primary">{region.symbol}{extra.rate}</p></div></div>
+                                  <div className="flex items-center gap-4">
+                                    <button onClick={() => updateExtra(extra.name, -1)} className="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Minus size={14}/></button>
+                                    <span className="text-base font-black text-primary-dark w-4 text-center">{formData.extras[extra.name] || 0}</span>
+                                    <button onClick={() => updateExtra(extra.name, 1)} className="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-primary shadow-sm hover:bg-primary hover:text-white transition-all"><Plus size={14}/></button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+
+                      <div className="space-y-8">
+                        <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Logistics</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Access & Arrival details</p></div>
+                        <div className="space-y-6">
+                          <div className="space-y-3">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Car size={14} className="text-primary"/> Parking Availability</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              {['Available on-site', 'Public Parking', 'Paid Parking', 'No Parking'].map(p => (
+                                <button key={p} onClick={() => setFormData({...formData, parking: p})} className={`p-4 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${formData.parking === p ? 'border-primary bg-primary text-white shadow-lg' : 'border-slate-50 bg-slate-50'}`}>{p}</button>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Key size={14} className="text-primary"/> Entry Instructions</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              {['I will be home', 'Key under mat', 'Concierge/Reception', 'Lockbox/Code'].map(k => (
+                                <button key={k} onClick={() => setFormData({...formData, keyAccess: k})} className={`p-4 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${formData.keyAccess === k ? 'border-primary bg-primary text-white shadow-lg' : 'border-slate-50 bg-slate-50'}`}>{k}</button>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Info size={14} className="text-primary"/> Special Instructions</p>
+                            <textarea className="w-full p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-xs" rows={3} placeholder="Example: Gate code is 1234, focus on the kitchen tiles..." value={formData.specialInstructions} onChange={(e) => setFormData({...formData, specialInstructions: e.target.value})}/>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="bg-primary/5 p-6 rounded-[32px] border border-primary/10 mb-6"><p className="text-sm font-bold text-primary-dark mb-3">Booking: <span className="text-primary">{formData.serviceType}</span> on <span className="text-primary">{formData.date}</span> at <span className="text-primary">{formData.address}</span></p><div className="flex items-center gap-3 text-[10px] font-black text-primary uppercase tracking-widest"><ShieldCheck size={18} />Securely processed by Stripe</div></div>
-                    <Elements stripe={stripePromise}><StripePayment amount={totalPrice} currency={region.id === 'UK' ? 'GBP' : 'NGN'} customerInfo={formData} onPaymentSuccess={handlePaymentSuccess} /></Elements>
-                    
-                    {/* Developer Test Mode */}
-                    {/* <div className="mt-8 pt-8 border-t border-slate-100">
-                      <button 
-                        onClick={() => handlePaymentSuccess({ id: `TEST-${Date.now()}` })}
-                        className="w-full py-4 rounded-2xl bg-slate-50 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 hover:text-slate-600 transition-all border-2 border-dashed border-slate-200"
-                      >
-                        Dev: Submit Without Paying (TEST MODE)
-                      </button>
-                    </div> */}
+                  </div>
+                )}
+
+                {step === 4 && (
+                  <div className="space-y-10 animate-in fade-in">
+                    <div className="flex flex-col gap-10">
+
+                      {/* Date & Time */}
+                      <div className="space-y-6">
+                        <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Select Date & Time</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">When should we arrive?</p></div>
+                        <CustomCalendar selectedDate={formData.date} onDateSelect={(d) => setFormData({...formData, date: d})} bookedDates={bookedDates} />
+                        {formData.date && (
+                          <div className="grid grid-cols-3 gap-3">
+                            {['Morning (8am-12pm)', 'Afternoon (12pm-4pm)', 'Evening (4pm-8pm)'].map(slot => (
+                              <button key={slot} onClick={() => setFormData({...formData, timeSlot: slot})} className={`p-5 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${formData.timeSlot === slot ? 'border-primary bg-primary text-white shadow-lg shadow-primary/20' : 'border-slate-50 bg-slate-50'}`}>{slot.split(' ')[0]}<br/><span className="text-[8px] font-bold opacity-70 normal-case">{slot.match(/\(.*\)/)?.[0]}</span></button>
+                            ))}
+                          </div>
+                        )}
+                        {formData.timeSlot && (
+                          <div className="animate-in slide-in-from-bottom-2 space-y-2">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Clock size={14} className="text-primary"/> Do you have a specific arrival time? </p>
+                            <input type="text" placeholder="e.g. 9:30 AM" className="w-full p-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" value={formData.preferredTime} onChange={(e) => setFormData({...formData, preferredTime: e.target.value})} />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Customer Details */}
+                      <div className="space-y-6">
+                        <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Your Details</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[9px] tracking-widest mt-1">Final step to confirm</p></div>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm" placeholder="First Name" value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})}/>
+                          <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm" placeholder="Last Name" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})}/>
+                          <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm md:col-span-2" placeholder="Email Address" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}/>
+                          <input className="p-5 rounded-2xl bg-slate-50 border-none shadow-sm outline-none font-bold text-sm md:col-span-2" placeholder="Phone Number" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})}/>
+                        </div>
+                      </div>
+
+                      {/* Payment */}
+                      <div className="bg-primary/5 p-6 rounded-[32px] border border-primary/10">
+                        <div className="flex items-center gap-3 text-[10px] font-black text-primary uppercase tracking-widest mb-4"><ShieldCheck size={18} />Securely processed by Stripe</div>
+                        <Elements stripe={stripePromise}><StripePayment amount={totalPrice} currency={region.id === 'UK' ? 'GBP' : 'NGN'} customerInfo={formData} onPaymentSuccess={handlePaymentSuccess} /></Elements>
+                      </div>
+
+                      {/* Developer Test Mode */}
+                      {/* <div className="pt-2 pb-6">
+                        <button
+                          onClick={() => handlePaymentSuccess({ id: `TEST-${Date.now()}` })}
+                          className="w-full py-4 rounded-2xl bg-slate-50 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200 transition-all border-2 border-dashed border-slate-200 flex items-center justify-center gap-2"
+                        >
+                          <Zap size={14} />
+                          Dev: Skip Payment & Test Submit
+                        </button>
+                      </div> */}
+
+                    </div>
                   </div>
                 )}
 
@@ -615,7 +688,7 @@ const Booking = () => {
                       <span className="hidden xs:inline">Go Back</span>
                     </button>
                   ) : <div/>}
-                  {step < 8 && (
+                  {step < 4 && (
                     <button onClick={nextStep} className="pointer-events-auto flex items-center gap-3 md:gap-4 bg-primary text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-black text-[10px] md:text-xs shadow-xl shadow-primary/20 hover:scale-105 transition-all group">
                       Next Step <ArrowRight size={18} className="group-hover:translate-x-1 transition-all" />
                     </button>
@@ -646,6 +719,27 @@ const Booking = () => {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {notification && (
+          <motion.div 
+            initial={{ opacity: 0, y: -100 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -100 }}
+            className="fixed top-10 left-1/2 -translate-x-1/2 z-100 w-[90%] max-w-md"
+          >
+            <div className={`p-6 rounded-[32px] border-2 shadow-2xl flex items-center gap-4 bg-white ${notification.type === 'error' ? 'border-rose-100 text-rose-600' : 'border-emerald-100 text-emerald-600'}`}>
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${notification.type === 'error' ? 'bg-rose-50' : 'bg-emerald-50'}`}>
+                {notification.type === 'error' ? <AlertCircle size={24}/> : <CheckCircle2 size={24}/>}
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">{notification.type}</p>
+                <p className="font-bold text-sm leading-tight">{notification.message}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

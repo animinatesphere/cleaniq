@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useRegion } from '../context/RegionContext';
-import air1 from "../assets/karl-joshua-bernal-QtPG6tfUJp8-unsplash.jpg"
+import air1 from "../assets/josue-michel-FhsFUo-Wfc0-unsplash.jpg"
 import air2 from "../assets/vitaly-gariev-2NcTLdFHpH8-unsplash.jpg"
 import residentialImg from "../assets/residential.jpg"
 import officeImg from "../assets/office.jpg"
@@ -105,8 +105,17 @@ useEffect(() => {
               </Link>
               <div className="flex items-center gap-3 px-6 py-4">
                 <div className="flex -space-x-3">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-200" />
+                  {[
+                    "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&h=80&fit=crop&crop=face",
+                    "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=80&h=80&fit=crop&crop=face",
+                    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
+                  ].map((src, i) => (
+                    <img
+                      key={i}
+                      src={src}
+                      alt="Happy customer"
+                      className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-md"
+                    />
                   ))}
                 </div>
                 <div>
@@ -121,6 +130,7 @@ useEffect(() => {
 
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
+            
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1 }}
             className="relative lg:block"
