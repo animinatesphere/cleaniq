@@ -487,8 +487,15 @@ const Booking = () => {
                       <div className="space-y-4">
                         <div className="relative group">
                           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={20} />
-                          <input className="w-full p-6 pl-14 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" placeholder="Address Line 1 (start typing to search...)" value={formData.address} onChange={(e) => { setFormData({...formData, address: e.target.value}); setShowSuggestions(true); }}/>
-                          <AnimatePresence>{showSuggestions && addressSuggestions.length > 0 && (<motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden text-left">{addressSuggestions.map((addr, i) => (<button key={i} onClick={() => selectAddress(addr)} className="w-full p-4 text-left hover:bg-slate-50 flex items-center gap-3 border-b border-slate-50 text-xs font-bold text-slate-600"><MapPin size={14} className="text-primary"/>{addr}</button>))}</motion.div>)}</AnimatePresence>
+                          <input className="w-full p-6 pl-14 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" placeholder="Address Line 1 (start typing to search...)" value={formData.address} onChange={(e) => { setFormData({...formData, address: e.target.value}); setShowSuggestions(true); }} onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}/>
+                          <AnimatePresence>{showSuggestions && addressSuggestions.length > 0 && (
+                            <>
+                              <div className="fixed inset-0 z-40" onClick={() => setShowSuggestions(false)} />
+                              <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden text-left">
+                                {addressSuggestions.map((addr, i) => (<button key={i} onMouseDown={(e) => { e.preventDefault(); selectAddress(addr); }} onClick={() => selectAddress(addr)} className="w-full p-4 text-left hover:bg-slate-50 flex items-center gap-3 border-b border-slate-50 text-xs font-bold text-slate-600"><MapPin size={14} className="text-primary"/>{addr}</button>))}
+                              </motion.div>
+                            </>
+                          )}</AnimatePresence>
                         </div>
                         <div className="grid md:grid-cols-2 gap-4">
                           <input className="w-full p-6 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all" placeholder="Address Line 2 (optional)" value={formData.addressLine2} onChange={(e) => setFormData({...formData, addressLine2: e.target.value})}/>

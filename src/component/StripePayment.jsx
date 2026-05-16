@@ -149,10 +149,27 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Powered by Stripe</p>
             </div>
           </div>
-          <div className="flex gap-1">
-            <div className="w-8 h-5 bg-slate-100 rounded-md" />
-            <div className="w-8 h-5 bg-slate-100 rounded-md" />
-            <div className="w-8 h-5 bg-slate-100 rounded-md" />
+          <div className="flex gap-2 items-center">
+            {/* Visa */}
+            <div className="px-2 py-1 bg-white border border-slate-200 rounded-md flex items-center justify-center">
+              <svg viewBox="0 0 48 16" width="36" height="12" xmlns="http://www.w3.org/2000/svg">
+                <text x="0" y="13" fontFamily="Arial" fontWeight="900" fontSize="14" fill="#1A1F71">VISA</text>
+              </svg>
+            </div>
+            {/* Mastercard */}
+            <div className="px-1.5 py-1 bg-white border border-slate-200 rounded-md flex items-center justify-center">
+              <svg viewBox="0 0 38 24" width="28" height="18" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="14" cy="12" r="10" fill="#EB001B"/>
+                <circle cx="24" cy="12" r="10" fill="#F79E1B"/>
+                <path d="M19 5.5a10 10 0 010 13A10 10 0 0119 5.5z" fill="#FF5F00"/>
+              </svg>
+            </div>
+            {/* Verve */}
+            <div className="px-2 py-1 bg-white border border-slate-200 rounded-md flex items-center justify-center">
+              <svg viewBox="0 0 52 18" width="36" height="12" xmlns="http://www.w3.org/2000/svg">
+                <text x="0" y="13" fontFamily="Arial" fontWeight="900" fontSize="13" fill="#00425F">VERVE</text>
+              </svg>
+            </div>
           </div>
         </div>
 
@@ -219,9 +236,28 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
         )}
       </button>
       
-      <div className="flex items-center justify-center gap-6 opacity-40 grayscale group-hover:grayscale-0 transition-all">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-4" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6" />
+      <div className="flex items-center justify-center gap-3 py-2">
+        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">We accept</span>
+        {/* Visa */}
+        <div className="px-2 py-1 bg-white border border-slate-200 rounded shadow-sm">
+          <svg viewBox="0 0 48 16" width="32" height="11" xmlns="http://www.w3.org/2000/svg">
+            <text x="0" y="13" fontFamily="Arial" fontWeight="900" fontSize="14" fill="#1A1F71">VISA</text>
+          </svg>
+        </div>
+        {/* Mastercard */}
+        <div className="px-1.5 py-1 bg-white border border-slate-200 rounded shadow-sm">
+          <svg viewBox="0 0 38 24" width="24" height="16" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="12" r="10" fill="#EB001B"/>
+            <circle cx="24" cy="12" r="10" fill="#F79E1B"/>
+            <path d="M19 5.5a10 10 0 010 13A10 10 0 0119 5.5z" fill="#FF5F00"/>
+          </svg>
+        </div>
+        {/* Verve */}
+        <div className="px-2 py-1 bg-white border border-slate-200 rounded shadow-sm">
+          <svg viewBox="0 0 52 18" width="32" height="11" xmlns="http://www.w3.org/2000/svg">
+            <text x="0" y="13" fontFamily="Arial" fontWeight="900" fontSize="13" fill="#00425F">VERVE</text>
+          </svg>
+        </div>
       </div>
     </div>
   );
