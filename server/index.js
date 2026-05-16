@@ -36,6 +36,7 @@ const authRoutes = require('./routes/auth');
 const paymentRoutes = require('./routes/payments');
 const reviewRoutes = require('./routes/reviews');
 const marketingRoutes = require('./routes/marketing');
+const workerRoutes = require('./routes/workers');
 
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/recruitment', recruitmentRoutes);
@@ -45,6 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/marketing', marketingRoutes);
+app.use('/api/workers', workerRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);

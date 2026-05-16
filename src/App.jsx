@@ -19,6 +19,7 @@ import Applicants from './admin/Applicants';
 import Customers from './admin/Customers';
 import Settings from './admin/Settings';
 import ServicesManagement from './admin/Services';
+import Workers from './admin/Workers';
 
 function App() {
   const location = useLocation();
@@ -46,6 +47,7 @@ function App() {
             <Route path="bookings" element={<Bookings />} />
             <Route path="applicants" element={<Applicants />} />
             <Route path="customers" element={<Customers />} />
+            <Route path="workers" element={<Workers />} />
             <Route path="services" element={<ServicesManagement />} />
             <Route path="settings" element={<Settings />} />
           </Route>
