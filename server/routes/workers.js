@@ -1,6 +1,54 @@
 const express = require('express');
 const router = express.Router();
 const Worker = require('../models/Worker');
+const jwt = require('jsonwebtoken');
+
+// Mobile App Login Endpoint
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // Find worker by email
+    const worker = await Worker.findOne({ email });
+    if (!worker) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Check if access is granted and not suspended
+    if (!worker.appAccessGranted || worker.status === 'Suspended') {
+      return res.status(403).json({ error: 'App access is denied or suspended.' });
+    }
+
+    // Verify password (currently using tempPassword, in future hash check)
+    // Note: If they set a permanent password later, you'd check that instead or alongside.
+    if (worker.tempPassword !== password) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { workerId: worker._id, email: worker.email, region: worker.region },
+      process.env.JWT_SECRET || 'cleaniq_super_secret_mobile_key',
+      { expiresIn: '30d' }
+    );
+
+    res.json({
+      message: 'Login successful',
+      token,
+      worker: {
+        id: worker._id,
+        workerId: worker.workerId,
+        firstName: worker.firstName,
+        lastName: worker.lastName,
+        email: worker.email,
+        status: worker.status,
+        region: worker.region
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error during login' });
+  }
+});
 
 // Generate random password
 const generateTempPassword = () => {

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CleanIQ Worker App Docs</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; padding: 40px; max-width: 800px; margin: 0 auto; color: #333; }
+h1, h2, h3 { color: #111; border-bottom: 1px solid #eaeaea; padding-bottom: 5px; }
+code { background: #f4f4f4; padding: 2px 5px; border-radius: 4px; }
+pre { background: #f4f4f4; padding: 15px; border-radius: 8px; overflow-x: auto; }
+</style>
+</head>
+<body>
+<h1>CleanIQ Worker App - Architecture & Flow Documentation</h1>
+<p>This document outlines the architecture, user flows, and technical requirements for the CleanIQ Worker Mobile App (iOS & Android). This app connects your hired cleaners to incoming bookings based on their location.</p>
+
+<h2>1. Authentication & Onboarding Flow (How Workers Login)</h2>
+<p>To maintain security and quality control, workers cannot sign up freely on the app. Instead, we use an <strong>Admin-Invitation Model</strong>.</p>
+<ol>
+<li><strong>Application & Interview</strong>: The worker applies via a form on your main website. You conduct the interview.</li>
+<li><strong>Admin Approval</strong>: Once you decide to hire them, you go to your CleanIQ Admin Dashboard and click <strong>"Add Worker"</strong>.</li>
+<li><strong>Account Generation</strong>: The backend creates a Worker Profile and generates a secure, random <strong>Temporary Password</strong>.</li>
+<li><strong>Welcome Email/SMS</strong>: The system sends the iOS/Android app links and their Login Credentials (Email + Temp Password).</li>
+<li><strong>First Login</strong>: The worker logs into the mobile app.</li>
+<li><strong>Mandatory Setup</strong>: The app forces them to change their password, upload a photo, and enable GPS location.</li>
+</ol>
+
+<h2>2. Job Broadcasting & Acceptance Flow (Order Management)</h2>
+<p>When a customer books a cleaning, the system automatically routes that booking to the right workers.</p>
+<ol>
+<li><strong>New Booking</strong>: A customer books. Status: <code>Pending</code>.</li>
+<li><strong>Geo-Targeted Broadcast</strong>: The backend finds active workers within a specific radius (e.g., 10 miles).</li>
+<li><strong>Push Notification</strong>: The app sends an instant Push Notification: <em>"🚨 New Job Available!"</em></li>
+<li><strong>Job Feed</strong>: Workers open the app and see the job details (pay, area, rooms). Exact house number is hidden.</li>
+<li><strong>Acceptance</strong>: The first worker to tap <strong>"Accept Job"</strong> gets assigned.</li>
+<li><strong>System Update</strong>: The booking updates to <code>Assigned</code>. It disappears from other workers' apps. The worker now sees the full address and entry instructions.</li>
+</ol>
+
+<h2>3. Admin Dashboard Integration</h2>
+<ul>
+<li><strong>Worker Management Tab</strong>: View all hired workers, status, ratings, and completed jobs.</li>
+<li><strong>Booking Modal Update</strong>: The booking details show the "Assigned Worker" photo and name.</li>
+<li><strong>Manual Override</strong>: Admin can manually un-assign and re-assign workers if needed.</li>
+</ul>
+
+<script>
+  // Automatically trigger the print dialog to save as PDF
+  window.onload = () => window.print();
+</script>
+</body>
+</html>
