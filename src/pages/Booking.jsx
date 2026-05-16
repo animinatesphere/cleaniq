@@ -171,6 +171,7 @@ const Booking = () => {
     email: '',
     phone: '',
     specialInstructions: '',
+    hasPet: null,
   });
 
   const [totalPrice, setTotalPrice] = useState(0);
@@ -421,6 +422,7 @@ const Booking = () => {
           ...Object.entries(formData.property).filter(([_, q]) => q > 0).map(([n, q]) => `${n} (x${q})`),
           `Parking: ${formData.parking}`,
           `Entry: ${formData.keyAccess}`,
+          `Pet on premises: ${formData.hasPet || 'Not specified'}`,
           `Instructions: ${formData.specialInstructions || 'None'}`
         ]
       },
@@ -543,6 +545,28 @@ const Booking = () => {
                               </div>
                             </div>
                           ))}
+                        </div>
+
+                        {/* Pet Question */}
+                        <div className="mt-4 p-5 rounded-2xl bg-white border-2 border-slate-100">
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                            🐾 Do you have a pet at home?
+                          </p>
+                          <div className="grid grid-cols-2 gap-3">
+                            {['Yes', 'No'].map(opt => (
+                              <button
+                                key={opt}
+                                onClick={() => setFormData({...formData, hasPet: opt})}
+                                className={`py-4 rounded-2xl border-2 font-black text-sm transition-all ${
+                                  formData.hasPet === opt
+                                    ? 'border-primary bg-primary text-white shadow-lg shadow-primary/20'
+                                    : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-primary/30'
+                                }`}
+                              >
+                                {opt === 'Yes' ? '🐶 Yes, I have a pet' : '🚫 No pets'}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
 

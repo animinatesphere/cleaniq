@@ -239,7 +239,7 @@ const Bookings = () => {
     if (!b) return {};
     const data = {};
     const extras = b.details?.extras;
-    const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory', 'Living Room', 'Parking', 'Entry', 'Instructions'];
+    const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory', 'Living Room', 'Parking', 'Entry', 'Pet on premises', 'Instructions'];
     
     if (Array.isArray(extras)) {
       extras.forEach(item => {
@@ -254,6 +254,15 @@ const Bookings = () => {
       });
     }
     return data;
+  };
+
+  const getPetInfo = (b) => {
+    if (!b) return null;
+    if (Array.isArray(b.details?.extras)) {
+      const petEntry = b.details.extras.find(e => typeof e === 'string' && e.toLowerCase().startsWith('pet on premises:'));
+      if (petEntry) return petEntry.split(':')[1]?.trim() || null;
+    }
+    return null;
   };
 
   const getNotes = (b) => {
@@ -429,6 +438,21 @@ const Bookings = () => {
                           ))}
                         </div>
                       </div>
+                      {getPetInfo(selectedBooking) && (
+                        <div className={`p-5 rounded-[24px] border-2 flex items-center gap-4 ${
+                          getPetInfo(selectedBooking) === 'Yes'
+                            ? 'bg-amber-50 border-amber-200'
+                            : 'bg-slate-50 border-slate-200'
+                        }`}>
+                          <span className="text-2xl">{getPetInfo(selectedBooking) === 'Yes' ? '🐶' : '🚫'}</span>
+                          <div>
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Pet on Premises</p>
+                            <p className={`font-black text-sm ${ getPetInfo(selectedBooking) === 'Yes' ? 'text-amber-600' : 'text-slate-500' }`}>
+                              {getPetInfo(selectedBooking) === 'Yes' ? 'Yes — pet-friendly cleaning required' : 'No pets'}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </>
