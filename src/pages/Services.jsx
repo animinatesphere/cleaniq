@@ -17,7 +17,7 @@ import me1 from "../assets/image0.jpeg";
 import me2 from "../assets/image1.jpeg";
 import me3 from "../assets/Cleaniq services/4th Post.jpg";
 import airbnbImg from "../assets/airbnb_cleaning_service.png";
-import moveOutImg from "C:/Users/HP/.gemini/antigravity/brain/13ee3f1b-4a89-44ad-ba08-66eae60c5b3d/end_of_tenancy_cleaning_1778930299693.png";
+import moveOutImg from "../assets/end_of_tenancy.png";
 
 const Services = () => {
   const { region } = useRegion();
