@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Worker = require('../models/Worker');
+const Booking = require('../models/Booking');
 const jwt = require('jsonwebtoken');
 
 // Mobile App Login Endpoint
@@ -46,6 +47,7 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Login error detailed:', error);
     res.status(500).json({ error: 'Internal server error during login' });
   }
 });
@@ -54,6 +56,21 @@ router.post('/login', async (req, res) => {
 const generateTempPassword = () => {
   return Math.random().toString(36).slice(-8) + Math.floor(Math.random() * 10).toString();
 };
+
+// GET available jobs (all bookings without region restriction)
+router.get('/jobs', async (req, res) => {
+  try {
+    // Fetch bookings that need cleaning (Confirmed or Pending)
+    const jobs = await Booking.find({ 
+      status: { $in: ['Confirmed', 'Pending'] } 
+    }).sort({ createdAt: -1 });
+    
+    res.json(jobs);
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    res.status(500).json({ error: 'Internal server error fetching jobs' });
+  }
+});
 
 // GET all workers
 router.get('/', async (req, res) => {
