@@ -96,10 +96,6 @@ const JobsFeedScreen = () => {
         <View style={styles.serviceBadge}>
           <Text style={styles.serviceText}>{item.service}</Text>
         </View>
-        <Text style={styles.priceText}>
-          {item.payment?.currency === 'GBP' ? '£' : '₦'}
-          {item.payment?.amount || 'TBD'}
-        </Text>
       </View>
       
       <View style={styles.cardBody}>
@@ -181,7 +177,7 @@ const JobsFeedScreen = () => {
 
       <View style={styles.myJobFooter}>
         <Text style={styles.priceTextSmall}>
-          Payout: {item.payment?.currency === 'GBP' ? '£' : '₦'}{item.payment?.amount || 'TBD'}
+          Job Accepted
         </Text>
       </View>
     </View>

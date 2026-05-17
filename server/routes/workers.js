@@ -26,6 +26,12 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
+    // Automatically activate the worker if they were Pending and successfully logged in
+    if (worker.status === 'Pending') {
+      worker.status = 'Active';
+      await worker.save();
+    }
+
     // Generate JWT token
     const token = jwt.sign(
       { workerId: worker._id, email: worker.email, region: worker.region },
