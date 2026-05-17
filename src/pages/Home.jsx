@@ -6,7 +6,7 @@ import air1 from "../assets/josue-michel-FhsFUo-Wfc0-unsplash.jpg"
 import air2 from "../assets/vitaly-gariev-2NcTLdFHpH8-unsplash.jpg"
 import residentialImg from "../assets/residential.jpg"
 import officeImg from "../assets/office.jpg"
-import deepcleanImg from "../assets/deepclean.jpg"
+import deepcleanImg from "../assets/anton-y-bjqTUUw2Q-unsplash.jpg"
 import airbnbImg from "../assets/airbnb.jpg"
 import bento1 from "../assets/bento1.jpg"
 import bento2 from "../assets/bento2.jpg"
@@ -309,36 +309,36 @@ useEffect(() => {
       </section>
       
     {/* bento page */}
-   
-   <section className="py-24 bg-white">
-  <div className="max-w-7xl mx-auto px-6">
-    <div className="text-center mb-16">
+{/*    
+   <section className="py-24 bg-white"> */}
+  {/* <div className="max-w-7xl mx-auto px-6"> */}
+    {/* <div className="text-center mb-16">
       <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-4">Gallery</h2>
       <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark tracking-tighter">
         Clean spaces, happy faces.
       </h3>
-    </div>
+    </div> */}
 
-    <div className="grid grid-cols-2 md:grid-cols-3 grid-rows-2 gap-4 h-[600px]">
+    {/* <div className="grid grid-cols-2 md:grid-cols-3 grid-rows-2 gap-4 h-[600px]"> */}
       {/* Big left image */}
-      <div className="col-span-1 row-span-2 rounded-[32px] overflow-hidden">
+      {/* <div className="col-span-1 row-span-2 rounded-[32px] overflow-hidden">
         <img src={bento1} alt="clean home" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
-      </div>
+      </div> */}
       {/* Top middle */}
-      <div className="rounded-[32px] overflow-hidden">
+      {/* <div className="rounded-[32px] overflow-hidden">
         <img src={bento2} alt="clean kitchen" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
-      </div>
+      </div> */}
       {/* Top right */}
-      <div className="rounded-[32px] overflow-hidden">
+      {/* <div className="rounded-[32px] overflow-hidden">
         <img src={bento3} alt="clean bathroom" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
-      </div>
+      </div> */}
       {/* Bottom middle + right spanning */}
-      <div className="col-span-2 rounded-[32px] overflow-hidden">
+      {/* <div className="col-span-2 rounded-[32px] overflow-hidden">
         <img src={bento4} alt="clean office" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
-      </div>
-    </div>
-  </div>
-</section>
+      </div> */}
+    {/* </div> */}
+  {/* </div> */}
+{/* </section> */}
     {/* bento page */}
    
    
@@ -365,7 +365,7 @@ useEffect(() => {
               },
               { 
                 q: "Do I need to provide cleaning supplies?", 
-                a: "It's up to you! In the UK, we can bring eco-friendly supplies for a small fee. In Nigeria, we typically use the supplies available in your home unless otherwise requested." 
+                a: "Most clients prefer us to use their own supplies, but we`re happy eco-friendly cleaning products for a small additional fee." 
               }
             ].map((faq, i) => (
               <details key={i} className="group p-6 rounded-[32px] bg-white border border-slate-100 shadow-sm transition-all hover:shadow-md cursor-pointer">
@@ -468,7 +468,7 @@ useEffect(() => {
           </div>
         </div>
       </section>
-<section className="py-24 bg-white">
+{/* <section className="py-24 bg-white">
   <div className="max-w-7xl mx-auto px-6">
     <div className="text-center mb-16">
       <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Before & After</h2>
@@ -477,31 +477,9 @@ useEffect(() => {
       </h3>
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {[
-        { src: grid1, title: "Deep Kitchen Clean", tag: "Residential" },
-        { src: grid2, title: "Office Refresh", tag: "Commercial" },
-        { src: grid3, title: "Airbnb Turnover", tag: "Short-let" },
-      ].map((item, i) => (
-        <div key={i} className="group rounded-[32px] overflow-hidden shadow-xl relative h-80">
-          <img 
-            src={item.src}
-            alt={item.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-            loading="lazy"
-          />
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
-          {/* Caption */}
-          <div className="absolute bottom-6 left-6">
-            <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">{item.tag}</span>
-            <p className="text-xl font-black text-white">{item.title}</p>
-          </div>
-        </div>
-      ))}
-    </div>
+
   </div>
-</section>
+</section> */}
       {/* CTA Section */}
       <section className="py-24 bg-secondary/10 relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
