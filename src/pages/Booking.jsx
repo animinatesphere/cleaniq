@@ -151,6 +151,7 @@ const Booking = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [bookedDates, setBookedDates] = useState([]);
+  const [bookedSlotsByDate, setBookedSlotsByDate] = useState({});
   
   const [formData, setFormData] = useState({
     address: '',
@@ -192,15 +193,36 @@ const Booking = () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`);
         const data = await response.json();
-        // Convert dates to YYYY-MM-DD reliably, handling various string formats
-        const dates = data
-          .filter(b => b.schedule?.date)
-          .map(b => {
+        
+        // Group booking slots by date
+        const slotsMap = {};
+        data.forEach(b => {
+          if (b.schedule?.date && b.schedule?.timeSlot) {
             const d = new Date(b.schedule.date);
-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-          });
-        console.log('Booked Dates Loaded:', dates);
-        setBookedDates([...new Set(dates)]); 
+            const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            
+            if (!slotsMap[dateStr]) {
+              slotsMap[dateStr] = [];
+            }
+            if (!slotsMap[dateStr].includes(b.schedule.timeSlot)) {
+              slotsMap[dateStr].push(b.schedule.timeSlot);
+            }
+          }
+        });
+        
+        // A date is fully booked ONLY if all three standard slots are taken
+        const fullyBookedDates = Object.keys(slotsMap).filter(dateStr => {
+          const slots = slotsMap[dateStr];
+          return slots.includes('Morning (8am-12pm)') && 
+                 slots.includes('Afternoon (12pm-4pm)') && 
+                 slots.includes('Evening (4pm-8pm)');
+        });
+        
+        console.log('Booked Slots Map Loaded:', slotsMap);
+        console.log('Fully Booked Dates (Disabled in Calendar):', fullyBookedDates);
+        
+        setBookedSlotsByDate(slotsMap);
+        setBookedDates(fullyBookedDates);
       } catch (err) { console.error('Error fetching booked dates:', err); }
     };
 
@@ -670,12 +692,28 @@ const Booking = () => {
                       {/* Date & Time */}
                       <div className="space-y-6">
                         <div><h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">Select Date & Time</h1><p className="text-slate-400 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">Choose your preferred booking date</p></div>
-                        <CustomCalendar selectedDate={formData.date} onDateSelect={(d) => setFormData({...formData, date: d})} bookedDates={bookedDates} />
+                        <CustomCalendar selectedDate={formData.date} onDateSelect={(d) => setFormData({...formData, date: d, timeSlot: '', preferredTime: ''})} bookedDates={bookedDates} />
                         {formData.date && (
                           <div className="grid grid-cols-3 gap-3">
-                            {['Morning (8am-12pm)', 'Afternoon (12pm-4pm)', 'Evening (4pm-8pm)'].map(slot => (
-                              <button key={slot} onClick={() => setFormData({...formData, timeSlot: slot})} className={`p-5 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${formData.timeSlot === slot ? 'border-primary bg-primary text-white shadow-md' : 'border-slate-100 bg-white text-slate-400 hover:border-primary/30'}`}>{slot}</button>
-                            ))}
+                            {['Morning (8am-12pm)', 'Afternoon (12pm-4pm)', 'Evening (4pm-8pm)'].map(slot => {
+                              const isSlotBooked = bookedSlotsByDate[formData.date]?.includes(slot);
+                              return (
+                                <button 
+                                  key={slot} 
+                                  disabled={isSlotBooked}
+                                  onClick={() => setFormData({...formData, timeSlot: slot})} 
+                                  className={`p-5 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${
+                                    formData.timeSlot === slot 
+                                      ? 'border-primary bg-primary text-white shadow-md' 
+                                      : isSlotBooked
+                                        ? 'border-rose-100 bg-rose-50 text-rose-300 cursor-not-allowed'
+                                        : 'border-slate-100 bg-white text-slate-400 hover:border-primary/30'
+                                  }`}
+                                >
+                                  {slot} {isSlotBooked && '(Booked)'}
+                                </button>
+                              );
+                            })}
                           </div>
                         )}
                         {formData.timeSlot && (
