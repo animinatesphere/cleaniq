@@ -3,12 +3,12 @@ import {
   View, Text, StyleSheet, FlatList, TouchableOpacity, 
   ActivityIndicator, RefreshControl, Image, SafeAreaView, Platform
 } from 'react-native';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext, API_URL } from '../context/AuthContext';
 import { MapPin, Calendar, Clock, ChevronRight, LogOut, Briefcase } from 'lucide-react-native';
 import axios from 'axios';
 
 const JobsFeedScreen = () => {
-  const { workerInfo, logout, API_URL } = useContext(AuthContext);
+  const { workerInfo, logout } = useContext(AuthContext);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
