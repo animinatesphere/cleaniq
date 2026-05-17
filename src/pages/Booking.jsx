@@ -297,7 +297,7 @@ const Booking = () => {
 
     let total = 0;
     const fallbackUK = { 
-      'Residential Cleaning': 17.90, 'Deep Clean': 24.90, 'Airbnb Cleaning': 21.90, 'Office Cleaning': 19.90,
+      'Residential Cleaning': "17.90/hr", 'Deep Clean': "24.90/hr", 'Airbnb Cleaning': "21.90/hr", 'Office Cleaning': "19.90/hr",
       'Bedroom': 15, 'Bathroom': 12, 'Cloakroom': 8, 'Kitchen': 15, 'Utility Room': 10, 'Reception Room': 12, 'Conservatory': 15,
       'American fridge freeze': 15, 'Carpet(s) Cleaning': 30, 'Double Oven Cleaning': 20, 'Fridge and freezer': 18, 'Range Oven Cleaning': 25, 'Single fridge': 10, 'Single Oven Cleaning': 15, 'Venetian Blinds': 5
     };
@@ -309,13 +309,10 @@ const Booking = () => {
 
     const rates = region.id === 'UK' ? fallbackUK : fallbackNG;
 
-    // Base Service Rate (Multiplied by Duration if UK/Hourly)
-    const baseRate = dynamicRates[formData.serviceType.trim()] || rates[formData.serviceType.trim()] || 20;
-    if (region.id === 'UK') {
-      total += baseRate * formData.duration;
-    } else {
-      total += baseRate; // Flat rate for NG
-    }
+    // Base Service Rate (Multiplied by Duration for all regions - Price/Hr)
+    const rawBaseRate = dynamicRates[formData.serviceType.trim()] || rates[formData.serviceType.trim()] || 20;
+    const baseRate = parseFloat(rawBaseRate) || 20;
+    total += baseRate * formData.duration;
 
     // Room Rates - Removed as per user request (rooms are informational only)
     /*
@@ -541,7 +538,7 @@ const Booking = () => {
                               {s.icon}
                             </div>
                             <p className={`font-black text-lg tracking-tighter ${formData.serviceType === s.id ? 'text-primary' : 'text-primary-dark'}`}>{s.title}</p>
-                            <div className="mt-1 mb-4"><span className="text-base font-black text-primary-dark">{region.symbol}{dynamicRates[s.id.trim()] || (region.id === 'UK' ? (s.id === 'Deep Clean' ? '24.90' : s.id === 'Airbnb Cleaning' ? '21.90' : s.id === 'Office Cleaning' ? '19.90' : '17.90') : (s.id === 'Deep Clean' ? '25000' : s.id === 'Airbnb Cleaning' ? '20000' : s.id === 'Office Cleaning' ? '18000' : '15000'))}</span></div>
+                            <div className="mt-1 mb-4"><span className="text-base font-black text-primary-dark">{region.symbol}{String(dynamicRates[s.id.trim()] || (region.id === 'UK' ? (s.id === 'Deep Clean' ? '24.90' : s.id === 'Airbnb Cleaning' ? '21.90' : s.id === 'Office Cleaning' ? '19.90' : '17.90') : (s.id === 'Deep Clean' ? '25000' : s.id === 'Airbnb Cleaning' ? '20000' : s.id === 'Office Cleaning' ? '18000' : '15000'))).replace('/hr', '').replace('/hour', '')}</span><span className="text-[10px] font-bold text-slate-400 ml-1">/ hr</span></div>
                             
                             <div className="space-y-2 w-full text-left pt-4 border-t border-slate-100">
                               {s.bullets.map((bullet, idx) => (
@@ -768,7 +765,24 @@ const Booking = () => {
                 <div className="flex gap-3"><div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 shrink-0"><MapPin size={14}/></div><div><p className="text-[10px] font-black text-slate-400 uppercase">Location</p><p className="font-bold text-primary-dark">{formData.address || 'Select address'}</p></div></div>
                 <div className="flex gap-3"><div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 shrink-0"><Zap size={14}/></div><div className="flex-1"><p className="text-[10px] font-black text-slate-400 uppercase mb-1">Service Details</p>
                   <div className="space-y-2">
-                    {formData.duration > 0 && <div className="flex justify-between items-center text-[10px] bg-amber-50 p-2 rounded-lg border border-amber-100"><span className="font-bold text-amber-600">{formData.serviceType}</span><span className="font-black text-amber-600">{region.symbol}{formData.serviceType && (region.id === 'UK' ? (dynamicRates[formData.serviceType.trim()] || 20) * formData.duration : dynamicRates[formData.serviceType.trim()] || 20)}</span></div>}
+                    {formData.duration > 0 && (
+                      <div className="flex justify-between items-center text-[10px] bg-amber-50 p-2 rounded-lg border border-amber-100">
+                        <span className="font-bold text-amber-600">{formData.serviceType}</span>
+                        <span className="font-black text-amber-600">
+                          {region.symbol}
+                          {formData.serviceType && (
+                            (() => {
+                              const rawRate = dynamicRates[formData.serviceType.trim()] || 
+                                (region.id === 'UK' 
+                                  ? (formData.serviceType === 'Deep Clean' ? 24.90 : formData.serviceType === 'Airbnb Cleaning' ? 21.90 : formData.serviceType === 'Office Cleaning' ? 19.90 : 17.90) 
+                                  : (formData.serviceType === 'Deep Clean' ? 25000 : formData.serviceType === 'Airbnb Cleaning' ? 20000 : formData.serviceType === 'Office Cleaning' ? 18000 : 15000)
+                                );
+                              return (parseFloat(rawRate) || 20) * formData.duration;
+                            })()
+                          )}
+                        </span>
+                      </div>
+                    )}
                     {Object.entries(formData.property).map(([name, qty]) => qty > 0 ? (<div key={name} className="flex justify-between items-center text-[10px] bg-slate-50 p-2 rounded-lg border border-slate-100"><span className="font-bold text-slate-600">{name} x{qty}</span><span className="font-black text-slate-600">{region.symbol}{(dynamicRates[name.trim()] || 0) * qty}</span></div>) : null)}
                     {Object.entries(formData.extras).map(([name, qty]) => qty > 0 ? (<div key={name} className="flex justify-between items-center text-[10px] bg-primary/5 p-2 rounded-lg border border-primary/20"><span className="font-bold text-primary-dark">{name} x{qty}</span><span className="font-black text-primary">{region.symbol}{(dynamicRates[name.trim()] || 0) * qty}</span></div>) : null)}
                   </div>
