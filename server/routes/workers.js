@@ -72,6 +72,50 @@ router.get('/jobs', async (req, res) => {
   }
 });
 
+// GET jobs accepted by a specific worker
+router.get('/jobs/my-jobs/:workerId', async (req, res) => {
+  try {
+    const jobs = await Booking.find({ 
+      assignedWorker: req.params.workerId 
+    }).sort({ createdAt: -1 });
+    
+    res.json(jobs);
+  } catch (error) {
+    console.error('Error fetching my jobs:', error);
+    res.status(500).json({ error: 'Internal server error fetching my jobs' });
+  }
+});
+
+// POST accept a job
+router.post('/jobs/:id/accept', async (req, res) => {
+  try {
+    const { workerId, workerName } = req.body;
+    
+    // Find the booking and make sure it is not already assigned
+    const booking = await Booking.findById(req.params.id);
+    
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+    
+    if (booking.assignedWorker) {
+      return res.status(400).json({ error: 'Job has already been accepted by someone else' });
+    }
+    
+    // Update booking
+    booking.assignedWorker = workerId;
+    booking.assignedWorkerName = workerName;
+    booking.status = 'Assigned';
+    
+    await booking.save();
+    
+    res.json({ message: 'Job accepted successfully', booking });
+  } catch (error) {
+    console.error('Error accepting job:', error);
+    res.status(500).json({ error: 'Internal server error accepting job' });
+  }
+});
+
 // GET all workers
 router.get('/', async (req, res) => {
   try {

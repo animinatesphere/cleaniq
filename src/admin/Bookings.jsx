@@ -346,7 +346,7 @@ const Bookings = () => {
                 {loading ? (
                   <tr><td colSpan="5" className="py-20 text-center font-black text-slate-400 uppercase tracking-widest">Loading...</td></tr>
                 ) : filteredBookings.length === 0 ? (
-                  <tr><td colSpan="5" className="py-20 text-center font-black text-slate-300 uppercase tracking-widest">No matching entries</td></tr>
+                  <tr><td colSpan="6" className="py-20 text-center font-black text-slate-300 uppercase tracking-widest">No matching entries</td></tr>
                 ) : filteredBookings.map(b => (
                   <tr key={b._id} className="group hover:bg-slate-50/50 transition-colors">
                     <td className="px-8 py-6">
@@ -360,6 +360,13 @@ const Bookings = () => {
                     <td className="px-4 py-6 text-sm font-bold text-slate-700">
                       {new Date(b.schedule?.date).toLocaleDateString()}<br/>
                       <span className="text-[10px] text-primary uppercase">{b.schedule?.timeSlot}</span>
+                    </td>
+                    <td className="px-4 py-6">
+                      {b.assignedWorkerName ? (
+                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">{b.assignedWorkerName}</span>
+                      ) : (
+                        <span className="text-xs font-bold text-slate-300 italic">Unassigned</span>
+                      )}
                     </td>
                     <td className="px-4 py-6">
                       <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black border uppercase tracking-tight ${getStatusColor(b.status)}`}>{b.status}</span>
@@ -416,6 +423,18 @@ const Bookings = () => {
                     <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 text-center"><Phone size={20} className="text-primary mx-auto mb-2" /><p className="text-[9px] font-black text-slate-400 uppercase mb-1">Contact</p><p className="text-xs font-bold text-primary-dark">{selectedBooking.customer?.phone}</p></div>
                     <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 text-center"><DollarSign size={20} className="text-primary mx-auto mb-2" /><p className="text-[9px] font-black text-slate-400 uppercase mb-1">Payment</p><p className="text-xs font-black text-primary-dark">{selectedBooking.payment?.currency === 'GBP' ? '£' : '₦'}{selectedBooking.payment?.amount}</p></div>
                   </div>
+
+                  {selectedBooking.assignedWorkerName && (
+                    <div className="bg-emerald-50 rounded-3xl p-6 border border-emerald-100 flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center shrink-0">
+                        <User size={24} className="text-emerald-700" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Assigned Worker</p>
+                        <p className="text-sm font-black text-emerald-900">{selectedBooking.assignedWorkerName}</p>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid md:grid-cols-2 gap-12">
                     <div className="space-y-6">

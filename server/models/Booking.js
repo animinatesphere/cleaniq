@@ -26,6 +26,12 @@ const bookingSchema = new mongoose.Schema({
     method: String,
   },
   region: String,
+  assignedWorker: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Worker',
+    default: null
+  },
+  assignedWorkerName: { type: String, default: null },
   status: { type: String, default: 'Confirmed' },
   createdAt: { type: Date, default: Date.now },
   meta: mongoose.Schema.Types.Mixed // Catch-all for future expansions
