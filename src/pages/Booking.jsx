@@ -10,7 +10,7 @@ import {
   Clock, Info, ShieldCheck, Heart, Star,
   Search, Sparkles, Zap, Shield, HelpCircle, AlertCircle,
   ArrowRight, Truck, Key, Car, Layout, Coffee,
-  Waves, Refrigerator, Wind
+  Waves, Refrigerator, Wind,
 } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';

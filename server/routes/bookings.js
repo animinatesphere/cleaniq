@@ -6,7 +6,9 @@ const { sendEmail, templates } = require('../utils/emailService');
 // GET all bookings (Admin)
 router.get('/', async (req, res) => {
   try {
-    const bookings = await Booking.find().sort({ createdAt: -1 });
+    const bookings = await Booking.find()
+      .populate('assignedWorker', 'firstName lastName email phone region workerId')
+      .sort({ createdAt: -1 });
     res.json(bookings);
   } catch (err) {
     res.status(500).json({ message: err.message });
