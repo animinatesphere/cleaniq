@@ -382,16 +382,22 @@ const Booking = () => {
         const ukBbox = '-7.57216793459,49.959999905,1.68153079591,58.6350001085';
         const ngBbox = '2.6917,4.2406,14.6800,13.8659';
         const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(formData.address)}&limit=8&lang=en&bbox=${region.id === 'UK' ? ukBbox : ngBbox}`);
+        if (!response.ok) { setAddressSuggestions([]); return; }
+        
         const data = await response.json();
-        if (!data.features) { setAddressSuggestions([]); return; }
+        if (!data.features || data.features.length === 0) { setAddressSuggestions([]); return; }
+        
         const formatted = data.features.map(f => {
           const { name, street, housenumber, city, postcode, state } = f.properties;
           return [housenumber, street || name, city, postcode, state].filter(Boolean).join(", ");
         }).filter(Boolean);
         setAddressSuggestions([...new Set(formatted)]);
-      } catch (err) { console.error("Suggestions fetch error:", err); }
+      } catch (err) { 
+        console.error("Suggestions fetch error:", err); 
+        setAddressSuggestions([]); // IMPORTANT: Clear old suggestions if it fails so it doesn't stay open
+      }
     };
-    const timeoutId = setTimeout(fetchSuggestions, 300);
+    const timeoutId = setTimeout(fetchSuggestions, 400); // Increased debounce to 400ms to reduce API load
     return () => clearTimeout(timeoutId);
   }, [formData.address, region.id]);
 
@@ -696,7 +702,7 @@ const Booking = () => {
                       </div>
 
                       {/* Developer Test Mode */}
-                      {/* <div className="pt-2 pb-6">
+                      <div className="pt-2 pb-6">
                         <button
                           onClick={() => handlePaymentSuccess({ id: `TEST-${Date.now()}` })}
                           className="w-full py-4 rounded-2xl bg-slate-50 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200 transition-all border-2 border-dashed border-slate-200 flex items-center justify-center gap-2"
@@ -704,7 +710,7 @@ const Booking = () => {
                           <Zap size={14} />
                           Dev: Skip Payment & Test Submit
                         </button>
-                      </div> */}
+                      </div>
 
                     </div>
                   </div>
