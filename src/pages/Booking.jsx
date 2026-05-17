@@ -701,22 +701,7 @@ const Booking = () => {
                         <Elements stripe={stripePromise}><StripePayment amount={totalPrice} currency={region.id === 'UK' ? 'GBP' : 'NGN'} customerInfo={formData} onPaymentSuccess={handlePaymentSuccess} /></Elements>
                       </div>
 
-                      {/* Developer Test Mode */}
-                      <div className="pt-2 pb-6">
-                        <button
-                          onClick={() => handlePaymentSuccess({ id: `TEST-${Date.now()}` })}
-                          className="w-full py-4 rounded-2xl bg-slate-50 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200 transition-all border-2 border-dashed border-slate-200 flex items-center justify-center gap-2"
-                        >
-                          <Zap size={14} />
-                          Dev: Skip Payment & Test Submit
-                        </button>
-                      </div>
-
-                    </div>
-                  </div>
-                )}
-
-                </div>
+     
 
                 <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 bg-white/80 backdrop-blur-sm border-t border-slate-50 flex justify-between items-center pointer-events-none">
                   {step > 1 ? (
