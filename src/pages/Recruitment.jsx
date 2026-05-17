@@ -5,7 +5,7 @@ import { useRegion } from '../context/RegionContext';
 import { 
   Upload, CheckCircle2, User, Mail, Phone, 
   MapPin, Briefcase, FileText, ChevronRight, ChevronLeft,
-  ShieldCheck, Building, Award
+  ShieldCheck, Building, Award, AlertCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -14,6 +14,7 @@ const Recruitment = () => {
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState(null);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -26,7 +27,41 @@ const Recruitment = () => {
     idDocument: null,
   });
 
+  const showNotification = (message, type = 'error') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 4000);
+  };
+
   const nextStep = () => {
+    if (step === 1) {
+      if (!formData.fullName.trim()) {
+        showNotification('Please enter your full name.');
+        return;
+      }
+      if (!formData.email.trim()) {
+        showNotification('Please enter your email address.');
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        showNotification('Please enter a valid email address.');
+        return;
+      }
+      if (!formData.phone.trim()) {
+        showNotification('Please enter your phone number.');
+        return;
+      }
+      if (!formData.city.trim()) {
+        showNotification('Please enter your current city.');
+        return;
+      }
+    }
+    if (step === 2) {
+      if (!formData.experience) {
+        showNotification('Please select your professional experience level.');
+        return;
+      }
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setStep(s => s + 1);
   };
@@ -37,6 +72,14 @@ const Recruitment = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.idDocument) {
+      showNotification('Please upload a valid ID document.');
+      return;
+    }
+    if (!formData.cv) {
+      showNotification('Please upload your CV.');
+      return;
+    }
     setIsSubmitting(true);
     
     const data = new FormData();
@@ -414,6 +457,27 @@ const Recruitment = () => {
           ))}
         </div>
       </div>
+
+      <AnimatePresence>
+        {notification && (
+          <motion.div 
+            initial={{ opacity: 0, y: -100 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -100 }}
+            className="fixed top-10 left-1/2 -translate-x-1/2 z-100 w-[90%] max-w-md"
+          >
+            <div className={`p-6 rounded-[32px] border-2 shadow-2xl flex items-center gap-4 bg-white ${notification.type === 'error' ? 'border-rose-100 text-rose-600' : 'border-emerald-100 text-emerald-600'}`}>
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${notification.type === 'error' ? 'bg-rose-50' : 'bg-emerald-50'}`}>
+                {notification.type === 'error' ? <AlertCircle size={24}/> : <CheckCircle2 size={24}/>}
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">{notification.type}</p>
+                <p className="font-bold text-sm leading-tight">{notification.message}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

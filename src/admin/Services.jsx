@@ -35,6 +35,10 @@ const ServicesManagement = () => {
     setServices(prev => prev.map(s => s._id === id ? { ...s, rate: parseFloat(newRate) || 0 } : s));
   };
 
+  const handleNameChange = (id, newName) => {
+    setServices(prev => prev.map(s => s._id === id ? { ...s, name: newName } : s));
+  };
+
   const saveService = async (service) => {
     setSaving(true);
     try {
@@ -142,8 +146,13 @@ const ServicesManagement = () => {
           {categories[activeTab].map((service) => (
             <div key={service._id} className="bg-white border border-slate-200 rounded-[32px] p-6 shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all group">
               <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h4 className="font-black text-primary-dark group-hover:text-primary transition-colors">{service.name}</h4>
+                <div className="flex-1 mr-2">
+                  <input 
+                    type="text"
+                    value={service.name}
+                    onChange={(e) => handleNameChange(service._id, e.target.value)}
+                    className="font-black text-primary-dark group-hover:text-primary bg-transparent border-b border-transparent hover:border-slate-200 focus:border-primary focus:ring-0 outline-none text-sm transition-all w-full py-1 mb-1"
+                  />
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{service.type} rate</p>
                 </div>
                 <button onClick={() => deleteService(service._id)} className="p-2 text-slate-200 hover:text-rose-500 transition-colors"><Trash2 size={16}/></button>
