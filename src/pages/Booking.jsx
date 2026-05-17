@@ -705,6 +705,7 @@ const Booking = () => {
                     </div>
                   </div>
                 )}
+                </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 bg-white/80 backdrop-blur-sm border-t border-slate-50 flex justify-between items-center pointer-events-none rounded-b-[24px] md:rounded-b-[40px]">
                   {step > 1 ? (
@@ -712,7 +713,7 @@ const Booking = () => {
                       <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-all" />
                       <span className="hidden xs:inline">Go Back</span>
                     </button>
-                  ) : <div/>}
+                  ) : <div />}
                   {step < 4 && (
                     <button onClick={nextStep} className="pointer-events-auto group flex items-center gap-3 md:gap-4 bg-primary text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-primary/30 transition-all">
                       Next Step <ArrowRight size={18} className="group-hover:translate-x-1 transition-all" />
