@@ -194,11 +194,11 @@ const About = () => {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-secondary">
-                    <Globe size={24} />
+                    <Phone size={24} />
                   </div>
                   <div>
                     <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Website</p>
-                    <p className="text-lg font-bold">www.cleaniqservices.com</p>
+                    <p className="text-lg font-bold">+44 7752 476368</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-6">

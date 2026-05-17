@@ -74,7 +74,7 @@ const AdminLayout = () => {
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
     { name: 'Bookings', path: '/admin/bookings', icon: <Calendar size={20} /> },
-    { name: 'Workers', path: '/admin/workers', icon: <Briefcase size={20} /> },
+    { name: 'Staff', path: '/admin/workers', icon: <Briefcase size={20} /> },
     { name: 'Applicants', path: '/admin/applicants', icon: <Users size={20} /> },
     { name: 'Customers', path: '/admin/customers', icon: <User size={20} /> },
     { name: 'Services', path: '/admin/services', icon: <ShieldCheck size={20} /> },
