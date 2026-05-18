@@ -1,0 +1,17 @@
+# EAS build ignore rules
+# This prevents uploading massive node_modules or cache files to EAS cloud
+
+node_modules/
+.expo/
+dist/
+web-build/
+ios/
+android/
+*.jks
+*.pem
+*.key
+*.mobileprovision
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.DS_Store

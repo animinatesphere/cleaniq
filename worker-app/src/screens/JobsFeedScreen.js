@@ -2,13 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { 
   View, Text, StyleSheet, FlatList, TouchableOpacity, 
   ActivityIndicator, RefreshControl, Image, SafeAreaView, Platform,
-  Alert
+  Alert, Modal, ScrollView
 } from 'react-native';
 import { AuthContext, API_URL } from '../context/AuthContext';
 import { 
   MapPin, Calendar, Clock, ChevronRight, LogOut, 
   Briefcase, CheckCircle, User, Phone, MessageSquare, 
-  AlertCircle, Play, Check, Trash2 
+  AlertCircle, Play, Check, Trash2, HelpCircle, Info
 } from 'lucide-react-native';
 import axios from 'axios';
 
@@ -23,6 +23,9 @@ const JobsFeedScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState(null); // ID of the job being accepted
   const [tick, setTick] = useState(0);
+  const [checkedTasks, setCheckedTasks] = useState({});
+  const [isOnline, setIsOnline] = useState(true);
+  const [showGuide, setShowGuide] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setTick(t => t + 1), 30000);
@@ -219,6 +222,80 @@ const JobsFeedScreen = ({ navigation }) => {
     );
   };
 
+  const renderEarningsSummary = () => {
+    const completedJobs = myJobs.filter(j => j.status === 'Completed');
+    const totalEarnings = completedJobs.reduce((sum, j) => sum + (j.payment?.amount || 0), 0);
+    const currencySymbol = completedJobs[0]?.payment?.currency === 'GBP' ? '£' : '₦';
+    
+    return (
+      <View style={styles.earningsCard}>
+        <View>
+          <Text style={styles.earningsTitle}>Your Total Earnings</Text>
+          <Text style={styles.earningsValue}>{currencySymbol}{totalEarnings.toFixed(2)}</Text>
+        </View>
+        <View style={styles.earningsBadge}>
+          <Text style={styles.earningsBadgeText}>{completedJobs.length} Completed</Text>
+        </View>
+      </View>
+    );
+  };
+
+  const toggleTask = (jobId, index) => {
+    const key = `${jobId}_${index}`;
+    setCheckedTasks(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  const getChecklistForService = (service) => {
+    const name = (service || '').toLowerCase();
+    if (name.includes('tenancy') || name.includes('deep')) {
+      return [
+        "Dust ceiling corners & light fixtures",
+        "Deep clean inside cupboards & oven",
+        "Scrub bath, tiles & shower cabin",
+        "Clean doors, skirting boards & frames",
+        "Vacuum and mop all floor surfaces"
+      ];
+    }
+    return [
+      "Dust and polish all hard surfaces",
+      "Empty bins and replace liners",
+      "Vacuum all rugs and carpets",
+      "Scrub toilet, sink and shower tray",
+      "Wipe down kitchen exterior worktops"
+    ];
+  };
+
+  const renderCleanChecklist = (job) => {
+    const tasks = getChecklistForService(job.service);
+    return (
+      <View style={styles.checklistWrapper}>
+        <Text style={styles.checklistHeaderTitle}>Clean Room Tasks Checklist</Text>
+        <Text style={styles.checklistHeaderSub}>Complete and tick off all steps:</Text>
+        {tasks.map((task, index) => {
+          const key = `${job._id}_${index}`;
+          const isChecked = !!checkedTasks[key];
+          return (
+            <TouchableOpacity 
+              key={index} 
+              style={[styles.checklistItem, isChecked && styles.checklistItemChecked]} 
+              onPress={() => toggleTask(job._id, index)}
+            >
+              <View style={[styles.checkbox, isChecked && styles.checkboxChecked]}>
+                {isChecked && <Text style={styles.checkboxTick}>✓</Text>}
+              </View>
+              <Text style={[styles.checklistText, isChecked && styles.checklistTextChecked]}>
+                {task}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    );
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return 'Anytime';
     const date = new Date(dateString);
@@ -333,6 +410,9 @@ const JobsFeedScreen = ({ navigation }) => {
           
           {/* Countdown timer for active jobs */}
           {isCleaning && renderCountdown(item)}
+
+          {/* Interactive tasks checklist for active cleans */}
+          {isCleaning && renderCleanChecklist(item)}
         </View>
 
         <View style={styles.myJobFooter}>
@@ -401,6 +481,9 @@ const JobsFeedScreen = ({ navigation }) => {
               <Text style={styles.dateText}>Ready for your next job?</Text>
             </View>
             <View style={{ flexDirection: 'row', gap: 10 }}>
+              <TouchableOpacity onPress={() => setShowGuide(true)} style={styles.chatHeaderButton}>
+                <HelpCircle size={20} color="#FFFFFF" />
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation.navigate('Chat')} style={styles.chatHeaderButton}>
                 <MessageSquare size={20} color="#FFFFFF" />
               </TouchableOpacity>
@@ -412,17 +495,42 @@ const JobsFeedScreen = ({ navigation }) => {
         </SafeAreaView>
       </View>
 
-      {/* Stats Section */}
+      {/* Pro Performance & Gamification Dashboard */}
       <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <View style={styles.statIconContainer}>
-            <Briefcase size={20} color="#0A5C43" />
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={styles.statsScrollContent}
+        >
+          <View style={styles.statCardMini}>
+            <Text style={styles.statMiniVal}>⭐ 4.9</Text>
+            <Text style={styles.statMiniLabel}>Pro Rating</Text>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.statValue}>{activeTab === 'available' ? availableJobs.length : myJobs.length}</Text>
-            <Text style={styles.statLabel}>{activeTab === 'available' ? 'Available Jobs' : 'Your Assigned Jobs'}</Text>
+          <View style={styles.statCardMini}>
+            <Text style={styles.statMiniVal}>⏱️ 98%</Text>
+            <Text style={styles.statMiniLabel}>On-Time</Text>
           </View>
+          <View style={styles.statCardMini}>
+            <Text style={styles.statMiniVal}>🏁 {myJobs.filter(j => j.status === 'Completed').length}</Text>
+            <Text style={styles.statMiniLabel}>Done Cleans</Text>
+          </View>
+        </ScrollView>
+      </View>
+
+      {/* On-Duty / Off-Duty Toggle Bar */}
+      <View style={styles.dutyContainer}>
+        <View style={styles.dutyInfo}>
+          <View style={[styles.statusDot, { backgroundColor: isOnline ? '#10B981' : '#EF4444' }]} />
+          <Text style={styles.dutyText}>
+            You are {isOnline ? 'ONLINE & ACTIVE' : 'OFFLINE & INACTIVE'}
+          </Text>
         </View>
+        <TouchableOpacity 
+          style={[styles.dutyToggle, { backgroundColor: isOnline ? '#10B981' : '#64748B' }]} 
+          onPress={() => setIsOnline(!isOnline)}
+        >
+          <View style={[styles.dutyCircle, { alignSelf: isOnline ? 'flex-end' : 'flex-start' }]} />
+        </TouchableOpacity>
       </View>
 
       {/* Tabs */}
@@ -449,11 +557,27 @@ const JobsFeedScreen = ({ navigation }) => {
       <View style={styles.feedContainer}>
         {loading && !refreshing ? (
           <ActivityIndicator size="large" color="#0A5C43" style={{ marginTop: 40 }} />
+        ) : activeTab === 'available' && !isOnline ? (
+          <View style={styles.offlineContainer}>
+            <Image 
+              source={require('../../assets/logo.jpg')} 
+              style={{ width: 100, height: 100, opacity: 0.15, marginBottom: 20 }}
+              resizeMode="contain"
+            />
+            <Text style={styles.offlineTitle}>You are currently Offline</Text>
+            <Text style={styles.offlineSubtext}>
+              Toggle On-Duty at the top to start searching and accepting nearby Cleaniq cleaning bookings!
+            </Text>
+            <TouchableOpacity onPress={() => setIsOnline(true)} style={styles.goOnlineBtn}>
+              <Text style={styles.goOnlineBtnText}>Go Online Now</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <FlatList
             data={activeTab === 'available' ? availableJobs : myJobs}
             keyExtractor={(item) => item._id || item.bookingId}
             renderItem={activeTab === 'available' ? renderAvailableJobCard : renderMyJobCard}
+            ListHeaderComponent={null}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
             refreshControl={
@@ -475,6 +599,92 @@ const JobsFeedScreen = ({ navigation }) => {
           />
         )}
       </View>
+
+      {/* Guidelines How It Works Modal */}
+      <Modal
+        visible={showGuide}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowGuide(false)}
+      >
+        <SafeAreaView style={styles.guideModalContainer}>
+          <View style={styles.guideContentCard}>
+            <View style={styles.guideHeader}>
+              <Text style={styles.guideHeaderTitle}>How Cleaniq App Works</Text>
+              <TouchableOpacity onPress={() => setShowGuide(false)} style={styles.guideCloseBtn}>
+                <Text style={styles.guideCloseText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView contentContainerStyle={styles.guideScrollContent} showsVerticalScrollIndicator={false}>
+              <View style={styles.guideIntroBox}>
+                <Text style={styles.guideIntroText}>
+                  Welcome to the Cleaniq team! Here is a step-by-step guide on how to complete client jobs successfully using your mobile app.
+                </Text>
+              </View>
+
+              {/* Step 1 */}
+              <View style={styles.guideStepItem}>
+                <View style={styles.stepNumBadge}><Text style={styles.stepNumText}>1</Text></View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.guideStepTitle}>Find & Accept Cleanings</Text>
+                  <Text style={styles.guideStepDesc}>
+                    Keep an eye on the "Find Jobs" feed. Refresh regularly by pulling down, and tap "Accept Job" on cleans that fit your calendar.
+                  </Text>
+                </View>
+              </View>
+
+              {/* Step 2 */}
+              <View style={styles.guideStepItem}>
+                <View style={styles.stepNumBadge}><Text style={styles.stepNumText}>2</Text></View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.guideStepTitle}>Mark as Arrived</Text>
+                  <Text style={styles.guideStepDesc}>
+                    Once you arrive on-site at the customer's property, immediately tap "Reach Customer". This alerts the office support and confirms you are on time.
+                  </Text>
+                </View>
+              </View>
+
+              {/* Step 3 */}
+              <View style={styles.guideStepItem}>
+                <View style={styles.stepNumBadge}><Text style={styles.stepNumText}>3</Text></View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.guideStepTitle}>Start Active Cleaning</Text>
+                  <Text style={styles.guideStepDesc}>
+                    When you are ready to start cleaning, tap "Start Cleaning". This triggers the live active countdown timer matching the booked hours.
+                  </Text>
+                </View>
+              </View>
+
+              {/* Step 4 */}
+              <View style={styles.guideStepItem}>
+                <View style={styles.stepNumBadge}><Text style={styles.stepNumText}>4</Text></View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.guideStepTitle}>Interactive Clean Checklist</Text>
+                  <Text style={styles.guideStepDesc}>
+                    Use the room checklist generated inside the active cleaning card. Tick off tasks one by one as you complete them to guarantee standard quality.
+                  </Text>
+                </View>
+              </View>
+
+              {/* Step 5 */}
+              <View style={styles.guideStepItem}>
+                <View style={styles.stepNumBadge}><Text style={styles.stepNumText}>5</Text></View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.guideStepTitle}>Complete Clean & Support</Text>
+                  <Text style={styles.guideStepDesc}>
+                    Once all checklist items are ticked off and timing is finished, press "Mark as Done". Need help? Tap the chat bubble in the top right to message the office instantly!
+                  </Text>
+                </View>
+              </View>
+            </ScrollView>
+
+            <TouchableOpacity onPress={() => setShowGuide(false)} style={styles.guideSubmitBtn}>
+              <Text style={styles.guideSubmitBtnText}>Got It, Let's Start!</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 };
@@ -583,6 +793,328 @@ const styles = StyleSheet.create({
     gap: 8
   },
   timerTextFinished: { color: '#EF4444', fontSize: 12, fontWeight: '700', flex: 1 },
+
+  earningsCard: {
+    backgroundColor: '#0A5C43',
+    borderRadius: 24,
+    padding: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    shadowColor: '#0A5C43',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 6
+  },
+  earningsTitle: {
+    fontSize: 12,
+    color: '#E6F4F1',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5
+  },
+  earningsValue: {
+    fontSize: 28,
+    color: '#FFFFFF',
+    fontWeight: '900',
+    marginTop: 4
+  },
+  earningsBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12
+  },
+  earningsBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800'
+  },
+
+  checklistWrapper: {
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginTop: 14
+  },
+  checklistHeaderTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 2
+  },
+  checklistHeaderSub: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#64748B',
+    marginBottom: 12
+  },
+  checklistItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F8FAFC',
+    gap: 10
+  },
+  checklistItemChecked: {
+    opacity: 0.7
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#0A5C43',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  checkboxChecked: {
+    backgroundColor: '#0A5C43',
+    borderColor: '#0A5C43'
+  },
+  checkboxTick: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '900'
+  },
+  checklistText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
+    flex: 1
+  },
+  checklistTextChecked: {
+    textDecorationLine: 'line-through',
+    color: '#94A3B8'
+  },
+
+  guideModalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'flex-end'
+  },
+  guideContentCard: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    maxHeight: '90%',
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 24
+  },
+  guideHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9'
+  },
+  guideHeaderTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#0F172A'
+  },
+  guideCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  guideCloseText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#64748B'
+  },
+  guideScrollContent: {
+    paddingBottom: 24
+  },
+  guideIntroBox: {
+    backgroundColor: '#E6F4F1',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20
+  },
+  guideIntroText: {
+    fontSize: 13,
+    color: '#0A5C43',
+    lineHeight: 18,
+    fontWeight: '600'
+  },
+  guideStepItem: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    gap: 16
+  },
+  stepNumBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#0A5C43',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2
+  },
+  stepNumText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '950'
+  },
+  guideStepTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 4
+  },
+  guideStepDesc: {
+    fontSize: 12,
+    color: '#64748B',
+    lineHeight: 18,
+    fontWeight: '500'
+  },
+  guideSubmitBtn: {
+    backgroundColor: '#0A5C43',
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 12,
+    shadowColor: '#0A5C43',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 4
+  },
+  guideSubmitBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '800'
+  },
+
+  statsScrollContent: {
+    paddingHorizontal: 24,
+    gap: 12
+  },
+  statCardMini: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minWidth: 105,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#F1F5F9'
+  },
+  statMiniVal: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#0F172A'
+  },
+  statMiniLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 2
+  },
+  dutyContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0'
+  },
+  dutyInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4
+  },
+  dutyText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#334155',
+    letterSpacing: 0.5
+  },
+  dutyToggle: {
+    width: 44,
+    height: 24,
+    borderRadius: 12,
+    padding: 2,
+    justifyContent: 'center'
+  },
+  dutyCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2
+  },
+  offlineContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+    marginTop: 40
+  },
+  offlineTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#0F172A',
+    marginBottom: 8
+  },
+  offlineSubtext: {
+    fontSize: 13,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 18,
+    fontWeight: '500',
+    marginBottom: 24
+  },
+  goOnlineBtn: {
+    backgroundColor: '#0A5C43',
+    paddingHorizontal: 28,
+    paddingVertical: 12,
+    borderRadius: 12,
+    shadowColor: '#0A5C43',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3
+  },
+  goOnlineBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800'
+  },
 
   emptyContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 60 },
   emptyText: { fontSize: 16, fontWeight: '700', color: '#64748B' },

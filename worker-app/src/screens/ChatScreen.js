@@ -102,10 +102,7 @@ const ChatScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-        style={styles.container}
-      >
+      <View style={styles.container}>
         {/* Chat Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -120,58 +117,65 @@ const ChatScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Chat Body */}
-        <View style={styles.chatBody}>
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#0A5C43" />
-              <Text style={styles.loadingText}>Syncing Support Thread...</Text>
-            </View>
-          ) : (
-            <FlatList
-              ref={flatListRef}
-              data={messages}
-              keyExtractor={(item) => item._id || String(Math.random())}
-              renderItem={renderMessageBubble}
-              contentContainerStyle={styles.messageList}
-              showsVerticalScrollIndicator={false}
-              ListEmptyComponent={
-                <View style={styles.emptyContainer}>
-                  <MessageSquare size={50} color="#CBD5E1" style={{ marginBottom: 16 }} />
-                  <Text style={styles.emptyTitle}>Direct Line to Admin</Text>
-                  <Text style={styles.emptyText}>
-                    Need assistance or have questions about a booking? Message the office directly here.
-                  </Text>
-                </View>
-              }
-            />
-          )}
-        </View>
-
-        {/* Chat Input */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Type your message..."
-            placeholderTextColor="#94A3B8"
-            value={text}
-            onChangeText={setText}
-            multiline
-            maxLength={1000}
-          />
-          <TouchableOpacity 
-            style={[styles.sendButton, !text.trim() && styles.disabledSendButton]} 
-            onPress={handleSendMessage}
-            disabled={!text.trim() || sending}
-          >
-            {sending ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
+        {/* Keyboard Avoiding Container containing Chat Body & Input */}
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 110}
+        >
+          {/* Chat Body */}
+          <View style={styles.chatBody}>
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0A5C43" />
+                <Text style={styles.loadingText}>Syncing Support Thread...</Text>
+              </View>
             ) : (
-              <Send size={18} color="#FFFFFF" />
+              <FlatList
+                ref={flatListRef}
+                data={messages}
+                keyExtractor={(item) => item._id || String(Math.random())}
+                renderItem={renderMessageBubble}
+                contentContainerStyle={styles.messageList}
+                showsVerticalScrollIndicator={false}
+                ListEmptyComponent={
+                  <View style={styles.emptyContainer}>
+                    <MessageSquare size={50} color="#CBD5E1" style={{ marginBottom: 16 }} />
+                    <Text style={styles.emptyTitle}>Direct Line to Admin</Text>
+                    <Text style={styles.emptyText}>
+                      Need assistance or have questions about a booking? Message the office directly here.
+                    </Text>
+                  </View>
+                }
+              />
             )}
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+          </View>
+
+          {/* Chat Input */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Type your message..."
+              placeholderTextColor="#94A3B8"
+              value={text}
+              onChangeText={setText}
+              multiline
+              maxLength={1000}
+            />
+            <TouchableOpacity 
+              style={[styles.sendButton, !text.trim() && styles.disabledSendButton]} 
+              onPress={handleSendMessage}
+              disabled={!text.trim() || sending}
+            >
+              {sending ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Send size={18} color="#FFFFFF" />
+              )}
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 };

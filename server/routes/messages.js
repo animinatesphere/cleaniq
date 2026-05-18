@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Message = require('../models/Message');
 const Worker = require('../models/Worker');
+const { sendEmail, templates } = require('../utils/emailService');
 
 // GET chat thread with specific worker
 router.get('/worker/:workerId', async (req, res) => {
@@ -33,6 +34,33 @@ router.post('/', async (req, res) => {
     });
 
     await message.save();
+
+    // Send notifications based on sender type
+    try {
+      const staff = await Worker.findById(workerId);
+      if (staff) {
+        if (senderType === 'Admin') {
+          // Send support email notification to Staff member
+          console.log(`💬 Admin message sent to staff ${staff.firstName} ${staff.lastName}. Sending notification...`);
+          await sendEmail({
+            to: staff.email,
+            subject: `💬 New message from Cleaniq Admin`,
+            html: templates.newChatMessageToStaffAlert(staff, senderName, text)
+          });
+        } else {
+          // Send support email notification to Admin
+          console.log(`💬 Staff ${staff.firstName} sent message to Admin. Sending notification...`);
+          await sendEmail({
+            to: process.env.EMAIL_USER || 'admin@cleaniqservices.com',
+            subject: `💬 Support Chat Message from ${staff.firstName} ${staff.lastName}`,
+            html: templates.newChatMessageToAdminAlert(staff, text)
+          });
+        }
+      }
+    } catch (emailErr) {
+      console.error('❌ Failed to send support message email notification:', emailErr);
+    }
+
     res.status(201).json(message);
   } catch (error) {
     console.error('Error sending message:', error);

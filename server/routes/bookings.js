@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
+const Worker = require('../models/Worker');
 const { sendEmail, templates } = require('../utils/emailService');
 
 // GET all bookings (Admin)
@@ -47,10 +48,27 @@ router.post('/', async (req, res) => {
 
     // Send Alert Email to Admin
     await sendEmail({
-      to: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER || 'admin@cleaniqservices.com',
       subject: `🚨 New Booking: ${newBooking.bookingId}`,
       html: templates.adminNewBookingAlert(newBooking)
     });
+
+    // Notify all active Staff members of a new available clean job in their feed
+    try {
+      const activeStaff = await Worker.find({ status: 'Active', appAccessGranted: true });
+      if (activeStaff && activeStaff.length > 0) {
+        console.log(`📧 Notifying ${activeStaff.length} active staff members about booking ${newBooking.bookingId}...`);
+        for (const staff of activeStaff) {
+          await sendEmail({
+            to: staff.email,
+            subject: `🧹 New Job Alert: ${newBooking.service} is available!`,
+            html: templates.staffNewJobAlert(newBooking)
+          });
+        }
+      }
+    } catch (staffEmailErr) {
+      console.error('❌ Failed to email staff new job notification:', staffEmailErr);
+    }
 
     res.status(201).json(newBooking);
   } catch (err) {

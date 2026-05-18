@@ -1,6 +1,6 @@
 {
   "expo": {
-    // "name": "Cleaniq",
+    "name": "Cleaniq",
     "slug": "cleaniq-worker",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,9 +12,11 @@
       "backgroundColor": "#0A5C43"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cleaniq.worker"
     },
     "android": {
+      "package": "com.cleaniq.worker",
       "adaptiveIcon": {
         "backgroundColor": "#0A5C43",
         "foregroundImage": "./assets/icon.jpg"
@@ -22,8 +24,19 @@
     },
     "web": {
       "favicon": "./assets/icon.jpg",
-      "name": "CleanIQ",
-      "shortName": "CleanIQ"
+      "name": "Cleaniq",
+      "shortName": "Cleaniq"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c1e50a75-2559-4534-a471-6e975bdeccbc"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/c1e50a75-2559-4534-a471-6e975bdeccbc"
     }
   }
 }

@@ -3,6 +3,7 @@ const router = express.Router();
 const Worker = require('../models/Worker');
 const Booking = require('../models/Booking');
 const jwt = require('jsonwebtoken');
+const { sendEmail, templates } = require('../utils/emailService');
 
 // Mobile App Login Endpoint
 router.post('/login', async (req, res) => {
@@ -115,6 +116,17 @@ router.post('/jobs/:id/accept', async (req, res) => {
     
     await booking.save();
     
+    // Send email log to Admin
+    await sendEmail({
+      to: process.env.EMAIL_USER || 'admin@cleaniqservices.com',
+      subject: `Staff Accepted Job: ${booking.bookingId}`,
+      html: templates.staffActionAlert(
+        booking, 
+        'Job Accepted', 
+        `Staff member <strong>${workerName}</strong> has accepted this clean and committed to the schedule.`
+      )
+    });
+    
     res.json({ message: 'Job accepted successfully', booking });
   } catch (error) {
     console.error('Error accepting job:', error);
@@ -129,6 +141,8 @@ router.post('/jobs/:id/cancel', async (req, res) => {
     if (!booking) {
       return res.status(404).json({ error: 'Booking not found' });
     }
+    const previousWorkerName = booking.assignedWorkerName || 'Staff';
+    
     // Revert status to Confirmed (so it becomes available on the job feed again)
     booking.assignedWorker = null;
     booking.assignedWorkerName = null;
@@ -139,6 +153,18 @@ router.post('/jobs/:id/cancel', async (req, res) => {
     booking.jobDurationActual = 0;
     
     await booking.save();
+
+    // Send email log to Admin
+    await sendEmail({
+      to: process.env.EMAIL_USER || 'admin@cleaniqservices.com',
+      subject: `Staff Cancelled Job: ${booking.bookingId} ❌`,
+      html: templates.staffActionAlert(
+        booking, 
+        'Job Cancelled', 
+        `Staff member <strong>${previousWorkerName}</strong> has CANCELLED their acceptance of this clean. The job is back on the feed and available for other staff.`
+      )
+    });
+
     res.json({ message: 'Job acceptance cancelled successfully', booking });
   } catch (error) {
     console.error('Error cancelling job:', error);
@@ -156,6 +182,18 @@ router.post('/jobs/:id/arrive', async (req, res) => {
     booking.status = 'Arrived';
     booking.jobArrivedTime = new Date();
     await booking.save();
+
+    // Send email log to Admin
+    await sendEmail({
+      to: process.env.EMAIL_USER || 'admin@cleaniqservices.com',
+      subject: `Staff Arrived: ${booking.bookingId}`,
+      html: templates.staffActionAlert(
+        booking, 
+        'Arrived at Property', 
+        `Staff member <strong>${booking.assignedWorkerName}</strong> has reached the customer's property.`
+      )
+    });
+
     res.json({ message: 'Arrived at customer location', booking });
   } catch (error) {
     console.error('Error marking arrival:', error);
@@ -173,6 +211,18 @@ router.post('/jobs/:id/start', async (req, res) => {
     booking.status = 'Cleaning';
     booking.jobStartTime = new Date();
     await booking.save();
+
+    // Send email log to Admin
+    await sendEmail({
+      to: process.env.EMAIL_USER || 'admin@cleaniqservices.com',
+      subject: `Staff Started Cleaning: ${booking.bookingId}`,
+      html: templates.staffActionAlert(
+        booking, 
+        'Cleaning Started', 
+        `Staff member <strong>${booking.assignedWorkerName}</strong> has started active cleaning. The duration timer is counting.`
+      )
+    });
+
     res.json({ message: 'Clean started successfully', booking });
   } catch (error) {
     console.error('Error starting job:', error);
@@ -201,6 +251,18 @@ router.post('/jobs/:id/complete', async (req, res) => {
     }
     
     await booking.save();
+
+    // Send email log to Admin
+    await sendEmail({
+      to: process.env.EMAIL_USER || 'admin@cleaniqservices.com',
+      subject: `Staff Finished Clean: ${booking.bookingId} ✅`,
+      html: templates.staffActionAlert(
+        booking, 
+        'Cleaning Completed', 
+        `Staff member <strong>${booking.assignedWorkerName}</strong> has marked this clean as completed. Actual Duration: <strong>${booking.jobDurationActual} minutes</strong>.`
+      )
+    });
+
     res.json({ message: 'Job completed successfully', booking });
   } catch (error) {
     console.error('Error completing job:', error);
@@ -226,7 +288,7 @@ router.post('/', async (req, res) => {
     // Check if email exists
     const existingWorker = await Worker.findOne({ email });
     if (existingWorker) {
-      return res.status(400).json({ error: 'Worker with this email already exists' });
+      return res.status(400).json({ error: 'Staff member with this email already exists' });
     }
 
     const workerId = `WK-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -246,8 +308,17 @@ router.post('/', async (req, res) => {
 
     await worker.save();
     
-    // In a real app, send an email to the worker here with the tempPassword and app download links
-    // await emailService.sendWorkerInvite(email, tempPassword);
+    // Automatically send email invite to new Staff member with their credentials and the app download portal link
+    try {
+      console.log(`📧 Sending welcome invite email to new staff: ${email}...`);
+      await sendEmail({
+        to: email,
+        subject: 'Welcome to Cleaniq! Download Your Staff App 🧹📱',
+        html: templates.staffAppInvite(worker)
+      });
+    } catch (inviteEmailErr) {
+      console.error('❌ Failed to send staff welcome invite email:', inviteEmailErr);
+    }
 
     res.status(201).json(worker);
   } catch (error) {

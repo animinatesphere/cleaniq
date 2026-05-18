@@ -1,22 +1,46 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, 
   StyleSheet, KeyboardAvoidingView, Platform, 
   ActivityIndicator, Alert, Image, SafeAreaView
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { AuthContext } from '../context/AuthContext';
-import { Mail, Lock } from 'lucide-react-native';
+import { Mail, Lock, Fingerprint } from 'lucide-react-native';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
   
   const { login } = useContext(AuthContext);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        if (LocalAuthentication && LocalAuthentication.hasHardwareAsync) {
+          const compatible = await LocalAuthentication.hasHardwareAsync();
+          const enrolled = await LocalAuthentication.isEnrolledAsync();
+          setIsBiometricSupported(compatible && enrolled);
+        }
+      } catch (err) {
+        console.log('Biometric compatibility check skipped inside Expo Go:', err.message);
+      }
+
+      try {
+        const savedEmail = await AsyncStorage.getItem('@saved_email');
+        if (savedEmail) setEmail(savedEmail);
+      } catch (err) {
+        console.log('AsyncStorage email recovery skipped:', err.message);
+      }
+    })();
+  }, []);
+
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and your temporary password.');
+      Alert.alert('Error', 'Please enter both email and your password.');
       return;
     }
 
@@ -24,8 +48,40 @@ const LoginScreen = () => {
     const result = await login(email, password);
     setIsLoggingIn(false);
 
-    if (!result.success) {
+    if (result.success) {
+      await AsyncStorage.setItem('@saved_email', email);
+      await AsyncStorage.setItem('@saved_pass', password);
+    } else {
       Alert.alert('Login Failed', result.message);
+    }
+  };
+
+  const handleBiometricAuth = async () => {
+    try {
+      const savedEmail = await AsyncStorage.getItem('@saved_email');
+      const savedPass = await AsyncStorage.getItem('@saved_pass');
+      
+      if (!savedEmail || !savedPass) {
+        Alert.alert('Setup Required', 'Please log in with your email and password first to enable biometric shortcuts.');
+        return;
+      }
+
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Log in to Cleaniq with Biometrics',
+        fallbackLabel: 'Enter Password',
+        disableDeviceFallback: false
+      });
+
+      if (result.success) {
+        setIsLoggingIn(true);
+        const loginRes = await login(savedEmail, savedPass);
+        setIsLoggingIn(false);
+        if (!loginRes.success) {
+          Alert.alert('Biometric Login Failed', loginRes.message);
+        }
+      }
+    } catch (error) {
+      Alert.alert('Biometrics Error', 'An error occurred during authentication.');
     }
   };
 
@@ -73,17 +129,29 @@ const LoginScreen = () => {
               />
             </View>
 
-            <TouchableOpacity 
-              style={styles.loginButton} 
-              onPress={handleLogin}
-              disabled={isLoggingIn}
-            >
-              {isLoggingIn ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.loginButtonText}>LOG IN</Text>
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 10 }}>
+              <TouchableOpacity 
+                style={[styles.loginButton, { flex: 1, marginTop: 0 }]} 
+                onPress={handleLogin}
+                disabled={isLoggingIn}
+              >
+                {isLoggingIn ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.loginButtonText}>LOG IN</Text>
+                )}
+              </TouchableOpacity>
+
+              {isBiometricSupported && (
+                <TouchableOpacity 
+                  style={styles.biometricButton} 
+                  onPress={handleBiometricAuth}
+                  disabled={isLoggingIn}
+                >
+                  <Fingerprint size={28} color="#0A5C43" />
+                </TouchableOpacity>
               )}
-            </TouchableOpacity>
+            </View>
           </View>
 
           <Text style={styles.footerText}>
@@ -176,6 +244,21 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '900',
     letterSpacing: 2,
+  },
+  biometricButton: {
+    width: 65,
+    height: 65,
+    borderRadius: 20,
+    backgroundColor: '#E6F4F1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#0A5C43',
+    shadowColor: '#0A5C43',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   footerText: {
     marginTop: 'auto',

@@ -125,7 +125,7 @@ const templates = {
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0F172A; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
       <div style="background-color: #0F172A; padding: 30px; text-align: center;">
         <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: auto; margin-bottom: 10px; border-radius: 8px;" />
-        <h1 style="color: #6EE7B7; margin: 0; font-size: 24px;">New Worker Application 👷‍♂️</h1>
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 24px;">New Staff Application 👷‍♂️</h1>
       </div>
       <div style="padding: 30px; color: #1e293b;">
         <div style="background-color: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #edf2f7;">
@@ -179,6 +179,137 @@ const templates = {
 
         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #edf2f7;">
           <a href="https://cleaniqservices.com/admin/bookings" style="display: inline-block; background-color: #0F172A; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px;">Manage in Dashboard</a>
+        </div>
+      </div>
+    </div>
+  `,
+
+  staffActionAlert: (booking, action, details) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0F172A; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0F172A; padding: 30px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: auto; margin-bottom: 10px; border-radius: 8px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 20px; font-weight: bold;">Staff Action Log: ${action} 🚨</h1>
+      </div>
+      <div style="padding: 30px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 18px; margin-top: 0; color: #0F172A; border-bottom: 1px solid #edf2f7; padding-bottom: 10px;">Event Notice</h2>
+        <p style="font-size: 15px; color: #334155; font-weight: 500;">${details}</p>
+        
+        <div style="background-color: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #edf2f7; margin-top: 20px;">
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Booking Reference:</strong> ${booking.bookingId}</p>
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Service:</strong> ${booking.service}</p>
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Phone:</strong> ${booking.customer.phone}</p>
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Address:</strong> ${booking.details.address}</p>
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Scheduled Time:</strong> ${booking.schedule.timeSlot} (${booking.schedule.preferredTime || 'No preference'})</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+          <a href="https://cleaniqservices.com/admin/bookings" style="display: inline-block; background-color: #0F172A; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px;">View in Admin Portal</a>
+        </div>
+      </div>
+    </div>
+  `,
+
+  staffNewJobAlert: (booking) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0A5C43; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0A5C43; padding: 35px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: auto; margin-bottom: 10px; border-radius: 8px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 24px;">New Job Alert! 🧹✨</h1>
+        <p style="color: #E6F4F1; margin-top: 5px; font-size: 14px;">A new cleaning job is available on your feed</p>
+      </div>
+      <div style="padding: 30px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 18px; margin-top: 0; color: #0A5C43;">Hello Cleaniq Staff,</h2>
+        <p>A new cleaning appointment has been scheduled and is ready for acceptance. Here are the job details:</p>
+        
+        <div style="background-color: #F8FAFC; padding: 20px; border-radius: 16px; border: 1px solid #edf2f7; margin-bottom: 25px;">
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Date:</strong> ${new Date(booking.schedule.date).toDateString()}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Time Slot:</strong> ${booking.schedule.timeSlot}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Duration:</strong> ${booking.details.duration} Hours</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Location / Area:</strong> ${booking.details.address.split(',').slice(-2).join(', ').trim() || 'Local Region'}</p>
+        </div>
+
+        <p style="font-size: 13px; color: #64748b; font-style: italic;">Note: To protect customer privacy, the complete address and contact details will be shown only after you accept the job.</p>
+
+        <div style="text-align: center; margin-top: 35px;">
+          <p style="margin-bottom: 15px; font-weight: bold; color: #0A5C43;">Accept it now before another staff does!</p>
+          <a href="https://cleaniqservices.com" style="display: inline-block; background-color: #0A5C43; color: white; padding: 18px 36px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(10, 92, 67, 0.2);">Open Cleaniq Staff App</a>
+        </div>
+      </div>
+    </div>
+  `,
+
+  newChatMessageToAdminAlert: (staff, text) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0F172A; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0F172A; padding: 30px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: auto; margin-bottom: 10px; border-radius: 8px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 20px;">New Support Message 💬</h1>
+      </div>
+      <div style="padding: 30px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 18px; margin-top: 0; color: #0F172A;">Hello Admin,</h2>
+        <p>Staff member <strong>${staff.firstName} ${staff.lastName}</strong> (${staff.workerId || 'Staff'}) has sent you a new support chat message:</p>
+        
+        <div style="background-color: #F8FAFC; padding: 20px; border-radius: 16px; border-left: 4px solid #6EE7B7; margin: 20px 0; font-size: 15px; color: #334155; font-style: italic; font-weight: 500;">
+          "${text}"
+        </div>
+
+        <div style="text-align: center; margin-top: 35px; border-top: 1px solid #edf2f7; padding-top: 25px;">
+          <a href="https://cleaniqservices.com/admin/chat" style="display: inline-block; background-color: #0F172A; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px;">Open Support Chat Portal</a>
+        </div>
+      </div>
+    </div>
+  `,
+
+  newChatMessageToStaffAlert: (staff, senderName, text) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0A5C43; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0A5C43; padding: 35px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: auto; margin-bottom: 10px; border-radius: 8px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 22px;">New Support Message 💬</h1>
+        <p style="color: #E6F4F1; margin-top: 5px; font-size: 14px;">The Cleaniq office team has sent you a reply</p>
+      </div>
+      <div style="padding: 30px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 18px; margin-top: 0; color: #0A5C43;">Hello ${staff.firstName},</h2>
+        <p>You have received a new support chat message from the Cleaniq Admin team (<strong>${senderName || 'Admin Office'}</strong>):</p>
+        
+        <div style="background-color: #F8FAFC; padding: 20px; border-radius: 16px; border-left: 4px solid #6EE7B7; margin: 20px 0; font-size: 15px; color: #334155; font-style: italic; font-weight: 500;">
+          "${text}"
+        </div>
+
+        <div style="text-align: center; margin-top: 35px; border-top: 1px solid #edf2f7; padding-top: 25px;">
+          <a href="https://cleaniqservices.com" style="display: inline-block; background-color: #0A5C43; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px;">Open Cleaniq Staff App</a>
+        </div>
+      </div>
+    </div>
+  `,
+
+  staffAppInvite: (staff) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0A5C43; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0A5C43; padding: 40px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 110px; height: auto; margin-bottom: 15px; border-radius: 12px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">Welcome to Cleaniq! 🎉</h1>
+        <p style="color: #E6F4F1; margin-top: 5px; font-size: 15px;">Your Cleaniq Staff Account has been created</p>
+      </div>
+      <div style="padding: 45px 40px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 20px; margin-top: 0; color: #0A5C43;">Hi ${staff.firstName},</h2>
+        <p>Congratulations! You have been registered as an official member of the <strong>Cleaniq Services</strong> cleaning staff team.</p>
+        <p>To start accepting jobs and tracking your completed cleans, download our staff application using the secure link below:</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="https://expo.dev/artifacts/eas/j8DzdUDFEfmfLUiK7QVUSG.apk" style="display: inline-block; background-color: #0A5C43; color: white; padding: 18px 36px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 15px; box-shadow: 0 10px 15px -3px rgba(10, 92, 67, 0.2);">Download Cleaniq Staff App</a>
+        </div>
+
+        <h3 style="font-size: 15px; color: #0A5C43; text-transform: uppercase; letter-spacing: 1px; margin-top: 35px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Your Login Credentials</h3>
+        
+        <div style="background-color: #F8FAFC; padding: 24px; border-radius: 20px; border: 1px solid #edf2f7;">
+          <p style="margin: 0 0 10px 0; font-size: 14px; color: #475569;"><strong>Login Email:</strong> <span style="font-family: monospace; font-size: 15px; color: #0F172A;">${staff.email}</span></p>
+          <p style="margin: 0; font-size: 14px; color: #475569;"><strong>Temporary Password:</strong> <span style="font-family: monospace; font-size: 15px; font-weight: bold; color: #0A5C43;">${staff.tempPassword}</span></p>
+        </div>
+
+        <p style="font-size: 13px; color: #64748b; margin-top: 20px; font-style: italic;">Note: For security reasons, please change your password inside the app settings as soon as you log in for the first time.</p>
+
+        <div style="margin-top: 40px; padding-top: 25px; border-top: 1px solid #edf2f7; text-align: center;">
+          <p style="margin: 0; font-size: 14px; color: #94a3b8; font-weight: 600;">Welcome aboard!</p>
+          <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #0A5C43;">The Cleaniq Operations Team</p>
         </div>
       </div>
     </div>
