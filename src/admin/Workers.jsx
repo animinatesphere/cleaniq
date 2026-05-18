@@ -108,7 +108,7 @@ const Workers = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center"><Briefcase size={24} /></div>
-          <div><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Workers</p><p className="text-2xl font-black text-primary-dark">{workers.length}</p></div>
+          <div><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Staff</p><p className="text-2xl font-black text-primary-dark">{workers.length}</p></div>
         </div>
         <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center"><ShieldCheck size={24} /></div>
@@ -126,7 +126,7 @@ const Workers = () => {
           <h2 className="text-lg font-black text-primary-dark">Staff Directory</h2>
           <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border border-slate-200 focus-within:border-primary/50 transition-all w-full md:w-80 shadow-sm">
             <Search size={18} className="text-slate-400" />
-            <input type="text" placeholder="Search workers..." className="bg-transparent border-none outline-none text-sm font-medium w-full text-slate-700" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <input type="text" placeholder="Search staff..." className="bg-transparent border-none outline-none text-sm font-medium w-full text-slate-700" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
         </div>
 
@@ -143,9 +143,9 @@ const Workers = () => {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan="5" className="p-8 text-center text-slate-400 font-bold">Loading workers...</td></tr>
+                <tr><td colSpan="5" className="p-8 text-center text-slate-400 font-bold">Loading staff...</td></tr>
               ) : filteredWorkers.length === 0 ? (
-                <tr><td colSpan="5" className="p-8 text-center text-slate-400 font-bold">No workers found.</td></tr>
+                <tr><td colSpan="5" className="p-8 text-center text-slate-400 font-bold">No staff found.</td></tr>
               ) : (
                 filteredWorkers.map((w) => (
                   <tr key={w._id} className="hover:bg-slate-50/50 transition-colors group">
