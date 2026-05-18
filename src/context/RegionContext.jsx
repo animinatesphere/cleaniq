@@ -17,6 +17,7 @@ export const regions = {
       address: 'First Floor, Swan Buildings, 20 Swan St, Manchester M4 5JW, United Kingdom'
     }
   },
+  /*
   NG: {
     id: 'NG',
     name: 'Nigeria',
@@ -31,6 +32,7 @@ export const regions = {
       address: 'Lagos Office: Victoria Island, Lagos, Nigeria'
     }
   }
+  */
 };
 
 export const RegionProvider = ({ children }) => {

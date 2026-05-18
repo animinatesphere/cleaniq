@@ -71,7 +71,8 @@ const Navbar = () => {
           
           <div className="h-6 w-px bg-white/10" />
 
-          {/* Region Toggle */}
+          {/* Region Toggle - Commented out to lock to UK/GBP */}
+          {/*
           <div className="relative group">
             <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-all">
               <Globe size={16} className="text-secondary" />
@@ -96,6 +97,7 @@ const Navbar = () => {
               </div>
             </div>
           </div>
+          */}
 
           <Link to="/booking" className="btn-secondary px-8 text-primary shadow-secondary/10">
             Book Now
@@ -160,25 +162,7 @@ const Navbar = () => {
                 <div className="mt-auto space-y-6 md:8">
                   <div className="h-px bg-white/10 w-full" />
                   
-                  <div className="space-y-4">
-                    <h1 className="font-extrabold text-lg leading-none uppercase tracking-tighter text-white">Cleaniq</h1><span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Market Region</span>
-                    <div className="flex gap-2">
-                      {Object.values(regions).map((r) => (
-                        <button
-                          key={r.id}
-                          onClick={() => {
-                            toggleRegion(r.id);
-                            setIsOpen(false);
-                          }}
-                          className={`flex-1 py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold border transition-all ${
-                            region.id === r.id ? 'bg-secondary text-primary border-secondary' : 'border-white/10 text-white hover:bg-white/5'
-                          }`}
-                        >
-                          {r.id}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {/* Market Region Selection - disabled (locked to UK/GBP) */}
 
                   <Link to="/booking" className="btn-secondary w-full py-4 md:py-5 text-base md:text-lg text-center shadow-xl shadow-secondary/5">
                     Book Professional Clean

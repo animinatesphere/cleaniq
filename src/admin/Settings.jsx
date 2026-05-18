@@ -119,7 +119,7 @@ const Settings = () => {
                   <input type="number" placeholder="Rate" value={newService.rate} onChange={e => setNewService({...newService, rate: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" required />
                   <select value={newService.region} onChange={e => setNewService({...newService, region: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold">
                     <option value="UK">UK (GBP)</option>
-                    <option value="NG">NG (NGN)</option>
+                    {/* <option value="NG">NG (NGN)</option> */}
                   </select>
                   <button type="submit" className="btn-primary py-4 rounded-2xl font-black uppercase"><Plus size={18} /> Add</button>
                 </form>
