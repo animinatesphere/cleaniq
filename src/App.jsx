@@ -10,6 +10,8 @@ import About from './pages/About';
 import Booking from './pages/Booking';
 import Recruitment from './pages/Recruitment';
 import Services from './pages/Services';
+import Contact from './pages/Contact';
+import ServiceDetail from './pages/ServiceDetail';
 
 // Admin Importsddhdhdhdhhdh
 import AdminLayout from './admin/AdminLayout';
@@ -41,6 +43,8 @@ function App() {
           <Route path="/booking" element={<Booking />} />
           <Route path="/recruitment" element={<Recruitment />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/pages/contact" element={<Contact />} />
+          <Route path="/pages/:serviceSlug" element={<ServiceDetail />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>

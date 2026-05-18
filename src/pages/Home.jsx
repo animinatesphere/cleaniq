@@ -235,6 +235,28 @@ useEffect(() => {
 </motion.div>
             ))}
           </div>
+
+          {/* Specialized Local Cleaning Pages for SEO Link Building */}
+          <div className="mt-20 border-t border-slate-100 pt-16">
+            <h4 className="text-[10px] font-black text-center text-slate-400 uppercase tracking-[0.3em] mb-8">Our Specialized Manchester Cleaning Hubs</h4>
+            <div className="flex flex-wrap justify-center gap-4">
+              {[
+                { name: 'End of Tenancy Cleaning', path: '/pages/end-of-tenancy-cleaning-manchester' },
+                { name: 'Deep Cleaning Services', path: '/pages/deep-cleaning-manchester' },
+                { name: 'Airbnb Turnovers', path: '/pages/airbnb-cleaning-manchester' },
+                { name: 'Commercial Office Cleaning', path: '/pages/office-cleaning-manchester' },
+                { name: 'Post-Construction Cleaning', path: '/pages/post-construction-cleaning-manchester' }
+              ].map((link, i) => (
+                <Link
+                  key={i}
+                  to={link.path}
+                  className="px-6 py-3.5 bg-slate-50 border border-slate-100 hover:border-primary/20 rounded-2xl text-xs font-black text-primary-dark hover:text-primary transition-all shadow-sm hover:shadow"
+                >
+                  {link.name} &rarr;
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
