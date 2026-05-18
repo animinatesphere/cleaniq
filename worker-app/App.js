@@ -7,6 +7,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { AuthProvider, AuthContext } from './src/context/AuthContext';
 import LoginScreen from './src/screens/LoginScreen';
 import JobsFeedScreen from './src/screens/JobsFeedScreen';
+import ChatScreen from './src/screens/ChatScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,7 +30,10 @@ const AppNavigation = () => {
           <Stack.Screen name="Login" component={LoginScreen} />
         ) : (
           // User is signed in
-          <Stack.Screen name="JobsFeed" component={JobsFeedScreen} />
+          <>
+            <Stack.Screen name="JobsFeed" component={JobsFeedScreen} />
+            <Stack.Screen name="Chat" component={ChatScreen} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

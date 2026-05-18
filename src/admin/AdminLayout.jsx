@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Calendar, Users, 
   Settings, LogOut, ChevronRight, ShieldCheck,
-  Menu, X, Search, Bell, User, Clock, CheckCircle2, Briefcase
+  Menu, X, Search, Bell, User, Clock, CheckCircle2, Briefcase, MessageSquare
 } from 'lucide-react';
 import Login from './Login';
 
@@ -78,6 +78,7 @@ const AdminLayout = () => {
     { name: 'Applicants', path: '/admin/applicants', icon: <Users size={20} /> },
     { name: 'Customers', path: '/admin/customers', icon: <User size={20} /> },
     { name: 'Services', path: '/admin/services', icon: <ShieldCheck size={20} /> },
+    { name: 'Chat Support', path: '/admin/chat', icon: <MessageSquare size={20} /> },
     { name: 'Settings', path: '/admin/settings', icon: <Settings size={20} /> },
   ];
 

@@ -33,6 +33,10 @@ const bookingSchema = new mongoose.Schema({
   },
   assignedWorkerName: { type: String, default: null },
   status: { type: String, default: 'Confirmed' },
+  jobArrivedTime: { type: Date, default: null },
+  jobStartTime: { type: Date, default: null },
+  jobEndTime: { type: Date, default: null },
+  jobDurationActual: { type: Number, default: 0 }, // in minutes
   createdAt: { type: Date, default: Date.now },
   meta: mongoose.Schema.Types.Mixed // Catch-all for future expansions
 });

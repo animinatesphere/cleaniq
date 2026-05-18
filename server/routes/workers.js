@@ -122,6 +122,92 @@ router.post('/jobs/:id/accept', async (req, res) => {
   }
 });
 
+// POST cancel accepted job
+router.post('/jobs/:id/cancel', async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+    // Revert status to Confirmed (so it becomes available on the job feed again)
+    booking.assignedWorker = null;
+    booking.assignedWorkerName = null;
+    booking.status = 'Confirmed';
+    booking.jobArrivedTime = null;
+    booking.jobStartTime = null;
+    booking.jobEndTime = null;
+    booking.jobDurationActual = 0;
+    
+    await booking.save();
+    res.json({ message: 'Job acceptance cancelled successfully', booking });
+  } catch (error) {
+    console.error('Error cancelling job:', error);
+    res.status(500).json({ error: 'Internal server error cancelling job' });
+  }
+});
+
+// POST mark arrived at customer location
+router.post('/jobs/:id/arrive', async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+    booking.status = 'Arrived';
+    booking.jobArrivedTime = new Date();
+    await booking.save();
+    res.json({ message: 'Arrived at customer location', booking });
+  } catch (error) {
+    console.error('Error marking arrival:', error);
+    res.status(500).json({ error: 'Internal server error marking arrival' });
+  }
+});
+
+// POST start clean (counting down duration)
+router.post('/jobs/:id/start', async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+    booking.status = 'Cleaning';
+    booking.jobStartTime = new Date();
+    await booking.save();
+    res.json({ message: 'Clean started successfully', booking });
+  } catch (error) {
+    console.error('Error starting job:', error);
+    res.status(500).json({ error: 'Internal server error starting job' });
+  }
+});
+
+// POST complete clean (job done)
+router.post('/jobs/:id/complete', async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+    booking.status = 'Completed';
+    booking.jobEndTime = new Date();
+    
+    // Calculate total duration in minutes if startTime was recorded
+    if (booking.jobStartTime) {
+      const diffMs = booking.jobEndTime - booking.jobStartTime;
+      booking.jobDurationActual = Math.round(diffMs / 1000 / 60); // minutes
+    } else {
+      // Fallback to booked duration in hours * 60
+      const bookedHours = booking.details?.duration || 2;
+      booking.jobDurationActual = bookedHours * 60;
+    }
+    
+    await booking.save();
+    res.json({ message: 'Job completed successfully', booking });
+  } catch (error) {
+    console.error('Error completing job:', error);
+    res.status(500).json({ error: 'Internal server error completing job' });
+  }
+});
+
 // GET all workers
 router.get('/', async (req, res) => {
   try {

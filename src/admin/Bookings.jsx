@@ -425,39 +425,90 @@ const Bookings = () => {
                   </div>
 
                   {(selectedBooking.assignedWorker || selectedBooking.assignedWorkerName) && (
-                    <div className="bg-emerald-50 rounded-3xl p-6 border border-emerald-100">
-                      <div className="flex items-center gap-4 mb-4 pb-4 border-b border-emerald-100">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center shrink-0">
-                          <User size={24} className="text-emerald-700" />
+                    <div className="bg-emerald-50 rounded-[32px] p-6 border border-emerald-100 flex flex-col md:flex-row gap-8">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-4 mb-4 pb-4 border-b border-emerald-100">
+                          <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center shrink-0">
+                            <User size={24} className="text-emerald-700" />
+                          </div>
+                          <div>
+                            <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Assigned Worker</p>
+                            <p className="text-sm font-black text-emerald-900">
+                              {selectedBooking.assignedWorker?.firstName ? `${selectedBooking.assignedWorker.firstName} ${selectedBooking.assignedWorker.lastName}` : selectedBooking.assignedWorkerName}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Assigned Worker</p>
-                          <p className="text-sm font-black text-emerald-900">
-                            {selectedBooking.assignedWorker?.firstName ? `${selectedBooking.assignedWorker.firstName} ${selectedBooking.assignedWorker.lastName}` : selectedBooking.assignedWorkerName}
-                          </p>
+                        
+                        {selectedBooking.assignedWorker && (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Phone</p>
+                              <p className="text-xs font-bold text-emerald-800">{selectedBooking.assignedWorker.phone}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Email</p>
+                              <p className="text-xs font-bold text-emerald-800 truncate" title={selectedBooking.assignedWorker.email}>{selectedBooking.assignedWorker.email}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Worker ID</p>
+                              <p className="text-xs font-bold text-emerald-800">{selectedBooking.assignedWorker.workerId}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Region</p>
+                              <p className="text-xs font-bold text-emerald-800">{selectedBooking.assignedWorker.region}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Live Cleaner Progress Timeline */}
+                      <div className="w-full md:w-80 bg-white/70 backdrop-blur-sm p-5 rounded-2xl border border-emerald-100/50 flex flex-col justify-between">
+                        <h5 className="text-[10px] font-black text-emerald-800 uppercase tracking-widest mb-3 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                          Live Cleaner Progress
+                        </h5>
+                        
+                        <div className="space-y-4 relative pl-3 border-l-2 border-slate-100">
+                          {/* Step 1: Arrived */}
+                          <div className="relative">
+                            <span className={`absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 ${
+                              selectedBooking.jobArrivedTime ? 'bg-emerald-500 border-emerald-200' : 'bg-white border-slate-300'
+                            }`} />
+                            <p className="text-xs font-black text-primary-dark">Arrived at Customer</p>
+                            <p className="text-[10px] text-slate-400 font-medium">
+                              {selectedBooking.jobArrivedTime 
+                                ? `Completed at ${new Date(selectedBooking.jobArrivedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
+                                : 'Pending arrival...'}
+                            </p>
+                          </div>
+
+                          {/* Step 2: Commenced */}
+                          <div className="relative">
+                            <span className={`absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 ${
+                              selectedBooking.jobStartTime ? 'bg-emerald-500 border-emerald-200' : 'bg-white border-slate-300'
+                            }`} />
+                            <p className="text-xs font-black text-primary-dark">Cleaning Commenced</p>
+                            <p className="text-[10px] text-slate-400 font-medium">
+                              {selectedBooking.jobStartTime 
+                                ? `Started at ${new Date(selectedBooking.jobStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
+                                : 'Awaiting start...'}
+                            </p>
+                          </div>
+
+                          {/* Step 3: Finished */}
+                          <div className="relative">
+                            <span className={`absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 ${
+                              selectedBooking.jobEndTime ? 'bg-emerald-500 border-emerald-200' : 'bg-white border-slate-300'
+                            }`} />
+                            <p className="text-xs font-black text-primary-dark">Cleaning Finished</p>
+                            <p className="text-[10px] text-slate-400 font-medium font-bold">
+                              {selectedBooking.jobEndTime 
+                                ? `Done: ${selectedBooking.jobDurationActual || 0} mins actual clean` 
+                                : 'Awaiting completion...'}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                      
-                      {selectedBooking.assignedWorker && (
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Phone</p>
-                            <p className="text-sm font-semibold text-emerald-800">{selectedBooking.assignedWorker.phone}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Email</p>
-                            <p className="text-sm font-semibold text-emerald-800">{selectedBooking.assignedWorker.email}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Worker ID</p>
-                            <p className="text-sm font-semibold text-emerald-800">{selectedBooking.assignedWorker.workerId}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Region</p>
-                            <p className="text-sm font-semibold text-emerald-800">{selectedBooking.assignedWorker.region}</p>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
 
