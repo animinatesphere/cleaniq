@@ -1,5 +1,23 @@
 import React, { useEffect, useState } from "react";
 
+let stripePromise = null;
+let reactStripePromise = null;
+let stripePaymentPromise = null;
+
+export const preloadStripe = () => {
+  if (!stripePromise) {
+    stripePromise = import("@stripe/stripe-js").then(({ loadStripe }) =>
+      loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
+    );
+  }
+  if (!reactStripePromise) {
+    reactStripePromise = import("@stripe/react-stripe-js");
+  }
+  if (!stripePaymentPromise) {
+    stripePaymentPromise = import("../component/StripePayment");
+  }
+};
+
 const StripeLazyLoader = ({
   amount,
   currency,
@@ -15,21 +33,18 @@ const StripeLazyLoader = ({
 
     (async () => {
       try {
-        const [{ loadStripe }, reactStripe] = await Promise.all([
-          import("@stripe/stripe-js"),
-          import("@stripe/react-stripe-js"),
-        ]);
+        preloadStripe();
 
-        const stripe = await loadStripe(
-          import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-        );
-        const { default: StripePayment } =
-          await import("../component/StripePayment");
+        const [stripe, reactStripe, paymentModule] = await Promise.all([
+          stripePromise,
+          reactStripePromise,
+          stripePaymentPromise,
+        ]);
 
         if (!mounted) return;
         setStripeInstance(stripe);
         setElementsComp(() => reactStripe.Elements);
-        setStripePaymentComp(() => StripePayment);
+        setStripePaymentComp(() => paymentModule.default);
       } catch (err) {
         // silent fail - fallback UI will show
         // eslint-disable-next-line no-console
@@ -45,7 +60,7 @@ const StripeLazyLoader = ({
   if (!ElementsComp || !StripePaymentComp || !stripeInstance) {
     return (
       <div className="text-center py-6">
-        <p className="font-medium">Loading payment widget…</p>
+        <p className="font-medium text-slate-500 text-sm">Loading payment widget…</p>
       </div>
     );
   }

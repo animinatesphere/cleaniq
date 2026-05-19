@@ -38,7 +38,7 @@ import {
 } from "lucide-react";
 // Stripe will be loaded lazily to reduce initial JS bundle size
 import { Helmet } from "react-helmet-async";
-import StripeLazyLoader from "../component/StripeLazyLoader";
+import StripeLazyLoader, { preloadStripe } from "../component/StripeLazyLoader";
 
 const serviceOptions = [
   {
@@ -291,6 +291,11 @@ const Booking = () => {
   const [servicesList, setServicesList] = useState([]);
   const [loadingRates, setLoadingRates] = useState(true);
   const [notification, setNotification] = useState(null);
+
+  useEffect(() => {
+    // Eagerly load Stripe in the background so it's instantly ready at step 4
+    preloadStripe();
+  }, []);
 
   const showNotification = (message, type = "error") => {
     setNotification({ message, type });
