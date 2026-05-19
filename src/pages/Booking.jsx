@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 // Stripe will be loaded lazily to reduce initial JS bundle size
 import { Helmet } from "react-helmet-async";
+import StripeLazyLoader from "../component/StripeLazyLoader";
 
 const serviceOptions = [
   {
