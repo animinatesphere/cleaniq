@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CLEANIQ — SEO Audit Report</title>
+    <style>
+      body {
+        font-family:
+          Inter,
+          system-ui,
+          Segoe UI,
+          Arial,
+          sans-serif;
+        margin: 0;
+        padding: 32px;
+        background: #f7fafc;
+        color: #0f172a;
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        background: white;
+        padding: 28px;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(2, 6, 23, 0.08);
+      }
+      h1,
+      h2 {
+        margin: 0 0 12px;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 24px;
+      }
+      .card {
+        background: #fbfdff;
+        border: 1px solid #eef2f7;
+        padding: 18px;
+        border-radius: 10px;
+      }
+      ul {
+        margin: 8px 0 12px 20px;
+      }
+      .pill {
+        display: inline-block;
+        background: #e6f9f0;
+        color: #064e3b;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      td,
+      th {
+        padding: 8px 10px;
+        border-bottom: 1px solid #edf2f7;
+      }
+      footer {
+        margin-top: 18px;
+        font-size: 13px;
+        color: #64748b;
+      }
+      .muted {
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 16px;
+        "
+      >
+        <div>
+          <h1>CLEANIQ — SEO Audit</h1>
+          <div class="muted">Generated: 2026-05-19</div>
+        </div>
+        <div class="pill">Priority: High</div>
+      </header>
+
+      <section class="grid">
+        <main>
+          <div class="card">
+            <h2>Executive Summary</h2>
+            <p>
+              <strong>Good:</strong> Title tags, meta descriptions, Open Graph
+              and Twitter card tags are present on core pages. Helmet is used
+              for per-page metadata.
+            </p>
+            <p>
+              <strong>High priority issues:</strong> Only 2 pages appear indexed
+              (homepage & contact). Missing dedicated service pages for key
+              queries. Contact page contains repeated phone/email strings
+              (likely rendering bug).
+            </p>
+          </div>
+
+          <div style="margin-top: 18px" class="card">
+            <h2>Findings</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Issue</th>
+                  <th>Severity</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Indexed pages count</td>
+                  <td><strong>High</strong></td>
+                  <td>2 indexed pages vs 6+ expected for services</td>
+                </tr>
+                <tr>
+                  <td>Missing service pages</td>
+                  <td><strong>High</strong></td>
+                  <td>
+                    Create pages for End-of-Tenancy, Airbnb, Office, Deep Clean
+                  </td>
+                </tr>
+                <tr>
+                  <td>Duplicate contact info in HTML</td>
+                  <td><strong>High</strong></td>
+                  <td>Phone/email repeated ~11x — remove duplicates</td>
+                </tr>
+                <tr>
+                  <td>Performance (bundle size / third-party)</td>
+                  <td>Medium</td>
+                  <td>
+                    Large vendor bundles and Stripe script load on main bundle —
+                    defer/lazy-load
+                  </td>
+                </tr>
+                <tr>
+                  <td>Images</td>
+                  <td>Medium</td>
+                  <td>
+                    Several hero/og images need WebP/AVIF + srcset; sharp script
+                    exists but needs more sizes
+                  </td>
+                </tr>
+                <tr>
+                  <td>Structured Data</td>
+                  <td>Low</td>
+                  <td>
+                    LocalBusiness JSON-LD OK on homepage; ensure per-service
+                    Service JSON-LD on each service page
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-top: 18px" class="card">
+            <h2>Recommendations (ordered)</h2>
+            <ol>
+              <li>
+                Create dedicated service pages (End-of-Tenancy, Airbnb, Office,
+                Deep Clean). Add unique title/meta, H1, 400–800-word localized
+                content, structured Service JSON-LD.
+              </li>
+              <li>
+                Inspect and remove duplicate contact markup on the Contact page;
+                keep one canonical phone and email in visible content and use
+                schema/contactPoint in JSON-LD.
+              </li>
+              <li>
+                Claim & optimize Google Business Profile — ensure NAP
+                consistency and service categories.
+              </li>
+              <li>
+                Generate responsive images (AVIF/WebP) and add srcset/sizes for
+                hero and service images. Use progressive loading for large
+                images.
+              </li>
+              <li>
+                Defer Stripe and heavy third-party scripts to booking/payment
+                flow only. Use dynamic import for Stripe elements.
+              </li>
+              <li>
+                Code-split route bundles and lazy-load non-critical UI
+                components to reduce chunk sizes.
+              </li>
+              <li>
+                Re-run Lighthouse on canonical host
+                (https://www.cleaniqservices.com) after fixes.
+              </li>
+            </ol>
+          </div>
+
+          <div style="margin-top: 18px" class="card">
+            <h2>Quick fixes I can apply</h2>
+            <ul>
+              <li>
+                Draft LocalBusiness JSON-LD and per-service Service JSON-LD
+                (ready-to-insert Helmet script).
+              </li>
+              <li>
+                Create starter content for the three service pages
+                (SEO-optimized copy + meta + schema).
+              </li>
+              <li>
+                Search and remove duplicated contact strings automatically in
+                the Contact page source.
+              </li>
+            </ul>
+          </div>
+        </main>
+
+        <aside>
+          <div class="card">
+            <h3>Visuals</h3>
+            <canvas id="overviewChart" width="300" height="200"></canvas>
+            <p class="muted" style="margin-top: 8px">
+              Indexed pages vs Expected
+            </p>
+          </div>
+
+          <div style="margin-top: 16px" class="card">
+            <h3>Key metrics</h3>
+            <ul>
+              <li>Indexed pages: <strong>2</strong></li>
+              <li>Target pages: <strong>6+</strong></li>
+              <li>Critical issues found: <strong>2</strong></li>
+              <li>Performance (Lighthouse): major JS + third-party blocking</li>
+            </ul>
+          </div>
+
+          <div style="margin-top: 16px" class="card">
+            <h3>Next actionable step</h3>
+            <p>
+              Create & publish the service pages (I can draft content and schema
+              in repo).
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      <section style="margin-top: 18px" class="card">
+        <h2>Appendix — Suggested JSON-LD snippets</h2>
+        <p class="muted">
+          Examples you can paste into page Helmet blocks (replace placeholders)
+        </p>
+        <pre
+          style="
+            white-space: pre-wrap;
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            overflow: auto;
+          "
+        >
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "CLEANIQ Services",
+  "url": "https://cleaniqservices.com",
+  "telephone": "+447752476368",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Manchester",
+    "addressRegion": "Greater Manchester",
+    "postalCode": "M1",
+    "streetAddress": "[Your address here]"
+  }
+}</pre
+        >
+        <p class="muted">And a Service JSON-LD example for a service page:</p>
+        <pre
+          style="
+            white-space: pre-wrap;
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            overflow: auto;
+          "
+        >
+{
+  "@context":"https://schema.org",
+  "@type":"Service",
+  "name":"End of Tenancy Cleaning",
+  "description":"Professional end of tenancy cleaning in Manchester — deposit-back guarantee.",
+  "provider": { "@type": "LocalBusiness", "name": "CLEANIQ Services", "url": "https://cleaniqservices.com" }
+}</pre
+        >
+      </section>
+
+      <footer>
+        <div class="muted">
+          Created by Cleaniq internal audit tools. For implementation help, open
+          an issue or ask me to draft the page content and schema.
+        </div>
+      </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const ctx = document.getElementById("overviewChart").getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Indexed", "Expected"],
+          datasets: [
+            {
+              label: "Pages",
+              data: [2, 6],
+              backgroundColor: ["#0f172a", "#06b6d4"],
+            },
+          ],
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+        },
+      });
+    </script>
+  </body>
+</html>
