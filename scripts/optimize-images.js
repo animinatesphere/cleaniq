@@ -33,17 +33,17 @@ async function process() {
       .withMetadata();
 
     try {
+      const tmpOut = path.join(publicDir, t.out + ".tmp");
       if (t.format === "jpeg") {
         await transformer
           .jpeg({ quality: 80, progressive: true })
-          .toFile(path.join(publicDir, t.out));
+          .toFile(tmpOut);
       } else if (t.format === "png") {
-        await transformer
-          .png({ compressionLevel: 9 })
-          .toFile(path.join(publicDir, t.out));
+        await transformer.png({ compressionLevel: 9 }).toFile(tmpOut);
       } else {
-        await transformer.toFile(path.join(publicDir, t.out));
+        await transformer.toFile(tmpOut);
       }
+      fs.renameSync(tmpOut, path.join(publicDir, t.out));
       console.log(`Optimized ${t.src} -> ${t.out}`);
     } catch (err) {
       console.error(`Failed to process ${t.src}:`, err);
