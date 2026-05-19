@@ -14,7 +14,7 @@ const Stockport = () => (
       />
       <link
         rel="canonical"
-        href="https://cleaniqservices.com/cleaning-services-stockport"
+        href="https://cleaniqservices.com/pages/cleaning-stockport"
       />
     </Helmet>
     <div className="max-w-4xl mx-auto px-6 text-center">

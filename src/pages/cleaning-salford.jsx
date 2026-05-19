@@ -12,7 +12,7 @@ const Salford = () => (
       />
       <link
         rel="canonical"
-        href="https://cleaniqservices.com/cleaning-services-salford"
+        href="https://cleaniqservices.com/pages/cleaning-salford"
       />
     </Helmet>
     <div className="max-w-4xl mx-auto px-6 text-center">

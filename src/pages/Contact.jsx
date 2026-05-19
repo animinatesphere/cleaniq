@@ -29,7 +29,10 @@ const Contact = () => {
           name="description"
           content="Contact CLEANIQ Services in Manchester for a free cleaning quote. We offer end of tenancy, deep cleaning, Airbnb, and office cleaning. Call +44 7752 476368 or email us today."
         />
-        <link rel="canonical" href="https://cleaniqservices.com/contact" />
+        <link
+          rel="canonical"
+          href="https://cleaniqservices.com/pages/contact"
+        />
       </Helmet>
       <div className="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
         {/* Info Column */}
