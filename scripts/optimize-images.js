@@ -14,6 +14,27 @@ const targets = [
   { src: "twitter-banner.jpg", out: "twitter-banner.jpg", format: "jpeg" },
 ];
 
+// Additional output formats: WebP and AVIF (keeps backups of originals)
+const addWebpAvif = async (srcPath, baseName) => {
+  try {
+    const webpOut = path.join(publicDir, baseName + ".webp");
+    const avifOut = path.join(publicDir, baseName + ".avif");
+
+    await sharp(srcPath)
+      .resize(1200, 630, { fit: "cover" })
+      .webp({ quality: 80 })
+      .toFile(webpOut);
+    console.log(`Wrote ${path.basename(webpOut)}`);
+    await sharp(srcPath)
+      .resize(1200, 630, { fit: "cover" })
+      .avif({ quality: 70 })
+      .toFile(avifOut);
+    console.log(`Wrote ${path.basename(avifOut)}`);
+  } catch (err) {
+    console.error("Failed to write webp/avif for", baseName, err);
+  }
+};
+
 async function process() {
   for (const t of targets) {
     const srcPath = path.join(publicDir, t.src);
@@ -45,6 +66,8 @@ async function process() {
       }
       fs.renameSync(tmpOut, path.join(publicDir, t.out));
       console.log(`Optimized ${t.src} -> ${t.out}`);
+      // also produce webp and avif variants
+      await addWebpAvif(srcPath, path.parse(t.out).name);
     } catch (err) {
       console.error(`Failed to process ${t.src}:`, err);
     }

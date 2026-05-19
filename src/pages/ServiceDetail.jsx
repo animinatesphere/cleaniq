@@ -117,6 +117,25 @@ const ServiceDetail = () => {
         />
         <meta property="og:title" content={service.title} />
         <meta property="og:description" content={service.meta} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Service",
+            name: service.heading,
+            description: service.description,
+            provider: {
+              "@type": "LocalBusiness",
+              name: "CLEANIQ Services",
+              url: "https://www.cleaniqservices.com",
+            },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.9",
+              reviewCount: "2000",
+              bestRating: "5",
+            },
+          })}
+        </script>
       </Helmet>
       <div className="max-w-4xl mx-auto px-6 space-y-12">
         {/* Navigation Breadcrumb */}

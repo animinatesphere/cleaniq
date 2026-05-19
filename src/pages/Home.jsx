@@ -100,6 +100,7 @@ const Home = () => {
           property="og:image"
           content="https://www.cleaniqservices.com/preview.jpg"
         />
+        <link rel="preload" as="image" href={air1} fetchpriority="high" />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
       <script type="application/ld+json">

@@ -36,12 +36,8 @@ import {
   Refrigerator,
   Wind,
 } from "lucide-react";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
-import StripePayment from "../component/StripePayment";
+// Stripe will be loaded lazily to reduce initial JS bundle size
 import { Helmet } from "react-helmet-async";
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const serviceOptions = [
   {
@@ -1384,14 +1380,12 @@ const Booking = () => {
                             <ShieldCheck size={18} />
                             Securely processed by Stripe
                           </div>
-                          <Elements stripe={stripePromise}>
-                            <StripePayment
-                              amount={totalPrice}
-                              currency={region.id === "UK" ? "GBP" : "NGN"}
-                              customerInfo={formData}
-                              onPaymentSuccess={handlePaymentSuccess}
-                            />
-                          </Elements>
+                          <StripeLazyLoader
+                            amount={totalPrice}
+                            currency={region.id === "UK" ? "GBP" : "NGN"}
+                            customerInfo={formData}
+                            onPaymentSuccess={handlePaymentSuccess}
+                          />
                         </div>
                       </div>
                     </div>
