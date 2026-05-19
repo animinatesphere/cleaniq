@@ -113,6 +113,18 @@ const serviceOptions = [
   },
 ];
 
+// Fallback extras to show when the services API is unavailable
+const DEFAULT_EXTRAS = [
+  { _id: 'fallback-american-fridge', name: 'American fridge freeze', rate: 15 },
+  { _id: 'fallback-carpet-cleaning', name: 'Carpet(s) Cleaning', rate: 30 },
+  { _id: 'fallback-double-oven', name: 'Double Oven Cleaning', rate: 20 },
+  { _id: 'fallback-fridge-freezer', name: 'Fridge and freezer', rate: 18 },
+  { _id: 'fallback-range-oven', name: 'Range Oven Cleaning', rate: 25 },
+  { _id: 'fallback-single-fridge', name: 'Single fridge', rate: 10 },
+  { _id: 'fallback-single-oven', name: 'Single Oven Cleaning', rate: 15 },
+  { _id: 'fallback-venetian-blinds', name: 'Venetian Blinds', rate: 5 },
+];
+
 const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
@@ -1068,7 +1080,7 @@ const Booking = () => {
                             </p>
                           </div>
                           <div className="grid gap-3 mt-6">
-                            {servicesList
+                            {(servicesList.length ? servicesList : DEFAULT_EXTRAS)
                               .filter((s) => {
                                 const baseServices = [
                                   ...serviceOptions.map((o) => o.id),
