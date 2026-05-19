@@ -38,7 +38,11 @@ import {
 } from "lucide-react";
 // Stripe will be loaded lazily to reduce initial JS bundle size
 import { Helmet } from "react-helmet-async";
-import StripeLazyLoader, { preloadStripe } from "../component/StripeLazyLoader";
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import StripePayment from '../component/StripePayment';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const serviceOptions = [
   {
@@ -292,10 +296,6 @@ const Booking = () => {
   const [loadingRates, setLoadingRates] = useState(true);
   const [notification, setNotification] = useState(null);
 
-  useEffect(() => {
-    // Eagerly load Stripe in the background so it's instantly ready at step 4
-    preloadStripe();
-  }, []);
 
   const showNotification = (message, type = "error") => {
     setNotification({ message, type });
@@ -1398,12 +1398,14 @@ const Booking = () => {
                             <ShieldCheck size={18} />
                             Securely processed by Stripe
                           </div>
-                          <StripeLazyLoader
-                            amount={totalPrice}
-                            currency={region.id === "UK" ? "GBP" : "NGN"}
-                            customerInfo={formData}
-                            onPaymentSuccess={handlePaymentSuccess}
-                          />
+                          <Elements stripe={stripePromise}>
+                            <StripePayment
+                              amount={totalPrice}
+                              currency={region.id === "UK" ? "GBP" : "NGN"}
+                              customerInfo={formData}
+                              onPaymentSuccess={handlePaymentSuccess}
+                            />
+                          </Elements>
                         </div>
                       </div>
                     </div>
