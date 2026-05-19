@@ -78,7 +78,8 @@ const Home = () => {
     <div className="overflow-x-hidden bg-white">
       <Helmet>
         <title>
-          CLEANIQ SERVICES | Professional Cleaning Services in Manchester
+          Professional Cleaning Services in Manchester | Domestic, Office &
+          Airbnb Cleaning
         </title>
         <meta
           name="description"
@@ -99,6 +100,38 @@ const Home = () => {
         />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "How do you vet your cleaners?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Every cleaner undergoes a rigorous multi-stage vetting process, including face-to-face interviews, background checks, and practical skills assessments.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "What if I'm not satisfied with the clean?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "We offer a 48-hour satisfaction guarantee. If any part of the clean isn't up to our high standards, we'll send someone back to re-clean for free.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Do I need to provide cleaning supplies?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Most clients prefer us to use their own supplies, but we're happy to provide eco-friendly cleaning products for a small additional fee.",
+              },
+            },
+          ],
+        })}
+      </script>
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center pt-40 pb-20 overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 rounded-l-[150px] hidden lg:block" />

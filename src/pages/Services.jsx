@@ -16,6 +16,7 @@ import {
 import { useRegion } from "../context/RegionContext";
 import me1 from "../assets/image0.jpeg";
 import me2 from "../assets/image1.jpeg";
+
 import me3 from "../assets/Cleaniq services/4th Post.jpg";
 import airbnbImg from "../assets/airbnb_cleaning_service.png";
 import moveOutImg from "../assets/end_of_tenancy.png";
@@ -92,12 +93,11 @@ const Services = () => {
       id: "move",
       title: "Deep Clean",
       dbName: "Deep Clean",
-      tag: "Deep cleaning",
-      icon: <Trash2 className="text-secondary" size={40} />,
-      image: airbnbImg,
+      tag: "Specialist deep cleaning",
+      icon: <HomeIcon className="text-secondary" size={40} />,
+      image:
+        "https://images.unsplash.com/photo-1493666438817-866a91353ca9?q=80&w=2000&auto=format&fit=crop",
       features: [
-        "Inside cabinets & drawers.",
-        "Baseboard scrubbing.",
         "Door frame cleaning.",
         "Wall spot cleaning.",
         "Appliance deep clean.",
@@ -188,6 +188,48 @@ const Services = () => {
           property="og:description"
           content="Reliable, eco-friendly cleaning services across Manchester. Book deep cleans, move-outs, and regular home visits online."
         />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "LocalBusiness",
+                name: "CLEANIQ Services",
+                url: "https://cleaniqservices.com",
+              },
+              {
+                "@type": "Service",
+                name: "Residential Cleaning",
+                description:
+                  "Reliable, weekly or bi-weekly cleaning for your home.",
+              },
+              {
+                "@type": "Service",
+                name: "Office Cleaning",
+                description:
+                  "Professional janitorial services for your workspace.",
+              },
+              {
+                "@type": "Service",
+                name: "Deep Clean",
+                description:
+                  "Specialized deep cleaning services for a total refresh.",
+              },
+              {
+                "@type": "Service",
+                name: "Airbnb Cleaning",
+                description:
+                  "Professional turnover services for your short-let rental.",
+              },
+              {
+                "@type": "Service",
+                name: "End of Tenancy",
+                description:
+                  "Comprehensive move-in/move-out cleaning with a deposit-back guarantee.",
+              },
+            ],
+          })}
+        </script>
       </Helmet>
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
