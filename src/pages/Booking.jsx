@@ -250,6 +250,8 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   );
 };
 
+const cleanKey = (str) => (str || "").toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+
 const Booking = () => {
   const { region } = useRegion();
   const [searchParams] = useSearchParams();
@@ -408,7 +410,7 @@ const Booking = () => {
         setServicesList(combined);
         const ratesObj = {};
         combined.forEach((service) => {
-          ratesObj[service.name.trim()] = service.rate;
+          ratesObj[cleanKey(service.name)] = service.rate;
         });
         setDynamicRates(ratesObj);
       } catch (error) {
@@ -478,7 +480,7 @@ const Booking = () => {
 
     // Base Service Rate (Multiplied by Duration for all regions - Price/Hr)
     const rawBaseRate =
-      dynamicRates[formData.serviceType.trim()] ||
+      dynamicRates[cleanKey(formData.serviceType)] ||
       rates[formData.serviceType.trim()] ||
       20;
     const baseRate = parseFloat(rawBaseRate) || 20;
@@ -489,13 +491,13 @@ const Booking = () => {
     const roomMap = { bedrooms: 'Bedroom', bathrooms: 'Bathroom', cloakrooms: 'Cloakroom', kitchens: 'Kitchen', utilityRooms: 'Utility Room', receptionRooms: 'Reception Room', conservatories: 'Conservatory' };
     Object.entries(formData.property).forEach(([key, qty]) => {
       const roomName = roomMap[key];
-      total += (dynamicRates[roomName.trim()] || rates[roomName.trim()] || 0) * qty;
+      total += (dynamicRates[cleanKey(roomName)] || rates[roomName.trim()] || 0) * qty;
     });
     */
 
     // Extra Rates
     Object.entries(formData.extras).forEach(([name, qty]) => {
-      total += (dynamicRates[name.trim()] || rates[name.trim()] || 0) * qty;
+      total += (dynamicRates[cleanKey(name)] || rates[name.trim()] || 0) * qty;
     });
 
     if (formData.frequency === "Weekly") total *= 0.9;
@@ -875,7 +877,7 @@ const Booking = () => {
                                 <span className="text-base font-black text-primary-dark">
                                   {region.symbol}
                                   {String(
-                                    dynamicRates[s.id.trim()] ||
+                                    dynamicRates[cleanKey(s.id)] ||
                                       (region.id === "UK"
                                         ? s.id === "Deep Clean"
                                           ? "24.90"
@@ -1475,7 +1477,7 @@ const Booking = () => {
                             {formData.serviceType &&
                               (() => {
                                 const rawRate =
-                                  dynamicRates[formData.serviceType.trim()] ||
+                                  dynamicRates[cleanKey(formData.serviceType)] ||
                                   (region.id === "UK"
                                     ? formData.serviceType === "Deep Clean"
                                       ? 24.9
@@ -1514,7 +1516,7 @@ const Booking = () => {
                             </span>
                             <span className="font-black text-slate-600">
                               {region.symbol}
-                              {(dynamicRates[name.trim()] || 0) * qty}
+                              {(dynamicRates[cleanKey(name)] || 0) * qty}
                             </span>
                           </div>
                         ) : null,
@@ -1530,7 +1532,7 @@ const Booking = () => {
                             </span>
                             <span className="font-black text-primary">
                               {region.symbol}
-                              {(dynamicRates[name.trim()] || 0) * qty}
+                              {(dynamicRates[cleanKey(name)] || 0) * qty}
                             </span>
                           </div>
                         ) : null,
