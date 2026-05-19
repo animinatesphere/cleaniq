@@ -22,7 +22,6 @@ import {
   Heart,
   Star,
   Search,
-  Sparkles,
   Zap,
   Shield,
   HelpCircle,
@@ -1093,7 +1092,7 @@ const Booking = () => {
                               .map((extra) => {
                                 const iconMap = {
                                   "american fridge freeze": <Refrigerator />,
-                                  "carpet(s) cleaning": <Sparkles />,
+                                  "carpet(s) cleaning": <Star />,
                                   "double oven cleaning": <Zap />,
                                   "fridge and freezer": <Refrigerator />,
                                   "range oven cleaning": <Zap />,
@@ -1113,7 +1112,7 @@ const Booking = () => {
                                     <div className="flex items-center gap-3">
                                       <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
                                         {iconMap[cleanName] || (
-                                          <Sparkles size={18} />
+                                          <Star size={18} />
                                         )}
                                       </div>
                                       <div>

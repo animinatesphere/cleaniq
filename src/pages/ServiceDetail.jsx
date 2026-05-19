@@ -5,7 +5,6 @@ import {
   ShieldCheck,
   Calendar,
   Star,
-  Sparkles,
   Check,
   ArrowRight,
   Home as HomeIcon,
@@ -141,7 +140,7 @@ const ServiceDetail = () => {
           <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-bl-[100px] pointer-events-none" />
           <div className="space-y-6 relative z-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest">
-              <Sparkles size={14} /> Certified Specialist Clean
+              <Star size={14} /> Certified Specialist Clean
             </div>
 
             <h1 className="text-3xl md:text-5xl font-extrabold text-primary-dark tracking-tight leading-tight">

@@ -1,34 +1,34 @@
-const { Resend } = require('resend');
+const { Resend } = require("resend");
 
 // Safety: Initialize Resend only if key exists, otherwise use a dummy
-const resend = process.env.RESEND_API_KEY 
-  ? new Resend(process.env.RESEND_API_KEY) 
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
     if (!resend) {
-      console.error('❌ EMAIL ERROR: RESEND_API_KEY is missing in .env');
+      console.error("❌ EMAIL ERROR: RESEND_API_KEY is missing in .env");
       return false;
     }
 
     console.log(`📧 Resend: Attempting to send email to: ${to}...`);
     const { data, error } = await resend.emails.send({
-      from: 'Cleaniq Services <info@cleaniqservices.com>',
+      from: "Cleaniq Services <info@cleaniqservices.com>",
       to: to,
       subject: subject,
       html: html,
     });
 
     if (error) {
-      console.error('❌ RESEND ERROR DETAILS:', JSON.stringify(error, null, 2));
+      console.error("❌ RESEND ERROR DETAILS:", JSON.stringify(error, null, 2));
       return false;
     }
 
-    console.log('✅ Email sent successfully! ID:', data.id);
+    console.log("✅ Email sent successfully! ID:", data.id);
     return true;
   } catch (error) {
-    console.error('❌ CRITICAL EMAIL ERROR:', error);
+    console.error("❌ CRITICAL EMAIL ERROR:", error);
     return false;
   }
 };
@@ -57,7 +57,7 @@ const templates = {
             </div>
             <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7;">
               <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: bold;">DATE & TIME</p>
-              <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()} @ ${booking.schedule.timeSlot} ${booking.schedule.preferredTime ? '(' + booking.schedule.preferredTime + ')' : ''}</p>
+              <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()} @ ${booking.schedule.timeSlot} ${booking.schedule.preferredTime ? "(" + booking.schedule.preferredTime + ")" : ""}</p>
             </div>
             <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7;">
               <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: bold;">SERVICE ADDRESS</p>
@@ -70,13 +70,13 @@ const templates = {
         <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #475569;">
           <li><strong>Frequency:</strong> ${booking.details.frequency}</li>
           <li><strong>Duration:</strong> ${booking.details.duration} Hours</li>
-          ${booking.details.extras.map(extra => `<li style="margin-top: 4px;">${extra}</li>`).join('')}
+          ${booking.details.extras.map((extra) => `<li style="margin-top: 4px;">${extra}</li>`).join("")}
         </ul>
 
         <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
           <div>
             <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: bold;">TOTAL PAID</p>
-            <p style="margin: 0; font-size: 24px; font-weight: 900; color: #0F172A;">${booking.payment.currency === 'GBP' ? '£' : '₦'}${booking.payment.amount}</p>
+            <p style="margin: 0; font-size: 24px; font-weight: 900; color: #0F172A;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
           </div>
         </div>
 
@@ -89,7 +89,7 @@ const templates = {
       </div>
     </div>
   `,
-  
+
   applicantReceived: (applicantName, role) => `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
       <div style="background-color: #0F172A; padding: 40px; text-align: center;">
@@ -155,7 +155,7 @@ const templates = {
           </div>
           <div style="text-align: right;">
             <p style="margin: 0; font-size: 10px; color: #94a3b8; font-weight: 800; text-transform: uppercase;">Amount</p>
-            <p style="margin: 0; font-size: 16px; font-weight: 800; color: #0F172A;">${booking.payment.currency === 'GBP' ? '£' : '₦'}${booking.payment.amount}</p>
+            <p style="margin: 0; font-size: 16px; font-weight: 800; color: #0F172A;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
           </div>
         </div>
 
@@ -168,13 +168,13 @@ const templates = {
         <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Service Details</h3>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Date:</strong> ${new Date(booking.schedule.date).toDateString()}</p>
-        <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${booking.schedule.timeSlot} (${booking.schedule.preferredTime || 'No preference'})</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${booking.schedule.timeSlot} (${booking.schedule.preferredTime || "No preference"})</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Frequency:</strong> ${booking.details.frequency}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Duration:</strong> ${booking.details.duration} Hours</p>
 
         <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Requirements & Property Details</h3>
         <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
-          ${booking.details.extras.map(e => `<li style="margin-bottom: 5px;">${e}</li>`).join('')}
+          ${booking.details.extras.map((e) => `<li style="margin-bottom: 5px;">${e}</li>`).join("")}
         </ul>
 
         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #edf2f7;">
@@ -200,7 +200,7 @@ const templates = {
           <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Phone:</strong> ${booking.customer.phone}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Address:</strong> ${booking.details.address}</p>
-          <p style="margin: 5px 0; font-size: 13px;"><strong>Scheduled Time:</strong> ${booking.schedule.timeSlot} (${booking.schedule.preferredTime || 'No preference'})</p>
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Scheduled Time:</strong> ${booking.schedule.timeSlot} (${booking.schedule.preferredTime || "No preference"})</p>
         </div>
 
         <div style="text-align: center; margin-top: 30px;">
@@ -214,7 +214,7 @@ const templates = {
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0A5C43; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
       <div style="background-color: #0A5C43; padding: 35px; text-align: center;">
         <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: auto; margin-bottom: 10px; border-radius: 8px;" />
-        <h1 style="color: #6EE7B7; margin: 0; font-size: 24px;">New Job Alert! 🧹✨</h1>
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 24px;">New Job Alert! 🧹</h1>
         <p style="color: #E6F4F1; margin-top: 5px; font-size: 14px;">A new cleaning job is available on your feed</p>
       </div>
       <div style="padding: 30px; color: #1e293b; line-height: 1.6;">
@@ -226,7 +226,7 @@ const templates = {
           <p style="margin: 5px 0; font-size: 14px;"><strong>Date:</strong> ${new Date(booking.schedule.date).toDateString()}</p>
           <p style="margin: 5px 0; font-size: 14px;"><strong>Time Slot:</strong> ${booking.schedule.timeSlot}</p>
           <p style="margin: 5px 0; font-size: 14px;"><strong>Duration:</strong> ${booking.details.duration} Hours</p>
-          <p style="margin: 5px 0; font-size: 14px;"><strong>Location / Area:</strong> ${booking.details.address.split(',').slice(-2).join(', ').trim() || 'Local Region'}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Location / Area:</strong> ${booking.details.address.split(",").slice(-2).join(", ").trim() || "Local Region"}</p>
         </div>
 
         <p style="font-size: 13px; color: #64748b; font-style: italic;">Note: To protect customer privacy, the complete address and contact details will be shown only after you accept the job.</p>
@@ -247,7 +247,7 @@ const templates = {
       </div>
       <div style="padding: 30px; color: #1e293b; line-height: 1.6;">
         <h2 style="font-size: 18px; margin-top: 0; color: #0F172A;">Hello Admin,</h2>
-        <p>Staff member <strong>${staff.firstName} ${staff.lastName}</strong> (${staff.workerId || 'Staff'}) has sent you a new support chat message:</p>
+        <p>Staff member <strong>${staff.firstName} ${staff.lastName}</strong> (${staff.workerId || "Staff"}) has sent you a new support chat message:</p>
         
         <div style="background-color: #F8FAFC; padding: 20px; border-radius: 16px; border-left: 4px solid #6EE7B7; margin: 20px 0; font-size: 15px; color: #334155; font-style: italic; font-weight: 500;">
           "${text}"
@@ -269,7 +269,7 @@ const templates = {
       </div>
       <div style="padding: 30px; color: #1e293b; line-height: 1.6;">
         <h2 style="font-size: 18px; margin-top: 0; color: #0A5C43;">Hello ${staff.firstName},</h2>
-        <p>You have received a new support chat message from the Cleaniq Admin team (<strong>${senderName || 'Admin Office'}</strong>):</p>
+        <p>You have received a new support chat message from the Cleaniq Admin team (<strong>${senderName || "Admin Office"}</strong>):</p>
         
         <div style="background-color: #F8FAFC; padding: 20px; border-radius: 16px; border-left: 4px solid #6EE7B7; margin: 20px 0; font-size: 15px; color: #334155; font-style: italic; font-weight: 500;">
           "${text}"
@@ -313,7 +313,7 @@ const templates = {
         </div>
       </div>
     </div>
-  `
+  `,
 };
 
 module.exports = { sendEmail, templates };
