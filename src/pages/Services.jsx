@@ -20,7 +20,7 @@ import me2 from "../assets/image1.jpeg";
 import me3 from "../assets/Cleaniq services/4th Post.jpg";
 import airbnbImg from "../assets/airbnb_cleaning_service.png";
 import moveOutImg from "../assets/end_of_tenancy.png";
-
+import deep from "../assets/deepclean.jpg";
 const Services = () => {
   const { region } = useRegion();
   const [dynamicRates, setDynamicRates] = React.useState({});
@@ -95,8 +95,7 @@ const Services = () => {
       dbName: "Deep Clean",
       tag: "Specialist deep cleaning",
       icon: <HomeIcon className="text-secondary" size={40} />,
-      image:
-        "https://images.unsplash.com/photo-1493666438817-866a91353ca9?q=80&w=2000&auto=format&fit=crop",
+      image: deep,
       features: [
         "Door frame cleaning.",
         "Wall spot cleaning.",
