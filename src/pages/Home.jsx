@@ -85,10 +85,12 @@ const Home = () => {
           name="description"
           content="Premium eco-friendly cleaning services in Manchester — end of tenancy, deep cleaning, Airbnb turnovers, office and post-construction cleaning. Book online in 60 seconds."
         />
-        <link rel="canonical" href="https://cleaniqservices.com/" />
+        <link rel="canonical" href="https://www.cleaniqservices.com/" />
         <meta
           property="og:title"
-          content="CLEANIQ SERVICES | Premium Eco-Friendly Cleaning"
+          content={
+            "Professional Cleaning Services in Manchester | Domestic, Office & Airbnb Cleaning"
+          }
         />
         <meta
           property="og:description"
@@ -96,7 +98,7 @@ const Home = () => {
         />
         <meta
           property="og:image"
-          content="https://cleaniqservices.com/preview.jpg"
+          content="https://www.cleaniqservices.com/preview.jpg"
         />
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>

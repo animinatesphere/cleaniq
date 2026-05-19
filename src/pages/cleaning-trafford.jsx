@@ -12,7 +12,7 @@ const Trafford = () => (
       />
       <link
         rel="canonical"
-        href="https://cleaniqservices.com/pages/cleaning-trafford"
+        href="https://www.cleaniqservices.com/pages/cleaning-trafford"
       />
     </Helmet>
     <div className="max-w-4xl mx-auto px-6 text-center">

@@ -179,10 +179,10 @@ const Services = () => {
           name="description"
           content="Professional residential and commercial cleaning services in Manchester: deep clean, end-of-tenancy, Airbnb turnovers and office janitorial services."
         />
-        <link rel="canonical" href="https://cleaniqservices.com/services" />
+        <link rel="canonical" href="https://www.cleaniqservices.com/services" />
         <meta
           property="og:title"
-          content="CLEANIQ Services — Professional Cleaning"
+          content={"Services | CLEANIQ — Manchester Cleaning Services"}
         />
         <meta
           property="og:description"
@@ -195,7 +195,7 @@ const Services = () => {
               {
                 "@type": "LocalBusiness",
                 name: "CLEANIQ Services",
-                url: "https://cleaniqservices.com",
+                url: "https://www.cleaniqservices.com",
               },
               {
                 "@type": "Service",

@@ -12,7 +12,7 @@ const Bolton = () => (
       />
       <link
         rel="canonical"
-        href="https://cleaniqservices.com/pages/cleaning-bolton"
+        href="https://www.cleaniqservices.com/pages/cleaning-bolton"
       />
     </Helmet>
     <div className="max-w-4xl mx-auto px-6 text-center">

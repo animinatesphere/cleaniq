@@ -703,7 +703,11 @@ const Booking = () => {
           name="description"
           content="Book professional cleaning services in Manchester. Quick online booking for residential, deep clean, Airbnb turnovers, and office cleaning."
         />
-        <link rel="canonical" href="https://cleaniqservices.com/booking" />
+        <link rel="canonical" href="https://www.cleaniqservices.com/booking" />
+        <meta
+          property="og:title"
+          content={"Book Cleaning — CLEANIQ Services"}
+        />
       </Helmet>
       {isSubmitting && <LoadingOverlay message="Confirming..." />}
       <div className="max-w-7xl mx-auto px-4 md:px-8">

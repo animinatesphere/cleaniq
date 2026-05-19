@@ -12,7 +12,7 @@ const Bury = () => (
       />
       <link
         rel="canonical"
-        href="https://cleaniqservices.com/pages/cleaning-bury"
+        href="https://www.cleaniqservices.com/pages/cleaning-bury"
       />
     </Helmet>
     <div className="max-w-4xl mx-auto px-6 text-center">

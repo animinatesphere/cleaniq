@@ -40,7 +40,11 @@ const About = () => {
           name="description"
           content="CLEANIQ Services — eco-friendly cleaning in Manchester. Learn about our mission, values, and commitment to professional, vetted cleaners."
         />
-        <link rel="canonical" href="https://cleaniqservices.com/about" />
+        <link rel="canonical" href="https://www.cleaniqservices.com/about" />
+        <meta
+          property="og:title"
+          content={"About Us | CLEANIQ Services Manchester"}
+        />
       </Helmet>
       {/* Hero Section */}
       <section className="relative px-6 mb-24">

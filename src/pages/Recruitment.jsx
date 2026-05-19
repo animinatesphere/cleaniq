@@ -177,7 +177,14 @@ const Recruitment = () => {
           name="description"
           content="Apply to join Cleaniq Services. We're hiring vetted cleaning professionals in Manchester and Nigeria. Competitive pay and flexible schedules."
         />
-        <link rel="canonical" href="https://cleaniqservices.com/recruitment" />
+        <link
+          rel="canonical"
+          href="https://www.cleaniqservices.com/recruitment"
+        />
+        <meta
+          property="og:title"
+          content={"Join Cleaniq — Careers & Recruitment"}
+        />
       </Helmet>
       {isSubmitting && <LoadingOverlay message="Sending your application..." />}
       <div className="max-w-4xl mx-auto">

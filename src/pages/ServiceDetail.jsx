@@ -113,7 +113,7 @@ const ServiceDetail = () => {
         <meta name="description" content={service.meta} />
         <link
           rel="canonical"
-          href={`https://cleaniqservices.com/pages/${serviceSlug}`}
+          href={`https://www.cleaniqservices.com/pages/${serviceSlug}`}
         />
         <meta property="og:title" content={service.title} />
         <meta property="og:description" content={service.meta} />

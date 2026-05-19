@@ -31,7 +31,11 @@ const Contact = () => {
         />
         <link
           rel="canonical"
-          href="https://cleaniqservices.com/pages/contact"
+          href="https://www.cleaniqservices.com/pages/contact"
+        />
+        <meta
+          property="og:title"
+          content={"Contact Us | CLEANIQ Services Manchester"}
         />
       </Helmet>
       <div className="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
