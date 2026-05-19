@@ -21,7 +21,64 @@ const ServicesManagement = () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${activeRegion}`);
       const data = await response.json();
-      setServices(data);
+
+      const fallbackUK = [
+        { name: 'Residential Cleaning', rate: 17.90, type: 'hourly' },
+        { name: 'Deep Clean', rate: 24.90, type: 'hourly' },
+        { name: 'Airbnb Cleaning', rate: 21.90, type: 'hourly' },
+        { name: 'Office Cleaning', rate: 19.90, type: 'hourly' },
+        { name: 'End of Tenancy', rate: 20.00, type: 'hourly' },
+        { name: 'Bedroom', rate: 15, type: 'flat' },
+        { name: 'Bathroom', rate: 12, type: 'flat' },
+        { name: 'Cloakroom', rate: 8, type: 'flat' },
+        { name: 'Kitchen', rate: 15, type: 'flat' },
+        { name: 'Utility Room', rate: 10, type: 'flat' },
+        { name: 'Reception Room', rate: 12, type: 'flat' },
+        { name: 'Conservatory', rate: 15, type: 'flat' },
+        { name: 'American fridge freeze', rate: 15, type: 'flat' },
+        { name: 'Carpet(s) Cleaning', rate: 30, type: 'flat' },
+        { name: 'Double Oven Cleaning', rate: 20, type: 'flat' },
+        { name: 'Fridge and freezer', rate: 18, type: 'flat' },
+        { name: 'Range Oven Cleaning', rate: 25, type: 'flat' },
+        { name: 'Single fridge', rate: 10, type: 'flat' },
+        { name: 'Single Oven Cleaning', rate: 15, type: 'flat' },
+        { name: 'Venetian Blinds', rate: 5, type: 'flat' }
+      ];
+
+      const fallbackNG = [
+        { name: 'Residential Cleaning', rate: 15000, type: 'hourly' },
+        { name: 'Deep Clean', rate: 25000, type: 'hourly' },
+        { name: 'Airbnb Cleaning', rate: 20000, type: 'hourly' },
+        { name: 'Office Cleaning', rate: 18000, type: 'hourly' },
+        { name: 'End of Tenancy', rate: 30000, type: 'hourly' },
+        { name: 'Bedroom', rate: 5000, type: 'flat' },
+        { name: 'Bathroom', rate: 4000, type: 'flat' },
+        { name: 'Cloakroom', rate: 2500, type: 'flat' },
+        { name: 'Kitchen', rate: 6000, type: 'flat' },
+        { name: 'Utility Room', rate: 3000, type: 'flat' },
+        { name: 'Reception Room', rate: 5000, type: 'flat' },
+        { name: 'Conservatory', rate: 7000, type: 'flat' },
+        { name: 'American fridge freeze', rate: 8000, type: 'flat' },
+        { name: 'Carpet(s) Cleaning', rate: 15000, type: 'flat' },
+        { name: 'Double Oven Cleaning', rate: 12000, type: 'flat' },
+        { name: 'Fridge and freezer', rate: 10000, type: 'flat' },
+        { name: 'Range Oven Cleaning', rate: 15000, type: 'flat' },
+        { name: 'Single fridge', rate: 5000, type: 'flat' },
+        { name: 'Single Oven Cleaning', rate: 8000, type: 'flat' },
+        { name: 'Venetian Blinds', rate: 3000, type: 'flat' }
+      ];
+
+      const fallbacks = activeRegion === 'UK' ? fallbackUK : fallbackNG;
+      const combined = [...data];
+      const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+
+      fallbacks.forEach((fb) => {
+        if (!data.some((db) => clean(db.name) === clean(fb.name))) {
+          combined.push({ _id: `fallback-${fb.name}`, ...fb });
+        }
+      });
+
+      setServices(combined);
     } catch (error) {
       console.error('Error fetching services:', error);
     } finally {
