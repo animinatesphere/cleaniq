@@ -125,8 +125,7 @@ const ServiceDetail = () => {
             description: service.description,
             provider: {
               "@type": "LocalBusiness",
-              name: "CLEANIQ Services",
-              url: "https://www.cleaniqservices.com",
+              "@id": "https://www.cleaniqservices.com#localbusiness",
             },
             aggregateRating: {
               "@type": "AggregateRating",
@@ -134,6 +133,32 @@ const ServiceDetail = () => {
               reviewCount: "2000",
               bestRating: "5",
             },
+            review: [
+              {
+                "@type": "Review",
+                author: { "@type": "Person", name: "Samantha R" },
+                datePublished: "2026-04-12",
+                reviewBody:
+                  "Fantastic service — reliable, meticulous and professional. Would highly recommend!",
+                reviewRating: {
+                  "@type": "Rating",
+                  ratingValue: "5",
+                  bestRating: "5",
+                },
+              },
+              {
+                "@type": "Review",
+                author: { "@type": "Person", name: "Mark T" },
+                datePublished: "2026-03-01",
+                reviewBody:
+                  "Great team and easy booking. House looked brand new.",
+                reviewRating: {
+                  "@type": "Rating",
+                  ratingValue: "5",
+                  bestRating: "5",
+                },
+              },
+            ],
           })}
         </script>
       </Helmet>

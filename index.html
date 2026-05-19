@@ -130,55 +130,92 @@
       content="https://www.cleaniqservices.com/preview.jpg"
     />
 
-    <!-- Schema.org JSON-LD local SEO rich business markup -->
+    <!-- Consolidated Schema.org JSON-LD bundle (@graph) -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": "CLEANIQ Services",
-        "url": "https://www.cleaniqservices.com",
-        "telephone": "+44 7752 476368",
-        "email": "info@cleaniqservices.com",
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "First Floor, Swan Buildings, 20 Swan Street",
-          "addressLocality": "Manchester",
-          "postalCode": "M4 5JW",
-          "addressCountry": "GB"
-        },
-        "areaServed": "Manchester, UK",
-        "description": "Premium eco-friendly professional cleaning services in Manchester. Specialising in end of tenancy, deep cleaning, Airbnb, office, and post-construction cleaning.",
-        "openingHours": ["Mo-Su 08:00-18:00"],
-        "sameAs": [
-          "https://www.facebook.com/cleaniqservices",
-          "https://www.instagram.com/cleaniqservices"
-        ],
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.9",
-          "reviewCount": "2000",
-          "bestRating": "5"
-        },
-        "review": [
+        "@graph": [
           {
-            "@type": "Review",
-            "author": "Samantha R",
-            "datePublished": "2026-04-12",
-            "reviewBody": "Fantastic service — reliable, meticulous and professional. Would highly recommend!",
-            "reviewRating": {
-              "@type": "Rating",
-              "ratingValue": "5",
+            "@type": "LocalBusiness",
+            "@id": "https://www.cleaniqservices.com#localbusiness",
+            "name": "CLEANIQ Services",
+            "url": "https://www.cleaniqservices.com",
+            "telephone": "+44 7752 476368",
+            "email": "info@cleaniqservices.com",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "First Floor, Swan Buildings, 20 Swan Street",
+              "addressLocality": "Manchester",
+              "postalCode": "M4 5JW",
+              "addressCountry": "GB"
+            },
+            "areaServed": "Manchester, UK",
+            "description": "Premium eco-friendly professional cleaning services in Manchester. Specialising in end of tenancy, deep cleaning, Airbnb, office, and post-construction cleaning.",
+            "openingHours": ["Mo-Su 08:00-18:00"],
+            "sameAs": [
+              "https://www.facebook.com/cleaniqservices",
+              "https://www.instagram.com/cleaniqservices"
+            ],
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.9",
+              "reviewCount": "2000",
+              "bestRating": "5"
+            },
+            "review": [
+              {
+                "@type": "Review",
+                "author": "Samantha R",
+                "datePublished": "2026-04-12",
+                "reviewBody": "Fantastic service — reliable, meticulous and professional. Would highly recommend!",
+                "reviewRating": {
+                  "@type": "Rating",
+                  "ratingValue": "5",
+                  "bestRating": "5"
+                }
+              }
+            ],
+            "priceRange": "££",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": "53.4845",
+              "longitude": "-2.2446"
+            },
+            "image": "https://www.cleaniqservices.com/preview.jpg"
+          },
+          {
+            "@type": "Service",
+            "@id": "https://www.cleaniqservices.com/pages/end-of-tenancy-cleaning-manchester",
+            "name": "End of Tenancy Cleaning",
+            "description": "Comprehensive end of tenancy cleaning for landlords and tenants in Manchester.",
+            "provider": {
+              "@id": "https://www.cleaniqservices.com#localbusiness"
+            },
+            "url": "https://www.cleaniqservices.com/pages/end-of-tenancy-cleaning-manchester",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.9",
+              "reviewCount": "2000",
+              "bestRating": "5"
+            }
+          },
+          {
+            "@type": "Service",
+            "@id": "https://www.cleaniqservices.com/pages/airbnb-cleaning-manchester",
+            "name": "Airbnb Turnover Cleaning",
+            "description": "Fast, reliable turnover cleans tailored for Airbnb hosts in Manchester.",
+            "provider": {
+              "@id": "https://www.cleaniqservices.com#localbusiness"
+            },
+            "url": "https://www.cleaniqservices.com/pages/airbnb-cleaning-manchester",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.9",
+              "reviewCount": "2000",
               "bestRating": "5"
             }
           }
-        ],
-        "priceRange": "££",
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": "53.4845",
-          "longitude": "-2.2446"
-        },
-        "image": "https://www.cleaniqservices.com/preview.jpg"
+        ]
       }
     </script>
   </head>
