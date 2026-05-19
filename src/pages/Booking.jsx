@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import LoadingOverlay from "../component/LoadingOverlay";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRegion } from "../context/RegionContext";
@@ -6,12 +6,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import {
   ChevronRight,
   ChevronLeft,
-  Calendar,
-  User,
-  CreditCard,
   Home as HomeIcon,
   Briefcase,
-  Trash2,
   Plus,
   Minus,
   CheckCircle2,
@@ -24,7 +20,6 @@ import {
   Search,
   Zap,
   Shield,
-  HelpCircle,
   AlertCircle,
   ArrowRight,
   Truck,
@@ -293,7 +288,7 @@ const Booking = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dynamicRates, setDynamicRates] = useState({});
   const [servicesList, setServicesList] = useState([]);
-  const [loadingRates, setLoadingRates] = useState(true);
+  const [, setLoadingRates] = useState(true);
   const [notification, setNotification] = useState(null);
 
 
@@ -430,6 +425,7 @@ const Booking = () => {
   // Pricing Logic - Comprehensive Engine
   useEffect(() => {
     if (!formData.serviceType) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTotalPrice(0);
       return;
     }
@@ -643,10 +639,10 @@ const Booking = () => {
         duration: formData.duration,
         extras: [
           ...Object.entries(formData.extras)
-            .filter(([_, q]) => q > 0)
+            .filter((entry) => entry[1] > 0)
             .map(([n, q]) => `${n} (x${q})`),
           ...Object.entries(formData.property)
-            .filter(([_, q]) => q > 0)
+            .filter((entry) => entry[1] > 0)
             .map(([n, q]) => `${n} (x${q})`),
           `Parking: ${formData.parking}`,
           `Entry: ${formData.keyAccess}`,
