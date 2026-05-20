@@ -20,7 +20,7 @@ import me2 from "../assets/image1.jpeg";
 import me3 from "../assets/Cleaniq services/4th Post.jpg";
 import airbnbImg from "../assets/airbnb_cleaning_service.png";
 import moveOutImg from "../assets/end_of_tenancy.png";
-import deep from "../assets/deepclean.jpg";
+import deep from "../assets/anton-y-bjqTUUw2Q-unsplash.jpg";
 const cleanKey = (str) => (str || "").toLowerCase().replace(/[^a-z0-9]/g, "").trim();
 
 const Services = () => {
@@ -265,6 +265,17 @@ const Services = () => {
               transition={{ duration: 0.8 }}
               className={`flex flex-col lg:flex-row gap-8 lg:gap-16 items-center p-5 md:p-12 rounded-[32px] md:rounded-[60px] glass overflow-hidden relative shadow-xl shadow-primary/5 ${i % 2 !== 0 ? "lg:flex-row-reverse" : ""}`}
             >
+              <div className="lg:w-1/2 w-full aspect-video md:aspect-4/3 rounded-[32px] md:rounded-[48px] relative overflow-hidden group shadow-2xl">
+                <img
+                  src={service.image}
+                  alt={service.title}
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                  width="1200"
+                  height="675"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors duration-700" />
+              </div>
               <div className="lg:w-1/2 space-y-6 md:8">
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
@@ -321,17 +332,7 @@ const Services = () => {
                 </div>
               </div>
 
-              <div className="lg:w-1/2 w-full aspect-video md:aspect-4/3 rounded-[32px] md:rounded-[48px] relative overflow-hidden group shadow-2xl">
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                  width="1200"
-                  height="675"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors duration-700" />
-              </div>
+              
             </motion.div>
           ))}
         </div>
