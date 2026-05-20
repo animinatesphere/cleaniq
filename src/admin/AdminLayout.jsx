@@ -128,7 +128,7 @@ const AdminLayout = () => {
             <input type="text" placeholder="Search..." className="bg-transparent border-none outline-none text-sm font-medium w-64 text-slate-700" />
           </div>
 
-          <div className="flex items-center gap-3 lg:gap-6 relative" ref={notifRef}>
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-6 relative" ref={notifRef}>
             <button 
               onClick={() => setIsNotifOpen(!isNotifOpen)}
               className={`relative p-2.5 rounded-xl border transition-all ${isNotifOpen ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
@@ -139,7 +139,7 @@ const AdminLayout = () => {
 
             {/* Notification Dropdown */}
             {isNotifOpen && (
-              <div className="absolute top-full right-0 mt-4 w-80 bg-white border border-slate-200 rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="absolute top-full right-0 mt-4 w-[85vw] sm:w-80 bg-white border border-slate-200 rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
                 <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                   <h3 className="font-black text-primary-dark text-sm">Notifications</h3>
                   <span className="text-[10px] font-black text-primary uppercase bg-primary/10 px-2 py-0.5 rounded-full">{notifications.length} New</span>
@@ -184,7 +184,7 @@ const AdminLayout = () => {
           </div>
         </header>
 
-        <main className="flex-1 p-6 lg:p-10 max-w-[1600px] mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 max-w-[1600px] mx-auto w-full">
           <Outlet />
         </main>
       </div>

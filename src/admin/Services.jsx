@@ -147,7 +147,7 @@ const ServicesManagement = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
       {/* Header */}
-      <div className="bg-white p-8 rounded-[40px] border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="bg-white p-6 md:p-8 rounded-[32px] md:rounded-[40px] border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
           <h2 className="text-3xl font-black text-primary-dark tracking-tight">Services & Pricing</h2>
           <p className="text-slate-500 font-medium mt-1">Manage all rates, rooms, and extra add-ons</p>
@@ -163,7 +163,7 @@ const ServicesManagement = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 border-b border-slate-200 pb-4">
+      <div className="flex flex-wrap gap-4 border-b border-slate-200 pb-4">
         {Object.keys(categories).map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-400 hover:text-primary hover:bg-primary/5'}`}>
             {tab} Services
@@ -179,7 +179,7 @@ const ServicesManagement = () => {
       )}
 
       {/* Add New Service for current Tab */}
-      <div className="bg-primary/5 p-8 rounded-[40px] border border-primary/10">
+      <div className="bg-primary/5 p-6 md:p-8 rounded-[32px] md:rounded-[40px] border border-primary/10">
         <h3 className="text-sm font-black text-primary uppercase tracking-[0.2em] mb-6 flex items-center gap-2"><Plus size={18}/> Add New {activeTab} Service</h3>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           <input type="text" placeholder="Name (e.g. Fridge Cleaning)" value={newFeature.name} onChange={(e) => setNewFeature({...newFeature, name: e.target.value})} className="p-4 rounded-2xl bg-white border border-slate-200 outline-none font-bold text-sm" />

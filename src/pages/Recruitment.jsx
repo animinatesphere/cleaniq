@@ -140,7 +140,7 @@ const Recruitment = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full p-8 md:p-12 text-center rounded-[48px] bg-slate-50 border border-slate-100 shadow-xl"
+          className="max-w-md w-full p-6 md:p-12 text-center rounded-[32px] md:rounded-[48px] bg-slate-50 border border-slate-100 shadow-xl"
         >
           <motion.div
             initial={{ scale: 0 }}
@@ -209,7 +209,7 @@ const Recruitment = () => {
         </motion.div>
 
         {/* Multi-step Form */}
-        <div className="bg-slate-50 rounded-[60px] p-8 md:p-16 border border-slate-100 shadow-sm relative overflow-hidden">
+        <div className="bg-slate-50 rounded-[32px] md:rounded-[60px] p-6 md:p-16 border border-slate-100 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]" />
 
           {/* Stepper Progress */}
@@ -220,7 +220,7 @@ const Recruitment = () => {
                   className={`h-2 rounded-full transition-all duration-700 ${step >= s ? "bg-primary" : "bg-slate-200"}`}
                 />
                 <p
-                  className={`text-[10px] font-black uppercase tracking-widest mt-4 ${step >= s ? "text-primary" : "text-slate-400"}`}
+                  className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest mt-4 ${step >= s ? "text-primary" : "text-slate-400"}`}
                 >
                   Step 0{s}
                 </p>
@@ -238,7 +238,7 @@ const Recruitment = () => {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-8"
                 >
-                  <div className="flex items-center gap-4 mb-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
                     <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
                       <User size={24} />
                     </div>
@@ -339,7 +339,7 @@ const Recruitment = () => {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-10"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
                       <Briefcase size={24} />
                     </div>
@@ -397,7 +397,7 @@ const Recruitment = () => {
                     </label>
                   </div>
 
-                  <div className="flex gap-4">
+                  <div className="flex flex-col-reverse sm:flex-row gap-4">
                     <button
                       type="button"
                       onClick={prevStep}
@@ -425,7 +425,7 @@ const Recruitment = () => {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-10"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
                       <FileText size={24} />
                     </div>
@@ -452,7 +452,7 @@ const Recruitment = () => {
                           }
                         />
                         <div
-                          className={`p-10 border-2 border-dashed rounded-[40px] flex flex-col items-center justify-center gap-4 transition-all ${formData.idDocument ? "border-primary bg-primary/5" : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"}`}
+                          className={`p-6 md:p-10 border-2 border-dashed rounded-[32px] md:rounded-[40px] flex flex-col items-center justify-center gap-4 transition-all ${formData.idDocument ? "border-primary bg-primary/5" : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"}`}
                         >
                           <div
                             className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${formData.idDocument ? "bg-white text-primary" : "bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary"}`}
@@ -503,7 +503,7 @@ const Recruitment = () => {
                             }
                           />
                           <div
-                            className={`p-10 border-2 border-dashed rounded-[40px] flex flex-col items-center justify-center gap-4 transition-all ${formData.cv ? "border-primary bg-primary/5" : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"}`}
+                            className={`p-6 md:p-10 border-2 border-dashed rounded-[32px] md:rounded-[40px] flex flex-col items-center justify-center gap-4 transition-all ${formData.cv ? "border-primary bg-primary/5" : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"}`}
                           >
                             <div
                               className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${formData.cv ? "bg-white text-primary" : "bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary"}`}
@@ -543,7 +543,7 @@ const Recruitment = () => {
                             }
                           />
                           <div
-                            className={`p-10 border-2 border-dashed rounded-[40px] flex flex-col items-center justify-center gap-4 transition-all ${formData.cv ? "border-primary bg-primary/5" : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"}`}
+                            className={`p-6 md:p-10 border-2 border-dashed rounded-[32px] md:rounded-[40px] flex flex-col items-center justify-center gap-4 transition-all ${formData.cv ? "border-primary bg-primary/5" : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"}`}
                           >
                             <div
                               className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${formData.cv ? "bg-white text-primary" : "bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary"}`}
@@ -580,7 +580,7 @@ const Recruitment = () => {
                     </p>
                   </div>
 
-                  <div className="flex gap-4">
+                  <div className="flex flex-col-reverse sm:flex-row gap-4">
                     <button
                       type="button"
                       onClick={prevStep}

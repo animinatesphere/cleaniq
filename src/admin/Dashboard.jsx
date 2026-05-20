@@ -97,8 +97,8 @@ const Dashboard = () => {
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Operations Table */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden flex flex-col">
-          <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-[32px] lg:rounded-[40px] shadow-sm overflow-hidden flex flex-col">
+          <div className="p-5 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
             <div>
               <h3 className="text-xl font-black text-primary-dark tracking-tight">Active Operations</h3>
               <p className="text-sm text-slate-500 font-medium">Real-time status monitor</p>
@@ -144,7 +144,7 @@ const Dashboard = () => {
         {/* CPanel Sidebar */}
         <div className="space-y-8">
           {/* System Pulse */}
-          <div className="bg-primary-dark p-8 rounded-[40px] text-white relative overflow-hidden shadow-2xl">
+          <div className="bg-primary-dark p-6 md:p-8 rounded-[32px] md:rounded-[40px] text-white relative overflow-hidden shadow-2xl">
             <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-full blur-3xl -mr-16 -mt-16" />
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
               <Activity size={20} className="text-secondary" /> System Health
@@ -172,7 +172,7 @@ const Dashboard = () => {
           </div>
 
           {/* Quick Tools */}
-          <div className="bg-white border border-slate-200 p-8 rounded-[40px] shadow-sm">
+          <div className="bg-white border border-slate-200 p-6 md:p-8 rounded-[32px] md:rounded-[40px] shadow-sm">
             <h3 className="text-lg font-black text-primary-dark mb-6">Marketing Tools</h3>
             <div className="grid grid-cols-2 gap-4">
               <button 

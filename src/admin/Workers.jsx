@@ -121,8 +121,8 @@ const Workers = () => {
       </div>
 
       {/* Workers Table */}
-      <div className="bg-white rounded-[40px] shadow-sm border border-slate-100 overflow-hidden">
-        <div className="p-6 md:p-8 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-50/50">
+      <div className="bg-white rounded-[32px] md:rounded-[40px] shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-5 md:p-8 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-50/50">
           <h2 className="text-lg font-black text-primary-dark">Staff Directory</h2>
           <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border border-slate-200 focus-within:border-primary/50 transition-all w-full md:w-80 shadow-sm">
             <Search size={18} className="text-slate-400" />
@@ -198,7 +198,7 @@ const Workers = () => {
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-primary-dark/60 backdrop-blur-sm" onClick={() => setShowAddModal(false)}></div>
-          <div className="relative bg-white rounded-[40px] p-8 w-full max-w-lg shadow-2xl border-4 border-white animate-in zoom-in-95 duration-200">
+          <div className="relative bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-8 w-full max-w-lg shadow-2xl border-4 border-white animate-in zoom-in-95 duration-200">
             <button onClick={() => setShowAddModal(false)} className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-500 transition-all"><X size={20}/></button>
             <div className="flex items-center gap-4 mb-8">
               <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center"><Briefcase size={24}/></div>
@@ -226,7 +226,7 @@ const Workers = () => {
       {showCredsModal && newCredentials && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-primary-dark/80 backdrop-blur-md" onClick={() => setShowCredsModal(false)}></div>
-          <div className="relative bg-white rounded-[40px] p-10 w-full max-w-md shadow-2xl border-4 border-white animate-in zoom-in-95 duration-200 text-center text-balance">
+          <div className="relative bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-10 w-full max-w-md shadow-2xl border-4 border-white animate-in zoom-in-95 duration-200 text-center text-balance">
             <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-6"><ShieldCheck size={40}/></div>
             <h3 className="text-2xl font-black text-primary-dark tracking-tight mb-2">Worker Added Successfully</h3>
             <p className="text-slate-500 font-medium text-sm mb-8">Share these temporary credentials with the worker so they can log into the CleanIQ App.</p>

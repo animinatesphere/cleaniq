@@ -122,7 +122,7 @@ const Applicants = () => {
       )}
 
       {/* Header Info */}
-      <div className="bg-white p-8 rounded-[40px] border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="bg-white p-6 md:p-8 rounded-[32px] md:rounded-[40px] border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
           <h1 className="text-3xl font-black text-primary-dark tracking-tighter">Recruitment Command</h1>
           <p className="text-slate-400 font-bold text-sm uppercase tracking-widest mt-1">Manage Your Growing Team</p>
@@ -227,9 +227,9 @@ const Applicants = () => {
       {selectedApplicant && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md" onClick={() => setSelectedApplicant(null)} />
-          <div className="relative w-full max-w-2xl bg-white rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border-4 border-white">
+          <div className="relative w-full max-w-2xl bg-white rounded-[32px] md:rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border-4 border-white">
             
-            <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <div className="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center"><UserCheck size={24}/></div>
                 <div>
@@ -240,7 +240,7 @@ const Applicants = () => {
               <button onClick={() => setSelectedApplicant(null)} className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors"><X size={20} /></button>
             </div>
             
-            <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
+            <div className="p-6 md:p-8 space-y-8 max-h-[70vh] overflow-y-auto">
               {isEditing ? (
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
@@ -293,7 +293,7 @@ const Applicants = () => {
                     </div>
                   </div>
 
-                  <div className="p-8 rounded-[40px] bg-slate-50 border border-slate-100">
+                  <div className="p-6 md:p-8 rounded-[32px] md:rounded-[40px] bg-slate-50 border border-slate-100">
                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Role Experience / Motivation</h4>
                     <p className="text-sm font-bold text-slate-600 leading-relaxed">{selectedApplicant.experience}</p>
                   </div>
@@ -314,7 +314,7 @@ const Applicants = () => {
               )}
             </div>
 
-            <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex gap-4">
+            <div className="p-6 md:p-8 border-t border-slate-100 bg-slate-50/50 flex gap-4">
               {isEditing ? (
                 <>
                   <button onClick={() => setIsEditing(false)} className="flex-1 py-5 rounded-3xl bg-white border border-slate-200 text-xs font-black text-slate-500 uppercase tracking-widest">Discard</button>
