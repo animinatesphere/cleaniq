@@ -17,7 +17,6 @@ import {
   ShieldCheck,
   Heart,
   Star,
-  Search,
   Zap,
   Shield,
   AlertCircle,
@@ -33,9 +32,9 @@ import {
 } from "lucide-react";
 // Stripe will be loaded lazily to reduce initial JS bundle size
 import { Helmet } from "react-helmet-async";
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import StripePayment from '../component/StripePayment';
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import StripePayment from "../component/StripePayment";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -114,14 +113,14 @@ const serviceOptions = [
 
 // Fallback extras to show when the services API is unavailable
 const DEFAULT_EXTRAS = [
-  { _id: 'fallback-american-fridge', name: 'American fridge freeze', rate: 15 },
-  { _id: 'fallback-carpet-cleaning', name: 'Carpet(s) Cleaning', rate: 30 },
-  { _id: 'fallback-double-oven', name: 'Double Oven Cleaning', rate: 20 },
-  { _id: 'fallback-fridge-freezer', name: 'Fridge and freezer', rate: 18 },
-  { _id: 'fallback-range-oven', name: 'Range Oven Cleaning', rate: 25 },
-  { _id: 'fallback-single-fridge', name: 'Single fridge', rate: 10 },
-  { _id: 'fallback-single-oven', name: 'Single Oven Cleaning', rate: 15 },
-  { _id: 'fallback-venetian-blinds', name: 'Venetian Blinds', rate: 5 },
+  { _id: "fallback-american-fridge", name: "American fridge freeze", rate: 15 },
+  { _id: "fallback-carpet-cleaning", name: "Carpet(s) Cleaning", rate: 30 },
+  { _id: "fallback-double-oven", name: "Double Oven Cleaning", rate: 20 },
+  { _id: "fallback-fridge-freezer", name: "Fridge and freezer", rate: 18 },
+  { _id: "fallback-range-oven", name: "Range Oven Cleaning", rate: 25 },
+  { _id: "fallback-single-fridge", name: "Single fridge", rate: 10 },
+  { _id: "fallback-single-oven", name: "Single Oven Cleaning", rate: 15 },
+  { _id: "fallback-venetian-blinds", name: "Venetian Blinds", rate: 5 },
 ];
 
 const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
@@ -250,7 +249,11 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   );
 };
 
-const cleanKey = (str) => (str || "").toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+const cleanKey = (str) =>
+  (str || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
 
 const Booking = () => {
   const { region } = useRegion();
@@ -259,8 +262,7 @@ const Booking = () => {
 
   const [step, setStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [addressSuggestions, setAddressSuggestions] = useState([]);
+
   const [bookedDates, setBookedDates] = useState([]);
   const [bookedSlotsByDate, setBookedSlotsByDate] = useState({});
 
@@ -292,7 +294,6 @@ const Booking = () => {
   const [servicesList, setServicesList] = useState([]);
   const [, setLoadingRates] = useState(true);
   const [notification, setNotification] = useState(null);
-
 
   const showNotification = (message, type = "error") => {
     setNotification({ message, type });
@@ -568,55 +569,6 @@ const Booking = () => {
     { id: 4, title: "Payment" },
   ];
 
-  // Address Suggestions Logic
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      if (formData.address.length < 3) {
-        setAddressSuggestions([]);
-        return;
-      }
-      try {
-        const ukBbox =
-          "-7.57216793459,49.959999905,1.68153079591,58.6350001085";
-        const ngBbox = "2.6917,4.2406,14.6800,13.8659";
-        const response = await fetch(
-          `https://photon.komoot.io/api/?q=${encodeURIComponent(formData.address)}&limit=8&lang=en&bbox=${region.id === "UK" ? ukBbox : ngBbox}`,
-        );
-        if (!response.ok) {
-          setAddressSuggestions([]);
-          return;
-        }
-
-        const data = await response.json();
-        if (!data.features || data.features.length === 0) {
-          setAddressSuggestions([]);
-          return;
-        }
-
-        const formatted = data.features
-          .map((f) => {
-            const { name, street, housenumber, city, postcode, state } =
-              f.properties;
-            return [housenumber, street || name, city, postcode, state]
-              .filter(Boolean)
-              .join(", ");
-          })
-          .filter(Boolean);
-        setAddressSuggestions([...new Set(formatted)]);
-      } catch (err) {
-        console.error("Suggestions fetch error:", err);
-        setAddressSuggestions([]); // IMPORTANT: Clear old suggestions if it fails so it doesn't stay open
-      }
-    };
-    const timeoutId = setTimeout(fetchSuggestions, 400); // Increased debounce to 400ms to reduce API load
-    return () => clearTimeout(timeoutId);
-  }, [formData.address, region.id]);
-
-  const selectAddress = (addr) => {
-    setFormData({ ...formData, address: addr });
-    setShowSuggestions(false);
-  };
-
   const handlePaymentSuccess = async (paymentIntent) => {
     if (!formData.serviceType) {
       console.error("Submission Blocked: Service type is missing.");
@@ -773,55 +725,21 @@ const Booking = () => {
                         </div>
                         <div className="space-y-4">
                           <div className="relative group">
-                            <Search
+                            <MapPin
                               className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors"
                               size={20}
                             />
                             <input
                               className="w-full p-6 pl-14 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all"
-                              placeholder="Search address..."
+                              placeholder="Enter full address"
                               value={formData.address}
                               onChange={(e) => {
                                 setFormData({
                                   ...formData,
                                   address: e.target.value,
                                 });
-                                setShowSuggestions(true);
                               }}
-                              onFocus={() => setShowSuggestions(true)}
                             />
-                            <AnimatePresence>
-                              {showSuggestions &&
-                                addressSuggestions.length > 0 && (
-                                  <>
-                                    <div
-                                      className="fixed inset-0 z-40"
-                                      onClick={() => setShowSuggestions(false)}
-                                    />
-                                    <motion.div
-                                      initial={{ opacity: 0, y: 5 }}
-                                      animate={{ opacity: 1, y: 0 }}
-                                      className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 max-h-64 overflow-y-auto"
-                                    >
-                                      {addressSuggestions.map((addr, i) => (
-                                        <button
-                                          key={i}
-                                          onMouseDown={(e) => {
-                                            e.preventDefault();
-                                            selectAddress(addr);
-                                          }}
-                                          onClick={() => selectAddress(addr)}
-                                          className="w-full text-left p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors last:border-b-0"
-                                        >
-                                          <p className="text-xs font-bold text-primary-dark">
-                                            {addr}
-                                          </p>
-                                        </button>
-                                      ))}
-                                    </motion.div>
-                                  </>
-                                )}
-                            </AnimatePresence>
                           </div>
                           <div className="grid md:grid-cols-2 gap-4">
                             <input
@@ -1083,7 +1001,10 @@ const Booking = () => {
                             </p>
                           </div>
                           <div className="grid gap-3 mt-6">
-                            {(servicesList.length ? servicesList : DEFAULT_EXTRAS)
+                            {(servicesList.length
+                              ? servicesList
+                              : DEFAULT_EXTRAS
+                            )
                               .filter((s) => {
                                 const baseServices = [
                                   ...serviceOptions.map((o) => o.id),
@@ -1477,7 +1398,9 @@ const Booking = () => {
                             {formData.serviceType &&
                               (() => {
                                 const rawRate =
-                                  dynamicRates[cleanKey(formData.serviceType)] ||
+                                  dynamicRates[
+                                    cleanKey(formData.serviceType)
+                                  ] ||
                                   (region.id === "UK"
                                     ? formData.serviceType === "Deep Clean"
                                       ? 24.9
