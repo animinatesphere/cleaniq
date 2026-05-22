@@ -35,15 +35,15 @@ const About = () => {
   return (
     <div className="pt-32 pb-20 bg-white min-h-screen overflow-x-hidden">
       <Helmet>
-        <title>About Us | CLEANIQ Services Manchester</title>
+        <title>About Us | Cleaniq Services Manchester</title>
         <meta
           name="description"
-          content="CLEANIQ Services — eco-friendly cleaning in Manchester. Learn about our mission, values, and commitment to professional, vetted cleaners."
+          content="Cleaniq Services — eco-friendly cleaning in Manchester. Learn about our mission, values, and commitment to professional, vetted cleaners."
         />
         <link rel="canonical" href="https://www.cleaniqservices.com/about" />
         <meta
           property="og:title"
-          content={"About Us | CLEANIQ Services Manchester"}
+          content={"About Us | Cleaniq Services Manchester"}
         />
       </Helmet>
       {/* Hero Section */}

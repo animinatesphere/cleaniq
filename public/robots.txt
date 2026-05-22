@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://cleaniqservices.com/sitemap.xml
+# Disallow admin routes from indexing
+Disallow: /admin/
+Disallow: /admin/*
+
+Sitemap: https://www.cleaniqservices.com/sitemap.xml

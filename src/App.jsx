@@ -12,6 +12,7 @@ import Recruitment from './pages/Recruitment';
 import Services from './pages/Services';
 import Contact from './pages/Contact';
 import ServiceDetail from './pages/ServiceDetail';
+import LocationDetail from './pages/LocationDetail';
 
 // Admin Importsddhdhdhdhhdh
 import AdminLayout from './admin/AdminLayout';
@@ -45,6 +46,7 @@ function App() {
           <Route path="/services" element={<Services />} />
           <Route path="/pages/contact" element={<Contact />} />
           <Route path="/pages/:serviceSlug" element={<ServiceDetail />} />
+          <Route path="/locations/:area" element={<LocationDetail />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>

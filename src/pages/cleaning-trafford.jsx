@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 const Trafford = () => (
   <div className="pt-32 pb-20 min-h-screen bg-white">
     <Helmet>
-      <title>Cleaning Services Trafford | Domestic & Office — CLEANIQ</title>
+      <title>Cleaning Services Trafford | Domestic & Office — Cleaniq</title>
       <meta
         name="description"
         content="Trafford cleaning specialists — residential, commercial and end-of-tenancy cleaning. Book online or get a free quote."

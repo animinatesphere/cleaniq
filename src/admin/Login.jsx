@@ -50,7 +50,7 @@ const Login = ({ onLogin }) => {
       >
         <div className="bg-white rounded-[60px] p-8 md:p-12 shadow-2xl relative z-10 border-8 border-white/10">
           <div className="text-center mb-10">
-            <img src={logo} alt="CLEANIQ" className="h-16 mx-auto mb-8" />
+            <img src={logo} alt="Cleaniq" className="h-16 mx-auto mb-8" />
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-4">
               Secure Admin Access
             </div>

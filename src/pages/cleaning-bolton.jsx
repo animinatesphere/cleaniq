@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 const Bolton = () => (
   <div className="pt-32 pb-20 min-h-screen bg-white">
     <Helmet>
-      <title>Cleaning Services Bolton | Domestic & Commercial — CLEANIQ</title>
+      <title>Cleaning Services Bolton | Domestic & Commercial — Cleaniq</title>
       <meta
         name="description"
         content="Local professional cleaning services in Bolton — domestic, office, end-of-tenancy and Airbnb turnovers. Book online or get a free quote."

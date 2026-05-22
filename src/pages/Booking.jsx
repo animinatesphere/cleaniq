@@ -662,7 +662,7 @@ const Booking = () => {
   return (
     <div className="pt-32 min-h-screen bg-[#F8FAFC] pb-32">
       <Helmet>
-        <title>Book Cleaning — CLEANIQ Services</title>
+        <title>Book Cleaning — Cleaniq Services</title>
         <meta
           name="description"
           content="Book professional cleaning services in Manchester. Quick online booking for residential, deep clean, Airbnb turnovers, and office cleaning."
@@ -670,7 +670,7 @@ const Booking = () => {
         <link rel="canonical" href="https://www.cleaniqservices.com/booking" />
         <meta
           property="og:title"
-          content={"Book Cleaning — CLEANIQ Services"}
+          content={"Book Cleaning — Cleaniq Services"}
         />
       </Helmet>
       {isSubmitting && <LoadingOverlay message="Confirming..." />}

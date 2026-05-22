@@ -24,10 +24,10 @@ const Contact = () => {
   return (
     <div className="pt-32 pb-20 bg-slate-50 min-h-screen">
       <Helmet>
-        <title>Contact Us | CLEANIQ Services Manchester</title>
+        <title>Contact Us | Cleaniq Services Manchester</title>
         <meta
           name="description"
-          content="Contact CLEANIQ Services in Manchester for a free cleaning quote. We offer end of tenancy, deep cleaning, Airbnb, and office cleaning. Call +44 7752 476368 or email us today."
+          content="Contact Cleaniq Services in Manchester for a free cleaning quote. We offer end of tenancy, deep cleaning, Airbnb, and office cleaning. Call +44 7752 476368 or email us today."
         />
         <link
           rel="canonical"
@@ -35,7 +35,7 @@ const Contact = () => {
         />
         <meta
           property="og:title"
-          content={"Contact Us | CLEANIQ Services Manchester"}
+          content={"Contact Us | Cleaniq Services Manchester"}
         />
       </Helmet>
       <div className="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">

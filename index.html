@@ -16,67 +16,12 @@
       gtag("js", new Date());
       gtag("config", "G-L2675PD0N7");
     </script>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@graph": [
-          {
-            "@type": "Service",
-            "serviceType": "End of Tenancy Cleaning",
-            "name": "End of Tenancy Cleaning Manchester",
-            "description": "Comprehensive move-in/move-out cleaning with a deposit-back guarantee.",
-            "provider": {
-              "@type": "LocalBusiness",
-              "name": "CLEANIQ Services",
-              "url": "https://www.cleaniqservices.com"
-            },
-            "url": "https://www.cleaniqservices.com/pages/end-of-tenancy-cleaning-manchester"
-          },
-          {
-            "@type": "Service",
-            "serviceType": "Deep Cleaning",
-            "name": "Deep Cleaning Manchester",
-            "description": "Specialized deep cleaning services for a total refresh.",
-            "provider": {
-              "@type": "LocalBusiness",
-              "name": "CLEANIQ Services",
-              "url": "https://www.cleaniqservices.com"
-            },
-            "url": "https://www.cleaniqservices.com/pages/deep-cleaning-manchester"
-          },
-          {
-            "@type": "Service",
-            "serviceType": "Airbnb Cleaning",
-            "name": "Airbnb Cleaning Manchester",
-            "description": "Professional turnover services for short-let rentals.",
-            "provider": {
-              "@type": "LocalBusiness",
-              "name": "CLEANIQ Services",
-              "url": "https://www.cleaniqservices.com"
-            },
-            "url": "https://www.cleaniqservices.com/pages/airbnb-cleaning-manchester"
-          },
-          {
-            "@type": "Service",
-            "serviceType": "Office Cleaning",
-            "name": "Office Cleaning Manchester",
-            "description": "Professional office and commercial cleaning services.",
-            "provider": {
-              "@type": "LocalBusiness",
-              "name": "CLEANIQ Services",
-              "url": "https://www.cleaniqservices.com"
-            },
-            "url": "https://www.cleaniqservices.com/pages/office-cleaning-manchester"
-          }
-        ]
-      } 
-    </script>
+    <!-- Deprecated standalone Service schemas. Now merged into the @graph below for proper local SEO correlation -->
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="./public/logo DP2.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
-      Professional Cleaning Services in Manchester | Domestic, Office & Airbnb
-      Cleaning
+      Cleaniq SERVICES | Premium Eco-Friendly House & Office Cleaners in Manchester
     </title>
     <meta
       name="description"
@@ -88,14 +33,14 @@
     <meta name="theme-color" content="#005B41" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="CLEANIQ" />
+    <meta name="apple-mobile-web-app-title" content="Cleaniq" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.cleaniqservices.com" />
     <meta
       property="og:title"
-      content="CLEANIQ SERVICES | Premium Eco-Friendly House & Office Cleaners"
+      content="Cleaniq SERVICES | Premium Eco-Friendly House & Office Cleaners in Manchester"
     />
     <meta
       property="og:description"
@@ -120,7 +65,7 @@
     <meta name="twitter:url" content="https://www.cleaniqservices.com" />
     <meta
       name="twitter:title"
-      content="Professional Cleaning Services in Manchester | Domestic, Office & Airbnb Cleaning"
+      content="Cleaniq SERVICES | Premium Eco-Friendly House & Office Cleaners in Manchester"
     />
     <meta
       name="twitter:description"
@@ -139,7 +84,7 @@
           {
             "@type": "LocalBusiness",
             "@id": "https://www.cleaniqservices.com#localbusiness",
-            "name": "CLEANIQ Services",
+            "name": "Cleaniq Services",
             "url": "https://www.cleaniqservices.com",
             "telephone": "+44 7752 476368",
             "email": "info@cleaniqservices.com",
@@ -166,7 +111,7 @@
             "review": [
               {
                 "@type": "Review",
-                "author": "Samantha R",
+                "author": { "@type": "Person", "name": "Samantha R" },
                 "datePublished": "2026-04-12",
                 "reviewBody": "Fantastic service — reliable, meticulous and professional. Would highly recommend!",
                 "reviewRating": {
@@ -187,8 +132,9 @@
           {
             "@type": "Service",
             "@id": "https://www.cleaniqservices.com/pages/end-of-tenancy-cleaning-manchester",
-            "name": "End of Tenancy Cleaning",
-            "description": "Comprehensive end of tenancy cleaning for landlords and tenants in Manchester.",
+            "serviceType": "End of Tenancy Cleaning",
+            "name": "End of Tenancy Cleaning Manchester",
+            "description": "Comprehensive move-in/move-out cleaning with a deposit-back guarantee.",
             "provider": {
               "@id": "https://www.cleaniqservices.com#localbusiness"
             },
@@ -202,13 +148,48 @@
           },
           {
             "@type": "Service",
+            "@id": "https://www.cleaniqservices.com/pages/deep-cleaning-manchester",
+            "serviceType": "Deep Cleaning",
+            "name": "Deep Cleaning Manchester",
+            "description": "Specialized deep cleaning services for a total refresh.",
+            "provider": {
+              "@id": "https://www.cleaniqservices.com#localbusiness"
+            },
+            "url": "https://www.cleaniqservices.com/pages/deep-cleaning-manchester",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.9",
+              "reviewCount": "2000",
+              "bestRating": "5"
+            }
+          },
+          {
+            "@type": "Service",
             "@id": "https://www.cleaniqservices.com/pages/airbnb-cleaning-manchester",
-            "name": "Airbnb Turnover Cleaning",
+            "serviceType": "Airbnb Cleaning",
+            "name": "Airbnb Cleaning Manchester",
             "description": "Fast, reliable turnover cleans tailored for Airbnb hosts in Manchester.",
             "provider": {
               "@id": "https://www.cleaniqservices.com#localbusiness"
             },
             "url": "https://www.cleaniqservices.com/pages/airbnb-cleaning-manchester",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.9",
+              "reviewCount": "2000",
+              "bestRating": "5"
+            }
+          },
+          {
+            "@type": "Service",
+            "@id": "https://www.cleaniqservices.com/pages/office-cleaning-manchester",
+            "serviceType": "Office Cleaning",
+            "name": "Office Cleaning Manchester",
+            "description": "Professional office and commercial cleaning services.",
+            "provider": {
+              "@id": "https://www.cleaniqservices.com#localbusiness"
+            },
+            "url": "https://www.cleaniqservices.com/pages/office-cleaning-manchester",
             "aggregateRating": {
               "@type": "AggregateRating",
               "ratingValue": "4.9",

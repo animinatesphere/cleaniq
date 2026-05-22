@@ -6,7 +6,7 @@ const Stockport = () => (
   <div className="pt-32 pb-20 min-h-screen bg-white">
     <Helmet>
       <title>
-        Cleaning Services Stockport | Domestic & Commercial — CLEANIQ
+        Cleaning Services Stockport | Domestic & Commercial — Cleaniq
       </title>
       <meta
         name="description"

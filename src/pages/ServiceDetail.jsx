@@ -12,7 +12,7 @@ import {
 
 const SERVICES_MAP = {
   "end-of-tenancy-cleaning-manchester": {
-    title: "End of Tenancy Cleaning Manchester | CLEANIQ Services",
+    title: "End of Tenancy Cleaning Manchester | Cleaniq Services",
     meta: "Professional end of tenancy cleaning in Manchester. Fully guaranteed, eco-friendly, and landlord-approved. Book vetted cleaners online in 60 seconds. Call +44 7752 476368.",
     heading: "Professional End of Tenancy Cleaning in Manchester",
     tagline: "Landlord-Approved & Fully Guaranteed Move-Out Cleaning",
@@ -26,8 +26,8 @@ const SERVICES_MAP = {
     ],
   },
   "deep-cleaning-manchester": {
-    title: "Deep Cleaning Services Manchester | CLEANIQ Services",
-    meta: "One-off deep cleaning for homes and offices in Manchester. Thorough, eco-friendly, and affordable. Book expert deep cleaners online today with CLEANIQ.",
+    title: "Deep Cleaning Services Manchester | Cleaniq Services",
+    meta: "One-off deep cleaning for homes and offices in Manchester. Thorough, eco-friendly, and affordable. Book expert deep cleaners online today with Cleaniq.",
     heading: "Premium One-Off Deep Cleaning Services in Manchester",
     tagline: "Thorough, Eco-Friendly, and Meticulous Refresh Cleans",
     description:
@@ -41,7 +41,7 @@ const SERVICES_MAP = {
   },
   "airbnb-cleaning-manchester": {
     title: "Airbnb Cleaning Manchester | Short-Let Property Cleaners",
-    meta: "Reliable Airbnb and short-let cleaning in Manchester. Fast turnarounds, guest-ready results. Book professional Airbnb cleaners with CLEANIQ Services.",
+    meta: "Reliable Airbnb and short-let cleaning in Manchester. Fast turnarounds, guest-ready results. Book professional Airbnb cleaners with Cleaniq Services.",
     heading: "Five-Star Airbnb & Short-Let Property Cleaning Manchester",
     tagline: "Fast Turnarounds, Guest-Ready Results & Pristine Linen Care",
     description:
@@ -54,8 +54,8 @@ const SERVICES_MAP = {
     ],
   },
   "office-cleaning-manchester": {
-    title: "Office Cleaning Manchester | Commercial Cleaners | CLEANIQ",
-    meta: "Professional office and commercial cleaning services in Manchester. Flexible schedules, eco-friendly products. Get a free quote from CLEANIQ Services today.",
+    title: "Office Cleaning Manchester | Commercial Cleaners | Cleaniq",
+    meta: "Professional office and commercial cleaning services in Manchester. Flexible schedules, eco-friendly products. Get a free quote from Cleaniq Services today.",
     heading: "Professional Office & Commercial Cleaning in Manchester",
     tagline: "Flexible Corporate Schedules & Spotless Productive Workplaces",
     description:
@@ -68,8 +68,8 @@ const SERVICES_MAP = {
     ],
   },
   "post-construction-cleaning-manchester": {
-    title: "Post-Construction Cleaning Manchester | CLEANIQ Services",
-    meta: "Expert post-construction and builders cleaning in Manchester. Dust removal, debris clearance, and final handover cleans. Book CLEANIQ Services today.",
+    title: "Post-Construction Cleaning Manchester | Cleaniq Services",
+    meta: "Expert post-construction and builders cleaning in Manchester. Dust removal, debris clearance, and final handover cleans. Book Cleaniq Services today.",
     heading: "Expert Post-Construction & Builders Cleaning Manchester",
     tagline:
       "Industrial Dust Removal, Paint Spot Cleaning & Final Handover Cleans",
