@@ -66,6 +66,11 @@ router.put('/:id', async (req, res) => {
 // Delete a service
 router.delete('/:id', async (req, res) => {
   try {
+    // Safety check to prevent 500 CastError on invalid ObjectIds
+    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.json({ message: 'Fallback pseudo-service ignored' });
+    }
+
     const service = await Service.findByIdAndDelete(req.params.id);
     if (!service) return res.status(404).json({ message: 'Service not found' });
     res.json({ message: 'Service deleted successfully' });

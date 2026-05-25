@@ -11,6 +11,12 @@ import {
   ShieldCheck
 } from "lucide-react";
 
+import deepcleanImg from "../assets/deepclean.jpg";
+import residentialImg from "../assets/residential.jpg";
+import officeImg from "../assets/office.jpg";
+import bento1Img from "../assets/bento1.jpg";
+import grid1Img from "../assets/grid1.jpg";
+
 const LOCATIONS_MAP = {
   "didsbury": {
     name: "Didsbury",
@@ -132,6 +138,19 @@ const LocationDetail = () => {
         {/* Content Section */}
         <div className="grid md:grid-cols-3 gap-8 items-start">
           <div className="md:col-span-2 space-y-6">
+            {/* Visual Image Grid */}
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="col-span-2 h-64 md:h-80 rounded-[32px] overflow-hidden group">
+                <img src={deepcleanImg} alt="Deep Cleaning" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              </div>
+              <div className="h-48 md:h-64 rounded-[24px] overflow-hidden group">
+                <img src={residentialImg} alt="Residential Cleaning" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              </div>
+              <div className="h-48 md:h-64 rounded-[24px] overflow-hidden group">
+                <img src={officeImg} alt="Office Cleaning" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              </div>
+            </div>
+
             <div className="bg-white border border-slate-200 rounded-[36px] p-8 md:p-10 shadow-sm space-y-6">
               <h2 className="text-2xl font-black text-primary-dark">
                 About Our {locationData.name} Services
@@ -139,6 +158,15 @@ const LocationDetail = () => {
               <p className="text-slate-600 font-medium leading-relaxed">
                 {locationData.description}
               </p>
+              
+              <div className="grid grid-cols-2 gap-4 my-8">
+                <div className="h-40 rounded-2xl overflow-hidden group">
+                  <img src={bento1Img} alt="Cleaning Team" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                </div>
+                <div className="h-40 rounded-2xl overflow-hidden group">
+                  <img src={grid1Img} alt="Spotless Results" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                </div>
+              </div>
               
               <div className="h-px bg-slate-100 w-full my-8" />
               
