@@ -214,7 +214,6 @@ const Workers = () => {
               <input required type="tel" placeholder="Phone Number" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="w-full p-4 rounded-2xl bg-slate-50 border-none font-bold text-sm focus:ring-2 focus:ring-primary/20 outline-none" />
               <select value={formData.region} onChange={(e) => setFormData({...formData, region: e.target.value})} className="w-full p-4 rounded-2xl bg-slate-50 border-none font-bold text-sm focus:ring-2 focus:ring-primary/20 outline-none">
                 <option value="UK">United Kingdom</option>
-                <option value="NG">Nigeria</option>
               </select>
               <button type="submit" className="w-full py-4 mt-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform">Generate Credentials</button>
             </form>

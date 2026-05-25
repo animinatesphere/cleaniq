@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Lock, User, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
-import logo from "../assets/lOGO.png";
+import { motion, AnimatePresence } from 'framer-motion';
+import { Lock, User, ShieldCheck, ArrowRight, AlertCircle, Sparkles } from 'lucide-react';
+import logo from "../assets/logo DP.jpg";
+import officeImg from "../assets/office.jpg"; // Background for the split screen
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
@@ -38,82 +39,160 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-primary-dark flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[120px] -mr-64 -mt-64" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] -ml-64 -mb-64" />
+    <div className="min-h-screen bg-slate-50 flex overflow-hidden font-sans">
+      
+      {/* Left Panel - Visuals (Hidden on Mobile) */}
+      <div className="hidden lg:flex w-1/2 relative flex-col justify-between p-16">
+        <img 
+          src={officeImg} 
+          alt="Cleaniq Office" 
+          className="absolute inset-0 w-full h-full object-cover" 
+        />
+        {/* Modern dark/green overlay */}
+        <div className="absolute inset-0 bg-primary-dark/80 backdrop-blur-[2px] mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-t from-primary-dark via-primary-dark/50 to-transparent" />
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full"
-      >
-        <div className="bg-white rounded-[60px] p-8 md:p-12 shadow-2xl relative z-10 border-8 border-white/10">
-          <div className="text-center mb-10">
-            <img src={logo} alt="Cleaniq" className="h-16 mx-auto mb-8" />
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-4">
-              Secure Admin Access
+        <div className="relative z-10 bg-white p-4 rounded-3xl inline-block shadow-2xl">
+          <img src={logo} alt="Cleaniq" className="h-12 object-contain" />
+        </div>
+
+        <div className="relative z-10 space-y-6 max-w-xl">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md text-white text-xs font-black uppercase tracking-widest"
+          >
+            <Sparkles size={14} className="text-secondary" />
+            Admin Operations Portal
+          </motion.div>
+          
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.1]"
+          >
+            Streamlining <br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-emerald-200">
+              Professional Cleaning
+            </span>
+          </motion.h1>
+          
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-lg font-medium text-white/70 max-w-md leading-relaxed"
+          >
+            Manage bookings, workers, clients, and pricing from a single secure dashboard built for Manchester's top cleaning service.
+          </motion.p>
+        </div>
+      </div>
+
+      {/* Right Panel - Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12 relative bg-white">
+        {/* Subtle Background Glows */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[100px] -mr-48 -mt-48 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] -ml-48 -mb-48 pointer-events-none" />
+
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="max-w-md w-full relative z-10"
+        >
+          {/* Mobile Logo Only */}
+          <div className="lg:hidden text-center mb-10">
+            <div className="bg-white p-4 rounded-3xl inline-block shadow-sm mb-6">
+              <img src={logo} alt="Cleaniq" className="h-10 object-contain mix-blend-multiply" />
             </div>
-            <h2 className="text-3xl font-black text-primary-dark tracking-tighter">Welcome Back.</h2>
+          </div>
+
+          <div className="mb-10">
+            <h2 className="text-4xl font-black text-primary-dark tracking-tighter mb-3">Welcome Back</h2>
+            <p className="text-slate-500 font-medium">Please enter your credentials to access the admin operations center.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="p-4 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center gap-3 text-sm font-bold"
-              >
-                <AlertCircle size={18} />
-                {error}
-              </motion.div>
-            )}
+            <AnimatePresence>
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-4 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center gap-3 text-sm font-bold">
+                    <AlertCircle size={18} className="shrink-0" />
+                    {error}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Username</label>
-              <div className="relative">
-                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <div className="space-y-2 group">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-2 transition-colors group-focus-within:text-primary">
+                Administrator ID
+              </label>
+              <div className="relative flex items-center">
+                <User className="absolute left-5 text-slate-400 group-focus-within:text-primary transition-colors" size={20} />
                 <input 
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="cleaniqadmin"
-                  className="w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent focus:border-primary focus:bg-white rounded-[24px] outline-none font-bold text-primary-dark transition-all"
+                  placeholder="admin@cleaniq"
+                  className="w-full pl-14 pr-6 py-4 bg-slate-50 border-2 border-slate-100 focus:border-primary/30 focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,91,65,0.05)] rounded-[20px] outline-none font-bold text-primary-dark transition-all"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <div className="space-y-2 group">
+              <div className="flex justify-between items-center ml-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest transition-colors group-focus-within:text-primary">
+                  Password
+                </label>
+              </div>
+              <div className="relative flex items-center">
+                <Lock className="absolute left-5 text-slate-400 group-focus-within:text-primary transition-colors" size={20} />
                 <input 
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-transparent focus:border-primary focus:bg-white rounded-[24px] outline-none font-bold text-primary-dark transition-all"
+                  className="w-full pl-14 pr-6 py-4 bg-slate-50 border-2 border-slate-100 focus:border-primary/30 focus:bg-white focus:shadow-[0_0_0_4px_rgba(0,91,65,0.05)] rounded-[20px] outline-none font-bold text-primary-dark transition-all"
                   required
                 />
               </div>
             </div>
 
-            <button 
-              type="submit"
-              disabled={loading}
-              className="w-full btn-primary py-5 text-lg group shadow-xl shadow-primary/20"
-            >
-              {loading ? 'Authenticating...' : 'Sign In to Dashboard'}
-              {!loading && <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />}
-            </button>
+            <div className="pt-2">
+              <button 
+                type="submit"
+                disabled={loading}
+                className="w-full relative overflow-hidden bg-primary text-white py-5 rounded-[20px] font-black tracking-widest uppercase text-sm group hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20"
+              >
+                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                <div className="relative flex items-center justify-center gap-3">
+                  {loading ? 'Authenticating...' : 'Access Dashboard'}
+                  {!loading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
+                </div>
+              </button>
+            </div>
           </form>
 
-          <p className="mt-8 text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-            Protected by Cleaniq Security Protocol
-          </p>
-        </div>
-      </motion.div>
+          <div className="mt-12 flex items-center justify-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+            <ShieldCheck size={14} className="text-emerald-500" />
+            256-Bit Encrypted Connection
+          </div>
+        </motion.div>
+      </div>
+
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes shimmer {
+          100% { transform: translateX(100%); }
+        }
+      `}} />
     </div>
   );
 };

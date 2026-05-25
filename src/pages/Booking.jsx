@@ -501,8 +501,8 @@ const Booking = () => {
       total += (dynamicRates[cleanKey(name)] || rates[name.trim()] || 0) * qty;
     });
 
-    if (formData.frequency === "Weekly") total *= 0.9;
-    if (formData.frequency === "Fortnightly") total *= 0.95;
+    // if (formData.frequency === "Weekly") total *= 0.9;
+    // if (formData.frequency === "Fortnightly") total *= 0.95;
 
     setTotalPrice(Math.round(total * 100) / 100);
   }, [formData, region, dynamicRates]);

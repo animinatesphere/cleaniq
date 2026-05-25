@@ -117,11 +117,10 @@ const Customers = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {[
           { label: 'Total Clients', value: customers.length, sub: 'All regions' },
           { label: 'UK Region', value: customers.filter(c => c.region === 'UK').length, sub: 'United Kingdom' },
-          { label: 'Nigeria Region', value: customers.filter(c => c.region === 'NG').length, sub: 'Nigeria' },
         ].map((s, i) => (
           <div key={i} className="bg-white p-6 rounded-[28px] border border-slate-200 shadow-sm">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
