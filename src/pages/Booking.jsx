@@ -357,7 +357,7 @@ const Booking = () => {
         // Safety Fallbacks (UK)
         const fallbackExtrasUK = [
           { name: "American fridge freeze", rate: 15 },
-          { name: "Carpet(s) Cleaning", rate: 30 },
+          
           { name: "Double Oven Cleaning", rate: 20 },
           { name: "Fridge and freezer", rate: 18 },
           { name: "Range Oven Cleaning", rate: 25 },
@@ -445,8 +445,6 @@ const Booking = () => {
       "Utility Room": 10,
       "Reception Room": 12,
       Conservatory: 15,
-      "American fridge freeze": 15,
-      "Carpet(s) Cleaning": 30,
       "Double Oven Cleaning": 20,
       "Fridge and freezer": 18,
       "Range Oven Cleaning": 25,
@@ -467,7 +465,6 @@ const Booking = () => {
       "Reception Room": 5000,
       Conservatory: 7000,
       "American fridge freeze": 8000,
-      "Carpet(s) Cleaning": 15000,
       "Double Oven Cleaning": 12000,
       "Fridge and freezer": 10000,
       "Range Oven Cleaning": 15000,
