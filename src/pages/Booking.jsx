@@ -114,7 +114,6 @@ const serviceOptions = [
 // Fallback extras to show when the services API is unavailable
 const DEFAULT_EXTRAS = [
   { _id: "fallback-american-fridge", name: "American fridge freeze", rate: 15 },
-  { _id: "fallback-carpet-cleaning", name: "Carpet(s) Cleaning", rate: 30 },
   { _id: "fallback-double-oven", name: "Double Oven Cleaning", rate: 20 },
   { _id: "fallback-fridge-freezer", name: "Fridge and freezer", rate: 18 },
   { _id: "fallback-range-oven", name: "Range Oven Cleaning", rate: 25 },
