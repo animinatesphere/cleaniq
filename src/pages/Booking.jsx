@@ -544,6 +544,10 @@ const Booking = () => {
         showNotification("Please select at least one room or area.");
         return;
       }
+      if (!formData.hasPet) {
+        showNotification("Please let us know if you have a pet.");
+        return;
+      }
     }
     if (step === 3) {
       if (!formData.parking || !formData.keyAccess) {
@@ -1312,20 +1316,30 @@ const Booking = () => {
                         </div>
 
                         {/* Payment */}
-                        <div className="bg-primary/5 p-6 rounded-[32px] border border-primary/10">
-                          <div className="flex items-center gap-3 text-[10px] font-black text-primary uppercase tracking-widest mb-4">
-                            <ShieldCheck size={18} />
-                            Securely processed by Stripe
+                        {(!formData.date || !formData.timeSlot || !formData.firstName || !formData.lastName || !formData.email || !formData.phone) ? (
+                          <div className="bg-slate-50 p-8 rounded-[32px] border-2 border-slate-100 text-center animate-in fade-in">
+                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                              <ShieldCheck className="text-slate-300" size={32} />
+                            </div>
+                            <h3 className="font-extrabold text-primary-dark tracking-tight mb-2 text-lg">Complete Your Details</h3>
+                            <p className="text-xs font-bold text-slate-400">Please fill out your Date, Time, and Personal Details above to unlock secure payment.</p>
                           </div>
-                          <Elements stripe={stripePromise}>
-                            <StripePayment
-                              amount={totalPrice}
-                              currency={region.id === "UK" ? "GBP" : "NGN"}
-                              customerInfo={formData}
-                              onPaymentSuccess={handlePaymentSuccess}
-                            />
-                          </Elements>
-                        </div>
+                        ) : (
+                          <div className="bg-primary/5 p-6 rounded-[32px] border border-primary/10 animate-in slide-in-from-bottom-4">
+                            <div className="flex items-center gap-3 text-[10px] font-black text-primary uppercase tracking-widest mb-4">
+                              <ShieldCheck size={18} />
+                              Securely processed by Stripe
+                            </div>
+                            <Elements stripe={stripePromise}>
+                              <StripePayment
+                                amount={totalPrice}
+                                currency={region.id === "UK" ? "GBP" : "NGN"}
+                                customerInfo={formData}
+                                onPaymentSuccess={handlePaymentSuccess}
+                              />
+                            </Elements>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
