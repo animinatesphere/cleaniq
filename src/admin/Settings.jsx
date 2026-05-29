@@ -41,14 +41,24 @@ const Settings = () => {
 
   const handleUpdateService = async (id) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/services`, {
-        method: 'POST',
+      // Use PUT /:id for a clean, ID-based update — avoids creating duplicates
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/services/${id}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...editServiceData, name: editServiceData.name.trim() })
+        body: JSON.stringify({
+          name: editServiceData.name.trim(),
+          rate: editServiceData.rate,
+          type: editServiceData.type,
+          region: editServiceData.region,
+          category: editServiceData.category,
+          description: editServiceData.description
+        })
       });
       if (res.ok) {
         setEditingServiceId(null);
         fetchData();
+      } else {
+        alert('Error updating service');
       }
     } catch (err) { alert('Error updating'); }
   };
@@ -59,10 +69,10 @@ const Settings = () => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/services`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newService, name: newService.name.trim() })
+        body: JSON.stringify({ ...newService, name: newService.name.trim(), category: newService.category || 'Extras' })
       });
       if (res.ok) {
-        setNewService({ name: '', rate: '', region: 'UK', type: 'Cleaning' });
+        setNewService({ name: '', rate: '', region: 'UK', type: 'Cleaning', category: 'Extras' });
         fetchData();
       }
     } catch (err) { alert('Error adding'); }
