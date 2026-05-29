@@ -185,7 +185,7 @@ const Services = () => {
         tag: assets.tag,
         icon: assets.icon,
         image: assets.image,
-        features: assets.features,
+        features: (s.bullets && s.bullets.length > 0) ? s.bullets : assets.features,
         description: s.description || assets.defaultDesc,
         pricing: `From ${region.symbol}${s.rate}${region.id === "UK" ? (s.type === "hourly" ? "/hr" : "") : ""}`,
       };

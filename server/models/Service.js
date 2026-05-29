@@ -7,6 +7,7 @@ const serviceSchema = new mongoose.Schema({
   type: { type: String, enum: ['hourly', 'flat'], required: true },
   category: { type: String, enum: ['Base', 'Rooms', 'Extras'], default: 'Extras' },
   description: String,
+  bullets: { type: [String], default: [] },
   updatedAt: { type: Date, default: Date.now }
 });
 

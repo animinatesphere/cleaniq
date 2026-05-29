@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useRegion } from '../context/RegionContext';
-import { Menu, X, Globe, ChevronDown } from 'lucide-react';
+import { useCustomerAuth } from '../context/CustomerAuthContext';
+import { Menu, X, Globe, ChevronDown, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from "../assets/lOGO.png"
 
@@ -9,6 +10,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { region, toggleRegion, regions } = useRegion();
+  const { customer, logout } = useCustomerAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -32,8 +34,14 @@ const Navbar = () => {
     { name: 'Join Our Team', path: '/recruitment' },
   ];
 
+  const isAccountPage = location.pathname.startsWith('/account');
+
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-500 ${isScrolled ? 'top-0 glass-dark py-2 md:py-3 shadow-2xl shadow-black/20' : 'top-[80px] md:top-[52px] bg-primary py-4 md:py-6'}`}>
+    <nav className={`fixed w-full z-50 transition-all duration-500 ${
+      isScrolled 
+        ? 'top-0 glass-dark py-2 md:py-3 shadow-2xl shadow-black/20' 
+        : `${isAccountPage ? 'top-0' : 'top-[80px] md:top-[52px]'} bg-primary py-4 md:py-6`
+    }`}>
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
@@ -71,33 +79,24 @@ const Navbar = () => {
           
           <div className="h-6 w-px bg-white/10" />
 
-          {/* Region Toggle - Commented out to lock to UK/GBP */}
-          {/*
-          <div className="relative group">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-all">
-              <Globe size={16} className="text-secondary" />
-              <span className="text-xs font-bold text-white">{region.id}</span>
-              <ChevronDown size={12} className="text-white/40" />
-            </button>
-            
-            <div className="absolute right-0 mt-3 w-48 glass-dark rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 overflow-hidden border border-white/10 backdrop-blur-2xl">
-              <div className="p-2">
-                {Object.values(regions).map((r) => (
-                  <button
-                    key={r.id}
-                    onClick={() => toggleRegion(r.id)}
-                    className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all flex justify-between items-center group/item ${
-                      region.id === r.id ? 'bg-white/10 text-secondary' : 'text-white/60 hover:bg-white/5 hover:text-white'
-                    }`}
-                  >
-                    <span>{r.name}</span>
-                    <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded-lg">{r.currency}</span>
-                  </button>
-                ))}
-              </div>
+          {/* My Account */}
+          {customer ? (
+            <div className="flex items-center gap-3">
+              <Link to="/account/dashboard"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all text-white text-xs font-black">
+                <User size={14} /> {customer.firstName}
+              </Link>
+              <button onClick={logout} title="Log out"
+                className="p-2 rounded-full bg-white/10 hover:bg-rose-500/30 text-white/60 hover:text-white transition-all">
+                <LogOut size={14} />
+              </button>
             </div>
-          </div>
-          */}
+          ) : (
+            <Link to="/account/login"
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-white/80 hover:text-white hover:bg-white/10 text-xs font-black transition-all">
+              <User size={14} /> My Account
+            </Link>
+          )}
 
           <Link to="/booking" className="btn-secondary px-8 text-primary shadow-secondary/10">
             Book Now
@@ -161,8 +160,24 @@ const Navbar = () => {
 
                 <div className="mt-auto space-y-6 md:8">
                   <div className="h-px bg-white/10 w-full" />
-                  
-                  {/* Market Region Selection - disabled (locked to UK/GBP) */}
+
+                  {customer ? (
+                    <div className="space-y-3">
+                      <Link to="/account/dashboard"
+                        className="flex items-center gap-3 w-full py-3 px-4 bg-white/10 rounded-2xl text-white font-black text-sm">
+                        <User size={16} /> {customer.firstName} {customer.lastName}
+                      </Link>
+                      <button onClick={() => { logout(); setIsOpen(false); }}
+                        className="flex items-center gap-3 w-full py-3 px-4 bg-white/5 rounded-2xl text-white/60 font-black text-sm hover:bg-rose-500/20 hover:text-white transition-all">
+                        <LogOut size={16} /> Log out
+                      </button>
+                    </div>
+                  ) : (
+                    <Link to="/account/login"
+                      className="flex items-center gap-3 w-full py-3 px-4 border border-white/20 rounded-2xl text-white/80 font-black text-sm hover:bg-white/10 transition-all">
+                      <User size={16} /> My Account
+                    </Link>
+                  )}
 
                   <Link to="/booking" className="btn-secondary w-full py-4 md:py-5 text-base md:text-lg text-center shadow-xl shadow-secondary/5">
                     Book Professional Clean

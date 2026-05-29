@@ -67,6 +67,9 @@ const reviewRoutes = require("./routes/reviews");
 const marketingRoutes = require("./routes/marketing");
 const workerRoutes = require("./routes/workers");
 const messageRoutes = require("./routes/messages");
+const customerAuthRoutes = require("./routes/customer-auth");
+const customerBookingRoutes = require("./routes/customer-bookings");
+const customerChatRoutes = require("./routes/customer-chat");
 
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
@@ -78,6 +81,9 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/marketing", marketingRoutes);
 app.use("/api/workers", workerRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/customer-auth", customerAuthRoutes);
+app.use("/api/customer-bookings", customerBookingRoutes);
+app.use("/api/customer-chat", customerChatRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);

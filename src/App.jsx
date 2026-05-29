@@ -14,7 +14,13 @@ import Contact from './pages/Contact';
 import ServiceDetail from './pages/ServiceDetail';
 import LocationDetail from './pages/LocationDetail';
 
-// Admin Importsddhdhdhdhhdh
+// Customer Account
+import CustomerLogin from './pages/account/Login';
+import CustomerSignup from './pages/account/Signup';
+import CustomerDashboard from './pages/account/Dashboard';
+import { CustomerAuthProvider } from './context/CustomerAuthContext';
+
+// Admin Imports
 import AdminLayout from './admin/AdminLayout';
 import Dashboard from './admin/Dashboard';
 import Bookings from './admin/Bookings';
@@ -28,42 +34,51 @@ import Chat from './admin/Chat';
 function App() {
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith('/admin');
+  const isAccountPath = location.pathname.startsWith('/account');
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {!isAdminPath && <Preloader />}
-      <ScrollToTop />
-      {!isAdminPath && <TopNav />}
-      {!isAdminPath && <Navbar />}
-      
-      <main className="grow">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/booking" element={<Booking />} />
-          <Route path="/recruitment" element={<Recruitment />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/pages/contact" element={<Contact />} />
-          <Route path="/pages/:serviceSlug" element={<ServiceDetail />} />
-          <Route path="/locations/:area" element={<LocationDetail />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="bookings" element={<Bookings />} />
-            <Route path="applicants" element={<Applicants />} />
-            <Route path="customers" element={<Customers />} />
-            <Route path="workers" element={<Workers />} />
-            <Route path="services" element={<ServicesManagement />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="chat" element={<Chat />} />
-          </Route>
-        </Routes>
-      </main>
+    <CustomerAuthProvider>
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        {!isAdminPath && <Preloader />}
+        <ScrollToTop />
+        {!isAdminPath && !isAccountPath && <TopNav />}
+        {!isAdminPath && !isAccountPath && <Navbar />}
+        {isAccountPath && <Navbar />}
+        
+        <main className="grow">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/booking" element={<Booking />} />
+            <Route path="/recruitment" element={<Recruitment />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/pages/contact" element={<Contact />} />
+            <Route path="/pages/:serviceSlug" element={<ServiceDetail />} />
+            <Route path="/locations/:area" element={<LocationDetail />} />
 
-      {!isAdminPath && <Footer />}
-    </div>
+            {/* Customer Account Routes */}
+            <Route path="/account/login" element={<CustomerLogin />} />
+            <Route path="/account/signup" element={<CustomerSignup />} />
+            <Route path="/account/dashboard" element={<CustomerDashboard />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="bookings" element={<Bookings />} />
+              <Route path="applicants" element={<Applicants />} />
+              <Route path="customers" element={<Customers />} />
+              <Route path="workers" element={<Workers />} />
+              <Route path="services" element={<ServicesManagement />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="chat" element={<Chat />} />
+            </Route>
+          </Routes>
+        </main>
+
+        {!isAdminPath && !isAccountPath && <Footer />}
+      </div>
+    </CustomerAuthProvider>
   );
 }
 

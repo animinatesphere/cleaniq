@@ -301,11 +301,13 @@ const Booking = () => {
     const mapped = bases.map(s => {
       const key = getLayoutKey(s.name);
       const assets = optionAssets[key];
+      // Use live bullets from DB if saved, otherwise fallback to hardcoded defaults
+      const liveBullets = Array.isArray(s.bullets) && s.bullets.length > 0 ? s.bullets : assets.bullets;
       return {
         id: s.name,
         title: s.name,
         tag: assets.tag,
-        bullets: assets.bullets,
+        bullets: liveBullets,
         icon: assets.icon,
         layoutId: key
       };

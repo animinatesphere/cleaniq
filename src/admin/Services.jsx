@@ -3,7 +3,7 @@ import {
   Settings, Save, Plus, Trash2, 
   RefreshCcw, DollarSign, MapPin, 
   AlertCircle, CheckCircle2, Clock,
-  Info, Layout, Zap, Home as HomeIcon, Star
+  Info, Layout, Zap, Home as HomeIcon, Star, ListChecks, X as XIcon
 } from 'lucide-react';
 
 const ServicesManagement = () => {
@@ -60,6 +60,30 @@ const ServicesManagement = () => {
 
   const handleTypeChange = (id, newType) => {
     setServices(prev => prev.map(s => s._id === id ? { ...s, type: newType } : s));
+  };
+
+  const handleBulletChange = (id, idx, val) => {
+    setServices(prev => prev.map(s => {
+      if (s._id !== id) return s;
+      const bullets = [...(s.bullets || [])];
+      bullets[idx] = val;
+      return { ...s, bullets };
+    }));
+  };
+
+  const handleAddBullet = (id) => {
+    setServices(prev => prev.map(s => {
+      if (s._id !== id) return s;
+      return { ...s, bullets: [...(s.bullets || []), ''] };
+    }));
+  };
+
+  const handleRemoveBullet = (id, idx) => {
+    setServices(prev => prev.map(s => {
+      if (s._id !== id) return s;
+      const bullets = (s.bullets || []).filter((_, i) => i !== idx);
+      return { ...s, bullets };
+    }));
   };
 
   const saveService = async (service) => {
@@ -195,7 +219,43 @@ const ServicesManagement = () => {
                 <button onClick={() => deleteService(service._id)} className="p-2 text-slate-200 hover:text-rose-500 transition-colors shrink-0"><Trash2 size={16}/></button>
               </div>
               
-              <div className="flex gap-2">
+              {/* Bullets editor — only for Base services */}
+              {service.originalCategory === 'Base' && (
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                      <ListChecks size={12} /> Feature Bullets
+                    </p>
+                    <button onClick={() => handleAddBullet(service._id)}
+                      className="flex items-center gap-1 text-[9px] font-black text-primary uppercase tracking-widest hover:bg-primary/5 px-2 py-1 rounded-lg transition-all">
+                      <Plus size={11} /> Add
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {(service.bullets || []).map((bullet, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <CheckCircle2 size={11} className="text-primary/30 shrink-0" />
+                        <input
+                          type="text"
+                          value={bullet}
+                          onChange={e => handleBulletChange(service._id, idx, e.target.value)}
+                          placeholder={`Bullet point ${idx + 1}`}
+                          className="flex-1 text-xs font-bold bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white focus:outline-none rounded-lg px-3 py-1.5 transition-all"
+                        />
+                        <button onClick={() => handleRemoveBullet(service._id, idx)}
+                          className="text-slate-300 hover:text-rose-400 transition-colors shrink-0">
+                          <XIcon size={13} />
+                        </button>
+                      </div>
+                    ))}
+                    {(!service.bullets || service.bullets.length === 0) && (
+                      <p className="text-[10px] text-slate-300 font-bold italic">No bullets yet — click Add to create one</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2 mt-4">
                 <div className="relative flex-1">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-300">{activeRegion === 'UK' ? '£' : '₦'}</span>
                   <input 

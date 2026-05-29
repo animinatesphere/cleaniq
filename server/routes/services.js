@@ -31,25 +31,26 @@ router.get('/', async (req, res) => {
 // Create or update a service
 router.post('/', async (req, res) => {
   try {
-    const { _id, name, region, rate, type, category, description } = req.body;
+    const { _id, name, region, rate, type, category, description, bullets } = req.body;
     const trimmedName = name?.trim();
+    const bulletList = Array.isArray(bullets) ? bullets.filter(b => b && b.trim()) : undefined;
 
     let service;
 
     // If a valid MongoDB _id is provided, update that specific record (prevents duplicates on rename)
     if (_id && _id.match(/^[0-9a-fA-F]{24}$/)) {
-      service = await Service.findByIdAndUpdate(
-        _id,
-        { name: trimmedName, rate, type, category, description, region, updatedAt: Date.now() },
-        { new: true }
-      );
+      const updateFields = { name: trimmedName, rate, type, category, description, region, updatedAt: Date.now() };
+      if (bulletList !== undefined) updateFields.bullets = bulletList;
+      service = await Service.findByIdAndUpdate(_id, updateFields, { new: true });
     }
 
     // Fallback: find existing by name+region or create new
     if (!service) {
+      const updateFields = { rate, type, category, description, updatedAt: Date.now() };
+      if (bulletList !== undefined) updateFields.bullets = bulletList;
       service = await Service.findOneAndUpdate(
         { name: trimmedName, region },
-        { rate, type, category, description, updatedAt: Date.now() },
+        updateFields,
         { new: true, upsert: true }
       );
     }
@@ -63,12 +64,10 @@ router.post('/', async (req, res) => {
 // Update a service by ID
 router.put('/:id', async (req, res) => {
   try {
-    const { name, region, rate, type, category, description } = req.body;
-    const service = await Service.findByIdAndUpdate(
-      req.params.id,
-      { name, region, rate, type, category, description, updatedAt: Date.now() },
-      { new: true }
-    );
+    const { name, region, rate, type, category, description, bullets } = req.body;
+    const updateFields = { name, region, rate, type, category, description, updatedAt: Date.now() };
+    if (Array.isArray(bullets)) updateFields.bullets = bullets.filter(b => b && b.trim());
+    const service = await Service.findByIdAndUpdate(req.params.id, updateFields, { new: true });
     if (!service) return res.status(404).json({ message: 'Service not found' });
     res.json(service);
   } catch (err) {
