@@ -63,6 +63,32 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// Cleanup: remove duplicate services (keep newest per name+region)
+router.post('/cleanup-duplicates', async (req, res) => {
+  try {
+    const all = await Service.find({}).sort({ updatedAt: -1 });
+    const seen = new Set();
+    const toDelete = [];
+
+    all.forEach(s => {
+      const key = `${s.name.trim().toLowerCase()}__${s.region}`;
+      if (seen.has(key)) {
+        toDelete.push(s._id);
+      } else {
+        seen.add(key);
+      }
+    });
+
+    if (toDelete.length > 0) {
+      await Service.deleteMany({ _id: { $in: toDelete } });
+    }
+
+    res.json({ message: `Cleaned up ${toDelete.length} duplicate(s).`, removed: toDelete.length });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Delete a service
 router.delete('/:id', async (req, res) => {
   try {
