@@ -111,17 +111,6 @@ const serviceOptions = [
   },
 ];
 
-// Fallback extras to show when the services API is unavailable
-const DEFAULT_EXTRAS = [
-  { _id: "fallback-american-fridge", name: "American fridge freeze", rate: 15 },
-  { _id: "fallback-double-oven", name: "Double Oven Cleaning", rate: 20 },
-  { _id: "fallback-fridge-freezer", name: "Fridge and freezer", rate: 18 },
-  { _id: "fallback-range-oven", name: "Range Oven Cleaning", rate: 25 },
-  { _id: "fallback-single-fridge", name: "Single fridge", rate: 10 },
-  { _id: "fallback-single-oven", name: "Single Oven Cleaning", rate: 15 },
-  { _id: "fallback-venetian-blinds", name: "Venetian Blinds", rate: 5 },
-];
-
 const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
@@ -354,62 +343,14 @@ const Booking = () => {
         );
         const data = await response.json();
 
-        // Safety Fallbacks (UK)
-        const fallbackExtrasUK = [
-          { name: "American fridge freeze", rate: 15 },
-          
-          { name: "Double Oven Cleaning", rate: 20 },
-          { name: "Fridge and freezer", rate: 18 },
-          { name: "Range Oven Cleaning", rate: 25 },
-          { name: "Single fridge", rate: 10 },
-          { name: "Single Oven Cleaning", rate: 15 },
-          { name: "Venetian Blinds", rate: 5 },
-        ];
-
-        // Safety Fallbacks (NG)
-        const fallbackExtrasNG = [
-          { name: "American fridge freeze", rate: 8000 },
-          { name: "Carpet(s) Cleaning", rate: 15000 },
-          { name: "Double Oven Cleaning", rate: 12000 },
-          { name: "Fridge and freezer", rate: 10000 },
-          { name: "Range Oven Cleaning", rate: 15000 },
-          { name: "Single fridge", rate: 5000 },
-          { name: "Single Oven Cleaning", rate: 8000 },
-          { name: "Venetian Blinds", rate: 3000 },
-        ];
-
-        const fallbackRooms = [
-          { name: "Bedroom", rate: 0 },
-          { name: "Bathroom", rate: 0 },
-          { name: "Cloakroom", rate: 0 },
-          { name: "Kitchen", rate: 0 },
-          { name: "Utility Room", rate: 0 },
-          { name: "Reception Room", rate: 0 },
-          { name: "Conservatory", rate: 0 },
-        ];
-
-        const fallbacks = [
-          ...(region.id === "UK" ? fallbackExtrasUK : fallbackExtrasNG),
-          ...fallbackRooms,
-        ];
-
-        // Merge DB data with fallbacks (DB entries always override fallbacks)
-        const combined = [...data];
+        setServicesList(data);
+        const ratesObj = {};
         const clean = (str) =>
           str
             .toLowerCase()
             .replace(/[^a-z0-9]/g, "")
             .trim();
-
-        fallbacks.forEach((fb) => {
-          if (!data.some((db) => clean(db.name) === clean(fb.name))) {
-            combined.push({ _id: `fallback-${fb.name}`, ...fb, type: "flat" });
-          }
-        });
-
-        setServicesList(combined);
-        const ratesObj = {};
-        combined.forEach((service) => {
+        data.forEach((service) => {
           ratesObj[cleanKey(service.name)] = service.rate;
         });
         setDynamicRates(ratesObj);
@@ -433,53 +374,9 @@ const Booking = () => {
     }
 
     let total = 0;
-    const fallbackUK = {
-      "Residential Cleaning": "17.90/hr",
-      "Deep Clean": "24.90/hr",
-      "Airbnb Cleaning": "21.90/hr",
-      "Office Cleaning": "19.90/hr",
-      Bedroom: 15,
-      Bathroom: 12,
-      Cloakroom: 8,
-      Kitchen: 15,
-      "Utility Room": 10,
-      "Reception Room": 12,
-      Conservatory: 15,
-      "Double Oven Cleaning": 20,
-      "Fridge and freezer": 18,
-      "Range Oven Cleaning": 25,
-      "Single fridge": 10,
-      "Single Oven Cleaning": 15,
-      "Venetian Blinds": 5,
-    };
-    const fallbackNG = {
-      "Residential Cleaning": 15000,
-      "Deep Clean": 25000,
-      "Airbnb Cleaning": 20000,
-      "Office Cleaning": 18000,
-      Bedroom: 5000,
-      Bathroom: 4000,
-      Cloakroom: 2500,
-      Kitchen: 6000,
-      "Utility Room": 3000,
-      "Reception Room": 5000,
-      Conservatory: 7000,
-      "American fridge freeze": 8000,
-      "Double Oven Cleaning": 12000,
-      "Fridge and freezer": 10000,
-      "Range Oven Cleaning": 15000,
-      "Single fridge": 5000,
-      "Single Oven Cleaning": 8000,
-      "Venetian Blinds": 3000,
-    };
-
-    const rates = region.id === "UK" ? fallbackUK : fallbackNG;
 
     // Base Service Rate (Multiplied by Duration for all regions - Price/Hr)
-    const rawBaseRate =
-      dynamicRates[cleanKey(formData.serviceType)] ||
-      rates[formData.serviceType.trim()] ||
-      20;
+    const rawBaseRate = dynamicRates[cleanKey(formData.serviceType)] || 20;
     const baseRate = parseFloat(rawBaseRate) || 20;
     total += baseRate * formData.duration;
 
@@ -494,7 +391,7 @@ const Booking = () => {
 
     // Extra Rates
     Object.entries(formData.extras).forEach(([name, qty]) => {
-      total += (dynamicRates[cleanKey(name)] || rates[name.trim()] || 0) * qty;
+      total += (dynamicRates[cleanKey(name)] || 0) * qty;
     });
 
     // if (formData.frequency === "Weekly") total *= 0.9;
@@ -1001,10 +898,7 @@ const Booking = () => {
                             </p>
                           </div>
                           <div className="grid gap-3 mt-6">
-                            {(servicesList.length
-                              ? servicesList
-                              : DEFAULT_EXTRAS
-                            )
+                            {(servicesList || [])
                               .filter((s) => {
                                 const baseServices = [
                                   ...serviceOptions.map((o) => o.id),
@@ -1312,13 +1206,26 @@ const Booking = () => {
                         </div>
 
                         {/* Payment */}
-                        {(!formData.date || !formData.timeSlot || !formData.firstName || !formData.lastName || !formData.email || !formData.phone) ? (
+                        {!formData.date ||
+                        !formData.timeSlot ||
+                        !formData.firstName ||
+                        !formData.lastName ||
+                        !formData.email ||
+                        !formData.phone ? (
                           <div className="bg-slate-50 p-8 rounded-[32px] border-2 border-slate-100 text-center animate-in fade-in">
                             <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                              <ShieldCheck className="text-slate-300" size={32} />
+                              <ShieldCheck
+                                className="text-slate-300"
+                                size={32}
+                              />
                             </div>
-                            <h3 className="font-extrabold text-primary-dark tracking-tight mb-2 text-lg">Complete Your Details</h3>
-                            <p className="text-xs font-bold text-slate-400">Please fill out your Date, Time, and Personal Details above to unlock secure payment.</p>
+                            <h3 className="font-extrabold text-primary-dark tracking-tight mb-2 text-lg">
+                              Complete Your Details
+                            </h3>
+                            <p className="text-xs font-bold text-slate-400">
+                              Please fill out your Date, Time, and Personal
+                              Details above to unlock secure payment.
+                            </p>
                           </div>
                         ) : (
                           <div className="bg-primary/5 p-6 rounded-[32px] border border-primary/10 animate-in slide-in-from-bottom-4">
