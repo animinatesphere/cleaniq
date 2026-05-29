@@ -43,8 +43,14 @@ const ServicesManagement = () => {
   const saveService = async (service) => {
     setSaving(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/services`, {
-        method: 'POST',
+      const isExisting = service._id && service._id.match(/^[0-9a-fA-F]{24}$/);
+      const url = isExisting 
+        ? `${import.meta.env.VITE_API_URL}/services/${service._id}`
+        : `${import.meta.env.VITE_API_URL}/services`;
+      const method = isExisting ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...service, name: service.name.trim(), region: activeRegion })
       });
