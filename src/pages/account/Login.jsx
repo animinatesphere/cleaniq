@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, Sparkles, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useCustomerAuth } from '../../context/CustomerAuthContext';
+import logoImg from '../../assets/logo DP.jpg';
 
 export default function CustomerLogin() {
   const { login } = useCustomerAuth();
@@ -48,10 +49,7 @@ export default function CustomerLogin() {
         {/* Logo / Brand */}
         <div className="text-center mb-10">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center rotate-12 shadow-lg shadow-primary/20">
-              <Sparkles size={20} className="text-white -rotate-12" />
-            </div>
-            <span className="font-black text-xl tracking-tighter text-primary-dark">Cleaniq</span>
+            <img src={logoImg} alt="Cleaniq logo" className="h-16 w-auto object-contain rounded-2xl shadow-md border border-slate-100" />
           </Link>
           <h1 className="text-3xl font-extrabold text-primary-dark tracking-tight">Welcome back</h1>
           <p className="text-slate-400 font-bold text-sm mt-2">Log in to manage your bookings</p>
