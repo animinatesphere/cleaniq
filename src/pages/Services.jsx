@@ -21,7 +21,11 @@ import me3 from "../assets/Cleaniq services/4th Post.jpg";
 import airbnbImg from "../assets/airbnb_cleaning_service.png";
 import moveOutImg from "../assets/end_of_tenancy.png";
 import deep from "../assets/anton-y-bjqTUUw2Q-unsplash.jpg";
-const cleanKey = (str) => (str || "").toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+const cleanKey = (str) =>
+  (str || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
 
 const Services = () => {
   const { region } = useRegion();
@@ -44,18 +48,43 @@ const Services = () => {
 
   const getLayoutKey = (name) => {
     const cleanName = (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-    if (cleanName.includes("residential") || cleanName.includes("domestic") || cleanName.includes("home") || cleanName.includes("house")) return "residential";
-    if (cleanName.includes("office") || cleanName.includes("commercial") || cleanName.includes("workspace") || cleanName.includes("business")) return "commercial";
-    if (cleanName.includes("deep") || cleanName.includes("thorough")) return "move";
-    if (cleanName.includes("airbnb") || cleanName.includes("short") || cleanName.includes("holiday")) return "airbnb";
-    if (cleanName.includes("tenancy") || cleanName.includes("moveout") || cleanName.includes("movein") || cleanName.includes("moving")) return "tenancy";
+    if (
+      cleanName.includes("residential") ||
+      cleanName.includes("domestic") ||
+      cleanName.includes("home") ||
+      cleanName.includes("house")
+    )
+      return "residential";
+    if (
+      cleanName.includes("office") ||
+      cleanName.includes("commercial") ||
+      cleanName.includes("workspace") ||
+      cleanName.includes("business")
+    )
+      return "commercial";
+    if (cleanName.includes("deep") || cleanName.includes("thorough"))
+      return "move";
+    if (
+      cleanName.includes("airbnb") ||
+      cleanName.includes("short") ||
+      cleanName.includes("holiday")
+    )
+      return "airbnb";
+    if (
+      cleanName.includes("tenancy") ||
+      cleanName.includes("moveout") ||
+      cleanName.includes("movein") ||
+      cleanName.includes("moving")
+    )
+      return "tenancy";
     return "residential";
   };
 
   const layoutAssets = {
     residential: {
       icon: <HomeIcon className="text-secondary" size={40} />,
-      image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2000&auto=format&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2000&auto=format&fit=crop",
       features: [
         "Dusting of all surfaces.",
         "Vacuuming & Mopping.",
@@ -72,7 +101,8 @@ const Services = () => {
     },
     commercial: {
       icon: <Briefcase className="text-secondary" size={40} />,
-      image: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2000&auto=format&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2000&auto=format&fit=crop",
       features: [
         "Workstation sanitization.",
         "Communal area cleaning.",
@@ -104,14 +134,16 @@ const Services = () => {
     },
     airbnb: {
       icon: <Star className="text-secondary" size={40} />,
-      image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2000&auto=format&fit=crop",
+      image:
+        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2000&auto=format&fit=crop",
       features: [
         "Turnover Specialist",
-        "Please provide a washing machine,dryer and detergent if on-site linen and towel washing is  required ",
+
         "5-Star Prep",
         "Guest Ready Check",
         "Inventory Monitoring",
         "Consumable Supplies",
+        "Please provide a washing machine,dryer and detergent if on-site linen and towel washing is  required ",
       ],
       tag: "Short-let specialist",
       defaultName: "Airbnb Cleaning",
@@ -132,17 +164,18 @@ const Services = () => {
       ],
       tag: "Moving out/in clean",
       defaultName: "End of Tenancy",
-      defaultDesc: "Comprehensive move-in/move-out cleaning with a deposit-back guarantee.",
+      defaultDesc:
+        "Comprehensive move-in/move-out cleaning with a deposit-back guarantee.",
       defaultRateUK: "From £29.90/hr",
       defaultRateNG: "From ₦30,000",
     },
   };
 
   const serviceDetails = React.useMemo(() => {
-    const bases = dbServices.filter(s => s.category === 'Base');
+    const bases = dbServices.filter((s) => s.category === "Base");
     const keys = ["residential", "commercial", "move", "airbnb", "tenancy"];
-    
-    const mapped = bases.map(s => {
+
+    const mapped = bases.map((s) => {
       const key = getLayoutKey(s.name);
       const assets = layoutAssets[key];
       return {
@@ -159,8 +192,8 @@ const Services = () => {
     });
 
     // Fallback if layout key is missing
-    keys.forEach(k => {
-      if (!mapped.some(m => m.id === k)) {
+    keys.forEach((k) => {
+      if (!mapped.some((m) => m.id === k)) {
         const assets = layoutAssets[k];
         mapped.push({
           id: k,
@@ -171,7 +204,8 @@ const Services = () => {
           image: assets.image,
           features: assets.features,
           description: assets.defaultDesc,
-          pricing: region.id === "UK" ? assets.defaultRateUK : assets.defaultRateNG,
+          pricing:
+            region.id === "UK" ? assets.defaultRateUK : assets.defaultRateNG,
         });
       }
     });
@@ -351,8 +385,6 @@ const Services = () => {
                   </div>
                 </div>
               </div>
-
-              
             </motion.div>
           ))}
         </div>
