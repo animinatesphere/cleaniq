@@ -31,16 +31,29 @@ router.get('/', async (req, res) => {
 // Create or update a service
 router.post('/', async (req, res) => {
   try {
-    const { name, region, rate, type, description } = req.body;
+    const { _id, name, region, rate, type, description } = req.body;
     const trimmedName = name?.trim();
-    
-    // Find existing or create new
-    let service = await Service.findOneAndUpdate(
-      { name: trimmedName, region },
-      { rate, type, description, updatedAt: Date.now() },
-      { new: true, upsert: true }
-    );
-    
+
+    let service;
+
+    // If a valid MongoDB _id is provided, update that specific record (prevents duplicates on rename)
+    if (_id && _id.match(/^[0-9a-fA-F]{24}$/)) {
+      service = await Service.findByIdAndUpdate(
+        _id,
+        { name: trimmedName, rate, type, description, region, updatedAt: Date.now() },
+        { new: true }
+      );
+    }
+
+    // Fallback: find existing by name+region or create new
+    if (!service) {
+      service = await Service.findOneAndUpdate(
+        { name: trimmedName, region },
+        { rate, type, description, updatedAt: Date.now() },
+        { new: true, upsert: true }
+      );
+    }
+
     res.status(201).json(service);
   } catch (err) {
     res.status(400).json({ message: err.message });
