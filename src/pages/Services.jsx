@@ -25,56 +25,37 @@ const cleanKey = (str) => (str || "").toLowerCase().replace(/[^a-z0-9]/g, "").tr
 
 const Services = () => {
   const { region } = useRegion();
-  const [dynamicRates, setDynamicRates] = React.useState({});
+  const [dbServices, setDbServices] = React.useState([]);
 
   React.useEffect(() => {
-    const fetchRates = async () => {
+    const fetchServices = async () => {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/services?region=${region.id}&t=${Date.now()}`,
         );
         const data = await response.json();
-        const ratesObj = {};
-
-        // Build exact-match map first
-        data.forEach((service) => {
-          ratesObj[cleanKey(service.name)] = service.rate;
-        });
-
-        // Also add fuzzy aliases: for each DB service, if its cleanKey is a
-        // substring of a display name cleanKey (or vice versa), register that too.
-        const knownDisplayNames = [
-          "Residential Cleaning", "Office Cleaning", "Deep Clean",
-          "Airbnb Cleaning", "End of Tenancy"
-        ];
-        knownDisplayNames.forEach((displayName) => {
-          const dk = cleanKey(displayName);
-          if (ratesObj[dk] !== undefined) return; // already matched exactly
-          // Find the best fuzzy match from the DB services
-          const match = data.find((s) => {
-            const sk = cleanKey(s.name);
-            return sk.includes(dk) || dk.includes(sk);
-          });
-          if (match) ratesObj[dk] = match.rate;
-        });
-
-        setDynamicRates(ratesObj);
+        setDbServices(data || []);
       } catch (error) {
-        console.error("Error fetching rates:", error);
+        console.error("Error fetching services:", error);
       }
     };
-    fetchRates();
+    fetchServices();
   }, [region.id]);
 
-  const serviceDetails = [
-    {
-      id: "residential",
-      title: "Residential Cleaning",
-      dbName: "Residential Cleaning",
-      tag: "Reliable domestic cleaners",
+  const getLayoutKey = (name) => {
+    const cleanName = (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (cleanName.includes("residential") || cleanName.includes("domestic") || cleanName.includes("home") || cleanName.includes("house")) return "residential";
+    if (cleanName.includes("office") || cleanName.includes("commercial") || cleanName.includes("workspace") || cleanName.includes("business")) return "commercial";
+    if (cleanName.includes("deep") || cleanName.includes("thorough")) return "move";
+    if (cleanName.includes("airbnb") || cleanName.includes("short") || cleanName.includes("holiday")) return "airbnb";
+    if (cleanName.includes("tenancy") || cleanName.includes("moveout") || cleanName.includes("movein") || cleanName.includes("moving")) return "tenancy";
+    return "residential";
+  };
+
+  const layoutAssets = {
+    residential: {
       icon: <HomeIcon className="text-secondary" size={40} />,
-      image:
-        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2000&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2000&auto=format&fit=crop",
       features: [
         "Dusting of all surfaces.",
         "Vacuuming & Mopping.",
@@ -83,21 +64,15 @@ const Services = () => {
         "Bed making & tidying.",
         "Trash removal.",
       ],
-      description: "Reliable, weekly or bi-weekly cleaning for your home.",
-      pricing: dynamicRates[cleanKey("Residential Cleaning")]
-        ? `From ${region.symbol}${dynamicRates[cleanKey("Residential Cleaning")]}${region.id === "UK" ? "/hr" : ""}`
-        : region.id === "UK"
-          ? "From £17.90/hr"
-          : `From ${region.symbol}15,000`,
+      tag: "Reliable domestic cleaners",
+      defaultName: "Residential Cleaning",
+      defaultDesc: "Reliable, weekly or bi-weekly cleaning for your home.",
+      defaultRateUK: "From £17.90/hr",
+      defaultRateNG: "From ₦15,000",
     },
-    {
-      id: "commercial",
-      title: "Office Cleaning",
-      dbName: "Office Cleaning",
-      tag: "Expert office cleaning",
+    commercial: {
       icon: <Briefcase className="text-secondary" size={40} />,
-      image:
-        "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2000&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2000&auto=format&fit=crop",
       features: [
         "Workstation sanitization.",
         "Communal area cleaning.",
@@ -106,16 +81,13 @@ const Services = () => {
         "Carpet deep clean.",
         "Disinfection services.",
       ],
-      description: "Professional janitorial services for your workspace.",
-      pricing: dynamicRates[cleanKey("Office Cleaning")]
-        ? `From ${region.symbol}${dynamicRates[cleanKey("Office Cleaning")]}${region.id === "UK" ? "/hr" : ""}`
-        : "Custom Quotes",
+      tag: "Expert office cleaning",
+      defaultName: "Office Cleaning",
+      defaultDesc: "Professional janitorial services for your workspace.",
+      defaultRateUK: "From £19.90/hr",
+      defaultRateNG: "From ₦18,000",
     },
-    {
-      id: "move",
-      title: "Deep Clean",
-      dbName: "Deep Clean",
-      tag: "Specialist deep cleaning",
+    move: {
       icon: <HomeIcon className="text-secondary" size={40} />,
       image: deep,
       features: [
@@ -124,21 +96,15 @@ const Services = () => {
         "Appliance deep clean.",
         "End-of-tenancy guarantee.",
       ],
-      description: "Specialized deep cleaning services for a total refresh.",
-      pricing: dynamicRates[cleanKey("Deep Clean")]
-        ? `From ${region.symbol}${dynamicRates[cleanKey("Deep Clean")]}${region.id === "UK" ? "/hr" : ""}`
-        : region.id === "UK"
-          ? "From £24.90/hr"
-          : `From ${region.symbol}25,000`,
+      tag: "Specialist deep cleaning",
+      defaultName: "Deep Clean",
+      defaultDesc: "Specialized deep cleaning services for a total refresh.",
+      defaultRateUK: "From £24.90/hr",
+      defaultRateNG: "From ₦25,000",
     },
-    {
-      id: "airbnb",
-      title: "Airbnb Cleaning",
-      dbName: "Airbnb Cleaning",
-      tag: "Short-let specialist",
+    airbnb: {
       icon: <Star className="text-secondary" size={40} />,
-      image:
-        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2000&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2000&auto=format&fit=crop",
       features: [
         "Turnover Specialist",
         "Please provide a washing machine,dryer and detergent if on-site linen and towel washing is  required ",
@@ -147,18 +113,13 @@ const Services = () => {
         "Inventory Monitoring",
         "Consumable Supplies",
       ],
-      description: "Professional turnover services for your short-let rental.",
-      pricing: dynamicRates[cleanKey("Airbnb Cleaning")]
-        ? `From ${region.symbol}${dynamicRates[cleanKey("Airbnb Cleaning")]}${region.id === "UK" ? "/hr" : ""}`
-        : region.id === "UK"
-          ? "From £21.90/hr"
-          : `From ${region.symbol}20,000`,
+      tag: "Short-let specialist",
+      defaultName: "Airbnb Cleaning",
+      defaultDesc: "Professional turnover services for your short-let rental.",
+      defaultRateUK: "From £21.90/hr",
+      defaultRateNG: "From ₦20,000",
     },
-    {
-      id: "tenancy",
-      title: "End of Tenancy",
-      dbName: "End of Tenancy",
-      tag: "Moving out/in clean",
+    tenancy: {
       icon: <Truck className="text-secondary" size={40} />,
       image: moveOutImg,
       features: [
@@ -169,15 +130,54 @@ const Services = () => {
         "Deposit back guarantee.",
         "Move-in ready finish.",
       ],
-      description:
-        "Comprehensive move-in/move-out cleaning with a deposit-back guarantee.",
-      pricing: dynamicRates[cleanKey("End of Tenancy")]
-        ? `From ${region.symbol}${dynamicRates[cleanKey("End of Tenancy")]}${region.id === "UK" ? "/hr" : ""}`
-        : region.id === "UK"
-          ? "From £29.90/hr"
-          : `From ${region.symbol}30,000`,
+      tag: "Moving out/in clean",
+      defaultName: "End of Tenancy",
+      defaultDesc: "Comprehensive move-in/move-out cleaning with a deposit-back guarantee.",
+      defaultRateUK: "From £29.90/hr",
+      defaultRateNG: "From ₦30,000",
     },
-  ];
+  };
+
+  const serviceDetails = React.useMemo(() => {
+    const bases = dbServices.filter(s => s.category === 'Base');
+    const keys = ["residential", "commercial", "move", "airbnb", "tenancy"];
+    
+    const mapped = bases.map(s => {
+      const key = getLayoutKey(s.name);
+      const assets = layoutAssets[key];
+      return {
+        id: key,
+        title: s.name,
+        dbName: s.name,
+        tag: assets.tag,
+        icon: assets.icon,
+        image: assets.image,
+        features: assets.features,
+        description: s.description || assets.defaultDesc,
+        pricing: `From ${region.symbol}${s.rate}${region.id === "UK" ? (s.type === "hourly" ? "/hr" : "") : ""}`,
+      };
+    });
+
+    // Fallback if layout key is missing
+    keys.forEach(k => {
+      if (!mapped.some(m => m.id === k)) {
+        const assets = layoutAssets[k];
+        mapped.push({
+          id: k,
+          title: assets.defaultName,
+          dbName: assets.defaultName,
+          tag: assets.tag,
+          icon: assets.icon,
+          image: assets.image,
+          features: assets.features,
+          description: assets.defaultDesc,
+          pricing: region.id === "UK" ? assets.defaultRateUK : assets.defaultRateNG,
+        });
+      }
+    });
+
+    return mapped.sort((a, b) => keys.indexOf(a.id) - keys.indexOf(b.id));
+  }, [dbServices, region]);
 
   const containerVariants = {
     hidden: { opacity: 0 },

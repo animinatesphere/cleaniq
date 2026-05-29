@@ -54,6 +54,14 @@ const ServicesManagement = () => {
     setServices(prev => prev.map(s => s._id === id ? { ...s, name: newName, originalCategory: s.originalCategory || s.category } : s));
   };
 
+  const handleDescriptionChange = (id, newDesc) => {
+    setServices(prev => prev.map(s => s._id === id ? { ...s, description: newDesc } : s));
+  };
+
+  const handleTypeChange = (id, newType) => {
+    setServices(prev => prev.map(s => s._id === id ? { ...s, type: newType } : s));
+  };
+
   const saveService = async (service) => {
     setSaving(true);
     try {
@@ -165,9 +173,26 @@ const ServicesManagement = () => {
                     className="font-black text-primary-dark bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl px-3 py-2 text-sm transition-all w-full mb-1 cursor-text"
                     title="Click to edit name"
                   />
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">{service.type} rate</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Rate Type:</span>
+                    <select
+                      value={service.type}
+                      onChange={(e) => handleTypeChange(service._id, e.target.value)}
+                      className="text-[9px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white rounded-lg px-2 py-0.5 outline-none transition-all cursor-pointer"
+                    >
+                      <option value="flat">Flat</option>
+                      <option value="hourly">Hourly</option>
+                    </select>
+                  </div>
+                  <textarea
+                    value={service.description || ''}
+                    onChange={(e) => handleDescriptionChange(service._id, e.target.value)}
+                    placeholder="Enter brief description..."
+                    className="font-medium text-slate-500 bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl px-3 py-2 text-xs transition-all w-full mt-2 h-16 resize-none cursor-text"
+                    title="Click to edit description"
+                  />
                 </div>
-                <button onClick={() => deleteService(service._id)} className="p-2 text-slate-200 hover:text-rose-500 transition-colors"><Trash2 size={16}/></button>
+                <button onClick={() => deleteService(service._id)} className="p-2 text-slate-200 hover:text-rose-500 transition-colors shrink-0"><Trash2 size={16}/></button>
               </div>
               
               <div className="flex gap-2">

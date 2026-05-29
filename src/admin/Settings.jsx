@@ -145,16 +145,37 @@ const Settings = () => {
                     <div key={s._id} className="p-6 rounded-3xl border border-slate-100 bg-white flex items-center justify-between group">
                       <div className="flex-1">
                         {editingServiceId === s._id ? (
-                          <div className="flex flex-wrap gap-3">
-                            <input type="text" value={editServiceData.name} onChange={e => setEditServiceData({...editServiceData, name: e.target.value})} className="p-2 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm" />
-                            <input type="number" value={editServiceData.rate} onChange={e => setEditServiceData({...editServiceData, rate: e.target.value})} className="p-2 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm w-24" />
-                            <button onClick={() => handleUpdateService(s._id)} className="p-2 bg-primary text-white rounded-xl"><Check size={18}/></button>
-                            <button onClick={() => setEditingServiceId(null)} className="p-2 bg-slate-200 text-slate-600 rounded-xl"><X size={18}/></button>
+                          <div className="flex flex-col gap-3 w-full max-w-lg">
+                            <div className="flex flex-wrap gap-3">
+                              <input type="text" value={editServiceData.name} onChange={e => setEditServiceData({...editServiceData, name: e.target.value})} className="p-2 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm flex-1" placeholder="Name" />
+                              <input type="number" value={editServiceData.rate} onChange={e => setEditServiceData({...editServiceData, rate: e.target.value})} className="p-2 rounded-xl bg-slate-50 border border-slate-200 font-bold text-sm w-24" placeholder="Rate" />
+                            </div>
+                            <div className="flex flex-wrap gap-3">
+                              <select value={editServiceData.type} onChange={e => setEditServiceData({...editServiceData, type: e.target.value})} className="p-2 rounded-xl bg-slate-50 border border-slate-200 font-bold text-xs flex-1">
+                                <option value="flat">Flat Rate</option>
+                                <option value="hourly">Hourly Rate</option>
+                              </select>
+                              <select value={editServiceData.category} onChange={e => setEditServiceData({...editServiceData, category: e.target.value})} className="p-2 rounded-xl bg-slate-50 border border-slate-200 font-bold text-xs flex-1">
+                                <option value="Base">Base</option>
+                                <option value="Rooms">Rooms</option>
+                                <option value="Extras">Extras</option>
+                              </select>
+                              <select value={editServiceData.region} onChange={e => setEditServiceData({...editServiceData, region: e.target.value})} className="p-2 rounded-xl bg-slate-50 border border-slate-200 font-bold text-xs flex-1">
+                                <option value="UK">UK (GBP)</option>
+                                <option value="NG">NG (NGN)</option>
+                              </select>
+                            </div>
+                            <textarea value={editServiceData.description || ''} onChange={e => setEditServiceData({...editServiceData, description: e.target.value})} className="p-3 rounded-xl bg-slate-50 border border-slate-200 font-medium text-xs h-16 w-full resize-none" placeholder="Description..." />
+                            <div className="flex gap-2 justify-end">
+                              <button onClick={() => handleUpdateService(s._id)} className="p-2 px-4 bg-primary text-white rounded-xl text-xs font-bold flex items-center gap-1"><Check size={14}/> Save</button>
+                              <button onClick={() => setEditingServiceId(null)} className="p-2 px-4 bg-slate-200 text-slate-600 rounded-xl text-xs font-bold flex items-center gap-1"><X size={14}/> Cancel</button>
+                            </div>
                           </div>
                         ) : (
                           <div>
                             <p className="font-bold text-primary-dark">{s.name}</p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{s.region} • {s.region === 'UK' ? '£' : '₦'}{s.rate}/hr</p>
+                            {s.description && <p className="text-xs text-slate-500 mt-1 mb-2 leading-relaxed">{s.description}</p>}
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{s.region} • {s.category || 'Extras'} • {s.region === 'UK' ? '£' : '₦'}{s.rate}/{s.type === 'hourly' ? 'hr' : 'flat'}</p>
                           </div>
                         )}
                       </div>

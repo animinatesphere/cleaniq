@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import LoadingOverlay from "../component/LoadingOverlay";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRegion } from "../context/RegionContext";
@@ -38,78 +38,7 @@ import StripePayment from "../component/StripePayment";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-const serviceOptions = [
-  {
-    id: "Residential Cleaning",
-    title: "Residential Cleaning",
-    tag: "Reliable domestic cleaners",
-    bullets: [
-      "Dusting of all surfaces.",
-      "Vacuuming & Mopping.",
-      "Kitchen degreasing.",
-      "Bathroom sanitization.",
-      "Bed making & tidying.",
-      "Trash removal.",
-    ],
-    icon: <Heart />,
-  },
-  {
-    id: "Deep Clean",
-    title: "Deep Clean",
-    tag: "Deep cleaning",
-    bullets: [
-      "Inside cabinets & drawers.",
-      "Baseboard scrubbing.",
-      "Door frame cleaning.",
-      "Wall spot cleaning.",
-      "Appliance deep clean.",
-      "End-of-tenancy guarantee.",
-    ],
-    icon: <Zap />,
-  },
-  {
-    id: "Airbnb Cleaning",
-    title: "Airbnb Cleaning",
-    tag: "Short-let specialist",
-    bullets: [
-      "Linen & towel change.",
-      "Guest amenity restock.",
-      "Photo-verified check.",
-      "Damage reporting.",
-      "Inventory monitoring.",
-      "5-star turnover prep.",
-    ],
-    icon: <Star />,
-  },
-  {
-    id: "Office Cleaning",
-    title: "Office Cleaning",
-    tag: "Expert office cleaning",
-    bullets: [
-      "Workstation sanitization.",
-      "Communal area cleaning.",
-      "Restroom maintenance.",
-      "Window cleaning.",
-      "Carpet deep clean.",
-      "Disinfection services.",
-    ],
-    icon: <Briefcase />,
-  },
-  {
-    id: "End of Tenancy",
-    title: "End of Tenancy",
-    tag: "Moving out/in clean",
-    bullets: [
-      "Full property deep clean.",
-      "Inside all appliances.",
-      "Window & frame cleaning.",
-      "Carpet steam cleaning.",
-      "Deposit back guarantee.",
-      "Move-in ready finish.",
-    ],
-    icon: <Truck />,
-  },
-];
+
 
 const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -281,6 +210,123 @@ const Booking = () => {
   const [dynamicRates, setDynamicRates] = useState({});
   const [servicesList, setServicesList] = useState([]);
   const [, setLoadingRates] = useState(true);
+  
+  const dynamicServiceOptions = React.useMemo(() => {
+    const bases = servicesList.filter(s => s.category === 'Base');
+    const keys = ["residential", "commercial", "move", "airbnb", "tenancy"];
+    
+    const optionAssets = {
+      residential: {
+        tag: "Reliable domestic cleaners",
+        bullets: [
+          "Dusting of all surfaces.",
+          "Vacuuming & Mopping.",
+          "Kitchen degreasing.",
+          "Bathroom sanitization.",
+          "Bed making & tidying.",
+          "Trash removal.",
+        ],
+        icon: <Heart />,
+        defaultId: "Residential Cleaning",
+        defaultTitle: "Residential Cleaning",
+      },
+      commercial: {
+        tag: "Expert office cleaning",
+        bullets: [
+          "Workstation sanitization.",
+          "Communal area cleaning.",
+          "Restroom maintenance.",
+          "Window cleaning.",
+          "Carpet deep clean.",
+          "Disinfection services.",
+        ],
+        icon: <Briefcase />,
+        defaultId: "Office Cleaning",
+        defaultTitle: "Office Cleaning",
+      },
+      move: {
+        tag: "Deep cleaning",
+        bullets: [
+          "Inside cabinets & drawers.",
+          "Baseboard scrubbing.",
+          "Door frame cleaning.",
+          "Wall spot cleaning.",
+          "Appliance deep clean.",
+          "End-of-tenancy guarantee.",
+        ],
+        icon: <Zap />,
+        defaultId: "Deep Clean",
+        defaultTitle: "Deep Clean",
+      },
+      airbnb: {
+        tag: "Short-let specialist",
+        bullets: [
+          "Linen & towel change.",
+          "Guest amenity restock.",
+          "Photo-verified check.",
+          "Damage reporting.",
+          "Inventory monitoring.",
+          "5-star turnover prep.",
+        ],
+        icon: <Star />,
+        defaultId: "Airbnb Cleaning",
+        defaultTitle: "Airbnb Cleaning",
+      },
+      tenancy: {
+        tag: "Moving out/in clean",
+        bullets: [
+          "Full property deep clean.",
+          "Inside all appliances.",
+          "Window & frame cleaning.",
+          "Carpet steam cleaning.",
+          "Deposit back guarantee.",
+          "Move-in ready finish.",
+        ],
+        icon: <Truck />,
+        defaultId: "End of Tenancy",
+        defaultTitle: "End of Tenancy",
+      },
+    };
+
+    const getLayoutKey = (name) => {
+      const cleanName = (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (cleanName.includes("residential") || cleanName.includes("domestic") || cleanName.includes("home") || cleanName.includes("house")) return "residential";
+      if (cleanName.includes("office") || cleanName.includes("commercial") || cleanName.includes("workspace") || cleanName.includes("business")) return "commercial";
+      if (cleanName.includes("deep") || cleanName.includes("thorough")) return "move";
+      if (cleanName.includes("airbnb") || cleanName.includes("short") || cleanName.includes("holiday")) return "airbnb";
+      if (cleanName.includes("tenancy") || cleanName.includes("moveout") || cleanName.includes("movein") || cleanName.includes("moving")) return "tenancy";
+      return "residential";
+    };
+
+    const mapped = bases.map(s => {
+      const key = getLayoutKey(s.name);
+      const assets = optionAssets[key];
+      return {
+        id: s.name,
+        title: s.name,
+        tag: assets.tag,
+        bullets: assets.bullets,
+        icon: assets.icon,
+        layoutId: key
+      };
+    });
+
+    keys.forEach(k => {
+      const assets = optionAssets[k];
+      if (!mapped.some(m => m.layoutId === k)) {
+        mapped.push({
+          id: assets.defaultId,
+          title: assets.defaultTitle,
+          tag: assets.tag,
+          bullets: assets.bullets,
+          icon: assets.icon,
+          layoutId: k
+        });
+      }
+    });
+
+    return mapped.sort((a, b) => keys.indexOf(a.layoutId) - keys.indexOf(b.layoutId));
+  }, [servicesList]);
   const [notification, setNotification] = useState(null);
 
   const showNotification = (message, type = "error") => {
@@ -682,7 +728,7 @@ const Booking = () => {
                           What type of cleaning?
                         </h1>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {serviceOptions.map((s) => (
+                          {dynamicServiceOptions.map((s) => (
                             <button
                               key={s.id}
                               onClick={() => {
@@ -913,7 +959,7 @@ const Booking = () => {
                             {(servicesList || [])
                               .filter((s) => {
                                 const baseServices = [
-                                  ...serviceOptions.map((o) => o.id),
+                                  ...dynamicServiceOptions.map((o) => o.id),
                                   "Bedroom",
                                   "Bathroom",
                                   "Kitchen",
