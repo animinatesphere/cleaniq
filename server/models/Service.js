@@ -5,6 +5,7 @@ const serviceSchema = new mongoose.Schema({
   region: { type: String, enum: ['UK', 'NG'], required: true },
   rate: { type: Number, required: true },
   type: { type: String, enum: ['hourly', 'flat'], required: true },
+  category: { type: String, enum: ['Base', 'Rooms', 'Extras'], default: 'Extras' },
   description: String,
   updatedAt: { type: Date, default: Date.now }
 });

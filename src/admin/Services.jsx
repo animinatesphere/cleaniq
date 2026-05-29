@@ -26,10 +26,13 @@ const ServicesManagement = () => {
       const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'];
 
       const mappedData = data.map(s => {
-        let cat = 'Extras';
-        if (baseNames.some(b => clean(b) === clean(s.name))) cat = 'Base';
-        else if (roomNames.some(r => clean(r) === clean(s.name))) cat = 'Rooms';
-        return { ...s, originalCategory: cat };
+        let cat = s.category; // Use backend category if available
+        if (!cat) {
+          cat = 'Extras';
+          if (baseNames.some(b => clean(b) === clean(s.name))) cat = 'Base';
+          else if (roomNames.some(r => clean(r) === clean(s.name))) cat = 'Rooms';
+        }
+        return { ...s, category: cat, originalCategory: cat };
       });
 
       setServices(mappedData);
@@ -62,7 +65,12 @@ const ServicesManagement = () => {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...service, name: service.name.trim(), region: activeRegion })
+        body: JSON.stringify({ 
+          ...service, 
+          name: service.name.trim(), 
+          region: activeRegion,
+          category: service.category || service.originalCategory || 'Extras'
+        })
       });
       if (response.ok) {
         setMessage({ type: 'success', text: `"${service.name}" updated successfully!` });
@@ -85,7 +93,7 @@ const ServicesManagement = () => {
 
   const handleAddFeature = async () => {
     if (!newFeature.name || !newFeature.rate) return;
-    await saveService({ ...newFeature, name: newFeature.name.trim(), region: activeRegion });
+    await saveService({ ...newFeature, name: newFeature.name.trim(), region: activeRegion, category: activeTab });
     setNewFeature({ name: '', rate: '', type: 'flat', description: '' });
   };
 

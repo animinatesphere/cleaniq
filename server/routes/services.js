@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
 // Create or update a service
 router.post('/', async (req, res) => {
   try {
-    const { _id, name, region, rate, type, description } = req.body;
+    const { _id, name, region, rate, type, category, description } = req.body;
     const trimmedName = name?.trim();
 
     let service;
@@ -40,7 +40,7 @@ router.post('/', async (req, res) => {
     if (_id && _id.match(/^[0-9a-fA-F]{24}$/)) {
       service = await Service.findByIdAndUpdate(
         _id,
-        { name: trimmedName, rate, type, description, region, updatedAt: Date.now() },
+        { name: trimmedName, rate, type, category, description, region, updatedAt: Date.now() },
         { new: true }
       );
     }
@@ -49,7 +49,7 @@ router.post('/', async (req, res) => {
     if (!service) {
       service = await Service.findOneAndUpdate(
         { name: trimmedName, region },
-        { rate, type, description, updatedAt: Date.now() },
+        { rate, type, category, description, updatedAt: Date.now() },
         { new: true, upsert: true }
       );
     }
@@ -63,10 +63,10 @@ router.post('/', async (req, res) => {
 // Update a service by ID
 router.put('/:id', async (req, res) => {
   try {
-    const { name, region, rate, type, description } = req.body;
+    const { name, region, rate, type, category, description } = req.body;
     const service = await Service.findByIdAndUpdate(
       req.params.id,
-      { name, region, rate, type, description, updatedAt: Date.now() },
+      { name, region, rate, type, category, description, updatedAt: Date.now() },
       { new: true }
     );
     if (!service) return res.status(404).json({ message: 'Service not found' });
