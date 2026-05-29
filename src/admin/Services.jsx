@@ -21,8 +21,18 @@ const ServicesManagement = () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${activeRegion}`);
       const data = await response.json();
+      const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+      const baseNames = ['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning', 'End of Tenancy'];
+      const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'];
 
-      setServices(data);
+      const mappedData = data.map(s => {
+        let cat = 'Extras';
+        if (baseNames.some(b => clean(b) === clean(s.name))) cat = 'Base';
+        else if (roomNames.some(r => clean(r) === clean(s.name))) cat = 'Rooms';
+        return { ...s, originalCategory: cat };
+      });
+
+      setServices(mappedData);
     } catch (error) {
       console.error('Error fetching services:', error);
     } finally {
@@ -80,17 +90,10 @@ const ServicesManagement = () => {
   };
 
   const categories = (() => {
-    const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-    const baseNames = ['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning', 'End of Tenancy'];
-    const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'];
-
     return {
-      'Base': services.filter(s => baseNames.some(b => clean(b) === clean(s.name))),
-      'Rooms': services.filter(s => roomNames.some(r => clean(r) === clean(s.name))),
-      'Extras': services.filter(s => 
-        !baseNames.some(b => clean(b) === clean(s.name)) && 
-        !roomNames.some(r => clean(r) === clean(s.name))
-      )
+      'Base': services.filter(s => s.originalCategory === 'Base'),
+      'Rooms': services.filter(s => s.originalCategory === 'Rooms'),
+      'Extras': services.filter(s => s.originalCategory === 'Extras' || !s.originalCategory)
     };
   })();
 
