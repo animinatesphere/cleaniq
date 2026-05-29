@@ -138,10 +138,10 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
 
   return (
     <div className="space-y-6">
-      <div className="p-8 rounded-[40px] bg-white border-4 border-primary/10 shadow-xl shadow-primary/5">
-        <div className="flex items-center justify-between mb-6">
+      <div className="p-4 sm:p-8 rounded-[24px] sm:rounded-[40px] bg-white border-2 sm:border-4 border-primary/10 shadow-xl shadow-primary/5 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
               <ShieldCheck size={24} />
             </div>
             <div>
@@ -149,15 +149,15 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Powered by Stripe</p>
             </div>
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center flex-wrap">
             {/* Visa */}
-            <div className="px-2 py-1 bg-white border border-slate-200 rounded-md flex items-center justify-center">
+            <div className="px-2 py-1 bg-white border border-slate-200 rounded-md flex items-center justify-center shrink-0">
               <svg viewBox="0 0 48 16" width="36" height="12" xmlns="http://www.w3.org/2000/svg">
                 <text x="0" y="13" fontFamily="Arial" fontWeight="900" fontSize="14" fill="#1A1F71">VISA</text>
               </svg>
             </div>
             {/* Mastercard */}
-            <div className="px-1.5 py-1 bg-white border border-slate-200 rounded-md flex items-center justify-center">
+            <div className="px-1.5 py-1 bg-white border border-slate-200 rounded-md flex items-center justify-center shrink-0">
               <svg viewBox="0 0 38 24" width="28" height="18" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="14" cy="12" r="10" fill="#EB001B"/>
                 <circle cx="24" cy="12" r="10" fill="#F79E1B"/>
@@ -165,7 +165,7 @@ const StripePayment = ({ amount, currency, onPaymentSuccess, customerInfo }) => 
               </svg>
             </div>
             {/* Verve */}
-            <div className="px-2 py-1 bg-white border border-slate-200 rounded-md flex items-center justify-center">
+            <div className="px-2 py-1 bg-white border border-slate-200 rounded-md flex items-center justify-center shrink-0">
               <svg viewBox="0 0 52 18" width="36" height="12" xmlns="http://www.w3.org/2000/svg">
                 <text x="0" y="13" fontFamily="Arial" fontWeight="900" fontSize="13" fill="#00425F">VERVE</text>
               </svg>

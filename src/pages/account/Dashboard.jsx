@@ -140,9 +140,7 @@ export default function CustomerDashboard() {
   };
 
   const canCancel = (b) => {
-    if (b.status !== 'Confirmed' && b.status !== 'Pending') return false;
-    const d = new Date(b.schedule?.date);
-    return d > new Date();
+    return b.status === 'Confirmed' || b.status === 'Pending';
   };
 
   if (!customer) return null;

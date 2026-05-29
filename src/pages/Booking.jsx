@@ -35,6 +35,7 @@ import { Helmet } from "react-helmet-async";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import StripePayment from "../component/StripePayment";
+import { useCustomerAuth } from "../context/CustomerAuthContext";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -174,6 +175,7 @@ const cleanKey = (str) =>
 
 const Booking = () => {
   const { region } = useRegion();
+  const { customer } = useCustomerAuth();
   const [searchParams] = useSearchParams();
   const preSelectedService = searchParams.get("service");
 
@@ -204,6 +206,18 @@ const Booking = () => {
     specialInstructions: "",
     hasPet: null,
   });
+
+  useEffect(() => {
+    if (customer) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: prev.firstName || customer.firstName || "",
+        lastName: prev.lastName || customer.lastName || "",
+        email: prev.email || customer.email || "",
+        phone: prev.phone || customer.phone || "",
+      }));
+    }
+  }, [customer]);
 
   const [totalPrice, setTotalPrice] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1288,7 +1302,7 @@ const Booking = () => {
                             </p>
                           </div>
                         ) : (
-                          <div className="bg-primary/5 p-6 rounded-[32px] border border-primary/10 animate-in slide-in-from-bottom-4">
+                          <div className="bg-primary/5 p-6 rounded-[32px] border border-primary/10">
                             <div className="flex items-center gap-3 text-[10px] font-black text-primary uppercase tracking-widest mb-4">
                               <ShieldCheck size={18} />
                               Securely processed by Stripe

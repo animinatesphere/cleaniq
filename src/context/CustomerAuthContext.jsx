@@ -23,6 +23,31 @@ export const CustomerAuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  const sendOtp = async ({ firstName, lastName, email, phone, password }) => {
+    const res = await fetch(`${API}/customer-auth/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName, lastName, email, phone, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
+    return data;
+  };
+
+  const verifyOtp = async ({ email, code }) => {
+    const res = await fetch(`${API}/customer-auth/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'OTP Verification failed');
+    localStorage.setItem('ciq_customer_token', data.token);
+    localStorage.setItem('ciq_customer_data', JSON.stringify(data.customer));
+    setCustomer(data.customer);
+    return data.customer;
+  };
+
   const register = async ({ firstName, lastName, email, phone, password }) => {
     const res = await fetch(`${API}/customer-auth/register`, {
       method: 'POST',
@@ -72,7 +97,7 @@ export const CustomerAuthProvider = ({ children }) => {
   };
 
   return (
-    <CustomerAuthContext.Provider value={{ customer, loading, register, login, logout, getToken, authFetch }}>
+    <CustomerAuthContext.Provider value={{ customer, loading, register, login, logout, getToken, authFetch, sendOtp, verifyOtp }}>
       {children}
     </CustomerAuthContext.Provider>
   );
