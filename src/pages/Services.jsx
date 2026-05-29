@@ -35,9 +35,29 @@ const Services = () => {
         );
         const data = await response.json();
         const ratesObj = {};
+
+        // Build exact-match map first
         data.forEach((service) => {
           ratesObj[cleanKey(service.name)] = service.rate;
         });
+
+        // Also add fuzzy aliases: for each DB service, if its cleanKey is a
+        // substring of a display name cleanKey (or vice versa), register that too.
+        const knownDisplayNames = [
+          "Residential Cleaning", "Office Cleaning", "Deep Clean",
+          "Airbnb Cleaning", "End of Tenancy"
+        ];
+        knownDisplayNames.forEach((displayName) => {
+          const dk = cleanKey(displayName);
+          if (ratesObj[dk] !== undefined) return; // already matched exactly
+          // Find the best fuzzy match from the DB services
+          const match = data.find((s) => {
+            const sk = cleanKey(s.name);
+            return sk.includes(dk) || dk.includes(sk);
+          });
+          if (match) ratesObj[dk] = match.rate;
+        });
+
         setDynamicRates(ratesObj);
       } catch (error) {
         console.error("Error fetching rates:", error);

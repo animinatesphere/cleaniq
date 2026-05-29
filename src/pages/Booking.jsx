@@ -345,14 +345,26 @@ const Booking = () => {
 
         setServicesList(data);
         const ratesObj = {};
-        const clean = (str) =>
-          str
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, "")
-            .trim();
+        // Exact-match lookup first
         data.forEach((service) => {
           ratesObj[cleanKey(service.name)] = service.rate;
         });
+
+        // Fuzzy alias: cover renamed services so booking prices don't fall back to £0
+        const knownDisplayNames = [
+          "Residential Cleaning", "Office Cleaning", "Deep Clean",
+          "Airbnb Cleaning", "End of Tenancy"
+        ];
+        knownDisplayNames.forEach((displayName) => {
+          const dk = cleanKey(displayName);
+          if (ratesObj[dk] !== undefined) return;
+          const match = data.find((s) => {
+            const sk = cleanKey(s.name);
+            return sk.includes(dk) || dk.includes(sk);
+          });
+          if (match) ratesObj[dk] = match.rate;
+        });
+
         setDynamicRates(ratesObj);
       } catch (error) {
         console.error("Error fetching rates:", error);

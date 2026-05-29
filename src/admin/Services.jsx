@@ -50,7 +50,8 @@ const ServicesManagement = () => {
   };
 
   const handleNameChange = (id, newName) => {
-    setServices(prev => prev.map(s => s._id === id ? { ...s, name: newName } : s));
+    // Keep originalCategory stable when renaming so the service stays in the right tab
+    setServices(prev => prev.map(s => s._id === id ? { ...s, name: newName, originalCategory: s.originalCategory || s.category } : s));
   };
 
   const saveService = async (service) => {
@@ -161,9 +162,10 @@ const ServicesManagement = () => {
                     type="text"
                     value={service.name}
                     onChange={(e) => handleNameChange(service._id, e.target.value)}
-                    className="font-black text-primary-dark group-hover:text-primary bg-transparent border-b border-transparent hover:border-slate-200 focus:border-primary focus:ring-0 outline-none text-sm transition-all w-full py-1 mb-1"
+                    className="font-black text-primary-dark bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl px-3 py-2 text-sm transition-all w-full mb-1 cursor-text"
+                    title="Click to edit name"
                   />
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{service.type} rate</p>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">{service.type} rate</p>
                 </div>
                 <button onClick={() => deleteService(service._id)} className="p-2 text-slate-200 hover:text-rose-500 transition-colors"><Trash2 size={16}/></button>
               </div>
