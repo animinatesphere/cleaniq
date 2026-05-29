@@ -102,6 +102,30 @@ router.post('/cleanup-duplicates', async (req, res) => {
   }
 });
 
+// Migrate Categories (One-time use)
+router.post('/migrate-categories', async (req, res) => {
+  try {
+    const services = await Service.find({});
+    const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+    const baseNames = ['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning', 'End of Tenancy'];
+    const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'];
+    
+    let updated = 0;
+    for (let s of services) {
+      let cat = 'Extras';
+      if (baseNames.some(b => clean(b) === clean(s.name))) cat = 'Base';
+      else if (roomNames.some(r => clean(r) === clean(s.name))) cat = 'Rooms';
+      
+      await Service.updateOne({ _id: s._id }, { $set: { category: cat } });
+      updated++;
+    }
+    
+    res.json({ message: `Migrated ${updated} services successfully.` });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Delete a service
 router.delete('/:id', async (req, res) => {
   try {
