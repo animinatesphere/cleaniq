@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import {
   Calendar, Clock, MapPin, User, MessageCircle, LogOut,
   CheckCircle2, XCircle, AlertCircle, ChevronRight, Send,
-  Sparkles, RefreshCw, Home, Trash2, UserCheck, Package
+  RefreshCw, Trash2, UserCheck, Package, X, Ban
 } from 'lucide-react';
 import { useCustomerAuth } from '../../context/CustomerAuthContext';
 import { useRegion } from '../../context/RegionContext';
@@ -35,6 +35,8 @@ export default function CustomerDashboard() {
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
   const [cancelError, setCancelError] = useState('');
+  const [cancelModal, setCancelModal] = useState(null); // booking to cancel
+  const [successToast, setSuccessToast] = useState('');
 
   // Chat state
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -99,8 +101,10 @@ export default function CustomerDashboard() {
 
   const handleLogout = () => { logout(); navigate('/'); };
 
-  const handleCancel = async (booking) => {
-    if (!window.confirm(`Cancel booking ${booking.bookingId}? This cannot be undone.`)) return;
+  const handleCancel = async () => {
+    const booking = cancelModal;
+    if (!booking) return;
+    setCancelModal(null);
     setCancellingId(booking._id);
     setCancelError('');
     try {
@@ -108,6 +112,8 @@ export default function CustomerDashboard() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       await fetchBookings();
+      setSuccessToast(`Booking #${booking.bookingId} has been cancelled successfully.`);
+      setTimeout(() => setSuccessToast(''), 5000);
     } catch (err) {
       setCancelError(err.message);
     } finally {
@@ -134,7 +140,7 @@ export default function CustomerDashboard() {
   };
 
   const canCancel = (b) => {
-    if (b.status !== 'Confirmed') return false;
+    if (b.status !== 'Confirmed' && b.status !== 'Pending') return false;
     const d = new Date(b.schedule?.date);
     return d > new Date();
   };
@@ -147,6 +153,72 @@ export default function CustomerDashboard() {
         <title>My Dashboard — Cleaniq Services</title>
         <meta name="description" content="Manage your Cleaniq bookings, cancel orders and chat with admin from your personal dashboard." />
       </Helmet>
+
+      {/* ---- SUCCESS TOAST ---- */}
+      <AnimatePresence>
+        {successToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -60, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -60, scale: 0.95 }}
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 bg-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl shadow-emerald-600/30 font-bold text-sm max-w-sm w-[90%]"
+          >
+            <CheckCircle2 size={18} className="shrink-0" />
+            <span>{successToast}</span>
+            <button onClick={() => setSuccessToast('')} className="ml-auto opacity-70 hover:opacity-100"><X size={16} /></button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ---- CANCEL CONFIRMATION MODAL ---- */}
+      <AnimatePresence>
+        {cancelModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setCancelModal(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-white rounded-[32px] p-8 max-w-md w-full shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Ban size={32} className="text-rose-500" />
+              </div>
+              <h2 className="text-xl font-extrabold text-primary-dark text-center mb-2">Cancel this booking?</h2>
+              <p className="text-slate-500 font-bold text-sm text-center mb-1">{cancelModal.service}</p>
+              <p className="text-slate-300 font-bold text-xs text-center mb-6">
+                #{cancelModal.bookingId} &bull; {formatDate(cancelModal.schedule?.date)}
+              </p>
+              <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4 mb-6">
+                <p className="text-rose-600 font-bold text-sm text-center">
+                  ⚠️ This action cannot be undone. Your booking will be permanently cancelled.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setCancelModal(null)}
+                  className="flex-1 py-3.5 rounded-2xl border-2 border-slate-100 text-slate-500 font-black text-sm hover:bg-slate-50 transition-all"
+                >
+                  Keep Booking
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="flex-1 py-3.5 rounded-2xl bg-rose-500 text-white font-black text-sm hover:bg-rose-600 hover:shadow-lg hover:shadow-rose-500/30 transition-all"
+                >
+                  Yes, Cancel It
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Header */}
@@ -285,7 +357,7 @@ export default function CustomerDashboard() {
                         <MessageCircle size={14} /> Chat
                       </button>
                       {canCancel(b) && (
-                        <button onClick={() => handleCancel(b)} disabled={cancellingId === b._id}
+                        <button onClick={() => setCancelModal(b)} disabled={cancellingId === b._id}
                           className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border-2 border-rose-100 text-rose-500 font-black text-xs hover:bg-rose-50 transition-all disabled:opacity-50">
                           <Trash2 size={14} /> {cancellingId === b._id ? 'Cancelling…' : 'Cancel'}
                         </button>
@@ -341,7 +413,7 @@ export default function CustomerDashboard() {
                   {/* Chat header */}
                   <div className="p-5 border-b border-slate-100 flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <Sparkles size={18} className="text-primary" />
+                      <MessageCircle size={18} className="text-primary" />
                     </div>
                     <div>
                       <p className="font-extrabold text-primary-dark text-sm">{selectedBooking.service}</p>

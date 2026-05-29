@@ -26,8 +26,8 @@ router.put('/:id/cancel', verifyCustomer, async (req, res) => {
       return res.status(403).json({ message: 'You can only cancel your own bookings.' });
     }
 
-    // Only allow cancelling Confirmed bookings in the future
-    if (booking.status !== 'Confirmed') {
+    // Only allow cancelling Confirmed or Pending bookings in the future
+    if (booking.status !== 'Confirmed' && booking.status !== 'Pending') {
       return res.status(400).json({ message: `Booking cannot be cancelled (current status: ${booking.status}).` });
     }
     const bookingDate = new Date(booking.schedule?.date);
