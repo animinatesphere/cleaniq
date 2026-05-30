@@ -79,12 +79,28 @@ router.post('/', async (req, res) => {
 // UPDATE a booking (Admin)
 router.put('/:id', async (req, res) => {
   try {
+    const existingBooking = await Booking.findById(req.params.id);
+    if (!existingBooking) return res.status(404).json({ message: 'Booking not found' });
+
+    const wasCompleted = existingBooking.status === 'Completed';
+    const isNowCompleted = req.body.status === 'Completed';
+
     const updatedBooking = await Booking.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
     );
-    if (!updatedBooking) return res.status(404).json({ message: 'Booking not found' });
+
+    // Send Invoice Email if status just changed to Completed
+    if (!wasCompleted && isNowCompleted) {
+      console.log(`✅ Booking ${updatedBooking.bookingId} marked as completed. Sending invoice receipt...`);
+      await sendEmail({
+        to: updatedBooking.customer.email,
+        subject: `Your Cleaniq Invoice & Receipt: ${updatedBooking.bookingId}`,
+        html: templates.invoiceReceipt(updatedBooking)
+      });
+    }
+
     res.json(updatedBooking);
   } catch (err) {
     res.status(400).json({ message: err.message });
