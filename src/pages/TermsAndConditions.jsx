@@ -55,7 +55,7 @@ const sections = [
     icon: <CreditCard size={20} />,
     title: "4. Payments",
     content: [
-      "All prices are displayed in GBP (£) for UK customers  inclusive of applicable taxes where stated.",
+      "All prices are displayed in GBP for UK customers  inclusive of applicable taxes where stated.",
       "Full payment is required at the time of booking. We accept payment via Stripe-powered credit and debit card transactions. We do not store your card details , all payments are securely processed by Stripe.",
       "Prices are subject to change. The price quoted at the time of booking will be honoured for that booking.",
       "Additional charges may apply where the scope of work exceeds what was originally agreed (e.g., a property in significantly worse condition than described). We will notify you and obtain consent before carrying out additional work.",
