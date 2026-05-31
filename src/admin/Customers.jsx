@@ -12,6 +12,8 @@ const Customers = () => {
   const [selected, setSelected] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({});
+  const [customerBookings, setCustomerBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
   const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
 
   // Clear status message after 3 seconds
@@ -36,6 +38,26 @@ const Customers = () => {
   }, []);
 
   useEffect(() => { fetchCustomers(); }, [fetchCustomers]);
+
+  useEffect(() => {
+    if (selected && !isEditing) {
+      const fetchHistory = async () => {
+        setLoadingBookings(true);
+        try {
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/customers/${selected.email}/bookings`);
+          const data = await res.json();
+          setCustomerBookings(data);
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoadingBookings(false);
+        }
+      };
+      fetchHistory();
+    } else {
+      setCustomerBookings([]);
+    }
+  }, [selected, isEditing]);
 
   const handleUpdate = async (dataOverride = null) => {
     try {
@@ -199,7 +221,7 @@ const Customers = () => {
               <button onClick={() => setSelected(null)} className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors"><X size={20} /></button>
             </div>
             
-            <div className="p-6 md:p-8 space-y-6">
+            <div className="p-6 md:p-8 space-y-6 max-h-[60vh] overflow-y-auto no-scrollbar">
               {isEditing ? (
                 <div className="space-y-4">
                   <div className="space-y-1">
@@ -237,6 +259,30 @@ const Customers = () => {
                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Revenue</p>
                       <p className="text-lg font-black text-primary-dark">{selected.region === 'UK' ? '£' : '₦'}{selected.totalSpent?.toLocaleString()}</p>
                     </div>
+                  </div>
+
+                  <div className="text-left mt-8 pt-6 border-t border-slate-100">
+                    <h4 className="text-sm font-black text-primary-dark mb-4 uppercase tracking-widest">Booking History</h4>
+                    {loadingBookings ? (
+                      <p className="text-sm text-slate-400 font-bold animate-pulse">Loading history...</p>
+                    ) : customerBookings.length > 0 ? (
+                      <div className="space-y-3">
+                        {customerBookings.map(b => (
+                          <div key={b._id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-center">
+                            <div>
+                              <p className="font-bold text-sm text-primary-dark">{b.service}</p>
+                              <p className="text-xs text-slate-400 font-bold">{new Date(b.createdAt).toLocaleDateString()}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-black text-primary-dark">{b.payment?.currency === 'GBP' ? '£' : '₦'}{b.payment?.amount}</p>
+                              <span className={`text-[10px] font-black uppercase tracking-widest ${b.status === 'Completed' ? 'text-emerald-500' : b.status === 'Cancelled' ? 'text-rose-500' : 'text-amber-500'}`}>{b.status}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-400 font-bold">No bookings found.</p>
+                    )}
                   </div>
                 </div>
               )}

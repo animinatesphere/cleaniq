@@ -360,6 +360,12 @@ export default function CustomerDashboard() {
                           <Trash2 size={14} /> {cancellingId === b._id ? 'Cancelling…' : 'Cancel'}
                         </button>
                       )}
+                      {b.status === 'Cancelled' && (
+                        <button onClick={() => navigate(`/booking?service=${encodeURIComponent(b.service)}`)}
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border-2 border-emerald-100 text-emerald-600 font-black text-xs hover:bg-emerald-50 transition-all">
+                          <RefreshCw size={14} /> Reschedule
+                        </button>
+                      )}
                     </div>
                   </div>
                 </motion.div>

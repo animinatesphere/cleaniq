@@ -62,4 +62,15 @@ router.put('/:email', async (req, res) => {
   }
 });
 
+// GET customer booking history
+router.get('/:email/bookings', async (req, res) => {
+  try {
+    const { email } = req.params;
+    const bookings = await Booking.find({ "customer.email": email }).sort({ createdAt: -1 });
+    res.json(bookings);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

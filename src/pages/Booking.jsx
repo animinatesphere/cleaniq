@@ -23,6 +23,7 @@ import {
   ArrowRight,
   Truck,
   Key,
+  Lock,
   Car,
   Layout,
   Coffee,
@@ -175,7 +176,7 @@ const cleanKey = (str) =>
 
 const Booking = () => {
   const { region } = useRegion();
-  const { customer } = useCustomerAuth();
+  const { customer, loading: authLoading } = useCustomerAuth();
   const [searchParams] = useSearchParams();
   const preSelectedService = searchParams.get("service");
 
@@ -602,6 +603,49 @@ const Booking = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (authLoading) {
+    return <LoadingOverlay message="Loading account..." />;
+  }
+
+  if (!customer && !isSubmitted) {
+    return (
+      <div className="pt-40 pb-20 min-h-screen bg-[#F8FAFC] flex items-center justify-center px-6 text-center">
+        <Helmet>
+          <title>Account Required — Cleaniq Services</title>
+        </Helmet>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md w-full bg-white p-8 md:p-10 rounded-[32px] shadow-xl shadow-slate-200/50 border border-slate-100"
+        >
+          <div className="w-20 h-20 bg-primary/10 rounded-[24px] flex items-center justify-center mx-auto mb-8">
+            <Lock size={40} className="text-primary" />
+          </div>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-primary-dark mb-4 tracking-tight">
+            Account Required
+          </h1>
+          <p className="text-slate-500 font-bold mb-10 text-sm md:text-base leading-relaxed">
+            Please log in or create a free account to book a cleaning service. This helps us manage your schedule securely.
+          </p>
+          <div className="space-y-4">
+            <Link
+              to="/account/login"
+              className="btn-primary block w-full py-4 font-black rounded-2xl text-sm md:text-base"
+            >
+              Log In
+            </Link>
+            <Link
+              to="/account/signup"
+              className="block w-full py-4 bg-slate-50 text-primary-dark font-black rounded-2xl text-sm md:text-base hover:bg-slate-100 transition-colors"
+            >
+              Create Free Account
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   if (isSubmitted) {
     return (
