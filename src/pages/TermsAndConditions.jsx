@@ -71,9 +71,7 @@ const sections = [
       "Cleaniq Services reserves the right to cancel a booking and issue a full refund if we are unable to fulfil the service for any reason, including but not limited to staff unavailability or access issues.",
       "Once a cleaning service has been completed and marked as 'Completed', no refunds will be issued except where a valid complaint is raised within 24 hours of service completion.",
       "If you wish to reschedule a booking, you may cancel the existing booking via your dashboard and rebook at your convenience.",
-      "24 hours notice prior to the cleaning time is free No cancellation fee.",
-      "8 hours notice prior to the cleaning time should attract a charge.",
-      "The 2 hours notice prior to the schedule time should attract flull payment forfeiture/80% cancellation fee of the payment made.",
+      " 24+ hours’ notice prior to your scheduled cleaning time is free with no cancellation fee. 8–24 hours’ notice will incur a £10 charge. Less than 2 hours’ notice, or failure to provide access, will result in forfeiture of 80% of the payment made.",
     ],
   },
   {
