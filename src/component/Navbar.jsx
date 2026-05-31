@@ -32,6 +32,7 @@ const Navbar = () => {
     { name: 'Services', path: '/services' },
     { name: 'Booking', path: '/booking' },
     { name: 'Join Our Team', path: '/recruitment' },
+    { name: 'Contact', path: '/pages/contact' },
   ];
 
   const isAccountPage = location.pathname.startsWith('/account');

@@ -4,6 +4,7 @@ import Navbar from './component/Navbar';
 import TopNav from './component/TopNav';
 import Footer from './component/Footer';
 import ScrollToTop from './component/ScrollToTop';
+import WhatsAppButton from './component/WhatsAppButton';
 import Preloader from './component/Preloader';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -13,6 +14,7 @@ import Services from './pages/Services';
 import Contact from './pages/Contact';
 import ServiceDetail from './pages/ServiceDetail';
 import LocationDetail from './pages/LocationDetail';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 // Customer Account
 import CustomerLogin from './pages/account/Login';
@@ -56,6 +58,7 @@ function App() {
             <Route path="/pages/contact" element={<Contact />} />
             <Route path="/pages/:serviceSlug" element={<ServiceDetail />} />
             <Route path="/locations/:area" element={<LocationDetail />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
 
             {/* Customer Account Routes */}
             <Route path="/account/login" element={<CustomerLogin />} />
@@ -77,6 +80,7 @@ function App() {
         </main>
 
         {!isAdminPath && !isAccountPath && <Footer />}
+        {!isAdminPath && <WhatsAppButton />}
       </div>
     </CustomerAuthProvider>
   );

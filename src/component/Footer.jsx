@@ -137,7 +137,7 @@ const Footer = () => {
                 <a
                   href={
                     import.meta.env.VITE_GMB_REVIEW_URL ||
-                    "https://g.page/cleaniqservices/review"
+                    "https://g.page/r/CTGJLR1Z7dySEBM/review"
                   }
                   target="_blank"
                   rel="noopener noreferrer"
@@ -157,15 +157,24 @@ const Footer = () => {
             © 2026 Cleaniq Services. PROUDLY ECO-CONSCIOUS.
           </p>
           <div className="flex gap-6">
-            {["Privacy", "Terms", "Cookies"].map((label) => (
-              <a
-                key={label}
-                href="#"
-                className="text-[10px] md:text-xs font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors"
-              >
-                {label}
-              </a>
-            ))}
+            <a
+              href="#"
+              className="text-[10px] md:text-xs font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors"
+            >
+              Privacy
+            </a>
+            <Link
+              to="/terms"
+              className="text-[10px] md:text-xs font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors"
+            >
+              Terms
+            </Link>
+            <a
+              href="#"
+              className="text-[10px] md:text-xs font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors"
+            >
+              Cookies
+            </a>
           </div>
         </div>
       </div>
