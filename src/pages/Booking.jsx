@@ -40,8 +40,6 @@ import { useCustomerAuth } from "../context/CustomerAuthContext";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-
-
 const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
@@ -210,7 +208,7 @@ const Booking = () => {
 
   useEffect(() => {
     if (customer) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         firstName: prev.firstName || customer.firstName || "",
         lastName: prev.lastName || customer.lastName || "",
@@ -225,11 +223,11 @@ const Booking = () => {
   const [dynamicRates, setDynamicRates] = useState({});
   const [servicesList, setServicesList] = useState([]);
   const [, setLoadingRates] = useState(true);
-  
+
   const dynamicServiceOptions = React.useMemo(() => {
-    const bases = servicesList.filter(s => s.category === 'Base');
+    const bases = servicesList.filter((s) => s.category === "Base");
     const keys = ["residential", "commercial", "move", "airbnb", "tenancy"];
-    
+
     const optionAssets = {
       residential: {
         tag: "Reliable domestic cleaners",
@@ -305,44 +303,73 @@ const Booking = () => {
 
     const getLayoutKey = (name) => {
       const cleanName = (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-      if (cleanName.includes("residential") || cleanName.includes("domestic") || cleanName.includes("home") || cleanName.includes("house")) return "residential";
-      if (cleanName.includes("office") || cleanName.includes("commercial") || cleanName.includes("workspace") || cleanName.includes("business")) return "commercial";
-      if (cleanName.includes("deep") || cleanName.includes("thorough")) return "move";
-      if (cleanName.includes("airbnb") || cleanName.includes("short") || cleanName.includes("holiday")) return "airbnb";
-      if (cleanName.includes("tenancy") || cleanName.includes("moveout") || cleanName.includes("movein") || cleanName.includes("moving")) return "tenancy";
+      if (
+        cleanName.includes("residential") ||
+        cleanName.includes("domestic") ||
+        cleanName.includes("home") ||
+        cleanName.includes("house")
+      )
+        return "residential";
+      if (
+        cleanName.includes("office") ||
+        cleanName.includes("commercial") ||
+        cleanName.includes("workspace") ||
+        cleanName.includes("business")
+      )
+        return "commercial";
+      if (cleanName.includes("deep") || cleanName.includes("thorough"))
+        return "move";
+      if (
+        cleanName.includes("airbnb") ||
+        cleanName.includes("short") ||
+        cleanName.includes("holiday")
+      )
+        return "airbnb";
+      if (
+        cleanName.includes("tenancy") ||
+        cleanName.includes("moveout") ||
+        cleanName.includes("movein") ||
+        cleanName.includes("moving")
+      )
+        return "tenancy";
       return "residential";
     };
 
-    const mapped = bases.map(s => {
+    const mapped = bases.map((s) => {
       const key = getLayoutKey(s.name);
       const assets = optionAssets[key];
       // Use live bullets from DB if saved, otherwise fallback to hardcoded defaults
-      const liveBullets = Array.isArray(s.bullets) && s.bullets.length > 0 ? s.bullets : assets.bullets;
+      const liveBullets =
+        Array.isArray(s.bullets) && s.bullets.length > 0
+          ? s.bullets
+          : assets.bullets;
       return {
         id: s.name,
         title: s.name,
         tag: assets.tag,
         bullets: liveBullets,
         icon: assets.icon,
-        layoutId: key
+        layoutId: key,
       };
     });
 
-    keys.forEach(k => {
+    keys.forEach((k) => {
       const assets = optionAssets[k];
-      if (!mapped.some(m => m.layoutId === k)) {
+      if (!mapped.some((m) => m.layoutId === k)) {
         mapped.push({
           id: assets.defaultId,
           title: assets.defaultTitle,
           tag: assets.tag,
           bullets: assets.bullets,
           icon: assets.icon,
-          layoutId: k
+          layoutId: k,
         });
       }
     });
 
-    return mapped.sort((a, b) => keys.indexOf(a.layoutId) - keys.indexOf(b.layoutId));
+    return mapped.sort(
+      (a, b) => keys.indexOf(a.layoutId) - keys.indexOf(b.layoutId),
+    );
   }, [servicesList]);
   const [notification, setNotification] = useState(null);
 
@@ -415,8 +442,11 @@ const Booking = () => {
 
         // Fuzzy alias: cover renamed services so booking prices don't fall back to £0
         const knownDisplayNames = [
-          "Residential Cleaning", "Office Cleaning", "Deep Clean",
-          "Airbnb Cleaning", "End of Tenancy"
+          "Residential Cleaning",
+          "Office Cleaning",
+          "Deep Clean",
+          "Airbnb Cleaning",
+          "End of Tenancy",
         ];
         knownDisplayNames.forEach((displayName) => {
           const dk = cleanKey(displayName);
@@ -626,7 +656,8 @@ const Booking = () => {
             Account Required
           </h1>
           <p className="text-slate-500 font-bold mb-10 text-sm md:text-base leading-relaxed">
-            Please log in or create a free account to book a cleaning service. This helps us manage your schedule securely.
+            Please log in or create a free account to book a cleaning service.
+            This helps us manage your schedule securely.
           </p>
           <div className="space-y-4">
             <Link
@@ -689,9 +720,9 @@ const Booking = () => {
         />
       </Helmet>
       {isSubmitting && <LoadingOverlay message="Confirming..." />}
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12">
         {/* Progress Bar */}
-        <div className="flex justify-between items-center mb-6 md:mb-10 bg-white p-2 md:p-5 rounded-[20px] md:rounded-[24px] shadow-sm border border-slate-100 overflow-x-auto no-scrollbar sticky top-32 z-40">
+        <div className="flex justify-between items-center mb-6 md:mb-10 bg-white p-2 md:p-5 rounded-[20px] md:rounded-3xl shadow-sm border border-slate-100 overflow-x-auto no-scrollbar sticky top-32 z-40">
           {steps.map((s, idx) => (
             <div key={s.id} className="flex items-center shrink-0">
               <div

@@ -263,7 +263,7 @@ const About = () => {
                       Office Location
                     </p>
                     <p className="text-lg font-bold">
-                      Manchester, United Kingdom.
+                    First Floor, Swan Buildings, 20 Swan St, Manchester M4 5JW, United Kingdom
                     </p>
                   </div>
                 </div>

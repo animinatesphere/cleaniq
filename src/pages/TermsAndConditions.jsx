@@ -34,7 +34,7 @@ const sections = [
     title: "2. Our Services",
     content: [
       "Cleaniq Services provides professional cleaning services including, but not limited to: Residential Cleaning, Deep Cleaning, End of Tenancy Cleaning, Airbnb & Short-Let Turnover Cleaning, Office & Commercial Cleaning, and Post-Construction Cleaning.",
-      "All services are provided within the Greater Manchester area and surrounding regions of the United Kingdom, as well as select service areas in Nigeria as indicated on our website.",
+      "All services are provided within the Greater Manchester area and surrounding regions of the United Kingdom.",
       "We reserve the right to refuse service to any individual or property at our sole discretion, including situations where our staff's safety may be at risk.",
       "Service availability is subject to cleaner availability and confirmed upon booking. We will make every reasonable effort to honour confirmed bookings but cannot guarantee specific staff assignments.",
     ],
@@ -55,8 +55,8 @@ const sections = [
     icon: <CreditCard size={20} />,
     title: "4. Payments",
     content: [
-      "All prices are displayed in GBP (£) for UK customers and NGN (₦) for Nigerian customers, inclusive of applicable taxes where stated.",
-      "Full payment is required at the time of booking. We accept payment via Stripe-powered credit and debit card transactions. We do not store your card details — all payments are securely processed by Stripe.",
+      "All prices are displayed in GBP (£) for UK customers  inclusive of applicable taxes where stated.",
+      "Full payment is required at the time of booking. We accept payment via Stripe-powered credit and debit card transactions. We do not store your card details , all payments are securely processed by Stripe.",
       "Prices are subject to change. The price quoted at the time of booking will be honoured for that booking.",
       "Additional charges may apply where the scope of work exceeds what was originally agreed (e.g., a property in significantly worse condition than described). We will notify you and obtain consent before carrying out additional work.",
     ],
@@ -71,6 +71,9 @@ const sections = [
       "Cleaniq Services reserves the right to cancel a booking and issue a full refund if we are unable to fulfil the service for any reason, including but not limited to staff unavailability or access issues.",
       "Once a cleaning service has been completed and marked as 'Completed', no refunds will be issued except where a valid complaint is raised within 24 hours of service completion.",
       "If you wish to reschedule a booking, you may cancel the existing booking via your dashboard and rebook at your convenience.",
+      "24 hours notice prior to the cleaning time is free No cancellation fee.",
+      "8 hours notice prior to the cleaning time should attract a charge.",
+      "The 2 hours notice prior to the schedule time should attract flull payment forfeiture/80% cancellation fee of the payment made.",
     ],
   },
   {
@@ -152,7 +155,10 @@ const AccordionItem = ({ section }) => {
       {open && (
         <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-4 border-t border-slate-50">
           {section.content.map((para, i) => (
-            <p key={i} className="text-slate-600 text-sm md:text-base leading-relaxed font-medium">
+            <p
+              key={i}
+              className="text-slate-600 text-sm md:text-base leading-relaxed font-medium"
+            >
               {para}
             </p>
           ))}
@@ -174,8 +180,7 @@ const TermsAndConditions = () => {
         <link rel="canonical" href="https://www.cleaniqservices.com/terms" />
       </Helmet>
 
-      <div className="max-w-4xl mx-auto px-4 md:px-8">
-
+      <div className="max-w-5xl mx-auto px-4 md:px-8 mt-12">
         {/* Hero Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -191,7 +196,8 @@ const TermsAndConditions = () => {
             Terms & Conditions
           </h1>
           <p className="text-slate-500 font-bold text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-            Please read these terms carefully before using Cleaniq Services. By booking with us, you agree to be bound by the following conditions.
+            Please read these terms carefully before using Cleaniq Services. By
+            booking with us, you agree to be bound by the following conditions.
           </p>
           <p className="mt-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">
             Last Updated: {LAST_UPDATED}
@@ -203,20 +209,44 @@ const TermsAndConditions = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12"
+          className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-12"
         >
           {[
-            { icon: <RefreshCw size={20} />, title: "Full Refunds", desc: "Cancel any time and receive a full refund to your card." },
-            { icon: <Lock size={20} />, title: "Secure Payments", desc: "All transactions are encrypted and processed by Stripe." },
-            { icon: <ShieldCheck size={20} />, title: "Fully Insured", desc: "We carry public liability insurance on every job." },
+            {
+              icon: <RefreshCw size={20} />,
+              title: "Full Refunds",
+              desc: "Cancel any time and receive a full refund to your card.",
+            },
+            {
+              icon: <Lock size={20} />,
+              title: "Secure Payments",
+              desc: "All transactions are encrypted and processed by Stripe.",
+            },
+            {
+              icon: <ShieldCheck size={20} />,
+              title: "Fully Insured",
+              desc: "We carry public liability insurance on every job.",
+            },
+            {
+              icon: <ShieldCheck size={20} />,
+              title: "DBS Checked",
+              desc: "Our team members hold DBS checks to the level required for their role",
+            },
           ].map((card) => (
-            <div key={card.title} className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm flex gap-4 items-start">
+            <div
+              key={card.title}
+              className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm flex gap-4 items-start"
+            >
               <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                 {card.icon}
               </div>
               <div>
-                <p className="font-black text-primary-dark text-sm">{card.title}</p>
-                <p className="text-slate-500 text-xs font-medium mt-1 leading-relaxed">{card.desc}</p>
+                <p className="font-black text-primary-dark text-sm">
+                  {card.title}
+                </p>
+                <p className="text-slate-500 text-xs font-medium mt-1 leading-relaxed">
+                  {card.desc}
+                </p>
               </div>
             </div>
           ))}
@@ -240,7 +270,8 @@ const TermsAndConditions = () => {
             Have a question about our terms?
           </h3>
           <p className="text-slate-400 font-bold text-sm mb-8 max-w-md mx-auto">
-            Our team is happy to clarify anything. Reach out to us directly and we'll get back to you promptly.
+            Our team is happy to clarify anything. Reach out to us directly and
+            we'll get back to you promptly.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a
@@ -257,10 +288,11 @@ const TermsAndConditions = () => {
             </a>
           </div>
           <p className="mt-8 text-slate-500 text-xs font-bold">
-            <Link to="/" className="text-primary hover:underline">← Back to Home</Link>
+            <Link to="/" className="text-primary hover:underline">
+              ← Back to Home
+            </Link>
           </p>
         </motion.div>
-
       </div>
     </div>
   );
