@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Trash2, Edit2, Plus, Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  Trash2,
+  Edit2,
+  Plus,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import LoadingOverlay from "../component/LoadingOverlay";
 import { motion } from "framer-motion";
 
@@ -101,7 +109,9 @@ const AdminBlog = () => {
         throw new Error("Failed to save blog post");
       }
 
-      const message = editingId ? "Post updated successfully!" : "Post created successfully!";
+      const message = editingId
+        ? "Post updated successfully!"
+        : "Post created successfully!";
       setSuccessMessage(message);
       setTimeout(() => setSuccessMessage(""), 3000);
 
@@ -141,7 +151,12 @@ const AdminBlog = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this post? This action cannot be undone.")) return;
+    if (
+      !confirm(
+        "Are you sure you want to delete this post? This action cannot be undone.",
+      )
+    )
+      return;
 
     try {
       const response = await fetch(`${API_URL}/api/blog/${id}`, {
@@ -179,7 +194,7 @@ const AdminBlog = () => {
     return <LoadingOverlay message="Loading blog posts..." />;
   }
 
-  const publishedCount = posts.filter(p => p.published).length;
+  const publishedCount = posts.filter((p) => p.published).length;
   const draftCount = posts.length - publishedCount;
 
   return (
@@ -207,13 +222,22 @@ const AdminBlog = () => {
           </h1>
           <div className="flex gap-6 text-sm font-bold">
             <span className="text-slate-600">
-              <span className="text-lg text-primary font-black">{posts.length}</span> Total Posts
+              <span className="text-lg text-primary font-black">
+                {posts.length}
+              </span>{" "}
+              Total Posts
             </span>
             <span className="text-slate-600">
-              <span className="text-lg text-green-600 font-black">{publishedCount}</span> Published
+              <span className="text-lg text-green-600 font-black">
+                {publishedCount}
+              </span>{" "}
+              Published
             </span>
             <span className="text-slate-600">
-              <span className="text-lg text-amber-600 font-black">{draftCount}</span> Drafts
+              <span className="text-lg text-amber-600 font-black">
+                {draftCount}
+              </span>{" "}
+              Drafts
             </span>
           </div>
         </div>
@@ -332,7 +356,9 @@ const AdminBlog = () => {
                   alt="Preview"
                   className="w-full h-48 rounded-xl object-cover border-2 border-primary/30"
                 />
-                <p className="text-xs text-slate-500 mt-2 font-bold">Image Preview</p>
+                <p className="text-xs text-slate-500 mt-2 font-bold">
+                  Image Preview
+                </p>
               </div>
             )}
 
@@ -350,7 +376,9 @@ const AdminBlog = () => {
                 className="w-full p-4 rounded-xl border-2 border-slate-200 bg-white focus:border-primary focus:outline-none font-medium resize-none transition-colors"
               />
               <p className="text-xs text-slate-500 mt-1 font-bold">
-                Approximately {Math.ceil((formData.content.split(/\s+/).length || 0) / 200)} min read
+                Approximately{" "}
+                {Math.ceil((formData.content.split(/\s+/).length || 0) / 200)}{" "}
+                min read
               </p>
             </div>
 
@@ -364,8 +392,13 @@ const AdminBlog = () => {
                 id="published"
                 className="w-5 h-5 cursor-pointer accent-primary"
               />
-              <label htmlFor="published" className="font-black text-primary-dark cursor-pointer">
-                {formData.published ? "🟢 Publish immediately" : "🔴 Save as draft"}
+              <label
+                htmlFor="published"
+                className="font-black text-primary-dark cursor-pointer"
+              >
+                {formData.published
+                  ? "🟢 Publish immediately"
+                  : "🔴 Save as draft"}
               </label>
             </div>
 
@@ -436,11 +469,14 @@ const AdminBlog = () => {
                           {post.title}
                         </h3>
                         <p className="text-sm text-slate-500 font-bold">
-                          {new Date(post.createdAt).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
+                          {new Date(post.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            },
+                          )}
                         </p>
                       </div>
                       {post.published ? (
@@ -488,237 +524,6 @@ const AdminBlog = () => {
               </motion.div>
             ))}
           </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default AdminBlog;
-          </h2>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Title */}
-            <div>
-              <label className="block text-sm font-bold text-primary-dark mb-2">
-                Post Title *
-              </label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                placeholder="Enter blog post title"
-                className="w-full p-4 rounded-xl border-2 border-transparent bg-slate-50 focus:border-primary outline-none font-medium"
-              />
-            </div>
-
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-bold text-primary-dark mb-2">
-                Description *
-              </label>
-              <input
-                type="text"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Short description (appears in list view)"
-                className="w-full p-4 rounded-xl border-2 border-transparent bg-slate-50 focus:border-primary outline-none font-medium"
-              />
-              <p className="text-xs text-slate-400 mt-1">
-                This will show on the blog listing page
-              </p>
-            </div>
-
-            {/* Content */}
-            <div>
-              <label className="block text-sm font-bold text-primary-dark mb-2">
-                Full Content
-              </label>
-              <textarea
-                name="content"
-                value={formData.content}
-                onChange={handleInputChange}
-                placeholder="Full blog post content (optional)"
-                rows="6"
-                className="w-full p-4 rounded-xl border-2 border-transparent bg-slate-50 focus:border-primary outline-none font-medium resize-none"
-              />
-            </div>
-
-            {/* Image Upload */}
-            <div>
-              <label className="block text-sm font-bold text-primary-dark mb-2">
-                Featured Image {!editingId && "*"}
-              </label>
-              <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-primary transition-colors">
-                <input
-                  type="file"
-                  name="image"
-                  onChange={handleImageChange}
-                  accept="image/*"
-                  className="hidden"
-                  id="imageInput"
-                />
-                <label htmlFor="imageInput" className="cursor-pointer">
-                  {imagePreview ? (
-                    <div className="space-y-3">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="max-h-40 mx-auto rounded-lg object-cover"
-                      />
-                      <p className="text-sm text-slate-500">
-                        Click to change image
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-slate-600 font-bold">
-                        Click to upload image
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        PNG, JPG, GIF, WEBP up to 5MB
-                      </p>
-                    </div>
-                  )}
-                </label>
-              </div>
-            </div>
-
-            {/* Author */}
-            <div>
-              <label className="block text-sm font-bold text-primary-dark mb-2">
-                Author Name
-              </label>
-              <input
-                type="text"
-                name="author"
-                value={formData.author}
-                onChange={handleInputChange}
-                placeholder="Author name"
-                className="w-full p-4 rounded-xl border-2 border-transparent bg-slate-50 focus:border-primary outline-none font-medium"
-              />
-            </div>
-
-            {/* Published Toggle */}
-            <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
-              <input
-                type="checkbox"
-                name="published"
-                checked={formData.published}
-                onChange={handleInputChange}
-                id="published"
-                className="w-5 h-5 cursor-pointer"
-              />
-              <label
-                htmlFor="published"
-                className="font-bold text-primary-dark cursor-pointer"
-              >
-                Publish immediately
-              </label>
-            </div>
-
-            {/* Submit Buttons */}
-            <div className="flex gap-3 justify-end">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="px-6 py-3 rounded-full font-bold border-2 border-slate-200 text-slate-600 hover:border-slate-300 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="btn-primary px-8 py-3 rounded-full text-sm font-bold flex items-center gap-2"
-              >
-                {editingId ? "Update Post" : "Create Post"}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Posts List */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold text-primary-dark mb-4">
-          Blog Posts ({posts.length})
-        </h2>
-
-        {posts.length === 0 ? (
-          <div className="bg-white rounded-3xl p-12 text-center border border-slate-100">
-            <p className="text-slate-400 font-bold">
-              No blog posts yet. Create one to get started!
-            </p>
-          </div>
-        ) : (
-          posts.map((post) => (
-            <div
-              key={post._id}
-              className="bg-white rounded-2xl p-6 border border-slate-100 hover:shadow-md transition-shadow"
-            >
-              <div className="flex gap-6">
-                {post.image && (
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-24 h-24 rounded-lg object-cover flex-shrink-0"
-                  />
-                )}
-
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="text-lg font-bold text-primary-dark">
-                        {post.title}
-                      </h3>
-                      <p className="text-sm text-slate-500">
-                        {new Date(post.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      {post.published ? (
-                        <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
-                          <Eye size={14} />
-                          Published
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold">
-                          <EyeOff size={14} />
-                          Draft
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-slate-600 mb-3 line-clamp-2">
-                    {post.description}
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-slate-400">
-                      By {post.author} • {post.views || 0} views
-                    </p>
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(post)}
-                        className="p-2 hover:bg-blue-50 rounded-lg transition-colors text-blue-600"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(post._id)}
-                        className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-600"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
         )}
       </div>
     </div>
