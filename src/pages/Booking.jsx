@@ -378,13 +378,11 @@ const Booking = () => {
   const [notification, setNotification] = useState(null);
   const [guestCheckoutInModal, setGuestCheckoutInModal] = useState(false);
   const showAuthModal =
-    (step === 4 && !customer && !isSubmitted) ||
-    (guestCheckoutInModal && step === 4 && !isSubmitted);
+    step === 4 && !customer && !guestCheckoutInModal && !isSubmitted;
 
   useEffect(() => {
     if (step === 4) {
       // debug: log booking modal state
-      // eslint-disable-next-line no-console
       console.log(
         "[Booking] step=",
         step,
@@ -1369,7 +1367,7 @@ const Booking = () => {
                               <ShieldCheck size={18} />
                               Securely processed by Stripe
                             </div>
-                            {!customer ? (
+                            {!customer && !guestCheckoutInModal ? (
                               <div className="p-6 bg-white rounded-2xl border border-slate-100 text-center">
                                 <p className="font-extrabold text-primary-dark mb-2">
                                   Account required to pay
@@ -1596,140 +1594,67 @@ const Booking = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-primary-dark/70 backdrop-blur-sm z-50"
-              onClick={() => setGuestCheckoutInModal(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+              onClick={() => setStep(3)}
             />
             <motion.div
-              initial={{ y: 40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 40, opacity: 0 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-60 w-[95%] max-w-5xl bg-white rounded-2xl p-4 md:p-6 shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-60 w-[95%] max-w-md bg-white rounded-3xl shadow-2xl p-8"
             >
-              <div className="relative">
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Lock size={32} className="text-primary" />
+                </div>
+                <h2 className="text-3xl font-black text-primary-dark mb-2">
+                  Secure Checkout
+                </h2>
+                <p className="text-slate-500 text-sm">
+                  Please log in, sign up, or continue as a guest
+                </p>
+              </div>
+
+              <div className="space-y-3">
                 <button
-                  onClick={() => {
-                    setGuestCheckoutInModal(false);
-                    setStep(3);
-                  }}
-                  className="absolute right-4 top-4 text-slate-400 hover:text-slate-600"
-                  aria-label="Close"
+                  onClick={() => setGuestCheckoutInModal(true)}
+                  className="w-full py-4 px-6 bg-primary text-white rounded-2xl font-black text-lg hover:bg-primary-dark transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                  ✕
+                  Continue as Guest
                 </button>
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="hidden md:flex md:w-1/2 flex-col gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Lock size={24} className="text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-extrabold text-primary-dark">
-                          Secure checkout
-                        </h3>
-                        <p className="text-sm text-slate-500">
-                          You are checking out as a guest — enter card details
-                          to complete booking.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="bg-slate-50 p-5 rounded-2xl shadow-sm">
-                      <h4 className="font-bold text-lg mb-3">
-                        Booking Summary
-                      </h4>
-                      <div className="flex flex-col gap-2 text-sm text-slate-700">
-                        <div className="flex items-start gap-3">
-                          <MapPin size={16} className="text-slate-400 mt-1" />
-                          <div>
-                            <div className="font-semibold">
-                              {formData.address || "Address not provided"}
-                            </div>
-                            <div className="text-xs text-slate-500">
-                              {formData.addressLine2 || ""}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <Clock size={16} className="text-slate-400 mt-1" />
-                          <div>
-                            <div className="font-semibold">
-                              {formData.date || "TBD"}
-                            </div>
-                            <div className="text-xs text-slate-500">
-                              {formData.timeSlot ||
-                                formData.preferredTime ||
-                                "Time not selected"}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <Briefcase
-                            size={16}
-                            className="text-slate-400 mt-1"
-                          />
-                          <div>
-                            <div className="font-semibold">
-                              {formData.serviceType || "Service"}
-                            </div>
-                            <div className="text-xs text-slate-500">
-                              Extras:{" "}
-                              {Object.entries(formData.extras || {})
-                                .filter((e) => e[1] > 0)
-                                .map((e) => `${e[0]} (x${e[1]})`)
-                                .join(", ") || "None"}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <div className="text-sm text-slate-600">Total</div>
-                        <div className="text-xl font-extrabold text-primary">
-                          {region.id === "UK" ? "£" : ""}
-                          {totalPrice}
-                        </div>
-                      </div>
-                    </div>
+
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200"></div>
                   </div>
-                  <div className="md:w-1/2 bg-white p-4 md:p-6 rounded-2xl shadow-lg">
-                    {/* Mobile condensed summary */}
-                    <div className="md:hidden bg-slate-50 p-3 rounded-lg mb-4">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm font-semibold">
-                          {formData.serviceType || "Service"}
-                        </div>
-                        <div className="text-sm font-black text-primary">
-                          {region.id === "UK" ? "£" : ""}
-                          {totalPrice}
-                        </div>
-                      </div>
-                      <div className="text-xs text-slate-500 mt-1">
-                        {formData.date || "TBD"} •{" "}
-                        {formData.timeSlot || formData.preferredTime || "Time"}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="text-sm font-black uppercase tracking-widest text-slate-500">
-                        Payment
-                      </div>
-                      <div className="px-3 py-1 rounded-full bg-primary/5 text-primary font-bold text-sm">
-                        Guest
-                      </div>
-                    </div>
-                    <div className="w-full">
-                      <Elements stripe={stripePromise}>
-                        <StripePayment
-                          amount={totalPrice}
-                          currency={region.id === "UK" ? "GBP" : "NGN"}
-                          customerInfo={formData}
-                          onPaymentSuccess={handlePaymentSuccess}
-                        />
-                      </Elements>
-                    </div>
-                    <div className="text-center mt-3 text-[11px] text-slate-400">
-                      Securely processed by Stripe • No account required
-                    </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="px-3 bg-white text-slate-400 font-semibold">
+                      OR
+                    </span>
                   </div>
                 </div>
+
+                <Link
+                  to="/account/login"
+                  className="block w-full py-4 px-6 bg-slate-100 text-primary rounded-2xl font-black text-lg hover:bg-slate-200 transition-all duration-200 text-center border border-slate-200"
+                >
+                  Log In
+                </Link>
+
+                <Link
+                  to="/account/signup"
+                  className="block w-full py-4 px-6 bg-white text-primary rounded-2xl font-black text-lg hover:bg-slate-50 transition-all duration-200 border-2 border-primary text-center"
+                >
+                  Sign Up
+                </Link>
               </div>
+
+              <button
+                onClick={() => setStep(3)}
+                className="mt-6 text-sm text-slate-400 hover:text-slate-600 transition-colors w-full text-center"
+              >
+                ← Back
+              </button>
             </motion.div>
           </>
         )}
