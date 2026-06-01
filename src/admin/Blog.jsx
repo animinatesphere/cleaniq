@@ -30,6 +30,14 @@ const AdminBlog = () => {
   });
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const BASE_URL = API_URL.endsWith("/api") ? API_URL.slice(0, -4) : API_URL;
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return "";
+    if (imagePath.startsWith("http")) return imagePath;
+    if (imagePath.startsWith("data:")) return imagePath;
+    return `${BASE_URL}${imagePath}`;
+  };
 
   useEffect(() => {
     fetchPosts();
@@ -352,13 +360,7 @@ const AdminBlog = () => {
             {imagePreview && (
               <div className="relative max-w-xs">
                 <img
-                  src={
-                    imagePreview.startsWith("http")
-                      ? imagePreview
-                      : imagePreview.startsWith("data:")
-                        ? imagePreview
-                        : `${API_URL}${imagePreview}`
-                  }
+                  src={getImageUrl(imagePreview)}
                   alt="Preview"
                   className="w-full h-48 rounded-xl object-cover border-2 border-primary/30"
                 />
@@ -460,11 +462,7 @@ const AdminBlog = () => {
                   {post.image && (
                     <div className="relative w-24 h-24 flex-shrink-0">
                       <img
-                        src={
-                          post.image.startsWith("http")
-                            ? post.image
-                            : `${API_URL}${post.image}`
-                        }
+                        src={getImageUrl(post.image)}
                         alt={post.title}
                         className="w-full h-full rounded-lg object-cover border-2 border-slate-200"
                       />

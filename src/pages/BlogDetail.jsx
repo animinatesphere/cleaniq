@@ -11,6 +11,12 @@ const BlogDetail = () => {
   const [loading, setLoading] = useState(true);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const BASE_URL = API_URL.endsWith("/api") ? API_URL.slice(0, -4) : API_URL;
+
+  const getImageUrl = (imagePath) => {
+    if (imagePath.startsWith("http")) return imagePath;
+    return `${BASE_URL}${imagePath}`;
+  };
 
   useEffect(() => {
     fetchPost();
@@ -98,11 +104,7 @@ const BlogDetail = () => {
             className="relative w-full h-96 md:h-[500px] overflow-hidden"
           >
             <img
-              src={
-                post.image.startsWith("http")
-                  ? post.image
-                  : `${API_URL}${post.image}`
-              }
+              src={getImageUrl(post.image)}
               alt={post.title}
               className="w-full h-full object-cover"
             />

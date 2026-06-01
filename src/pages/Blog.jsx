@@ -7,6 +7,7 @@ import {
   Search,
   TrendingUp,
   ArrowRight,
+  Clock,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import LoadingOverlay from "../component/LoadingOverlay";
@@ -21,6 +22,12 @@ const Blog = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const postsPerPage = 9;
+  const BASE_URL = API_URL.endsWith("/api") ? API_URL.slice(0, -4) : API_URL;
+
+  const getImageUrl = (imagePath) => {
+    if (imagePath.startsWith("http")) return imagePath;
+    return `${BASE_URL}${imagePath}`;
+  };
 
   useEffect(() => {
     fetchPosts(currentPage);
@@ -142,11 +149,7 @@ const Blog = () => {
                   {featuredPost.image && (
                     <div className="relative h-96 overflow-hidden">
                       <img
-                        src={
-                          featuredPost.image.startsWith("http")
-                            ? featuredPost.image
-                            : `${API_URL}${featuredPost.image}`
-                        }
+                        src={getImageUrl(featuredPost.image)}
                         alt={featuredPost.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
@@ -217,7 +220,7 @@ const Blog = () => {
                       {post.image && (
                         <div className="relative h-48 overflow-hidden bg-slate-100">
                           <img
-                            src={post.image}
+                            src={getImageUrl(post.image)}
                             alt={post.title}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />
