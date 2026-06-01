@@ -38,7 +38,7 @@ const AdminBlog = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/blog/admin/all`);
+      const response = await fetch(`${API_URL}/blog/admin/all`);
       const data = await response.json();
       setPosts(data);
     } catch (error) {
@@ -95,8 +95,8 @@ const AdminBlog = () => {
       }
 
       const url = editingId
-        ? `${API_URL}/api/blog/${editingId}`
-        : `${API_URL}/api/blog`;
+        ? `${API_URL}/blog/${editingId}`
+        : `${API_URL}/blog`;
 
       const method = editingId ? "PUT" : "POST";
 

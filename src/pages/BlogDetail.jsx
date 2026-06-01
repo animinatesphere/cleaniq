@@ -19,7 +19,7 @@ const BlogDetail = () => {
   const fetchPost = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/blog/${id}`);
+      const response = await fetch(`${API_URL}/blog/${id}`);
       if (!response.ok) {
         throw new Error("Post not found");
       }

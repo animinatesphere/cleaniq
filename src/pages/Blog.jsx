@@ -30,7 +30,7 @@ const Blog = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `${API_URL}/api/blog?page=${page}&limit=${postsPerPage}`,
+        `${API_URL}/blog?page=${page}&limit=${postsPerPage}`,
       );
       const data = await response.json();
       setPosts(data.posts);
