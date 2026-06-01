@@ -55,7 +55,7 @@ const sections = [
     icon: <CreditCard size={20} />,
     title: "4. Payments",
     content: [
-      "All prices are displayed in GBP (£) for UK customers  inclusive of applicable taxes where stated.",
+      "All prices are displayed in GBP for UK customers  inclusive of applicable taxes where stated.",
       "Full payment is required at the time of booking. We accept payment via Stripe-powered credit and debit card transactions. We do not store your card details , all payments are securely processed by Stripe.",
       "Prices are subject to change. The price quoted at the time of booking will be honoured for that booking.",
       "Additional charges may apply where the scope of work exceeds what was originally agreed (e.g., a property in significantly worse condition than described). We will notify you and obtain consent before carrying out additional work.",
@@ -71,9 +71,7 @@ const sections = [
       "Cleaniq Services reserves the right to cancel a booking and issue a full refund if we are unable to fulfil the service for any reason, including but not limited to staff unavailability or access issues.",
       "Once a cleaning service has been completed and marked as 'Completed', no refunds will be issued except where a valid complaint is raised within 24 hours of service completion.",
       "If you wish to reschedule a booking, you may cancel the existing booking via your dashboard and rebook at your convenience.",
-      "24 hours notice prior to the cleaning time is free No cancellation fee.",
-      "8 hours notice prior to the cleaning time should attract a charge.",
-      "The 2 hours notice prior to the schedule time should attract flull payment forfeiture/80% cancellation fee of the payment made.",
+      " 24 hours’ notice prior to your scheduled cleaning time is free with no cancellation fee. 8–24 hours’ notice will incur a £10 charge. Less than 2 hours’ notice, or failure to provide access, will result in forfeiture of 80% of the payment made.",
     ],
   },
   {
