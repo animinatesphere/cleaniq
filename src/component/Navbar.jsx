@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useRegion } from "../context/RegionContext";
 import { useCustomerAuth } from "../context/CustomerAuthContext";
-import { Menu, X, Globe, ChevronDown, User, LogOut } from "lucide-react";
+import {
+  Menu,
+  X,
+  User,
+  LogOut,
+  Home,
+  Info,
+  Briefcase,
+  Calendar,
+  Users,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../assets/lOGO.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { region, toggleRegion, regions } = useRegion();
-  const { customer, logout } = useCustomerAuth();
-  const [isGuest, setIsGuest] = useState(false);
+  const { logout } = useCustomerAuth();
+  const { customer } = useCustomerAuth();
   const location = useLocation();
-
-  useEffect(() => {
-    // Do not auto-hide Sign up based on a transient guest flag.
-    setIsGuest(false);
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,17 +30,11 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setIsOpen(false);
-  }, [location]);
-
   const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "About Us", path: "/about" },
-    { name: "Services", path: "/services" },
-    { name: "Booking", path: "/booking" },
-    { name: "Join Our Team", path: "/recruitment" },
+    { name: "Home", path: "/", icon: Home },
+    { name: "About", path: "/about", icon: Info },
+    { name: "Services", path: "/services", icon: Briefcase },
+    { name: "Join Team", path: "/recruitment", icon: Users },
   ];
 
   const isAccountPage = location.pathname.startsWith("/account");
@@ -46,94 +43,127 @@ const Navbar = () => {
     <nav
       className={`fixed w-full z-50 transition-all duration-500 ${
         isScrolled
-          ? "top-0 glass-dark py-2 md:py-3 shadow-2xl shadow-black/20"
-          : `${isAccountPage ? "top-0" : "top-[80px] md:top-[52px]"} bg-primary py-4 md:py-6`
+          ? "top-0 glass-dark py-2.5 md:py-3 shadow-2xl shadow-black/30"
+          : `${isAccountPage ? "top-0" : "top-[80px] md:top-[52px]"} bg-primary py-3.5 md:py-4`
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+        {/* Logo - Professional Sizing */}
+        <Link to="/" className="flex items-center gap-2 group shrink-0">
           <motion.div
-            whileHover={{ rotate: 5, scale: 1.05 }}
+            whileHover={{ rotate: 3, scale: 1.03 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
             className="relative"
           >
             <img
               src={logo}
               alt="Cleaniq Services"
-              className="w-auto h-14 md:h-16 transition-all duration-300 brightness-100"
+              className="w-auto h-10 md:h-11 transition-all duration-300 brightness-100"
             />
           </motion.div>
         </Link>
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-10">
-          <div className="flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="relative group py-2"
-              >
-                <span
-                  className={`text-sm font-bold tracking-wide transition-colors ${
-                    location.pathname === link.path
-                      ? "text-secondary"
-                      : "text-white/80 hover:text-white"
-                  }`}
+          {/* Navigation Icons with Text */}
+          <div className="flex items-end gap-8">
+            {navLinks.map((link) => {
+              const IconComponent = link.icon;
+              const isActive = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className="flex flex-col items-center gap-2 group transition-all"
                 >
-                  {link.name}
-                </span>
-                {location.pathname === link.path && (
                   <motion.div
-                    layoutId="navUnderline"
-                    className="absolute bottom-0 left-0 w-full h-0.5 bg-secondary"
-                  />
-                )}
-              </Link>
-            ))}
+                    whileHover={{ scale: 1.12, y: -3 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    className={`p-2 rounded-lg transition-all duration-300 ${
+                      isActive
+                        ? "bg-secondary text-primary shadow-lg shadow-secondary/50"
+                        : "bg-white/8 text-white/70 group-hover:bg-white/15 group-hover:text-white"
+                    }`}
+                  >
+                    <IconComponent size={18} strokeWidth={1.8} />
+                  </motion.div>
+                  <span
+                    className={`text-[10px] md:text-xs font-bold tracking-wide uppercase transition-colors ${
+                      isActive ? "text-secondary font-black" : "text-white/75"
+                    }`}
+                  >
+                    {link.name}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
 
-          <div className="h-6 w-px bg-white/10" />
+          <div className="h-7 w-px bg-white/15" />
 
-          {/* Account actions */}
-          {customer ? (
-            <div className="flex items-center gap-3">
+          {/* Account & Book Section */}
+          <div className="flex items-center gap-6">
+            {/* Account Actions */}
+            {customer ? (
               <Link
                 to="/account/dashboard"
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all text-white text-xs font-black"
+                className="flex flex-col items-center gap-2 group transition-all"
               >
-                <User size={14} /> {customer.firstName}
+                <motion.div
+                  whileHover={{ scale: 1.12, y: -3 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  className="p-2 rounded-lg bg-white/8 text-white/70 group-hover:bg-white/15 group-hover:text-white transition-all duration-300"
+                >
+                  <User size={18} strokeWidth={1.8} />
+                </motion.div>
+                <span className="text-[10px] md:text-xs font-bold tracking-wide uppercase text-white/75">
+                  Account
+                </span>
               </Link>
-              <button
-                onClick={logout}
-                title="Log out"
-                className="p-2 rounded-full bg-white/10 hover:bg-rose-500/30 text-white/60 hover:text-white transition-all"
-              >
-                <LogOut size={14} />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
+            ) : (
               <Link
                 to="/account/login"
-                className="text-white/90 font-black text-sm px-4 py-2 rounded-full hover:bg-white/10 transition-all"
+                className="flex flex-col items-center gap-2 group transition-all"
               >
-                Log in
+                <motion.div
+                  whileHover={{ scale: 1.12, y: -3 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  className="p-2 rounded-lg bg-white/8 text-white/70 group-hover:bg-white/15 group-hover:text-white transition-all duration-300"
+                >
+                  <User size={18} strokeWidth={1.8} />
+                </motion.div>
+                <span className="text-[10px] md:text-xs font-bold tracking-wide uppercase text-white/75">
+                  Log In
+                </span>
               </Link>
-            </div>
-          )}
+            )}
 
-          <Link
-            to="/booking"
-            className="btn-secondary px-8 text-primary shadow-secondary/10"
-          >
-            Book Now
-          </Link>
+            {/* Book Now Button */}
+            <Link
+              to="/booking"
+              className="flex flex-col items-center gap-2 group transition-all"
+            >
+              <motion.div
+                whileHover={{ scale: 1.15, y: -4 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                className="px-4 py-2 rounded-lg bg-secondary text-primary font-black shadow-lg shadow-secondary/50 group-hover:shadow-secondary/70 transition-all duration-300"
+              >
+                <Calendar size={18} strokeWidth={2} />
+              </motion.div>
+              <span className="text-[10px] md:text-xs font-black tracking-wide uppercase text-secondary">
+                Book Now
+              </span>
+            </Link>
+          </div>
         </div>
 
         {/* Mobile Menu Toggle */}
         <button
-          className="md:hidden p-2 rounded-xl transition-colors text-white bg-white/10"
+          className="md:hidden p-2.5 rounded-lg transition-all text-white bg-white/10 hover:bg-white/20"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <X size={20} /> : <Menu size={20} />}
@@ -159,7 +189,7 @@ const Navbar = () => {
               className="fixed top-0 right-0 h-screen w-[85%] max-w-sm glass-dark shadow-[-20px_0_50px_rgba(0,0,0,0.5)] md:hidden flex flex-col z-50"
             >
               <div className="p-6 md:p-8 flex flex-col h-full">
-                <div className="flex justify-between items-center mb-10 md:12">
+                <div className="flex justify-between items-center mb-8">
                   <img
                     src={logo}
                     alt="Cleaniq Services"
@@ -173,74 +203,77 @@ const Navbar = () => {
                   </button>
                 </div>
 
-                <div className="space-y-5 md:6">
-                  {navLinks.map((link, i) => (
-                    <motion.div
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      key={link.path}
-                    >
-                      <Link
-                        to={link.path}
-                        className={`text-xl md:text-2xl font-bold block tracking-tight ${
-                          location.pathname === link.path
-                            ? "text-secondary"
-                            : "text-white"
-                        }`}
+                <div className="space-y-4">
+                  {navLinks.map((link, i) => {
+                    const IconComponent = link.icon;
+                    return (
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.08 }}
+                        key={link.path}
                       >
-                        {link.name}
-                      </Link>
-                    </motion.div>
-                  ))}
+                        <Link
+                          to={link.path}
+                          className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                            location.pathname === link.path
+                              ? "bg-secondary/20 text-secondary font-bold"
+                              : "text-white/80 hover:bg-white/10 hover:text-white font-semibold"
+                          }`}
+                        >
+                          <IconComponent size={20} strokeWidth={1.8} />
+                          <span className="text-base tracking-tight">
+                            {link.name}
+                          </span>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
                 </div>
 
-                <div className="mt-auto space-y-6 md:8">
-                  <div className="h-px bg-white/10 w-full" />
+                <div className="mt-auto space-y-6">
+                  <div className="h-px bg-white/15 w-full" />
 
                   {customer ? (
                     <div className="space-y-3">
                       <Link
                         to="/account/dashboard"
-                        className="flex items-center gap-3 w-full py-3 px-4 bg-white/10 rounded-2xl text-white font-black text-sm"
+                        className="flex items-center gap-3 w-full py-3 px-4 bg-white/10 rounded-lg text-white font-semibold text-sm transition-all hover:bg-white/15"
                       >
-                        <User size={16} /> {customer.firstName}{" "}
-                        {customer.lastName}
+                        <User size={16} strokeWidth={1.5} /> Dashboard
                       </Link>
                       <button
                         onClick={() => {
                           logout();
                           setIsOpen(false);
                         }}
-                        className="flex items-center gap-3 w-full py-3 px-4 bg-white/5 rounded-2xl text-white/60 font-black text-sm hover:bg-rose-500/20 hover:text-white transition-all"
+                        className="flex items-center gap-3 w-full py-3 px-4 bg-white/5 rounded-lg text-white/70 font-semibold text-sm hover:bg-rose-500/20 hover:text-white transition-all"
                       >
-                        <LogOut size={16} /> Log out
+                        <LogOut size={16} strokeWidth={1.5} /> Log Out
                       </button>
                     </div>
                   ) : (
                     <div className="space-y-3">
                       <Link
                         to="/account/login"
-                        className="flex items-center gap-3 w-full py-3 px-4 border border-white/20 rounded-2xl text-white/80 font-black text-sm hover:bg-white/10 transition-all"
+                        className="flex items-center gap-3 w-full py-3 px-4 border border-white/20 rounded-lg text-white/80 font-semibold text-sm hover:bg-white/10 transition-all"
                       >
-                        <User size={16} /> Log in
+                        <User size={16} strokeWidth={1.5} /> Log In
                       </Link>
-                      {!isGuest && (
-                        <Link
-                          to="/account/signup"
-                          className="flex items-center gap-3 w-full py-3 px-4 bg-white/10 rounded-2xl text-white font-black text-sm justify-center"
-                        >
-                          Sign up
-                        </Link>
-                      )}
+                      <Link
+                        to="/account/signup"
+                        className="flex items-center gap-3 w-full py-3 px-4 bg-white/10 rounded-lg text-white font-semibold text-sm justify-center hover:bg-white/15 transition-all"
+                      >
+                        <span>Sign Up</span>
+                      </Link>
                     </div>
                   )}
 
                   <Link
                     to="/booking"
-                    className="btn-secondary w-full py-4 md:py-5 text-base md:text-lg text-center shadow-xl shadow-secondary/5"
+                    className="btn-secondary w-full py-3.5 text-base font-bold text-center shadow-lg shadow-secondary/30 flex items-center justify-center gap-2 rounded-lg transition-all hover:shadow-secondary/50"
                   >
-                    Book Professional Clean
+                    <Calendar size={18} strokeWidth={2} /> Book Clean
                   </Link>
                 </div>
               </div>
