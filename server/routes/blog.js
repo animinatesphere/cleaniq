@@ -40,6 +40,25 @@ const upload = multer({
   },
 });
 
+// Debug endpoint - GET all blog posts (published and unpublished) for testing
+router.get("/debug/all", async (req, res) => {
+  try {
+    const posts = await BlogPost.find().sort({ createdAt: -1 });
+    res.json({
+      totalCount: posts.length,
+      publishedCount: posts.filter((p) => p.published).length,
+      draftCount: posts.filter((p) => !p.published).length,
+      posts: posts.map((p) => ({
+        _id: p._id,
+        title: p.title,
+        published: p.published,
+      })),
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // GET all published blog posts (for public blog page)
 router.get("/", async (req, res) => {
   try {

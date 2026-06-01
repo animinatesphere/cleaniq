@@ -36,14 +36,23 @@ const Blog = () => {
   const fetchPosts = async (page) => {
     try {
       setLoading(true);
+      console.log(
+        "Fetching from:",
+        `${API_URL}/blog?page=${page}&limit=${postsPerPage}`,
+      );
       const response = await fetch(
         `${API_URL}/blog?page=${page}&limit=${postsPerPage}`,
       );
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
       const data = await response.json();
-      setPosts(data.posts);
-      setTotalPages(data.pages);
+      console.log("Fetched data:", data);
+      setPosts(data.posts || []);
+      setTotalPages(data.pages || 1);
     } catch (error) {
       console.error("Error fetching blog posts:", error);
+      setPosts([]);
     } finally {
       setLoading(false);
     }
@@ -345,19 +354,5 @@ const Blog = () => {
     </>
   );
 };
-
-const Clock = ({ size }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <circle cx="12" cy="12" r="10" />
-    <polyline points="12 6 12 12 16 14" />
-  </svg>
-);
 
 export default Blog;

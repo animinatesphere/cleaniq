@@ -5,8 +5,10 @@ import {
   Plus,
   Eye,
   EyeOff,
-  AlertCircle,
   CheckCircle,
+  ImageIcon,
+  FileText,
+  Users,
 } from "lucide-react";
 import LoadingOverlay from "../component/LoadingOverlay";
 import { motion } from "framer-motion";
@@ -30,13 +32,14 @@ const AdminBlog = () => {
   });
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-  const BASE_URL = API_URL.endsWith("/api") ? API_URL.slice(0, -4) : API_URL;
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "";
     if (imagePath.startsWith("http")) return imagePath;
     if (imagePath.startsWith("data:")) return imagePath;
-    return `${BASE_URL}${imagePath}`;
+    // Ensure we get the correct URL by removing /api if it exists in the path
+    const cleanPath = imagePath.replace(/^\/api/, "");
+    return `${API_URL.replace(/\/api$/, "")}${cleanPath}`;
   };
 
   useEffect(() => {
@@ -206,7 +209,7 @@ const AdminBlog = () => {
   const draftCount = posts.length - publishedCount;
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       {submitting && <LoadingOverlay message="Saving blog post..." />}
 
       {/* Success Message */}
@@ -215,324 +218,396 @@ const AdminBlog = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="mb-6 flex items-center gap-3 bg-green-50 border-2 border-green-200 text-green-700 px-6 py-4 rounded-xl font-bold"
+          className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-full font-bold shadow-lg"
         >
           <CheckCircle size={20} />
           {successMessage}
         </motion.div>
       )}
 
-      {/* Header */}
-      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-black text-primary-dark mb-2">
-            Blog Management
-          </h1>
-          <div className="flex gap-6 text-sm font-bold">
-            <span className="text-slate-600">
-              <span className="text-lg text-primary font-black">
-                {posts.length}
-              </span>{" "}
-              Total Posts
-            </span>
-            <span className="text-slate-600">
-              <span className="text-lg text-green-600 font-black">
-                {publishedCount}
-              </span>{" "}
-              Published
-            </span>
-            <span className="text-slate-600">
-              <span className="text-lg text-amber-600 font-black">
-                {draftCount}
-              </span>{" "}
-              Drafts
-            </span>
-          </div>
-        </div>
-        <button
-          onClick={() => {
-            setShowForm(!showForm);
-            if (!showForm) setEditingId(null);
-          }}
-          className="btn-primary flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold whitespace-nowrap"
-        >
-          <Plus size={18} />
-          New Post
-        </button>
-      </div>
-
-      {/* Form Section */}
-      {showForm && (
+      {/* Page Container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-8 mb-12 border-2 border-slate-200 shadow-lg"
+          className="mb-12"
         >
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-black text-primary-dark">
-              {editingId ? "✎ Edit Blog Post" : "✍ Create New Blog Post"}
-            </h2>
-            <button
-              onClick={() => setShowForm(false)}
-              className="text-slate-400 hover:text-slate-600 text-2xl"
-            >
-              ✕
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Grid Layout */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Title */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-black text-primary-dark mb-2 uppercase tracking-wide">
-                  Post Title *
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  placeholder="Enter compelling blog post title"
-                  className="w-full p-4 rounded-xl border-2 border-slate-200 bg-white focus:border-primary focus:outline-none font-medium transition-colors"
-                />
-              </div>
-
-              {/* Description */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-black text-primary-dark mb-2 uppercase tracking-wide">
-                  Description / Preview Text *
-                </label>
-                <input
-                  type="text"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Brief description shown in blog listing"
-                  maxLength="150"
-                  className="w-full p-4 rounded-xl border-2 border-slate-200 bg-white focus:border-primary focus:outline-none font-medium transition-colors"
-                />
-                <p className="text-xs text-slate-500 mt-1 font-bold">
-                  {formData.description.length}/150 characters
-                </p>
-              </div>
-
-              {/* Author */}
-              <div>
-                <label className="block text-sm font-black text-primary-dark mb-2 uppercase tracking-wide">
-                  Author Name
-                </label>
-                <input
-                  type="text"
-                  name="author"
-                  value={formData.author}
-                  onChange={handleInputChange}
-                  placeholder="Author name"
-                  className="w-full p-4 rounded-xl border-2 border-slate-200 bg-white focus:border-primary focus:outline-none font-medium transition-colors"
-                />
-              </div>
-
-              {/* Image Upload */}
-              <div>
-                <label className="block text-sm font-black text-primary-dark mb-2 uppercase tracking-wide">
-                  Featured Image {!editingId && "*"}
-                </label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    name="image"
-                    onChange={handleImageChange}
-                    accept="image/*"
-                    className="hidden"
-                    id="imageInput"
-                  />
-                  <label
-                    htmlFor="imageInput"
-                    className="block p-4 rounded-xl border-2 border-dashed border-slate-300 hover:border-primary bg-slate-50 hover:bg-primary/5 cursor-pointer transition-all text-center font-bold text-slate-600 hover:text-primary"
-                  >
-                    📸 Click to upload
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* Image Preview */}
-            {imagePreview && (
-              <div className="relative max-w-xs">
-                <img
-                  src={getImageUrl(imagePreview)}
-                  alt="Preview"
-                  className="w-full h-48 rounded-xl object-cover border-2 border-primary/30"
-                />
-                <p className="text-xs text-slate-500 mt-2 font-bold">
-                  Image Preview
-                </p>
-              </div>
-            )}
-
-            {/* Content */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
             <div>
-              <label className="block text-sm font-black text-primary-dark mb-2 uppercase tracking-wide">
-                Full Article Content
-              </label>
-              <textarea
-                name="content"
-                value={formData.content}
-                onChange={handleInputChange}
-                placeholder="Write your full blog post content here..."
-                rows="10"
-                className="w-full p-4 rounded-xl border-2 border-slate-200 bg-white focus:border-primary focus:outline-none font-medium resize-none transition-colors"
-              />
-              <p className="text-xs text-slate-500 mt-1 font-bold">
-                Approximately{" "}
-                {Math.ceil((formData.content.split(/\s+/).length || 0) / 200)}{" "}
-                min read
+              <h1 className="text-4xl sm:text-5xl font-black text-primary-dark mb-3">
+                📰 Blog Management
+              </h1>
+              <p className="text-slate-600 text-lg font-medium">
+                Manage your blog posts and engage with your audience
               </p>
             </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                setShowForm(!showForm);
+                if (!showForm) setEditingId(null);
+              }}
+              className="btn-primary flex items-center justify-center gap-2 px-6 sm:px-8 py-4 rounded-full text-sm sm:text-base font-black whitespace-nowrap shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <Plus size={20} />
+              New Post
+            </motion.button>
+          </div>
 
-            {/* Publish Toggle */}
-            <div className="flex items-center gap-4 p-4 bg-slate-100 rounded-xl border-2 border-slate-200">
-              <input
-                type="checkbox"
-                name="published"
-                checked={formData.published}
-                onChange={handleInputChange}
-                id="published"
-                className="w-5 h-5 cursor-pointer accent-primary"
-              />
-              <label
-                htmlFor="published"
-                className="font-black text-primary-dark cursor-pointer"
-              >
-                {formData.published
-                  ? "🟢 Publish immediately"
-                  : "🔴 Save as draft"}
-              </label>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 justify-end pt-4">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="px-8 py-3 rounded-full font-black border-2 border-slate-300 text-slate-600 hover:border-slate-400 hover:bg-slate-50 transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="btn-primary px-8 py-3 rounded-full text-sm font-black"
-              >
-                {editingId ? "✓ Update Post" : "✓ Create Post"}
-              </button>
-            </div>
-          </form>
-        </motion.div>
-      )}
-
-      {/* Posts List Section */}
-      <div>
-        <h2 className="text-xl font-black text-primary-dark mb-6">
-          📰 Blog Posts ({posts.length})
-        </h2>
-
-        {posts.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-slate-300"
-          >
-            <AlertCircle size={48} className="mx-auto mb-4 text-slate-300" />
-            <p className="text-slate-500 text-lg font-bold">
-              No blog posts yet. Click "New Post" above to get started!
-            </p>
-          </motion.div>
-        ) : (
-          <div className="grid gap-4">
-            {posts.map((post, idx) => (
+          {/* Stats Dashboard */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              {
+                label: "Total Posts",
+                value: posts.length,
+                icon: FileText,
+                color: "primary",
+              },
+              {
+                label: "Published",
+                value: publishedCount,
+                icon: Eye,
+                color: "emerald",
+              },
+              {
+                label: "Drafts",
+                value: draftCount,
+                icon: EyeOff,
+                color: "amber",
+              },
+            ].map((stat, idx) => (
               <motion.div
-                key={post._id}
+                key={idx}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="bg-white rounded-2xl border-2 border-slate-200 hover:border-primary hover:shadow-lg transition-all p-6"
+                transition={{ delay: idx * 0.1 }}
+                className={`bg-gradient-to-br from-${stat.color}-50 to-${stat.color}-100 rounded-2xl p-6 border-2 border-${stat.color}-200`}
               >
-                <div className="flex gap-6">
-                  {/* Image */}
-                  {post.image && (
-                    <div className="relative w-24 h-24 flex-shrink-0">
-                      <img
-                        src={getImageUrl(post.image)}
-                        alt={post.title}
-                        className="w-full h-full rounded-lg object-cover border-2 border-slate-200"
-                      />
-                    </div>
-                  )}
-
-                  {/* Content */}
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between gap-4 mb-2">
-                      <div>
-                        <h3 className="text-lg font-black text-primary-dark line-clamp-2">
-                          {post.title}
-                        </h3>
-                        <p className="text-sm text-slate-500 font-bold">
-                          {new Date(post.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            },
-                          )}
-                        </p>
-                      </div>
-                      {post.published ? (
-                        <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-black whitespace-nowrap">
-                          <Eye size={14} />
-                          Published
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-black whitespace-nowrap">
-                          <EyeOff size={14} />
-                          Draft
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-sm text-slate-600 mb-3 line-clamp-2 font-medium">
-                      {post.description}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-600 text-sm font-bold uppercase tracking-wide mb-1">
+                      {stat.label}
                     </p>
-
-                    <div className="flex items-center justify-between">
-                      <div className="text-xs text-slate-500 font-bold space-y-1">
-                        <p>👤 By {post.author}</p>
-                        <p>👁️ {post.views || 0} views</p>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(post)}
-                          className="p-2 hover:bg-blue-50 rounded-lg transition-colors text-blue-600 font-bold"
-                          title="Edit"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(post._id)}
-                          className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-600 font-bold"
-                          title="Delete"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
+                    <p className={`text-3xl font-black text-${stat.color}-600`}>
+                      {stat.value}
+                    </p>
+                  </div>
+                  <div
+                    className={`p-3 bg-${stat.color}-200 rounded-full text-${stat.color}-600`}
+                  >
+                    <stat.icon size={24} />
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
+        </motion.div>
+
+        {/* Create/Edit Form */}
+        {showForm && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="mb-12"
+          >
+            <div className="bg-white rounded-3xl shadow-xl border-2 border-slate-200 overflow-hidden">
+              {/* Form Header */}
+              <div className="bg-gradient-to-r from-primary to-secondary px-6 sm:px-8 py-6 flex items-center justify-between">
+                <h2 className="text-2xl sm:text-3xl font-black text-white">
+                  {editingId ? "✎ Edit Blog Post" : "✍ Create New Blog Post"}
+                </h2>
+                <button
+                  onClick={handleCancel}
+                  className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Form Content */}
+              <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-black text-primary-dark mb-3 uppercase tracking-wider">
+                    Post Title *
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    placeholder="Enter your compelling blog post title..."
+                    className="w-full px-5 py-3 rounded-xl border-2 border-slate-300 bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none font-medium transition-all"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-black text-primary-dark mb-3 uppercase tracking-wider">
+                    Description / Preview *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      placeholder="Brief description that appears in the blog listing..."
+                      maxLength="150"
+                      className="w-full px-5 py-3 rounded-xl border-2 border-slate-300 bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none font-medium transition-all"
+                    />
+                    <span className="absolute right-4 top-3 text-xs font-bold text-slate-400">
+                      {formData.description.length}/150
+                    </span>
+                  </div>
+                </div>
+
+                {/* Author & Image Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {/* Author */}
+                  <div>
+                    <label className="block text-sm font-black text-primary-dark mb-3 uppercase tracking-wider">
+                      Author Name
+                    </label>
+                    <div className="flex items-center">
+                      <Users
+                        size={18}
+                        className="absolute ml-4 text-slate-400 pointer-events-none"
+                      />
+                      <input
+                        type="text"
+                        name="author"
+                        value={formData.author}
+                        onChange={handleInputChange}
+                        placeholder="Author name"
+                        className="w-full pl-12 pr-5 py-3 rounded-xl border-2 border-slate-300 bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none font-medium transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Featured Image */}
+                  <div>
+                    <label className="block text-sm font-black text-primary-dark mb-3 uppercase tracking-wider">
+                      Featured Image {!editingId && "*"}
+                    </label>
+                    <div>
+                      <input
+                        type="file"
+                        name="image"
+                        onChange={handleImageChange}
+                        accept="image/*"
+                        className="hidden"
+                        id="imageInput"
+                      />
+                      <label
+                        htmlFor="imageInput"
+                        className="flex items-center justify-center gap-3 p-4 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 cursor-pointer transition-all"
+                      >
+                        <ImageIcon size={20} className="text-primary" />
+                        <span className="font-bold text-primary">
+                          Upload Image
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Image Preview */}
+                {imagePreview && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative"
+                  >
+                    <p className="text-sm font-bold text-slate-600 mb-3">
+                      Image Preview:
+                    </p>
+                    <img
+                      src={getImageUrl(imagePreview)}
+                      alt="Preview"
+                      className="w-full sm:w-64 h-40 rounded-2xl object-cover border-2 border-primary shadow-lg"
+                    />
+                  </motion.div>
+                )}
+
+                {/* Content */}
+                <div>
+                  <label className="block text-sm font-black text-primary-dark mb-3 uppercase tracking-wider">
+                    Full Article Content
+                  </label>
+                  <textarea
+                    name="content"
+                    value={formData.content}
+                    onChange={handleInputChange}
+                    placeholder="Write your complete blog post content here..."
+                    rows="12"
+                    className="w-full px-5 py-3 rounded-xl border-2 border-slate-300 bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none font-medium resize-none transition-all"
+                  />
+                  <p className="text-xs text-slate-500 mt-2 font-bold">
+                    ⏱️ Estimated read time:{" "}
+                    <span className="text-primary font-black">
+                      {Math.ceil(
+                        (formData.content.split(/\s+/).length || 0) / 200,
+                      )}{" "}
+                      min
+                    </span>
+                  </p>
+                </div>
+
+                {/* Publish Status */}
+                <div className="flex items-center gap-4 p-5 bg-gradient-to-r from-slate-100 to-slate-50 rounded-xl border-2 border-slate-200">
+                  <input
+                    type="checkbox"
+                    name="published"
+                    checked={formData.published}
+                    onChange={handleInputChange}
+                    id="published"
+                    className="w-6 h-6 cursor-pointer accent-primary rounded"
+                  />
+                  <label
+                    htmlFor="published"
+                    className="font-bold text-primary-dark cursor-pointer flex-1"
+                  >
+                    {formData.published
+                      ? "🟢 Publish immediately"
+                      : "🔴 Save as draft"}
+                  </label>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 justify-end pt-6 border-t-2 border-slate-200">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="px-6 sm:px-8 py-3 rounded-full font-bold border-2 border-slate-300 text-slate-600 hover:bg-slate-100 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-primary px-6 sm:px-8 py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-shadow"
+                  >
+                    {editingId ? "✓ Update Post" : "✓ Create Post"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
         )}
+
+        {/* Posts List */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <h2 className="text-3xl font-black text-primary-dark mb-6">
+            All Posts ({posts.length})
+          </h2>
+
+          {posts.length === 0 ? (
+            <div className="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-slate-300 shadow-md">
+              <FileText size={64} className="mx-auto mb-4 text-slate-300" />
+              <p className="text-slate-500 text-lg font-bold mb-2">
+                No blog posts yet
+              </p>
+              <p className="text-slate-400">
+                Click "New Post" above to create your first blog post
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {posts.map((post, idx) => (
+                <motion.div
+                  key={post._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="bg-white rounded-2xl border-2 border-slate-200 hover:border-primary hover:shadow-xl transition-all p-4 sm:p-6"
+                >
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                    {/* Image */}
+                    {post.image && (
+                      <div className="relative w-full sm:w-28 h-40 sm:h-28 flex-shrink-0">
+                        <img
+                          src={getImageUrl(post.image)}
+                          alt={post.title}
+                          className="w-full h-full rounded-xl object-cover border-2 border-slate-200 shadow-md"
+                        />
+                      </div>
+                    )}
+
+                    {/* Content */}
+                    <div className="flex-1 flex flex-col">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
+                        <div className="flex-1">
+                          <h3 className="text-lg sm:text-xl font-black text-primary-dark line-clamp-2">
+                            {post.title}
+                          </h3>
+                          <p className="text-sm text-slate-500 font-bold mt-1">
+                            {new Date(post.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              },
+                            )}
+                          </p>
+                        </div>
+                        {post.published ? (
+                          <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 rounded-full text-xs font-black whitespace-nowrap">
+                            <Eye size={16} />
+                            Published
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 rounded-full text-xs font-black whitespace-nowrap">
+                            <EyeOff size={16} />
+                            Draft
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-sm text-slate-600 mb-4 line-clamp-2 font-medium">
+                        {post.description}
+                      </p>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-3 border-t-2 border-slate-100">
+                        <div className="text-xs text-slate-500 font-bold space-y-1 sm:space-y-0 sm:space-x-4 sm:flex">
+                          <span>👤 {post.author}</span>
+                          <span>👁️ {post.views || 0} views</span>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => handleEdit(post)}
+                            className="p-2 sm:p-3 hover:bg-blue-50 rounded-lg transition-all text-blue-600 font-bold border border-blue-200 hover:border-blue-300"
+                            title="Edit"
+                          >
+                            <Edit2 size={18} />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => handleDelete(post._id)}
+                            className="p-2 sm:p-3 hover:bg-red-50 rounded-lg transition-all text-red-600 font-bold border border-red-200 hover:border-red-300"
+                            title="Delete"
+                          >
+                            <Trash2 size={18} />
+                          </motion.button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </motion.div>
       </div>
     </div>
   );
