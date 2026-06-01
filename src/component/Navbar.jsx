@@ -11,7 +11,13 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { region, toggleRegion, regions } = useRegion();
   const { customer, logout } = useCustomerAuth();
+  const [isGuest, setIsGuest] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    // Do not auto-hide Sign up based on a transient guest flag.
+    setIsGuest(false);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -114,12 +120,14 @@ const Navbar = () => {
               >
                 Log in
               </Link>
-              <Link
-                to="/account/signup"
-                className="btn-secondary px-6 py-2 text-primary font-black"
-              >
-                Sign up
-              </Link>
+              {!isGuest && (
+                <Link
+                  to="/account/signup"
+                  className="btn-secondary px-6 py-2 text-primary font-black"
+                >
+                  Sign up
+                </Link>
+              )}
             </div>
           )}
 
@@ -225,12 +233,14 @@ const Navbar = () => {
                       >
                         <User size={16} /> Log in
                       </Link>
-                      <Link
-                        to="/account/signup"
-                        className="flex items-center gap-3 w-full py-3 px-4 bg-white/10 rounded-2xl text-white font-black text-sm justify-center"
-                      >
-                        Sign up
-                      </Link>
+                      {!isGuest && (
+                        <Link
+                          to="/account/signup"
+                          className="flex items-center gap-3 w-full py-3 px-4 bg-white/10 rounded-2xl text-white font-black text-sm justify-center"
+                        >
+                          Sign up
+                        </Link>
+                      )}
                     </div>
                   )}
 
