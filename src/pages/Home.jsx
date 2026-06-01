@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useRegion } from "../context/RegionContext";
@@ -14,14 +14,18 @@ import strip2 from "../assets/strip2.jpg";
 import strip3 from "../assets/strip3.jpg";
 import strip4 from "../assets/strip4.jpg";
 import strip5 from "../assets/strip5.jpg";
-import grid1 from "../assets/grid1.jpg";
-import grid2 from "../assets/grid2.jpg";
-import grid3 from "../assets/grid3.jpg";
-import { Star, ShieldCheck, Home as HomeIcon, Briefcase, ArrowRight, Zap } from "lucide-react";
+import {
+  Star,
+  ShieldCheck,
+  Home as HomeIcon,
+  Briefcase,
+  ArrowRight,
+  Zap,
+  Plus,
+} from "lucide-react";
 
 const Home = () => {
   const { region } = useRegion();
-  const [activeFaq, setActiveFaq] = useState(null);
   const [activeSlide, setActiveSlide] = useState(0);
   const slides = [
     { src: strip1, label: "Living Room" },
@@ -36,26 +40,7 @@ const Home = () => {
       setActiveSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  };
+  }, [slides.length]);
 
   return (
     <div className="overflow-x-hidden bg-white">
@@ -90,10 +75,10 @@ const Home = () => {
             "@context": "https://schema.org",
             "@type": "CommercialCleaningService",
             name: "Cleaniq Services",
-            image: "https://cleaniqservices.com",
+            image: "https://www.cleaniqservices.com/preview.jpg",
             "@id": "https://www.cleaniqservices.com",
             url: "https://www.cleaniqservices.com",
-            }, [slides.length]);
+            telephone: "+447752476368",
             address: {
               "@type": "PostalAddress",
               streetAddress: "First Floor, Swan Buildings, 20 Swan St",
@@ -106,18 +91,20 @@ const Home = () => {
               latitude: 53.4842,
               longitude: -2.2361,
             },
-            openingHoursSpecification: {
-              "@type": "OpeningHoursSpecification",
-              dayOfWeek: [
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-              ],
-              opens: "09:00",
-              closes: "17:00",
-            },
+            openingHoursSpecification: [
+              {
+                "@type": "OpeningHoursSpecification",
+                dayOfWeek: [
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                ],
+                opens: "09:00",
+                closes: "17:00",
+              },
+            ],
           })}
         </script>
       </Helmet>

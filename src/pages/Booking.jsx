@@ -207,15 +207,19 @@ const Booking = () => {
   });
 
   useEffect(() => {
-    if (customer) {
-      setFormData((prev) => ({
-        ...prev,
-        firstName: prev.firstName || customer.firstName || "",
-        lastName: prev.lastName || customer.lastName || "",
-        email: prev.email || customer.email || "",
-        phone: prev.phone || customer.phone || "",
-      }));
-    }
+    if (!customer) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFormData((prev) => {
+      const updates = {};
+      if (!prev.firstName && customer.firstName)
+        updates.firstName = customer.firstName;
+      if (!prev.lastName && customer.lastName)
+        updates.lastName = customer.lastName;
+      if (!prev.email && customer.email) updates.email = customer.email;
+      if (!prev.phone && customer.phone) updates.phone = customer.phone;
+      if (Object.keys(updates).length === 0) return prev;
+      return { ...prev, ...updates };
+    });
   }, [customer]);
 
   const [totalPrice, setTotalPrice] = useState(0);
@@ -372,7 +376,7 @@ const Booking = () => {
     );
   }, [servicesList]);
   const [notification, setNotification] = useState(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const showAuthModal = step === 4 && !customer && !isSubmitted;
 
   const showNotification = (message, type = "error") => {
     setNotification({ message, type });
@@ -506,13 +510,7 @@ const Booking = () => {
     setTotalPrice(Math.round(total * 100) / 100);
   }, [formData, region, dynamicRates]);
 
-  useEffect(() => {
-    if (step === 4 && !customer && !isSubmitted) {
-      setShowAuthModal(true);
-    } else {
-      setShowAuthModal(false);
-    }
-  }, [step, customer, isSubmitted]);
+  // auth modal is derived from step/customer/isSubmitted
 
   const updateRoom = (name, delta) => {
     setFormData((prev) => {
@@ -1579,7 +1577,7 @@ const Booking = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-primary-dark/70 backdrop-blur-sm z-50"
-              onClick={() => setShowAuthModal(false)}
+              onClick={() => setStep(3)}
             />
             <motion.div
               initial={{ y: 40, opacity: 0 }}
@@ -1613,7 +1611,7 @@ const Booking = () => {
                   </Link>
                 </div>
                 <button
-                  onClick={() => setShowAuthModal(false)}
+                  onClick={() => setStep(3)}
                   className="mt-4 text-slate-400"
                 >
                   Continue as guest
