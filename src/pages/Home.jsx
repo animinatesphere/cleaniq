@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useRegion } from "../context/RegionContext";
 import { Helmet } from "react-helmet-async";
@@ -9,10 +9,6 @@ import residentialImg from "../assets/residential.jpg";
 import officeImg from "../assets/office.jpg";
 import deepcleanImg from "../assets/anton-y-bjqTUUw2Q-unsplash.jpg";
 import airbnbImg from "../assets/airbnb.jpg";
-import bento1 from "../assets/bento1.jpg";
-import bento2 from "../assets/bento2.jpg";
-import bento3 from "../assets/bento3.jpg";
-import bento4 from "../assets/bento4.jpg";
 import strip1 from "../assets/strip1.jpg";
 import strip2 from "../assets/strip2.jpg";
 import strip3 from "../assets/strip3.jpg";
@@ -21,20 +17,7 @@ import strip5 from "../assets/strip5.jpg";
 import grid1 from "../assets/grid1.jpg";
 import grid2 from "../assets/grid2.jpg";
 import grid3 from "../assets/grid3.jpg";
-import {
-  CheckCircle2,
-  Star,
-  ShieldCheck,
-  Clock,
-  Home as HomeIcon,
-  Briefcase,
-  ArrowRight,
-  Users,
-  Heart,
-  Zap,
-  Plus,
-  ChevronDown,
-} from "lucide-react";
+import { Star, ShieldCheck, Home as HomeIcon, Briefcase, ArrowRight, Zap } from "lucide-react";
 
 const Home = () => {
   const { region } = useRegion();
@@ -102,6 +85,41 @@ const Home = () => {
         />
         <link rel="preload" as="image" href={air1} fetchpriority="high" />
         <meta name="twitter:card" content="summary_large_image" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CommercialCleaningService",
+            name: "Cleaniq Services",
+            image: "https://cleaniqservices.com",
+            "@id": "https://www.cleaniqservices.com",
+            url: "https://www.cleaniqservices.com",
+            }, [slides.length]);
+            address: {
+              "@type": "PostalAddress",
+              streetAddress: "First Floor, Swan Buildings, 20 Swan St",
+              addressLocality: "Manchester",
+              postalCode: "M4 5JW",
+              addressCountry: "GB",
+            },
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: 53.4842,
+              longitude: -2.2361,
+            },
+            openingHoursSpecification: {
+              "@type": "OpeningHoursSpecification",
+              dayOfWeek: [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+              ],
+              opens: "09:00",
+              closes: "17:00",
+            },
+          })}
+        </script>
       </Helmet>
       <script type="application/ld+json">
         {JSON.stringify({
