@@ -15,6 +15,8 @@ import Contact from "./pages/Contact";
 import ServiceDetail from "./pages/ServiceDetail";
 import LocationDetail from "./pages/LocationDetail";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import Blog from "./pages/Blog";
+import BlogDetail from "./pages/BlogDetail";
 
 // Customer Account
 import CustomerLogin from "./pages/account/Login";
@@ -33,6 +35,7 @@ import Settings from "./admin/Settings";
 import ServicesManagement from "./admin/Services";
 import Workers from "./admin/Workers";
 import Chat from "./admin/Chat";
+import AdminBlog from "./admin/Blog";
 
 function App() {
   const location = useLocation();
@@ -56,6 +59,8 @@ function App() {
             <Route path="/booking" element={<Booking />} />
             <Route path="/recruitment" element={<Recruitment />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogDetail />} />
             <Route path="/pages/contact" element={<Contact />} />
             <Route path="/pages/:serviceSlug" element={<ServiceDetail />} />
             <Route path="/locations/:area" element={<LocationDetail />} />
@@ -75,6 +80,7 @@ function App() {
               <Route path="customers" element={<Customers />} />
               <Route path="workers" element={<Workers />} />
               <Route path="services" element={<ServicesManagement />} />
+              <Route path="blog" element={<AdminBlog />} />
               <Route path="settings" element={<Settings />} />
               <Route path="chat" element={<Chat />} />
             </Route>

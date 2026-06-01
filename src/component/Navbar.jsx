@@ -11,6 +11,7 @@ import {
   Briefcase,
   Calendar,
   Users,
+  BookOpen,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../assets/lOGO.png";
@@ -34,6 +35,7 @@ const Navbar = () => {
     { name: "Home", path: "/", icon: Home },
     { name: "About", path: "/about", icon: Info },
     { name: "Services", path: "/services", icon: Briefcase },
+    { name: "Blog", path: "/blog", icon: BookOpen },
     { name: "Join Team", path: "/recruitment", icon: Users },
   ];
 
