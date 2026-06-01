@@ -120,14 +120,6 @@ const Navbar = () => {
               >
                 Log in
               </Link>
-              {!isGuest && (
-                <Link
-                  to="/account/signup"
-                  className="btn-secondary px-6 py-2 text-primary font-black"
-                >
-                  Sign up
-                </Link>
-              )}
             </div>
           )}
 

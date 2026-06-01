@@ -281,6 +281,8 @@ const Bookings = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [editData, setEditData] = useState({});
   const [statusMessage, setStatusMessage] = useState({ type: "", text: "" });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successBooking, setSuccessBooking] = useState(null);
 
   useEffect(() => {
     if (statusMessage.text) {
@@ -1999,16 +2001,10 @@ const Bookings = () => {
                       );
                       if (!res.ok) throw new Error("Failed to create booking");
                       const newBooking = await res.json();
-                      setStatusMessage({
-                        type: "success",
-                        text: "Booking created",
-                      });
+                      setSuccessBooking(newBooking);
+                      setShowSuccessModal(true);
                       setShowCreateModal(false);
                       fetchBookings();
-                      window.open(
-                        `/admin/bookings/pay/${newBooking._id}`,
-                        "_blank",
-                      );
                     } catch (err) {
                       console.error(err);
                       setStatusMessage({
@@ -2022,6 +2018,148 @@ const Bookings = () => {
                   Create & Open Payment
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {showSuccessModal && successBooking && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[32px] p-8 max-w-md w-full shadow-2xl animate-in fade-in zoom-in">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 size={32} className="text-emerald-600" />
+              </div>
+              <h2 className="text-2xl font-black text-slate-900 mb-2">
+                Booking Created!
+              </h2>
+              <p className="text-sm text-slate-500">
+                Payment link sent to customer email
+              </p>
+            </div>
+
+            {/* Booking Details */}
+            <div className="bg-slate-50 rounded-2xl p-6 mb-6 space-y-4">
+              {/* Reference */}
+              <div className="pb-4 border-b border-slate-200">
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">
+                  Booking Reference
+                </p>
+                <p className="text-xl font-black text-slate-900">
+                  {successBooking.bookingId}
+                </p>
+              </div>
+
+              {/* Customer */}
+              <div>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
+                  Customer
+                </p>
+                <p className="text-sm font-bold text-slate-900">
+                  {successBooking.customer.firstName}{" "}
+                  {successBooking.customer.lastName}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {successBooking.customer.email}
+                </p>
+              </div>
+
+              {/* Service Details */}
+              <div>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
+                  Service Details
+                </p>
+                <div className="space-y-1 text-sm">
+                  <p>
+                    <strong>Service:</strong> {successBooking.service}
+                  </p>
+                  <p>
+                    <strong>Date:</strong>{" "}
+                    {new Date(successBooking.schedule.date).toDateString()}
+                  </p>
+                  <p>
+                    <strong>Time:</strong> {successBooking.schedule.timeSlot}
+                  </p>
+                  <p>
+                    <strong>Duration:</strong> {successBooking.details.duration}{" "}
+                    hours
+                  </p>
+                  <p>
+                    <strong>Location:</strong> {successBooking.details.address}
+                  </p>
+                </div>
+              </div>
+
+              {/* Extras/Add-ons */}
+              {successBooking.details.extras &&
+                successBooking.details.extras.length > 0 && (
+                  <div>
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
+                      Add-ons Selected
+                    </p>
+                    <div className="space-y-1">
+                      {successBooking.details.extras.map((extra, idx) => (
+                        <div
+                          key={idx}
+                          className="text-sm bg-white px-3 py-2 rounded-lg border border-slate-200 flex items-center gap-2"
+                        >
+                          <Plus size={14} className="text-emerald-600" />
+                          <span className="text-slate-700">{extra}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* Amount */}
+              <div className="pt-4 border-t border-slate-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-slate-600">
+                    Total Amount
+                  </span>
+                  <span className="text-2xl font-black text-emerald-600">
+                    {successBooking.payment.currency === "GBP" ? "£" : "₦"}
+                    {successBooking.payment.amount}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Info Box */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+              <p className="text-xs text-blue-900">
+                <strong>✓ Payment link sent</strong> to{" "}
+                <span className="font-bold">
+                  {successBooking.customer.email}
+                </span>
+              </p>
+              <p className="text-xs text-blue-800 mt-2">
+                Customer will receive email with secure payment button. Once
+                paid, booking status will be updated to Confirmed.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  setSuccessBooking(null);
+                }}
+                className="w-full py-3 px-6 rounded-2xl bg-emerald-600 text-white font-black hover:bg-emerald-700 transition-colors"
+              >
+                Done
+              </button>
+              <button
+                onClick={() => {
+                  window.location.href = "/admin/bookings";
+                }}
+                className="w-full py-3 px-6 rounded-2xl bg-slate-100 text-slate-900 font-black hover:bg-slate-200 transition-colors"
+              >
+                Back to Bookings
+              </button>
             </div>
           </div>
         </div>
