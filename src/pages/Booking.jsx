@@ -187,12 +187,12 @@ const Booking = () => {
 
   // Initialize formData with localStorage backup
   const [formData, setFormData] = useState(() => {
-    const saved = localStorage.getItem('ciq_booking_draft');
+    const saved = localStorage.getItem("ciq_booking_draft");
     if (saved) {
       try {
         return JSON.parse(saved);
       } catch {
-        localStorage.removeItem('ciq_booking_draft');
+        localStorage.removeItem("ciq_booking_draft");
       }
     }
     return {
@@ -220,13 +220,13 @@ const Booking = () => {
 
   // Save formData to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('ciq_booking_draft', JSON.stringify(formData));
+    localStorage.setItem("ciq_booking_draft", JSON.stringify(formData));
   }, [formData]);
 
   // Clear localStorage after successful submission
   useEffect(() => {
     if (isSubmitted) {
-      localStorage.removeItem('ciq_booking_draft');
+      localStorage.removeItem("ciq_booking_draft");
     }
   }, [isSubmitted]);
 
