@@ -98,7 +98,11 @@ const BlogDetail = () => {
             className="relative w-full h-96 md:h-[500px] overflow-hidden"
           >
             <img
-              src={post.image}
+              src={
+                post.image.startsWith("http")
+                  ? post.image
+                  : `${API_URL}${post.image}`
+              }
               alt={post.title}
               className="w-full h-full object-cover"
             />

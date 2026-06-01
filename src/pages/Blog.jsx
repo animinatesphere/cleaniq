@@ -142,7 +142,11 @@ const Blog = () => {
                   {featuredPost.image && (
                     <div className="relative h-96 overflow-hidden">
                       <img
-                        src={featuredPost.image}
+                        src={
+                          featuredPost.image.startsWith("http")
+                            ? featuredPost.image
+                            : `${API_URL}${featuredPost.image}`
+                        }
                         alt={featuredPost.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />

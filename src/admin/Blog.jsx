@@ -159,7 +159,7 @@ const AdminBlog = () => {
       return;
 
     try {
-      const response = await fetch(`${API_URL}/api/blog/${id}`, {
+      const response = await fetch(`${API_URL}/blog/${id}`, {
         method: "DELETE",
       });
 
@@ -352,7 +352,13 @@ const AdminBlog = () => {
             {imagePreview && (
               <div className="relative max-w-xs">
                 <img
-                  src={imagePreview}
+                  src={
+                    imagePreview.startsWith("http")
+                      ? imagePreview
+                      : imagePreview.startsWith("data:")
+                        ? imagePreview
+                        : `${API_URL}${imagePreview}`
+                  }
                   alt="Preview"
                   className="w-full h-48 rounded-xl object-cover border-2 border-primary/30"
                 />
@@ -454,7 +460,11 @@ const AdminBlog = () => {
                   {post.image && (
                     <div className="relative w-24 h-24 flex-shrink-0">
                       <img
-                        src={post.image}
+                        src={
+                          post.image.startsWith("http")
+                            ? post.image
+                            : `${API_URL}${post.image}`
+                        }
                         alt={post.title}
                         className="w-full h-full rounded-lg object-cover border-2 border-slate-200"
                       />
