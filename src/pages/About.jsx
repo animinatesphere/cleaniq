@@ -33,7 +33,7 @@ const About = () => {
   };
 
   return (
-    <div className="pt-32 pb-20 bg-white min-h-screen overflow-x-hidden">
+    <div className="pt-32 pb-20 bg-white min-h-screen overflow-x-hidde mt-12">
       <Helmet>
         <title>About Us | Cleaniq Services Manchester</title>
         <meta
@@ -263,7 +263,8 @@ const About = () => {
                       Office Location
                     </p>
                     <p className="text-lg font-bold">
-                    First Floor, Swan Buildings, 20 Swan St, Manchester M4 5JW, United Kingdom
+                      First Floor, Swan Buildings, 20 Swan St, Manchester M4
+                      5JW, United Kingdom
                     </p>
                   </div>
                 </div>

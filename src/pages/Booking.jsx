@@ -177,8 +177,9 @@ const Booking = () => {
   const { customer, loading: authLoading } = useCustomerAuth();
   const [searchParams] = useSearchParams();
   const preSelectedService = searchParams.get("service");
+  const returnedStep = parseInt(searchParams.get("step") || "1");
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(returnedStep);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const [bookedDates, setBookedDates] = useState([]);
@@ -1378,13 +1379,13 @@ const Booking = () => {
                                 </p>
                                 <div className="flex gap-3 justify-center">
                                   <Link
-                                    to="/account/login"
+                                    to="/account/login?returnTo=/booking"
                                     className="btn-primary py-3 px-6 font-black"
                                   >
                                     Log in
                                   </Link>
                                   <Link
-                                    to="/account/signup"
+                                    to="/account/signup?returnTo=/booking"
                                     className="py-3 px-6 bg-slate-50 rounded-2xl font-black text-primary"
                                   >
                                     Sign up
@@ -1635,14 +1636,14 @@ const Booking = () => {
                 </div>
 
                 <Link
-                  to="/account/login"
+                  to="/account/login?returnTo=/booking&step=4"
                   className="block w-full py-4 px-6 bg-slate-100 text-primary rounded-2xl font-black text-lg hover:bg-slate-200 transition-all duration-200 text-center border border-slate-200"
                 >
                   Log In
                 </Link>
 
                 <Link
-                  to="/account/signup"
+                  to="/account/signup?returnTo=/booking&step=4"
                   className="block w-full py-4 px-6 bg-white text-primary rounded-2xl font-black text-lg hover:bg-slate-50 transition-all duration-200 border-2 border-primary text-center"
                 >
                   Sign Up

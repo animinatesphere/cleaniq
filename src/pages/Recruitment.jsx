@@ -170,7 +170,7 @@ const Recruitment = () => {
   }
 
   return (
-    <div className="pt-32 pb-20 px-6 min-h-screen bg-white">
+    <div className="pt-32 pb-20 px-6 min-h-screen bg-white mt-12">
       <Helmet>
         <title>Join Cleaniq — Careers & Recruitment</title>
         <meta
