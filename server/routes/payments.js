@@ -44,4 +44,49 @@ router.post("/create-intent", async (req, res) => {
   }
 });
 
+// Create Stripe Checkout Session Link for Admin-Created Bookings
+router.post("/create-checkout-session", async (req, res) => {
+  const { bookingId, amount, currency, customerEmail, service, customerName } =
+    req.body;
+
+  try {
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: "Invalid amount" });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      customer_email: customerEmail,
+      line_items: [
+        {
+          price_data: {
+            currency: currency.toLowerCase(),
+            product_data: {
+              name: `Cleaniq - ${service || "Cleaning Service"}`,
+              description: `Booking Reference: ${bookingId}`,
+            },
+            unit_amount: Math.round(amount * 100), // Stripe uses cents/pence
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        bookingId,
+        company: "Cleaniq Services",
+      },
+      success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=success&bookingId=${bookingId}`,
+      cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=cancelled`,
+    });
+
+    res.json({
+      sessionId: session.id,
+      checkoutUrl: session.url,
+    });
+  } catch (error) {
+    console.error("❌ STRIPE CHECKOUT ERROR:", error.message);
+    res.status(500).json({ message: "Failed to create payment link" });
+  }
+});
+
 module.exports = router;

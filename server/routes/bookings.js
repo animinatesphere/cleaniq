@@ -42,12 +42,60 @@ router.post("/", async (req, res) => {
 
     const newBooking = await booking.save();
 
-    // Send Confirmation Email to Customer
-    await sendEmail({
-      to: newBooking.customer.email,
-      subject: "Your Cleaniq Booking is Confirmed!",
-      html: templates.bookingConfirmation(newBooking),
-    });
+    // If booking is created by admin (payment status is "Pending"), send payment email with Stripe link
+    if (newBooking.payment && newBooking.payment.status === "Pending") {
+      try {
+        // Generate Stripe Checkout Link
+        const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          mode: "payment",
+          customer_email: newBooking.customer.email,
+          line_items: [
+            {
+              price_data: {
+                currency: (newBooking.payment.currency || "GBP").toLowerCase(),
+                product_data: {
+                  name: `Cleaniq - ${newBooking.service}`,
+                  description: `Booking Reference: ${newBooking.bookingId}`,
+                },
+                unit_amount: Math.round(newBooking.payment.amount * 100),
+              },
+              quantity: 1,
+            },
+          ],
+          metadata: {
+            bookingId: newBooking._id.toString(),
+            company: "Cleaniq Services",
+          },
+          success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=success&bookingId=${newBooking._id}`,
+          cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=cancelled`,
+        });
+
+        // Send Payment Required Email to Customer
+        await sendEmail({
+          to: newBooking.customer.email,
+          subject: `Payment Required: Cleaniq Booking ${newBooking.bookingId}`,
+          html: templates.paymentRequired(newBooking, session.url),
+        });
+
+        console.log(
+          `✅ Payment email sent to ${newBooking.customer.email} with checkout link`,
+        );
+      } catch (paymentEmailErr) {
+        console.error(
+          "❌ Failed to send payment email:",
+          paymentEmailErr.message,
+        );
+      }
+    } else {
+      // Send Confirmation Email to Customer (if not pending payment)
+      await sendEmail({
+        to: newBooking.customer.email,
+        subject: "Your Cleaniq Booking is Confirmed!",
+        html: templates.bookingConfirmation(newBooking),
+      });
+    }
 
     // Send Alert Email to Admin
     await sendEmail({

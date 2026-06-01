@@ -367,6 +367,153 @@ const templates = {
       </div>
     </div>
   `,
+
+  paymentRequired: (booking, checkoutLink) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0F172A; padding: 40px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 28px; letter-spacing: -1px;">Payment Required</h1>
+        <p style="color: #94a3b8; margin-top: 10px; font-weight: 500;">Complete your booking payment</p>
+      </div>
+      <div style="padding: 40px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 20px; margin-top: 0; color: #0F172A;">Hi ${booking.customer.firstName},</h2>
+        <p>Your cleaning booking has been created! To confirm your appointment, please complete the payment using the button below.</p>
+        
+        <div style="background-color: #f8fafc; padding: 24px; border-radius: 20px; margin: 24px 0; border: 1px solid #f1f5f9;">
+          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Booking Reference</p>
+          <p style="margin: 8px 0 20px 0; font-size: 20px; font-weight: 900; color: #0F172A;">${booking.bookingId}</p>
+          
+          <div style="display: grid; gap: 12px;">
+            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
+              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Service</span>
+              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.service}</span>
+            </div>
+            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
+              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Date</span>
+              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()}</span>
+            </div>
+            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
+              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Time</span>
+              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.schedule.timeSlot}</span>
+            </div>
+            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
+              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Duration</span>
+              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.duration} Hours</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 32px; padding: 20px; background-color: #6EE7B7; border-radius: 20px; text-align: center;">
+          <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 800; color: #0A5C43; text-transform: uppercase; letter-spacing: 1px;">Amount Due</p>
+          <p style="margin: 0; font-size: 32px; font-weight: 900; color: #0A5C43;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+          <a href="${checkoutLink}" style="display: inline-block; background-color: #0F172A; color: white; padding: 20px 40px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); cursor: pointer;">Pay Now Securely</a>
+          <p style="margin-top: 15px; font-size: 12px; color: #94a3b8;">🔒 Secure payment powered by Stripe</p>
+        </div>
+
+        <p style="margin-top: 30px; font-size: 14px; color: #64748b; text-align: center;">Once you complete the payment, your booking status will be updated to <strong>Confirmed</strong> and you will receive a confirmation email.</p>
+        
+        <div style="text-align: center; margin-top: 40px;">
+          <a href="https://cleaniqservices.com/account/bookings" style="display: inline-block; background-color: transparent; color: #0F172A; padding: 15px 30px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 14px; border: 2px solid #0F172A;">View All Bookings</a>
+        </div>
+      </div>
+      <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #f1f5f9;">
+        <p style="margin: 0; font-size: 12px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  paymentSuccessCustomer: (booking) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0A5C43; padding: 40px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 28px; letter-spacing: -1px;">✓ Payment Confirmed!</h1>
+        <p style="color: #E6F4F1; margin-top: 10px; font-weight: 500;">Your booking is now confirmed</p>
+      </div>
+      <div style="padding: 40px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 20px; margin-top: 0; color: #0A5C43;">Hi ${booking.customer.firstName},</h2>
+        <p>Excellent! Your payment has been successfully processed. Your cleaning booking is now confirmed and scheduled.</p>
+        
+        <div style="background-color: #f8fafc; padding: 24px; border-radius: 20px; margin: 24px 0; border: 1px solid #f1f5f9;">
+          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Booking Reference</p>
+          <p style="margin: 8px 0 20px 0; font-size: 20px; font-weight: 900; color: #0A5C43;">${booking.bookingId}</p>
+          
+          <div style="display: grid; gap: 12px;">
+            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
+              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Service</span>
+              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.service}</span>
+            </div>
+            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
+              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Date</span>
+              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()}</span>
+            </div>
+            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
+              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Time</span>
+              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.schedule.timeSlot}</span>
+            </div>
+            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
+              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Location</span>
+              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 32px; padding: 20px; background-color: #ECFDF5; border-radius: 20px; text-align: center; border: 1px solid #BBEDD7;">
+          <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 800; color: #0A5C43; text-transform: uppercase; letter-spacing: 1px;">Amount Paid</p>
+          <p style="margin: 0; font-size: 32px; font-weight: 900; color: #0A5C43;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
+        </div>
+
+        <p style="margin-top: 30px; font-size: 14px; color: #64748b; text-align: center;">Our team will reach out with any final details. Get ready for a sparkling clean!</p>
+        
+        <div style="text-align: center; margin-top: 40px;">
+          <a href="https://cleaniqservices.com/account/bookings" style="display: inline-block; background-color: #0A5C43; color: white; padding: 20px 40px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">Track Your Booking</a>
+        </div>
+      </div>
+      <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #f1f5f9;">
+        <p style="margin: 0; font-size: 12px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  paymentSuccessAdmin: (booking) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0F172A; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0F172A; padding: 30px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: auto; margin-bottom: 10px; border-radius: 8px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 24px;">✓ Payment Received! 💰</h1>
+      </div>
+      <div style="padding: 30px; color: #1e293b; line-height: 1.5;">
+        <h2 style="font-size: 18px; margin-top: 0; color: #0F172A; border-bottom: 1px solid #edf2f7; padding-bottom: 15px;">Payment Successfully Processed</h2>
+        
+        <div style="display: flex; justify-content: space-between; margin: 20px 0; padding-bottom: 15px; border-bottom: 1px solid #edf2f7;">
+          <div>
+            <p style="margin: 0; font-size: 10px; color: #94a3b8; font-weight: 800; text-transform: uppercase;">Booking Reference</p>
+            <p style="margin: 0; font-size: 16px; font-weight: 800; color: #0F172A;">${booking.bookingId}</p>
+          </div>
+          <div style="text-align: right;">
+            <p style="margin: 0; font-size: 10px; color: #94a3b8; font-weight: 800; text-transform: uppercase;">Amount Paid</p>
+            <p style="margin: 0; font-size: 16px; font-weight: 800; color: #0A5C43;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
+          </div>
+        </div>
+
+        <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Customer Details</h3>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Email:</strong> ${booking.customer.email}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Phone:</strong> ${booking.customer.phone}</p>
+
+        <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Service Details</h3>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Date:</strong> ${new Date(booking.schedule.date).toDateString()}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${booking.schedule.timeSlot}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Address:</strong> ${booking.details.address}</p>
+
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #edf2f7;">
+          <a href="https://cleaniqservices.com/admin/bookings" style="display: inline-block; background-color: #0F172A; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px;">Manage in Dashboard</a>
+        </div>
+      </div>
+    </div>
+  `,
 };
 
 module.exports = { sendEmail, templates };

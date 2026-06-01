@@ -123,12 +123,23 @@ app.post(
             booking.payment.status = "Paid";
             await booking.save();
 
-            // Send invoice/receipt email
+            // Send Payment Success Email to Customer
             await sendEmail({
               to: booking.customer.email,
-              subject: `Your Cleaniq Invoice & Receipt: ${booking.bookingId}`,
-              html: templates.invoiceReceipt(booking),
+              subject: `✓ Payment Confirmed: Cleaniq Booking ${booking.bookingId}`,
+              html: templates.paymentSuccessCustomer(booking),
             });
+
+            // Send Payment Success Email to Admin
+            await sendEmail({
+              to: process.env.EMAIL_USER || "admin@cleaniqservices.com",
+              subject: `✓ Payment Received: ${booking.bookingId} - ${booking.customer.firstName} ${booking.customer.lastName}`,
+              html: templates.paymentSuccessAdmin(booking),
+            });
+
+            console.log(
+              `✅ Payment success emails sent for booking ${bookingId}`,
+            );
           } else {
             console.warn(
               "⚠️ Booking not found for webhook bookingId:",
