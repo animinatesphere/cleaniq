@@ -22,7 +22,7 @@ const Blog = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `${API_URL}/api/blog?page=${page}&limit=${postsPerPage}`
+        `${API_URL}/api/blog?page=${page}&limit=${postsPerPage}`,
       );
       const data = await response.json();
       setPosts(data.posts);
@@ -74,7 +74,9 @@ const Blog = () => {
           {/* Blog Posts */}
           {posts.length === 0 ? (
             <div className="bg-white rounded-3xl p-12 text-center border border-slate-100">
-              <p className="text-slate-400 font-bold">No blog posts available yet.</p>
+              <p className="text-slate-400 font-bold">
+                No blog posts available yet.
+              </p>
             </div>
           ) : (
             <div className="space-y-8">
@@ -89,10 +91,7 @@ const Blog = () => {
                   <div className="grid md:grid-cols-3 gap-6 p-6 md:p-8">
                     {/* Image */}
                     {post.image && (
-                      <Link
-                        to={`/blog/${post._id}`}
-                        className="md:col-span-1"
-                      >
+                      <Link to={`/blog/${post._id}`} className="md:col-span-1">
                         <img
                           src={post.image}
                           alt={post.title}
@@ -102,11 +101,10 @@ const Blog = () => {
                     )}
 
                     {/* Content */}
-                    <div className={post.image ? "md:col-span-2" : "md:col-span-3"}>
-                      <Link
-                        to={`/blog/${post._id}`}
-                        className="block group"
-                      >
+                    <div
+                      className={post.image ? "md:col-span-2" : "md:col-span-3"}
+                    >
+                      <Link to={`/blog/${post._id}`} className="block group">
                         <h2 className="text-2xl md:text-3xl font-extrabold text-primary-dark mb-3 group-hover:text-primary transition-colors">
                           {post.title}
                         </h2>
@@ -116,11 +114,14 @@ const Blog = () => {
                       <div className="flex flex-wrap gap-4 text-sm text-slate-500 font-bold mb-4">
                         <span className="flex items-center gap-1">
                           <Calendar size={16} />
-                          {new Date(post.createdAt).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
+                          {new Date(post.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            },
+                          )}
                         </span>
                         <span className="flex items-center gap-1">
                           <User size={16} />
@@ -143,7 +144,9 @@ const Blog = () => {
                         className="inline-flex items-center gap-2 font-bold text-primary hover:text-primary-dark transition-colors group"
                       >
                         Read Article
-                        <span className="group-hover:translate-x-1 transition-transform">→</span>
+                        <span className="group-hover:translate-x-1 transition-transform">
+                          →
+                        </span>
                       </Link>
                     </div>
                   </div>
@@ -163,22 +166,26 @@ const Blog = () => {
                 Previous
               </button>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-2 rounded-lg font-bold transition-colors ${
-                    currentPage === page
-                      ? "bg-primary text-white"
-                      : "border-2 border-slate-200 hover:border-primary hover:text-primary"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-2 rounded-lg font-bold transition-colors ${
+                      currentPage === page
+                        ? "bg-primary text-white"
+                        : "border-2 border-slate-200 hover:border-primary hover:text-primary"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
 
               <button
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                onClick={() =>
+                  setCurrentPage(Math.min(totalPages, currentPage + 1))
+                }
                 disabled={currentPage === totalPages}
                 className="px-4 py-2 rounded-lg font-bold border-2 border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed hover:border-primary hover:text-primary transition-colors"
               >

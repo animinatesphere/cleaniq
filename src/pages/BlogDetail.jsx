@@ -62,10 +62,18 @@ const BlogDetail = () => {
       <Helmet>
         <title>{post.title} — Cleaniq Blog</title>
         <meta name="description" content={post.description} />
-        <link rel="canonical" href={`https://www.cleaniqservices.com/blog/${post._id}`} />
+        <link
+          rel="canonical"
+          href={`https://www.cleaniqservices.com/blog/${post._id}`}
+        />
         <meta property="og:title" content={post.title} />
         <meta property="og:description" content={post.description} />
-        {post.image && <meta property="og:image" content={`https://www.cleaniqservices.com${post.image}`} />}
+        {post.image && (
+          <meta
+            property="og:image"
+            content={`https://www.cleaniqservices.com${post.image}`}
+          />
+        )}
       </Helmet>
 
       <div className="pt-32 min-h-screen bg-[#F8FAFC] pb-20">
@@ -142,7 +150,8 @@ const BlogDetail = () => {
                   Ready for a Professional Clean?
                 </h3>
                 <p className="text-slate-600 mb-4">
-                  Book our cleaning services today and experience the Cleaniq difference.
+                  Book our cleaning services today and experience the Cleaniq
+                  difference.
                 </p>
                 <Link
                   to="/booking"
@@ -164,7 +173,9 @@ const BlogDetail = () => {
               className="inline-flex items-center gap-2 font-bold text-primary hover:text-primary-dark transition-colors group"
             >
               View All Blog Posts
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
+              <span className="group-hover:translate-x-1 transition-transform">
+                →
+              </span>
             </Link>
           </div>
         </div>

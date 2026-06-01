@@ -101,7 +101,9 @@ const AdminBlog = () => {
         throw new Error("Failed to save blog post");
       }
 
-      alert(editingId ? "Post updated successfully" : "Post created successfully");
+      alert(
+        editingId ? "Post updated successfully" : "Post created successfully",
+      );
       setFormData({
         title: "",
         description: "",
@@ -179,7 +181,9 @@ const AdminBlog = () => {
       {submitting && <LoadingOverlay message="Saving blog post..." />}
 
       <div className="mb-8 flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-primary-dark">Blog Management</h1>
+        <h1 className="text-3xl font-bold text-primary-dark">
+          Blog Management
+        </h1>
         <button
           onClick={() => setShowForm(!showForm)}
           className="btn-primary flex items-center gap-2 px-6 py-3 rounded-full text-sm"
@@ -225,7 +229,9 @@ const AdminBlog = () => {
                 placeholder="Short description (appears in list view)"
                 className="w-full p-4 rounded-xl border-2 border-transparent bg-slate-50 focus:border-primary outline-none font-medium"
               />
-              <p className="text-xs text-slate-400 mt-1">This will show on the blog listing page</p>
+              <p className="text-xs text-slate-400 mt-1">
+                This will show on the blog listing page
+              </p>
             </div>
 
             {/* Content */}
@@ -265,12 +271,18 @@ const AdminBlog = () => {
                         alt="Preview"
                         className="max-h-40 mx-auto rounded-lg object-cover"
                       />
-                      <p className="text-sm text-slate-500">Click to change image</p>
+                      <p className="text-sm text-slate-500">
+                        Click to change image
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <p className="text-slate-600 font-bold">Click to upload image</p>
-                      <p className="text-xs text-slate-400">PNG, JPG, GIF, WEBP up to 5MB</p>
+                      <p className="text-slate-600 font-bold">
+                        Click to upload image
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        PNG, JPG, GIF, WEBP up to 5MB
+                      </p>
                     </div>
                   )}
                 </label>
@@ -302,7 +314,10 @@ const AdminBlog = () => {
                 id="published"
                 className="w-5 h-5 cursor-pointer"
               />
-              <label htmlFor="published" className="font-bold text-primary-dark cursor-pointer">
+              <label
+                htmlFor="published"
+                className="font-bold text-primary-dark cursor-pointer"
+              >
                 Publish immediately
               </label>
             </div>
@@ -335,7 +350,9 @@ const AdminBlog = () => {
 
         {posts.length === 0 ? (
           <div className="bg-white rounded-3xl p-12 text-center border border-slate-100">
-            <p className="text-slate-400 font-bold">No blog posts yet. Create one to get started!</p>
+            <p className="text-slate-400 font-bold">
+              No blog posts yet. Create one to get started!
+            </p>
           </div>
         ) : (
           posts.map((post) => (
@@ -355,7 +372,9 @@ const AdminBlog = () => {
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <h3 className="text-lg font-bold text-primary-dark">{post.title}</h3>
+                      <h3 className="text-lg font-bold text-primary-dark">
+                        {post.title}
+                      </h3>
                       <p className="text-sm text-slate-500">
                         {new Date(post.createdAt).toLocaleDateString()}
                       </p>
