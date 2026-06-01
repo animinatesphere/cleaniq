@@ -185,27 +185,50 @@ const Booking = () => {
   const [bookedDates, setBookedDates] = useState([]);
   const [bookedSlotsByDate, setBookedSlotsByDate] = useState({});
 
-  const [formData, setFormData] = useState({
-    address: "",
-    addressLine2: "",
-    postcode: "",
-    serviceType: preSelectedService || "",
-    frequency: "Once",
-    duration: 2,
-    property: {},
-    extras: {},
-    parking: "Available on-site",
-    keyAccess: "I will be home",
-    date: "",
-    timeSlot: "",
-    preferredTime: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    specialInstructions: "",
-    hasPet: null,
+  // Initialize formData with localStorage backup
+  const [formData, setFormData] = useState(() => {
+    const saved = localStorage.getItem('ciq_booking_draft');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        localStorage.removeItem('ciq_booking_draft');
+      }
+    }
+    return {
+      address: "",
+      addressLine2: "",
+      postcode: "",
+      serviceType: preSelectedService || "",
+      frequency: "Once",
+      duration: 2,
+      property: {},
+      extras: {},
+      parking: "Available on-site",
+      keyAccess: "I will be home",
+      date: "",
+      timeSlot: "",
+      preferredTime: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      specialInstructions: "",
+      hasPet: null,
+    };
   });
+
+  // Save formData to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('ciq_booking_draft', JSON.stringify(formData));
+  }, [formData]);
+
+  // Clear localStorage after successful submission
+  useEffect(() => {
+    if (isSubmitted) {
+      localStorage.removeItem('ciq_booking_draft');
+    }
+  }, [isSubmitted]);
 
   useEffect(() => {
     if (!customer) return;
