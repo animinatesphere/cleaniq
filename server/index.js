@@ -78,6 +78,72 @@ app.use("/api/services", serviceRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/payments", paymentRoutes);
+
+// Stripe webhook endpoint (raw body required)
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "");
+const Booking = require("./models/Booking");
+const { sendEmail, templates } = require("./utils/emailService");
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
+
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const sig = req.headers["stripe-signature"];
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        STRIPE_WEBHOOK_SECRET,
+      );
+    } catch (err) {
+      console.error(
+        "❌ Stripe webhook signature verification failed:",
+        err.message,
+      );
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the event
+    try {
+      if (event.type === "payment_intent.succeeded") {
+        const pi = event.data.object;
+        const bookingId = pi.metadata && pi.metadata.bookingId;
+        console.log(
+          "🔔 Stripe payment succeeded for metadata.bookingId=",
+          bookingId,
+        );
+        if (bookingId) {
+          const booking = await Booking.findById(bookingId);
+          if (booking) {
+            booking.status = "Completed";
+            booking.payment = booking.payment || {};
+            booking.payment.transactionId = pi.id;
+            booking.payment.status = "Paid";
+            await booking.save();
+
+            // Send invoice/receipt email
+            await sendEmail({
+              to: booking.customer.email,
+              subject: `Your Cleaniq Invoice & Receipt: ${booking.bookingId}`,
+              html: templates.invoiceReceipt(booking),
+            });
+          } else {
+            console.warn(
+              "⚠️ Booking not found for webhook bookingId:",
+              bookingId,
+            );
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error handling stripe webhook:", err);
+    }
+
+    res.json({ received: true });
+  },
+);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/marketing", marketingRoutes);
 app.use("/api/workers", workerRoutes);

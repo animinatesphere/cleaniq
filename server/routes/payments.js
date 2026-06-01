@@ -1,14 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-router.post('/create-intent', async (req, res) => {
-  const { amount, currency, customerName, service } = req.body;
-  
+router.post("/create-intent", async (req, res) => {
+  const { amount, currency, customerName, service, bookingId } = req.body;
+
   try {
     // Safety: Ensure we have a valid amount
     if (!amount || amount <= 0) {
-      return res.status(400).json({ message: 'Invalid amount' });
+      return res.status(400).json({ message: "Invalid amount" });
     }
 
     // Create a PaymentIntent
@@ -18,22 +18,25 @@ router.post('/create-intent', async (req, res) => {
       automatic_payment_methods: {
         enabled: true,
       },
-      metadata: {
-        company: 'Cleaniq Services',
-        customer: customerName || 'Unknown',
-        service: service || 'Cleaning Service'
-      }
+      metadata: Object.assign(
+        {
+          company: "Cleaniq Services",
+          customer: customerName || "Unknown",
+          service: service || "Cleaning Service",
+        },
+        bookingId ? { bookingId } : {},
+      ),
     });
 
     res.json({
       clientSecret: paymentIntent.client_secret,
     });
   } catch (error) {
-    console.error('❌ STRIPE ERROR:', error.message);
-    
+    console.error("❌ STRIPE ERROR:", error.message);
+
     // Better user-facing error messages
-    let userMessage = 'Could not initialize payment.';
-    if (error.message.includes('currency')) {
+    let userMessage = "Could not initialize payment.";
+    if (error.message.includes("currency")) {
       userMessage = `Payment failed: The currency ${currency.toUpperCase()} is not supported by your account.`;
     }
 

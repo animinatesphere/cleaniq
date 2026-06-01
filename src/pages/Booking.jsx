@@ -372,6 +372,7 @@ const Booking = () => {
     );
   }, [servicesList]);
   const [notification, setNotification] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const showNotification = (message, type = "error") => {
     setNotification({ message, type });
@@ -504,6 +505,14 @@ const Booking = () => {
 
     setTotalPrice(Math.round(total * 100) / 100);
   }, [formData, region, dynamicRates]);
+
+  useEffect(() => {
+    if (step === 4 && !customer && !isSubmitted) {
+      setShowAuthModal(true);
+    } else {
+      setShowAuthModal(false);
+    }
+  }, [step, customer, isSubmitted]);
 
   const updateRoom = (name, delta) => {
     setFormData((prev) => {
@@ -638,46 +647,6 @@ const Booking = () => {
     return <LoadingOverlay message="Loading account..." />;
   }
 
-  if (!customer && !isSubmitted) {
-    return (
-      <div className="pt-40 pb-20 min-h-screen bg-[#F8FAFC] flex items-center justify-center px-6 text-center">
-        <Helmet>
-          <title>Account Required — Cleaniq Services</title>
-        </Helmet>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full bg-white p-8 md:p-10 rounded-[32px] shadow-xl shadow-slate-200/50 border border-slate-100"
-        >
-          <div className="w-20 h-20 bg-primary/10 rounded-[24px] flex items-center justify-center mx-auto mb-8">
-            <Lock size={40} className="text-primary" />
-          </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-primary-dark mb-4 tracking-tight">
-            Account Required
-          </h1>
-          <p className="text-slate-500 font-bold mb-10 text-sm md:text-base leading-relaxed">
-            Please log in or create a free account to book a cleaning service.
-            This helps us manage your schedule securely.
-          </p>
-          <div className="space-y-4">
-            <Link
-              to="/account/login"
-              className="btn-primary block w-full py-4 font-black rounded-2xl text-sm md:text-base"
-            >
-              Log In
-            </Link>
-            <Link
-              to="/account/signup"
-              className="block w-full py-4 bg-slate-50 text-primary-dark font-black rounded-2xl text-sm md:text-base hover:bg-slate-100 transition-colors"
-            >
-              Create Free Account
-            </Link>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
   if (isSubmitted) {
     return (
       <div className="pt-40 pb-20 min-h-screen bg-white flex items-center justify-center px-6 text-center">
@@ -755,7 +724,7 @@ const Booking = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="bg-white rounded-[24px] md:rounded-[40px] p-5 md:p-10 border border-slate-100 relative min-h-[600px]"
+                className="bg-white rounded-3xl md:rounded-[40px] p-5 md:p-10 border border-slate-100 relative min-h-150"
               >
                 <div className="flex-1 pb-20 md:pb-24">
                   {step === 1 && (
@@ -1382,14 +1351,40 @@ const Booking = () => {
                               <ShieldCheck size={18} />
                               Securely processed by Stripe
                             </div>
-                            <Elements stripe={stripePromise}>
-                              <StripePayment
-                                amount={totalPrice}
-                                currency={region.id === "UK" ? "GBP" : "NGN"}
-                                customerInfo={formData}
-                                onPaymentSuccess={handlePaymentSuccess}
-                              />
-                            </Elements>
+                            {!customer ? (
+                              <div className="p-6 bg-white rounded-2xl border border-slate-100 text-center">
+                                <p className="font-extrabold text-primary-dark mb-2">
+                                  Account required to pay
+                                </p>
+                                <p className="text-sm text-slate-500 mb-4">
+                                  Please log in or create a free account to
+                                  complete payment and secure your booking.
+                                </p>
+                                <div className="flex gap-3 justify-center">
+                                  <Link
+                                    to="/account/login"
+                                    className="btn-primary py-3 px-6 font-black"
+                                  >
+                                    Log in
+                                  </Link>
+                                  <Link
+                                    to="/account/signup"
+                                    className="py-3 px-6 bg-slate-50 rounded-2xl font-black text-primary"
+                                  >
+                                    Sign up
+                                  </Link>
+                                </div>
+                              </div>
+                            ) : (
+                              <Elements stripe={stripePromise}>
+                                <StripePayment
+                                  amount={totalPrice}
+                                  currency={region.id === "UK" ? "GBP" : "NGN"}
+                                  customerInfo={formData}
+                                  onPaymentSuccess={handlePaymentSuccess}
+                                />
+                              </Elements>
+                            )}
                           </div>
                         )}
                       </div>
@@ -1575,7 +1570,59 @@ const Booking = () => {
         </div>
       </div>
 
+      {/* Auth modal shown when user reaches payment but isn't logged in */}
       <AnimatePresence>
+        {showAuthModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-primary-dark/70 backdrop-blur-sm z-50"
+              onClick={() => setShowAuthModal(false)}
+            />
+            <motion.div
+              initial={{ y: 40, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 40, opacity: 0 }}
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-60 w-[90%] max-w-md bg-white rounded-2xl p-8 shadow-2xl"
+            >
+              <div className="flex flex-col items-center text-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Lock size={28} className="text-primary" />
+                </div>
+                <h3 className="text-xl font-extrabold text-primary-dark">
+                  Please sign in to continue
+                </h3>
+                <p className="text-sm text-slate-500">
+                  You need an account to complete payment and manage your
+                  bookings securely.
+                </p>
+                <div className="flex gap-3 mt-2 w-full">
+                  <Link
+                    to="/account/login"
+                    className="btn-primary py-3 px-5 w-1/2 text-center"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    to="/account/signup"
+                    className="py-3 px-5 bg-slate-50 rounded-2xl font-black text-primary w-1/2 text-center"
+                  >
+                    Sign up
+                  </Link>
+                </div>
+                <button
+                  onClick={() => setShowAuthModal(false)}
+                  className="mt-4 text-slate-400"
+                >
+                  Continue as guest
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+
         {notification && (
           <motion.div
             initial={{ opacity: 0, y: -100 }}

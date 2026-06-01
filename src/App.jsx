@@ -1,42 +1,43 @@
-import React from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
-import Navbar from './component/Navbar';
-import TopNav from './component/TopNav';
-import Footer from './component/Footer';
-import ScrollToTop from './component/ScrollToTop';
-import WhatsAppButton from './component/WhatsAppButton';
-import Preloader from './component/Preloader';
-import Home from './pages/Home';
-import About from './pages/About';
-import Booking from './pages/Booking';
-import Recruitment from './pages/Recruitment';
-import Services from './pages/Services';
-import Contact from './pages/Contact';
-import ServiceDetail from './pages/ServiceDetail';
-import LocationDetail from './pages/LocationDetail';
-import TermsAndConditions from './pages/TermsAndConditions';
+import React from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import Navbar from "./component/Navbar";
+import TopNav from "./component/TopNav";
+import Footer from "./component/Footer";
+import ScrollToTop from "./component/ScrollToTop";
+import WhatsAppButton from "./component/WhatsAppButton";
+import Preloader from "./component/Preloader";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Booking from "./pages/Booking";
+import Recruitment from "./pages/Recruitment";
+import Services from "./pages/Services";
+import Contact from "./pages/Contact";
+import ServiceDetail from "./pages/ServiceDetail";
+import LocationDetail from "./pages/LocationDetail";
+import TermsAndConditions from "./pages/TermsAndConditions";
 
 // Customer Account
-import CustomerLogin from './pages/account/Login';
-import CustomerSignup from './pages/account/Signup';
-import CustomerDashboard from './pages/account/Dashboard';
-import { CustomerAuthProvider } from './context/CustomerAuthContext';
+import CustomerLogin from "./pages/account/Login";
+import CustomerSignup from "./pages/account/Signup";
+import CustomerDashboard from "./pages/account/Dashboard";
+import { CustomerAuthProvider } from "./context/CustomerAuthContext";
 
 // Admin Imports
-import AdminLayout from './admin/AdminLayout';
-import Dashboard from './admin/Dashboard';
-import Bookings from './admin/Bookings';
-import Applicants from './admin/Applicants';
-import Customers from './admin/Customers';
-import Settings from './admin/Settings';
-import ServicesManagement from './admin/Services';
-import Workers from './admin/Workers';
-import Chat from './admin/Chat';
+import AdminLayout from "./admin/AdminLayout";
+import Dashboard from "./admin/Dashboard";
+import Bookings from "./admin/Bookings";
+import AdminBookingPay from "./admin/AdminBookingPay";
+import Applicants from "./admin/Applicants";
+import Customers from "./admin/Customers";
+import Settings from "./admin/Settings";
+import ServicesManagement from "./admin/Services";
+import Workers from "./admin/Workers";
+import Chat from "./admin/Chat";
 
 function App() {
   const location = useLocation();
-  const isAdminPath = location.pathname.startsWith('/admin');
-  const isAccountPath = location.pathname.startsWith('/account');
+  const isAdminPath = location.pathname.startsWith("/admin");
+  const isAccountPath = location.pathname.startsWith("/account");
 
   return (
     <CustomerAuthProvider>
@@ -46,7 +47,7 @@ function App() {
         {!isAdminPath && !isAccountPath && <TopNav />}
         {!isAdminPath && !isAccountPath && <Navbar />}
         {isAccountPath && <Navbar />}
-        
+
         <main className="grow">
           <Routes>
             {/* Public Routes */}
@@ -64,11 +65,12 @@ function App() {
             <Route path="/account/login" element={<CustomerLogin />} />
             <Route path="/account/signup" element={<CustomerSignup />} />
             <Route path="/account/dashboard" element={<CustomerDashboard />} />
-            
+
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="bookings" element={<Bookings />} />
+              <Route path="bookings/pay/:id" element={<AdminBookingPay />} />
               <Route path="applicants" element={<Applicants />} />
               <Route path="customers" element={<Customers />} />
               <Route path="workers" element={<Workers />} />
