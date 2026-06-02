@@ -363,7 +363,7 @@ const CityLanding = () => {
                     {service}
                   </h4>
                   <p className="text-xs text-slate-500 font-bold uppercase tracking-wide">
-                    Professional service
+                    Professional cleaning service
                   </p>
                 </div>
               </motion.div>
