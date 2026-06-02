@@ -1,22 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Search,
-  Filter,
-  User,
   Mail,
   Phone,
   MapPin,
-  Calendar,
-  ChevronRight,
-  Star,
-  CreditCard,
   ShoppingBag,
-  RefreshCcw,
   Download,
   X,
   Edit3,
   Save,
-  Trash2,
   Eye,
   CheckCircle2,
   XCircle,
@@ -24,6 +16,7 @@ import {
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
@@ -58,8 +51,9 @@ const Customers = () => {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line
     fetchCustomers();
-  }, [fetchCustomers]);
+  }, []);
 
   useEffect(() => {
     if (selected && !isEditing) {
@@ -71,8 +65,8 @@ const Customers = () => {
           );
           const data = await res.json();
           setCustomerBookings(data);
-        } catch (err) {
-          console.error(err);
+        } catch {
+          // Error fetching bookings
         } finally {
           setLoadingBookings(false);
         }
@@ -81,12 +75,11 @@ const Customers = () => {
     } else {
       setCustomerBookings([]);
     }
+    // eslint-disable-next-line
   }, [selected, isEditing]);
 
-  const handleUpdate = async (dataOverride = null) => {
+  const handleUpdate = async () => {
     try {
-      const payload =
-        dataOverride && !dataOverride.nativeEvent ? dataOverride : editData;
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/customers/${selected.email}`,
         {
@@ -101,7 +94,7 @@ const Customers = () => {
         setSelected(null);
         setStatusMessage({ type: "success", text: "Client info updated" });
       }
-    } catch (err) {
+    } catch {
       setStatusMessage({ type: "error", text: "Failed to update client" });
     }
   };

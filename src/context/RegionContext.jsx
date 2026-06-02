@@ -1,21 +1,21 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const RegionContext = createContext();
 
 export const regions = {
   UK: {
-    id: 'UK',
-    name: 'United Kingdom',
-    currency: 'GBP',
-    symbol: '£',
-    locale: 'en-GB',
-    paymentGateways: ['stripe'],
+    id: "UK",
+    name: "United Kingdom",
+    currency: "GBP",
+    symbol: "£",
+    locale: "en-GB",
+    paymentGateways: ["stripe"],
     basePrice: 20,
     contact: {
-      phone: '+44 7752 476368',
-      email: 'info@cleaniqservices.com',
-      address: 'First Floor, Swan Buildings, 20 Swan St, Manchester M4 5JW, United Kingdom'
-    }
+      phone: "+44 7752 476368",
+      email: "info@cleaniqservices.com",
+      address: "20 Swan St, Manchester, M4 5JW",
+    },
   },
   /*
   NG: {
@@ -37,7 +37,7 @@ export const regions = {
 
 export const RegionProvider = ({ children }) => {
   const [region, setRegion] = useState(() => {
-    const saved = localStorage.getItem('cleaniq_region');
+    const saved = localStorage.getItem("cleaniq_region");
     if (saved) {
       const savedData = JSON.parse(saved);
       // Ensure we get the latest data for the saved region ID
@@ -47,7 +47,7 @@ export const RegionProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    localStorage.setItem('cleaniq_region', JSON.stringify({ id: region.id }));
+    localStorage.setItem("cleaniq_region", JSON.stringify({ id: region.id }));
   }, [region]);
 
   const toggleRegion = (regionId) => {
@@ -64,7 +64,7 @@ export const RegionProvider = ({ children }) => {
 export const useRegion = () => {
   const context = useContext(RegionContext);
   if (!context) {
-    throw new Error('useRegion must be used within a RegionProvider');
+    throw new Error("useRegion must be used within a RegionProvider");
   }
   return context;
 };

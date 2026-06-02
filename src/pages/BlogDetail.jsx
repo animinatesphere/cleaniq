@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
   Calendar,
   User,
-  Eye,
   ArrowLeft,
-  Share2,
+  ArrowRight,
   Clock,
   Send,
   MessageCircle,
@@ -15,7 +14,7 @@ import LoadingOverlay from "../component/LoadingOverlay";
 import { motion } from "framer-motion";
 
 const BlogDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
@@ -31,36 +30,46 @@ const BlogDetail = () => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const BASE_URL = API_URL.endsWith("/api") ? API_URL.slice(0, -4) : API_URL;
 
+  // Extract ID from slug (format: id-title-slug)
+  const extractIdFromSlug = (slug) => {
+    if (!slug) return null;
+    // If slug is just an ID (MongoDB format), use it directly
+    if (slug.match(/^[0-9a-f]{24}$/i)) return slug;
+    // If slug contains ID at the beginning (id-title-format), extract it
+    const parts = slug.split("-");
+    if (parts[0] && parts[0].match(/^[0-9a-f]{24}$/i)) {
+      return parts[0];
+    }
+    return slug; // Fallback to slug as-is
+  };
+
+  const postId = extractIdFromSlug(slug);
+
   const getImageUrl = (imagePath) => {
     if (imagePath.startsWith("http")) return imagePath;
     return `${BASE_URL}${imagePath}`;
   };
 
-  useEffect(() => {
-    fetchPost();
-  }, [id]);
-
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/blog/${id}`);
+      const response = await fetch(`${API_URL}/blog/${postId}`);
       if (!response.ok) {
         throw new Error("Post not found");
       }
       const data = await response.json();
       setPost(data);
-      fetchComments();
     } catch (error) {
       console.error("Error fetching blog post:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [postId, API_URL]);
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       setLoadingComments(true);
-      const response = await fetch(`${API_URL}/comments/${id}`);
+      const response = await fetch(`${API_URL}/comments/${postId}`);
       if (response.ok) {
         const data = await response.json();
         setComments(data);
@@ -70,7 +79,23 @@ const BlogDetail = () => {
     } finally {
       setLoadingComments(false);
     }
-  };
+  }, [postId, API_URL]);
+
+  useEffect(() => {
+    if (postId) {
+      // This pattern is acceptable: fetchPost is useCallback-wrapped and memoized
+      // eslint-disable-next-line
+      fetchPost();
+    }
+  }, [postId, fetchPost]);
+
+  useEffect(() => {
+    if (postId) {
+      // This pattern is acceptable: fetchComments is useCallback-wrapped and memoized
+      // eslint-disable-next-line
+      fetchComments();
+    }
+  }, [postId, fetchComments]);
 
   const handleCommentChange = (e) => {
     const { name, value } = e.target;
@@ -96,7 +121,7 @@ const BlogDetail = () => {
 
     try {
       setSubmittingComment(true);
-      const response = await fetch(`${API_URL}/comments/${id}`, {
+      const response = await fetch(`${API_URL}/comments/${postId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(commentForm),
@@ -119,19 +144,13 @@ const BlogDetail = () => {
     }
   };
 
-  const estimateReadTime = (content) => {
-    const wordsPerMinute = 200;
-    const wordCount = (content || "").split(/\s+/).length;
-    return Math.ceil(wordCount / wordsPerMinute) || 5;
-  };
-
   if (loading) {
     return <LoadingOverlay message="Loading post..." />;
   }
 
   if (!post) {
     return (
-      <div className="pt-40 min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pb-20">
+      <div className="pt-40 min-h-screen bg-linear-to-br mt-12 from-slate-900 via-slate-800 to-slate-900 pb-20">
         <div className="max-w-3xl mx-auto px-4 md:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -176,140 +195,135 @@ const BlogDetail = () => {
       </Helmet>
 
       <div className="min-h-screen bg-white">
-        {/* Featured Image Section */}
-        {post.image && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="relative w-full h-80 sm:h-96 md:h-[500px] overflow-hidden"
-          >
-            <img
-              src={getImageUrl(post.image)}
-              alt={post.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-white" />
+        {/* Header Section */}
+        <div className="bg-linear-to-br from-primary/5 mt-12 to-secondary/5 pt-32 pb-12">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8">
+            {/* Back Button */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-8"
+            >
+              <Link
+                to="/blog"
+                className="inline-flex items-center gap-2 font-bold text-primary hover:text-primary-dark transition-colors group hover:gap-3"
+              >
+                <ArrowLeft size={18} />
+                <span>Back to Blog</span>
+              </Link>
+            </motion.div>
 
-            {/* Category Badge */}
-            <div className="absolute top-6 left-6 bg-gradient-to-r from-primary to-secondary px-4 py-2 rounded-full shadow-lg">
-              <span className="text-white font-black text-xs sm:text-sm">
-                Cleaning Tips
-              </span>
-            </div>
-          </motion.div>
-        )}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="grid md:grid-cols-3 gap-8 items-start"
+            >
+              {/* Content */}
+              <div className="md:col-span-2">
+                {/* Category Badge */}
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 mb-6">
+                  <span className="w-2 h-2 rounded-full bg-primary"></span>
+                  <span className="text-xs font-black text-primary uppercase tracking-widest">
+                    Cleaning Tips
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h1 className="text-4xl sm:text-5xl font-black text-primary-dark mb-6 leading-tight tracking-tight">
+                  {post.title}
+                </h1>
+
+                {/* Description */}
+                <p className="text-lg text-slate-600 font-medium mb-8 leading-relaxed">
+                  {post.description}
+                </p>
+
+                {/* Meta Info */}
+                <div className="flex flex-wrap items-center gap-4 text-sm font-bold text-slate-600">
+                  <div className="flex items-center gap-2">
+                    <User size={16} className="text-primary" />
+                    <span>{post.author}</span>
+                  </div>
+                  <div className="w-px h-4 bg-slate-300"></div>
+                  <div className="flex items-center gap-2">
+                    <Calendar size={16} className="text-primary" />
+                    <span>
+                      {new Date(post.createdAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  <div className="w-px h-4 bg-slate-300"></div>
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} className="text-primary" />
+                    <span>
+                      {Math.ceil(
+                        post.content.trim().split(/\s+/).length / 200,
+                      ) || 5}{" "}
+                      min read
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Featured Image - Sidebar */}
+              {post.image && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="md:col-span-1 relative"
+                >
+                  <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200 bg-slate-100">
+                    <div className="aspect-square relative">
+                      <img
+                        src={getImageUrl(post.image)}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.error(
+                            "Image failed to load:",
+                            getImageUrl(post.image),
+                          );
+                          e.target.src = "";
+                          e.target.alt = "Image unavailable - " + post.title;
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-secondary/10"></div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          </div>
+        </div>
 
         {/* Article Content */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-12 md:py-16">
-          {/* Back Button */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-8"
-          >
-            <Link
-              to="/blog"
-              className="inline-flex items-center gap-2 font-bold text-primary hover:text-primary-dark transition-colors group hover:gap-3"
-            >
-              <ArrowLeft size={18} />
-              <span>Back to Blog</span>
-            </Link>
-          </motion.div>
-
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 py-12 md:py-16">
           <motion.article
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            {/* Title */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-primary-dark mb-6 leading-tight tracking-tight">
-              {post.title}
-            </h1>
-
-            {/* Meta Info Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 pb-8 mb-12 border-b-2 border-slate-200">
-              <div className="flex flex-wrap items-center gap-6">
-                {/* Author Info */}
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md">
-                    <User size={20} className="text-white" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-900">{post.author}</p>
-                    <p className="text-xs text-slate-500 font-bold">Author</p>
-                  </div>
-                </div>
-
-                {/* Divider */}
-                <div className="h-8 w-px bg-slate-200" />
-
-                {/* Date */}
-                <div className="flex items-center gap-2 text-slate-600 font-bold">
-                  <Calendar size={16} className="text-primary" />
-                  {new Date(post.createdAt).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </div>
-
-                {/* Read Time */}
-                <div className="flex items-center gap-2 text-slate-600 font-bold">
-                  <Clock size={16} className="text-primary" />
-                  {estimateReadTime(post.content)} min
-                </div>
-
-                {/* Views */}
-                <div className="flex items-center gap-2 text-slate-600 font-bold">
-                  <Eye size={16} className="text-primary" />
-                  {post.views || 0}
-                </div>
-              </div>
-
-              {/* Share Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
-                      title: post.title,
-                      text: post.description,
-                      url: window.location.href,
-                    });
-                  }
-                }}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-bold transition-colors border border-primary/20"
-              >
-                <Share2 size={16} />
-                Share
-              </motion.button>
-            </div>
-
-            {/* Description */}
-            <p className="text-lg md:text-xl text-slate-700 mb-12 leading-relaxed font-semibold italic border-l-4 border-primary pl-6 bg-slate-50 py-6 px-8 rounded-r-lg">
-              "{post.description}"
-            </p>
-
             {/* Full Content */}
             {post.content && (
-              <div className="prose prose-lg max-w-none mb-16">
-                <div className="text-slate-700 leading-relaxed text-lg whitespace-pre-wrap space-y-6 text-base sm:text-lg">
-                  {post.content}
-                </div>
+              <div className="text-slate-700 leading-relaxed text-base sm:text-lg whitespace-pre-wrap space-y-6 mb-16">
+                {post.content}
               </div>
             )}
 
             {/* Author Bio Card */}
-            <div className="bg-gradient-to-r from-primary/5 to-secondary/5 border-2 border-primary/10 rounded-2xl p-8 md:p-10 mb-16 hover:border-primary/20 transition-all">
+            <div className="bg-linear-to-r from-primary/5 to-secondary/5 border-2 border-primary/10 rounded-2xl p-8 md:p-10 mb-16 hover:border-primary/20 transition-all">
               <h3 className="text-xl font-black text-primary-dark mb-6 flex items-center gap-3">
-                <div className="w-1 h-8 bg-gradient-to-b from-primary to-secondary rounded-full" />
+                <div className="w-1 h-8 bg-linear-to-b from-primary to-secondary rounded-full" />
                 About the Author
               </h3>
               <div className="flex gap-6 items-start">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
+                <div className="w-16 h-16 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-md">
                   <User size={28} className="text-white" />
                 </div>
                 <div>
@@ -329,7 +343,7 @@ const BlogDetail = () => {
             {/* CTA Section */}
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-r from-primary via-secondary to-primary rounded-2xl p-8 md:p-12 text-white mb-16 shadow-2xl shadow-primary/20"
+              className="bg-linear-to-r from-primary via-secondary to-primary rounded-2xl p-8 md:p-12 text-white mb-16 shadow-2xl shadow-primary/20"
             >
               <h3 className="text-2xl md:text-3xl font-black mb-4">
                 Ready for a Professional Clean?
@@ -339,15 +353,13 @@ const BlogDetail = () => {
                 the cleaning for you. Book your service today and experience the
                 Cleaniq difference.
               </p>
-              <motion.div whileHover={{ gap: "12px" }} className="inline-flex">
-                <Link
-                  to="/booking"
-                  className="inline-flex items-center gap-2 bg-white text-primary font-black px-8 py-4 rounded-full hover:bg-slate-100 transition-colors shadow-lg"
-                >
-                  Book Now
-                  <span>→</span>
-                </Link>
-              </motion.div>
+              <Link
+                to="/booking"
+                className="inline-flex items-center gap-2 bg-white text-primary font-black px-8 py-4 rounded-full hover:bg-slate-100 transition-colors shadow-lg"
+              >
+                Book Now
+                <ArrowRight size={20} />
+              </Link>
             </motion.div>
           </motion.article>
 
@@ -416,7 +428,7 @@ const BlogDetail = () => {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={submittingComment}
-                  className="bg-gradient-to-r from-primary to-secondary px-6 py-3 rounded-lg font-bold text-white flex items-center gap-2 hover:shadow-lg shadow-primary/30 transition-all disabled:opacity-50"
+                  className="bg-linear-to-r from-primary to-secondary px-6 py-3 rounded-lg font-bold text-white flex items-center gap-2 hover:shadow-lg shadow-primary/30 transition-all disabled:opacity-50"
                 >
                   <Send size={18} />
                   {submittingComment ? "Submitting..." : "Post Comment"}
@@ -454,7 +466,7 @@ const BlogDetail = () => {
                     className="bg-white border-2 border-slate-200 rounded-lg p-6 hover:shadow-md hover:border-primary/20 transition-all"
                   >
                     <div className="flex gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
+                      <div className="w-12 h-12 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-md">
                         <User size={20} className="text-white" />
                       </div>
                       <div className="flex-1">

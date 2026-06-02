@@ -12,25 +12,12 @@ import {
   Phone,
   Mail,
   MapPin,
-  Globe,
 } from "lucide-react";
 import { useRegion } from "../context/RegionContext";
 
 const About = () => {
+  // eslint-disable-next-line no-unused-vars
   const { region } = useRegion();
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.2 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
 
   return (
     <div className="pt-32 pb-20 bg-white min-h-screen overflow-x-hidde mt-12">
@@ -104,7 +91,7 @@ const About = () => {
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="bg-white p-8 md:p-12 rounded-[32px] md:rounded-[48px] shadow-xl border border-slate-100"
+            className="bg-white p-8 md:p-12 rounded-4xl md:rounded-[48px] shadow-xl border border-slate-100"
           >
             <div className="w-16 h-16 rounded-2xl bg-secondary/20 text-primary flex items-center justify-center mb-8">
               <Target size={32} />
@@ -123,7 +110,7 @@ const About = () => {
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="bg-primary p-8 md:p-12 rounded-[32px] md:rounded-[48px] shadow-xl text-white relative overflow-hidden"
+            className="bg-primary p-8 md:p-12 rounded-4xl md:rounded-[48px] shadow-xl text-white relative overflow-hidden"
           >
             <div className="absolute bottom-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mb-16 -mr-16" />
             <div className="w-16 h-16 rounded-2xl bg-white/10 text-secondary flex items-center justify-center mb-8">
@@ -187,7 +174,7 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="p-6 md:p-8 rounded-[24px] md:rounded-[32px] bg-slate-50 border border-slate-100 hover:border-primary/20 transition-all group"
+                className="p-6 md:p-8 rounded-3xl md:rounded-4xl bg-slate-50 border border-slate-100 hover:border-primary/20 transition-all group"
               >
                 <div className="text-primary mb-6 transition-transform group-hover:scale-110 group-hover:rotate-6">
                   {React.cloneElement(value.icon, { size: 32 })}
@@ -231,7 +218,7 @@ const About = () => {
               ))}
             </div>
           </div>
-          <div className="bg-white/10 backdrop-blur-xl p-6 md:p-12 rounded-[32px] md:rounded-[60px] border border-white/20">
+          <div className="bg-white/10 backdrop-blur-xl p-6 md:p-12 rounded-4xl md:rounded-[60px] border border-white/20">
             <h2 className="text-2xl font-bold mb-8 tracking-tight">
               The Cleaniq Standard.
             </h2>
@@ -247,7 +234,7 @@ const About = () => {
       {/* Contact Section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="bg-slate-900 rounded-[32px] md:rounded-[60px] p-6 sm:p-8 md:p-20 text-white relative overflow-hidden">
+          <div className="bg-slate-900 rounded-4xl md:rounded-[60px] p-6 sm:p-8 md:p-20 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-[100px] -mr-48 -mt-48" />
             <div className="max-w-2xl">
               <h2 className="text-3xl md:text-5xl font-extrabold mb-10 md:12 tracking-tighter">
@@ -263,8 +250,7 @@ const About = () => {
                       Office Location
                     </p>
                     <p className="text-lg font-bold">
-                      First Floor, Swan Buildings, 20 Swan St, Manchester M4
-                      5JW, United Kingdom
+                      20 Swan St, Manchester, M4 5JW
                     </p>
                   </div>
                 </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -117,9 +117,6 @@ const AdminLayout = () => {
     { name: "Settings", path: "/admin/settings", icon: <Settings size={20} /> },
   ];
 
-  const activeItem =
-    menuItems.find((m) => m.path === location.pathname) || menuItems[0];
-
   return (
     <div className="flex min-h-screen bg-[#F8FAFC]">
       {/* Mobile Sidebar Overlay */}
@@ -219,7 +216,7 @@ const AdminLayout = () => {
 
             {/* Notification Dropdown */}
             {isNotifOpen && (
-              <div className="absolute top-full right-0 mt-4 w-[85vw] sm:w-80 bg-white border border-slate-200 rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="absolute top-full right-0 mt-4 w-[85vw] sm:w-80 bg-white border border-slate-200 rounded-4xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
                 <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                   <h3 className="font-black text-primary-dark text-sm">
                     Notifications
@@ -228,7 +225,7 @@ const AdminLayout = () => {
                     {notifications.length} New
                   </span>
                 </div>
-                <div className="max-h-[400px] overflow-y-auto">
+                <div className="max-h-100 overflow-y-auto">
                   {notifications.map((n, i) => (
                     <div
                       key={i}
@@ -291,7 +288,7 @@ const AdminLayout = () => {
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-10 max-w-[1600px] mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 max-w-400 mx-auto w-full">
           <Outlet />
         </main>
       </div>

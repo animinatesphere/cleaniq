@@ -23,6 +23,7 @@ import {
   Zap,
   Plus,
 } from "lucide-react";
+import { generateBlogSlug } from "../utils/slugGenerator";
 
 const getImageUrl = (imagePath) => {
   if (!imagePath) return "";
@@ -40,6 +41,7 @@ const calculateReadTime = (content) => {
 const Home = () => {
   const { region } = useRegion();
   const [activeSlide, setActiveSlide] = useState(0);
+  const [activeCategory, setActiveCategory] = useState("cleaning");
   const [blogPosts, setBlogPosts] = useState([]);
   const [blogLoading, setBlogLoading] = useState(true);
 
@@ -673,6 +675,114 @@ const Home = () => {
           </div>
         </div>
       </section>
+      {/* Services in Top Cities Section */}
+      <section className="py-24 md:py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-4">
+              Our Coverage
+            </h2>
+            <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark tracking-tighter mb-6">
+              Cleaniq services in your city.
+            </h3>
+            <p className="text-lg text-slate-600 font-medium">
+              Professional cleaning services available across the UK's top
+              cities. Select a service category to explore availability near
+              you.
+            </p>
+          </div>
+
+          {/* Category Tabs */}
+          <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-12">
+            {[
+              { id: "cleaning", label: "Cleaning" },
+              { id: "housekeeping", label: "Housekeeping" },
+              { id: "ironing", label: "Ironing" },
+              { id: "regular", label: "Regular Cleaning" },
+              { id: "airbnb", label: "Airbnb Cleaning" },
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`px-5 md:px-6 py-2.5 md:py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-wide transition-all ${
+                  activeCategory === cat.id
+                    ? "bg-primary text-white shadow-lg shadow-primary/30"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Cities Grid */}
+          <motion.div
+            key={activeCategory}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+          >
+            {[
+              { city: "London", slug: "london" },
+              { city: "Bristol", slug: "bristol" },
+              { city: "Birmingham", slug: "birmingham" },
+              { city: "Manchester", slug: "manchester" },
+              { city: "Leeds", slug: "leeds" },
+              { city: "Slough", slug: "slough" },
+              { city: "Chelmsford", slug: "chelmsford" },
+              { city: "Luton", slug: "luton" },
+              { city: "Milton Keynes", slug: "milton-keynes" },
+              { city: "Liverpool", slug: "liverpool" },
+              { city: "Coventry", slug: "coventry" },
+              { city: "Croydon", slug: "croydon" },
+            ].map((location) => {
+              const serviceLabelMap = {
+                cleaning: "Cleaning",
+                housekeeping: "Housekeeping",
+                ironing: "Ironing",
+                regular: "Regular cleaning",
+                airbnb: "Airbnb cleaning",
+              };
+              const serviceName = `${serviceLabelMap[activeCategory]} in ${location.city}`;
+
+              return (
+                <motion.div
+                  key={location.slug}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Link
+                    to={`/locations/${location.slug}`}
+                    className="block p-5 rounded-2xl bg-gradient-to-br from-primary/5 to-secondary/5 border border-slate-200 hover:border-primary/30 hover:shadow-lg transition-all text-center group"
+                  >
+                    <p className="text-sm font-black text-primary-dark group-hover:text-primary transition-colors">
+                      {serviceName}
+                    </p>
+                    <p className="text-xs text-slate-500 font-bold mt-2 group-hover:text-slate-600 transition-colors">
+                      Book Today →
+                    </p>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+
+          {/* CTA */}
+          <div className="text-center mt-16">
+            <p className="text-slate-600 font-medium mb-6">
+              Don't see your city? We're expanding rapidly.
+            </p>
+            <Link
+              to="/booking"
+              className="inline-flex items-center gap-2 font-bold text-white bg-primary hover:bg-primary-dark px-10 py-4 rounded-full transition-colors shadow-lg shadow-primary/30"
+            >
+              Check Availability
+              <ArrowRight size={20} />
+            </Link>
+          </div>
+        </div>
+      </section>
       {/* Featured Blog Section */}
       <section className="py-24 md:py-32 bg-slate-50">
         <div className="max-w-7xl mx-auto px-6">
@@ -711,6 +821,13 @@ const Home = () => {
                         alt={post.title}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                         loading="lazy"
+                        onError={(e) => {
+                          console.error(
+                            "Image failed to load:",
+                            getImageUrl(post.image),
+                          );
+                          e.target.style.display = "none";
+                        }}
                       />
                     ) : (
                       <div className="text-5xl font-black text-primary opacity-20">
@@ -732,7 +849,7 @@ const Home = () => {
                       {post.description}
                     </p>
                     <Link
-                      to={`/blog/${post._id}`}
+                      to={`/blog/${generateBlogSlug(post._id, post.title)}`}
                       className="inline-flex items-center gap-2 font-black text-primary hover:gap-3 transition-all text-sm"
                     >
                       Read Article

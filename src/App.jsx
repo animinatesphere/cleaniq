@@ -15,8 +15,10 @@ import Contact from "./pages/Contact";
 import ServiceDetail from "./pages/ServiceDetail";
 import LocationDetail from "./pages/LocationDetail";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
+import CityLanding from "./pages/CityLanding";
 
 // Customer Account
 import CustomerLogin from "./pages/account/Login";
@@ -60,11 +62,13 @@ function App() {
             <Route path="/recruitment" element={<Recruitment />} />
             <Route path="/services" element={<Services />} />
             <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<BlogDetail />} />
+            <Route path="/blog/:slug" element={<BlogDetail />} />
+            <Route path="/locations/:city" element={<CityLanding />} />
             <Route path="/pages/contact" element={<Contact />} />
             <Route path="/pages/:serviceSlug" element={<ServiceDetail />} />
             <Route path="/locations/:area" element={<LocationDetail />} />
             <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
 
             {/* Customer Account Routes */}
             <Route path="/account/login" element={<CustomerLogin />} />

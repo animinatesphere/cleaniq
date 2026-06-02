@@ -159,12 +159,12 @@ const Footer = () => {
             © 2026 Cleaniq Services. PROUDLY ECO-CONSCIOUS.
           </p>
           <div className="flex gap-6">
-            <a
-              href="#"
+            <Link
+              to="/privacy"
               className="text-[10px] md:text-xs font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors"
             >
               Privacy
-            </a>
+            </Link>
             <Link
               to="/terms"
               className="text-[10px] md:text-xs font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors"

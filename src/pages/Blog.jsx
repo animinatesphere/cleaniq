@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import LoadingOverlay from "../component/LoadingOverlay";
+import { generateBlogSlug } from "../utils/slugGenerator";
 import { motion } from "framer-motion";
 
 const Blog = () => {
@@ -98,7 +99,7 @@ const Blog = () => {
         />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="min-h-screen bg-linear-to-br mt-12 from-slate-900 via-slate-800 to-slate-900">
         {/* Navigation Background */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-20 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
@@ -173,7 +174,10 @@ const Blog = () => {
                 transition={{ duration: 0.8, delay: 0.3 }}
                 className="mb-20"
               >
-                <Link to={`/blog/${featuredPost._id}`} className="group">
+                <Link
+                  to={`/blog/${generateBlogSlug(featuredPost._id, featuredPost.title)}`}
+                  className="group"
+                >
                   <div className="relative overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500">
                     {/* Image with Overlay */}
                     {featuredPost.image && (
@@ -272,7 +276,10 @@ const Blog = () => {
                     transition={{ duration: 0.5, delay: 0.1 + idx * 0.1 }}
                     className="group h-full"
                   >
-                    <Link to={`/blog/${post._id}`} className="block h-full">
+                    <Link
+                      to={`/blog/${generateBlogSlug(post._id, post.title)}`}
+                      className="block h-full"
+                    >
                       <div className="h-full bg-white/5 backdrop-blur border border-white/10 rounded-2xl overflow-hidden hover:border-primary/50 hover:bg-white/10 transition-all duration-300 flex flex-col group-hover:-translate-y-2">
                         {/* Image */}
                         {post.image && (
