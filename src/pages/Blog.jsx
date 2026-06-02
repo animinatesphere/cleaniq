@@ -8,6 +8,9 @@ import {
   TrendingUp,
   ArrowRight,
   Clock,
+  Zap,
+  BookOpen,
+  ChevronRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import LoadingOverlay from "../component/LoadingOverlay";
@@ -95,260 +98,303 @@ const Blog = () => {
         />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 pb-20">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        {/* Navigation Background */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-20 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
+        </div>
+
         {/* Hero Section */}
-        <div className="pt-40 pb-16 md:pb-20 px-4 md:px-8">
-          <div className="max-w-5xl mx-auto text-center">
+        <div className="relative pt-32 pb-16 md:pb-24 px-4 md:px-8">
+          <div className="max-w-6xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-12"
             >
-              <div className="flex items-center justify-center gap-2 mb-6">
-                <TrendingUp size={20} className="text-primary" />
-                <span className="text-sm font-bold text-primary uppercase tracking-widest">
-                  Insights & Tips
+              {/* Badge */}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 mb-6"
+              >
+                <BookOpen size={16} className="text-primary" />
+                <span className="text-sm font-bold text-white uppercase tracking-widest">
+                  Expert Insights
                 </span>
-              </div>
-              <h1 className="text-5xl md:text-6xl font-black text-primary-dark mb-6 tracking-tight leading-tight">
-                Cleaning Insights & Professional Tips
+              </motion.div>
+
+              {/* Main Title */}
+              <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white mb-6 tracking-tight leading-tight">
+                Cleaning Tips & <br />
+                <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                  Industry Insights
+                </span>
               </h1>
-              <p className="text-lg md:text-xl text-slate-600 mb-8 leading-relaxed max-w-2xl mx-auto">
-                Discover expert advice, industry trends, and practical tips to
-                maintain a spotless home or office space.
+
+              {/* Subtitle */}
+              <p className="text-lg md:text-xl text-slate-300 mb-10 leading-relaxed max-w-3xl mx-auto">
+                Discover expert advice, proven strategies, and insider tips from
+                Cleaniq professionals to maintain a spotless and healthy home.
               </p>
 
               {/* Search Bar */}
-              <div className="relative max-w-md mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="relative max-w-2xl mx-auto"
+              >
                 <Search
                   className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                  size={20}
+                  size={22}
                 />
                 <input
                   type="text"
-                  placeholder="Search articles..."
+                  placeholder="Search articles, tips, and insights..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 md:py-4 rounded-xl border-2 border-slate-200 bg-white focus:border-primary focus:outline-none font-medium text-slate-700 transition-colors"
+                  className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white/10 backdrop-blur-md border-2 border-white/20 text-white placeholder:text-slate-400 focus:border-primary focus:outline-none font-medium transition-all hover:border-white/30"
                 />
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
-          {/* Featured Post */}
-          {featuredPost && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="mb-16"
-            >
-              <Link to={`/blog/${featuredPost._id}`} className="group block">
-                <div className="relative overflow-hidden rounded-3xl border border-slate-200 shadow-lg hover:shadow-2xl transition-shadow duration-500">
-                  {/* Featured Badge */}
-                  <div className="absolute top-4 left-4 z-20 bg-gradient-to-r from-primary to-secondary px-4 py-2 rounded-full">
-                    <span className="text-white font-bold text-sm">
-                      Featured
-                    </span>
-                  </div>
+        {/* Content Section */}
+        <div className="relative pb-20 px-4 md:px-8">
+          <div className="max-w-6xl mx-auto">
+            {/* Featured Post */}
+            {featuredPost && (
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="mb-20"
+              >
+                <Link to={`/blog/${featuredPost._id}`} className="group">
+                  <div className="relative overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500">
+                    {/* Image with Overlay */}
+                    {featuredPost.image && (
+                      <div className="relative h-96 md:h-[500px] overflow-hidden">
+                        <img
+                          src={getImageUrl(featuredPost.image)}
+                          alt={featuredPost.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                      </div>
+                    )}
 
-                  {/* Image */}
-                  {featuredPost.image && (
-                    <div className="relative h-96 overflow-hidden">
-                      <img
-                        src={getImageUrl(featuredPost.image)}
-                        alt={featuredPost.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                    </div>
-                  )}
-
-                  {/* Content Overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
-                    <p className="text-white/80 font-bold text-sm uppercase tracking-widest mb-3">
-                      {estimateReadTime(featuredPost.content)} min read
-                    </p>
-                    <h2 className="text-3xl md:text-4xl font-black text-white mb-4 leading-tight">
-                      {featuredPost.title}
-                    </h2>
-                    <p className="text-white/90 text-lg mb-6 line-clamp-2">
-                      {featuredPost.description}
-                    </p>
-                    <div className="flex items-center gap-6 text-white/70 text-sm font-bold">
-                      <span className="flex items-center gap-2">
-                        <Calendar size={16} />
-                        {new Date(featuredPost.createdAt).toLocaleDateString(
-                          "en-US",
-                          {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          },
-                        )}
-                      </span>
-                      <span className="flex items-center gap-2">
-                        <User size={16} />
-                        {featuredPost.author}
-                      </span>
-                      <span className="flex items-center gap-2">
-                        <Eye size={16} />
-                        {featuredPost.views || 0} views
+                    {/* Badge */}
+                    <div className="absolute top-6 left-6 bg-gradient-to-r from-primary to-secondary px-5 py-2.5 rounded-full shadow-lg">
+                      <span className="text-white font-black text-sm flex items-center gap-2">
+                        <Zap size={16} />
+                        Featured Post
                       </span>
                     </div>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          )}
 
-          {/* Blog Posts Grid */}
-          {remainingPosts.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-slate-400 text-lg font-bold">
-                {searchQuery
-                  ? "No articles match your search."
-                  : "No blog posts available yet."}
-              </p>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-              {remainingPosts.map((post, idx) => (
-                <motion.article
-                  key={post._id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="group"
-                >
-                  <Link to={`/blog/${post._id}`} className="block h-full">
-                    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full hover:-translate-y-1">
-                      {/* Image Container */}
-                      {post.image && (
-                        <div className="relative h-48 overflow-hidden bg-slate-100">
-                          <img
-                            src={getImageUrl(post.image)}
-                            alt={post.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                        </div>
-                      )}
-
-                      {/* Content */}
-                      <div className="p-6 flex flex-col flex-1">
-                        {/* Meta */}
-                        <div className="flex items-center gap-3 mb-4">
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-dark bg-primary/10 px-3 py-1 rounded-full">
-                            <Clock size={12} />
-                            {estimateReadTime(post.content)} min
-                          </span>
-                          {post.published && (
-                            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full">
-                              <Eye size={12} />
-                              Published
-                            </span>
+                    {/* Content */}
+                    <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+                      {/* Meta */}
+                      <div className="flex flex-wrap gap-4 md:gap-6 text-white/80 text-sm font-bold mb-6">
+                        <span className="flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1 rounded-full">
+                          <Clock size={16} />
+                          {estimateReadTime(featuredPost.content)} min read
+                        </span>
+                        <span className="flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1 rounded-full">
+                          <Calendar size={16} />
+                          {new Date(featuredPost.createdAt).toLocaleDateString(
+                            "en-US",
+                            { month: "short", day: "numeric", year: "numeric" },
                           )}
-                        </div>
+                        </span>
+                      </div>
 
-                        {/* Title */}
-                        <h3 className="text-lg md:text-xl font-black text-primary-dark mb-3 leading-tight group-hover:text-primary transition-colors line-clamp-2">
-                          {post.title}
-                        </h3>
+                      {/* Title */}
+                      <h2 className="text-3xl md:text-5xl font-black text-white mb-4 leading-tight group-hover:text-primary transition-colors">
+                        {featuredPost.title}
+                      </h2>
 
-                        {/* Description */}
-                        <p className="text-slate-600 text-sm md:text-base mb-4 flex-1 line-clamp-3">
-                          {post.description}
-                        </p>
+                      {/* Description */}
+                      <p className="text-white/90 text-lg md:text-xl mb-6 line-clamp-2">
+                        {featuredPost.description}
+                      </p>
 
-                        {/* Footer Meta */}
-                        <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs font-bold text-slate-500">
-                          <span className="flex items-center gap-1">
-                            <Calendar size={14} />
-                            {new Date(post.createdAt).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                              },
-                            )}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Eye size={14} />
-                            {post.views || 0}
-                          </span>
-                        </div>
-
-                        {/* Read More */}
-                        <div className="mt-4 inline-flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all">
-                          Read More
-                          <ArrowRight size={16} />
-                        </div>
+                      {/* CTA */}
+                      <div className="flex items-center gap-2 text-primary font-black text-lg group-hover:gap-4 transition-all">
+                        Read Article
+                        <ChevronRight size={24} />
                       </div>
                     </div>
-                  </Link>
-                </motion.article>
-              ))}
-            </div>
-          )}
+                  </div>
+                </Link>
+              </motion.div>
+            )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex justify-center items-center gap-2 md:gap-3 flex-wrap mt-16 pt-12 border-t border-slate-200"
-            >
-              <button
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 rounded-lg font-bold border-2 border-slate-300 text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
+            {/* Section Title */}
+            {remainingPosts.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="mb-12"
               >
-                ← Previous
-              </button>
+                <h2 className="text-3xl md:text-4xl font-black text-white flex items-center gap-3">
+                  <div className="w-1 h-10 bg-gradient-to-b from-primary to-secondary rounded-full" />
+                  Latest Articles
+                </h2>
+              </motion.div>
+            )}
 
-              <div className="flex gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let page;
-                  if (totalPages <= 5) {
-                    page = i + 1;
-                  } else if (currentPage <= 3) {
-                    page = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    page = totalPages - 4 + i;
-                  } else {
-                    page = currentPage - 2 + i;
-                  }
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-10 h-10 rounded-lg font-bold transition-all ${
-                        currentPage === page
-                          ? "bg-primary text-white shadow-lg shadow-primary/30"
-                          : "border-2 border-slate-300 text-slate-700 hover:border-primary hover:text-primary"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  );
-                })}
+            {/* Posts Grid */}
+            {remainingPosts.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-20"
+              >
+                <BookOpen size={64} className="mx-auto mb-4 text-slate-500" />
+                <p className="text-slate-300 text-xl font-bold">
+                  {searchQuery
+                    ? "No articles match your search. Try different keywords."
+                    : "No blog posts available yet. Check back soon!"}
+                </p>
+              </motion.div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+                {remainingPosts.map((post, idx) => (
+                  <motion.div
+                    key={post._id}
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 + idx * 0.1 }}
+                    className="group h-full"
+                  >
+                    <Link to={`/blog/${post._id}`} className="block h-full">
+                      <div className="h-full bg-white/5 backdrop-blur border border-white/10 rounded-2xl overflow-hidden hover:border-primary/50 hover:bg-white/10 transition-all duration-300 flex flex-col group-hover:-translate-y-2">
+                        {/* Image */}
+                        {post.image && (
+                          <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20">
+                            <img
+                              src={getImageUrl(post.image)}
+                              alt={post.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                          </div>
+                        )}
+
+                        {/* Content */}
+                        <div className="p-6 flex flex-col flex-1">
+                          {/* Category Badge */}
+                          <div className="inline-flex items-center gap-2 mb-4 w-fit">
+                            <span className="text-xs font-black text-primary bg-primary/20 px-3 py-1.5 rounded-full">
+                              Cleaning Tips
+                            </span>
+                          </div>
+
+                          {/* Title */}
+                          <h3 className="text-lg md:text-xl font-black text-white mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+                            {post.title}
+                          </h3>
+
+                          {/* Description */}
+                          <p className="text-slate-300 text-sm md:text-base mb-6 flex-1 line-clamp-3">
+                            {post.description}
+                          </p>
+
+                          {/* Meta */}
+                          <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                            <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                              <Clock size={14} />
+                              {estimateReadTime(post.content)} min
+                            </div>
+                            <div className="flex items-center gap-1 text-xs font-bold text-slate-400">
+                              <Eye size={14} />
+                              {post.views || 0}
+                            </div>
+                          </div>
+
+                          {/* Read More */}
+                          <div className="mt-4 flex items-center gap-2 text-primary font-bold group-hover:gap-3 transition-all">
+                            <span>Read More</span>
+                            <ArrowRight
+                              size={16}
+                              className="group-hover:translate-x-1 transition-transform"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
               </div>
+            )}
 
-              <button
-                onClick={() =>
-                  setCurrentPage(Math.min(totalPages, currentPage + 1))
-                }
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 rounded-lg font-bold border-2 border-slate-300 text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                className="flex justify-center items-center gap-2 md:gap-3 flex-wrap pt-12 border-t border-white/10"
               >
-                Next →
-              </button>
-            </motion.div>
-          )}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 rounded-lg font-bold border-2 border-white/20 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:bg-primary/10 transition-all"
+                >
+                  ← Previous
+                </motion.button>
+
+                <div className="flex gap-2">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let page;
+                    if (totalPages <= 5) {
+                      page = i + 1;
+                    } else if (currentPage <= 3) {
+                      page = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      page = totalPages - 4 + i;
+                    } else {
+                      page = currentPage - 2 + i;
+                    }
+                    return (
+                      <motion.button
+                        key={page}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-10 h-10 rounded-lg font-bold transition-all ${
+                          currentPage === page
+                            ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30"
+                            : "border-2 border-white/20 text-white hover:border-primary hover:bg-primary/10"
+                        }`}
+                      >
+                        {page}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() =>
+                    setCurrentPage(Math.min(totalPages, currentPage + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 rounded-lg font-bold border-2 border-white/20 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:bg-primary/10 transition-all"
+                >
+                  Next →
+                </motion.button>
+              </motion.div>
+            )}
+          </div>
         </div>
       </div>
     </>

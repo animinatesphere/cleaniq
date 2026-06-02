@@ -9,6 +9,8 @@ import {
   ImageIcon,
   FileText,
   Users,
+  MessageCircle,
+  Check,
 } from "lucide-react";
 import LoadingOverlay from "../component/LoadingOverlay";
 import { motion } from "framer-motion";
@@ -21,6 +23,9 @@ const AdminBlog = () => {
   const [submitting, setSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [commentsModal, setCommentsModal] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [loadingComments, setLoadingComments] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -99,7 +104,7 @@ const AdminBlog = () => {
       form.append("description", formData.description);
       form.append("content", formData.content);
       form.append("author", formData.author);
-      form.append("published", formData.published);
+      form.append("published", String(formData.published));
 
       if (formData.image instanceof File) {
         form.append("image", formData.image);
@@ -199,6 +204,60 @@ const AdminBlog = () => {
     setImagePreview(null);
     setEditingId(null);
     setShowForm(false);
+  };
+
+  const fetchComments = async (postId) => {
+    try {
+      setLoadingComments(true);
+      const response = await fetch(`${API_URL}/comments/admin/${postId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setComments(data);
+      }
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleViewComments = (postId, postTitle) => {
+    setCommentsModal(postId);
+    fetchComments(postId);
+  };
+
+  const handleApproveComment = async (commentId) => {
+    try {
+      const response = await fetch(`${API_URL}/comments/approve/${commentId}`, {
+        method: "PUT",
+      });
+
+      if (response.ok) {
+        setSuccessMessage("Comment approved!");
+        setTimeout(() => setSuccessMessage(""), 3000);
+        fetchComments(commentsModal);
+      }
+    } catch (error) {
+      console.error("Error approving comment:", error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!confirm("Delete this comment?")) return;
+
+    try {
+      const response = await fetch(`${API_URL}/comments/${commentId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setSuccessMessage("Comment deleted!");
+        setTimeout(() => setSuccessMessage(""), 3000);
+        fetchComments(commentsModal);
+      }
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+    }
   };
 
   if (loading && !showForm) {
@@ -584,6 +643,17 @@ const AdminBlog = () => {
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
+                            onClick={() =>
+                              handleViewComments(post._id, post.title)
+                            }
+                            className="p-2 sm:p-3 hover:bg-purple-50 rounded-lg transition-all text-purple-600 font-bold border border-purple-200 hover:border-purple-300"
+                            title="Comments"
+                          >
+                            <MessageCircle size={18} />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => handleEdit(post)}
                             className="p-2 sm:p-3 hover:bg-blue-50 rounded-lg transition-all text-blue-600 font-bold border border-blue-200 hover:border-blue-300"
                             title="Edit"
@@ -609,6 +679,118 @@ const AdminBlog = () => {
           )}
         </motion.div>
       </div>
+
+      {/* Comments Modal */}
+      {commentsModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+          >
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-primary to-secondary px-6 sm:px-8 py-6 flex items-center justify-between sticky top-0">
+              <h3 className="text-2xl font-black text-white flex items-center gap-2">
+                <MessageCircle size={28} />
+                Comments
+              </h3>
+              <button
+                onClick={() => {
+                  setCommentsModal(null);
+                  setComments([]);
+                }}
+                className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-6 sm:p-8">
+              {loadingComments ? (
+                <div className="text-center py-12">
+                  <p className="text-slate-500 font-bold">
+                    Loading comments...
+                  </p>
+                </div>
+              ) : comments.length === 0 ? (
+                <div className="text-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300">
+                  <MessageCircle
+                    size={48}
+                    className="mx-auto mb-3 text-slate-300"
+                  />
+                  <p className="text-slate-500 font-bold">No comments yet</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {comments.map((comment, idx) => (
+                    <motion.div
+                      key={comment._id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className={`rounded-xl p-4 border-2 ${
+                        comment.approved
+                          ? "bg-green-50 border-green-200"
+                          : "bg-yellow-50 border-yellow-200"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <div>
+                          <h5 className="font-black text-primary-dark">
+                            {comment.name}
+                          </h5>
+                          <p className="text-xs text-slate-500 font-bold">
+                            {comment.email} •{" "}
+                            {new Date(comment.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-xs font-black px-3 py-1 rounded-full whitespace-nowrap ${
+                            comment.approved
+                              ? "bg-green-200 text-green-700"
+                              : "bg-yellow-200 text-yellow-700"
+                          }`}
+                        >
+                          {comment.approved ? "✓ Approved" : "⏳ Pending"}
+                        </span>
+                      </div>
+
+                      <p className="text-slate-700 mb-4 leading-relaxed">
+                        {comment.content}
+                      </p>
+
+                      <div className="flex gap-2 justify-end">
+                        {!comment.approved && (
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleApproveComment(comment._id)}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition-colors"
+                          >
+                            <Check size={16} />
+                            Approve
+                          </motion.button>
+                        )}
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleDeleteComment(comment._id)}
+                          className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                          Delete
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

@@ -24,9 +24,25 @@ import {
   Plus,
 } from "lucide-react";
 
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return "";
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const baseUrl = apiUrl.replace("/api", "");
+  return `${baseUrl}${imagePath.startsWith("/") ? imagePath : "/" + imagePath}`;
+};
+
+const calculateReadTime = (content) => {
+  if (!content) return 5;
+  const wordCount = content.trim().split(/\s+/).length;
+  return Math.max(5, Math.ceil(wordCount / 200));
+};
+
 const Home = () => {
   const { region } = useRegion();
   const [activeSlide, setActiveSlide] = useState(0);
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [blogLoading, setBlogLoading] = useState(true);
+
   const slides = [
     { src: strip1, label: "Living Room" },
     { src: strip2, label: "Kitchen" },
@@ -41,6 +57,26 @@ const Home = () => {
     }, 5000);
     return () => clearInterval(timer);
   }, [slides.length]);
+
+  useEffect(() => {
+    const fetchBlogPosts = async () => {
+      try {
+        setBlogLoading(true);
+        const apiUrl =
+          import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+        const response = await fetch(`${apiUrl}/blog?limit=3&page=1`);
+        const data = await response.json();
+        setBlogPosts(data.posts || []);
+      } catch (error) {
+        console.error("Failed to fetch blog posts:", error);
+        setBlogPosts([]);
+      } finally {
+        setBlogLoading(false);
+      }
+    };
+
+    fetchBlogPosts();
+  }, []);
 
   return (
     <div className="overflow-x-hidden bg-white">
@@ -634,6 +670,94 @@ const Home = () => {
                 />
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+      {/* Featured Blog Section */}
+      <section className="py-24 md:py-32 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-4">
+              From Our Blog
+            </h2>
+            <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark tracking-tighter mb-6">
+              Cleaning tips & expert insights.
+            </h3>
+            <p className="text-lg text-slate-600 font-medium">
+              Discover professional cleaning advice, industry trends, and
+              practical tips to maintain a spotless home.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            {blogLoading ? (
+              <div className="col-span-full text-center py-12">
+                <div className="inline-block h-8 w-8 border-4 border-primary border-r-transparent rounded-full animate-spin" />
+                <p className="mt-4 text-slate-600 font-medium">
+                  Loading articles...
+                </p>
+              </div>
+            ) : blogPosts.length > 0 ? (
+              blogPosts.map((post) => (
+                <motion.div
+                  key={post._id}
+                  whileHover={{ y: -8 }}
+                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg transition-all"
+                >
+                  <div className="h-48 bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center overflow-hidden relative">
+                    {post.image ? (
+                      <img
+                        src={getImageUrl(post.image)}
+                        alt={post.title}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="text-5xl font-black text-primary opacity-20">
+                        {post.title.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-6 md:p-8">
+                    <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-500">
+                      <span className="inline-block px-2 py-1 bg-primary/10 text-primary rounded-full">
+                        Cleaning Tips
+                      </span>
+                      <span>{calculateReadTime(post.content)} min read</span>
+                    </div>
+                    <h4 className="text-xl font-black text-primary-dark mb-3 line-clamp-2">
+                      {post.title}
+                    </h4>
+                    <p className="text-slate-600 text-sm mb-6 line-clamp-2">
+                      {post.description}
+                    </p>
+                    <Link
+                      to={`/blog/${post._id}`}
+                      className="inline-flex items-center gap-2 font-black text-primary hover:gap-3 transition-all text-sm"
+                    >
+                      Read Article
+                      <ArrowRight size={16} />
+                    </Link>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-slate-600 font-medium">
+                  No articles available yet.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="text-center">
+            <Link
+              to="/blog"
+              className="inline-flex items-center gap-2 font-bold text-white bg-primary hover:bg-primary-dark px-8 py-4 rounded-full transition-colors shadow-lg shadow-primary/30"
+            >
+              View All Articles
+              <ArrowRight size={20} />
+            </Link>
           </div>
         </div>
       </section>

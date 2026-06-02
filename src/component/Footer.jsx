@@ -63,6 +63,7 @@ const Footer = () => {
               {[
                 { label: "Book Service", path: "/booking" },
                 { label: "Our Services", path: "/services" },
+                { label: "Blog", path: "/blog" },
                 { label: "Join Team", path: "/recruitment" },
                 { label: "About Us", path: "/about" },
                 { label: "Contact", path: "/pages/contact" },
