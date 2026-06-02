@@ -355,7 +355,7 @@ const CityLanding = () => {
                 whileHover={{ x: 10 }}
                 className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-all flex items-center gap-4"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                   <Star size={24} />
                 </div>
                 <div>
