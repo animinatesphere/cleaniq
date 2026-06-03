@@ -55,7 +55,6 @@ const Dashboard = () => {
           })),
           stats: [
             { title: 'Total Revenue (UK)', value: `£${ukRevenue.toLocaleString()}`, change: '+100%', isUp: true, icon: <DollarSign className="text-emerald-500" /> },
-            { title: 'Total Revenue (NG)', value: `₦${ngRevenue.toLocaleString()}`, change: '+100%', isUp: true, icon: <DollarSign className="text-blue-500" /> },
             { title: 'Total Bookings', value: bookings.length.toString(), change: '+100%', isUp: true, icon: <Calendar className="text-indigo-500" /> },
             { title: 'Conversion Rate', value: '12.5%', change: '+2%', isUp: true, icon: <TrendingUp className="text-purple-500" /> },
           ],
