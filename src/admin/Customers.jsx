@@ -53,6 +53,7 @@ const Customers = () => {
   useEffect(() => {
     // eslint-disable-next-line
     fetchCustomers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -75,7 +76,6 @@ const Customers = () => {
     } else {
       setCustomerBookings([]);
     }
-    // eslint-disable-next-line
   }, [selected, isEditing]);
 
   const handleUpdate = async () => {
@@ -148,7 +148,7 @@ const Customers = () => {
       {/* Notifications - Fixed to viewport for maximum visibility */}
       {statusMessage.text && (
         <div
-          className={`fixed top-10 right-10 z-9999 px-8 py-5 rounded-[32px] border shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex items-center gap-4 font-black text-sm uppercase tracking-widest transition-all duration-500 transform translate-x-0 ${
+          className={`fixed top-10 right-10 z-9999 px-8 py-5 rounded-4xl border shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex items-center gap-4 font-black text-sm uppercase tracking-widest transition-all duration-500 transform translate-x-0 ${
             statusMessage.type === "success"
               ? "bg-emerald-500 text-white border-emerald-400"
               : "bg-rose-500 text-white border-rose-400"
@@ -166,7 +166,7 @@ const Customers = () => {
       )}
 
       {/* Header */}
-      <div className="bg-white p-6 md:p-8 rounded-[32px] md:rounded-[40px] border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="bg-white p-6 md:p-8 rounded-4xl md:rounded-[40px] border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
           <h1 className="text-3xl font-black text-primary-dark tracking-tighter">
             Customer Intelligence
@@ -325,7 +325,7 @@ const Customers = () => {
             className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md"
             onClick={() => setSelected(null)}
           />
-          <div className="relative w-full max-w-md bg-white rounded-[32px] md:rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border-4 border-white">
+          <div className="relative w-full max-w-md bg-white rounded-4xl md:rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border-4 border-white">
             <div className="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <h3 className="text-xl font-black text-primary-dark">
                 {isEditing ? "Edit Client" : "Client Profile"}
@@ -396,7 +396,7 @@ const Customers = () => {
               ) : (
                 <div className="space-y-6">
                   <div className="text-center">
-                    <div className="w-20 h-20 rounded-[32px] bg-primary/10 text-primary flex items-center justify-center text-4xl font-black mx-auto mb-6">
+                    <div className="w-20 h-20 rounded-4xl bg-primary/10 text-primary flex items-center justify-center text-4xl font-black mx-auto mb-6">
                       {selected.firstName[0]}
                     </div>
                     <h4 className="text-3xl font-black text-primary-dark tracking-tighter">

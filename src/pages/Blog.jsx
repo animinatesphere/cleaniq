@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import {
   Calendar,
-  User,
   Eye,
   Search,
-  TrendingUp,
   ArrowRight,
   Clock,
   Zap,
@@ -35,6 +33,7 @@ const Blog = () => {
 
   useEffect(() => {
     fetchPosts(currentPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
   const fetchPosts = async (page) => {
@@ -129,7 +128,7 @@ const Blog = () => {
               {/* Main Title */}
               <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white mb-6 tracking-tight leading-tight">
                 Cleaning Tips & <br />
-                <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
                   Industry Insights
                 </span>
               </h1>
@@ -181,18 +180,18 @@ const Blog = () => {
                   <div className="relative overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500">
                     {/* Image with Overlay */}
                     {featuredPost.image && (
-                      <div className="relative h-96 md:h-[500px] overflow-hidden">
+                      <div className="relative h-96 md:h-125 overflow-hidden">
                         <img
                           src={getImageUrl(featuredPost.image)}
                           alt={featuredPost.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
                       </div>
                     )}
 
                     {/* Badge */}
-                    <div className="absolute top-6 left-6 bg-gradient-to-r from-primary to-secondary px-5 py-2.5 rounded-full shadow-lg">
+                    <div className="absolute top-6 left-6 bg-linear-to-r from-primary to-secondary px-5 py-2.5 rounded-full shadow-lg">
                       <span className="text-white font-black text-sm flex items-center gap-2">
                         <Zap size={16} />
                         Featured Post
@@ -246,7 +245,7 @@ const Blog = () => {
                 className="mb-12"
               >
                 <h2 className="text-3xl md:text-4xl font-black text-white flex items-center gap-3">
-                  <div className="w-1 h-10 bg-gradient-to-b from-primary to-secondary rounded-full" />
+                  <div className="w-1 h-10 bg-linear-to-b from-primary to-secondary rounded-full" />
                   Latest Articles
                 </h2>
               </motion.div>
@@ -283,13 +282,13 @@ const Blog = () => {
                       <div className="h-full bg-white/5 backdrop-blur border border-white/10 rounded-2xl overflow-hidden hover:border-primary/50 hover:bg-white/10 transition-all duration-300 flex flex-col group-hover:-translate-y-2">
                         {/* Image */}
                         {post.image && (
-                          <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20">
+                          <div className="relative h-48 overflow-hidden bg-linear-to-br from-primary/20 to-secondary/20">
                             <img
                               src={getImageUrl(post.image)}
                               alt={post.title}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                            <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
                           </div>
                         )}
 
@@ -378,7 +377,7 @@ const Blog = () => {
                         onClick={() => setCurrentPage(page)}
                         className={`w-10 h-10 rounded-lg font-bold transition-all ${
                           currentPage === page
-                            ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30"
+                            ? "bg-linear-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30"
                             : "border-2 border-white/20 text-white hover:border-primary hover:bg-primary/10"
                         }`}
                       >

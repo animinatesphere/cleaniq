@@ -445,6 +445,30 @@ const Bookings = () => {
     return mapped;
   }, [servicesList]);
 
+  // Compute extra services (filter out base services)
+  const extraServicesList = React.useMemo(() => {
+    const baseServices = [
+      ...createServiceOptions.map((o) => o.id),
+      "Bedroom",
+      "Bathroom",
+      "Kitchen",
+      "Living Room",
+      "Cloakroom",
+      "Utility Room",
+      "Reception Room",
+      "Conservatory",
+    ];
+    const cleanName = (str) =>
+      str
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "")
+        .trim();
+    return (servicesList || []).filter(
+      (s) =>
+        !baseServices.some((base) => cleanName(base) === cleanName(s.name)),
+    );
+  }, [servicesList, createServiceOptions]);
+
   // Pricing for admin create form
   useEffect(() => {
     const fd = createData.details || {};
@@ -458,13 +482,12 @@ const Bookings = () => {
         (createData.service || "").toLowerCase().replace(/[^a-z0-9]/g, "")
       ] || 20;
     total += (parseFloat(baseRate) || 20) * (fd.duration || 1);
-    // extras array assumed to be strings in details.extras
+
+    // Handle extras as objects with name and qty properties
     if (Array.isArray(fd.extras)) {
       fd.extras.forEach((ex) => {
-        // if format 'Name (xN)'
-        const qtyMatch = ex.match(/\(x(\d+)\)/);
-        const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
-        const name = ex.split(" (x")[0];
+        const qty = ex.qty || 1;
+        const name = ex.name || "";
         total +=
           (dynamicRates[(name || "").toLowerCase().replace(/[^a-z0-9]/g, "")] ||
             0) * qty;
@@ -643,7 +666,6 @@ const Bookings = () => {
   const getPropertyData = (b) => {
     if (!b) return {};
     const data = {};
-    const extras = b.details?.extras;
     const roomNames = [
       "Bedroom",
       "Bathroom",
@@ -655,25 +677,19 @@ const Bookings = () => {
       "Living Room",
     ];
 
-    if (Array.isArray(extras)) {
-      extras.forEach((item) => {
-        if (typeof item === "string") {
-          roomNames.forEach((rn) => {
-            if (item.toLowerCase().includes(rn.toLowerCase())) {
-              const qtyMatch = item.match(/\(x(\d+)\)/);
-              data[rn] = qtyMatch ? parseInt(qtyMatch[1]) : 1;
-            }
-          });
-        }
-      });
-    }
+    // Check details object directly for room properties
+    roomNames.forEach((room) => {
+      if (b.details?.[room] && b.details[room] > 0) {
+        data[room] = b.details[room];
+      }
+    });
+
     return data;
   };
 
   const getExtrasData = (b) => {
     if (!b) return {};
     const data = {};
-    const extras = b.details?.extras;
     const roomNames = [
       "Bedroom",
       "Bathroom",
@@ -683,19 +699,25 @@ const Bookings = () => {
       "Reception Room",
       "Conservatory",
       "Living Room",
-      "Parking",
-      "Entry",
-      "Pet on premises",
-      "Instructions",
     ];
 
+    const extras = b.details?.extras;
     if (Array.isArray(extras)) {
       extras.forEach((item) => {
-        if (typeof item === "string") {
-          const isRoomOrLogistics = roomNames.some((rn) =>
+        if (typeof item === "object" && item.name) {
+          // New format: {name, qty, rate}
+          const isRoom = roomNames.some((rn) =>
+            item.name.toLowerCase().includes(rn.toLowerCase()),
+          );
+          if (!isRoom) {
+            data[item.name] = item.qty || 1;
+          }
+        } else if (typeof item === "string") {
+          // Old format: "Service (xN)"
+          const isRoom = roomNames.some((rn) =>
             item.toLowerCase().includes(rn.toLowerCase()),
           );
-          if (!isRoomOrLogistics) {
+          if (!isRoom) {
             const name = item.split(" (x")[0];
             const qtyMatch = item.match(/\(x(\d+)\)/);
             data[name] = qtyMatch ? parseInt(qtyMatch[1]) : 1;
@@ -1292,7 +1314,7 @@ const Bookings = () => {
                             <p className="text-xs font-black text-primary-dark">
                               Cleaning Finished
                             </p>
-                            <p className="text-[10px] text-slate-400 font-medium font-bold">
+                            <p className="text-[10px] text-slate-400 font-bold">
                               {selectedBooking.jobEndTime
                                 ? `Done: ${selectedBooking.jobDurationActual || 0} mins actual clean`
                                 : "Awaiting completion..."}
@@ -1365,49 +1387,70 @@ const Bookings = () => {
                       </div>
                     </div>
                     <div className="space-y-6">
-                      <div className="p-6 bg-slate-50 rounded-[32px] border border-slate-100 space-y-4">
-                        <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                          <HomeIcon size={14} className="text-primary" />{" "}
-                          Property Rooms
-                        </h4>
-                        <div className="grid grid-cols-2 gap-2 text-[10px]">
-                          {Object.entries(getPropertyData(selectedBooking)).map(
-                            ([key, qty]) =>
+                      {/* Property Rooms Section */}
+                      {Object.keys(getPropertyData(selectedBooking)).length >
+                        0 && (
+                        <div className="p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-[24px] border-2 border-indigo-200 space-y-4">
+                          <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+                            <HomeIcon size={16} className="text-indigo-600" />
+                            Property Rooms
+                          </h4>
+                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                            {Object.entries(
+                              getPropertyData(selectedBooking),
+                            ).map(([key, qty]) =>
                               qty > 0 ? (
                                 <div
                                   key={key}
-                                  className="flex justify-between bg-white p-2 rounded-lg border border-slate-100 font-bold"
+                                  className="bg-white rounded-lg border-2 border-indigo-200 p-3 text-center hover:shadow-md transition-shadow"
                                 >
-                                  <span className="text-slate-500 capitalize">
-                                    {key.replace(/([A-Z])/g, " $1")}
-                                  </span>
-                                  <span className="text-primary">x{qty}</span>
+                                  <p className="text-[10px] font-black text-indigo-600">
+                                    {qty}x
+                                  </p>
+                                  <p className="text-[9px] font-bold text-slate-700 mt-1 line-clamp-2">
+                                    {key}
+                                  </p>
                                 </div>
                               ) : null,
-                          )}
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div className="p-6 bg-slate-50 rounded-[32px] border border-slate-100 space-y-4">
-                        <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                          <Zap size={14} className="text-primary" /> Extra
-                          Services
-                        </h4>
-                        <div className="space-y-2">
-                          {Object.entries(getExtrasData(selectedBooking)).map(
-                            ([name, qty]) => (
-                              <div
-                                key={name}
-                                className="flex justify-between items-center text-xs font-bold text-slate-600"
-                              >
-                                <span>{name}</span>
-                                <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-lg font-black">
-                                  ✓
-                                </span>
-                              </div>
-                            ),
-                          )}
+                      )}
+
+                      {/* Extra Services Section */}
+                      {Object.keys(getExtrasData(selectedBooking)).length >
+                        0 && (
+                        <div className="p-6 bg-gradient-to-br from-rose-50 to-rose-100 rounded-[24px] border-2 border-rose-200 space-y-4">
+                          <h4 className="text-[10px] font-black text-rose-600 uppercase tracking-widest flex items-center gap-2">
+                            <Zap size={16} className="text-rose-600" /> Extra
+                            Services
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {Object.entries(getExtrasData(selectedBooking)).map(
+                              ([name, qty]) => (
+                                <div
+                                  key={name}
+                                  className="bg-white rounded-lg border-2 border-rose-200 p-4 flex items-center justify-between hover:shadow-md transition-shadow"
+                                >
+                                  <div className="flex-1">
+                                    <p className="text-sm font-bold text-slate-900">
+                                      {name}
+                                    </p>
+                                    <p className="text-xs text-slate-600 font-semibold">
+                                      Qty: {qty}
+                                    </p>
+                                  </div>
+                                  <span className="inline-flex items-center justify-center w-6 h-6 bg-rose-600 text-white rounded-full text-xs font-black">
+                                    ✓
+                                  </span>
+                                </div>
+                              ),
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      )}
+
+                      {/* Pet Info */}
                       {getPetInfo(selectedBooking) && (
                         <div
                           className={`p-5 rounded-[24px] border-2 flex items-center gap-4 ${
@@ -1487,93 +1530,162 @@ const Bookings = () => {
       {showCreateModal && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 sm:p-6 lg:p-10">
           <div
-            className="absolute inset-0 bg-primary-dark/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md"
             onClick={() => setShowCreateModal(false)}
           />
-          <div className="relative w-full max-w-7xl bg-white rounded-[20px] sm:rounded-[28px] p-4 sm:p-6 lg:p-10 shadow-2xl overflow-auto max-h-[92vh] border border-slate-100">
-            <h3 className="text-xl font-black text-primary-dark mb-4">
-              Create Booking (Admin)
-            </h3>
-
-            <div className="mb-4 flex flex-wrap gap-3">
-              {["Location", "Home & Hours", "Add-ons", "Payment"].map(
-                (t, idx) => (
-                  <div
-                    key={t}
-                    className={`px-3 py-2 rounded-2xl font-extrabold text-[12px] ${createStep === idx + 1 ? "bg-primary text-white shadow" : "bg-slate-50 text-slate-400"}`}
-                  >
-                    {idx + 1}. {t}
+          <div className="relative w-full max-w-7xl bg-white rounded-[32px] overflow-hidden shadow-2xl overflow-y-auto max-h-[92vh] border border-slate-100 animate-in fade-in zoom-in-95">
+            {/* Header with Gradient */}
+            <div className="bg-gradient-to-r from-primary via-blue-600 to-indigo-600 px-4 sm:px-6 lg:px-10 py-6 sm:py-8 flex items-center justify-between">
+              <div>
+                <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
+                  <div className="bg-white/20 p-3 rounded-2xl">
+                    <Plus size={24} className="text-white" />
                   </div>
-                ),
-              )}
+                  New Booking
+                </h3>
+                <p className="text-white/80 text-[11px] font-bold uppercase tracking-widest mt-2">
+                  Step {createStep} of 4 • Create and assign a cleaning service
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white transition-colors"
+              >
+                <X size={24} />
+              </button>
             </div>
 
-            <div className="grid lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-8 bg-white p-4 sm:p-6 rounded-[16px] border border-slate-100">
-                {/* Step content */}
-                {createStep === 1 && (
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-black text-lg">
-                        Where are we cleaning?
-                      </h4>
-                      <p className="text-[10px] text-slate-400 uppercase tracking-widest">
-                        Enter address and select service
-                      </p>
+            {/* Progress Bar */}
+            <div className="px-4 sm:px-6 lg:px-10 pt-6">
+              <div className="flex items-center gap-3">
+                {[1, 2, 3, 4].map((step) => (
+                  <div key={step} className="flex items-center gap-3 flex-1">
+                    <div
+                      className={`w-10 h-10 rounded-full font-black text-sm flex items-center justify-center transition-all ${
+                        step <= createStep
+                          ? "bg-primary text-white shadow-lg scale-110"
+                          : "bg-slate-100 text-slate-400"
+                      }`}
+                    >
+                      {step < createStep ? <CheckCircle2 size={20} /> : step}
                     </div>
-                    <div className="space-y-3">
-                      <input
-                        placeholder="Address"
-                        className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        value={createData.details.address || ""}
-                        onChange={(e) =>
-                          setCreateData({
-                            ...createData,
-                            details: {
-                              ...createData.details,
-                              address: e.target.value,
-                            },
-                          })
-                        }
+                    {step < 4 && (
+                      <div
+                        className={`h-1 flex-1 rounded-full transition-colors ${
+                          step < createStep ? "bg-primary" : "bg-slate-100"
+                        }`}
                       />
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <input
-                          placeholder="Postcode"
-                          className="p-3 rounded-2xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                          value={createData.details.postcode || ""}
-                          onChange={(e) =>
-                            setCreateData({
-                              ...createData,
-                              details: {
-                                ...createData.details,
-                                postcode: e.target.value,
-                              },
-                            })
-                          }
-                        />
-                        <select
-                          value={createData.details.frequency}
-                          onChange={(e) =>
-                            setCreateData({
-                              ...createData,
-                              details: {
-                                ...createData.details,
-                                frequency: e.target.value,
-                              },
-                            })
-                          }
-                          className="p-3 rounded-2xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        >
-                          <option>Once</option>
-                          <option>Weekly</option>
-                          <option>Fortnightly</option>
-                          <option>Monthly</option>
-                        </select>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between mt-3 mb-6">
+                {["Location", "Home & Hours", "Add-ons", "Payment"].map(
+                  (t, idx) => (
+                    <div
+                      key={t}
+                      className={`text-[10px] font-black uppercase tracking-wider ${
+                        createStep === idx + 1
+                          ? "text-primary"
+                          : idx + 1 < createStep
+                            ? "text-slate-500"
+                            : "text-slate-300"
+                      }`}
+                    >
+                      {t}
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-12 gap-6 px-4 sm:px-6 lg:px-10 py-6">
+              <div className="lg:col-span-8">
+                <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 sm:p-8 rounded-[28px] border border-slate-200/50">
+                  {/* Step content */}
+                  {createStep === 1 && (
+                    <div className="space-y-6">
+                      <div className="pb-4 border-b border-slate-200">
+                        <h4 className="text-2xl font-black text-primary-dark flex items-center gap-3">
+                          <MapPin size={24} className="text-primary" />
+                          Cleaning Location
+                        </h4>
+                        <p className="text-[11px] text-slate-500 uppercase tracking-widest mt-2 font-bold">
+                          Where and what type of cleaning?
+                        </p>
                       </div>
 
-                      <div className="pt-4">
-                        <h5 className="font-black text-sm mb-3">
-                          What type of cleaning?
+                      {/* Address and Postcode */}
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
+                            📍 Full Address
+                          </label>
+                          <input
+                            placeholder="Enter complete address"
+                            className="w-full p-4 rounded-2xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium placeholder:text-slate-400"
+                            value={createData.details.address || ""}
+                            onChange={(e) =>
+                              setCreateData({
+                                ...createData,
+                                details: {
+                                  ...createData.details,
+                                  address: e.target.value,
+                                },
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
+                              📬 Postcode
+                            </label>
+                            <input
+                              placeholder="e.g., M1 1AA"
+                              className="w-full p-4 rounded-2xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium placeholder:text-slate-400"
+                              value={createData.details.postcode || ""}
+                              onChange={(e) =>
+                                setCreateData({
+                                  ...createData,
+                                  details: {
+                                    ...createData.details,
+                                    postcode: e.target.value,
+                                  },
+                                })
+                              }
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
+                              🔄 Frequency
+                            </label>
+                            <select
+                              value={createData.details.frequency}
+                              onChange={(e) =>
+                                setCreateData({
+                                  ...createData,
+                                  details: {
+                                    ...createData.details,
+                                    frequency: e.target.value,
+                                  },
+                                })
+                              }
+                              className="w-full p-4 rounded-2xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium"
+                            >
+                              <option>Once</option>
+                              <option>Weekly</option>
+                              <option>Fortnightly</option>
+                              <option>Monthly</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Service Selection */}
+                      <div className="pt-2">
+                        <h5 className="font-black text-lg text-primary-dark mb-4 flex items-center gap-2">
+                          🧹 Select Service Type
                         </h5>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                           {createServiceOptions.map((s) => (
@@ -1582,302 +1694,395 @@ const Bookings = () => {
                               onClick={() =>
                                 setCreateData({ ...createData, service: s.id })
                               }
-                              className={`p-4 rounded-2xl border transition-shadow text-left ${createData.service === s.id ? "border-primary bg-primary/5 shadow-lg" : "border-slate-100 hover:shadow-sm"}`}
+                              className={`p-4 rounded-2xl border-2 transition-all text-left transform hover:scale-105 ${
+                                createData.service === s.id
+                                  ? "border-primary bg-gradient-to-br from-primary/10 to-blue-50 shadow-lg scale-105"
+                                  : "border-slate-200 bg-white hover:shadow-md hover:border-primary/30"
+                              }`}
                             >
-                              <div className="font-extrabold text-sm">
+                              <div className="font-extrabold text-base text-primary-dark">
                                 {s.title}
                               </div>
-                              <div className="text-[12px] text-slate-400 mt-2">
+                              <div className="text-[11px] text-slate-500 mt-2 font-bold">
                                 {s.tag}
                               </div>
+                              {createData.service === s.id && (
+                                <div className="text-primary text-sm font-black mt-2">
+                                  ✓ Selected
+                                </div>
+                              )}
                             </button>
                           ))}
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {createStep === 2 && (
-                  <div className="space-y-4">
-                    <h4 className="font-black text-lg">Home & Hours</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-[10px] font-black text-slate-400 uppercase">
-                          Duration (hours)
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={createData.details.duration}
-                          onChange={(e) =>
-                            setCreateData({
-                              ...createData,
-                              details: {
-                                ...createData.details,
-                                duration: parseFloat(e.target.value || 1),
-                              },
-                            })
-                          }
-                          className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-100"
-                        />
+                  {createStep === 2 && (
+                    <div className="space-y-6">
+                      <div className="pb-4 border-b border-slate-200">
+                        <h4 className="text-2xl font-black text-primary-dark flex items-center gap-3">
+                          <HomeIcon size={24} className="text-primary" />
+                          Home Details & Duration
+                        </h4>
+                        <p className="text-[11px] text-slate-500 uppercase tracking-widest mt-2 font-bold">
+                          Specify property rooms and cleaning hours
+                        </p>
                       </div>
-                      <div>
-                        <label className="text-[10px] font-black text-slate-400 uppercase">
-                          Has Pet
-                        </label>
-                        <select
-                          value={createData.details.hasPet || "No"}
-                          onChange={(e) =>
-                            setCreateData({
-                              ...createData,
-                              details: {
-                                ...createData.details,
-                                hasPet: e.target.value,
-                              },
-                            })
-                          }
-                          className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-100"
-                        >
-                          <option value="No">No</option>
-                          <option value="Yes">Yes</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="pt-4">
-                      <h5 className="font-black text-sm mb-2">
-                        Property Rooms (informational)
-                      </h5>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        {[
-                          "Bedroom",
-                          "Bathroom",
-                          "Kitchen",
-                          "Living Room",
-                          "Utility Room",
-                          "Reception Room",
-                          "Conservatory",
-                        ].map((r) => (
-                          <div key={r} className="flex items-center gap-2">
-                            <div className="font-bold text-sm">{r}</div>
-                            <div className="ml-auto flex items-center gap-2">
-                              <button
-                                onClick={() => {
-                                  const cur = createData.details[r] || 0;
-                                  setCreateData({
-                                    ...createData,
-                                    details: {
-                                      ...createData.details,
-                                      [r]: Math.max(0, cur - 1),
-                                    },
-                                  });
-                                }}
-                                className="p-2 rounded-xl bg-slate-50"
-                              >
-                                -
-                              </button>
-                              <div className="w-8 text-center">
-                                {createData.details[r] || 0}
-                              </div>
-                              <button
-                                onClick={() => {
-                                  const cur = createData.details[r] || 0;
-                                  setCreateData({
-                                    ...createData,
-                                    details: {
-                                      ...createData.details,
-                                      [r]: cur + 1,
-                                    },
-                                  });
-                                }}
-                                className="p-2 rounded-xl bg-slate-50"
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
 
-                {createStep === 3 && (
-                  <div className="space-y-4">
-                    <h4 className="font-black text-lg">Add-ons</h4>
-                    <p className="text-[11px] text-slate-400">
-                      Add extra services or notes
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <input
-                        placeholder="Extra name (e.g. Oven Clean)"
-                        id="extraName"
-                        className="p-3 rounded-2xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      />
-                      <input
-                        placeholder="Qty"
-                        id="extraQty"
-                        type="number"
-                        defaultValue={1}
-                        className="p-3 rounded-2xl bg-slate-50 border border-slate-100"
-                      />
-                    </div>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => {
-                          const nameEl = document.getElementById("extraName");
-                          const qtyEl = document.getElementById("extraQty");
-                          const name = (nameEl?.value || "").trim();
-                          const qty = parseInt(qtyEl?.value || 1);
-                          if (!name) return;
-                          const extras = Array.isArray(
-                            createData.details.extras,
-                          )
-                            ? [...createData.details.extras]
-                            : [];
-                          extras.push(`${name} (x${qty})`);
-                          setCreateData({
-                            ...createData,
-                            details: { ...createData.details, extras },
-                          });
-                          if (nameEl) nameEl.value = "";
-                          if (qtyEl) qtyEl.value = "1";
-                        }}
-                        className="py-2 px-4 rounded-2xl bg-primary text-white"
-                      >
-                        Add Extra
-                      </button>
-                      <button
-                        onClick={() =>
-                          setCreateData({
-                            ...createData,
-                            details: { ...createData.details, extras: [] },
-                          })
-                        }
-                        className="py-2 px-4 rounded-2xl bg-slate-50 border"
-                      >
-                        Clear Extras
-                      </button>
-                    </div>
-                    <div className="space-y-2 pt-4">
-                      {(createData.details.extras || []).map((ex, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100"
-                        >
-                          <div className="font-bold text-sm">{ex}</div>
-                          <button
-                            onClick={() => {
-                              const arr = [
-                                ...(createData.details.extras || []),
-                              ];
-                              arr.splice(idx, 1);
-                              setCreateData({
-                                ...createData,
-                                details: { ...createData.details, extras: arr },
-                              });
-                            }}
-                            className="p-2 rounded-xl bg-rose-50 text-rose-600"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {createStep === 4 && (
-                  <div className="space-y-4">
-                    <h4 className="font-black text-lg">Payment & Schedule</h4>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-[10px] font-black text-slate-400 uppercase">
-                          Select Date
-                        </label>
-                        <CreateCalendar
-                          selectedDate={createData.schedule.date}
-                          onDateSelect={(d) =>
-                            setCreateData({
-                              ...createData,
-                              schedule: { ...createData.schedule, date: d },
-                            })
-                          }
-                          bookedDates={bookedDates}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-black text-slate-400 uppercase">
-                          Time Slot
-                        </label>
-                        <select
-                          value={createData.schedule.timeSlot}
-                          onChange={(e) =>
-                            setCreateData({
-                              ...createData,
-                              schedule: {
-                                ...createData.schedule,
-                                timeSlot: e.target.value,
-                              },
-                            })
-                          }
-                          className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-100"
-                        >
-                          <option>Morning (8am-12pm)</option>
-                          <option>Afternoon (12pm-4pm)</option>
-                          <option>Evening (4pm-8pm)</option>
-                        </select>
-
-                        <label className="text-[10px] font-black text-slate-400 uppercase mt-4 block">
-                          Preferred Arrival Time
-                        </label>
-                        <input
-                          placeholder="e.g. 10:00 AM"
-                          value={createData.schedule.preferredTime || ""}
-                          onChange={(e) =>
-                            setCreateData({
-                              ...createData,
-                              schedule: {
-                                ...createData.schedule,
-                                preferredTime: e.target.value,
-                              },
-                            })
-                          }
-                          className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-100"
-                        />
-
-                        <div className="pt-4">
-                          <label className="text-[10px] font-black text-slate-400 uppercase">
-                            Customer Info
+                      {/* Duration and Pet */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-white rounded-2xl border-2 border-slate-200">
+                        <div>
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block">
+                            ⏱️ Duration (Hours)
                           </label>
                           <input
-                            placeholder="First name"
-                            value={createData.customer.firstName}
+                            type="number"
+                            min="1"
+                            value={createData.details.duration}
                             onChange={(e) =>
                               setCreateData({
                                 ...createData,
-                                customer: {
-                                  ...createData.customer,
-                                  firstName: e.target.value,
+                                details: {
+                                  ...createData.details,
+                                  duration: parseFloat(e.target.value || 1),
                                 },
                               })
                             }
-                            className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-100 mt-2"
+                            className="w-full p-3 rounded-xl bg-slate-50 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-lg font-bold text-primary"
                           />
-                          <input
-                            placeholder="Last name"
-                            value={createData.customer.lastName}
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block">
+                            🐾 Has Pet
+                          </label>
+                          <select
+                            value={createData.details.hasPet || "No"}
                             onChange={(e) =>
                               setCreateData({
                                 ...createData,
-                                customer: {
-                                  ...createData.customer,
-                                  lastName: e.target.value,
+                                details: {
+                                  ...createData.details,
+                                  hasPet: e.target.value,
                                 },
                               })
                             }
-                            className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-100 mt-2"
+                            className="w-full p-3 rounded-xl bg-slate-50 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-bold"
+                          >
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Property Rooms */}
+                      <div className="p-4 bg-white rounded-2xl border-2 border-slate-200">
+                        <h5 className="font-black text-base text-primary-dark mb-4 flex items-center gap-2">
+                          🛏️ Property Rooms
+                        </h5>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                          {[
+                            "Bedroom",
+                            "Bathroom",
+                            "Kitchen",
+                            "Living Room",
+                            "Utility Room",
+                            "Reception Room",
+                            "Conservatory",
+                            "Cloakroom",
+                          ].map((r) => (
+                            <div
+                              key={r}
+                              className="p-3 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-slate-200 flex flex-col items-center gap-2 hover:shadow-md transition-all"
+                            >
+                              <div className="font-bold text-sm text-primary-dark text-center line-clamp-2">
+                                {r}
+                              </div>
+                              <div className="flex items-center gap-2 bg-white rounded-lg px-2 py-1 border border-slate-200">
+                                <button
+                                  onClick={() => {
+                                    const cur = createData.details[r] || 0;
+                                    setCreateData({
+                                      ...createData,
+                                      details: {
+                                        ...createData.details,
+                                        [r]: Math.max(0, cur - 1),
+                                      },
+                                    });
+                                  }}
+                                  className="p-1 rounded-md hover:bg-slate-100 text-slate-500 hover:text-primary transition-colors"
+                                >
+                                  <Minus size={16} />
+                                </button>
+                                <div className="w-6 text-center font-black text-primary text-sm">
+                                  {createData.details[r] || 0}
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    const cur = createData.details[r] || 0;
+                                    setCreateData({
+                                      ...createData,
+                                      details: {
+                                        ...createData.details,
+                                        [r]: cur + 1,
+                                      },
+                                    });
+                                  }}
+                                  className="p-1 rounded-md hover:bg-slate-100 text-slate-500 hover:text-primary transition-colors"
+                                >
+                                  <Plus size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {createStep === 3 && (
+                    <div className="space-y-6">
+                      <div className="pb-4 border-b border-slate-200">
+                        <h4 className="text-2xl font-black text-primary-dark flex items-center gap-3">
+                          <Zap size={24} className="text-primary" />
+                          Extra Services
+                        </h4>
+                        <p className="text-[11px] text-slate-500 uppercase tracking-widest mt-2 font-bold">
+                          Add optional services to boost the booking value
+                        </p>
+                      </div>
+                      {extraServicesList.length === 0 ? (
+                        <div className="text-center py-12 px-6 bg-white rounded-2xl border-2 border-dashed border-slate-200">
+                          <Zap
+                            size={40}
+                            className="mx-auto text-slate-300 mb-3"
                           />
+                          <p className="text-sm font-bold text-slate-500">
+                            No extra services available
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="grid gap-3">
+                          {extraServicesList.map((extra) => {
+                            const currentQty =
+                              createData.details.extras?.find(
+                                (e) => e.name === extra.name,
+                              )?.qty || 0;
+                            return (
+                              <div
+                                key={extra._id}
+                                className={`p-4 rounded-2xl border-2 transition-all transform hover:scale-105 ${
+                                  currentQty > 0
+                                    ? "bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-300 shadow-md"
+                                    : "bg-white border-slate-200 hover:border-primary/30"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-4 flex-1">
+                                    <div className="p-3 bg-white rounded-xl border-2 border-slate-200">
+                                      <Zap
+                                        size={20}
+                                        className="text-amber-500"
+                                      />
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-black text-primary-dark">
+                                        {extra.name}
+                                      </p>
+                                      <p className="text-xs font-bold text-slate-500 mt-1">
+                                        £{extra.rate} per unit
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3 bg-white rounded-xl p-2 border-2 border-slate-200">
+                                    <button
+                                      onClick={() => {
+                                        setCreateData((prev) => {
+                                          const extras = Array.isArray(
+                                            prev.details.extras,
+                                          )
+                                            ? [...prev.details.extras]
+                                            : [];
+                                          const idx = extras.findIndex(
+                                            (e) => e.name === extra.name,
+                                          );
+                                          if (idx !== -1) {
+                                            if (extras[idx].qty > 1) {
+                                              extras[idx].qty--;
+                                            } else {
+                                              extras.splice(idx, 1);
+                                            }
+                                          }
+                                          return {
+                                            ...prev,
+                                            details: {
+                                              ...prev.details,
+                                              extras,
+                                            },
+                                          };
+                                        });
+                                      }}
+                                      className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 flex items-center justify-center transition-colors font-bold"
+                                    >
+                                      −
+                                    </button>
+                                    <span className="text-lg font-black text-primary w-8 text-center">
+                                      {currentQty}
+                                    </span>
+                                    <button
+                                      onClick={() => {
+                                        setCreateData((prev) => {
+                                          const extras = Array.isArray(
+                                            prev.details.extras,
+                                          )
+                                            ? [...prev.details.extras]
+                                            : [];
+                                          const idx = extras.findIndex(
+                                            (e) => e.name === extra.name,
+                                          );
+                                          if (idx !== -1) {
+                                            extras[idx].qty++;
+                                          } else {
+                                            extras.push({
+                                              name: extra.name,
+                                              qty: 1,
+                                            });
+                                          }
+                                          return {
+                                            ...prev,
+                                            details: {
+                                              ...prev.details,
+                                              extras,
+                                            },
+                                          };
+                                        });
+                                      }}
+                                      className="w-8 h-8 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-600 flex items-center justify-center transition-colors font-bold"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {createStep === 4 && (
+                    <div className="space-y-6">
+                      <div className="pb-4 border-b border-slate-200">
+                        <h4 className="text-2xl font-black text-primary-dark flex items-center gap-3">
+                          <DollarSign size={24} className="text-primary" />
+                          Payment & Schedule
+                        </h4>
+                        <p className="text-[11px] text-slate-500 uppercase tracking-widest mt-2 font-bold">
+                          Set date, time, and customer details
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Calendar and Time */}
+                        <div className="p-4 bg-white rounded-2xl border-2 border-slate-200">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block">
+                            📅 Select Date
+                          </label>
+                          <CreateCalendar
+                            selectedDate={createData.schedule.date}
+                            onDateSelect={(d) =>
+                              setCreateData({
+                                ...createData,
+                                schedule: { ...createData.schedule, date: d },
+                              })
+                            }
+                            bookedDates={bookedDates}
+                          />
+
+                          <div className="mt-4 space-y-3">
+                            <div>
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
+                                🕐 Time Slot
+                              </label>
+                              <select
+                                value={createData.schedule.timeSlot}
+                                onChange={(e) =>
+                                  setCreateData({
+                                    ...createData,
+                                    schedule: {
+                                      ...createData.schedule,
+                                      timeSlot: e.target.value,
+                                    },
+                                  })
+                                }
+                                className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-bold"
+                              >
+                                <option>Morning (8am-12pm)</option>
+                                <option>Afternoon (12pm-4pm)</option>
+                                <option>Evening (4pm-8pm)</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
+                                ⏰ Preferred Arrival Time
+                              </label>
+                              <input
+                                placeholder="e.g. 10:00 AM"
+                                value={createData.schedule.preferredTime || ""}
+                                onChange={(e) =>
+                                  setCreateData({
+                                    ...createData,
+                                    schedule: {
+                                      ...createData.schedule,
+                                      preferredTime: e.target.value,
+                                    },
+                                  })
+                                }
+                                className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Customer Info */}
+                        <div className="p-4 bg-white rounded-2xl border-2 border-slate-200 space-y-3">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
+                            👤 Customer Information
+                          </label>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input
+                              placeholder="First name"
+                              value={createData.customer.firstName}
+                              onChange={(e) =>
+                                setCreateData({
+                                  ...createData,
+                                  customer: {
+                                    ...createData.customer,
+                                    firstName: e.target.value,
+                                  },
+                                })
+                              }
+                              className="p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400 text-sm"
+                            />
+                            <input
+                              placeholder="Last name"
+                              value={createData.customer.lastName}
+                              onChange={(e) =>
+                                setCreateData({
+                                  ...createData,
+                                  customer: {
+                                    ...createData.customer,
+                                    lastName: e.target.value,
+                                  },
+                                })
+                              }
+                              className="p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400 text-sm"
+                            />
+                          </div>
+
                           <input
                             placeholder="Email"
                             value={createData.customer.email}
@@ -1890,7 +2095,7 @@ const Bookings = () => {
                                 },
                               })
                             }
-                            className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-100 mt-2"
+                            className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400 text-sm"
                           />
                           <input
                             placeholder="Phone"
@@ -1904,120 +2109,207 @@ const Bookings = () => {
                                 },
                               })
                             }
-                            className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-100 mt-2"
+                            className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400 text-sm"
                           />
                         </div>
                       </div>
-                    </div>
-                    <div className="pt-4 border-t border-slate-100">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-[11px] text-slate-400 uppercase font-black">
-                            Estimated Total
-                          </p>
-                          <p className="text-2xl font-black">£{createTotal}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[11px] text-slate-400 uppercase font-black">
-                            Status
-                          </p>
-                          <p className="font-black">{createData.status}</p>
+
+                      {/* Final Summary */}
+                      <div className="p-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-[10px] text-emerald-600 uppercase font-black tracking-wider">
+                              💰 Estimated Total
+                            </p>
+                            <p className="text-3xl font-black text-emerald-700 mt-1">
+                              £{createTotal}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[10px] text-emerald-600 uppercase font-black tracking-wider">
+                              📊 Status
+                            </p>
+                            <p className="font-black text-emerald-700 text-lg mt-1">
+                              {createData.status}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
-              <div className="lg:col-span-4 bg-slate-50 p-4 sm:p-6 rounded-[16px] border border-slate-100 sticky top-6 self-start">
-                <h5 className="font-black text-sm mb-3">Summary</h5>
-                <p className="text-[11px] text-slate-400 mb-2">Service</p>
-                <div className="font-black text-lg mb-4">
-                  {createData.service || "—"}
-                </div>
-                <p className="text-[11px] text-slate-400 mb-2">Address</p>
-                <div className="text-sm font-bold mb-4">
-                  {createData.details.address || "—"}
-                </div>
-                <p className="text-[11px] text-slate-400 mb-2">Date & Time</p>
-                <div className="text-sm font-bold mb-4">
-                  {createData.schedule.date || "—"} •{" "}
-                  {createData.schedule.timeSlot || "—"}
-                </div>
-                <p className="text-[11px] text-slate-400 mb-2">Customer</p>
-                <div className="text-sm font-bold mb-4">
-                  {createData.customer.firstName || ""}{" "}
-                  {createData.customer.lastName || ""}
-                </div>
-                <div className="pt-4 border-t border-slate-100">
-                  <p className="text-[11px] text-slate-400 uppercase font-black">
-                    Price
-                  </p>
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="font-black">Total</div>
-                    <div className="text-2xl font-black">£{createTotal}</div>
+              {/* Sidebar Summary */}
+              <div className="lg:col-span-4">
+                <div className="sticky top-6 bg-gradient-to-br from-primary via-blue-600 to-indigo-600 rounded-[28px] p-6 text-white shadow-xl border border-indigo-400/30 space-y-4">
+                  <h5 className="font-black text-lg flex items-center gap-2">
+                    📋 Booking Summary
+                  </h5>
+
+                  {/* Service Card */}
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-colors">
+                    <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
+                      🧹 Service
+                    </p>
+                    <div className="font-black text-lg mt-2">
+                      {createData.service || "Not selected"}
+                    </div>
+                  </div>
+
+                  {/* Address Card */}
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-colors">
+                    <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
+                      📍 Address
+                    </p>
+                    <div className="text-sm font-bold mt-2 line-clamp-2">
+                      {createData.details.address || "Not provided"}
+                    </div>
+                  </div>
+
+                  {/* Date & Time Card */}
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-colors">
+                    <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
+                      📅 Date & Time
+                    </p>
+                    <div className="text-sm font-bold mt-2">
+                      {createData.schedule.date || "Not selected"}
+                      <br />
+                      <span className="text-xs text-white/80">
+                        {createData.schedule.timeSlot || "Select time"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Customer Card */}
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-colors">
+                    <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
+                      👤 Customer
+                    </p>
+                    <div className="text-sm font-bold mt-2">
+                      {createData.customer.firstName &&
+                      createData.customer.lastName
+                        ? `${createData.customer.firstName} ${createData.customer.lastName}`
+                        : "Not provided"}
+                    </div>
+                  </div>
+
+                  {/* Duration Card */}
+                  {createData.details.duration && (
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-colors">
+                      <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
+                        ⏱️ Duration
+                      </p>
+                      <div className="text-sm font-bold mt-2">
+                        {createData.details.duration} hours
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Price Divider */}
+                  <div className="h-px bg-white/20"></div>
+
+                  {/* Total Price Card */}
+                  <div className="bg-white rounded-xl p-5 text-primary shadow-lg">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      💰 Estimated Total
+                    </p>
+                    <p className="text-3xl font-black text-primary mt-2">
+                      £{createTotal}
+                    </p>
+                    <p className="text-xs text-slate-600 mt-2 font-bold">
+                      Ready to create this booking?
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 mt-6 justify-end">
-              {createStep > 1 && (
-                <button
-                  onClick={() => setCreateStep((s) => Math.max(1, s - 1))}
-                  className="w-full sm:w-auto py-3 px-6 rounded-2xl bg-white border"
-                >
-                  Back
-                </button>
-              )}
-              {createStep < 4 && (
-                <button
-                  onClick={() => setCreateStep((s) => Math.min(4, s + 1))}
-                  className="w-full sm:w-auto py-3 px-6 rounded-2xl bg-primary text-white"
-                >
-                  Next
-                </button>
-              )}
-              {createStep === 4 && (
-                <button
-                  onClick={async () => {
-                    try {
-                      const payload = {
-                        ...createData,
-                        bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
-                        payment: {
-                          amount: createTotal,
-                          currency: createData.payment?.currency || "GBP",
-                          status: "Pending",
-                        },
-                      };
-                      const res = await fetch(
-                        `${import.meta.env.VITE_API_URL}/bookings`,
-                        {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify(payload),
-                        },
-                      );
-                      if (!res.ok) throw new Error("Failed to create booking");
-                      const newBooking = await res.json();
-                      setSuccessBooking(newBooking);
-                      setShowSuccessModal(true);
-                      setShowCreateModal(false);
-                      fetchBookings();
-                    } catch (err) {
-                      console.error(err);
-                      setStatusMessage({
-                        type: "error",
-                        text: "Failed to create booking",
-                      });
-                    }
-                  }}
-                  className="w-full sm:w-auto py-3 px-6 rounded-2xl bg-emerald-600 text-white font-black"
-                >
-                  Create & Open Payment
-                </button>
-              )}
+            {/* Footer Buttons */}
+            <div className="px-4 sm:px-6 lg:px-10 py-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3 justify-between">
+              <div className="flex gap-3 flex-1 sm:flex-initial">
+                {createStep > 1 && (
+                  <button
+                    onClick={() => setCreateStep((s) => Math.max(1, s - 1))}
+                    className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-black transition-colors border-2 border-slate-200"
+                  >
+                    ← Back
+                  </button>
+                )}
+              </div>
+
+              <div className="flex gap-3 flex-1 justify-end">
+                {createStep < 4 && (
+                  <button
+                    onClick={() => setCreateStep((s) => Math.min(4, s + 1))}
+                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg text-white font-black transition-all transform hover:scale-105 border-2 border-primary flex items-center gap-2"
+                  >
+                    Next →
+                  </button>
+                )}
+                {createStep === 4 && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        // Build extras with rate information
+                        const extrasWithRates = (
+                          createData.details.extras || []
+                        ).map((extra) => {
+                          const rate =
+                            dynamicRates[
+                              (extra.name || "")
+                                .toLowerCase()
+                                .replace(/[^a-z0-9]/g, "")
+                            ] || 0;
+                          return {
+                            ...extra,
+                            rate,
+                          };
+                        });
+
+                        const payload = {
+                          ...createData,
+                          bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
+                          details: {
+                            ...createData.details,
+                            extras: extrasWithRates,
+                          },
+                          payment: {
+                            amount: createTotal,
+                            currency: createData.payment?.currency || "GBP",
+                            status: "Pending",
+                          },
+                        };
+                        const res = await fetch(
+                          `${import.meta.env.VITE_API_URL}/bookings`,
+                          {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                          },
+                        );
+                        if (!res.ok)
+                          throw new Error("Failed to create booking");
+                        const newBooking = await res.json();
+                        setSuccessBooking(newBooking);
+                        setShowSuccessModal(true);
+                        setShowCreateModal(false);
+                        fetchBookings();
+                      } catch (err) {
+                        console.error(err);
+                        setStatusMessage({
+                          type: "error",
+                          text: "Failed to create booking",
+                        });
+                      }
+                    }}
+                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-xl text-white font-black transition-all transform hover:scale-105 border-2 border-emerald-600 flex items-center gap-2"
+                  >
+                    <CheckCircle2 size={20} />
+                    Create & Open Payment
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -2026,118 +2318,215 @@ const Bookings = () => {
       {/* Success Modal */}
       {showSuccessModal && successBooking && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[32px] p-8 max-w-md w-full shadow-2xl animate-in fade-in zoom-in">
+          <div className="bg-white rounded-[32px] p-8 max-w-2xl w-full shadow-2xl animate-in fade-in zoom-in overflow-y-auto max-h-[90vh]">
             {/* Header */}
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 size={32} className="text-emerald-600" />
               </div>
               <h2 className="text-2xl font-black text-slate-900 mb-2">
-                Booking Created!
+                Booking Created Successfully!
               </h2>
               <p className="text-sm text-slate-500">
-                Payment link sent to customer email
+                Payment link has been sent to customer email
               </p>
             </div>
 
-            {/* Booking Details */}
-            <div className="bg-slate-50 rounded-2xl p-6 mb-6 space-y-4">
-              {/* Reference */}
-              <div className="pb-4 border-b border-slate-200">
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">
-                  Booking Reference
-                </p>
-                <p className="text-xl font-black text-slate-900">
-                  {successBooking.bookingId}
-                </p>
-              </div>
+            {/* Booking Details - 2 Column Layout */}
+            <div className="space-y-6 mb-8">
+              {/* Row 1: Reference & Customer */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Booking Reference */}
+                <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 border border-slate-200">
+                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+                    📋 Booking Reference
+                  </p>
+                  <p className="text-2xl font-black text-slate-900 font-mono">
+                    {successBooking.bookingId}
+                  </p>
+                </div>
 
-              {/* Customer */}
-              <div>
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
-                  Customer
-                </p>
-                <p className="text-sm font-bold text-slate-900">
-                  {successBooking.customer.firstName}{" "}
-                  {successBooking.customer.lastName}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {successBooking.customer.email}
-                </p>
-              </div>
-
-              {/* Service Details */}
-              <div>
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
-                  Service Details
-                </p>
-                <div className="space-y-1 text-sm">
-                  <p>
-                    <strong>Service:</strong> {successBooking.service}
+                {/* Customer Info */}
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+                    👤 Customer
                   </p>
-                  <p>
-                    <strong>Date:</strong>{" "}
-                    {new Date(successBooking.schedule.date).toDateString()}
+                  <p className="text-lg font-black text-slate-900 mb-1">
+                    {successBooking.customer.firstName}{" "}
+                    {successBooking.customer.lastName}
                   </p>
-                  <p>
-                    <strong>Time:</strong> {successBooking.schedule.timeSlot}
+                  <p className="text-xs text-slate-600">
+                    {successBooking.customer.email}
                   </p>
-                  <p>
-                    <strong>Duration:</strong> {successBooking.details.duration}{" "}
-                    hours
-                  </p>
-                  <p>
-                    <strong>Location:</strong> {successBooking.details.address}
+                  <p className="text-xs text-slate-600 mt-2">
+                    📱 {successBooking.customer.phone}
                   </p>
                 </div>
               </div>
 
-              {/* Extras/Add-ons */}
-              {successBooking.details.extras &&
-                successBooking.details.extras.length > 0 && (
-                  <div>
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
-                      Add-ons Selected
+              {/* Row 2: Service & Schedule */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Service Type */}
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
+                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+                    🧹 Service Type
+                  </p>
+                  <p className="text-lg font-black text-slate-900 mb-1">
+                    {successBooking.service}
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    Duration: {successBooking.details.duration} hours
+                  </p>
+                  <p className="text-xs text-slate-600 mt-1">
+                    Frequency: {successBooking.details.frequency || "Once"}
+                  </p>
+                </div>
+
+                {/* Schedule */}
+                <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-6 border border-amber-200">
+                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+                    📅 Schedule
+                  </p>
+                  <p className="text-lg font-black text-slate-900 mb-2">
+                    {new Date(successBooking.schedule.date).toDateString()}
+                  </p>
+                  <p className="text-sm font-bold text-slate-700">
+                    🕐 {successBooking.schedule.timeSlot}
+                  </p>
+                </div>
+              </div>
+
+              {/* Row 3: Location */}
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-emerald-200">
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+                  📍 Location
+                </p>
+                <p className="text-lg font-black text-slate-900 mb-2">
+                  {successBooking.details.address}
+                </p>
+                <p className="text-sm text-slate-700">
+                  Postcode:{" "}
+                  <span className="font-bold">
+                    {successBooking.details.postcode}
+                  </span>
+                </p>
+              </div>
+
+              {/* Row 4: Property Rooms */}
+              {(() => {
+                const roomTypes = [
+                  "Bedroom",
+                  "Bathroom",
+                  "Kitchen",
+                  "Living Room",
+                  "Utility Room",
+                  "Reception Room",
+                  "Conservatory",
+                ];
+                const rooms = roomTypes.filter(
+                  (r) =>
+                    successBooking.details[r] && successBooking.details[r] > 0,
+                );
+                return rooms.length > 0 ? (
+                  <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-6 border border-indigo-200">
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">
+                      🏠 Property Rooms
                     </p>
-                    <div className="space-y-1">
-                      {successBooking.details.extras.map((extra, idx) => (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {rooms.map((room) => (
                         <div
-                          key={idx}
-                          className="text-sm bg-white px-3 py-2 rounded-lg border border-slate-200 flex items-center gap-2"
+                          key={room}
+                          className="bg-white rounded-xl p-3 border border-indigo-200 flex flex-col items-center justify-center"
                         >
-                          <Plus size={14} className="text-emerald-600" />
-                          <span className="text-slate-700">{extra}</span>
+                          <p className="text-xs font-black text-indigo-600">
+                            {successBooking.details[room]}x
+                          </p>
+                          <p className="text-xs font-bold text-slate-700 text-center mt-1">
+                            {room}
+                          </p>
                         </div>
                       ))}
                     </div>
                   </div>
+                ) : null;
+              })()}
+
+              {/* Row 5: Extra Services */}
+              {successBooking.details.extras &&
+                successBooking.details.extras.length > 0 && (
+                  <div className="bg-gradient-to-br from-rose-50 to-rose-100 rounded-2xl p-6 border border-rose-200">
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">
+                      ⭐ Extra Services
+                    </p>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {successBooking.details.extras.map((extra, idx) => {
+                        const displayText =
+                          typeof extra === "string"
+                            ? extra
+                            : `${extra.name} (x${extra.qty})`;
+                        const extraPrice =
+                          typeof extra === "string" ? null : extra.rate;
+                        return (
+                          <div
+                            key={idx}
+                            className="bg-white rounded-xl p-4 border border-rose-200 flex items-start justify-between"
+                          >
+                            <div>
+                              <p className="text-sm font-bold text-slate-900">
+                                {displayText}
+                              </p>
+                              {extraPrice && (
+                                <p className="text-xs text-slate-600 mt-1">
+                                  £{extraPrice} each
+                                </p>
+                              )}
+                            </div>
+                            <span className="inline-flex items-center justify-center w-5 h-5 bg-rose-600 text-white rounded-full text-[10px] font-black">
+                              ✓
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
 
-              {/* Amount */}
-              <div className="pt-4 border-t border-slate-200">
+              {/* Row 6: Payment */}
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-600">
-                    Total Amount
-                  </span>
-                  <span className="text-2xl font-black text-emerald-600">
-                    {successBooking.payment.currency === "GBP" ? "£" : "₦"}
-                    {successBooking.payment.amount}
-                  </span>
+                  <div>
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
+                      💰 Total Amount
+                    </p>
+                    <p className="text-xs text-slate-600 mb-1">
+                      Status:{" "}
+                      <span className="font-bold text-amber-600">
+                        Pending Payment
+                      </span>
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-4xl font-black text-green-600">
+                      {successBooking.payment.currency === "GBP" ? "£" : "₦"}
+                      {successBooking.payment.amount}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Info Box */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-              <p className="text-xs text-blue-900">
-                <strong>✓ Payment link sent</strong> to{" "}
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-6">
+              <p className="text-sm font-bold text-blue-900 mb-2">
+                ✓ Payment Link Sent
+              </p>
+              <p className="text-xs text-blue-800">
+                A secure payment link has been sent to{" "}
                 <span className="font-bold">
                   {successBooking.customer.email}
                 </span>
-              </p>
-              <p className="text-xs text-blue-800 mt-2">
-                Customer will receive email with secure payment button. Once
-                paid, booking status will be updated to Confirmed.
+                . Once the customer pays, the booking status will automatically
+                update to Confirmed and the worker will be notified.
               </p>
             </div>
 
@@ -2147,18 +2536,35 @@ const Bookings = () => {
                 onClick={() => {
                   setShowSuccessModal(false);
                   setSuccessBooking(null);
+                  setCreateData({
+                    customer: {
+                      firstName: "",
+                      lastName: "",
+                      email: "",
+                      phone: "",
+                    },
+                    service: "",
+                    details: {
+                      address: "",
+                      frequency: "Once",
+                      duration: 2,
+                      extras: [],
+                    },
+                    schedule: { date: "", timeSlot: "", preferredTime: "" },
+                    payment: { amount: 0, currency: "GBP", status: "Pending" },
+                    status: "Pending",
+                  });
+                  setCreateStep(1);
                 }}
-                className="w-full py-3 px-6 rounded-2xl bg-emerald-600 text-white font-black hover:bg-emerald-700 transition-colors"
+                className="w-full py-3 px-6 rounded-2xl bg-primary text-white font-black hover:bg-primary/90 transition-all"
               >
-                Done
+                Close & Create New Booking
               </button>
               <button
-                onClick={() => {
-                  window.location.href = "/admin/bookings";
-                }}
-                className="w-full py-3 px-6 rounded-2xl bg-slate-100 text-slate-900 font-black hover:bg-slate-200 transition-colors"
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full py-3 px-6 rounded-2xl bg-slate-100 text-slate-700 font-black hover:bg-slate-200 transition-all"
               >
-                Back to Bookings
+                Close
               </button>
             </div>
           </div>
