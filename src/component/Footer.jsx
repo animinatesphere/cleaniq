@@ -66,7 +66,7 @@ const Footer = () => {
                 { label: "Blog", path: "/blog" },
                 { label: "Join Team", path: "/recruitment" },
                 { label: "About Us", path: "/about" },
-                { label: "Contact", path: "/pages/contact" },
+                { label: "Contact Us", path: "/pages/contact" },
               ].map((link) => (
                 <li key={link.label}>
                   <Link
