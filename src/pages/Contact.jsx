@@ -101,7 +101,7 @@ const Contact = () => {
               {
                 icon: <MapPin size={20} />,
                 label: "Head Office",
-                value: "First Floor, Swan Buildings,\n20 Swan St, Manchester M4 5JW",
+                value: "20 Swan St, Manchester M4 5JW",
                 href: null,
               },
             ].map((item) => (
