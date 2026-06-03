@@ -16,7 +16,6 @@ import {
   Mail,
   Phone,
   DollarSign,
-  Database,
   X,
   Trash2,
   Edit3,
@@ -24,7 +23,7 @@ import {
   Plus,
   Minus,
   Download,
-  Calendar as CalIcon,
+  Calendar,
   ShieldAlert,
   ChevronLeft,
   ChevronRight,
@@ -243,9 +242,17 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
                     `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
                   )
                 }
-                className={`w-full h-full rounded-lg ${isSelected(date) ? "bg-primary text-white" : isBooked(date) ? "bg-rose-50 text-rose-400" : "bg-slate-50 text-slate-600 hover:bg-primary/10"}`}
+                className={`w-full h-full rounded-lg transition-all font-black text-sm ${
+                  isPast(date)
+                    ? "bg-slate-100 text-slate-300 cursor-not-allowed opacity-50"
+                    : isSelected(date)
+                      ? "bg-primary text-white shadow-md"
+                      : isBooked(date)
+                        ? "bg-rose-50 text-rose-400 cursor-not-allowed opacity-60"
+                        : "bg-slate-50 text-slate-600 hover:bg-primary/10 hover:text-primary cursor-pointer"
+                }`}
               >
-                <span className="text-sm font-black">{date.getDate()}</span>
+                <span>{date.getDate()}</span>
               </button>
             ) : (
               <div className="w-full h-full" />
@@ -283,6 +290,10 @@ const Bookings = () => {
   const [statusMessage, setStatusMessage] = useState({ type: "", text: "" });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successBooking, setSuccessBooking] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
+  const [fieldTouched, setFieldTouched] = useState({});
+  const [selectedBookings, setSelectedBookings] = useState(new Set());
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
   useEffect(() => {
     if (statusMessage.text) {
@@ -495,6 +506,314 @@ const Bookings = () => {
     }
     setCreateTotal(Math.round(total * 100) / 100);
   }, [createData, dynamicRates]);
+
+  // Validation functions
+  const validateField = (fieldPath, value) => {
+    // Customer fields
+    if (fieldPath === "customer.firstName") {
+      if (!value || value.trim().length < 2)
+        return "First name must be at least 2 characters";
+      if (!/^[a-zA-Z\s'-]+$/.test(value))
+        return "First name must contain letters only";
+      return "";
+    }
+    if (fieldPath === "customer.lastName") {
+      if (!value || value.trim().length < 2)
+        return "Last name must be at least 2 characters";
+      if (!/^[a-zA-Z\s'-]+$/.test(value))
+        return "Last name must contain letters only";
+      return "";
+    }
+    if (fieldPath === "customer.email") {
+      if (!value) return "Email is required";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+        return "Invalid email address";
+      return "";
+    }
+    if (fieldPath === "customer.phone") {
+      if (!value) return "Phone is required";
+      if (value.replace(/\D/g, "").length < 10)
+        return "Phone must have at least 10 digits";
+      return "";
+    }
+
+    // Service field
+    if (fieldPath === "service") {
+      if (!value) return "Service type must be selected";
+      return "";
+    }
+
+    // Details fields
+    if (fieldPath === "details.address") {
+      if (!value || value.trim().length < 5)
+        return "Address must be at least 5 characters";
+      if (value.trim().length > 200)
+        return "Address must not exceed 200 characters";
+      return "";
+    }
+    if (fieldPath === "details.frequency") {
+      if (!["Once", "Weekly", "Bi-weekly", "Monthly"].includes(value))
+        return "Valid frequency must be selected";
+      return "";
+    }
+    if (fieldPath === "details.duration") {
+      if (!value || Number(value) < 0.5)
+        return "Duration must be at least 0.5 hours";
+      if (Number(value) > 8) return "Duration must not exceed 8 hours";
+      return "";
+    }
+    if (fieldPath === "details.bedrooms") {
+      if (value && (Number(value) < 0 || Number(value) > 10))
+        return "Bedrooms must be 0-10";
+      return "";
+    }
+    if (fieldPath === "details.bathrooms") {
+      if (value && (Number(value) < 0 || Number(value) > 10))
+        return "Bathrooms must be 0-10";
+      return "";
+    }
+
+    // Schedule fields
+    if (fieldPath === "schedule.date") {
+      if (!value) return "Date is required";
+      const selectedDate = new Date(value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) return "Date cannot be in the past";
+      return "";
+    }
+    if (fieldPath === "schedule.timeSlot") {
+      if (!value) return "Time slot is required";
+      if (!["Morning", "Afternoon", "Evening"].includes(value))
+        return "Valid time slot must be selected";
+      return "";
+    }
+
+    // Payment fields
+    if (fieldPath === "payment.amount") {
+      if (!value || Number(value) <= 0) return "Amount must be greater than 0";
+      return "";
+    }
+    if (fieldPath === "payment.currency") {
+      if (!value) return "Currency must be selected";
+      if (value !== "GBP")
+        return "Only GBP (Pounds) is accepted";
+      return "";
+    }
+
+    return "";
+  };
+
+  const validateStep = (step) => {
+    const errors = {};
+    let isValid = true;
+
+    if (step === 1) {
+      // Step 1: Location & Service
+      const addressErr = validateField(
+        "details.address",
+        createData.details?.address,
+      );
+      const frequencyErr = validateField(
+        "details.frequency",
+        createData.details?.frequency,
+      );
+      const serviceErr = validateField("service", createData.service);
+      if (addressErr) {
+        errors["details.address"] = addressErr;
+        isValid = false;
+      }
+      if (frequencyErr) {
+        errors["details.frequency"] = frequencyErr;
+        isValid = false;
+      }
+      if (serviceErr) {
+        errors.service = serviceErr;
+        isValid = false;
+      }
+    } else if (step === 2) {
+      // Step 2: Home & Duration
+      const durationErr = validateField(
+        "details.duration",
+        createData.details?.duration,
+      );
+      const bedroomsErr = validateField(
+        "details.bedrooms",
+        createData.details?.bedrooms,
+      );
+      const bathroomsErr = validateField(
+        "details.bathrooms",
+        createData.details?.bathrooms,
+      );
+      if (durationErr) {
+        errors["details.duration"] = durationErr;
+        isValid = false;
+      }
+      if (bedroomsErr) {
+        errors["details.bedrooms"] = bedroomsErr;
+        isValid = false;
+      }
+      if (bathroomsErr) {
+        errors["details.bathrooms"] = bathroomsErr;
+        isValid = false;
+      }
+    } else if (step === 3) {
+      // Step 3: Extras (mostly optional, just verify if extras exist)
+      return { isValid: true, errors: {} };
+    } else if (step === 4) {
+      // Step 4: Payment & Schedule
+      const dateErr = validateField("schedule.date", createData.schedule?.date);
+      const slotErr = validateField(
+        "schedule.timeSlot",
+        createData.schedule?.timeSlot,
+      );
+      const firstErr = validateField(
+        "customer.firstName",
+        createData.customer?.firstName,
+      );
+      const lastErr = validateField(
+        "customer.lastName",
+        createData.customer?.lastName,
+      );
+      const emailErr = validateField(
+        "customer.email",
+        createData.customer?.email,
+      );
+      const phoneErr = validateField(
+        "customer.phone",
+        createData.customer?.phone,
+      );
+      const amountErr = validateField(
+        "payment.amount",
+        createData.payment?.amount,
+      );
+      const currencyErr = validateField(
+        "payment.currency",
+        createData.payment?.currency,
+      );
+
+      if (dateErr) {
+        errors["schedule.date"] = dateErr;
+        isValid = false;
+      }
+      if (slotErr) {
+        errors["schedule.timeSlot"] = slotErr;
+        isValid = false;
+      }
+      if (firstErr) {
+        errors["customer.firstName"] = firstErr;
+        isValid = false;
+      }
+      if (lastErr) {
+        errors["customer.lastName"] = lastErr;
+        isValid = false;
+      }
+      if (emailErr) {
+        errors["customer.email"] = emailErr;
+        isValid = false;
+      }
+      if (phoneErr) {
+        errors["customer.phone"] = phoneErr;
+        isValid = false;
+      }
+      if (amountErr) {
+        errors["payment.amount"] = amountErr;
+        isValid = false;
+      }
+      if (currencyErr) {
+        errors["payment.currency"] = currencyErr;
+        isValid = false;
+      }
+    }
+
+    return { isValid, errors };
+  };
+
+  const handleNextStep = () => {
+    const validation = validateStep(createStep);
+    setFormErrors(validation.errors);
+
+    if (validation.isValid) {
+      setCreateStep(createStep + 1);
+      setFieldTouched({});
+    }
+  };
+
+  const handleFieldChange = (path, value) => {
+    // Update createData
+    const keys = path.split(".");
+    setCreateData((prev) => {
+      const updated = { ...prev };
+      let current = updated;
+      for (let i = 0; i < keys.length - 1; i++) {
+        current[keys[i]] = { ...current[keys[i]] };
+        current = current[keys[i]];
+      }
+      current[keys[keys.length - 1]] = value;
+      return updated;
+    });
+
+    // Mark field as touched
+    setFieldTouched((prev) => ({ ...prev, [path]: true }));
+
+    // Validate field
+    const error = validateField(path, value);
+    setFormErrors((prev) => {
+      const updated = { ...prev };
+      if (error) {
+        updated[path] = error;
+      } else {
+        delete updated[path];
+      }
+      return updated;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedBookings.size === 0) return;
+
+    try {
+      const bookingIds = Array.from(selectedBookings);
+      await Promise.all(
+        bookingIds.map((id) =>
+          fetch(`${import.meta.env.VITE_API_URL}/bookings/${id}`, {
+            method: "DELETE",
+          }),
+        ),
+      );
+
+      setSelectedBookings(new Set());
+      setShowBulkDeleteModal(false);
+      setStatusMessage({
+        type: "success",
+        text: `${bookingIds.length} booking(s) deleted successfully`,
+      });
+      fetchBookings();
+    } catch (error) {
+      setStatusMessage({
+        type: "error",
+        text: "Failed to delete bookings",
+      });
+    }
+  };
+
+  const toggleBookingSelection = (bookingId) => {
+    const newSelected = new Set(selectedBookings);
+    if (newSelected.has(bookingId)) {
+      newSelected.delete(bookingId);
+    } else {
+      newSelected.add(bookingId);
+    }
+    setSelectedBookings(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedBookings.size === filteredBookings.length) {
+      setSelectedBookings(new Set());
+    } else {
+      setSelectedBookings(new Set(filteredBookings.map((b) => b._id)));
+    }
+  };
 
   const toggleAvailability = async (date, isCurrentlyBlocked) => {
     const dStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -851,8 +1170,8 @@ const Bookings = () => {
 
       {view === "list" ? (
         <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden animate-in fade-in">
-          <div className="p-6 border-b border-slate-100 flex items-center gap-4 bg-slate-50/30">
-            <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border border-slate-200 w-full md:w-96">
+          <div className="p-6 border-b border-slate-100 flex items-center gap-4 bg-slate-50/30 justify-between flex-wrap">
+            <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border border-slate-200 flex-1 min-w-60">
               <Search size={18} className="text-slate-400" />
               <input
                 type="text"
@@ -862,12 +1181,32 @@ const Bookings = () => {
                 className="bg-transparent outline-none text-sm font-bold w-full"
               />
             </div>
+            {selectedBookings.size > 0 && (
+              <button
+                onClick={() => setShowBulkDeleteModal(true)}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:shadow-lg text-white font-black transition-all flex items-center gap-2 text-sm"
+              >
+                <Trash2 size={18} />
+                Delete ({selectedBookings.size})
+              </button>
+            )}
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+                  <th className="px-4 py-5 w-12">
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedBookings.size === filteredBookings.length &&
+                        filteredBookings.length > 0
+                      }
+                      onChange={toggleSelectAll}
+                      className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
+                    />
+                  </th>
                   <th className="px-8 py-5">Customer</th>
                   <th className="px-4 py-5">Service</th>
                   <th className="px-4 py-5">Date</th>
@@ -898,8 +1237,18 @@ const Bookings = () => {
                   filteredBookings.map((b) => (
                     <tr
                       key={b._id}
-                      className="group hover:bg-slate-50/50 transition-colors"
+                      className={`group hover:bg-slate-50/50 transition-colors ${
+                        selectedBookings.has(b._id) ? "bg-blue-50" : ""
+                      }`}
                     >
+                      <td className="px-4 py-6 w-12">
+                        <input
+                          type="checkbox"
+                          checked={selectedBookings.has(b._id)}
+                          onChange={() => toggleBookingSelection(b._id)}
+                          className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
+                        />
+                      </td>
                       <td className="px-8 py-6">
                         <p className="font-bold text-primary-dark">
                           {b.customer?.firstName} {b.customer?.lastName}
@@ -1618,23 +1967,38 @@ const Bookings = () => {
                       {/* Address and Postcode */}
                       <div className="space-y-3">
                         <div>
-                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
-                            📍 Full Address
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                            📍 Full Address{" "}
+                            <span className="text-rose-500">*</span>
                           </label>
                           <input
                             placeholder="Enter complete address"
-                            className="w-full p-4 rounded-2xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium placeholder:text-slate-400"
+                            className={`w-full p-4 rounded-2xl bg-white border-2 transition-all text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 ${
+                              formErrors["details.address"]
+                                ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500"
+                                : "border-slate-200 focus:ring-primary/30 focus:border-primary"
+                            }`}
                             value={createData.details.address || ""}
                             onChange={(e) =>
-                              setCreateData({
-                                ...createData,
-                                details: {
-                                  ...createData.details,
-                                  address: e.target.value,
-                                },
-                              })
+                              handleFieldChange(
+                                "details.address",
+                                e.target.value,
+                              )
+                            }
+                            onBlur={() =>
+                              setFieldTouched((prev) => ({
+                                ...prev,
+                                "details.address": true,
+                              }))
                             }
                           />
+                          {(formErrors["details.address"] ||
+                            fieldTouched["details.address"]) &&
+                            formErrors["details.address"] && (
+                              <p className="text-rose-500 text-[10px] font-bold mt-1">
+                                {formErrors["details.address"]}
+                              </p>
+                            )}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div>
@@ -1646,38 +2010,44 @@ const Bookings = () => {
                               className="w-full p-4 rounded-2xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium placeholder:text-slate-400"
                               value={createData.details.postcode || ""}
                               onChange={(e) =>
-                                setCreateData({
-                                  ...createData,
-                                  details: {
-                                    ...createData.details,
-                                    postcode: e.target.value,
-                                  },
-                                })
+                                handleFieldChange(
+                                  "details.postcode",
+                                  e.target.value,
+                                )
                               }
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
-                              🔄 Frequency
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                              🔄 Frequency{" "}
+                              <span className="text-rose-500">*</span>
                             </label>
                             <select
                               value={createData.details.frequency}
                               onChange={(e) =>
-                                setCreateData({
-                                  ...createData,
-                                  details: {
-                                    ...createData.details,
-                                    frequency: e.target.value,
-                                  },
-                                })
+                                handleFieldChange(
+                                  "details.frequency",
+                                  e.target.value,
+                                )
                               }
-                              className="w-full p-4 rounded-2xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium"
+                              className={`w-full p-4 rounded-2xl bg-white border-2 transition-all text-sm font-medium focus:outline-none focus:ring-2 ${
+                                formErrors["details.frequency"]
+                                  ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500"
+                                  : "border-slate-200 focus:ring-primary/30 focus:border-primary"
+                              }`}
                             >
                               <option>Once</option>
                               <option>Weekly</option>
-                              <option>Fortnightly</option>
+                              <option>Bi-weekly</option>
                               <option>Monthly</option>
                             </select>
+                            {(formErrors["details.frequency"] ||
+                              fieldTouched["details.frequency"]) &&
+                              formErrors["details.frequency"] && (
+                                <p className="text-rose-500 text-[10px] font-bold mt-1">
+                                  {formErrors["details.frequency"]}
+                                </p>
+                              )}
                           </div>
                         </div>
                       </div>
@@ -1685,19 +2055,20 @@ const Bookings = () => {
                       {/* Service Selection */}
                       <div className="pt-2">
                         <h5 className="font-black text-lg text-primary-dark mb-4 flex items-center gap-2">
-                          🧹 Select Service Type
+                          🧹 Select Service Type{" "}
+                          <span className="text-rose-500">*</span>
                         </h5>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                           {createServiceOptions.map((s) => (
                             <button
                               key={s.id}
-                              onClick={() =>
-                                setCreateData({ ...createData, service: s.id })
-                              }
+                              onClick={() => handleFieldChange("service", s.id)}
                               className={`p-4 rounded-2xl border-2 transition-all text-left transform hover:scale-105 ${
                                 createData.service === s.id
                                   ? "border-primary bg-gradient-to-br from-primary/10 to-blue-50 shadow-lg scale-105"
-                                  : "border-slate-200 bg-white hover:shadow-md hover:border-primary/30"
+                                  : formErrors.service
+                                    ? "border-rose-200 bg-white hover:shadow-md"
+                                    : "border-slate-200 bg-white hover:shadow-md hover:border-primary/30"
                               }`}
                             >
                               <div className="font-extrabold text-base text-primary-dark">
@@ -1714,6 +2085,12 @@ const Bookings = () => {
                             </button>
                           ))}
                         </div>
+                        {(formErrors.service || fieldTouched.service) &&
+                          formErrors.service && (
+                            <p className="text-rose-500 text-[10px] font-bold mt-2">
+                              {formErrors.service}
+                            </p>
+                          )}
                       </div>
                     </div>
                   )}
@@ -1733,24 +2110,40 @@ const Bookings = () => {
                       {/* Duration and Pet */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-white rounded-2xl border-2 border-slate-200">
                         <div>
-                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block">
-                            ⏱️ Duration (Hours)
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block flex items-center gap-1">
+                            ⏱️ Duration (Hours){" "}
+                            <span className="text-rose-500">*</span>
                           </label>
                           <input
                             type="number"
-                            min="1"
+                            min="0.5"
+                            step="0.5"
                             value={createData.details.duration}
                             onChange={(e) =>
-                              setCreateData({
-                                ...createData,
-                                details: {
-                                  ...createData.details,
-                                  duration: parseFloat(e.target.value || 1),
-                                },
-                              })
+                              handleFieldChange(
+                                "details.duration",
+                                parseFloat(e.target.value || 0.5),
+                              )
                             }
-                            className="w-full p-3 rounded-xl bg-slate-50 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-lg font-bold text-primary"
+                            onBlur={() =>
+                              setFieldTouched((prev) => ({
+                                ...prev,
+                                "details.duration": true,
+                              }))
+                            }
+                            className={`w-full p-3 rounded-xl bg-slate-50 border-2 transition-all text-lg font-bold focus:outline-none focus:ring-2 ${
+                              formErrors["details.duration"]
+                                ? "border-rose-400 text-rose-500 focus:ring-rose-200 focus:border-rose-500"
+                                : "border-slate-200 text-primary focus:ring-primary/30 focus:border-primary"
+                            }`}
                           />
+                          {(formErrors["details.duration"] ||
+                            fieldTouched["details.duration"]) &&
+                            formErrors["details.duration"] && (
+                              <p className="text-rose-500 text-[10px] font-bold mt-1">
+                                {formErrors["details.duration"]}
+                              </p>
+                            )}
                         </div>
                         <div>
                           <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block">
@@ -1759,13 +2152,10 @@ const Bookings = () => {
                           <select
                             value={createData.details.hasPet || "No"}
                             onChange={(e) =>
-                              setCreateData({
-                                ...createData,
-                                details: {
-                                  ...createData.details,
-                                  hasPet: e.target.value,
-                                },
-                              })
+                              handleFieldChange(
+                                "details.hasPet",
+                                e.target.value,
+                              )
                             }
                             className="w-full p-3 rounded-xl bg-slate-50 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-bold"
                           >
@@ -1802,13 +2192,10 @@ const Bookings = () => {
                                 <button
                                   onClick={() => {
                                     const cur = createData.details[r] || 0;
-                                    setCreateData({
-                                      ...createData,
-                                      details: {
-                                        ...createData.details,
-                                        [r]: Math.max(0, cur - 1),
-                                      },
-                                    });
+                                    handleFieldChange(
+                                      `details.${r}`,
+                                      Math.max(0, cur - 1),
+                                    );
                                   }}
                                   className="p-1 rounded-md hover:bg-slate-100 text-slate-500 hover:text-primary transition-colors"
                                 >
@@ -1986,42 +2373,69 @@ const Bookings = () => {
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Calendar and Time */}
                         <div className="p-4 bg-white rounded-2xl border-2 border-slate-200">
-                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block">
-                            📅 Select Date
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block flex items-center gap-1">
+                            📅 Select Date{" "}
+                            <span className="text-rose-500">*</span>
                           </label>
                           <CreateCalendar
                             selectedDate={createData.schedule.date}
                             onDateSelect={(d) =>
-                              setCreateData({
-                                ...createData,
-                                schedule: { ...createData.schedule, date: d },
-                              })
+                              handleFieldChange("schedule.date", d)
                             }
                             bookedDates={bookedDates}
                           />
+                          {(formErrors["schedule.date"] ||
+                            fieldTouched["schedule.date"]) &&
+                            formErrors["schedule.date"] && (
+                              <p className="text-rose-500 text-[10px] font-bold mt-2">
+                                {formErrors["schedule.date"]}
+                              </p>
+                            )}
 
                           <div className="mt-4 space-y-3">
                             <div>
-                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
-                                🕐 Time Slot
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                                🕐 Time Slot{" "}
+                                <span className="text-rose-500">*</span>
                               </label>
                               <select
                                 value={createData.schedule.timeSlot}
                                 onChange={(e) =>
-                                  setCreateData({
-                                    ...createData,
-                                    schedule: {
-                                      ...createData.schedule,
-                                      timeSlot: e.target.value,
-                                    },
-                                  })
+                                  handleFieldChange(
+                                    "schedule.timeSlot",
+                                    e.target.value,
+                                  )
                                 }
-                                className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-bold"
+                                onBlur={() =>
+                                  setFieldTouched((prev) => ({
+                                    ...prev,
+                                    "schedule.timeSlot": true,
+                                  }))
+                                }
+                                className={`w-full p-3 rounded-xl border-2 transition-all font-bold focus:outline-none focus:ring-2 ${
+                                  formErrors["schedule.timeSlot"]
+                                    ? "bg-white border-rose-400 focus:ring-rose-200 focus:border-rose-500"
+                                    : "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 focus:ring-primary/30 focus:border-primary"
+                                }`}
                               >
-                                <option>Morning (8am-12pm)</option>
-                                <option>Afternoon (12pm-4pm)</option>
-                                <option>Evening (4pm-8pm)</option>
+                                <option value="">Select a time slot</option>
+                                <option value="Morning">
+                                  Morning (8am-12pm)
+                                </option>
+                                <option value="Afternoon">
+                                  Afternoon (12pm-4pm)
+                                </option>
+                                <option value="Evening">
+                                  Evening (4pm-8pm)
+                                </option>
                               </select>
+                              {(formErrors["schedule.timeSlot"] ||
+                                fieldTouched["schedule.timeSlot"]) &&
+                                formErrors["schedule.timeSlot"] && (
+                                  <p className="text-rose-500 text-[10px] font-bold mt-1">
+                                    {formErrors["schedule.timeSlot"]}
+                                  </p>
+                                )}
                             </div>
 
                             <div>
@@ -2032,13 +2446,10 @@ const Bookings = () => {
                                 placeholder="e.g. 10:00 AM"
                                 value={createData.schedule.preferredTime || ""}
                                 onChange={(e) =>
-                                  setCreateData({
-                                    ...createData,
-                                    schedule: {
-                                      ...createData.schedule,
-                                      preferredTime: e.target.value,
-                                    },
-                                  })
+                                  handleFieldChange(
+                                    "schedule.preferredTime",
+                                    e.target.value,
+                                  )
                                 }
                                 className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400"
                               />
@@ -2053,64 +2464,120 @@ const Bookings = () => {
                           </label>
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input
-                              placeholder="First name"
-                              value={createData.customer.firstName}
-                              onChange={(e) =>
-                                setCreateData({
-                                  ...createData,
-                                  customer: {
-                                    ...createData.customer,
-                                    firstName: e.target.value,
-                                  },
-                                })
-                              }
-                              className="p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400 text-sm"
-                            />
-                            <input
-                              placeholder="Last name"
-                              value={createData.customer.lastName}
-                              onChange={(e) =>
-                                setCreateData({
-                                  ...createData,
-                                  customer: {
-                                    ...createData.customer,
-                                    lastName: e.target.value,
-                                  },
-                                })
-                              }
-                              className="p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400 text-sm"
-                            />
+                            <div>
+                              <input
+                                placeholder="First name"
+                                value={createData.customer.firstName}
+                                onChange={(e) =>
+                                  handleFieldChange(
+                                    "customer.firstName",
+                                    e.target.value,
+                                  )
+                                }
+                                onBlur={() =>
+                                  setFieldTouched((prev) => ({
+                                    ...prev,
+                                    "customer.firstName": true,
+                                  }))
+                                }
+                                className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm focus:outline-none focus:ring-2 ${
+                                  formErrors["customer.firstName"]
+                                    ? "bg-white border-rose-400 focus:ring-rose-200 focus:border-rose-500 placeholder:text-rose-300"
+                                    : "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 focus:ring-primary/30 focus:border-primary placeholder:text-slate-400"
+                                }`}
+                              />
+                              {formErrors["customer.firstName"] && (
+                                <p className="text-rose-500 text-[9px] font-bold mt-1">
+                                  {formErrors["customer.firstName"]}
+                                </p>
+                              )}
+                            </div>
+                            <div>
+                              <input
+                                placeholder="Last name"
+                                value={createData.customer.lastName}
+                                onChange={(e) =>
+                                  handleFieldChange(
+                                    "customer.lastName",
+                                    e.target.value,
+                                  )
+                                }
+                                onBlur={() =>
+                                  setFieldTouched((prev) => ({
+                                    ...prev,
+                                    "customer.lastName": true,
+                                  }))
+                                }
+                                className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm focus:outline-none focus:ring-2 ${
+                                  formErrors["customer.lastName"]
+                                    ? "bg-white border-rose-400 focus:ring-rose-200 focus:border-rose-500 placeholder:text-rose-300"
+                                    : "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 focus:ring-primary/30 focus:border-primary placeholder:text-slate-400"
+                                }`}
+                              />
+                              {formErrors["customer.lastName"] && (
+                                <p className="text-rose-500 text-[9px] font-bold mt-1">
+                                  {formErrors["customer.lastName"]}
+                                </p>
+                              )}
+                            </div>
                           </div>
 
-                          <input
-                            placeholder="Email"
-                            value={createData.customer.email}
-                            onChange={(e) =>
-                              setCreateData({
-                                ...createData,
-                                customer: {
-                                  ...createData.customer,
-                                  email: e.target.value,
-                                },
-                              })
-                            }
-                            className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400 text-sm"
-                          />
-                          <input
-                            placeholder="Phone"
-                            value={createData.customer.phone}
-                            onChange={(e) =>
-                              setCreateData({
-                                ...createData,
-                                customer: {
-                                  ...createData.customer,
-                                  phone: e.target.value,
-                                },
-                              })
-                            }
-                            className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400 text-sm"
-                          />
+                          <div>
+                            <input
+                              placeholder="Email"
+                              value={createData.customer.email}
+                              onChange={(e) =>
+                                handleFieldChange(
+                                  "customer.email",
+                                  e.target.value,
+                                )
+                              }
+                              onBlur={() =>
+                                setFieldTouched((prev) => ({
+                                  ...prev,
+                                  "customer.email": true,
+                                }))
+                              }
+                              className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm focus:outline-none focus:ring-2 ${
+                                formErrors["customer.email"]
+                                  ? "bg-white border-rose-400 focus:ring-rose-200 focus:border-rose-500 placeholder:text-rose-300"
+                                  : "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 focus:ring-primary/30 focus:border-primary placeholder:text-slate-400"
+                              }`}
+                            />
+                            {formErrors["customer.email"] && (
+                              <p className="text-rose-500 text-[9px] font-bold mt-1">
+                                {formErrors["customer.email"]}
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <input
+                              placeholder="Phone"
+                              value={createData.customer.phone}
+                              onChange={(e) =>
+                                handleFieldChange(
+                                  "customer.phone",
+                                  e.target.value,
+                                )
+                              }
+                              onBlur={() =>
+                                setFieldTouched((prev) => ({
+                                  ...prev,
+                                  "customer.phone": true,
+                                }))
+                              }
+                              className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm focus:outline-none focus:ring-2 ${
+                                formErrors["customer.phone"]
+                                  ? "bg-white border-rose-400 focus:ring-rose-200 focus:border-rose-500 placeholder:text-rose-300"
+                                  : "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 focus:ring-primary/30 focus:border-primary placeholder:text-slate-400"
+                              }`}
+                            />
+                            {formErrors["customer.phone"] && (
+                              <p className="text-rose-500 text-[9px] font-bold mt-1">
+                                {formErrors["customer.phone"]}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -2241,8 +2708,13 @@ const Bookings = () => {
               <div className="flex gap-3 flex-1 justify-end">
                 {createStep < 4 && (
                   <button
-                    onClick={() => setCreateStep((s) => Math.min(4, s + 1))}
-                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg text-white font-black transition-all transform hover:scale-105 border-2 border-primary flex items-center gap-2"
+                    onClick={handleNextStep}
+                    disabled={Object.keys(formErrors).length > 0}
+                    className={`px-8 py-3 rounded-xl transition-all transform font-black border-2 flex items-center gap-2 ${
+                      Object.keys(formErrors).length > 0
+                        ? "bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed"
+                        : "bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg text-white hover:scale-105 border-primary"
+                    }`}
                   >
                     Next →
                   </button>
@@ -2250,6 +2722,18 @@ const Bookings = () => {
                 {createStep === 4 && (
                   <button
                     onClick={async () => {
+                      // Validate all required fields before creating
+                      const validation = validateStep(4);
+                      setFormErrors(validation.errors);
+
+                      if (!validation.isValid) {
+                        setStatusMessage({
+                          type: "error",
+                          text: "Please fill all required fields correctly",
+                        });
+                        return;
+                      }
+
                       try {
                         // Build extras with rate information
                         const extrasWithRates = (
@@ -2294,6 +2778,8 @@ const Bookings = () => {
                         setSuccessBooking(newBooking);
                         setShowSuccessModal(true);
                         setShowCreateModal(false);
+                        setFormErrors({});
+                        setFieldTouched({});
                         fetchBookings();
                       } catch (err) {
                         console.error(err);
@@ -2566,6 +3052,50 @@ const Bookings = () => {
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBulkDeleteModal && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md"
+            onClick={() => setShowBulkDeleteModal(false)}
+          />
+          <div className="relative w-full max-w-md bg-white rounded-[32px] shadow-2xl overflow-hidden border-4 border-white p-8">
+            <div className="text-center space-y-6">
+              <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto">
+                <Trash2 size={32} className="text-rose-500" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-primary-dark tracking-tighter">
+                  Delete {selectedBookings.size} Bookings?
+                </h3>
+                <p className="text-sm text-slate-500 mt-2">
+                  This action cannot be undone. All selected bookings will be
+                  permanently deleted.
+                </p>
+              </div>
+              <div className="bg-rose-50 border-2 border-rose-200 rounded-2xl p-4">
+                <p className="text-[10px] font-black text-rose-600 uppercase tracking-wider">
+                  Warning: {selectedBookings.size} bookings will be deleted
+                </p>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowBulkDeleteModal(false)}
+                  className="flex-1 py-3 px-6 rounded-2xl bg-slate-100 text-slate-700 font-black hover:bg-slate-200 transition-all border-2 border-slate-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex-1 py-3 px-6 rounded-2xl bg-gradient-to-r from-rose-500 to-red-600 text-white font-black hover:shadow-lg transition-all border-2 border-rose-600"
+                >
+                  Delete All
+                </button>
+              </div>
             </div>
           </div>
         </div>

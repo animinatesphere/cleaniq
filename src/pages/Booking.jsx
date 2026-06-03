@@ -662,7 +662,7 @@ const Booking = () => {
       },
       payment: {
         amount: totalPrice,
-        currency: region.id === "UK" ? "GBP" : "NGN",
+        currency: "GBP",
         method: "Stripe",
         transactionId: paymentIntent.id,
       },
@@ -1419,7 +1419,7 @@ const Booking = () => {
                               <Elements stripe={stripePromise}>
                                 <StripePayment
                                   amount={totalPrice}
-                                  currency={region.id === "UK" ? "GBP" : "NGN"}
+                                  currency="GBP"
                                   customerInfo={formData}
                                   onPaymentSuccess={handlePaymentSuccess}
                                 />

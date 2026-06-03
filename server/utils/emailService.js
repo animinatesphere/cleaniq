@@ -477,6 +477,306 @@ const templates = {
     </div>
   `,
 
+  adminBookingCreatedEmail1: (booking) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0F172A; padding: 45px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 130px; height: auto; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 32px; letter-spacing: -1px; font-weight: 800;">Booking Created by Admin ✓</h1>
+        <p style="color: #94a3b8; margin-top: 12px; font-weight: 600; font-size: 15px;">Your cleaning appointment details</p>
+      </div>
+      
+      <div style="padding: 50px 45px; color: #1e293b; line-height: 1.8;">
+        <h2 style="font-size: 22px; margin-top: 0; margin-bottom: 10px; color: #0F172A;">Hello ${booking.customer.firstName},</h2>
+        <p style="font-size: 15px; color: #475569; margin-bottom: 30px;">Your Cleaniq booking has been successfully created by our admin team. Your appointment is confirmed and ready to go. Here's everything you need to know:</p>
+        
+        <!-- BOOKING REFERENCE CARD -->
+        <div style="background: linear-gradient(135deg, #0F172A 0%, #1e3a8a 100%); padding: 32px; border-radius: 24px; margin-bottom: 32px; color: white; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);">
+          <p style="margin: 0; font-size: 13px; font-weight: 800; color: #e0f2fe; text-transform: uppercase; letter-spacing: 2px;">Your Booking Reference</p>
+          <p style="margin: 12px 0 0 0; font-size: 28px; font-weight: 900; letter-spacing: 1px;">${booking.bookingId}</p>
+        </div>
+
+        <!-- SERVICE DETAILS GRID -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px;">📋 Service Details</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 32px;">
+          <div style="padding: 18px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 16px; border: 1px solid #bae6fd;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #0369a1; text-transform: uppercase; letter-spacing: 1px;">Service Type</p>
+            <p style="margin: 8px 0 0 0; font-size: 16px; font-weight: 700; color: #0F172A;">${booking.service}</p>
+          </div>
+          <div style="padding: 18px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 16px; border: 1px solid #e2e8f0;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Frequency</p>
+            <p style="margin: 8px 0 0 0; font-size: 16px; font-weight: 700; color: #0F172A;">${booking.details.frequency}</p>
+          </div>
+          <div style="padding: 18px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 16px; border: 1px solid #fcd34d;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 1px;">Duration</p>
+            <p style="margin: 8px 0 0 0; font-size: 16px; font-weight: 700; color: #0F172A;">${booking.details.duration} Hours</p>
+          </div>
+          <div style="padding: 18px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 16px; border: 1px solid #93c5fd;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 1px;">Scheduling</p>
+            <p style="margin: 8px 0 0 0; font-size: 16px; font-weight: 700; color: #0F172A;">As Arranged</p>
+          </div>
+        </div>
+
+        <!-- DATE & TIME SECTION -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px;">📅 Scheduled Date & Time</h3>
+        
+        <div style="padding: 24px; background-color: #f8fafc; border-radius: 20px; border: 2px solid #e2e8f0; margin-bottom: 32px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div>
+              <p style="margin: 0; font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Date</p>
+              <p style="margin: 10px 0 0 0; font-size: 18px; font-weight: 800; color: #0F172A;">${new Date(booking.schedule.date).toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
+            </div>
+            <div>
+              <p style="margin: 0; font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Time Slot</p>
+              <p style="margin: 10px 0 0 0; font-size: 18px; font-weight: 800; color: #0F172A;">${booking.schedule.timeSlot} ${booking.schedule.preferredTime ? "(" + booking.schedule.preferredTime + ")" : ""}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADDRESS SECTION -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px;">📍 Service Address</h3>
+        
+        <div style="padding: 24px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 20px; border: 2px solid #a7f3d0; margin-bottom: 32px;">
+          <p style="margin: 0; font-size: 16px; font-weight: 700; color: #0F172A; line-height: 1.6;">${booking.details.address}</p>
+        </div>
+
+        <!-- EXTRAS & REQUIREMENTS -->
+        ${
+          booking.details.extras && booking.details.extras.length > 0
+            ? `
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px;">🛠️ Extras & Special Requests</h3>
+        
+        <div style="padding: 24px; background-color: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; margin-bottom: 32px;">
+          <ul style="margin: 0; padding-left: 0; list-style: none;">
+            ${booking.details.extras
+              .map(
+                (extra, idx) => `
+              <li style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-size: 15px; color: #334155; display: flex; align-items: center;">
+                <span style="display: inline-block; width: 6px; height: 6px; background-color: #6EE7B7; border-radius: 50%; margin-right: 12px;"></span>
+                ${extra}
+              </li>
+            `,
+              )
+              .join("")}
+          </ul>
+        </div>
+        `
+            : ""
+        }
+
+        <!-- PROPERTY DETAILS -->
+        ${
+          booking.property
+            ? `
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px;">🏠 Property Information</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 32px;">
+          ${booking.property.bedrooms ? `<div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;"><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">Bedrooms</p><p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #0F172A;">${booking.property.bedrooms}</p></div>` : ""}
+          ${booking.property.bathrooms ? `<div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;"><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">Bathrooms</p><p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #0F172A;">${booking.property.bathrooms}</p></div>` : ""}
+          ${booking.property.kitchens ? `<div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;"><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">Kitchens</p><p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #0F172A;">${booking.property.kitchens}</p></div>` : ""}
+          ${booking.property.livingRooms ? `<div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;"><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">Living Rooms</p><p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #0F172A;">${booking.property.livingRooms}</p></div>` : ""}
+        </div>
+        `
+            : ""
+        }
+
+        <!-- PRICING BREAKDOWN -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px;">💷 Payment Summary</h3>
+        
+        <div style="padding: 28px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 24px; border: 2px solid #86efac; margin-bottom: 32px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #bbf7d0;">
+            <span style="font-size: 15px; color: #3f6e37; font-weight: 600;">Base Service</span>
+            <span style="font-size: 15px; color: #3f6e37; font-weight: 700;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 16px; color: #15803d; font-weight: 800; text-transform: uppercase;">Total Due</span>
+            <span style="font-size: 28px; color: #15803d; font-weight: 900;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</span>
+          </div>
+          <p style="margin: 15px 0 0 0; font-size: 12px; color: #22863a; font-style: italic;">Status: <strong>Booking Created</strong></p>
+        </div>
+
+        <!-- NOTES SECTION -->
+        ${
+          booking.details.notes
+            ? `
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px;">📝 Special Notes</h3>
+        
+        <div style="padding: 24px; background-color: #fffbeb; border-radius: 20px; border-left: 4px solid #f59e0b; margin-bottom: 32px;">
+          <p style="margin: 0; font-size: 15px; color: #92400e; line-height: 1.6;">${booking.details.notes}</p>
+        </div>
+        `
+            : ""
+        }
+
+        <!-- NEXT STEPS -->
+        <div style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); padding: 28px; border-radius: 20px; margin-bottom: 32px;">
+          <h3 style="margin-top: 0; margin-bottom: 18px; font-size: 15px; color: #0F172A; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">✓ What Happens Next</h3>
+          <ol style="margin: 0; padding-left: 20px;">
+            <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Confirmation:</strong> You will receive a second confirmation email with final details.</li>
+            <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Assignment:</strong> Our team will assign a professional cleaner to your job.</li>
+            <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Reminder:</strong> 24 hours before your appointment, you'll get a final reminder.</li>
+            <li style="font-size: 14px; color: #374151; line-height: 1.6;"><strong>Completion:</strong> After the service, you'll receive a receipt and can rate your experience.</li>
+          </ol>
+        </div>
+
+        <!-- SUPPORT -->
+        <div style="text-align: center; padding-top: 30px; border-top: 2px solid #e2e8f0;">
+          <p style="margin: 0 0 20px 0; font-size: 14px; color: #64748b;">Have any questions about your booking?</p>
+          <a href="https://cleaniqservices.com/contact" style="display: inline-block; background-color: #0F172A; color: white; padding: 16px 36px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">Contact Support</a>
+        </div>
+      </div>
+      
+      <div style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0 0 8px 0; font-size: 12px; color: #94a3b8; font-weight: 600;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+        <p style="margin: 0; font-size: 11px; color: #cbd5e1;">This is an automated message. Please do not reply to this email.</p>
+      </div>
+    </div>
+  `,
+
+  adminBookingCreatedEmail2: (booking) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0A5C43; padding: 45px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 130px; height: auto; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 32px; letter-spacing: -1px; font-weight: 800;">Your Booking is Ready! ✓</h1>
+        <p style="color: #E6F4F1; margin-top: 12px; font-weight: 600; font-size: 15px;">Complete details of your scheduled appointment</p>
+      </div>
+      
+      <div style="padding: 50px 45px; color: #1e293b; line-height: 1.8;">
+        <h2 style="font-size: 22px; margin-top: 0; margin-bottom: 10px; color: #0F172A;">Hello ${booking.customer.firstName},</h2>
+        <p style="font-size: 15px; color: #475569; margin-bottom: 30px;">Your cleaning appointment has been confirmed by our admin team. Everything is set, and we're ready to make your home sparkle! Here's your complete booking summary:</p>
+        
+        <!-- BOOKING CONFIRMATION BADGE -->
+        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px 32px; border-radius: 16px; margin-bottom: 32px; color: white; text-align: center; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);">
+          <p style="margin: 0; font-size: 12px; font-weight: 800; color: #d1fae5; text-transform: uppercase; letter-spacing: 2px;">✓ BOOKING CONFIRMED</p>
+          <p style="margin: 12px 0 0 0; font-size: 24px; font-weight: 900;">${booking.bookingId}</p>
+        </div>
+
+        <!-- COMPLETE SERVICE DETAILS -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #10b981; padding-left: 12px;">📋 Full Service Summary</h3>
+        
+        <div style="padding: 24px; background-color: #f0fdf4; border-radius: 20px; border: 1px solid #bbf7d0; margin-bottom: 32px;">
+          <div style="display: grid; gap: 16px;">
+            <div style="display: grid; grid-template-columns: 140px 1fr; gap: 16px; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #d1fae5;">
+              <span style="font-size: 13px; font-weight: 800; color: #059669; text-transform: uppercase;">Service Type</span>
+              <span style="font-size: 15px; font-weight: 700; color: #0F172A;">${booking.service}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 140px 1fr; gap: 16px; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #d1fae5;">
+              <span style="font-size: 13px; font-weight: 800; color: #059669; text-transform: uppercase;">Frequency</span>
+              <span style="font-size: 15px; font-weight: 700; color: #0F172A;">${booking.details.frequency}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 140px 1fr; gap: 16px; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #d1fae5;">
+              <span style="font-size: 13px; font-weight: 800; color: #059669; text-transform: uppercase;">Duration</span>
+              <span style="font-size: 15px; font-weight: 700; color: #0F172A;">${booking.details.duration} Hours</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 140px 1fr; gap: 16px; align-items: center;">
+              <span style="font-size: 13px; font-weight: 800; color: #059669; text-transform: uppercase;">Status</span>
+              <span style="display: inline-block; background-color: #d1fae5; color: #065f46; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px;">✓ CONFIRMED</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- APPOINTMENT SCHEDULE -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #10b981; padding-left: 12px;">📅 Your Appointment</h3>
+        
+        <div style="padding: 28px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 20px; border: 2px solid #86efac; margin-bottom: 32px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 28px;">
+            <div>
+              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 1px;">📆 Date</p>
+              <p style="margin: 10px 0 0 0; font-size: 18px; font-weight: 800; color: #065f46;">${new Date(booking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", year: "numeric", month: "short", day: "numeric" })}</p>
+            </div>
+            <div>
+              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 1px;">🕐 Time</p>
+              <p style="margin: 10px 0 0 0; font-size: 18px; font-weight: 800; color: #065f46;">${booking.schedule.timeSlot}</p>
+            </div>
+          </div>
+          <div style="padding-top: 20px; border-top: 1px solid #bbf7d0;">
+            <p style="margin: 0; font-size: 13px; font-weight: 600; color: #047857;">⏱️ <strong>Duration:</strong> ${booking.details.duration} hours of professional cleaning</p>
+          </div>
+        </div>
+
+        <!-- LOCATION & ADDRESS -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #10b981; padding-left: 12px;">📍 Service Location</h3>
+        
+        <div style="padding: 24px; background-color: #ecfdf5; border-radius: 20px; border: 2px solid #a7f3d0; margin-bottom: 32px;">
+          <p style="margin: 0; font-size: 16px; font-weight: 700; color: #065f46; line-height: 1.8;">${booking.details.address}</p>
+        </div>
+
+        <!-- CLEANING SCOPE -->
+        ${
+          booking.details.extras && booking.details.extras.length > 0
+            ? `
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #10b981; padding-left: 12px;">🧹 What We'll Clean</h3>
+        
+        <div style="padding: 24px; background-color: #f0fdf4; border-radius: 20px; border: 1px solid #bbf7d0; margin-bottom: 32px;">
+          <ul style="margin: 0; padding-left: 0; list-style: none;">
+            ${booking.details.extras
+              .map(
+                (extra) => `
+              <li style="padding: 12px 0; border-bottom: 1px solid #d1fae5; font-size: 15px; color: #065f46; display: flex; align-items: center;">
+                <span style="display: inline-block; width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; margin-right: 14px; flex-shrink: 0;"></span>
+                <span style="font-weight: 600;">${extra}</span>
+              </li>
+            `,
+              )
+              .join("")}
+          </ul>
+        </div>
+        `
+            : ""
+        }
+
+        <!-- PRICE SUMMARY -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #10b981; padding-left: 12px;">💷 Pricing & Payment</h3>
+        
+        <div style="padding: 28px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 24px; border: 2px solid #86efac; margin-bottom: 32px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 12px 0; border-bottom: 1px solid #a7f3d0; font-size: 14px; color: #065f46;">Service Charge</td>
+              <td style="padding: 12px 0; border-bottom: 1px solid #a7f3d0; text-align: right; font-size: 14px; font-weight: 700; color: #065f46;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</td>
+            </tr>
+            <tr style="background-color: rgba(16, 185, 129, 0.1);">
+              <td style="padding: 16px 0; font-size: 16px; font-weight: 800; color: #065f46; text-transform: uppercase;">Total Due</td>
+              <td style="padding: 16px 0; text-align: right; font-size: 24px; font-weight: 900; color: #065f46;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</td>
+            </tr>
+          </table>
+          <p style="margin: 16px 0 0 0; font-size: 13px; color: #047857; font-weight: 600;">✓ Payment Status: <strong>CONFIRMED</strong></p>
+        </div>
+
+        <!-- CUSTOMER INFORMATION -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #10b981; padding-left: 12px;">👤 Your Information</h3>
+        
+        <div style="padding: 20px; background-color: #f0fdf4; border-radius: 16px; border: 1px solid #bbf7d0; margin-bottom: 32px;">
+          <p style="margin: 0 0 12px 0; font-size: 14px; color: #065f46;"><strong>Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
+          <p style="margin: 0 0 12px 0; font-size: 14px; color: #065f46;"><strong>Email:</strong> ${booking.customer.email}</p>
+          <p style="margin: 0; font-size: 14px; color: #065f46;"><strong>Phone:</strong> ${booking.customer.phone}</p>
+        </div>
+
+        <!-- FINAL NOTES -->
+        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 28px; border-radius: 20px; border-left: 4px solid #f59e0b; margin-bottom: 32px;">
+          <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 15px; color: #92400e; font-weight: 800; text-transform: uppercase;">⚡ Important Reminders</h3>
+          <ul style="margin: 0; padding-left: 20px; list-style: disc;">
+            <li style="margin-bottom: 10px; font-size: 14px; color: #b45309; line-height: 1.5;">Please ensure someone is home or provide access instructions</li>
+            <li style="margin-bottom: 10px; font-size: 14px; color: #b45309; line-height: 1.5;">You'll receive a reminder 24 hours before your appointment</li>
+            <li style="margin-bottom: 10px; font-size: 14px; color: #b45309; line-height: 1.5;">Our cleaner will contact you 30 minutes before arrival</li>
+            <li style="font-size: 14px; color: #b45309; line-height: 1.5;">Rate your experience after completion to help us improve</li>
+          </ul>
+        </div>
+
+        <!-- SUPPORT & NEXT STEPS -->
+        <div style="text-align: center; padding-top: 30px; border-top: 2px solid #e2e8f0;">
+          <p style="margin: 0 0 20px 0; font-size: 14px; color: #64748b; font-weight: 600;">Need to reschedule or have questions?</p>
+          <a href="https://cleaniqservices.com/contact" style="display: inline-block; background-color: #0A5C43; color: white; padding: 16px 36px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(10, 92, 67, 0.15); margin-right: 12px; margin-bottom: 12px;">Contact Us</a>
+          <a href="https://cleaniqservices.com/account/bookings" style="display: inline-block; background-color: transparent; color: #0A5C43; padding: 16px 36px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 14px; border: 2px solid #0A5C43;">View Dashboard</a>
+        </div>
+      </div>
+      
+      <div style="background-color: #f0fdf4; padding: 24px; text-align: center; border-top: 1px solid #d1fae5;">
+        <p style="margin: 0 0 8px 0; font-size: 12px; color: #059669; font-weight: 600;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+        <p style="margin: 0; font-size: 11px; color: #6b7280;">Thank you for choosing Cleaniq for your cleaning needs!</p>
+      </div>
+    </div>
+  `,
+
   paymentSuccessAdmin: (booking) => `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0F172A; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
       <div style="background-color: #0F172A; padding: 30px; text-align: center;">

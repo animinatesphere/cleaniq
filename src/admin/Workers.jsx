@@ -16,6 +16,8 @@ const Workers = () => {
   const [newCredentials, setNewCredentials] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
+  const [selectedWorkers, setSelectedWorkers] = useState(new Set());
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -76,6 +78,45 @@ const Workers = () => {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedWorkers.size === 0) return;
+    
+    try {
+      const workerIds = Array.from(selectedWorkers);
+      await Promise.all(
+        workerIds.map((id) =>
+          fetch(`${import.meta.env.VITE_API_URL}/workers/${id}`, {
+            method: "DELETE",
+          })
+        )
+      );
+      
+      setSelectedWorkers(new Set());
+      setShowBulkDeleteModal(false);
+      setWorkers(workers.filter(w => !selectedWorkers.has(w._id)));
+    } catch (error) {
+      console.error('Error deleting workers:', error);
+    }
+  };
+
+  const toggleWorkerSelection = (workerId) => {
+    const newSelected = new Set(selectedWorkers);
+    if (newSelected.has(workerId)) {
+      newSelected.delete(workerId);
+    } else {
+      newSelected.add(workerId);
+    }
+    setSelectedWorkers(newSelected);
+  };
+
+  const toggleSelectAllWorkers = () => {
+    if (selectedWorkers.size === filteredWorkers.length) {
+      setSelectedWorkers(new Set());
+    } else {
+      setSelectedWorkers(new Set(filteredWorkers.map((w) => w._id)));
+    }
+  };
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -124,9 +165,20 @@ const Workers = () => {
       <div className="bg-white rounded-[32px] md:rounded-[40px] shadow-sm border border-slate-100 overflow-hidden">
         <div className="p-5 md:p-8 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-50/50">
           <h2 className="text-lg font-black text-primary-dark">Staff Directory</h2>
-          <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border border-slate-200 focus-within:border-primary/50 transition-all w-full md:w-80 shadow-sm">
-            <Search size={18} className="text-slate-400" />
-            <input type="text" placeholder="Search staff..." className="bg-transparent border-none outline-none text-sm font-medium w-full text-slate-700" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border border-slate-200 focus-within:border-primary/50 transition-all w-full md:w-80 shadow-sm">
+              <Search size={18} className="text-slate-400" />
+              <input type="text" placeholder="Search staff..." className="bg-transparent border-none outline-none text-sm font-medium w-full text-slate-700" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            </div>
+            {selectedWorkers.size > 0 && (
+              <button
+                onClick={() => setShowBulkDeleteModal(true)}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:shadow-lg text-white font-black transition-all flex items-center gap-2 text-sm whitespace-nowrap"
+              >
+                <Trash2 size={18} />
+                Delete ({selectedWorkers.size})
+              </button>
+            )}
           </div>
         </div>
 
@@ -134,6 +186,14 @@ const Workers = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
+                <th className="p-6 w-12">
+                  <input
+                    type="checkbox"
+                    checked={selectedWorkers.size === filteredWorkers.length && filteredWorkers.length > 0}
+                    onChange={toggleSelectAllWorkers}
+                    className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
+                  />
+                </th>
                 <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Worker ID & Name</th>
                 <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact</th>
                 <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status & Region</th>
@@ -143,12 +203,25 @@ const Workers = () => {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan="5" className="p-8 text-center text-slate-400 font-bold">Loading staff...</td></tr>
+                <tr><td colSpan="6" className="p-8 text-center text-slate-400 font-bold">Loading staff...</td></tr>
               ) : filteredWorkers.length === 0 ? (
-                <tr><td colSpan="5" className="p-8 text-center text-slate-400 font-bold">No staff found.</td></tr>
+                <tr><td colSpan="6" className="p-8 text-center text-slate-400 font-bold">No staff found.</td></tr>
               ) : (
                 filteredWorkers.map((w) => (
-                  <tr key={w._id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr 
+                    key={w._id} 
+                    className={`transition-colors ${
+                      selectedWorkers.has(w._id) ? "bg-blue-50" : "hover:bg-slate-50/50"
+                    } group`}
+                  >
+                    <td className="p-6 w-12">
+                      <input
+                        type="checkbox"
+                        checked={selectedWorkers.has(w._id)}
+                        onChange={() => toggleWorkerSelection(w._id)}
+                        className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
+                      />
+                    </td>
                     <td className="p-6">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black uppercase text-sm shrink-0">
@@ -251,8 +324,36 @@ const Workers = () => {
         </div>
       )}
 
+      {/* Bulk Delete Modal */}
+      {showBulkDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-primary-dark/60 backdrop-blur-sm" onClick={() => setShowBulkDeleteModal(false)}></div>
+          <div className="relative bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-10 w-full max-w-md shadow-2xl border-4 border-white animate-in zoom-in-95 duration-200 text-center">
+            <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6"><AlertTriangle size={40}/></div>
+            <h3 className="text-2xl font-black text-primary-dark tracking-tight mb-2">Delete {selectedWorkers.size} Staff Member(s)?</h3>
+            <p className="text-slate-500 font-medium text-sm mb-8">This action cannot be undone. The selected workers will be permanently removed from your database.</p>
+            
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setShowBulkDeleteModal(false)} 
+                className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleBulkDelete} 
+                className="flex-1 py-3 bg-gradient-to-r from-rose-500 to-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20 hover:scale-[1.02] transition-all"
+              >
+                Delete All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
+
 
 export default Workers;

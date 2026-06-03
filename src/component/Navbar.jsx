@@ -45,11 +45,11 @@ const Navbar = () => {
     <nav
       className={`fixed w-full z-50 transition-all duration-500 ${
         isScrolled
-          ? "top-0 glass-dark py-2.5 md:py-3 shadow-2xl shadow-black/30"
-          : `${isAccountPage ? "top-0" : "top-[80px] md:top-[52px]"} bg-primary py-3.5 md:py-4`
+          ? "top-0 glass-dark py-2 sm:py-2.5 md:py-3 shadow-2xl shadow-black/30"
+          : `${isAccountPage ? "top-0" : "top-[80px] sm:top-[72px] md:top-[52px]"} bg-primary py-3 sm:py-3.5 md:py-4`
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 flex justify-between items-center">
         {/* Logo - Professional Sizing */}
         <Link to="/" className="flex items-center gap-2 group shrink-0">
           <motion.div
@@ -60,7 +60,7 @@ const Navbar = () => {
             <img
               src={logo}
               alt="Cleaniq Services"
-              className="w-auto h-10 md:h-11 transition-all duration-300 brightness-100"
+              className="w-auto h-9 sm:h-10 md:h-11 transition-all duration-300 brightness-100"
             />
           </motion.div>
         </Link>
@@ -165,7 +165,7 @@ const Navbar = () => {
 
         {/* Mobile Menu Toggle */}
         <button
-          className="md:hidden p-2.5 rounded-lg transition-all text-white bg-white/10 hover:bg-white/20"
+          className="md:hidden p-1.5 sm:p-2 rounded-lg transition-all text-white bg-white/10 hover:bg-white/20"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <X size={20} /> : <Menu size={20} />}
@@ -190,22 +190,22 @@ const Navbar = () => {
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="fixed top-0 right-0 h-screen w-[85%] max-w-sm glass-dark shadow-[-20px_0_50px_rgba(0,0,0,0.5)] md:hidden flex flex-col z-50"
             >
-              <div className="p-6 md:p-8 flex flex-col h-full">
-                <div className="flex justify-between items-center mb-8">
+              <div className="p-4 sm:p-5 md:p-8 flex flex-col h-full overflow-y-auto">
+                <div className="flex justify-between items-center mb-6 sm:mb-8">
                   <img
                     src={logo}
                     alt="Cleaniq Services"
-                    className="h-7 w-auto"
+                    className="h-6 sm:h-7 w-auto"
                   />
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="text-white/60 hover:text-white p-2"
+                    className="text-white/60 hover:text-white p-1.5 sm:p-2 transition-colors"
                   >
-                    <X size={24} />
+                    <X size={22} />
                   </button>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-2 sm:space-y-3">
                   {navLinks.map((link, i) => {
                     const IconComponent = link.icon;
                     return (
@@ -217,14 +217,15 @@ const Navbar = () => {
                       >
                         <Link
                           to={link.path}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                          onClick={() => setIsOpen(false)}
+                          className={`flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all text-sm sm:text-base ${
                             location.pathname === link.path
                               ? "bg-secondary/20 text-secondary font-bold"
                               : "text-white/80 hover:bg-white/10 hover:text-white font-semibold"
                           }`}
                         >
-                          <IconComponent size={20} strokeWidth={1.8} />
-                          <span className="text-base tracking-tight">
+                          <IconComponent size={18} strokeWidth={1.8} />
+                          <span className="tracking-tight">
                             {link.name}
                           </span>
                         </Link>
@@ -233,14 +234,15 @@ const Navbar = () => {
                   })}
                 </div>
 
-                <div className="mt-auto space-y-6">
+                <div className="mt-auto space-y-4 sm:space-y-6">
                   <div className="h-px bg-white/15 w-full" />
 
                   {customer ? (
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       <Link
                         to="/account/dashboard"
-                        className="flex items-center gap-3 w-full py-3 px-4 bg-white/10 rounded-lg text-white font-semibold text-sm transition-all hover:bg-white/15"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-2 sm:gap-3 w-full py-2.5 sm:py-3 px-3 sm:px-4 bg-white/10 rounded-lg text-white font-semibold text-xs sm:text-sm transition-all hover:bg-white/15"
                       >
                         <User size={16} strokeWidth={1.5} /> Dashboard
                       </Link>
@@ -249,22 +251,24 @@ const Navbar = () => {
                           logout();
                           setIsOpen(false);
                         }}
-                        className="flex items-center gap-3 w-full py-3 px-4 bg-white/5 rounded-lg text-white/70 font-semibold text-sm hover:bg-rose-500/20 hover:text-white transition-all"
+                        className="flex items-center gap-2 sm:gap-3 w-full py-2.5 sm:py-3 px-3 sm:px-4 bg-white/5 rounded-lg text-white/70 font-semibold text-xs sm:text-sm hover:bg-rose-500/20 hover:text-white transition-all"
                       >
                         <LogOut size={16} strokeWidth={1.5} /> Log Out
                       </button>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       <Link
                         to="/account/login"
-                        className="flex items-center gap-3 w-full py-3 px-4 border border-white/20 rounded-lg text-white/80 font-semibold text-sm hover:bg-white/10 transition-all"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-2 sm:gap-3 w-full py-2.5 sm:py-3 px-3 sm:px-4 border border-white/20 rounded-lg text-white/80 font-semibold text-xs sm:text-sm hover:bg-white/10 transition-all"
                       >
                         <User size={16} strokeWidth={1.5} /> Log In
                       </Link>
                       <Link
                         to="/account/signup"
-                        className="flex items-center gap-3 w-full py-3 px-4 bg-white/10 rounded-lg text-white font-semibold text-sm justify-center hover:bg-white/15 transition-all"
+                        onClick={() => setIsOpen(false)}
+                        className="flex items-center gap-2 sm:gap-3 w-full py-2.5 sm:py-3 px-3 sm:px-4 bg-white/10 rounded-lg text-white font-semibold text-xs sm:text-sm justify-center hover:bg-white/15 transition-all"
                       >
                         <span>Sign Up</span>
                       </Link>
@@ -273,9 +277,10 @@ const Navbar = () => {
 
                   <Link
                     to="/booking"
-                    className="btn-secondary w-full py-3.5 text-base font-bold text-center shadow-lg shadow-secondary/30 flex items-center justify-center gap-2 rounded-lg transition-all hover:shadow-secondary/50"
+                    onClick={() => setIsOpen(false)}
+                    className="btn-secondary w-full py-2.5 sm:py-3.5 text-xs sm:text-base font-bold text-center shadow-lg shadow-secondary/30 flex items-center justify-center gap-2 rounded-lg transition-all hover:shadow-secondary/50"
                   >
-                    <Calendar size={18} strokeWidth={2} /> Book Clean
+                    <Calendar size={16} strokeWidth={2} /> Book Clean
                   </Link>
                 </div>
               </div>

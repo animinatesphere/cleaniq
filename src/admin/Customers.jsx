@@ -12,6 +12,8 @@ import {
   Eye,
   CheckCircle2,
   XCircle,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 
 const Customers = () => {
@@ -25,6 +27,8 @@ const Customers = () => {
   const [customerBookings, setCustomerBookings] = useState([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [statusMessage, setStatusMessage] = useState({ type: "", text: "" });
+  const [selectedCustomers, setSelectedCustomers] = useState(new Set());
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
   // Clear status message after 3 seconds
   useEffect(() => {
@@ -133,6 +137,44 @@ const Customers = () => {
     document.body.removeChild(link);
   };
 
+  const handleBulkDelete = async () => {
+    try {
+      const ids = Array.from(selectedCustomers);
+      await Promise.all(
+        ids.map((customerId) =>
+          fetch(`${import.meta.env.VITE_API_URL}/customers/${customerId}`, {
+            method: "DELETE",
+          })
+        )
+      );
+      fetchCustomers();
+      setSelectedCustomers(new Set());
+      setShowBulkDeleteModal(false);
+      setStatusMessage({ type: "success", text: `${ids.length} client(s) deleted successfully` });
+    } catch (error) {
+      console.error("Error deleting customers:", error);
+      setStatusMessage({ type: "error", text: "Failed to delete clients" });
+    }
+  };
+
+  const toggleCustomerSelection = (customerId) => {
+    const newSet = new Set(selectedCustomers);
+    if (newSet.has(customerId)) {
+      newSet.delete(customerId);
+    } else {
+      newSet.add(customerId);
+    }
+    setSelectedCustomers(newSet);
+  };
+
+  const toggleSelectAllCustomers = () => {
+    if (selectedCustomers.size === filtered.length) {
+      setSelectedCustomers(new Set());
+    } else {
+      setSelectedCustomers(new Set(filtered.map((c) => c._id)));
+    }
+  };
+
   const filtered = useMemo(() => {
     return customers.filter(
       (c) =>
@@ -232,7 +274,7 @@ const Customers = () => {
 
       {/* Search and Table */}
       <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50/30">
+        <div className="p-6 border-b border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border border-slate-200 w-full md:w-96 group focus-within:border-primary/50 transition-all">
             <Search size={18} className="text-slate-400" />
             <input
@@ -243,12 +285,28 @@ const Customers = () => {
               className="bg-transparent outline-none text-sm font-bold w-full"
             />
           </div>
+          {selectedCustomers.size > 0 && (
+            <button
+              onClick={() => setShowBulkDeleteModal(true)}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:shadow-lg text-white font-black transition-all flex items-center gap-2 text-sm whitespace-nowrap"
+            >
+              Delete ({selectedCustomers.size})
+            </button>
+          )}
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+                <th className="px-4 py-5 w-12">
+                  <input
+                    type="checkbox"
+                    checked={selectedCustomers.size === filtered.length && filtered.length > 0}
+                    onChange={toggleSelectAllCustomers}
+                    className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
+                  />
+                </th>
                 <th className="px-8 py-5">Customer</th>
                 <th className="px-4 py-5">Contact</th>
                 <th className="px-4 py-5">Activity</th>
@@ -260,8 +318,18 @@ const Customers = () => {
               {filtered.map((c) => (
                 <tr
                   key={c.email}
-                  className="group hover:bg-slate-50/50 transition-colors"
+                  className={`transition-colors ${
+                    selectedCustomers.has(c._id) ? "bg-blue-50" : "hover:bg-slate-50/50"
+                  } group`}
                 >
+                  <td className="px-4 py-6 w-12">
+                    <input
+                      type="checkbox"
+                      checked={selectedCustomers.has(c._id)}
+                      onChange={() => toggleCustomerSelection(c._id)}
+                      className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
+                    />
+                  </td>
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-4">
                       <div className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-lg">
@@ -559,8 +627,37 @@ const Customers = () => {
           </div>
         </div>
       )}
+
+      {/* Bulk Delete Modal */}
+      {showBulkDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-primary-dark/60 backdrop-blur-sm" onClick={() => setShowBulkDeleteModal(false)}></div>
+          <div className="relative bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-10 w-full max-w-md shadow-2xl border-4 border-white animate-in zoom-in-95 duration-200 text-center">
+            <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6"><AlertTriangle size={40}/></div>
+            <h3 className="text-2xl font-black text-primary-dark tracking-tight mb-2">Delete {selectedCustomers.size} Client(s)?</h3>
+            <p className="text-slate-500 font-medium text-sm mb-8">This action cannot be undone. The selected clients will be permanently removed from your database.</p>
+            
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setShowBulkDeleteModal(false)} 
+                className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleBulkDelete} 
+                className="flex-1 py-3 bg-gradient-to-r from-rose-500 to-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20 hover:scale-[1.02] transition-all"
+              >
+                Delete All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
 
 export default Customers;
+

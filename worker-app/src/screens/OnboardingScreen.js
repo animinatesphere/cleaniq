@@ -1,178 +1,185 @@
-import React, { useState, useRef } from 'react';
-import { 
-  View, Text, StyleSheet, FlatList, TouchableOpacity, 
-  Dimensions, Animated, SafeAreaView, Image, Platform
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { 
-  Calendar, ClipboardCheck, MessageSquare, ShieldCheck, ChevronRight 
-} from 'lucide-react-native';
+import React, { useState, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Dimensions,
+  SafeAreaView,
+  Platform,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  Briefcase,
+  MapPin,
+  TrendingUp,
+  MessageSquare,
+  Bell,
+  ChevronRight,
+  Check,
+} from "lucide-react-native";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 const SLIDES = [
   {
-    id: '1',
-    title: 'Welcome to Cleaniq',
-    description: 'The ultimate tool for Cleaniq professional cleaners. Access your bookings, client details, and schedules in real-time.',
-    icon: Calendar,
-    color: '#0A5C43',
-    bgColor: '#E6F4F1'
+    id: "1",
+    title: "Welcome to CleanIQ",
+    subtitle: "Your Professional Cleaning Partner",
+    description:
+      "Get hired for cleaning jobs in your area and start earning immediately with transparent pricing",
+    icon: Briefcase,
+    color: "#1E40AF",
+    accentColor: "#60A5FA",
   },
   {
-    id: '2',
-    title: 'Tick Off Task Checklists',
-    description: 'Ensure premium quality by checking off generated cleaning tasks one by one as you clean each room.',
-    icon: ClipboardCheck,
-    color: '#3B82F6',
-    bgColor: '#EFF6FF'
+    id: "2",
+    title: "Find Jobs Easily",
+    subtitle: "Browse Available Offers",
+    description:
+      "See all available cleaning jobs near you with full details, rates, and customer information",
+    icon: MapPin,
+    color: "#10B981",
+    accentColor: "#6EE7B7",
   },
   {
-    id: '3',
-    title: 'Direct Support Line',
-    description: 'Need assistance on site? Tap the header chat support icon to message the Cleaniq office team instantly.',
+    id: "3",
+    title: "Get Paid Fairly",
+    subtitle: "Transparent Pricing",
+    description:
+      "Know exactly how much you'll earn before accepting. Paid based on hourly rates and job duration",
+    icon: TrendingUp,
+    color: "#F59E0B",
+    accentColor: "#FCD34D",
+  },
+  {
+    id: "4",
+    title: "Stay Connected",
+    subtitle: "Direct Communication",
+    description:
+      "Message customers directly. They'll receive notifications and emails. Build relationships and get repeat jobs",
     icon: MessageSquare,
-    color: '#8B5CF6',
-    bgColor: '#F5F3FF'
+    color: "#8B5CF6",
+    accentColor: "#D8B4FE",
   },
   {
-    id: '4',
-    title: 'Fast Secure Biometrics',
-    description: 'Log in securely in a split second using your phone\'s Fingerprint or Face ID for a seamless experience.',
-    icon: ShieldCheck,
-    color: '#10B981',
-    bgColor: '#ECFDF5'
-  }
+    id: "5",
+    title: "Track Everything",
+    subtitle: "Manage Your Schedule",
+    description:
+      "View your schedule, track earnings, manage notifications, and keep track of your activity",
+    icon: Bell,
+    color: "#EC4899",
+    accentColor: "#F472B6",
+  },
 ];
 
 const OnboardingScreen = ({ onFinished }) => {
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const flatListRef = useRef(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const scrollViewRef = useRef(null);
 
-  // Animates bottom buttons & pagination indicators smoothly
-  const handleScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-    { useNativeDriver: false }
-  );
-
-  const handleNextSlide = async () => {
-    const nextIndex = currentSlideIndex + 1;
-    if (nextIndex < SLIDES.length) {
-      flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
-      setCurrentSlideIndex(nextIndex);
+  const handleNext = async () => {
+    if (currentSlide < SLIDES.length - 1) {
+      setCurrentSlide(currentSlide + 1);
+      scrollViewRef.current?.scrollTo({
+        x: (currentSlide + 1) * width,
+        animated: true,
+      });
     } else {
-      // Save onboarding flag & navigate to login
       try {
-        await AsyncStorage.setItem('@has_onboarded', 'true');
+        await AsyncStorage.setItem("@has_onboarded", "true");
         onFinished();
       } catch (err) {
-        console.error('Error saving onboarding flag:', err);
+        console.error("Error saving onboarding flag:", err);
       }
     }
   };
 
   const handleSkip = async () => {
     try {
-      await AsyncStorage.setItem('@has_onboarded', 'true');
+      await AsyncStorage.setItem("@has_onboarded", "true");
       onFinished();
     } catch (err) {
-      console.error('Error skipping onboarding:', err);
+      console.error("Error skipping onboarding:", err);
     }
   };
 
-  const renderSlideItem = ({ item }) => {
-    const IconComponent = item.icon;
-    return (
-      <View style={styles.slideContainer}>
-        <View style={[styles.imageContainer, { backgroundColor: item.bgColor }]}>
-          <View style={styles.circleDecoration1} />
-          <View style={styles.circleDecoration2} />
-          <IconComponent size={120} color={item.color} />
-        </View>
-        <View style={styles.textContainer}>
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.description}>{item.description}</Text>
-        </View>
-      </View>
-    );
+  const handleScroll = (e) => {
+    const contentOffsetX = e.nativeEvent.contentOffset.x;
+    const currentIndex = Math.round(contentOffsetX / width);
+    setCurrentSlide(currentIndex);
   };
 
+  const slide = SLIDES[currentSlide];
+  const IconComponent = slide.icon;
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Top Skip Button */}
-      {currentSlideIndex < SLIDES.length - 1 && (
+    <SafeAreaView style={[styles.container, { backgroundColor: slide.color }]}>
+      {/* Skip Button */}
+      {currentSlide < SLIDES.length - 1 && (
         <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
       )}
 
-      {/* Slide Carousels */}
-      <FlatList
-        ref={flatListRef}
-        data={SLIDES}
-        keyExtractor={(item) => item.id}
-        renderItem={renderSlideItem}
+      {/* Progress Indicator */}
+      <View style={styles.progressContainer}>
+        {SLIDES.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.progressDot,
+              index <= currentSlide && { backgroundColor: slide.accentColor },
+            ]}
+          />
+        ))}
+      </View>
+
+      {/* Carousel */}
+      <ScrollView
+        ref={scrollViewRef}
         horizontal
         pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
         scrollEventThrottle={16}
-        onMomentumScrollEnd={(e) => {
-          const contentOffset = e.nativeEvent.contentOffset.x;
-          const index = Math.round(contentOffset / width);
-          setCurrentSlideIndex(index);
-        }}
-      />
+        onScroll={handleScroll}
+        scrollEnabled={false}
+        showsHorizontalScrollIndicator={false}
+        style={styles.carousel}
+      >
+        {SLIDES.map((slideItem) => (
+          <View key={slideItem.id} style={styles.slide}>
+            {/* Icon Container */}
+            <View
+              style={[
+                styles.iconContainer,
+                { backgroundColor: slide.accentColor },
+              ]}
+            >
+              <IconComponent size={80} color={slide.color} strokeWidth={1.5} />
+            </View>
 
-      {/* Pagination Footer */}
-      <View style={styles.footer}>
-        {/* Indicators */}
-        <View style={styles.indicatorContainer}>
-          {SLIDES.map((_, index) => {
-            const inputRange = [
-              (index - 1) * width,
-              index * width,
-              (index + 1) * width
-            ];
+            {/* Content */}
+            <View style={styles.content}>
+              <Text style={styles.mainTitle}>{slideItem.title}</Text>
+              <Text style={styles.subtitle}>{slideItem.subtitle}</Text>
+              <Text style={styles.description}>{slideItem.description}</Text>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
 
-            const indicatorWidth = scrollX.interpolate({
-              inputRange,
-              outputRange: [8, 22, 8],
-              extrapolate: 'clamp'
-            });
+      {/* Bottom Section */}
+      <View style={styles.bottomSection}>
+        <Text style={styles.slideCounter}>
+          {currentSlide + 1} / {SLIDES.length}
+        </Text>
 
-            const opacity = scrollX.interpolate({
-              inputRange,
-              outputRange: [0.4, 1, 0.4],
-              extrapolate: 'clamp'
-            });
-
-            return (
-              <Animated.View 
-                key={index} 
-                style={[
-                  styles.indicator, 
-                  { 
-                    width: indicatorWidth, 
-                    opacity,
-                    backgroundColor: currentSlideIndex === index ? '#0A5C43' : '#94A3B8'
-                  }
-                ]} 
-              />
-            );
-          })}
-        </View>
-
-        {/* Action Button */}
-        <TouchableOpacity 
-          style={styles.actionBtn} 
-          onPress={handleNextSlide}
-        >
-          <Text style={styles.actionBtnText}>
-            {currentSlideIndex === SLIDES.length - 1 ? 'GET STARTED' : 'CONTINUE'}
+        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+          <Text style={styles.nextButtonText}>
+            {currentSlide === SLIDES.length - 1 ? "Get Started" : "Next"}
           </Text>
-          <ChevronRight size={18} color="#FFFFFF" />
+          <ChevronRight size={20} color="#FFFFFF" strokeWidth={2.5} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -180,106 +187,117 @@ const OnboardingScreen = ({ onFinished }) => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#FFFFFF' },
-  skipButton: { 
-    position: 'absolute', 
-    top: Platform.OS === 'ios' ? 60 : 30, 
-    right: 24, 
-    zIndex: 10,
-    padding: 10
+  container: {
+    flex: 1,
+    justifyContent: "space-between",
   },
-  skipText: { fontSize: 14, fontWeight: '700', color: '#64748B' },
-  slideContainer: { 
-    width, 
-    height: height * 0.75, 
-    alignItems: 'center', 
-    justifyContent: 'center',
-    paddingHorizontal: 32
+  skipButton: {
+    alignSelf: "flex-end",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
-  imageContainer: {
-    width: width * 0.65,
-    height: width * 0.65,
-    borderRadius: (width * 0.65) / 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 40,
-    overflow: 'hidden',
-    position: 'relative'
+  skipText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "rgba(255, 255, 255, 0.7)",
   },
-  circleDecoration1: {
-    position: 'absolute',
+  progressContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 12,
+  },
+  progressDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+  },
+  carousel: {
+    flex: 1,
+    width: width,
+  },
+  slide: {
+    width: width,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  iconContainer: {
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: 'rgba(255,255,255,0.4)',
-    top: -30,
-    left: -30
-  },
-  circleDecoration2: {
-    position: 'absolute',
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    bottom: -10,
-    right: -10
-  },
-  textContainer: { 
-    alignItems: 'center',
-    paddingHorizontal: 10
-  },
-  title: { 
-    fontSize: 26, 
-    fontWeight: '900', 
-    color: '#0F172A', 
-    textAlign: 'center',
-    marginBottom: 16
-  },
-  description: { 
-    fontSize: 14, 
-    color: '#64748B', 
-    textAlign: 'center', 
-    lineHeight: 22,
-    fontWeight: '500'
-  },
-  footer: {
-    height: height * 0.25 - 40,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingBottom: 40
-  },
-  indicatorContainer: { 
-    flexDirection: 'row', 
-    justifyContent: 'center',
-    height: 10
-  },
-  indicator: {
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4
-  },
-  actionBtn: {
-    width: '100%',
-    height: 65,
-    borderRadius: 20,
-    backgroundColor: '#0A5C43',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    shadowColor: '#0A5C43',
-    shadowOffset: { width: 0, height: 8 },
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 40,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 8
+    shadowRadius: 12,
   },
-  actionBtnText: {
-    color: '#FFFFFF',
+  content: {
+    alignItems: "center",
+    paddingHorizontal: 12,
+  },
+  mainTitle: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "rgba(255, 255, 255, 0.95)",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  description: {
     fontSize: 15,
-    fontWeight: '900',
-    letterSpacing: 1.5
-  }
+    color: "rgba(255, 255, 255, 0.85)",
+    textAlign: "center",
+    lineHeight: 24,
+    maxWidth: "90%",
+    fontWeight: "500",
+  },
+  bottomSection: {
+    paddingHorizontal: 24,
+    paddingBottom: 32,
+    paddingTop: 16,
+  },
+  slideCounter: {
+    textAlign: "center",
+    fontSize: 12,
+    color: "rgba(255, 255, 255, 0.6)",
+    marginBottom: 16,
+    fontWeight: "600",
+  },
+  nextButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    gap: 8,
+  },
+  nextButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
 });
 
 export default OnboardingScreen;

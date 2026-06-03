@@ -1,39 +1,56 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useContext, useState, useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { StatusBar } from "expo-status-bar";
+import { View, Text, Platform } from "react-native";
+const ActivityIndicator =
+  Platform.OS === "web" ? null : require("react-native").ActivityIndicator;
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Home, Bell, Calendar, MessageSquare, User } from "lucide-react-native";
 let Notifications = null;
 try {
-  const Constants = require('expo-constants').default;
-  const isExpoGo = Constants.appOwnership === 'expo';
-  
+  const Constants = require("expo-constants").default;
+  const isExpoGo = Constants.appOwnership === "expo";
+
   if (!isExpoGo) {
-    Notifications = require('expo-notifications');
+    Notifications = require("expo-notifications");
   } else {
-    console.log('🛡️ Expo Go client detected: Bypassing expo-notifications import to prevent SDK 53+ push crashes.');
+    console.log(
+      "🛡️ Expo Go client detected: Bypassing expo-notifications import to prevent SDK 53+ push crashes.",
+    );
   }
 } catch (err) {
-  console.log('Bypassing expo-notifications in this client:', err.message);
+  console.log("Bypassing expo-notifications in this client:", err.message);
 }
 
-import { AuthProvider, AuthContext } from './src/context/AuthContext';
-import OnboardingScreen from './src/screens/OnboardingScreen';
-import LoginScreen from './src/screens/LoginScreen';
-import JobsFeedScreen from './src/screens/JobsFeedScreen';
-import ChatScreen from './src/screens/ChatScreen';
+import { AuthProvider, AuthContext } from "./src/context/AuthContext";
+import OnboardingScreen from "./src/screens/OnboardingScreen";
+import LoginScreen from "./src/screens/LoginScreen";
+import HomeScreen from "./src/screens/HomeScreen";
+import NotificationScreen from "./src/screens/NotificationScreen";
+import ScheduleScreen from "./src/screens/ScheduleScreen";
+import MessagesScreen from "./src/screens/MessagesScreen";
+import MyAccountScreen from "./src/screens/MyAccountScreen";
+import OfferDetailScreen from "./src/screens/OfferDetailScreen";
+import AcceptedBookingDetailScreen from "./src/screens/AcceptedBookingDetailScreen";
+import ChatWithCustomerScreen from "./src/screens/ChatWithCustomerScreen";
+import ChatScreen from "./src/screens/ChatScreen";
 
 // Catch all unhandled runtime errors and print them straight to the computer terminal
 if (global.ErrorUtils) {
   const originalHandler = global.ErrorUtils.getGlobalHandler();
   global.ErrorUtils.setGlobalHandler((error, isFatal) => {
-    console.log('\n============== MOBILE CRASH DETECTED (SENT TO TERMINAL) ==============');
+    console.log(
+      "\n============== MOBILE CRASH DETECTED (SENT TO TERMINAL) ==============",
+    );
     console.error(error.message || error);
     if (error.stack) {
       console.error(error.stack);
     }
-    console.log('========================================================================\n');
+    console.log(
+      "========================================================================\n",
+    );
     originalHandler(error, isFatal);
   });
 }
@@ -50,35 +67,109 @@ try {
     });
   }
 } catch (err) {
-  console.log('Skipping notifications handler initialization (Expo Go context):', err);
+  console.log(
+    "Skipping notifications handler initialization (Expo Go context):",
+    err,
+  );
 }
 
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+// Tab Navigator Component
+const TabNavigator = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: "#1E40AF",
+        tabBarInactiveTintColor: "#9CA3AF",
+        tabBarStyle: {
+          backgroundColor: "#FFFFFF",
+          borderTopWidth: 1,
+          borderTopColor: "#E5E7EB",
+          paddingBottom: 8,
+          paddingTop: 8,
+          height: 65,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
+          marginTop: 4,
+        },
+        tabBarIcon: ({ color, size }) => {
+          let Icon = Home;
+
+          if (route.name === "HomeTab") Icon = Home;
+          else if (route.name === "NotificationTab") Icon = Bell;
+          else if (route.name === "ScheduleTab") Icon = Calendar;
+          else if (route.name === "MessagesTab") Icon = MessageSquare;
+          else if (route.name === "AccountTab") Icon = User;
+
+          return <Icon size={24} color={color} strokeWidth={2} />;
+        },
+      })}
+    >
+      <Tab.Screen
+        name="HomeTab"
+        component={HomeScreen}
+        options={{ tabBarLabel: "Home" }}
+      />
+      <Tab.Screen
+        name="NotificationTab"
+        component={NotificationScreen}
+        options={{ tabBarLabel: "Notification" }}
+      />
+      <Tab.Screen
+        name="ScheduleTab"
+        component={ScheduleScreen}
+        options={{ tabBarLabel: "Schedule" }}
+      />
+      <Tab.Screen
+        name="MessagesTab"
+        component={MessagesScreen}
+        options={{ tabBarLabel: "Messages" }}
+      />
+      <Tab.Screen
+        name="AccountTab"
+        component={MyAccountScreen}
+        options={{ tabBarLabel: "My Account" }}
+      />
+    </Tab.Navigator>
+  );
+};
 
 const AppNavigation = () => {
   const { isLoading, userToken } = useContext(AuthContext);
   const [hasOnboarded, setHasOnboarded] = useState(false);
-  const [isOnboardingCheckLoading, setIsOnboardingCheckLoading] = useState(true);
+  const [isOnboardingCheckLoading, setIsOnboardingCheckLoading] =
+    useState(true);
 
   useEffect(() => {
     // Request permission for push notifications and custom sound alerts safely on first launch
     const registerForNotifications = async () => {
       try {
         if (!Notifications || !Notifications.getPermissionsAsync) {
-          console.log('Skipping notifications: expo-notifications not loaded in current client.');
+          console.log(
+            "Skipping notifications: expo-notifications not loaded in current client.",
+          );
           return;
         }
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        const { status: existingStatus } =
+          await Notifications.getPermissionsAsync();
         let finalStatus = existingStatus;
-        if (existingStatus !== 'granted') {
+        if (existingStatus !== "granted") {
           const { status } = await Notifications.requestPermissionsAsync();
           finalStatus = status;
         }
-        if (finalStatus !== 'granted') {
-          console.log('Notification alerts permission rejected!');
+        if (finalStatus !== "granted") {
+          console.log("Notification alerts permission rejected!");
         }
       } catch (err) {
-        console.log('Notification configuration skipped inside Expo Go:', err.message);
+        console.log(
+          "Notification configuration skipped inside Expo Go:",
+          err.message,
+        );
       }
     };
     registerForNotifications();
@@ -86,12 +177,12 @@ const AppNavigation = () => {
     // Check if worker has already gone through the onboarding slides
     (async () => {
       try {
-        const onboardedVal = await AsyncStorage.getItem('@has_onboarded');
-        if (onboardedVal === 'true') {
+        const onboardedVal = await AsyncStorage.getItem("@has_onboarded");
+        if (onboardedVal === "true") {
           setHasOnboarded(true);
         }
       } catch (err) {
-        console.log('AsyncStorage onboarding check error:', err);
+        console.log("AsyncStorage onboarding check error:", err);
       } finally {
         setIsOnboardingCheckLoading(false);
       }
@@ -100,8 +191,19 @@ const AppNavigation = () => {
 
   if (isLoading || isOnboardingCheckLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
-        <ActivityIndicator size="large" color="#0A5C43" />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#FFFFFF",
+        }}
+      >
+        {ActivityIndicator ? (
+          <ActivityIndicator size="large" color="#0A5C43" />
+        ) : (
+          <Text>Loading...</Text>
+        )}
       </View>
     );
   }
@@ -120,8 +222,19 @@ const AppNavigation = () => {
         ) : (
           // User is signed in
           <>
-            <Stack.Screen name="JobsFeed" component={JobsFeedScreen} />
-            <Stack.Screen name="Chat" component={ChatScreen} />
+            <Stack.Screen name="MainTabs" component={TabNavigator} />
+            <Stack.Group screenOptions={{ presentation: "modal" }}>
+              <Stack.Screen name="OfferDetail" component={OfferDetailScreen} />
+              <Stack.Screen
+                name="AcceptedBookingDetail"
+                component={AcceptedBookingDetailScreen}
+              />
+              <Stack.Screen
+                name="ChatWithCustomer"
+                component={ChatWithCustomerScreen}
+              />
+              <Stack.Screen name="Chat" component={ChatScreen} />
+            </Stack.Group>
           </>
         )}
       </Stack.Navigator>
