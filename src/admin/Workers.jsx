@@ -457,15 +457,15 @@ const Workers = () => {
                 }
                 className="w-full p-4 rounded-2xl bg-slate-50 border-none font-bold text-sm focus:ring-2 focus:ring-primary/20 outline-none"
               />
-              <select
+              <input
+                type="text"
+                placeholder="Country / Region (e.g. United Kingdom)"
                 value={formData.region}
                 onChange={(e) =>
                   setFormData({ ...formData, region: e.target.value })
                 }
                 className="w-full p-4 rounded-2xl bg-slate-50 border-none font-bold text-sm focus:ring-2 focus:ring-primary/20 outline-none"
-              >
-                <option value="UK">United Kingdom</option>
-              </select>
+              />
               <button
                 type="submit"
                 className="w-full py-4 mt-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform"

@@ -232,7 +232,7 @@ const Navbar = () => {
                   })}
                 </div>
 
-                <div className="mt-auto space-y-4 sm:space-y-6">
+                <div className="mt-30 space-y-4 sm:space-y-6">
                   <div className="h-px bg-white/15 w-full" />
 
                   {customer ? (
@@ -278,7 +278,7 @@ const Navbar = () => {
                     onClick={() => setIsOpen(false)}
                     className="btn-secondary w-full py-2.5 sm:py-3.5 text-xs sm:text-base font-bold text-center shadow-lg shadow-secondary/30 flex items-center justify-center gap-2 rounded-lg transition-all hover:shadow-secondary/50"
                   >
-                    <Calendar size={16} strokeWidth={2} /> Book Clean
+                    <Calendar size={16} strokeWidth={2} /> Book Now
                   </Link>
                 </div>
               </div>

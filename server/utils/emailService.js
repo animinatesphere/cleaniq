@@ -57,7 +57,7 @@ const templates = {
             </tr>
             <tr style="border-bottom: 1px solid #edf2f7;">
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Date & Time:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()} @ ${booking.schedule.timeSlot} ${booking.schedule.preferredTime ? "(" + booking.schedule.preferredTime + ")" : ""}</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()} — ${booking.schedule.timeSlot}${booking.schedule.preferredTime ? " (Requested Arrival: " + booking.schedule.preferredTime + ")" : ""}</td>
             </tr>
             <tr>
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Address:</td>
@@ -225,7 +225,7 @@ const templates = {
         <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Service Details</h3>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Date:</strong> ${new Date(booking.schedule.date).toDateString()}</p>
-        <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${booking.schedule.timeSlot} (${booking.schedule.preferredTime || "No preference"})</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${booking.schedule.timeSlot}${booking.schedule.preferredTime ? " (Requested Arrival: " + booking.schedule.preferredTime + ")" : ""}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Frequency:</strong> ${booking.details.frequency}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Duration:</strong> ${booking.details.duration} Hours</p>
 
@@ -261,7 +261,7 @@ const templates = {
           <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Phone:</strong> ${booking.customer.phone}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Address:</strong> ${booking.details.address}</p>
-          <p style="margin: 5px 0; font-size: 13px;"><strong>Scheduled Time:</strong> ${booking.schedule.timeSlot} (${booking.schedule.preferredTime || "No preference"})</p>
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Scheduled Time:</strong> ${booking.schedule.timeSlot}${booking.schedule.preferredTime ? " (Requested Arrival: " + booking.schedule.preferredTime + ")" : ""}</p>
         </div>
 
         <div style="text-align: center; margin-top: 30px;">
@@ -402,7 +402,7 @@ const templates = {
             </tr>
             <tr style="border-bottom: 1px solid #edf2f7;">
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Time:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.schedule.timeSlot}</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.schedule.timeSlot}${booking.schedule.preferredTime ? " (Requested Arrival: " + booking.schedule.preferredTime + ")" : ""}</td>
             </tr>
             <tr>
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Duration:</td>
@@ -482,7 +482,7 @@ const templates = {
             </tr>
             <tr style="border-bottom: 1px solid #edf2f7;">
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Time:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.schedule.timeSlot}</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.schedule.timeSlot}${booking.schedule.preferredTime ? " (Requested Arrival: " + booking.schedule.preferredTime + ")" : ""}</td>
             </tr>
             <tr>
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Location:</td>
@@ -852,7 +852,7 @@ const templates = {
         <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Service Details</h3>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Date:</strong> ${new Date(booking.schedule.date).toDateString()}</p>
-        <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${booking.schedule.timeSlot}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${booking.schedule.timeSlot}${booking.schedule.preferredTime ? " (Requested Arrival: " + booking.schedule.preferredTime + ")" : ""}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Address:</strong> ${booking.details.address}</p>
 
         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #edf2f7;">
