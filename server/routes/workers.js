@@ -340,7 +340,83 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE a worker
+// DELETE a notification (must come before DELETE /:id)
+router.delete('/notifications/:id', async (req, res) => {
+  try {
+    const Message = require('../models/Message');
+    await Message.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Notification deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting notification:', error);
+    res.status(500).json({ error: 'Failed to delete notification' });
+  }
+});
+
+// GET notifications for a worker (messages from admin)
+router.get('/:id/notifications', async (req, res) => {
+  try {
+    const Message = require('../models/Message');
+    const notifications = await Message.find({ workerId: req.params.id })
+      .sort({ createdAt: -1 })
+      .limit(50);
+    
+    res.json(notifications || []);
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+});
+
+// GET worker's schedule (assigned bookings)
+router.get('/:id/schedule', async (req, res) => {
+  try {
+    const schedule = await Booking.find({ 
+      assignedWorker: req.params.id 
+    })
+    .sort({ 'schedule.date': 1 })
+    .select('bookingId service status schedule details customer payment assignedWorkerName');
+    
+    res.json(schedule || []);
+  } catch (error) {
+    console.error('Error fetching schedule:', error);
+    res.status(500).json({ error: 'Failed to fetch schedule' });
+  }
+});
+
+// GET conversations for worker (unique customer bookings for messaging)
+router.get('/:id/conversations', async (req, res) => {
+  try {
+    // Get all bookings assigned to this worker
+    const workerBookings = await Booking.find({ 
+      assignedWorker: req.params.id 
+    }).select('bookingId customer service status createdAt');
+    
+    // Extract unique conversations from bookings
+    const conversations = workerBookings.map(booking => ({
+      bookingId: booking.bookingId,
+      customerId: booking.customer?._id || booking.customerId,
+      customerName: `${booking.customer?.firstName || 'Customer'} ${booking.customer?.lastName || ''}`.trim(),
+      customerEmail: booking.customer?.email,
+      service: booking.service,
+      status: booking.status,
+      lastMessageTime: booking.createdAt
+    }));
+    
+    // Remove duplicates and sort by most recent
+    const uniqueConversations = Array.from(
+      new Map(
+        conversations.map(conv => [conv.customerId, conv])
+      ).values()
+    ).sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
+    
+    res.json(uniqueConversations || []);
+  } catch (error) {
+    console.error('Error fetching conversations:', error);
+    res.status(500).json({ error: 'Failed to fetch conversations' });
+  }
+});
+
+// DELETE a worker (must come last to avoid route conflicts)
 router.delete('/:id', async (req, res) => {
   try {
     await Worker.findByIdAndDelete(req.params.id);
