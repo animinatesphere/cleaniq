@@ -182,17 +182,22 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   for (let i = 1; i <= totalDays; i++)
     days.push(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i));
 
-  const isPast = (date) => {
+  const isToday = (date) => {
     if (!date) return false;
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date < today;
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
   };
+
   const isBooked = (date) => {
     if (!date) return false;
     const dStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     return bookedDates.includes(dStr);
   };
+  
   const isSelected = (date) => {
     if (!date || !selectedDate) return false;
     const sel = new Date(selectedDate);
@@ -203,63 +208,88 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
     );
   };
 
+  const isPast = (date) => {
+    if (!date) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date < today;
+  };
+
   return (
-    <div className="bg-white rounded-[24px] p-4 border border-slate-100">
-      <div className="flex justify-between items-center mb-4">
-        <h4 className="font-black text-sm">
+    <div className="bg-white rounded-[24px] md:rounded-[32px] p-4 md:p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
+      <div className="flex justify-between items-center mb-6 md:mb-8">
+        <h3 className="font-black text-primary-dark tracking-tighter text-base md:text-lg">
           {currentMonth.toLocaleString("default", { month: "long" })}{" "}
           <span className="text-primary">{currentMonth.getFullYear()}</span>
-        </h4>
-        <div className="flex gap-2">
+        </h3>
+        <div className="flex gap-1 md:gap-2">
           <button
+            type="button"
             onClick={handlePrevMonth}
-            className="p-2 rounded-lg bg-slate-50"
+            className="p-1.5 md:p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={18} />
           </button>
           <button
+            type="button"
             onClick={handleNextMonth}
-            className="p-2 rounded-lg bg-slate-50"
+            className="p-1.5 md:p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={18} />
           </button>
         </div>
       </div>
-      <div className="grid grid-cols-7 gap-1 mb-2 text-[10px] text-slate-300 font-black">
+      <div className="grid grid-cols-7 gap-1 mb-2">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-          <div key={d} className="text-center py-1">
+          <div
+            key={d}
+            className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase text-center py-2"
+          >
             {d}
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-1">
-        {days.map((date, i) => (
-          <div key={i} className="aspect-square">
-            {date ? (
-              <button
-                disabled={isPast(date) || isBooked(date)}
-                onClick={() =>
-                  onDateSelect(
-                    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
-                  )
-                }
-                className={`w-full h-full rounded-lg transition-all font-black text-sm ${
-                  isPast(date)
-                    ? "bg-slate-100 text-slate-300 cursor-not-allowed opacity-50"
-                    : isSelected(date)
-                      ? "bg-primary text-white shadow-md"
-                      : isBooked(date)
-                        ? "bg-rose-50 text-rose-400 cursor-not-allowed opacity-60"
-                        : "bg-slate-50 text-slate-600 hover:bg-primary/10 hover:text-primary cursor-pointer"
-                }`}
-              >
-                <span>{date.getDate()}</span>
-              </button>
-            ) : (
-              <div className="w-full h-full" />
-            )}
-          </div>
-        ))}
+      <div className="grid grid-cols-7 gap-1 md:gap-2">
+        {days.map((date, i) => {
+          const booked = isBooked(date);
+          const past = isPast(date);
+          const disabled = booked; // Admin can select past dates!
+          return (
+            <div key={i} className="aspect-square">
+              {date ? (
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() =>
+                    onDateSelect(
+                      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+                    )
+                  }
+                  className={`w-full h-full rounded-xl text-center flex items-center justify-center relative font-black text-sm transition-all ${isSelected(date) ? "bg-primary text-white shadow-lg" : booked ? "bg-rose-50 text-rose-300 cursor-not-allowed" : past ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-slate-50 text-slate-600 hover:bg-primary/10 hover:text-primary"}`}
+                >
+                  <span className="text-xs md:text-sm font-black">
+                    {date.getDate()}
+                  </span>
+                  {booked && (
+                    <span className="text-[6px] md:text-[7px] font-black uppercase text-rose-500 absolute top-0.5 md:top-1">
+                      Taken
+                    </span>
+                  )}
+                  {past && !booked && !isSelected(date) && (
+                    <span className="text-[5px] md:text-[6px] font-black uppercase text-amber-500 absolute top-0.5 md:top-1">
+                      Past
+                    </span>
+                  )}
+                  {isToday(date) && !isSelected(date) && (
+                    <div className="w-0.5 h-0.5 md:w-1 md:h-1 rounded-full absolute bottom-1.5 md:bottom-2 bg-primary" />
+                  )}
+                </button>
+              ) : (
+                <div className="w-full h-full" />
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -276,7 +306,14 @@ const Bookings = () => {
   const [createData, setCreateData] = useState({
     customer: { firstName: "", lastName: "", email: "", phone: "" },
     service: "",
-    details: { address: "", frequency: "Once", duration: 2, extras: [], Bedroom: 0, Bathroom: 0 },
+    details: {
+      address: "",
+      frequency: "Once",
+      duration: 2,
+      extras: [],
+      Bedroom: 0,
+      Bathroom: 0,
+    },
     schedule: { date: "", timeSlot: "", preferredTime: "" },
     payment: { amount: 0, currency: "GBP", status: "Pending" },
     status: "Pending",
@@ -685,10 +722,7 @@ const Bookings = () => {
         "customer.phone",
         createData.customer?.phone,
       );
-      const amountErr = validateField(
-        "payment.amount",
-        createTotal,
-      );
+      const amountErr = validateField("payment.amount", createTotal);
       const currencyErr = validateField(
         "payment.currency",
         createData.payment?.currency,
@@ -2168,11 +2202,14 @@ const Bookings = () => {
                       </div>
 
                       {/* Property Rooms */}
-                      <div className={`p-4 bg-white rounded-2xl border-2 ${
-                        formErrors["details.Bedroom"] || formErrors["details.Bathroom"]
-                          ? "border-rose-400 bg-rose-50"
-                          : "border-slate-200"
-                      }`}>
+                      <div
+                        className={`p-4 bg-white rounded-2xl border-2 ${
+                          formErrors["details.Bedroom"] ||
+                          formErrors["details.Bathroom"]
+                            ? "border-rose-400 bg-rose-50"
+                            : "border-slate-200"
+                        }`}
+                      >
                         <h5 className="font-black text-base text-primary-dark mb-4 flex items-center gap-2">
                           🛏️ Property Rooms
                           <span className="text-rose-500">*</span>
@@ -2214,10 +2251,7 @@ const Bookings = () => {
                                 <button
                                   onClick={() => {
                                     const cur = createData.details[r] || 0;
-                                    handleFieldChange(
-                                      `details.${r}`,
-                                      cur + 1,
-                                    );
+                                    handleFieldChange(`details.${r}`, cur + 1);
                                   }}
                                   className="p-1 rounded-md hover:bg-slate-100 text-slate-500 hover:text-primary transition-colors"
                                 >
@@ -2227,7 +2261,8 @@ const Bookings = () => {
                             </div>
                           ))}
                         </div>
-                        {(formErrors["details.Bedroom"] || formErrors["details.Bathroom"]) && (
+                        {(formErrors["details.Bedroom"] ||
+                          formErrors["details.Bathroom"]) && (
                           <div className="mt-4 p-3 bg-rose-100 border-l-4 border-rose-500 rounded">
                             {formErrors["details.Bedroom"] && (
                               <p className="text-rose-700 text-[10px] font-bold mb-1">
@@ -3036,7 +3071,7 @@ const Bookings = () => {
 
             {/* Action Buttons */}
             <div className="space-y-3">
-              <button
+              {/* <button
                 onClick={() => {
                   setShowSuccessModal(false);
                   setSuccessBooking(null);
@@ -3063,7 +3098,7 @@ const Bookings = () => {
                 className="w-full py-3 px-6 rounded-2xl bg-primary text-white font-black hover:bg-primary/90 transition-all"
               >
                 Close & Create New Booking
-              </button>
+              </button> */}
               <button
                 onClick={() => setShowSuccessModal(false)}
                 className="w-full py-3 px-6 rounded-2xl bg-slate-100 text-slate-700 font-black hover:bg-slate-200 transition-all"

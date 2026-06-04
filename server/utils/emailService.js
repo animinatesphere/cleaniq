@@ -66,11 +66,15 @@ const templates = {
           </div>
         </div>
 
-        <h3 style="font-size: 16px; color: #0F172A; margin-bottom: 12px;">Work Summary</h3>
+        <h3 style="font-size: 16px; color: #0F172A; margin-bottom: 12px;">Work Summary & Requirements</h3>
         <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #475569;">
           <li><strong>Frequency:</strong> ${booking.details.frequency}</li>
           <li><strong>Duration:</strong> ${booking.details.duration} Hours</li>
-          ${booking.details.extras.map((extra) => `<li style="margin-top: 4px;">${extra}</li>`).join("")}
+          ${(booking.details.extras || []).map((e) => `<li style="margin-top: 4px;"><strong>Requirement:</strong> ${typeof e === 'object' && e !== null ? `${e.name} (x${e.qty || 1})` : e}</li>`).join("")}
+          ${booking.details.Bedroom !== undefined ? `<li style="margin-top: 4px;"><strong>Bedrooms:</strong> ${booking.details.Bedroom}</li>` : ""}
+          ${booking.details.Bathroom !== undefined ? `<li style="margin-top: 4px;"><strong>Bathrooms:</strong> ${booking.details.Bathroom}</li>` : ""}
+          ${booking.details.Kitchen !== undefined ? `<li style="margin-top: 4px;"><strong>Kitchens:</strong> ${booking.details.Kitchen}</li>` : ""}
+          ${booking.details["Living Room"] !== undefined ? `<li style="margin-top: 4px;"><strong>Living Rooms:</strong> ${booking.details["Living Room"]}</li>` : ""}
         </ul>
 
         <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
@@ -227,7 +231,11 @@ const templates = {
 
         <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Requirements & Property Details</h3>
         <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
-          ${booking.details.extras.map((e) => `<li style="margin-bottom: 5px;">${e}</li>`).join("")}
+          ${(booking.details.extras || []).map((e) => `<li style="margin-bottom: 5px;">${typeof e === 'object' && e !== null ? `${e.name} (x${e.qty || 1})` : e}</li>`).join("")}
+          ${booking.details.Bedroom !== undefined ? `<li style="margin-bottom: 5px;">Bedrooms: ${booking.details.Bedroom}</li>` : ""}
+          ${booking.details.Bathroom !== undefined ? `<li style="margin-bottom: 5px;">Bathrooms: ${booking.details.Bathroom}</li>` : ""}
+          ${booking.details.Kitchen !== undefined ? `<li style="margin-bottom: 5px;">Kitchens: ${booking.details.Kitchen}</li>` : ""}
+          ${booking.details["Living Room"] !== undefined ? `<li style="margin-bottom: 5px;">Living Rooms: ${booking.details["Living Room"]}</li>` : ""}
         </ul>
 
         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #edf2f7;">
@@ -403,17 +411,40 @@ const templates = {
           </div>
         </div>
 
-        <div style="margin-top: 32px; padding: 20px; background-color: #6EE7B7; border-radius: 20px; text-align: center;">
-          <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 800; color: #0A5C43; text-transform: uppercase; letter-spacing: 1px;">Amount Due</p>
-          <p style="margin: 0; font-size: 32px; font-weight: 900; color: #0A5C43;">£${booking.payment.amount}</p>
+        <h3 style="font-size: 16px; color: #0F172A; margin-top: 32px; margin-bottom: 12px; font-weight: 800;">Requirements & Property Details:</h3>
+        <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #475569;">
+          ${(booking.details.extras || []).map((e) => `<li style="margin-top: 4px;"><strong>Requirement:</strong> ${typeof e === 'object' && e !== null ? `${e.name} (x${e.qty || 1})` : e}</li>`).join("")}
+          ${booking.details.Bedroom !== undefined ? `<li style="margin-top: 4px;"><strong>Bedrooms:</strong> ${booking.details.Bedroom}</li>` : ""}
+          ${booking.details.Bathroom !== undefined ? `<li style="margin-top: 4px;"><strong>Bathrooms:</strong> ${booking.details.Bathroom}</li>` : ""}
+          ${booking.details.Kitchen !== undefined ? `<li style="margin-top: 4px;"><strong>Kitchens:</strong> ${booking.details.Kitchen}</li>` : ""}
+          ${booking.details["Living Room"] !== undefined ? `<li style="margin-top: 4px;"><strong>Living Rooms:</strong> ${booking.details["Living Room"]}</li>` : ""}
+        </ul>
+
+        <div style="margin-top: 32px; padding: 24px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 20px; text-align: center; border: 2px solid #86efac;">
+          <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 800; color: #15803d; text-transform: uppercase; letter-spacing: 1px;">Total Amount Due:</p>
+          <p style="margin: 0; font-size: 36px; font-weight: 900; color: #15803d;">£${booking.payment.amount}</p>
         </div>
 
         <div style="text-align: center; margin-top: 40px;">
-          <a href="${checkoutLink}" style="display: inline-block; background-color: #0F172A; color: white; padding: 20px 40px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); cursor: pointer;">Pay Now Securely</a>
-          <p style="margin-top: 15px; font-size: 12px; color: #94a3b8;">🔒 Secure payment powered by Stripe</p>
+          <h3 style="font-size: 16px; color: #0F172A; margin-bottom: 20px; font-weight: 800;">Option 1: Pay Online</h3>
+          <a href="${checkoutLink}" style="display: inline-block; background-color: #0F172A; color: white; padding: 18px 40px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); cursor: pointer;">Pay Now Securely</a>
+          <p style="margin-top: 15px; font-size: 13px; color: #94a3b8; font-weight: 600;">🔒 Secure card payment powered by Stripe.</p>
         </div>
 
-        <p style="margin-top: 30px; font-size: 14px; color: #64748b; text-align: center;">Once you complete the payment, your booking status will be updated to <strong>Confirmed</strong> and you will receive a confirmation email.</p>
+        <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #e2e8f0; text-align: center;">
+          <h3 style="font-size: 16px; color: #0F172A; margin-bottom: 20px; font-weight: 800;">Option 2: Pay by Bank Transfer</h3>
+          <div style="background-color: #f8fafc; padding: 24px; border-radius: 16px; border: 1px solid #cbd5e1; display: inline-block; text-align: left;">
+            <p style="margin: 0 0 10px 0; font-size: 15px; color: #334155;"><strong>Bank:</strong> HSBC Bank</p>
+            <p style="margin: 0 0 10px 0; font-size: 15px; color: #334155;"><strong>Account Name:</strong> Cleaniq services Limited</p>
+            <p style="margin: 0 0 10px 0; font-size: 15px; color: #334155;"><strong>Sort Code:</strong> 40-11-56</p>
+            <p style="margin: 0 0 10px 0; font-size: 15px; color: #334155;"><strong>Account Number:</strong> 81106546</p>
+            <div style="margin-top: 16px; padding: 12px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 8px;">
+              <p style="margin: 0; font-size: 13px; color: #b45309;"><strong>Reference:</strong> Please use your Booking ID (<strong>${booking.bookingId}</strong>) as the payment reference.</p>
+            </div>
+          </div>
+        </div>
+
+        <p style="margin-top: 40px; font-size: 14px; color: #64748b; text-align: center; line-height: 1.6;">Once your payment is received and processed, your booking status will be officially updated to <strong>"Confirmed"</strong>, and you will receive a final confirmation email.</p>
         
         <div style="text-align: center; margin-top: 40px;">
           <a href="https://cleaniqservices.com/account/bookings" style="display: inline-block; background-color: transparent; color: #0F172A; padding: 15px 30px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 14px; border: 2px solid #0F172A;">View All Bookings</a>
@@ -487,7 +518,7 @@ const templates = {
       
       <div style="padding: 50px 45px; color: #1e293b; line-height: 1.8;">
         <h2 style="font-size: 22px; margin-top: 0; margin-bottom: 10px; color: #0F172A;">Hello ${booking.customer.firstName},</h2>
-        <p style="font-size: 15px; color: #475569; margin-bottom: 30px;">Your Cleaniq booking has been successfully created by our admin team. Your appointment is confirmed and ready to go. Here's everything you need to know:</p>
+        <p style="font-size: 15px; color: #475569; margin-bottom: 30px;">Your Cleaniq booking has been successfully created by our administrative team. We are thrilled to serve you! Please find your complete booking summary below, along with instructions for completing your payment via bank transfer. Here is everything you need to know:</p>
         
         <!-- BOOKING REFERENCE CARD -->
         <div style="background: linear-gradient(135deg, #0F172A 0%, #1e3a8a 100%); padding: 32px; border-radius: 24px; margin-bottom: 32px; color: white; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);">
@@ -585,14 +616,30 @@ const templates = {
         
         <div style="padding: 28px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 24px; border: 2px solid #86efac; margin-bottom: 32px;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #bbf7d0;">
-            <span style="font-size: 15px; color: #3f6e37; font-weight: 600;">Base Service</span>
+            <span style="font-size: 15px; color: #3f6e37; font-weight: 600;">Service Charge:</span>
             <span style="font-size: 15px; color: #3f6e37; font-weight: 700;">£${booking.payment.amount}</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 16px; color: #15803d; font-weight: 800; text-transform: uppercase;">Total Due</span>
+            <span style="font-size: 16px; color: #15803d; font-weight: 800; text-transform: uppercase;">Total Due:</span>
             <span style="font-size: 28px; color: #15803d; font-weight: 900;">£${booking.payment.amount}</span>
           </div>
-          <p style="margin: 15px 0 0 0; font-size: 12px; color: #22863a; font-style: italic;">Status: <strong>Booking Created</strong></p>
+          <p style="margin: 15px 0 0 0; font-size: 12px; color: #22863a; font-style: italic;">Status: <strong>Awaiting Payment</strong></p>
+        </div>
+
+        <!-- BANK TRANSFER DETAILS -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px;">🏦 How to Pay (Bank Transfer)</h3>
+        
+        <div style="padding: 24px; background-color: #f8fafc; border-radius: 20px; border: 1px solid #cbd5e1; margin-bottom: 32px;">
+          <p style="margin: 0 0 15px 0; font-size: 14px; color: #334155; line-height: 1.6;">Please complete your payment via bank transfer using the details below. Ensure you use your <strong>Booking Reference</strong> as the payment reference so we can locate your transfer quickly.</p>
+          <div style="background-color: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <p style="margin: 0 0 10px 0; font-size: 15px; color: #0F172A;"><strong>Bank Name:</strong> HSBC Bank</p>
+            <p style="margin: 0 0 10px 0; font-size: 15px; color: #0F172A;"><strong>Account Name:</strong> Cleaniq services Limited</p>
+            <p style="margin: 0 0 10px 0; font-size: 15px; color: #0F172A;"><strong>Sort Code:</strong> 40-11-56</p>
+            <p style="margin: 0; font-size: 15px; color: #0F172A;"><strong>Account Number:</strong> 81106546</p>
+          </div>
+          <div style="margin-top: 16px; padding: 12px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 8px;">
+            <p style="margin: 0; font-size: 13px; color: #b45309;"><strong>Reference Code:</strong> ${booking.bookingId}</p>
+          </div>
         </div>
 
         <!-- NOTES SECTION -->
@@ -612,10 +659,10 @@ const templates = {
         <div style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); padding: 28px; border-radius: 20px; margin-bottom: 32px;">
           <h3 style="margin-top: 0; margin-bottom: 18px; font-size: 15px; color: #0F172A; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">✓ What Happens Next</h3>
           <ol style="margin: 0; padding-left: 20px;">
-            <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Confirmation:</strong> You will receive a second confirmation email with final details.</li>
+            <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Payment:</strong> Please complete your bank transfer using the details provided above.</li>
+            <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Confirmation:</strong> Once payment is verified, your booking will be officially confirmed!</li>
             <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Assignment:</strong> Our team will assign a professional cleaner to your job.</li>
-            <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Reminder:</strong> 24 hours before your appointment, you'll get a final reminder.</li>
-            <li style="font-size: 14px; color: #374151; line-height: 1.6;"><strong>Completion:</strong> After the service, you'll receive a receipt and can rate your experience.</li>
+            <li style="font-size: 14px; color: #374151; line-height: 1.6;"><strong>Reminder:</strong> 24 hours before your appointment, you will receive a final reminder.</li>
           </ol>
         </div>
 
