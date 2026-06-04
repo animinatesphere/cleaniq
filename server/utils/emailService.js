@@ -70,7 +70,7 @@ const templates = {
         <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #475569;">
           <li><strong>Frequency:</strong> ${booking.details.frequency}</li>
           <li><strong>Duration:</strong> ${booking.details.duration} Hours</li>
-          ${(booking.details.extras || []).map((e) => `<li style="margin-top: 4px;"><strong>Requirement:</strong> ${typeof e === 'object' && e !== null ? `${e.name} (x${e.qty || 1})` : e}</li>`).join("")}
+          ${(booking.details.extras || []).map((e) => `<li style="margin-top: 4px;"><strong>Requirement:</strong> ${typeof e === "object" && e !== null ? `${e.name} (x${e.qty || 1})` : e}</li>`).join("")}
           ${booking.details.Bedroom !== undefined ? `<li style="margin-top: 4px;"><strong>Bedrooms:</strong> ${booking.details.Bedroom}</li>` : ""}
           ${booking.details.Bathroom !== undefined ? `<li style="margin-top: 4px;"><strong>Bathrooms:</strong> ${booking.details.Bathroom}</li>` : ""}
           ${booking.details.Kitchen !== undefined ? `<li style="margin-top: 4px;"><strong>Kitchens:</strong> ${booking.details.Kitchen}</li>` : ""}
@@ -231,7 +231,7 @@ const templates = {
 
         <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Requirements & Property Details</h3>
         <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
-          ${(booking.details.extras || []).map((e) => `<li style="margin-bottom: 5px;">${typeof e === 'object' && e !== null ? `${e.name} (x${e.qty || 1})` : e}</li>`).join("")}
+          ${(booking.details.extras || []).map((e) => `<li style="margin-bottom: 5px;">${typeof e === "object" && e !== null ? `${e.name} (x${e.qty || 1})` : e}</li>`).join("")}
           ${booking.details.Bedroom !== undefined ? `<li style="margin-bottom: 5px;">Bedrooms: ${booking.details.Bedroom}</li>` : ""}
           ${booking.details.Bathroom !== undefined ? `<li style="margin-bottom: 5px;">Bathrooms: ${booking.details.Bathroom}</li>` : ""}
           ${booking.details.Kitchen !== undefined ? `<li style="margin-bottom: 5px;">Kitchens: ${booking.details.Kitchen}</li>` : ""}
@@ -413,7 +413,7 @@ const templates = {
 
         <h3 style="font-size: 16px; color: #0F172A; margin-top: 32px; margin-bottom: 12px; font-weight: 800;">Requirements & Property Details:</h3>
         <ul style="padding-left: 20px; margin: 0; font-size: 14px; color: #475569;">
-          ${(booking.details.extras || []).map((e) => `<li style="margin-top: 4px;"><strong>Requirement:</strong> ${typeof e === 'object' && e !== null ? `${e.name} (x${e.qty || 1})` : e}</li>`).join("")}
+          ${(booking.details.extras || []).map((e) => `<li style="margin-top: 4px;"><strong>Requirement:</strong> ${typeof e === "object" && e !== null ? `${e.name} (x${e.qty || 1})` : e}</li>`).join("")}
           ${booking.details.Bedroom !== undefined ? `<li style="margin-top: 4px;"><strong>Bedrooms:</strong> ${booking.details.Bedroom}</li>` : ""}
           ${booking.details.Bathroom !== undefined ? `<li style="margin-top: 4px;"><strong>Bathrooms:</strong> ${booking.details.Bathroom}</li>` : ""}
           ${booking.details.Kitchen !== undefined ? `<li style="margin-top: 4px;"><strong>Kitchens:</strong> ${booking.details.Kitchen}</li>` : ""}
@@ -584,7 +584,7 @@ const templates = {
                 (extra, idx) => `
               <li style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-size: 15px; color: #334155; display: flex; align-items: center;">
                 <span style="display: inline-block; width: 6px; height: 6px; background-color: #6EE7B7; border-radius: 50%; margin-right: 12px;"></span>
-                ${typeof extra === 'object' && extra !== null ? `${extra.name} (x${extra.qty || 1})` : extra}
+                ${typeof extra === "object" && extra !== null ? `${extra.name} (x${extra.qty || 1})` : extra}
               </li>
             `,
               )
@@ -597,7 +597,9 @@ const templates = {
 
         <!-- PROPERTY DETAILS -->
         ${
-          (booking.property && Object.keys(booking.property).length > 0) || (booking.details.Bedroom !== undefined || booking.details.Bathroom !== undefined)
+          (booking.property && Object.keys(booking.property).length > 0) ||
+          booking.details.Bedroom !== undefined ||
+          booking.details.Bathroom !== undefined
             ? `
         <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px;">🏠 Property Information</h3>
         
@@ -633,7 +635,7 @@ const templates = {
           <p style="margin: 0 0 15px 0; font-size: 14px; color: #334155; line-height: 1.6;">Please complete your payment via bank transfer using the details below. Ensure you use your <strong>Booking Reference:</strong> as the payment reference so we can locate your transfer quickly.</p>
           <div style="background-color: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
             <p style="margin: 0 0 10px 0; font-size: 15px; color: #0F172A;"><strong>Bank Name:</strong> HSBC Bank</p>
-            <p style="margin: 0 0 10px 0; font-size: 15px; color: #0F172A;"><strong>Account Name:</strong> Cleaniq services Limited</p>
+            <p style="margin: 0 0 10px 0; font-size: 15px; color: #0F172A;"><strong>Account Name:</strong> Cleaniq Services Limited</p>
             <p style="margin: 0 0 10px 0; font-size: 15px; color: #0F172A;"><strong>Sort Code:</strong> 40-11-56</p>
             <p style="margin: 0; font-size: 15px; color: #0F172A;"><strong>Account Number:</strong> 81106546</p>
           </div>
