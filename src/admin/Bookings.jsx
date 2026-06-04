@@ -276,7 +276,7 @@ const Bookings = () => {
   const [createData, setCreateData] = useState({
     customer: { firstName: "", lastName: "", email: "", phone: "" },
     service: "",
-    details: { address: "", frequency: "Once", duration: 2, extras: [] },
+    details: { address: "", frequency: "Once", duration: 2, extras: [], Bedroom: 0, Bathroom: 0 },
     schedule: { date: "", timeSlot: "", preferredTime: "" },
     payment: { amount: 0, currency: "GBP", status: "Pending" },
     status: "Pending",
@@ -687,7 +687,7 @@ const Bookings = () => {
       );
       const amountErr = validateField(
         "payment.amount",
-        createData.payment?.amount,
+        createTotal,
       );
       const currencyErr = validateField(
         "payment.currency",

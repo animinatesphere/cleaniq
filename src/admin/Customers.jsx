@@ -174,7 +174,7 @@ const Customers = () => {
     if (selectedCustomers.size === filtered.length) {
       setSelectedCustomers(new Set());
     } else {
-      setSelectedCustomers(new Set(filtered.map((c) => c._id)));
+      setSelectedCustomers(new Set(filtered.map((c) => c.email)));
     }
   };
 
@@ -353,8 +353,8 @@ const Customers = () => {
                   <td className="px-4 py-6 w-12">
                     <input
                       type="checkbox"
-                      checked={selectedCustomers.has(c._id)}
-                      onChange={() => toggleCustomerSelection(c._id)}
+                      checked={selectedCustomers.has(c.email)}
+                      onChange={() => toggleCustomerSelection(c.email)}
                       className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
                     />
                   </td>
@@ -406,7 +406,7 @@ const Customers = () => {
                       <Eye size={18} />
                     </button>
                     <button
-                      onClick={() => handleDeleteCustomer(c._id)}
+                      onClick={() => handleDeleteCustomer(c.email)}
                       className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all shadow-sm"
                       title="Delete customer"
                     >
@@ -657,7 +657,7 @@ const Customers = () => {
                     <Edit3 size={18} /> Modify Profile
                   </button>
                   <button
-                    onClick={() => handleDeleteCustomer(selected._id)}
+                    onClick={() => handleDeleteCustomer(selected.email)}
                     className="flex-1 py-5 rounded-3xl bg-rose-50 text-rose-500 text-xs font-black uppercase tracking-widest border border-rose-200 hover:bg-rose-100 transition-all flex items-center justify-center gap-2"
                   >
                     <Trash2 size={18} /> Delete Customer

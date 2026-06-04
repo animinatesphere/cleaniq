@@ -89,28 +89,15 @@ router.post("/", async (req, res) => {
         );
       }
     } else {
-      // Send TWO Confirmation Emails to Customer (Enhanced booking details)
-      // Email 1: Initial confirmation with all details
+      // Send Confirmation Email to Customer (Enhanced booking details)
       await sendEmail({
         to: newBooking.customer.email,
         subject: `✓ Your Cleaniq Booking is Created - ${newBooking.bookingId}`,
         html: templates.adminBookingCreatedEmail1(newBooking),
       });
       console.log(
-        `✅ Email 1 sent to ${newBooking.customer.email} - Initial booking confirmation`,
+        `✅ Email sent to ${newBooking.customer.email} - Initial booking confirmation`,
       );
-
-      // Email 2: Sent 2 seconds later with ready to go confirmation
-      setTimeout(async () => {
-        await sendEmail({
-          to: newBooking.customer.email,
-          subject: `✓ Your Appointment is Ready! - ${newBooking.bookingId}`,
-          html: templates.adminBookingCreatedEmail2(newBooking),
-        });
-        console.log(
-          `✅ Email 2 sent to ${newBooking.customer.email} - Appointment ready confirmation`,
-        );
-      }, 2000);
     }
 
     // Send Alert Email to Admin

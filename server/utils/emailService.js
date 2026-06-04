@@ -553,7 +553,7 @@ const templates = {
                 (extra, idx) => `
               <li style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-size: 15px; color: #334155; display: flex; align-items: center;">
                 <span style="display: inline-block; width: 6px; height: 6px; background-color: #6EE7B7; border-radius: 50%; margin-right: 12px;"></span>
-                ${extra}
+                ${typeof extra === 'object' && extra !== null ? `${extra.name} (x${extra.qty || 1})` : extra}
               </li>
             `,
               )
@@ -566,15 +566,15 @@ const templates = {
 
         <!-- PROPERTY DETAILS -->
         ${
-          booking.property
+          (booking.property && Object.keys(booking.property).length > 0) || (booking.details.Bedroom !== undefined || booking.details.Bathroom !== undefined)
             ? `
         <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px;">🏠 Property Information</h3>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 32px;">
-          ${booking.property.bedrooms ? `<div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;"><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">Bedrooms</p><p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #0F172A;">${booking.property.bedrooms}</p></div>` : ""}
-          ${booking.property.bathrooms ? `<div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;"><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">Bathrooms</p><p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #0F172A;">${booking.property.bathrooms}</p></div>` : ""}
-          ${booking.property.kitchens ? `<div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;"><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">Kitchens</p><p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #0F172A;">${booking.property.kitchens}</p></div>` : ""}
-          ${booking.property.livingRooms ? `<div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;"><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">Living Rooms</p><p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #0F172A;">${booking.property.livingRooms}</p></div>` : ""}
+          ${booking.property?.bedrooms || booking.details.Bedroom !== undefined ? `<div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;"><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">Bedrooms</p><p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #0F172A;">${booking.property?.bedrooms || booking.details.Bedroom}</p></div>` : ""}
+          ${booking.property?.bathrooms || booking.details.Bathroom !== undefined ? `<div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;"><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">Bathrooms</p><p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #0F172A;">${booking.property?.bathrooms || booking.details.Bathroom}</p></div>` : ""}
+          ${booking.property?.kitchens || booking.details.Kitchen !== undefined ? `<div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;"><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">Kitchens</p><p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #0F172A;">${booking.property?.kitchens || booking.details.Kitchen}</p></div>` : ""}
+          ${booking.property?.livingRooms || booking.details["Living Room"] !== undefined ? `<div style="padding: 18px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;"><p style="margin: 0; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase;">Living Rooms</p><p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #0F172A;">${booking.property?.livingRooms || booking.details["Living Room"]}</p></div>` : ""}
         </div>
         `
             : ""

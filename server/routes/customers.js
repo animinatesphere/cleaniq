@@ -127,4 +127,24 @@ router.get("/:email/bookings", async (req, res) => {
   }
 });
 
+// DELETE a customer and all their bookings
+router.delete("/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+    
+    // Delete registered customer account if it exists
+    await Customer.findOneAndDelete({ email });
+    
+    // Delete all bookings associated with this email
+    const bookingResult = await Booking.deleteMany({ "customer.email": email });
+    
+    res.json({ 
+      message: "Customer and associated bookings deleted successfully",
+      deletedBookingsCount: bookingResult.deletedCount 
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

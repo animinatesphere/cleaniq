@@ -248,6 +248,7 @@ const Booking = () => {
 
   const [totalPrice, setTotalPrice] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
   const [dynamicRates, setDynamicRates] = useState({});
   const [servicesList, setServicesList] = useState([]);
   const [, setLoadingRates] = useState(true);
@@ -1400,19 +1401,27 @@ const Booking = () => {
                                   Please log in or create a free account to
                                   complete payment and secure your booking.
                                 </p>
-                                <div className="flex gap-3 justify-center">
-                                  <Link
-                                    to="/account/login?returnTo=/booking"
-                                    className="btn-primary py-3 px-6 font-black"
+                                <div className="flex flex-col gap-3">
+                                  <div className="flex gap-3 justify-center">
+                                    <Link
+                                      to="/account/login?returnTo=/booking"
+                                      className="btn-primary py-3 px-6 font-black"
+                                    >
+                                      Log in
+                                    </Link>
+                                    <Link
+                                      to="/account/signup?returnTo=/booking"
+                                      className="py-3 px-6 bg-slate-50 rounded-2xl font-black text-primary border border-slate-200"
+                                    >
+                                      Sign up
+                                    </Link>
+                                  </div>
+                                  <button
+                                    onClick={() => setGuestCheckoutInModal(true)}
+                                    className="mt-2 text-xs font-bold text-slate-400 hover:text-slate-600 underline"
                                   >
-                                    Log in
-                                  </Link>
-                                  <Link
-                                    to="/account/signup?returnTo=/booking"
-                                    className="py-3 px-6 bg-slate-50 rounded-2xl font-black text-primary"
-                                  >
-                                    Sign up
-                                  </Link>
+                                    Continue as Guest
+                                  </button>
                                 </div>
                               </div>
                             ) : (
