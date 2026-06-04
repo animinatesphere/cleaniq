@@ -47,23 +47,23 @@ const templates = {
         <p>Your cleaning appointment is officially confirmed. Here are your booking details:</p>
         
         <div style="background-color: #f8fafc; padding: 24px; border-radius: 20px; margin: 24px 0; border: 1px solid #f1f5f9;">
-          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Booking Reference</p>
+          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Booking Reference:</p>
           <p style="margin: 0 0 20px 0; font-size: 20px; font-weight: 900; color: #0F172A;">${booking.bookingId}</p>
           
-          <div style="display: grid; gap: 12px;">
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: bold;">SERVICE</p>
-              <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #0F172A;">${booking.service}</p>
-            </div>
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: bold;">DATE & TIME</p>
-              <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()} @ ${booking.schedule.timeSlot} ${booking.schedule.preferredTime ? "(" + booking.schedule.preferredTime + ")" : ""}</p>
-            </div>
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7;">
-              <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: bold;">SERVICE ADDRESS</p>
-              <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}</p>
-            </div>
-          </div>
+          <table width="100%" cellpadding="12" cellspacing="0" style="background: white; border-radius: 12px; border: 1px solid #edf2f7; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Service:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.service}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Date & Time:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()} @ ${booking.schedule.timeSlot} ${booking.schedule.preferredTime ? "(" + booking.schedule.preferredTime + ")" : ""}</td>
+            </tr>
+            <tr>
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Address:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}</td>
+            </tr>
+          </table>
         </div>
 
         <h3 style="font-size: 16px; color: #0F172A; margin-bottom: 12px;">Work Summary & Requirements</h3>
@@ -109,20 +109,20 @@ const templates = {
           <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Invoice Reference</p>
           <p style="margin: 0 0 20px 0; font-size: 20px; font-weight: 900; color: #0F172A;">INV-${booking.bookingId}</p>
           
-          <div style="display: grid; gap: 12px;">
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Service</span>
-              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.service}</span>
-            </div>
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Date Completed</span>
-              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date().toDateString()}</span>
-            </div>
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Duration</span>
-              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.duration} Hours</span>
-            </div>
-          </div>
+          <table width="100%" cellpadding="12" cellspacing="0" style="background: white; border-radius: 12px; border: 1px solid #edf2f7; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Service:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.service}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Date Completed:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date().toDateString()}</td>
+            </tr>
+            <tr>
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Duration:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.duration} Hours</td>
+            </tr>
+          </table>
         </div>
 
         <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
@@ -256,7 +256,7 @@ const templates = {
         <p style="font-size: 15px; color: #334155; font-weight: 500;">${details}</p>
         
         <div style="background-color: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #edf2f7; margin-top: 20px;">
-          <p style="margin: 5px 0; font-size: 13px;"><strong>Booking Reference:</strong> ${booking.bookingId}</p>
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Booking Reference::</strong> ${booking.bookingId}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Service:</strong> ${booking.service}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Phone:</strong> ${booking.customer.phone}</p>
@@ -388,27 +388,27 @@ const templates = {
         <p>Your cleaning booking has been created! To confirm your appointment, please complete the payment using the button below.</p>
         
         <div style="background-color: #f8fafc; padding: 24px; border-radius: 20px; margin: 24px 0; border: 1px solid #f1f5f9;">
-          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Booking Reference</p>
+          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Booking Reference:</p>
           <p style="margin: 8px 0 20px 0; font-size: 20px; font-weight: 900; color: #0F172A;">${booking.bookingId}</p>
           
-          <div style="display: grid; gap: 12px;">
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Service</span>
-              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.service}</span>
-            </div>
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Date</span>
-              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()}</span>
-            </div>
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Time</span>
-              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.schedule.timeSlot}</span>
-            </div>
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Duration</span>
-              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.duration} Hours</span>
-            </div>
-          </div>
+          <table width="100%" cellpadding="12" cellspacing="0" style="background: white; border-radius: 12px; border: 1px solid #edf2f7; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Service:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.service}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Date:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Time:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.schedule.timeSlot}</td>
+            </tr>
+            <tr>
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Duration:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.duration} Hours</td>
+            </tr>
+          </table>
         </div>
 
         <h3 style="font-size: 16px; color: #0F172A; margin-top: 32px; margin-bottom: 12px; font-weight: 800;">Requirements & Property Details:</h3>
@@ -468,27 +468,27 @@ const templates = {
         <p>Excellent! Your payment has been successfully processed. Your cleaning booking is now confirmed and scheduled.</p>
         
         <div style="background-color: #f8fafc; padding: 24px; border-radius: 20px; margin: 24px 0; border: 1px solid #f1f5f9;">
-          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Booking Reference</p>
+          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Booking Reference:</p>
           <p style="margin: 8px 0 20px 0; font-size: 20px; font-weight: 900; color: #0A5C43;">${booking.bookingId}</p>
           
-          <div style="display: grid; gap: 12px;">
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Service</span>
-              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.service}</span>
-            </div>
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Date</span>
-              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()}</span>
-            </div>
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Time</span>
-              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.schedule.timeSlot}</span>
-            </div>
-            <div style="padding: 12px; background: white; border-radius: 12px; border: 1px solid #edf2f7; display: flex; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: bold; color: #64748b;">Location</span>
-              <span style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}</span>
-            </div>
-          </div>
+          <table width="100%" cellpadding="12" cellspacing="0" style="background: white; border-radius: 12px; border: 1px solid #edf2f7; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Service:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.service}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Date:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date(booking.schedule.date).toDateString()}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Time:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.schedule.timeSlot}</td>
+            </tr>
+            <tr>
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Location:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}</td>
+            </tr>
+          </table>
         </div>
 
         <div style="margin-top: 32px; padding: 20px; background-color: #ECFDF5; border-radius: 20px; text-align: center; border: 1px solid #BBEDD7;">
@@ -522,7 +522,7 @@ const templates = {
         
         <!-- BOOKING REFERENCE CARD -->
         <div style="background: linear-gradient(135deg, #0F172A 0%, #1e3a8a 100%); padding: 32px; border-radius: 24px; margin-bottom: 32px; color: white; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);">
-          <p style="margin: 0; font-size: 13px; font-weight: 800; color: #e0f2fe; text-transform: uppercase; letter-spacing: 2px;">Your Booking Reference</p>
+          <p style="margin: 0; font-size: 13px; font-weight: 800; color: #e0f2fe; text-transform: uppercase; letter-spacing: 2px;">Your Booking Reference:</p>
           <p style="margin: 12px 0 0 0; font-size: 28px; font-weight: 900; letter-spacing: 1px;">${booking.bookingId}</p>
         </div>
 
@@ -630,7 +630,7 @@ const templates = {
         <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px;">🏦 How to Pay (Bank Transfer)</h3>
         
         <div style="padding: 24px; background-color: #f8fafc; border-radius: 20px; border: 1px solid #cbd5e1; margin-bottom: 32px;">
-          <p style="margin: 0 0 15px 0; font-size: 14px; color: #334155; line-height: 1.6;">Please complete your payment via bank transfer using the details below. Ensure you use your <strong>Booking Reference</strong> as the payment reference so we can locate your transfer quickly.</p>
+          <p style="margin: 0 0 15px 0; font-size: 14px; color: #334155; line-height: 1.6;">Please complete your payment via bank transfer using the details below. Ensure you use your <strong>Booking Reference:</strong> as the payment reference so we can locate your transfer quickly.</p>
           <div style="background-color: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
             <p style="margin: 0 0 10px 0; font-size: 15px; color: #0F172A;"><strong>Bank Name:</strong> HSBC Bank</p>
             <p style="margin: 0 0 10px 0; font-size: 15px; color: #0F172A;"><strong>Account Name:</strong> Cleaniq services Limited</p>
@@ -835,7 +835,7 @@ const templates = {
         
         <div style="display: flex; justify-content: space-between; margin: 20px 0; padding-bottom: 15px; border-bottom: 1px solid #edf2f7;">
           <div>
-            <p style="margin: 0; font-size: 10px; color: #94a3b8; font-weight: 800; text-transform: uppercase;">Booking Reference</p>
+            <p style="margin: 0; font-size: 10px; color: #94a3b8; font-weight: 800; text-transform: uppercase;">Booking Reference:</p>
             <p style="margin: 0; font-size: 16px; font-weight: 800; color: #0F172A;">${booking.bookingId}</p>
           </div>
           <div style="text-align: right;">

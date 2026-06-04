@@ -729,6 +729,7 @@ const Booking = () => {
           content={"Book Cleaning — Cleaniq Services"}
         />
       </Helmet>
+
       {isSubmitting && <LoadingOverlay message="Confirming..." />}
       <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12">
         {/* Progress Bar */}
@@ -1251,37 +1252,57 @@ const Booking = () => {
                           />
                           {formData.date && (
                             <div className="grid grid-cols-3 gap-3">
-                              {[
-                                "Morning (8am-12pm)",
-                                "Afternoon (12pm-4pm)",
-                                "Evening (4pm-8pm)",
-                              ].map((slot) => {
-                                const isSlotBooked =
-                                  bookedSlotsByDate[formData.date]?.includes(
-                                    slot,
-                                  );
-                                return (
-                                  <button
-                                    key={slot}
-                                    disabled={isSlotBooked}
-                                    onClick={() =>
-                                      setFormData({
-                                        ...formData,
-                                        timeSlot: slot,
-                                      })
+                              {(() => {
+                                const allSlots = [
+                                  { label: "Morning (8am-12pm)", limit: 12 },
+                                  { label: "Afternoon (12pm-4pm)", limit: 16 },
+                                  { label: "Evening (4pm-8pm)", limit: 20 },
+                                ];
+                                
+                                let availableSlots = allSlots;
+                                if (formData.date) {
+                                  const selectedDate = new Date(formData.date);
+                                  const today = new Date();
+                                  if (
+                                    selectedDate.getDate() === today.getDate() &&
+                                    selectedDate.getMonth() === today.getMonth() &&
+                                    selectedDate.getFullYear() === today.getFullYear()
+                                  ) {
+                                    const currentHour = today.getHours();
+                                    availableSlots = allSlots.filter(s => currentHour < s.limit);
+                                    if (availableSlots.length === 0) {
+                                      availableSlots = [allSlots[2]]; // Fallback to Evening
                                     }
-                                    className={`p-5 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${
-                                      formData.timeSlot === slot
-                                        ? "border-primary bg-primary text-white shadow-md"
-                                        : isSlotBooked
-                                          ? "border-rose-100 bg-rose-50 text-rose-300 cursor-not-allowed"
-                                          : "border-slate-100 bg-white text-slate-400 hover:border-primary/30"
-                                    }`}
-                                  >
-                                    {slot} {isSlotBooked && "(Booked)"}
-                                  </button>
-                                );
-                              })}
+                                  }
+                                }
+
+                                return availableSlots.map((s) => {
+                                  const slot = s.label;
+                                  const isSlotBooked =
+                                    bookedSlotsByDate[formData.date]?.includes(slot);
+                                  return (
+                                    <button
+                                      key={slot}
+                                      disabled={isSlotBooked}
+                                      onClick={() =>
+                                        setFormData({
+                                          ...formData,
+                                          timeSlot: slot,
+                                        })
+                                      }
+                                      className={`p-5 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${
+                                        formData.timeSlot === slot
+                                          ? "border-primary bg-primary text-white shadow-md"
+                                          : isSlotBooked
+                                            ? "border-rose-100 bg-rose-50 text-rose-300 cursor-not-allowed"
+                                            : "border-slate-100 bg-white text-slate-400 hover:border-primary/30"
+                                      }`}
+                                    >
+                                      {slot} {isSlotBooked && "(Booked)"}
+                                    </button>
+                                  );
+                                });
+                              })()}
                             </div>
                           )}
                           {formData.timeSlot && (

@@ -2472,15 +2472,38 @@ const Bookings = () => {
                                 }`}
                               >
                                 <option value="">Select a time slot</option>
-                                <option value="Morning">
-                                  Morning (8am-12pm)
-                                </option>
-                                <option value="Afternoon">
-                                  Afternoon (12pm-4pm)
-                                </option>
-                                <option value="Evening">
-                                  Evening (4pm-8pm)
-                                </option>
+                                {(() => {
+                                  const slots = [
+                                    { value: "Morning", label: "Morning (8am-12pm)", limit: 12 },
+                                    { value: "Afternoon", label: "Afternoon (12pm-4pm)", limit: 16 },
+                                    { value: "Evening", label: "Evening (4pm-8pm)", limit: 20 },
+                                  ];
+                                  
+                                  const selectedDateStr = createData.schedule.date;
+                                  let availableSlots = slots;
+                                  
+                                  if (selectedDateStr) {
+                                    const selectedDate = new Date(selectedDateStr);
+                                    const today = new Date();
+                                    if (
+                                      selectedDate.getDate() === today.getDate() &&
+                                      selectedDate.getMonth() === today.getMonth() &&
+                                      selectedDate.getFullYear() === today.getFullYear()
+                                    ) {
+                                      const currentHour = today.getHours();
+                                      availableSlots = slots.filter(slot => currentHour < slot.limit);
+                                      if (availableSlots.length === 0) {
+                                        availableSlots = [slots[2]]; // Fallback to Evening
+                                      }
+                                    }
+                                  }
+                                  
+                                  return availableSlots.map(slot => (
+                                    <option key={slot.value} value={slot.value}>
+                                      {slot.label}
+                                    </option>
+                                  ));
+                                })()}
                               </select>
                               {(formErrors["schedule.timeSlot"] ||
                                 fieldTouched["schedule.timeSlot"]) &&
