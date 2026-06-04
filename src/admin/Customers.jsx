@@ -12,7 +12,6 @@ import {
   Eye,
   CheckCircle2,
   XCircle,
-  Trash2,
   AlertTriangle,
 } from "lucide-react";
 
@@ -144,13 +143,16 @@ const Customers = () => {
         ids.map((customerId) =>
           fetch(`${import.meta.env.VITE_API_URL}/customers/${customerId}`, {
             method: "DELETE",
-          })
-        )
+          }),
+        ),
       );
       fetchCustomers();
       setSelectedCustomers(new Set());
       setShowBulkDeleteModal(false);
-      setStatusMessage({ type: "success", text: `${ids.length} client(s) deleted successfully` });
+      setStatusMessage({
+        type: "success",
+        text: `${ids.length} client(s) deleted successfully`,
+      });
     } catch (error) {
       console.error("Error deleting customers:", error);
       setStatusMessage({ type: "error", text: "Failed to delete clients" });
@@ -288,7 +290,7 @@ const Customers = () => {
           {selectedCustomers.size > 0 && (
             <button
               onClick={() => setShowBulkDeleteModal(true)}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:shadow-lg text-white font-black transition-all flex items-center gap-2 text-sm whitespace-nowrap"
+              className="px-4 py-2 rounded-xl bg-linear-to-r from-rose-500 to-red-600 hover:shadow-lg text-white font-black transition-all flex items-center gap-2 text-sm whitespace-nowrap"
             >
               Delete ({selectedCustomers.size})
             </button>
@@ -302,7 +304,10 @@ const Customers = () => {
                 <th className="px-4 py-5 w-12">
                   <input
                     type="checkbox"
-                    checked={selectedCustomers.size === filtered.length && filtered.length > 0}
+                    checked={
+                      selectedCustomers.size === filtered.length &&
+                      filtered.length > 0
+                    }
                     onChange={toggleSelectAllCustomers}
                     className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
                   />
@@ -319,7 +324,9 @@ const Customers = () => {
                 <tr
                   key={c.email}
                   className={`transition-colors ${
-                    selectedCustomers.has(c._id) ? "bg-blue-50" : "hover:bg-slate-50/50"
+                    selectedCustomers.has(c._id)
+                      ? "bg-blue-50"
+                      : "hover:bg-slate-50/50"
                   } group`}
                 >
                   <td className="px-4 py-6 w-12">
@@ -364,8 +371,7 @@ const Customers = () => {
                     </div>
                   </td>
                   <td className="px-4 py-6 font-black text-primary-dark">
-                    {c.region === "UK" ? "£" : "₦"}
-                    {c.totalSpent?.toLocaleString()}
+                    £{c.totalSpent?.toLocaleString()}
                   </td>
                   <td className="px-8 py-6 text-right">
                     <button
@@ -538,8 +544,7 @@ const Customers = () => {
                         Total Spent
                       </p>
                       <p className="text-2xl font-black text-emerald-600">
-                        {selected.region === "UK" ? "£" : "₦"}
-                        {selected.totalSpent?.toLocaleString() || "0"}
+                        £{selected.totalSpent?.toLocaleString() || "0"}
                       </p>
                     </div>
                   </div>
@@ -631,22 +636,32 @@ const Customers = () => {
       {/* Bulk Delete Modal */}
       {showBulkDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-primary-dark/60 backdrop-blur-sm" onClick={() => setShowBulkDeleteModal(false)}></div>
+          <div
+            className="absolute inset-0 bg-primary-dark/60 backdrop-blur-sm"
+            onClick={() => setShowBulkDeleteModal(false)}
+          ></div>
           <div className="relative bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-10 w-full max-w-md shadow-2xl border-4 border-white animate-in zoom-in-95 duration-200 text-center">
-            <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6"><AlertTriangle size={40}/></div>
-            <h3 className="text-2xl font-black text-primary-dark tracking-tight mb-2">Delete {selectedCustomers.size} Client(s)?</h3>
-            <p className="text-slate-500 font-medium text-sm mb-8">This action cannot be undone. The selected clients will be permanently removed from your database.</p>
-            
+            <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <AlertTriangle size={40} />
+            </div>
+            <h3 className="text-2xl font-black text-primary-dark tracking-tight mb-2">
+              Delete {selectedCustomers.size} Client(s)?
+            </h3>
+            <p className="text-slate-500 font-medium text-sm mb-8">
+              This action cannot be undone. The selected clients will be
+              permanently removed from your database.
+            </p>
+
             <div className="flex gap-4">
-              <button 
-                onClick={() => setShowBulkDeleteModal(false)} 
+              <button
+                onClick={() => setShowBulkDeleteModal(false)}
                 className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
               >
                 Cancel
               </button>
-              <button 
-                onClick={handleBulkDelete} 
-                className="flex-1 py-3 bg-gradient-to-r from-rose-500 to-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20 hover:scale-[1.02] transition-all"
+              <button
+                onClick={handleBulkDelete}
+                className="flex-1 py-3 bg-linear-to-r from-rose-500 to-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20 hover:scale-[1.02] transition-all"
               >
                 Delete All
               </button>
@@ -654,10 +669,8 @@ const Customers = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
 
 export default Customers;
-

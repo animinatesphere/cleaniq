@@ -596,8 +596,7 @@ const Bookings = () => {
     }
     if (fieldPath === "payment.currency") {
       if (!value) return "Currency must be selected";
-      if (value !== "GBP")
-        return "Only GBP (Pounds) is accepted";
+      if (value !== "GBP") return "Only GBP (Pounds) is accepted";
       return "";
     }
 

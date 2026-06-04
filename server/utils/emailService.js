@@ -76,7 +76,7 @@ const templates = {
         <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
           <div>
             <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: bold;">TOTAL PAID</p>
-            <p style="margin: 0; font-size: 24px; font-weight: 900; color: #0F172A;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
+            <p style="margin: 0; font-size: 24px; font-weight: 900; color: #0F172A;">£${booking.payment.amount}</p>
           </div>
         </div>
 
@@ -124,7 +124,7 @@ const templates = {
         <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
           <div>
             <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: bold;">TOTAL CHARGED</p>
-            <p style="margin: 0; font-size: 24px; font-weight: 900; color: #0F172A;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
+            <p style="margin: 0; font-size: 24px; font-weight: 900; color: #0F172A;">£${booking.payment.amount}</p>
           </div>
           <div style="background-color: #ecfdf5; color: #059669; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; text-transform: uppercase;">
             Paid
@@ -208,7 +208,7 @@ const templates = {
           </div>
           <div style="text-align: right;">
             <p style="margin: 0; font-size: 10px; color: #94a3b8; font-weight: 800; text-transform: uppercase;">Amount</p>
-            <p style="margin: 0; font-size: 16px; font-weight: 800; color: #0F172A;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
+            <p style="margin: 0; font-size: 16px; font-weight: 800; color: #0F172A;">£${booking.payment.amount}</p>
           </div>
         </div>
 
@@ -405,7 +405,7 @@ const templates = {
 
         <div style="margin-top: 32px; padding: 20px; background-color: #6EE7B7; border-radius: 20px; text-align: center;">
           <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 800; color: #0A5C43; text-transform: uppercase; letter-spacing: 1px;">Amount Due</p>
-          <p style="margin: 0; font-size: 32px; font-weight: 900; color: #0A5C43;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
+          <p style="margin: 0; font-size: 32px; font-weight: 900; color: #0A5C43;">£${booking.payment.amount}</p>
         </div>
 
         <div style="text-align: center; margin-top: 40px;">
@@ -462,7 +462,7 @@ const templates = {
 
         <div style="margin-top: 32px; padding: 20px; background-color: #ECFDF5; border-radius: 20px; text-align: center; border: 1px solid #BBEDD7;">
           <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 800; color: #0A5C43; text-transform: uppercase; letter-spacing: 1px;">Amount Paid</p>
-          <p style="margin: 0; font-size: 32px; font-weight: 900; color: #0A5C43;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
+          <p style="margin: 0; font-size: 32px; font-weight: 900; color: #0A5C43;">£${booking.payment.amount}</p>
         </div>
 
         <p style="margin-top: 30px; font-size: 14px; color: #64748b; text-align: center;">Our team will reach out with any final details. Get ready for a sparkling clean!</p>
@@ -586,11 +586,11 @@ const templates = {
         <div style="padding: 28px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 24px; border: 2px solid #86efac; margin-bottom: 32px;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #bbf7d0;">
             <span style="font-size: 15px; color: #3f6e37; font-weight: 600;">Base Service</span>
-            <span style="font-size: 15px; color: #3f6e37; font-weight: 700;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</span>
+            <span style="font-size: 15px; color: #3f6e37; font-weight: 700;">£${booking.payment.amount}</span>
           </div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="font-size: 16px; color: #15803d; font-weight: 800; text-transform: uppercase;">Total Due</span>
-            <span style="font-size: 28px; color: #15803d; font-weight: 900;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</span>
+            <span style="font-size: 28px; color: #15803d; font-weight: 900;">£${booking.payment.amount}</span>
           </div>
           <p style="margin: 15px 0 0 0; font-size: 12px; color: #22863a; font-style: italic;">Status: <strong>Booking Created</strong></p>
         </div>
@@ -732,11 +732,11 @@ const templates = {
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="padding: 12px 0; border-bottom: 1px solid #a7f3d0; font-size: 14px; color: #065f46;">Service Charge</td>
-              <td style="padding: 12px 0; border-bottom: 1px solid #a7f3d0; text-align: right; font-size: 14px; font-weight: 700; color: #065f46;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</td>
+              <td style="padding: 12px 0; border-bottom: 1px solid #a7f3d0; text-align: right; font-size: 14px; font-weight: 700; color: #065f46;">£${booking.payment.amount}</td>
             </tr>
             <tr style="background-color: rgba(16, 185, 129, 0.1);">
               <td style="padding: 16px 0; font-size: 16px; font-weight: 800; color: #065f46; text-transform: uppercase;">Total Due</td>
-              <td style="padding: 16px 0; text-align: right; font-size: 24px; font-weight: 900; color: #065f46;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</td>
+              <td style="padding: 16px 0; text-align: right; font-size: 24px; font-weight: 900; color: #065f46;">£${booking.payment.amount}</td>
             </tr>
           </table>
           <p style="margin: 16px 0 0 0; font-size: 13px; color: #047857; font-weight: 600;">✓ Payment Status: <strong>CONFIRMED</strong></p>
@@ -793,7 +793,7 @@ const templates = {
           </div>
           <div style="text-align: right;">
             <p style="margin: 0; font-size: 10px; color: #94a3b8; font-weight: 800; text-transform: uppercase;">Amount Paid</p>
-            <p style="margin: 0; font-size: 16px; font-weight: 800; color: #0A5C43;">${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
+            <p style="margin: 0; font-size: 16px; font-weight: 800; color: #0A5C43;">£${booking.payment.amount}</p>
           </div>
         </div>
 

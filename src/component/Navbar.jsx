@@ -225,9 +225,7 @@ const Navbar = () => {
                           }`}
                         >
                           <IconComponent size={18} strokeWidth={1.8} />
-                          <span className="tracking-tight">
-                            {link.name}
-                          </span>
+                          <span className="tracking-tight">{link.name}</span>
                         </Link>
                       </motion.div>
                     );
