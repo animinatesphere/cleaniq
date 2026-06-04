@@ -28,6 +28,7 @@ import {
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 
 const AdminCalendar = ({ bookings, onToggleDate }) => {
@@ -562,13 +563,15 @@ const Bookings = () => {
       if (Number(value) > 8) return "Duration must not exceed 8 hours";
       return "";
     }
-    if (fieldPath === "details.bedrooms") {
-      if (value && (Number(value) < 0 || Number(value) > 10))
+    if (fieldPath === "details.Bedroom") {
+      if (!value && value !== 0) return "Bedrooms is required";
+      if (Number(value) < 0 || Number(value) > 10)
         return "Bedrooms must be 0-10";
       return "";
     }
-    if (fieldPath === "details.bathrooms") {
-      if (value && (Number(value) < 0 || Number(value) > 10))
+    if (fieldPath === "details.Bathroom") {
+      if (!value && value !== 0) return "Bathrooms is required";
+      if (Number(value) < 0 || Number(value) > 10)
         return "Bathrooms must be 0-10";
       return "";
     }
@@ -637,27 +640,27 @@ const Bookings = () => {
         createData.details?.duration,
       );
       const bedroomsErr = validateField(
-        "details.bedrooms",
-        createData.details?.bedrooms,
+        "details.Bedroom",
+        createData.details?.Bedroom,
       );
       const bathroomsErr = validateField(
-        "details.bathrooms",
-        createData.details?.bathrooms,
+        "details.Bathroom",
+        createData.details?.Bathroom,
       );
       if (durationErr) {
         errors["details.duration"] = durationErr;
         isValid = false;
       }
       if (bedroomsErr) {
-        errors["details.bedrooms"] = bedroomsErr;
+        errors["details.Bedroom"] = bedroomsErr;
         isValid = false;
       }
       if (bathroomsErr) {
-        errors["details.bathrooms"] = bathroomsErr;
+        errors["details.Bathroom"] = bathroomsErr;
         isValid = false;
       }
     } else if (step === 3) {
-      // Step 3: Extras (mostly optional, just verify if extras exist)
+      // Step 3: Extras (optional)
       return { isValid: true, errors: {} };
     } else if (step === 4) {
       // Step 4: Payment & Schedule
@@ -2165,9 +2168,14 @@ const Bookings = () => {
                       </div>
 
                       {/* Property Rooms */}
-                      <div className="p-4 bg-white rounded-2xl border-2 border-slate-200">
+                      <div className={`p-4 bg-white rounded-2xl border-2 ${
+                        formErrors["details.Bedroom"] || formErrors["details.Bathroom"]
+                          ? "border-rose-400 bg-rose-50"
+                          : "border-slate-200"
+                      }`}>
                         <h5 className="font-black text-base text-primary-dark mb-4 flex items-center gap-2">
                           🛏️ Property Rooms
+                          <span className="text-rose-500">*</span>
                         </h5>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                           {[
@@ -2206,13 +2214,10 @@ const Bookings = () => {
                                 <button
                                   onClick={() => {
                                     const cur = createData.details[r] || 0;
-                                    setCreateData({
-                                      ...createData,
-                                      details: {
-                                        ...createData.details,
-                                        [r]: cur + 1,
-                                      },
-                                    });
+                                    handleFieldChange(
+                                      `details.${r}`,
+                                      cur + 1,
+                                    );
                                   }}
                                   className="p-1 rounded-md hover:bg-slate-100 text-slate-500 hover:text-primary transition-colors"
                                 >
@@ -2222,6 +2227,20 @@ const Bookings = () => {
                             </div>
                           ))}
                         </div>
+                        {(formErrors["details.Bedroom"] || formErrors["details.Bathroom"]) && (
+                          <div className="mt-4 p-3 bg-rose-100 border-l-4 border-rose-500 rounded">
+                            {formErrors["details.Bedroom"] && (
+                              <p className="text-rose-700 text-[10px] font-bold mb-1">
+                                ⚠️ {formErrors["details.Bedroom"]}
+                              </p>
+                            )}
+                            {formErrors["details.Bathroom"] && (
+                              <p className="text-rose-700 text-[10px] font-bold">
+                                ⚠️ {formErrors["details.Bathroom"]}
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
