@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
+  Trash2,
 } from "lucide-react";
 
 const Customers = () => {
@@ -174,6 +175,26 @@ const Customers = () => {
       setSelectedCustomers(new Set());
     } else {
       setSelectedCustomers(new Set(filtered.map((c) => c._id)));
+    }
+  };
+
+  const handleDeleteCustomer = async (customerId) => {
+    if (!window.confirm("⚠️ Are you sure you want to delete this customer?")) {
+      return;
+    }
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/customers/${customerId}`,
+        { method: "DELETE" },
+      );
+      if (res.ok) {
+        fetchCustomers();
+        setSelected(null);
+        setStatusMessage({ type: "success", text: "Customer deleted successfully" });
+      }
+    } catch (error) {
+      console.error("Error deleting customer:", error);
+      setStatusMessage({ type: "error", text: "Failed to delete customer" });
     }
   };
 
@@ -373,7 +394,7 @@ const Customers = () => {
                   <td className="px-4 py-6 font-black text-primary-dark">
                     £{c.totalSpent?.toLocaleString()}
                   </td>
-                  <td className="px-8 py-6 text-right">
+                  <td className="px-8 py-6 text-right flex items-center justify-end gap-2">
                     <button
                       onClick={() => {
                         setSelected(c);
@@ -383,6 +404,13 @@ const Customers = () => {
                       className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all shadow-sm"
                     >
                       <Eye size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCustomer(c._id)}
+                      className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all shadow-sm"
+                      title="Delete customer"
+                    >
+                      <Trash2 size={18} />
                     </button>
                   </td>
                 </tr>
@@ -621,12 +649,20 @@ const Customers = () => {
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="flex-1 py-5 rounded-3xl bg-primary text-white text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
-                >
-                  <Edit3 size={18} /> Modify Profile
-                </button>
+                <>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="flex-1 py-5 rounded-3xl bg-primary text-white text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                  >
+                    <Edit3 size={18} /> Modify Profile
+                  </button>
+                  <button
+                    onClick={() => handleDeleteCustomer(selected._id)}
+                    className="flex-1 py-5 rounded-3xl bg-rose-50 text-rose-500 text-xs font-black uppercase tracking-widest border border-rose-200 hover:bg-rose-100 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Trash2 size={18} /> Delete Customer
+                  </button>
+                </>
               )}
             </div>
           </div>
