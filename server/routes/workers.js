@@ -140,6 +140,7 @@ router.post('/jobs/:id/accept', async (req, res) => {
     booking.assignedWorker = workerId;
     booking.assignedWorkerName = workerName;
     booking.status = 'Assigned';
+    booking.jobAcceptedTime = new Date();
     
     await booking.save();
     
@@ -174,6 +175,7 @@ router.post('/jobs/:id/cancel', async (req, res) => {
     booking.assignedWorker = null;
     booking.assignedWorkerName = null;
     booking.status = 'Confirmed';
+    booking.jobAcceptedTime = null;
     booking.jobArrivedTime = null;
     booking.jobStartTime = null;
     booking.jobEndTime = null;

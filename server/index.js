@@ -73,6 +73,7 @@ const customerChatRoutes = require("./routes/customer-chat");
 const contactRoutes = require("./routes/contact");
 const blogRoutes = require("./routes/blog");
 const commentRoutes = require("./routes/comments");
+const settingsRoutes = require("./routes/settings");
 
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
@@ -82,6 +83,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/blog", blogRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/settings", settingsRoutes);
 
 // Stripe webhook endpoint (raw body required)
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "");

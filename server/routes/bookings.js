@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Booking = require("../models/Booking");
 const Worker = require("../models/Worker");
+const SystemSetting = require("../models/SystemSetting");
 const { sendEmail, templates } = require("../utils/emailService");
 
 // GET all bookings (Admin)
@@ -39,6 +40,24 @@ router.post("/", async (req, res) => {
     booking.set("details", req.body.details);
     booking.set("property", req.body.property);
     booking.set("meta", req.body.meta);
+
+    // Apply global default workerRate / workerDuration if not provided
+    if (booking.workerRate == null || booking.workerDuration == null) {
+      try {
+        const [rateSetting, durSetting] = await Promise.all([
+          SystemSetting.findOne({ key: "defaultWorkerRate" }),
+          SystemSetting.findOne({ key: "defaultWorkerDuration" }),
+        ]);
+        if (booking.workerRate == null && rateSetting) {
+          booking.workerRate = rateSetting.value;
+        }
+        if (booking.workerDuration == null && durSetting) {
+          booking.workerDuration = durSetting.value;
+        }
+      } catch (settingsErr) {
+        console.warn("⚠️ Could not load default worker settings:", settingsErr.message);
+      }
+    }
 
     const newBooking = await booking.save();
 

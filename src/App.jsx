@@ -38,6 +38,7 @@ import ServicesManagement from "./admin/Services";
 import Workers from "./admin/Workers";
 import Chat from "./admin/Chat";
 import AdminBlog from "./admin/Blog";
+import WorkerPay from "./admin/WorkerPay";
 
 function App() {
   const location = useLocation();
@@ -87,6 +88,7 @@ function App() {
               <Route path="blog" element={<AdminBlog />} />
               <Route path="settings" element={<Settings />} />
               <Route path="chat" element={<Chat />} />
+              <Route path="worker-pay" element={<WorkerPay />} />
             </Route>
           </Routes>
         </main>

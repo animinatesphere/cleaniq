@@ -18,6 +18,7 @@ import {
   Briefcase,
   MessageSquare,
   BookOpen,
+  Wallet,
 } from "lucide-react";
 import Login from "./Login";
 
@@ -96,6 +97,7 @@ const AdminLayout = () => {
   const menuItems = [
     { name: "Dashboard", path: "/admin", icon: <LayoutDashboard size={20} /> },
     { name: "Bookings", path: "/admin/bookings", icon: <Calendar size={20} /> },
+    { name: "Worker Pay", path: "/admin/worker-pay", icon: <Wallet size={20} /> },
     { name: "Staff", path: "/admin/workers", icon: <Briefcase size={20} /> },
     {
       name: "Applicants",
@@ -154,20 +156,26 @@ const AdminLayout = () => {
         </div>
 
         <nav className="flex-1 space-y-2">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${location.pathname === item.path ? "bg-secondary text-primary-dark shadow-lg" : "hover:bg-white/5 text-slate-400 hover:text-white"}`}
-            >
-              <div className="flex items-center gap-3">
-                <span>{item.icon}</span>
-                <span className="font-bold text-sm">{item.name}</span>
-              </div>
-              {location.pathname === item.path && <ChevronRight size={16} />}
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const isActive =
+              item.path === "/admin"
+                ? location.pathname === "/admin"
+                : location.pathname.startsWith(item.path);
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${isActive ? "bg-secondary text-primary-dark shadow-lg" : "hover:bg-white/5 text-slate-400 hover:text-white"}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span>{item.icon}</span>
+                  <span className="font-bold text-sm">{item.name}</span>
+                </div>
+                {isActive && <ChevronRight size={16} />}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="mt-auto border-t border-white/10 pt-6 space-y-4">
