@@ -55,7 +55,9 @@ const HomeScreen = ({ navigation }) => {
         axios.get(`${API_URL}/workers/jobs/my-jobs/${workerInfo.id}`),
       ]);
 
-      setAvailableJobs(availableRes.data || []);
+      const available = availableRes.data || [];
+      const filteredAvailable = available.filter(job => !job.rejectedBy || !job.rejectedBy.includes(workerInfo.id));
+      setAvailableJobs(filteredAvailable);
       setMyJobs(myJobsRes.data || []);
 
       // Calculate activity stats
@@ -408,9 +410,9 @@ const HomeScreen = ({ navigation }) => {
 
               <View style={styles.jobFooter}>
                 <View>
-                  <Text style={styles.jobRate}>£{job.rate}/hour</Text>
+                  <Text style={styles.jobRate}>£{job.workerRate || job.rate || 0}/hour</Text>
                   <Text style={styles.jobDuration}>
-                    {job.duration || 2} hours
+                    {job.workerDuration || job.duration || 2} hours
                   </Text>
                 </View>
                 <View style={styles.acceptButton}>

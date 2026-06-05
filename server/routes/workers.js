@@ -93,6 +93,20 @@ router.get('/jobs/my-jobs/:workerId', async (req, res) => {
   }
 });
 
+// GET a specific job detail
+router.get('/jobs/:id', async (req, res) => {
+  try {
+    const job = await Booking.findById(req.params.id);
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+    res.json(job);
+  } catch (error) {
+    console.error('Error fetching job details:', error);
+    res.status(500).json({ error: 'Internal server error fetching job details' });
+  }
+});
+
 // POST accept a job
 router.post('/jobs/:id/accept', async (req, res) => {
   try {
@@ -169,6 +183,59 @@ router.post('/jobs/:id/cancel', async (req, res) => {
   } catch (error) {
     console.error('Error cancelling job:', error);
     res.status(500).json({ error: 'Internal server error cancelling job' });
+  }
+});
+
+// POST reject a job proposal
+router.post('/jobs/:id/reject', async (req, res) => {
+  try {
+    const { workerId } = req.body;
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+    
+    // Add workerId to rejectedBy array if not already present
+    if (!booking.rejectedBy.includes(workerId)) {
+      booking.rejectedBy.push(workerId);
+      await booking.save();
+    }
+    
+    res.json({ message: 'Job rejected successfully', booking });
+  } catch (error) {
+    console.error('Error rejecting job:', error);
+    res.status(500).json({ error: 'Internal server error rejecting job' });
+  }
+});
+
+// POST suggest another time
+router.post('/jobs/:id/suggest-time', async (req, res) => {
+  try {
+    const { workerId, suggestedTime } = req.body;
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+    
+    // Find worker info
+    const worker = await Worker.findById(workerId);
+    const workerName = worker ? `${worker.firstName} ${worker.lastName}` : workerId;
+
+    // Send email alert to admin
+    await sendEmail({
+      to: process.env.EMAIL_USER || 'admin@cleaniqservices.com',
+      subject: `Staff Suggested Time: ${booking.bookingId}`,
+      html: templates.staffActionAlert(
+        booking, 
+        'Suggested New Time', 
+        `Staff member <strong>${workerName}</strong> has suggested an alternative time for this clean:<br/><br/><strong>"${suggestedTime}"</strong>`
+      )
+    });
+
+    res.json({ message: 'Time suggestion sent successfully' });
+  } catch (error) {
+    console.error('Error suggesting time:', error);
+    res.status(500).json({ error: 'Internal server error suggesting time' });
   }
 });
 

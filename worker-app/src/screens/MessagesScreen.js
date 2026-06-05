@@ -27,7 +27,7 @@ const MessagesScreen = ({ navigation }) => {
     try {
       if (!workerInfo?.id) return;
       const response = await axios.get(
-        `${API_URL}/workers/${workerInfo.id}/messages`,
+        `${API_URL}/workers/${workerInfo.id}/conversations`,
       );
       setConversations(response.data || []);
     } catch (error) {

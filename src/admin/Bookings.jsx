@@ -1498,6 +1498,40 @@ const Bookings = () => {
                       </div>
                       <div className="space-y-1">
                         <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
+                          Worker Rate (£/hr)
+                        </label>
+                        <input
+                          type="number"
+                          value={editData.workerRate || ""}
+                          onChange={(e) =>
+                            setEditData({
+                              ...editData,
+                              workerRate: Number(e.target.value) || 0,
+                            })
+                          }
+                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-black text-lg"
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
+                          Worker Expected Hours
+                        </label>
+                        <input
+                          type="number"
+                          value={editData.workerDuration || ""}
+                          onChange={(e) =>
+                            setEditData({
+                              ...editData,
+                              workerDuration: Number(e.target.value) || 0,
+                            })
+                          }
+                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-black text-lg"
+                          placeholder="e.g. 2"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
                           Booking Date
                         </label>
                         <input
@@ -1635,6 +1669,22 @@ const Bookings = () => {
                               </p>
                               <p className="text-xs font-bold text-emerald-800">
                                 {selectedBooking.assignedWorker.region}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
+                                Assigned Rate
+                              </p>
+                              <p className="text-xs font-bold text-emerald-800">
+                                £{selectedBooking.workerRate || 0}/hr
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
+                                Expected Hours
+                              </p>
+                              <p className="text-xs font-bold text-emerald-800">
+                                {selectedBooking.workerDuration || 0} hrs
                               </p>
                             </div>
                           </div>

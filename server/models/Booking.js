@@ -37,6 +37,9 @@ const bookingSchema = new mongoose.Schema({
   jobStartTime: { type: Date, default: null },
   jobEndTime: { type: Date, default: null },
   jobDurationActual: { type: Number, default: 0 }, // in minutes
+  workerRate: { type: Number, default: null }, // per hour rate set by admin
+  workerDuration: { type: Number, default: null }, // expected duration set by admin
+  rejectedBy: [{ type: String }], // Array of worker IDs who turned down this job
   createdAt: { type: Date, default: Date.now },
   meta: mongoose.Schema.Types.Mixed // Catch-all for future expansions
 });

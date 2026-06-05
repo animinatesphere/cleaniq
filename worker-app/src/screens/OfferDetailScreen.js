@@ -42,7 +42,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
   const fetchOfferDetails = async () => {
     try {
       // Fetch offer details
-      const offerRes = await axios.get(`${API_URL}/workers/offers/${offerId}`);
+      const offerRes = await axios.get(`${API_URL}/workers/jobs/${offerId}`);
       setOffer(offerRes.data);
 
       // Fetch customer details
@@ -73,7 +73,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
           onPress: async () => {
             setActionLoading("accept");
             try {
-              await axios.post(`${API_URL}/workers/offers/${offerId}/accept`, {
+              await axios.post(`${API_URL}/workers/jobs/${offerId}/accept`, {
                 workerId: workerInfo.id,
               });
               Alert.alert("Success", "You have accepted this proposal!", [
@@ -101,7 +101,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
     setActionLoading("suggest");
     try {
-      await axios.post(`${API_URL}/workers/offers/${offerId}/suggest-time`, {
+      await axios.post(`${API_URL}/workers/jobs/${offerId}/suggest-time`, {
         workerId: workerInfo.id,
         suggestedTime,
       });
@@ -137,7 +137,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
           onPress: async () => {
             setActionLoading("reject");
             try {
-              await axios.post(`${API_URL}/workers/offers/${offerId}/reject`, {
+              await axios.post(`${API_URL}/workers/jobs/${offerId}/reject`, {
                 workerId: workerInfo.id,
               });
               Alert.alert("Done", "You have turned down this proposal.", [
@@ -241,9 +241,9 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
           <View style={styles.rateBox}>
             <Text style={styles.rateLabel}>Payment</Text>
-            <Text style={styles.rateAmount}>£{offer.rate}/hour</Text>
+            <Text style={styles.rateAmount}>£{offer.workerRate || offer.rate || 0}/hour</Text>
             <Text style={styles.rateSubtext}>
-              Estimated: {offer.duration || 2} hours
+              Estimated: {offer.workerDuration || offer.duration || 2} hours
             </Text>
           </View>
         </View>
