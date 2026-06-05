@@ -5,6 +5,14 @@ const Booking = require('../models/Booking');
 const jwt = require('jsonwebtoken');
 const { sendEmail, templates } = require('../utils/emailService');
 
+const findBookingByIdOrBookingId = async (id) => {
+  if (id.match(/^[0-9a-fA-F]{24}$/)) {
+    return await Booking.findById(id);
+  } else {
+    return await Booking.findOne({ bookingId: id });
+  }
+};
+
 // Mobile App Login Endpoint
 router.post('/login', async (req, res) => {
   try {
@@ -96,7 +104,8 @@ router.get('/jobs/my-jobs/:workerId', async (req, res) => {
 // GET a specific job detail
 router.get('/jobs/:id', async (req, res) => {
   try {
-    const job = await Booking.findById(req.params.id);
+    const job = await findBookingByIdOrBookingId(req.params.id);
+    
     if (!job) {
       return res.status(404).json({ error: 'Job not found' });
     }
@@ -113,7 +122,7 @@ router.post('/jobs/:id/accept', async (req, res) => {
     const { workerId, workerName } = req.body;
     
     // Find the booking and make sure it is not already assigned
-    const booking = await Booking.findById(req.params.id);
+    const booking = await findBookingByIdOrBookingId(req.params.id);
     
     if (!booking) {
       return res.status(404).json({ error: 'Booking not found' });
@@ -151,7 +160,7 @@ router.post('/jobs/:id/accept', async (req, res) => {
 // POST cancel accepted job
 router.post('/jobs/:id/cancel', async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.id);
+    const booking = await findBookingByIdOrBookingId(req.params.id);
     if (!booking) {
       return res.status(404).json({ error: 'Booking not found' });
     }
@@ -190,7 +199,7 @@ router.post('/jobs/:id/cancel', async (req, res) => {
 router.post('/jobs/:id/reject', async (req, res) => {
   try {
     const { workerId } = req.body;
-    const booking = await Booking.findById(req.params.id);
+    const booking = await findBookingByIdOrBookingId(req.params.id);
     if (!booking) {
       return res.status(404).json({ error: 'Booking not found' });
     }
@@ -212,7 +221,7 @@ router.post('/jobs/:id/reject', async (req, res) => {
 router.post('/jobs/:id/suggest-time', async (req, res) => {
   try {
     const { workerId, suggestedTime } = req.body;
-    const booking = await Booking.findById(req.params.id);
+    const booking = await findBookingByIdOrBookingId(req.params.id);
     if (!booking) {
       return res.status(404).json({ error: 'Booking not found' });
     }
@@ -242,7 +251,7 @@ router.post('/jobs/:id/suggest-time', async (req, res) => {
 // POST mark arrived at customer location
 router.post('/jobs/:id/arrive', async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.id);
+    const booking = await findBookingByIdOrBookingId(req.params.id);
     if (!booking) {
       return res.status(404).json({ error: 'Booking not found' });
     }
@@ -271,7 +280,7 @@ router.post('/jobs/:id/arrive', async (req, res) => {
 // POST start clean (counting down duration)
 router.post('/jobs/:id/start', async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.id);
+    const booking = await findBookingByIdOrBookingId(req.params.id);
     if (!booking) {
       return res.status(404).json({ error: 'Booking not found' });
     }
@@ -300,7 +309,7 @@ router.post('/jobs/:id/start', async (req, res) => {
 // POST complete clean (job done)
 router.post('/jobs/:id/complete', async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.id);
+    const booking = await findBookingByIdOrBookingId(req.params.id);
     if (!booking) {
       return res.status(404).json({ error: 'Booking not found' });
     }

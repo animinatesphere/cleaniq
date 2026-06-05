@@ -46,11 +46,17 @@ const OfferDetailScreen = ({ route, navigation }) => {
       setOffer(offerRes.data);
 
       // Fetch customer details
-      if (offerRes.data.customerId) {
-        const customerRes = await axios.get(
-          `${API_URL}/customers/${offerRes.data.customerId}`,
-        );
-        setCustomer(customerRes.data);
+      if (offerRes.data.customer) {
+        setCustomer(offerRes.data.customer);
+      } else if (offerRes.data.customerId) {
+        try {
+          const customerRes = await axios.get(
+            `${API_URL}/customers/${offerRes.data.customerId}`,
+          );
+          setCustomer(customerRes.data);
+        } catch (e) {
+          console.log("Could not fetch separate customer details", e);
+        }
       }
     } catch (error) {
       console.error("Error fetching offer details:", error);
@@ -197,7 +203,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
           <View style={styles.customerHeader}>
             <View>
               <Text style={styles.customerName}>
-                {customer.firstName} {customer.lastName}
+                {customer?.firstName || "Customer"} {customer?.lastName || ""}
               </Text>
               <View style={styles.availableBadge}>
                 <CheckCircle size={14} color="#10B981" />
