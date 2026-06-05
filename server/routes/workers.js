@@ -90,10 +90,14 @@ router.get('/jobs', async (req, res) => {
 // GET jobs accepted by a specific worker
 router.get('/jobs/my-jobs/:workerId', async (req, res) => {
   try {
-    const jobs = await Booking.find({ 
-      assignedWorker: req.params.workerId 
+    const wId = req.params.workerId;
+    // Match by string OR ObjectId (so it works regardless of how the ID was stored)
+    const jobs = await Booking.find({
+      $or: [
+        { assignedWorker: wId },
+        { assignedWorkerName: { $exists: true }, assignedWorker: wId }
+      ]
     }).sort({ createdAt: -1 });
-    
     res.json(jobs);
   } catch (error) {
     console.error('Error fetching my jobs:', error);
@@ -462,30 +466,32 @@ router.get('/:id/schedule', async (req, res) => {
 // GET conversations for worker (unique customer bookings for messaging)
 router.get('/:id/conversations', async (req, res) => {
   try {
-    // Get all bookings assigned to this worker
-    const workerBookings = await Booking.find({ 
-      assignedWorker: req.params.id 
+    const wId = req.params.id;
+    // Match by string or ObjectId
+    const workerBookings = await Booking.find({
+      $or: [
+        { assignedWorker: wId },
+        { assignedWorkerName: { $exists: true, $ne: null }, assignedWorker: wId }
+      ]
     }).select('bookingId customer service status createdAt');
-    
-    // Extract unique conversations from bookings
+
     const conversations = workerBookings.map(booking => ({
+      _id: booking._id,               // ← actual MongoDB _id for React key
       bookingId: booking.bookingId,
       customerId: booking.customer?._id || booking.customerId,
       customerName: `${booking.customer?.firstName || 'Customer'} ${booking.customer?.lastName || ''}`.trim(),
       customerEmail: booking.customer?.email,
       service: booking.service,
       status: booking.status,
-      lastMessageTime: booking.createdAt
+      lastMessage: `Booking: ${booking.service || 'Cleaning'}`,
+      lastMessageTime: booking.createdAt,
+      unreadCount: 0
     }));
-    
-    // Remove duplicates and sort by most recent
-    const uniqueConversations = Array.from(
-      new Map(
-        conversations.map(conv => [conv.customerId, conv])
-      ).values()
-    ).sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
-    
-    res.json(uniqueConversations || []);
+
+    // Sort by most recent
+    conversations.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
+
+    res.json(conversations);
   } catch (error) {
     console.error('Error fetching conversations:', error);
     res.status(500).json({ error: 'Failed to fetch conversations' });

@@ -89,17 +89,18 @@ const MessagesScreen = ({ navigation }) => {
             <MessageSquare size={48} color="#9CA3AF" />
             <Text style={styles.emptyStateText}>No messages yet</Text>
             <Text style={styles.emptyStateSubtext}>
-              Messages from customers will appear here
+              Messages will appear here once you accept a job
             </Text>
           </View>
         ) : (
           filteredConversations.map((conversation) => (
             <TouchableOpacity
-              key={conversation._id}
+              key={String(conversation._id || conversation.bookingId)}
               style={styles.conversationCard}
               onPress={() =>
                 navigation.navigate("Chat", {
-                  conversationId: conversation._id,
+                  bookingId: conversation.bookingId,
+                  customerName: conversation.customerName,
                 })
               }
               activeOpacity={0.7}
@@ -115,7 +116,7 @@ const MessagesScreen = ({ navigation }) => {
                     {conversation.customerName}
                   </Text>
                   <Text style={styles.lastMessage} numberOfLines={1}>
-                    {conversation.lastMessage}
+                    {conversation.lastMessage || conversation.service || "Tap to view booking"}
                   </Text>
                 </View>
                 {conversation.unreadCount > 0 && (
@@ -128,7 +129,12 @@ const MessagesScreen = ({ navigation }) => {
               </View>
               <View style={styles.conversationFooter}>
                 <Text style={styles.timestamp}>
-                  {new Date(conversation.lastMessageTime).toLocaleDateString()}
+                  {conversation.lastMessageTime
+                    ? new Date(conversation.lastMessageTime).toLocaleDateString("en-GB")
+                    : ""}
+                </Text>
+                <Text style={[styles.timestamp, { marginLeft: 8, color: "#10B981", fontWeight: "600" }]}>
+                  {conversation.status}
                 </Text>
               </View>
             </TouchableOpacity>

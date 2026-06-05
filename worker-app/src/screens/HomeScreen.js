@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   Alert,
   FlatList,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import {
   LogOut,
@@ -29,7 +30,7 @@ import {
 } from "lucide-react-native";
 import axios from "axios";
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ navigation, route }) => {
   const { workerInfo, logout } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState("activity"); // 'activity' or 'offers'
 
@@ -56,29 +57,30 @@ const HomeScreen = ({ navigation }) => {
       ]);
 
       const available = availableRes.data || [];
-      const filteredAvailable = available.filter(job => !job.rejectedBy || !job.rejectedBy.includes(workerInfo.id));
+      const filteredAvailable = available.filter(
+        (job) => !job.rejectedBy || !job.rejectedBy.includes(workerInfo.id)
+      );
       setAvailableJobs(filteredAvailable);
       setMyJobs(myJobsRes.data || []);
 
       // Calculate activity stats
-      const completedJobs = (myJobsRes.data || []).filter(
-        (j) => j.status === "completed",
-      );
+      const allMyJobs = myJobsRes.data || [];
+      const completedJobs = allMyJobs.filter((j) => j.status === "Completed");
       const totalEarnings = completedJobs.reduce(
-        (sum, job) => sum + (job.rate || 0),
+        (sum, job) => sum + ((job.workerRate || 0) * (job.workerDuration || 0)),
         0,
       );
-      const uniqueCustomers = new Set(completedJobs.map((j) => j.customerId))
-        .size;
+      const uniqueCustomers = new Set(
+        completedJobs.map((j) => j.customer?.email).filter(Boolean)
+      ).size;
 
       setActivityStats({
         totalEarnings,
-        offersAccepted: myJobsRes.data?.length || 0,
+        offersAccepted: allMyJobs.length,
         customersServed: uniqueCustomers,
       });
     } catch (error) {
       console.error("Error fetching data:", error);
-      Alert.alert("Error", "Failed to load data");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -88,6 +90,17 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     fetchData();
   }, [workerInfo?.id]);
+
+  // Refresh data every time screen comes into focus (e.g. after accepting a job)
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+      // If navigated with a tab param, switch to it
+      if (route?.params?.tab) {
+        setActiveTab(route.params.tab);
+      }
+    }, [workerInfo?.id, route?.params?.tab])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -112,9 +125,15 @@ const HomeScreen = ({ navigation }) => {
             );
 
             if (response.data.booking) {
+              // Remove from available, add to my jobs
               setAvailableJobs((prev) => prev.filter((j) => j._id !== jobId));
               setMyJobs((prev) => [response.data.booking, ...prev]);
-              Alert.alert("Success", "Job accepted! Check your offers.");
+              // Switch to Activity tab so worker sees the accepted job immediately
+              setActiveTab("activity");
+              Alert.alert(
+                "✅ Job Accepted!",
+                "The job has been added to your Activity tab."
+              );
             }
           } catch (error) {
             Alert.alert(
@@ -286,7 +305,7 @@ const HomeScreen = ({ navigation }) => {
             >
               <View style={styles.jobHeader}>
                 <Text style={styles.jobTitle}>
-                  {job.serviceType || "Cleaning Service"}
+                  {job.service || "Cleaning Service"}
                 </Text>
                 <View
                   style={[
@@ -301,18 +320,18 @@ const HomeScreen = ({ navigation }) => {
               <View style={styles.jobDetails}>
                 <View style={styles.detailRow}>
                   <MapPin size={16} color="#6B7280" />
-                  <Text style={styles.detailText}>{job.address}</Text>
+                  <Text style={styles.detailText}>{job.details?.address || "Address not specified"}</Text>
                 </View>
                 <View style={styles.detailRow}>
                   <Calendar size={16} color="#6B7280" />
                   <Text style={styles.detailText}>
-                    {new Date(job.date).toLocaleDateString()}
+                    {job.schedule?.date ? new Date(job.schedule.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Date TBC"}
                   </Text>
                 </View>
                 <View style={styles.detailRow}>
                   <Clock size={16} color="#6B7280" />
                   <Text style={styles.detailText}>
-                    {job.startTime} - {job.endTime}
+                    {job.schedule?.timeSlot || job.schedule?.preferredTime || "Time TBC"}
                   </Text>
                 </View>
               </View>
@@ -385,25 +404,25 @@ const HomeScreen = ({ navigation }) => {
             >
               <View style={styles.jobHeader}>
                 <Text style={styles.jobTitle}>
-                  {job.serviceType || "Cleaning Service"}
+                  {job.service || "Cleaning Service"}
                 </Text>
               </View>
 
               <View style={styles.jobDetails}>
                 <View style={styles.detailRow}>
                   <MapPin size={16} color="#6B7280" />
-                  <Text style={styles.detailText}>{job.address}</Text>
+                  <Text style={styles.detailText}>{job.details?.address || "Address not specified"}</Text>
                 </View>
                 <View style={styles.detailRow}>
                   <Calendar size={16} color="#6B7280" />
                   <Text style={styles.detailText}>
-                    {new Date(job.date).toLocaleDateString()}
+                    {job.schedule?.date ? new Date(job.schedule.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Date TBC"}
                   </Text>
                 </View>
                 <View style={styles.detailRow}>
                   <Clock size={16} color="#6B7280" />
                   <Text style={styles.detailText}>
-                    {job.startTime} - {job.endTime}
+                    {job.schedule?.timeSlot || job.schedule?.preferredTime || "Time TBC"}
                   </Text>
                 </View>
               </View>
