@@ -97,7 +97,11 @@ const AdminLayout = () => {
   const menuItems = [
     { name: "Dashboard", path: "/admin", icon: <LayoutDashboard size={20} /> },
     { name: "Bookings", path: "/admin/bookings", icon: <Calendar size={20} /> },
-    { name: "Worker Pay", path: "/admin/worker-pay", icon: <Wallet size={20} /> },
+    {
+      name: "Staff pay",
+      path: "/admin/worker-pay",
+      icon: <Wallet size={20} />,
+    },
     { name: "Staff", path: "/admin/workers", icon: <Briefcase size={20} /> },
     {
       name: "Applicants",

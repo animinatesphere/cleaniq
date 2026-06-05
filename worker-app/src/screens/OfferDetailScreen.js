@@ -64,32 +64,44 @@ const OfferDetailScreen = ({ route, navigation }) => {
   };
 
   const handleAcceptOffer = async () => {
-    Alert.alert("Accept Proposal", "Are you sure you want to accept this job?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Accept",
-        style: "default",
-        onPress: async () => {
-          setActionLoading("accept");
-          try {
-            await axios.post(`${API_URL}/workers/jobs/${offerId}/accept`, {
-              workerId: workerInfo.id,
-              workerName: `${workerInfo.firstName} ${workerInfo.lastName}`,
-            });
-            Alert.alert("✅ Job Accepted!", "The job has been added to your Activity tab.", [
-              {
-                text: "View My Jobs",
-                onPress: () => navigation.navigate("Home", { tab: "activity" }),
-              },
-            ]);
-          } catch (error) {
-            Alert.alert("Error", error.response?.data?.error || "Failed to accept proposal");
-          } finally {
-            setActionLoading(null);
-          }
+    Alert.alert(
+      "Accept Proposal",
+      "Are you sure you want to accept this job?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Accept",
+          style: "default",
+          onPress: async () => {
+            setActionLoading("accept");
+            try {
+              await axios.post(`${API_URL}/workers/jobs/${offerId}/accept`, {
+                workerId: workerInfo.id,
+                workerName: `${workerInfo.firstName} ${workerInfo.lastName}`,
+              });
+              Alert.alert(
+                "✅ Job Accepted!",
+                "The job has been added to your Activity tab.",
+                [
+                  {
+                    text: "View My Jobs",
+                    onPress: () =>
+                      navigation.navigate("Home", { tab: "activity" }),
+                  },
+                ],
+              );
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                error.response?.data?.error || "Failed to accept proposal",
+              );
+            } finally {
+              setActionLoading(null);
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const handleSuggestTime = async () => {
@@ -106,45 +118,64 @@ const OfferDetailScreen = ({ route, navigation }) => {
       setShowSuggestTime(false);
       Alert.alert("Sent!", "Your suggested time has been sent to the admin.");
     } catch (error) {
-      Alert.alert("Error", error.response?.data?.error || "Failed to send suggestion");
+      Alert.alert(
+        "Error",
+        error.response?.data?.error || "Failed to send suggestion",
+      );
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleRejectOffer = async () => {
-    Alert.alert("Turn Down Proposal", "Are you sure? This job will no longer appear in your feed.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Turn Down",
-        style: "destructive",
-        onPress: async () => {
-          setActionLoading("reject");
-          try {
-            await axios.post(`${API_URL}/workers/jobs/${offerId}/reject`, {
-              workerId: workerInfo.id,
-            });
-            Alert.alert("Done", "You have turned down this proposal.", [
-              { text: "OK", onPress: () => navigation.goBack() },
-            ]);
-          } catch (error) {
-            Alert.alert("Error", error.response?.data?.error || "Failed to reject proposal");
-          } finally {
-            setActionLoading(null);
-          }
+    Alert.alert(
+      "Turn Down Proposal",
+      "Are you sure? This job will no longer appear in your feed.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Turn Down",
+          style: "destructive",
+          onPress: async () => {
+            setActionLoading("reject");
+            try {
+              await axios.post(`${API_URL}/workers/jobs/${offerId}/reject`, {
+                workerId: workerInfo.id,
+              });
+              Alert.alert("Done", "You have turned down this proposal.", [
+                { text: "OK", onPress: () => navigation.goBack() },
+              ]);
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                error.response?.data?.error || "Failed to reject proposal",
+              );
+            } finally {
+              setActionLoading(null);
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   // Extract rooms and services from details object
   const extractDetails = (detailsObj) => {
     if (!detailsObj) return { rooms: [], services: [], info: {} };
-    
+
     const rooms = [];
-    const roomKeys = ["Bedroom", "Bathroom", "Kitchen", "Living Room", "Cloakroom", "Conservatory", "Reception Room", "Utility Room"];
-    
-    roomKeys.forEach(key => {
+    const roomKeys = [
+      "Bedroom",
+      "Bathroom",
+      "Kitchen",
+      "Living Room",
+      "Cloakroom",
+      "Conservatory",
+      "Reception Room",
+      "Utility Room",
+    ];
+
+    roomKeys.forEach((key) => {
       if (detailsObj[key] && detailsObj[key] > 0) {
         rooms.push(`${key} (x${detailsObj[key]})`);
       }
@@ -152,9 +183,9 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
     const services = [];
     let extrasList = [];
-    
+
     // Sometimes extras is a JSON string, sometimes it's an array
-    if (typeof detailsObj.extras === 'string') {
+    if (typeof detailsObj.extras === "string") {
       try {
         extrasList = JSON.parse(detailsObj.extras);
       } catch (e) {
@@ -165,17 +196,21 @@ const OfferDetailScreen = ({ route, navigation }) => {
     }
 
     if (Array.isArray(extrasList)) {
-      extrasList.forEach(extra => {
-        if (typeof extra === 'string') {
+      extrasList.forEach((extra) => {
+        if (typeof extra === "string") {
           // If it's already a string like "Carpet Cleaning (x1)", just add it
           // But filter out room names if they accidentally got in there
           const lower = extra.toLowerCase();
-          if (!roomKeys.some(k => lower.includes(k.toLowerCase())) &&
-              !lower.startsWith("parking") && !lower.startsWith("entry") &&
-              !lower.startsWith("pet") && !lower.startsWith("instructions")) {
+          if (
+            !roomKeys.some((k) => lower.includes(k.toLowerCase())) &&
+            !lower.startsWith("parking") &&
+            !lower.startsWith("entry") &&
+            !lower.startsWith("pet") &&
+            !lower.startsWith("instructions")
+          ) {
             services.push(extra);
           }
-        } else if (typeof extra === 'object' && extra !== null) {
+        } else if (typeof extra === "object" && extra !== null) {
           // If it's an object { name: "...", qty: 2 }
           if (extra.name && extra.qty > 0) {
             services.push(`${extra.name} (x${extra.qty})`);
@@ -221,7 +256,10 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backBtn}
+        >
           <ChevronLeft size={22} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Job Proposal</Text>
@@ -236,7 +274,9 @@ const OfferDetailScreen = ({ route, navigation }) => {
               <Briefcase size={28} color="#fff" />
             </View>
             <View style={styles.heroInfo}>
-              <Text style={styles.heroService}>{offer.service || "Cleaning Service"}</Text>
+              <Text style={styles.heroService}>
+                {offer.service || "Cleaning Service"}
+              </Text>
               <Text style={styles.heroRef}>Ref: {offer.bookingId}</Text>
             </View>
             <View style={styles.newBadge}>
@@ -245,40 +285,65 @@ const OfferDetailScreen = ({ route, navigation }) => {
           </View>
 
           {/* Pay Banner */}
-          {(offer.workerRate > 0) ? (
+          {offer.workerRate > 0 ? (
             <View style={styles.payBanner}>
               <View style={styles.payItem}>
                 <Text style={styles.payLabel}>Your Rate</Text>
-                <Text style={styles.payValue}>£{offer.workerRate || 0}<Text style={styles.payUnit}>/hr</Text></Text>
+                <Text style={styles.payValue}>
+                  £{offer.workerRate || 0}
+                  <Text style={styles.payUnit}>/hr</Text>
+                </Text>
               </View>
               <View style={styles.payDivider} />
               <View style={styles.payItem}>
                 <Text style={styles.payLabel}>Duration</Text>
-                <Text style={styles.payValue}>{offer.details?.duration || offer.workerDuration || offer.duration || 0}<Text style={styles.payUnit}> hrs</Text></Text>
+                <Text style={styles.payValue}>
+                  {offer.details?.duration ||
+                    offer.workerDuration ||
+                    offer.duration ||
+                    0}
+                  <Text style={styles.payUnit}> hrs</Text>
+                </Text>
               </View>
               <View style={styles.payDivider} />
               <View style={styles.payItem}>
                 <Text style={styles.payLabel}>Estimated</Text>
-                <Text style={[styles.payValue, { color: "#10B981" }]}>£{((offer.workerRate || 0) * (offer.details?.duration || offer.workerDuration || offer.duration || 0)).toFixed(0)}</Text>
+                <Text style={[styles.payValue, { color: "#10B981" }]}>
+                  £
+                  {(
+                    (offer.workerRate || 0) *
+                    (offer.details?.duration ||
+                      offer.workerDuration ||
+                      offer.duration ||
+                      0)
+                  ).toFixed(0)}
+                </Text>
               </View>
             </View>
           ) : (
             <View style={[styles.payBanner, { justifyContent: "center" }]}>
-              <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 12 }}>Rate pending — Admin will confirm pay</Text>
+              <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 12 }}>
+                Rate pending — Admin will confirm pay
+              </Text>
             </View>
           )}
         </View>
 
         {/* Schedule */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📅  Schedule</Text>
+          <Text style={styles.sectionTitle}>📅 Schedule</Text>
           <View style={styles.scheduleRow}>
             <View style={styles.scheduleCard}>
               <Calendar size={18} color="#4F46E5" />
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.scheduleLabel}>Date</Text>
                 <Text style={styles.scheduleValue}>
-                  {offerDate.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+                  {offerDate.toLocaleDateString("en-GB", {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
                 </Text>
               </View>
             </View>
@@ -287,7 +352,9 @@ const OfferDetailScreen = ({ route, navigation }) => {
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.scheduleLabel}>Time</Text>
                 <Text style={styles.scheduleValue}>
-                  {offer.schedule?.timeSlot || offer.schedule?.preferredTime || "Flexible"}
+                  {offer.schedule?.timeSlot ||
+                    offer.schedule?.preferredTime ||
+                    "Flexible"}
                 </Text>
               </View>
             </View>
@@ -297,7 +364,9 @@ const OfferDetailScreen = ({ route, navigation }) => {
               <Repeat size={18} color="#8B5CF6" />
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.scheduleLabel}>Frequency</Text>
-                <Text style={styles.scheduleValue}>{offer.details.frequency}</Text>
+                <Text style={styles.scheduleValue}>
+                  {offer.details.frequency}
+                </Text>
               </View>
             </View>
           )}
@@ -305,7 +374,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
         {/* Location */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📍  Location</Text>
+          <Text style={styles.sectionTitle}>📍 Location</Text>
           <View style={styles.locationCard}>
             <MapPin size={20} color="#4F46E5" />
             <Text style={styles.locationText}>
@@ -317,7 +386,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
         {/* Rooms */}
         {rooms.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🏠  Rooms to Clean</Text>
+            <Text style={styles.sectionTitle}>🏠 Rooms to Clean</Text>
             <View style={styles.tagsWrap}>
               {rooms.map((r, i) => (
                 <View key={i} style={styles.roomTag}>
@@ -332,12 +401,14 @@ const OfferDetailScreen = ({ route, navigation }) => {
         {/* Extra Services */}
         {services.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>✨  Extra Services</Text>
+            <Text style={styles.sectionTitle}>✨ Extra Services</Text>
             <View style={styles.tagsWrap}>
               {services.map((s, i) => (
                 <View key={i} style={[styles.roomTag, styles.serviceTag]}>
-                  <Sparkles size={12} color="#F59E0B" />
-                  <Text style={[styles.roomTagText, { color: "#92400E" }]}>{s}</Text>
+                  {/* <Sparkles size={12} color="#F59E0B" /> */}
+                  <Text style={[styles.roomTagText, { color: "#92400E" }]}>
+                    {s}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -346,7 +417,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
         {/* Property Info */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ℹ️  Property Info</Text>
+          <Text style={styles.sectionTitle}>ℹ️ Property Info</Text>
           <View style={styles.infoGrid}>
             {parking && (
               <View style={styles.infoChip}>
@@ -377,7 +448,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
         {/* Customer Info */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>👤  Customer</Text>
+          <Text style={styles.sectionTitle}>👤 Customer</Text>
           <View style={styles.customerCard}>
             <View style={styles.customerAvatar}>
               <Text style={styles.customerAvatarText}>
@@ -385,15 +456,23 @@ const OfferDetailScreen = ({ route, navigation }) => {
               </Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.customerName}>{cust.firstName || "Customer"} {cust.lastName || ""}</Text>
-              <Text style={styles.customerSub}>{cust.phone || cust.email || "Contact info not shared"}</Text>
+              <Text style={styles.customerName}>
+                {cust.firstName || "Customer"} {cust.lastName || ""}
+              </Text>
+              <Text style={styles.customerSub}>
+                {cust.phone || cust.email || "Contact info not shared"}
+              </Text>
             </View>
           </View>
         </View>
 
         {/* Received Time */}
         <Text style={styles.receivedText}>
-          Received: {timeReceived.toLocaleDateString("en-GB")} at {timeReceived.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          Received: {timeReceived.toLocaleDateString("en-GB")} at{" "}
+          {timeReceived.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
         </Text>
 
         {/* Action Buttons */}
@@ -430,7 +509,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
             {actionLoading === "reject" ? (
               <ActivityIndicator color="#EF4444" />
             ) : (
-              <Text style={styles.rejectBtnText}>✕  Turn Down Proposal</Text>
+              <Text style={styles.rejectBtnText}>✕ Turn Down Proposal</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -439,7 +518,12 @@ const OfferDetailScreen = ({ route, navigation }) => {
       </ScrollView>
 
       {/* Suggest Time Modal */}
-      <Modal visible={showSuggestTime} animationType="slide" transparent onRequestClose={() => setShowSuggestTime(false)}>
+      <Modal
+        visible={showSuggestTime}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowSuggestTime(false)}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
@@ -448,7 +532,9 @@ const OfferDetailScreen = ({ route, navigation }) => {
                 <X size={22} color="#6B7280" />
               </TouchableOpacity>
             </View>
-            <Text style={styles.modalSub}>e.g. "Tomorrow at 3 PM" or "Next Monday 10:00 AM"</Text>
+            <Text style={styles.modalSub}>
+              e.g. "Tomorrow at 3 PM" or "Next Monday 10:00 AM"
+            </Text>
             <TextInput
               style={styles.timeInput}
               placeholder="Enter your preferred time..."
@@ -477,7 +563,12 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F5F7" },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F5F5F7" },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F5F5F7",
+  },
   loadingText: { marginTop: 12, color: "#6B7280", fontSize: 14 },
 
   // Header
@@ -490,7 +581,14 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingTop: 18,
   },
-  backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.15)", justifyContent: "center", alignItems: "center" },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   headerTitle: { fontSize: 17, fontWeight: "700", color: "#fff" },
 
   content: { flex: 1 },
@@ -506,123 +604,266 @@ const styles = StyleSheet.create({
   },
   heroTop: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
   serviceIconBox: {
-    width: 52, height: 52, borderRadius: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center", alignItems: "center", marginRight: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
   },
   heroInfo: { flex: 1 },
-  heroService: { fontSize: 18, fontWeight: "800", color: "#fff", marginBottom: 2 },
+  heroService: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#fff",
+    marginBottom: 2,
+  },
   heroRef: { fontSize: 12, color: "rgba(255,255,255,0.65)" },
   newBadge: {
-    backgroundColor: "#F59E0B", paddingHorizontal: 10, paddingVertical: 4,
+    backgroundColor: "#F59E0B",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 8,
   },
-  newBadgeText: { fontSize: 10, fontWeight: "800", color: "#fff", letterSpacing: 0.5 },
+  newBadgeText: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#fff",
+    letterSpacing: 0.5,
+  },
   payBanner: {
     backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 16, padding: 16,
-    flexDirection: "row", justifyContent: "space-around",
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
   payItem: { alignItems: "center" },
-  payLabel: { fontSize: 10, color: "rgba(255,255,255,0.7)", fontWeight: "600", marginBottom: 4, textTransform: "uppercase" },
+  payLabel: {
+    fontSize: 10,
+    color: "rgba(255,255,255,0.7)",
+    fontWeight: "600",
+    marginBottom: 4,
+    textTransform: "uppercase",
+  },
   payValue: { fontSize: 22, fontWeight: "800", color: "#fff" },
   payUnit: { fontSize: 13, fontWeight: "500" },
   payDivider: { width: 1, backgroundColor: "rgba(255,255,255,0.2)" },
 
   // Sections
   section: { marginHorizontal: 16, marginTop: 20 },
-  sectionTitle: { fontSize: 13, fontWeight: "800", color: "#374151", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#374151",
+    marginBottom: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
 
   // Schedule
   scheduleRow: { flexDirection: "row", gap: 10 },
   scheduleCard: {
-    flex: 1, flexDirection: "row", alignItems: "center",
-    backgroundColor: "#fff", borderRadius: 14, padding: 14,
-    shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  scheduleLabel: { fontSize: 10, color: "#9CA3AF", fontWeight: "600", textTransform: "uppercase" },
-  scheduleValue: { fontSize: 13, fontWeight: "700", color: "#1F2937", marginTop: 2 },
+  scheduleLabel: {
+    fontSize: 10,
+    color: "#9CA3AF",
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  scheduleValue: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#1F2937",
+    marginTop: 2,
+  },
 
   // Location
   locationCard: {
-    backgroundColor: "#fff", borderRadius: 14, padding: 16,
-    flexDirection: "row", alignItems: "flex-start", gap: 12,
-    shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  locationText: { flex: 1, fontSize: 14, fontWeight: "600", color: "#1F2937", lineHeight: 20 },
+  locationText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1F2937",
+    lineHeight: 20,
+  },
 
   // Rooms & Services Tags
   tagsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   roomTag: {
-    flexDirection: "row", alignItems: "center", gap: 6,
-    backgroundColor: "#EEF2FF", paddingHorizontal: 12, paddingVertical: 8,
-    borderRadius: 20, borderWidth: 1, borderColor: "#C7D2FE",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#EEF2FF",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#C7D2FE",
   },
   roomTagText: { fontSize: 13, fontWeight: "600", color: "#4338CA" },
   serviceTag: { backgroundColor: "#FFFBEB", borderColor: "#FDE68A" },
 
   // Property Info
-  infoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 10 },
+  infoGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 10,
+  },
   infoChip: {
-    flexDirection: "row", alignItems: "center", gap: 6,
-    backgroundColor: "#fff", paddingHorizontal: 12, paddingVertical: 8,
-    borderRadius: 20, borderWidth: 1, borderColor: "#E5E7EB",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#fff",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
   infoChipText: { fontSize: 12, color: "#374151", fontWeight: "500" },
   instructionBox: {
-    flexDirection: "row", alignItems: "flex-start", gap: 8,
-    backgroundColor: "#EEF2FF", borderRadius: 12, padding: 12,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    backgroundColor: "#EEF2FF",
+    borderRadius: 12,
+    padding: 12,
   },
   instructionText: { flex: 1, fontSize: 13, color: "#3730A3", lineHeight: 18 },
 
   // Customer
   customerCard: {
-    backgroundColor: "#fff", borderRadius: 14, padding: 16,
-    flexDirection: "row", alignItems: "center", gap: 12,
-    shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 8, elevation: 2,
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   customerAvatar: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: "#4F46E5", justifyContent: "center", alignItems: "center",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#4F46E5",
+    justifyContent: "center",
+    alignItems: "center",
   },
   customerAvatarText: { fontSize: 18, fontWeight: "800", color: "#fff" },
   customerName: { fontSize: 15, fontWeight: "700", color: "#1F2937" },
   customerSub: { fontSize: 12, color: "#9CA3AF", marginTop: 2 },
 
-  receivedText: { textAlign: "center", fontSize: 12, color: "#9CA3AF", marginTop: 20, marginBottom: 4 },
+  receivedText: {
+    textAlign: "center",
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 20,
+    marginBottom: 4,
+  },
 
   // Action Buttons
   actionsContainer: { paddingHorizontal: 16, marginTop: 16, gap: 10 },
   acceptBtn: {
-    backgroundColor: "#4F46E5", borderRadius: 16, paddingVertical: 16,
-    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
-    shadowColor: "#4F46E5", shadowOpacity: 0.4, shadowRadius: 12, elevation: 6,
+    backgroundColor: "#4F46E5",
+    borderRadius: 16,
+    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    shadowColor: "#4F46E5",
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 6,
   },
   acceptBtnText: { fontSize: 16, fontWeight: "800", color: "#fff" },
   suggestBtn: {
-    backgroundColor: "#EEF2FF", borderRadius: 16, paddingVertical: 14,
-    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
-    borderWidth: 1.5, borderColor: "#C7D2FE",
+    backgroundColor: "#EEF2FF",
+    borderRadius: 16,
+    paddingVertical: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1.5,
+    borderColor: "#C7D2FE",
   },
   suggestBtnText: { fontSize: 14, fontWeight: "700", color: "#4F46E5" },
   rejectBtn: {
-    backgroundColor: "#FEF2F2", borderRadius: 16, paddingVertical: 14,
-    alignItems: "center", borderWidth: 1.5, borderColor: "#FECACA",
+    backgroundColor: "#FEF2F2",
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#FECACA",
   },
   rejectBtnText: { fontSize: 14, fontWeight: "700", color: "#EF4444" },
 
   // Modal
-  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" },
-  modalCard: { backgroundColor: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24 },
-  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  modalCard: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 24,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
   modalTitle: { fontSize: 18, fontWeight: "800", color: "#1F2937" },
   modalSub: { fontSize: 13, color: "#6B7280", marginBottom: 16 },
   timeInput: {
-    backgroundColor: "#F9FAFB", borderRadius: 14, padding: 14,
-    fontSize: 14, color: "#1F2937", minHeight: 80, textAlignVertical: "top",
-    borderWidth: 1, borderColor: "#E5E7EB", marginBottom: 16,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 14,
+    padding: 14,
+    fontSize: 14,
+    color: "#1F2937",
+    minHeight: 80,
+    textAlignVertical: "top",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    marginBottom: 16,
   },
-  sendBtn: { backgroundColor: "#4F46E5", borderRadius: 14, paddingVertical: 14, alignItems: "center" },
+  sendBtn: {
+    backgroundColor: "#4F46E5",
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
   sendBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
 });
 

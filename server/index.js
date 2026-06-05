@@ -6,7 +6,20 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
+app.use(
+  cors({
+    origin: [
+      "https://www.cleaniqservices.com",
+      "https://cleaniqservices.com",
+      "http://localhost:5173",
+      "http://localhost:8081",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // ✅ added OPTIONS
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
+);
+app.options("*", cors());
 // Enforce canonical host (www) in production to avoid www vs non-www split
 app.use((req, res, next) => {
   try {
@@ -28,18 +41,7 @@ app.use((req, res, next) => {
 });
 
 // Middleware
-app.use(
-  cors({
-    origin: [
-      "https://www.cleaniqservices.com",
-      "https://cleaniqservices.com",
-      "http://localhost:5173",
-      "http://localhost:8081",
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
