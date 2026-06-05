@@ -41,18 +41,12 @@ router.post("/", async (req, res) => {
     booking.set("property", req.body.property);
     booking.set("meta", req.body.meta);
 
-    // Apply global default workerRate / workerDuration if not provided
-    if (booking.workerRate == null || booking.workerDuration == null) {
+    // Apply global default workerRate if not provided
+    if (booking.workerRate == null) {
       try {
-        const [rateSetting, durSetting] = await Promise.all([
-          SystemSetting.findOne({ key: "defaultWorkerRate" }),
-          SystemSetting.findOne({ key: "defaultWorkerDuration" }),
-        ]);
-        if (booking.workerRate == null && rateSetting) {
+        const rateSetting = await SystemSetting.findOne({ key: "defaultWorkerRate" });
+        if (rateSetting) {
           booking.workerRate = rateSetting.value;
-        }
-        if (booking.workerDuration == null && durSetting) {
-          booking.workerDuration = durSetting.value;
         }
       } catch (settingsErr) {
         console.warn("⚠️ Could not load default worker settings:", settingsErr.message);

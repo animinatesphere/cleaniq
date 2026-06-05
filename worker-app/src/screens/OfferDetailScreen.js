@@ -23,7 +23,7 @@ import {
   DollarSign,
   User,
   Home,
-  Sparkles,
+  Briefcase,
   Car,
   Key,
   PawPrint,
@@ -233,7 +233,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
         <View style={styles.heroCard}>
           <View style={styles.heroTop}>
             <View style={styles.serviceIconBox}>
-              <Sparkles size={28} color="#fff" />
+              <Briefcase size={28} color="#fff" />
             </View>
             <View style={styles.heroInfo}>
               <Text style={styles.heroService}>{offer.service || "Cleaning Service"}</Text>
@@ -245,7 +245,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
           </View>
 
           {/* Pay Banner */}
-          {(offer.workerRate > 0 || offer.workerDuration > 0) ? (
+          {(offer.workerRate > 0) ? (
             <View style={styles.payBanner}>
               <View style={styles.payItem}>
                 <Text style={styles.payLabel}>Your Rate</Text>
@@ -254,12 +254,12 @@ const OfferDetailScreen = ({ route, navigation }) => {
               <View style={styles.payDivider} />
               <View style={styles.payItem}>
                 <Text style={styles.payLabel}>Duration</Text>
-                <Text style={styles.payValue}>{offer.workerDuration || 0}<Text style={styles.payUnit}> hrs</Text></Text>
+                <Text style={styles.payValue}>{offer.details?.duration || offer.workerDuration || offer.duration || 0}<Text style={styles.payUnit}> hrs</Text></Text>
               </View>
               <View style={styles.payDivider} />
               <View style={styles.payItem}>
                 <Text style={styles.payLabel}>Estimated</Text>
-                <Text style={[styles.payValue, { color: "#10B981" }]}>£{((offer.workerRate || 0) * (offer.workerDuration || 0)).toFixed(0)}</Text>
+                <Text style={[styles.payValue, { color: "#10B981" }]}>£{((offer.workerRate || 0) * (offer.details?.duration || offer.workerDuration || offer.duration || 0)).toFixed(0)}</Text>
               </View>
             </View>
           ) : (

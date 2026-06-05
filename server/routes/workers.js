@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Worker = require('../models/Worker');
 const Booking = require('../models/Booking');
+const Notification = require('../models/Notification');
 const jwt = require('jsonwebtoken');
 const { sendEmail, templates } = require('../utils/emailService');
 
@@ -143,6 +144,14 @@ router.post('/jobs/:id/accept', async (req, res) => {
     booking.jobAcceptedTime = new Date();
     
     await booking.save();
+    
+    // Create notification
+    await Notification.create({
+      workerId: workerId,
+      title: "Job Accepted",
+      message: `You have successfully accepted the job for ${booking.customer?.firstName} (${booking.service}). Check your schedule.`,
+      type: "success"
+    });
     
     // Send email log to Admin
     await sendEmail({
@@ -507,6 +516,43 @@ router.delete('/:id', async (req, res) => {
     res.json({ message: 'Worker deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+
+// PUT update worker profile (bank details, personal info)
+router.put('/:id/profile', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { phone, bankDetails } = req.body;
+    
+    const worker = await Worker.findById(id);
+    if (!worker) {
+      return res.status(404).json({ error: 'Worker not found' });
+    }
+
+    if (phone) worker.phone = phone;
+    if (bankDetails) {
+      worker.bankDetails = {
+        ...worker.bankDetails,
+        ...bankDetails
+      };
+    }
+
+    await worker.save();
+    
+    // Create notification
+    await Notification.create({
+      workerId: worker._id,
+      title: "Profile Updated",
+      message: "Your profile and bank details have been successfully updated.",
+      type: "success"
+    });
+
+    res.json(worker);
+  } catch (error) {
+    console.error('Error updating worker profile:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

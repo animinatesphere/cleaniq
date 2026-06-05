@@ -14,7 +14,7 @@ import {
   Alert,
 } from "react-native";
 import { AuthContext, API_URL } from "../context/AuthContext";
-import { Send, ChevronLeft, Phone, Bell } from "lucide-react-native";
+import { Send, ChevronLeft, Phone, Bell, ShieldAlert } from "lucide-react-native";
 import axios from "axios";
 
 const ChatWithCustomerScreen = ({ route, navigation }) => {
@@ -133,10 +133,10 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <ChevronLeft size={24} color="#1F2937" />
         </TouchableOpacity>
-        <View style={{ flex: 1 }}>
+        <View style={styles.headerInfo}>
           <Text style={styles.headerTitle}>{customerName}</Text>
           <Text style={styles.headerSubtitle}>
             Booking #{bookingId.slice(-6)}
@@ -145,13 +145,13 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
         <TouchableOpacity
           onPress={() =>
             Alert.alert(
-              "Note",
-              "Customer will receive notifications and email for all messages",
+              "Important Note",
+              "Customers will receive push notifications and emails for all your messages. Keep it professional."
             )
           }
           style={styles.infoIcon}
         >
-          <Bell size={20} color="#1E40AF" />
+          <ShieldAlert size={20} color="#4F46E5" />
         </TouchableOpacity>
       </View>
 
@@ -194,12 +194,12 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
             {sending ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <Send size={20} color="#FFFFFF" />
+              <Send size={18} color="#FFFFFF" />
             )}
           </TouchableOpacity>
         </View>
         <Text style={styles.inputHint}>
-          Messages sent will notify the customer via email and app
+          Customers receive notifications for all messages instantly.
         </Text>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -219,29 +219,42 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
-    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  backBtn: {
+    padding: 8,
+    marginRight: 4,
+  },
+  headerInfo: {
+    flex: 1,
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "800",
     color: "#1F2937",
   },
   headerSubtitle: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: "#6B7280",
+    fontWeight: "600",
     marginTop: 2,
   },
   infoIcon: {
     padding: 8,
-    borderRadius: 8,
-    backgroundColor: "#F3F4F6",
+    borderRadius: 12,
+    backgroundColor: "#EEF2FF",
   },
   messagesList: {
     paddingVertical: 16,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
+    gap: 4,
   },
   messageContainer: {
-    marginBottom: 12,
+    marginBottom: 8,
     flexDirection: "row",
   },
   workerMessageContainer: {
@@ -252,9 +265,9 @@ const styles = StyleSheet.create({
   },
   messageBubble: {
     maxWidth: "80%",
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 20,
     elevation: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -262,74 +275,81 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   workerBubble: {
-    backgroundColor: "#1E40AF",
+    backgroundColor: "#4F46E5",
     borderBottomRightRadius: 4,
   },
   customerBubble: {
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "#FFFFFF",
     borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
   messageText: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
   },
   workerMessageText: {
     color: "#FFFFFF",
+    fontWeight: "500",
   },
   customerMessageText: {
     color: "#1F2937",
+    fontWeight: "500",
   },
   messageTime: {
-    fontSize: 11,
+    fontSize: 10,
     marginTop: 4,
+    alignSelf: "flex-end",
+    fontWeight: "600",
   },
   workerMessageTime: {
     color: "rgba(255, 255, 255, 0.7)",
   },
   customerMessageTime: {
-    color: "#6B7280",
+    color: "#9CA3AF",
   },
   inputContainer: {
     backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
     borderTopColor: "#E5E7EB",
     paddingVertical: 12,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "flex-end",
-    gap: 8,
-    paddingHorizontal: 4,
+    gap: 12,
   },
   input: {
     flex: 1,
     backgroundColor: "#F3F4F6",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontSize: 14,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 15,
     color: "#1F2937",
     maxHeight: 100,
-    minHeight: 40,
+    minHeight: 44,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
   sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: "#1E40AF",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#4F46E5",
     justifyContent: "center",
     alignItems: "center",
   },
   sendButtonDisabled: {
     backgroundColor: "#D1D5DB",
-    opacity: 0.6,
   },
   inputHint: {
     fontSize: 11,
     color: "#9CA3AF",
     marginTop: 8,
     textAlign: "center",
+    fontWeight: "500",
   },
 });
 

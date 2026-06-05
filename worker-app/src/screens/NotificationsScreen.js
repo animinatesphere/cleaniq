@@ -4,7 +4,7 @@ import { AuthContext, API_URL } from '../context/AuthContext';
 import { Bell, Check, Info, AlertTriangle, CheckCircle, Briefcase, ChevronLeft } from 'lucide-react-native';
 import axios from 'axios';
 
-const NotificationScreen = ({ navigation }) => {
+const NotificationsScreen = ({ navigation }) => {
   const { workerInfo } = useContext(AuthContext);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -226,4 +226,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default NotificationScreen;
+export default NotificationsScreen;

@@ -210,10 +210,10 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
               <Text style={styles.serviceRef}>Ref: {booking.bookingId}</Text>
             </View>
           </View>
-          {(booking.workerRate > 0 || booking.workerDuration > 0) && (
+          {(booking.workerRate > 0) && (
             <View style={styles.earningsBox}>
               <Text style={styles.earningsAmount}>
-                £{((booking.workerRate || 0) * (booking.workerDuration || 0)).toFixed(0)}
+                £{((booking.workerRate || 0) * (booking.details?.duration || booking.workerDuration || booking.duration || 0)).toFixed(0)}
               </Text>
               <Text style={styles.earningsLabel}>Estimated</Text>
             </View>
@@ -364,13 +364,13 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             <View style={styles.payDivider} />
             <View style={styles.payRow}>
               <Text style={styles.payRowLabel}>Expected Hours</Text>
-              <Text style={styles.payRowValue}>{booking.workerDuration || 0} hrs</Text>
+              <Text style={styles.payRowValue}>{booking.details?.duration || booking.workerDuration || booking.duration || 0} hrs</Text>
             </View>
             <View style={styles.payDivider} />
             <View style={styles.payRow}>
               <Text style={[styles.payRowLabel, { fontWeight: "700", color: "#1F2937" }]}>Estimated Total</Text>
               <Text style={[styles.payRowValue, { color: "#10B981", fontSize: 18 }]}>
-                £{((booking.workerRate || 0) * (booking.workerDuration || 0)).toFixed(2)}
+                £{((booking.workerRate || 0) * (booking.details?.duration || booking.workerDuration || booking.duration || 0)).toFixed(2)}
               </Text>
             </View>
           </View>

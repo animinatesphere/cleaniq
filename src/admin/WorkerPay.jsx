@@ -20,6 +20,8 @@ import {
   ChevronUp,
   Settings,
   Zap,
+  ArrowDownRight,
+  ArrowUpRight
 } from "lucide-react";
 
 const WorkerPay = () => {
@@ -32,11 +34,10 @@ const WorkerPay = () => {
   // Global defaults state
   const [defaults, setDefaults] = useState({
     defaultWorkerRate: "",
-    defaultWorkerDuration: "",
   });
   const [savingDefaults, setSavingDefaults] = useState(false);
 
-  // Inline edit state: { [bookingId]: { workerRate, workerDuration } }
+  // Inline edit state: { [bookingId]: { workerRate } }
   const [editMap, setEditMap] = useState({});
   const [editingId, setEditingId] = useState(null);
 
@@ -69,7 +70,6 @@ const WorkerPay = () => {
       });
       setDefaults({
         defaultWorkerRate: out.defaultWorkerRate ?? "",
-        defaultWorkerDuration: out.defaultWorkerDuration ?? "",
       });
     } catch (err) {
       console.error(err);
@@ -91,24 +91,14 @@ const WorkerPay = () => {
   const handleSaveDefaults = async () => {
     setSavingDefaults(true);
     try {
-      await Promise.all([
-        fetch(`${API}/settings`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            key: "defaultWorkerRate",
-            value: parseFloat(defaults.defaultWorkerRate) || 0,
-          }),
+      await fetch(`${API}/settings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: "defaultWorkerRate",
+          value: parseFloat(defaults.defaultWorkerRate) || 0,
         }),
-        fetch(`${API}/settings`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            key: "defaultWorkerDuration",
-            value: parseFloat(defaults.defaultWorkerDuration) || 0,
-          }),
-        }),
-      ]);
+      });
       flash("success", "✅ Default settings saved successfully!");
     } catch (err) {
       flash("error", "❌ Failed to save defaults.");
@@ -124,7 +114,6 @@ const WorkerPay = () => {
       ...prev,
       [booking._id]: {
         workerRate: booking.workerRate ?? "",
-        workerDuration: booking.workerDuration ?? "",
       },
     }));
   };
@@ -140,7 +129,6 @@ const WorkerPay = () => {
         body: JSON.stringify({
           ...booking,
           workerRate: parseFloat(vals.workerRate) || 0,
-          workerDuration: parseFloat(vals.workerDuration) || 0,
         }),
       });
       if (!res.ok) throw new Error("Failed");
@@ -157,16 +145,13 @@ const WorkerPay = () => {
   // Compute stats
   const assignedBookings = bookings.filter((b) => b.assignedWorker);
   const totalPayout = bookings.reduce(
-    (sum, b) => sum + (b.workerRate || 0) * (b.workerDuration || 0),
+    (sum, b) => sum + (b.workerRate || 0) * (b.details?.duration || 0),
     0
   );
-  const avgRate =
-    bookings.filter((b) => b.workerRate > 0).length > 0
-      ? bookings
-          .filter((b) => b.workerRate > 0)
-          .reduce((sum, b) => sum + b.workerRate, 0) /
-        bookings.filter((b) => b.workerRate > 0).length
-      : 0;
+  const totalRevenue = bookings.reduce(
+    (sum, b) => sum + (b.payment?.amount || 0),
+    0
+  );
 
   const statusOptions = [
     { value: "all", label: "All Bookings" },
@@ -224,7 +209,7 @@ const WorkerPay = () => {
             Worker Pay
           </h1>
           <p className="text-slate-500 text-sm font-bold mt-1 ml-1">
-            Set hourly rates, manage expected hours & track job acceptance
+            Set hourly rates & track money flow and profit
           </p>
         </div>
         <button
@@ -268,16 +253,16 @@ const WorkerPay = () => {
             color: "emerald",
           },
           {
-            icon: <DollarSign size={20} />,
-            label: "Total Projected Pay",
+            icon: <ArrowUpRight size={20} />,
+            label: "Total Worker Payout",
             value: `£${totalPayout.toFixed(2)}`,
             color: "indigo",
           },
           {
-            icon: <TrendingUp size={20} />,
-            label: "Avg Hourly Rate",
-            value: `£${avgRate.toFixed(2)}/hr`,
-            color: "violet",
+            icon: <ArrowDownRight size={20} />,
+            label: "Total Revenue",
+            value: `£${totalRevenue.toFixed(2)}`,
+            color: "emerald",
           },
         ].map((stat, i) => (
           <div
@@ -310,12 +295,12 @@ const WorkerPay = () => {
               Global Default Settings
             </h2>
             <p className="text-xs text-slate-500 font-bold mt-0.5">
-              These defaults automatically apply to all new incoming bookings
+              Set the default hourly rate for new bookings
             </p>
           </div>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 items-end">
-          <div className="space-y-2">
+        <div className="flex flex-wrap gap-5 items-end">
+          <div className="space-y-2 w-full max-w-sm">
             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1">
               <DollarSign size={12} /> Default Hourly Rate (£)
             </label>
@@ -331,39 +316,6 @@ const WorkerPay = () => {
               className="w-full p-4 rounded-2xl border-2 border-white bg-white font-black text-lg focus:outline-none focus:border-primary transition-all shadow-sm"
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1">
-              <Timer size={12} /> Default Expected Hours
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="0.5"
-              value={defaults.defaultWorkerDuration}
-              onChange={(e) =>
-                setDefaults((d) => ({
-                  ...d,
-                  defaultWorkerDuration: e.target.value,
-                }))
-              }
-              placeholder="e.g. 3"
-              className="w-full p-4 rounded-2xl border-2 border-white bg-white font-black text-lg focus:outline-none focus:border-primary transition-all shadow-sm"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
-              Projected Total Per Job
-            </label>
-            <div className="w-full p-4 rounded-2xl border-2 border-emerald-200 bg-emerald-50 font-black text-lg text-emerald-700">
-              £
-              {(
-                (parseFloat(defaults.defaultWorkerRate) || 0) *
-                (parseFloat(defaults.defaultWorkerDuration) || 0)
-              ).toFixed(2)}
-            </div>
-          </div>
-        </div>
-        <div className="mt-5 flex justify-end">
           <button
             onClick={handleSaveDefaults}
             disabled={savingDefaults}
@@ -385,7 +337,7 @@ const WorkerPay = () => {
         <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <h2 className="text-lg font-black text-primary-dark flex items-center gap-2">
             <Zap size={18} className="text-primary" />
-            Booking Pay Details
+            Booking Money Flow
             <span className="text-xs font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
               {filtered.length}
             </span>
@@ -430,10 +382,10 @@ const WorkerPay = () => {
               const rate = isEditing
                 ? parseFloat(editVals.workerRate) || 0
                 : booking.workerRate || 0;
-              const duration = isEditing
-                ? parseFloat(editVals.workerDuration) || 0
-                : booking.workerDuration || 0;
+              const duration = booking.details?.duration || 0;
+              const customerPaid = booking.payment?.amount || 0;
               const totalPay = rate * duration;
+              const profit = customerPaid - totalPay;
               const isExpanded = expandedId === booking._id;
 
               return (
@@ -490,13 +442,13 @@ const WorkerPay = () => {
                         )}
                       </div>
 
-                      {/* Rate & Hours (editable) */}
-                      <div className="flex items-center gap-3 lg:w-72">
+                      {/* Financials (editable) */}
+                      <div className="flex flex-wrap items-center gap-3 lg:w-[450px]">
                         {isEditing ? (
                           <>
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-[100px]">
                               <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">
-                                £/hr
+                                Worker Rate (£/hr)
                               </label>
                               <input
                                 type="number"
@@ -514,28 +466,6 @@ const WorkerPay = () => {
                                 }
                                 className="w-full p-2.5 rounded-xl border-2 border-primary/30 bg-white font-black text-sm focus:outline-none focus:border-primary"
                                 placeholder="Rate"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">
-                                Hours
-                              </label>
-                              <input
-                                type="number"
-                                min="0"
-                                step="0.5"
-                                value={editVals.workerDuration}
-                                onChange={(e) =>
-                                  setEditMap((prev) => ({
-                                    ...prev,
-                                    [booking._id]: {
-                                      ...prev[booking._id],
-                                      workerDuration: e.target.value,
-                                    },
-                                  }))
-                                }
-                                className="w-full p-2.5 rounded-xl border-2 border-primary/30 bg-white font-black text-sm focus:outline-none focus:border-primary"
-                                placeholder="Hrs"
                               />
                             </div>
                             <div className="flex gap-1.5 mt-4">
@@ -560,23 +490,36 @@ const WorkerPay = () => {
                           </>
                         ) : (
                           <>
-                            <div className="flex-1">
+                            <div className="flex flex-col flex-1 min-w-[80px]">
+                               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Customer Paid</p>
+                               <p className="text-sm font-black text-emerald-600">£{customerPaid.toFixed(2)}</p>
+                            </div>
+                            <div className="flex flex-col flex-1 min-w-[100px]">
                               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                Rate / Hours
+                                Worker Rate/Hrs
                               </p>
                               <p className="text-sm font-black text-primary-dark">
-                                £{(booking.workerRate || 0).toFixed(2)}/hr ×{" "}
-                                {booking.workerDuration || 0}h
+                                £{(booking.workerRate || 0).toFixed(2)}/hr × {duration}h
                               </p>
                             </div>
-                            <div className="flex-1">
+                            <div className="flex flex-col flex-1 min-w-[80px]">
                               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                Total Pay
+                                Worker Pay
                               </p>
                               <p
-                                className={`text-sm font-black ${totalPay > 0 ? "text-emerald-600" : "text-slate-400"}`}
+                                className={`text-sm font-black ${totalPay > 0 ? "text-indigo-600" : "text-slate-400"}`}
                               >
                                 £{totalPay.toFixed(2)}
+                              </p>
+                            </div>
+                             <div className="flex flex-col flex-1 min-w-[80px]">
+                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                Profit
+                              </p>
+                              <p
+                                className={`text-sm font-black ${profit >= 0 ? "text-emerald-600" : "text-rose-600"}`}
+                              >
+                                {profit >= 0 ? '+' : '-'}£{Math.abs(profit).toFixed(2)}
                               </p>
                             </div>
                             <button
@@ -707,8 +650,17 @@ const WorkerPay = () => {
                       {/* Pay Summary Bar */}
                       <div className="mt-5 p-4 rounded-2xl bg-gradient-to-r from-primary/10 to-indigo-100 border border-primary/20 flex flex-wrap gap-6 items-center">
                         <div>
+                           <p className="text-[9px] font-black text-emerald-700 uppercase tracking-widest">
+                             Customer Paid
+                           </p>
+                           <p className="text-2xl font-black text-emerald-600">
+                             £{customerPaid.toFixed(2)}
+                           </p>
+                        </div>
+                        <div className="w-px h-8 bg-primary/20 hidden md:block"></div>
+                        <div>
                           <p className="text-[9px] font-black text-primary/70 uppercase tracking-widest">
-                            Hourly Rate
+                            Worker Rate
                           </p>
                           <p className="text-xl font-black text-primary">
                             £{(booking.workerRate || 0).toFixed(2)}/hr
@@ -717,33 +669,39 @@ const WorkerPay = () => {
                         <div className="text-slate-400 font-black text-lg">×</div>
                         <div>
                           <p className="text-[9px] font-black text-primary/70 uppercase tracking-widest">
-                            Expected Hours
+                            Booked Hours
                           </p>
                           <p className="text-xl font-black text-primary">
-                            {booking.workerDuration || 0} hrs
+                            {duration} hrs
                           </p>
                         </div>
                         <div className="text-slate-400 font-black text-lg">=</div>
                         <div>
-                          <p className="text-[9px] font-black text-emerald-700 uppercase tracking-widest">
-                            Projected Pay
+                          <p className="text-[9px] font-black text-indigo-700 uppercase tracking-widest">
+                            Worker Payout
                           </p>
-                          <p className="text-2xl font-black text-emerald-600">
-                            £
-                            {(
-                              (booking.workerRate || 0) *
-                              (booking.workerDuration || 0)
-                            ).toFixed(2)}
+                          <p className="text-2xl font-black text-indigo-600">
+                            £{totalPay.toFixed(2)}
                           </p>
                         </div>
-                        {booking.workerRate > 0 && booking.workerDuration > 0 && (
+                        <div className="w-px h-8 bg-primary/20 hidden md:block"></div>
+                        <div>
+                          <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
+                            Profit
+                          </p>
+                          <p className={`text-2xl font-black ${profit >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                            {profit >= 0 ? '+' : '-'}£{Math.abs(profit).toFixed(2)}
+                          </p>
+                        </div>
+
+                        {booking.workerRate > 0 && (
                           <div className="ml-auto">
                             <span className="px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
                               <CheckCircle2 size={12} /> Pay Set
                             </span>
                           </div>
                         )}
-                        {(!booking.workerRate || !booking.workerDuration) && (
+                        {!booking.workerRate && (
                           <div className="ml-auto">
                             <span className="px-3 py-1.5 rounded-xl bg-amber-100 text-amber-700 border border-amber-200 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
                               <AlertCircle size={12} /> Using Defaults
