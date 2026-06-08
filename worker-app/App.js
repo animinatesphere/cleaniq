@@ -25,6 +25,7 @@ try {
 }
 
 import { AuthProvider, AuthContext } from "./src/context/AuthContext";
+import { NotificationProvider } from "./src/context/NotificationContext";
 import OnboardingScreen from "./src/screens/OnboardingScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import HomeScreen from "./src/screens/HomeScreen";
@@ -36,6 +37,7 @@ import OfferDetailScreen from "./src/screens/OfferDetailScreen";
 import AcceptedBookingDetailScreen from "./src/screens/AcceptedBookingDetailScreen";
 import ChatWithCustomerScreen from "./src/screens/ChatWithCustomerScreen";
 import ChatScreen from "./src/screens/ChatScreen";
+import notificationService from "./src/utils/notificationService";
 
 // Catch all unhandled runtime errors and print them straight to the computer terminal
 if (global.ErrorUtils) {
@@ -140,7 +142,7 @@ const TabNavigator = () => {
 };
 
 const AppNavigation = () => {
-  const { isLoading, userToken } = useContext(AuthContext);
+  const { isLoading, userToken, workerInfo } = useContext(AuthContext);
   const [hasOnboarded, setHasOnboarded] = useState(false);
   const [isOnboardingCheckLoading, setIsOnboardingCheckLoading] =
     useState(true);
@@ -188,6 +190,28 @@ const AppNavigation = () => {
       }
     })();
   }, []);
+
+  // Start notification polling when user logs in, stop when logs out
+  useEffect(() => {
+    if (userToken && workerInfo?.id) {
+      console.log(
+        "🚀 Starting notification service for worker:",
+        workerInfo.id,
+      );
+      notificationService.startPolling(workerInfo.id, 3000); // Poll every 3 seconds for faster updates
+    } else {
+      console.log("🛑 User logged out, stopping notification service");
+      notificationService.stopPolling();
+      notificationService.clearStoredNotifications();
+    }
+
+    return () => {
+      // Cleanup on unmount
+      if (!userToken) {
+        notificationService.stopPolling();
+      }
+    };
+  }, [userToken, workerInfo?.id]);
 
   if (isLoading || isOnboardingCheckLoading) {
     return (
@@ -242,11 +266,21 @@ const AppNavigation = () => {
   );
 };
 
+const NavigationWrapper = () => {
+  const { workerInfo } = useContext(AuthContext);
+
+  return (
+    <NotificationProvider workerInfo={workerInfo}>
+      <StatusBar style="auto" />
+      <AppNavigation />
+    </NotificationProvider>
+  );
+};
+
 export default function App() {
   return (
     <AuthProvider>
-      <StatusBar style="auto" />
-      <AppNavigation />
+      <NavigationWrapper />
     </AuthProvider>
   );
 }

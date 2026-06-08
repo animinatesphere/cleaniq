@@ -24,7 +24,6 @@ import {
   Briefcase,
   CheckCircle,
   User,
-  Phone,
   MessageSquare,
   AlertCircle,
   Play,
@@ -504,12 +503,7 @@ const JobsFeedScreen = ({ navigation }) => {
               {item.customer?.firstName} {item.customer?.lastName}
             </Text>
           </View>
-          <View style={styles.infoRow}>
-            <Phone size={16} color="#64748B" />
-            <Text style={styles.infoText}>
-              {item.customer?.phone || "No phone provided"}
-            </Text>
-          </View>
+
           <View style={[styles.infoRow, { alignItems: "flex-start" }]}>
             <MapPin size={16} color="#64748B" style={{ marginTop: 2 }} />
             <Text style={styles.fullAddressText}>

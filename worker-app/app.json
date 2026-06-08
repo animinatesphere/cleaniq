@@ -20,13 +20,17 @@
       "adaptiveIcon": {
         "backgroundColor": "#0A5C43",
         "foregroundImage": "./assets/icon.jpg"
-      }
+      },
+      "permissions": ["android.permission.POST_NOTIFICATIONS"]
     },
-    "web": {
-      "favicon": "./assets/icon.jpg",
-      "name": "Cleaniq",
-      "shortName": "Cleaniq"
-    },
+    "plugins": [
+      [
+        "expo-updates",
+        {
+          "username": "hexcode"
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "c1e50a75-2559-4534-a471-6e975bdeccbc"
@@ -36,7 +40,10 @@
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/c1e50a75-2559-4534-a471-6e975bdeccbc"
+      "url": "https://u.expo.dev/c1e50a75-2559-4534-a471-6e975bdeccbc",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 30000
     }
   }
 }

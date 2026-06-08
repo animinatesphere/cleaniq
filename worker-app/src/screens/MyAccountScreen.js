@@ -10,6 +10,7 @@ import {
   Alert,
   TextInput,
   Platform,
+  Modal,
 } from "react-native";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import {
@@ -25,7 +26,12 @@ import {
   Briefcase,
   TrendingUp,
   CreditCard,
-  ShieldCheck
+  ShieldCheck,
+  Wallet,
+  DollarSign,
+  ArrowUpRight,
+  AlertCircle,
+  Check,
 } from "lucide-react-native";
 import axios from "axios";
 
@@ -33,6 +39,11 @@ const MyAccountScreen = ({ navigation }) => {
   const { workerInfo, logout } = useContext(AuthContext);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [wallet, setWallet] = useState(null);
+  const [withdrawalHistory, setWithdrawalHistory] = useState([]);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
   
   // Combine normal user info + bank details
   const [formData, setFormData] = useState({
@@ -47,7 +58,68 @@ const MyAccountScreen = ({ navigation }) => {
     sortCode: workerInfo?.bankDetails?.sortCode || "",
   });
 
-  const handleEditChange = (field, value) => {
+  useEffect(() => {
+    fetchWalletData();
+  }, [workerInfo?.id]);
+
+  const fetchWalletData = async () => {
+    if (!workerInfo?.id) return;
+    try {
+      const [walletRes, historyRes] = await Promise.all([
+        axios.get(`${API_URL}/payments/wallet/${workerInfo.id}`),
+        axios.get(`${API_URL}/payments/withdrawals/${workerInfo.id}`),
+      ]);
+      setWallet(walletRes.data);
+      setWithdrawalHistory(historyRes.data || []);
+    } catch (error) {
+      console.error("Error fetching wallet data:", error);
+    }
+  };
+
+  const handleRequestWithdrawal = async () => {
+    const amount = parseFloat(withdrawAmount);
+
+    if (!amount || amount <= 0) {
+      Alert.alert("Invalid", "Please enter a valid amount");
+      return;
+    }
+
+    if (!workerInfo?.bankDetails?.accountName) {
+      Alert.alert(
+        "Bank Details Required",
+        "Please add your bank details before withdrawing"
+      );
+      setShowWithdrawModal(false);
+      setIsEditing(true);
+      return;
+    }
+
+    setWithdrawLoading(true);
+    try {
+      const response = await axios.post(
+        `${API_URL}/payments/withdraw/${workerInfo.id}`,
+        { amount }
+      );
+
+      Alert.alert("Success", response.data.message, [
+        {
+          text: "OK",
+          onPress: () => {
+            setWithdrawAmount("");
+            setShowWithdrawModal(false);
+            fetchWalletData();
+          },
+        },
+      ]);
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.error || "Failed to request withdrawal"
+      );
+    } finally {
+      setWithdrawLoading(false);
+    }
+  };
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -242,6 +314,112 @@ const MyAccountScreen = ({ navigation }) => {
                 </View>
               </View>
             </View>
+
+            {/* Wallet Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Wallet & Payments</Text>
+              {wallet ? (
+                <>
+                  <View style={styles.walletCard}>
+                    <View style={styles.walletHeader}>
+                      <View style={styles.walletIconBox}>
+                        <Wallet size={24} color="#10B981" />
+                      </View>
+                      <View>
+                        <Text style={styles.walletLabel}>Available Balance</Text>
+                        <Text style={styles.walletAmount}>£{wallet.balance?.toFixed(2) || "0.00"}</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={styles.walletStatsRow}>
+                    <View style={styles.walletStatBox}>
+                      <Text style={styles.walletStatLabel}>Total Earned</Text>
+                      <Text style={styles.walletStatValue}>£{wallet.totalEarned?.toFixed(2) || "0.00"}</Text>
+                    </View>
+                    <View style={styles.walletStatDivider} />
+                    <View style={styles.walletStatBox}>
+                      <Text style={styles.walletStatLabel}>On Hold</Text>
+                      <Text style={styles.walletStatValue}>£{wallet.onHold?.toFixed(2) || "0.00"}</Text>
+                    </View>
+                    <View style={styles.walletStatDivider} />
+                    <View style={styles.walletStatBox}>
+                      <Text style={styles.walletStatLabel}>Withdrawn</Text>
+                      <Text style={styles.walletStatValue}>£{wallet.withdrawn?.toFixed(2) || "0.00"}</Text>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
+                    style={styles.withdrawButton}
+                    onPress={() => setShowWithdrawModal(true)}
+                    disabled={wallet.balance <= 0}
+                  >
+                    <ArrowUpRight size={18} color="#FFFFFF" />
+                    <Text style={styles.withdrawButtonText}>Request Withdrawal</Text>
+                  </TouchableOpacity>
+
+                  {withdrawalHistory.length > 0 && (
+                    <View style={styles.historySection}>
+                      <Text style={styles.historyTitle}>Recent Withdrawals</Text>
+                      {withdrawalHistory.slice(0, 3).map((withdrawal) => (
+                        <View key={withdrawal._id} style={styles.historyItem}>
+                          <View style={styles.historyItemLeft}>
+                            <View
+                              style={[
+                                styles.historyStatusBadge,
+                                {
+                                  backgroundColor:
+                                    withdrawal.status === "completed"
+                                      ? "#ECFDF5"
+                                      : withdrawal.status === "pending"
+                                      ? "#FEF3C7"
+                                      : "#FEE2E2",
+                                },
+                              ]}
+                            >
+                              {withdrawal.status === "completed" && (
+                                <Check size={14} color="#10B981" />
+                              )}
+                              {withdrawal.status === "pending" && (
+                                <AlertCircle size={14} color="#F59E0B" />
+                              )}
+                              {withdrawal.status === "failed" && (
+                                <X size={14} color="#EF4444" />
+                              )}
+                            </View>
+                            <View>
+                              <Text style={styles.historyAmount}>£{withdrawal.amount.toFixed(2)}</Text>
+                              <Text style={styles.historyDate}>
+                                {new Date(withdrawal.createdAt).toLocaleDateString()}
+                              </Text>
+                            </View>
+                          </View>
+                          <Text
+                            style={[
+                              styles.historyStatus,
+                              {
+                                color:
+                                  withdrawal.status === "completed"
+                                    ? "#10B981"
+                                    : withdrawal.status === "pending"
+                                    ? "#F59E0B"
+                                    : "#EF4444",
+                              },
+                            ]}
+                          >
+                            {withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </>
+              ) : (
+                <View style={styles.loadingBox}>
+                  <ActivityIndicator color="#4F46E5" />
+                </View>
+              )}
+            </View>
             
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Settings</Text>
@@ -266,6 +444,92 @@ const MyAccountScreen = ({ navigation }) => {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Withdrawal Modal */}
+      <Modal
+        visible={showWithdrawModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowWithdrawModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Request Withdrawal</Text>
+              <TouchableOpacity onPress={() => setShowWithdrawModal(false)}>
+                <X size={24} color="#1F2937" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              <View style={styles.modalSection}>
+                <Text style={styles.modalLabel}>Available Balance</Text>
+                <Text style={styles.modalBalance}>£{wallet?.balance?.toFixed(2) || "0.00"}</Text>
+              </View>
+
+              <View style={styles.modalSection}>
+                <Text style={styles.modalLabel}>Withdrawal Amount</Text>
+                <View style={styles.withdrawInputContainer}>
+                  <DollarSign size={20} color="#4F46E5" />
+                  <TextInput
+                    style={styles.withdrawInput}
+                    placeholder="Enter amount"
+                    value={withdrawAmount}
+                    onChangeText={setWithdrawAmount}
+                    keyboardType="decimal-pad"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
+                <Text style={styles.modalHint}>
+                  Minimum: £20 | Maximum: £1000
+                </Text>
+              </View>
+
+              <View style={styles.modalSection}>
+                <Text style={styles.modalLabel}>Bank Account</Text>
+                <View style={styles.bankDetailsBox}>
+                  <Text style={styles.bankDetailText}>
+                    {workerInfo?.bankDetails?.accountName || "No bank details"}
+                  </Text>
+                  <Text style={styles.bankDetailText}>
+                    {workerInfo?.bankDetails?.accountNumber
+                      ? `••••${workerInfo.bankDetails.accountNumber.slice(-4)}`
+                      : "Not set"}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.modalInfoBox}>
+                <AlertCircle size={16} color="#F59E0B" />
+                <Text style={styles.modalInfoText}>
+                  The amount will be deducted from your wallet and sent to your bank account. Admin approval may take 24-48 hours.
+                </Text>
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setShowWithdrawModal(false)}
+                disabled={withdrawLoading}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalConfirmButton}
+                onPress={handleRequestWithdrawal}
+                disabled={withdrawLoading || !withdrawAmount}
+              >
+                {withdrawLoading ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text style={styles.modalConfirmText}>Confirm Withdrawal</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -342,7 +606,145 @@ const styles = StyleSheet.create({
     alignItems: "center", marginTop: 24, marginBottom: 40,
     shadowColor: "#4F46E5", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 4
   },
-  saveButtonText: { fontSize: 16, fontWeight: "700", color: "#FFFFFF" }
+  saveButtonText: { fontSize: 16, fontWeight: "700", color: "#FFFFFF" },
+  
+  // Wallet Styles
+  walletCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    borderLeftWidth: 4,
+    borderLeftColor: "#10B981",
+  },
+  walletHeader: { flexDirection: "row", alignItems: "center", gap: 16 },
+  walletIconBox: {
+    width: 50,
+    height: 50,
+    borderRadius: 12,
+    backgroundColor: "#ECFDF5",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  walletLabel: { fontSize: 12, color: "#6B7280", fontWeight: "600" },
+  walletAmount: { fontSize: 28, fontWeight: "800", color: "#10B981", marginTop: 4 },
+  walletStatsRow: {
+    flexDirection: "row",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 16,
+  },
+  walletStatBox: { flex: 1, alignItems: "center" },
+  walletStatLabel: { fontSize: 11, color: "#6B7280", fontWeight: "600" },
+  walletStatValue: { fontSize: 16, fontWeight: "700", color: "#1F2937", marginTop: 4 },
+  walletStatDivider: { width: 1, backgroundColor: "#E5E7EB" },
+  withdrawButton: {
+    backgroundColor: "#10B981",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 16,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  withdrawButtonText: { fontSize: 15, fontWeight: "700", color: "#FFFFFF" },
+  historySection: { marginTop: 12 },
+  historyTitle: { fontSize: 13, fontWeight: "700", color: "#1F2937", marginBottom: 12 },
+  historyItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  historyItemLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
+  historyStatusBadge: { width: 32, height: 32, borderRadius: 8, justifyContent: "center", alignItems: "center" },
+  historyAmount: { fontSize: 14, fontWeight: "700", color: "#1F2937" },
+  historyDate: { fontSize: 12, color: "#6B7280", marginTop: 2 },
+  historyStatus: { fontSize: 12, fontWeight: "600" },
+  loadingBox: { paddingVertical: 40, justifyContent: "center", alignItems: "center" },
+
+  // Modal Styles
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0, 0, 0, 0.5)", justifyContent: "flex-end" },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: "90%",
+    paddingTop: 20,
+  },
+  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, marginBottom: 20 },
+  modalTitle: { fontSize: 20, fontWeight: "800", color: "#1F2937" },
+  modalBody: { paddingHorizontal: 20, maxHeight: "70%" },
+  modalSection: { marginBottom: 24 },
+  modalLabel: { fontSize: 13, fontWeight: "700", color: "#4B5563", marginBottom: 8 },
+  modalBalance: { fontSize: 28, fontWeight: "800", color: "#10B981" },
+  withdrawInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  withdrawInput: { flex: 1, fontSize: 16, color: "#1F2937", fontWeight: "600" },
+  modalHint: { fontSize: 12, color: "#6B7280", marginTop: 8 },
+  bankDetailsBox: {
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    padding: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#4F46E5",
+  },
+  bankDetailText: { fontSize: 13, color: "#1F2937", fontWeight: "600", marginVertical: 4 },
+  modalInfoBox: {
+    flexDirection: "row",
+    gap: 12,
+    backgroundColor: "#FEF3C7",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 24,
+  },
+  modalInfoText: { flex: 1, fontSize: 12, color: "#92400E", fontWeight: "500" },
+  modalFooter: {
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+  modalCancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#E5E7EB",
+  },
+  modalCancelText: { fontSize: 15, fontWeight: "700", color: "#6B7280", textAlign: "center" },
+  modalConfirmButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#10B981",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalConfirmText: { fontSize: 15, fontWeight: "700", color: "#FFFFFF" },
 });
 
 export default MyAccountScreen;

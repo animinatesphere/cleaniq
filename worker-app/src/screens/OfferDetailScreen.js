@@ -13,6 +13,7 @@ import {
   StatusBar,
 } from "react-native";
 import { AuthContext, API_URL } from "../context/AuthContext";
+import { NotificationContext } from "../context/NotificationContext";
 import {
   ChevronLeft,
   MapPin,
@@ -36,6 +37,7 @@ import axios from "axios";
 const OfferDetailScreen = ({ route, navigation }) => {
   const { offerId } = route.params;
   const { workerInfo } = useContext(AuthContext);
+  const { triggerNotificationUpdate } = useContext(NotificationContext);
 
   const [offer, setOffer] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -79,6 +81,10 @@ const OfferDetailScreen = ({ route, navigation }) => {
                 workerId: workerInfo.id,
                 workerName: `${workerInfo.firstName} ${workerInfo.lastName}`,
               });
+
+              // Trigger notification update to fetch new "Job Accepted" notification immediately
+              triggerNotificationUpdate();
+
               Alert.alert(
                 "✅ Job Accepted!",
                 "The job has been added to your Activity tab.",

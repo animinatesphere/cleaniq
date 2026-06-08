@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const workerSchema = new mongoose.Schema({
   workerId: { type: String, required: true, unique: true },
@@ -6,7 +6,7 @@ const workerSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true },
-  region: { type: String, required: true, enum: ['UK', 'NG'] },
+  region: { type: String, required: true, enum: ["UK", "NG"] },
   // Availability
   availability: {
     type: mongoose.Schema.Types.Mixed,
@@ -20,14 +20,28 @@ const workerSchema = new mongoose.Schema({
       sunday: { available: false, slots: [] },
     },
   },
-  
+
   // Bank Details
   bankDetails: {
-    accountName: { type: String, default: '' },
-    accountNumber: { type: String, default: '' },
-    sortCode: { type: String, default: '' },
+    accountName: { type: String, default: "" },
+    accountNumber: { type: String, default: "" },
+    sortCode: { type: String, default: "" },
   },
-  status: { type: String, default: 'Pending', enum: ['Active', 'Pending', 'Suspended'] },
+
+  // Wallet & Payments
+  wallet: {
+    totalEarned: { type: Number, default: 0 },
+    balance: { type: Number, default: 0 },
+    onHold: { type: Number, default: 0 },
+    withdrawn: { type: Number, default: 0 },
+    lastUpdated: { type: Date, default: Date.now },
+  },
+
+  status: {
+    type: String,
+    default: "Pending",
+    enum: ["Active", "Pending", "Suspended"],
+  },
   tempPassword: { type: String },
   appAccessGranted: { type: Boolean, default: false },
   rating: { type: Number, default: 5.0 },
@@ -35,10 +49,10 @@ const workerSchema = new mongoose.Schema({
   location: {
     lat: Number,
     lng: Number,
-    lastUpdated: Date
+    lastUpdated: Date,
   },
   createdAt: { type: Date, default: Date.now },
-  meta: mongoose.Schema.Types.Mixed
+  meta: mongoose.Schema.Types.Mixed,
 });
 
-module.exports = mongoose.model('Worker', workerSchema);
+module.exports = mongoose.model("Worker", workerSchema);
