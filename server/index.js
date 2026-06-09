@@ -78,6 +78,7 @@ const propertiesRoutes = require("./routes/properties");
 const settingsRoutes = require("./routes/settings");
 const notificationsRoutes = require("./routes/notifications");
 const commentRoutes = require("./routes/comments");
+const workerChatRoutes = require("./routes/worker-chat");
 
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
@@ -174,6 +175,7 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/customer-auth", customerAuthRoutes);
 app.use("/api/customer-bookings", customerBookingRoutes);
 app.use("/api/customer-chat", customerChatRoutes);
+app.use("/api/worker-chat", workerChatRoutes);
 app.use("/api/contact", contactRoutes);
 
 app.listen(PORT, () => {
