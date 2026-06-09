@@ -179,7 +179,7 @@ router.put("/:id", async (req, res) => {
       );
 
       // Update worker wallet with earned amount
-      if (updatedBooking.worker) {
+      if (updatedBooking.assignedWorker) {
         const Worker = require("../models/Worker");
         const workerEarnings =
           (updatedBooking.workerRate || 0) *
@@ -189,7 +189,7 @@ router.put("/:id", async (req, res) => {
             0);
 
         if (workerEarnings > 0) {
-          const worker = await Worker.findById(updatedBooking.worker);
+          const worker = await Worker.findById(updatedBooking.assignedWorker);
           if (worker) {
             if (!worker.wallet) {
               worker.wallet = {
@@ -199,12 +199,11 @@ router.put("/:id", async (req, res) => {
                 withdrawn: 0,
               };
             }
-            worker.wallet.totalEarned += workerEarnings;
-            worker.wallet.balance += workerEarnings;
+            // Just ensure wallet exists - balance will be calculated on fetch
             worker.wallet.lastUpdated = new Date();
             await worker.save();
             console.log(
-              `💰 Updated worker wallet: +£${workerEarnings.toFixed(2)}, New balance: £${worker.wallet.balance.toFixed(2)}`,
+              `💰 Booking completed for worker ${updatedBooking.assignedWorkerName}: +£${workerEarnings.toFixed(2)}`,
             );
           }
         }

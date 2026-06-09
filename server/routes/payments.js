@@ -113,7 +113,6 @@ router.get("/wallet/:workerId", async (req, res) => {
 
     // Initialize wallet if it doesn't exist
     if (!worker.wallet) {
-      console.log(`📊 Initializing wallet for worker: ${workerId}`);
       worker.wallet = {
         totalEarned: 0,
         balance: 0,
@@ -122,28 +121,55 @@ router.get("/wallet/:workerId", async (req, res) => {
         lastUpdated: new Date(),
       };
       await worker.save();
-      console.log(`✅ Wallet initialized for worker: ${workerId}`);
     }
 
-    // Ensure balance is always: totalEarned - (onHold + withdrawn)
-    // This way if totalEarned increases, balance automatically increases
+    // ALWAYS recalculate totalEarned from completed bookings
+    const Booking = require("../models/Booking");
+    const completedBookings = await Booking.find({
+      assignedWorker: workerId,
+      status: "Completed",
+    });
+
+    let totalEarned = 0;
+    if (completedBookings.length > 0) {
+      totalEarned = completedBookings.reduce((sum, booking) => {
+        const earnings =
+          (booking.workerRate || 0) *
+          (booking.details?.duration ||
+            booking.workerDuration ||
+            booking.duration ||
+            0);
+        return sum + earnings;
+      }, 0);
+      console.log(
+        `✅ Found ${completedBookings.length} completed bookings, total earnings: £${totalEarned.toFixed(
+          2,
+        )}`,
+      );
+    }
+
+    // Get onHold and withdrawn from wallet
     const onHold = worker.wallet.onHold || 0;
     const withdrawn = worker.wallet.withdrawn || 0;
-    const totalEarned = worker.wallet.totalEarned || 0;
-    const calculatedBalance = totalEarned - onHold - withdrawn;
 
-    // If balance is incorrect, fix it
-    if (worker.wallet.balance !== calculatedBalance) {
-      console.log(
-        `🔄 Correcting balance: was £${worker.wallet.balance}, now £${calculatedBalance} (totalEarned: £${totalEarned}, onHold: £${onHold}, withdrawn: £${withdrawn})`,
-      );
-      worker.wallet.balance = Math.max(0, calculatedBalance); // Never negative
-      worker.wallet.lastUpdated = new Date();
-      await worker.save();
-    }
+    // Calculate available balance
+    const balance = Math.max(0, totalEarned - onHold);
 
-    console.log(`💼 Returning wallet:`, worker.wallet);
-    res.json(worker.wallet);
+    console.log(
+      `💼 Wallet Summary: totalEarned=£${totalEarned.toFixed(
+        2,
+      )}, onHold=£${onHold.toFixed(2)}, withdrawn=£${withdrawn.toFixed(
+        2,
+      )}, balance=£${balance.toFixed(2)}`,
+    );
+
+    res.json({
+      totalEarned,
+      balance,
+      onHold,
+      withdrawn,
+      lastUpdated: new Date(),
+    });
   } catch (error) {
     console.error("❌ Error fetching wallet:", error);
     res.json({
