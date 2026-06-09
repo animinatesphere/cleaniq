@@ -267,7 +267,7 @@ router.post("/withdraw/:workerId", async (req, res) => {
       });
     }
 
-    const worker = await Worker.findById(workerId);
+    let worker = await Worker.findById(workerId);
     if (!worker) {
       return res.status(404).json({ error: "Worker not found" });
     }
@@ -281,9 +281,53 @@ router.post("/withdraw/:workerId", async (req, res) => {
       });
     }
 
-    if (worker.wallet.balance < amount) {
+    // Initialize wallet if it doesn't exist
+    if (!worker.wallet) {
+      worker.wallet = {
+        totalEarned: 0,
+        balance: 0,
+        onHold: 0,
+        withdrawn: 0,
+        lastUpdated: new Date(),
+      };
+    }
+
+    // RECALCULATE totalEarned from completed bookings (same as GET endpoint)
+    const Booking = require("../models/Booking");
+    const completedBookings = await Booking.find({
+      assignedWorker: workerId,
+      status: "Completed",
+    });
+
+    let totalEarned = 0;
+    if (completedBookings.length > 0) {
+      totalEarned = completedBookings.reduce((sum, booking) => {
+        const earnings =
+          (booking.workerRate || 0) *
+          (booking.details?.duration ||
+            booking.workerDuration ||
+            booking.duration ||
+            0);
+        return sum + earnings;
+      }, 0);
+    }
+
+    // Calculate available balance dynamically
+    const onHold = worker.wallet.onHold || 0;
+    const withdrawn = worker.wallet.withdrawn || 0;
+    const availableBalance = Math.max(0, totalEarned - onHold);
+
+    console.log(
+      `💰 Withdrawal check: totalEarned=£${totalEarned.toFixed(
+        2,
+      )}, onHold=£${onHold.toFixed(2)}, withdrawn=£${withdrawn.toFixed(
+        2,
+      )}, available=£${availableBalance.toFixed(2)}, requested=£${amount}`,
+    );
+
+    if (availableBalance < amount) {
       return res.status(400).json({
-        error: `Insufficient balance. Available: £${worker.wallet.balance.toFixed(
+        error: `Insufficient balance. Available: £${availableBalance.toFixed(
           2,
         )}`,
       });
@@ -309,11 +353,16 @@ router.post("/withdraw/:workerId", async (req, res) => {
 
     await withdrawal.save();
 
-    // Deduct from balance, add to onHold
-    worker.wallet.balance -= amount;
+    // Update wallet: move from available balance to onHold
     worker.wallet.onHold += amount;
     worker.wallet.lastUpdated = new Date();
     await worker.save();
+
+    console.log(
+      `✅ Withdrawal request created: £${amount} moved to onHold. New balance: £${(
+        totalEarned - worker.wallet.onHold
+      ).toFixed(2)}`,
+    );
 
     // Send confirmation email to worker
     try {
