@@ -44,12 +44,17 @@ router.post("/", async (req, res) => {
     // Apply global default workerRate if not provided
     if (booking.workerRate == null) {
       try {
-        const rateSetting = await SystemSetting.findOne({ key: "defaultWorkerRate" });
+        const rateSetting = await SystemSetting.findOne({
+          key: "defaultWorkerRate",
+        });
         if (rateSetting) {
           booking.workerRate = rateSetting.value;
         }
       } catch (settingsErr) {
-        console.warn("⚠️ Could not load default worker settings:", settingsErr.message);
+        console.warn(
+          "⚠️ Could not load default worker settings:",
+          settingsErr.message,
+        );
       }
     }
 
@@ -167,11 +172,44 @@ router.put("/:id", async (req, res) => {
       { new: true },
     );
 
-    // Send Invoice Email if status just changed to Completed
+    // Send Invoice Email and update worker wallet if status just changed to Completed
     if (!wasCompleted && isNowCompleted) {
       console.log(
         `✅ Booking ${updatedBooking.bookingId} marked as completed. Sending invoice receipt...`,
       );
+
+      // Update worker wallet with earned amount
+      if (updatedBooking.worker) {
+        const Worker = require("../models/Worker");
+        const workerEarnings =
+          (updatedBooking.workerRate || 0) *
+          (updatedBooking.details?.duration ||
+            updatedBooking.workerDuration ||
+            updatedBooking.duration ||
+            0);
+
+        if (workerEarnings > 0) {
+          const worker = await Worker.findById(updatedBooking.worker);
+          if (worker) {
+            if (!worker.wallet) {
+              worker.wallet = {
+                totalEarned: 0,
+                balance: 0,
+                onHold: 0,
+                withdrawn: 0,
+              };
+            }
+            worker.wallet.totalEarned += workerEarnings;
+            worker.wallet.balance += workerEarnings;
+            worker.wallet.lastUpdated = new Date();
+            await worker.save();
+            console.log(
+              `💰 Updated worker wallet: +£${workerEarnings.toFixed(2)}, New balance: £${worker.wallet.balance.toFixed(2)}`,
+            );
+          }
+        }
+      }
+
       await sendEmail({
         to: updatedBooking.customer.email,
         subject: `Your Cleaniq Invoice & Receipt: ${updatedBooking.bookingId}`,

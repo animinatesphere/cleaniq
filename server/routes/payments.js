@@ -100,7 +100,7 @@ router.get("/wallet/:workerId", async (req, res) => {
     const workerId = req.params.workerId;
     console.log(`💰 Fetching wallet for worker: ${workerId}`);
 
-    const worker = await Worker.findById(workerId);
+    let worker = await Worker.findById(workerId);
     if (!worker) {
       console.warn(`⚠️ Worker not found: ${workerId}`);
       // Return default wallet instead of 404
@@ -112,16 +112,67 @@ router.get("/wallet/:workerId", async (req, res) => {
       });
     }
 
-    res.json(
-      worker.wallet || {
+    // Initialize wallet if it doesn't exist
+    if (!worker.wallet) {
+      console.log(`📊 Initializing wallet for worker: ${workerId}`);
+      worker.wallet = {
         totalEarned: 0,
         balance: 0,
         onHold: 0,
         withdrawn: 0,
-      },
-    );
+        lastUpdated: new Date(),
+      };
+      await worker.save();
+      console.log(`✅ Wallet initialized for worker: ${workerId}`);
+    }
+
+    // Calculate earnings from completed bookings as backup
+    try {
+      const Booking = require("../models/Booking");
+      const completedBookings = await Booking.find({
+        worker: workerId,
+        status: "Completed",
+      });
+
+      let calculatedEarnings = 0;
+      if (completedBookings.length > 0) {
+        calculatedEarnings = completedBookings.reduce((sum, booking) => {
+          const earnings =
+            (booking.workerRate || 0) *
+            (booking.details?.duration ||
+              booking.workerDuration ||
+              booking.duration ||
+              0);
+          return sum + earnings;
+        }, 0);
+
+        console.log(
+          `📊 Calculated earnings from ${completedBookings.length} completed bookings: £${calculatedEarnings.toFixed(2)}`,
+        );
+
+        // If calculated earnings are higher than stored, update wallet
+        if (
+          calculatedEarnings > 0 &&
+          calculatedEarnings > worker.wallet.totalEarned
+        ) {
+          console.log(
+            `🔄 Syncing wallet: updating totalEarned from £${worker.wallet.totalEarned} to £${calculatedEarnings}`,
+          );
+          worker.wallet.totalEarned = calculatedEarnings;
+          worker.wallet.balance =
+            calculatedEarnings - (worker.wallet.onHold || 0);
+          worker.wallet.lastUpdated = new Date();
+          await worker.save();
+        }
+      }
+    } catch (calcError) {
+      console.error("❌ Error calculating earnings from bookings:", calcError);
+    }
+
+    console.log(`💼 Returning wallet:`, worker.wallet);
+    res.json(worker.wallet);
   } catch (error) {
-    console.error("Error fetching wallet:", error);
+    console.error("❌ Error fetching wallet:", error);
     // Return default wallet on error instead of 500
     res.json({
       totalEarned: 0,
@@ -129,6 +180,48 @@ router.get("/wallet/:workerId", async (req, res) => {
       onHold: 0,
       withdrawn: 0,
     });
+  }
+});
+
+// DEBUG: Add test earnings to worker wallet
+router.post("/wallet/:workerId/add-test-earnings", async (req, res) => {
+  try {
+    const workerId = req.params.workerId;
+    const { amount = 100 } = req.body;
+
+    console.log(
+      `💰 [DEBUG] Adding £${amount} test earnings to worker: ${workerId}`,
+    );
+
+    let worker = await Worker.findById(workerId);
+    if (!worker) {
+      return res.status(404).json({ error: "Worker not found" });
+    }
+
+    if (!worker.wallet) {
+      worker.wallet = {
+        totalEarned: 0,
+        balance: 0,
+        onHold: 0,
+        withdrawn: 0,
+      };
+    }
+
+    worker.wallet.totalEarned += amount;
+    worker.wallet.balance += amount;
+    worker.wallet.lastUpdated = new Date();
+    await worker.save();
+
+    console.log(
+      `✅ [DEBUG] Updated wallet. New balance: £${worker.wallet.balance}`,
+    );
+    res.json({
+      message: "Test earnings added successfully",
+      wallet: worker.wallet,
+    });
+  } catch (error) {
+    console.error("❌ [DEBUG] Error adding test earnings:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 

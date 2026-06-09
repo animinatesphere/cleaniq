@@ -364,6 +364,38 @@ router.post("/jobs/:id/complete", async (req, res) => {
 
     await booking.save();
 
+    // Update worker wallet with earned amount
+    if (booking.worker) {
+      const Worker = require("../models/Worker");
+      const workerEarnings =
+        (booking.workerRate || 0) *
+        (booking.details?.duration ||
+          booking.workerDuration ||
+          booking.duration ||
+          0);
+
+      if (workerEarnings > 0) {
+        const worker = await Worker.findById(booking.worker);
+        if (worker) {
+          if (!worker.wallet) {
+            worker.wallet = {
+              totalEarned: 0,
+              balance: 0,
+              onHold: 0,
+              withdrawn: 0,
+            };
+          }
+          worker.wallet.totalEarned += workerEarnings;
+          worker.wallet.balance += workerEarnings;
+          worker.wallet.lastUpdated = new Date();
+          await worker.save();
+          console.log(
+            `💰 Updated worker wallet: +£${workerEarnings.toFixed(2)}, New balance: £${worker.wallet.balance.toFixed(2)}`,
+          );
+        }
+      }
+    }
+
     // Send email log to Admin
     await sendEmail({
       to: process.env.EMAIL_USER || "admin@cleaniqservices.com",

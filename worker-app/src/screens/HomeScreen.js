@@ -36,7 +36,7 @@ import axios from "axios";
 
 const HomeScreen = ({ navigation, route }) => {
   const { workerInfo } = useContext(AuthContext);
-  const [activeTab, setActiveTab] = useState("activity"); // 'activity' or 'offers'
+  const [activeTab, setActiveTab] = useState("activity"); // 'activity', 'offers', or 'history'
 
   const [availableJobs, setAvailableJobs] = useState([]);
   const [myJobs, setMyJobs] = useState([]);
@@ -53,7 +53,8 @@ const HomeScreen = ({ navigation, route }) => {
     onHold: 0,
     withdrawn: 0,
   });
-  const [walletLoading, setWalletLoading] = useState(false);
+  const [walletLoading, setWalletLoading] = useState(true);
+  const [walletError, setWalletError] = useState(null);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawLoading, setWithdrawLoading] = useState(false);
@@ -95,7 +96,7 @@ const HomeScreen = ({ navigation, route }) => {
 
       setActivityStats({
         totalEarnings,
-        offersAccepted: allMyJobs.length,
+        offersAccepted: completedJobs.length,
         customersServed: uniqueCustomers,
       });
     } catch (error) {
@@ -113,29 +114,52 @@ const HomeScreen = ({ navigation, route }) => {
   useFocusEffect(
     useCallback(() => {
       fetchData();
+      fetchWalletData();
       if (route?.params?.tab) {
         setActiveTab(route.params.tab);
       }
     }, [workerInfo?.id, route?.params?.tab]),
   );
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    fetchData();
-    fetchWalletData();
+    try {
+      await fetchData();
+      await fetchWalletData();
+      console.log("✅ Refresh complete");
+    } catch (error) {
+      console.error("❌ Refresh error:", error);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const fetchWalletData = async () => {
-    if (!workerInfo?.id) return;
+    if (!workerInfo?.id) {
+      console.log("⚠️ Worker ID not available yet");
+      setWalletLoading(false);
+      return;
+    }
 
-    setWalletLoading(true);
     try {
+      console.log(`📊 Fetching wallet for worker: ${workerInfo.id}`);
       const walletRes = await axios.get(
         `${API_URL}/payments/wallet/${workerInfo.id}`,
       );
-      setWallet(walletRes.data || {});
+      console.log("✅ Wallet data received:", walletRes.data);
+      setWallet(
+        walletRes.data || {
+          totalEarned: 0,
+          balance: 0,
+          onHold: 0,
+          withdrawn: 0,
+        },
+      );
+      setWalletError(null);
     } catch (error) {
-      console.error("Error fetching wallet:", error.message);
+      console.error("❌ Error fetching wallet:", error.message);
+      console.error("Error response:", error.response?.data);
+      setWalletError(error.message);
       setWallet({
         totalEarned: 0,
         balance: 0,
@@ -151,7 +175,25 @@ const HomeScreen = ({ navigation, route }) => {
     const amount = parseFloat(withdrawAmount);
 
     if (!amount || amount <= 0) {
-      Alert.alert("Invalid", "Please enter a valid amount");
+      Alert.alert("Invalid Amount", "Please enter a valid amount");
+      return;
+    }
+
+    if (amount > wallet.balance) {
+      Alert.alert(
+        "Insufficient Balance",
+        `Your available balance is £${wallet.balance.toFixed(2)}`,
+      );
+      return;
+    }
+
+    if (amount < 20) {
+      Alert.alert("Minimum Amount", "Minimum withdrawal is £20");
+      return;
+    }
+
+    if (amount > 1000) {
+      Alert.alert("Maximum Amount", "Maximum withdrawal is £1000");
       return;
     }
 
@@ -262,6 +304,14 @@ const HomeScreen = ({ navigation, route }) => {
     }
   };
 
+  // Filter active jobs (exclude completed)
+  const activeJobs = myJobs.filter(
+    (job) => job.status !== "Completed" && job.status !== "completed",
+  );
+  const completedJobs = myJobs.filter(
+    (job) => job.status === "Completed" || job.status === "completed",
+  );
+
   const renderActivityTab = () => (
     <ScrollView
       style={styles.tabContent}
@@ -311,56 +361,49 @@ const HomeScreen = ({ navigation, route }) => {
       </View>
 
       {/* Wallet Card */}
-      {walletLoading ? (
-        <View
-          style={[
-            styles.walletCard,
-            { justifyContent: "center", alignItems: "center" },
-          ]}
-        >
-          <ActivityIndicator color="#10B981" size="large" />
-        </View>
-      ) : (
-        <View style={styles.walletCard}>
-          <View style={styles.walletHeader}>
-            <View style={styles.walletIconBox}>
-              <Wallet size={22} color="#10B981" />
-            </View>
-            <View style={styles.walletInfo}>
-              <Text style={styles.walletLabel}>Available Balance</Text>
+      <View style={styles.walletCard}>
+        <View style={styles.walletHeader}>
+          <View style={styles.walletIconBox}>
+            <Wallet size={22} color="#10B981" />
+          </View>
+          <View style={styles.walletInfo}>
+            <Text style={styles.walletLabel}>Available Balance</Text>
+            {walletLoading ? (
+              <ActivityIndicator color="#10B981" size="small" />
+            ) : (
               <Text style={styles.walletAmount}>
                 £{wallet.balance?.toFixed(2) || "0.00"}
               </Text>
-            </View>
+            )}
           </View>
-          <View style={styles.walletStatsRow}>
-            <View style={styles.walletStat}>
-              <Text style={styles.walletStatLabel}>On Hold</Text>
-              <Text style={styles.walletStatValue}>
-                £{wallet.onHold?.toFixed(2) || "0.00"}
-              </Text>
-            </View>
-            <View style={styles.walletStatDivider} />
-            <View style={styles.walletStat}>
-              <Text style={styles.walletStatLabel}>Withdrawn</Text>
-              <Text style={styles.walletStatValue}>
-                £{wallet.withdrawn?.toFixed(2) || "0.00"}
-              </Text>
-            </View>
-          </View>
-          <TouchableOpacity
-            style={[
-              styles.withdrawBtn,
-              wallet.balance <= 0 && styles.withdrawBtnDisabled,
-            ]}
-            onPress={() => setShowWithdrawModal(true)}
-            disabled={wallet.balance <= 0}
-          >
-            <ArrowUpRight size={18} color="#FFFFFF" />
-            <Text style={styles.withdrawBtnText}>Request Withdrawal</Text>
-          </TouchableOpacity>
         </View>
-      )}
+        <View style={styles.walletStatsRow}>
+          <View style={styles.walletStat}>
+            <Text style={styles.walletStatLabel}>On Hold</Text>
+            <Text style={styles.walletStatValue}>
+              £{wallet.onHold?.toFixed(2) || "0.00"}
+            </Text>
+          </View>
+          <View style={styles.walletStatDivider} />
+          <View style={styles.walletStat}>
+            <Text style={styles.walletStatLabel}>Withdrawn</Text>
+            <Text style={styles.walletStatValue}>
+              £{wallet.withdrawn?.toFixed(2) || "0.00"}
+            </Text>
+          </View>
+        </View>
+        <TouchableOpacity
+          style={styles.withdrawBtn}
+          onPress={() => {
+            console.log("💰 Withdrawal button pressed");
+            setShowWithdrawModal(true);
+          }}
+          activeOpacity={0.7}
+        >
+          <ArrowUpRight size={18} color="#FFFFFF" />
+          <Text style={styles.withdrawBtnText}>Request Withdrawal</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.statsGrid}>
         <View style={styles.statBox}>
@@ -394,12 +437,12 @@ const HomeScreen = ({ navigation, route }) => {
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Active Jobs</Text>
-        {myJobs.length > 0 && (
-          <Text style={styles.sectionCount}>{myJobs.length}</Text>
+        {activeJobs.length > 0 && (
+          <Text style={styles.sectionCount}>{activeJobs.length}</Text>
         )}
       </View>
 
-      {myJobs.length === 0 ? (
+      {activeJobs.length === 0 ? (
         <View style={styles.emptyState}>
           <View style={styles.emptyIconBox}>
             <Briefcase size={40} color="#9CA3AF" />
@@ -411,7 +454,7 @@ const HomeScreen = ({ navigation, route }) => {
         </View>
       ) : (
         <View style={styles.jobList}>
-          {myJobs.map((job) => (
+          {activeJobs.map((job) => (
             <TouchableOpacity
               key={job._id}
               style={styles.jobCard}
@@ -528,6 +571,140 @@ const HomeScreen = ({ navigation, route }) => {
                       <ChevronRight size={16} color="#4F46E5" />
                     </TouchableOpacity>
                   )}
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+      <View style={{ height: 40 }} />
+    </ScrollView>
+  );
+
+  const renderHistoryTab = () => (
+    <ScrollView
+      style={styles.tabContent}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={["#4F46E5"]}
+        />
+      }
+    >
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Completed Jobs</Text>
+        {completedJobs.length > 0 && (
+          <Text style={styles.sectionCount}>{completedJobs.length}</Text>
+        )}
+      </View>
+
+      {completedJobs.length === 0 ? (
+        <View style={styles.emptyState}>
+          <View style={styles.emptyIconBox}>
+            <CheckCircle size={40} color="#9CA3AF" />
+          </View>
+          <Text style={styles.emptyStateText}>No completed jobs yet</Text>
+          <Text style={styles.emptyStateSubtext}>
+            Your completed work will appear here
+          </Text>
+        </View>
+      ) : (
+        <View style={styles.jobList}>
+          {completedJobs.map((job) => (
+            <TouchableOpacity
+              key={job._id}
+              style={styles.jobCard}
+              onPress={() =>
+                navigation.navigate("AcceptedBookingDetail", {
+                  bookingId: job._id,
+                })
+              }
+              activeOpacity={0.8}
+            >
+              <View style={styles.jobCardHeader}>
+                <View style={styles.jobServiceCol}>
+                  <Text style={styles.jobServiceText}>
+                    {job.service || job.serviceType || "Cleaning Service"}
+                  </Text>
+                  <Text style={styles.jobCustomerText}>
+                    {job.customer?.firstName} {job.customer?.lastName}
+                  </Text>
+                </View>
+                <View
+                  style={[
+                    styles.statusPill,
+                    { backgroundColor: getStatusColor(job.status) + "1A" },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusText,
+                      { color: getStatusColor(job.status) },
+                    ]}
+                  >
+                    {job.status}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.jobCardBody}>
+                <View style={styles.jobInfoRow}>
+                  <Calendar size={14} color="#6B7280" />
+                  <Text style={styles.jobInfoText}>
+                    {job.schedule?.date
+                      ? new Date(job.schedule.date).toLocaleDateString(
+                          "en-GB",
+                          { day: "numeric", month: "short" },
+                        )
+                      : "Date TBC"}
+                  </Text>
+                </View>
+                <View style={styles.jobInfoRow}>
+                  <Clock size={14} color="#6B7280" />
+                  <Text style={styles.jobInfoText}>
+                    {job.schedule?.timeSlot ||
+                      job.schedule?.preferredTime ||
+                      "Time TBC"}
+                  </Text>
+                </View>
+                <View style={styles.jobInfoRow}>
+                  <MapPin size={14} color="#6B7280" />
+                  <Text style={styles.jobInfoText} numberOfLines={1}>
+                    {job.details?.address || job.address || "Address pending"}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.jobCardFooter}>
+                <View style={styles.payBox}>
+                  <Text style={styles.payLabel}>Earned</Text>
+                  <Text style={styles.payValue}>
+                    £
+                    {(
+                      (job.workerRate || 0) *
+                      (job.details?.duration ||
+                        job.workerDuration ||
+                        job.duration ||
+                        0)
+                    ).toFixed(2)}
+                  </Text>
+                </View>
+                <View style={styles.actionsBox}>
+                  <TouchableOpacity
+                    style={styles.btnOutlineDefault}
+                    onPress={() =>
+                      navigation.navigate("AcceptedBookingDetail", {
+                        bookingId: job._id,
+                      })
+                    }
+                  >
+                    <Text style={styles.btnOutlineDefaultText}>
+                      View details
+                    </Text>
+                    <ChevronRight size={16} color="#4F46E5" />
+                  </TouchableOpacity>
                 </View>
               </View>
             </TouchableOpacity>
@@ -674,8 +851,31 @@ const HomeScreen = ({ navigation, route }) => {
                 activeTab === "activity" && styles.activeTabText,
               ]}
             >
-              Activity
+              Active
             </Text>
+            {activeJobs.length > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{activeJobs.length}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "history" && styles.activeTab]}
+            onPress={() => setActiveTab("history")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "history" && styles.activeTabText,
+              ]}
+            >
+              History
+            </Text>
+            {completedJobs.length > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{completedJobs.length}</Text>
+              </View>
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tab, activeTab === "offers" && styles.activeTab]}
@@ -698,7 +898,11 @@ const HomeScreen = ({ navigation, route }) => {
         </View>
       </View>
 
-      {activeTab === "activity" ? renderActivityTab() : renderOffersTab()}
+      {activeTab === "activity"
+        ? renderActivityTab()
+        : activeTab === "history"
+          ? renderHistoryTab()
+          : renderOffersTab()}
 
       {/* Withdrawal Modal */}
       <Modal
