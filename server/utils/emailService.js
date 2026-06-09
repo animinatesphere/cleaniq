@@ -863,6 +863,165 @@ const templates = {
       </div>
     </div>
   `,
+
+  withdrawalRequestWorker: (worker, amount) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0F172A; padding: 40px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 26px;">Withdrawal Request Received ✅</h1>
+        <p style="color: #94a3b8; margin-top: 10px; font-weight: 500;">Your request is being processed</p>
+      </div>
+      <div style="padding: 40px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 20px; margin-top: 0; color: #0F172A;">Hi ${worker.firstName},</h2>
+        <p>We have received your withdrawal request. It is now pending admin approval. Once approved, the funds will be transferred to your registered bank account within 2-3 business days.</p>
+        
+        <div style="background-color: #f8fafc; padding: 24px; border-radius: 20px; margin: 24px 0; border: 1px solid #f1f5f9;">
+          <p style="margin: 0 0 15px 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Withdrawal Details</p>
+          
+          <table width="100%" cellpadding="10" cellspacing="0" style="background: white; border-radius: 12px; border: 1px solid #edf2f7;">
+            <tr style="border-bottom: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Amount Requested:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">£${amount.toFixed(2)}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Status:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #F59E0B;">Pending Approval</td>
+            </tr>
+            <tr>
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Requested On:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date().toDateString()}</td>
+            </tr>
+          </table>
+        </div>
+
+        <p style="margin-top: 25px; font-size: 14px; color: #64748b;">You will receive another email notification once our admin team reviews and approves your request. If you have any questions, please reach out to our support team.</p>
+
+        <div style="margin-top: 40px; padding: 20px; background-color: #ECFDF5; border-radius: 16px; border-left: 4px solid #0A5C43;">
+          <p style="margin: 0; font-size: 13px; color: #0A5C43;"><strong>💡 Tip:</strong> Make sure your bank details in your profile are up to date for faster processing.</p>
+        </div>
+      </div>
+      <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #f1f5f9;">
+        <p style="margin: 0; font-size: 12px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  withdrawalRequestAdmin: (worker, amount, bankDetails, requestId) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: auto; border: 2px solid #0F172A; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0F172A; padding: 40px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 26px;">🚨 New Withdrawal Request</h1>
+        <p style="color: #94a3b8; margin-top: 10px; font-weight: 500;">Pending your approval</p>
+      </div>
+      <div style="padding: 40px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 20px; margin-top: 0; color: #0F172A;">Staff Withdrawal Request</h2>
+        <p>A staff member has requested a withdrawal. Please review the details below and take appropriate action.</p>
+        
+        <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Staff Information</h3>
+        <div style="background-color: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #edf2f7;">
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Name:</strong> ${worker.firstName} ${worker.lastName}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Email:</strong> ${worker.email}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Phone:</strong> ${worker.phone}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Worker ID:</strong> ${worker._id}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Address:</strong> ${worker.address}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Postcode:</strong> ${worker.postcode}</p>
+        </div>
+
+        <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Withdrawal Details</h3>
+        <div style="background-color: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #edf2f7;">
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Amount Requested:</strong> £${amount.toFixed(2)}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Request ID:</strong> ${requestId}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Current Balance:</strong> £${worker.wallet?.balance?.toFixed(2) || "0.00"}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Requested On:</strong> ${new Date().toDateString()}</p>
+        </div>
+
+        <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Bank Account Details</h3>
+        <div style="background-color: #FEF3C7; padding: 20px; border-radius: 16px; border: 1px solid #FCD34D; border-left: 4px solid #F59E0B;">
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Account Holder:</strong> ${bankDetails.accountHolder || "N/A"}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Account Number:</strong> ****${bankDetails.accountNumber?.slice(-4) || "XXXX"}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Sort Code:</strong> ${bankDetails.sortCode || "N/A"}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Bank Name:</strong> ${bankDetails.bankName || "N/A"}</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 35px; gap: 15px; display: flex; justify-content: center;">
+          <a href="https://cleaniqservices.com/admin/withdrawals" style="display: inline-block; background-color: #0A5C43; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 14px;">View in Admin Portal</a>
+        </div>
+      </div>
+      <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #f1f5f9;">
+        <p style="margin: 0; font-size: 12px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  withdrawalApprovedWorker: (worker, amount, requestId) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0A5C43; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0A5C43; padding: 40px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 26px;">✅ Withdrawal Approved!</h1>
+        <p style="color: #E6F4F1; margin-top: 10px; font-weight: 500;">Your money is on the way</p>
+      </div>
+      <div style="padding: 40px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 20px; margin-top: 0; color: #0A5C43;">Hi ${worker.firstName},</h2>
+        <p>Great news! Your withdrawal request has been approved by our admin team. The funds have been deducted from your account balance and will be transferred to your registered bank account within 2-3 business days.</p>
+        
+        <div style="background-color: #ECFDF5; padding: 24px; border-radius: 20px; margin: 24px 0; border: 1px solid #BBEDD7;">
+          <p style="margin: 0 0 15px 0; font-size: 11px; font-weight: 800; color: #0A5C43; text-transform: uppercase; letter-spacing: 1px;">Withdrawal Confirmation</p>
+          
+          <table width="100%" cellpadding="10" cellspacing="0" style="background: white; border-radius: 12px; border: 1px solid #BBEDD7;">
+            <tr style="border-bottom: 1px solid #BBEDD7;">
+              <td style="font-size: 14px; font-weight: bold; color: #0A5C43;">Amount Withdrawn:</td>
+              <td align="right" style="font-size: 16px; font-weight: 900; color: #0A5C43;">£${amount.toFixed(2)}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #BBEDD7;">
+              <td style="font-size: 14px; font-weight: bold; color: #0A5C43;">Request ID:</td>
+              <td align="right" style="font-size: 14px; font-weight: 600; color: #059669;">${requestId}</td>
+            </tr>
+            <tr>
+              <td style="font-size: 14px; font-weight: bold; color: #0A5C43;">Approved On:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0A5C43;">${new Date().toDateString()}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="margin-top: 25px; padding: 20px; background-color: #E0F2FE; border-radius: 16px; border-left: 4px solid #0284C7;">
+          <p style="margin: 0; font-size: 13px; color: #0C4A6E;"><strong>⏱️ Processing Time:</strong> The transfer typically takes 2-3 business days. Check your bank account for the incoming funds.</p>
+        </div>
+
+        <p style="margin-top: 25px; font-size: 14px; color: #64748b;">If you have any questions about this withdrawal or don't receive the funds within 5 business days, please contact our support team.</p>
+      </div>
+      <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #f1f5f9;">
+        <p style="margin: 0; font-size: 12px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  withdrawalRejectedWorker: (worker, amount, reason) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #fee2e2; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #DC2626; padding: 40px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
+        <h1 style="color: #FECACA; margin: 0; font-size: 26px;">❌ Withdrawal Declined</h1>
+        <p style="color: #FECACA; margin-top: 10px; font-weight: 500;">Your request could not be processed</p>
+      </div>
+      <div style="padding: 40px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 20px; margin-top: 0; color: #DC2626;">Hi ${worker.firstName},</h2>
+        <p>Unfortunately, your withdrawal request for £${amount.toFixed(2)} has been declined. Your account balance remains unchanged.</p>
+        
+        <div style="background-color: #FEE2E2; padding: 20px; border-radius: 16px; margin: 24px 0; border: 1px solid #FECACA; border-left: 4px solid #DC2626;">
+          <p style="margin: 5px 0; font-size: 13px; color: #7F1D1D;"><strong>Reason:</strong></p>
+          <p style="margin: 5px 0; font-size: 14px; color: #991B1B;">${reason || "Your request does not meet the withdrawal criteria. Please contact support for more information."}</p>
+        </div>
+
+        <p style="margin-top: 25px; font-size: 14px; color: #64748b;">If you believe this is an error or would like to discuss your withdrawal request further, please reach out to our support team via the support chat in your app.</p>
+
+        <div style="text-align: center; margin-top: 35px;">
+          <a href="https://cleaniqservices.com" style="display: inline-block; background-color: #0F172A; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 14px;">Open Cleaniq Staff App</a>
+        </div>
+      </div>
+      <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #f1f5f9;">
+        <p style="margin: 0; font-size: 12px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
 };
 
 module.exports = { sendEmail, templates };

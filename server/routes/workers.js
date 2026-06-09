@@ -60,8 +60,18 @@ router.post("/login", async (req, res) => {
         firstName: worker.firstName,
         lastName: worker.lastName,
         email: worker.email,
+        phone: worker.phone,
         status: worker.status,
         region: worker.region,
+        rating: worker.rating || 5.0,
+        jobsCompleted: worker.jobsCompleted || 0,
+        bankDetails: worker.bankDetails || {},
+        wallet: worker.wallet || {
+          totalEarned: 0,
+          balance: 0,
+          onHold: 0,
+          withdrawn: 0,
+        },
       },
     });
   } catch (error) {
@@ -408,6 +418,13 @@ router.post("/", async (req, res) => {
       status: "Pending",
       tempPassword,
       appAccessGranted: true,
+      wallet: {
+        totalEarned: 0,
+        balance: 0,
+        onHold: 0,
+        withdrawn: 0,
+        lastUpdated: new Date(),
+      },
     });
 
     await worker.save();
@@ -547,14 +564,40 @@ router.delete("/:id", async (req, res) => {
 router.put("/:id/profile", async (req, res) => {
   try {
     const { id } = req.params;
-    const { phone, bankDetails } = req.body;
+    const {
+      firstName,
+      lastName,
+      phone,
+      email,
+      address,
+      postcode,
+      bankDetails,
+    } = req.body;
 
     const worker = await Worker.findById(id);
     if (!worker) {
       return res.status(404).json({ error: "Worker not found" });
     }
 
+    // Update personal info
+    if (firstName) worker.firstName = firstName;
+    if (lastName) worker.lastName = lastName;
     if (phone) worker.phone = phone;
+    if (email && email !== worker.email) {
+      // Check if new email already exists
+      const existingWorker = await Worker.findOne({
+        email: email,
+        _id: { $ne: id },
+      });
+      if (existingWorker) {
+        return res.status(400).json({ error: "Email already in use" });
+      }
+      worker.email = email;
+    }
+    if (address) worker.address = address;
+    if (postcode) worker.postcode = postcode;
+
+    // Update bank details
     if (bankDetails) {
       worker.bankDetails = {
         ...worker.bankDetails,
@@ -612,9 +655,15 @@ router.put("/:id/availability", async (req, res) => {
 // GET worker availability
 router.get("/:id/availability", async (req, res) => {
   try {
-    const worker = await Worker.findById(req.params.id);
+    const workerId = req.params.id;
+    console.log(`📅 Fetching availability for worker: ${workerId}`);
+
+    const worker = await Worker.findById(workerId);
+
     if (!worker) {
-      return res.status(404).json({ error: "Worker not found" });
+      console.warn(`⚠️ Worker not found: ${workerId}`);
+      // Return empty availability instead of 404
+      return res.json({});
     }
 
     // Return availability as object, or empty object if not set
@@ -622,12 +671,12 @@ router.get("/:id/availability", async (req, res) => {
       worker.availability && typeof worker.availability === "object"
         ? worker.availability
         : {};
+
     res.json(availability);
   } catch (error) {
     console.error("Error fetching availability:", error);
-    res
-      .status(500)
-      .json({ error: "Internal server error fetching availability" });
+    // Return empty object on error to prevent app crash
+    res.json({});
   }
 });
 

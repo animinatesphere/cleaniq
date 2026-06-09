@@ -7,6 +7,8 @@ const workerSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true },
   region: { type: String, required: true, enum: ["UK", "NG"] },
+  address: { type: String, default: "" },
+  postcode: { type: String, default: "" },
   // Availability
   availability: {
     type: mongoose.Schema.Types.Mixed,

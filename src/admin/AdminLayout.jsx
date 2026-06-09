@@ -102,6 +102,11 @@ const AdminLayout = () => {
       path: "/admin/worker-pay",
       icon: <Wallet size={20} />,
     },
+    {
+      name: "Withdrawals",
+      path: "/admin/withdrawals",
+      icon: <Wallet size={20} />,
+    },
     { name: "Staff", path: "/admin/workers", icon: <Briefcase size={20} /> },
     {
       name: "Applicants",

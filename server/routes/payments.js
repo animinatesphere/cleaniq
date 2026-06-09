@@ -3,6 +3,7 @@ const router = express.Router();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const Worker = require("../models/Worker");
 const Withdrawal = require("../models/Withdrawal");
+const { sendEmail, templates } = require("../utils/emailService");
 
 router.post("/create-intent", async (req, res) => {
   const { amount, currency, customerName, service, bookingId } = req.body;
@@ -96,9 +97,19 @@ router.post("/create-checkout-session", async (req, res) => {
 // GET worker wallet balance
 router.get("/wallet/:workerId", async (req, res) => {
   try {
-    const worker = await Worker.findById(req.params.workerId);
+    const workerId = req.params.workerId;
+    console.log(`💰 Fetching wallet for worker: ${workerId}`);
+
+    const worker = await Worker.findById(workerId);
     if (!worker) {
-      return res.status(404).json({ error: "Worker not found" });
+      console.warn(`⚠️ Worker not found: ${workerId}`);
+      // Return default wallet instead of 404
+      return res.json({
+        totalEarned: 0,
+        balance: 0,
+        onHold: 0,
+        withdrawn: 0,
+      });
     }
 
     res.json(
@@ -111,21 +122,31 @@ router.get("/wallet/:workerId", async (req, res) => {
     );
   } catch (error) {
     console.error("Error fetching wallet:", error);
-    res.status(500).json({ error: "Failed to fetch wallet" });
+    // Return default wallet on error instead of 500
+    res.json({
+      totalEarned: 0,
+      balance: 0,
+      onHold: 0,
+      withdrawn: 0,
+    });
   }
 });
 
 // GET withdrawal history
 router.get("/withdrawals/:workerId", async (req, res) => {
   try {
-    const withdrawals = await Withdrawal.find({ workerId: req.params.workerId })
+    const workerId = req.params.workerId;
+    console.log(`📋 Fetching withdrawal history for worker: ${workerId}`);
+
+    const withdrawals = await Withdrawal.find({ workerId: workerId })
       .sort({ createdAt: -1 })
       .select("-bankDetails.accountNumber"); // Don't expose full account numbers
 
-    res.json(withdrawals);
+    res.json(withdrawals || []);
   } catch (error) {
     console.error("Error fetching withdrawals:", error);
-    res.status(500).json({ error: "Failed to fetch withdrawals" });
+    // Return empty array instead of error
+    res.json([]);
   }
 });
 
@@ -181,11 +202,16 @@ router.post("/withdraw/:workerId", async (req, res) => {
     const withdrawal = new Withdrawal({
       workerId: workerId,
       workerName: `${worker.firstName} ${worker.lastName}`,
+      workerEmail: worker.email,
+      workerPhone: worker.phone,
+      workerAddress: worker.address,
+      workerPostcode: worker.postcode,
       amount: amount,
       bankDetails: {
         accountName: worker.bankDetails.accountName,
         accountNumber: worker.bankDetails.accountNumber,
         sortCode: worker.bankDetails.sortCode,
+        bankName: worker.bankDetails.bankName,
       },
       status: "pending",
     });
@@ -197,6 +223,36 @@ router.post("/withdraw/:workerId", async (req, res) => {
     worker.wallet.onHold += amount;
     worker.wallet.lastUpdated = new Date();
     await worker.save();
+
+    // Send confirmation email to worker
+    try {
+      await sendEmail({
+        to: worker.email,
+        subject: "Withdrawal Request Confirmed - Cleaniq Services",
+        html: templates.withdrawalRequestWorker(worker, amount),
+      });
+      console.log(`✅ Confirmation email sent to worker: ${worker.email}`);
+    } catch (emailError) {
+      console.error("❌ Failed to send worker email:", emailError);
+    }
+
+    // Send notification email to admin
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL || "admin@cleaniqservices.com";
+      await sendEmail({
+        to: adminEmail,
+        subject: `New Withdrawal Request - £${amount} from ${worker.firstName} ${worker.lastName}`,
+        html: templates.withdrawalRequestAdmin(
+          worker,
+          amount,
+          worker.bankDetails,
+          withdrawal._id,
+        ),
+      });
+      console.log(`✅ Admin notification email sent to: ${adminEmail}`);
+    } catch (emailError) {
+      console.error("❌ Failed to send admin email:", emailError);
+    }
 
     console.log(
       `✅ Withdrawal request created: £${amount} for worker ${worker.workerId}`,
@@ -227,6 +283,18 @@ router.get("/admin/withdrawals/pending", async (req, res) => {
   }
 });
 
+// ADMIN: Get all withdrawals (with all statuses)
+router.get("/admin/withdrawals/all", async (req, res) => {
+  try {
+    const withdrawals = await Withdrawal.find({}).sort({ createdAt: -1 });
+
+    res.json(withdrawals);
+  } catch (error) {
+    console.error("Error fetching all withdrawals:", error);
+    res.status(500).json({ error: "Failed to fetch withdrawals" });
+  }
+});
+
 // ADMIN: Approve withdrawal
 router.put("/admin/withdrawals/:withdrawalId/approve", async (req, res) => {
   try {
@@ -243,16 +311,49 @@ router.put("/admin/withdrawals/:withdrawalId/approve", async (req, res) => {
       });
     }
 
+    // Get worker to update wallet and send email
+    const worker = await Worker.findById(withdrawal.workerId);
+    if (!worker) {
+      return res.status(404).json({ error: "Worker not found" });
+    }
+
+    // Update withdrawal status
     withdrawal.status = "approved";
     withdrawal.approvedBy = adminId;
     withdrawal.approvedAt = new Date();
     await withdrawal.save();
 
+    // Update worker wallet: deduct from onHold, add to withdrawn
+    worker.wallet.onHold -= withdrawal.amount;
+    worker.wallet.withdrawn += withdrawal.amount;
+    worker.wallet.lastUpdated = new Date();
+    await worker.save();
+
+    // Send approval email to worker
+    try {
+      await sendEmail({
+        to: worker.email,
+        subject: "Withdrawal Approved - Funds on the Way! 🎉 Cleaniq Services",
+        html: templates.withdrawalApprovedWorker(
+          worker,
+          withdrawal.amount,
+          withdrawal._id,
+        ),
+      });
+      console.log(`✅ Approval email sent to worker: ${worker.email}`);
+    } catch (emailError) {
+      console.error("❌ Failed to send approval email:", emailError);
+    }
+
     console.log(
       `✅ Withdrawal approved: £${withdrawal.amount} for worker ${withdrawal.workerName}`,
     );
 
-    res.json({ message: "Withdrawal approved", withdrawal });
+    res.json({
+      message: "Withdrawal approved and funds deducted from wallet",
+      withdrawal,
+      workerWallet: worker.wallet,
+    });
   } catch (error) {
     console.error("Error approving withdrawal:", error);
     res.status(500).json({ error: "Failed to approve withdrawal" });
@@ -288,11 +389,33 @@ router.put("/admin/withdrawals/:withdrawalId/reject", async (req, res) => {
     withdrawal.reason = reason || "Rejected by admin";
     await withdrawal.save();
 
+    // Send rejection email to worker
+    if (worker) {
+      try {
+        await sendEmail({
+          to: worker.email,
+          subject: "Withdrawal Request Declined - Cleaniq Services",
+          html: templates.withdrawalRejectedWorker(
+            worker,
+            withdrawal.amount,
+            reason || "Your withdrawal request does not meet our criteria.",
+          ),
+        });
+        console.log(`✅ Rejection email sent to worker: ${worker.email}`);
+      } catch (emailError) {
+        console.error("❌ Failed to send rejection email:", emailError);
+      }
+    }
+
     console.log(
       `❌ Withdrawal rejected: £${withdrawal.amount} refunded to ${withdrawal.workerName}`,
     );
 
-    res.json({ message: "Withdrawal rejected and refunded", withdrawal });
+    res.json({
+      message: "Withdrawal rejected and refunded",
+      withdrawal,
+      workerWallet: worker?.wallet,
+    });
   } catch (error) {
     console.error("Error rejecting withdrawal:", error);
     res.status(500).json({ error: "Failed to reject withdrawal" });

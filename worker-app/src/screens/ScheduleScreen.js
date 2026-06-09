@@ -46,21 +46,29 @@ const ScheduleScreen = ({ navigation }) => {
       const workerId = workerInfo.id;
       console.log("Fetching schedule for worker:", workerId);
 
-      const [scheduleRes, availRes] = await Promise.all([
-        axios.get(`${API_URL}/workers/${workerId}/schedule`),
-        axios.get(`${API_URL}/workers/${workerId}/availability`),
-      ]);
-
-      setSchedule(scheduleRes.data || []);
-      setAvailability(availRes.data || {});
-    } catch (error) {
-      console.error("Error fetching data:", error.message);
-      if (error.response?.status === 404) {
-        console.error(
-          "Worker not found - ensure worker ID is correct:",
-          workerInfo?.id,
+      try {
+        const scheduleRes = await axios.get(
+          `${API_URL}/workers/${workerId}/schedule`,
         );
+        setSchedule(scheduleRes.data || []);
+      } catch (scheduleError) {
+        console.error("Error fetching schedule:", scheduleError.message);
+        setSchedule([]);
       }
+
+      try {
+        const availRes = await axios.get(
+          `${API_URL}/workers/${workerId}/availability`,
+        );
+        setAvailability(availRes.data || {});
+      } catch (availError) {
+        console.error("Error fetching availability:", availError.message);
+        setAvailability({});
+      }
+    } catch (error) {
+      console.error("Unexpected error in fetchSchedule:", error.message);
+      setSchedule([]);
+      setAvailability({});
     } finally {
       setLoading(false);
       setRefreshing(false);
