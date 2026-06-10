@@ -118,94 +118,101 @@ router.post("/", async (req, res) => {
 
     const newBooking = await booking.save();
 
-    // If booking is created by admin (payment status is "Pending"), send payment email with Stripe link
-    if (newBooking.payment && newBooking.payment.status === "Pending") {
-      try {
-        // Generate Stripe Checkout Link
-        const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-        const session = await stripe.checkout.sessions.create({
-          payment_method_types: ["card"],
-          mode: "payment",
-          customer_email: newBooking.customer.email,
-          line_items: [
-            {
-              price_data: {
-                currency: (newBooking.payment.currency || "GBP").toLowerCase(),
-                product_data: {
-                  name: `Cleaniq - ${newBooking.service}`,
-                  description: `Booking Reference: ${newBooking.bookingId}`,
-                },
-                unit_amount: Math.round(newBooking.payment.amount * 100),
-              },
-              quantity: 1,
-            },
-          ],
-          metadata: {
-            bookingId: newBooking._id.toString(),
-            company: "Cleaniq Services",
-          },
-          success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=success&bookingId=${newBooking._id}`,
-          cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=cancelled`,
-        });
+    // ✅ Skip all emails for DEV MODE bookings (testing only)
+    const isDevMode = newBooking.payment && newBooking.payment.method === "Dev Mode";
 
-        // Send Payment Required Email to Customer
+    if (!isDevMode) {
+      // If booking is created by admin (payment status is "Pending"), send payment email with Stripe link
+      if (newBooking.payment && newBooking.payment.status === "Pending") {
+        try {
+          // Generate Stripe Checkout Link
+          const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+          const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            mode: "payment",
+            customer_email: newBooking.customer.email,
+            line_items: [
+              {
+                price_data: {
+                  currency: (newBooking.payment.currency || "GBP").toLowerCase(),
+                  product_data: {
+                    name: `Cleaniq - ${newBooking.service}`,
+                    description: `Booking Reference: ${newBooking.bookingId}`,
+                  },
+                  unit_amount: Math.round(newBooking.payment.amount * 100),
+                },
+                quantity: 1,
+              },
+            ],
+            metadata: {
+              bookingId: newBooking._id.toString(),
+              company: "Cleaniq Services",
+            },
+            success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=success&bookingId=${newBooking._id}`,
+            cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=cancelled`,
+          });
+
+          // Send Payment Required Email to Customer
+          await sendEmail({
+            to: newBooking.customer.email,
+            subject: `Payment Required: Cleaniq Booking ${newBooking.bookingId}`,
+            html: templates.paymentRequired(newBooking, session.url),
+          });
+
+          console.log(
+            `✅ Payment email sent to ${newBooking.customer.email} with checkout link`,
+          );
+        } catch (paymentEmailErr) {
+          console.error(
+            "❌ Failed to send payment email:",
+            paymentEmailErr.message,
+          );
+        }
+      } else {
+        // Send Confirmation Email to Customer (Enhanced booking details)
         await sendEmail({
           to: newBooking.customer.email,
-          subject: `Payment Required: Cleaniq Booking ${newBooking.bookingId}`,
-          html: templates.paymentRequired(newBooking, session.url),
+          subject: `✓ Your Cleaniq Booking is Created - ${newBooking.bookingId}`,
+          html: templates.adminBookingCreatedEmail1(newBooking),
         });
-
         console.log(
-          `✅ Payment email sent to ${newBooking.customer.email} with checkout link`,
+          `✅ Email sent to ${newBooking.customer.email} - Initial booking confirmation`,
         );
-      } catch (paymentEmailErr) {
+      }
+
+      // Send Alert Email to Admin
+      await sendEmail({
+        to: process.env.EMAIL_USER || "admin@cleaniqservices.com",
+        subject: `🚨 New Booking: ${newBooking.bookingId}`,
+        html: templates.adminNewBookingAlert(newBooking),
+      });
+
+      // Notify all active Staff members of a new available clean job in their feed
+      try {
+        const activeStaff = await Worker.find({
+          status: "Active",
+          appAccessGranted: true,
+        });
+        if (activeStaff && activeStaff.length > 0) {
+          console.log(
+            `📧 Notifying ${activeStaff.length} active staff members about booking ${newBooking.bookingId}...`,
+          );
+          for (const staff of activeStaff) {
+            await sendEmail({
+              to: staff.email,
+              subject: `🧹 New Job Alert: ${newBooking.service} is available!`,
+              html: templates.staffNewJobAlert(newBooking),
+            });
+          }
+        }
+      } catch (staffEmailErr) {
         console.error(
-          "❌ Failed to send payment email:",
-          paymentEmailErr.message,
+          "❌ Failed to email staff new job notification:",
+          staffEmailErr,
         );
       }
     } else {
-      // Send Confirmation Email to Customer (Enhanced booking details)
-      await sendEmail({
-        to: newBooking.customer.email,
-        subject: `✓ Your Cleaniq Booking is Created - ${newBooking.bookingId}`,
-        html: templates.adminBookingCreatedEmail1(newBooking),
-      });
-      console.log(
-        `✅ Email sent to ${newBooking.customer.email} - Initial booking confirmation`,
-      );
-    }
-
-    // Send Alert Email to Admin
-    await sendEmail({
-      to: process.env.EMAIL_USER || "admin@cleaniqservices.com",
-      subject: `🚨 New Booking: ${newBooking.bookingId}`,
-      html: templates.adminNewBookingAlert(newBooking),
-    });
-
-    // Notify all active Staff members of a new available clean job in their feed
-    try {
-      const activeStaff = await Worker.find({
-        status: "Active",
-        appAccessGranted: true,
-      });
-      if (activeStaff && activeStaff.length > 0) {
-        console.log(
-          `📧 Notifying ${activeStaff.length} active staff members about booking ${newBooking.bookingId}...`,
-        );
-        for (const staff of activeStaff) {
-          await sendEmail({
-            to: staff.email,
-            subject: `🧹 New Job Alert: ${newBooking.service} is available!`,
-            html: templates.staffNewJobAlert(newBooking),
-          });
-        }
-      }
-    } catch (staffEmailErr) {
-      console.error(
-        "❌ Failed to email staff new job notification:",
-        staffEmailErr,
-      );
+      console.log(`🧪 [DEV MODE] Booking ${newBooking.bookingId} created - NO emails sent (test mode)`);
     }
 
     res.status(201).json(newBooking);
