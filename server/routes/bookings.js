@@ -231,14 +231,31 @@ router.put("/:id", async (req, res) => {
                     name: booking.service,
                   });
 
-                  // Use service payment rate if available, otherwise fallback to old calculation
-                  const earnings =
-                    service?.workerPaymentRate ||
-                    (booking.workerRate || 0) *
+                  // Calculate earnings based on service type
+                  let earnings = 0;
+
+                  if (service?.type === "hourly") {
+                    // For hourly services: hourlyRate × duration
+                    const duration =
+                      booking.details?.duration ||
+                      booking.workerDuration ||
+                      booking.duration ||
+                      0;
+                    earnings = (service?.workerHourlyRate || 0) * duration;
+                  } else {
+                    // For flat-rate services: use workerPaymentRate
+                    earnings = service?.workerPaymentRate || 0;
+                  }
+
+                  // Fallback to old calculation if no service rate available
+                  if (earnings === 0) {
+                    earnings =
+                      (booking.workerRate || 0) *
                       (booking.details?.duration ||
                         booking.workerDuration ||
                         booking.duration ||
                         0);
+                  }
 
                   totalEarnings += earnings;
                   jobsList.push({

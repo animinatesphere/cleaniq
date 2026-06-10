@@ -38,7 +38,7 @@ import ServicesManagement from "./admin/Services";
 import Workers from "./admin/Workers";
 import Chat from "./admin/Chat";
 import AdminBlog from "./admin/Blog";
-import ServicePricing from "./admin/ServicePricing";
+import StaffPay from "./admin/StaffPay";
 import AdminWithdrawals from "./admin/AdminWithdrawals";
 import AdminPayments from "./admin/AdminPayments";
 
@@ -90,7 +90,7 @@ function App() {
               <Route path="blog" element={<AdminBlog />} />
               <Route path="settings" element={<Settings />} />
               <Route path="chat" element={<Chat />} />
-              <Route path="service-pricing" element={<ServicePricing />} />
+              <Route path="staff-pay" element={<StaffPay />} />
               <Route path="withdrawals" element={<AdminWithdrawals />} />
               <Route path="payments" element={<AdminPayments />} />
             </Route>

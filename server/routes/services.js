@@ -1,27 +1,27 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Service = require('../models/Service');
+const Service = require("../models/Service");
 
 // Get all services for a region
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const { region } = req.query;
     const filter = region ? { region } : {};
     // Sort by updatedAt desc to get newest first
     const services = await Service.find(filter).sort({ updatedAt: -1 });
-    
+
     // Deduplicate by trimmed name
     const uniqueServices = [];
     const seenNames = new Set();
-    
-    services.forEach(s => {
+
+    services.forEach((s) => {
       const trimmedName = s.name.trim();
       if (!seenNames.has(trimmedName)) {
         seenNames.add(trimmedName);
         uniqueServices.push(s);
       }
     });
-    
+
     res.json(uniqueServices);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -29,29 +29,48 @@ router.get('/', async (req, res) => {
 });
 
 // Create or update a service
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const { _id, name, region, rate, type, category, description, bullets } = req.body;
+    const { _id, name, region, rate, type, category, description, bullets } =
+      req.body;
     const trimmedName = name?.trim();
-    const bulletList = Array.isArray(bullets) ? bullets.filter(b => b && b.trim()) : undefined;
+    const bulletList = Array.isArray(bullets)
+      ? bullets.filter((b) => b && b.trim())
+      : undefined;
 
     let service;
 
     // If a valid MongoDB _id is provided, update that specific record (prevents duplicates on rename)
     if (_id && _id.match(/^[0-9a-fA-F]{24}$/)) {
-      const updateFields = { name: trimmedName, rate, type, category, description, region, updatedAt: Date.now() };
+      const updateFields = {
+        name: trimmedName,
+        rate,
+        type,
+        category,
+        description,
+        region,
+        updatedAt: Date.now(),
+      };
       if (bulletList !== undefined) updateFields.bullets = bulletList;
-      service = await Service.findByIdAndUpdate(_id, updateFields, { new: true });
+      service = await Service.findByIdAndUpdate(_id, updateFields, {
+        new: true,
+      });
     }
 
     // Fallback: find existing by name+region or create new
     if (!service) {
-      const updateFields = { rate, type, category, description, updatedAt: Date.now() };
+      const updateFields = {
+        rate,
+        type,
+        category,
+        description,
+        updatedAt: Date.now(),
+      };
       if (bulletList !== undefined) updateFields.bullets = bulletList;
       service = await Service.findOneAndUpdate(
         { name: trimmedName, region },
         updateFields,
-        { new: true, upsert: true }
+        { new: true, upsert: true },
       );
     }
 
@@ -62,13 +81,40 @@ router.post('/', async (req, res) => {
 });
 
 // Update a service by ID
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
-    const { name, region, rate, type, category, description, bullets } = req.body;
-    const updateFields = { name, region, rate, type, category, description, updatedAt: Date.now() };
-    if (Array.isArray(bullets)) updateFields.bullets = bullets.filter(b => b && b.trim());
-    const service = await Service.findByIdAndUpdate(req.params.id, updateFields, { new: true });
-    if (!service) return res.status(404).json({ message: 'Service not found' });
+    const {
+      name,
+      region,
+      rate,
+      type,
+      category,
+      description,
+      bullets,
+      workerHourlyRate,
+      workerPaymentRate,
+    } = req.body;
+    const updateFields = {
+      name,
+      region,
+      rate,
+      type,
+      category,
+      description,
+      updatedAt: Date.now(),
+    };
+    if (Array.isArray(bullets))
+      updateFields.bullets = bullets.filter((b) => b && b.trim());
+    if (workerHourlyRate !== undefined)
+      updateFields.workerHourlyRate = workerHourlyRate;
+    if (workerPaymentRate !== undefined)
+      updateFields.workerPaymentRate = workerPaymentRate;
+    const service = await Service.findByIdAndUpdate(
+      req.params.id,
+      updateFields,
+      { new: true },
+    );
+    if (!service) return res.status(404).json({ message: "Service not found" });
     res.json(service);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -76,13 +122,13 @@ router.put('/:id', async (req, res) => {
 });
 
 // Cleanup: remove duplicate services (keep newest per name+region)
-router.post('/cleanup-duplicates', async (req, res) => {
+router.post("/cleanup-duplicates", async (req, res) => {
   try {
     const all = await Service.find({}).sort({ updatedAt: -1 });
     const seen = new Set();
     const toDelete = [];
 
-    all.forEach(s => {
+    all.forEach((s) => {
       const key = `${s.name.trim().toLowerCase()}__${s.region}`;
       if (seen.has(key)) {
         toDelete.push(s._id);
@@ -95,30 +141,51 @@ router.post('/cleanup-duplicates', async (req, res) => {
       await Service.deleteMany({ _id: { $in: toDelete } });
     }
 
-    res.json({ message: `Cleaned up ${toDelete.length} duplicate(s).`, removed: toDelete.length });
+    res.json({
+      message: `Cleaned up ${toDelete.length} duplicate(s).`,
+      removed: toDelete.length,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
 // Migrate Categories (One-time use)
-router.post('/migrate-categories', async (req, res) => {
+router.post("/migrate-categories", async (req, res) => {
   try {
     const services = await Service.find({});
-    const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-    const baseNames = ['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning', 'End of Tenancy'];
-    const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'];
-    
+    const clean = (str) =>
+      str
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "")
+        .trim();
+    const baseNames = [
+      "Residential Cleaning",
+      "Deep Clean",
+      "Airbnb Cleaning",
+      "Office Cleaning",
+      "End of Tenancy",
+    ];
+    const roomNames = [
+      "Bedroom",
+      "Bathroom",
+      "Cloakroom",
+      "Kitchen",
+      "Utility Room",
+      "Reception Room",
+      "Conservatory",
+    ];
+
     let updated = 0;
     for (let s of services) {
-      let cat = 'Extras';
-      if (baseNames.some(b => clean(b) === clean(s.name))) cat = 'Base';
-      else if (roomNames.some(r => clean(r) === clean(s.name))) cat = 'Rooms';
-      
+      let cat = "Extras";
+      if (baseNames.some((b) => clean(b) === clean(s.name))) cat = "Base";
+      else if (roomNames.some((r) => clean(r) === clean(s.name))) cat = "Rooms";
+
       await Service.updateOne({ _id: s._id }, { $set: { category: cat } });
       updated++;
     }
-    
+
     res.json({ message: `Migrated ${updated} services successfully.` });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -126,16 +193,16 @@ router.post('/migrate-categories', async (req, res) => {
 });
 
 // Delete a service
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     // Safety check to prevent 500 CastError on invalid ObjectIds
     if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.json({ message: 'Fallback pseudo-service ignored' });
+      return res.json({ message: "Fallback pseudo-service ignored" });
     }
 
     const service = await Service.findByIdAndDelete(req.params.id);
-    if (!service) return res.status(404).json({ message: 'Service not found' });
-    res.json({ message: 'Service deleted successfully' });
+    if (!service) return res.status(404).json({ message: "Service not found" });
+    res.json({ message: "Service deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

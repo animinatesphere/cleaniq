@@ -12,11 +12,18 @@ const serviceSchema = new mongoose.Schema({
   },
   description: String,
   bullets: { type: [String], default: [] },
-  // Worker payment rate - amount paid to worker when this service is completed
+  // Worker payment rate - amount paid to worker per hour (hourly services)
+  workerHourlyRate: {
+    type: Number,
+    default: 0,
+    description: "Amount paid to worker per hour for hourly services",
+  },
+  // Worker payment rate - fixed amount paid to worker per service completion (flat services)
   workerPaymentRate: {
     type: Number,
     default: 0,
-    description: "Fixed amount paid to worker per service completion",
+    description:
+      "Fixed amount paid to worker per service completion for flat-rate services",
   },
   updatedAt: { type: Date, default: Date.now },
 });

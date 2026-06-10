@@ -99,8 +99,8 @@ const AdminLayout = () => {
     { name: "Dashboard", path: "/admin", icon: <LayoutDashboard size={20} /> },
     { name: "Bookings", path: "/admin/bookings", icon: <Calendar size={20} /> },
     {
-      name: "Service Pricing",
-      path: "/admin/service-pricing",
+      name: "Staff Pay",
+      path: "/admin/staff-pay",
       icon: <DollarSign size={20} />,
     },
     {
