@@ -45,14 +45,14 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   // Check if job is tomorrow or later
   const isJobTomorrowOrLater = useCallback(() => {
     if (!booking || !booking.schedule || !booking.schedule.date) return false;
-    
+
     const jobDate = new Date(booking.schedule.date);
     const today = new Date();
-    
+
     // Set time to midnight for comparison
     jobDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
-    
+
     // Job date should be today or later (not in the past)
     return jobDate >= today;
   }, [booking]);
@@ -322,9 +322,12 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             <TouchableOpacity
               style={[
                 styles.mainActionBtn,
-                { 
+                {
                   backgroundColor: statusCfg.nextColor,
-                  opacity: (statusCfg.next === "start" && !isJobTomorrowOrLater()) ? 0.5 : 1
+                  opacity:
+                    statusCfg.next === "start" && !isJobTomorrowOrLater()
+                      ? 0.5
+                      : 1,
                 },
               ]}
               onPress={() =>
@@ -334,7 +337,10 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                   `Status updated to ${nextStatusMap[statusCfg.next]}`,
                 )
               }
-              disabled={actionLoading !== null || (statusCfg.next === "start" && !isJobTomorrowOrLater())}
+              disabled={
+                actionLoading !== null ||
+                (statusCfg.next === "start" && !isJobTomorrowOrLater())
+              }
             >
               {actionLoading === statusCfg.next ? (
                 <ActivityIndicator color="#fff" />
