@@ -236,12 +236,12 @@ router.post("/", async (req, res) => {
         );
       }
     } else {
-      // DEV MODE: Send success confirmation email to customer
+      // DEV MODE: Send dev mode success confirmation email to customer (without payment section)
       try {
         await sendEmail({
           to: newBooking.customer.email,
-          subject: `✓ Booking Successful - ${newBooking.bookingId}`,
-          html: templates.adminBookingCreatedEmail1(newBooking),
+          subject: `✓ Booking Confirmed - ${newBooking.bookingId}`,
+          html: templates.devModeBookingSuccess(newBooking),
         });
         console.log(
           `🧪 [DEV MODE] Booking ${newBooking.bookingId} created - Success email sent to customer`,

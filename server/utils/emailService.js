@@ -1022,6 +1022,94 @@ const templates = {
       </div>
     </div>
   `,
+
+  devModeBookingSuccess: (booking) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 45px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 130px; height: auto; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);" />
+        <h1 style="color: #ffffff; margin: 0; font-size: 32px; letter-spacing: -1px; font-weight: 800;">✓ Booking Confirmed!</h1>
+        <p style="color: #d1fae5; margin-top: 12px; font-weight: 600; font-size: 15px;">Your cleaning appointment is all set</p>
+      </div>
+      
+      <div style="padding: 50px 45px; color: #1e293b; line-height: 1.8;">
+        <h2 style="font-size: 22px; margin-top: 0; margin-bottom: 10px; color: #0F172A;">Hello ${booking.customer.firstName},</h2>
+        <p style="font-size: 15px; color: #475569; margin-bottom: 30px;">Your cleaning booking has been confirmed! We're excited to help you get your home sparkling clean. Here are your complete booking details:</p>
+        
+        <!-- BOOKING REFERENCE CARD -->
+        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 32px; border-radius: 24px; margin-bottom: 32px; color: white; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);">
+          <p style="margin: 0; font-size: 13px; font-weight: 800; color: #d1fae5; text-transform: uppercase; letter-spacing: 2px;">Your Booking Reference:</p>
+          <p style="margin: 12px 0 0 0; font-size: 28px; font-weight: 900; letter-spacing: 1px;">${booking.bookingId}</p>
+        </div>
+
+        <!-- SERVICE DETAILS GRID -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #10b981; padding-left: 12px;">📋 Service Details</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 32px;">
+          <div style="padding: 18px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 16px; border: 1px solid #86efac;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 1px;">Service Type</p>
+            <p style="margin: 8px 0 0 0; font-size: 16px; font-weight: 700; color: #0F172A;">${booking.service}</p>
+          </div>
+          <div style="padding: 18px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 16px; border: 1px solid #e2e8f0;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Frequency</p>
+            <p style="margin: 8px 0 0 0; font-size: 16px; font-weight: 700; color: #0F172A;">${booking.details.frequency}</p>
+          </div>
+          <div style="padding: 18px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 16px; border: 1px solid #fcd34d;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 1px;">Duration</p>
+            <p style="margin: 8px 0 0 0; font-size: 16px; font-weight: 700; color: #0F172A;">${booking.details.duration} Hours</p>
+          </div>
+          <div style="padding: 18px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 16px; border: 1px solid #bae6fd;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #0369a1; text-transform: uppercase; letter-spacing: 1px;">Amount</p>
+            <p style="margin: 8px 0 0 0; font-size: 16px; font-weight: 700; color: #0F172A;">£${booking.payment.amount}</p>
+          </div>
+        </div>
+
+        <!-- DATE & TIME SECTION -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #10b981; padding-left: 12px;">📅 Scheduled Date & Time</h3>
+        
+        <div style="padding: 24px; background-color: #f0fdf4; border-radius: 20px; border: 2px solid #86efac; margin-bottom: 32px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div>
+              <p style="margin: 0; font-size: 12px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 1px;">Date</p>
+              <p style="margin: 10px 0 0 0; font-size: 18px; font-weight: 800; color: #0F172A;">${new Date(booking.schedule.date).toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>
+            </div>
+            <div>
+              <p style="margin: 0; font-size: 12px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 1px;">Time Slot</p>
+              <p style="margin: 10px 0 0 0; font-size: 18px; font-weight: 800; color: #0F172A;">${booking.schedule.timeSlot} ${booking.schedule.preferredTime ? "(" + booking.schedule.preferredTime + ")" : ""}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADDRESS SECTION -->
+        <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #10b981; padding-left: 12px;">📍 Service Address</h3>
+        
+        <div style="padding: 24px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 20px; border: 2px solid #a7f3d0; margin-bottom: 32px;">
+          <p style="margin: 0; font-size: 16px; font-weight: 700; color: #0F172A; line-height: 1.6;">${booking.details.address}</p>
+        </div>
+
+        <!-- NEXT STEPS -->
+        <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); padding: 28px; border-radius: 20px; margin-bottom: 32px; border: 2px solid #86efac;">
+          <h3 style="margin-top: 0; margin-bottom: 18px; font-size: 15px; color: #0F172A; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">✓ What Happens Next</h3>
+          <ol style="margin: 0; padding-left: 20px;">
+            <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Booking Confirmed:</strong> Your appointment is locked in and ready to go!</li>
+            <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Professional Assigned:</strong> Our team will assign the best cleaner for your home.</li>
+            <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Reminder Email:</strong> You'll get a reminder 24 hours before your appointment.</li>
+            <li style="font-size: 14px; color: #374151; line-height: 1.6;"><strong>Quality Guaranteed:</strong> We stand behind our work with a 100% satisfaction guarantee!</li>
+          </ol>
+        </div>
+
+        <!-- SUPPORT -->
+        <div style="text-align: center; padding-top: 30px; border-top: 2px solid #e2e8f0;">
+          <p style="margin: 0 0 20px 0; font-size: 14px; color: #64748b;">Have any questions about your booking?</p>
+          <a href="https://cleaniqservices.com/contact" style="display: inline-block; background-color: #10b981; color: white; padding: 16px 36px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);">Contact Support</a>
+        </div>
+      </div>
+      
+      <div style="background-color: #f0fdf4; padding: 24px; text-align: center; border-top: 1px solid #86efac;">
+        <p style="margin: 0 0 8px 0; font-size: 12px; color: #059669; font-weight: 600;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+        <p style="margin: 0; font-size: 11px; color: #6ee7b7;">This is an automated message. Please do not reply to this email.</p>
+      </div>
+    </div>
+  `,
 };
 
 module.exports = { sendEmail, templates };
