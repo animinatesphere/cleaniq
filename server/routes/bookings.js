@@ -215,106 +215,103 @@ router.put("/:id", async (req, res) => {
                 const Withdrawal = require("../models/Withdrawal");
                 const Service = require("../models/Service");
 
-                // Calculate total earnings from all completed jobs using service rates
-                const completedBookings = await Booking.find({
-                  assignedWorker: updatedBooking.assignedWorker,
-                  status: "Completed",
+                // Calculate earnings for THIS job (just completed)
+                const service = await Service.findOne({
+                  name: updatedBooking.service,
                 });
 
-                let totalEarnings = 0;
-                let jobsList = [];
+                let jobEarnings = 0;
 
-                // Process each completed booking and get service rates
-                for (const booking of completedBookings) {
-                  // Look up the service to get worker payment rate
-                  const service = await Service.findOne({
-                    name: booking.service,
-                  });
-
-                  // Calculate earnings based on service type
-                  let earnings = 0;
-
-                  if (service?.type === "hourly") {
-                    // For hourly services: hourlyRate × duration
-                    const duration =
-                      booking.details?.duration ||
-                      booking.workerDuration ||
-                      booking.duration ||
-                      0;
-                    earnings = (service?.workerHourlyRate || 0) * duration;
-                  } else {
-                    // For flat-rate services: use workerPaymentRate
-                    earnings = service?.workerPaymentRate || 0;
-                  }
-
-                  // Fallback to old calculation if no service rate available
-                  if (earnings === 0) {
-                    earnings =
-                      (booking.workerRate || 0) *
-                      (booking.details?.duration ||
-                        booking.workerDuration ||
-                        booking.duration ||
-                        0);
-                  }
-
-                  totalEarnings += earnings;
-                  jobsList.push({
-                    bookingId: booking.bookingId,
-                    service: booking.service,
-                    amount: earnings,
-                    completedDate: booking.updatedAt,
-                  });
+                if (service?.type === "hourly") {
+                  // For hourly services: hourlyRate × duration
+                  const duration =
+                    updatedBooking.details?.duration ||
+                    updatedBooking.workerDuration ||
+                    updatedBooking.duration ||
+                    0;
+                  jobEarnings = (service?.workerHourlyRate || 0) * duration;
+                } else {
+                  // For flat-rate services: use workerPaymentRate
+                  jobEarnings = service?.workerPaymentRate || 0;
                 }
 
-                // Check if there's already an upcoming/pending payout
-                const existingPayout = await Withdrawal.findOne({
-                  workerId: updatedBooking.assignedWorker,
-                  status: { $in: ["upcoming", "pending"] },
-                });
+                // Fallback to old calculation if no service rate available
+                if (jobEarnings === 0) {
+                  jobEarnings =
+                    (updatedBooking.workerRate || 0) *
+                    (updatedBooking.details?.duration ||
+                      updatedBooking.workerDuration ||
+                      updatedBooking.duration ||
+                      0);
+                }
 
-                if (!existingPayout && totalEarnings > 0) {
-                  // Calculate next payout date (8 days from now or next schedule)
-                  const payoutType = worker.payoutPreference || "weekly";
-                  let expectedPayoutDate = new Date();
+                // Skip if no earnings
+                if (jobEarnings > 0) {
+                  // Calculate payout date: 8 days from now
+                  const expectedPayoutDate = new Date();
+                  expectedPayoutDate.setDate(expectedPayoutDate.getDate() + 8);
+                  // Set to start of day for consistency
+                  expectedPayoutDate.setHours(0, 0, 0, 0);
 
-                  if (payoutType === "weekly") {
-                    const daysUntilMonday =
-                      (1 - expectedPayoutDate.getDay() + 7) % 7 || 7;
-                    expectedPayoutDate.setDate(
-                      expectedPayoutDate.getDate() + daysUntilMonday,
-                    );
-                  } else if (payoutType === "monthly") {
-                    expectedPayoutDate.setMonth(
-                      expectedPayoutDate.getMonth() + 1,
-                    );
-                    expectedPayoutDate.setDate(1);
-                  }
-
-                  // Create withdrawal record
-                  const withdrawal = new Withdrawal({
+                  // Check if there's already an upcoming withdrawal for this 8-day window
+                  // Looking for withdrawals with same expectedPayoutDate (same 8-day cycle)
+                  const existingWithdrawal = await Withdrawal.findOne({
                     workerId: updatedBooking.assignedWorker,
-                    workerName: `${worker.firstName} ${worker.lastName}`,
-                    workerEmail: worker.email,
-                    workerPhone: worker.phone,
-                    workerAddress: worker.address,
-                    workerPostcode: worker.postcode,
-                    amount: totalEarnings,
-                    completedJobs: jobsList,
-                    bankDetails: {
-                      accountName: worker.bankDetails.accountName,
-                      accountNumber: worker.bankDetails.accountNumber,
-                      sortCode: worker.bankDetails.sortCode,
-                      bankName: worker.bankDetails.bankName,
-                    },
                     status: "upcoming",
-                    payoutType,
-                    expectedPayoutDate,
+                    expectedPayoutDate: {
+                      $gte: new Date(expectedPayoutDate.getTime() - 86400000), // Within 1 day
+                      $lte: new Date(expectedPayoutDate.getTime() + 86400000),
+                    },
                   });
 
-                  await withdrawal.save();
+                  const jobRecord = {
+                    bookingId: updatedBooking.bookingId,
+                    service: updatedBooking.service,
+                    amount: jobEarnings,
+                    completedDate: updatedBooking.updatedAt,
+                  };
 
-                  // Update worker wallet onHold
-                  worker.wallet.onHold = totalEarnings;
+                  if (existingWithdrawal) {
+                    // ADD to existing withdrawal
+                    existingWithdrawal.completedJobs.push(jobRecord);
+                    existingWithdrawal.amount += jobEarnings;
+                    await existingWithdrawal.save();
+
+                    console.log(
+                      `✅ Added £${jobEarnings.toFixed(2)} to existing withdrawal for ${worker.firstName}`,
+                    );
+                  } else {
+                    // CREATE new withdrawal
+                    const withdrawal = new Withdrawal({
+                      workerId: updatedBooking.assignedWorker,
+                      workerName: `${worker.firstName} ${worker.lastName}`,
+                      workerEmail: worker.email,
+                      workerPhone: worker.phone,
+                      workerAddress: worker.address,
+                      workerPostcode: worker.postcode,
+                      amount: jobEarnings,
+                      completedJobs: [jobRecord],
+                      bankDetails: {
+                        accountName: worker.bankDetails.accountName,
+                        accountNumber: worker.bankDetails.accountNumber,
+                        sortCode: worker.bankDetails.sortCode,
+                        bankName: worker.bankDetails.bankName,
+                      },
+                      status: "upcoming",
+                      payoutType: "fixed_8days",
+                      expectedPayoutDate,
+                    });
+
+                    await withdrawal.save();
+
+                    console.log(
+                      `✅ Created new withdrawal: £${jobEarnings.toFixed(2)} scheduled for ${expectedPayoutDate.toDateString()}`,
+                    );
+                  }
+
+                  // Update worker wallet - add to onHold
+                  worker.wallet.onHold =
+                    (worker.wallet.onHold || 0) + jobEarnings;
                   await worker.save();
 
                   console.log(

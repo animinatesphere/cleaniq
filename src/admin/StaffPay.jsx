@@ -22,6 +22,11 @@ const StaffPay = () => {
   const API_URL =
     import.meta.env.VITE_API_URL || "https://api.cleaniqservices.com/api";
 
+  // Force re-fetch when component mounts
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
   // Fetch all services
   const fetchServices = async () => {
     setLoading(true);
@@ -35,10 +40,6 @@ const StaffPay = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchServices();
-  }, []);
 
   const flash = (type, text) => {
     setStatusMsg({ type, text });
@@ -77,17 +78,26 @@ const StaffPay = () => {
     setSavingId(serviceId);
     try {
       const newRate = editMap[serviceId]?.workerHourlyRate || 0;
-      await axios.put(`${API_URL}/services/${serviceId}`, {
+      const response = await axios.put(`${API_URL}/services/${serviceId}`, {
         workerHourlyRate: newRate,
       });
+
+      // Use the returned data from server to ensure consistency
+      const updatedService = response.data;
       setServices(
-        services.map((s) =>
-          s._id === serviceId ? { ...s, workerHourlyRate: newRate } : s,
-        ),
+        services.map((s) => (s._id === serviceId ? updatedService : s)),
       );
       setEditingId(null);
       const serviceName = services.find((s) => s._id === serviceId)?.name;
-      flash("success", `✅ Updated hourly rate for ${serviceName}`);
+      flash(
+        "success",
+        `✅ Updated hourly rate for ${serviceName}: £${newRate.toFixed(2)}/hr`,
+      );
+
+      // Force refresh after short delay to ensure database is updated
+      setTimeout(() => {
+        fetchServices();
+      }, 500);
     } catch (err) {
       console.error("Error saving service:", err);
       flash("error", "Failed to save hourly rate");

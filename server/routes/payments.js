@@ -679,7 +679,7 @@ router.get("/admin/withdrawals/all", async (req, res) => {
 // ADMIN: Approve withdrawal
 router.put("/admin/withdrawals/:withdrawalId/approve", async (req, res) => {
   try {
-    const { adminId, action = "approve" } = req.body; // action: approve, process, complete
+    const { adminId, action = "complete" } = req.body; // Default to complete for immediate payment
     const withdrawal = await Withdrawal.findById(req.params.withdrawalId);
 
     if (!withdrawal) {
@@ -703,58 +703,80 @@ router.put("/admin/withdrawals/:withdrawalId/approve", async (req, res) => {
     // Generate transaction reference
     const transactionRef = `TXN-${Date.now()}-${withdrawal.workerId.toString().slice(-6)}`;
 
-    // Update withdrawal status based on action
-    if (action === "approve") {
-      withdrawal.status = "approved";
-    } else if (action === "process") {
-      withdrawal.status = "processing";
-    } else if (action === "complete") {
-      withdrawal.status = "completed";
-      withdrawal.completedAt = new Date();
-      withdrawal.transactionRef = transactionRef;
-
-      // Deduct from onHold, add to withdrawn (only on completion)
-      worker.wallet.onHold -= withdrawal.amount;
-      worker.wallet.withdrawn += withdrawal.amount;
-      worker.wallet.balance =
-        worker.wallet.totalEarned - worker.wallet.withdrawn;
-      worker.wallet.lastUpdated = new Date();
-    }
-
+    // Update withdrawal status and process payment
+    withdrawal.status = "completed";
+    withdrawal.completedAt = new Date();
+    withdrawal.transactionRef = transactionRef;
     withdrawal.approvedBy = adminId;
     withdrawal.approvedAt = new Date();
+
+    // Deduct from onHold, add to withdrawn
+    if (!worker.wallet) {
+      worker.wallet = {
+        totalEarned: 0,
+        balance: 0,
+        onHold: 0,
+        withdrawn: 0,
+      };
+    }
+
+    // Ensure onHold is at least the withdrawal amount
+    worker.wallet.onHold = Math.max(
+      0,
+      (worker.wallet.onHold || 0) - withdrawal.amount,
+    );
+    worker.wallet.withdrawn =
+      (worker.wallet.withdrawn || 0) + withdrawal.amount;
+    worker.wallet.balance =
+      (worker.wallet.totalEarned || 0) - worker.wallet.withdrawn;
+    worker.wallet.lastUpdated = new Date();
+
+    console.log(
+      `💳 Processing payment for ${worker.firstName}: £${withdrawal.amount.toFixed(2)}`,
+    );
+    console.log(
+      `💰 Updated wallet - onHold: £${worker.wallet.onHold.toFixed(2)}, withdrawn: £${worker.wallet.withdrawn.toFixed(2)}, balance: £${worker.wallet.balance.toFixed(2)}`,
+    );
+
     await withdrawal.save();
     await worker.save();
 
-    // Send email based on action
+    // Send email with transaction reference
     try {
-      if (action === "complete" || action === "approve") {
-        await sendEmail({
-          to: worker.email,
-          subject: "✅ Payment Processed - Funds Transferred! Cleaniq Services",
-          html: `
-            <h2>Payment Successfully Transferred</h2>
-            <p>Hi ${worker.firstName},</p>
-            <p>Your payment has been successfully processed and transferred to your account.</p>
-            <p><strong>Amount:</strong> £${withdrawal.amount.toFixed(2)}</p>
-            <p><strong>Transaction Reference:</strong> ${transactionRef}</p>
-            <p><strong>Transfer Date:</strong> ${new Date().toLocaleDateString()}</p>
-            <p>The funds should appear in your bank account within 1-2 working days.</p>
-            <p>Thank you for your excellent work!</p>
-          `,
-        });
-        console.log(`✅ Payment completion email sent to: ${worker.email}`);
-      }
+      await sendEmail({
+        to: worker.email,
+        subject: "✅ Payment Processed - Funds Transferred! Cleaniq Services",
+        html: `
+          <h2>Payment Successfully Transferred</h2>
+          <p>Hi ${worker.firstName},</p>
+          <p>Your payment has been successfully processed and transferred to your account.</p>
+          <p><strong>Amount:</strong> £${withdrawal.amount.toFixed(2)}</p>
+          <p><strong>Transaction Reference:</strong> ${transactionRef}</p>
+          <p><strong>Transfer Date:</strong> ${new Date().toLocaleDateString()}</p>
+          <p><strong>Expected in Bank:</strong> 1-2 working days</p>
+          <p>Completed Services:</p>
+          <ul>
+            ${withdrawal.completedJobs
+              .map(
+                (job) =>
+                  `<li>${job.service} - £${job.amount.toFixed(2)} (${new Date(job.completedDate).toLocaleDateString()})</li>`,
+              )
+              .join("")}
+          </ul>
+          <p>Thank you for your excellent work!</p>
+        `,
+      });
+      console.log(`✅ Payment email sent to: ${worker.email}`);
     } catch (emailError) {
-      console.error("⚠️ Failed to send email:", emailError);
+      console.error("⚠️ Failed to send payment email:", emailError);
     }
 
     console.log(
-      `✅ Withdrawal ${action}ed: £${withdrawal.amount} for worker ${withdrawal.workerName}`,
+      `✅ Withdrawal completed: £${withdrawal.amount} for worker ${withdrawal.workerName}`,
     );
 
     res.json({
-      message: `Withdrawal ${action}ed successfully`,
+      message: "Payment processed and sent successfully",
       withdrawal,
       workerWallet: worker.wallet,
       transactionRef,

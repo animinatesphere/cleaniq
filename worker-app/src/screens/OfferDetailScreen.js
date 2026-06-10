@@ -92,7 +92,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
                   {
                     text: "View My Jobs",
                     onPress: () =>
-                      navigation.navigate("Home", { tab: "activity" }),
+                      navigation.navigate("HomeTab", { tab: "activity" }),
                   },
                 ],
               );

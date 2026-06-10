@@ -471,27 +471,49 @@ const MyAccountScreen = ({ navigation }) => {
                     </View>
                   </View>
 
-                  <View style={styles.walletStatsRow}>
-                    <View style={styles.walletStatBox}>
-                      <Text style={styles.walletStatLabel}>Total Earned</Text>
-                      <Text style={styles.walletStatValue}>
-                        £{wallet.totalEarned?.toFixed(2) || "0.00"}
-                      </Text>
-                    </View>
-                    <View style={styles.walletStatDivider} />
-                    <View style={styles.walletStatBox}>
-                      <Text style={styles.walletStatLabel}>On Hold</Text>
-                      <Text style={styles.walletStatValue}>
-                        £{wallet.onHold?.toFixed(2) || "0.00"}
-                      </Text>
-                    </View>
-                    <View style={styles.walletStatDivider} />
-                    <View style={styles.walletStatBox}>
-                      <Text style={styles.walletStatLabel}>Withdrawn</Text>
-                      <Text style={styles.walletStatValue}>
-                        £{wallet.withdrawn?.toFixed(2) || "0.00"}
-                      </Text>
-                    </View>
+                  {/* Upcoming Payments */}
+                  <View style={styles.upcomingPaymentsSection}>
+                    <Text style={styles.upcomingTitle}>
+                      💳 Upcoming Payments (8-Day Payouts)
+                    </Text>
+                    {withdrawalHistory.filter((w) => w.status === "upcoming")
+                      .length > 0 ? (
+                      withdrawalHistory
+                        .filter((w) => w.status === "upcoming")
+                        .map((payment) => (
+                          <View
+                            key={payment._id}
+                            style={styles.upcomingPaymentCard}
+                          >
+                            <View style={styles.paymentCardLeft}>
+                              <Text style={styles.paymentAmount}>
+                                £{payment.amount.toFixed(2)}
+                              </Text>
+                              <Text style={styles.paymentDate}>
+                                Will Pay:{" "}
+                                {new Date(
+                                  payment.expectedPayoutDate,
+                                ).toLocaleDateString()}
+                              </Text>
+                              {payment.completedJobs?.length > 0 && (
+                                <Text style={styles.paymentJobsCount}>
+                                  {payment.completedJobs.length} service(s)
+                                </Text>
+                              )}
+                            </View>
+                            <View style={styles.paymentStatusBadge}>
+                              <Text style={styles.paymentStatus}>PENDING</Text>
+                            </View>
+                          </View>
+                        ))
+                    ) : (
+                      <View style={styles.emptyPaymentsBox}>
+                        <Text style={styles.emptyPaymentsText}>
+                          No upcoming payments yet. Complete a job to schedule a
+                          payment!
+                        </Text>
+                      </View>
+                    )}
                   </View>
 
                   <View style={styles.walletNote}>
@@ -943,6 +965,73 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   withdrawButtonText: { fontSize: 15, fontWeight: "700", color: "#FFFFFF" },
+  upcomingPaymentsSection: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: "#F59E0B",
+  },
+  upcomingTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#1F2937",
+    marginBottom: 12,
+  },
+  upcomingPaymentCard: {
+    backgroundColor: "#FFFBEB",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderLeftWidth: 3,
+    borderLeftColor: "#F59E0B",
+  },
+  paymentCardLeft: { flex: 1 },
+  paymentAmount: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1F2937",
+    marginBottom: 4,
+  },
+  paymentDate: {
+    fontSize: 12,
+    color: "#6B7280",
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  paymentJobsCount: {
+    fontSize: 11,
+    color: "#F59E0B",
+    fontWeight: "600",
+  },
+  paymentStatusBadge: {
+    backgroundColor: "#FEF3C7",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  paymentStatus: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#D97706",
+  },
+  emptyPaymentsBox: {
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyPaymentsText: {
+    fontSize: 12,
+    color: "#6B7280",
+    textAlign: "center",
+    fontWeight: "500",
+  },
   historySection: { marginTop: 12 },
   historyTitle: {
     fontSize: 13,

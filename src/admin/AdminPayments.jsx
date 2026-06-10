@@ -197,6 +197,12 @@ const AdminPayments = () => {
                   <div>
                     <h3>{payout.workerName}</h3>
                     <p className="worker-email">{payout.workerEmail}</p>
+                    <p className="payout-date">
+                      📅 {payoutTab === "upcoming" ? "Will Pay: " : ""}
+                      {payout.status === "completed"
+                        ? `Paid: ${new Date(payout.completedAt).toLocaleDateString()}`
+                        : `${new Date(payout.expectedPayoutDate).toLocaleDateString()}`}
+                    </p>
                   </div>
                 </div>
                 <div className="payout-amount">
