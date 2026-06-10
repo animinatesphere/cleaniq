@@ -40,13 +40,15 @@ router.get("/availability/:date/:serviceType", async (req, res) => {
     // Parse the date (YYYY-MM-DD format)
     const selectedDate = new Date(date);
     if (isNaN(selectedDate.getTime())) {
-      return res.status(400).json({ message: "Invalid date format. Use YYYY-MM-DD" });
+      return res
+        .status(400)
+        .json({ message: "Invalid date format. Use YYYY-MM-DD" });
     }
 
     // Get start and end of the selected day
     const dayStart = new Date(selectedDate);
     dayStart.setHours(0, 0, 0, 0);
-    
+
     const dayEnd = new Date(selectedDate);
     dayEnd.setHours(23, 59, 59, 999);
 
@@ -54,9 +56,9 @@ router.get("/availability/:date/:serviceType", async (req, res) => {
     const bookingsOnDate = await Booking.find({
       "schedule.date": {
         $gte: dayStart,
-        $lte: dayEnd
+        $lte: dayEnd,
       },
-      status: { $in: ["Confirmed", "Pending", "Accepted", "In Progress"] }
+      status: { $in: ["Confirmed", "Pending", "Accepted", "In Progress"] },
     });
 
     // Extract booked time slots and hours
@@ -68,7 +70,7 @@ router.get("/availability/:date/:serviceType", async (req, res) => {
       if (booking.schedule?.timeSlot) {
         bookedSlots.push(booking.schedule.timeSlot);
       }
-      
+
       // If has duration (hourly services) - mark those hours as partial/booked
       if (booking.details?.duration) {
         // Store duration for reference
@@ -81,7 +83,7 @@ router.get("/availability/:date/:serviceType", async (req, res) => {
       bookedSlots: [...new Set(bookedSlots)], // Remove duplicates
       bookedHours: Array.from(bookedHours),
       totalBookingsOnDate: bookingsOnDate.length,
-      availableHours: [2, 3, 4, 5, 6, 7].filter(h => !bookedHours.has(h))
+      availableHours: [2, 3, 4, 5, 6, 7].filter((h) => !bookedHours.has(h)),
     });
   } catch (err) {
     console.error("Availability check error:", err);
@@ -119,7 +121,8 @@ router.post("/", async (req, res) => {
     const newBooking = await booking.save();
 
     // ✅ Skip all emails for DEV MODE bookings (testing only)
-    const isDevMode = newBooking.payment && newBooking.payment.method === "Dev Mode";
+    const isDevMode =
+      newBooking.payment && newBooking.payment.method === "Dev Mode";
 
     if (!isDevMode) {
       // If booking is created by admin (payment status is "Pending"), send payment email with Stripe link
@@ -134,7 +137,9 @@ router.post("/", async (req, res) => {
             line_items: [
               {
                 price_data: {
-                  currency: (newBooking.payment.currency || "GBP").toLowerCase(),
+                  currency: (
+                    newBooking.payment.currency || "GBP"
+                  ).toLowerCase(),
                   product_data: {
                     name: `Cleaniq - ${newBooking.service}`,
                     description: `Booking Reference: ${newBooking.bookingId}`,
@@ -212,7 +217,22 @@ router.post("/", async (req, res) => {
         );
       }
     } else {
-      console.log(`🧪 [DEV MODE] Booking ${newBooking.bookingId} created - NO emails sent (test mode)`);
+      // DEV MODE: Send success confirmation email to customer
+      try {
+        await sendEmail({
+          to: newBooking.customer.email,
+          subject: `✓ Booking Successful - ${newBooking.bookingId}`,
+          html: templates.adminBookingCreatedEmail1(newBooking),
+        });
+        console.log(
+          `🧪 [DEV MODE] Booking ${newBooking.bookingId} created - Success email sent to customer`,
+        );
+      } catch (devEmailErr) {
+        console.error(
+          `❌ Failed to send dev mode confirmation email:`,
+          devEmailErr.message,
+        );
+      }
     }
 
     res.status(201).json(newBooking);

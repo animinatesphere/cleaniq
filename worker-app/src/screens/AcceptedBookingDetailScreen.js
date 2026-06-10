@@ -42,6 +42,21 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
 
+  // Check if job is tomorrow or later
+  const isJobTomorrowOrLater = useCallback(() => {
+    if (!booking || !booking.schedule || !booking.schedule.date) return false;
+    
+    const jobDate = new Date(booking.schedule.date);
+    const today = new Date();
+    
+    // Set time to midnight for comparison
+    jobDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    
+    // Job date should be today or later (not in the past)
+    return jobDate >= today;
+  }, [booking]);
+
   const fetchBookingDetails = async () => {
     try {
       const res = await axios.get(`${API_URL}/workers/jobs/${bookingId}`);
@@ -307,7 +322,10 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             <TouchableOpacity
               style={[
                 styles.mainActionBtn,
-                { backgroundColor: statusCfg.nextColor },
+                { 
+                  backgroundColor: statusCfg.nextColor,
+                  opacity: (statusCfg.next === "start" && !isJobTomorrowOrLater()) ? 0.5 : 1
+                },
               ]}
               onPress={() =>
                 doAction(
@@ -316,7 +334,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                   `Status updated to ${nextStatusMap[statusCfg.next]}`,
                 )
               }
-              disabled={actionLoading !== null}
+              disabled={actionLoading !== null || (statusCfg.next === "start" && !isJobTomorrowOrLater())}
             >
               {actionLoading === statusCfg.next ? (
                 <ActivityIndicator color="#fff" />
@@ -332,7 +350,9 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                     <CheckCircle size={18} color="#fff" />
                   )}
                   <Text style={styles.mainActionText}>
-                    {statusCfg.nextLabel}
+                    {statusCfg.next === "start" && !isJobTomorrowOrLater()
+                      ? "Available Tomorrow"
+                      : statusCfg.nextLabel}
                   </Text>
                 </>
               )}
