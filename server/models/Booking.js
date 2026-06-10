@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema({
   bookingId: { type: String, required: true, unique: true },
@@ -22,17 +22,20 @@ const bookingSchema = new mongoose.Schema({
   payment: {
     amount: Number,
     currency: String,
-    status: { type: String, default: 'Pending' },
+    status: { type: String, default: "Pending" },
     method: String,
+    stripePaymentIntentId: String, // Store Stripe PaymentIntent ID for "authorize then capture"
+    authorizedAt: Date, // When payment was authorized
+    capturedAt: Date, // When payment was captured (money deducted)
   },
   region: String,
   assignedWorker: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Worker',
-    default: null
+    ref: "Worker",
+    default: null,
   },
   assignedWorkerName: { type: String, default: null },
-  status: { type: String, default: 'Confirmed' },
+  status: { type: String, default: "Confirmed" },
   jobAcceptedTime: { type: Date, default: null },
   jobArrivedTime: { type: Date, default: null },
   jobStartTime: { type: Date, default: null },
@@ -42,7 +45,7 @@ const bookingSchema = new mongoose.Schema({
   workerDuration: { type: Number, default: null }, // expected duration set by admin
   rejectedBy: [{ type: String }], // Array of worker IDs who turned down this job
   createdAt: { type: Date, default: Date.now },
-  meta: mongoose.Schema.Types.Mixed // Catch-all for future expansions
+  meta: mongoose.Schema.Types.Mixed, // Catch-all for future expansions
 });
 
-module.exports = mongoose.model('Booking', bookingSchema);
+module.exports = mongoose.model("Booking", bookingSchema);

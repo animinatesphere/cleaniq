@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const Worker = require("../models/Worker");
+const Booking = require("../models/Booking");
 const Withdrawal = require("../models/Withdrawal");
 const { sendEmail, templates } = require("../utils/emailService");
 
@@ -61,6 +62,13 @@ router.post("/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       mode: "payment",
       customer_email: customerEmail,
+      payment_intent_data: {
+        capture_method: "manual", // Authorize but don't capture - money held pending
+        metadata: {
+          bookingId,
+          company: "Cleaniq Services",
+        },
+      },
       line_items: [
         {
           price_data: {
@@ -852,6 +860,59 @@ router.put("/admin/withdrawals/:withdrawalId/reject", async (req, res) => {
   } catch (error) {
     console.error("Error rejecting withdrawal:", error);
     res.status(500).json({ error: "Failed to reject withdrawal" });
+  }
+});
+
+// CAPTURE AUTHORIZED PAYMENT when booking is completed
+// Called when admin or system marks booking as completed
+router.post("/capture/:bookingId", async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    console.log(`💳 Attempting to capture payment for booking: ${bookingId}`);
+
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    // Check if payment was authorized
+    if (
+      !booking.payment ||
+      !booking.payment.stripePaymentIntentId ||
+      booking.payment.status !== "Authorized"
+    ) {
+      return res.status(400).json({
+        error: "Payment is not in authorized state or already captured",
+        currentStatus: booking.payment?.status,
+      });
+    }
+
+    try {
+      // Capture the authorized payment
+      const paymentIntent = await stripe.paymentIntents.capture(
+        booking.payment.stripePaymentIntentId,
+      );
+
+      console.log(
+        `✅ Payment captured successfully for booking ${bookingId}`,
+        paymentIntent.status,
+      );
+
+      res.json({
+        message: "Payment captured successfully",
+        paymentIntentStatus: paymentIntent.status,
+        bookingId,
+      });
+    } catch (stripeErr) {
+      console.error("❌ Stripe capture error:", stripeErr.message);
+      res.status(400).json({
+        error: "Failed to capture payment with Stripe",
+        details: stripeErr.message,
+      });
+    }
+  } catch (error) {
+    console.error("❌ Error capturing payment:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 

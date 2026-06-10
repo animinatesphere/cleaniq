@@ -124,16 +124,35 @@ router.post("/", async (req, res) => {
     const isDevMode =
       newBooking.payment && newBooking.payment.method === "Dev Mode";
 
+    // Check if payment was already completed via Stripe (not pending payment)
+    const isPaymentCompleted =
+      newBooking.payment &&
+      (newBooking.payment.status === "Completed" ||
+        newBooking.payment.status === "Confirmed" ||
+        newBooking.payment.method === "Card");
+
     if (!isDevMode) {
-      // If booking is created by admin (payment status is "Pending"), send payment email with Stripe link
-      if (newBooking.payment && newBooking.payment.status === "Pending") {
+      // If payment is pending AND not yet paid via Stripe, send payment email with Stripe link
+      if (
+        newBooking.payment &&
+        newBooking.payment.status === "Pending" &&
+        !isPaymentCompleted
+      ) {
         try {
-          // Generate Stripe Checkout Link
+          // Generate Stripe Checkout Link with manual capture
           const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
           const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             mode: "payment",
             customer_email: newBooking.customer.email,
+            payment_intent_data: {
+              capture_method: "manual", // Authorize but don't capture - money held in pending
+              metadata: {
+                bookingId: newBooking._id.toString(),
+                bookingRef: newBooking.bookingId,
+                company: "Cleaniq Services",
+              },
+            },
             line_items: [
               {
                 price_data: {
@@ -174,14 +193,14 @@ router.post("/", async (req, res) => {
           );
         }
       } else {
-        // Send Confirmation Email to Customer (Enhanced booking details)
+        // Send Success Confirmation Email (payment already completed or admin booking)
         await sendEmail({
           to: newBooking.customer.email,
-          subject: `✓ Your Cleaniq Booking is Created - ${newBooking.bookingId}`,
+          subject: `✓ Booking Successful - ${newBooking.bookingId}`,
           html: templates.adminBookingCreatedEmail1(newBooking),
         });
         console.log(
-          `✅ Email sent to ${newBooking.customer.email} - Initial booking confirmation`,
+          `✅ Email sent to ${newBooking.customer.email} - Booking confirmation`,
         );
       }
 
@@ -418,6 +437,55 @@ router.put("/:id", async (req, res) => {
               }
             }
           }
+        }
+      }
+
+      // CAPTURE AUTHORIZED PAYMENT when booking is completed
+      if (
+        updatedBooking.payment?.stripePaymentIntentId &&
+        updatedBooking.payment.status === "Authorized"
+      ) {
+        try {
+          const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+          const capturedPayment = await stripe.paymentIntents.capture(
+            updatedBooking.payment.stripePaymentIntentId,
+          );
+
+          // Update booking to mark payment as captured
+          updatedBooking.payment.status = "Completed";
+          updatedBooking.payment.capturedAt = new Date();
+          await updatedBooking.save();
+
+          console.log(
+            `💳 ✅ Payment captured for booking ${updatedBooking.bookingId} - Status: ${capturedPayment.status}`,
+          );
+
+          // Send payment captured email to customer
+          try {
+            await sendEmail({
+              to: updatedBooking.customer.email,
+              subject: `✓ Payment Captured: Cleaniq Booking ${updatedBooking.bookingId}`,
+              html: `
+                <h2>Payment Captured</h2>
+                <p>Hi ${updatedBooking.customer.firstName},</p>
+                <p>Your cleaning service has been completed successfully!</p>
+                <p><strong>Booking Reference:</strong> ${updatedBooking.bookingId}</p>
+                <p><strong>Service:</strong> ${updatedBooking.service}</p>
+                <p><strong>Amount Charged:</strong> ${updatedBooking.payment.currency === "GBP" ? "£" : "₦"}${updatedBooking.payment.amount}</p>
+                <p>Your payment has been successfully processed. Thank you for choosing Cleaniq!</p>
+              `,
+            });
+            console.log(
+              `✅ Payment captured email sent to: ${updatedBooking.customer.email}`,
+            );
+          } catch (emailErr) {
+            console.error("⚠️ Failed to send payment capture email:", emailErr);
+          }
+        } catch (captureErr) {
+          console.error(
+            `❌ Failed to capture payment for booking ${updatedBooking.bookingId}:`,
+            captureErr.message,
+          );
         }
       }
 

@@ -120,44 +120,66 @@ app.post(
 
     // Handle the event
     try {
-      if (event.type === "payment_intent.succeeded") {
-        const pi = event.data.object;
-        const bookingId = pi.metadata && pi.metadata.bookingId;
+      if (event.type === "checkout.session.completed") {
+        const session = event.data.object;
+        const bookingId = session.metadata && session.metadata.bookingId;
         console.log(
-          "🔔 Stripe payment succeeded for metadata.bookingId=",
+          "💳 Stripe checkout session completed - payment authorized for bookingId:",
           bookingId,
         );
-        if (bookingId) {
+
+        if (bookingId && session.payment_intent) {
           const booking = await Booking.findById(bookingId);
           if (booking) {
-            booking.status = "Completed";
+            // Store payment intent for later capture
             booking.payment = booking.payment || {};
-            booking.payment.transactionId = pi.id;
-            booking.payment.status = "Paid";
+            booking.payment.stripePaymentIntentId = session.payment_intent;
+            booking.payment.status = "Authorized"; // Money is held, not yet captured
+            booking.payment.authorizedAt = new Date();
+            booking.status = "Confirmed"; // Booking is confirmed but cleaning not done yet
             await booking.save();
 
-            // Send Payment Success Email to Customer
+            // Send Authorization Email to Customer (payment held)
             await sendEmail({
               to: booking.customer.email,
-              subject: `✓ Payment Confirmed: Cleaniq Booking ${booking.bookingId}`,
-              html: templates.paymentSuccessCustomer(booking),
-            });
-
-            // Send Payment Success Email to Admin
-            await sendEmail({
-              to: process.env.EMAIL_USER || "admin@cleaniqservices.com",
-              subject: `✓ Payment Received: ${booking.bookingId} - ${booking.customer.firstName} ${booking.customer.lastName}`,
-              html: templates.paymentSuccessAdmin(booking),
+              subject: `✓ Payment Authorized: Cleaniq Booking ${booking.bookingId}`,
+              html: templates.adminBookingCreatedEmail1(booking), // Use success template
             });
 
             console.log(
-              `✅ Payment success emails sent for booking ${bookingId}`,
+              `✅ Payment authorized for booking ${bookingId}, awaiting completion to capture`,
             );
           } else {
             console.warn(
-              "⚠️ Booking not found for webhook bookingId:",
+              "⚠️ Booking not found for checkout session:",
               bookingId,
             );
+          }
+        }
+      } else if (event.type === "payment_intent.succeeded") {
+        const pi = event.data.object;
+        const bookingId = pi.metadata && pi.metadata.bookingId;
+        console.log(
+          "🔔 Stripe payment intent succeeded for bookingId:",
+          bookingId,
+        );
+
+        if (bookingId) {
+          const booking = await Booking.findById(bookingId);
+          if (booking) {
+            booking.payment = booking.payment || {};
+            booking.payment.status = "Completed"; // Payment has been captured
+            booking.payment.capturedAt = new Date();
+            await booking.save();
+
+            // Send Payment Capture Confirmation Email
+            await sendEmail({
+              to: booking.customer.email,
+              subject: `✓ Payment Captured: Cleaniq Booking ${booking.bookingId}`,
+              html: templates.paymentSuccessCustomer(booking),
+            });
+
+            console.log(`✅ Payment captured for booking ${bookingId}`);
           }
         }
       }
