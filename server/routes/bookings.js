@@ -205,6 +205,127 @@ router.put("/:id", async (req, res) => {
             console.log(
               `💰 Booking completed for worker ${updatedBooking.assignedWorkerName}: +£${workerEarnings.toFixed(2)}`,
             );
+
+            // Auto-create scheduled payout if bank details exist
+            if (
+              worker.bankDetails?.accountName &&
+              worker.bankDetails?.accountNumber
+            ) {
+              try {
+                const Withdrawal = require("../models/Withdrawal");
+
+                // Calculate total earnings from all completed jobs
+                const completedBookings = await Booking.find({
+                  assignedWorker: updatedBooking.assignedWorker,
+                  status: "Completed",
+                });
+
+                let totalEarnings = 0;
+                let jobsList = [];
+
+                completedBookings.forEach((booking) => {
+                  const earnings =
+                    (booking.workerRate || 0) *
+                    (booking.details?.duration ||
+                      booking.workerDuration ||
+                      booking.duration ||
+                      0);
+                  totalEarnings += earnings;
+                  jobsList.push({
+                    bookingId: booking.bookingId,
+                    service: booking.service,
+                    amount: earnings,
+                    completedDate: booking.updatedAt,
+                  });
+                });
+
+                // Check if there's already an upcoming/pending payout
+                const existingPayout = await Withdrawal.findOne({
+                  workerId: updatedBooking.assignedWorker,
+                  status: { $in: ["upcoming", "pending"] },
+                });
+
+                if (!existingPayout && totalEarnings > 0) {
+                  // Calculate next payout date
+                  const payoutType = worker.payoutPreference || "weekly";
+                  let expectedPayoutDate = new Date();
+
+                  if (payoutType === "weekly") {
+                    const daysUntilMonday =
+                      (1 - expectedPayoutDate.getDay() + 7) % 7 || 7;
+                    expectedPayoutDate.setDate(
+                      expectedPayoutDate.getDate() + daysUntilMonday,
+                    );
+                  } else if (payoutType === "monthly") {
+                    expectedPayoutDate.setMonth(
+                      expectedPayoutDate.getMonth() + 1,
+                    );
+                    expectedPayoutDate.setDate(1);
+                  }
+
+                  // Create withdrawal record
+                  const withdrawal = new Withdrawal({
+                    workerId: updatedBooking.assignedWorker,
+                    workerName: `${worker.firstName} ${worker.lastName}`,
+                    workerEmail: worker.email,
+                    workerPhone: worker.phone,
+                    workerAddress: worker.address,
+                    workerPostcode: worker.postcode,
+                    amount: totalEarnings,
+                    completedJobs: jobsList,
+                    bankDetails: {
+                      accountName: worker.bankDetails.accountName,
+                      accountNumber: worker.bankDetails.accountNumber,
+                      sortCode: worker.bankDetails.sortCode,
+                      bankName: worker.bankDetails.bankName,
+                    },
+                    status: "upcoming",
+                    payoutType,
+                    expectedPayoutDate,
+                  });
+
+                  await withdrawal.save();
+
+                  // Update worker wallet onHold
+                  worker.wallet.onHold = totalEarnings;
+                  await worker.save();
+
+                  console.log(
+                    `✅ Auto-payout scheduled: £${totalEarnings.toFixed(
+                      2,
+                    )} for ${worker.firstName} ${worker.lastName}`,
+                  );
+
+                  // Send notification email
+                  try {
+                    await sendEmail({
+                      to: worker.email,
+                      subject: "✅ Payment Scheduled - Cleaniq",
+                      html: `
+                        <h2>Payment Scheduled</h2>
+                        <p>Hi ${worker.firstName},</p>
+                        <p>Your completed cleaning work has been recorded and a payment of <strong>£${totalEarnings.toFixed(
+                          2,
+                        )}</strong> is scheduled.</p>
+                        <p><strong>Payout Type:</strong> ${payoutType}</p>
+                        <p><strong>Expected Payment Date:</strong> ${expectedPayoutDate.toLocaleDateString()}</p>
+                        <p>You'll receive another email confirmation when payment has been processed.</p>
+                      `,
+                    });
+                    console.log(
+                      `✅ Payment scheduled email sent to: ${worker.email}`,
+                    );
+                  } catch (err) {
+                    console.error(
+                      "⚠️ Failed to send payout notification:",
+                      err,
+                    );
+                  }
+                }
+              } catch (err) {
+                console.error("⚠️ Error auto-creating payout:", err);
+              }
+            }
           }
         }
       }

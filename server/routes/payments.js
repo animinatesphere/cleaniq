@@ -180,7 +180,248 @@ router.get("/wallet/:workerId", async (req, res) => {
     });
   }
 });
+// ===== NEW SCHEDULED PAYOUT SYSTEM =====
 
+// GET upcoming payments for worker (earnings pending for next payout)
+router.get("/upcoming-payments/:workerId", async (req, res) => {
+  try {
+    const { workerId } = req.params;
+    console.log(`📊 Fetching upcoming payments for worker: ${workerId}`);
+
+    const worker = await Worker.findById(workerId);
+    if (!worker) {
+      return res.status(404).json({ error: "Worker not found" });
+    }
+
+    // Get earnings from completed jobs since last payout
+    const Booking = require("../models/Booking");
+    const completedBookings = await Booking.find({
+      assignedWorker: workerId,
+      status: "Completed",
+    }).select("bookingId service workerRate details");
+
+    let totalEarnings = 0;
+    let jobsList = [];
+
+    if (completedBookings.length > 0) {
+      jobsList = completedBookings.map((booking) => {
+        const earnings =
+          (booking.workerRate || 0) *
+          (booking.details?.duration || booking.workerDuration || 0);
+        totalEarnings += earnings;
+        return {
+          bookingId: booking.bookingId,
+          service: booking.service || "Cleaning Service",
+          amount: earnings,
+          completedDate: booking.updatedAt,
+        };
+      });
+    }
+
+    // Calculate next payout date (default weekly on Monday)
+    const today = new Date();
+    const payoutType = worker.payoutPreference || "weekly";
+    let nextPayoutDate = new Date(today);
+
+    if (payoutType === "weekly") {
+      const daysUntilMonday = (1 - today.getDay() + 7) % 7 || 7;
+      nextPayoutDate.setDate(today.getDate() + daysUntilMonday);
+    } else if (payoutType === "monthly") {
+      nextPayoutDate.setMonth(today.getMonth() + 1);
+      nextPayoutDate.setDate(1);
+    }
+
+    res.json({
+      totalEarnings,
+      jobsList,
+      nextPayoutDate,
+      payoutType,
+      workerName: `${worker.firstName} ${worker.lastName}`,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching upcoming payments:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET withdrawal history (pending, approved, completed)
+router.get("/withdrawal-history/:workerId", async (req, res) => {
+  try {
+    const { workerId } = req.params;
+    console.log(`📋 Fetching withdrawal history for worker: ${workerId}`);
+
+    const withdrawals = await Withdrawal.find({ workerId })
+      .select(
+        "-bankDetails.accountNumber -bankDetails.sortCode -transactionRef",
+      )
+      .sort({ createdAt: -1 });
+
+    res.json(withdrawals || []);
+  } catch (error) {
+    console.error("❌ Error fetching withdrawal history:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET received payments (completed/paid out)
+router.get("/received/:workerId", async (req, res) => {
+  try {
+    const { workerId } = req.params;
+    console.log(`💰 Fetching received payments for worker: ${workerId}`);
+
+    const received = await Withdrawal.find({
+      workerId,
+      status: "completed",
+    })
+      .select("-bankDetails")
+      .sort({ completedAt: -1 });
+
+    const totalReceived = received.reduce((sum, w) => sum + w.amount, 0);
+
+    res.json({
+      payments: received,
+      totalReceived,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching received payments:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST create automatic withdrawal when job completed
+router.post("/create-payout/:workerId", async (req, res) => {
+  try {
+    const { workerId } = req.params;
+    const { bookingId } = req.body;
+
+    let worker = await Worker.findById(workerId);
+    if (!worker) {
+      return res.status(404).json({ error: "Worker not found" });
+    }
+
+    // Check if bank details exist
+    if (
+      !worker.bankDetails?.accountName ||
+      !worker.bankDetails?.accountNumber
+    ) {
+      return res.status(400).json({
+        error: "Bank details required for automatic payouts",
+      });
+    }
+
+    // Initialize wallet if needed
+    if (!worker.wallet) {
+      worker.wallet = {
+        totalEarned: 0,
+        balance: 0,
+        onHold: 0,
+        withdrawn: 0,
+      };
+    }
+
+    // Get all completed jobs and calculate earnings
+    const Booking = require("../models/Booking");
+    const completedBookings = await Booking.find({
+      assignedWorker: workerId,
+      status: "Completed",
+    });
+
+    let totalEarnings = 0;
+    let jobsList = [];
+
+    completedBookings.forEach((booking) => {
+      const earnings =
+        (booking.workerRate || 0) *
+        (booking.details?.duration || booking.workerDuration || 0);
+      totalEarnings += earnings;
+      jobsList.push({
+        bookingId: booking.bookingId,
+        service: booking.service,
+        amount: earnings,
+        completedDate: booking.updatedAt,
+      });
+    });
+
+    if (totalEarnings <= 0) {
+      return res.status(400).json({ error: "No earnings to withdraw" });
+    }
+
+    // Calculate next payout date
+    const payoutType = worker.payoutPreference || "weekly";
+    let expectedPayoutDate = new Date();
+
+    if (payoutType === "weekly") {
+      const daysUntilMonday = (1 - expectedPayoutDate.getDay() + 7) % 7 || 7;
+      expectedPayoutDate.setDate(
+        expectedPayoutDate.getDate() + daysUntilMonday,
+      );
+    } else if (payoutType === "monthly") {
+      expectedPayoutDate.setMonth(expectedPayoutDate.getMonth() + 1);
+      expectedPayoutDate.setDate(1);
+    }
+
+    // Create withdrawal record
+    const withdrawal = new Withdrawal({
+      workerId,
+      workerName: `${worker.firstName} ${worker.lastName}`,
+      workerEmail: worker.email,
+      workerPhone: worker.phone,
+      workerAddress: worker.address,
+      workerPostcode: worker.postcode,
+      amount: totalEarnings,
+      completedJobs: jobsList,
+      bankDetails: {
+        accountName: worker.bankDetails.accountName,
+        accountNumber: worker.bankDetails.accountNumber,
+        sortCode: worker.bankDetails.sortCode,
+        bankName: worker.bankDetails.bankName,
+      },
+      status: "upcoming",
+      payoutType,
+      expectedPayoutDate,
+    });
+
+    await withdrawal.save();
+
+    // Update wallet onHold
+    worker.wallet.onHold += totalEarnings;
+    worker.wallet.lastUpdated = new Date();
+    await worker.save();
+
+    console.log(
+      `✅ Automatic payout created: £${totalEarnings.toFixed(2)} scheduled for ${payoutType}`,
+    );
+
+    // Send email to worker
+    try {
+      await sendEmail({
+        to: worker.email,
+        subject: "✅ Payment Scheduled - Cleaniq",
+        html: `
+          <h2>Payment Scheduled</h2>
+          <p>Hi ${worker.firstName},</p>
+          <p>Your completed cleaning work has been recorded and a payment of <strong>£${totalEarnings.toFixed(
+            2,
+          )}</strong> is scheduled.</p>
+          <p><strong>Payout Schedule:</strong> ${payoutType}</p>
+          <p><strong>Expected Payment Date:</strong> ${expectedPayoutDate.toLocaleDateString()}</p>
+          <p>You'll receive another email confirmation when payment has been processed.</p>
+          <p>Thank you for your hard work!</p>
+        `,
+      });
+    } catch (emailErr) {
+      console.error("⚠️ Failed to send email:", emailErr);
+    }
+
+    res.json({
+      message: "Payout scheduled successfully",
+      withdrawal,
+    });
+  } catch (error) {
+    console.error("❌ Error creating payout:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
 // DEBUG: Add test earnings to worker wallet
 router.post("/wallet/:workerId/add-test-earnings", async (req, res) => {
   try {
@@ -438,14 +679,16 @@ router.get("/admin/withdrawals/all", async (req, res) => {
 // ADMIN: Approve withdrawal
 router.put("/admin/withdrawals/:withdrawalId/approve", async (req, res) => {
   try {
-    const { adminId } = req.body;
+    const { adminId, action = "approve" } = req.body; // action: approve, process, complete
     const withdrawal = await Withdrawal.findById(req.params.withdrawalId);
 
     if (!withdrawal) {
       return res.status(404).json({ error: "Withdrawal not found" });
     }
 
-    if (withdrawal.status !== "pending") {
+    // Allow approval from upcoming or pending status
+    const validStatuses = ["upcoming", "pending"];
+    if (!validStatuses.includes(withdrawal.status)) {
       return res.status(400).json({
         error: `Cannot approve withdrawal with status: ${withdrawal.status}`,
       });
@@ -457,42 +700,64 @@ router.put("/admin/withdrawals/:withdrawalId/approve", async (req, res) => {
       return res.status(404).json({ error: "Worker not found" });
     }
 
-    // Update withdrawal status
-    withdrawal.status = "approved";
+    // Generate transaction reference
+    const transactionRef = `TXN-${Date.now()}-${withdrawal.workerId.toString().slice(-6)}`;
+
+    // Update withdrawal status based on action
+    if (action === "approve") {
+      withdrawal.status = "approved";
+    } else if (action === "process") {
+      withdrawal.status = "processing";
+    } else if (action === "complete") {
+      withdrawal.status = "completed";
+      withdrawal.completedAt = new Date();
+      withdrawal.transactionRef = transactionRef;
+
+      // Deduct from onHold, add to withdrawn (only on completion)
+      worker.wallet.onHold -= withdrawal.amount;
+      worker.wallet.withdrawn += withdrawal.amount;
+      worker.wallet.balance =
+        worker.wallet.totalEarned - worker.wallet.withdrawn;
+      worker.wallet.lastUpdated = new Date();
+    }
+
     withdrawal.approvedBy = adminId;
     withdrawal.approvedAt = new Date();
     await withdrawal.save();
-
-    // Update worker wallet: deduct from onHold, add to withdrawn
-    worker.wallet.onHold -= withdrawal.amount;
-    worker.wallet.withdrawn += withdrawal.amount;
-    worker.wallet.lastUpdated = new Date();
     await worker.save();
 
-    // Send approval email to worker
+    // Send email based on action
     try {
-      await sendEmail({
-        to: worker.email,
-        subject: "Withdrawal Approved - Funds on the Way! 🎉 Cleaniq Services",
-        html: templates.withdrawalApprovedWorker(
-          worker,
-          withdrawal.amount,
-          withdrawal._id,
-        ),
-      });
-      console.log(`✅ Approval email sent to worker: ${worker.email}`);
+      if (action === "complete" || action === "approve") {
+        await sendEmail({
+          to: worker.email,
+          subject: "✅ Payment Processed - Funds Transferred! Cleaniq Services",
+          html: `
+            <h2>Payment Successfully Transferred</h2>
+            <p>Hi ${worker.firstName},</p>
+            <p>Your payment has been successfully processed and transferred to your account.</p>
+            <p><strong>Amount:</strong> £${withdrawal.amount.toFixed(2)}</p>
+            <p><strong>Transaction Reference:</strong> ${transactionRef}</p>
+            <p><strong>Transfer Date:</strong> ${new Date().toLocaleDateString()}</p>
+            <p>The funds should appear in your bank account within 1-2 working days.</p>
+            <p>Thank you for your excellent work!</p>
+          `,
+        });
+        console.log(`✅ Payment completion email sent to: ${worker.email}`);
+      }
     } catch (emailError) {
-      console.error("❌ Failed to send approval email:", emailError);
+      console.error("⚠️ Failed to send email:", emailError);
     }
 
     console.log(
-      `✅ Withdrawal approved: £${withdrawal.amount} for worker ${withdrawal.workerName}`,
+      `✅ Withdrawal ${action}ed: £${withdrawal.amount} for worker ${withdrawal.workerName}`,
     );
 
     res.json({
-      message: "Withdrawal approved and funds deducted from wallet",
+      message: `Withdrawal ${action}ed successfully`,
       withdrawal,
       workerWallet: worker.wallet,
+      transactionRef,
     });
   } catch (error) {
     console.error("Error approving withdrawal:", error);
@@ -510,7 +775,8 @@ router.put("/admin/withdrawals/:withdrawalId/reject", async (req, res) => {
       return res.status(404).json({ error: "Withdrawal not found" });
     }
 
-    if (withdrawal.status !== "pending") {
+    const validStatuses = ["upcoming", "pending", "approved"];
+    if (!validStatuses.includes(withdrawal.status)) {
       return res.status(400).json({
         error: `Cannot reject withdrawal with status: ${withdrawal.status}`,
       });
@@ -519,8 +785,9 @@ router.put("/admin/withdrawals/:withdrawalId/reject", async (req, res) => {
     // Refund to worker's balance
     const worker = await Worker.findById(withdrawal.workerId);
     if (worker) {
-      worker.wallet.balance += withdrawal.amount;
       worker.wallet.onHold -= withdrawal.amount;
+      worker.wallet.balance =
+        worker.wallet.totalEarned - worker.wallet.withdrawn;
       worker.wallet.lastUpdated = new Date();
       await worker.save();
     }
@@ -534,25 +801,29 @@ router.put("/admin/withdrawals/:withdrawalId/reject", async (req, res) => {
       try {
         await sendEmail({
           to: worker.email,
-          subject: "Withdrawal Request Declined - Cleaniq Services",
-          html: templates.withdrawalRejectedWorker(
-            worker,
-            withdrawal.amount,
-            reason || "Your withdrawal request does not meet our criteria.",
-          ),
+          subject: "⚠️ Payment Request Status Update - Cleaniq Services",
+          html: `
+            <h2>Payment Request Update</h2>
+            <p>Hi ${worker.firstName},</p>
+            <p>Your payment request of <strong>£${withdrawal.amount.toFixed(
+              2,
+            )}</strong> could not be processed at this time.</p>
+            <p><strong>Reason:</strong> ${reason || "Rejected by admin"}</p>
+            <p>Please contact support for more information or resubmit your request.</p>
+          `,
         });
-        console.log(`✅ Rejection email sent to worker: ${worker.email}`);
+        console.log(`✅ Rejection email sent to: ${worker.email}`);
       } catch (emailError) {
-        console.error("❌ Failed to send rejection email:", emailError);
+        console.error("⚠️ Failed to send rejection email:", emailError);
       }
     }
 
     console.log(
-      `❌ Withdrawal rejected: £${withdrawal.amount} refunded to ${withdrawal.workerName}`,
+      `❌ Withdrawal rejected: £${withdrawal.amount} for worker ${withdrawal.workerName}`,
     );
 
     res.json({
-      message: "Withdrawal rejected and refunded",
+      message: "Withdrawal rejected and funds refunded to wallet",
       withdrawal,
       workerWallet: worker?.wallet,
     });

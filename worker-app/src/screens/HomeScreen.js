@@ -10,8 +10,6 @@ import {
   SafeAreaView,
   Platform,
   Alert,
-  Modal,
-  TextInput,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { AuthContext, API_URL } from "../context/AuthContext";
@@ -29,14 +27,12 @@ import {
   Wallet,
   Star,
   Award,
-  ArrowUpRight,
-  X,
 } from "lucide-react-native";
 import axios from "axios";
 
 const HomeScreen = ({ navigation, route }) => {
   const { workerInfo } = useContext(AuthContext);
-  const [activeTab, setActiveTab] = useState("activity"); // 'activity', 'offers', or 'history'
+  const [activeTab, setActiveTab] = useState("activity"); // 'activity', 'offers', 'history', 'payments'
 
   const [availableJobs, setAvailableJobs] = useState([]);
   const [myJobs, setMyJobs] = useState([]);
@@ -55,9 +51,21 @@ const HomeScreen = ({ navigation, route }) => {
   });
   const [walletLoading, setWalletLoading] = useState(true);
   const [walletError, setWalletError] = useState(null);
-  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
-  const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [withdrawLoading, setWithdrawLoading] = useState(false);
+
+  // Payment tabs state
+  const [paymentTab, setPaymentTab] = useState("upcoming"); // 'upcoming', 'withdrawal', 'received'
+  const [upcomingPayments, setUpcomingPayments] = useState({
+    totalEarnings: 0,
+    jobsList: [],
+    nextPayoutDate: new Date(),
+    payoutType: "weekly",
+  });
+  const [withdrawalHistory, setWithdrawalHistory] = useState([]);
+  const [receivedPayments, setReceivedPayments] = useState({
+    payments: [],
+    totalReceived: 0,
+  });
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -115,6 +123,7 @@ const HomeScreen = ({ navigation, route }) => {
     useCallback(() => {
       fetchData();
       fetchWalletData();
+      fetchAllPaymentData();
       if (route?.params?.tab) {
         setActiveTab(route.params.tab);
       }
@@ -126,6 +135,7 @@ const HomeScreen = ({ navigation, route }) => {
     try {
       await fetchData();
       await fetchWalletData();
+      await fetchAllPaymentData();
       console.log("✅ Refresh complete");
     } catch (error) {
       console.error("❌ Refresh error:", error);
@@ -171,65 +181,56 @@ const HomeScreen = ({ navigation, route }) => {
     }
   };
 
-  const handleRequestWithdrawal = async () => {
-    const amount = parseFloat(withdrawAmount);
-
-    if (!amount || amount <= 0) {
-      Alert.alert("Invalid Amount", "Please enter a valid amount");
-      return;
-    }
-
-    if (amount > wallet.balance) {
-      Alert.alert(
-        "Insufficient Balance",
-        `Your available balance is £${wallet.balance.toFixed(2)}`,
-      );
-      return;
-    }
-
-    if (amount < 20) {
-      Alert.alert("Minimum Amount", "Minimum withdrawal is £20");
-      return;
-    }
-
-    if (amount > 1000) {
-      Alert.alert("Maximum Amount", "Maximum withdrawal is £1000");
-      return;
-    }
-
-    if (!workerInfo?.bankDetails?.accountName) {
-      Alert.alert(
-        "Bank Details Required",
-        "Please add your bank details in your profile before withdrawing",
-      );
-      setShowWithdrawModal(false);
-      navigation.navigate("Account");
-      return;
-    }
-
-    setWithdrawLoading(true);
+  // Fetch upcoming payments
+  const fetchUpcomingPayments = async () => {
+    if (!workerInfo?.id) return;
     try {
-      const response = await axios.post(
-        `${API_URL}/payments/withdraw/${workerInfo.id}`,
-        { amount },
+      const res = await axios.get(
+        `${API_URL}/payments/upcoming-payments/${workerInfo.id}`,
       );
-      Alert.alert("Success", response.data.message, [
-        {
-          text: "OK",
-          onPress: () => {
-            setWithdrawAmount("");
-            setShowWithdrawModal(false);
-            fetchWalletData();
-          },
-        },
-      ]);
+      setUpcomingPayments(res.data || {});
     } catch (error) {
-      Alert.alert(
-        "Error",
-        error.response?.data?.error || "Failed to request withdrawal",
+      console.error("Error fetching upcoming payments:", error.message);
+    }
+  };
+
+  // Fetch withdrawal history
+  const fetchWithdrawalHistory = async () => {
+    if (!workerInfo?.id) return;
+    try {
+      const res = await axios.get(
+        `${API_URL}/payments/withdrawal-history/${workerInfo.id}`,
       );
+      setWithdrawalHistory(res.data || []);
+    } catch (error) {
+      console.error("Error fetching withdrawal history:", error.message);
+    }
+  };
+
+  // Fetch received payments
+  const fetchReceivedPayments = async () => {
+    if (!workerInfo?.id) return;
+    try {
+      const res = await axios.get(
+        `${API_URL}/payments/received/${workerInfo.id}`,
+      );
+      setReceivedPayments(res.data || { payments: [], totalReceived: 0 });
+    } catch (error) {
+      console.error("Error fetching received payments:", error.message);
+    }
+  };
+
+  // Fetch all payment data
+  const fetchAllPaymentData = async () => {
+    setPaymentLoading(true);
+    try {
+      await Promise.all([
+        fetchUpcomingPayments(),
+        fetchWithdrawalHistory(),
+        fetchReceivedPayments(),
+      ]);
     } finally {
-      setWithdrawLoading(false);
+      setPaymentLoading(false);
     }
   };
 
@@ -392,16 +393,12 @@ const HomeScreen = ({ navigation, route }) => {
             </Text>
           </View>
         </View>
-        <TouchableOpacity
-          style={styles.withdrawBtn}
-          onPress={() => {
-            console.log("💰 Withdrawal button pressed");
-            setShowWithdrawModal(true);
-          }}
-          activeOpacity={0.7}
-        >
-          <ArrowUpRight size={18} color="#FFFFFF" />
-          <Text style={styles.withdrawBtnText}>Request Withdrawal</Text>
+        <TouchableOpacity style={styles.infoBox} activeOpacity={0.9}>
+          <Text style={styles.infoLabel}>💡 Automatic Payouts</Text>
+          <Text style={styles.infoText}>
+            Payments are sent automatically. Check your Payments tab for
+            details.
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -837,6 +834,267 @@ const HomeScreen = ({ navigation, route }) => {
     </ScrollView>
   );
 
+  const renderPaymentsTab = () => (
+    <ScrollView
+      style={styles.tabContent}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={["#4F46E5"]}
+        />
+      }
+    >
+      {/* Sub-tabs for payments */}
+      <View style={styles.subTabContainer}>
+        <TouchableOpacity
+          style={[
+            styles.subTab,
+            paymentTab === "upcoming" && styles.activeSubTab,
+          ]}
+          onPress={() => setPaymentTab("upcoming")}
+        >
+          <Text
+            style={[
+              styles.subTabText,
+              paymentTab === "upcoming" && styles.activeSubTabText,
+            ]}
+          >
+            Upcoming
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.subTab,
+            paymentTab === "withdrawal" && styles.activeSubTab,
+          ]}
+          onPress={() => setPaymentTab("withdrawal")}
+        >
+          <Text
+            style={[
+              styles.subTabText,
+              paymentTab === "withdrawal" && styles.activeSubTabText,
+            ]}
+          >
+            Withdrawal
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.subTab,
+            paymentTab === "received" && styles.activeSubTab,
+          ]}
+          onPress={() => setPaymentTab("received")}
+        >
+          <Text
+            style={[
+              styles.subTabText,
+              paymentTab === "received" && styles.activeSubTabText,
+            ]}
+          >
+            Received
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {paymentLoading && (
+        <View style={styles.loadingCenter}>
+          <ActivityIndicator size="large" color="#4F46E5" />
+        </View>
+      )}
+
+      {paymentTab === "upcoming" && !paymentLoading && (
+        <View style={styles.paymentSection}>
+          <Text style={styles.sectionTitle}>Upcoming Payments</Text>
+          {upcomingPayments.jobsList?.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>No upcoming payments</Text>
+              <Text style={styles.emptyStateSubtext}>
+                Completed jobs will appear here
+              </Text>
+            </View>
+          ) : (
+            <>
+              <View style={styles.payoutScheduleCard}>
+                <Text style={styles.scheduleLabel}>Next Payment</Text>
+                <Text style={styles.nextPayoutDate}>
+                  {upcomingPayments.nextPayoutDate
+                    ? new Date(
+                        upcomingPayments.nextPayoutDate,
+                      ).toLocaleDateString("en-GB", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                      })
+                    : "TBC"}
+                </Text>
+                <Text style={styles.payoutTypeLabel}>
+                  Payment Type: {upcomingPayments.payoutType}
+                </Text>
+                <Text style={styles.totalEarningsText}>
+                  Total Earnings: £
+                  {upcomingPayments.totalEarnings?.toFixed(2) || "0.00"}
+                </Text>
+              </View>
+
+              <View style={styles.jobsListPayment}>
+                {upcomingPayments.jobsList?.map((job, index) => (
+                  <View key={index} style={styles.paymentJobCard}>
+                    <View style={styles.paymentJobHeader}>
+                      <Text style={styles.paymentJobService}>
+                        {job.service || "Cleaning Service"}
+                      </Text>
+                      <Text style={styles.paymentJobAmount}>
+                        £{job.amount?.toFixed(2) || "0.00"}
+                      </Text>
+                    </View>
+                    <Text style={styles.paymentJobDate}>
+                      Completed:{" "}
+                      {job.completedDate
+                        ? new Date(job.completedDate).toLocaleDateString(
+                            "en-GB",
+                          )
+                        : "Date TBC"}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
+        </View>
+      )}
+
+      {paymentTab === "withdrawal" && !paymentLoading && (
+        <View style={styles.paymentSection}>
+          <Text style={styles.sectionTitle}>Pending Withdrawals</Text>
+          {withdrawalHistory.filter((w) =>
+            ["upcoming", "pending", "approved"].includes(w.status),
+          ).length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>No pending withdrawals</Text>
+              <Text style={styles.emptyStateSubtext}>
+                Your payments will appear here
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.jobsListPayment}>
+              {withdrawalHistory
+                .filter((w) =>
+                  ["upcoming", "pending", "approved"].includes(w.status),
+                )
+                .map((withdrawal, index) => (
+                  <View key={index} style={styles.withdrawalCard}>
+                    <View style={styles.withdrawalHeader}>
+                      <Text style={styles.withdrawalAmount}>
+                        £{withdrawal.amount?.toFixed(2) || "0.00"}
+                      </Text>
+                      <View
+                        style={[
+                          styles.statusBadge,
+                          {
+                            backgroundColor:
+                              withdrawal.status === "approved"
+                                ? "#D1FAE5"
+                                : withdrawal.status === "pending"
+                                  ? "#FEF3C7"
+                                  : "#E0E7FF",
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.statusBadgeText,
+                            {
+                              color:
+                                withdrawal.status === "approved"
+                                  ? "#059669"
+                                  : withdrawal.status === "pending"
+                                    ? "#D97706"
+                                    : "#4F46E5",
+                            },
+                          ]}
+                        >
+                          {withdrawal.status}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={styles.withdrawalDate}>
+                      Expected Payment:{" "}
+                      {withdrawal.expectedPayoutDate
+                        ? new Date(
+                            withdrawal.expectedPayoutDate,
+                          ).toLocaleDateString("en-GB")
+                        : "TBC"}
+                    </Text>
+                    <Text style={styles.withdrawalPayoutType}>
+                      Type: {withdrawal.payoutType}
+                    </Text>
+                  </View>
+                ))}
+            </View>
+          )}
+        </View>
+      )}
+
+      {paymentTab === "received" && !paymentLoading && (
+        <View style={styles.paymentSection}>
+          <Text style={styles.sectionTitle}>Received Payments</Text>
+          {receivedPayments.payments?.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>
+                No payments received yet
+              </Text>
+              <Text style={styles.emptyStateSubtext}>
+                Completed payouts will appear here
+              </Text>
+            </View>
+          ) : (
+            <>
+              <View style={styles.totalReceivedCard}>
+                <Text style={styles.totalReceivedLabel}>Total Received</Text>
+                <Text style={styles.totalReceivedAmount}>
+                  £{receivedPayments.totalReceived?.toFixed(2) || "0.00"}
+                </Text>
+              </View>
+
+              <View style={styles.jobsListPayment}>
+                {receivedPayments.payments?.map((payment, index) => (
+                  <View key={index} style={styles.receivedPaymentCard}>
+                    <View style={styles.receivedHeader}>
+                      <Text style={styles.receivedAmount}>
+                        £{payment.amount?.toFixed(2) || "0.00"}
+                      </Text>
+                      <View style={styles.successBadge}>
+                        <CheckCircle size={16} color="#10B981" />
+                        <Text style={styles.successText}>Transferred</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.receivedDate}>
+                      Paid:{" "}
+                      {payment.completedAt
+                        ? new Date(payment.completedAt).toLocaleDateString(
+                            "en-GB",
+                          )
+                        : "Date TBC"}
+                    </Text>
+                    {payment.transactionRef && (
+                      <Text style={styles.transactionRef}>
+                        Ref: {payment.transactionRef}
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
+        </View>
+      )}
+
+      <View style={{ height: 40 }} />
+    </ScrollView>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.topNav}>
@@ -895,6 +1153,22 @@ const HomeScreen = ({ navigation, route }) => {
               </View>
             )}
           </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "payments" && styles.activeTab]}
+            onPress={() => {
+              setActiveTab("payments");
+              fetchAllPaymentData();
+            }}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "payments" && styles.activeTabText,
+              ]}
+            >
+              Payments
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -902,69 +1176,9 @@ const HomeScreen = ({ navigation, route }) => {
         ? renderActivityTab()
         : activeTab === "history"
           ? renderHistoryTab()
-          : renderOffersTab()}
-
-      {/* Withdrawal Modal */}
-      <Modal
-        visible={showWithdrawModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowWithdrawModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.withdrawalModal}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Request Withdrawal</Text>
-              <TouchableOpacity onPress={() => setShowWithdrawModal(false)}>
-                <X size={24} color="#1F2937" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.modalContent}>
-              <Text style={styles.availableLabel}>Available Balance</Text>
-              <Text style={styles.availableAmount}>
-                £{wallet.balance?.toFixed(2) || "0.00"}
-              </Text>
-
-              <Text style={styles.amountLabel}>Withdrawal Amount</Text>
-              <View style={styles.amountInputWrapper}>
-                <Text style={styles.currencySymbol}>£</Text>
-                <TextInput
-                  style={styles.amountInput}
-                  placeholder="Enter amount"
-                  placeholderTextColor="#9CA3AF"
-                  keyboardType="decimal-pad"
-                  value={withdrawAmount}
-                  onChangeText={setWithdrawAmount}
-                  editable={!withdrawLoading}
-                />
-              </View>
-
-              <Text style={styles.limitNote}>Min: £20 | Max: £1000</Text>
-
-              <TouchableOpacity
-                style={[
-                  styles.confirmBtn,
-                  withdrawLoading && styles.confirmBtnDisabled,
-                ]}
-                onPress={handleRequestWithdrawal}
-                disabled={withdrawLoading}
-              >
-                {withdrawLoading ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <>
-                    <ArrowUpRight size={18} color="#FFFFFF" />
-                    <Text style={styles.confirmBtnText}>
-                      Request Withdrawal
-                    </Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+          : activeTab === "offers"
+            ? renderOffersTab()
+            : renderPaymentsTab()}
     </SafeAreaView>
   );
 };
@@ -1336,99 +1550,220 @@ const styles = StyleSheet.create({
   },
   walletStatValue: { fontSize: 16, fontWeight: "800", color: "#1F2937" },
   walletStatDivider: { width: 1, backgroundColor: "#E5E7EB" },
-  withdrawBtn: {
-    backgroundColor: "#10B981",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 14,
+  infoBox: {
+    backgroundColor: "#FEF3C7",
+    borderRadius: 12,
+    padding: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#F59E0B",
   },
-  withdrawBtnDisabled: { backgroundColor: "#D1D5DB", opacity: 0.6 },
-  withdrawBtnText: { color: "#FFFFFF", fontWeight: "700", fontSize: 15 },
-
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  withdrawalModal: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 40,
-    maxHeight: "80%",
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  modalTitle: { fontSize: 20, fontWeight: "800", color: "#1F2937" },
-  modalContent: { gap: 16 },
-  availableLabel: {
-    fontSize: 12,
-    color: "#6B7280",
-    fontWeight: "600",
-    textTransform: "uppercase",
-  },
-  availableAmount: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#10B981",
-    marginBottom: 8,
-  },
-  amountLabel: {
+  infoLabel: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#1F2937",
-    marginTop: 8,
+    color: "#D97706",
+    marginBottom: 4,
   },
-  amountInputWrapper: {
+  infoText: {
+    fontSize: 12,
+    color: "#92400E",
+    lineHeight: 18,
+  },
+
+  // Payment tab styles
+  subTabContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F9FAFB",
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    marginHorizontal: 0,
   },
-  currencySymbol: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1F2937",
-    marginRight: 4,
-  },
-  amountInput: {
+  subTab: {
     flex: 1,
-    paddingVertical: 14,
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1F2937",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 3,
+    borderBottomColor: "transparent",
+    alignItems: "center",
   },
-  limitNote: {
+  activeSubTab: {
+    borderBottomColor: "#4F46E5",
+  },
+  subTabText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6B7280",
+  },
+  activeSubTabText: {
+    color: "#4F46E5",
+    fontWeight: "700",
+  },
+  loadingCenter: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  paymentSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  payoutScheduleCard: {
+    backgroundColor: "#EEF2FF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: "#4F46E5",
+  },
+  scheduleLabel: {
     fontSize: 12,
     color: "#6B7280",
     fontWeight: "500",
-    marginTop: 8,
+    marginBottom: 4,
   },
-  confirmBtn: {
-    backgroundColor: "#10B981",
+  nextPayoutDate: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#4F46E5",
+    marginBottom: 8,
+  },
+  payoutTypeLabel: {
+    fontSize: 13,
+    color: "#4F46E5",
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  totalEarningsText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1F2937",
+  },
+  jobsListPayment: {
+    gap: 12,
+  },
+  paymentJobCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#10B981",
+  },
+  paymentJobHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  paymentJobService: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1F2937",
+  },
+  paymentJobAmount: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#10B981",
+  },
+  paymentJobDate: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  withdrawalCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 14,
+    borderLeftWidth: 4,
+    borderLeftColor: "#F59E0B",
+  },
+  withdrawalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  withdrawalAmount: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#1F2937",
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  statusBadgeText: {
+    fontSize: 11,
+    fontWeight: "600",
+    textTransform: "capitalize",
+  },
+  withdrawalDate: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginBottom: 4,
+  },
+  withdrawalPayoutType: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  totalReceivedCard: {
+    backgroundColor: "#ECFDF5",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: "#10B981",
+  },
+  totalReceivedLabel: {
+    fontSize: 12,
+    color: "#6B7280",
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  totalReceivedAmount: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#10B981",
+  },
+  receivedPaymentCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 14,
+    borderLeftWidth: 4,
+    borderLeftColor: "#10B981",
+  },
+  receivedHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  receivedAmount: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#10B981",
+  },
+  successBadge: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 16,
-    borderRadius: 14,
-    marginTop: 16,
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: "#ECFDF5",
+    borderRadius: 8,
   },
-  confirmBtnDisabled: { backgroundColor: "#D1D5DB", opacity: 0.6 },
-  confirmBtnText: { color: "#FFFFFF", fontWeight: "700", fontSize: 16 },
+  successText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#10B981",
+  },
+  receivedDate: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginBottom: 4,
+  },
+  transactionRef: {
+    fontSize: 11,
+    color: "#9CA3AF",
+    fontFamily: "monospace",
+  },
 });
 
 export default HomeScreen;

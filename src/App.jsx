@@ -40,6 +40,7 @@ import Chat from "./admin/Chat";
 import AdminBlog from "./admin/Blog";
 import WorkerPay from "./admin/WorkerPay";
 import AdminWithdrawals from "./admin/AdminWithdrawals";
+import AdminPayments from "./admin/AdminPayments";
 
 function App() {
   const location = useLocation();
@@ -91,6 +92,7 @@ function App() {
               <Route path="chat" element={<Chat />} />
               <Route path="worker-pay" element={<WorkerPay />} />
               <Route path="withdrawals" element={<AdminWithdrawals />} />
+              <Route path="payments" element={<AdminPayments />} />
             </Route>
           </Routes>
         </main>
