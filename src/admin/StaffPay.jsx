@@ -78,9 +78,16 @@ const StaffPay = () => {
     setSavingId(serviceId);
     try {
       const newRate = editMap[serviceId]?.workerHourlyRate || 0;
+
+      console.log(`💾 Saving ${serviceId} with rate: £${newRate}/hr`);
+
       const response = await axios.put(`${API_URL}/services/${serviceId}`, {
         workerHourlyRate: newRate,
       });
+
+      console.log(
+        `✅ Server response: ${response.data.name} now has rate £${response.data.workerHourlyRate}`,
+      );
 
       // Use the returned data from server to ensure consistency
       const updatedService = response.data;
@@ -88,19 +95,23 @@ const StaffPay = () => {
         services.map((s) => (s._id === serviceId ? updatedService : s)),
       );
       setEditingId(null);
-      const serviceName = services.find((s) => s._id === serviceId)?.name;
+      const serviceName = updatedService.name;
+
       flash(
         "success",
-        `✅ Updated hourly rate for ${serviceName}: £${newRate.toFixed(2)}/hr`,
+        `✅ Updated hourly rate for ${serviceName}: £${updatedService.workerHourlyRate.toFixed(2)}/hr`,
       );
 
-      // Force refresh after short delay to ensure database is updated
+      // Force refresh after short delay to ensure UI consistency
       setTimeout(() => {
         fetchServices();
-      }, 500);
+      }, 800);
     } catch (err) {
       console.error("Error saving service:", err);
-      flash("error", "Failed to save hourly rate");
+      flash(
+        "error",
+        `Failed to save: ${err.response?.data?.message || err.message}`,
+      );
     } finally {
       setSavingId(null);
     }

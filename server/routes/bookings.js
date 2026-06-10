@@ -253,17 +253,6 @@ router.put("/:id", async (req, res) => {
                   // Set to start of day for consistency
                   expectedPayoutDate.setHours(0, 0, 0, 0);
 
-                  // Check if there's already an upcoming withdrawal for this 8-day window
-                  // Looking for withdrawals with same expectedPayoutDate (same 8-day cycle)
-                  const existingWithdrawal = await Withdrawal.findOne({
-                    workerId: updatedBooking.assignedWorker,
-                    status: "upcoming",
-                    expectedPayoutDate: {
-                      $gte: new Date(expectedPayoutDate.getTime() - 86400000), // Within 1 day
-                      $lte: new Date(expectedPayoutDate.getTime() + 86400000),
-                    },
-                  });
-
                   const jobRecord = {
                     bookingId: updatedBooking.bookingId,
                     service: updatedBooking.service,
@@ -271,43 +260,35 @@ router.put("/:id", async (req, res) => {
                     completedDate: updatedBooking.updatedAt,
                   };
 
-                  if (existingWithdrawal) {
-                    // ADD to existing withdrawal
-                    existingWithdrawal.completedJobs.push(jobRecord);
-                    existingWithdrawal.amount += jobEarnings;
-                    await existingWithdrawal.save();
+                  // CREATE NEW withdrawal for EACH job (no accumulation)
+                  // Each job gets its own separate withdrawal record
+                  const withdrawal = new Withdrawal({
+                    workerId: updatedBooking.assignedWorker,
+                    workerName: `${worker.firstName} ${worker.lastName}`,
+                    workerEmail: worker.email,
+                    workerPhone: worker.phone,
+                    workerAddress: worker.address,
+                    workerPostcode: worker.postcode,
+                    amount: jobEarnings,
+                    completedJobs: [jobRecord],
+                    bankDetails: {
+                      accountName: worker.bankDetails.accountName,
+                      accountNumber: worker.bankDetails.accountNumber,
+                      sortCode: worker.bankDetails.sortCode,
+                      bankName: worker.bankDetails.bankName,
+                    },
+                    status: "upcoming",
+                    payoutType: "fixed_8days",
+                    expectedPayoutDate,
+                  });
 
-                    console.log(
-                      `✅ Added £${jobEarnings.toFixed(2)} to existing withdrawal for ${worker.firstName}`,
-                    );
-                  } else {
-                    // CREATE new withdrawal
-                    const withdrawal = new Withdrawal({
-                      workerId: updatedBooking.assignedWorker,
-                      workerName: `${worker.firstName} ${worker.lastName}`,
-                      workerEmail: worker.email,
-                      workerPhone: worker.phone,
-                      workerAddress: worker.address,
-                      workerPostcode: worker.postcode,
-                      amount: jobEarnings,
-                      completedJobs: [jobRecord],
-                      bankDetails: {
-                        accountName: worker.bankDetails.accountName,
-                        accountNumber: worker.bankDetails.accountNumber,
-                        sortCode: worker.bankDetails.sortCode,
-                        bankName: worker.bankDetails.bankName,
-                      },
-                      status: "upcoming",
-                      payoutType: "fixed_8days",
-                      expectedPayoutDate,
-                    });
+                  await withdrawal.save();
 
-                    await withdrawal.save();
-
-                    console.log(
-                      `✅ Created new withdrawal: £${jobEarnings.toFixed(2)} scheduled for ${expectedPayoutDate.toDateString()}`,
-                    );
-                  }
+                  console.log(
+                    `✅ Created withdrawal: £${jobEarnings.toFixed(
+                      2,
+                    )} for ${updatedBooking.service} on ${expectedPayoutDate.toDateString()}`,
+                  );
 
                   // Update worker wallet - add to onHold
                   worker.wallet.onHold =
@@ -315,9 +296,9 @@ router.put("/:id", async (req, res) => {
                   await worker.save();
 
                   console.log(
-                    `✅ Auto-payout scheduled: £${totalEarnings.toFixed(
+                    `✅ Payment scheduled: £${jobEarnings.toFixed(
                       2,
-                    )} for ${worker.firstName} ${worker.lastName}`,
+                    )} for ${worker.firstName} ${worker.lastName} - Will pay on ${expectedPayoutDate.toDateString()}`,
                   );
 
                   // Send notification email
@@ -328,10 +309,11 @@ router.put("/:id", async (req, res) => {
                       html: `
                         <h2>Payment Scheduled</h2>
                         <p>Hi ${worker.firstName},</p>
-                        <p>Your completed cleaning work has been recorded and a payment of <strong>£${totalEarnings.toFixed(
+                        <p>Your completed cleaning work has been recorded and a payment of <strong>£${jobEarnings.toFixed(
                           2,
                         )}</strong> is scheduled.</p>
-                        <p><strong>Payout Type:</strong> ${payoutType}</p>
+                        <p><strong>Service:</strong> ${updatedBooking.service}</p>
+                        <p><strong>Payout Type:</strong> 8-Day Fixed Schedule</p>
                         <p><strong>Expected Payment Date:</strong> ${expectedPayoutDate.toLocaleDateString()}</p>
                         <p>You'll receive another email confirmation when payment has been processed.</p>
                       `,

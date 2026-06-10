@@ -94,29 +94,37 @@ router.put("/:id", async (req, res) => {
       workerHourlyRate,
       workerPaymentRate,
     } = req.body;
-    const updateFields = {
-      name,
-      region,
-      rate,
-      type,
-      category,
-      description,
-      updatedAt: Date.now(),
-    };
+
+    // Only update fields that are explicitly provided
+    const updateFields = { updatedAt: Date.now() };
+
+    // Only add fields if they're in the request body
+    if (name !== undefined) updateFields.name = name;
+    if (region !== undefined) updateFields.region = region;
+    if (rate !== undefined) updateFields.rate = rate;
+    if (type !== undefined) updateFields.type = type;
+    if (category !== undefined) updateFields.category = category;
+    if (description !== undefined) updateFields.description = description;
     if (Array.isArray(bullets))
       updateFields.bullets = bullets.filter((b) => b && b.trim());
     if (workerHourlyRate !== undefined)
       updateFields.workerHourlyRate = workerHourlyRate;
     if (workerPaymentRate !== undefined)
       updateFields.workerPaymentRate = workerPaymentRate;
+
     const service = await Service.findByIdAndUpdate(
       req.params.id,
       updateFields,
       { new: true },
     );
     if (!service) return res.status(404).json({ message: "Service not found" });
+
+    console.log(
+      `✅ Updated service ${service.name}: hourlyRate=${service.workerHourlyRate}`,
+    );
     res.json(service);
   } catch (err) {
+    console.error("Error updating service:", err);
     res.status(400).json({ message: err.message });
   }
 });
