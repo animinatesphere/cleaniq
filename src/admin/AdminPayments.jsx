@@ -11,7 +11,7 @@ const AdminPayments = () => {
   const [selectedPayouts, setSelectedPayouts] = useState(new Set());
 
   const API_URL =
-    process.env.REACT_APP_API_URL || "https://api.cleaniqservices.com/api";
+    import.meta.env.VITE_API_URL || "https://api.cleaniqservices.com/api";
 
   // Fetch all withdrawals
   const fetchWithdrawals = async () => {

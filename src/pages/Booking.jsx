@@ -435,18 +435,32 @@ const Booking = () => {
         );
         const data = await response.json();
 
-        // Group booking slots by date
+        // Group booking slots by date - includes both standard slots and flexible times
         const slotsMap = {};
         data.forEach((b) => {
-          if (b.schedule?.date && b.schedule?.timeSlot) {
+          if (b.schedule?.date) {
             const d = new Date(b.schedule.date);
             const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
             if (!slotsMap[dateStr]) {
               slotsMap[dateStr] = [];
             }
-            if (!slotsMap[dateStr].includes(b.schedule.timeSlot)) {
-              slotsMap[dateStr].push(b.schedule.timeSlot);
+
+            // Add standard time slot if present
+            if (b.schedule?.timeSlot && b.schedule.timeSlot !== "Flexible") {
+              if (!slotsMap[dateStr].includes(b.schedule.timeSlot)) {
+                slotsMap[dateStr].push(b.schedule.timeSlot);
+              }
+            }
+
+            // Add flexible time slot if present
+            if (
+              b.schedule?.timeSlot === "Flexible" &&
+              b.schedule?.preferredTime
+            ) {
+              if (!slotsMap[dateStr].includes(b.schedule.preferredTime)) {
+                slotsMap[dateStr].push(b.schedule.preferredTime);
+              }
             }
           }
         });
@@ -461,16 +475,16 @@ const Booking = () => {
           );
         });
 
-        console.log("Booked Slots Map Loaded:", slotsMap);
+        console.log("[AVAILABILITY] Booked Slots Map Loaded:", slotsMap);
         console.log(
-          "Fully Booked Dates (Disabled in Calendar):",
+          "[AVAILABILITY] Fully Booked Dates (Disabled in Calendar):",
           fullyBookedDates,
         );
 
         setBookedSlotsByDate(slotsMap);
         setBookedDates(fullyBookedDates);
       } catch (err) {
-        console.error("Error fetching booked dates:", err);
+        console.error("[AVAILABILITY] Error fetching booked dates:", err);
       }
     };
 
@@ -683,6 +697,74 @@ const Booking = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Dev mode submit - skip payment processing
+  // const handleDevModeSubmit = async () => {
+  //   if (!formData.serviceType) {
+  //     console.error("Submission Blocked: Service type is missing.");
+  //     showNotification(
+  //       "Please select a service type before completing your booking.",
+  //     );
+  //     return;
+  //   }
+
+  //   const bookingPayload = {
+  //     bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
+  //     customer: {
+  //       firstName: formData.firstName || "Customer",
+  //       lastName: formData.lastName || "User",
+  //       email: formData.email || "pending@cleaniq.com",
+  //       phone: formData.phone || "000",
+  //     },
+  //     service: formData.serviceType,
+  //     details: {
+  //       address: `${formData.address}${formData.addressLine2 ? ", " + formData.addressLine2 : ""}${formData.postcode ? ", " + formData.postcode : ""}`,
+  //       frequency: formData.frequency,
+  //       duration: formData.duration,
+  //       extras: [
+  //         ...Object.entries(formData.extras)
+  //           .filter((entry) => entry[1] > 0)
+  //           .map(([n, q]) => `${n} (x${q})`),
+  //         ...Object.entries(formData.property)
+  //           .filter((entry) => entry[1] > 0)
+  //           .map(([n, q]) => `${n} (x${q})`),
+  //         `Parking: ${formData.parking}`,
+  //         `Entry: ${formData.keyAccess}`,
+  //         `Pet on premises: ${formData.hasPet || "Not specified"}`,
+  //         `Instructions: ${formData.specialInstructions || "None"}`,
+  //       ],
+  //     },
+  //     schedule: {
+  //       date: formData.date,
+  //       timeSlot: formData.timeSlot,
+  //       preferredTime: formData.preferredTime,
+  //     },
+  //     payment: {
+  //       amount: totalPrice,
+  //       currency: "GBP",
+  //       method: "Dev Mode",
+  //       transactionId: "DEV-TEST-NO-PAYMENT",
+  //     },
+  //     region: region.id,
+  //   };
+  //   setIsSubmitting(true);
+  //   try {
+  //     const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(bookingPayload),
+  //     });
+  //     if (response.ok) {
+  //       setIsSubmitted(true);
+  //       console.log("✅ [DEV MODE] Booking submitted without payment!");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error saving booking:", error);
+  //     showNotification("Error submitting booking. Please try again.");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
   if (authLoading) {
     return <LoadingOverlay message="Loading account..." />;
@@ -992,40 +1074,31 @@ const Booking = () => {
                               How long?
                             </h2>
                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">
-                              Select hours for the cleaning
+                              Select duration for the cleaning
                             </p>
                           </div>
-                          <div className="flex items-center justify-center gap-8 mb-8">
-                            <button
-                              onClick={() =>
-                                setFormData({
-                                  ...formData,
-                                  duration: Math.max(2, formData.duration - 1),
-                                })
-                              }
-                              className="w-14 h-14 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary hover:bg-slate-50"
-                            >
-                              <Minus size={20} />
-                            </button>
-                            <div className="text-center">
-                              <span className="text-5xl font-black text-primary-dark">
-                                {formData.duration}
-                              </span>
-                              <p className="text-[9px] font-black text-primary uppercase tracking-widest">
-                                hours
-                              </p>
-                            </div>
-                            <button
-                              onClick={() =>
-                                setFormData({
-                                  ...formData,
-                                  duration: Math.min(8, formData.duration + 1),
-                                })
-                              }
-                              className="w-14 h-14 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary hover:bg-slate-50"
-                            >
-                              <Plus size={20} />
-                            </button>
+                          <div className="grid grid-cols-3 gap-3 mb-8">
+                            {[2, 3, 4, 5, 6, 7].map((hours) => (
+                              <button
+                                key={hours}
+                                onClick={() =>
+                                  setFormData({
+                                    ...formData,
+                                    duration: hours,
+                                  })
+                                }
+                                className={`py-5 px-2 rounded-2xl border-2 font-black text-sm transition-all transform hover:scale-105 ${
+                                  formData.duration === hours
+                                    ? "border-primary bg-primary text-white shadow-lg scale-110"
+                                    : "border-slate-200 bg-white text-primary hover:border-primary/50"
+                                }`}
+                              >
+                                {hours}
+                                <span className="block text-[10px] font-bold opacity-80 mt-1">
+                                  hours
+                                </span>
+                              </button>
+                            ))}
                           </div>
                           <div className="grid grid-cols-3 gap-2">
                             {["Once", "Weekly", "Fortnightly"].map((f) => (
@@ -1251,80 +1324,271 @@ const Booking = () => {
                             bookedDates={bookedDates}
                           />
                           {formData.date && (
-                            <div className="grid grid-cols-3 gap-3">
-                              {(() => {
-                                const allSlots = [
-                                  { label: "Morning (8am-12pm)", limit: 12 },
-                                  { label: "Afternoon (12pm-4pm)", limit: 16 },
-                                  { label: "Evening (4pm-8pm)", limit: 20 },
-                                ];
-                                
-                                let availableSlots = allSlots;
-                                if (formData.date) {
-                                  const selectedDate = new Date(formData.date);
-                                  const today = new Date();
-                                  if (
-                                    selectedDate.getDate() === today.getDate() &&
-                                    selectedDate.getMonth() === today.getMonth() &&
-                                    selectedDate.getFullYear() === today.getFullYear()
-                                  ) {
-                                    const currentHour = today.getHours();
-                                    availableSlots = allSlots.filter(s => currentHour < s.limit);
-                                    if (availableSlots.length === 0) {
-                                      availableSlots = [allSlots[2]]; // Fallback to Evening
-                                    }
-                                  }
-                                }
+                            <div className="space-y-4">
+                              <div className="bg-white p-4 rounded-2xl border-2 border-slate-200">
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">
+                                  📅 Time Slot Selection
+                                  (Morning/Afternoon/Evening)
+                                </p>
+                                <div className="grid grid-cols-3 gap-3">
+                                  {(() => {
+                                    const allSlots = [
+                                      {
+                                        label: "Morning (8am-12pm)",
+                                        limit: 12,
+                                      },
+                                      {
+                                        label: "Afternoon (12pm-4pm)",
+                                        limit: 16,
+                                      },
+                                      { label: "Evening (4pm-8pm)", limit: 20 },
+                                    ];
 
-                                return availableSlots.map((s) => {
-                                  const slot = s.label;
-                                  const isSlotBooked =
-                                    bookedSlotsByDate[formData.date]?.includes(slot);
-                                  return (
-                                    <button
-                                      key={slot}
-                                      disabled={isSlotBooked}
-                                      onClick={() =>
+                                    let availableSlots = allSlots;
+                                    if (formData.date) {
+                                      const selectedDate = new Date(
+                                        formData.date,
+                                      );
+                                      const today = new Date();
+                                      if (
+                                        selectedDate.getDate() ===
+                                          today.getDate() &&
+                                        selectedDate.getMonth() ===
+                                          today.getMonth() &&
+                                        selectedDate.getFullYear() ===
+                                          today.getFullYear()
+                                      ) {
+                                        const currentHour = today.getHours();
+                                        availableSlots = allSlots.filter(
+                                          (s) => currentHour < s.limit,
+                                        );
+                                        if (availableSlots.length === 0) {
+                                          availableSlots = [allSlots[2]]; // Fallback to Evening
+                                        }
+                                      }
+                                    }
+
+                                    return availableSlots.map((s) => {
+                                      const slot = s.label;
+                                      const isSlotBooked =
+                                        bookedSlotsByDate[
+                                          formData.date
+                                        ]?.includes(slot);
+                                      return (
+                                        <button
+                                          key={slot}
+                                          disabled={isSlotBooked}
+                                          onClick={() =>
+                                            setFormData({
+                                              ...formData,
+                                              timeSlot: slot,
+                                            })
+                                          }
+                                          className={`p-4 rounded-2xl border-2 text-[10px] font-black uppercase transition-all transform hover:scale-105 ${
+                                            formData.timeSlot === slot
+                                              ? "border-primary bg-primary text-white shadow-md scale-110"
+                                              : isSlotBooked
+                                                ? "border-rose-200 bg-rose-50 text-rose-400 cursor-not-allowed opacity-60"
+                                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                          }`}
+                                        >
+                                          {slot.split("(")[0].trim()}
+                                          {isSlotBooked && (
+                                            <span className="block text-[8px] mt-1">
+                                              Booked
+                                            </span>
+                                          )}
+                                        </button>
+                                      );
+                                    });
+                                  })()}
+                                </div>
+                              </div>
+
+                              <div className="bg-white p-6 rounded-2xl border-2 border-slate-200 space-y-4">
+                                <div>
+                                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <Clock size={16} className="text-primary" />
+                                    Choose Your Flexible Time
+                                  </p>
+                                  <p className="text-[9px] text-slate-400 mb-4">
+                                    Available: 12:30 PM - 10:00 PM
+                                  </p>
+                                </div>
+
+                                {/* Quick Select Buttons */}
+                                <div className="grid grid-cols-4 gap-2 mb-4">
+                                  {(() => {
+                                    const quickTimes = [
+                                      "12:30",
+                                      "14:00",
+                                      "16:00",
+                                      "18:00",
+                                      "19:00",
+                                      "20:00",
+                                      "21:00",
+                                      "22:00",
+                                    ];
+
+                                    return quickTimes.map((time) => {
+                                      const isBooked =
+                                        bookedSlotsByDate[
+                                          formData.date
+                                        ]?.includes(time);
+                                      return (
+                                        <button
+                                          key={time}
+                                          disabled={isBooked}
+                                          onClick={() => {
+                                            setFormData({
+                                              ...formData,
+                                              preferredTime: time,
+                                              timeSlot: "Flexible",
+                                            });
+                                            console.log(
+                                              `[DEV] Quick selected time: ${time}`,
+                                            );
+                                          }}
+                                          className={`py-3 px-2 rounded-xl border-2 text-[10px] font-bold transition-all transform hover:scale-105 ${
+                                            formData.preferredTime === time &&
+                                            formData.timeSlot === "Flexible"
+                                              ? "border-primary bg-primary text-white shadow-lg scale-110"
+                                              : isBooked
+                                                ? "border-rose-200 bg-rose-50 text-rose-300 cursor-not-allowed opacity-50"
+                                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                          }`}
+                                        >
+                                          {time}
+                                        </button>
+                                      );
+                                    });
+                                  })()}
+                                </div>
+
+                                {/* Custom Time Input */}
+                                <div className="border-t-2 border-slate-100 pt-4 space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                      ⏰ Custom Time
+                                    </p>
+                                    {/* <button
+                                      type="button"
+                                      onClick={() => {
+                                        const testDate = new Date();
+                                        testDate.setDate(
+                                          testDate.getDate() + 1,
+                                        );
+                                        const dateStr = `${testDate.getFullYear()}-${String(testDate.getMonth() + 1).padStart(2, "0")}-${String(testDate.getDate()).padStart(2, "0")}`;
                                         setFormData({
                                           ...formData,
-                                          timeSlot: slot,
-                                        })
-                                      }
-                                      className={`p-5 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${
-                                        formData.timeSlot === slot
-                                          ? "border-primary bg-primary text-white shadow-md"
-                                          : isSlotBooked
-                                            ? "border-rose-100 bg-rose-50 text-rose-300 cursor-not-allowed"
-                                            : "border-slate-100 bg-white text-slate-400 hover:border-primary/30"
-                                      }`}
+                                          date: dateStr,
+                                          timeSlot: "Flexible",
+                                          preferredTime: "14:00",
+                                          serviceType:
+                                            formData.serviceType ||
+                                            servicesList[0]?.name ||
+                                            "",
+                                          duration: 3,
+                                          firstName: "Test",
+                                          lastName: "User",
+                                          email: "test@example.com",
+                                          phone: "07700000000",
+                                          address: "Test Address",
+                                          postcode: "SW1A",
+                                        });
+                                        console.log(
+                                          "[DEV TEST] Form populated with test data - NO PAYMENT REQUIRED",
+                                        );
+                                      }}
+                                      className="text-[8px] font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wider px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition"
                                     >
-                                      {slot} {isSlotBooked && "(Booked)"}
-                                    </button>
-                                  );
-                                });
-                              })()}
+                                      🧪 Dev Test Fill
+                                    </button> */}
+                                  </div>
+                                  <div className="flex gap-2 items-center">
+                                    <input
+                                      type="time"
+                                      value={
+                                        formData.preferredTime &&
+                                        formData.timeSlot === "Flexible"
+                                          ? formData.preferredTime.includes(":")
+                                            ? formData.preferredTime
+                                            : "12:30"
+                                          : ""
+                                      }
+                                      onChange={(e) => {
+                                        if (e.target.value) {
+                                          setFormData({
+                                            ...formData,
+                                            preferredTime: e.target.value,
+                                            timeSlot: "Flexible",
+                                          });
+                                          console.log(
+                                            `[DEV] Custom time entered: ${e.target.value}`,
+                                          );
+                                        } else {
+                                          console.log(
+                                            "[DEV MODE] No time entered - using default: 12:30",
+                                          );
+                                          setFormData({
+                                            ...formData,
+                                            preferredTime: "12:30",
+                                            timeSlot: "Flexible",
+                                          });
+                                        }
+                                      }}
+                                      onBlur={() => {
+                                        // If empty on blur, set to 12:30
+                                        if (!formData.preferredTime) {
+                                          console.log(
+                                            "[DEV] Blur event - setting default to 12:30",
+                                          );
+                                          setFormData({
+                                            ...formData,
+                                            preferredTime: "12:30",
+                                            timeSlot: "Flexible",
+                                          });
+                                        }
+                                      }}
+                                      className="flex-1 p-4 rounded-xl bg-slate-50 border-2 border-slate-200 focus:border-primary focus:bg-white shadow-sm outline-none font-bold text-sm text-slate-700"
+                                      min="12:30"
+                                      max="22:00"
+                                    />
+                                    <span className="text-[9px] font-bold text-slate-500 text-center">
+                                      {formData.preferredTime &&
+                                      formData.timeSlot === "Flexible"
+                                        ? "✓ Selected"
+                                        : "Click to set"}
+                                    </span>
+                                  </div>
+                                  <p className="text-[8px] text-slate-400">
+                                    💡 If left empty, we'll default to 12:30 PM
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           )}
-                          {formData.timeSlot && (
-                            <div className="animate-in slide-in-from-bottom-2 space-y-2">
-                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <Clock size={14} className="text-primary" /> Do
-                                you have a specific start time?
-                              </p>
-                              <input
-                                type="text"
-                                placeholder="e.g. 9:30 AM"
-                                className="w-full p-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm"
-                                value={formData.preferredTime}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    preferredTime: e.target.value,
-                                  })
-                                }
-                              />
-                            </div>
-                          )}
+                          {formData.timeSlot &&
+                            formData.timeSlot !== "Flexible" && (
+                              <div className="animate-in slide-in-from-bottom-2 space-y-2 bg-white p-4 rounded-2xl border-2 border-slate-200">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                  <Clock size={14} className="text-primary" />{" "}
+                                  Alternative: Specify exact time?
+                                </p>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. 9:30 AM (optional)"
+                                  className="w-full p-4 rounded-xl bg-slate-50 border-2 border-transparent focus:border-primary/50 shadow-sm outline-none font-bold text-sm"
+                                  value={formData.preferredTime}
+                                  onChange={(e) =>
+                                    setFormData({
+                                      ...formData,
+                                      preferredTime: e.target.value,
+                                    })
+                                  }
+                                />
+                              </div>
+                            )}
                         </div>
 
                         {/* Customer Details */}
@@ -1438,7 +1702,9 @@ const Booking = () => {
                                     </Link>
                                   </div>
                                   <button
-                                    onClick={() => setGuestCheckoutInModal(true)}
+                                    onClick={() =>
+                                      setGuestCheckoutInModal(true)
+                                    }
                                     className="mt-2 text-xs font-bold text-slate-400 hover:text-slate-600 underline"
                                   >
                                     Continue as Guest
@@ -1446,14 +1712,37 @@ const Booking = () => {
                                 </div>
                               </div>
                             ) : (
-                              <Elements stripe={stripePromise}>
-                                <StripePayment
-                                  amount={totalPrice}
-                                  currency="GBP"
-                                  customerInfo={formData}
-                                  onPaymentSuccess={handlePaymentSuccess}
-                                />
-                              </Elements>
+                              <div className="space-y-4">
+                                <Elements stripe={stripePromise}>
+                                  <StripePayment
+                                    amount={totalPrice}
+                                    currency="GBP"
+                                    customerInfo={formData}
+                                    onPaymentSuccess={handlePaymentSuccess}
+                                  />
+                                </Elements>
+
+                                {/* Dev Mode: Skip Payment Button */}
+                                {/* <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl flex items-center justify-between">
+                                  <div>
+                                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider">
+                                      🧪 Dev Mode: Test Booking
+                                    </p>
+                                    <p className="text-[8px] text-blue-600 mt-1">
+                                      Submit without payment for testing
+                                    </p>
+                                  </div>
+                                  <button
+                                    onClick={handleDevModeSubmit}
+                                    disabled={isSubmitting}
+                                    className="ml-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-black text-[9px] px-4 py-2 rounded-xl whitespace-nowrap transition-all"
+                                  >
+                                    {isSubmitting
+                                      ? "Submitting..."
+                                      : "Skip Payment"}
+                                  </button>
+                                </div> */}
+                              </div>
                             )}
                           </div>
                         )}

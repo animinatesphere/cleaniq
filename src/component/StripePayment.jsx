@@ -281,7 +281,12 @@ const StripePayment = ({
           {error}
         </div>
       )}
-
+      <p className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-normal">
+        By tapping the button below and booking, you accept our{" "}
+        <a href="/terms" className="underline">
+          Terms of service
+        </a>
+      </p>
       <button
         disabled={!stripe || processing || !clientSecret}
         onClick={handleSubmit}

@@ -197,7 +197,7 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
     const dStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     return bookedDates.includes(dStr);
   };
-  
+
   const isSelected = (date) => {
     if (!date || !selectedDate) return false;
     const sel = new Date(selectedDate);
@@ -381,16 +381,26 @@ const Bookings = () => {
   }, []);
 
   useEffect(() => {
-    // derive bookedDates from bookings
+    // derive bookedDates from bookings - includes both standard slots and flexible times
     const fullyBooked = [];
     const slotsMap = {};
     bookings.forEach((b) => {
-      if (b.schedule?.date && b.schedule?.timeSlot) {
+      if (b.schedule?.date) {
         const d = new Date(b.schedule.date);
         const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
         slotsMap[dStr] = slotsMap[dStr] || [];
-        if (!slotsMap[dStr].includes(b.schedule.timeSlot))
-          slotsMap[dStr].push(b.schedule.timeSlot);
+
+        // Add standard time slot if present
+        if (b.schedule?.timeSlot && b.schedule.timeSlot !== "Flexible") {
+          if (!slotsMap[dStr].includes(b.schedule.timeSlot))
+            slotsMap[dStr].push(b.schedule.timeSlot);
+        }
+
+        // Add flexible time slot if present
+        if (b.schedule?.timeSlot === "Flexible" && b.schedule?.preferredTime) {
+          if (!slotsMap[dStr].includes(b.schedule.preferredTime))
+            slotsMap[dStr].push(b.schedule.preferredTime);
+        }
       }
     });
     Object.keys(slotsMap).forEach((d) => {
@@ -402,6 +412,7 @@ const Bookings = () => {
       )
         fullyBooked.push(d);
     });
+    console.log("[ADMIN AVAILABILITY] Booked slots map:", slotsMap);
     setBookedDates(fullyBooked);
   }, [bookings]);
 
@@ -1597,7 +1608,7 @@ const Bookings = () => {
                         {selectedBooking.customer?.phone}
                       </p>
                     </div>
-                    <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 text-center">
+                    <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 text-center relative group">
                       <DollarSign
                         size={20}
                         className="text-primary mx-auto mb-2"
@@ -1611,6 +1622,44 @@ const Bookings = () => {
                           : "₦"}
                         {selectedBooking.payment?.amount}
                       </p>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(
+                              `${import.meta.env.VITE_API_URL}/bookings/${selectedBooking._id}`,
+                              {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                  payment: {
+                                    ...selectedBooking.payment,
+                                    status: "Confirmed",
+                                    confirmedAt: new Date().toISOString(),
+                                  },
+                                }),
+                              },
+                            );
+                            if (res.ok) {
+                              setSelectedBooking((prev) => ({
+                                ...prev,
+                                payment: {
+                                  ...prev.payment,
+                                  status: "Confirmed",
+                                  confirmedAt: new Date().toISOString(),
+                                },
+                              }));
+                              alert("✅ Payment confirmed!");
+                              fetchBookings();
+                            }
+                          } catch (err) {
+                            console.error("Failed to confirm payment:", err);
+                            alert("❌ Failed to confirm payment");
+                          }
+                        }}
+                        className="absolute top-2 right-2 px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[8px] font-black rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        Confirm
+                      </button>
                     </div>
                   </div>
 
@@ -1772,6 +1821,28 @@ const Bookings = () => {
                           </h4>
                           <p className="font-bold text-primary-dark leading-tight">
                             {selectedBooking.details?.address}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                          <Calendar size={20} />
+                        </div>
+                        <div>
+                          <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                            Booking Date
+                          </h4>
+                          <p className="font-bold text-primary-dark">
+                            {selectedBooking.schedule?.date
+                              ? new Date(
+                                  selectedBooking.schedule.date,
+                                ).toLocaleDateString("en-GB", {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })
+                              : "Not set"}
                           </p>
                         </div>
                       </div>
@@ -2195,41 +2266,34 @@ const Bookings = () => {
 
                       {/* Duration and Pet */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-white rounded-2xl border-2 border-slate-200">
-                        <div>
+                        <div className="sm:col-span-2">
                           <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block flex items-center gap-1">
                             ⏱️ Duration (Hours){" "}
                             <span className="text-rose-500">*</span>
                           </label>
-                          <input
-                            type="number"
-                            min="0.5"
-                            step="0.5"
-                            value={createData.details.duration}
-                            onChange={(e) =>
-                              handleFieldChange(
-                                "details.duration",
-                                parseFloat(e.target.value || 0.5),
-                              )
-                            }
-                            onBlur={() =>
-                              setFieldTouched((prev) => ({
-                                ...prev,
-                                "details.duration": true,
-                              }))
-                            }
-                            className={`w-full p-3 rounded-xl bg-slate-50 border-2 transition-all text-lg font-bold focus:outline-none focus:ring-2 ${
-                              formErrors["details.duration"]
-                                ? "border-rose-400 text-rose-500 focus:ring-rose-200 focus:border-rose-500"
-                                : "border-slate-200 text-primary focus:ring-primary/30 focus:border-primary"
-                            }`}
-                          />
-                          {(formErrors["details.duration"] ||
-                            fieldTouched["details.duration"]) &&
-                            formErrors["details.duration"] && (
-                              <p className="text-rose-500 text-[10px] font-bold mt-1">
-                                {formErrors["details.duration"]}
-                              </p>
-                            )}
+                          <div className="grid grid-cols-4 gap-2">
+                            {[2, 3, 4, 5, 6, 7, 8].map((hours) => (
+                              <button
+                                key={hours}
+                                onClick={() =>
+                                  handleFieldChange("details.duration", hours)
+                                }
+                                type="button"
+                                className={`py-3 px-2 rounded-xl border-2 font-black text-sm transition-all transform hover:scale-105 ${
+                                  createData.details.duration === hours
+                                    ? "border-primary bg-primary text-white shadow-lg"
+                                    : "border-slate-200 bg-white text-primary hover:border-primary/50"
+                                }`}
+                              >
+                                {hours}h
+                              </button>
+                            ))}
+                          </div>
+                          {formErrors["details.duration"] && (
+                            <p className="text-rose-500 text-[10px] font-bold mt-2">
+                              {formErrors["details.duration"]}
+                            </p>
+                          )}
                         </div>
                         <div>
                           <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block">
@@ -2496,90 +2560,308 @@ const Bookings = () => {
                             )}
 
                           <div className="mt-4 space-y-3">
-                            <div>
-                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
-                                🕐 Time Slot{" "}
-                                <span className="text-rose-500">*</span>
+                            <div className="space-y-3">
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block flex items-center gap-1">
+                                🕐 Time Slot Selection
                               </label>
-                              <select
-                                value={createData.schedule.timeSlot}
-                                onChange={(e) =>
-                                  handleFieldChange(
-                                    "schedule.timeSlot",
-                                    e.target.value,
-                                  )
-                                }
-                                onBlur={() =>
-                                  setFieldTouched((prev) => ({
-                                    ...prev,
-                                    "schedule.timeSlot": true,
-                                  }))
-                                }
-                                className={`w-full p-3 rounded-xl border-2 transition-all font-bold focus:outline-none focus:ring-2 ${
-                                  formErrors["schedule.timeSlot"]
-                                    ? "bg-white border-rose-400 focus:ring-rose-200 focus:border-rose-500"
-                                    : "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 focus:ring-primary/30 focus:border-primary"
-                                }`}
-                              >
-                                <option value="">Select a time slot</option>
-                                {(() => {
-                                  const slots = [
-                                    { value: "Morning", label: "Morning (8am-12pm)", limit: 12 },
-                                    { value: "Afternoon", label: "Afternoon (12pm-4pm)", limit: 16 },
-                                    { value: "Evening", label: "Evening (4pm-8pm)", limit: 20 },
-                                  ];
-                                  
-                                  const selectedDateStr = createData.schedule.date;
-                                  let availableSlots = slots;
-                                  
-                                  if (selectedDateStr) {
-                                    const selectedDate = new Date(selectedDateStr);
-                                    const today = new Date();
-                                    if (
-                                      selectedDate.getDate() === today.getDate() &&
-                                      selectedDate.getMonth() === today.getMonth() &&
-                                      selectedDate.getFullYear() === today.getFullYear()
-                                    ) {
-                                      const currentHour = today.getHours();
-                                      availableSlots = slots.filter(slot => currentHour < slot.limit);
-                                      if (availableSlots.length === 0) {
-                                        availableSlots = [slots[2]]; // Fallback to Evening
+
+                              <div className="p-3 bg-white rounded-xl border-2 border-slate-200">
+                                <p className="text-[9px] font-bold text-slate-500 mb-2">
+                                  Traditional Slots
+                                </p>
+                                <div className="grid grid-cols-3 gap-2">
+                                  {(() => {
+                                    const slots = [
+                                      {
+                                        value: "Morning",
+                                        label: "Morning (8am-12pm)",
+                                        limit: 12,
+                                      },
+                                      {
+                                        value: "Afternoon",
+                                        label: "Afternoon (12pm-4pm)",
+                                        limit: 16,
+                                      },
+                                      {
+                                        value: "Evening",
+                                        label: "Evening (4pm-8pm)",
+                                        limit: 20,
+                                      },
+                                    ];
+
+                                    const selectedDateStr =
+                                      createData.schedule.date;
+                                    let availableSlots = slots;
+
+                                    if (selectedDateStr) {
+                                      const selectedDate = new Date(
+                                        selectedDateStr,
+                                      );
+                                      const today = new Date();
+                                      if (
+                                        selectedDate.getDate() ===
+                                          today.getDate() &&
+                                        selectedDate.getMonth() ===
+                                          today.getMonth() &&
+                                        selectedDate.getFullYear() ===
+                                          today.getFullYear()
+                                      ) {
+                                        const currentHour = today.getHours();
+                                        availableSlots = slots.filter(
+                                          (slot) => currentHour < slot.limit,
+                                        );
+                                        if (availableSlots.length === 0) {
+                                          availableSlots = [slots[2]]; // Fallback to Evening
+                                        }
                                       }
                                     }
-                                  }
-                                  
-                                  return availableSlots.map(slot => (
-                                    <option key={slot.value} value={slot.value}>
-                                      {slot.label}
-                                    </option>
-                                  ));
-                                })()}
-                              </select>
-                              {(formErrors["schedule.timeSlot"] ||
-                                fieldTouched["schedule.timeSlot"]) &&
-                                formErrors["schedule.timeSlot"] && (
-                                  <p className="text-rose-500 text-[10px] font-bold mt-1">
-                                    {formErrors["schedule.timeSlot"]}
+
+                                    return availableSlots.map((slot) => (
+                                      <button
+                                        key={slot.value}
+                                        onClick={() =>
+                                          handleFieldChange(
+                                            "schedule.timeSlot",
+                                            slot.value,
+                                          )
+                                        }
+                                        type="button"
+                                        className={`py-3 px-2 rounded-lg border-2 text-[10px] font-bold uppercase transition-all ${
+                                          createData.schedule.timeSlot ===
+                                          slot.value
+                                            ? "border-primary bg-primary text-white shadow-md"
+                                            : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                        }`}
+                                      >
+                                        {slot.label.split("(")[0].trim()}
+                                      </button>
+                                    ));
+                                  })()}
+                                </div>
+                              </div>
+
+                              <div className="p-6 bg-white rounded-xl border-2 border-slate-200 space-y-4">
+                                <div>
+                                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <Clock size={16} className="text-primary" />
+                                    Choose Your Flexible Time
                                   </p>
-                                )}
+                                  <p className="text-[9px] text-slate-400 mb-4">
+                                    Available: 12:30 PM - 10:00 PM
+                                  </p>
+                                </div>
+
+                                {/* Quick Select Buttons */}
+                                <div className="grid grid-cols-4 gap-2 mb-4">
+                                  {(() => {
+                                    const quickTimes = [
+                                      "12:30",
+                                      "14:00",
+                                      "16:00",
+                                      "18:00",
+                                      "19:00",
+                                      "20:00",
+                                      "21:00",
+                                      "22:00",
+                                    ];
+
+                                    // Get booked times for the selected date
+                                    const selectedDateStr =
+                                      createData.schedule.date;
+                                    let bookedTimes = [];
+                                    if (selectedDateStr && bookedDates) {
+                                      // Find bookings for this date
+                                      bookedTimes = bookings
+                                        .filter((b) => {
+                                          if (!b.schedule?.date) return false;
+                                          const d = new Date(b.schedule.date);
+                                          const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+                                          return (
+                                            dStr === selectedDateStr &&
+                                            b.schedule?.timeSlot === "Flexible"
+                                          );
+                                        })
+                                        .map((b) => b.schedule.preferredTime)
+                                        .filter(Boolean);
+                                    }
+
+                                    return quickTimes.map((time) => {
+                                      const isBooked =
+                                        bookedTimes.includes(time);
+                                      return (
+                                        <button
+                                          key={time}
+                                          disabled={isBooked}
+                                          onClick={() => {
+                                            handleFieldChange(
+                                              "schedule.timeSlot",
+                                              "Flexible",
+                                            );
+                                            handleFieldChange(
+                                              "schedule.preferredTime",
+                                              time,
+                                            );
+                                            console.log(
+                                              `[DEV] Admin quick selected time: ${time}`,
+                                            );
+                                          }}
+                                          type="button"
+                                          className={`py-3 px-2 rounded-xl border-2 text-[10px] font-bold transition-all transform hover:scale-105 ${
+                                            createData.schedule
+                                              .preferredTime === time
+                                              ? "border-primary bg-primary text-white shadow-lg scale-110"
+                                              : isBooked
+                                                ? "border-rose-200 bg-rose-50 text-rose-300 cursor-not-allowed opacity-50"
+                                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                          }`}
+                                        >
+                                          {time}
+                                        </button>
+                                      );
+                                    });
+                                  })()}
+                                </div>
+
+                                {/* Custom Time Input */}
+                                <div className="border-t-2 border-slate-100 pt-4 space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                      ⏰ Custom Time
+                                    </p>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const testDate = new Date();
+                                        testDate.setDate(
+                                          testDate.getDate() + 1,
+                                        );
+                                        const dateStr = `${testDate.getFullYear()}-${String(testDate.getMonth() + 1).padStart(2, "0")}-${String(testDate.getDate()).padStart(2, "0")}`;
+                                        setCreateData({
+                                          ...createData,
+                                          schedule: {
+                                            date: dateStr,
+                                            timeSlot: "Flexible",
+                                            preferredTime: "14:00",
+                                          },
+                                          firstName: "Test",
+                                          lastName: "Admin Test",
+                                          email: "test@example.com",
+                                          phone: "07700000000",
+                                        });
+                                        console.log(
+                                          "[DEV TEST] Admin form populated with test data - NO PAYMENT REQUIRED",
+                                        );
+                                      }}
+                                      className="text-[8px] font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wider px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition"
+                                    >
+                                      🧪 Dev Test Fill
+                                    </button>
+                                  </div>
+                                  <div className="flex gap-2 items-center">
+                                    <input
+                                      type="time"
+                                      value={
+                                        createData.schedule.preferredTime &&
+                                        createData.schedule.timeSlot ===
+                                          "Flexible"
+                                          ? createData.schedule.preferredTime.includes(
+                                              ":",
+                                            )
+                                            ? createData.schedule.preferredTime
+                                            : "12:30"
+                                          : ""
+                                      }
+                                      onChange={(e) => {
+                                        if (e.target.value) {
+                                          handleFieldChange(
+                                            "schedule.timeSlot",
+                                            "Flexible",
+                                          );
+                                          handleFieldChange(
+                                            "schedule.preferredTime",
+                                            e.target.value,
+                                          );
+                                          console.log(
+                                            `[DEV] Admin custom time entered: ${e.target.value}`,
+                                          );
+                                        } else {
+                                          console.log(
+                                            "[DEV MODE] Admin - No time entered - using default: 12:30",
+                                          );
+                                          handleFieldChange(
+                                            "schedule.preferredTime",
+                                            "12:30",
+                                          );
+                                          handleFieldChange(
+                                            "schedule.timeSlot",
+                                            "Flexible",
+                                          );
+                                        }
+                                      }}
+                                      onBlur={() => {
+                                        // If empty on blur, set to 12:30
+                                        if (
+                                          !createData.schedule.preferredTime
+                                        ) {
+                                          console.log(
+                                            "[DEV] Admin - Blur event - setting default to 12:30",
+                                          );
+                                          handleFieldChange(
+                                            "schedule.preferredTime",
+                                            "12:30",
+                                          );
+                                          handleFieldChange(
+                                            "schedule.timeSlot",
+                                            "Flexible",
+                                          );
+                                        }
+                                      }}
+                                      className="flex-1 p-4 rounded-xl bg-slate-50 border-2 border-slate-200 focus:border-primary focus:bg-white shadow-sm outline-none font-bold text-sm text-slate-700"
+                                      min="12:30"
+                                      max="22:00"
+                                    />
+                                    <span className="text-[9px] font-bold text-slate-500 text-center whitespace-nowrap">
+                                      {createData.schedule.preferredTime &&
+                                      createData.schedule.timeSlot ===
+                                        "Flexible"
+                                        ? "✓ Selected"
+                                        : "Click to set"}
+                                    </span>
+                                  </div>
+                                  <p className="text-[8px] text-slate-400">
+                                    💡 If left empty, we'll default to 12:30 PM
+                                  </p>
+                                </div>
+                              </div>
                             </div>
 
-                            <div>
-                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
-                                ⏰ Preferred Arrival Time
-                              </label>
-                              <input
-                                placeholder="e.g. 10:00 AM"
-                                value={createData.schedule.preferredTime || ""}
-                                onChange={(e) =>
-                                  handleFieldChange(
-                                    "schedule.preferredTime",
-                                    e.target.value,
-                                  )
-                                }
-                                className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400"
-                              />
-                            </div>
+                            {formErrors["schedule.timeSlot"] && (
+                              <p className="text-rose-500 text-[10px] font-bold">
+                                {formErrors["schedule.timeSlot"]}
+                              </p>
+                            )}
+
+                            {createData.schedule.timeSlot &&
+                              createData.schedule.timeSlot !== "Flexible" && (
+                                <div>
+                                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
+                                    ⏰ Preferred Arrival Time (Optional)
+                                  </label>
+                                  <input
+                                    placeholder="e.g. 10:00 AM"
+                                    value={
+                                      createData.schedule.preferredTime || ""
+                                    }
+                                    onChange={(e) =>
+                                      handleFieldChange(
+                                        "schedule.preferredTime",
+                                        e.target.value,
+                                      )
+                                    }
+                                    className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400"
+                                  />
+                                </div>
+                              )}
                           </div>
                         </div>
 
@@ -2848,10 +3130,8 @@ const Bookings = () => {
                 {createStep === 4 && (
                   <button
                     onClick={async () => {
-                      // Validate all required fields before creating
                       const validation = validateStep(4);
                       setFormErrors(validation.errors);
-
                       if (!validation.isValid) {
                         setStatusMessage({
                           type: "error",
@@ -2859,9 +3139,7 @@ const Bookings = () => {
                         });
                         return;
                       }
-
                       try {
-                        // Build extras with rate information
                         const extrasWithRates = (
                           createData.details.extras || []
                         ).map((extra) => {
@@ -2876,7 +3154,6 @@ const Bookings = () => {
                             rate,
                           };
                         });
-
                         const payload = {
                           ...createData,
                           bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -2918,7 +3195,7 @@ const Bookings = () => {
                     className="px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-xl text-white font-black transition-all transform hover:scale-105 border-2 border-emerald-600 flex items-center gap-2"
                   >
                     <CheckCircle2 size={20} />
-                    Create & Open Payment
+                    Create Booking
                   </button>
                 )}
               </div>
