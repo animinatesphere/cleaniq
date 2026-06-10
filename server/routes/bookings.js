@@ -213,8 +213,9 @@ router.put("/:id", async (req, res) => {
             ) {
               try {
                 const Withdrawal = require("../models/Withdrawal");
+                const Service = require("../models/Service");
 
-                // Calculate total earnings from all completed jobs
+                // Calculate total earnings from all completed jobs using service rates
                 const completedBookings = await Booking.find({
                   assignedWorker: updatedBooking.assignedWorker,
                   status: "Completed",
@@ -223,13 +224,22 @@ router.put("/:id", async (req, res) => {
                 let totalEarnings = 0;
                 let jobsList = [];
 
-                completedBookings.forEach((booking) => {
+                // Process each completed booking and get service rates
+                for (const booking of completedBookings) {
+                  // Look up the service to get worker payment rate
+                  const service = await Service.findOne({
+                    name: booking.service,
+                  });
+
+                  // Use service payment rate if available, otherwise fallback to old calculation
                   const earnings =
+                    service?.workerPaymentRate ||
                     (booking.workerRate || 0) *
-                    (booking.details?.duration ||
-                      booking.workerDuration ||
-                      booking.duration ||
-                      0);
+                      (booking.details?.duration ||
+                        booking.workerDuration ||
+                        booking.duration ||
+                        0);
+
                   totalEarnings += earnings;
                   jobsList.push({
                     bookingId: booking.bookingId,
@@ -237,7 +247,7 @@ router.put("/:id", async (req, res) => {
                     amount: earnings,
                     completedDate: booking.updatedAt,
                   });
-                });
+                }
 
                 // Check if there's already an upcoming/pending payout
                 const existingPayout = await Withdrawal.findOne({
@@ -246,7 +256,7 @@ router.put("/:id", async (req, res) => {
                 });
 
                 if (!existingPayout && totalEarnings > 0) {
-                  // Calculate next payout date
+                  // Calculate next payout date (8 days from now or next schedule)
                   const payoutType = worker.payoutPreference || "weekly";
                   let expectedPayoutDate = new Date();
 

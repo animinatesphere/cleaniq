@@ -276,16 +276,23 @@ const AdminPayments = () => {
                   {/* Jobs List */}
                   {payout.completedJobs?.length > 0 && (
                     <div className="jobs-section">
-                      <h4>Completed Jobs ({payout.completedJobs.length})</h4>
+                      <h4>
+                        Completed Services ({payout.completedJobs.length})
+                      </h4>
                       <div className="jobs-list">
                         {payout.completedJobs.map((job, idx) => (
                           <div key={idx} className="job-item">
-                            <span className="service">{job.service}</span>
+                            <div className="job-details">
+                              <span className="service">📋 {job.service}</span>
+                              <span className="job-date">
+                                Completed:{" "}
+                                {new Date(
+                                  job.completedDate,
+                                ).toLocaleDateString()}
+                              </span>
+                            </div>
                             <span className="job-amount">
                               £{job.amount?.toFixed(2)}
-                            </span>
-                            <span className="job-date">
-                              {new Date(job.completedDate).toLocaleDateString()}
                             </span>
                           </div>
                         ))}

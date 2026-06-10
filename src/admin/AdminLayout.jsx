@@ -19,6 +19,7 @@ import {
   MessageSquare,
   BookOpen,
   Wallet,
+  DollarSign,
 } from "lucide-react";
 import Login from "./Login";
 
@@ -98,19 +99,19 @@ const AdminLayout = () => {
     { name: "Dashboard", path: "/admin", icon: <LayoutDashboard size={20} /> },
     { name: "Bookings", path: "/admin/bookings", icon: <Calendar size={20} /> },
     {
-      name: "Staff pay",
-      path: "/admin/worker-pay",
-      icon: <Wallet size={20} />,
-    },
-    {
-      name: "Withdrawals",
-      path: "/admin/withdrawals",
-      icon: <Wallet size={20} />,
+      name: "Service Pricing",
+      path: "/admin/service-pricing",
+      icon: <DollarSign size={20} />,
     },
     {
       name: "Payment Approvals",
       path: "/admin/payments",
       icon: <CheckCircle2 size={20} />,
+    },
+    {
+      name: "Withdrawals",
+      path: "/admin/withdrawals",
+      icon: <Wallet size={20} />,
     },
     { name: "Staff", path: "/admin/workers", icon: <Briefcase size={20} /> },
     {

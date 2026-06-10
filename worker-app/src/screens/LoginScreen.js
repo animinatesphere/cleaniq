@@ -1,20 +1,38 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { 
-  View, Text, TextInput, TouchableOpacity, 
-  StyleSheet, KeyboardAvoidingView, Platform, 
-  ActivityIndicator, Alert, Image, SafeAreaView
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as LocalAuthentication from 'expo-local-authentication';
-import { AuthContext } from '../context/AuthContext';
-import { Mail, Lock, Fingerprint } from 'lucide-react-native';
+import React, { useState, useEffect, useContext } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  Alert,
+  Image,
+  SafeAreaView,
+  Dimensions,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as LocalAuthentication from "expo-local-authentication";
+import { AuthContext } from "../context/AuthContext";
+import { Mail, Lock, Fingerprint } from "lucide-react-native";
+import {
+  responsiveWidth,
+  responsiveHeight,
+  responsiveFontSize,
+  getResponsivePadding,
+  getResponsiveBorderRadius,
+  isSmallScreen,
+  isBigScreen,
+} from "../utils/responsive";
 
 const LoginScreen = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isBiometricSupported, setIsBiometricSupported] = useState(false);
-  
+
   const { login } = useContext(AuthContext);
 
   useEffect(() => {
@@ -26,21 +44,24 @@ const LoginScreen = () => {
           setIsBiometricSupported(compatible && enrolled);
         }
       } catch (err) {
-        console.log('Biometric compatibility check skipped inside Expo Go:', err.message);
+        console.log(
+          "Biometric compatibility check skipped inside Expo Go:",
+          err.message,
+        );
       }
 
       try {
-        const savedEmail = await AsyncStorage.getItem('@saved_email');
+        const savedEmail = await AsyncStorage.getItem("@saved_email");
         if (savedEmail) setEmail(savedEmail);
       } catch (err) {
-        console.log('AsyncStorage email recovery skipped:', err.message);
+        console.log("AsyncStorage email recovery skipped:", err.message);
       }
     })();
   }, []);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and your password.');
+      Alert.alert("Error", "Please enter both email and your password.");
       return;
     }
 
@@ -49,27 +70,30 @@ const LoginScreen = () => {
     setIsLoggingIn(false);
 
     if (result.success) {
-      await AsyncStorage.setItem('@saved_email', email);
-      await AsyncStorage.setItem('@saved_pass', password);
+      await AsyncStorage.setItem("@saved_email", email);
+      await AsyncStorage.setItem("@saved_pass", password);
     } else {
-      Alert.alert('Login Failed', result.message);
+      Alert.alert("Login Failed", result.message);
     }
   };
 
   const handleBiometricAuth = async () => {
     try {
-      const savedEmail = await AsyncStorage.getItem('@saved_email');
-      const savedPass = await AsyncStorage.getItem('@saved_pass');
-      
+      const savedEmail = await AsyncStorage.getItem("@saved_email");
+      const savedPass = await AsyncStorage.getItem("@saved_pass");
+
       if (!savedEmail || !savedPass) {
-        Alert.alert('Setup Required', 'Please log in with your email and password first to enable biometric shortcuts.');
+        Alert.alert(
+          "Setup Required",
+          "Please log in with your email and password first to enable biometric shortcuts.",
+        );
         return;
       }
 
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Log in to Cleaniq with Biometrics',
-        fallbackLabel: 'Enter Password',
-        disableDeviceFallback: false
+        promptMessage: "Log in to Cleaniq with Biometrics",
+        fallbackLabel: "Enter Password",
+        disableDeviceFallback: false,
       });
 
       if (result.success) {
@@ -77,31 +101,36 @@ const LoginScreen = () => {
         const loginRes = await login(savedEmail, savedPass);
         setIsLoggingIn(false);
         if (!loginRes.success) {
-          Alert.alert('Biometric Login Failed', loginRes.message);
+          Alert.alert("Biometric Login Failed", loginRes.message);
         }
       }
     } catch (error) {
-      Alert.alert('Biometrics Error', 'An error occurred during authentication.');
+      Alert.alert(
+        "Biometrics Error",
+        "An error occurred during authentication.",
+      );
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.topSection}>
-        <Image 
-          source={require('../../assets/logo.jpg')} 
+        <Image
+          source={require("../../assets/logo.jpg")}
           style={styles.fullLogo}
           resizeMode="cover"
         />
       </View>
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.bottomSection}
       >
         <View style={styles.formContainer}>
           <Text style={styles.welcomeText}>Welcome back</Text>
-          <Text style={styles.subtitle}>Enter your details to access your jobs.</Text>
+          <Text style={styles.subtitle}>
+            Enter your details to access your jobs.
+          </Text>
 
           <View style={styles.form}>
             <View style={styles.inputWrapper}>
@@ -129,9 +158,9 @@ const LoginScreen = () => {
               />
             </View>
 
-            <View style={{ flexDirection: 'row', gap: 12, marginTop: 10 }}>
-              <TouchableOpacity 
-                style={[styles.loginButton, { flex: 1, marginTop: 0 }]} 
+            <View style={{ flexDirection: "row", gap: 12, marginTop: 10 }}>
+              <TouchableOpacity
+                style={[styles.loginButton, { flex: 1, marginTop: 0 }]}
                 onPress={handleLogin}
                 disabled={isLoggingIn}
               >
@@ -143,8 +172,8 @@ const LoginScreen = () => {
               </TouchableOpacity>
 
               {isBiometricSupported && (
-                <TouchableOpacity 
-                  style={styles.biometricButton} 
+                <TouchableOpacity
+                  style={styles.biometricButton}
                   onPress={handleBiometricAuth}
                   disabled={isLoggingIn}
                 >
@@ -166,22 +195,22 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A5C43',
+    backgroundColor: "#0A5C43",
   },
   topSection: {
     flex: 0.4,
-    width: '100%',
+    width: "100%",
   },
   fullLogo: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   bottomSection: {
     flex: 0.6,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -10 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
@@ -195,23 +224,23 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 28,
-    fontWeight: '900',
-    color: '#0F172A',
+    fontWeight: "900",
+    color: "#0F172A",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: '#64748B',
+    color: "#64748B",
     marginBottom: 40,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   form: {
     gap: 20,
   },
   inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
     borderRadius: 20,
     paddingHorizontal: 20,
     height: 65,
@@ -221,52 +250,52 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: '100%',
-    color: '#0F172A',
+    height: "100%",
+    color: "#0F172A",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   loginButton: {
-    backgroundColor: '#0A5C43',
+    backgroundColor: "#0A5C43",
     height: 65,
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 10,
-    shadowColor: '#0A5C43',
+    shadowColor: "#0A5C43",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 15,
     elevation: 8,
   },
   loginButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: '900',
+    fontWeight: "900",
     letterSpacing: 2,
   },
   biometricButton: {
     width: 65,
     height: 65,
     borderRadius: 20,
-    backgroundColor: '#E6F4F1',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#E6F4F1",
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 1.5,
-    borderColor: '#0A5C43',
-    shadowColor: '#0A5C43',
+    borderColor: "#0A5C43",
+    shadowColor: "#0A5C43",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
   },
   footerText: {
-    marginTop: 'auto',
-    textAlign: 'center',
-    color: '#94A3B8',
+    marginTop: "auto",
+    textAlign: "center",
+    color: "#94A3B8",
     fontSize: 13,
-    fontWeight: '600',
-  }
+    fontWeight: "600",
+  },
 });
 
 export default LoginScreen;
