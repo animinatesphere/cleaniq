@@ -1,8 +1,52 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, RefreshControl } from 'react-native';
-import { AuthContext, API_URL } from '../context/AuthContext';
-import { Bell, Check, Info, AlertTriangle, CheckCircle, Briefcase, ChevronLeft } from 'lucide-react-native';
-import axios from 'axios';
+import React, { useState, useEffect, useContext } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  SafeAreaView,
+  RefreshControl,
+} from "react-native";
+import { AuthContext, API_URL } from "../context/AuthContext";
+import {
+  Bell,
+  Check,
+  Info,
+  AlertTriangle,
+  CheckCircle,
+  Briefcase,
+  ChevronLeft,
+} from "lucide-react-native";
+import axios from "axios";
+
+// ── Design tokens ──────────────────────────────────────────
+const C = {
+  bg: "#FFFFFF",
+  surface: "#FFFFFF",
+  surfaceUnread: "#F0FDF9",
+
+  border: "#E6F7F1",
+  borderUnread: "#6EE7B7",
+
+  green: "#10B981",
+  greenDark: "#059669",
+  greenDeep: "#047857",
+  greenDim: "#D1FAE5",
+  greenPale: "#ECFDF5",
+
+  indigo: "#4F46E5",
+  indigoDim: "#EEF2FF",
+  amber: "#F59E0B",
+  amberDim: "#FFFBEB",
+  blue: "#3B82F6",
+  blueDim: "#EFF6FF",
+
+  text: "#111827",
+  textSub: "#6B7280",
+  textMute: "#9CA3AF",
+};
 
 const NotificationsScreen = ({ navigation }) => {
   const { workerInfo } = useContext(AuthContext);
@@ -34,7 +78,9 @@ const NotificationsScreen = ({ navigation }) => {
   const markAsRead = async (id) => {
     try {
       await axios.put(`${API_URL}/notifications/${id}/read`);
-      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)),
+      );
     } catch (err) {
       console.error("Error marking as read", err);
     }
@@ -43,187 +89,361 @@ const NotificationsScreen = ({ navigation }) => {
   const markAllAsRead = async () => {
     try {
       await axios.put(`${API_URL}/notifications/${workerInfo.id}/read-all`);
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     } catch (err) {
       console.error("Error marking all as read", err);
     }
   };
 
-  const getIcon = (type) => {
-    switch(type) {
-      case 'success': return <CheckCircle size={24} color="#10B981" />;
-      case 'warning': return <AlertTriangle size={24} color="#F59E0B" />;
-      case 'job': return <Briefcase size={24} color="#4F46E5" />;
-      default: return <Info size={24} color="#3B82F6" />;
+  const getIconConfig = (type) => {
+    switch (type) {
+      case "success":
+        return {
+          icon: <CheckCircle size={20} color={C.green} />,
+          bg: C.greenPale,
+        };
+      case "warning":
+        return {
+          icon: <AlertTriangle size={20} color={C.amber} />,
+          bg: C.amberDim,
+        };
+      case "job":
+        return {
+          icon: <Briefcase size={20} color={C.indigo} />,
+          bg: C.indigoDim,
+        };
+      default:
+        return { icon: <Info size={20} color={C.blue} />, bg: C.blueDim };
     }
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity 
-      style={[styles.notificationCard, !item.isRead && styles.unreadCard]}
-      onPress={() => markAsRead(item._id)}
-      activeOpacity={0.7}
-    >
-      <View style={styles.iconContainer}>
-        {getIcon(item.type)}
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const renderListHeader = () =>
+    unreadCount > 0 ? (
+      <View style={styles.unreadBanner}>
+        <View style={styles.unreadBannerDot} />
+        <Text style={styles.unreadBannerText}>
+          {unreadCount} unread notification{unreadCount > 1 ? "s" : ""}
+        </Text>
       </View>
-      <View style={styles.contentContainer}>
-        <Text style={[styles.title, !item.isRead && styles.unreadText]}>{item.title}</Text>
-        <Text style={styles.message}>{item.message}</Text>
-        <Text style={styles.time}>{new Date(item.createdAt).toLocaleString()}</Text>
+    ) : (
+      <View style={styles.allReadBanner}>
+        <CheckCircle size={14} color={C.green} />
+        <Text style={styles.allReadText}>All caught up</Text>
       </View>
-      {!item.isRead && <View style={styles.unreadDot} />}
-    </TouchableOpacity>
-  );
+    );
+
+  const renderItem = ({ item }) => {
+    const { icon, bg } = getIconConfig(item.type);
+    return (
+      <TouchableOpacity
+        style={[styles.card, !item.isRead && styles.cardUnread]}
+        onPress={() => markAsRead(item._id)}
+        activeOpacity={0.75}
+      >
+        {!item.isRead && <View style={styles.accentBar} />}
+
+        <View style={[styles.iconWrap, { backgroundColor: bg }]}>{icon}</View>
+
+        <View style={styles.cardContent}>
+          <View style={styles.cardTitleRow}>
+            <Text
+              style={[styles.cardTitle, !item.isRead && styles.cardTitleUnread]}
+              numberOfLines={1}
+            >
+              {item.title}
+            </Text>
+            {!item.isRead && <View style={styles.unreadDot} />}
+          </View>
+          <Text style={styles.cardMessage} numberOfLines={2}>
+            {item.message}
+          </Text>
+          <Text style={styles.cardTime}>
+            {new Date(item.createdAt).toLocaleString()}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* ── Header ── */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <ChevronLeft size={24} color="#1F2937" />
+        <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => navigation.goBack()}
+        >
+          <ChevronLeft size={20} color={C.greenDark} />
         </TouchableOpacity>
+
         <Text style={styles.headerTitle}>Notifications</Text>
-        {notifications.some(n => !n.isRead) ? (
-          <TouchableOpacity onPress={markAllAsRead}>
-            <Text style={styles.markAllText}>Mark all read</Text>
+
+        {notifications.some((n) => !n.isRead) ? (
+          <TouchableOpacity style={styles.markAllBtn} onPress={markAllAsRead}>
+            <Text style={styles.markAllText}>Mark all</Text>
           </TouchableOpacity>
-        ) : <View style={{ width: 80 }} />}
+        ) : (
+          <View style={{ width: 68 }} />
+        )}
       </View>
 
+      <View style={styles.headerDivider} />
+
+      {/* ── Content ── */}
       {loading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#4F46E5" />
+          <ActivityIndicator size="large" color={C.green} />
         </View>
       ) : notifications.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Bell size={64} color="#D1D5DB" />
-          <Text style={styles.emptyText}>No notifications yet</Text>
-          <Text style={styles.emptySub}>We'll let you know when something important happens.</Text>
+          <View style={styles.emptyIconWrap}>
+            <Bell size={36} color={C.green} />
+          </View>
+          <Text style={styles.emptyTitle}>No notifications yet</Text>
+          <Text style={styles.emptySub}>
+            We'll let you know when something important happens.
+          </Text>
         </View>
       ) : (
         <FlatList
           data={notifications}
-          keyExtractor={item => item._id}
+          keyExtractor={(item) => item._id}
           renderItem={renderItem}
+          ListHeaderComponent={renderListHeader}
           contentContainerStyle={styles.listContainer}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#4F46E5"]} />}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[C.green]}
+              tintColor={C.green}
+            />
+          }
         />
       )}
     </SafeAreaView>
   );
 };
 
+// ─────────────────────────────────────────────────────────────
+// STYLES
+// ─────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: C.bg,
   },
+
+  // ── Header ────────────────────────────────────────────────
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: C.surface,
+  },
+  headerDivider: {
+    height: 2,
+    backgroundColor: C.green,
+    opacity: 0.15,
   },
   backBtn: {
-    padding: 4,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: C.greenPale,
+    borderWidth: 1,
+    borderColor: C.greenDim,
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#1F2937',
+    fontSize: 17,
+    fontWeight: "700",
+    color: C.text,
+    letterSpacing: -0.2,
+  },
+  markAllBtn: {
+    backgroundColor: C.greenPale,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: C.greenDim,
   },
   markAllText: {
-    fontSize: 14,
-    color: '#4F46E5',
-    fontWeight: '600',
+    fontSize: 12,
+    color: C.greenDark,
+    fontWeight: "700",
   },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+
+  // ── Banners ────────────────────────────────────────────────
+  unreadBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    backgroundColor: C.greenPale,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: C.greenDim,
   },
+  unreadBannerDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: C.green,
+  },
+  unreadBannerText: {
+    fontSize: 13,
+    color: C.greenDeep,
+    fontWeight: "600",
+  },
+  allReadBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    backgroundColor: C.greenPale,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: C.greenDim,
+  },
+  allReadText: {
+    fontSize: 13,
+    color: C.greenDark,
+    fontWeight: "600",
+  },
+
+  // ── Cards ─────────────────────────────────────────────────
   listContainer: {
     padding: 16,
-    gap: 12,
+    gap: 10,
   },
-  notificationCard: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  unreadCard: {
-    backgroundColor: '#EEF2FF',
+  card: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: C.surface,
+    borderRadius: 16,
+    padding: 14,
     borderWidth: 1,
-    borderColor: '#C7D2FE',
+    borderColor: C.border,
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 2,
+    overflow: "hidden",
+    marginBottom: 2,
   },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
+  cardUnread: {
+    backgroundColor: C.surfaceUnread,
+    borderColor: C.borderUnread,
+    shadowOpacity: 0.13,
+    shadowRadius: 14,
+    elevation: 3,
   },
-  contentContainer: {
+  accentBar: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 3,
+    backgroundColor: C.green,
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+  },
+  iconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+    flexShrink: 0,
+  },
+  cardContent: {
     flex: 1,
   },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 4,
+  cardTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 3,
   },
-  unreadText: {
-    fontWeight: '800',
-    color: '#1F2937',
-  },
-  message: {
+  cardTitle: {
     fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
-    marginBottom: 8,
+    fontWeight: "600",
+    color: C.textSub,
+    flex: 1,
+    marginRight: 6,
   },
-  time: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    fontWeight: '500',
+  cardTitleUnread: {
+    fontWeight: "700",
+    color: C.text,
   },
   unreadDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#4F46E5',
-    marginTop: 6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: C.green,
+    flexShrink: 0,
+  },
+  cardMessage: {
+    fontSize: 13,
+    color: C.textSub,
+    lineHeight: 19,
+    marginBottom: 7,
+  },
+  cardTime: {
+    fontSize: 11,
+    color: C.textMute,
+    fontWeight: "500",
+  },
+
+  // ── Empty state ────────────────────────────────────────────
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
   },
-  emptyText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#374151',
-    marginTop: 20,
+  emptyIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: C.greenPale,
+    borderWidth: 1.5,
+    borderColor: C.greenDim,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: C.text,
+    marginBottom: 8,
   },
   emptySub: {
     fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-    marginTop: 8,
-  }
+    color: C.textSub,
+    textAlign: "center",
+    lineHeight: 20,
+  },
 });
 
 export default NotificationsScreen;

@@ -8,6 +8,7 @@ import {
   PaymentRequestButtonElement,
 } from "@stripe/react-stripe-js";
 import { Zap, AlertCircle, ShieldCheck } from "lucide-react";
+import TrustBadges from "./TrustBadges";
 
 const StripePayment = ({
   amount,
@@ -281,6 +282,7 @@ const StripePayment = ({
           {error}
         </div>
       )}
+      <TrustBadges />
       <p className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-normal">
         By tapping the button below and booking, you accept our{" "}
         <a href="/terms" className="underline">

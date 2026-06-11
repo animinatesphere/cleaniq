@@ -41,6 +41,8 @@ import {
   Wallet,
   Star,
   Award,
+  ArrowUpRight,
+  Zap,
 } from "lucide-react-native";
 import axios from "axios";
 
@@ -299,7 +301,7 @@ const HomeScreen = ({ navigation, route }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4F46E5" />
+        <ActivityIndicator size="large" color="#6C63FF" />
       </View>
     );
   }
@@ -307,15 +309,15 @@ const HomeScreen = ({ navigation, route }) => {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case "completed":
-        return "#10B981";
+        return "#00C896";
       case "in_progress":
-        return "#3B82F6";
+        return "#4F9EFF";
       case "pending":
-        return "#F59E0B";
+        return "#FFB547";
       case "assigned":
-        return "#4F46E5";
+        return "#6C63FF";
       default:
-        return "#6B7280";
+        return "#9CA3AF";
     }
   };
 
@@ -335,136 +337,130 @@ const HomeScreen = ({ navigation, route }) => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={["#4F46E5"]}
+          colors={["#6C63FF"]}
         />
       }
     >
+      {/* Header */}
       <View style={styles.greetingHeader}>
         <View>
-          <Text style={styles.greetingText}>
-            Hello, {workerInfo?.firstName} 👋
-          </Text>
-          <Text style={styles.dateText}>
-            {new Date().toLocaleDateString("en-GB", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-            })}
+          <Text style={styles.greetingLabel}>Good day</Text>
+          <Text style={styles.greetingText}>{workerInfo?.firstName} 👋</Text>
+        </View>
+        <View style={styles.ratingChip}>
+          <Star size={13} color="#FFB547" fill="#FFB547" />
+          <Text style={styles.ratingChipText}>
+            {workerInfo?.rating ? workerInfo.rating.toFixed(1) : "5.0"}
           </Text>
         </View>
       </View>
 
-      <View style={styles.earningsCard}>
-        <View style={styles.earningsHeader}>
-          <Wallet size={20} color="#FFFFFF" opacity={0.8} />
-          <Text style={styles.earningsTitle}>Total Earnings</Text>
-        </View>
-        <Text style={styles.earningsAmount}>
-          £{activityStats.totalEarnings.toFixed(2)}
-        </Text>
-        <View style={styles.earningsFooter}>
-          <Text style={styles.earningsSubtitle}>
-            From {activityStats.offersAccepted} completed jobs
-          </Text>
-          <View style={styles.ratingBadge}>
-            <Star size={12} color="#F59E0B" fill="#F59E0B" />
-            <Text style={styles.ratingText}>
-              {workerInfo?.rating ? workerInfo.rating.toFixed(1) : "5.0"}
-            </Text>
+      {/* === HERO: Available Balance === */}
+      <View style={styles.balanceHero}>
+        <View style={styles.balanceHeroInner}>
+          <View style={styles.balanceTopRow}>
+            <View style={styles.balanceLabelRow}>
+              <View style={styles.balanceDot} />
+              <Text style={styles.balanceLabel}>Available to Withdraw</Text>
+            </View>
+            <Wallet size={18} color="rgba(255,255,255,0.6)" />
           </View>
-        </View>
-      </View>
 
-      {/* Wallet Card */}
-      <View style={styles.walletCard}>
-        <View style={styles.walletHeader}>
-          <View style={styles.walletIconBox}>
-            <Wallet size={22} color="#10B981" />
-          </View>
-          <View style={styles.walletInfo}>
-            <Text style={styles.walletLabel}>Available Balance</Text>
-            {walletLoading ? (
-              <ActivityIndicator color="#10B981" size="small" />
-            ) : (
-              <Text style={styles.walletAmount}>
-                £{wallet.balance?.toFixed(2) || "0.00"}
-              </Text>
-            )}
-          </View>
-        </View>
-        <View style={styles.walletStatsRow}>
-          <View style={styles.walletStat}>
-            <Text style={styles.walletStatLabel}>On Hold</Text>
-            <Text style={styles.walletStatValue}>
+          {walletLoading ? (
+            <ActivityIndicator
+              color="#FFFFFF"
+              size="large"
+              style={{ marginVertical: 12 }}
+            />
+          ) : (
+            <Text style={styles.balanceAmount}>
               £{wallet.onHold?.toFixed(2) || "0.00"}
             </Text>
-          </View>
-          <View style={styles.walletStatDivider} />
-          <View style={styles.walletStat}>
-            <Text style={styles.walletStatLabel}>Withdrawn</Text>
-            <Text style={styles.walletStatValue}>
-              £{wallet.withdrawn?.toFixed(2) || "0.00"}
-            </Text>
+          )}
+
+          <View style={styles.balanceDivider} />
+
+          <View style={styles.balanceStatsRow}>
+            <View style={styles.balanceStat}>
+              <Text style={styles.balanceStatLabel}>On Hold</Text>
+              <Text style={styles.balanceStatValue}>
+                £{wallet.onHold?.toFixed(2) || "0.00"}
+              </Text>
+            </View>
+            <View style={styles.balanceStatSep} />
+            <View style={styles.balanceStat}>
+              <Text style={styles.balanceStatLabel}>Withdrawn</Text>
+              <Text style={styles.balanceStatValue}>
+                £{wallet.withdrawn?.toFixed(2) || "0.00"}
+              </Text>
+            </View>
+            <View style={styles.balanceStatSep} />
+            <View style={styles.balanceStat}>
+              <Text style={styles.balanceStatLabel}>Total Earned</Text>
+              <Text style={styles.balanceStatValue}>
+                £
+                {wallet.totalEarned?.toFixed(2) ||
+                  activityStats.totalEarnings.toFixed(2)}
+              </Text>
+            </View>
           </View>
         </View>
-        <TouchableOpacity style={styles.infoBox} activeOpacity={0.9}>
-          <Text style={styles.infoLabel}>💡 Automatic Payouts</Text>
-          <Text style={styles.infoText}>
-            Payments are sent automatically. Check your Payments tab for
-            details.
+        {/* Payout notice */}
+        <View style={styles.payoutNotice}>
+          <Zap size={13} color="#FFB547" />
+          <Text style={styles.payoutNoticeText}>
+            Payments sent automatically · Check Payments tab for schedule
           </Text>
-        </TouchableOpacity>
+        </View>
       </View>
 
+      {/* Stats Grid */}
       <View style={styles.statsGrid}>
-        <View style={styles.statBox}>
-          <View
-            style={[styles.statIconWrapper, { backgroundColor: "#EEF2FF" }]}
-          >
-            <Briefcase size={20} color="#4F46E5" />
+        <View style={styles.statCard}>
+          <View style={[styles.statIcon, { backgroundColor: "#EEF0FF" }]}>
+            <Briefcase size={18} color="#6C63FF" />
           </View>
           <Text style={styles.statValue}>{activityStats.offersAccepted}</Text>
-          <Text style={styles.statLabel}>Jobs</Text>
+          <Text style={styles.statLabel}>Jobs Done</Text>
         </View>
-        <View style={styles.statBox}>
-          <View
-            style={[styles.statIconWrapper, { backgroundColor: "#ECFDF5" }]}
-          >
-            <Users size={20} color="#10B981" />
+        <View style={styles.statCard}>
+          <View style={[styles.statIcon, { backgroundColor: "#E6FBF4" }]}>
+            <Users size={18} color="#00C896" />
           </View>
           <Text style={styles.statValue}>{activityStats.customersServed}</Text>
           <Text style={styles.statLabel}>Clients</Text>
         </View>
-        <View style={styles.statBox}>
-          <View
-            style={[styles.statIconWrapper, { backgroundColor: "#FEF3C7" }]}
-          >
-            <Award size={20} color="#F59E0B" />
+        <View style={styles.statCard}>
+          <View style={[styles.statIcon, { backgroundColor: "#FFF7E6" }]}>
+            <Award size={18} color="#FFB547" />
           </View>
           <Text style={styles.statValue}>Top</Text>
           <Text style={styles.statLabel}>Rank</Text>
         </View>
       </View>
 
-      <View style={styles.sectionHeader}>
+      {/* Active Jobs Section */}
+      <View style={styles.sectionRow}>
         <Text style={styles.sectionTitle}>Active Jobs</Text>
         {activeJobs.length > 0 && (
-          <Text style={styles.sectionCount}>{activeJobs.length}</Text>
+          <View style={styles.countPill}>
+            <Text style={styles.countPillText}>{activeJobs.length}</Text>
+          </View>
         )}
       </View>
 
       {activeJobs.length === 0 ? (
         <View style={styles.emptyState}>
-          <View style={styles.emptyIconBox}>
-            <Briefcase size={40} color="#9CA3AF" />
+          <View style={styles.emptyIconRing}>
+            <Briefcase size={32} color="#C4C9D4" />
           </View>
-          <Text style={styles.emptyStateText}>No active jobs yet</Text>
-          <Text style={styles.emptyStateSubtext}>
-            Switch to Offers tab to find work
+          <Text style={styles.emptyTitle}>No active jobs</Text>
+          <Text style={styles.emptySubtitle}>
+            Head to Offers to find work near you
           </Text>
         </View>
       ) : (
-        <View style={styles.jobList}>
+        <View style={styles.cardList}>
           {activeJobs.map((job) => (
             <TouchableOpacity
               key={job._id}
@@ -474,26 +470,32 @@ const HomeScreen = ({ navigation, route }) => {
                   bookingId: job._id,
                 })
               }
-              activeOpacity={0.8}
+              activeOpacity={0.75}
             >
-              <View style={styles.jobCardHeader}>
-                <View style={styles.jobServiceCol}>
-                  <Text style={styles.jobServiceText}>
+              <View style={styles.jobCardTop}>
+                <View style={styles.jobCardLeft}>
+                  <Text style={styles.jobService}>
                     {job.service || job.serviceType || "Cleaning Service"}
                   </Text>
-                  <Text style={styles.jobCustomerText}>
+                  <Text style={styles.jobCustomer}>
                     {job.customer?.firstName} {job.customer?.lastName}
                   </Text>
                 </View>
                 <View
                   style={[
-                    styles.statusPill,
-                    { backgroundColor: getStatusColor(job.status) + "1A" },
+                    styles.statusChip,
+                    { backgroundColor: getStatusColor(job.status) + "20" },
                   ]}
                 >
+                  <View
+                    style={[
+                      styles.statusDot,
+                      { backgroundColor: getStatusColor(job.status) },
+                    ]}
+                  />
                   <Text
                     style={[
-                      styles.statusText,
+                      styles.statusChipText,
                       { color: getStatusColor(job.status) },
                     ]}
                   >
@@ -502,10 +504,10 @@ const HomeScreen = ({ navigation, route }) => {
                 </View>
               </View>
 
-              <View style={styles.jobCardBody}>
-                <View style={styles.jobInfoRow}>
-                  <Calendar size={14} color="#6B7280" />
-                  <Text style={styles.jobInfoText}>
+              <View style={styles.jobMeta}>
+                <View style={styles.jobMetaItem}>
+                  <Calendar size={13} color="#9CA3AF" />
+                  <Text style={styles.jobMetaText}>
                     {job.schedule?.date
                       ? new Date(job.schedule.date).toLocaleDateString(
                           "en-GB",
@@ -514,24 +516,24 @@ const HomeScreen = ({ navigation, route }) => {
                       : "Date TBC"}
                   </Text>
                 </View>
-                <View style={styles.jobInfoRow}>
-                  <Clock size={14} color="#6B7280" />
-                  <Text style={styles.jobInfoText}>
+                <View style={styles.jobMetaItem}>
+                  <Clock size={13} color="#9CA3AF" />
+                  <Text style={styles.jobMetaText}>
                     {getDisplayTime(job.schedule)}
                   </Text>
                 </View>
-                <View style={styles.jobInfoRow}>
-                  <MapPin size={14} color="#6B7280" />
-                  <Text style={styles.jobInfoText} numberOfLines={1}>
+                <View style={styles.jobMetaItem}>
+                  <MapPin size={13} color="#9CA3AF" />
+                  <Text style={styles.jobMetaText} numberOfLines={1}>
                     {job.details?.address || job.address || "Address pending"}
                   </Text>
                 </View>
               </View>
 
-              <View style={styles.jobCardFooter}>
-                <View style={styles.payBox}>
-                  <Text style={styles.payLabel}>Est. Pay</Text>
-                  <Text style={styles.payValue}>
+              <View style={styles.jobCardBottom}>
+                <View>
+                  <Text style={styles.estPayLabel}>Est. Pay</Text>
+                  <Text style={styles.estPayValue}>
                     £
                     {(
                       (job.workerRate || 0) *
@@ -542,42 +544,40 @@ const HomeScreen = ({ navigation, route }) => {
                     ).toFixed(2)}
                   </Text>
                 </View>
-                <View style={styles.actionsBox}>
+                <View style={styles.jobActions}>
                   {job.status?.toLowerCase() === "pending" && (
                     <>
                       <TouchableOpacity
-                        style={styles.btnOutlineRed}
+                        style={styles.iconBtnRed}
                         onPress={() => handleCancelJob(job._id)}
                         disabled={actionLoading === job._id}
                       >
                         <Trash2 size={16} color="#EF4444" />
                       </TouchableOpacity>
                       <TouchableOpacity
-                        style={styles.btnSolidPrimary}
+                        style={styles.arriveBtn}
                         onPress={() => handleArriveJob(job._id)}
                         disabled={actionLoading === job._id}
                       >
                         {actionLoading === job._id ? (
                           <ActivityIndicator size="small" color="#FFFFFF" />
                         ) : (
-                          <Text style={styles.btnSolidText}>Arrive</Text>
+                          <Text style={styles.arriveBtnText}>I've Arrived</Text>
                         )}
                       </TouchableOpacity>
                     </>
                   )}
                   {job.status?.toLowerCase() !== "pending" && (
                     <TouchableOpacity
-                      style={styles.btnOutlineDefault}
+                      style={styles.viewBtn}
                       onPress={() =>
                         navigation.navigate("AcceptedBookingDetail", {
                           bookingId: job._id,
                         })
                       }
                     >
-                      <Text style={styles.btnOutlineDefaultText}>
-                        View details
-                      </Text>
-                      <ChevronRight size={16} color="#4F46E5" />
+                      <Text style={styles.viewBtnText}>Details</Text>
+                      <ChevronRight size={14} color="#6C63FF" />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -586,7 +586,7 @@ const HomeScreen = ({ navigation, route }) => {
           ))}
         </View>
       )}
-      <View style={{ height: 40 }} />
+      <View style={{ height: 48 }} />
     </ScrollView>
   );
 
@@ -598,29 +598,31 @@ const HomeScreen = ({ navigation, route }) => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={["#4F46E5"]}
+          colors={["#6C63FF"]}
         />
       }
     >
-      <View style={styles.sectionHeader}>
+      <View style={styles.sectionRow}>
         <Text style={styles.sectionTitle}>Completed Jobs</Text>
         {completedJobs.length > 0 && (
-          <Text style={styles.sectionCount}>{completedJobs.length}</Text>
+          <View style={styles.countPill}>
+            <Text style={styles.countPillText}>{completedJobs.length}</Text>
+          </View>
         )}
       </View>
 
       {completedJobs.length === 0 ? (
         <View style={styles.emptyState}>
-          <View style={styles.emptyIconBox}>
-            <CheckCircle size={40} color="#9CA3AF" />
+          <View style={styles.emptyIconRing}>
+            <CheckCircle size={32} color="#C4C9D4" />
           </View>
-          <Text style={styles.emptyStateText}>No completed jobs yet</Text>
-          <Text style={styles.emptyStateSubtext}>
-            Your completed work will appear here
+          <Text style={styles.emptyTitle}>No completed jobs yet</Text>
+          <Text style={styles.emptySubtitle}>
+            Your history will appear here
           </Text>
         </View>
       ) : (
-        <View style={styles.jobList}>
+        <View style={styles.cardList}>
           {completedJobs.map((job) => (
             <TouchableOpacity
               key={job._id}
@@ -630,26 +632,32 @@ const HomeScreen = ({ navigation, route }) => {
                   bookingId: job._id,
                 })
               }
-              activeOpacity={0.8}
+              activeOpacity={0.75}
             >
-              <View style={styles.jobCardHeader}>
-                <View style={styles.jobServiceCol}>
-                  <Text style={styles.jobServiceText}>
+              <View style={styles.jobCardTop}>
+                <View style={styles.jobCardLeft}>
+                  <Text style={styles.jobService}>
                     {job.service || job.serviceType || "Cleaning Service"}
                   </Text>
-                  <Text style={styles.jobCustomerText}>
+                  <Text style={styles.jobCustomer}>
                     {job.customer?.firstName} {job.customer?.lastName}
                   </Text>
                 </View>
                 <View
                   style={[
-                    styles.statusPill,
-                    { backgroundColor: getStatusColor(job.status) + "1A" },
+                    styles.statusChip,
+                    { backgroundColor: getStatusColor(job.status) + "20" },
                   ]}
                 >
+                  <View
+                    style={[
+                      styles.statusDot,
+                      { backgroundColor: getStatusColor(job.status) },
+                    ]}
+                  />
                   <Text
                     style={[
-                      styles.statusText,
+                      styles.statusChipText,
                       { color: getStatusColor(job.status) },
                     ]}
                   >
@@ -658,10 +666,10 @@ const HomeScreen = ({ navigation, route }) => {
                 </View>
               </View>
 
-              <View style={styles.jobCardBody}>
-                <View style={styles.jobInfoRow}>
-                  <Calendar size={14} color="#6B7280" />
-                  <Text style={styles.jobInfoText}>
+              <View style={styles.jobMeta}>
+                <View style={styles.jobMetaItem}>
+                  <Calendar size={13} color="#9CA3AF" />
+                  <Text style={styles.jobMetaText}>
                     {job.schedule?.date
                       ? new Date(job.schedule.date).toLocaleDateString(
                           "en-GB",
@@ -670,24 +678,24 @@ const HomeScreen = ({ navigation, route }) => {
                       : "Date TBC"}
                   </Text>
                 </View>
-                <View style={styles.jobInfoRow}>
-                  <Clock size={14} color="#6B7280" />
-                  <Text style={styles.jobInfoText}>
+                <View style={styles.jobMetaItem}>
+                  <Clock size={13} color="#9CA3AF" />
+                  <Text style={styles.jobMetaText}>
                     {getDisplayTime(job.schedule)}
                   </Text>
                 </View>
-                <View style={styles.jobInfoRow}>
-                  <MapPin size={14} color="#6B7280" />
-                  <Text style={styles.jobInfoText} numberOfLines={1}>
+                <View style={styles.jobMetaItem}>
+                  <MapPin size={13} color="#9CA3AF" />
+                  <Text style={styles.jobMetaText} numberOfLines={1}>
                     {job.details?.address || job.address || "Address pending"}
                   </Text>
                 </View>
               </View>
 
-              <View style={styles.jobCardFooter}>
-                <View style={styles.payBox}>
-                  <Text style={styles.payLabel}>Earned</Text>
-                  <Text style={styles.payValue}>
+              <View style={styles.jobCardBottom}>
+                <View>
+                  <Text style={styles.estPayLabel}>Earned</Text>
+                  <Text style={styles.estPayValue}>
                     £
                     {(
                       (job.workerRate || 0) *
@@ -698,27 +706,23 @@ const HomeScreen = ({ navigation, route }) => {
                     ).toFixed(2)}
                   </Text>
                 </View>
-                <View style={styles.actionsBox}>
-                  <TouchableOpacity
-                    style={styles.btnOutlineDefault}
-                    onPress={() =>
-                      navigation.navigate("AcceptedBookingDetail", {
-                        bookingId: job._id,
-                      })
-                    }
-                  >
-                    <Text style={styles.btnOutlineDefaultText}>
-                      View details
-                    </Text>
-                    <ChevronRight size={16} color="#4F46E5" />
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  style={styles.viewBtn}
+                  onPress={() =>
+                    navigation.navigate("AcceptedBookingDetail", {
+                      bookingId: job._id,
+                    })
+                  }
+                >
+                  <Text style={styles.viewBtnText}>Details</Text>
+                  <ChevronRight size={14} color="#6C63FF" />
+                </TouchableOpacity>
               </View>
             </TouchableOpacity>
           ))}
         </View>
       )}
-      <View style={{ height: 40 }} />
+      <View style={{ height: 48 }} />
     </ScrollView>
   );
 
@@ -730,29 +734,31 @@ const HomeScreen = ({ navigation, route }) => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={["#4F46E5"]}
+          colors={["#6C63FF"]}
         />
       }
     >
-      <View style={styles.offersHeader}>
-        <Text style={styles.offersTitle}>Available Offers</Text>
-        <Text style={styles.offersSubtitle}>
-          Accept jobs that fit your schedule
+      <View style={styles.offersPageHeader}>
+        <Text style={styles.offersPageTitle}>Job Offers</Text>
+        <Text style={styles.offersPageSub}>
+          {availableJobs.length > 0
+            ? `${availableJobs.length} offer${availableJobs.length !== 1 ? "s" : ""} waiting`
+            : "Nothing new right now"}
         </Text>
       </View>
 
       {availableJobs.length === 0 ? (
         <View style={styles.emptyState}>
-          <View style={styles.emptyIconBox}>
-            <AlertCircle size={40} color="#9CA3AF" />
+          <View style={styles.emptyIconRing}>
+            <AlertCircle size={32} color="#C4C9D4" />
           </View>
-          <Text style={styles.emptyStateText}>No new offers</Text>
-          <Text style={styles.emptyStateSubtext}>
-            We'll notify you when jobs are available.
+          <Text style={styles.emptyTitle}>No offers available</Text>
+          <Text style={styles.emptySubtitle}>
+            You'll be notified when jobs come in
           </Text>
         </View>
       ) : (
-        <View style={styles.jobList}>
+        <View style={styles.cardList}>
           {availableJobs.map((job) => (
             <TouchableOpacity
               key={job._id || job.bookingId}
@@ -763,62 +769,85 @@ const HomeScreen = ({ navigation, route }) => {
                   offer: job,
                 })
               }
-              activeOpacity={0.8}
+              activeOpacity={0.75}
             >
-              <View style={styles.offerHeader}>
-                <View style={styles.offerServiceBadge}>
-                  <Text style={styles.offerServiceText}>
+              {/* Offer top */}
+              <View style={styles.offerTop}>
+                <View style={styles.offerServiceTag}>
+                  <Text style={styles.offerServiceTagText}>
                     {job.service || job.serviceType || "Cleaning"}
                   </Text>
                 </View>
-                <Text style={styles.offerRateText}>£{job.workerRate}/hr</Text>
+                <View style={styles.offerRateBox}>
+                  <Text style={styles.offerRateValue}>£{job.workerRate}</Text>
+                  <Text style={styles.offerRatePer}>/hr</Text>
+                </View>
               </View>
 
-              <View style={styles.offerBody}>
-                <View style={styles.offerRow}>
-                  <View style={styles.offerIconCircle}>
-                    <Calendar size={14} color="#4F46E5" />
+              {/* Offer details */}
+              <View style={styles.offerDetails}>
+                <View style={styles.offerDetailRow}>
+                  <View
+                    style={[
+                      styles.offerDetailIcon,
+                      { backgroundColor: "#EEF0FF" },
+                    ]}
+                  >
+                    <Calendar size={13} color="#6C63FF" />
                   </View>
-                  <Text style={styles.offerInfoText}>
+                  <Text style={styles.offerDetailText}>
                     {job.schedule?.date
                       ? new Date(job.schedule.date).toLocaleDateString(
                           "en-GB",
-                          { weekday: "short", day: "numeric", month: "short" },
+                          {
+                            weekday: "short",
+                            day: "numeric",
+                            month: "short",
+                          },
                         )
                       : "Date TBC"}{" "}
-                    •{" "}
-                    {getDisplayTime(job.schedule)}
+                    · {getDisplayTime(job.schedule)}
                   </Text>
                 </View>
-                <View style={styles.offerRow}>
-                  <View style={styles.offerIconCircle}>
-                    <MapPin size={14} color="#EF4444" />
+                <View style={styles.offerDetailRow}>
+                  <View
+                    style={[
+                      styles.offerDetailIcon,
+                      { backgroundColor: "#FFF0F0" },
+                    ]}
+                  >
+                    <MapPin size={13} color="#EF4444" />
                   </View>
-                  <Text style={styles.offerInfoText} numberOfLines={2}>
+                  <Text style={styles.offerDetailText} numberOfLines={2}>
                     {job.details?.address ||
                       job.address ||
-                      "Area undisclosed until accepted"}
+                      "Area revealed after accepting"}
                   </Text>
                 </View>
-                <View style={styles.offerRow}>
-                  <View style={styles.offerIconCircle}>
-                    <Clock size={14} color="#F59E0B" />
+                <View style={styles.offerDetailRow}>
+                  <View
+                    style={[
+                      styles.offerDetailIcon,
+                      { backgroundColor: "#FFF7E6" },
+                    ]}
+                  >
+                    <Clock size={13} color="#FFB547" />
                   </View>
-                  <Text style={styles.offerInfoText}>
-                    Est. Duration:{" "}
+                  <Text style={styles.offerDetailText}>
                     {job.details?.duration ||
                       job.workerDuration ||
                       job.duration ||
                       0}{" "}
-                    hrs
+                    hrs estimated
                   </Text>
                 </View>
               </View>
 
+              {/* Offer footer */}
               <View style={styles.offerFooter}>
                 <View>
-                  <Text style={styles.totalPayLabel}>Total Payout</Text>
-                  <Text style={styles.totalPayValue}>
+                  <Text style={styles.offerPayoutLabel}>Total Payout</Text>
+                  <Text style={styles.offerPayoutValue}>
                     £
                     {(
                       (job.workerRate || 0) *
@@ -829,16 +858,16 @@ const HomeScreen = ({ navigation, route }) => {
                     ).toFixed(2)}
                   </Text>
                 </View>
-                <View style={styles.viewOfferBtn}>
-                  <Text style={styles.viewOfferText}>Review Offer</Text>
-                  <ChevronRight size={16} color="#FFFFFF" />
-                </View>
+                <TouchableOpacity style={styles.reviewOfferBtn}>
+                  <Text style={styles.reviewOfferBtnText}>Review</Text>
+                  <ArrowUpRight size={15} color="#FFFFFF" />
+                </TouchableOpacity>
               </View>
             </TouchableOpacity>
           ))}
         </View>
       )}
-      <View style={{ height: 40 }} />
+      <View style={{ height: 48 }} />
     </ScrollView>
   );
 
@@ -850,83 +879,54 @@ const HomeScreen = ({ navigation, route }) => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={["#4F46E5"]}
+          colors={["#6C63FF"]}
         />
       }
     >
-      {/* Sub-tabs for payments */}
-      <View style={styles.subTabContainer}>
-        <TouchableOpacity
-          style={[
-            styles.subTab,
-            paymentTab === "upcoming" && styles.activeSubTab,
-          ]}
-          onPress={() => setPaymentTab("upcoming")}
-        >
-          <Text
-            style={[
-              styles.subTabText,
-              paymentTab === "upcoming" && styles.activeSubTabText,
-            ]}
+      {/* Sub-tabs */}
+      <View style={styles.subTabBar}>
+        {["upcoming", "withdrawal", "received"].map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            style={[styles.subTab, paymentTab === tab && styles.subTabActive]}
+            onPress={() => setPaymentTab(tab)}
           >
-            Upcoming
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.subTab,
-            paymentTab === "withdrawal" && styles.activeSubTab,
-          ]}
-          onPress={() => setPaymentTab("withdrawal")}
-        >
-          <Text
-            style={[
-              styles.subTabText,
-              paymentTab === "withdrawal" && styles.activeSubTabText,
-            ]}
-          >
-            Withdrawal
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.subTab,
-            paymentTab === "received" && styles.activeSubTab,
-          ]}
-          onPress={() => setPaymentTab("received")}
-        >
-          <Text
-            style={[
-              styles.subTabText,
-              paymentTab === "received" && styles.activeSubTabText,
-            ]}
-          >
-            Received
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={[
+                styles.subTabText,
+                paymentTab === tab && styles.subTabTextActive,
+              ]}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       {paymentLoading && (
         <View style={styles.loadingCenter}>
-          <ActivityIndicator size="large" color="#4F46E5" />
+          <ActivityIndicator size="large" color="#6C63FF" />
         </View>
       )}
 
       {paymentTab === "upcoming" && !paymentLoading && (
-        <View style={styles.paymentSection}>
-          <Text style={styles.sectionTitle}>Upcoming Payments</Text>
+        <View style={styles.paySection}>
+          <Text style={styles.paySectionTitle}>Upcoming Payments</Text>
           {upcomingPayments.jobsList?.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>No upcoming payments</Text>
-              <Text style={styles.emptyStateSubtext}>
-                Completed jobs will appear here
+              <View style={styles.emptyIconRing}>
+                <Wallet size={32} color="#C4C9D4" />
+              </View>
+              <Text style={styles.emptyTitle}>No upcoming payments</Text>
+              <Text style={styles.emptySubtitle}>
+                Completed jobs will show here
               </Text>
             </View>
           ) : (
             <>
-              <View style={styles.payoutScheduleCard}>
-                <Text style={styles.scheduleLabel}>Next Payment</Text>
-                <Text style={styles.nextPayoutDate}>
+              <View style={styles.nextPayCard}>
+                <Text style={styles.nextPayCardLabel}>Next Payment</Text>
+                <Text style={styles.nextPayCardDate}>
                   {upcomingPayments.nextPayoutDate
                     ? new Date(
                         upcomingPayments.nextPayoutDate,
@@ -937,33 +937,34 @@ const HomeScreen = ({ navigation, route }) => {
                       })
                     : "TBC"}
                 </Text>
-                <Text style={styles.payoutTypeLabel}>
-                  Payment Type: {upcomingPayments.payoutType}
-                </Text>
-                <Text style={styles.totalEarningsText}>
-                  Total Earnings: £
-                  {upcomingPayments.totalEarnings?.toFixed(2) || "0.00"}
-                </Text>
+                <View style={styles.nextPayCardRow}>
+                  <Text style={styles.nextPayCardType}>
+                    {upcomingPayments.payoutType}
+                  </Text>
+                  <Text style={styles.nextPayCardTotal}>
+                    £{upcomingPayments.totalEarnings?.toFixed(2) || "0.00"}
+                  </Text>
+                </View>
               </View>
 
-              <View style={styles.jobsListPayment}>
+              <View style={styles.payJobList}>
                 {upcomingPayments.jobsList?.map((job, index) => (
-                  <View key={index} style={styles.paymentJobCard}>
-                    <View style={styles.paymentJobHeader}>
-                      <Text style={styles.paymentJobService}>
+                  <View key={index} style={styles.payJobItem}>
+                    <View>
+                      <Text style={styles.payJobService}>
                         {job.service || "Cleaning Service"}
                       </Text>
-                      <Text style={styles.paymentJobAmount}>
-                        £{job.amount?.toFixed(2) || "0.00"}
+                      <Text style={styles.payJobDate}>
+                        Completed:{" "}
+                        {job.completedDate
+                          ? new Date(job.completedDate).toLocaleDateString(
+                              "en-GB",
+                            )
+                          : "Date TBC"}
                       </Text>
                     </View>
-                    <Text style={styles.paymentJobDate}>
-                      Completed:{" "}
-                      {job.completedDate
-                        ? new Date(job.completedDate).toLocaleDateString(
-                            "en-GB",
-                          )
-                        : "Date TBC"}
+                    <Text style={styles.payJobAmount}>
+                      £{job.amount?.toFixed(2) || "0.00"}
                     </Text>
                   </View>
                 ))}
@@ -974,52 +975,55 @@ const HomeScreen = ({ navigation, route }) => {
       )}
 
       {paymentTab === "withdrawal" && !paymentLoading && (
-        <View style={styles.paymentSection}>
-          <Text style={styles.sectionTitle}>Pending Withdrawals</Text>
+        <View style={styles.paySection}>
+          <Text style={styles.paySectionTitle}>Pending Withdrawals</Text>
           {withdrawalHistory.filter((w) =>
             ["upcoming", "pending", "approved"].includes(w.status),
           ).length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>No pending withdrawals</Text>
-              <Text style={styles.emptyStateSubtext}>
-                Your payments will appear here
+              <View style={styles.emptyIconRing}>
+                <ArrowUpRight size={32} color="#C4C9D4" />
+              </View>
+              <Text style={styles.emptyTitle}>No pending withdrawals</Text>
+              <Text style={styles.emptySubtitle}>
+                Your payouts will appear here
               </Text>
             </View>
           ) : (
-            <View style={styles.jobsListPayment}>
+            <View style={styles.payJobList}>
               {withdrawalHistory
                 .filter((w) =>
                   ["upcoming", "pending", "approved"].includes(w.status),
                 )
                 .map((withdrawal, index) => (
-                  <View key={index} style={styles.withdrawalCard}>
-                    <View style={styles.withdrawalHeader}>
-                      <Text style={styles.withdrawalAmount}>
+                  <View key={index} style={styles.withdrawalItem}>
+                    <View style={styles.withdrawalItemTop}>
+                      <Text style={styles.withdrawalItemAmount}>
                         £{withdrawal.amount?.toFixed(2) || "0.00"}
                       </Text>
                       <View
                         style={[
-                          styles.statusBadge,
+                          styles.withdrawalStatusChip,
                           {
                             backgroundColor:
                               withdrawal.status === "approved"
-                                ? "#D1FAE5"
+                                ? "#E6FBF4"
                                 : withdrawal.status === "pending"
-                                  ? "#FEF3C7"
-                                  : "#E0E7FF",
+                                  ? "#FFF7E6"
+                                  : "#EEF0FF",
                           },
                         ]}
                       >
                         <Text
                           style={[
-                            styles.statusBadgeText,
+                            styles.withdrawalStatusText,
                             {
                               color:
                                 withdrawal.status === "approved"
-                                  ? "#059669"
+                                  ? "#00C896"
                                   : withdrawal.status === "pending"
-                                    ? "#D97706"
-                                    : "#4F46E5",
+                                    ? "#FFB547"
+                                    : "#6C63FF",
                             },
                           ]}
                         >
@@ -1027,16 +1031,14 @@ const HomeScreen = ({ navigation, route }) => {
                         </Text>
                       </View>
                     </View>
-                    <Text style={styles.withdrawalDate}>
-                      Expected Payment:{" "}
+                    <Text style={styles.withdrawalMeta}>
+                      Expected:{" "}
                       {withdrawal.expectedPayoutDate
                         ? new Date(
                             withdrawal.expectedPayoutDate,
                           ).toLocaleDateString("en-GB")
-                        : "TBC"}
-                    </Text>
-                    <Text style={styles.withdrawalPayoutType}>
-                      Type: {withdrawal.payoutType}
+                        : "TBC"}{" "}
+                      · {withdrawal.payoutType}
                     </Text>
                   </View>
                 ))}
@@ -1046,51 +1048,56 @@ const HomeScreen = ({ navigation, route }) => {
       )}
 
       {paymentTab === "received" && !paymentLoading && (
-        <View style={styles.paymentSection}>
-          <Text style={styles.sectionTitle}>Received Payments</Text>
+        <View style={styles.paySection}>
+          <Text style={styles.paySectionTitle}>Received Payments</Text>
           {receivedPayments.payments?.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>
-                No payments received yet
-              </Text>
-              <Text style={styles.emptyStateSubtext}>
+              <View style={styles.emptyIconRing}>
+                <CheckCircle size={32} color="#C4C9D4" />
+              </View>
+              <Text style={styles.emptyTitle}>No payments received yet</Text>
+              <Text style={styles.emptySubtitle}>
                 Completed payouts will appear here
               </Text>
             </View>
           ) : (
             <>
-              <View style={styles.totalReceivedCard}>
-                <Text style={styles.totalReceivedLabel}>Total Received</Text>
-                <Text style={styles.totalReceivedAmount}>
+              <View style={styles.totalReceivedBanner}>
+                <Text style={styles.totalReceivedBannerLabel}>
+                  Total Received
+                </Text>
+                <Text style={styles.totalReceivedBannerAmount}>
                   £{receivedPayments.totalReceived?.toFixed(2) || "0.00"}
                 </Text>
               </View>
 
-              <View style={styles.jobsListPayment}>
+              <View style={styles.payJobList}>
                 {receivedPayments.payments?.map((payment, index) => (
-                  <View key={index} style={styles.receivedPaymentCard}>
-                    <View style={styles.receivedHeader}>
-                      <Text style={styles.receivedAmount}>
-                        £{payment.amount?.toFixed(2) || "0.00"}
-                      </Text>
-                      <View style={styles.successBadge}>
-                        <CheckCircle size={16} color="#10B981" />
-                        <Text style={styles.successText}>Transferred</Text>
+                  <View key={index} style={styles.receivedItem}>
+                    <View>
+                      <View style={styles.receivedSuccessRow}>
+                        <CheckCircle size={14} color="#00C896" />
+                        <Text style={styles.receivedSuccessText}>
+                          Transferred
+                        </Text>
                       </View>
-                    </View>
-                    <Text style={styles.receivedDate}>
-                      Paid:{" "}
-                      {payment.completedAt
-                        ? new Date(payment.completedAt).toLocaleDateString(
-                            "en-GB",
-                          )
-                        : "Date TBC"}
-                    </Text>
-                    {payment.transactionRef && (
-                      <Text style={styles.transactionRef}>
-                        Ref: {payment.transactionRef}
+                      <Text style={styles.receivedDate}>
+                        Paid:{" "}
+                        {payment.completedAt
+                          ? new Date(payment.completedAt).toLocaleDateString(
+                              "en-GB",
+                            )
+                          : "Date TBC"}
                       </Text>
-                    )}
+                      {payment.transactionRef && (
+                        <Text style={styles.receivedRef}>
+                          Ref: {payment.transactionRef}
+                        </Text>
+                      )}
+                    </View>
+                    <Text style={styles.receivedAmount}>
+                      £{payment.amount?.toFixed(2) || "0.00"}
+                    </Text>
                   </View>
                 ))}
               </View>
@@ -1099,84 +1106,47 @@ const HomeScreen = ({ navigation, route }) => {
         </View>
       )}
 
-      <View style={{ height: 40 }} />
+      <View style={{ height: 48 }} />
     </ScrollView>
   );
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Top tab bar */}
       <View style={styles.topNav}>
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "activity" && styles.activeTab]}
-            onPress={() => setActiveTab("activity")}
-          >
-            <Text
+        <View style={styles.tabBar}>
+          {[
+            { key: "activity", label: "Active", count: activeJobs.length },
+            { key: "history", label: "History", count: completedJobs.length },
+            { key: "offers", label: "Offers", count: availableJobs.length },
+            { key: "payments", label: "Payments", count: 0 },
+          ].map(({ key, label, count }) => (
+            <TouchableOpacity
+              key={key}
               style={[
-                styles.tabText,
-                activeTab === "activity" && styles.activeTabText,
+                styles.tabItem,
+                activeTab === key && styles.tabItemActive,
               ]}
+              onPress={() => {
+                setActiveTab(key);
+                if (key === "payments") fetchAllPaymentData();
+              }}
             >
-              Active
-            </Text>
-            {activeJobs.length > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{activeJobs.length}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "history" && styles.activeTab]}
-            onPress={() => setActiveTab("history")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "history" && styles.activeTabText,
-              ]}
-            >
-              History
-            </Text>
-            {completedJobs.length > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{completedJobs.length}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "offers" && styles.activeTab]}
-            onPress={() => setActiveTab("offers")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "offers" && styles.activeTabText,
-              ]}
-            >
-              Offers
-            </Text>
-            {availableJobs.length > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{availableJobs.length}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "payments" && styles.activeTab]}
-            onPress={() => {
-              setActiveTab("payments");
-              fetchAllPaymentData();
-            }}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "payments" && styles.activeTabText,
-              ]}
-            >
-              Payments
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[
+                  styles.tabItemText,
+                  activeTab === key && styles.tabItemTextActive,
+                ]}
+              >
+                {label}
+              </Text>
+              {count > 0 && (
+                <View style={styles.tabBadge}>
+                  <Text style={styles.tabBadgeText}>{count}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
@@ -1192,698 +1162,711 @@ const HomeScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F9FAFB" },
+  container: { flex: 1, backgroundColor: "#F4F5F9" },
+
+  // ── Top Nav ──────────────────────────────────────────────
   topNav: {
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingTop: 8,
+    paddingBottom: 0,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#EBEBF0",
   },
-  tabContainer: {
+  tabBar: {
     flexDirection: "row",
-    backgroundColor: "#F3F4F6",
-    borderRadius: getResponsiveBorderRadius(12),
-    padding: isSmallScreen() ? 3 : 4,
   },
-  tab: {
+  tabItem: {
     flex: 1,
-    paddingVertical: isSmallScreen() ? 8 : 10,
-    paddingHorizontal: isSmallScreen() ? 4 : 8,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: getResponsiveBorderRadius(8),
-    flexDirection: "row",
+    paddingVertical: 12,
+    borderBottomWidth: 2.5,
+    borderBottomColor: "transparent",
+    gap: 5,
   },
-  activeTab: {
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+  tabItemActive: {
+    borderBottomColor: "#6C63FF",
   },
-  tabText: {
+  tabItemText: {
     fontSize: responsiveFontSize(13),
     fontWeight: "600",
-    color: "#6B7280",
+    color: "#9CA3AF",
   },
-  activeTabText: { color: "#1F2937", fontWeight: "700" },
-  badge: {
+  tabItemTextActive: {
+    color: "#6C63FF",
+    fontWeight: "700",
+  },
+  tabBadge: {
     backgroundColor: "#EF4444",
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginLeft: 6,
+    borderRadius: 8,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    minWidth: 16,
+    alignItems: "center",
   },
-  badgeText: {
+  tabBadgeText: {
     color: "#FFFFFF",
     fontSize: responsiveFontSize(9),
     fontWeight: "800",
   },
+
+  // ── Loading ───────────────────────────────────────────────
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  tabContent: { flex: 1 },
-  greetingHeader: {
-    paddingHorizontal: getResponsivePadding(),
-    paddingTop: isSmallScreen() ? 16 : 24,
-    paddingBottom: getResponsiveMargin(),
-  },
-  greetingText: {
-    fontSize: responsiveFontSize(24),
-    fontWeight: "800",
-    color: "#1F2937",
-    marginBottom: 4,
-  },
-  dateText: {
-    fontSize: responsiveFontSize(13),
-    color: "#6B7280",
-    fontWeight: "500",
-  },
-  earningsCard: {
-    marginHorizontal: getResponsivePadding(),
-    backgroundColor: "#4F46E5",
-    borderRadius: getResponsiveBorderRadius(24),
-    padding: isSmallScreen() ? 16 : 24,
-    shadowColor: "#4F46E5",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
-    marginBottom: getResponsiveMargin(),
-  },
-  earningsHeader: {
-    flexDirection: "row",
+  loadingCenter: {
+    paddingVertical: isSmallScreen() ? 30 : 48,
     alignItems: "center",
-    gap: getResponsiveGap(),
-    marginBottom: 12,
   },
-  earningsTitle: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: responsiveFontSize(13),
-    fontWeight: "600",
-  },
-  earningsAmount: {
-    fontSize: responsiveFontSize(isSmallScreen() ? 32 : 40),
-    fontWeight: "800",
-    color: "#FFFFFF",
-    marginBottom: 16,
-  },
-  earningsFooter: {
+  tabContent: { flex: 1 },
+
+  // ── Greeting ─────────────────────────────────────────────
+  greetingHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.1)",
-    paddingTop: 16,
+    paddingHorizontal: getResponsivePadding(),
+    paddingTop: isSmallScreen() ? 16 : 24,
+    paddingBottom: 12,
   },
-  earningsSubtitle: {
-    color: "rgba(255,255,255,0.8)",
+  greetingLabel: {
     fontSize: responsiveFontSize(12),
+    color: "#9CA3AF",
+    fontWeight: "500",
+    marginBottom: 2,
   },
-  ratingBadge: {
+  greetingText: {
+    fontSize: responsiveFontSize(22),
+    fontWeight: "800",
+    color: "#1A1D2E",
+  },
+  ratingChip: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: getResponsiveBorderRadius(12),
     gap: 4,
+    backgroundColor: "#FFF7E6",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
   },
-  ratingText: {
-    color: "#FFFFFF",
-    fontSize: responsiveFontSize(11),
+  ratingChipText: {
+    fontSize: responsiveFontSize(13),
     fontWeight: "700",
+    color: "#D97706",
   },
+
+  // ── Balance Hero ──────────────────────────────────────────
+  balanceHero: {
+    marginHorizontal: getResponsivePadding(),
+    marginBottom: getResponsiveMargin(),
+  },
+  balanceHeroInner: {
+    backgroundColor: "#1A1D2E",
+    borderRadius: getResponsiveBorderRadius(24),
+    padding: isSmallScreen() ? 20 : 24,
+    shadowColor: "#1A1D2E",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  balanceTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  balanceLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  balanceDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#00C896",
+  },
+  balanceLabel: {
+    fontSize: responsiveFontSize(12),
+    color: "rgba(255,255,255,0.55)",
+    fontWeight: "600",
+    letterSpacing: 0.3,
+  },
+  balanceAmount: {
+    fontSize: responsiveFontSize(isSmallScreen() ? 38 : 46),
+    fontWeight: "800",
+    color: "#FFFFFF",
+    letterSpacing: -1,
+    marginBottom: 4,
+  },
+  balanceDivider: {
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    marginVertical: 16,
+  },
+  balanceStatsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  balanceStat: { flex: 1, alignItems: "center" },
+  balanceStatLabel: {
+    fontSize: responsiveFontSize(10),
+    color: "rgba(255,255,255,0.4)",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  balanceStatValue: {
+    fontSize: responsiveFontSize(14),
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  balanceStatSep: {
+    width: 1,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    marginHorizontal: 4,
+  },
+  payoutNotice: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(26,29,46,0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(26,29,46,0.08)",
+    borderRadius: getResponsiveBorderRadius(12),
+    padding: 10,
+    marginTop: 10,
+  },
+  payoutNoticeText: {
+    fontSize: responsiveFontSize(11),
+    color: "#6B7280",
+    flex: 1,
+    lineHeight: 16,
+  },
+
+  // ── Stats Grid ────────────────────────────────────────────
   statsGrid: {
     flexDirection: "row",
     marginHorizontal: getResponsivePadding(),
-    gap: getResponsiveGap(12),
+    gap: getResponsiveGap(10),
     marginBottom: getResponsiveMargin(),
   },
-  statBox: {
+  statCard: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    borderRadius: getResponsiveBorderRadius(20),
+    borderRadius: getResponsiveBorderRadius(18),
     padding: isSmallScreen() ? 12 : 16,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.04,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 1,
   },
-  statIconWrapper: {
-    width: isSmallScreen() ? 36 : 44,
-    height: isSmallScreen() ? 36 : 44,
-    borderRadius: isSmallScreen() ? 18 : 22,
+  statIcon: {
+    width: isSmallScreen() ? 36 : 42,
+    height: isSmallScreen() ? 36 : 42,
+    borderRadius: isSmallScreen() ? 18 : 21,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: isSmallScreen() ? 8 : 12,
+    marginBottom: isSmallScreen() ? 8 : 10,
   },
   statValue: {
-    fontSize: responsiveFontSize(isSmallScreen() ? 16 : 20),
+    fontSize: responsiveFontSize(isSmallScreen() ? 17 : 20),
     fontWeight: "800",
-    color: "#1F2937",
+    color: "#1A1D2E",
     marginBottom: 2,
   },
   statLabel: {
-    fontSize: responsiveFontSize(11),
-    color: "#6B7280",
+    fontSize: responsiveFontSize(10),
+    color: "#9CA3AF",
     fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
   },
-  sectionHeader: {
+
+  // ── Section Header ────────────────────────────────────────
+  sectionRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: getResponsivePadding(),
-    marginBottom: getResponsiveMargin(),
+    marginBottom: 12,
+    marginTop: 4,
   },
   sectionTitle: {
-    fontSize: responsiveFontSize(isSmallScreen() ? 16 : 18),
+    fontSize: responsiveFontSize(16),
     fontWeight: "800",
-    color: "#1F2937",
+    color: "#1A1D2E",
   },
-  sectionCount: {
-    backgroundColor: "#EEF2FF",
-    color: "#4F46E5",
-    fontWeight: "700",
-    fontSize: responsiveFontSize(11),
+  countPill: {
+    backgroundColor: "#EEF0FF",
+    borderRadius: 10,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: getResponsiveBorderRadius(12),
     marginLeft: 8,
   },
-  jobList: {
+  countPillText: {
+    fontSize: responsiveFontSize(11),
+    fontWeight: "700",
+    color: "#6C63FF",
+  },
+
+  // ── Job Cards ─────────────────────────────────────────────
+  cardList: {
     paddingHorizontal: getResponsivePadding(),
-    gap: getResponsiveGap(16),
+    gap: getResponsiveGap(12),
   },
   jobCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: getResponsiveBorderRadius(20),
-    padding: isSmallScreen() ? 12 : 16,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    padding: isSmallScreen() ? 14 : 18,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 1,
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  jobCardHeader: {
+  jobCardTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: 12,
   },
-  jobServiceCol: { flex: 1 },
-  jobServiceText: {
-    fontSize: responsiveFontSize(16),
+  jobCardLeft: { flex: 1, paddingRight: 8 },
+  jobService: {
+    fontSize: responsiveFontSize(15),
     fontWeight: "800",
-    color: "#1F2937",
-    marginBottom: 2,
+    color: "#1A1D2E",
+    marginBottom: 3,
   },
-  jobCustomerText: {
+  jobCustomer: {
     fontSize: responsiveFontSize(12),
-    color: "#6B7280",
+    color: "#9CA3AF",
     fontWeight: "500",
   },
-  statusPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: getResponsiveBorderRadius(12),
-  },
-  statusText: {
-    fontSize: responsiveFontSize(10),
-    fontWeight: "700",
-    textTransform: "uppercase",
-  },
-  jobCardBody: { gap: isSmallScreen() ? 6 : 8, marginBottom: 12 },
-  jobInfoRow: {
+  statusChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: isSmallScreen() ? 6 : 8,
+    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 20,
   },
-  jobInfoText: { fontSize: responsiveFontSize(12), color: "#4B5563", flex: 1 },
-  jobCardFooter: {
+  statusDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+  },
+  statusChipText: {
+    fontSize: responsiveFontSize(10),
+    fontWeight: "700",
+    textTransform: "capitalize",
+  },
+  jobMeta: {
+    gap: isSmallScreen() ? 6 : 8,
+    marginBottom: 14,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  jobMetaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  jobMetaText: {
+    fontSize: responsiveFontSize(12),
+    color: "#6B7280",
+    flex: 1,
+  },
+  jobCardBottom: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-    paddingTop: isSmallScreen() ? 12 : 16,
   },
-  payBox: {},
-  payLabel: {
+  estPayLabel: {
     fontSize: responsiveFontSize(10),
     color: "#9CA3AF",
     fontWeight: "600",
     textTransform: "uppercase",
+    letterSpacing: 0.3,
     marginBottom: 2,
   },
-  payValue: {
-    fontSize: responsiveFontSize(isSmallScreen() ? 16 : 18),
+  estPayValue: {
+    fontSize: responsiveFontSize(isSmallScreen() ? 17 : 20),
     fontWeight: "800",
-    color: "#10B981",
+    color: "#00C896",
   },
-  actionsBox: { flexDirection: "row", gap: isSmallScreen() ? 6 : 8 },
-  btnOutlineRed: {
-    padding: isSmallScreen() ? 8 : 10,
+  jobActions: {
+    flexDirection: "row",
+    gap: isSmallScreen() ? 6 : 8,
+    alignItems: "center",
+  },
+  iconBtnRed: {
+    padding: isSmallScreen() ? 9 : 11,
     borderRadius: getResponsiveBorderRadius(12),
+    backgroundColor: "#FEF2F2",
     borderWidth: 1,
     borderColor: "#FECACA",
-    backgroundColor: "#FEF2F2",
   },
-  btnSolidPrimary: {
-    backgroundColor: "#4F46E5",
-    paddingHorizontal: isSmallScreen() ? 12 : 16,
-    paddingVertical: isSmallScreen() ? 8 : 10,
+  arriveBtn: {
+    backgroundColor: "#6C63FF",
+    paddingHorizontal: isSmallScreen() ? 14 : 18,
+    paddingVertical: isSmallScreen() ? 9 : 11,
     borderRadius: getResponsiveBorderRadius(12),
-    justifyContent: "center",
   },
-  btnSolidText: {
+  arriveBtnText: {
     color: "#FFFFFF",
     fontWeight: "700",
     fontSize: responsiveFontSize(12),
   },
-  btnOutlineDefault: {
+  viewBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    backgroundColor: "#EEF2FF",
+    gap: 3,
+    backgroundColor: "#EEF0FF",
     paddingHorizontal: isSmallScreen() ? 10 : 12,
-    paddingVertical: isSmallScreen() ? 6 : 8,
+    paddingVertical: isSmallScreen() ? 7 : 9,
     borderRadius: getResponsiveBorderRadius(12),
   },
-  btnOutlineDefaultText: {
-    color: "#4F46E5",
-    fontWeight: "600",
+  viewBtnText: {
+    color: "#6C63FF",
+    fontWeight: "700",
     fontSize: responsiveFontSize(12),
   },
+
+  // ── Empty States ──────────────────────────────────────────
   emptyState: {
     alignItems: "center",
-    paddingVertical: isSmallScreen() ? 30 : 40,
+    paddingVertical: isSmallScreen() ? 36 : 52,
+    paddingHorizontal: 24,
   },
-  emptyIconBox: {
-    width: isSmallScreen() ? 60 : 80,
-    height: isSmallScreen() ? 60 : 80,
-    borderRadius: isSmallScreen() ? 30 : 40,
+  emptyIconRing: {
+    width: isSmallScreen() ? 64 : 80,
+    height: isSmallScreen() ? 64 : 80,
+    borderRadius: isSmallScreen() ? 32 : 40,
     backgroundColor: "#F3F4F6",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
   },
-  emptyStateText: {
-    fontSize: responsiveFontSize(isSmallScreen() ? 16 : 18),
+  emptyTitle: {
+    fontSize: responsiveFontSize(16),
     fontWeight: "700",
-    color: "#1F2937",
-    marginBottom: 8,
+    color: "#1A1D2E",
+    marginBottom: 6,
   },
-  emptyStateSubtext: { fontSize: responsiveFontSize(12), color: "#6B7280" },
-  offersHeader: {
+  emptySubtitle: {
+    fontSize: responsiveFontSize(13),
+    color: "#9CA3AF",
+    textAlign: "center",
+  },
+
+  // ── Offers ────────────────────────────────────────────────
+  offersPageHeader: {
     paddingHorizontal: getResponsivePadding(),
     paddingTop: isSmallScreen() ? 16 : 24,
-    paddingBottom: getResponsiveMargin(),
+    paddingBottom: 12,
   },
-  offersTitle: {
-    fontSize: responsiveFontSize(isSmallScreen() ? 20 : 24),
+  offersPageTitle: {
+    fontSize: responsiveFontSize(22),
     fontWeight: "800",
-    color: "#1F2937",
-    marginBottom: 4,
+    color: "#1A1D2E",
+    marginBottom: 3,
   },
-  offersSubtitle: {
+  offersPageSub: {
     fontSize: responsiveFontSize(13),
-    color: "#6B7280",
+    color: "#9CA3AF",
     fontWeight: "500",
   },
   offerCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: getResponsiveBorderRadius(20),
-    padding: isSmallScreen() ? 12 : 16,
+    padding: isSmallScreen() ? 14 : 18,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    marginHorizontal: getResponsivePadding(),
-    marginBottom: getResponsiveGap(12),
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
+    elevation: 3,
   },
-  offerHeader: {
+  offerTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: isSmallScreen() ? 12 : 16,
+    marginBottom: 14,
   },
-  offerServiceBadge: {
-    backgroundColor: "#F3F4F6",
+  offerServiceTag: {
+    backgroundColor: "#F4F5F9",
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: getResponsiveBorderRadius(8),
   },
-  offerServiceText: {
+  offerServiceTagText: {
     fontSize: responsiveFontSize(12),
     fontWeight: "700",
-    color: "#1F2937",
+    color: "#1A1D2E",
   },
-  offerRateText: {
-    fontSize: responsiveFontSize(16),
+  offerRateBox: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 2,
+  },
+  offerRateValue: {
+    fontSize: responsiveFontSize(20),
     fontWeight: "800",
-    color: "#10B981",
+    color: "#00C896",
   },
-  offerBody: {
-    gap: getResponsiveGap(10),
-    marginBottom: isSmallScreen() ? 16 : 20,
+  offerRatePer: {
+    fontSize: responsiveFontSize(12),
+    color: "#9CA3AF",
+    fontWeight: "600",
   },
-  offerRow: {
+  offerDetails: {
+    gap: isSmallScreen() ? 8 : 10,
+    marginBottom: 14,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  offerDetailRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: getResponsiveGap(10),
+    gap: 10,
   },
-  offerIconCircle: {
-    width: isSmallScreen() ? 24 : 28,
-    height: isSmallScreen() ? 24 : 28,
-    borderRadius: isSmallScreen() ? 12 : 14,
-    backgroundColor: "#F3F4F6",
+  offerDetailIcon: {
+    width: isSmallScreen() ? 26 : 30,
+    height: isSmallScreen() ? 26 : 30,
+    borderRadius: isSmallScreen() ? 13 : 15,
     justifyContent: "center",
     alignItems: "center",
   },
-  offerInfoText: {
+  offerDetailText: {
     fontSize: responsiveFontSize(12),
     color: "#4B5563",
     flex: 1,
-    lineHeight: isSmallScreen() ? 16 : 18,
+    lineHeight: isSmallScreen() ? 17 : 19,
   },
   offerFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-    paddingTop: isSmallScreen() ? 12 : 16,
   },
-  totalPayLabel: {
+  offerPayoutLabel: {
     fontSize: responsiveFontSize(10),
     color: "#9CA3AF",
     fontWeight: "600",
     textTransform: "uppercase",
+    letterSpacing: 0.3,
     marginBottom: 2,
   },
-  totalPayValue: {
-    fontSize: responsiveFontSize(isSmallScreen() ? 18 : 20),
+  offerPayoutValue: {
+    fontSize: responsiveFontSize(isSmallScreen() ? 18 : 22),
     fontWeight: "800",
-    color: "#10B981",
+    color: "#1A1D2E",
   },
-  viewOfferBtn: {
-    backgroundColor: "#1F2937",
+  reviewOfferBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    paddingHorizontal: isSmallScreen() ? 12 : 16,
-    paddingVertical: isSmallScreen() ? 8 : 10,
+    backgroundColor: "#1A1D2E",
+    paddingHorizontal: isSmallScreen() ? 14 : 18,
+    paddingVertical: isSmallScreen() ? 9 : 11,
     borderRadius: getResponsiveBorderRadius(12),
   },
-  viewOfferText: {
+  reviewOfferBtnText: {
     color: "#FFFFFF",
     fontWeight: "700",
-    fontSize: responsiveFontSize(12),
+    fontSize: responsiveFontSize(13),
   },
 
-  // Wallet styles
-  walletCard: {
-    marginHorizontal: getResponsivePadding(),
+  // ── Payments ──────────────────────────────────────────────
+  subTabBar: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EBEBF0",
     backgroundColor: "#FFFFFF",
-    borderRadius: getResponsiveBorderRadius(20),
-    padding: isSmallScreen() ? 16 : 20,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 2,
-    marginBottom: getResponsiveMargin(),
-  },
-  walletHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: isSmallScreen() ? 12 : 16,
-    marginBottom: 16,
-  },
-  walletIconBox: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#ECFDF5",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  walletInfo: { flex: 1 },
-  walletLabel: {
-    fontSize: 12,
-    color: "#6B7280",
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  walletAmount: {
-    fontSize: responsiveFontSize(isSmallScreen() ? 24 : 28),
-    fontWeight: "800",
-    color: "#10B981",
-  },
-  walletStatsRow: {
-    flexDirection: "row",
-    gap: getResponsiveGap(12),
-    marginBottom: isSmallScreen() ? 16 : 20,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-  walletStat: { flex: 1 },
-  walletStatLabel: {
-    fontSize: responsiveFontSize(10),
-    color: "#9CA3AF",
-    fontWeight: "600",
-    marginBottom: 4,
-    textTransform: "uppercase",
-  },
-  walletStatValue: {
-    fontSize: responsiveFontSize(isSmallScreen() ? 14 : 16),
-    fontWeight: "800",
-    color: "#1F2937",
-  },
-  walletStatDivider: { width: 1, backgroundColor: "#E5E7EB" },
-  infoBox: {
-    backgroundColor: "#FEF3C7",
-    borderRadius: getResponsiveBorderRadius(12),
-    padding: isSmallScreen() ? 10 : 12,
-    borderLeftWidth: 4,
-    borderLeftColor: "#F59E0B",
-    marginTop: isSmallScreen() ? 12 : 16,
-  },
-  infoLabel: {
-    fontSize: responsiveFontSize(12),
-    fontWeight: "700",
-    color: "#D97706",
-    marginBottom: 4,
-  },
-  infoText: {
-    fontSize: responsiveFontSize(11),
-    color: "#92400E",
-    lineHeight: isSmallScreen() ? 16 : 18,
-  },
-
-  // Payment tab styles
-  subTabContainer: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-    marginHorizontal: 0,
   },
   subTab: {
     flex: 1,
-    paddingVertical: isSmallScreen() ? 10 : 12,
-    paddingHorizontal: isSmallScreen() ? 12 : 16,
-    borderBottomWidth: 3,
-    borderBottomColor: "transparent",
+    paddingVertical: isSmallScreen() ? 10 : 13,
     alignItems: "center",
+    borderBottomWidth: 2.5,
+    borderBottomColor: "transparent",
   },
-  activeSubTab: {
-    borderBottomColor: "#4F46E5",
+  subTabActive: {
+    borderBottomColor: "#6C63FF",
   },
   subTabText: {
-    fontSize: responsiveFontSize(isSmallScreen() ? 12 : 14),
+    fontSize: responsiveFontSize(13),
     fontWeight: "600",
-    color: "#6B7280",
+    color: "#9CA3AF",
   },
-  activeSubTabText: {
-    color: "#4F46E5",
+  subTabTextActive: {
+    color: "#6C63FF",
     fontWeight: "700",
   },
-  loadingCenter: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: isSmallScreen() ? 30 : 40,
-  },
-  paymentSection: {
+  paySection: {
     paddingHorizontal: getResponsivePadding(),
-    paddingVertical: isSmallScreen() ? 12 : 16,
+    paddingTop: isSmallScreen() ? 16 : 20,
   },
-  payoutScheduleCard: {
-    backgroundColor: "#EEF2FF",
+  paySectionTitle: {
+    fontSize: responsiveFontSize(16),
+    fontWeight: "800",
+    color: "#1A1D2E",
+    marginBottom: 14,
+  },
+  nextPayCard: {
+    backgroundColor: "#EEF0FF",
     borderRadius: getResponsiveBorderRadius(16),
-    padding: isSmallScreen() ? 12 : 16,
-    marginBottom: getResponsiveGap(12),
+    padding: isSmallScreen() ? 14 : 18,
+    marginBottom: 16,
     borderLeftWidth: 4,
-    borderLeftColor: "#4F46E5",
+    borderLeftColor: "#6C63FF",
   },
-  scheduleLabel: {
+  nextPayCardLabel: {
     fontSize: responsiveFontSize(11),
     color: "#6B7280",
     fontWeight: "500",
     marginBottom: 4,
   },
-  nextPayoutDate: {
+  nextPayCardDate: {
     fontSize: responsiveFontSize(isSmallScreen() ? 16 : 18),
     fontWeight: "800",
-    color: "#4F46E5",
-    marginBottom: 8,
+    color: "#6C63FF",
+    marginBottom: 10,
   },
-  payoutTypeLabel: {
-    fontSize: responsiveFontSize(12),
-    color: "#4F46E5",
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  totalEarningsText: {
-    fontSize: responsiveFontSize(isSmallScreen() ? 14 : 16),
-    fontWeight: "700",
-    color: "#1F2937",
-  },
-  jobsListPayment: {
-    gap: getResponsiveGap(12),
-  },
-  paymentJobCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: getResponsiveBorderRadius(12),
-    padding: isSmallScreen() ? 10 : 12,
-    borderLeftWidth: 4,
-    borderLeftColor: "#10B981",
-  },
-  paymentJobHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: isSmallScreen() ? 6 : 8,
-  },
-  paymentJobService: {
-    fontSize: responsiveFontSize(13),
-    fontWeight: "600",
-    color: "#1F2937",
-  },
-  paymentJobAmount: {
-    fontSize: responsiveFontSize(13),
-    fontWeight: "800",
-    color: "#10B981",
-  },
-  paymentJobDate: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  withdrawalCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 14,
-    borderLeftWidth: 4,
-    borderLeftColor: "#F59E0B",
-  },
-  withdrawalHeader: {
+  nextPayCardRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
   },
-  withdrawalAmount: {
-    fontSize: 16,
+  nextPayCardType: {
+    fontSize: responsiveFontSize(12),
+    color: "#6C63FF",
+    fontWeight: "600",
+    textTransform: "capitalize",
+  },
+  nextPayCardTotal: {
+    fontSize: responsiveFontSize(isSmallScreen() ? 16 : 18),
     fontWeight: "800",
-    color: "#1F2937",
+    color: "#1A1D2E",
   },
-  statusBadge: {
+  payJobList: {
+    gap: getResponsiveGap(10),
+  },
+  payJobItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: getResponsiveBorderRadius(14),
+    padding: isSmallScreen() ? 12 : 14,
+    borderLeftWidth: 3,
+    borderLeftColor: "#00C896",
+  },
+  payJobService: {
+    fontSize: responsiveFontSize(13),
+    fontWeight: "700",
+    color: "#1A1D2E",
+    marginBottom: 3,
+  },
+  payJobDate: {
+    fontSize: responsiveFontSize(11),
+    color: "#9CA3AF",
+  },
+  payJobAmount: {
+    fontSize: responsiveFontSize(15),
+    fontWeight: "800",
+    color: "#00C896",
+  },
+  withdrawalItem: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: getResponsiveBorderRadius(14),
+    padding: isSmallScreen() ? 12 : 14,
+    borderLeftWidth: 3,
+    borderLeftColor: "#FFB547",
+  },
+  withdrawalItemTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  withdrawalItemAmount: {
+    fontSize: responsiveFontSize(16),
+    fontWeight: "800",
+    color: "#1A1D2E",
+  },
+  withdrawalStatusChip: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
   },
-  statusBadgeText: {
-    fontSize: 11,
-    fontWeight: "600",
+  withdrawalStatusText: {
+    fontSize: responsiveFontSize(11),
+    fontWeight: "700",
     textTransform: "capitalize",
   },
-  withdrawalDate: {
-    fontSize: 12,
-    color: "#6B7280",
-    marginBottom: 4,
+  withdrawalMeta: {
+    fontSize: responsiveFontSize(11),
+    color: "#9CA3AF",
   },
-  withdrawalPayoutType: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  totalReceivedCard: {
-    backgroundColor: "#ECFDF5",
-    borderRadius: 16,
-    padding: 16,
+  totalReceivedBanner: {
+    backgroundColor: "#E6FBF4",
+    borderRadius: getResponsiveBorderRadius(16),
+    padding: isSmallScreen() ? 14 : 18,
     marginBottom: 16,
     borderLeftWidth: 4,
-    borderLeftColor: "#10B981",
+    borderLeftColor: "#00C896",
   },
-  totalReceivedLabel: {
-    fontSize: 12,
+  totalReceivedBannerLabel: {
+    fontSize: responsiveFontSize(11),
     color: "#6B7280",
     fontWeight: "500",
     marginBottom: 4,
   },
-  totalReceivedAmount: {
-    fontSize: 20,
+  totalReceivedBannerAmount: {
+    fontSize: responsiveFontSize(isSmallScreen() ? 22 : 26),
     fontWeight: "800",
-    color: "#10B981",
+    color: "#00C896",
   },
-  receivedPaymentCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 14,
-    borderLeftWidth: 4,
-    borderLeftColor: "#10B981",
-  },
-  receivedHeader: {
+  receivedItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    backgroundColor: "#FFFFFF",
+    borderRadius: getResponsiveBorderRadius(14),
+    padding: isSmallScreen() ? 12 : 14,
+    borderLeftWidth: 3,
+    borderLeftColor: "#00C896",
   },
-  receivedAmount: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#10B981",
-  },
-  successBadge: {
+  receivedSuccessRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    backgroundColor: "#ECFDF5",
-    borderRadius: 8,
-  },
-  successText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#10B981",
-  },
-  receivedDate: {
-    fontSize: 12,
-    color: "#6B7280",
+    gap: 5,
     marginBottom: 4,
   },
-  transactionRef: {
-    fontSize: 11,
+  receivedSuccessText: {
+    fontSize: responsiveFontSize(12),
+    fontWeight: "700",
+    color: "#00C896",
+  },
+  receivedDate: {
+    fontSize: responsiveFontSize(11),
     color: "#9CA3AF",
-    fontFamily: "monospace",
+    marginBottom: 2,
+  },
+  receivedRef: {
+    fontSize: responsiveFontSize(10),
+    color: "#C4C9D4",
+    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
+  },
+  receivedAmount: {
+    fontSize: responsiveFontSize(17),
+    fontWeight: "800",
+    color: "#00C896",
   },
 });
 

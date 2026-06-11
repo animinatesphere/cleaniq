@@ -43,18 +43,12 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
 
-  // Check if job is tomorrow or later
   const isJobTomorrowOrLater = useCallback(() => {
     if (!booking || !booking.schedule || !booking.schedule.date) return false;
-
     const jobDate = new Date(booking.schedule.date);
     const today = new Date();
-
-    // Set time to midnight for comparison
     jobDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
-
-    // Job date should be today or later (not in the past)
     return jobDate >= today;
   }, [booking]);
 
@@ -81,7 +75,6 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     }, [bookingId]),
   );
 
-  // Extract rooms and services from details object
   const extractDetails = (detailsObj) => {
     if (!detailsObj) return { rooms: [], services: [], info: {} };
 
@@ -106,7 +99,6 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     const services = [];
     let extrasList = [];
 
-    // Sometimes extras is a JSON string, sometimes it's an array
     if (typeof detailsObj.extras === "string") {
       try {
         extrasList = JSON.parse(detailsObj.extras);
@@ -120,8 +112,6 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     if (Array.isArray(extrasList)) {
       extrasList.forEach((extra) => {
         if (typeof extra === "string") {
-          // If it's already a string like "Carpet Cleaning (x1)", just add it
-          // But filter out room names if they accidentally got in there
           const lower = extra.toLowerCase();
           if (
             !roomKeys.some((k) => lower.includes(k.toLowerCase())) &&
@@ -133,7 +123,6 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             services.push(extra);
           }
         } else if (typeof extra === "object" && extra !== null) {
-          // If it's an object { name: "...", qty: 2 }
           if (extra.name && extra.qty > 0) {
             services.push(`${extra.name} (x${extra.qty})`);
           }
@@ -150,8 +139,6 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 
     return { rooms, services, info };
   };
-
-  // Removed handleCall - workers should use in-app messaging only
 
   const handleMessage = () => {
     navigation.navigate("ChatWithCustomer", {
@@ -199,11 +186,11 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         label: "In Progress",
         next: "complete",
         nextLabel: "Complete Service",
-        nextColor: "#10B981",
+        nextColor: "#1A7A4A",
       },
       Completed: {
-        color: "#10B981",
-        bg: "#ECFDF5",
+        color: "#1A7A4A",
+        bg: "#EAF5EE",
         label: "Completed",
         next: null,
         nextLabel: null,
@@ -223,7 +210,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4F46E5" />
+        <ActivityIndicator size="large" color="#1A7A4A" />
         <Text style={styles.loadingText}>Loading booking...</Text>
       </View>
     );
@@ -247,7 +234,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#4F46E5" />
+      <StatusBar barStyle="light-content" backgroundColor="#1A7A4A" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -272,7 +259,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {/* Service Banner */}
         <View style={styles.serviceBanner}>
           <View style={styles.serviceBannerLeft}>
-            <Sparkles size={22} color="#4F46E5" />
+            <Sparkles size={22} color="#1A7A4A" />
             <View style={{ marginLeft: 12 }}>
               <Text style={styles.serviceName}>
                 {booking.service || "Cleaning Service"}
@@ -300,7 +287,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {/* Quick Action Buttons */}
         <View style={styles.quickActions}>
           <TouchableOpacity style={styles.quickBtn} onPress={handleMessage}>
-            <MessageSquare size={20} color="#4F46E5" />
+            <MessageSquare size={20} color="#1A7A4A" />
             <Text style={styles.quickBtnText}>Message</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -372,7 +359,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
           <Text style={styles.sectionTitle}>📅 Schedule</Text>
           <View style={styles.scheduleRow}>
             <View style={styles.scheduleCard}>
-              <Calendar size={18} color="#4F46E5" />
+              <Calendar size={18} color="#1A7A4A" />
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.scheduleLabel}>Date</Text>
                 <Text style={styles.scheduleValue}>
@@ -412,7 +399,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📍 Location</Text>
           <View style={styles.locationCard}>
-            <MapPin size={20} color="#4F46E5" />
+            <MapPin size={20} color="#1A7A4A" />
             <Text style={styles.locationText}>
               {booking.details?.address || "Address not specified"}
             </Text>
@@ -426,7 +413,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             <View style={styles.tagsWrap}>
               {rooms.map((r, i) => (
                 <View key={i} style={styles.roomTag}>
-                  <Home size={12} color="#4F46E5" />
+                  <Home size={12} color="#1A7A4A" />
                   <Text style={styles.roomTagText}>{r}</Text>
                 </View>
               ))}
@@ -457,26 +444,26 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
           <View style={styles.infoGrid}>
             {parking && (
               <View style={styles.infoChip}>
-                <Car size={14} color="#6B7280" />
+                <Car size={14} color="#3A5A44" />
                 <Text style={styles.infoChipText}>{parking}</Text>
               </View>
             )}
             {entry && (
               <View style={styles.infoChip}>
-                <Key size={14} color="#6B7280" />
+                <Key size={14} color="#3A5A44" />
                 <Text style={styles.infoChipText}>{entry}</Text>
               </View>
             )}
             {pet && (
               <View style={styles.infoChip}>
-                <PawPrint size={14} color="#6B7280" />
+                <PawPrint size={14} color="#3A5A44" />
                 <Text style={styles.infoChipText}>{pet}</Text>
               </View>
             )}
           </View>
           {instructions && instructions !== "None" && (
             <View style={styles.instructionBox}>
-              <FileText size={14} color="#4F46E5" />
+              <FileText size={14} color="#1A7A4A" />
               <Text style={styles.instructionText}>{instructions}</Text>
             </View>
           )}
@@ -508,13 +495,13 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
               <Text
                 style={[
                   styles.payRowLabel,
-                  { fontWeight: "700", color: "#1F2937" },
+                  { fontWeight: "700", color: "#1A2E22" },
                 ]}
               >
                 Estimated Total
               </Text>
               <Text
-                style={[styles.payRowValue, { color: "#10B981", fontSize: 18 }]}
+                style={[styles.payRowValue, { color: "#1A7A4A", fontSize: 18 }]}
               >
                 £
                 {(
@@ -532,7 +519,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {/* Completed State */}
         {booking.status === "Completed" && (
           <View style={styles.completedBanner}>
-            <CheckCircle size={24} color="#10B981" />
+            <CheckCircle size={24} color="#1A7A4A" />
             <Text style={styles.completedText}>
               Service Completed — Well done! 🎉
             </Text>
@@ -546,17 +533,17 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F5F7" },
+  container: { flex: 1, backgroundColor: "#F4F8F4" },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5F5F7",
+    backgroundColor: "#F4F8F4",
   },
-  loadingText: { marginTop: 12, color: "#6B7280", fontSize: 14 },
+  loadingText: { marginTop: 12, color: "#4B7A5A", fontSize: 14 },
 
   header: {
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#1A7A4A",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -568,7 +555,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(255,255,255,0.18)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -596,22 +583,22 @@ const styles = StyleSheet.create({
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 3,
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
   },
   serviceBannerLeft: { flex: 1, flexDirection: "row", alignItems: "center" },
-  serviceName: { fontSize: 16, fontWeight: "800", color: "#1F2937" },
-  serviceRef: { fontSize: 11, color: "#9CA3AF", marginTop: 2 },
+  serviceName: { fontSize: 16, fontWeight: "800", color: "#1A2E22" },
+  serviceRef: { fontSize: 11, color: "#86A892", marginTop: 2 },
   earningsBox: {
     alignItems: "center",
-    backgroundColor: "#ECFDF5",
+    backgroundColor: "#EAF5EE",
     borderRadius: 12,
     padding: 10,
+    borderWidth: 0.5,
+    borderColor: "#A7D9B8",
   },
-  earningsAmount: { fontSize: 20, fontWeight: "800", color: "#10B981" },
-  earningsLabel: { fontSize: 10, color: "#6B7280", marginTop: 2 },
+  earningsAmount: { fontSize: 20, fontWeight: "800", color: "#1A7A4A" },
+  earningsLabel: { fontSize: 10, color: "#4B7A5A", marginTop: 2 },
 
   quickActions: {
     flexDirection: "row",
@@ -620,13 +607,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 16,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 3,
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
   },
   quickBtn: { flex: 1, alignItems: "center", paddingVertical: 14, gap: 4 },
-  quickBtnText: { fontSize: 11, fontWeight: "600", color: "#374151" },
+  quickBtnText: { fontSize: 11, fontWeight: "600", color: "#3A5A44" },
 
   mainActionBtn: {
     borderRadius: 16,
@@ -637,7 +622,7 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 12,
     shadowColor: "#000",
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -647,7 +632,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#374151",
+    color: "#4B7A5A",
     marginBottom: 10,
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -661,21 +646,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 14,
     padding: 14,
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
   },
   scheduleLabel: {
     fontSize: 10,
-    color: "#9CA3AF",
+    color: "#86A892",
     fontWeight: "600",
     textTransform: "uppercase",
   },
   scheduleValue: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#1F2937",
+    color: "#1A2E22",
     marginTop: 2,
   },
 
@@ -686,16 +669,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
   },
   locationText: {
     flex: 1,
     fontSize: 14,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#1A2E22",
     lineHeight: 20,
   },
 
@@ -704,14 +685,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#EEF2FF",
+    backgroundColor: "#EAF5EE",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#C7D2FE",
+    borderColor: "#A7D9B8",
   },
-  roomTagText: { fontSize: 13, fontWeight: "600", color: "#4338CA" },
+  roomTagText: { fontSize: 13, fontWeight: "600", color: "#1A6638" },
   serviceTag: { backgroundColor: "#FFFBEB", borderColor: "#FDE68A" },
 
   infoGrid: {
@@ -728,28 +709,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
   },
-  infoChipText: { fontSize: 12, color: "#374151", fontWeight: "500" },
+  infoChipText: { fontSize: 12, color: "#3A5A44", fontWeight: "500" },
   instructionBox: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 8,
-    backgroundColor: "#EEF2FF",
+    backgroundColor: "#EAF5EE",
     borderRadius: 12,
     padding: 12,
+    borderWidth: 0.5,
+    borderColor: "#A7D9B8",
   },
-  instructionText: { flex: 1, fontSize: 13, color: "#3730A3", lineHeight: 18 },
+  instructionText: { flex: 1, fontSize: 13, color: "#1A5C33", lineHeight: 18 },
 
   payCard: {
     backgroundColor: "#fff",
     borderRadius: 14,
     padding: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
   },
   payRow: {
     flexDirection: "row",
@@ -757,21 +738,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
   },
-  payRowLabel: { fontSize: 13, color: "#6B7280" },
-  payRowValue: { fontSize: 15, fontWeight: "700", color: "#1F2937" },
-  payDivider: { height: 1, backgroundColor: "#F3F4F6" },
+  payRowLabel: { fontSize: 13, color: "#4B7A5A" },
+  payRowValue: { fontSize: 15, fontWeight: "700", color: "#1A2E22" },
+  payDivider: { height: 1, backgroundColor: "#EAF5EE" },
 
   completedBanner: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: "#EAF5EE",
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 14,
     padding: 16,
+    borderWidth: 0.5,
+    borderColor: "#A7D9B8",
   },
-  completedText: { fontSize: 14, fontWeight: "700", color: "#065F46" },
+  completedText: { fontSize: 14, fontWeight: "700", color: "#1A5C33" },
 });
 
 export default AcceptedBookingDetailScreen;

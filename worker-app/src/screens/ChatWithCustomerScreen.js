@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
@@ -14,8 +13,32 @@ import {
   Alert,
 } from "react-native";
 import { AuthContext, API_URL } from "../context/AuthContext";
-import { Send, ChevronLeft, Phone, Bell, ShieldAlert } from "lucide-react-native";
+import { Send, ChevronLeft, ShieldAlert } from "lucide-react-native";
 import axios from "axios";
+
+// ── Design tokens ──────────────────────────────────────────
+const C = {
+  bg: "#F6FEFC",
+  surface: "#FFFFFF",
+
+  border: "#E6F7F1",
+  borderInput: "#D1FAE5",
+
+  green: "#10B981",
+  greenDark: "#059669",
+  greenDeep: "#047857",
+  greenDim: "#D1FAE5",
+  greenPale: "#ECFDF5",
+
+  text: "#111827",
+  textSub: "#6B7280",
+  textMute: "#9CA3AF",
+  textOnGreen: "#FFFFFF",
+  textOnGreenMute: "#A7F3D0",
+
+  theirBubble: "#FFFFFF",
+  theirBorder: "#E6F7F1",
+};
 
 const ChatWithCustomerScreen = ({ route, navigation }) => {
   const { bookingId, customerId, customerName } = route.params;
@@ -29,7 +52,6 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     fetchMessages();
-    // Poll for new messages every 3 seconds
     const interval = setInterval(fetchMessages, 3000);
     return () => clearInterval(interval);
   }, [bookingId]);
@@ -40,7 +62,6 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
         `${API_URL}/workers/bookings/${bookingId}/messages`,
       );
       setMessages(response.data || []);
-      // Auto scroll to bottom
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 100);
@@ -53,11 +74,9 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
-
     const messageText = inputMessage;
     setInputMessage("");
     setSending(true);
-
     try {
       const response = await axios.post(
         `${API_URL}/workers/bookings/${bookingId}/messages`,
@@ -69,17 +88,13 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
           customerId,
         },
       );
-
-      // Add message to local state immediately
       setMessages((prev) => [...prev, response.data]);
-
-      // Scroll to bottom
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 100);
     } catch (error) {
       Alert.alert("Error", "Failed to send message");
-      setInputMessage(messageText); // Restore input on error
+      setInputMessage(messageText);
     } finally {
       setSending(false);
     }
@@ -90,36 +105,40 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  const renderMessage = (item) => {
+  // Customer initials for avatar
+  const initials = customerName
+    ? customerName.substring(0, 2).toUpperCase()
+    : "C";
+
+  const renderMessage = ({ item }) => {
     const isWorker = item.senderType === "worker";
     return (
       <View
-        key={item._id}
-        style={[
-          styles.messageContainer,
-          isWorker
-            ? styles.workerMessageContainer
-            : styles.customerMessageContainer,
-        ]}
+        style={[styles.messageRow, isWorker ? styles.myRow : styles.theirRow]}
       >
+        {!isWorker && (
+          <View style={styles.theirAvatar}>
+            <Text style={styles.theirAvatarText}>{initials}</Text>
+          </View>
+        )}
         <View
           style={[
-            styles.messageBubble,
-            isWorker ? styles.workerBubble : styles.customerBubble,
+            styles.bubble,
+            isWorker ? styles.myBubble : styles.theirBubble,
           ]}
         >
           <Text
             style={[
-              styles.messageText,
-              isWorker ? styles.workerMessageText : styles.customerMessageText,
+              styles.bubbleText,
+              isWorker ? styles.myBubbleText : styles.theirBubbleText,
             ]}
           >
             {item.message}
           </Text>
           <Text
             style={[
-              styles.messageTime,
-              isWorker ? styles.workerMessageTime : styles.customerMessageTime,
+              styles.bubbleTime,
+              isWorker ? styles.myBubbleTime : styles.theirBubbleTime,
             ]}
           >
             {formatTime(item.createdAt)}
@@ -130,53 +149,81 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
+    <SafeAreaView style={styles.safeArea}>
+      {/* ── Header ── */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <ChevronLeft size={24} color="#1F2937" />
-        </TouchableOpacity>
-        <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>{customerName}</Text>
-          <Text style={styles.headerSubtitle}>
-            Booking #{bookingId.slice(-6)}
-          </Text>
-        </View>
         <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => navigation.goBack()}
+        >
+          <ChevronLeft size={20} color={C.greenDark} />
+        </TouchableOpacity>
+
+        <View style={styles.headerCenter}>
+          <View style={styles.headerAvatar}>
+            <Text style={styles.headerAvatarText}>{initials}</Text>
+          </View>
+          <View>
+            <Text style={styles.headerTitle}>{customerName}</Text>
+            <Text style={styles.headerSub}>Booking #{bookingId.slice(-6)}</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={styles.infoBtn}
           onPress={() =>
             Alert.alert(
               "Important Note",
-              "Customers will receive push notifications and emails for all your messages. Keep it professional."
+              "Customers will receive push notifications and emails for all your messages. Keep it professional.",
             )
           }
-          style={styles.infoIcon}
         >
-          <ShieldAlert size={20} color="#4F46E5" />
+          <ShieldAlert size={18} color={C.greenDark} />
         </TouchableOpacity>
       </View>
 
-      {/* Messages List */}
-      <FlatList
-        ref={scrollViewRef}
-        data={messages}
-        renderItem={({ item }) => renderMessage(item)}
-        keyExtractor={(item) => item._id || Math.random().toString()}
-        contentContainerStyle={styles.messagesList}
-        onContentSizeChange={() =>
-          scrollViewRef.current?.scrollToEnd({ animated: true })
-        }
-      />
+      <View style={styles.headerDivider} />
 
-      {/* Message Input */}
+      {/* ── Messages ── */}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={C.green} />
+        </View>
+      ) : (
+        <FlatList
+          ref={scrollViewRef}
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item._id || Math.random().toString()}
+          contentContainerStyle={styles.messagesList}
+          showsVerticalScrollIndicator={false}
+          onContentSizeChange={() =>
+            scrollViewRef.current?.scrollToEnd({ animated: true })
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyAvatarLarge}>
+                <Text style={styles.emptyAvatarText}>{initials}</Text>
+              </View>
+              <Text style={styles.emptyTitle}>Chat with {customerName}</Text>
+              <Text style={styles.emptyText}>
+                Send a message to get the conversation started.
+              </Text>
+            </View>
+          }
+        />
+      )}
+
+      {/* ── Input ── */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.inputContainer}
+        style={styles.inputOuter}
       >
-        <View style={styles.inputWrapper}>
+        <View style={styles.inputRow}>
           <TextInput
             style={styles.input}
             placeholder="Type your message..."
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={C.textMute}
             value={inputMessage}
             onChangeText={setInputMessage}
             multiline
@@ -185,8 +232,8 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
           />
           <TouchableOpacity
             style={[
-              styles.sendButton,
-              !inputMessage.trim() && styles.sendButtonDisabled,
+              styles.sendBtn,
+              !inputMessage.trim() && styles.sendBtnDisabled,
             ]}
             onPress={handleSendMessage}
             disabled={!inputMessage.trim() || sending}
@@ -194,7 +241,7 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
             {sending ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <Send size={18} color="#FFFFFF" />
+              <Send size={17} color="#FFFFFF" />
             )}
           </TouchableOpacity>
         </View>
@@ -206,150 +253,271 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
   );
 };
 
+// ─────────────────────────────────────────────────────────────
+// STYLES
+// ─────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: C.surface,
   },
+
+  // ── Header ────────────────────────────────────────────────
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
+    backgroundColor: C.surface,
+    gap: 10,
+  },
+  headerDivider: {
+    height: 2,
+    backgroundColor: C.green,
+    opacity: 0.15,
   },
   backBtn: {
-    padding: 8,
-    marginRight: 4,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: C.greenPale,
+    borderWidth: 1,
+    borderColor: C.greenDim,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  headerInfo: {
+  headerCenter: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: C.green,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: C.greenDim,
+  },
+  headerAvatarText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#FFFFFF",
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#1F2937",
+    fontSize: 14,
+    fontWeight: "700",
+    color: C.text,
+    letterSpacing: -0.2,
   },
-  headerSubtitle: {
-    fontSize: 12,
-    color: "#6B7280",
+  headerSub: {
+    fontSize: 11,
+    color: C.greenDark,
     fontWeight: "600",
-    marginTop: 2,
+    marginTop: 1,
   },
-  infoIcon: {
-    padding: 8,
-    borderRadius: 12,
-    backgroundColor: "#EEF2FF",
+  infoBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: C.greenPale,
+    borderWidth: 1,
+    borderColor: C.greenDim,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  // ── Chat body ─────────────────────────────────────────────
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: C.bg,
   },
   messagesList: {
     paddingVertical: 16,
     paddingHorizontal: 16,
-    gap: 4,
+    gap: 8,
+    backgroundColor: C.bg,
+    flexGrow: 1,
   },
-  messageContainer: {
-    marginBottom: 8,
+
+  // ── Bubbles ───────────────────────────────────────────────
+  messageRow: {
     flexDirection: "row",
+    marginBottom: 4,
+    maxWidth: "82%",
   },
-  workerMessageContainer: {
+  myRow: {
+    alignSelf: "flex-end",
     justifyContent: "flex-end",
   },
-  customerMessageContainer: {
+  theirRow: {
+    alignSelf: "flex-start",
     justifyContent: "flex-start",
   },
-  messageBubble: {
-    maxWidth: "80%",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  theirAvatar: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: C.greenDim,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
+    alignSelf: "flex-end",
+    borderWidth: 1,
+    borderColor: C.green,
+  },
+  theirAvatarText: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: C.greenDeep,
+  },
+  bubble: {
     borderRadius: 20,
-    elevation: 1,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  myBubble: {
+    backgroundColor: C.green,
+    borderBottomRightRadius: 5,
+    shadowColor: C.green,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  theirBubble: {
+    backgroundColor: C.theirBubble,
+    borderBottomLeftRadius: 5,
+    borderWidth: 1,
+    borderColor: C.theirBorder,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  workerBubble: {
-    backgroundColor: "#4F46E5",
-    borderBottomRightRadius: 4,
+  bubbleText: {
+    fontSize: 14,
+    lineHeight: 20,
   },
-  customerBubble: {
-    backgroundColor: "#FFFFFF",
-    borderBottomLeftRadius: 4,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  messageText: {
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  workerMessageText: {
-    color: "#FFFFFF",
+  myBubbleText: {
+    color: C.textOnGreen,
     fontWeight: "500",
   },
-  customerMessageText: {
-    color: "#1F2937",
+  theirBubbleText: {
+    color: C.text,
     fontWeight: "500",
   },
-  messageTime: {
+  bubbleTime: {
     fontSize: 10,
-    marginTop: 4,
+    marginTop: 5,
     alignSelf: "flex-end",
-    fontWeight: "600",
+    fontWeight: "500",
   },
-  workerMessageTime: {
-    color: "rgba(255, 255, 255, 0.7)",
+  myBubbleTime: {
+    color: C.textOnGreenMute,
   },
-  customerMessageTime: {
-    color: "#9CA3AF",
+  theirBubbleTime: {
+    color: C.textMute,
   },
-  inputContainer: {
-    backgroundColor: "#FFFFFF",
+
+  // ── Empty ─────────────────────────────────────────────────
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 80,
+    paddingHorizontal: 32,
+  },
+  emptyAvatarLarge: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: C.green,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+    borderWidth: 3,
+    borderColor: C.greenDim,
+    shadowColor: C.green,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  emptyAvatarText: {
+    fontSize: 26,
+    fontWeight: "800",
+    color: "#FFFFFF",
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: C.text,
+    marginBottom: 8,
+  },
+  emptyText: {
+    fontSize: 13,
+    color: C.textSub,
+    textAlign: "center",
+    lineHeight: 19,
+  },
+
+  // ── Input ─────────────────────────────────────────────────
+  inputOuter: {
+    backgroundColor: C.surface,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: C.border,
     paddingVertical: 12,
     paddingHorizontal: 16,
   },
-  inputWrapper: {
+  inputRow: {
     flexDirection: "row",
     alignItems: "flex-end",
-    gap: 12,
+    gap: 10,
   },
   input: {
     flex: 1,
-    backgroundColor: "#F3F4F6",
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: "#1F2937",
+    backgroundColor: C.greenPale,
+    borderRadius: 22,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+    fontSize: 14,
+    color: C.text,
+    fontWeight: "500",
     maxHeight: 100,
     minHeight: 44,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: C.borderInput,
   },
-  sendButton: {
+  sendBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#4F46E5",
+    backgroundColor: C.green,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: C.green,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  sendButtonDisabled: {
-    backgroundColor: "#D1D5DB",
+  sendBtnDisabled: {
+    backgroundColor: C.greenDim,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   inputHint: {
     fontSize: 11,
-    color: "#9CA3AF",
-    marginTop: 8,
+    color: C.textMute,
+    marginTop: 7,
     textAlign: "center",
-    fontWeight: "500",
   },
 });
 

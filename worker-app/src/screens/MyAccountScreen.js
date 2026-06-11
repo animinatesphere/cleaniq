@@ -76,16 +76,14 @@ const MyAccountScreen = ({ navigation }) => {
 
     setWalletLoading(true);
 
-    // Create a timeout promise
     const timeoutPromise = new Promise((resolve) => {
       setTimeout(() => {
         console.warn("Wallet fetch timeout - using default values");
         resolve("timeout");
-      }, 5000); // 5 second timeout
+      }, 5000);
     });
 
     try {
-      // Fetch wallet with fallback
       try {
         const walletRes = await Promise.race([
           axios.get(`${API_URL}/payments/wallet/${workerInfo.id}`),
@@ -96,16 +94,9 @@ const MyAccountScreen = ({ navigation }) => {
         setWallet(walletRes.data || {});
       } catch (walletError) {
         console.error("Error fetching wallet:", walletError.message);
-        // Keep the default wallet with zero balance
-        setWallet({
-          totalEarned: 0,
-          balance: 0,
-          onHold: 0,
-          withdrawn: 0,
-        });
+        setWallet({ totalEarned: 0, balance: 0, onHold: 0, withdrawn: 0 });
       }
 
-      // Fetch withdrawal history with fallback
       try {
         const historyRes = await axios.get(
           `${API_URL}/payments/withdrawals/${workerInfo.id}`,
@@ -120,13 +111,7 @@ const MyAccountScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error("Unexpected error in fetchWalletData:", error);
-      // Keep default wallet
-      setWallet({
-        totalEarned: 0,
-        balance: 0,
-        onHold: 0,
-        withdrawn: 0,
-      });
+      setWallet({ totalEarned: 0, balance: 0, onHold: 0, withdrawn: 0 });
       setWithdrawalHistory([]);
     } finally {
       setWalletLoading(false);
@@ -178,10 +163,7 @@ const MyAccountScreen = ({ navigation }) => {
   };
 
   const handleEditChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSaveProfile = async () => {
@@ -203,7 +185,6 @@ const MyAccountScreen = ({ navigation }) => {
 
       await axios.put(`${API_URL}/workers/${workerInfo.id}/profile`, payload);
 
-      // Update the context with new worker info
       await updateWorkerInfo({
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -246,7 +227,7 @@ const MyAccountScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <User size={24} color="#1F2937" />
+        <User size={24} color="#1A2E22" />
         <Text style={styles.headerTitle}>My Account</Text>
         <TouchableOpacity
           onPress={() => setIsEditing(!isEditing)}
@@ -255,7 +236,7 @@ const MyAccountScreen = ({ navigation }) => {
           {isEditing ? (
             <X size={20} color="#EF4444" />
           ) : (
-            <Edit2 size={20} color="#4F46E5" />
+            <Edit2 size={20} color="#1A7A4A" />
           )}
         </TouchableOpacity>
       </View>
@@ -283,9 +264,9 @@ const MyAccountScreen = ({ navigation }) => {
           <View style={styles.statsContainer}>
             <View style={styles.statBox}>
               <View
-                style={[styles.statIconCircle, { backgroundColor: "#EEF2FF" }]}
+                style={[styles.statIconCircle, { backgroundColor: "#EAF5EE" }]}
               >
-                <Briefcase size={20} color="#4F46E5" />
+                <Briefcase size={20} color="#1A7A4A" />
               </View>
               <Text style={styles.statValue}>
                 {workerInfo?.jobsCompleted || 0}
@@ -295,9 +276,9 @@ const MyAccountScreen = ({ navigation }) => {
             <View style={styles.statDivider} />
             <View style={styles.statBox}>
               <View
-                style={[styles.statIconCircle, { backgroundColor: "#ECFDF5" }]}
+                style={[styles.statIconCircle, { backgroundColor: "#EAF5EE" }]}
               >
-                <TrendingUp size={20} color="#10B981" />
+                <TrendingUp size={20} color="#1A7A4A" />
               </View>
               <Text style={styles.statValue}>
                 {workerInfo?.rating ? workerInfo.rating.toFixed(1) : "5.0"}
@@ -390,7 +371,7 @@ const MyAccountScreen = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Contact Info</Text>
               <View style={styles.infoCard}>
                 <View style={styles.infoRow}>
-                  <Mail size={18} color="#4F46E5" />
+                  <Mail size={18} color="#1A7A4A" />
                   <View style={styles.infoTextContainer}>
                     <Text style={styles.infoLabel}>Email</Text>
                     <Text style={styles.infoValue}>{workerInfo?.email}</Text>
@@ -398,7 +379,7 @@ const MyAccountScreen = ({ navigation }) => {
                 </View>
                 <View style={styles.infoDivider} />
                 <View style={styles.infoRow}>
-                  <Phone size={18} color="#4F46E5" />
+                  <Phone size={18} color="#1A7A4A" />
                   <View style={styles.infoTextContainer}>
                     <Text style={styles.infoLabel}>Phone</Text>
                     <Text style={styles.infoValue}>
@@ -413,7 +394,7 @@ const MyAccountScreen = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Bank Details</Text>
               <View style={styles.infoCard}>
                 <View style={styles.infoRow}>
-                  <CreditCard size={18} color="#10B981" />
+                  <CreditCard size={18} color="#1A7A4A" />
                   <View style={styles.infoTextContainer}>
                     <Text style={styles.infoLabel}>Account Name</Text>
                     <Text style={styles.infoValue}>
@@ -451,14 +432,14 @@ const MyAccountScreen = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Wallet & Payments</Text>
               {walletLoading ? (
                 <View style={styles.loadingBox}>
-                  <ActivityIndicator color="#4F46E5" />
+                  <ActivityIndicator color="#1A7A4A" />
                 </View>
               ) : (
                 <>
                   <View style={styles.walletCard}>
                     <View style={styles.walletHeader}>
                       <View style={styles.walletIconBox}>
-                        <Wallet size={24} color="#10B981" />
+                        <Wallet size={24} color="#1A7A4A" />
                       </View>
                       <View>
                         <Text style={styles.walletLabel}>
@@ -517,7 +498,7 @@ const MyAccountScreen = ({ navigation }) => {
                   </View>
 
                   <View style={styles.walletNote}>
-                    <AlertCircle size={16} color="#4F46E5" />
+                    <AlertCircle size={16} color="#1A7A4A" />
                     <Text style={styles.walletNoteText}>
                       To request a withdrawal, go to your Dashboard
                     </Text>
@@ -537,7 +518,7 @@ const MyAccountScreen = ({ navigation }) => {
                                 {
                                   backgroundColor:
                                     withdrawal.status === "completed"
-                                      ? "#ECFDF5"
+                                      ? "#EAF5EE"
                                       : withdrawal.status === "pending"
                                         ? "#FEF3C7"
                                         : "#FEE2E2",
@@ -545,7 +526,7 @@ const MyAccountScreen = ({ navigation }) => {
                               ]}
                             >
                               {withdrawal.status === "completed" && (
-                                <Check size={14} color="#10B981" />
+                                <Check size={14} color="#1A7A4A" />
                               )}
                               {withdrawal.status === "pending" && (
                                 <AlertCircle size={14} color="#F59E0B" />
@@ -571,7 +552,7 @@ const MyAccountScreen = ({ navigation }) => {
                               {
                                 color:
                                   withdrawal.status === "completed"
-                                    ? "#10B981"
+                                    ? "#1A7A4A"
                                     : withdrawal.status === "pending"
                                       ? "#F59E0B"
                                       : "#EF4444",
@@ -627,7 +608,7 @@ const MyAccountScreen = ({ navigation }) => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Request Withdrawal</Text>
               <TouchableOpacity onPress={() => setShowWithdrawModal(false)}>
-                <X size={24} color="#1F2937" />
+                <X size={24} color="#1A2E22" />
               </TouchableOpacity>
             </View>
 
@@ -645,7 +626,7 @@ const MyAccountScreen = ({ navigation }) => {
               <View style={styles.modalSection}>
                 <Text style={styles.modalLabel}>Withdrawal Amount</Text>
                 <View style={styles.withdrawInputContainer}>
-                  <DollarSign size={20} color="#4F46E5" />
+                  <DollarSign size={20} color="#1A7A4A" />
                   <TextInput
                     style={styles.withdrawInput}
                     placeholder="Enter amount"
@@ -710,10 +691,10 @@ const MyAccountScreen = ({ navigation }) => {
       </Modal>
     </SafeAreaView>
   );
-}; // ← MyAccountScreen closes here
+};
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F3F4F6" },
+  container: { flex: 1, backgroundColor: "#F4F8F4" },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -721,18 +702,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#D1E8D8",
   },
-  headerTitle: { fontSize: 18, fontWeight: "800", color: "#1F2937" },
-  editButton: { padding: 8, borderRadius: 12, backgroundColor: "#EEF2FF" },
+  headerTitle: { fontSize: 18, fontWeight: "800", color: "#1A2E22" },
+  editButton: { padding: 8, borderRadius: 12, backgroundColor: "#EAF5EE" },
   content: { flex: 1 },
   profileHeader: { alignItems: "center", paddingVertical: 24 },
   avatarLarge: {
     width: 90,
     height: 90,
     borderRadius: 45,
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#1A7A4A",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
@@ -743,22 +724,22 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: "#10B981",
+    backgroundColor: "#F59E0B",
     width: 28,
     height: 28,
     borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
-    borderColor: "#F3F4F6",
+    borderColor: "#F4F8F4",
   },
   profileName: {
     fontSize: 24,
     fontWeight: "800",
-    color: "#1F2937",
+    color: "#1A2E22",
     marginBottom: 4,
   },
-  profileEmail: { fontSize: 14, color: "#6B7280", fontWeight: "500" },
+  profileEmail: { fontSize: 14, color: "#4B7A5A", fontWeight: "500" },
   statsContainer: {
     flexDirection: "row",
     backgroundColor: "#FFFFFF",
@@ -766,11 +747,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 16,
     marginBottom: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
   },
   statBox: { flex: 1, alignItems: "center" },
   statIconCircle: {
@@ -781,20 +759,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
   },
-  statValue: { fontSize: 20, fontWeight: "800", color: "#1F2937" },
+  statValue: { fontSize: 20, fontWeight: "800", color: "#1A2E22" },
   statLabel: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#4B7A5A",
     fontWeight: "600",
     marginTop: 2,
   },
-  statDivider: { width: 1, backgroundColor: "#E5E7EB" },
+  statDivider: { width: 1, backgroundColor: "#D1E8D8" },
   sectionsWrapper: { paddingHorizontal: 16, gap: 24 },
   section: { gap: 0 },
   sectionTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#4B5563",
+    color: "#4B7A5A",
     textTransform: "uppercase",
     marginBottom: 12,
     letterSpacing: 0.5,
@@ -804,11 +782,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
     paddingHorizontal: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
   },
   infoRow: {
     flexDirection: "row",
@@ -819,12 +794,12 @@ const styles = StyleSheet.create({
   infoTextContainer: { flex: 1 },
   infoLabel: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: "#86A892",
     fontWeight: "600",
     marginBottom: 4,
   },
-  infoValue: { fontSize: 15, fontWeight: "600", color: "#1F2937" },
-  infoDivider: { height: 1, backgroundColor: "#F3F4F6", marginLeft: 34 },
+  infoValue: { fontSize: 15, fontWeight: "600", color: "#1A2E22" },
+  infoDivider: { height: 1, backgroundColor: "#EAF5EE", marginLeft: 34 },
   settingItem: {
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
@@ -832,19 +807,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
   },
   settingTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#1F2937",
+    color: "#1A2E22",
     marginBottom: 2,
   },
-  settingSubtitle: { fontSize: 12, color: "#9CA3AF" },
+  settingSubtitle: { fontSize: 12, color: "#86A892" },
   logoutButton: {
     marginHorizontal: 16,
     marginTop: 32,
@@ -855,19 +827,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
+    borderWidth: 0.5,
+    borderColor: "#FECACA",
   },
   logoutButtonText: { fontSize: 15, fontWeight: "700", color: "#EF4444" },
   editForm: { paddingHorizontal: 16 },
   sectionHeader: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F2937",
+    color: "#1A2E22",
     marginTop: 16,
     marginBottom: 16,
   },
   hintText: {
     fontSize: 13,
-    color: "#6B7280",
+    color: "#4B7A5A",
     marginBottom: 16,
     marginTop: -12,
   },
@@ -875,7 +849,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#4B5563",
+    color: "#4B7A5A",
     marginBottom: 8,
     marginLeft: 4,
   },
@@ -885,19 +859,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 15,
-    color: "#1F2937",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    color: "#1A2E22",
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
     fontWeight: "500",
   },
   saveButton: {
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#1A7A4A",
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
     marginTop: 24,
     marginBottom: 40,
-    shadowColor: "#4F46E5",
+    shadowColor: "#1A7A4A",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -909,48 +883,45 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
     borderLeftWidth: 4,
-    borderLeftColor: "#10B981",
+    borderLeftColor: "#1A7A4A",
   },
   walletHeader: { flexDirection: "row", alignItems: "center", gap: 16 },
   walletIconBox: {
     width: 50,
     height: 50,
     borderRadius: 12,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: "#EAF5EE",
     justifyContent: "center",
     alignItems: "center",
   },
-  walletLabel: { fontSize: 12, color: "#6B7280", fontWeight: "600" },
+  walletLabel: { fontSize: 12, color: "#4B7A5A", fontWeight: "600" },
   walletAmount: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#10B981",
+    color: "#1A7A4A",
     marginTop: 4,
   },
   walletStatsRow: {
     flexDirection: "row",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#F4F8F4",
     borderRadius: 16,
     padding: 12,
     marginBottom: 16,
   },
   walletStatBox: { flex: 1, alignItems: "center" },
-  walletStatLabel: { fontSize: 11, color: "#6B7280", fontWeight: "600" },
+  walletStatLabel: { fontSize: 11, color: "#4B7A5A", fontWeight: "600" },
   walletStatValue: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#1F2937",
+    color: "#1A2E22",
     marginTop: 4,
   },
-  walletStatDivider: { width: 1, backgroundColor: "#E5E7EB" },
+  walletStatDivider: { width: 1, backgroundColor: "#D1E8D8" },
   withdrawButton: {
-    backgroundColor: "#10B981",
+    backgroundColor: "#1A7A4A",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -958,7 +929,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     marginBottom: 20,
-    shadowColor: "#10B981",
+    shadowColor: "#1A7A4A",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -972,20 +943,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderLeftWidth: 5,
     borderLeftColor: "#F59E0B",
-    shadowColor: "#F59E0B",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 3,
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
   },
   upcomingTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#1F2937",
+    color: "#1A2E22",
     marginBottom: 14,
     paddingBottom: 12,
-    borderBottomWidth: 2,
-    borderBottomColor: "#FEF3C7",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EAF5EE",
   },
   upcomingPaymentCard: {
     backgroundColor: "#FFFBEB",
@@ -995,15 +963,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: "#FDE68A",
     borderLeftWidth: 5,
     borderLeftColor: "#F59E0B",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
   },
   paymentCardLeft: { flex: 1, paddingRight: 12 },
   paymentAmount: {
@@ -1029,38 +992,51 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: "#F59E0B",
     justifyContent: "center",
     alignItems: "center",
   },
-  paymentStatus: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: "#D97706",
-  },
+  paymentStatus: { fontSize: 11, fontWeight: "800", color: "#D97706" },
   emptyPaymentsBox: {
-    backgroundColor: "#F0FDF4",
+    backgroundColor: "#EAF5EE",
     borderRadius: 12,
     padding: 20,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#DCFCE7",
+    borderWidth: 1,
+    borderColor: "#A7D9B8",
     borderStyle: "dashed",
   },
   emptyPaymentsText: {
     fontSize: 13,
-    color: "#6B7280",
+    color: "#4B7A5A",
     textAlign: "center",
     fontWeight: "600",
     lineHeight: 20,
+  },
+  walletNote: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#EAF5EE",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 0.5,
+    borderColor: "#A7D9B8",
+  },
+  walletNoteText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#1A5C33",
+    fontWeight: "500",
   },
   historySection: { marginTop: 12 },
   historyTitle: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#1F2937",
+    color: "#1A2E22",
     marginBottom: 12,
   },
   historyItem: {
@@ -1069,7 +1045,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "#EAF5EE",
   },
   historyItemLeft: {
     flexDirection: "row",
@@ -1084,8 +1060,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  historyAmount: { fontSize: 14, fontWeight: "700", color: "#1F2937" },
-  historyDate: { fontSize: 12, color: "#6B7280", marginTop: 2 },
+  historyAmount: { fontSize: 14, fontWeight: "700", color: "#1A2E22" },
+  historyDate: { fontSize: 12, color: "#86A892", marginTop: 2 },
   historyStatus: { fontSize: 12, fontWeight: "600" },
   loadingBox: {
     paddingVertical: 40,
@@ -1111,39 +1087,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 20,
   },
-  modalTitle: { fontSize: 20, fontWeight: "800", color: "#1F2937" },
+  modalTitle: { fontSize: 20, fontWeight: "800", color: "#1A2E22" },
   modalBody: { paddingHorizontal: 20, maxHeight: "70%" },
   modalSection: { marginBottom: 24 },
   modalLabel: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#4B5563",
+    color: "#4B7A5A",
     marginBottom: 8,
   },
-  modalBalance: { fontSize: 28, fontWeight: "800", color: "#10B981" },
+  modalBalance: { fontSize: 28, fontWeight: "800", color: "#1A7A4A" },
   withdrawInputContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#F4F8F4",
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
   },
-  withdrawInput: { flex: 1, fontSize: 16, color: "#1F2937", fontWeight: "600" },
-  modalHint: { fontSize: 12, color: "#6B7280", marginTop: 8 },
+  withdrawInput: { flex: 1, fontSize: 16, color: "#1A2E22", fontWeight: "600" },
+  modalHint: { fontSize: 12, color: "#4B7A5A", marginTop: 8 },
   bankDetailsBox: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#F4F8F4",
     borderRadius: 12,
     padding: 12,
     borderLeftWidth: 4,
-    borderLeftColor: "#4F46E5",
+    borderLeftColor: "#1A7A4A",
   },
   bankDetailText: {
     fontSize: 13,
-    color: "#1F2937",
+    color: "#1A2E22",
     fontWeight: "600",
     marginVertical: 4,
   },
@@ -1166,20 +1142,20 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
+    borderWidth: 0.5,
+    borderColor: "#D1E8D8",
   },
   modalCancelText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#6B7280",
+    color: "#4B7A5A",
     textAlign: "center",
   },
   modalConfirmButton: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: "#10B981",
+    backgroundColor: "#1A7A4A",
     justifyContent: "center",
     alignItems: "center",
   },

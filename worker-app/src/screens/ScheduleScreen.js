@@ -25,6 +25,45 @@ import {
 } from "lucide-react-native";
 import axios from "axios";
 
+// ── Design tokens ──────────────────────────────────────────
+const C = {
+  bg: "#FFFFFF",
+  surface: "#FFFFFF",
+  surfaceMuted: "#F6FEFC",
+
+  border: "#E6F7F1",
+  borderStrong: "#D1FAE5",
+
+  green: "#10B981",
+  greenDark: "#059669",
+  greenDeep: "#047857",
+  greenDim: "#D1FAE5",
+  greenPale: "#ECFDF5",
+
+  amber: "#F59E0B",
+  blue: "#3B82F6",
+  red: "#EF4444",
+
+  text: "#111827",
+  textSub: "#6B7280",
+  textMute: "#9CA3AF",
+};
+
+const getStatusColor = (status) => {
+  switch (status?.toLowerCase()) {
+    case "completed":
+      return C.green;
+    case "in_progress":
+      return C.blue;
+    case "assigned":
+      return "#4F46E5";
+    case "pending":
+      return C.amber;
+    default:
+      return C.textSub;
+  }
+};
+
 const ScheduleScreen = ({ navigation }) => {
   const { workerInfo } = useContext(AuthContext);
   const [schedule, setSchedule] = useState([]);
@@ -38,36 +77,28 @@ const ScheduleScreen = ({ navigation }) => {
   const fetchSchedule = async () => {
     try {
       if (!workerInfo?.id) {
-        console.warn("Worker ID not available yet");
         setLoading(false);
         setRefreshing(false);
         return;
       }
-
       const workerId = workerInfo.id;
-      console.log("Fetching schedule for worker:", workerId);
-
       try {
         const scheduleRes = await axios.get(
           `${API_URL}/workers/${workerId}/schedule`,
         );
         setSchedule(scheduleRes.data || []);
-      } catch (scheduleError) {
-        console.error("Error fetching schedule:", scheduleError.message);
+      } catch (e) {
         setSchedule([]);
       }
-
       try {
         const availRes = await axios.get(
           `${API_URL}/workers/${workerId}/availability`,
         );
         setAvailability(availRes.data || {});
-      } catch (availError) {
-        console.error("Error fetching availability:", availError.message);
+      } catch (e) {
         setAvailability({});
       }
     } catch (error) {
-      console.error("Unexpected error in fetchSchedule:", error.message);
       setSchedule([]);
       setAvailability({});
     } finally {
@@ -85,32 +116,26 @@ const ScheduleScreen = ({ navigation }) => {
     fetchSchedule();
   };
 
-  const getDaysInMonth = (date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  };
+  const getDaysInMonth = (date) =>
+    new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 
-  const getFirstDayOfMonth = (date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  };
+  const getFirstDayOfMonth = (date) =>
+    new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
   const handleAvailabilityToggle = async (day) => {
     const dateKey = `date-${currentMonth.getFullYear()}-${currentMonth.getMonth() + 1}-${day}`;
     const newAvailability = { ...availability };
-
     if (!newAvailability[dateKey]) {
       newAvailability[dateKey] = true;
     } else {
       delete newAvailability[dateKey];
     }
-
     setAvailability(newAvailability);
-
     setSaving(true);
     try {
       await axios.put(`${API_URL}/workers/${workerInfo.id}/availability`, {
         availability: newAvailability,
       });
-      console.log(`✅ Availability updated for ${dateKey}`);
     } catch (error) {
       Alert.alert("Error", "Failed to update availability");
       setAvailability(availability);
@@ -125,7 +150,7 @@ const ScheduleScreen = ({ navigation }) => {
     const days = [];
 
     for (let i = 0; i < firstDay; i++) {
-      days.push(<View key={`empty-${i}`} style={styles.emptyCalendarDay} />);
+      days.push(<View key={`empty-${i}`} style={styles.emptyDay} />);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -141,8 +166,8 @@ const ScheduleScreen = ({ navigation }) => {
           key={day}
           style={[
             styles.calendarDay,
-            isToday && styles.todayDay,
-            isAvailable && styles.availableDay,
+            isToday && styles.calendarDayToday,
+            isAvailable && styles.calendarDayAvailable,
           ]}
           onPress={() => handleAvailabilityToggle(day)}
           disabled={saving}
@@ -150,60 +175,37 @@ const ScheduleScreen = ({ navigation }) => {
           <Text
             style={[
               styles.calendarDayText,
-              isAvailable && styles.availableDayText,
-              isToday && styles.todayDayText,
+              isAvailable && styles.calendarDayTextAvailable,
+              isToday && !isAvailable && styles.calendarDayTextToday,
             ]}
           >
             {day}
           </Text>
           {isAvailable && (
             <View style={styles.availableBadge}>
-              <Check size={10} color="#10B981" />
+              <Check size={8} color="#FFFFFF" />
             </View>
           )}
         </TouchableOpacity>,
       );
     }
-
     return days;
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4F46E5" />
+        <ActivityIndicator size="large" color={C.green} />
       </View>
     );
   }
 
-  const upcomingJobs = schedule
-    .filter(
-      (job) =>
-        new Date(job.schedule?.date || job.date) >=
-        new Date(new Date().setHours(0, 0, 0, 0)),
-    )
-    .sort(
-      (a, b) =>
-        new Date(a.schedule?.date || a.date) -
-        new Date(b.schedule?.date || b.date),
-    );
-
-  const pastJobs = schedule
-    .filter(
-      (job) =>
-        new Date(job.schedule?.date || job.date) <
-        new Date(new Date().setHours(0, 0, 0, 0)),
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.schedule?.date || b.date) -
-        new Date(a.schedule?.date || a.date),
-    );
-
   const renderJobCard = (job) => {
     const jobDate = job.schedule?.date || job.date;
-    const timeSlot = getDisplayTime(job.schedule) || `${job.startTime} - ${job.endTime}`;
+    const timeSlot =
+      getDisplayTime(job.schedule) || `${job.startTime} - ${job.endTime}`;
     const address = job.details?.address || job.address;
+    const statusColor = getStatusColor(job.status);
 
     return (
       <TouchableOpacity
@@ -214,66 +216,79 @@ const ScheduleScreen = ({ navigation }) => {
           navigation.navigate("AcceptedBookingDetail", { bookingId: job._id })
         }
       >
-        <View style={styles.cardHeader}>
-          <View style={styles.dateBox}>
-            <Text style={styles.dateDay}>
-              {new Date(jobDate).toLocaleDateString("en-GB", {
-                day: "numeric",
-              })}
-            </Text>
-            <Text style={styles.dateMonth}>
-              {new Date(jobDate).toLocaleDateString("en-GB", {
-                month: "short",
-              })}
-            </Text>
-          </View>
-          <View style={styles.headerContent}>
-            <Text style={styles.jobTitle}>
-              {job.service || job.serviceType || "Cleaning Service"}
-            </Text>
-            <View style={styles.timeRow}>
-              <Clock size={14} color="#6B7280" />
-              <Text style={styles.timeText}>{timeSlot}</Text>
-            </View>
-          </View>
-          <View
-            style={[
-              styles.statusPill,
-              { backgroundColor: getStatusColor(job.status) + "20" },
-            ]}
-          >
-            <Text
-              style={[styles.statusText, { color: getStatusColor(job.status) }]}
-            >
-              {job.status}
-            </Text>
-          </View>
-        </View>
+        {/* Left accent */}
+        <View style={[styles.jobAccent, { backgroundColor: statusColor }]} />
 
-        <View style={styles.cardBody}>
-          <View style={styles.locationRow}>
-            <View style={styles.iconCircle}>
-              <MapPin size={16} color="#4F46E5" />
+        <View style={styles.jobCardInner}>
+          {/* Top row */}
+          <View style={styles.jobCardTop}>
+            {/* Date box */}
+            <View style={styles.dateBox}>
+              <Text style={styles.dateDay}>
+                {new Date(jobDate).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                })}
+              </Text>
+              <Text style={styles.dateMonth}>
+                {new Date(jobDate).toLocaleDateString("en-GB", {
+                  month: "short",
+                })}
+              </Text>
             </View>
-            <Text style={styles.locationText} numberOfLines={2}>
+
+            {/* Title + time */}
+            <View style={styles.jobMeta}>
+              <Text style={styles.jobTitle}>
+                {job.service || job.serviceType || "Cleaning Service"}
+              </Text>
+              <View style={styles.metaRow}>
+                <Clock size={12} color={C.textSub} />
+                <Text style={styles.metaText}>{timeSlot}</Text>
+              </View>
+            </View>
+
+            {/* Status pill */}
+            <View
+              style={[
+                styles.statusPill,
+                { backgroundColor: statusColor + "20" },
+              ]}
+            >
+              <Text style={[styles.statusPillText, { color: statusColor }]}>
+                {job.status}
+              </Text>
+            </View>
+          </View>
+
+          {/* Location row */}
+          <View style={styles.locationRow}>
+            <View style={styles.locationIconWrap}>
+              <MapPin size={13} color={C.green} />
+            </View>
+            <Text style={styles.locationText} numberOfLines={1}>
               {address || "Location pending"}
             </Text>
           </View>
-        </View>
 
-        <View style={styles.cardFooter}>
-          <View style={styles.payoutBox}>
-            <Text style={styles.payoutLabel}>Est. Payout</Text>
-            <Text style={styles.payoutAmount}>
-              £
-              {(
-                (job.workerRate || 0) *
-                (job.details?.duration ||
-                  job.workerDuration ||
-                  job.duration ||
-                  0)
-              ).toFixed(2)}
-            </Text>
+          {/* Footer */}
+          <View style={styles.jobCardFooter}>
+            <View>
+              <Text style={styles.payoutLabel}>Est. Payout</Text>
+              <Text style={styles.payoutAmount}>
+                £
+                {(
+                  (job.workerRate || 0) *
+                  (job.details?.duration ||
+                    job.workerDuration ||
+                    job.duration ||
+                    0)
+                ).toFixed(2)}
+              </Text>
+            </View>
+            <View style={styles.detailsBtn}>
+              <Text style={styles.detailsBtnText}>Details</Text>
+              <ChevronRight size={13} color={C.green} />
+            </View>
           </View>
         </View>
       </TouchableOpacity>
@@ -282,40 +297,35 @@ const ScheduleScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* ── Header ── */}
       <View style={styles.header}>
-        <Calendar size={24} color="#1F2937" />
+        <View style={styles.headerIconWrap}>
+          <Calendar size={18} color={C.greenDark} />
+        </View>
         <Text style={styles.headerTitle}>My Schedule</Text>
-        <View style={{ width: 24 }} />
+        <View style={{ width: 38 }} />
       </View>
 
-      {/* Tab Switcher */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "jobs" && styles.activeTab]}
-          onPress={() => setActiveTab("jobs")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "jobs" && styles.activeTabText,
-            ]}
+      <View style={styles.headerDivider} />
+
+      {/* ── Tabs ── */}
+      <View style={styles.tabBar}>
+        {["jobs", "availability"].map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            style={[styles.tabItem, activeTab === tab && styles.tabItemActive]}
+            onPress={() => setActiveTab(tab)}
           >
-            My Jobs
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "availability" && styles.activeTab]}
-          onPress={() => setActiveTab("availability")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "availability" && styles.activeTabText,
-            ]}
-          >
-            Availability
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === tab && styles.tabTextActive,
+              ]}
+            >
+              {tab === "jobs" ? "My Jobs" : "Availability"}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       <ScrollView
@@ -325,40 +335,35 @@ const ScheduleScreen = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#4F46E5"]}
+            colors={[C.green]}
+            tintColor={C.green}
           />
         }
       >
         {activeTab === "jobs" ? (
-          // JOBS TAB
-          <>
-            {loading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#4F46E5" />
+          schedule.length === 0 ? (
+            <View style={styles.emptyState}>
+              <View style={styles.emptyIconWrap}>
+                <Calendar size={36} color={C.green} />
               </View>
-            ) : schedule.length === 0 ? (
-              <View style={styles.emptyState}>
-                <View style={styles.emptyIconBox}>
-                  <Calendar size={48} color="#9CA3AF" />
-                </View>
-                <Text style={styles.emptyStateText}>No scheduled jobs</Text>
-                <Text style={styles.emptyStateSubtext}>
-                  When you accept a job offer, it will appear here.
-                </Text>
-              </View>
-            ) : (
-              <View style={styles.sectionsContainer}>
-                {schedule.map((job) => renderJobCard(job))}
-              </View>
-            )}
-          </>
+              <Text style={styles.emptyTitle}>No scheduled jobs</Text>
+              <Text style={styles.emptySub}>
+                When you accept a job offer, it will appear here.
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.jobList}>
+              {schedule.map((job) => renderJobCard(job))}
+            </View>
+          )
         ) : (
-          // AVAILABILITY TAB
-          <View style={styles.availabilityContainer}>
+          // ── Availability tab ──
+          <View style={styles.availContainer}>
             <View style={styles.calendarCard}>
-              {/* Month Navigation */}
-              <View style={styles.monthNavigator}>
+              {/* Month nav */}
+              <View style={styles.monthNav}>
                 <TouchableOpacity
+                  style={styles.monthNavBtn}
                   onPress={() =>
                     setCurrentMonth(
                       new Date(
@@ -368,7 +373,7 @@ const ScheduleScreen = ({ navigation }) => {
                     )
                   }
                 >
-                  <ChevronLeft size={24} color="#4F46E5" />
+                  <ChevronLeft size={20} color={C.greenDark} />
                 </TouchableOpacity>
                 <Text style={styles.monthTitle}>
                   {currentMonth.toLocaleDateString("en-GB", {
@@ -377,6 +382,7 @@ const ScheduleScreen = ({ navigation }) => {
                   })}
                 </Text>
                 <TouchableOpacity
+                  style={styles.monthNavBtn}
                   onPress={() =>
                     setCurrentMonth(
                       new Date(
@@ -386,380 +392,463 @@ const ScheduleScreen = ({ navigation }) => {
                     )
                   }
                 >
-                  <ChevronRight size={24} color="#4F46E5" />
+                  <ChevronRight size={20} color={C.greenDark} />
                 </TouchableOpacity>
               </View>
 
-              {/* Day Headers */}
+              {/* Day headers */}
               <View style={styles.dayHeaderRow}>
-                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
-                  (day) => (
-                    <Text key={day} style={styles.dayHeader}>
-                      {day}
-                    </Text>
-                  ),
-                )}
+                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+                  <Text key={d} style={styles.dayHeader}>
+                    {d}
+                  </Text>
+                ))}
               </View>
 
-              {/* Calendar Grid */}
+              {/* Grid */}
               <View style={styles.calendarGrid}>{renderCalendarDays()}</View>
 
               {/* Legend */}
               <View style={styles.legend}>
                 <View style={styles.legendItem}>
                   <View
-                    style={[styles.legendBox, { backgroundColor: "#10B981" }]}
+                    style={[styles.legendSwatch, { backgroundColor: C.green }]}
                   />
                   <Text style={styles.legendText}>Available</Text>
                 </View>
                 <View style={styles.legendItem}>
                   <View
-                    style={[styles.legendBox, { backgroundColor: "#F3F4F6" }]}
+                    style={[
+                      styles.legendSwatch,
+                      {
+                        backgroundColor: C.greenPale,
+                        borderWidth: 1,
+                        borderColor: C.greenDim,
+                      },
+                    ]}
                   />
-                  <Text style={styles.legendText}>Not Available</Text>
+                  <Text style={styles.legendText}>Not set</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View
+                    style={[
+                      styles.legendSwatch,
+                      {
+                        backgroundColor: C.greenPale,
+                        borderWidth: 2,
+                        borderColor: C.green,
+                      },
+                    ]}
+                  />
+                  <Text style={styles.legendText}>Today</Text>
                 </View>
               </View>
 
-              <Text style={styles.availabilityHint}>
-                ℹ️ Tap dates to mark yourself as available
+              <Text style={styles.availHint}>
+                Tap dates to mark yourself as available
               </Text>
             </View>
           </View>
         )}
+
+        <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-const getStatusColor = (status) => {
-  switch (status?.toLowerCase()) {
-    case "completed":
-      return "#10B981";
-    case "in_progress":
-      return "#3B82F6";
-    case "assigned":
-      return "#4F46E5";
-    case "pending":
-      return "#F59E0B";
-    default:
-      return "#6B7280";
-  }
-};
-
+// ─────────────────────────────────────────────────────────────
+// STYLES
+// ─────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F3F4F6",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#1F2937",
-  },
-  tabContainer: {
-    flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    marginHorizontal: 8,
-    borderBottomWidth: 2,
-    borderBottomColor: "transparent",
-  },
-  activeTab: {
-    borderBottomColor: "#4F46E5",
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#6B7280",
-    textAlign: "center",
-  },
-  activeTabText: {
-    color: "#4F46E5",
-  },
-  content: {
-    flex: 1,
+    backgroundColor: C.bg,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: C.bg,
   },
-  sectionsContainer: {
-    paddingVertical: 20,
+
+  // ── Header ────────────────────────────────────────────────
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: C.surface,
+  },
+  headerDivider: {
+    height: 2,
+    backgroundColor: C.green,
+    opacity: 0.15,
+  },
+  headerIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: C.greenPale,
+    borderWidth: 1,
+    borderColor: C.greenDim,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: C.text,
+    letterSpacing: -0.2,
+  },
+
+  // ── Tabs ──────────────────────────────────────────────────
+  tabBar: {
+    flexDirection: "row",
+    backgroundColor: C.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: C.border,
+    paddingHorizontal: 8,
+  },
+  tabItem: {
+    flex: 1,
+    paddingVertical: 13,
+    alignItems: "center",
+    borderBottomWidth: 2,
+    borderBottomColor: "transparent",
+  },
+  tabItemActive: {
+    borderBottomColor: C.green,
+  },
+  tabText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: C.textSub,
+  },
+  tabTextActive: {
+    color: C.green,
+    fontWeight: "700",
+  },
+
+  // ── Content ───────────────────────────────────────────────
+  content: {
+    flex: 1,
+  },
+  jobList: {
+    padding: 16,
     gap: 12,
   },
+
+  // ── Job Card ──────────────────────────────────────────────
   jobCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 16,
-    shadowColor: "#000",
+    backgroundColor: C.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: C.border,
+    shadowColor: "#10B981",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
     elevation: 2,
+    flexDirection: "row",
+    overflow: "hidden",
+    marginBottom: 2,
   },
-  cardHeader: {
+  jobAccent: {
+    width: 4,
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+  },
+  jobCardInner: {
+    flex: 1,
+    padding: 14,
+  },
+  jobCardTop: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 16,
+    marginBottom: 12,
+    gap: 10,
   },
   dateBox: {
-    backgroundColor: "#F3F4F6",
-    borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    backgroundColor: C.greenPale,
+    borderRadius: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
     alignItems: "center",
-    marginRight: 12,
+    borderWidth: 1,
+    borderColor: C.greenDim,
+    minWidth: 44,
   },
   dateDay: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#1F2937",
+    color: C.greenDeep,
   },
   dateMonth: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#6B7280",
+    fontSize: 11,
+    fontWeight: "700",
+    color: C.green,
+    textTransform: "uppercase",
   },
-  headerContent: {
+  jobMeta: {
     flex: 1,
   },
   jobTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#1F2937",
+    color: C.text,
     marginBottom: 4,
   },
-  timeRow: {
+  metaRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
   },
-  timeText: {
+  metaText: {
     fontSize: 12,
-    color: "#6B7280",
+    color: C.textSub,
   },
   statusPill: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
+    alignSelf: "flex-start",
   },
-  statusText: {
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  cardBody: {
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
+  statusPillText: {
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "capitalize",
   },
   locationRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     gap: 8,
+    backgroundColor: C.surfaceMuted,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: C.border,
   },
-  iconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#EFF6FF",
+  locationIconWrap: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: C.greenPale,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 2,
   },
   locationText: {
     flex: 1,
-    fontSize: 13,
-    color: "#6B7280",
+    fontSize: 12,
+    color: C.textSub,
   },
-  cardFooter: {
+  jobCardFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-  },
-  payoutBox: {
-    flex: 1,
+    borderTopColor: C.border,
   },
   payoutLabel: {
-    fontSize: 11,
-    color: "#6B7280",
+    fontSize: 10,
+    color: C.textMute,
+    fontWeight: "600",
+    textTransform: "uppercase",
     marginBottom: 2,
   },
   payoutAmount: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#10B981",
+    fontSize: 17,
+    fontWeight: "800",
+    color: C.green,
   },
-  emptyState: {
-    justifyContent: "center",
+  detailsBtn: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 60,
+    gap: 3,
+    backgroundColor: C.greenPale,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: C.greenDim,
   },
-  emptyIconBox: {
+  detailsBtnText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: C.greenDark,
+  },
+
+  // ── Empty ─────────────────────────────────────────────────
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 70,
+    paddingHorizontal: 32,
+  },
+  emptyIconWrap: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: C.greenPale,
+    borderWidth: 1.5,
+    borderColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
   },
-  emptyStateText: {
+  emptyTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1F2937",
+    color: C.text,
     marginBottom: 8,
   },
-  emptyStateSubtext: {
+  emptySub: {
     fontSize: 14,
-    color: "#6B7280",
+    color: C.textSub,
     textAlign: "center",
-    paddingHorizontal: 40,
+    lineHeight: 20,
   },
-  // AVAILABILITY STYLES
-  availabilityContainer: {
+
+  // ── Availability / Calendar ────────────────────────────────
+  availContainer: {
     padding: 16,
     paddingBottom: 40,
   },
   calendarCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    backgroundColor: C.surface,
+    borderRadius: 20,
     padding: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: C.border,
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
     elevation: 2,
   },
-  monthNavigator: {
+  monthNav: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
-    paddingBottom: 16,
+    marginBottom: 16,
+    paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: C.border,
+  },
+  monthNavBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: C.greenPale,
+    borderWidth: 1,
+    borderColor: C.greenDim,
+    justifyContent: "center",
+    alignItems: "center",
   },
   monthTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
-    color: "#1F2937",
+    color: C.text,
   },
   dayHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-around",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   dayHeader: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#6B7280",
+    color: C.green,
     width: "14.28%",
     textAlign: "center",
   },
   calendarGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginBottom: 20,
+    marginBottom: 16,
+  },
+  emptyDay: {
+    width: "14.28%",
+    aspectRatio: 1,
   },
   calendarDay: {
     width: "14.28%",
     aspectRatio: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginVertical: 4,
+    marginVertical: 3,
     borderRadius: 8,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: C.greenPale,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: C.border,
   },
-  emptyCalendarDay: {
-    width: "14.28%",
-    aspectRatio: 1,
-  },
-  todayDay: {
+  calendarDayToday: {
     borderWidth: 2,
-    borderColor: "#4F46E5",
+    borderColor: C.green,
   },
-  availableDay: {
-    backgroundColor: "#D1FAE5",
-    borderColor: "#10B981",
-    borderWidth: 2,
+  calendarDayAvailable: {
+    backgroundColor: C.green,
+    borderColor: C.greenDark,
+    borderWidth: 1,
   },
   calendarDayText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
-    color: "#6B7280",
+    color: C.textSub,
   },
-  availableDayText: {
-    color: "#065F46",
-    fontWeight: "700",
+  calendarDayTextAvailable: {
+    color: "#FFFFFF",
+    fontWeight: "800",
   },
-  todayDayText: {
-    color: "#4F46E5",
-    fontWeight: "700",
+  calendarDayTextToday: {
+    color: C.greenDark,
+    fontWeight: "800",
   },
   availableBadge: {
     position: "absolute",
     top: 2,
     right: 2,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "#10B981",
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: C.greenDark,
     justifyContent: "center",
     alignItems: "center",
   },
   legend: {
     flexDirection: "row",
     justifyContent: "space-around",
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 8,
-    backgroundColor: "#F9FAFB",
-    borderRadius: 8,
+    backgroundColor: C.greenPale,
+    borderRadius: 10,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: C.border,
   },
   legendItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
   },
-  legendBox: {
-    width: 16,
-    height: 16,
+  legendSwatch: {
+    width: 14,
+    height: 14,
     borderRadius: 4,
   },
   legendText: {
-    fontSize: 12,
-    color: "#6B7280",
+    fontSize: 11,
+    color: C.textSub,
+    fontWeight: "600",
   },
-  availabilityHint: {
+  availHint: {
     fontSize: 12,
-    color: "#6B7280",
+    color: C.textMute,
     textAlign: "center",
-    marginTop: 8,
   },
 });
 
