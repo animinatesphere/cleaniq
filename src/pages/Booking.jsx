@@ -1358,12 +1358,21 @@ const Booking = () => {
                                         selectedDate.getFullYear() ===
                                           today.getFullYear()
                                       ) {
+                                        // Use local time (respects the user's browser timezone automatically)
                                         const currentHour = today.getHours();
+                                        const currentMinute =
+                                          today.getMinutes();
+                                        // Add a 30-min buffer so they can't book a slot that starts too soon
+                                        const effectiveHour =
+                                          currentMinute >= 30
+                                            ? currentHour + 1
+                                            : currentHour;
+
                                         availableSlots = allSlots.filter(
-                                          (s) => currentHour < s.limit,
+                                          (s) => effectiveHour < s.limit,
                                         );
                                         if (availableSlots.length === 0) {
-                                          availableSlots = [allSlots[2]]; // Fallback to Evening
+                                          availableSlots = []; // All slots passed — show no standard slots
                                         }
                                       }
                                     }
@@ -1412,23 +1421,68 @@ const Booking = () => {
                                     Choose Your Flexible Time
                                   </p>
                                   <p className="text-[9px] text-slate-400 mb-4">
-                                    Available: 12:30 PM - 10:00 PM
+                                    Available: 8:00 AM - 8:00 PM
                                   </p>
                                 </div>
 
                                 {/* Quick Select Buttons */}
                                 <div className="grid grid-cols-4 gap-2 mb-4">
                                   {(() => {
-                                    const quickTimes = [
+                                    // Filter quick times if today is selected
+                                    const isToday = (() => {
+                                      if (!formData.date) return false;
+                                      const sel = new Date(formData.date);
+                                      const now = new Date();
+                                      return (
+                                        sel.getDate() === now.getDate() &&
+                                        sel.getMonth() === now.getMonth() &&
+                                        sel.getFullYear() === now.getFullYear()
+                                      );
+                                    })();
+
+                                    const now = new Date();
+                                    // 30-min buffer: current time + 30 mins
+                                    const cutoffMinutes =
+                                      now.getHours() * 60 +
+                                      now.getMinutes() +
+                                      30;
+
+                                    const allQuickTimes = [
+                                      "08:00",
+                                      "08:30",
+                                      "09:00",
+                                      "09:30",
+                                      "10:00",
+                                      "10:30",
+                                      "11:00",
+                                      "11:30",
+                                      "12:00",
                                       "12:30",
+                                      "13:00",
+                                      "13:30",
                                       "14:00",
+                                      "14:30",
+                                      "15:00",
+                                      "15:30",
                                       "16:00",
+                                      "16:30",
+                                      "17:00",
+                                      "17:30",
                                       "18:00",
+                                      "18:30",
                                       "19:00",
+                                      "19:30",
                                       "20:00",
-                                      "21:00",
-                                      "22:00",
                                     ];
+
+                                    const quickTimes = isToday
+                                      ? allQuickTimes.filter((time) => {
+                                          const [h, m] = time
+                                            .split(":")
+                                            .map(Number);
+                                          return h * 60 + m > cutoffMinutes;
+                                        })
+                                      : allQuickTimes;
 
                                     return quickTimes.map((time) => {
                                       const isBooked =
@@ -1551,8 +1605,8 @@ const Booking = () => {
                                         }
                                       }}
                                       className="flex-1 p-4 rounded-xl bg-slate-50 border-2 border-slate-200 focus:border-primary focus:bg-white shadow-sm outline-none font-bold text-sm text-slate-700"
-                                      min="12:30"
-                                      max="22:00"
+                                      min="08:00"
+                                      max="20:00"
                                     />
                                     <span className="text-[9px] font-bold text-slate-500 text-center">
                                       {formData.preferredTime &&
