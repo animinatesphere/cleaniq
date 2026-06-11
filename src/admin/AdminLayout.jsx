@@ -109,7 +109,7 @@ const AdminLayout = () => {
       icon: <CheckCircle2 size={20} />,
     },
     {
-      name: "Withdrawals",
+      name: "Disbursement",
       path: "/admin/withdrawals",
       icon: <Wallet size={20} />,
     },
