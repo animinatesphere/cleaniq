@@ -364,9 +364,11 @@ router.post("/jobs/:id/complete", async (req, res) => {
 
     await booking.save();
 
-    // Update worker wallet - ensure wallet exists (balance calculated on fetch)
+    // Update worker wallet and create Withdrawal
     if (booking.assignedWorker) {
       const Worker = require("../models/Worker");
+      const Withdrawal = require("../models/Withdrawal");
+      
       const workerEarnings =
         (booking.workerRate || 0) *
         (booking.details?.duration ||
@@ -385,6 +387,44 @@ router.post("/jobs/:id/complete", async (req, res) => {
               withdrawn: 0,
             };
           }
+          
+          // Create an automatic 8-day payout withdrawal
+          const expectedPayoutDate = new Date();
+          expectedPayoutDate.setDate(expectedPayoutDate.getDate() + 8);
+          expectedPayoutDate.setHours(0, 0, 0, 0);
+
+          const jobRecord = {
+            bookingId: booking.bookingId,
+            service: booking.service,
+            amount: workerEarnings,
+            completedDate: booking.jobEndTime || new Date(),
+          };
+
+          const withdrawal = new Withdrawal({
+            workerId: worker._id,
+            workerName: `${worker.firstName} ${worker.lastName}`,
+            workerEmail: worker.email,
+            workerPhone: worker.phone,
+            workerAddress: worker.address,
+            workerPostcode: worker.postcode,
+            amount: workerEarnings,
+            completedJobs: [jobRecord],
+            bankDetails: worker.bankDetails ? {
+              accountName: worker.bankDetails.accountName,
+              accountNumber: worker.bankDetails.accountNumber,
+              sortCode: worker.bankDetails.sortCode,
+              bankName: worker.bankDetails.bankName,
+            } : {},
+            status: "upcoming",
+            payoutType: "fixed_8days",
+            expectedPayoutDate,
+          });
+
+          await withdrawal.save();
+          console.log(`✅ Created withdrawal: £${workerEarnings.toFixed(2)} for ${booking.service} on ${expectedPayoutDate.toDateString()}`);
+
+          // Add to onHold
+          worker.wallet.onHold = (worker.wallet.onHold || 0) + workerEarnings;
           worker.wallet.lastUpdated = new Date();
           await worker.save();
           console.log(

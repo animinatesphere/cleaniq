@@ -201,43 +201,28 @@ router.get("/upcoming-payments/:workerId", async (req, res) => {
       return res.status(404).json({ error: "Worker not found" });
     }
 
-    // Get earnings from completed jobs since last payout
-    const Booking = require("../models/Booking");
-    const completedBookings = await Booking.find({
-      assignedWorker: workerId,
-      status: "Completed",
-    }).select("bookingId service workerRate details");
+    // Get actual scheduled withdrawals
+    const upcomingWithdrawals = await Withdrawal.find({
+      workerId,
+      status: { $in: ["upcoming", "pending"] },
+    }).sort({ expectedPayoutDate: 1 });
 
     let totalEarnings = 0;
     let jobsList = [];
+    let nextPayoutDate = null;
 
-    if (completedBookings.length > 0) {
-      jobsList = completedBookings.map((booking) => {
-        const earnings =
-          (booking.workerRate || 0) *
-          (booking.details?.duration || booking.workerDuration || 0);
-        totalEarnings += earnings;
-        return {
-          bookingId: booking.bookingId,
-          service: booking.service || "Cleaning Service",
-          amount: earnings,
-          completedDate: booking.updatedAt,
-        };
+    if (upcomingWithdrawals.length > 0) {
+      // The earliest upcoming date
+      nextPayoutDate = upcomingWithdrawals[0].expectedPayoutDate;
+      upcomingWithdrawals.forEach((withdrawal) => {
+        totalEarnings += withdrawal.amount;
+        if (withdrawal.completedJobs && withdrawal.completedJobs.length > 0) {
+          jobsList = [...jobsList, ...withdrawal.completedJobs];
+        }
       });
     }
 
-    // Calculate next payout date (default weekly on Monday)
-    const today = new Date();
-    const payoutType = worker.payoutPreference || "weekly";
-    let nextPayoutDate = new Date(today);
-
-    if (payoutType === "weekly") {
-      const daysUntilMonday = (1 - today.getDay() + 7) % 7 || 7;
-      nextPayoutDate.setDate(today.getDate() + daysUntilMonday);
-    } else if (payoutType === "monthly") {
-      nextPayoutDate.setMonth(today.getMonth() + 1);
-      nextPayoutDate.setDate(1);
-    }
+    const payoutType = worker.payoutPreference || "fixed_8days";
 
     res.json({
       totalEarnings,

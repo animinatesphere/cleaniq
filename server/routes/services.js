@@ -119,6 +119,25 @@ router.put("/:id", async (req, res) => {
     );
     if (!service) return res.status(404).json({ message: "Service not found" });
 
+    // Sync updated rate to pending/assigned bookings so workers see the new rate instantly
+    if (workerHourlyRate !== undefined || workerPaymentRate !== undefined) {
+      try {
+        const Booking = require("../models/Booking");
+        const newRate = service.type === "hourly" ? service.workerHourlyRate : service.workerPaymentRate;
+        
+        const updateResult = await Booking.updateMany(
+          { 
+            service: service.name, 
+            status: { $nin: ["Completed", "Cancelled"] } 
+          },
+          { $set: { workerRate: newRate || 0 } }
+        );
+        console.log(`✅ Synced new rate (£${newRate}) to ${updateResult.modifiedCount} pending bookings for ${service.name}`);
+      } catch (syncErr) {
+        console.error("⚠️ Failed to sync rate to pending bookings:", syncErr);
+      }
+    }
+
     console.log(
       `✅ Updated service ${service.name}: hourlyRate=${service.workerHourlyRate}`,
     );
