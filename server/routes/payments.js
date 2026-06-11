@@ -161,7 +161,7 @@ router.get("/wallet/:workerId", async (req, res) => {
     const withdrawn = worker.wallet.withdrawn || 0;
 
     // Calculate available balance
-    const balance = Math.max(0, totalEarned - onHold);
+    const balance = Math.max(0, totalEarned - onHold - withdrawn);
 
     console.log(
       `💼 Wallet Summary: totalEarned=£${totalEarned.toFixed(
@@ -549,7 +549,7 @@ router.post("/withdraw/:workerId", async (req, res) => {
     // Calculate available balance dynamically
     const onHold = worker.wallet.onHold || 0;
     const withdrawn = worker.wallet.withdrawn || 0;
-    const availableBalance = Math.max(0, totalEarned - onHold);
+    const availableBalance = Math.max(0, totalEarned - onHold - worker.wallet.withdrawn);
 
     console.log(
       `💰 Withdrawal check: totalEarned=£${totalEarned.toFixed(
@@ -594,7 +594,7 @@ router.post("/withdraw/:workerId", async (req, res) => {
 
     console.log(
       `✅ Withdrawal request created: £${amount} moved to onHold. New balance: £${(
-        totalEarned - worker.wallet.onHold
+        totalEarned - worker.wallet.onHold - worker.wallet.withdrawn
       ).toFixed(2)}`,
     );
 
@@ -721,7 +721,7 @@ router.put("/admin/withdrawals/:withdrawalId/approve", async (req, res) => {
     worker.wallet.withdrawn =
       (worker.wallet.withdrawn || 0) + withdrawal.amount;
     worker.wallet.balance =
-      (worker.wallet.totalEarned || 0) - worker.wallet.withdrawn;
+      (worker.wallet.totalEarned || 0) - worker.wallet.onHold - worker.wallet.withdrawn;
     worker.wallet.lastUpdated = new Date();
 
     console.log(
