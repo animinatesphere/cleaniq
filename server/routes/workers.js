@@ -409,13 +409,13 @@ router.post("/jobs/:id/complete", async (req, res) => {
             workerPostcode: worker.postcode,
             amount: workerEarnings,
             completedJobs: [jobRecord],
-            bankDetails: worker.bankDetails ? {
-              accountName: worker.bankDetails.accountName,
-              accountNumber: worker.bankDetails.accountNumber,
-              sortCode: worker.bankDetails.sortCode,
-              bankName: worker.bankDetails.bankName,
-            } : {},
-            status: "upcoming",
+            bankDetails: {
+              accountName: worker.bankDetails?.accountName || "Pending Setup",
+              accountNumber: worker.bankDetails?.accountNumber || "Pending Setup",
+              sortCode: worker.bankDetails?.sortCode || "Pending Setup",
+              bankName: worker.bankDetails?.bankName || "Pending Setup",
+            },
+            status: "pending",
             payoutType: "fixed_8days",
             expectedPayoutDate,
           });

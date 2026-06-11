@@ -46,7 +46,7 @@ const withdrawalSchema = new mongoose.Schema({
   },
   payoutType: {
     type: String,
-    enum: ["weekly", "monthly"],
+    enum: ["weekly", "monthly", "fixed_8days"],
     default: "weekly",
   },
   expectedPayoutDate: { type: Date }, // When payout is scheduled
