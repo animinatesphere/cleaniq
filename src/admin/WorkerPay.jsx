@@ -121,22 +121,25 @@ const WorkerPay = () => {
   // Save a single booking's pay
   const handleSavePay = async (booking) => {
     const vals = editMap[booking._id] || {};
+    const newRate = parseFloat(vals.workerRate) || 0;
     setSavingId(booking._id);
     try {
       const res = await fetch(`${API}/bookings/${booking._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...booking,
-          workerRate: parseFloat(vals.workerRate) || 0,
+          workerRate: newRate,
         }),
       });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to save");
+      }
       setEditingId(null);
-      flash("success", `✅ Pay updated for booking ${booking.bookingId}`);
+      flash("success", `Pay updated for booking ${booking.bookingId}: £${newRate.toFixed(2)}/hr`);
       fetchBookings();
     } catch (err) {
-      flash("error", "❌ Failed to update booking pay.");
+      flash("error", `Failed to update booking pay: ${err.message}`);
     } finally {
       setSavingId(null);
     }

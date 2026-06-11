@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { getDisplayTime } from "../utils/timeUtils";
 import {
   View,
   Text,
@@ -358,9 +359,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.scheduleLabel}>Time</Text>
                 <Text style={styles.scheduleValue}>
-                  {offer.schedule?.timeSlot ||
-                    offer.schedule?.preferredTime ||
-                    "Flexible"}
+                  {getDisplayTime(offer.schedule)}
                 </Text>
               </View>
             </View>

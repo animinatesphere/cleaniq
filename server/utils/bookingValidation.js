@@ -77,7 +77,7 @@ export const bookingValidationSchema = {
     },
     timeSlot: {
       required: true,
-      enum: ["Morning", "Afternoon", "Evening"],
+      enum: ["Morning", "Afternoon", "Evening", "Flexible"],
       message: "Valid time slot must be selected",
     },
     preferredTime: {

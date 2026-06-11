@@ -389,9 +389,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.scheduleLabel}>Time</Text>
                 <Text style={styles.scheduleValue}>
-                  {booking.schedule?.timeSlot ||
-                    booking.schedule?.preferredTime ||
-                    "Flexible"}
+                  {getDisplayTime(booking.schedule)}
                 </Text>
               </View>
             </View>

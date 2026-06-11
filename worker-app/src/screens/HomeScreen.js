@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
+import { getDisplayTime } from "../utils/timeUtils";
 import {
   View,
   Text,
@@ -516,9 +517,7 @@ const HomeScreen = ({ navigation, route }) => {
                 <View style={styles.jobInfoRow}>
                   <Clock size={14} color="#6B7280" />
                   <Text style={styles.jobInfoText}>
-                    {job.schedule?.timeSlot ||
-                      job.schedule?.preferredTime ||
-                      "Time TBC"}
+                    {getDisplayTime(job.schedule)}
                   </Text>
                 </View>
                 <View style={styles.jobInfoRow}>
@@ -674,9 +673,7 @@ const HomeScreen = ({ navigation, route }) => {
                 <View style={styles.jobInfoRow}>
                   <Clock size={14} color="#6B7280" />
                   <Text style={styles.jobInfoText}>
-                    {job.schedule?.timeSlot ||
-                      job.schedule?.preferredTime ||
-                      "Time TBC"}
+                    {getDisplayTime(job.schedule)}
                   </Text>
                 </View>
                 <View style={styles.jobInfoRow}>
@@ -790,9 +787,7 @@ const HomeScreen = ({ navigation, route }) => {
                         )
                       : "Date TBC"}{" "}
                     •{" "}
-                    {job.schedule?.timeSlot ||
-                      job.schedule?.preferredTime ||
-                      "Time TBC"}
+                    {getDisplayTime(job.schedule)}
                   </Text>
                 </View>
                 <View style={styles.offerRow}>

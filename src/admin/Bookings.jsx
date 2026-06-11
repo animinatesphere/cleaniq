@@ -635,7 +635,7 @@ const Bookings = () => {
     }
     if (fieldPath === "schedule.timeSlot") {
       if (!value) return "Time slot is required";
-      if (!["Morning", "Afternoon", "Evening"].includes(value))
+      if (!["Morning", "Afternoon", "Evening", "Flexible"].includes(value))
         return "Valid time slot must be selected";
       return "";
     }

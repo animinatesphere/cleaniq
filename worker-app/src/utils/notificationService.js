@@ -10,7 +10,7 @@
 import axios from "axios";
 import { API_URL } from "../context/AuthContext";
 
-// Safely import Notifications (may not be available in Expo Go SDK 53+)
+// Safely import expo-notifications — skip in Expo Go SDK 53+
 let Notifications = null;
 try {
   const Constants = require("expo-constants").default;
@@ -20,31 +20,14 @@ try {
     Notifications = require("expo-notifications");
   } else {
     console.log(
-      "🛡️ Expo Go detected: Notifications will be fetched only (no local notification sounds in Expo Go SDK 53+)",
+      "🛡️ notificationService: Skipping expo-notifications in Expo Go (SDK 53+)",
     );
   }
 } catch (err) {
-  console.log("⚠️ Could not load expo-notifications:", err.message);
-}
-
-// Configure notification channel for Android with sound
-async function configureAndroidNotificationChannel() {
-  if (Notifications && Notifications.setNotificationChannelAsync) {
-    try {
-      await Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.HIGH,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-        sound: true,
-        enableLED: true,
-        enableVibrate: true,
-      });
-      console.log("✅ Android notification channel configured");
-    } catch (error) {
-      console.error("Error configuring notification channel:", error);
-    }
-  }
+  console.log(
+    "notificationService: expo-notifications not available:",
+    err.message,
+  );
 }
 
 class NotificationService {
@@ -53,9 +36,6 @@ class NotificationService {
     this.lastNotificationIds = new Set();
     this.pollingActive = false;
     this.Notifications = Notifications;
-    if (Notifications) {
-      configureAndroidNotificationChannel();
-    }
   }
 
   /**
@@ -71,7 +51,7 @@ class NotificationService {
 
     this.pollingActive = true;
     console.log(
-      `🔔 Starting notification polling for worker: ${workerId} (interval: ${pollIntervalMs}ms)`,
+      `Starting notification polling for worker: ${workerId} (interval: ${pollIntervalMs}ms)`,
     );
 
     // Initial check
@@ -91,7 +71,7 @@ class NotificationService {
       clearInterval(this.pollInterval);
       this.pollInterval = null;
       this.pollingActive = false;
-      console.log("🛑 Notification polling stopped");
+      console.log("Notification polling stopped");
     }
   }
 
@@ -104,29 +84,18 @@ class NotificationService {
       const response = await axios.get(`${API_URL}/notifications/${workerId}`);
       const notifications = response.data || [];
 
-      console.log(
-        `📡 Fetched ${notifications.length} notifications from backend`,
-      );
-
       // Check for new notifications
       for (const notification of notifications) {
-        const notifId = notification._id || notification.id;
-        if (!this.lastNotificationIds.has(notifId)) {
-          this.lastNotificationIds.add(notifId);
-          console.log(
-            `🆕 NEW notification detected: "${notification.title}" - ${notification.message}`,
-          );
+        if (!this.lastNotificationIds.has(notification._id)) {
+          this.lastNotificationIds.add(notification._id);
+          console.log("New notification received:", notification.title);
 
           // Show local notification with sound
           await this.showNotificationWithSound(notification);
         }
       }
     } catch (error) {
-      console.error(
-        "Error fetching notifications:",
-        error.response?.status,
-        error.message,
-      );
+      console.error("Error fetching notifications:", error.message);
     }
   }
 
@@ -137,11 +106,11 @@ class NotificationService {
   async showNotificationWithSound(notification) {
     try {
       if (!this.Notifications) {
-        console.log("Notifications not available");
+        console.log("Notifications not available in this client");
         return;
       }
 
-      // Schedule local notification with sound
+      // Schedule local notification
       await this.Notifications.scheduleNotificationAsync({
         content: {
           title: notification.title || "New Notification",
@@ -155,7 +124,6 @@ class NotificationService {
           badge: 1,
           // Android specific
           android: {
-            channelId: "default",
             sound: true,
             priority: "high",
             vibrate: [0, 250, 250, 250],
@@ -164,7 +132,7 @@ class NotificationService {
         trigger: null, // Show immediately
       });
 
-      console.log("✅ Local notification scheduled with sound");
+      console.log("Local notification scheduled");
     } catch (error) {
       console.error("Error showing notification:", error);
     }
@@ -183,7 +151,7 @@ class NotificationService {
       };
 
       await this.showNotificationWithSound(testNotif);
-      console.log("✅ Test notification sent");
+      console.log("Test notification sent");
     } catch (error) {
       console.error("Error sending test notification:", error);
     }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { getDisplayTime } from "../utils/timeUtils";
 import {
   View,
   Text,
@@ -417,7 +418,7 @@ const JobsFeedScreen = ({ navigation }) => {
         <View style={styles.infoRow}>
           <Clock size={16} color="#64748B" />
           <Text style={styles.infoText}>
-            {item.schedule?.timeSlot || "Flexible"}
+            {getDisplayTime(item.schedule)}
           </Text>
         </View>
         <View style={styles.infoRow}>
@@ -522,7 +523,7 @@ const JobsFeedScreen = ({ navigation }) => {
           <View style={styles.infoRow}>
             <Clock size={16} color="#64748B" />
             <Text style={styles.infoText}>
-              {item.schedule?.timeSlot || "Flexible"} (
+              {getDisplayTime(item.schedule)} (
               {item.details?.duration || 2} hrs booked)
             </Text>
           </View>

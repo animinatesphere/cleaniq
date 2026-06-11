@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { getDisplayTime } from "../utils/timeUtils";
 import {
   View,
   Text,
@@ -201,8 +202,7 @@ const ScheduleScreen = ({ navigation }) => {
 
   const renderJobCard = (job) => {
     const jobDate = job.schedule?.date || job.date;
-    const timeSlot =
-      job.schedule?.timeSlot || `${job.startTime} - ${job.endTime}`;
+    const timeSlot = getDisplayTime(job.schedule) || `${job.startTime} - ${job.endTime}`;
     const address = job.details?.address || job.address;
 
     return (
