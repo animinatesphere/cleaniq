@@ -33,8 +33,148 @@ import {
 } from "lucide-react";
 import AdminCRM from "./AdminCRM";
 
-const AdminCalendar = ({ bookings, onToggleDate }) => {
+const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [showRecurring, setShowRecurring] = useState(false);
+  const [recurringLoading, setRecurringLoading] = useState(false);
+  const [recurringSuccess, setRecurringSuccess] = useState(null);
+  const [recurringForm, setRecurringForm] = useState({
+    frequency: "weekly",
+    startDate: "",
+    endDate: "",
+    timeSlot: "Morning (8am-12pm)",
+    customerFirstName: "",
+    customerLastName: "",
+    customerEmail: "",
+    customerPhone: "",
+    address: "",
+    postcode: "",
+    service: "Residential Cleaning",
+    duration: 3,
+    amount: "",
+    region: "UK",
+    notes: "",
+  });
+
+  const [servicesList, setServicesList] = useState([]);
+  const [dynamicRates, setDynamicRates] = useState({});
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/services`);
+        const data = await res.json();
+        setServicesList(data || []);
+        const ratesObj = {};
+        data.forEach((s) => {
+          ratesObj[(s.name || "").toLowerCase().replace(/[^a-z0-9]/g, "")] = s.rate;
+        });
+        setDynamicRates(ratesObj);
+      } catch (err) {
+        console.error("Failed to load services for recurring calendar:", err);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  const createServiceOptions = useMemo(() => {
+    const bases = servicesList.filter((s) => s.category === "Base");
+    const keys = ["residential", "commercial", "move", "airbnb", "tenancy"];
+    const optionAssets = {
+      residential: {
+        tag: "Reliable domestic cleaners",
+        bullets: [
+          "Dusting",
+          "Vacuuming",
+          "Kitchen degreasing",
+          "Bathroom sanitization",
+        ],
+        icon: <HomeIcon />,
+        defaultId: "Residential Cleaning",
+        defaultTitle: "Residential Cleaning",
+      },
+      commercial: {
+        tag: "Expert office cleaning",
+        bullets: ["Workstation sanitization", "Communal area cleaning"],
+        icon: <Briefcase />,
+        defaultId: "Office Cleaning",
+        defaultTitle: "Office Cleaning",
+      },
+      move: {
+        tag: "Deep cleaning",
+        bullets: ["Inside cabinets", "Baseboard scrubbing"],
+        icon: <Zap />,
+        defaultId: "Deep Clean",
+        defaultTitle: "Deep Clean",
+      },
+      airbnb: {
+        tag: "Short-let specialist",
+        bullets: ["Linen & towel change", "Guest amenity restock"],
+        icon: <Star />,
+        defaultId: "Airbnb Cleaning",
+        defaultTitle: "Airbnb Cleaning",
+      },
+      tenancy: {
+        tag: "Moving out/in clean",
+        bullets: ["Full property deep clean", "Appliance deep clean"],
+        icon: <Truck />,
+        defaultId: "End of Tenancy",
+        defaultTitle: "End of Tenancy",
+      },
+    };
+
+    const getLayoutKey = (name) => {
+      const clean = (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (
+        clean.includes("residential") ||
+        clean.includes("domestic") ||
+        clean.includes("home")
+      )
+        return "residential";
+      if (clean.includes("office") || clean.includes("commercial"))
+        return "commercial";
+      if (clean.includes("deep") || clean.includes("move")) return "move";
+      if (clean.includes("airbnb") || clean.includes("short")) return "airbnb";
+      if (clean.includes("tenancy") || clean.includes("moveout"))
+        return "tenancy";
+      return "residential";
+    };
+
+    const mapped = bases.map((s) => {
+      const key = getLayoutKey(s.name);
+      const assets = optionAssets[key];
+      return {
+        id: s.name,
+        title: s.name,
+        tag: assets.tag,
+        bullets: assets.bullets,
+        icon: assets.icon,
+        layoutId: key,
+      };
+    });
+    keys.forEach((k) => {
+      if (!mapped.some((m) => m.layoutId === k))
+        mapped.push({
+          id: optionAssets[k].defaultId,
+          title: optionAssets[k].defaultTitle,
+          tag: optionAssets[k].tag,
+          bullets: optionAssets[k].bullets,
+          icon: optionAssets[k].icon,
+          layoutId: k,
+        });
+    });
+    return mapped;
+  }, [servicesList]);
+
+  // Set initial default calculated price when dynamicRates or service/duration are loaded/change
+  useEffect(() => {
+    if (Object.keys(dynamicRates).length > 0 && !recurringForm.amount) {
+      const key = (recurringForm.service || "").toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+      const rate = parseFloat(dynamicRates[key]) || 20;
+      setRecurringForm(f => ({ ...f, amount: String(rate * f.duration) }));
+    }
+  }, [dynamicRates]);
+
 
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
   const startDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
@@ -73,90 +213,472 @@ const AdminCalendar = ({ bookings, onToggleDate }) => {
     });
   };
 
+  // Calculate preview of dates that will be generated
+  const getPreviewDates = () => {
+    if (!recurringForm.startDate || !recurringForm.endDate) return [];
+    const dates = [];
+    const start = new Date(recurringForm.startDate);
+    const end = new Date(recurringForm.endDate);
+    if (start > end) return [];
+    let current = new Date(start);
+    const maxDates = 365;
+    while (current <= end && dates.length < maxDates) {
+      dates.push(new Date(current));
+      if (recurringForm.frequency === "daily") {
+        current.setDate(current.getDate() + 1);
+      } else if (recurringForm.frequency === "weekly") {
+        current.setDate(current.getDate() + 7);
+      } else if (recurringForm.frequency === "fortnightly") {
+        current.setDate(current.getDate() + 14);
+      } else if (recurringForm.frequency === "monthly") {
+        current.setMonth(current.getMonth() + 1);
+      }
+    }
+    return dates;
+  };
+
+  const previewDates = getPreviewDates();
+
+  const handleCreateRecurring = async () => {
+    if (!recurringForm.startDate || !recurringForm.endDate) {
+      alert("Please select both start and end dates.");
+      return;
+    }
+    if (!recurringForm.customerEmail || !recurringForm.customerFirstName) {
+      alert("Customer name and email are required.");
+      return;
+    }
+    if (!recurringForm.address) {
+      alert("Service address is required.");
+      return;
+    }
+    if (previewDates.length === 0) {
+      alert("No dates would be generated with these settings.");
+      return;
+    }
+    if (previewDates.length > 200) {
+      alert(`This would create ${previewDates.length} bookings — please shorten the date range.`);
+      return;
+    }
+
+    setRecurringLoading(true);
+    try {
+      const bookingsToCreate = previewDates.map((date) => {
+        const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+        const rand = Math.random().toString(36).substr(2, 6).toUpperCase();
+        return {
+          bookingId: `BK-${rand}`,
+          customer: {
+            firstName: recurringForm.customerFirstName,
+            lastName: recurringForm.customerLastName,
+            email: recurringForm.customerEmail,
+            phone: recurringForm.customerPhone,
+          },
+          service: recurringForm.service,
+          details: {
+            address: recurringForm.address,
+            postcode: recurringForm.postcode,
+            frequency: recurringForm.frequency.charAt(0).toUpperCase() + recurringForm.frequency.slice(1),
+            duration: recurringForm.duration,
+            extras: [],
+            notes: recurringForm.notes,
+          },
+          schedule: {
+            date: dateStr,
+            timeSlot: recurringForm.timeSlot,
+            preferredTime: "",
+          },
+          payment: {
+            amount: parseFloat(recurringForm.amount) || 0,
+            currency: "GBP",
+            status: "Pending",
+            method: "Bank Transfer",
+          },
+          region: recurringForm.region,
+          status: "Confirmed",
+          meta: { recurringGroup: `REC-${Date.now()}` },
+        };
+      });
+
+      // Create all bookings sequentially
+      let created = 0;
+      for (const bk of bookingsToCreate) {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bk),
+        });
+        if (res.ok) created++;
+      }
+
+      setRecurringSuccess(created);
+      if (onBookingsCreated) onBookingsCreated();
+      setRecurringForm({
+        frequency: "weekly", startDate: "", endDate: "",
+        timeSlot: "Morning (8am-12pm)", customerFirstName: "", customerLastName: "",
+        customerEmail: "", customerPhone: "", address: "", postcode: "",
+        service: "Residential Cleaning", duration: 3, amount: "", region: "UK", notes: "",
+      });
+    } catch (err) {
+      alert("Error creating recurring bookings: " + err.message);
+    } finally {
+      setRecurringLoading(false);
+    }
+  };
+
+  const inputStyle = {
+    width: "100%", padding: "10px 14px", borderRadius: "12px",
+    border: "1.5px solid #e2e8f0", fontSize: "13px", outline: "none",
+    boxSizing: "border-box", fontFamily: "inherit", color: "#0F172A",
+    background: "white",
+  };
+  const labelStyle = {
+    display: "block", marginBottom: "6px", fontSize: "11px",
+    fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: "1px",
+  };
+
   return (
-    <div className="bg-white rounded-[40px] p-10 border border-slate-200 shadow-sm animate-in fade-in">
-      <div className="flex justify-between items-center mb-10">
-        <div>
-          <h3 className="text-2xl font-black text-primary-dark tracking-tighter">
-            {currentMonth.toLocaleString("default", { month: "long" })}{" "}
-            <span className="text-primary">{currentMonth.getFullYear()}</span>
-          </h3>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-            Click any date to Block/Unblock
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={handlePrevMonth}
-            className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button
-            onClick={handleNextMonth}
-            className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
-          >
-            <ChevronRight size={20} />
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-7 gap-2 mb-4">
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-          <div
-            key={d}
-            className="text-[10px] font-black text-slate-300 uppercase text-center py-2"
-          >
-            {d}
+    <div className="space-y-6">
+      {/* ── MAIN CALENDAR ───────────────────────────────────── */}
+      <div className="bg-white rounded-[40px] p-10 border border-slate-200 shadow-sm animate-in fade-in">
+        <div className="flex justify-between items-center mb-10">
+          <div>
+            <h3 className="text-2xl font-black text-primary-dark tracking-tighter">
+              {currentMonth.toLocaleString("default", { month: "long" })}{" "}
+              <span className="text-primary">{currentMonth.getFullYear()}</span>
+            </h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+              Click any date to Block/Unblock
+            </p>
           </div>
-        ))}
+          <div className="flex gap-3 items-center">
+            <button
+              onClick={() => { setShowRecurring(!showRecurring); setRecurringSuccess(null); }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all border-2"
+              style={{
+                background: showRecurring ? "linear-gradient(135deg,#0F172A,#1e3a5f)" : "white",
+                color: showRecurring ? "#6EE7B7" : "#0F172A",
+                borderColor: showRecurring ? "#0F172A" : "#e2e8f0",
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/>
+              </svg>
+              {showRecurring ? "Hide Recurring" : "Create Recurring Booking"}
+            </button>
+            <button
+              onClick={handlePrevMonth}
+              className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              onClick={handleNextMonth}
+              className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-7 gap-2 mb-4">
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+            <div
+              key={d}
+              className="text-[10px] font-black text-slate-300 uppercase text-center py-2"
+            >
+              {d}
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-3">
+          {days.map((date, i) => {
+            const dayBookings = getBookingsForDate(date);
+            const isBlocked = dayBookings.some(
+              (b) =>
+                b.status === "Blackout" ||
+                b.customer?.firstName === "ADMIN_BLOCK",
+            );
+            const hasBookings = dayBookings.some(
+              (b) =>
+                b.status !== "Blackout" &&
+                b.customer?.firstName !== "ADMIN_BLOCK",
+            );
+            // Highlight recurring bookings
+            const hasRecurring = dayBookings.some((b) => b.meta?.recurringGroup);
+
+            return (
+              <div key={i} className="aspect-square">
+                {date ? (
+                  <button
+                    onClick={() => onToggleDate(date, isBlocked)}
+                    className={`w-full h-full rounded-[24px] flex flex-col items-center justify-center transition-all relative border-2 group
+                      ${isBlocked ? "bg-rose-50 border-rose-200 text-rose-500" : hasBookings ? "bg-emerald-50 border-emerald-200 text-emerald-600" : "bg-slate-50 border-transparent text-slate-400 hover:border-primary/30"}
+                    `}
+                  >
+                    <span className="text-sm font-black">{date.getDate()}</span>
+                    {isBlocked && (
+                      <span className="text-[7px] font-black uppercase absolute bottom-2">
+                        Blocked
+                      </span>
+                    )}
+                    {hasBookings && !isBlocked && (
+                      <span className="text-[7px] font-black uppercase absolute bottom-2">
+                        {dayBookings.length} Booking{dayBookings.length > 1 ? "s" : ""}
+                      </span>
+                    )}
+                    {hasRecurring && !isBlocked && (
+                      <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-purple-400" title="Recurring" />
+                    )}
+                  </button>
+                ) : (
+                  <div className="w-full h-full" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Legend */}
+        <div className="flex gap-6 mt-8 pt-6 border-t border-slate-100 flex-wrap">
+          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-300" /><span className="text-[11px] font-bold text-slate-400">Has Bookings</span></div>
+          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-rose-300" /><span className="text-[11px] font-bold text-slate-400">Blocked</span></div>
+          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-purple-400" /><span className="text-[11px] font-bold text-slate-400">Recurring</span></div>
+          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-slate-200" /><span className="text-[11px] font-bold text-slate-400">Available</span></div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-3">
-        {days.map((date, i) => {
-          const dayBookings = getBookingsForDate(date);
-          const isBlocked = dayBookings.some(
-            (b) =>
-              b.status === "Blackout" ||
-              b.customer?.firstName === "ADMIN_BLOCK",
-          );
-          const hasBookings = dayBookings.some(
-            (b) =>
-              b.status !== "Blackout" &&
-              b.customer?.firstName !== "ADMIN_BLOCK",
-          );
+      {/* ── RECURRING BOOKING PANEL ─────────────────────────── */}
+      {showRecurring && (
+        <div className="bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden" style={{ animation: "fadeIn 0.3s ease" }}>
+          {/* Panel Header */}
+          <div style={{ background: "linear-gradient(135deg, #0F172A 0%, #1e3a5f 100%)", padding: "28px 40px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <div style={{ background: "rgba(110,231,183,0.15)", border: "1px solid rgba(110,231,183,0.3)", borderRadius: "14px", padding: "12px", display: "flex" }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/>
+                </svg>
+              </div>
+              <div>
+                <h3 style={{ margin: "0 0 4px", fontSize: "20px", fontWeight: 900, color: "white", letterSpacing: "-0.3px" }}>Create Recurring Booking</h3>
+                <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8", fontWeight: 600 }}>Schedule Daily, Weekly, Fortnightly or Monthly cleaning appointments</p>
+              </div>
+            </div>
+          </div>
 
-          return (
-            <div key={i} className="aspect-square">
-              {date ? (
+          <div style={{ padding: "36px 40px" }}>
+            {/* Success banner */}
+            {recurringSuccess !== null && (
+              <div style={{ background: "linear-gradient(135deg,#ecfdf5,#d1fae5)", border: "2px solid #86efac", borderRadius: "20px", padding: "20px 24px", marginBottom: "28px", display: "flex", alignItems: "center", gap: "14px" }}>
+                <CheckCircle2 size={24} style={{ color: "#059669", flexShrink: 0 }} />
+                <div>
+                  <p style={{ margin: "0 0 4px", fontSize: "16px", fontWeight: 900, color: "#065f46" }}>✓ {recurringSuccess} recurring bookings created!</p>
+                  <p style={{ margin: 0, fontSize: "13px", color: "#059669" }}>All appointments are now visible in the bookings list and calendar.</p>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "32px" }}>
+              {/* LEFT COLUMN */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                {/* FREQUENCY */}
+                <div>
+                  <label style={labelStyle}>Cleaning Frequency</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    {[
+                      { val: "daily", label: "Daily", sub: "Every day" },
+                      { val: "weekly", label: "Weekly", sub: "Every 7 days" },
+                      { val: "fortnightly", label: "Fortnightly", sub: "Every 2 weeks" },
+                      { val: "monthly", label: "Monthly", sub: "Same day each month" },
+                    ].map(({ val, label, sub }) => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setRecurringForm(f => ({ ...f, frequency: val }))}
+                        style={{
+                          padding: "14px", borderRadius: "14px", border: `2px solid ${recurringForm.frequency === val ? "#6EE7B7" : "#e2e8f0"}`,
+                          background: recurringForm.frequency === val ? "linear-gradient(135deg,#ecfdf5,#d1fae5)" : "white",
+                          cursor: "pointer", textAlign: "left", transition: "all 0.2s",
+                        }}
+                      >
+                        <p style={{ margin: "0 0 2px", fontSize: "13px", fontWeight: 800, color: recurringForm.frequency === val ? "#065f46" : "#0F172A" }}>{label}</p>
+                        <p style={{ margin: 0, fontSize: "11px", color: "#94a3b8", fontWeight: 600 }}>{sub}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* DATE RANGE */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div>
+                    <label style={labelStyle}>Start Date</label>
+                    <input type="date" style={inputStyle} value={recurringForm.startDate}
+                      onChange={e => setRecurringForm(f => ({ ...f, startDate: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>End Date</label>
+                    <input type="date" style={inputStyle} value={recurringForm.endDate}
+                      onChange={e => setRecurringForm(f => ({ ...f, endDate: e.target.value }))} />
+                  </div>
+                </div>
+
+                {/* PREVIEW */}
+                {previewDates.length > 0 && (
+                  <div style={{ background: "linear-gradient(135deg,#0F172A,#1e3a5f)", borderRadius: "16px", padding: "16px 20px" }}>
+                    <p style={{ margin: "0 0 6px", fontSize: "12px", fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px" }}>Schedule Preview</p>
+                    <p style={{ margin: "0 0 10px", fontSize: "22px", fontWeight: 900, color: "#6EE7B7" }}>{previewDates.length} appointments</p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", maxHeight: "100px", overflowY: "auto" }}>
+                      {previewDates.slice(0, 12).map((d, i) => (
+                        <span key={i} style={{ background: "rgba(110,231,183,0.15)", border: "1px solid rgba(110,231,183,0.25)", color: "#6EE7B7", padding: "3px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: 700 }}>
+                          {d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
+                        </span>
+                      ))}
+                      {previewDates.length > 12 && (
+                        <span style={{ color: "#94a3b8", fontSize: "11px", fontWeight: 700, padding: "3px 6px" }}>+{previewDates.length - 12} more</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* TIME & SERVICE */}
+                <div>
+                  <label style={labelStyle}>Time Slot</label>
+                  <select style={inputStyle} value={recurringForm.timeSlot}
+                    onChange={e => setRecurringForm(f => ({ ...f, timeSlot: e.target.value }))}>
+                    <option>Morning (8am-12pm)</option>
+                    <option>Afternoon (12pm-4pm)</option>
+                    <option>Evening (4pm-8pm)</option>
+                    <option>Flexible</option>
+                  </select>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "10px" }}>
+                  <div>
+                    <label style={labelStyle}>Service</label>
+                    <input type="text" style={inputStyle} value={recurringForm.service}
+                      onChange={e => setRecurringForm(f => ({ ...f, service: e.target.value }))}
+                      placeholder="e.g. Residential Cleaning" />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Hours</label>
+                    <input type="number" min={1} max={12} style={inputStyle} value={recurringForm.duration}
+                      onChange={e => setRecurringForm(f => ({ ...f, duration: parseInt(e.target.value) || 2 }))} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>£ / Visit</label>
+                    <input type="number" min={0} style={inputStyle} value={recurringForm.amount}
+                      onChange={e => setRecurringForm(f => ({ ...f, amount: e.target.value }))}
+                      placeholder="0.00" />
+                  </div>
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN — CUSTOMER */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div>
+                  <label style={{ ...labelStyle, color: "#0F172A", fontSize: "12px" }}>Customer Details</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                    <div>
+                      <label style={labelStyle}>First Name *</label>
+                      <input type="text" style={inputStyle} value={recurringForm.customerFirstName}
+                        onChange={e => setRecurringForm(f => ({ ...f, customerFirstName: e.target.value }))}
+                        placeholder="Jane" />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Last Name</label>
+                      <input type="text" style={inputStyle} value={recurringForm.customerLastName}
+                        onChange={e => setRecurringForm(f => ({ ...f, customerLastName: e.target.value }))}
+                        placeholder="Smith" />
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: "10px" }}>
+                    <label style={labelStyle}>Email *</label>
+                    <input type="email" style={inputStyle} value={recurringForm.customerEmail}
+                      onChange={e => setRecurringForm(f => ({ ...f, customerEmail: e.target.value }))}
+                      placeholder="jane@example.com" />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Phone</label>
+                    <input type="tel" style={inputStyle} value={recurringForm.customerPhone}
+                      onChange={e => setRecurringForm(f => ({ ...f, customerPhone: e.target.value }))}
+                      placeholder="+44 7700 000000" />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Service Address *</label>
+                  <input type="text" style={{ ...inputStyle, marginBottom: "10px" }} value={recurringForm.address}
+                    onChange={e => setRecurringForm(f => ({ ...f, address: e.target.value }))}
+                    placeholder="123 High Street, London" />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    <div>
+                      <label style={labelStyle}>Postcode</label>
+                      <input type="text" style={inputStyle} value={recurringForm.postcode}
+                        onChange={e => setRecurringForm(f => ({ ...f, postcode: e.target.value }))}
+                        placeholder="SW1A 1AA" />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Region</label>
+                      <select style={inputStyle} value={recurringForm.region}
+                        onChange={e => setRecurringForm(f => ({ ...f, region: e.target.value }))}>
+                        <option value="UK">UK</option>
+                        <option value="NG">NG</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Internal Notes (optional)</label>
+                  <textarea rows={3} style={{ ...inputStyle, resize: "none", lineHeight: 1.6 }}
+                    value={recurringForm.notes}
+                    onChange={e => setRecurringForm(f => ({ ...f, notes: e.target.value }))}
+                    placeholder="e.g. Customer prefers the cleaner to arrive 15 min early..." />
+                </div>
+
+                {/* CREATE BUTTON */}
                 <button
-                  onClick={() => onToggleDate(date, isBlocked)}
-                  className={`w-full h-full rounded-[24px] flex flex-col items-center justify-center transition-all relative border-2 group
-                    ${isBlocked ? "bg-rose-50 border-rose-200 text-rose-500" : hasBookings ? "bg-emerald-50 border-emerald-200 text-emerald-600" : "bg-slate-50 border-transparent text-slate-400 hover:border-primary/30"}
-                  `}
+                  onClick={handleCreateRecurring}
+                  disabled={recurringLoading || previewDates.length === 0}
+                  style={{
+                    width: "100%", padding: "18px", borderRadius: "18px", border: "none",
+                    background: recurringLoading || previewDates.length === 0
+                      ? "#94a3b8"
+                      : "linear-gradient(135deg, #0F172A 0%, #1e3a5f 100%)",
+                    color: recurringLoading || previewDates.length === 0 ? "white" : "#6EE7B7",
+                    fontWeight: 900, fontSize: "15px", cursor: recurringLoading || previewDates.length === 0 ? "not-allowed" : "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+                    boxShadow: recurringLoading || previewDates.length === 0 ? "none" : "0 10px 25px rgba(15,23,42,0.3)",
+                    transition: "all 0.2s",
+                    marginTop: "auto",
+                  }}
                 >
-                  <span className="text-sm font-black">{date.getDate()}</span>
-                  {isBlocked && (
-                    <span className="text-[7px] font-black uppercase absolute bottom-2">
-                      Blocked
-                    </span>
-                  )}
-                  {hasBookings && !isBlocked && (
-                    <span className="text-[7px] font-black uppercase absolute bottom-2">
-                      {dayBookings.length} Bookings
-                    </span>
+                  {recurringLoading ? (
+                    <>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ animation: "spin 1s linear infinite" }}>
+                        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                      </svg>
+                      Creating {previewDates.length} Bookings...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/>
+                      </svg>
+                      Create {previewDates.length > 0 ? previewDates.length : ""} Recurring Booking{previewDates.length !== 1 ? "s" : ""}
+                    </>
                   )}
                 </button>
-              ) : (
-                <div className="w-full h-full" />
-              )}
+              </div>
             </div>
-          );
-        })}
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 // Lightweight calendar for admin create booking (select date)
 const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
@@ -1385,7 +1907,7 @@ const Bookings = () => {
           </div>
         </div>
       ) : (
-        <AdminCalendar bookings={bookings} onToggleDate={toggleAvailability} />
+        <AdminCalendar bookings={bookings} onToggleDate={toggleAvailability} onBookingsCreated={fetchBookings} />
       )}
 
       {selectedBooking && (

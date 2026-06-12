@@ -17,7 +17,7 @@ import {
   ChevronDown,
   Trash2,
   Package,
-  Sparkles,
+  MessageSquare,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "https://api.cleaniqservices.com";
@@ -205,7 +205,7 @@ const AdminCRM = ({ booking, onClose }) => {
     if (activeTab === "payment") {
       setLoadingServices(true);
       const region = booking.region || "UK";
-      fetch(`${API}/api/services?region=${region}`)
+      fetch(`${API}/services?region=${region}`)
         .then((r) => r.json())
         .then((data) => {
           setServices(Array.isArray(data) ? data : []);
@@ -219,7 +219,7 @@ const AdminCRM = ({ booking, onClose }) => {
   const doAction = useCallback(async (endpoint, body = {}) => {
     setLoadingAction(endpoint);
     try {
-      const res = await fetch(`${API}/api/bookings/${booking._id}/${endpoint}`, {
+      const res = await fetch(`${API}/bookings/${booking._id}/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -869,7 +869,7 @@ const AdminCRM = ({ booking, onClose }) => {
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
             <div style={{ background: "rgba(110,231,183,0.15)", border: "1px solid rgba(110,231,183,0.3)", borderRadius: "12px", padding: "10px", display: "flex" }}>
-              <Sparkles size={20} style={{ color: "#6EE7B7" }} />
+              <MessageSquare size={20} style={{ color: "#6EE7B7" }} />
             </div>
             <div>
               <h2 style={{ margin: "0 0 3px", fontSize: "18px", fontWeight: 900, color: "white", letterSpacing: "-0.3px" }}>CRM Actions</h2>
