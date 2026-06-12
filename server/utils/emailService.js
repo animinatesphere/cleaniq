@@ -61,7 +61,7 @@ const templates = {
             </tr>
             <tr>
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Address:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode ? ', ' + booking.details.postcode : ''}</td>
             </tr>
           </table>
         </div>
@@ -220,7 +220,7 @@ const templates = {
         <p style="margin: 5px 0; font-size: 14px;"><strong>Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Email:</strong> ${booking.customer.email}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Phone:</strong> ${booking.customer.phone}</p>
-        <p style="margin: 5px 0; font-size: 14px;"><strong>Service Address:</strong> ${booking.details.address}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Service Address:</strong> ${booking.details.address}${booking.details.postcode ? ', ' + booking.details.postcode : ''}</p>
 
         <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Service Details</h3>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
@@ -260,7 +260,7 @@ const templates = {
           <p style="margin: 5px 0; font-size: 13px;"><strong>Service:</strong> ${booking.service}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Phone:</strong> ${booking.customer.phone}</p>
-          <p style="margin: 5px 0; font-size: 13px;"><strong>Address:</strong> ${booking.details.address}</p>
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Address:</strong> ${booking.details.address}${booking.details.postcode ? ', ' + booking.details.postcode : ''}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Scheduled Time:</strong> ${booking.schedule.timeSlot}${booking.schedule.preferredTime ? " (Requested Arrival: " + booking.schedule.preferredTime + ")" : ""}</p>
         </div>
 
@@ -486,7 +486,7 @@ const templates = {
             </tr>
             <tr>
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Location:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode ? ', ' + booking.details.postcode : ''}</td>
             </tr>
           </table>
         </div>
@@ -569,6 +569,7 @@ const templates = {
         
         <div style="padding: 24px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 20px; border: 2px solid #a7f3d0; margin-bottom: 32px;">
           <p style="margin: 0; font-size: 16px; font-weight: 700; color: #0F172A; line-height: 1.6;">${booking.details.address}</p>
+          ${booking.details.postcode ? `<p style="margin: 8px 0 0 0; font-size: 15px; font-weight: 800; color: #065f46; letter-spacing: 1px;">${booking.details.postcode}</p>` : ''}
         </div>
 
         <!-- EXTRAS & REQUIREMENTS -->
@@ -748,6 +749,7 @@ const templates = {
         
         <div style="padding: 24px; background-color: #ecfdf5; border-radius: 20px; border: 2px solid #a7f3d0; margin-bottom: 32px;">
           <p style="margin: 0; font-size: 16px; font-weight: 700; color: #065f46; line-height: 1.8;">${booking.details.address}</p>
+          ${booking.details.postcode ? `<p style="margin: 8px 0 0 0; font-size: 15px; font-weight: 800; color: #065f46; letter-spacing: 1px;">${booking.details.postcode}</p>` : ''}
         </div>
 
         <!-- CLEANING SCOPE -->
@@ -855,7 +857,7 @@ const templates = {
         <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Date:</strong> ${new Date(booking.schedule.date).toDateString()}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${booking.schedule.timeSlot}${booking.schedule.preferredTime ? " (Requested Arrival: " + booking.schedule.preferredTime + ")" : ""}</p>
-        <p style="margin: 5px 0; font-size: 14px;"><strong>Address:</strong> ${booking.details.address}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Address:</strong> ${booking.details.address}${booking.details.postcode ? ', ' + booking.details.postcode : ''}</p>
 
         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #edf2f7;">
           <a href="https://cleaniqservices.com/admin/bookings" style="display: inline-block; background-color: #0F172A; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px;">Manage in Dashboard</a>
@@ -1084,6 +1086,7 @@ const templates = {
         
         <div style="padding: 24px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 20px; border: 2px solid #a7f3d0; margin-bottom: 32px;">
           <p style="margin: 0; font-size: 16px; font-weight: 700; color: #0F172A; line-height: 1.6;">${booking.details.address}</p>
+          ${booking.details.postcode ? `<p style="margin: 8px 0 0 0; font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: 1px;">${booking.details.postcode}</p>` : ''}
         </div>
 
         <!-- NEXT STEPS -->
@@ -1107,6 +1110,152 @@ const templates = {
       <div style="background-color: #f0fdf4; padding: 24px; text-align: center; border-top: 1px solid #86efac;">
         <p style="margin: 0 0 8px 0; font-size: 12px; color: #059669; font-weight: 600;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
         <p style="margin: 0; font-size: 11px; color: #6ee7b7;">This is an automated message. Please do not reply to this email.</p>
+      </div>
+    </div>
+  `,
+
+  // ─── REVIEW REQUEST EMAIL ──────────────────────────────────────────────────
+  reviewRequest: (booking, reviewUrl) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 620px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <!-- HEADER -->
+      <div style="background: linear-gradient(135deg, #0F172A 0%, #1e293b 100%); padding: 50px 40px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 80px; height: 80px; margin-bottom: 20px; border-radius: 50%; object-fit: cover; border: 3px solid #6EE7B7; box-shadow: 0 0 0 6px rgba(110,231,183,0.15);" />
+        <div style="font-size: 48px; margin-bottom: 12px;">⭐</div>
+        <h1 style="color: #ffffff; margin: 0; font-size: 30px; letter-spacing: -1px; font-weight: 800;">How did we do?</h1>
+        <p style="color: #94a3b8; margin-top: 10px; font-size: 15px; font-weight: 500;">Your feedback helps us be better</p>
+      </div>
+
+      <!-- BODY -->
+      <div style="padding: 50px 40px; color: #1e293b; line-height: 1.8;">
+        <h2 style="font-size: 22px; margin-top: 0; margin-bottom: 8px; color: #0F172A; font-weight: 800;">Hi ${booking.customer.firstName},</h2>
+        <p style="font-size: 15px; color: #475569; margin-bottom: 30px;">We hope you loved your recent cleaning session! Your experience and honest feedback means the world to us and helps us keep delivering 5-star results.</p>
+
+        <!-- BOOKING REFERENCE CARD -->
+        <div style="background: linear-gradient(135deg, #0F172A 0%, #1e3a5f 100%); padding: 24px 28px; border-radius: 20px; margin-bottom: 32px; color: white; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px;">Booking Reference</p>
+            <p style="margin: 8px 0 0 0; font-size: 22px; font-weight: 900; letter-spacing: 1px;">${booking.bookingId}</p>
+          </div>
+          <div style="text-align: right;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px;">Service</p>
+            <p style="margin: 8px 0 0 0; font-size: 15px; font-weight: 700; color: #6EE7B7;">${booking.service}</p>
+          </div>
+        </div>
+
+        <!-- STAR RATING VISUAL -->
+        <div style="text-align: center; margin: 30px 0;">
+          <p style="margin: 0 0 16px 0; font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Tap a star to leave your rating</p>
+          <div style="display: inline-block;">
+            <a href="${reviewUrl}&rating=1" style="text-decoration: none; font-size: 36px; margin: 0 4px;">⭐</a>
+            <a href="${reviewUrl}&rating=2" style="text-decoration: none; font-size: 36px; margin: 0 4px;">⭐</a>
+            <a href="${reviewUrl}&rating=3" style="text-decoration: none; font-size: 36px; margin: 0 4px;">⭐</a>
+            <a href="${reviewUrl}&rating=4" style="text-decoration: none; font-size: 36px; margin: 0 4px;">⭐</a>
+            <a href="${reviewUrl}&rating=5" style="text-decoration: none; font-size: 36px; margin: 0 4px;">⭐</a>
+          </div>
+        </div>
+
+        <!-- CTA BUTTON -->
+        <div style="text-align: center; margin: 36px 0;">
+          <a href="${reviewUrl}" style="display: inline-block; background: linear-gradient(135deg, #6EE7B7 0%, #10b981 100%); color: #0F172A; padding: 20px 48px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 16px; letter-spacing: 0.5px; box-shadow: 0 10px 25px rgba(16,185,129,0.35);">Leave a Review →</a>
+        </div>
+
+        <p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 24px;">It only takes 30 seconds and makes a huge difference. Thank you! 🙏</p>
+      </div>
+
+      <!-- FOOTER -->
+      <div style="background-color: #f8fafc; padding: 24px 40px; text-align: center; border-top: 1px solid #f1f5f9;">
+        <p style="margin: 0 0 4px 0; font-size: 13px; color: #64748b; font-weight: 600;">Cleaniq Services — Professional Cleaning</p>
+        <p style="margin: 0; font-size: 11px; color: #94a3b8;">© 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  // ─── PAYMENT LINK EMAIL ────────────────────────────────────────────────────
+  paymentLinkEmail: (booking, items, totalAmount, payUrl, note) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 620px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <!-- HEADER -->
+      <div style="background: linear-gradient(135deg, #0F172A 0%, #1e293b 100%); padding: 50px 40px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 80px; height: 80px; margin-bottom: 20px; border-radius: 50%; object-fit: cover; border: 3px solid #6EE7B7; box-shadow: 0 0 0 6px rgba(110,231,183,0.15);" />
+        <div style="font-size: 48px; margin-bottom: 12px;">💳</div>
+        <h1 style="color: #ffffff; margin: 0; font-size: 30px; letter-spacing: -1px; font-weight: 800;">Payment Request</h1>
+        <p style="color: #94a3b8; margin-top: 10px; font-size: 15px; font-weight: 500;">Secure payment for your Cleaniq services</p>
+      </div>
+
+      <!-- BODY -->
+      <div style="padding: 50px 40px; color: #1e293b; line-height: 1.8;">
+        <h2 style="font-size: 22px; margin-top: 0; margin-bottom: 8px; color: #0F172A; font-weight: 800;">Hi ${booking.customer.firstName},</h2>
+        <p style="font-size: 15px; color: #475569; margin-bottom: 32px;">A payment has been prepared for you by the Cleaniq team. Please review the details below and click the button to pay securely online.</p>
+
+        <!-- BOOKING REF -->
+        <div style="background: linear-gradient(135deg, #0F172A 0%, #1e3a5f 100%); padding: 20px 28px; border-radius: 18px; margin-bottom: 28px; color: white;">
+          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px;">Booking Reference</p>
+          <p style="margin: 8px 0 0 0; font-size: 20px; font-weight: 900;">${booking.bookingId}</p>
+        </div>
+
+        <!-- ITEMS TABLE -->
+        <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px; margin-bottom: 16px;">📋 Service Items</h3>
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; margin-bottom: 28px;">
+          <thead>
+            <tr style="background-color: #f8fafc;">
+              <th style="text-align: left; padding: 14px 18px; font-size: 12px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #e2e8f0;">Service / Item</th>
+              <th style="text-align: center; padding: 14px 18px; font-size: 12px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #e2e8f0;">Qty</th>
+              <th style="text-align: right; padding: 14px 18px; font-size: 12px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #e2e8f0;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(items || []).map((item, i) => `
+              <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#fafafa'}; border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 14px 18px; font-size: 14px; font-weight: 600; color: #1e293b;">${item.name}</td>
+                <td style="padding: 14px 18px; font-size: 14px; color: #64748b; text-align: center;">${item.qty || 1}</td>
+                <td style="padding: 14px 18px; font-size: 14px; font-weight: 700; color: #0F172A; text-align: right;">£${((item.amount || 0) * (item.qty || 1)).toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <!-- TOTAL -->
+        <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); padding: 24px 28px; border-radius: 18px; border: 2px solid #86efac; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <p style="margin: 0; font-size: 13px; font-weight: 800; color: #065f46; text-transform: uppercase; letter-spacing: 1px;">Total Amount Due</p>
+          </div>
+          <div style="text-align: right;">
+            <p style="margin: 0; font-size: 36px; font-weight: 900; color: #065f46;">£${Number(totalAmount).toFixed(2)}</p>
+          </div>
+        </div>
+
+        ${note ? `
+        <!-- NOTE FROM ADMIN -->
+        <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 18px 22px; border-radius: 12px; margin-bottom: 28px;">
+          <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: 1px;">Note from Cleaniq</p>
+          <p style="margin: 0; font-size: 14px; color: #78350f; line-height: 1.6;">${note}</p>
+        </div>
+        ` : ''}
+
+        <!-- PAY BUTTON -->
+        <div style="text-align: center; margin: 36px 0 24px;">
+          <a href="${payUrl}" style="display: inline-block; background: linear-gradient(135deg, #0F172A 0%, #1e3a5f 100%); color: #6EE7B7; padding: 22px 56px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 18px; letter-spacing: 0.5px; box-shadow: 0 15px 30px rgba(15,23,42,0.3);">🔒 Pay Securely Now</a>
+          <p style="margin-top: 14px; font-size: 12px; color: #94a3b8; font-weight: 600;">Powered by Stripe — 100% Secure &amp; Encrypted</p>
+        </div>
+
+        <!-- BANK TRANSFER OPTION -->
+        <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #e2e8f0; text-align: center;">
+          <h3 style="font-size: 15px; color: #0F172A; margin-bottom: 18px; font-weight: 800;">Or Pay by Bank Transfer</h3>
+          <div style="background-color: #f8fafc; padding: 22px; border-radius: 16px; border: 1px solid #cbd5e1; display: inline-block; text-align: left;">
+            <p style="margin: 0 0 8px 0; font-size: 14px; color: #334155;"><strong>Bank:</strong> HSBC Bank</p>
+            <p style="margin: 0 0 8px 0; font-size: 14px; color: #334155;"><strong>Account Name:</strong> Cleaniq services Limited</p>
+            <p style="margin: 0 0 8px 0; font-size: 14px; color: #334155;"><strong>Sort Code:</strong> 40-11-56</p>
+            <p style="margin: 0 0 8px 0; font-size: 14px; color: #334155;"><strong>Account Number:</strong> 81106546</p>
+            <div style="margin-top: 14px; padding: 10px 14px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 8px;">
+              <p style="margin: 0; font-size: 13px; color: #b45309;"><strong>Reference:</strong> ${booking.bookingId}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div style="background-color: #f8fafc; padding: 24px 40px; text-align: center; border-top: 1px solid #f1f5f9;">
+        <p style="margin: 0 0 4px 0; font-size: 13px; color: #64748b; font-weight: 600;">Cleaniq Services — Professional Cleaning</p>
+        <p style="margin: 0; font-size: 11px; color: #94a3b8;">© 2026 Cleaniq Services. All rights reserved.</p>
       </div>
     </div>
   `,

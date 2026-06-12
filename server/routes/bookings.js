@@ -533,4 +533,157 @@ router.post("/:id/resend", async (req, res) => {
   }
 });
 
+// ─── CRM: SEND BOOKING CONFIRMATION ──────────────────────────────────────────
+router.post("/:id/send-confirmation", async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    const ok = await sendEmail({
+      to: booking.customer.email,
+      subject: `✓ Booking Confirmed — ${booking.bookingId} | Cleaniq Services`,
+      html: templates.bookingConfirmation(booking),
+    });
+
+    if (!ok) return res.status(500).json({ message: "Failed to send email" });
+
+    // Track that confirmation was sent
+    booking.meta = booking.meta || {};
+    booking.meta.confirmationSentAt = new Date();
+    await booking.save();
+
+    res.json({ success: true, message: "Booking confirmation sent successfully" });
+  } catch (err) {
+    console.error("CRM send-confirmation error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ─── CRM: SEND INVOICE ────────────────────────────────────────────────────────
+router.post("/:id/send-invoice", async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    const ok = await sendEmail({
+      to: booking.customer.email,
+      subject: `🧾 Invoice — ${booking.bookingId} | Cleaniq Services`,
+      html: templates.invoiceReceipt(booking),
+    });
+
+    if (!ok) return res.status(500).json({ message: "Failed to send invoice email" });
+
+    booking.meta = booking.meta || {};
+    booking.meta.invoiceSentAt = new Date();
+    await booking.save();
+
+    res.json({ success: true, message: "Invoice sent to customer successfully" });
+  } catch (err) {
+    console.error("CRM send-invoice error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ─── CRM: SEND REVIEW REQUEST ─────────────────────────────────────────────────
+router.post("/:id/send-review-request", async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    const reviewUrl = `https://cleaniqservices.com/review?booking=${booking.bookingId}&customer=${encodeURIComponent(booking.customer.firstName + ' ' + booking.customer.lastName)}`;
+
+    const ok = await sendEmail({
+      to: booking.customer.email,
+      subject: `⭐ How was your clean? Leave us a review — Cleaniq Services`,
+      html: templates.reviewRequest(booking, reviewUrl),
+    });
+
+    if (!ok) return res.status(500).json({ message: "Failed to send review request" });
+
+    booking.meta = booking.meta || {};
+    booking.meta.reviewRequestSentAt = new Date();
+    await booking.save();
+
+    res.json({ success: true, message: "Review request sent to customer successfully" });
+  } catch (err) {
+    console.error("CRM send-review-request error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ─── CRM: CREATE PAYMENT LINK (Stripe Checkout) ───────────────────────────────
+router.post("/:id/create-payment-link", async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    const { items } = req.body;
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: "At least one item is required" });
+    }
+
+    const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "");
+
+    const lineItems = items.map((item) => ({
+      price_data: {
+        currency: "gbp",
+        product_data: {
+          name: item.name,
+          description: `Cleaniq Service — Booking ${booking.bookingId}`,
+        },
+        unit_amount: Math.round((item.amount || 0) * 100), // convert to pence
+      },
+      quantity: item.qty || 1,
+    }));
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: lineItems,
+      mode: "payment",
+      success_url: `https://cleaniqservices.com/account/dashboard?payment=success&booking=${booking.bookingId}`,
+      cancel_url: `https://cleaniqservices.com/account/dashboard?payment=cancelled`,
+      customer_email: booking.customer.email,
+      metadata: {
+        bookingId: String(booking._id),
+        bookingRef: booking.bookingId,
+        type: "crm-payment-link",
+      },
+    });
+
+    res.json({ url: session.url, sessionId: session.id });
+  } catch (err) {
+    console.error("CRM create-payment-link error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ─── CRM: SEND PAYMENT LINK VIA EMAIL ────────────────────────────────────────
+router.post("/:id/send-payment-link", async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    const { url, items, totalAmount, note } = req.body;
+    if (!url) return res.status(400).json({ message: "Payment URL is required" });
+
+    const ok = await sendEmail({
+      to: booking.customer.email,
+      subject: `💳 Payment Request — £${Number(totalAmount).toFixed(2)} | Cleaniq Services`,
+      html: templates.paymentLinkEmail(booking, items || [], totalAmount || 0, url, note || ""),
+    });
+
+    if (!ok) return res.status(500).json({ message: "Failed to send payment link email" });
+
+    booking.meta = booking.meta || {};
+    booking.meta.paymentLinkSentAt = new Date();
+    booking.meta.lastPaymentLinkUrl = url;
+    await booking.save();
+
+    res.json({ success: true, message: "Payment link sent to customer successfully" });
+  } catch (err) {
+    console.error("CRM send-payment-link error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

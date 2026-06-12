@@ -29,7 +29,9 @@ import {
   ChevronRight,
   CheckCircle2,
   AlertTriangle,
+  Sparkles,
 } from "lucide-react";
+import AdminCRM from "./AdminCRM";
 
 const AdminCalendar = ({ bookings, onToggleDate }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -298,6 +300,7 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
 const Bookings = () => {
   const [view, setView] = useState("list"); // 'list' or 'availability'
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [crmBooking, setCrmBooking] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showRaw, setShowRaw] = useState(false);
   const [bookings, setBookings] = useState([]);
@@ -1165,6 +1168,11 @@ const Bookings = () => {
 
   return (
     <div className="space-y-6 pb-20 relative">
+      {/* ── CRM MODAL ─────────────────────────────────────────── */}
+      {crmBooking && (
+        <AdminCRM booking={crmBooking} onClose={() => setCrmBooking(null)} />
+      )}
+
       {statusMessage.text && (
         <div className="fixed top-10 right-10 z-100 px-8 py-5 rounded-[32px] border shadow-2xl bg-primary-dark text-white font-black text-sm uppercase tracking-widest animate-in slide-in-from-right">
           {statusMessage.text}
@@ -1348,12 +1356,22 @@ const Bookings = () => {
                               setShowRaw(false);
                             }}
                             className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
+                            title="View Booking"
                           >
                             <Eye size={18} />
                           </button>
                           <button
+                            onClick={() => setCrmBooking(b)}
+                            className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all"
+                            title="CRM Actions — Email, Invoice, Review, Payment Link"
+                            style={{ position: "relative" }}
+                          >
+                            <Sparkles size={18} />
+                          </button>
+                          <button
                             onClick={() => handleDelete(b._id, b.bookingId)}
                             className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-100 hover:text-rose-500 transition-all"
+                            title="Delete Booking"
                           >
                             <Trash2 size={18} />
                           </button>
