@@ -294,8 +294,10 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             style={styles.quickBtn}
             onPress={() => {
               const addr = booking.details?.address || "";
+              const postcode = booking.details?.postcode || "";
+              const fullAddr = addr + (postcode && !addr.includes(postcode) ? ', ' + postcode : '');
               Linking.openURL(
-                `https://www.google.com/maps/search/${encodeURIComponent(addr)}`,
+                `https://www.google.com/maps/search/${encodeURIComponent(fullAddr || addr)}`,
               );
             }}
           >
@@ -401,7 +403,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
           <View style={styles.locationCard}>
             <MapPin size={20} color="#1A7A4A" />
             <Text style={styles.locationText}>
-              {booking.details?.address || "Address not specified"}
+              {(booking.details?.address || '') + (booking.details?.postcode ? ', ' + booking.details.postcode : '') || "Address not specified"}
             </Text>
           </View>
         </View>

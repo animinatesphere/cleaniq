@@ -508,7 +508,7 @@ const JobsFeedScreen = ({ navigation }) => {
           <View style={[styles.infoRow, { alignItems: "flex-start" }]}>
             <MapPin size={16} color="#64748B" style={{ marginTop: 2 }} />
             <Text style={styles.fullAddressText}>
-              {item.details?.address || "Address not provided"}
+              {(item.details?.address || '') + (item.details?.postcode ? ', ' + item.details.postcode : '') || "Address not provided"}
             </Text>
           </View>
         </View>

@@ -36,6 +36,7 @@ import AdminCRM from "./AdminCRM";
 const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showRecurring, setShowRecurring] = useState(false);
+  const [selectedDateForDetails, setSelectedDateForDetails] = useState(null);
   const [recurringLoading, setRecurringLoading] = useState(false);
   const [recurringSuccess, setRecurringSuccess] = useState(null);
   const [recurringForm, setRecurringForm] = useState({
@@ -412,7 +413,7 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
               <div key={i} className="aspect-square">
                 {date ? (
                   <button
-                    onClick={() => onToggleDate(date, isBlocked)}
+                    onClick={() => setSelectedDateForDetails({ date, isBlocked, bookingsOnDate: dayBookings })}
                     className={`w-full h-full rounded-[24px] flex flex-col items-center justify-center transition-all relative border-2 group
                       ${isBlocked ? "bg-rose-50 border-rose-200 text-rose-500" : hasBookings ? "bg-emerald-50 border-emerald-200 text-emerald-600" : "bg-slate-50 border-transparent text-slate-400 hover:border-primary/30"}
                     `}
@@ -447,7 +448,91 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
           <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-purple-400" /><span className="text-[11px] font-bold text-slate-400">Recurring</span></div>
           <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-slate-200" /><span className="text-[11px] font-bold text-slate-400">Available</span></div>
         </div>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">💡 Click any date to view bookings and manage availability</p>
       </div>
+
+      {/* Date Details Modal */}
+      {selectedDateForDetails && (() => {
+        const { date, isBlocked, bookingsOnDate } = selectedDateForDetails;
+        const dStr = date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const realBookings = bookingsOnDate.filter(b => b.customer?.firstName !== 'ADMIN_BLOCK' && b.status !== 'Blackout');
+        const statusColors = { Confirmed: '#059669', Pending: '#D97706', Completed: '#6366F1', Cancelled: '#EF4444', Accepted: '#0EA5E9' };
+        return (
+          <div
+            style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+            onClick={(e) => { if (e.target === e.currentTarget) setSelectedDateForDetails(null); }}
+          >
+            <div style={{ background: 'white', borderRadius: '32px', width: '100%', maxWidth: '560px', maxHeight: '80vh', overflow: 'auto', boxShadow: '0 25px 50px rgba(0,0,0,0.25)' }}>
+              {/* Modal Header */}
+              <div style={{ background: 'linear-gradient(135deg, #0F172A, #1e3a5f)', padding: '28px 32px', borderRadius: '32px 32px 0 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' }}>Schedule Details</p>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: 'white', lineHeight: 1.3 }}>{dStr}</h3>
+                  </div>
+                  <button onClick={() => setSelectedDateForDetails(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '12px', padding: '8px', cursor: 'pointer', color: 'white', display: 'flex' }}>
+                    <X size={18} />
+                  </button>
+                </div>
+                {isBlocked && (
+                  <div style={{ marginTop: '12px', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#fca5a5', textTransform: 'uppercase' }}>⛔ Date is Blocked</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Bookings List */}
+              <div style={{ padding: '24px 32px' }}>
+                {realBookings.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                    <p style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 700, color: '#94a3b8' }}>No bookings on this date</p>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#cbd5e1' }}>{isBlocked ? 'This date is blocked for new bookings.' : 'This date is available for booking.'}</p>
+                  </div>
+                ) : (
+                  <div style={{ marginBottom: '20px' }}>
+                    <p style={{ margin: '0 0 12px', fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>{realBookings.length} Booking{realBookings.length > 1 ? 's' : ''} Scheduled</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {realBookings.map((b, i) => (
+                        <div key={i} style={{ background: '#f8fafc', borderRadius: '16px', padding: '14px 16px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: statusColors[b.status] || '#94a3b8', marginTop: '5px', flexShrink: 0 }} />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <p style={{ margin: 0, fontSize: '13px', fontWeight: 800, color: '#0F172A' }}>{b.customer?.firstName} {b.customer?.lastName}</p>
+                              <span style={{ fontSize: '10px', fontWeight: 800, color: statusColors[b.status] || '#94a3b8', background: (statusColors[b.status] || '#94a3b8') + '15', padding: '2px 8px', borderRadius: '20px', textTransform: 'uppercase' }}>{b.status}</span>
+                            </div>
+                            <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b', fontWeight: 600 }}>{b.service}</p>
+                            <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#94a3b8' }}>{b.schedule?.timeSlot || ''}{b.schedule?.preferredTime ? ' · ' + b.schedule.preferredTime : ''} · {b.bookingId}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Block / Unblock Action */}
+                <div style={{ display: 'flex', gap: '10px', paddingTop: '20px', borderTop: '1px solid #f1f5f9' }}>
+                  <button
+                    onClick={() => { onToggleDate(date, isBlocked); setSelectedDateForDetails(null); }}
+                    style={{
+                      flex: 1, padding: '14px', borderRadius: '16px', border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: '13px', transition: 'all 0.2s',
+                      background: isBlocked ? 'linear-gradient(135deg, #ecfdf5, #d1fae5)' : 'linear-gradient(135deg, #fff1f2, #ffe4e6)',
+                      color: isBlocked ? '#059669' : '#e11d48',
+                    }}
+                  >
+                    {isBlocked ? '🔓 Unlock This Date' : '⛔ Block This Date'}
+                  </button>
+                  <button
+                    onClick={() => setSelectedDateForDetails(null)}
+                    style={{ padding: '14px 20px', borderRadius: '16px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── RECURRING BOOKING PANEL ─────────────────────────── */}
       {showRecurring && (
@@ -848,6 +933,7 @@ const Bookings = () => {
   const [dynamicRates, setDynamicRates] = useState({});
   const [createTotal, setCreateTotal] = useState(0);
   const [bookedDates, setBookedDates] = useState([]);
+  const [bookedSlotsByDate, setBookedSlotsByDate] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [editData, setEditData] = useState({});
   const [statusMessage, setStatusMessage] = useState({ type: "", text: "" });
@@ -930,14 +1016,14 @@ const Bookings = () => {
     });
     Object.keys(slotsMap).forEach((d) => {
       const s = slotsMap[d];
-      if (
-        s.includes("Morning (8am-12pm)") &&
-        s.includes("Afternoon (12pm-4pm)") &&
-        s.includes("Evening (4pm-8pm)")
-      )
+      const hasMorning = s.some(slot => slot.includes("Morning"));
+      const hasAfternoon = s.some(slot => slot.includes("Afternoon"));
+      const hasEvening = s.some(slot => slot.includes("Evening"));
+      if (hasMorning && hasAfternoon && hasEvening)
         fullyBooked.push(d);
     });
     console.log("[ADMIN AVAILABILITY] Booked slots map:", slotsMap);
+    setBookedSlotsByDate(slotsMap);
     setBookedDates(fullyBooked);
   }, [bookings]);
 
@@ -3162,26 +3248,39 @@ const Bookings = () => {
                                       }
                                     }
 
-                                    return availableSlots.map((slot) => (
-                                      <button
-                                        key={slot.value}
-                                        onClick={() =>
-                                          handleFieldChange(
-                                            "schedule.timeSlot",
-                                            slot.value,
-                                          )
-                                        }
-                                        type="button"
-                                        className={`py-3 px-2 rounded-lg border-2 text-[10px] font-bold uppercase transition-all ${
-                                          createData.schedule.timeSlot ===
-                                          slot.value
-                                            ? "border-primary bg-primary text-white shadow-md"
-                                            : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
-                                        }`}
-                                      >
-                                        {slot.label.split("(")[0].trim()}
-                                      </button>
-                                    ));
+                                    return availableSlots.map((slot) => {
+                                      const isSlotBooked = selectedDateStr && bookedSlotsByDate[selectedDateStr]?.some(
+                                        (s) => s.includes(slot.value)
+                                      );
+                                      return (
+                                        <button
+                                          key={slot.value}
+                                          disabled={isSlotBooked}
+                                          onClick={() =>
+                                            handleFieldChange(
+                                              "schedule.timeSlot",
+                                              slot.value,
+                                            )
+                                          }
+                                          type="button"
+                                          className={`py-3 px-2 rounded-lg border-2 text-[10px] font-bold uppercase transition-all ${
+                                            createData.schedule.timeSlot ===
+                                            slot.value
+                                              ? "border-primary bg-primary text-white shadow-md"
+                                              : isSlotBooked
+                                                ? "border-rose-200 bg-rose-50 text-rose-300 cursor-not-allowed opacity-50 font-black text-xs"
+                                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                          }`}
+                                        >
+                                          {slot.label.split("(")[0].trim()}
+                                          {isSlotBooked && (
+                                            <span className="block text-[8px] mt-0.5 text-rose-500 font-bold uppercase tracking-wider">
+                                              Booked
+                                            </span>
+                                          )}
+                                        </button>
+                                      );
+                                    });
                                   })()}
                                 </div>
                               </div>

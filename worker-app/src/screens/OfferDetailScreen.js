@@ -380,7 +380,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
           <View style={styles.locationCard}>
             <MapPin size={20} color="#1A7A4A" />
             <Text style={styles.locationText}>
-              {offer.details?.address || "Address not specified"}
+              {(offer.details?.address || '') + (offer.details?.postcode ? ', ' + offer.details.postcode : '') || "Address not specified"}
             </Text>
           </View>
         </View>

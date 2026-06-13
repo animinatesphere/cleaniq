@@ -525,7 +525,7 @@ const HomeScreen = ({ navigation, route }) => {
                 <View style={styles.jobMetaItem}>
                   <MapPin size={13} color="#9CA3AF" />
                   <Text style={styles.jobMetaText} numberOfLines={1}>
-                    {job.details?.address || job.address || "Address pending"}
+                    {(job.details?.address || job.address || '') + (job.details?.postcode ? ', ' + job.details.postcode : '') || 'Address pending'}
                   </Text>
                 </View>
               </View>
@@ -687,7 +687,7 @@ const HomeScreen = ({ navigation, route }) => {
                 <View style={styles.jobMetaItem}>
                   <MapPin size={13} color="#9CA3AF" />
                   <Text style={styles.jobMetaText} numberOfLines={1}>
-                    {job.details?.address || job.address || "Address pending"}
+                    {(job.details?.address || job.address || '') + (job.details?.postcode ? ', ' + job.details.postcode : '') || 'Address pending'}
                   </Text>
                 </View>
               </View>
@@ -819,9 +819,7 @@ const HomeScreen = ({ navigation, route }) => {
                     <MapPin size={13} color="#EF4444" />
                   </View>
                   <Text style={styles.offerDetailText} numberOfLines={2}>
-                    {job.details?.address ||
-                      job.address ||
-                      "Area revealed after accepting"}
+                    {(job.details?.address || job.address || '') + (job.details?.postcode ? ', ' + job.details.postcode : '') || 'Area revealed after accepting'}
                   </Text>
                 </View>
                 <View style={styles.offerDetailRow}>

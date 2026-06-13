@@ -204,7 +204,7 @@ const ScheduleScreen = ({ navigation }) => {
     const jobDate = job.schedule?.date || job.date;
     const timeSlot =
       getDisplayTime(job.schedule) || `${job.startTime} - ${job.endTime}`;
-    const address = job.details?.address || job.address;
+    const address = (job.details?.address || job.address || '') + (job.details?.postcode ? ', ' + job.details.postcode : '');
     const statusColor = getStatusColor(job.status);
 
     return (

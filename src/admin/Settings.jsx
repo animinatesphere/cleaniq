@@ -3,7 +3,7 @@ import {
   Globe, Shield, 
   Save, RefreshCw, Plus, Trash2,
   Sliders, Star, Edit3, X, Check,
-  Megaphone, Send, Key
+  Megaphone, Send, Key, ThumbsUp, ThumbsDown
 } from 'lucide-react';
 
 const Settings = () => {
@@ -93,6 +93,25 @@ const Settings = () => {
       }
     } catch (err) { alert('Failed'); }
     finally { setSendingBroadcast(false); }
+  };
+
+  const handleUpdateReviewStatus = async (id, status) => {
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/reviews/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      fetchData();
+    } catch (err) { console.error(err); }
+  };
+
+  const handleDeleteReview = async (id) => {
+    if (!window.confirm('Delete this review permanently?')) return;
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/reviews/${id}`, { method: 'DELETE' });
+      fetchData();
+    } catch (err) { console.error(err); }
   };
 
   const tabs = [
@@ -199,6 +218,89 @@ const Settings = () => {
                 <button disabled={sendingBroadcast} onClick={handleSendBroadcast} className="w-full py-5 rounded-3xl bg-primary text-white font-black uppercase tracking-widest flex items-center justify-center gap-3 disabled:opacity-50">
                   {sendingBroadcast ? 'Sending...' : <><Send size={20} /> Send Broadcast</>}
                 </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'reviews' && (
+            <div className="space-y-6">
+              <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden">
+                <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                  <div>
+                    <h3 className="text-xl font-black text-primary-dark">Customer Reviews</h3>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Approve or reject submitted reviews</p>
+                  </div>
+                  <RefreshCw size={18} className={loading ? 'animate-spin text-primary' : 'text-slate-400 cursor-pointer'} onClick={fetchData} />
+                </div>
+                <div className="p-8 space-y-4">
+                  {loading && <p className="text-slate-400 font-bold text-sm">Loading reviews...</p>}
+                  {!loading && reviews.length === 0 && (
+                    <div className="text-center py-16">
+                      <Star size={40} className="text-slate-200 mx-auto mb-4" />
+                      <p className="text-slate-400 font-bold">No reviews yet</p>
+                      <p className="text-slate-300 text-sm mt-1">Customer reviews will appear here once submitted.</p>
+                    </div>
+                  )}
+                  {reviews.map((review) => (
+                    <div key={review._id} className="p-6 rounded-3xl border-2 border-slate-100 bg-white hover:border-slate-200 transition-all">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center font-black text-primary-dark text-sm">
+                              {(review.customerName || 'A')[0].toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="font-black text-primary-dark text-sm">{review.customerName}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                {new Date(review.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                              </p>
+                            </div>
+                            <div className="flex gap-0.5 ml-auto">
+                              {[1,2,3,4,5].map(i => (
+                                <Star key={i} size={13} className={i <= review.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'} />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-slate-600 text-sm leading-relaxed mb-3">{review.comment}</p>
+                          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                            review.status === 'Approved' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                            review.status === 'Rejected' ? 'bg-rose-50 text-rose-500 border border-rose-200' :
+                            'bg-amber-50 text-amber-600 border border-amber-200'
+                          }`}>
+                            {review.status === 'Approved' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+                            {review.status === 'Rejected' && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
+                            {review.status === 'Pending' && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+                            {review.status}
+                          </span>
+                        </div>
+                        <div className="flex flex-col gap-2 flex-shrink-0">
+                          {review.status !== 'Approved' && (
+                            <button
+                              onClick={() => handleUpdateReviewStatus(review._id, 'Approved')}
+                              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-bold text-xs border border-emerald-200 transition-all"
+                            >
+                              <ThumbsUp size={13} /> Approve
+                            </button>
+                          )}
+                          {review.status !== 'Rejected' && (
+                            <button
+                              onClick={() => handleUpdateReviewStatus(review._id, 'Rejected')}
+                              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-rose-50 text-rose-500 hover:bg-rose-100 font-bold text-xs border border-rose-200 transition-all"
+                            >
+                              <ThumbsDown size={13} /> Reject
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteReview(review._id)}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-rose-500 font-bold text-xs border border-slate-200 transition-all"
+                          >
+                            <Trash2 size={13} /> Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

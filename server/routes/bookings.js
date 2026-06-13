@@ -96,6 +96,14 @@ router.get("/availability/:date/:serviceType", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const booking = new Booking(req.body);
+    // If postcode is provided separately and not already in address, append it
+    if (req.body.details?.postcode && req.body.details?.address) {
+      const postcode = (req.body.details.postcode || '').trim();
+      const address = (req.body.details.address || '').trim();
+      if (postcode && !address.toLowerCase().includes(postcode.toLowerCase())) {
+        req.body.details.address = `${address}, ${postcode}`;
+      }
+    }
     // Explicitly set Mixed fields to bypass potential strict schema stripping
     booking.set("details", req.body.details);
     booking.set("property", req.body.property);
@@ -270,6 +278,14 @@ router.put("/:id", async (req, res) => {
     const wasCompleted = existingBooking.status === "Completed";
     const isNowCompleted = req.body.status === "Completed";
 
+    // If postcode is provided separately and not already in address, append it
+    if (req.body.details?.postcode && req.body.details?.address) {
+      const postcode = (req.body.details.postcode || '').trim();
+      const address = (req.body.details.address || '').trim();
+      if (postcode && !address.toLowerCase().includes(postcode.toLowerCase())) {
+        req.body.details.address = `${address}, ${postcode}`;
+      }
+    }
     const updatedBooking = await Booking.findByIdAndUpdate(
       req.params.id,
       req.body,

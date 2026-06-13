@@ -61,7 +61,7 @@ const templates = {
             </tr>
             <tr>
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Address:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode ? ', ' + booking.details.postcode : ''}</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</td>
             </tr>
           </table>
         </div>
@@ -95,54 +95,103 @@ const templates = {
   `,
 
   invoiceReceipt: (booking) => `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
-      <div style="background-color: #0F172A; padding: 40px; text-align: center;">
-        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 120px; height: auto; margin-bottom: 20px; border-radius: 12px;" />
-        <h1 style="color: #6EE7B7; margin: 0; font-size: 28px; letter-spacing: -1px;">Receipt & Invoice</h1>
-        <p style="color: #94a3b8; margin-top: 10px; font-weight: 500;">Your cleaning service is completed!</p>
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0;">
+      <!-- Header -->
+      <div style="background: #ffffff; padding: 40px 48px 24px; border-bottom: 3px solid #0F172A;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td>
+              <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq" style="width: 80px; height: auto; border-radius: 8px;" />
+              <p style="margin: 8px 0 0; font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Professional Cleaning Services</p>
+            </td>
+            <td align="right" style="vertical-align: top;">
+              <p style="margin: 0; font-size: 28px; font-weight: 900; color: #0F172A; letter-spacing: -1px;">INVOICE</p>
+              <p style="margin: 4px 0 0; font-size: 13px; color: #64748b; font-weight: 600;">INV-${booking.bookingId}</p>
+              <div style="margin-top: 12px; display: inline-block; background: #ecfdf5; border: 2px solid #6EE7B7; border-radius: 20px; padding: 4px 16px;">
+                <span style="font-size: 12px; font-weight: 900; color: #059669; text-transform: uppercase; letter-spacing: 1px;">✓ PAID</span>
+              </div>
+            </td>
+          </tr>
+        </table>
       </div>
-      <div style="padding: 40px; color: #1e293b; line-height: 1.6;">
-        <h2 style="font-size: 20px; margin-top: 0; color: #0F172A;">Hi ${booking.customer.firstName},</h2>
-        <p>This is a formal receipt for your recently completed cleaning service. The payment authorized at the time of booking has now been fully processed.</p>
-        
-        <div style="background-color: #f8fafc; padding: 24px; border-radius: 20px; margin: 24px 0; border: 1px solid #f1f5f9;">
-          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Invoice Reference</p>
-          <p style="margin: 0 0 20px 0; font-size: 20px; font-weight: 900; color: #0F172A;">INV-${booking.bookingId}</p>
-          
-          <table width="100%" cellpadding="12" cellspacing="0" style="background: white; border-radius: 12px; border: 1px solid #edf2f7; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid #edf2f7;">
-              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Service:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.service}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #edf2f7;">
-              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Date Completed:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${new Date().toDateString()}</td>
-            </tr>
-            <tr>
-              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Duration:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.duration} Hours</td>
-            </tr>
-          </table>
-        </div>
 
-        <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: bold;">TOTAL CHARGED</p>
-            <p style="margin: 0; font-size: 24px; font-weight: 900; color: #0F172A;">£${booking.payment.amount}</p>
-          </div>
-          <div style="background-color: #ecfdf5; color: #059669; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; text-transform: uppercase;">
-            Paid
-          </div>
-        </div>
-
-        <p style="margin-top: 30px; font-size: 14px; color: #64748b;">If you have any questions about this receipt, please contact our support team via your dashboard.</p>
-        
-        <div style="text-align: center; margin-top: 40px;">
-          <a href="https://cleaniqservices.com/account/dashboard" style="display: inline-block; background-color: #0F172A; color: #6EE7B7; padding: 18px 36px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">Visit Dashboard</a>
-        </div>
+      <!-- Billing Info -->
+      <div style="padding: 32px 48px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="vertical-align: top; width: 50%;">
+              <p style="margin: 0 0 6px; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px;">Billed To</p>
+              <p style="margin: 0; font-size: 15px; font-weight: 800; color: #0F172A;">${booking.customer.firstName} ${booking.customer.lastName}</p>
+              <p style="margin: 2px 0; font-size: 13px; color: #64748b;">${booking.customer.email}</p>
+              <p style="margin: 2px 0; font-size: 13px; color: #64748b;">${booking.customer.phone || ''}</p>
+              ${booking.details?.address ? `<p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</p>` : ''}
+            </td>
+            <td style="vertical-align: top; text-align: right;">
+              <p style="margin: 0 0 6px; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px;">Invoice Details</p>
+              <p style="margin: 0; font-size: 13px; color: #334155;"><strong>Date:</strong> ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+              <p style="margin: 2px 0; font-size: 13px; color: #334155;"><strong>Service Date:</strong> ${new Date(booking.schedule?.date || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+              <p style="margin: 2px 0; font-size: 13px; color: #334155;"><strong>Time Slot:</strong> ${booking.schedule?.timeSlot || 'N/A'}</p>
+            </td>
+          </tr>
+        </table>
       </div>
-      <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #f1f5f9;">
-        <p style="margin: 0; font-size: 12px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+
+      <!-- Line Items Table -->
+      <div style="padding: 28px 48px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+          <thead>
+            <tr style="background: #0F172A;">
+              <th style="padding: 12px 16px; text-align: left; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Description</th>
+              <th style="padding: 12px 16px; text-align: center; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Duration</th>
+              <th style="padding: 12px 16px; text-align: right; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+              <td style="padding: 16px; font-size: 14px; color: #0F172A; font-weight: 600;">
+                ${booking.service}
+                ${booking.details?.address ? `<br><span style="font-size: 12px; color: #64748b; font-weight: 400;">📍 ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</span>` : ''}
+              </td>
+              <td style="padding: 16px; text-align: center; font-size: 14px; color: #334155;">${booking.details?.duration || 'N/A'} hrs</td>
+              <td style="padding: 16px; text-align: right; font-size: 14px; font-weight: 700; color: #0F172A;">£${booking.payment.amount}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Totals -->
+      <div style="padding: 0 48px 32px; margin-top: 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+          <tr style="border-top: 1px solid #e2e8f0;">
+            <td colspan="2" style="padding: 12px 16px; text-align: right; font-size: 13px; color: #64748b;">Subtotal:</td>
+            <td style="padding: 12px 16px; text-align: right; font-size: 13px; font-weight: 700; color: #334155;">£${booking.payment.amount}</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="padding: 4px 16px; text-align: right; font-size: 13px; color: #64748b;">VAT (0%):</td>
+            <td style="padding: 4px 16px; text-align: right; font-size: 13px; font-weight: 700; color: #334155;">£0.00</td>
+          </tr>
+          <tr style="background: #f8fafc; border-top: 2px solid #0F172A;">
+            <td colspan="2" style="padding: 16px; text-align: right; font-size: 15px; font-weight: 900; color: #0F172A;">TOTAL PAID:</td>
+            <td style="padding: 16px; text-align: right; font-size: 18px; font-weight: 900; color: #0F172A;">£${booking.payment.amount}</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Thank you message -->
+      <div style="margin: 0 48px 32px; padding: 20px 24px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 16px; border: 1px solid #86efac; text-align: center;">
+        <p style="margin: 0; font-size: 14px; font-weight: 700; color: #065f46;">Thank you for choosing Cleaniq Services! 🌟</p>
+        <p style="margin: 6px 0 0; font-size: 13px; color: #059669;">We hope you're delighted with your clean. Please leave us a review!</p>
+      </div>
+
+      <!-- CTA -->
+      <div style="text-align: center; padding: 0 48px 40px;">
+        <a href="https://cleaniqservices.com/account/dashboard" style="display: inline-block; background: #0F172A; color: #6EE7B7; padding: 16px 36px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 14px; letter-spacing: 0.5px;">View Your Dashboard</a>
+      </div>
+
+      <!-- Footer -->
+      <div style="background: #f8fafc; padding: 24px 48px; border-top: 1px solid #e2e8f0; text-align: center;">
+        <p style="margin: 0; font-size: 12px; color: #94a3b8;">Cleaniq Services Limited · cleaniqservices.com · support@cleaniqservices.com</p>
+        <p style="margin: 6px 0 0; font-size: 11px; color: #cbd5e1;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
       </div>
     </div>
   `,
@@ -220,7 +269,7 @@ const templates = {
         <p style="margin: 5px 0; font-size: 14px;"><strong>Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Email:</strong> ${booking.customer.email}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Phone:</strong> ${booking.customer.phone}</p>
-        <p style="margin: 5px 0; font-size: 14px;"><strong>Service Address:</strong> ${booking.details.address}${booking.details.postcode ? ', ' + booking.details.postcode : ''}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Service Address:</strong> ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</p>
 
         <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Service Details</h3>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
@@ -260,7 +309,7 @@ const templates = {
           <p style="margin: 5px 0; font-size: 13px;"><strong>Service:</strong> ${booking.service}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Phone:</strong> ${booking.customer.phone}</p>
-          <p style="margin: 5px 0; font-size: 13px;"><strong>Address:</strong> ${booking.details.address}${booking.details.postcode ? ', ' + booking.details.postcode : ''}</p>
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Address:</strong> ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Scheduled Time:</strong> ${booking.schedule.timeSlot}${booking.schedule.preferredTime ? " (Requested Arrival: " + booking.schedule.preferredTime + ")" : ""}</p>
         </div>
 
@@ -408,6 +457,11 @@ const templates = {
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Duration:</td>
               <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.duration} Hours</td>
             </tr>
+            ${booking.details?.address ? `
+            <tr style="border-top: 1px solid #edf2f7;">
+              <td style="font-size: 14px; font-weight: bold; color: #64748b;">Service Address:</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</td>
+            </tr>` : ''}
           </table>
         </div>
 
@@ -486,7 +540,7 @@ const templates = {
             </tr>
             <tr>
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Location:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode ? ', ' + booking.details.postcode : ''}</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</td>
             </tr>
           </table>
         </div>
@@ -857,7 +911,7 @@ const templates = {
         <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Date:</strong> ${new Date(booking.schedule.date).toDateString()}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${booking.schedule.timeSlot}${booking.schedule.preferredTime ? " (Requested Arrival: " + booking.schedule.preferredTime + ")" : ""}</p>
-        <p style="margin: 5px 0; font-size: 14px;"><strong>Address:</strong> ${booking.details.address}${booking.details.postcode ? ', ' + booking.details.postcode : ''}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Address:</strong> ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</p>
 
         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #edf2f7;">
           <a href="https://cleaniqservices.com/admin/bookings" style="display: inline-block; background-color: #0F172A; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px;">Manage in Dashboard</a>
