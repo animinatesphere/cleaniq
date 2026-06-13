@@ -61,7 +61,7 @@ const templates = {
             </tr>
             <tr>
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Address:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ", " + booking.details.postcode : ""}</td>
             </tr>
           </table>
         </div>
@@ -123,14 +123,14 @@ const templates = {
               <p style="margin: 0 0 6px; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px;">Billed To</p>
               <p style="margin: 0; font-size: 15px; font-weight: 800; color: #0F172A;">${booking.customer.firstName} ${booking.customer.lastName}</p>
               <p style="margin: 2px 0; font-size: 13px; color: #64748b;">${booking.customer.email}</p>
-              <p style="margin: 2px 0; font-size: 13px; color: #64748b;">${booking.customer.phone || ''}</p>
-              ${booking.details?.address ? `<p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</p>` : ''}
+              <p style="margin: 2px 0; font-size: 13px; color: #64748b;">${booking.customer.phone || ""}</p>
+              ${booking.details?.address ? `<p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ", " + booking.details.postcode : ""}</p>` : ""}
             </td>
             <td style="vertical-align: top; text-align: right;">
               <p style="margin: 0 0 6px; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px;">Invoice Details</p>
-              <p style="margin: 0; font-size: 13px; color: #334155;"><strong>Date:</strong> ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-              <p style="margin: 2px 0; font-size: 13px; color: #334155;"><strong>Service Date:</strong> ${new Date(booking.schedule?.date || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-              <p style="margin: 2px 0; font-size: 13px; color: #334155;"><strong>Time Slot:</strong> ${booking.schedule?.timeSlot || 'N/A'}</p>
+              <p style="margin: 0; font-size: 13px; color: #334155;"><strong>Date:</strong> ${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</p>
+              <p style="margin: 2px 0; font-size: 13px; color: #334155;"><strong>Service Date:</strong> ${new Date(booking.schedule?.date || Date.now()).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</p>
+              <p style="margin: 2px 0; font-size: 13px; color: #334155;"><strong>Time Slot:</strong> ${booking.schedule?.timeSlot || "N/A"}</p>
             </td>
           </tr>
         </table>
@@ -150,9 +150,9 @@ const templates = {
             <tr style="border-bottom: 1px solid #f1f5f9;">
               <td style="padding: 16px; font-size: 14px; color: #0F172A; font-weight: 600;">
                 ${booking.service}
-                ${booking.details?.address ? `<br><span style="font-size: 12px; color: #64748b; font-weight: 400;">📍 ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</span>` : ''}
+                ${booking.details?.address ? `<br><span style="font-size: 12px; color: #64748b; font-weight: 400;">📍 ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ", " + booking.details.postcode : ""}</span>` : ""}
               </td>
-              <td style="padding: 16px; text-align: center; font-size: 14px; color: #334155;">${booking.details?.duration || 'N/A'} hrs</td>
+              <td style="padding: 16px; text-align: center; font-size: 14px; color: #334155;">${booking.details?.duration || "N/A"} hrs</td>
               <td style="padding: 16px; text-align: right; font-size: 14px; font-weight: 700; color: #0F172A;">£${booking.payment.amount}</td>
             </tr>
           </tbody>
@@ -269,7 +269,7 @@ const templates = {
         <p style="margin: 5px 0; font-size: 14px;"><strong>Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Email:</strong> ${booking.customer.email}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Phone:</strong> ${booking.customer.phone}</p>
-        <p style="margin: 5px 0; font-size: 14px;"><strong>Service Address:</strong> ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Service Address:</strong> ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ", " + booking.details.postcode : ""}</p>
 
         <h3 style="font-size: 14px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 25px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Service Details</h3>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
@@ -309,7 +309,7 @@ const templates = {
           <p style="margin: 5px 0; font-size: 13px;"><strong>Service:</strong> ${booking.service}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Name:</strong> ${booking.customer.firstName} ${booking.customer.lastName}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Customer Phone:</strong> ${booking.customer.phone}</p>
-          <p style="margin: 5px 0; font-size: 13px;"><strong>Address:</strong> ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</p>
+          <p style="margin: 5px 0; font-size: 13px;"><strong>Address:</strong> ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ", " + booking.details.postcode : ""}</p>
           <p style="margin: 5px 0; font-size: 13px;"><strong>Scheduled Time:</strong> ${booking.schedule.timeSlot}${booking.schedule.preferredTime ? " (Requested Arrival: " + booking.schedule.preferredTime + ")" : ""}</p>
         </div>
 
@@ -457,11 +457,15 @@ const templates = {
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Duration:</td>
               <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.duration} Hours</td>
             </tr>
-            ${booking.details?.address ? `
+            ${
+              booking.details?.address
+                ? `
             <tr style="border-top: 1px solid #edf2f7;">
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Service Address:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</td>
-            </tr>` : ''}
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ", " + booking.details.postcode : ""}</td>
+            </tr>`
+                : ""
+            }
           </table>
         </div>
 
@@ -540,7 +544,7 @@ const templates = {
             </tr>
             <tr>
               <td style="font-size: 14px; font-weight: bold; color: #64748b;">Location:</td>
-              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</td>
+              <td align="right" style="font-size: 14px; font-weight: bold; color: #0F172A;">${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ", " + booking.details.postcode : ""}</td>
             </tr>
           </table>
         </div>
@@ -623,7 +627,7 @@ const templates = {
         
         <div style="padding: 24px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 20px; border: 2px solid #a7f3d0; margin-bottom: 32px;">
           <p style="margin: 0; font-size: 16px; font-weight: 700; color: #0F172A; line-height: 1.6;">${booking.details.address}</p>
-          ${booking.details.postcode ? `<p style="margin: 8px 0 0 0; font-size: 15px; font-weight: 800; color: #065f46; letter-spacing: 1px;">${booking.details.postcode}</p>` : ''}
+          ${booking.details.postcode ? `<p style="margin: 8px 0 0 0; font-size: 15px; font-weight: 800; color: #065f46; letter-spacing: 1px;">${booking.details.postcode}</p>` : ""}
         </div>
 
         <!-- EXTRAS & REQUIREMENTS -->
@@ -803,7 +807,7 @@ const templates = {
         
         <div style="padding: 24px; background-color: #ecfdf5; border-radius: 20px; border: 2px solid #a7f3d0; margin-bottom: 32px;">
           <p style="margin: 0; font-size: 16px; font-weight: 700; color: #065f46; line-height: 1.8;">${booking.details.address}</p>
-          ${booking.details.postcode ? `<p style="margin: 8px 0 0 0; font-size: 15px; font-weight: 800; color: #065f46; letter-spacing: 1px;">${booking.details.postcode}</p>` : ''}
+          ${booking.details.postcode ? `<p style="margin: 8px 0 0 0; font-size: 15px; font-weight: 800; color: #065f46; letter-spacing: 1px;">${booking.details.postcode}</p>` : ""}
         </div>
 
         <!-- CLEANING SCOPE -->
@@ -911,7 +915,7 @@ const templates = {
         <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Date:</strong> ${new Date(booking.schedule.date).toDateString()}</p>
         <p style="margin: 5px 0; font-size: 14px;"><strong>Time:</strong> ${booking.schedule.timeSlot}${booking.schedule.preferredTime ? " (Requested Arrival: " + booking.schedule.preferredTime + ")" : ""}</p>
-        <p style="margin: 5px 0; font-size: 14px;"><strong>Address:</strong> ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ', ' + booking.details.postcode : ''}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Address:</strong> ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ", " + booking.details.postcode : ""}</p>
 
         <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #edf2f7;">
           <a href="https://cleaniqservices.com/admin/bookings" style="display: inline-block; background-color: #0F172A; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px;">Manage in Dashboard</a>
@@ -1140,7 +1144,7 @@ const templates = {
         
         <div style="padding: 24px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 20px; border: 2px solid #a7f3d0; margin-bottom: 32px;">
           <p style="margin: 0; font-size: 16px; font-weight: 700; color: #0F172A; line-height: 1.6;">${booking.details.address}</p>
-          ${booking.details.postcode ? `<p style="margin: 8px 0 0 0; font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: 1px;">${booking.details.postcode}</p>` : ''}
+          ${booking.details.postcode ? `<p style="margin: 8px 0 0 0; font-size: 15px; font-weight: 800; color: #0F172A; letter-spacing: 1px;">${booking.details.postcode}</p>` : ""}
         </div>
 
         <!-- NEXT STEPS -->
@@ -1210,7 +1214,7 @@ const templates = {
 
         <!-- CTA BUTTON -->
         <div style="text-align: center; margin: 36px 0;">
-          <a href="${reviewUrl}" style="display: inline-block; background: linear-gradient(135deg, #6EE7B7 0%, #10b981 100%); color: #0F172A; padding: 20px 48px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 16px; letter-spacing: 0.5px; box-shadow: 0 10px 25px rgba(16,185,129,0.35);">Leave a Review →</a>
+          <a href="https://g.page/r/CTGJLR1Z7dySEBM/review" style="display: inline-block; background: linear-gradient(135deg, #6EE7B7 0%, #10b981 100%); color: #0F172A; padding: 20px 48px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 16px; letter-spacing: 0.5px; box-shadow: 0 10px 25px rgba(16,185,129,0.35);">Leave a Review →</a>
         </div>
 
         <p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 24px;">It only takes 30 seconds and makes a huge difference. Thank you! 🙏</p>
@@ -1257,13 +1261,17 @@ const templates = {
             </tr>
           </thead>
           <tbody>
-            ${(items || []).map((item, i) => `
-              <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#fafafa'}; border-bottom: 1px solid #f1f5f9;">
+            ${(items || [])
+              .map(
+                (item, i) => `
+              <tr style="background-color: ${i % 2 === 0 ? "#ffffff" : "#fafafa"}; border-bottom: 1px solid #f1f5f9;">
                 <td style="padding: 14px 18px; font-size: 14px; font-weight: 600; color: #1e293b;">${item.name}</td>
                 <td style="padding: 14px 18px; font-size: 14px; color: #64748b; text-align: center;">${item.qty || 1}</td>
                 <td style="padding: 14px 18px; font-size: 14px; font-weight: 700; color: #0F172A; text-align: right;">£${((item.amount || 0) * (item.qty || 1)).toFixed(2)}</td>
               </tr>
-            `).join('')}
+            `,
+              )
+              .join("")}
           </tbody>
         </table>
 
@@ -1277,13 +1285,17 @@ const templates = {
           </div>
         </div>
 
-        ${note ? `
+        ${
+          note
+            ? `
         <!-- NOTE FROM ADMIN -->
         <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 18px 22px; border-radius: 12px; margin-bottom: 28px;">
           <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: 1px;">Note from Cleaniq</p>
           <p style="margin: 0; font-size: 14px; color: #78350f; line-height: 1.6;">${note}</p>
         </div>
-        ` : ''}
+        `
+            : ""
+        }
 
         <!-- PAY BUTTON -->
         <div style="text-align: center; margin: 36px 0 24px;">
