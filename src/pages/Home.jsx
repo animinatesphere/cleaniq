@@ -196,13 +196,13 @@ const Home = () => {
               </span>
               {region.id === "UK"
                 ? "TOP-RATED CLEANERS IN MANCHESTER"
-                : "EXCEPTIONAL CLEANING IN LAGOS & ABUJA"}
+                : "EXCEPTIONAL CLEANING IN MANCHESTER"}
             </div>
 
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-primary-dark leading-[1.1] mb-8 tracking-tighter">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold text-primary-dark leading-[1.1] mb-8 tracking-tighter">
               {region.id === "UK"
-                ? "Best Professional House Cleaning in"
-                : "Top-Rated Home & Office Cleaning in"}
+                ? " Professional End of Tenancy Cleaning in"
+                : "Top-Rated End of Tenancy Cleaning  in"}
               <br />
               <span className="text-primary bg-clip-text">
                 {region.id === "UK" ? "Manchester" : "Lagos & Abuja"}
@@ -213,7 +213,7 @@ const Home = () => {
             <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-lg leading-relaxed font-medium">
               We provide the most reliable{" "}
               {region.id === "UK"
-                ? "housekeeping and domestic services"
+                ? "End of Tenancy Cleaning "
                 : "professional maid and janitorial services"}
               . Whether you need a regular weekly clean or specialized Airbnb
               cleaning, our vetted pros handle the meticulous care of your
@@ -223,7 +223,7 @@ const Home = () => {
             <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
               <Link
                 to="/booking"
-                className="btn-primary py-5 px-10 text-lg group"
+                className="btn-primary py-5 px-10 text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16px] group"
               >
                 Book in 60 Seconds
                 <ArrowRight
