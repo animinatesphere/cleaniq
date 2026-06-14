@@ -68,7 +68,8 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
         setServicesList(data || []);
         const ratesObj = {};
         data.forEach((s) => {
-          ratesObj[(s.name || "").toLowerCase().replace(/[^a-z0-9]/g, "")] = s.rate;
+          ratesObj[(s.name || "").toLowerCase().replace(/[^a-z0-9]/g, "")] =
+            s.rate;
         });
         setDynamicRates(ratesObj);
       } catch (err) {
@@ -170,12 +171,14 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
   // Set initial default calculated price when dynamicRates or service/duration are loaded/change
   useEffect(() => {
     if (Object.keys(dynamicRates).length > 0 && !recurringForm.amount) {
-      const key = (recurringForm.service || "").toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+      const key = (recurringForm.service || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "")
+        .trim();
       const rate = parseFloat(dynamicRates[key]) || 20;
-      setRecurringForm(f => ({ ...f, amount: String(rate * f.duration) }));
+      setRecurringForm((f) => ({ ...f, amount: String(rate * f.duration) }));
     }
   }, [dynamicRates]);
-
 
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
   const startDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
@@ -258,7 +261,9 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
       return;
     }
     if (previewDates.length > 200) {
-      alert(`This would create ${previewDates.length} bookings — please shorten the date range.`);
+      alert(
+        `This would create ${previewDates.length} bookings — please shorten the date range.`,
+      );
       return;
     }
 
@@ -279,7 +284,9 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
           details: {
             address: recurringForm.address,
             postcode: recurringForm.postcode,
-            frequency: recurringForm.frequency.charAt(0).toUpperCase() + recurringForm.frequency.slice(1),
+            frequency:
+              recurringForm.frequency.charAt(0).toUpperCase() +
+              recurringForm.frequency.slice(1),
             duration: recurringForm.duration,
             extras: [],
             notes: recurringForm.notes,
@@ -315,10 +322,21 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
       setRecurringSuccess(created);
       if (onBookingsCreated) onBookingsCreated();
       setRecurringForm({
-        frequency: "weekly", startDate: "", endDate: "",
-        timeSlot: "Morning (8am-12pm)", customerFirstName: "", customerLastName: "",
-        customerEmail: "", customerPhone: "", address: "", postcode: "",
-        service: "Residential Cleaning", duration: 3, amount: "", region: "UK", notes: "",
+        frequency: "weekly",
+        startDate: "",
+        endDate: "",
+        timeSlot: "Morning (8am-12pm)",
+        customerFirstName: "",
+        customerLastName: "",
+        customerEmail: "",
+        customerPhone: "",
+        address: "",
+        postcode: "",
+        service: "Residential Cleaning",
+        duration: 3,
+        amount: "",
+        region: "UK",
+        notes: "",
       });
     } catch (err) {
       alert("Error creating recurring bookings: " + err.message);
@@ -328,14 +346,25 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
   };
 
   const inputStyle = {
-    width: "100%", padding: "10px 14px", borderRadius: "12px",
-    border: "1.5px solid #e2e8f0", fontSize: "13px", outline: "none",
-    boxSizing: "border-box", fontFamily: "inherit", color: "#0F172A",
+    width: "100%",
+    padding: "10px 14px",
+    borderRadius: "12px",
+    border: "1.5px solid #e2e8f0",
+    fontSize: "13px",
+    outline: "none",
+    boxSizing: "border-box",
+    fontFamily: "inherit",
+    color: "#0F172A",
     background: "white",
   };
   const labelStyle = {
-    display: "block", marginBottom: "6px", fontSize: "11px",
-    fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: "1px",
+    display: "block",
+    marginBottom: "6px",
+    fontSize: "11px",
+    fontWeight: 800,
+    color: "#64748b",
+    textTransform: "uppercase",
+    letterSpacing: "1px",
   };
 
   return (
@@ -354,16 +383,33 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
           </div>
           <div className="flex gap-3 items-center">
             <button
-              onClick={() => { setShowRecurring(!showRecurring); setRecurringSuccess(null); }}
+              onClick={() => {
+                setShowRecurring(!showRecurring);
+                setRecurringSuccess(null);
+              }}
               className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all border-2"
               style={{
-                background: showRecurring ? "linear-gradient(135deg,#0F172A,#1e3a5f)" : "white",
+                background: showRecurring
+                  ? "linear-gradient(135deg,#0F172A,#1e3a5f)"
+                  : "white",
                 color: showRecurring ? "#6EE7B7" : "#0F172A",
                 borderColor: showRecurring ? "#0F172A" : "#e2e8f0",
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M17 1l4 4-4 4" />
+                <path d="M3 11V9a4 4 0 014-4h14" />
+                <path d="M7 23l-4-4 4-4" />
+                <path d="M21 13v2a4 4 0 01-4 4H3" />
               </svg>
               {showRecurring ? "Hide Recurring" : "Create Recurring Booking"}
             </button>
@@ -407,13 +453,21 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
                 b.customer?.firstName !== "ADMIN_BLOCK",
             );
             // Highlight recurring bookings
-            const hasRecurring = dayBookings.some((b) => b.meta?.recurringGroup);
+            const hasRecurring = dayBookings.some(
+              (b) => b.meta?.recurringGroup,
+            );
 
             return (
               <div key={i} className="aspect-square">
                 {date ? (
                   <button
-                    onClick={() => setSelectedDateForDetails({ date, isBlocked, bookingsOnDate: dayBookings })}
+                    onClick={() =>
+                      setSelectedDateForDetails({
+                        date,
+                        isBlocked,
+                        bookingsOnDate: dayBookings,
+                      })
+                    }
                     className={`w-full h-full rounded-[24px] flex flex-col items-center justify-center transition-all relative border-2 group
                       ${isBlocked ? "bg-rose-50 border-rose-200 text-rose-500" : hasBookings ? "bg-emerald-50 border-emerald-200 text-emerald-600" : "bg-slate-50 border-transparent text-slate-400 hover:border-primary/30"}
                     `}
@@ -426,11 +480,15 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
                     )}
                     {hasBookings && !isBlocked && (
                       <span className="text-[7px] font-black uppercase absolute bottom-2">
-                        {dayBookings.length} Booking{dayBookings.length > 1 ? "s" : ""}
+                        {dayBookings.length} Booking
+                        {dayBookings.length > 1 ? "s" : ""}
                       </span>
                     )}
                     {hasRecurring && !isBlocked && (
-                      <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-purple-400" title="Recurring" />
+                      <span
+                        className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-purple-400"
+                        title="Recurring"
+                      />
                     )}
                   </button>
                 ) : (
@@ -443,111 +501,418 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
 
         {/* Legend */}
         <div className="flex gap-6 mt-8 pt-6 border-t border-slate-100 flex-wrap">
-          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-300" /><span className="text-[11px] font-bold text-slate-400">Has Bookings</span></div>
-          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-rose-300" /><span className="text-[11px] font-bold text-slate-400">Blocked</span></div>
-          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-purple-400" /><span className="text-[11px] font-bold text-slate-400">Recurring</span></div>
-          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-slate-200" /><span className="text-[11px] font-bold text-slate-400">Available</span></div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-emerald-300" />
+            <span className="text-[11px] font-bold text-slate-400">
+              Has Bookings
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-rose-300" />
+            <span className="text-[11px] font-bold text-slate-400">
+              Blocked
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-purple-400" />
+            <span className="text-[11px] font-bold text-slate-400">
+              Recurring
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-slate-200" />
+            <span className="text-[11px] font-bold text-slate-400">
+              Available
+            </span>
+          </div>
         </div>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">💡 Click any date to view bookings and manage availability</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">
+          💡 Click any date to view bookings and manage availability
+        </p>
       </div>
 
       {/* Date Details Modal */}
-      {selectedDateForDetails && (() => {
-        const { date, isBlocked, bookingsOnDate } = selectedDateForDetails;
-        const dStr = date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        const realBookings = bookingsOnDate.filter(b => b.customer?.firstName !== 'ADMIN_BLOCK' && b.status !== 'Blackout');
-        const statusColors = { Confirmed: '#059669', Pending: '#D97706', Completed: '#6366F1', Cancelled: '#EF4444', Accepted: '#0EA5E9' };
-        return (
-          <div
-            style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
-            onClick={(e) => { if (e.target === e.currentTarget) setSelectedDateForDetails(null); }}
-          >
-            <div style={{ background: 'white', borderRadius: '32px', width: '100%', maxWidth: '560px', maxHeight: '80vh', overflow: 'auto', boxShadow: '0 25px 50px rgba(0,0,0,0.25)' }}>
-              {/* Modal Header */}
-              <div style={{ background: 'linear-gradient(135deg, #0F172A, #1e3a5f)', padding: '28px 32px', borderRadius: '32px 32px 0 0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' }}>Schedule Details</p>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: 'white', lineHeight: 1.3 }}>{dStr}</h3>
-                  </div>
-                  <button onClick={() => setSelectedDateForDetails(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '12px', padding: '8px', cursor: 'pointer', color: 'white', display: 'flex' }}>
-                    <X size={18} />
-                  </button>
-                </div>
-                {isBlocked && (
-                  <div style={{ marginTop: '12px', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#fca5a5', textTransform: 'uppercase' }}>⛔ Date is Blocked</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Bookings List */}
-              <div style={{ padding: '24px 32px' }}>
-                {realBookings.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '32px 0' }}>
-                    <p style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 700, color: '#94a3b8' }}>No bookings on this date</p>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#cbd5e1' }}>{isBlocked ? 'This date is blocked for new bookings.' : 'This date is available for booking.'}</p>
-                  </div>
-                ) : (
-                  <div style={{ marginBottom: '20px' }}>
-                    <p style={{ margin: '0 0 12px', fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>{realBookings.length} Booking{realBookings.length > 1 ? 's' : ''} Scheduled</p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      {realBookings.map((b, i) => (
-                        <div key={i} style={{ background: '#f8fafc', borderRadius: '16px', padding: '14px 16px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: statusColors[b.status] || '#94a3b8', marginTop: '5px', flexShrink: 0 }} />
-                          <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <p style={{ margin: 0, fontSize: '13px', fontWeight: 800, color: '#0F172A' }}>{b.customer?.firstName} {b.customer?.lastName}</p>
-                              <span style={{ fontSize: '10px', fontWeight: 800, color: statusColors[b.status] || '#94a3b8', background: (statusColors[b.status] || '#94a3b8') + '15', padding: '2px 8px', borderRadius: '20px', textTransform: 'uppercase' }}>{b.status}</span>
-                            </div>
-                            <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748b', fontWeight: 600 }}>{b.service}</p>
-                            <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#94a3b8' }}>{b.schedule?.timeSlot || ''}{b.schedule?.preferredTime ? ' · ' + b.schedule.preferredTime : ''} · {b.bookingId}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Block / Unblock Action */}
-                <div style={{ display: 'flex', gap: '10px', paddingTop: '20px', borderTop: '1px solid #f1f5f9' }}>
-                  <button
-                    onClick={() => { onToggleDate(date, isBlocked); setSelectedDateForDetails(null); }}
+      {selectedDateForDetails &&
+        (() => {
+          const { date, isBlocked, bookingsOnDate } = selectedDateForDetails;
+          const dStr = date.toLocaleDateString("en-GB", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          });
+          const realBookings = bookingsOnDate.filter(
+            (b) =>
+              b.customer?.firstName !== "ADMIN_BLOCK" &&
+              b.status !== "Blackout",
+          );
+          const statusColors = {
+            Confirmed: "#059669",
+            Pending: "#D97706",
+            Completed: "#6366F1",
+            Cancelled: "#EF4444",
+            Accepted: "#0EA5E9",
+          };
+          return (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(15,23,42,0.6)",
+                zIndex: 9999,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "20px",
+              }}
+              onClick={(e) => {
+                if (e.target === e.currentTarget)
+                  setSelectedDateForDetails(null);
+              }}
+            >
+              <div
+                style={{
+                  background: "white",
+                  borderRadius: "32px",
+                  width: "100%",
+                  maxWidth: "560px",
+                  maxHeight: "80vh",
+                  overflow: "auto",
+                  boxShadow: "0 25px 50px rgba(0,0,0,0.25)",
+                }}
+              >
+                {/* Modal Header */}
+                <div
+                  style={{
+                    background: "linear-gradient(135deg, #0F172A, #1e3a5f)",
+                    padding: "28px 32px",
+                    borderRadius: "32px 32px 0 0",
+                  }}
+                >
+                  <div
                     style={{
-                      flex: 1, padding: '14px', borderRadius: '16px', border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: '13px', transition: 'all 0.2s',
-                      background: isBlocked ? 'linear-gradient(135deg, #ecfdf5, #d1fae5)' : 'linear-gradient(135deg, #fff1f2, #ffe4e6)',
-                      color: isBlocked ? '#059669' : '#e11d48',
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
                     }}
                   >
-                    {isBlocked ? '🔓 Unlock This Date' : '⛔ Block This Date'}
-                  </button>
-                  <button
-                    onClick={() => setSelectedDateForDetails(null)}
-                    style={{ padding: '14px 20px', borderRadius: '16px', border: '1px solid #e2e8f0', background: 'white', color: '#64748b', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+                    <div>
+                      <p
+                        style={{
+                          margin: "0 0 4px",
+                          fontSize: "11px",
+                          fontWeight: 800,
+                          color: "#94a3b8",
+                          textTransform: "uppercase",
+                          letterSpacing: "1px",
+                        }}
+                      >
+                        Schedule Details
+                      </p>
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize: "18px",
+                          fontWeight: 900,
+                          color: "white",
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {dStr}
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => setSelectedDateForDetails(null)}
+                      style={{
+                        background: "rgba(255,255,255,0.1)",
+                        border: "none",
+                        borderRadius: "12px",
+                        padding: "8px",
+                        cursor: "pointer",
+                        color: "white",
+                        display: "flex",
+                      }}
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                  {isBlocked && (
+                    <div
+                      style={{
+                        marginTop: "12px",
+                        background: "rgba(239,68,68,0.15)",
+                        border: "1px solid rgba(239,68,68,0.3)",
+                        borderRadius: "10px",
+                        padding: "8px 14px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          fontWeight: 800,
+                          color: "#fca5a5",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        ⛔ Date is Blocked
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Bookings List */}
+                <div style={{ padding: "24px 32px" }}>
+                  {realBookings.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "32px 0" }}>
+                      <p
+                        style={{
+                          margin: "0 0 4px",
+                          fontSize: "14px",
+                          fontWeight: 700,
+                          color: "#94a3b8",
+                        }}
+                      >
+                        No bookings on this date
+                      </p>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: "12px",
+                          color: "#cbd5e1",
+                        }}
+                      >
+                        {isBlocked
+                          ? "This date is blocked for new bookings."
+                          : "This date is available for booking."}
+                      </p>
+                    </div>
+                  ) : (
+                    <div style={{ marginBottom: "20px" }}>
+                      <p
+                        style={{
+                          margin: "0 0 12px",
+                          fontSize: "11px",
+                          fontWeight: 800,
+                          color: "#64748b",
+                          textTransform: "uppercase",
+                          letterSpacing: "1px",
+                        }}
+                      >
+                        {realBookings.length} Booking
+                        {realBookings.length > 1 ? "s" : ""} Scheduled
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "10px",
+                        }}
+                      >
+                        {realBookings.map((b, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              background: "#f8fafc",
+                              borderRadius: "16px",
+                              padding: "14px 16px",
+                              border: "1px solid #e2e8f0",
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: "12px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: "8px",
+                                height: "8px",
+                                borderRadius: "50%",
+                                background: statusColors[b.status] || "#94a3b8",
+                                marginTop: "5px",
+                                flexShrink: 0,
+                              }}
+                            />
+                            <div style={{ flex: 1 }}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <p
+                                  style={{
+                                    margin: 0,
+                                    fontSize: "13px",
+                                    fontWeight: 800,
+                                    color: "#0F172A",
+                                  }}
+                                >
+                                  {b.customer?.firstName} {b.customer?.lastName}
+                                </p>
+                                <span
+                                  style={{
+                                    fontSize: "10px",
+                                    fontWeight: 800,
+                                    color: statusColors[b.status] || "#94a3b8",
+                                    background:
+                                      (statusColors[b.status] || "#94a3b8") +
+                                      "15",
+                                    padding: "2px 8px",
+                                    borderRadius: "20px",
+                                    textTransform: "uppercase",
+                                  }}
+                                >
+                                  {b.status}
+                                </span>
+                              </div>
+                              <p
+                                style={{
+                                  margin: "2px 0 0",
+                                  fontSize: "12px",
+                                  color: "#64748b",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {b.service}
+                              </p>
+                              <p
+                                style={{
+                                  margin: "2px 0 0",
+                                  fontSize: "11px",
+                                  color: "#94a3b8",
+                                }}
+                              >
+                                {b.schedule?.timeSlot || ""}
+                                {b.schedule?.preferredTime
+                                  ? " · " + b.schedule.preferredTime
+                                  : ""}{" "}
+                                · {b.bookingId}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Block / Unblock Action */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      paddingTop: "20px",
+                      borderTop: "1px solid #f1f5f9",
+                    }}
                   >
-                    Close
-                  </button>
+                    <button
+                      onClick={() => {
+                        onToggleDate(date, isBlocked);
+                        setSelectedDateForDetails(null);
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: "14px",
+                        borderRadius: "16px",
+                        border: "none",
+                        cursor: "pointer",
+                        fontWeight: 800,
+                        fontSize: "13px",
+                        transition: "all 0.2s",
+                        background: isBlocked
+                          ? "linear-gradient(135deg, #ecfdf5, #d1fae5)"
+                          : "linear-gradient(135deg, #fff1f2, #ffe4e6)",
+                        color: isBlocked ? "#059669" : "#e11d48",
+                      }}
+                    >
+                      {isBlocked ? "🔓 Unlock This Date" : "⛔ Block This Date"}
+                    </button>
+                    <button
+                      onClick={() => setSelectedDateForDetails(null)}
+                      style={{
+                        padding: "14px 20px",
+                        borderRadius: "16px",
+                        border: "1px solid #e2e8f0",
+                        background: "white",
+                        color: "#64748b",
+                        fontWeight: 700,
+                        fontSize: "13px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
 
       {/* ── RECURRING BOOKING PANEL ─────────────────────────── */}
       {showRecurring && (
-        <div className="bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden" style={{ animation: "fadeIn 0.3s ease" }}>
+        <div
+          className="bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden"
+          style={{ animation: "fadeIn 0.3s ease" }}
+        >
           {/* Panel Header */}
-          <div style={{ background: "linear-gradient(135deg, #0F172A 0%, #1e3a5f 100%)", padding: "28px 40px" }}>
+          <div
+            style={{
+              background: "linear-gradient(135deg, #0F172A 0%, #1e3a5f 100%)",
+              padding: "28px 40px",
+            }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <div style={{ background: "rgba(110,231,183,0.15)", border: "1px solid rgba(110,231,183,0.3)", borderRadius: "14px", padding: "12px", display: "flex" }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6EE7B7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/>
+              <div
+                style={{
+                  background: "rgba(110,231,183,0.15)",
+                  border: "1px solid rgba(110,231,183,0.3)",
+                  borderRadius: "14px",
+                  padding: "12px",
+                  display: "flex",
+                }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#6EE7B7"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 1l4 4-4 4" />
+                  <path d="M3 11V9a4 4 0 014-4h14" />
+                  <path d="M7 23l-4-4 4-4" />
+                  <path d="M21 13v2a4 4 0 01-4 4H3" />
                 </svg>
               </div>
               <div>
-                <h3 style={{ margin: "0 0 4px", fontSize: "20px", fontWeight: 900, color: "white", letterSpacing: "-0.3px" }}>Create Recurring Booking</h3>
-                <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8", fontWeight: 600 }}>Schedule Daily, Weekly, Fortnightly or Monthly cleaning appointments</p>
+                <h3
+                  style={{
+                    margin: "0 0 4px",
+                    fontSize: "20px",
+                    fontWeight: 900,
+                    color: "white",
+                    letterSpacing: "-0.3px",
+                  }}
+                >
+                  Create Recurring Booking
+                </h3>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "13px",
+                    color: "#94a3b8",
+                    fontWeight: 600,
+                  }}
+                >
+                  Schedule Daily, Weekly, Fortnightly or Monthly cleaning
+                  appointments
+                </p>
               </div>
             </div>
           </div>
@@ -555,72 +920,235 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
           <div style={{ padding: "36px 40px" }}>
             {/* Success banner */}
             {recurringSuccess !== null && (
-              <div style={{ background: "linear-gradient(135deg,#ecfdf5,#d1fae5)", border: "2px solid #86efac", borderRadius: "20px", padding: "20px 24px", marginBottom: "28px", display: "flex", alignItems: "center", gap: "14px" }}>
-                <CheckCircle2 size={24} style={{ color: "#059669", flexShrink: 0 }} />
+              <div
+                style={{
+                  background: "linear-gradient(135deg,#ecfdf5,#d1fae5)",
+                  border: "2px solid #86efac",
+                  borderRadius: "20px",
+                  padding: "20px 24px",
+                  marginBottom: "28px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "14px",
+                }}
+              >
+                <CheckCircle2
+                  size={24}
+                  style={{ color: "#059669", flexShrink: 0 }}
+                />
                 <div>
-                  <p style={{ margin: "0 0 4px", fontSize: "16px", fontWeight: 900, color: "#065f46" }}>✓ {recurringSuccess} recurring bookings created!</p>
-                  <p style={{ margin: 0, fontSize: "13px", color: "#059669" }}>All appointments are now visible in the bookings list and calendar.</p>
+                  <p
+                    style={{
+                      margin: "0 0 4px",
+                      fontSize: "16px",
+                      fontWeight: 900,
+                      color: "#065f46",
+                    }}
+                  >
+                    ✓ {recurringSuccess} recurring bookings created!
+                  </p>
+                  <p style={{ margin: 0, fontSize: "13px", color: "#059669" }}>
+                    All appointments are now visible in the bookings list and
+                    calendar.
+                  </p>
                 </div>
               </div>
             )}
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "32px" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: "32px",
+              }}
+            >
               {/* LEFT COLUMN */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                }}
+              >
                 {/* FREQUENCY */}
                 <div>
                   <label style={labelStyle}>Cleaning Frequency</label>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "10px",
+                    }}
+                  >
                     {[
                       { val: "daily", label: "Daily", sub: "Every day" },
                       { val: "weekly", label: "Weekly", sub: "Every 7 days" },
-                      { val: "fortnightly", label: "Fortnightly", sub: "Every 2 weeks" },
-                      { val: "monthly", label: "Monthly", sub: "Same day each month" },
+                      {
+                        val: "fortnightly",
+                        label: "Fortnightly",
+                        sub: "Every 2 weeks",
+                      },
+                      {
+                        val: "monthly",
+                        label: "Monthly",
+                        sub: "Same day each month",
+                      },
                     ].map(({ val, label, sub }) => (
                       <button
                         key={val}
                         type="button"
-                        onClick={() => setRecurringForm(f => ({ ...f, frequency: val }))}
+                        onClick={() =>
+                          setRecurringForm((f) => ({ ...f, frequency: val }))
+                        }
                         style={{
-                          padding: "14px", borderRadius: "14px", border: `2px solid ${recurringForm.frequency === val ? "#6EE7B7" : "#e2e8f0"}`,
-                          background: recurringForm.frequency === val ? "linear-gradient(135deg,#ecfdf5,#d1fae5)" : "white",
-                          cursor: "pointer", textAlign: "left", transition: "all 0.2s",
+                          padding: "14px",
+                          borderRadius: "14px",
+                          border: `2px solid ${recurringForm.frequency === val ? "#6EE7B7" : "#e2e8f0"}`,
+                          background:
+                            recurringForm.frequency === val
+                              ? "linear-gradient(135deg,#ecfdf5,#d1fae5)"
+                              : "white",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          transition: "all 0.2s",
                         }}
                       >
-                        <p style={{ margin: "0 0 2px", fontSize: "13px", fontWeight: 800, color: recurringForm.frequency === val ? "#065f46" : "#0F172A" }}>{label}</p>
-                        <p style={{ margin: 0, fontSize: "11px", color: "#94a3b8", fontWeight: 600 }}>{sub}</p>
+                        <p
+                          style={{
+                            margin: "0 0 2px",
+                            fontSize: "13px",
+                            fontWeight: 800,
+                            color:
+                              recurringForm.frequency === val
+                                ? "#065f46"
+                                : "#0F172A",
+                          }}
+                        >
+                          {label}
+                        </p>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: "11px",
+                            color: "#94a3b8",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {sub}
+                        </p>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* DATE RANGE */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "12px",
+                  }}
+                >
                   <div>
                     <label style={labelStyle}>Start Date</label>
-                    <input type="date" style={inputStyle} value={recurringForm.startDate}
-                      onChange={e => setRecurringForm(f => ({ ...f, startDate: e.target.value }))} />
+                    <input
+                      type="date"
+                      style={inputStyle}
+                      value={recurringForm.startDate}
+                      onChange={(e) =>
+                        setRecurringForm((f) => ({
+                          ...f,
+                          startDate: e.target.value,
+                        }))
+                      }
+                    />
                   </div>
                   <div>
                     <label style={labelStyle}>End Date</label>
-                    <input type="date" style={inputStyle} value={recurringForm.endDate}
-                      onChange={e => setRecurringForm(f => ({ ...f, endDate: e.target.value }))} />
+                    <input
+                      type="date"
+                      style={inputStyle}
+                      value={recurringForm.endDate}
+                      onChange={(e) =>
+                        setRecurringForm((f) => ({
+                          ...f,
+                          endDate: e.target.value,
+                        }))
+                      }
+                    />
                   </div>
                 </div>
 
                 {/* PREVIEW */}
                 {previewDates.length > 0 && (
-                  <div style={{ background: "linear-gradient(135deg,#0F172A,#1e3a5f)", borderRadius: "16px", padding: "16px 20px" }}>
-                    <p style={{ margin: "0 0 6px", fontSize: "12px", fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px" }}>Schedule Preview</p>
-                    <p style={{ margin: "0 0 10px", fontSize: "22px", fontWeight: 900, color: "#6EE7B7" }}>{previewDates.length} appointments</p>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", maxHeight: "100px", overflowY: "auto" }}>
+                  <div
+                    style={{
+                      background: "linear-gradient(135deg,#0F172A,#1e3a5f)",
+                      borderRadius: "16px",
+                      padding: "16px 20px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: "0 0 6px",
+                        fontSize: "12px",
+                        fontWeight: 800,
+                        color: "#94a3b8",
+                        textTransform: "uppercase",
+                        letterSpacing: "1px",
+                      }}
+                    >
+                      Schedule Preview
+                    </p>
+                    <p
+                      style={{
+                        margin: "0 0 10px",
+                        fontSize: "22px",
+                        fontWeight: 900,
+                        color: "#6EE7B7",
+                      }}
+                    >
+                      {previewDates.length} appointments
+                    </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "6px",
+                        maxHeight: "100px",
+                        overflowY: "auto",
+                      }}
+                    >
                       {previewDates.slice(0, 12).map((d, i) => (
-                        <span key={i} style={{ background: "rgba(110,231,183,0.15)", border: "1px solid rgba(110,231,183,0.25)", color: "#6EE7B7", padding: "3px 10px", borderRadius: "20px", fontSize: "11px", fontWeight: 700 }}>
-                          {d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
+                        <span
+                          key={i}
+                          style={{
+                            background: "rgba(110,231,183,0.15)",
+                            border: "1px solid rgba(110,231,183,0.25)",
+                            color: "#6EE7B7",
+                            padding: "3px 10px",
+                            borderRadius: "20px",
+                            fontSize: "11px",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {d.toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "short",
+                          })}
                         </span>
                       ))}
                       {previewDates.length > 12 && (
-                        <span style={{ color: "#94a3b8", fontSize: "11px", fontWeight: 700, padding: "3px 6px" }}>+{previewDates.length - 12} more</span>
+                        <span
+                          style={{
+                            color: "#94a3b8",
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            padding: "3px 6px",
+                          }}
+                        >
+                          +{previewDates.length - 12} more
+                        </span>
                       )}
                     </div>
                   </div>
@@ -629,8 +1157,16 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
                 {/* TIME & SERVICE */}
                 <div>
                   <label style={labelStyle}>Time Slot</label>
-                  <select style={inputStyle} value={recurringForm.timeSlot}
-                    onChange={e => setRecurringForm(f => ({ ...f, timeSlot: e.target.value }))}>
+                  <select
+                    style={inputStyle}
+                    value={recurringForm.timeSlot}
+                    onChange={(e) =>
+                      setRecurringForm((f) => ({
+                        ...f,
+                        timeSlot: e.target.value,
+                      }))
+                    }
+                  >
                     <option>Morning (8am-12pm)</option>
                     <option>Afternoon (12pm-4pm)</option>
                     <option>Evening (4pm-8pm)</option>
@@ -638,75 +1174,200 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
                   </select>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "10px" }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "2fr 1fr 1fr",
+                    gap: "10px",
+                  }}
+                >
                   <div>
                     <label style={labelStyle}>Service</label>
-                    <input type="text" style={inputStyle} value={recurringForm.service}
-                      onChange={e => setRecurringForm(f => ({ ...f, service: e.target.value }))}
-                      placeholder="e.g. Residential Cleaning" />
+                    <input
+                      type="text"
+                      style={inputStyle}
+                      value={recurringForm.service}
+                      onChange={(e) =>
+                        setRecurringForm((f) => ({
+                          ...f,
+                          service: e.target.value,
+                        }))
+                      }
+                      placeholder="e.g. Residential Cleaning"
+                    />
                   </div>
                   <div>
                     <label style={labelStyle}>Hours</label>
-                    <input type="number" min={1} max={12} style={inputStyle} value={recurringForm.duration}
-                      onChange={e => setRecurringForm(f => ({ ...f, duration: parseInt(e.target.value) || 2 }))} />
+                    <input
+                      type="number"
+                      min={1}
+                      max={12}
+                      style={inputStyle}
+                      value={recurringForm.duration}
+                      onChange={(e) =>
+                        setRecurringForm((f) => ({
+                          ...f,
+                          duration: parseInt(e.target.value) || 2,
+                        }))
+                      }
+                    />
                   </div>
                   <div>
                     <label style={labelStyle}>£ / Visit</label>
-                    <input type="number" min={0} style={inputStyle} value={recurringForm.amount}
-                      onChange={e => setRecurringForm(f => ({ ...f, amount: e.target.value }))}
-                      placeholder="0.00" />
+                    <input
+                      type="number"
+                      min={0}
+                      style={inputStyle}
+                      value={recurringForm.amount}
+                      onChange={(e) =>
+                        setRecurringForm((f) => ({
+                          ...f,
+                          amount: e.target.value,
+                        }))
+                      }
+                      placeholder="0.00"
+                    />
                   </div>
                 </div>
               </div>
 
               {/* RIGHT COLUMN — CUSTOMER */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "16px",
+                }}
+              >
                 <div>
-                  <label style={{ ...labelStyle, color: "#0F172A", fontSize: "12px" }}>Customer Details</label>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                  <label
+                    style={{
+                      ...labelStyle,
+                      color: "#0F172A",
+                      fontSize: "12px",
+                    }}
+                  >
+                    Customer Details
+                  </label>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "10px",
+                      marginBottom: "10px",
+                    }}
+                  >
                     <div>
                       <label style={labelStyle}>First Name *</label>
-                      <input type="text" style={inputStyle} value={recurringForm.customerFirstName}
-                        onChange={e => setRecurringForm(f => ({ ...f, customerFirstName: e.target.value }))}
-                        placeholder="Jane" />
+                      <input
+                        type="text"
+                        style={inputStyle}
+                        value={recurringForm.customerFirstName}
+                        onChange={(e) =>
+                          setRecurringForm((f) => ({
+                            ...f,
+                            customerFirstName: e.target.value,
+                          }))
+                        }
+                        placeholder="Jane"
+                      />
                     </div>
                     <div>
                       <label style={labelStyle}>Last Name</label>
-                      <input type="text" style={inputStyle} value={recurringForm.customerLastName}
-                        onChange={e => setRecurringForm(f => ({ ...f, customerLastName: e.target.value }))}
-                        placeholder="Smith" />
+                      <input
+                        type="text"
+                        style={inputStyle}
+                        value={recurringForm.customerLastName}
+                        onChange={(e) =>
+                          setRecurringForm((f) => ({
+                            ...f,
+                            customerLastName: e.target.value,
+                          }))
+                        }
+                        placeholder="Smith"
+                      />
                     </div>
                   </div>
                   <div style={{ marginBottom: "10px" }}>
                     <label style={labelStyle}>Email *</label>
-                    <input type="email" style={inputStyle} value={recurringForm.customerEmail}
-                      onChange={e => setRecurringForm(f => ({ ...f, customerEmail: e.target.value }))}
-                      placeholder="jane@example.com" />
+                    <input
+                      type="email"
+                      style={inputStyle}
+                      value={recurringForm.customerEmail}
+                      onChange={(e) =>
+                        setRecurringForm((f) => ({
+                          ...f,
+                          customerEmail: e.target.value,
+                        }))
+                      }
+                      placeholder="jane@example.com"
+                    />
                   </div>
                   <div>
                     <label style={labelStyle}>Phone</label>
-                    <input type="tel" style={inputStyle} value={recurringForm.customerPhone}
-                      onChange={e => setRecurringForm(f => ({ ...f, customerPhone: e.target.value }))}
-                      placeholder="+44 7700 000000" />
+                    <input
+                      type="tel"
+                      style={inputStyle}
+                      value={recurringForm.customerPhone}
+                      onChange={(e) =>
+                        setRecurringForm((f) => ({
+                          ...f,
+                          customerPhone: e.target.value,
+                        }))
+                      }
+                      placeholder="+44 7700 000000"
+                    />
                   </div>
                 </div>
 
                 <div>
                   <label style={labelStyle}>Service Address *</label>
-                  <input type="text" style={{ ...inputStyle, marginBottom: "10px" }} value={recurringForm.address}
-                    onChange={e => setRecurringForm(f => ({ ...f, address: e.target.value }))}
-                    placeholder="123 High Street, London" />
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  <input
+                    type="text"
+                    style={{ ...inputStyle, marginBottom: "10px" }}
+                    value={recurringForm.address}
+                    onChange={(e) =>
+                      setRecurringForm((f) => ({
+                        ...f,
+                        address: e.target.value,
+                      }))
+                    }
+                    placeholder="123 High Street, London"
+                  />
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "10px",
+                    }}
+                  >
                     <div>
                       <label style={labelStyle}>Postcode</label>
-                      <input type="text" style={inputStyle} value={recurringForm.postcode}
-                        onChange={e => setRecurringForm(f => ({ ...f, postcode: e.target.value }))}
-                        placeholder="SW1A 1AA" />
+                      <input
+                        type="text"
+                        style={inputStyle}
+                        value={recurringForm.postcode}
+                        onChange={(e) =>
+                          setRecurringForm((f) => ({
+                            ...f,
+                            postcode: e.target.value,
+                          }))
+                        }
+                        placeholder="SW1A 1AA"
+                      />
                     </div>
                     <div>
                       <label style={labelStyle}>Region</label>
-                      <select style={inputStyle} value={recurringForm.region}
-                        onChange={e => setRecurringForm(f => ({ ...f, region: e.target.value }))}>
+                      <select
+                        style={inputStyle}
+                        value={recurringForm.region}
+                        onChange={(e) =>
+                          setRecurringForm((f) => ({
+                            ...f,
+                            region: e.target.value,
+                          }))
+                        }
+                      >
                         <option value="UK">UK</option>
                         <option value="NG">NG</option>
                       </select>
@@ -716,10 +1377,15 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
 
                 <div>
                   <label style={labelStyle}>Internal Notes (optional)</label>
-                  <textarea rows={3} style={{ ...inputStyle, resize: "none", lineHeight: 1.6 }}
+                  <textarea
+                    rows={3}
+                    style={{ ...inputStyle, resize: "none", lineHeight: 1.6 }}
                     value={recurringForm.notes}
-                    onChange={e => setRecurringForm(f => ({ ...f, notes: e.target.value }))}
-                    placeholder="e.g. Customer prefers the cleaner to arrive 15 min early..." />
+                    onChange={(e) =>
+                      setRecurringForm((f) => ({ ...f, notes: e.target.value }))
+                    }
+                    placeholder="e.g. Customer prefers the cleaner to arrive 15 min early..."
+                  />
                 </div>
 
                 {/* CREATE BUTTON */}
@@ -727,31 +1393,71 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
                   onClick={handleCreateRecurring}
                   disabled={recurringLoading || previewDates.length === 0}
                   style={{
-                    width: "100%", padding: "18px", borderRadius: "18px", border: "none",
-                    background: recurringLoading || previewDates.length === 0
-                      ? "#94a3b8"
-                      : "linear-gradient(135deg, #0F172A 0%, #1e3a5f 100%)",
-                    color: recurringLoading || previewDates.length === 0 ? "white" : "#6EE7B7",
-                    fontWeight: 900, fontSize: "15px", cursor: recurringLoading || previewDates.length === 0 ? "not-allowed" : "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
-                    boxShadow: recurringLoading || previewDates.length === 0 ? "none" : "0 10px 25px rgba(15,23,42,0.3)",
+                    width: "100%",
+                    padding: "18px",
+                    borderRadius: "18px",
+                    border: "none",
+                    background:
+                      recurringLoading || previewDates.length === 0
+                        ? "#94a3b8"
+                        : "linear-gradient(135deg, #0F172A 0%, #1e3a5f 100%)",
+                    color:
+                      recurringLoading || previewDates.length === 0
+                        ? "white"
+                        : "#6EE7B7",
+                    fontWeight: 900,
+                    fontSize: "15px",
+                    cursor:
+                      recurringLoading || previewDates.length === 0
+                        ? "not-allowed"
+                        : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "10px",
+                    boxShadow:
+                      recurringLoading || previewDates.length === 0
+                        ? "none"
+                        : "0 10px 25px rgba(15,23,42,0.3)",
                     transition: "all 0.2s",
                     marginTop: "auto",
                   }}
                 >
                   {recurringLoading ? (
                     <>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ animation: "spin 1s linear infinite" }}>
-                        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        style={{ animation: "spin 1s linear infinite" }}
+                      >
+                        <path d="M21 12a9 9 0 11-6.219-8.56" />
                       </svg>
                       Creating {previewDates.length} Bookings...
                     </>
                   ) : (
                     <>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/>
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M17 1l4 4-4 4" />
+                        <path d="M3 11V9a4 4 0 014-4h14" />
+                        <path d="M7 23l-4-4 4-4" />
+                        <path d="M21 13v2a4 4 0 01-4 4H3" />
                       </svg>
-                      Create {previewDates.length > 0 ? previewDates.length : ""} Recurring Booking{previewDates.length !== 1 ? "s" : ""}
+                      Create{" "}
+                      {previewDates.length > 0 ? previewDates.length : ""}{" "}
+                      Recurring Booking{previewDates.length !== 1 ? "s" : ""}
                     </>
                   )}
                 </button>
@@ -763,7 +1469,6 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
     </div>
   );
 };
-
 
 // Lightweight calendar for admin create booking (select date)
 const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
@@ -943,6 +1648,13 @@ const Bookings = () => {
   const [fieldTouched, setFieldTouched] = useState({});
   const [selectedBookings, setSelectedBookings] = useState(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [additionalHoursForm, setAdditionalHoursForm] = useState({
+    hours: "",
+    hourlyRate: "",
+    isGenerating: false,
+  });
+  const [showAdditionalHoursModal, setShowAdditionalHoursModal] =
+    useState(false);
 
   useEffect(() => {
     if (statusMessage.text) {
@@ -1016,11 +1728,10 @@ const Bookings = () => {
     });
     Object.keys(slotsMap).forEach((d) => {
       const s = slotsMap[d];
-      const hasMorning = s.some(slot => slot.includes("Morning"));
-      const hasAfternoon = s.some(slot => slot.includes("Afternoon"));
-      const hasEvening = s.some(slot => slot.includes("Evening"));
-      if (hasMorning && hasAfternoon && hasEvening)
-        fullyBooked.push(d);
+      const hasMorning = s.some((slot) => slot.includes("Morning"));
+      const hasAfternoon = s.some((slot) => slot.includes("Afternoon"));
+      const hasEvening = s.some((slot) => slot.includes("Evening"));
+      if (hasMorning && hasAfternoon && hasEvening) fullyBooked.push(d);
     });
     console.log("[ADMIN AVAILABILITY] Booked slots map:", slotsMap);
     setBookedSlotsByDate(slotsMap);
@@ -1993,7 +2704,11 @@ const Bookings = () => {
           </div>
         </div>
       ) : (
-        <AdminCalendar bookings={bookings} onToggleDate={toggleAvailability} onBookingsCreated={fetchBookings} />
+        <AdminCalendar
+          bookings={bookings}
+          onToggleDate={toggleAvailability}
+          onBookingsCreated={fetchBookings}
+        />
       )}
 
       {selectedBooking && (
@@ -2248,44 +2963,61 @@ const Bookings = () => {
                           : "₦"}
                         {selectedBooking.payment?.amount}
                       </p>
-                      <button
-                        onClick={async () => {
-                          try {
-                            const res = await fetch(
-                              `${import.meta.env.VITE_API_URL}/bookings/${selectedBooking._id}`,
-                              {
-                                method: "PUT",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
+                      <div className="flex gap-1 mt-2 flex-col sm:flex-row">
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await fetch(
+                                `${import.meta.env.VITE_API_URL}/bookings/${selectedBooking._id}`,
+                                {
+                                  method: "PUT",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify({
+                                    payment: {
+                                      ...selectedBooking.payment,
+                                      status: "Confirmed",
+                                      confirmedAt: new Date().toISOString(),
+                                    },
+                                  }),
+                                },
+                              );
+                              if (res.ok) {
+                                setSelectedBooking((prev) => ({
+                                  ...prev,
                                   payment: {
-                                    ...selectedBooking.payment,
+                                    ...prev.payment,
                                     status: "Confirmed",
                                     confirmedAt: new Date().toISOString(),
                                   },
-                                }),
-                              },
-                            );
-                            if (res.ok) {
-                              setSelectedBooking((prev) => ({
-                                ...prev,
-                                payment: {
-                                  ...prev.payment,
-                                  status: "Confirmed",
-                                  confirmedAt: new Date().toISOString(),
-                                },
-                              }));
-                              alert("✅ Payment confirmed!");
-                              fetchBookings();
+                                }));
+                                alert("✅ Payment confirmed!");
+                                fetchBookings();
+                              }
+                            } catch (err) {
+                              console.error("Failed to confirm payment:", err);
+                              alert("❌ Failed to confirm payment");
                             }
-                          } catch (err) {
-                            console.error("Failed to confirm payment:", err);
-                            alert("❌ Failed to confirm payment");
-                          }
-                        }}
-                        className="absolute top-2 right-2 px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[8px] font-black rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                      >
-                        Confirm
-                      </button>
+                          }}
+                          className="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[8px] font-black rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => {
+                            setAdditionalHoursForm({
+                              hours: "",
+                              hourlyRate: "",
+                              isGenerating: false,
+                            });
+                            setShowAdditionalHoursModal(true);
+                          }}
+                          className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-[8px] font-black rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                        >
+                          + Extra Hours
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -2653,6 +3385,224 @@ const Bookings = () => {
                   </button>
                 </>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Additional Hours Payment Link Modal */}
+      {showAdditionalHoursModal && selectedBooking && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 sm:p-6 lg:p-10">
+          <div
+            className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md"
+            onClick={() => setShowAdditionalHoursModal(false)}
+          />
+          <div className="relative w-full max-w-md bg-white rounded-[28px] overflow-hidden shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-6 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+                  <Zap size={20} className="text-white" />
+                  Additional Cleaning Hours
+                </h3>
+                <p className="text-white/80 text-[11px] font-bold uppercase tracking-widest mt-1">
+                  Create a payment link for extra hours
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAdditionalHoursModal(false)}
+                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-5">
+              {/* Current Hours Info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+                <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider mb-2">
+                  Current Booking Details
+                </p>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <p className="text-slate-600 font-bold">Original Hours:</p>
+                    <p className="text-blue-700 font-black text-lg">
+                      {selectedBooking.details?.duration || 0}h
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-slate-600 font-bold">Current Total:</p>
+                    <p className="text-blue-700 font-black text-lg">
+                      {(selectedBooking.details?.additionalHoursPurchased ||
+                        0) + (selectedBooking.details?.duration || 0)}
+                      h
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Hours Input */}
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
+                  📝 Additional Hours Needed
+                </label>
+                <input
+                  type="number"
+                  min="0.5"
+                  step="0.5"
+                  placeholder="e.g., 2"
+                  value={additionalHoursForm.hours}
+                  onChange={(e) =>
+                    setAdditionalHoursForm((prev) => ({
+                      ...prev,
+                      hours: e.target.value,
+                    }))
+                  }
+                  className="w-full p-3 rounded-xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all text-sm font-bold placeholder:text-slate-400"
+                />
+              </div>
+
+              {/* Hourly Rate Input */}
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
+                  💷 Hourly Rate (£)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g., 25"
+                  value={additionalHoursForm.hourlyRate}
+                  onChange={(e) =>
+                    setAdditionalHoursForm((prev) => ({
+                      ...prev,
+                      hourlyRate: e.target.value,
+                    }))
+                  }
+                  className="w-full p-3 rounded-xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all text-sm font-bold placeholder:text-slate-400"
+                />
+              </div>
+
+              {/* Calculate Total */}
+              {additionalHoursForm.hours && additionalHoursForm.hourlyRate && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
+                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider mb-2">
+                    💰 Payment Amount
+                  </p>
+                  <p className="text-3xl font-black text-emerald-700">
+                    £
+                    {(
+                      parseFloat(additionalHoursForm.hours || 0) *
+                      parseFloat(additionalHoursForm.hourlyRate || 0)
+                    ).toFixed(2)}
+                  </p>
+                  <p className="text-[11px] text-emerald-600 font-bold mt-1">
+                    {additionalHoursForm.hours}h × £
+                    {additionalHoursForm.hourlyRate}/hr
+                  </p>
+                </div>
+              )}
+
+              {/* Send Link Button */}
+              <button
+                onClick={async () => {
+                  if (
+                    !additionalHoursForm.hours ||
+                    !additionalHoursForm.hourlyRate
+                  ) {
+                    alert("Please enter both hours and hourly rate");
+                    return;
+                  }
+
+                  setAdditionalHoursForm((prev) => ({
+                    ...prev,
+                    isGenerating: true,
+                  }));
+
+                  try {
+                    const response = await fetch(
+                      `${import.meta.env.VITE_API_URL}/payments/additional-hours-checkout`,
+                      {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          bookingId: selectedBooking._id,
+                          additionalHours: parseFloat(
+                            additionalHoursForm.hours,
+                          ),
+                          hourlyRate: parseFloat(
+                            additionalHoursForm.hourlyRate,
+                          ),
+                        }),
+                      },
+                    );
+
+                    if (!response.ok) {
+                      throw new Error("Failed to create payment link");
+                    }
+
+                    const data = await response.json();
+
+                    // Send email with payment link
+                    const emailResponse = await fetch(
+                      `${import.meta.env.VITE_API_URL}/payments/send-additional-hours-email`,
+                      {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          bookingId: selectedBooking._id,
+                          customerEmail: selectedBooking.customer.email,
+                          customerName: selectedBooking.customer.firstName,
+                          checkoutUrl: data.checkoutUrl,
+                          additionalHours: parseFloat(
+                            additionalHoursForm.hours,
+                          ),
+                          additionalAmount: data.additionalAmount,
+                          bookingRef: selectedBooking.bookingId,
+                        }),
+                      },
+                    );
+
+                    if (emailResponse.ok) {
+                      alert(
+                        `✅ Payment link sent to ${selectedBooking.customer.email}!\n\nAmount: £${data.additionalAmount.toFixed(2)}`,
+                      );
+                      setShowAdditionalHoursModal(false);
+                    } else {
+                      alert(
+                        "✅ Payment link created, but email failed to send",
+                      );
+                    }
+                  } catch (error) {
+                    console.error("Error:", error);
+                    alert(`❌ ${error.message}`);
+                  } finally {
+                    setAdditionalHoursForm((prev) => ({
+                      ...prev,
+                      isGenerating: false,
+                    }));
+                  }
+                }}
+                disabled={
+                  additionalHoursForm.isGenerating ||
+                  !additionalHoursForm.hours ||
+                  !additionalHoursForm.hourlyRate
+                }
+                className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2"
+              >
+                {additionalHoursForm.isGenerating ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Generating Link...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={16} />
+                    Send Payment Link to Customer
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -3249,9 +4199,11 @@ const Bookings = () => {
                                     }
 
                                     return availableSlots.map((slot) => {
-                                      const isSlotBooked = selectedDateStr && bookedSlotsByDate[selectedDateStr]?.some(
-                                        (s) => s.includes(slot.value)
-                                      );
+                                      const isSlotBooked =
+                                        selectedDateStr &&
+                                        bookedSlotsByDate[
+                                          selectedDateStr
+                                        ]?.some((s) => s.includes(slot.value));
                                       return (
                                         <button
                                           key={slot.value}

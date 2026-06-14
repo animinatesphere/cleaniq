@@ -901,4 +901,184 @@ router.post("/capture/:bookingId", async (req, res) => {
   }
 });
 
+// CREATE CHECKOUT SESSION FOR ADDITIONAL HOURS
+// Admin creates a payment link for customer to add extra cleaning hours
+router.post("/additional-hours-checkout", async (req, res) => {
+  const { bookingId, additionalHours, hourlyRate } = req.body;
+
+  try {
+    if (!bookingId || !additionalHours || additionalHours <= 0) {
+      return res.status(400).json({ message: "Invalid booking ID or additional hours" });
+    }
+
+    if (!hourlyRate || hourlyRate <= 0) {
+      return res.status(400).json({ message: "Invalid hourly rate" });
+    }
+
+    // Fetch the booking to get customer details
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    // Calculate amount for additional hours
+    const additionalAmount = parseFloat(hourlyRate) * additionalHours;
+
+    // Create Stripe checkout session for additional hours
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      customer_email: booking.customer.email,
+      payment_intent_data: {
+        capture_method: "manual", // Authorize but don't capture - money held pending
+        metadata: {
+          bookingId: booking._id.toString(),
+          bookingRef: booking.bookingId,
+          additionalHours: additionalHours.toString(),
+          type: "additional_hours",
+          company: "Cleaniq Services",
+        },
+      },
+      line_items: [
+        {
+          price_data: {
+            currency: (booking.payment?.currency || "GBP").toLowerCase(),
+            product_data: {
+              name: `Cleaniq - Additional Cleaning Hours`,
+              description: `${additionalHours} extra hours for Booking Reference: ${booking.bookingId}`,
+            },
+            unit_amount: Math.round(additionalAmount * 100), // Stripe uses cents/pence
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        bookingId: booking._id.toString(),
+        bookingRef: booking.bookingId,
+        additionalHours: additionalHours.toString(),
+        type: "additional_hours",
+        company: "Cleaniq Services",
+      },
+      success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=success&bookingId=${booking._id}&type=additional_hours`,
+      cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=cancelled`,
+    });
+
+    console.log(
+      `✅ Additional hours checkout session created for booking ${bookingId}`,
+      `Additional Hours: ${additionalHours}, Amount: £${additionalAmount.toFixed(2)}`,
+    );
+
+    res.json({
+      sessionId: session.id,
+      checkoutUrl: session.url,
+      additionalHours,
+      additionalAmount: parseFloat(additionalAmount.toFixed(2)),
+      message: "Payment link created successfully",
+    });
+  } catch (error) {
+    console.error("❌ ADDITIONAL HOURS CHECKOUT ERROR:", error.message);
+    res.status(500).json({ message: "Failed to create additional hours payment link" });
+  }
+});
+
+// SEND ADDITIONAL HOURS PAYMENT LINK EMAIL
+router.post("/send-additional-hours-email", async (req, res) => {
+  const { bookingId, customerEmail, customerName, checkoutUrl, additionalHours, additionalAmount, bookingRef } = req.body;
+
+  try {
+    const emailHtml = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 45px; text-align: center;">
+          <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 130px; height: auto; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);" />
+          <h1 style="color: #ffffff; margin: 0; font-size: 32px; letter-spacing: -1px; font-weight: 800;">Need More Cleaning Time?</h1>
+          <p style="color: #dbeafe; margin-top: 12px; font-weight: 600; font-size: 15px;">Add extra hours to your booking</p>
+        </div>
+        
+        <div style="padding: 50px 45px; color: #1e293b; line-height: 1.8;">
+          <h2 style="font-size: 22px; margin-top: 0; margin-bottom: 10px; color: #0F172A;">Hi ${customerName},</h2>
+          <p style="font-size: 15px; color: #475569; margin-bottom: 30px;">We've prepared a special offer to extend your cleaning session with additional hours. This will give our team more time to provide an even more thorough clean of your property.</p>
+          
+          <!-- BOOKING REFERENCE CARD -->
+          <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 32px; border-radius: 24px; margin-bottom: 32px; color: white; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);">
+            <p style="margin: 0; font-size: 13px; font-weight: 800; color: #dbeafe; text-transform: uppercase; letter-spacing: 2px;">Your Booking Reference:</p>
+            <p style="margin: 12px 0 0 0; font-size: 28px; font-weight: 900; letter-spacing: 1px;">${bookingRef}</p>
+          </div>
+
+          <!-- ADDITIONAL HOURS DETAILS -->
+          <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #3b82f6; padding-left: 12px;">⏱️ Additional Hours Offer</h3>
+          
+          <div style="padding: 28px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 24px; border: 2px solid #93c5fd; margin-bottom: 32px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #bfdbfe;">
+              <span style="font-size: 15px; color: #1e40af; font-weight: 600;">Additional Hours:</span>
+              <span style="font-size: 15px; color: #1e40af; font-weight: 700;">${additionalHours} hours</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 16px; color: #1e40af; font-weight: 800; text-transform: uppercase;">Total Amount:</span>
+              <span style="font-size: 28px; color: #1e40af; font-weight: 900;">£${additionalAmount.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <!-- WHAT'S INCLUDED -->
+          <h3 style="font-size: 16px; color: #0F172A; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; font-weight: 800; border-left: 4px solid #3b82f6; padding-left: 12px;">✓ What You Get</h3>
+          
+          <div style="padding: 24px; background-color: #f8fafc; border-radius: 20px; border: 1px solid #e2e8f0; margin-bottom: 32px;">
+            <ul style="margin: 0; padding-left: 0; list-style: none;">
+              <li style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-size: 15px; color: #334155; display: flex; align-items: center;">
+                <span style="display: inline-block; width: 6px; height: 6px; background-color: #3b82f6; border-radius: 50%; margin-right: 12px;"></span>
+                Extra ${additionalHours} hours of professional cleaning
+              </li>
+              <li style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-size: 15px; color: #334155; display: flex; align-items: center;">
+                <span style="display: inline-block; width: 6px; height: 6px; background-color: #3b82f6; border-radius: 50%; margin-right: 12px;"></span>
+                More thorough attention to detail
+              </li>
+              <li style="padding: 12px 0; font-size: 15px; color: #334155; display: flex; align-items: center;">
+                <span style="display: inline-block; width: 6px; height: 6px; background-color: #3b82f6; border-radius: 50%; margin-right: 12px;"></span>
+                Hours automatically added to your booking upon payment
+              </li>
+            </ul>
+          </div>
+
+          <!-- PAYMENT BUTTON -->
+          <div style="text-align: center; margin-bottom: 32px;">
+            <a href="${checkoutUrl}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 20px 50px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 16px; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); cursor: pointer; transition: all 0.3s ease;">💳 Pay Now - £${additionalAmount.toFixed(2)}</a>
+          </div>
+
+          <!-- NEXT STEPS -->
+          <div style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); padding: 28px; border-radius: 20px; margin-bottom: 32px;">
+            <h3 style="margin-top: 0; margin-bottom: 18px; font-size: 15px; color: #0F172A; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">✓ What Happens Next</h3>
+            <ol style="margin: 0; padding-left: 20px;">
+              <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Payment:</strong> Securely pay for the additional hours using our Stripe checkout.</li>
+              <li style="margin-bottom: 12px; font-size: 14px; color: #374151; line-height: 1.6;"><strong>Confirmation:</strong> Your booking is instantly updated with the new total hours.</li>
+              <li style="font-size: 14px; color: #374151; line-height: 1.6;"><strong>Cleaning:</strong> Your cleaner will dedicate the extra time for a more comprehensive clean.</li>
+            </ol>
+          </div>
+
+          <!-- SUPPORT -->
+          <div style="text-align: center; padding-top: 30px; border-top: 2px solid #e2e8f0;">
+            <p style="margin: 0 0 20px 0; font-size: 14px; color: #64748b;">Have any questions?</p>
+            <a href="https://cleaniqservices.com/contact" style="display: inline-block; background-color: #0F172A; color: white; padding: 16px 36px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">Contact Support</a>
+          </div>
+        </div>
+        
+        <div style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
+          <p style="margin: 0 0 8px 0; font-size: 12px; color: #94a3b8; font-weight: 600;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+          <p style="margin: 0; font-size: 11px; color: #cbd5e1;">This is an automated message. Please do not reply to this email.</p>
+        </div>
+      </div>
+    `;
+
+    await sendEmail({
+      to: customerEmail,
+      subject: `💳 Add Extra Hours to Your Cleaniq Booking ${bookingRef}`,
+      html: emailHtml,
+    });
+
+    console.log(`✅ Additional hours payment link email sent to ${customerEmail}`);
+    res.json({ message: "Email sent successfully" });
+  } catch (error) {
+    console.error("❌ SEND EMAIL ERROR:", error.message);
+    res.status(500).json({ message: "Failed to send email" });
+  }
+});
+
 module.exports = router;
