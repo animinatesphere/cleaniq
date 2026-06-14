@@ -311,7 +311,7 @@ const Home = () => {
             <p className="text-lg text-slate-500 font-medium">
               Whether it's a{" "}
               {region.id === "UK"
-                ? "weekly domestic clean"
+                ? "end of tenancy clean"
                 : "regular maintenance"}{" "}
               or a deep seasonal refresh, we have the right pros for you.
               {region.id === "NG" && (
@@ -325,10 +325,10 @@ const Home = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
-                title: "Residential Cleaning",
-                desc: "Reliable, weekly or bi-weekly cleaning for your home.",
+                title: "End of Tenancy Cleaning",
+                desc: "Comprehensive move-out cleaning to ensure you get your deposit back.",
                 icon: <HomeIcon size={32} />,
-                keyword: "Reliable domestic cleaners",
+                keyword: "Move-out specialists",
                 image: residentialImg, // 👈 add this
               },
               {
@@ -468,7 +468,9 @@ const Home = () => {
                 services that enhance the quality of living and working
                 environments, grounded in professionalism, integrity, and trust.
                 Based in Manchester, we've redefined what clean means through
-                precision and sustainability.
+                precision and sustainability — including thorough end of tenancy
+                cleaning that helps tenants leave on the right note and
+                landlords prepare properties for new occupants with confidence.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 mb-10">
                 <div className="flex-1 p-6 rounded-3xl bg-slate-50 border border-slate-100">
@@ -697,7 +699,7 @@ const Home = () => {
             {[
               { id: "cleaning", label: "Cleaning" },
               { id: "housekeeping", label: "Housekeeping" },
-              { id: "ironing", label: "Ironing" },
+              { id: "end of tenancy", label: "End of Tenancy" },
               { id: "regular", label: "Regular Cleaning" },
               { id: "airbnb", label: "Airbnb Cleaning" },
             ].map((cat) => (
@@ -794,7 +796,7 @@ const Home = () => {
               Cleaning tips & expert insights.
             </h3>
             <p className="text-lg text-slate-600 font-medium">
-              Discover professional cleaning advice, industry trends, and
+              Discover professional end of tenancy advice, industry trends, and
               practical tips to maintain a spotless home.
             </p>
           </div>
@@ -963,8 +965,8 @@ const Home = () => {
                   : "residential and commercial cleaning"}{" "}
                 across{" "}
                 {region.id === "UK" ? "Greater Manchester" : "Lagos & Abuja"}.
-                We specialize in deep cleaning, move-in/move-out services,
-                Airbnb management cleaning, and office janitorial solutions.
+                We specialize in deep cleaning, move-in/move-out services, End
+                of tenancy cleaning, and office janitorial solutions.
               </p>
             </p>
           </div>
