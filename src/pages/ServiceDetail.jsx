@@ -1125,7 +1125,7 @@ const ServiceDetail = () => {
                   Book your clean
                 </p>
                 <p className="text-2xl font-bold text-slate-900 mb-1">
-                  {servicePrice ?? "From £20 /hr"}
+                  {servicePrice ?? "From £30 /hr"}
                 </p>
                 <p className="text-xs text-slate-400 mb-5">
                   No hidden fees · Insured cleaners
