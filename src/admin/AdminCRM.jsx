@@ -2108,7 +2108,7 @@ const AdminCRM = ({ booking, onClose }) => {
     { id: "invoice", label: "Invoice", icon: FileText },
     { id: "review", label: "Review", icon: Star },
     { id: "payment", label: "Payment Link", icon: CreditCard },
-    { id: "additional-hours", label: "Extra Hours", icon: Zap },
+    // { id: "additional-hours", label: "Extra Hours", icon: Zap },
   ];
 
   const renderTab = () => {

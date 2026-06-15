@@ -201,7 +201,7 @@ const Home = () => {
 
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold text-primary-dark leading-[1.1] mb-8 tracking-tighter">
               {region.id === "UK"
-                ? " Professional End of Tenancy Cleaning in"
+                ? " Professional Cleaning Services in"
                 : "Top-Rated End of Tenancy Cleaning  in"}
               <br />
               <span className="text-primary bg-clip-text">
@@ -685,21 +685,20 @@ const Home = () => {
               Our Coverage
             </h2>
             <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark tracking-tighter mb-6">
-              Cleaniq services in your city.
+              Cleaniq services in Manchester.
             </h3>
             <p className="text-lg text-slate-600 font-medium">
-              Professional cleaning services available across the UK's top
-              cities. Select a service category to explore availability near
-              you.
+              Professional cleaning services available across greater manchester
+              . Select a service category to explore availability near you.
             </p>
           </div>
 
           {/* Category Tabs */}
           <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-12">
             {[
-              { id: "cleaning", label: "Cleaning" },
-              { id: "housekeeping", label: "Housekeeping" },
-              { id: "end of tenancy", label: "End of Tenancy" },
+              { id: "OfficeCleaning", label: "Office Cleaning" },
+              { id: "DeepCleaning", label: "Deep Cleaning" },
+              { id: "endOfTenancy", label: "End of Tenancy" },
               { id: "regular", label: "Regular Cleaning" },
               { id: "airbnb", label: "Airbnb Cleaning" },
             ].map((cat) => (
@@ -726,23 +725,21 @@ const Home = () => {
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
           >
             {[
-              { city: "London", slug: "london" },
-              { city: "Bristol", slug: "bristol" },
-              { city: "Birmingham", slug: "birmingham" },
-              { city: "Manchester", slug: "manchester" },
-              { city: "Leeds", slug: "leeds" },
-              { city: "Slough", slug: "slough" },
-              { city: "Chelmsford", slug: "chelmsford" },
-              { city: "Luton", slug: "luton" },
-              { city: "Milton Keynes", slug: "milton-keynes" },
-              { city: "Liverpool", slug: "liverpool" },
-              { city: "Coventry", slug: "coventry" },
-              { city: "Croydon", slug: "croydon" },
+              { city: "Manchester City", slug: "Manchester City" },
+              { city: "Salford", slug: "Salford" },
+              { city: "Bolton", slug: "Bolton" },
+              { city: "Bury", slug: "Bury" },
+              { city: "Oldham", slug: "Oldham" },
+              { city: "Rochdale", slug: "Rochdale" },
+              { city: "Stockport", slug: "Stockport" },
+              { city: "Tameside", slug: "Tameside" },
+              { city: "Trafford", slug: "Trafford" },
+              { city: "Wigan", slug: "Wigan" },
             ].map((location) => {
               const serviceLabelMap = {
-                cleaning: "Cleaning",
-                housekeeping: "Housekeeping",
-                ironing: "Ironing",
+                OfficeCleaning: "Office cleaning",
+                DeepCleaning: "Deep cleaning",
+                endOfTenancy: "End of Tenancy Cleaning",
                 regular: "Regular cleaning",
                 airbnb: "Airbnb cleaning",
               };
