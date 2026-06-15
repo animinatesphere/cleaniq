@@ -41,7 +41,7 @@ const calculateReadTime = (content) => {
 const Home = () => {
   const { region } = useRegion();
   const [activeSlide, setActiveSlide] = useState(0);
-  const [activeCategory, setActiveCategory] = useState("cleaning");
+  const [activeCategory, setActiveCategory] = useState("OfficeCleaning");
   const [blogPosts, setBlogPosts] = useState([]);
   const [blogLoading, setBlogLoading] = useState(true);
 
