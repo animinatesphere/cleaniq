@@ -3000,8 +3000,121 @@ const Bookings = () => {
 
                                 <div>
                                   <label className="text-[9px] font-black text-slate-400 ml-1 uppercase block mb-2">
-                                    Or set a flexible time
+                                    Or pick a flexible time
                                   </label>
+                                  <div className="grid grid-cols-4 gap-2 mb-3">
+                                    {(() => {
+                                      const allQuickTimes = [
+                                        "08:00",
+                                        "08:30",
+                                        "09:00",
+                                        "09:30",
+                                        "10:00",
+                                        "10:30",
+                                        "11:00",
+                                        "11:30",
+                                        "12:00",
+                                        "12:30",
+                                        "13:00",
+                                        "13:30",
+                                        "14:00",
+                                        "14:30",
+                                        "15:00",
+                                        "15:30",
+                                        "16:00",
+                                        "16:30",
+                                        "17:00",
+                                        "17:30",
+                                        "18:00",
+                                        "18:30",
+                                        "19:00",
+                                        "19:30",
+                                        "20:00",
+                                      ];
+
+                                      // fetch any flexible-time bookings already on this date, excluding this booking itself
+                                      let bookedTimes = [];
+                                      if (editDateStr) {
+                                        bookedTimes = bookings
+                                          .filter((b) => {
+                                            if (b._id === selectedBooking?._id)
+                                              return false;
+                                            if (!b.schedule?.date) return false;
+                                            const d = new Date(b.schedule.date);
+                                            const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+                                            return (
+                                              dStr === editDateStr &&
+                                              b.schedule?.timeSlot ===
+                                                "Flexible"
+                                            );
+                                          })
+                                          .map((b) => b.schedule.preferredTime)
+                                          .filter(Boolean);
+                                      }
+
+                                      const isTodaySelected = (() => {
+                                        if (!editDateStr) return false;
+                                        const sel = new Date(editDateStr);
+                                        const now = new Date();
+                                        return (
+                                          sel.getDate() === now.getDate() &&
+                                          sel.getMonth() === now.getMonth() &&
+                                          sel.getFullYear() ===
+                                            now.getFullYear()
+                                        );
+                                      })();
+
+                                      const now = new Date();
+                                      const cutoffMinutes =
+                                        now.getHours() * 60 +
+                                        now.getMinutes() +
+                                        30;
+
+                                      const quickTimes = isTodaySelected
+                                        ? allQuickTimes.filter((time) => {
+                                            const [h, m] = time
+                                              .split(":")
+                                              .map(Number);
+                                            return h * 60 + m > cutoffMinutes;
+                                          })
+                                        : allQuickTimes;
+
+                                      return quickTimes.map((time) => {
+                                        const isBooked =
+                                          bookedTimes.includes(time);
+                                        return (
+                                          <button
+                                            key={time}
+                                            type="button"
+                                            disabled={isBooked}
+                                            onClick={() =>
+                                              setEditData({
+                                                ...editData,
+                                                schedule: {
+                                                  ...editData.schedule,
+                                                  timeSlot: "Flexible",
+                                                  preferredTime: time,
+                                                },
+                                              })
+                                            }
+                                            className={`py-3 px-2 rounded-xl border-2 text-[10px] font-bold transition-all ${
+                                              editData.schedule?.timeSlot ===
+                                                "Flexible" &&
+                                              editData.schedule
+                                                ?.preferredTime === time
+                                                ? "border-primary bg-primary text-white shadow-lg scale-105"
+                                                : isBooked
+                                                  ? "border-rose-200 bg-rose-50 text-rose-300 cursor-not-allowed opacity-50"
+                                                  : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                            }`}
+                                          >
+                                            {time}
+                                          </button>
+                                        );
+                                      });
+                                    })()}
+                                  </div>
+
                                   <input
                                     type="time"
                                     min="08:00"
