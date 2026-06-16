@@ -1737,7 +1737,38 @@ const Bookings = () => {
     setBookedSlotsByDate(slotsMap);
     setBookedDates(fullyBooked);
   }, [bookings]);
+  const editAvailability = useMemo(() => {
+    const fullyBooked = [];
+    const slotsMap = {};
+    const excludeId = selectedBooking?._id;
 
+    bookings.forEach((b) => {
+      if (b._id === excludeId) return; // skip this booking's own current slot
+      if (b.schedule?.date) {
+        const d = new Date(b.schedule.date);
+        const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        slotsMap[dStr] = slotsMap[dStr] || [];
+        if (b.schedule?.timeSlot && b.schedule.timeSlot !== "Flexible") {
+          if (!slotsMap[dStr].includes(b.schedule.timeSlot))
+            slotsMap[dStr].push(b.schedule.timeSlot);
+        }
+        if (b.schedule?.timeSlot === "Flexible" && b.schedule?.preferredTime) {
+          if (!slotsMap[dStr].includes(b.schedule.preferredTime))
+            slotsMap[dStr].push(b.schedule.preferredTime);
+        }
+      }
+    });
+
+    Object.keys(slotsMap).forEach((d) => {
+      const s = slotsMap[d];
+      const hasMorning = s.some((slot) => slot.includes("Morning"));
+      const hasAfternoon = s.some((slot) => slot.includes("Afternoon"));
+      const hasEvening = s.some((slot) => slot.includes("Evening"));
+      if (hasMorning && hasAfternoon && hasEvening) fullyBooked.push(d);
+    });
+
+    return { fullyBookedDates: fullyBooked, slotsByDate: slotsMap };
+  }, [bookings, selectedBooking]);
   const createServiceOptions = React.useMemo(() => {
     const bases = servicesList.filter((s) => s.category === "Base");
     const keys = ["residential", "commercial", "move", "airbnb", "tenancy"];
@@ -2882,31 +2913,122 @@ const Bookings = () => {
                           placeholder="e.g. 2"
                         />
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
-                          Booking Date
-                        </label>
-                        <input
-                          type="date"
-                          value={
-                            editData.schedule?.date
-                              ? new Date(editData.schedule.date)
-                                  .toISOString()
-                                  .split("T")[0]
-                              : ""
-                          }
-                          onChange={(e) =>
-                            setEditData({
-                              ...editData,
-                              schedule: {
-                                ...editData.schedule,
-                                date: e.target.value,
-                              },
-                            })
-                          }
-                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
-                        />
-                      </div>
+                      {(() => {
+                        const editDateStr = editData.schedule?.date
+                          ? (() => {
+                              const d = new Date(editData.schedule.date);
+                              return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+                            })()
+                          : null;
+
+                        return (
+                          <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 space-y-4 md:col-span-2">
+                            <h4 className="text-xs font-black text-primary-dark uppercase tracking-widest">
+                              Schedule
+                            </h4>
+                            <div className="grid md:grid-cols-2 gap-6">
+                              <div>
+                                <label className="text-[9px] font-black text-slate-400 ml-1 uppercase block mb-2">
+                                  Booking Date
+                                </label>
+                                <CreateCalendar
+                                  selectedDate={editData.schedule?.date}
+                                  onDateSelect={(d) =>
+                                    setEditData({
+                                      ...editData,
+                                      schedule: {
+                                        ...editData.schedule,
+                                        date: d,
+                                      },
+                                    })
+                                  }
+                                  bookedDates={
+                                    editAvailability.fullyBookedDates
+                                  }
+                                />
+                              </div>
+
+                              <div className="space-y-3">
+                                <label className="text-[9px] font-black text-slate-400 ml-1 uppercase block">
+                                  Time Slot
+                                </label>
+                                <div className="grid grid-cols-3 gap-2">
+                                  {[
+                                    { value: "Morning", label: "Morning" },
+                                    { value: "Afternoon", label: "Afternoon" },
+                                    { value: "Evening", label: "Evening" },
+                                  ].map((slot) => {
+                                    const isTaken =
+                                      editDateStr &&
+                                      editAvailability.slotsByDate[
+                                        editDateStr
+                                      ]?.some((s) => s.includes(slot.value));
+                                    return (
+                                      <button
+                                        key={slot.value}
+                                        type="button"
+                                        disabled={isTaken}
+                                        onClick={() =>
+                                          setEditData({
+                                            ...editData,
+                                            schedule: {
+                                              ...editData.schedule,
+                                              timeSlot: slot.value,
+                                              preferredTime: "",
+                                            },
+                                          })
+                                        }
+                                        className={`py-3 px-2 rounded-lg border-2 text-[10px] font-bold uppercase transition-all ${
+                                          editData.schedule?.timeSlot ===
+                                          slot.value
+                                            ? "border-primary bg-primary text-white shadow-md"
+                                            : isTaken
+                                              ? "border-rose-200 bg-rose-50 text-rose-300 cursor-not-allowed opacity-50"
+                                              : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                        }`}
+                                      >
+                                        {slot.label}
+                                        {isTaken && (
+                                          <span className="block text-[8px] mt-0.5 text-rose-500 font-bold uppercase">
+                                            Booked
+                                          </span>
+                                        )}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+
+                                <div>
+                                  <label className="text-[9px] font-black text-slate-400 ml-1 uppercase block mb-2">
+                                    Or set a flexible time
+                                  </label>
+                                  <input
+                                    type="time"
+                                    min="08:00"
+                                    max="20:00"
+                                    value={
+                                      editData.schedule?.timeSlot === "Flexible"
+                                        ? editData.schedule?.preferredTime || ""
+                                        : ""
+                                    }
+                                    onChange={(e) =>
+                                      setEditData({
+                                        ...editData,
+                                        schedule: {
+                                          ...editData.schedule,
+                                          timeSlot: "Flexible",
+                                          preferredTime: e.target.value,
+                                        },
+                                      })
+                                    }
+                                    className="w-full p-3 rounded-xl bg-white border-2 border-slate-200 font-bold text-sm"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                     <div className="space-y-1 pt-4">
                       <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
