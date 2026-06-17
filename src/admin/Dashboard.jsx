@@ -44,9 +44,10 @@ const Dashboard = () => {
         const applicants = await applicantsRes.json();
 
         // Calculate Revenue
-        const ukRevenue = bookings
-          .filter((b) => b.region === "UK")
-          .reduce((sum, b) => sum + b.payment.amount, 0);
+        const totalRevenue = bookings.reduce(
+          (sum, b) => sum + Number(b.payment?.amount || 0),
+          0,
+        );
         const ngRevenue = bookings
           .filter((b) => b.region === "NG")
           .reduce((sum, b) => sum + b.payment.amount, 0);
@@ -77,8 +78,8 @@ const Dashboard = () => {
           })),
           stats: [
             {
-              title: "Total Revenue (UK)",
-              value: `£${ukRevenue.toLocaleString()}`,
+              title: "Total Revenue",
+              value: `£${totalRevenue.toLocaleString()}`,
               change: "+100%",
               isUp: true,
               icon: <DollarSign className="text-emerald-500" />,
