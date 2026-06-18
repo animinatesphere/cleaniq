@@ -41,6 +41,7 @@ import AdminBlog from "./admin/Blog";
 import StaffPay from "./admin/StaffPay";
 import AdminWithdrawals from "./admin/AdminWithdrawals";
 import AdminPayments from "./admin/AdminPayments";
+import QuoteBuilder from "./admin/QuoteBuilder";
 
 function App() {
   const location = useLocation();
@@ -88,6 +89,7 @@ function App() {
               <Route path="workers" element={<Workers />} />
               <Route path="services" element={<ServicesManagement />} />
               <Route path="blog" element={<AdminBlog />} />
+              <Route path="quotes" element={<QuoteBuilder />} />
               <Route path="settings" element={<Settings />} />
               <Route path="chat" element={<Chat />} />
               <Route path="staff-pay" element={<StaffPay />} />

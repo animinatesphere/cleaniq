@@ -1,0 +1,529 @@
+const express = require("express");
+const router = express.Router();
+const { sendEmail, templates } = require("../utils/emailService");
+
+// Store sent quotes in memory (in production, use database)
+const sentQuotes = [];
+
+/**
+ * POST /api/quotes/send
+ * Send a customized quote to a company email
+ */
+router.post("/send", async (req, res) => {
+  try {
+    const {
+      companyName,
+      contactName,
+      email,
+      phone,
+      address,
+      frequency,
+      quoteRef,
+      date,
+      items,
+      subtotal,
+      vat,
+      grandTotal,
+      validDays,
+      vatRate,
+      includeVat,
+      sendCopy,
+      notes,
+    } = req.body;
+
+    // Validation
+    if (!email || !companyName || !items || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: email, companyName, or items",
+      });
+    }
+
+    // Generate quote email HTML
+    const quoteHtml = generateQuoteEmail({
+      companyName,
+      contactName,
+      email,
+      phone,
+      address,
+      frequency,
+      quoteRef,
+      date,
+      items,
+      subtotal,
+      vat,
+      grandTotal,
+      validDays,
+      vatRate,
+      includeVat,
+      notes,
+    });
+
+    // Send email to company
+    const emailSent = await sendEmail({
+      to: email,
+      subject: `Professional Service Quote - Ref: ${quoteRef} | Cleaniq Services`,
+      html: quoteHtml,
+    });
+
+    if (!emailSent) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send email. Please try again.",
+      });
+    }
+
+    // Store quote record
+    const quoteRecord = {
+      quoteRef,
+      companyName,
+      email,
+      phone,
+      address,
+      frequency,
+      date,
+      items,
+      subtotal,
+      vat,
+      grandTotal,
+      validDays,
+      notes,
+      createdAt: new Date().toISOString(),
+      status: "sent",
+    };
+    sentQuotes.push(quoteRecord);
+
+    // Send copy to admin if requested
+    if (sendCopy) {
+      await sendEmail({
+        to: process.env.EMAIL_USER || "info@cleaniqservices.com",
+        subject: `Quote Sent - ${companyName} | ${quoteRef}`,
+        html: generateAdminNotificationEmail(quoteRecord),
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Quote sent successfully to ${email}`,
+      quoteRef,
+    });
+  } catch (error) {
+    console.error("Quote send error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * GET /api/quotes
+ * Retrieve all sent quotes history
+ */
+router.get("/", async (req, res) => {
+  try {
+    const { limit = 50, skip = 0 } = req.query;
+    const quotes = sentQuotes
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(parseInt(skip), parseInt(skip) + parseInt(limit));
+
+    res.status(200).json({
+      success: true,
+      data: quotes,
+      total: sentQuotes.length,
+    });
+  } catch (error) {
+    console.error("Quote fetch error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch quotes",
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * GET /api/quotes/:quoteRef
+ * Retrieve a specific quote by reference
+ */
+router.get("/:quoteRef", async (req, res) => {
+  try {
+    const { quoteRef } = req.params;
+    const quote = sentQuotes.find((q) => q.quoteRef === quoteRef);
+
+    if (!quote) {
+      return res.status(404).json({
+        success: false,
+        message: "Quote not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: quote,
+    });
+  } catch (error) {
+    console.error("Quote detail error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch quote",
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * POST /api/quotes/resend/:quoteRef
+ * Resend an existing quote to the same or different email
+ */
+router.post("/resend/:quoteRef", async (req, res) => {
+  try {
+    const { quoteRef } = req.params;
+    const { email } = req.body;
+
+    const quote = sentQuotes.find((q) => q.quoteRef === quoteRef);
+    if (!quote) {
+      return res.status(404).json({
+        success: false,
+        message: "Quote not found",
+      });
+    }
+
+    const targetEmail = email || quote.email;
+    const quoteHtml = generateQuoteEmail(quote);
+
+    const emailSent = await sendEmail({
+      to: targetEmail,
+      subject: `Professional Service Quote - Ref: ${quoteRef} | Cleaniq Services`,
+      html: quoteHtml,
+    });
+
+    if (!emailSent) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to resend email",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Quote resent to ${targetEmail}`,
+    });
+  } catch (error) {
+    console.error("Quote resend error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to resend quote",
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * POST /api/quotes/schedule
+ * Schedule recurring quotes to be sent automatically
+ */
+router.post("/schedule", async (req, res) => {
+  try {
+    const {
+      companyName,
+      email,
+      frequency, // weekly, biweekly, monthly, quarterly
+      items,
+      subtotal,
+      grandTotal,
+      active = true,
+    } = req.body;
+
+    if (!email || !frequency || !items) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields for scheduling",
+      });
+    }
+
+    // Validate frequency
+    const validFrequencies = ["weekly", "biweekly", "monthly", "quarterly"];
+    if (!validFrequencies.includes(frequency)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid frequency. Must be weekly, biweekly, monthly, or quarterly",
+      });
+    }
+
+    const scheduleRecord = {
+      id: `SCH-${Date.now()}`,
+      companyName,
+      email,
+      frequency,
+      items,
+      subtotal,
+      grandTotal,
+      active,
+      createdAt: new Date().toISOString(),
+      nextSendDate: calculateNextSendDate(frequency),
+      sentCount: 0,
+    };
+
+    // In a real implementation, store this in database and use a cron job
+    console.log("📅 Quote schedule created:", scheduleRecord);
+
+    res.status(201).json({
+      success: true,
+      message: "Recurring quote schedule created",
+      schedule: scheduleRecord,
+      note: "In production, implement cron job or job queue for automatic sending",
+    });
+  } catch (error) {
+    console.error("Schedule quote error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to schedule quote",
+      error: error.message,
+    });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// HELPER FUNCTIONS
+// ─────────────────────────────────────────────────────────────────────
+
+function generateQuoteEmail(quote) {
+  const {
+    companyName,
+    contactName,
+    quoteRef,
+    date,
+    items,
+    subtotal,
+    vat,
+    grandTotal,
+    validDays,
+    vatRate,
+    includeVat,
+    frequency,
+    notes,
+    address,
+    phone,
+  } = quote;
+
+  const frequencyLabel =
+    {
+      once: "One-time",
+      weekly: "Weekly",
+      biweekly: "Fortnightly",
+      monthly: "Monthly",
+      quarterly: "Quarterly",
+    }[frequency] || "One-time";
+
+  const itemsHtml = items
+    .filter((i) => i.service || i.customService)
+    .map(
+      (item, idx) => `
+    <tr style="border-bottom: 1px solid #e2e8f0;">
+      <td style="padding: 14px 16px; text-align: left;">
+        <p style="margin: 0; font-weight: 700; color: #0F172A; font-size: 14px;">${item.service || item.customService}</p>
+        ${item.description ? `<p style="margin: 6px 0 0; font-size: 12px; color: #64748b;">${item.description}</p>` : ""}
+      </td>
+      <td style="padding: 14px 16px; text-align: center; color: #64748b; font-size: 14px;">${item.qty}</td>
+      <td style="padding: 14px 16px; text-align: right; color: #64748b; font-size: 14px;">£${Number(item.unitPrice || 0).toFixed(2)}</td>
+      <td style="padding: 14px 16px; text-align: right; font-weight: 700; color: #0F172A; font-size: 14px;">£${(Number(item.unitPrice || 0) * item.qty).toFixed(2)}</td>
+    </tr>
+  `,
+    )
+    .join("");
+
+  return `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <!-- HEADER -->
+      <div style="background: linear-gradient(135deg, #0F172A 0%, #1e293b 100%); padding: 50px 40px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: 100px; margin-bottom: 20px; border-radius: 50%; object-fit: cover; border: 3px solid #6EE7B7;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 32px; letter-spacing: -1px; font-weight: 800;">Service Quote</h1>
+        <p style="color: #cbd5e1; margin: 8px 0 0; font-size: 14px;">Professional Cleaning Services</p>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div style="padding: 50px 40px;">
+        <!-- QUOTE REF & DATE -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 40px;">
+          <div>
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Quote Reference</p>
+            <p style="margin: 12px 0 0 0; font-size: 24px; font-weight: 900; color: #0F172A;">${quoteRef}</p>
+          </div>
+          <div>
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Quote Date</p>
+            <p style="margin: 12px 0 0 0; font-size: 24px; font-weight: 900; color: #0F172A;">${date}</p>
+          </div>
+        </div>
+
+        <!-- COMPANY DETAILS -->
+        <div style="background: #f8fafc; border-radius: 16px; padding: 24px; margin-bottom: 40px; border: 1px solid #e2e8f0;">
+          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Prepared For</p>
+          <p style="margin: 0 0 4px 0; font-size: 18px; font-weight: 900; color: #0F172A;">${companyName}</p>
+          ${contactName ? `<p style="margin: 4px 0; font-size: 14px; color: #64748b;">Attn: ${contactName}</p>` : ""}
+          ${phone ? `<p style="margin: 4px 0; font-size: 14px; color: #64748b;">📱 ${phone}</p>` : ""}
+          ${address ? `<p style="margin: 4px 0; font-size: 14px; color: #64748b;">📍 ${address}</p>` : ""}
+        </div>
+
+        <!-- SERVICES TABLE -->
+        <div style="margin-bottom: 32px;">
+          <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 800; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; border-left: 4px solid #6EE7B7; padding-left: 12px;">Services Included</p>
+          <div style="overflow: hidden; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: white;">
+              <thead>
+                <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
+                  <th style="padding: 14px 16px; text-align: left; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Service</th>
+                  <th style="padding: 14px 16px; text-align: center; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Qty</th>
+                  <th style="padding: 14px 16px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Unit Price</th>
+                  <th style="padding: 14px 16px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- PRICING SUMMARY -->
+        <div style="background: #f8fafc; border-radius: 16px; padding: 24px; margin-bottom: 32px; border: 1px solid #e2e8f0;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+            <span style="font-size: 14px; color: #64748b;">Subtotal</span>
+            <span style="font-size: 14px; font-weight: 700; color: #0F172A;">£${subtotal.toFixed(2)}</span>
+          </div>
+          ${
+            includeVat && vat > 0
+              ? `
+          <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+            <span style="font-size: 14px; color: #64748b;">VAT (${vatRate}%)</span>
+            <span style="font-size: 14px; font-weight: 700; color: #0F172A;">£${vat.toFixed(2)}</span>
+          </div>
+          `
+              : ""
+          }
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-size: 16px; font-weight: 800; color: #0F172A;">GRAND TOTAL</span>
+            <span style="font-size: 16px; font-weight: 900; color: #6EE7B7;">£${grandTotal.toFixed(2)}${frequency !== "once" ? ` / ${frequencyLabel.toLowerCase()}` : ""}</span>
+          </div>
+        </div>
+
+        <!-- RECURRING NOTICE -->
+        ${
+          frequency !== "once"
+            ? `
+        <div style="background: #eef2ff; border-radius: 12px; padding: 16px; margin-bottom: 32px; border-left: 4px solid #6366f1;">
+          <p style="margin: 0; font-size: 12px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.5px;">📅 Recurring Service</p>
+          <p style="margin: 8px 0 0 0; font-size: 14px; color: #4f46e5;">This is a recurring contract with ${frequencyLabel.toLowerCase()} billing</p>
+        </div>
+        `
+            : ""
+        }
+
+        <!-- NOTES & TERMS -->
+        ${
+          notes
+            ? `
+        <div style="background: #fef3c7; border-radius: 12px; padding: 16px; margin-bottom: 32px; border-left: 4px solid #f59e0b;">
+          <p style="margin: 0; font-size: 12px; font-weight: 800; color: #d97706; text-transform: uppercase; letter-spacing: 0.5px;">📝 Terms & Conditions</p>
+          <p style="margin: 12px 0 0 0; font-size: 13px; color: #92400e; line-height: 1.6; white-space: pre-line;">${notes}</p>
+        </div>
+        `
+            : ""
+        }
+
+        <!-- VALIDITY -->
+        <div style="background: #ecfdf5; border-radius: 12px; padding: 16px; border-left: 4px solid #10b981;">
+          <p style="margin: 0; font-size: 12px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 0.5px;">✓ Validity</p>
+          <p style="margin: 8px 0 0 0; font-size: 14px; color: #047857;">This quote is valid for ${validDays} days from the date of issue</p>
+        </div>
+
+        <!-- CTA -->
+        <div style="text-align: center; margin-top: 40px; padding-top: 32px; border-top: 1px solid #e2e8f0;">
+          <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b;">Ready to proceed with this quote?</p>
+          <a href="https://cleaniqservices.com/contact" style="display: inline-block; background-color: #6EE7B7; color: #0F172A; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Get Started Today</a>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div style="background: #f8fafc; padding: 32px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0; font-size: 13px; font-weight: 700; color: #0F172A;">Cleaniq Services Limited</p>
+        <p style="margin: 6px 0 0 0; font-size: 12px; color: #64748b;">📧 info@cleaniqservices.com | 🌐 cleaniqservices.com</p>
+        <p style="margin: 12px 0 0 0; font-size: 11px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+}
+
+function generateAdminNotificationEmail(quote) {
+  return `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <!-- HEADER -->
+      <div style="background: linear-gradient(135deg, #6EE7B7 0%, #10b981 100%); padding: 40px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800;">✓ Quote Sent</h1>
+      </div>
+
+      <!-- CONTENT -->
+      <div style="padding: 40px;">
+        <p style="margin: 0 0 24px 0; font-size: 14px; color: #64748b;">A service quote has been sent to a company. Here are the details:</p>
+
+        <div style="background: #f8fafc; border-radius: 16px; padding: 20px; margin-bottom: 24px; border: 1px solid #e2e8f0; space-y: 3;">
+          <div style="margin-bottom: 12px;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Quote Ref</p>
+            <p style="margin: 6px 0 0 0; font-size: 16px; font-weight: 800; color: #0F172A;">${quote.quoteRef}</p>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Company</p>
+            <p style="margin: 6px 0 0 0; font-size: 14px; color: #0F172A;">${quote.companyName}</p>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Email</p>
+            <p style="margin: 6px 0 0 0; font-size: 14px; color: #0F172A;">${quote.email}</p>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Total Amount</p>
+            <p style="margin: 6px 0 0 0; font-size: 18px; font-weight: 800; color: #6EE7B7;">£${quote.grandTotal.toFixed(2)}</p>
+          </div>
+          <div>
+            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Frequency</p>
+            <p style="margin: 6px 0 0 0; font-size: 14px; color: #0F172A;">${quote.frequency === "once" ? "One-time" : quote.frequency.charAt(0).toUpperCase() + quote.frequency.slice(1)}</p>
+          </div>
+        </div>
+
+        <a href="https://cleaniqservices.com/admin/quotes" style="display: block; text-align: center; background-color: #0F172A; color: white; padding: 12px 24px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 12px; text-transform: uppercase;">View All Quotes</a>
+      </div>
+
+      <!-- FOOTER -->
+      <div style="background: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0; font-size: 11px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+}
+
+function calculateNextSendDate(frequency) {
+  const today = new Date();
+  const next = new Date(today);
+
+  switch (frequency) {
+    case "weekly":
+      next.setDate(next.getDate() + 7);
+      break;
+    case "biweekly":
+      next.setDate(next.getDate() + 14);
+      break;
+    case "monthly":
+      next.setMonth(next.getMonth() + 1);
+      break;
+    case "quarterly":
+      next.setMonth(next.getMonth() + 3);
+      break;
+    default:
+      return null;
+  }
+
+  return next.toISOString();
+}
+
+module.exports = router;

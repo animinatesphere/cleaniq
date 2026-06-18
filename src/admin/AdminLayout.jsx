@@ -20,6 +20,7 @@ import {
   BookOpen,
   Wallet,
   DollarSign,
+  FileText,
 } from "lucide-react";
 import Login from "./Login";
 
@@ -126,6 +127,11 @@ const AdminLayout = () => {
       icon: <ShieldCheck size={20} />,
     },
     { name: "Blog", path: "/admin/blog", icon: <BookOpen size={20} /> },
+    {
+      name: "Quotes",
+      path: "/admin/quotes",
+      icon: <FileText size={20} />,
+    },
     {
       name: "Chat Support",
       path: "/admin/chat",
