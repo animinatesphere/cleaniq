@@ -22,12 +22,20 @@ router.post("/send", async (req, res) => {
       date,
       items,
       subtotal,
+      discountAmount,
+      subtotalAfterDiscount,
       vat,
       grandTotal,
       validDays,
       vatRate,
       includeVat,
       sendCopy,
+      paymentTerms,
+      depositRequired,
+      depositPercent,
+      depositAmount,
+      balanceDue,
+      discount,
       notes,
     } = req.body;
 
@@ -51,11 +59,19 @@ router.post("/send", async (req, res) => {
       date,
       items,
       subtotal,
+      discountAmount,
+      subtotalAfterDiscount,
       vat,
       grandTotal,
       validDays,
       vatRate,
       includeVat,
+      paymentTerms,
+      depositRequired,
+      depositPercent,
+      depositAmount,
+      balanceDue,
+      discount,
       notes,
     });
 
@@ -84,9 +100,15 @@ router.post("/send", async (req, res) => {
       date,
       items,
       subtotal,
+      discountAmount,
+      subtotalAfterDiscount,
       vat,
       grandTotal,
+      depositAmount,
+      balanceDue,
       validDays,
+      paymentTerms,
+      depositRequired,
       notes,
       createdAt: new Date().toISOString(),
       status: "sent",
@@ -298,12 +320,20 @@ function generateQuoteEmail(quote) {
     date,
     items,
     subtotal,
+    discountAmount,
+    subtotalAfterDiscount,
     vat,
     grandTotal,
+    depositAmount,
+    balanceDue,
     validDays,
     vatRate,
     includeVat,
     frequency,
+    paymentTerms,
+    depositRequired,
+    depositPercent,
+    discount,
     notes,
     address,
     phone,
@@ -336,48 +366,51 @@ function generateQuoteEmail(quote) {
     .join("");
 
   return `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
-      <!-- HEADER -->
-      <div style="background: linear-gradient(135deg, #0F172A 0%, #1e293b 100%); padding: 50px 40px; text-align: center;">
-        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: 100px; margin-bottom: 20px; border-radius: 50%; object-fit: cover; border: 3px solid #6EE7B7;" />
-        <h1 style="color: #6EE7B7; margin: 0; font-size: 32px; letter-spacing: -1px; font-weight: 800;">Service Quote</h1>
-        <p style="color: #cbd5e1; margin: 8px 0 0; font-size: 14px;">Professional Cleaning Services</p>
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 750px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+      <!-- PREMIUM HEADER -->
+      <div style="background: linear-gradient(135deg, #0F172A 0%, #1e293b 50%, #6EE7B7 100%); padding: 60px 40px; text-align: center; position: relative;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.05;">
+          <div style="font-size: 80px; font-weight: 900; color: white;">💼</div>
+        </div>
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 110px; height: 110px; margin-bottom: 20px; border-radius: 50%; object-fit: cover; border: 4px solid #6EE7B7; box-shadow: 0 10px 25px rgba(110, 231, 183, 0.2); position: relative; z-index: 1;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 36px; letter-spacing: -1px; font-weight: 800; position: relative; z-index: 1;">PROFESSIONAL SERVICE QUOTE</h1>
+        <p style="color: #cbd5e1; margin: 8px 0 0; font-size: 14px; position: relative; z-index: 1;">Cleaniq Services - Premium Cleaning Solutions</p>
       </div>
 
       <!-- MAIN CONTENT -->
       <div style="padding: 50px 40px;">
         <!-- QUOTE REF & DATE -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 40px;">
-          <div>
-            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Quote Reference</p>
-            <p style="margin: 12px 0 0 0; font-size: 24px; font-weight: 900; color: #0F172A;">${quoteRef}</p>
+          <div style="background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #6366f1;">
+            <p style="margin: 0; font-size: 10px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 1px;">📋 Quote Reference</p>
+            <p style="margin: 12px 0 0 0; font-size: 26px; font-weight: 900; color: #0F172A; font-family: monospace;">${quoteRef}</p>
           </div>
-          <div>
-            <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Quote Date</p>
-            <p style="margin: 12px 0 0 0; font-size: 24px; font-weight: 900; color: #0F172A;">${date}</p>
+          <div style="background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #dc2626;">
+            <p style="margin: 0; font-size: 10px; font-weight: 800; color: #991b1b; text-transform: uppercase; letter-spacing: 1px;">📅 Quote Date</p>
+            <p style="margin: 12px 0 0 0; font-size: 26px; font-weight: 900; color: #0F172A;">${date}</p>
           </div>
         </div>
 
         <!-- COMPANY DETAILS -->
-        <div style="background: #f8fafc; border-radius: 16px; padding: 24px; margin-bottom: 40px; border: 1px solid #e2e8f0;">
-          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Prepared For</p>
-          <p style="margin: 0 0 4px 0; font-size: 18px; font-weight: 900; color: #0F172A;">${companyName}</p>
-          ${contactName ? `<p style="margin: 4px 0; font-size: 14px; color: #64748b;">Attn: ${contactName}</p>` : ""}
-          ${phone ? `<p style="margin: 4px 0; font-size: 14px; color: #64748b;">📱 ${phone}</p>` : ""}
-          ${address ? `<p style="margin: 4px 0; font-size: 14px; color: #64748b;">📍 ${address}</p>` : ""}
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 16px; padding: 28px; margin-bottom: 40px; border: 2px solid #0369a1;">
+          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #0369a1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">✓ Prepared For</p>
+          <p style="margin: 0 0 8px 0; font-size: 20px; font-weight: 900; color: #0F172A;">${companyName}</p>
+          ${contactName ? `<p style="margin: 8px 0; font-size: 14px; color: #0c4a6e; font-weight: 600;">👤 Contact: ${contactName}</p>` : ""}
+          ${phone ? `<p style="margin: 8px 0; font-size: 14px; color: #0c4a6e; font-weight: 600;">📱 Phone: ${phone}</p>` : ""}
+          ${address ? `<p style="margin: 8px 0; font-size: 14px; color: #0c4a6e; font-weight: 600;">📍 Address: ${address}</p>` : ""}
         </div>
 
         <!-- SERVICES TABLE -->
         <div style="margin-bottom: 32px;">
-          <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 800; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; border-left: 4px solid #6EE7B7; padding-left: 12px;">Services Included</p>
-          <div style="overflow: hidden; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 800; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; border-left: 4px solid #6EE7B7; padding-left: 12px;">📋 Services Included</p>
+          <div style="overflow: hidden; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
             <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: white;">
               <thead>
-                <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
-                  <th style="padding: 14px 16px; text-align: left; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Service</th>
-                  <th style="padding: 14px 16px; text-align: center; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Qty</th>
-                  <th style="padding: 14px 16px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Unit Price</th>
-                  <th style="padding: 14px 16px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Total</th>
+                <tr style="background: linear-gradient(to right, #0f172a, #1e293b); border-bottom: 2px solid #e2e8f0;">
+                  <th style="padding: 16px; text-align: left; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Service</th>
+                  <th style="padding: 16px; text-align: center; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Qty</th>
+                  <th style="padding: 16px; text-align: right; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Unit Price</th>
+                  <th style="padding: 16px; text-align: right; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -387,35 +420,77 @@ function generateQuoteEmail(quote) {
           </div>
         </div>
 
-        <!-- PRICING SUMMARY -->
-        <div style="background: #f8fafc; border-radius: 16px; padding: 24px; margin-bottom: 32px; border: 1px solid #e2e8f0;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+        <!-- PRICING SUMMARY - PROFESSIONAL LAYOUT -->
+        <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 16px; padding: 32px; margin-bottom: 32px; border: 2px solid #cbd5e1;">
+          <p style="margin: 0 0 20px 0; font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 1px;">💰 Pricing Summary</p>
+          
+          <div style="display: flex; justify-content: space-between; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">
             <span style="font-size: 14px; color: #64748b;">Subtotal</span>
-            <span style="font-size: 14px; font-weight: 700; color: #0F172A;">£${subtotal.toFixed(2)}</span>
+            <span style="font-size: 16px; font-weight: 700; color: #0F172A;">£${subtotal.toFixed(2)}</span>
           </div>
+          
           ${
-            includeVat && vat > 0
+            discountAmount > 0
               ? `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
-            <span style="font-size: 14px; color: #64748b;">VAT (${vatRate}%)</span>
-            <span style="font-size: 14px; font-weight: 700; color: #0F172A;">£${vat.toFixed(2)}</span>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">
+            <span style="font-size: 14px; color: #64748b;">Discount (${discount}%)</span>
+            <span style="font-size: 16px; font-weight: 700; color: #10b981;">-£${discountAmount.toFixed(2)}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">
+            <span style="font-size: 14px; color: #64748b;">Subtotal after discount</span>
+            <span style="font-size: 16px; font-weight: 700; color: #0F172A;">£${subtotalAfterDiscount.toFixed(2)}</span>
           </div>
           `
               : ""
           }
-          <div style="display: flex; justify-content: space-between;">
-            <span style="font-size: 16px; font-weight: 800; color: #0F172A;">GRAND TOTAL</span>
-            <span style="font-size: 16px; font-weight: 900; color: #6EE7B7;">£${grandTotal.toFixed(2)}${frequency !== "once" ? ` / ${frequencyLabel.toLowerCase()}` : ""}</span>
+          
+          ${
+            includeVat && vat > 0
+              ? `
+          <div style="display: flex; justify-content: space-between; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 2px solid #cbd5e1;">
+            <span style="font-size: 14px; color: #64748b;">VAT (${vatRate}%)</span>
+            <span style="font-size: 16px; font-weight: 700; color: #0F172A;">£${vat.toFixed(2)}</span>
           </div>
+          `
+              : ""
+          }
+          
+          <div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #6EE7B7 0%, #10b981 100%); border-radius: 12px;">
+            <span style="font-size: 16px; font-weight: 800; color: white;">GRAND TOTAL</span>
+            <span style="font-size: 20px; font-weight: 900; color: white;">£${grandTotal.toFixed(2)}${frequency !== "once" ? ` / ${frequencyLabel.toLowerCase()}` : ""}</span>
+          </div>
+          
+          ${
+            depositRequired && depositAmount > 0
+              ? `
+          <div style="background: #eef2ff; border-radius: 12px; padding: 16px; border-left: 4px solid #6366f1;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+              <span style="font-size: 13px; font-weight: 700; color: #4f46e5;">Deposit Required (${depositPercent}%)</span>
+              <span style="font-size: 14px; font-weight: 800; color: #4f46e5;">£${depositAmount.toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 13px; font-weight: 700; color: #4f46e5;">Balance Due</span>
+              <span style="font-size: 14px; font-weight: 800; color: #4f46e5;">£${balanceDue.toFixed(2)}</span>
+            </div>
+          </div>
+          `
+              : ""
+          }
+        </div>
+
+        <!-- PAYMENT TERMS -->
+        <div style="background: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 24px; border-left: 4px solid #f59e0b;">
+          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #d97706; text-transform: uppercase; letter-spacing: 0.5px;">💳 Payment Terms</p>
+          <p style="margin: 12px 0 0 0; font-size: 14px; color: #92400e; font-weight: 600;">${paymentTerms}</p>
         </div>
 
         <!-- RECURRING NOTICE -->
         ${
           frequency !== "once"
             ? `
-        <div style="background: #eef2ff; border-radius: 12px; padding: 16px; margin-bottom: 32px; border-left: 4px solid #6366f1;">
+        <div style="background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); border-radius: 12px; padding: 20px; margin-bottom: 32px; border-left: 4px solid #6366f1;">
           <p style="margin: 0; font-size: 12px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.5px;">📅 Recurring Service</p>
-          <p style="margin: 8px 0 0 0; font-size: 14px; color: #4f46e5;">This is a recurring contract with ${frequencyLabel.toLowerCase()} billing</p>
+          <p style="margin: 12px 0 0 0; font-size: 14px; color: #4f46e5; font-weight: 600;">This is a recurring contract with <strong>${frequencyLabel.toLowerCase()}</strong> billing. Services will be provided and invoiced accordingly.</p>
         </div>
         `
             : ""
@@ -425,32 +500,43 @@ function generateQuoteEmail(quote) {
         ${
           notes
             ? `
-        <div style="background: #fef3c7; border-radius: 12px; padding: 16px; margin-bottom: 32px; border-left: 4px solid #f59e0b;">
+        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%); border-radius: 12px; padding: 20px; margin-bottom: 24px; border-left: 4px solid #f59e0b;">
           <p style="margin: 0; font-size: 12px; font-weight: 800; color: #d97706; text-transform: uppercase; letter-spacing: 0.5px;">📝 Terms & Conditions</p>
-          <p style="margin: 12px 0 0 0; font-size: 13px; color: #92400e; line-height: 1.6; white-space: pre-line;">${notes}</p>
+          <p style="margin: 12px 0 0 0; font-size: 13px; color: #92400e; line-height: 1.7; font-weight: 500;">${notes}</p>
         </div>
         `
             : ""
         }
 
         <!-- VALIDITY -->
-        <div style="background: #ecfdf5; border-radius: 12px; padding: 16px; border-left: 4px solid #10b981;">
-          <p style="margin: 0; font-size: 12px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 0.5px;">✓ Validity</p>
-          <p style="margin: 8px 0 0 0; font-size: 14px; color: #047857;">This quote is valid for ${validDays} days from the date of issue</p>
+        <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 12px; padding: 20px; margin-bottom: 32px; border-left: 4px solid #10b981;">
+          <p style="margin: 0; font-size: 12px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 0.5px;">✓ Validity Period</p>
+          <p style="margin: 8px 0 0 0; font-size: 14px; color: #047857; font-weight: 600;">This quote is valid for <strong>${validDays} days</strong> from the date of issue. After this period, prices and availability are subject to change.</p>
         </div>
 
-        <!-- CTA -->
-        <div style="text-align: center; margin-top: 40px; padding-top: 32px; border-top: 1px solid #e2e8f0;">
-          <p style="margin: 0 0 16px 0; font-size: 14px; color: #64748b;">Ready to proceed with this quote?</p>
-          <a href="https://cleaniqservices.com/contact" style="display: inline-block; background-color: #6EE7B7; color: #0F172A; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Get Started Today</a>
+        <!-- CTA BUTTONS -->
+        <div style="text-align: center; margin-top: 40px; padding-top: 32px; border-top: 2px solid #e2e8f0;">
+          <p style="margin: 0 0 24px 0; font-size: 14px; color: #64748b; font-weight: 600;">Ready to proceed with this professional service quote?</p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin: 0 auto; max-width: 100%;">
+            <tr>
+              <td align="center">
+                <a href="https://cleaniqservices.com/booking" style="display: inline-block; background: linear-gradient(135deg, #6EE7B7 0%, #10b981 100%); color: #0F172A; padding: 16px 40px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 20px rgba(110, 231, 183, 0.3);">Accept & Book Now</a>
+              </td>
+              <td style="width: 20px;"></td>
+              <td align="center">
+                <a href="https://cleaniqservices.com/pages/contact" style="display: inline-block; background: white; color: #0F172A; padding: 16px 40px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; border: 2px solid #0F172A;">Contact Us</a>
+              </td>
+            </tr>
+          </table>
         </div>
       </div>
 
       <!-- FOOTER -->
-      <div style="background: #f8fafc; padding: 32px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
-        <p style="margin: 0; font-size: 13px; font-weight: 700; color: #0F172A;">Cleaniq Services Limited</p>
-        <p style="margin: 6px 0 0 0; font-size: 12px; color: #64748b;">📧 info@cleaniqservices.com | 🌐 cleaniqservices.com</p>
-        <p style="margin: 12px 0 0 0; font-size: 11px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      <div style="background: linear-gradient(135deg, #0F172A 0%, #1e293b 100%); padding: 40px; text-align: center; border-top: 2px solid #e2e8f0;">
+        <p style="margin: 0; font-size: 14px; font-weight: 700; color: #6EE7B7;">Cleaniq Services Limited</p>
+        <p style="margin: 12px 0 0 0; font-size: 12px; color: #cbd5e1;">Professional Cleaning Solutions</p>
+        <p style="margin: 12px 0 0 0; font-size: 12px; color: #94a3b8;">📧 info@cleaniqservices.com | 🌐 cleaniqservices.com | 📞 +44 7752 476368</p>
+        <p style="margin: 12px 0 0 0; font-size: 11px; color: #64748b;">&copy; 2026 Cleaniq Services. All rights reserved. This is a confidential quote.</p>
       </div>
     </div>
   `;

@@ -164,7 +164,7 @@ const AdminLayout = () => {
                 Cleaniq
               </h1>
               <span className="text-[10px] text-secondary font-bold uppercase tracking-widest">
-                Admin Panel
+                Business Portal
               </span>
             </div>
           </div>
