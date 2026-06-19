@@ -1,13 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const { sendEmail, templates } = require("../utils/emailService");
+const { sendEmail } = require("../utils/emailService");
+const Quote = require("../models/Quote");
 
-// Store sent quotes in memory (in production, use database)
-const sentQuotes = [];
+const FREQUENCY_LABELS = {
+  once: "One-time",
+  weekly: "Weekly",
+  biweekly: "Fortnightly",
+  monthly: "Monthly",
+  quarterly: "Quarterly",
+  yearly: "Yearly",
+};
 
 /**
  * POST /api/quotes/send
- * Send a customized quote to a company email
+ * Send a customized quote to a company email and persist it
  */
 router.post("/send", async (req, res) => {
   try {
@@ -47,8 +54,7 @@ router.post("/send", async (req, res) => {
       });
     }
 
-    // Generate quote email HTML
-    const quoteHtml = generateQuoteEmail({
+    const quoteData = {
       companyName,
       contactName,
       email,
@@ -73,7 +79,10 @@ router.post("/send", async (req, res) => {
       balanceDue,
       discount,
       notes,
-    });
+    };
+
+    // Generate quote email HTML
+    const quoteHtml = generateQuoteEmail(quoteData);
 
     // Send email to company
     const emailSent = await sendEmail({
@@ -89,31 +98,11 @@ router.post("/send", async (req, res) => {
       });
     }
 
-    // Store quote record
-    const quoteRecord = {
-      quoteRef,
-      companyName,
-      email,
-      phone,
-      address,
-      frequency,
-      date,
-      items,
-      subtotal,
-      discountAmount,
-      subtotalAfterDiscount,
-      vat,
-      grandTotal,
-      depositAmount,
-      balanceDue,
-      validDays,
-      paymentTerms,
-      depositRequired,
-      notes,
-      createdAt: new Date().toISOString(),
+    // Persist quote record
+    const quoteRecord = await Quote.create({
+      ...quoteData,
       status: "sent",
-    };
-    sentQuotes.push(quoteRecord);
+    });
 
     // Send copy to admin if requested
     if (sendCopy) {
@@ -128,6 +117,7 @@ router.post("/send", async (req, res) => {
       success: true,
       message: `Quote sent successfully to ${email}`,
       quoteRef,
+      data: quoteRecord,
     });
   } catch (error) {
     console.error("Quote send error:", error);
@@ -146,14 +136,18 @@ router.post("/send", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const { limit = 50, skip = 0 } = req.query;
-    const quotes = sentQuotes
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(parseInt(skip), parseInt(skip) + parseInt(limit));
+    const [quotes, total] = await Promise.all([
+      Quote.find()
+        .sort({ createdAt: -1 })
+        .skip(parseInt(skip))
+        .limit(parseInt(limit)),
+      Quote.countDocuments(),
+    ]);
 
     res.status(200).json({
       success: true,
       data: quotes,
-      total: sentQuotes.length,
+      total,
     });
   } catch (error) {
     console.error("Quote fetch error:", error);
@@ -166,13 +160,77 @@ router.get("/", async (req, res) => {
 });
 
 /**
+ * GET /api/quotes/stats
+ * Summary stats for the dashboard (total quotes, total quoted value, this month's count)
+ */
+router.get("/stats", async (req, res) => {
+  try {
+    const [total, allQuotes] = await Promise.all([
+      Quote.countDocuments(),
+      Quote.find({}, "grandTotal createdAt"),
+    ]);
+
+    const totalQuotedValue = allQuotes.reduce(
+      (s, q) => s + (q.grandTotal || 0),
+      0,
+    );
+
+    const now = new Date();
+    const thisMonthCount = allQuotes.filter((q) => {
+      const d = new Date(q.createdAt);
+      return (
+        d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+      );
+    }).length;
+
+    res.status(200).json({
+      success: true,
+      data: { total, totalQuotedValue, thisMonthCount },
+    });
+  } catch (error) {
+    console.error("Quote stats error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch quote stats",
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * GET /api/quotes/customer/:email
+ * Retrieve quote history for a specific customer email
+ */
+router.get("/customer/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+    const quotes = await Quote.find({ email: email.toLowerCase() }).sort({
+      createdAt: -1,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: quotes,
+      total: quotes.length,
+    });
+  } catch (error) {
+    console.error("Customer quote fetch error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch customer quotes",
+      error: error.message,
+    });
+  }
+});
+
+/**
  * GET /api/quotes/:quoteRef
  * Retrieve a specific quote by reference
  */
 router.get("/:quoteRef", async (req, res) => {
   try {
     const { quoteRef } = req.params;
-    const quote = sentQuotes.find((q) => q.quoteRef === quoteRef);
+    const quote = await Quote.findOne({ quoteRef });
 
     if (!quote) {
       return res.status(404).json({
@@ -204,7 +262,7 @@ router.post("/resend/:quoteRef", async (req, res) => {
     const { quoteRef } = req.params;
     const { email } = req.body;
 
-    const quote = sentQuotes.find((q) => q.quoteRef === quoteRef);
+    const quote = await Quote.findOne({ quoteRef });
     if (!quote) {
       return res.status(404).json({
         success: false,
@@ -213,7 +271,7 @@ router.post("/resend/:quoteRef", async (req, res) => {
     }
 
     const targetEmail = email || quote.email;
-    const quoteHtml = generateQuoteEmail(quote);
+    const quoteHtml = generateQuoteEmail(quote.toObject());
 
     const emailSent = await sendEmail({
       to: targetEmail,
@@ -251,7 +309,7 @@ router.post("/schedule", async (req, res) => {
     const {
       companyName,
       email,
-      frequency, // weekly, biweekly, monthly, quarterly
+      frequency, // weekly, biweekly, monthly, quarterly, yearly
       items,
       subtotal,
       grandTotal,
@@ -266,12 +324,18 @@ router.post("/schedule", async (req, res) => {
     }
 
     // Validate frequency
-    const validFrequencies = ["weekly", "biweekly", "monthly", "quarterly"];
+    const validFrequencies = [
+      "weekly",
+      "biweekly",
+      "monthly",
+      "quarterly",
+      "yearly",
+    ];
     if (!validFrequencies.includes(frequency)) {
       return res.status(400).json({
         success: false,
         message:
-          "Invalid frequency. Must be weekly, biweekly, monthly, or quarterly",
+          "Invalid frequency. Must be weekly, biweekly, monthly, quarterly, or yearly",
       });
     }
 
@@ -339,30 +403,28 @@ function generateQuoteEmail(quote) {
     phone,
   } = quote;
 
-  const frequencyLabel =
-    {
-      once: "One-time",
-      weekly: "Weekly",
-      biweekly: "Fortnightly",
-      monthly: "Monthly",
-      quarterly: "Quarterly",
-    }[frequency] || "One-time";
+  const frequencyLabel = FREQUENCY_LABELS[frequency] || "One-time";
 
   const itemsHtml = items
     .filter((i) => i.service || i.customService)
-    .map(
-      (item, idx) => `
+    .map((item) => {
+      const isHourly = item.billingType === "hourly";
+      const pricingLabel = isHourly
+        ? `${item.qty} hrs @ £${Number(item.unitPrice || 0).toFixed(2)}/hr`
+        : `Qty ${item.qty} × £${Number(item.unitPrice || 0).toFixed(2)}`;
+      return `
     <tr style="border-bottom: 1px solid #e2e8f0;">
       <td style="padding: 14px 16px; text-align: left;">
         <p style="margin: 0; font-weight: 700; color: #0F172A; font-size: 14px;">${item.service || item.customService}</p>
-        ${item.description ? `<p style="margin: 6px 0 0; font-size: 12px; color: #64748b;">${item.description}</p>` : ""}
+        ${item.description ? `<p style="margin: 6px 0 0; font-size: 12px; color: #64748b;"><strong>What's included:</strong> ${item.description}</p>` : ""}
+        <p style="margin: 6px 0 0; font-size: 11px; color: #94a3b8; font-weight: 600;">${pricingLabel}</p>
       </td>
-      <td style="padding: 14px 16px; text-align: center; color: #64748b; font-size: 14px;">${item.qty}</td>
-      <td style="padding: 14px 16px; text-align: right; color: #64748b; font-size: 14px;">£${Number(item.unitPrice || 0).toFixed(2)}</td>
+      <td style="padding: 14px 16px; text-align: center; color: #64748b; font-size: 14px;">${item.qty}${isHourly ? " hrs" : ""}</td>
+      <td style="padding: 14px 16px; text-align: right; color: #64748b; font-size: 14px;">£${Number(item.unitPrice || 0).toFixed(2)}${isHourly ? "/hr" : ""}</td>
       <td style="padding: 14px 16px; text-align: right; font-weight: 700; color: #0F172A; font-size: 14px;">£${(Number(item.unitPrice || 0) * item.qty).toFixed(2)}</td>
     </tr>
-  `,
-    )
+  `;
+    })
     .join("");
 
   return `
@@ -402,12 +464,12 @@ function generateQuoteEmail(quote) {
 
         <!-- SERVICES TABLE -->
         <div style="margin-bottom: 32px;">
-          <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 800; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; border-left: 4px solid #6EE7B7; padding-left: 12px;">📋 Services Included</p>
+          <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 800; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; border-left: 4px solid #6EE7B7; padding-left: 12px;">🧹 Cleaning Services & Scope of Work</p>
           <div style="overflow: hidden; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
             <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: white;">
               <thead>
                 <tr style="background: linear-gradient(to right, #0f172a, #1e293b); border-bottom: 2px solid #e2e8f0;">
-                  <th style="padding: 16px; text-align: left; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Service</th>
+                  <th style="padding: 16px; text-align: left; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Service & Details</th>
                   <th style="padding: 16px; text-align: center; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Qty</th>
                   <th style="padding: 16px; text-align: right; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Unit Price</th>
                   <th style="padding: 16px; text-align: right; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Total</th>
@@ -423,12 +485,12 @@ function generateQuoteEmail(quote) {
         <!-- PRICING SUMMARY - PROFESSIONAL LAYOUT -->
         <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 16px; padding: 32px; margin-bottom: 32px; border: 2px solid #cbd5e1;">
           <p style="margin: 0 0 20px 0; font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 1px;">💰 Pricing Summary</p>
-          
+
           <div style="display: flex; justify-content: space-between; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">
             <span style="font-size: 14px; color: #64748b;">Subtotal</span>
             <span style="font-size: 16px; font-weight: 700; color: #0F172A;">£${subtotal.toFixed(2)}</span>
           </div>
-          
+
           ${
             discountAmount > 0
               ? `
@@ -443,7 +505,7 @@ function generateQuoteEmail(quote) {
           `
               : ""
           }
-          
+
           ${
             includeVat && vat > 0
               ? `
@@ -454,12 +516,12 @@ function generateQuoteEmail(quote) {
           `
               : ""
           }
-          
+
           <div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #6EE7B7 0%, #10b981 100%); border-radius: 12px;">
             <span style="font-size: 16px; font-weight: 800; color: white;">GRAND TOTAL</span>
             <span style="font-size: 20px; font-weight: 900; color: white;">£${grandTotal.toFixed(2)}${frequency !== "once" ? ` / ${frequencyLabel.toLowerCase()}` : ""}</span>
           </div>
-          
+
           ${
             depositRequired && depositAmount > 0
               ? `
@@ -573,7 +635,7 @@ function generateAdminNotificationEmail(quote) {
           </div>
           <div>
             <p style="margin: 0; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Frequency</p>
-            <p style="margin: 6px 0 0 0; font-size: 14px; color: #0F172A;">${quote.frequency === "once" ? "One-time" : quote.frequency.charAt(0).toUpperCase() + quote.frequency.slice(1)}</p>
+            <p style="margin: 6px 0 0 0; font-size: 14px; color: #0F172A;">${FREQUENCY_LABELS[quote.frequency] || "One-time"}</p>
           </div>
         </div>
 
@@ -604,6 +666,9 @@ function calculateNextSendDate(frequency) {
       break;
     case "quarterly":
       next.setMonth(next.getMonth() + 3);
+      break;
+    case "yearly":
+      next.setFullYear(next.getFullYear() + 1);
       break;
     default:
       return null;

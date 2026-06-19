@@ -15,6 +15,8 @@ import {
   X,
   Hash,
   Pencil,
+  Clock,
+  History,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -25,6 +27,7 @@ const FREQUENCY_OPTIONS = [
   { value: "biweekly", label: "Fortnightly" },
   { value: "monthly", label: "Monthly" },
   { value: "quarterly", label: "Quarterly" },
+  { value: "yearly", label: "Yearly" },
 ];
 
 const DEFAULT_SERVICES = [
@@ -42,6 +45,7 @@ const emptyItem = () => ({
   service: "",
   customService: "",
   description: "",
+  billingType: "flat",
   qty: 1,
   unitPrice: "",
 });
@@ -107,23 +111,44 @@ const LineItem = ({ item, index, onChange, onRemove, services }) => (
       </div>
       <div className="sm:col-span-2">
         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 block">
-          Description (optional)
+          Cleaning Details — what will be cleaned (optional)
         </label>
         <textarea
           rows={2}
-          placeholder="e.g. 3-bed property, kitchen & bathrooms..."
+          placeholder="e.g. 3-bed property: all bedrooms, 2 bathrooms, kitchen deep clean, hoovering & dusting throughout..."
           value={item.description}
           onChange={(e) => onChange(index, "description", e.target.value)}
           className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-medium text-slate-700 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 transition-all"
         />
+        <p className="text-[10px] text-slate-400 font-semibold mt-1">
+          This shows up in the quote preview and the email sent to the
+          customer, so they know exactly how the clean will be done.
+        </p>
+      </div>
+      <div className="sm:col-span-2 flex items-center gap-2 p-1 bg-white rounded-2xl border border-slate-200 w-fit">
+        <button
+          type="button"
+          onClick={() => onChange(index, "billingType", "flat")}
+          className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${item.billingType !== "hourly" ? "bg-indigo-600 text-white shadow" : "text-slate-500 hover:bg-slate-50"}`}
+        >
+          Flat Rate
+        </button>
+        <button
+          type="button"
+          onClick={() => onChange(index, "billingType", "hourly")}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition-all ${item.billingType === "hourly" ? "bg-indigo-600 text-white shadow" : "text-slate-500 hover:bg-slate-50"}`}
+        >
+          <Clock size={12} /> Hourly Rate
+        </button>
       </div>
       <div>
         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 block">
-          Quantity / Visits
+          {item.billingType === "hourly" ? "Estimated Hours" : "Quantity / Visits"}
         </label>
         <input
           type="number"
           min="1"
+          step={item.billingType === "hourly" ? "0.5" : "1"}
           value={item.qty}
           onChange={(e) => onChange(index, "qty", Number(e.target.value))}
           className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 transition-all"
@@ -131,7 +156,7 @@ const LineItem = ({ item, index, onChange, onRemove, services }) => (
       </div>
       <div>
         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 block">
-          Unit Price (£)
+          {item.billingType === "hourly" ? "Hourly Rate (£/hr)" : "Unit Price (£)"}
         </label>
         <input
           type="number"
@@ -253,7 +278,7 @@ const PreviewModal = ({
             <table className="w-full text-sm">
               <thead className="bg-slate-50">
                 <tr className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  <th className="px-5 py-3 text-left">Service</th>
+                  <th className="px-5 py-3 text-left">Service & Cleaning Details</th>
                   <th className="px-4 py-3 text-center">Qty</th>
                   <th className="px-4 py-3 text-right">Unit</th>
                   <th className="px-5 py-3 text-right">Total</th>
@@ -275,12 +300,19 @@ const PreviewModal = ({
                             {item.description}
                           </p>
                         )}
+                        {item.billingType === "hourly" && (
+                          <p className="text-[10px] text-indigo-500 font-bold mt-1 flex items-center gap-1">
+                            <Clock size={10} /> Billed hourly
+                          </p>
+                        )}
                       </td>
                       <td className="px-4 py-4 text-center font-semibold text-slate-700">
                         {item.qty}
+                        {item.billingType === "hourly" ? " hrs" : ""}
                       </td>
                       <td className="px-4 py-4 text-right font-semibold text-slate-700">
                         £{Number(item.unitPrice || 0).toFixed(2)}
+                        {item.billingType === "hourly" ? "/hr" : ""}
                       </td>
                       <td className="px-5 py-4 text-right font-black text-slate-800">
                         £
@@ -358,6 +390,159 @@ const PreviewModal = ({
   </div>
 );
 
+// ── Quote Detail / History Modal ────────────────────────────────────────────────
+const QuoteDetailModal = ({ quote, onClose }) => {
+  const frequencyLabel =
+    FREQUENCY_OPTIONS.find((f) => f.value === quote.frequency)?.label ||
+    "One-time Quote";
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-slate-100 px-8 py-5 flex justify-between items-center rounded-t-[32px] z-10">
+          <div>
+            <h2 className="text-lg font-black text-slate-800">
+              {quote.quoteRef}
+            </h2>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+              Sent {new Date(quote.createdAt).toLocaleString("en-GB")}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-2xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all"
+          >
+            <X size={18} className="text-slate-600" />
+          </button>
+        </div>
+        <div className="p-8 space-y-6">
+          <div className="bg-slate-50 rounded-3xl p-6 space-y-1">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              Sent To
+            </p>
+            <p className="font-black text-slate-800 text-lg">
+              {quote.companyName}
+            </p>
+            {quote.contactName && (
+              <p className="text-sm text-slate-600 font-semibold">
+                Attn: {quote.contactName}
+              </p>
+            )}
+            <p className="text-sm text-slate-500">{quote.email}</p>
+            {quote.phone && (
+              <p className="text-sm text-slate-500">{quote.phone}</p>
+            )}
+            {quote.address && (
+              <p className="text-sm text-slate-500">{quote.address}</p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3 px-5 py-3 bg-indigo-50 border border-indigo-200 rounded-2xl">
+            <Repeat2 size={18} className="text-indigo-600" />
+            <p className="text-sm font-bold text-slate-700">
+              {frequencyLabel}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
+              Cleaning Services & Scope of Work
+            </p>
+            <div className="space-y-3">
+              {(quote.items || []).map((item, i) => (
+                <div
+                  key={i}
+                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200"
+                >
+                  <div className="flex justify-between items-start gap-3">
+                    <p className="font-bold text-slate-800 text-sm">
+                      {item.service || item.customService}
+                    </p>
+                    <p className="font-black text-slate-800 text-sm whitespace-nowrap">
+                      £
+                      {(
+                        Number(item.unitPrice || 0) * Number(item.qty || 1)
+                      ).toFixed(2)}
+                    </p>
+                  </div>
+                  {item.description && (
+                    <p className="text-xs text-slate-500 mt-1.5">
+                      <span className="font-bold text-slate-600">
+                        What will be cleaned:
+                      </span>{" "}
+                      {item.description}
+                    </p>
+                  )}
+                  <p className="text-[11px] font-bold text-indigo-500 mt-1.5 flex items-center gap-1">
+                    {item.billingType === "hourly" ? (
+                      <>
+                        <Clock size={11} /> {item.qty} hrs @ £
+                        {Number(item.unitPrice || 0).toFixed(2)}/hr
+                      </>
+                    ) : (
+                      <>Qty {item.qty} × £{Number(item.unitPrice || 0).toFixed(2)}</>
+                    )}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2 bg-slate-50 rounded-3xl p-6">
+            <div className="flex justify-between text-sm font-semibold text-slate-600">
+              <span>Subtotal</span>
+              <span>£{Number(quote.subtotal || 0).toFixed(2)}</span>
+            </div>
+            {quote.discountAmount > 0 && (
+              <div className="flex justify-between text-sm font-semibold text-emerald-600">
+                <span>Discount ({quote.discount}%)</span>
+                <span>-£{Number(quote.discountAmount).toFixed(2)}</span>
+              </div>
+            )}
+            {quote.includeVat && quote.vat > 0 && (
+              <div className="flex justify-between text-sm font-semibold text-slate-600">
+                <span>VAT ({quote.vatRate}%)</span>
+                <span>£{Number(quote.vat).toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-base font-black text-slate-800 pt-3 border-t border-slate-200">
+              <span>GRAND TOTAL</span>
+              <span>
+                £{Number(quote.grandTotal || 0).toFixed(2)}
+                {quote.frequency !== "once"
+                  ? ` / ${frequencyLabel.split(" ")[0].toLowerCase()}`
+                  : ""}
+              </span>
+            </div>
+            {quote.depositRequired && quote.depositAmount > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-200 space-y-2">
+                <div className="flex justify-between text-sm font-semibold text-indigo-600">
+                  <span>Deposit Required ({quote.depositPercent}%)</span>
+                  <span>£{Number(quote.depositAmount).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm font-semibold text-slate-600">
+                  <span>Balance Due</span>
+                  <span>£{Number(quote.balanceDue).toFixed(2)}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {quote.notes && (
+            <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5">
+              <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-2">
+                Notes & Terms
+              </p>
+              <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                {quote.notes}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ── Toggle ─────────────────────────────────────────────────────────────────────
 const Toggle = ({ value, onChange, label }) => (
   <label
@@ -383,6 +568,9 @@ const QuoteBuilder = () => {
   const [toast, setToast] = useState(null);
   const [preview, setPreview] = useState(false);
   const [sentQuotes, setSentQuotes] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [showAllHistory, setShowAllHistory] = useState(false);
+  const [selectedQuote, setSelectedQuote] = useState(null);
 
   const [form, setForm] = useState({
     companyName: "",
@@ -403,6 +591,17 @@ const QuoteBuilder = () => {
       "This quote is valid for 30 days from the date of issue. All services are subject to our terms and conditions available at cleaniqservices.com/terms.",
   });
 
+  const loadHistory = useCallback((limit = 10) => {
+    setHistoryLoading(true);
+    fetch(`${API}/quotes?limit=${limit}`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success) setSentQuotes(res.data);
+      })
+      .catch(() => {})
+      .finally(() => setHistoryLoading(false));
+  }, []);
+
   useEffect(() => {
     fetch(`${API}/services`)
       .then((r) => r.json())
@@ -416,12 +615,14 @@ const QuoteBuilder = () => {
         }
       })
       .catch(() => {});
-    try {
-      setSentQuotes(
-        JSON.parse(localStorage.getItem("sentQuotes") || "[]").slice(0, 10),
-      );
-    } catch {}
-  }, []);
+    loadHistory(10);
+  }, [loadHistory]);
+
+  const toggleHistoryView = () => {
+    const next = !showAllHistory;
+    setShowAllHistory(next);
+    loadHistory(next ? 100 : 10);
+  };
 
   const updateForm = (key, val) => setForm((f) => ({ ...f, [key]: val }));
   const updateItem = (i, key, val) =>
@@ -490,21 +691,7 @@ const QuoteBuilder = () => {
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Server error");
-      const history = [
-        {
-          ref: quoteRef,
-          company: form.companyName,
-          email: form.email,
-          total: grandTotal,
-          frequency: form.frequency,
-          date: new Date().toISOString(),
-          depositAmount,
-          balanceDue,
-        },
-        ...sentQuotes,
-      ].slice(0, 10);
-      localStorage.setItem("sentQuotes", JSON.stringify(history));
-      setSentQuotes(history);
+      loadHistory(showAllHistory ? 100 : 10);
       setToast({ msg: `Quote sent to ${form.email}!`, type: "success" });
       setItems([emptyItem()]);
       setForm((f) => ({
@@ -984,46 +1171,71 @@ const QuoteBuilder = () => {
           </div>
 
           {/* History */}
-          {sentQuotes.length > 0 && (
-            <div className="bg-white border border-slate-200 rounded-[28px] shadow-sm overflow-hidden">
-              <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
-                <h3 className="text-base font-black text-slate-800">
-                  Recently Sent
+          <div className="bg-white border border-slate-200 rounded-[28px] shadow-sm overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
+                  <History size={16} className="text-indigo-500" />
+                  Quote History
                 </h3>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                  Last 10 quotes
+                  {showAllHistory ? "All quotes sent" : "Last 10 quotes"}
                 </p>
               </div>
-              <div className="p-4 space-y-1">
-                {sentQuotes.map((q, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all"
+              <button
+                onClick={toggleHistoryView}
+                className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-800 transition-colors flex-shrink-0"
+              >
+                {showAllHistory ? "Show Recent" : "View All"}
+              </button>
+            </div>
+            <div className="p-4 space-y-1 max-h-[420px] overflow-y-auto">
+              {historyLoading && (
+                <div className="flex items-center justify-center py-8 text-slate-400">
+                  <RefreshCw size={16} className="animate-spin" />
+                </div>
+              )}
+              {!historyLoading && sentQuotes.length === 0 && (
+                <p className="text-xs text-slate-400 font-semibold text-center py-8">
+                  No quotes sent yet.
+                </p>
+              )}
+              {!historyLoading &&
+                sentQuotes.map((q) => (
+                  <button
+                    key={q.quoteRef}
+                    onClick={() => setSelectedQuote(q)}
+                    className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all text-left"
                   >
                     <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
                       <CheckCircle2 size={16} className="text-emerald-500" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-black text-slate-800 truncate">
-                        {q.company}
+                        {q.companyName}
                       </p>
                       <p className="text-[10px] font-semibold text-slate-400">
-                        {q.ref} · £{Number(q.total).toFixed(2)}
+                        {q.quoteRef} · £{Number(q.grandTotal || 0).toFixed(2)}
                       </p>
                     </div>
                     <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest flex-shrink-0">
-                      {new Date(q.date).toLocaleDateString("en-GB", {
+                      {new Date(q.createdAt).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
                       })}
                     </span>
-                  </div>
+                  </button>
                 ))}
-              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
+      {selectedQuote && (
+        <QuoteDetailModal
+          quote={selectedQuote}
+          onClose={() => setSelectedQuote(null)}
+        />
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   TrendingUp,
@@ -15,13 +15,14 @@ import {
   Plus,
   RefreshCw,
   Wallet,
-  BarChart3,
   Timer,
   Star,
   Zap,
   ArrowUpRight,
   ArrowDownRight,
   Receipt,
+  X,
+  FileText,
 } from "lucide-react";
 
 const RevenueCard = ({
@@ -33,10 +34,14 @@ const RevenueCard = ({
   icon: Icon,
   barColor,
   max,
+  onClick,
 }) => {
   const pct = max > 0 ? Math.min((amount / max) * 100, 100).toFixed(1) : "0.0";
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300">
+    <button
+      onClick={onClick}
+      className="text-left w-full bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:border-slate-300 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer"
+    >
       <div className="flex justify-between items-start mb-5">
         <div
           className={`w-10 h-10 rounded-xl flex items-center justify-center ${bg}`}
@@ -67,6 +72,90 @@ const RevenueCard = ({
         <span className={`text-[11px] font-semibold tabular-nums ${color}`}>
           {pct}%
         </span>
+      </div>
+      <p className="text-[10px] font-bold text-indigo-500 mt-3 flex items-center gap-1 opacity-0 group-hover:opacity-100">
+        View details <ChevronRight size={11} />
+      </p>
+    </button>
+  );
+};
+
+// ── Revenue Detail Modal ────────────────────────────────────────────────────────
+const RevenueDetailModal = ({ segment, onClose, onViewBooking }) => {
+  const { title, color, bg, bookings, total } = segment;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-xl max-h-[85vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-slate-100 px-7 py-5 flex justify-between items-center rounded-t-[28px] z-10">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${bg}`}>
+              <Receipt size={18} className={color} />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">{title}</h2>
+              <p className="text-[11px] font-semibold text-slate-400 tabular-nums">
+                £
+                {total.toLocaleString("en-GB", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}{" "}
+                · {bookings.length} booking{bookings.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-2xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all"
+          >
+            <X size={18} className="text-slate-600" />
+          </button>
+        </div>
+        <div className="p-3">
+          {bookings.length === 0 ? (
+            <p className="text-sm text-slate-400 font-medium text-center py-12">
+              No bookings in this segment.
+            </p>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {bookings.map((b, i) => (
+                <button
+                  key={i}
+                  onClick={() => onViewBooking(b)}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 rounded-2xl transition-colors text-left"
+                >
+                  <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[10px] font-bold text-slate-500">
+                      {initials(b)}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-800 truncate">
+                      {b.customer?.firstName} {b.customer?.lastName}
+                    </p>
+                    <p className="text-[11px] font-medium text-slate-400 truncate">
+                      {b.service} ·{" "}
+                      {b.schedule?.date
+                        ? new Date(b.schedule.date).toLocaleDateString(
+                            "en-GB",
+                            { day: "numeric", month: "short" },
+                          )
+                        : "—"}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-sm font-bold text-slate-900 tabular-nums">
+                      £
+                      {Number(b.payment?.amount || 0).toLocaleString("en-GB", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </p>
+                    <StatusBadge status={b.status} />
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -115,11 +204,22 @@ const initials = (b) => {
   return (f + l).toUpperCase() || "?";
 };
 
+const TREND_RANGES = [
+  { label: "7D", days: 7 },
+  { label: "30D", days: 30 },
+  { label: "90D", days: 90 },
+  { label: "1Y", days: 365 },
+];
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(null);
+  const [trendRange, setTrendRange] = useState(30);
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+  const [detailSegment, setDetailSegment] = useState(null);
+  const [quoteStats, setQuoteStats] = useState(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -137,6 +237,12 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchData();
+    fetch(`${import.meta.env.VITE_API_URL}/quotes/stats`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success) setQuoteStats(res.data);
+      })
+      .catch(() => {});
   }, [fetchData]);
 
   // Revenue by status
@@ -197,13 +303,105 @@ const Dashboard = () => {
     )
     .join(" ");
 
-  // Average monthly revenue, shown as a reference line on the bar chart
-  const avgMonthlyRevenue =
-    monthlyData.reduce((s, m) => s + m.revenue, 0) / monthlyData.length;
-  const avgLinePct =
-    maxMonthRev > 0
-      ? Math.min((avgMonthlyRevenue / maxMonthRev) * 100, 100)
-      : 0;
+  // Revenue trend chart (Google Analytics-style): buckets by day/week/month
+  // depending on the selected range, plus a comparison vs. the prior period.
+  const buildTrendSeries = (days) => {
+    const now = new Date();
+    now.setHours(23, 59, 59, 999);
+    let bucketUnit, bucketCount;
+    if (days <= 30) {
+      bucketUnit = "day";
+      bucketCount = days;
+    } else if (days === 90) {
+      bucketUnit = "week";
+      bucketCount = 13;
+    } else {
+      bucketUnit = "month";
+      bucketCount = 12;
+    }
+
+    const ranges = Array.from({ length: bucketCount }, (_, idx) => {
+      const i = bucketCount - 1 - idx;
+      let start, end, label;
+      if (bucketUnit === "day") {
+        end = new Date(now);
+        end.setDate(end.getDate() - i);
+        end.setHours(23, 59, 59, 999);
+        start = new Date(end);
+        start.setHours(0, 0, 0, 0);
+        label = start.toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "short",
+        });
+      } else if (bucketUnit === "week") {
+        end = new Date(now);
+        end.setDate(end.getDate() - i * 7);
+        end.setHours(23, 59, 59, 999);
+        start = new Date(end);
+        start.setDate(start.getDate() - 6);
+        start.setHours(0, 0, 0, 0);
+        label = start.toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "short",
+        });
+      } else {
+        const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        start = monthDate;
+        end = new Date(
+          monthDate.getFullYear(),
+          monthDate.getMonth() + 1,
+          0,
+          23,
+          59,
+          59,
+          999,
+        );
+        label = start.toLocaleDateString("en-GB", { month: "short" });
+      }
+      return { start, end, label };
+    });
+
+    const series = ranges.map(({ start, end, label }) => {
+      const inBucket = bookings.filter((b) => {
+        const d = new Date(b.createdAt || b.schedule?.date);
+        return d >= start && d <= end;
+      });
+      return { label, revenue: rev(inBucket), count: inBucket.length };
+    });
+
+    return {
+      series,
+      rangeStart: ranges[0].start,
+      rangeEnd: ranges[ranges.length - 1].end,
+    };
+  };
+
+  const { series: trendSeries, rangeStart, rangeEnd } =
+    buildTrendSeries(trendRange);
+  const rangeRevenue = trendSeries.reduce((s, m) => s + m.revenue, 0);
+  const periodMs = rangeEnd.getTime() - rangeStart.getTime();
+  const prevPeriodStart = new Date(rangeStart.getTime() - periodMs - 1);
+  const prevPeriodEnd = new Date(rangeStart.getTime() - 1);
+  const prevRangeRevenue = rev(
+    bookings.filter((b) => {
+      const d = new Date(b.createdAt || b.schedule?.date);
+      return d >= prevPeriodStart && d <= prevPeriodEnd;
+    }),
+  );
+  const rangeChangePct =
+    prevRangeRevenue > 0
+      ? ((rangeRevenue - prevRangeRevenue) / prevRangeRevenue) * 100
+      : null;
+
+  const maxTrendRev = Math.max(...trendSeries.map((m) => m.revenue), 1);
+  const trendPoints = trendSeries.map((m, i) => {
+    const heightPct = maxTrendRev > 0 ? (m.revenue / maxTrendRev) * 78 : 0;
+    const x =
+      trendSeries.length > 1 ? (i / (trendSeries.length - 1)) * 100 : 50;
+    return { ...m, x, heightPct, y: 92 - heightPct };
+  });
+  const trendLinePoints = trendPoints.map((p) => `${p.x},${p.y}`).join(" ");
+  const trendLabelStep = Math.max(1, Math.ceil(trendSeries.length / 7));
 
   // Top services
   const serviceMap = {};
@@ -250,7 +448,18 @@ const Dashboard = () => {
       {/* Revenue Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
         {/* Total Revenue - ledger hero card */}
-        <div className="bg-gradient-to-br from-[#101A2E] to-[#070B14] rounded-3xl p-6 text-white shadow-xl shadow-slate-900/30 relative overflow-hidden">
+        <button
+          onClick={() =>
+            setDetailSegment({
+              title: "Total Revenue",
+              color: "text-blue-700",
+              bg: "bg-blue-50",
+              bookings,
+              total: totalRevenue,
+            })
+          }
+          className="text-left w-full bg-gradient-to-br from-[#101A2E] to-[#070B14] rounded-3xl p-6 text-white shadow-xl shadow-slate-900/30 relative overflow-hidden hover:shadow-2xl hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer"
+        >
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
           <div className="relative z-10">
             <div className="flex justify-between items-start mb-5">
@@ -322,7 +531,7 @@ const Dashboard = () => {
               </svg>
             </div>
           </div>
-        </div>
+        </button>
 
         <RevenueCard
           label="Completed Revenue"
@@ -333,6 +542,15 @@ const Dashboard = () => {
           barColor="bg-emerald-600"
           icon={CheckCircle2}
           max={totalRevenue}
+          onClick={() =>
+            setDetailSegment({
+              title: "Completed Revenue",
+              color: "text-emerald-700",
+              bg: "bg-emerald-50",
+              bookings: completed,
+              total: completedRevenue,
+            })
+          }
         />
         <RevenueCard
           label="Pending Revenue"
@@ -343,6 +561,15 @@ const Dashboard = () => {
           barColor="bg-amber-500"
           icon={Timer}
           max={totalRevenue}
+          onClick={() =>
+            setDetailSegment({
+              title: "Pending Revenue",
+              color: "text-amber-700",
+              bg: "bg-amber-50",
+              bookings: pending,
+              total: pendingRevenue,
+            })
+          }
         />
         <RevenueCard
           label="Cancelled Revenue"
@@ -353,11 +580,20 @@ const Dashboard = () => {
           barColor="bg-red-500"
           icon={XCircle}
           max={totalRevenue}
+          onClick={() =>
+            setDetailSegment({
+              title: "Cancelled Revenue",
+              color: "text-red-700",
+              bg: "bg-red-50",
+              bookings: cancelled,
+              total: cancelledRevenue,
+            })
+          }
         />
       </div>
 
       {/* KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
         <div
           className={`rounded-2xl p-5 border flex items-center gap-4 ${totalProfit >= 0 ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}
         >
@@ -432,86 +668,174 @@ const Dashboard = () => {
             </p>
           </div>
         </div>
+
+        <button
+          onClick={() => navigate("/admin/quotes")}
+          className="text-left rounded-2xl p-5 border bg-white border-slate-200 hover:border-slate-300 hover:shadow-md transition-all flex items-center gap-4"
+        >
+          <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center flex-shrink-0">
+            <FileText size={20} className="text-violet-700" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+              Quotes Sent
+            </p>
+            <p className="text-xl font-bold tabular-nums text-violet-700">
+              {quoteStats
+                ? quoteStats.total
+                : loading
+                  ? "—"
+                  : 0}
+            </p>
+            <p className="text-[10px] text-slate-400 font-medium truncate">
+              {quoteStats
+                ? `£${quoteStats.totalQuotedValue.toLocaleString("en-GB", { maximumFractionDigits: 0 })} quoted in total`
+                : "Create & send a new quote"}
+            </p>
+          </div>
+        </button>
       </div>
 
       {/* Chart + Revenue Split */}
       <div className="grid lg:grid-cols-3 gap-7">
-        {/* Monthly Bar Chart */}
+        {/* Revenue Trend (Analytics-style) */}
         <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-3xl shadow-sm overflow-hidden">
-          <div className="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center">
+          <div className="p-6 md:p-8 border-b border-slate-100 flex flex-wrap justify-between items-start gap-4">
             <div>
               <h3 className="text-base font-bold text-slate-800">
-                Monthly Revenue
+                Revenue Trend
               </h3>
-              <p className="text-[11px] font-medium text-slate-400 mt-0.5">
-                Last 6 months
-              </p>
+              <div className="flex items-baseline gap-2.5 mt-1.5">
+                <span className="text-2xl font-bold text-slate-900 tabular-nums tracking-tight">
+                  £
+                  {rangeRevenue.toLocaleString("en-GB", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+                {rangeChangePct !== null ? (
+                  <span
+                    className={`inline-flex items-center gap-1 text-[11px] font-semibold tabular-nums ${rangeChangePct >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                  >
+                    {rangeChangePct >= 0 ? (
+                      <ArrowUpRight size={12} />
+                    ) : (
+                      <ArrowDownRight size={12} />
+                    )}
+                    {rangeChangePct >= 0 ? "+" : ""}
+                    {rangeChangePct.toFixed(1)}% vs prior period
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-medium text-slate-400">
+                    No prior period data yet
+                  </span>
+                )}
+              </div>
             </div>
-            <BarChart3 size={18} className="text-slate-300" />
+            <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
+              {TREND_RANGES.map((opt) => (
+                <button
+                  key={opt.days}
+                  onClick={() => setTrendRange(opt.days)}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${trendRange === opt.days ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="p-6 md:p-8">
             {loading ? (
-              <div className="flex items-end gap-3 h-44">
-                {[...Array(6)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex-1 bg-slate-100 rounded-xl animate-pulse"
-                    style={{ height: `${40 + i * 10}%` }}
-                  />
-                ))}
-              </div>
+              <div className="h-52 bg-slate-50 rounded-2xl animate-pulse" />
             ) : (
               <div className="space-y-2">
-                <div className="relative" style={{ height: "140px" }}>
-                  <div
-                    className="absolute left-0 right-0 flex items-center gap-2 z-10"
-                    style={{ bottom: `${avgLinePct}%` }}
+                <div className="relative" style={{ height: "200px" }}>
+                  {/* Horizontal grid lines, Analytics-style */}
+                  {[0, 25, 50, 75].map((g) => (
+                    <div
+                      key={g}
+                      className="absolute left-0 right-0 border-t border-slate-100"
+                      style={{ bottom: `${g}%` }}
+                    />
+                  ))}
+                  <svg
+                    className="absolute inset-0 w-full h-full"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
                   >
-                    <div className="flex-1 border-t border-dashed border-slate-300" />
-                    <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-400 bg-white px-1 -translate-y-1/2 flex-shrink-0">
-                      Avg £
-                      {avgMonthlyRevenue.toLocaleString("en-GB", {
-                        maximumFractionDigits: 0,
-                      })}
-                    </span>
-                  </div>
-                  <div className="flex gap-3 h-full">
-                    {monthlyData.map((m, i) => {
-                      const heightPct =
-                        maxMonthRev > 0 ? (m.revenue / maxMonthRev) * 100 : 0;
-                      return (
-                        <div
-                          key={i}
-                          className="flex-1 h-full relative flex flex-col items-center justify-end group"
-                        >
-                          <div className="absolute bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[10px] font-semibold rounded-xl px-2.5 py-1.5 whitespace-nowrap z-20 pointer-events-none shadow-xl tabular-nums">
+                    <defs>
+                      <linearGradient
+                        id="trendFill"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.18" />
+                        <stop offset="100%" stopColor="#4F46E5" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <polygon
+                      points={`0,100 ${trendLinePoints} 100,100`}
+                      fill="url(#trendFill)"
+                    />
+                    <polyline
+                      points={trendLinePoints}
+                      fill="none"
+                      stroke="#4F46E5"
+                      strokeWidth="1.5"
+                      vectorEffect="non-scaling-stroke"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex">
+                    {trendPoints.map((p, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 h-full relative cursor-pointer"
+                        onMouseEnter={() => setHoveredPoint(i)}
+                        onMouseLeave={() => setHoveredPoint(null)}
+                      >
+                        {hoveredPoint === i && (
+                          <div
+                            className="absolute -translate-x-1/2 mb-2 bg-slate-900 text-white text-[10px] font-semibold rounded-xl px-2.5 py-1.5 whitespace-nowrap z-20 pointer-events-none shadow-xl tabular-nums"
+                            style={{
+                              left: "50%",
+                              bottom: `${Math.min(p.heightPct + 10, 88)}%`,
+                            }}
+                          >
                             £
-                            {m.revenue.toLocaleString("en-GB", {
+                            {p.revenue.toLocaleString("en-GB", {
                               minimumFractionDigits: 2,
                             })}
                             <br />
                             <span className="text-slate-400">
-                              {m.count} booking{m.count !== 1 ? "s" : ""}
+                              {p.count} booking{p.count !== 1 ? "s" : ""} ·{" "}
+                              {p.label}
                             </span>
                           </div>
-                          <div
-                            className="w-full bg-gradient-to-t from-slate-700 to-slate-500 group-hover:from-primary group-hover:to-primary/70 rounded-t-lg transition-all duration-300 cursor-pointer"
-                            style={{
-                              height: `${Math.max(heightPct, 4)}%`,
-                              minHeight: "6px",
-                            }}
-                          />
-                        </div>
-                      );
-                    })}
+                        )}
+                        <div
+                          className={`absolute rounded-full border-2 border-white shadow transition-all ${hoveredPoint === i ? "bg-indigo-600 w-3 h-3" : "bg-indigo-400 w-1.5 h-1.5"}`}
+                          style={{
+                            left: "50%",
+                            bottom: `${p.heightPct}%`,
+                            transform: "translate(-50%, 50%)",
+                          }}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="flex gap-3">
-                  {monthlyData.map((m, i) => (
+                <div className="flex gap-1">
+                  {trendPoints.map((p, i) => (
                     <div key={i} className="flex-1 text-center">
-                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                        {m.label}
-                      </span>
+                      {i % trendLabelStep === 0 && (
+                        <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">
+                          {p.label}
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -837,7 +1161,7 @@ const Dashboard = () => {
             <h3 className="text-sm font-bold text-slate-800 mb-4">
               Quick Actions
             </h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {[
                 {
                   label: "Bookings",
@@ -847,11 +1171,18 @@ const Dashboard = () => {
                   route: "/admin/bookings",
                 },
                 {
-                  label: "Worker Pay",
+                  label: "New Quote",
+                  icon: FileText,
+                  bg: "hover:bg-violet-50 hover:border-violet-200",
+                  iconBg: "bg-violet-100 text-violet-600",
+                  route: "/admin/quotes",
+                },
+                {
+                  label: "Staff Pay",
                   icon: Wallet,
                   bg: "hover:bg-slate-100 hover:border-slate-300",
                   iconBg: "bg-slate-200/70 text-slate-700",
-                  route: "/admin/worker-pay",
+                  route: "/admin/staff-pay",
                 },
                 {
                   label: "Reviews",
@@ -866,6 +1197,13 @@ const Dashboard = () => {
                   bg: "hover:bg-indigo-50 hover:border-indigo-200",
                   iconBg: "bg-indigo-100 text-indigo-600",
                   route: "/admin/services",
+                },
+                {
+                  label: "Customers",
+                  icon: Users,
+                  bg: "hover:bg-emerald-50 hover:border-emerald-200",
+                  iconBg: "bg-emerald-100 text-emerald-600",
+                  route: "/admin/customers",
                 },
               ].map((item, i) => (
                 <button
@@ -887,6 +1225,14 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {detailSegment && (
+        <RevenueDetailModal
+          segment={detailSegment}
+          onClose={() => setDetailSegment(null)}
+          onViewBooking={(b) => navigate(`/admin/bookings?id=${b._id}`)}
+        />
+      )}
     </div>
   );
 };

@@ -96,48 +96,98 @@ const AdminLayout = () => {
   if (!isAuthenticated)
     return <Login onLogin={() => setIsAuthenticated(true)} />;
 
-  const menuItems = [
-    { name: "Dashboard", path: "/admin", icon: <LayoutDashboard size={20} /> },
-    { name: "Bookings", path: "/admin/bookings", icon: <Calendar size={20} /> },
+  const menuGroups = [
     {
-      name: "Staff Pay",
-      path: "/admin/staff-pay",
-      icon: <DollarSign size={20} />,
+      label: "Overview",
+      items: [
+        {
+          name: "Dashboard",
+          path: "/admin",
+          icon: <LayoutDashboard size={20} />,
+        },
+      ],
     },
     {
-      name: "Payment Approvals",
-      path: "/admin/payments",
-      icon: <CheckCircle2 size={20} />,
+      label: "Operations",
+      items: [
+        {
+          name: "Bookings",
+          path: "/admin/bookings",
+          icon: <Calendar size={20} />,
+        },
+        {
+          name: "Quotes",
+          path: "/admin/quotes",
+          icon: <FileText size={20} />,
+        },
+        {
+          name: "Services",
+          path: "/admin/services",
+          icon: <ShieldCheck size={20} />,
+        },
+      ],
     },
     {
-      name: "Disbursement",
-      path: "/admin/withdrawals",
-      icon: <Wallet size={20} />,
-    },
-    { name: "Staff", path: "/admin/workers", icon: <Briefcase size={20} /> },
-    {
-      name: "Applicants",
-      path: "/admin/applicants",
-      icon: <Users size={20} />,
-    },
-    { name: "Customers", path: "/admin/customers", icon: <User size={20} /> },
-    {
-      name: "Services",
-      path: "/admin/services",
-      icon: <ShieldCheck size={20} />,
-    },
-    { name: "Blog", path: "/admin/blog", icon: <BookOpen size={20} /> },
-    {
-      name: "Quotes",
-      path: "/admin/quotes",
-      icon: <FileText size={20} />,
+      label: "Finance",
+      items: [
+        {
+          name: "Staff Pay",
+          path: "/admin/staff-pay",
+          icon: <DollarSign size={20} />,
+        },
+        {
+          name: "Payment Approvals",
+          path: "/admin/payments",
+          icon: <CheckCircle2 size={20} />,
+        },
+        {
+          name: "Disbursement",
+          path: "/admin/withdrawals",
+          icon: <Wallet size={20} />,
+        },
+      ],
     },
     {
-      name: "Chat Support",
-      path: "/admin/chat",
-      icon: <MessageSquare size={20} />,
+      label: "People",
+      items: [
+        {
+          name: "Staff",
+          path: "/admin/workers",
+          icon: <Briefcase size={20} />,
+        },
+        {
+          name: "Applicants",
+          path: "/admin/applicants",
+          icon: <Users size={20} />,
+        },
+        {
+          name: "Customers",
+          path: "/admin/customers",
+          icon: <User size={20} />,
+        },
+      ],
     },
-    { name: "Settings", path: "/admin/settings", icon: <Settings size={20} /> },
+    {
+      label: "Content & Support",
+      items: [
+        { name: "Blog", path: "/admin/blog", icon: <BookOpen size={20} /> },
+        {
+          name: "Chat Support",
+          path: "/admin/chat",
+          icon: <MessageSquare size={20} />,
+        },
+      ],
+    },
+    {
+      label: "System",
+      items: [
+        {
+          name: "Settings",
+          path: "/admin/settings",
+          icon: <Settings size={20} />,
+        },
+      ],
+    },
   ];
 
   return (
@@ -176,27 +226,34 @@ const AdminLayout = () => {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-2">
-          {menuItems.map((item) => {
-            const isActive =
-              item.path === "/admin"
-                ? location.pathname === "/admin"
-                : location.pathname.startsWith(item.path);
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${isActive ? "bg-secondary text-primary-dark shadow-lg" : "hover:bg-white/5 text-slate-400 hover:text-white"}`}
-              >
-                <div className="flex items-center gap-3">
-                  <span>{item.icon}</span>
-                  <span className="font-bold text-sm">{item.name}</span>
-                </div>
-                {isActive && <ChevronRight size={16} />}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 space-y-6 overflow-y-auto custom-scrollbar pr-1">
+          {menuGroups.map((group) => (
+            <div key={group.label} className="space-y-1.5">
+              <p className="px-4 text-[10px] font-black uppercase tracking-widest text-white/30 mb-1">
+                {group.label}
+              </p>
+              {group.items.map((item) => {
+                const isActive =
+                  item.path === "/admin"
+                    ? location.pathname === "/admin"
+                    : location.pathname.startsWith(item.path);
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex items-center justify-between p-3.5 rounded-2xl transition-all duration-300 border-l-[3px] ${isActive ? "bg-secondary text-primary-dark shadow-lg border-secondary" : "hover:bg-white/5 text-slate-400 hover:text-white border-transparent"}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span>{item.icon}</span>
+                      <span className="font-bold text-sm">{item.name}</span>
+                    </div>
+                    {isActive && <ChevronRight size={16} />}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         <div className="mt-auto border-t border-white/10 pt-6 space-y-4">
