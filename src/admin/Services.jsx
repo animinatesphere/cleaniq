@@ -139,66 +139,64 @@ const ServicesManagement = () => {
   })();
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-20">
+    <div className="space-y-6 animate-in fade-in duration-700 pb-20">
       {/* Header */}
-      <div className="bg-white p-6 md:p-8 rounded-[32px] md:rounded-[40px] border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black text-primary-dark tracking-tight">Services & Pricing</h2>
-          <p className="text-slate-500 font-medium mt-1">Manage all rates, rooms, and extra add-ons</p>
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Services & Pricing</h2>
+          <p className="text-sm text-slate-400 font-medium mt-1">Manage all rates, rooms, and extra add-ons</p>
+        </div>
+        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1">
+          {Object.keys(categories).map(tab => (
+            <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${activeTab === tab ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+              {tab}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-4 border-b border-slate-200 pb-4">
-        {Object.keys(categories).map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-400 hover:text-primary hover:bg-primary/5'}`}>
-            {tab} Services
-          </button>
-        ))}
-      </div>
-
       {message && (
-        <div className={`p-5 rounded-[24px] border flex items-center gap-4 animate-in slide-in-from-top-2 shadow-sm ${message.type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-rose-50 border-rose-100 text-rose-700'}`}>
-          {message.type === 'success' ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
-          <p className="text-sm font-black uppercase tracking-widest">{message.text}</p>
+        <div className={`p-4 rounded-2xl border flex items-center gap-3 animate-in slide-in-from-top-2 shadow-sm ${message.type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-rose-50 border-rose-100 text-rose-700'}`}>
+          {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+          <p className="text-sm font-semibold">{message.text}</p>
         </div>
       )}
 
       {/* Add New Service for current Tab */}
-      <div className="bg-primary/5 p-6 md:p-8 rounded-[32px] md:rounded-[40px] border border-primary/10">
-        <h3 className="text-sm font-black text-primary uppercase tracking-[0.2em] mb-6 flex items-center gap-2"><Plus size={18}/> Add New {activeTab} Service</h3>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <input type="text" placeholder="Name (e.g. Fridge Cleaning)" value={newFeature.name} onChange={(e) => setNewFeature({...newFeature, name: e.target.value})} className="p-4 rounded-2xl bg-white border border-slate-200 outline-none font-bold text-sm" />
-          <input type="number" placeholder="Rate / Price" value={newFeature.rate} onChange={(e) => setNewFeature({...newFeature, rate: e.target.value})} className="p-4 rounded-2xl bg-white border border-slate-200 outline-none font-bold text-sm" />
-          <select value={newFeature.type} onChange={(e) => setNewFeature({...newFeature, type: e.target.value})} className="p-4 rounded-2xl bg-white border border-slate-200 outline-none font-bold text-sm">
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-6">
+        <h3 className="text-sm font-bold text-slate-800 mb-5 flex items-center gap-2"><Plus size={16} className="text-primary"/> Add New {activeTab} Service</h3>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <input type="text" placeholder="Name (e.g. Fridge Cleaning)" value={newFeature.name} onChange={(e) => setNewFeature({...newFeature, name: e.target.value})} className="p-3 rounded-xl bg-slate-50 border border-slate-200 outline-none font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+          <input type="number" placeholder="Rate / Price" value={newFeature.rate} onChange={(e) => setNewFeature({...newFeature, rate: e.target.value})} className="p-3 rounded-xl bg-slate-50 border border-slate-200 outline-none font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+          <select value={newFeature.type} onChange={(e) => setNewFeature({...newFeature, type: e.target.value})} className="p-3 rounded-xl bg-slate-50 border border-slate-200 outline-none font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
             <option value="flat">Flat Rate</option>
             <option value="hourly">Hourly Rate</option>
           </select>
-          <button onClick={handleAddFeature} className="bg-primary text-white p-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all">Add {activeTab}</button>
+          <button onClick={handleAddFeature} className="bg-primary text-white p-3 rounded-xl font-bold text-sm hover:bg-primary-dark transition-all">Add {activeTab}</button>
           <div className="md:col-span-2 lg:col-span-4">
-            <input type="text" placeholder="Brief description (optional)" value={newFeature.description} onChange={(e) => setNewFeature({...newFeature, description: e.target.value})} className="w-full p-4 rounded-2xl bg-white border border-slate-200 outline-none font-bold text-sm" />
+            <input type="text" placeholder="Brief description (optional)" value={newFeature.description} onChange={(e) => setNewFeature({...newFeature, description: e.target.value})} className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 outline-none font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
           </div>
         </div>
       </div>
 
       {/* Categorized Rates */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-slate-400"><RefreshCcw size={40} className="animate-spin mb-4"/><p className="font-black uppercase tracking-widest text-xs">Syncing Database...</p></div>
+        <div className="py-20 flex flex-col items-center justify-center text-slate-400"><RefreshCcw size={32} className="animate-spin mb-3"/><p className="font-semibold text-sm">Loading services…</p></div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories[activeTab].map((service) => (
-            <div key={service._id} className="bg-white border border-slate-200 rounded-[32px] p-6 shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all group">
-              <div className="flex justify-between items-start mb-6">
+            <div key={service._id} className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all group">
+              <div className="flex justify-between items-start mb-5">
                 <div className="flex-1 mr-2">
-                  <input 
+                  <input
                     type="text"
                     value={service.name}
                     onChange={(e) => handleNameChange(service._id, e.target.value)}
-                    className="font-black text-primary-dark bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl px-3 py-2 text-sm transition-all w-full mb-1 cursor-text"
+                    className="font-bold text-slate-900 bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl px-3 py-2 text-sm transition-all w-full mb-1 cursor-text"
                     title="Click to edit name"
                   />
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Rate Type:</span>
+                    <span className="text-[10px] font-semibold text-slate-400 px-1">Rate Type:</span>
                     <select
                       value={service.type}
                       onChange={(e) => handleTypeChange(service._id, e.target.value)}
@@ -223,11 +221,11 @@ const ServicesManagement = () => {
               {service.originalCategory === 'Base' && (
                 <div className="mt-4 border-t border-slate-100 pt-4">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                    <p className="text-[10px] font-semibold text-slate-400 flex items-center gap-1">
                       <ListChecks size={12} /> Feature Bullets
                     </p>
                     <button onClick={() => handleAddBullet(service._id)}
-                      className="flex items-center gap-1 text-[9px] font-black text-primary uppercase tracking-widest hover:bg-primary/5 px-2 py-1 rounded-lg transition-all">
+                      className="flex items-center gap-1 text-[10px] font-bold text-primary hover:bg-primary/5 px-2 py-1 rounded-lg transition-all">
                       <Plus size={11} /> Add
                     </button>
                   </div>
@@ -262,7 +260,7 @@ const ServicesManagement = () => {
                     type="number"
                     value={service.rate}
                     onChange={(e) => handleRateChange(service._id, e.target.value)}
-                    className="w-full pl-8 pr-4 py-3 bg-slate-50 rounded-xl border-none font-black text-primary-dark text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full pl-8 pr-4 py-3 bg-slate-50 rounded-xl border-none font-bold text-slate-900 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                   />
                 </div>
                 <button onClick={() => saveService(service)} className="bg-primary/10 text-primary p-3 rounded-xl hover:bg-primary hover:text-white transition-all"><Save size={20}/></button>

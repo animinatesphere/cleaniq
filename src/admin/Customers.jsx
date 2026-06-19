@@ -210,42 +210,40 @@ const Customers = () => {
 
   return (
     <div className="space-y-6 pb-20 relative">
-      {/* Notifications - Fixed to viewport for maximum visibility */}
+      {/* Notifications */}
       {statusMessage.text && (
         <div
-          className={`fixed top-10 right-10 z-9999 px-8 py-5 rounded-4xl border shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex items-center gap-4 font-black text-sm uppercase tracking-widest transition-all duration-500 transform translate-x-0 ${
+          className={`fixed top-6 right-6 z-9999 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 font-bold text-sm transition-all duration-300 ${
             statusMessage.type === "success"
-              ? "bg-emerald-500 text-white border-emerald-400"
-              : "bg-rose-500 text-white border-rose-400"
+              ? "bg-emerald-600 text-white"
+              : "bg-rose-600 text-white"
           }`}
         >
-          <div className="bg-white/20 p-2 rounded-xl">
-            {statusMessage.type === "success" ? (
-              <CheckCircle2 size={20} />
-            ) : (
-              <XCircle size={20} />
-            )}
-          </div>
+          {statusMessage.type === "success" ? (
+            <CheckCircle2 size={18} />
+          ) : (
+            <XCircle size={18} />
+          )}
           {statusMessage.text}
         </div>
       )}
 
       {/* Header */}
-      <div className="bg-white p-6 md:p-8 rounded-4xl md:rounded-[40px] border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-primary-dark tracking-tighter">
-            Customer Intelligence
-          </h1>
-          <p className="text-slate-400 font-bold text-sm uppercase tracking-widest mt-1">
-            Manage Your Client Base
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Customers
+          </h2>
+          <p className="text-sm text-slate-400 font-medium mt-1">
+            Manage your client base
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={downloadCSV}
-            className="btn-secondary px-6 py-3 rounded-2xl flex items-center gap-2"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
           >
-            <Download size={18} /> Export CSV
+            <Download size={15} /> Export CSV
           </button>
           <button
             onClick={async () => {
@@ -259,7 +257,7 @@ const Customers = () => {
                 fetchCustomers();
               }
             }}
-            className="px-6 py-3 bg-rose-50 text-rose-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-rose-100 transition-all border border-rose-100"
+            className="px-4 py-2.5 bg-rose-50 text-rose-600 rounded-xl text-sm font-semibold hover:bg-rose-100 transition-all border border-rose-100"
           >
             Clear All
           </button>
@@ -267,51 +265,45 @@ const Customers = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm flex flex-wrap divide-y sm:divide-y-0 divide-x divide-slate-100">
         {[
           {
             label: "Total Clients",
             value: customers.length,
-            sub: "All regions",
           },
           {
             label: "UK Region",
             value: customers.filter((c) => c.region === "UK").length,
-            sub: "United Kingdom",
           },
         ].map((s, i) => (
-          <div
-            key={i}
-            className="bg-white p-6 rounded-[28px] border border-slate-200 shadow-sm"
-          >
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+          <div key={i} className="flex-1 min-w-[140px] px-6 py-5">
+            <p className="text-[11px] font-semibold text-slate-400 mb-1.5">
               {s.label}
             </p>
-            <h3 className="text-3xl font-black text-primary-dark mt-1">
+            <p className="text-xl font-bold text-slate-900 tabular-nums">
               {s.value}
-            </h3>
-            <p className="text-xs font-bold text-slate-400 mt-1">{s.sub}</p>
+            </p>
           </div>
         ))}
       </div>
 
       {/* Search and Table */}
-      <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50/30 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border border-slate-200 w-full md:w-96 group focus-within:border-primary/50 transition-all">
-            <Search size={18} className="text-slate-400" />
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-200 w-full md:w-80 focus-within:border-primary/50 transition-all">
+            <Search size={16} className="text-slate-400" />
             <input
               type="text"
               placeholder="Search by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-transparent outline-none text-sm font-bold w-full"
+              className="bg-transparent outline-none text-sm font-medium w-full text-slate-700"
             />
           </div>
           {selectedCustomers.size > 0 && (
             <button
               onClick={() => setShowBulkDeleteModal(true)}
-              className="px-4 py-2 rounded-xl bg-linear-to-r from-rose-500 to-red-600 hover:shadow-lg text-white font-black transition-all flex items-center gap-2 text-sm whitespace-nowrap"
+              className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold transition-all flex items-center gap-2 text-sm whitespace-nowrap"
             >
               Delete ({selectedCustomers.size})
             </button>

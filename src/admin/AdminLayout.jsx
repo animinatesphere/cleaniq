@@ -6,11 +6,11 @@ import {
   Users,
   Settings,
   LogOut,
-  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   ShieldCheck,
   Menu,
   X,
-  Search,
   Bell,
   User,
   Clock,
@@ -29,6 +29,9 @@ const AdminLayout = () => {
     !!localStorage.getItem("adminToken"),
   );
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(
+    () => localStorage.getItem("adminSidebarCollapsed") === "true",
+  );
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const notifRef = useRef(null);
@@ -39,6 +42,13 @@ const AdminLayout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
     setIsAuthenticated(false);
+  };
+
+  const toggleCollapsed = () => {
+    setIsCollapsed((prev) => {
+      localStorage.setItem("adminSidebarCollapsed", String(!prev));
+      return !prev;
+    });
   };
 
   // Close dropdown when clicking outside
@@ -195,41 +205,45 @@ const AdminLayout = () => {
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-primary-dark/50 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-primary-dark text-white p-6 flex flex-col transition-transform duration-300 lg:translate-x-0 lg:static ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 z-50 w-72 ${isCollapsed ? "lg:w-22 lg:px-3" : ""} bg-white border-r border-slate-200 text-slate-600 p-6 flex flex-col transition-all duration-300 lg:translate-x-0 lg:static ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        <div className="flex items-center justify-between mb-12">
+        <div
+          className={`flex items-center mb-10 ${isCollapsed ? "lg:justify-center" : "justify-between"}`}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center shadow-lg shadow-secondary/20">
-              <ShieldCheck className="text-primary-dark" size={24} />
+            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
+              <ShieldCheck className="text-white" size={20} />
             </div>
-            <div>
-              <h1 className="font-black text-lg leading-none uppercase tracking-tighter">
+            <div className={isCollapsed ? "lg:hidden" : ""}>
+              <h1 className="font-black text-base leading-none uppercase tracking-tighter text-slate-900 whitespace-nowrap">
                 Cleaniq
               </h1>
-              <span className="text-[10px] text-secondary font-bold uppercase tracking-widest">
+              <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest whitespace-nowrap">
                 Business Portal
               </span>
             </div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-white/50 hover:text-white"
+            className={`lg:hidden text-slate-400 hover:text-slate-600 ${isCollapsed ? "lg:hidden" : ""}`}
           >
-            <X size={24} />
+            <X size={22} />
           </button>
         </div>
 
-        <nav className="flex-1 space-y-6 overflow-y-auto custom-scrollbar pr-1">
+        <nav className="flex-1 space-y-5 overflow-y-auto custom-scrollbar pr-1">
           {menuGroups.map((group) => (
-            <div key={group.label} className="space-y-1.5">
-              <p className="px-4 text-[10px] font-black uppercase tracking-widest text-white/30 mb-1">
+            <div key={group.label} className="space-y-1">
+              <p
+                className={`px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 ${isCollapsed ? "lg:hidden" : ""}`}
+              >
                 {group.label}
               </p>
               {group.items.map((item) => {
@@ -242,13 +256,19 @@ const AdminLayout = () => {
                     key={item.path}
                     to={item.path}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center justify-between p-3.5 rounded-2xl transition-all duration-300 border-l-[3px] ${isActive ? "bg-secondary text-primary-dark shadow-lg border-secondary" : "hover:bg-white/5 text-slate-400 hover:text-white border-transparent"}`}
+                    title={isCollapsed ? item.name : undefined}
+                    className={`flex items-center p-3 rounded-xl transition-all duration-200 ${isCollapsed ? "lg:justify-center" : ""} ${isActive ? "bg-primary/10 text-primary font-bold" : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"}`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span>{item.icon}</span>
-                      <span className="font-bold text-sm">{item.name}</span>
+                    <div
+                      className={`flex items-center gap-3 ${isCollapsed ? "lg:gap-0" : ""}`}
+                    >
+                      <span className="flex-shrink-0">{item.icon}</span>
+                      <span
+                        className={`text-sm whitespace-nowrap ${isActive ? "font-bold" : "font-medium"} ${isCollapsed ? "lg:hidden" : ""}`}
+                      >
+                        {item.name}
+                      </span>
                     </div>
-                    {isActive && <ChevronRight size={16} />}
                   </Link>
                 );
               })}
@@ -256,13 +276,30 @@ const AdminLayout = () => {
           ))}
         </nav>
 
-        <div className="mt-auto border-t border-white/10 pt-6 space-y-4">
+        <button
+          onClick={toggleCollapsed}
+          className={`hidden lg:flex items-center gap-3 p-3 mt-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-all ${isCollapsed ? "justify-center" : ""}`}
+        >
+          {isCollapsed ? (
+            <ChevronsRight size={18} />
+          ) : (
+            <>
+              <ChevronsLeft size={18} />
+              <span className="font-semibold text-sm">Collapse</span>
+            </>
+          )}
+        </button>
+
+        <div className="mt-auto border-t border-slate-100 pt-4 space-y-2">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full p-4 text-slate-400 hover:text-red-400 transition-colors"
+            title={isCollapsed ? "Logout" : undefined}
+            className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors ${isCollapsed ? "lg:justify-center" : ""}`}
           >
-            <LogOut size={20} />
-            <span className="font-bold text-sm">Logout</span>
+            <LogOut size={19} className="flex-shrink-0" />
+            <span className={`font-semibold text-sm ${isCollapsed ? "lg:hidden" : ""}`}>
+              Logout
+            </span>
           </button>
         </div>
       </aside>
@@ -277,13 +314,13 @@ const AdminLayout = () => {
             <Menu size={24} />
           </button>
 
-          <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-slate-100 rounded-2xl border border-slate-200 focus-within:border-primary/50 transition-all">
-            <Search size={18} className="text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="bg-transparent border-none outline-none text-sm font-medium w-64 text-slate-700"
-            />
+          <div>
+            <p className="text-base font-bold text-slate-900">
+              Welcome back, {localStorage.getItem("adminUser") || "Admin"}
+            </p>
+            <p className="text-xs text-slate-400 font-medium hidden sm:block">
+              Here's what's happening with your business today
+            </p>
           </div>
 
           <div
@@ -361,7 +398,7 @@ const AdminLayout = () => {
             >
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-black text-primary-dark leading-tight group-hover:text-primary transition-colors">
-                  Admin
+                  {localStorage.getItem("adminUser") || "Admin"}
                 </p>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                   Manager
