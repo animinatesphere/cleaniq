@@ -5,6 +5,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { sendEmail, templates } = require('../utils/emailService');
 
+// Pages a "restricted" account can ever be granted. Dashboard (revenue) and
+// Settings (which includes this very admin-management screen) are never
+// grantable, regardless of what the creating superadmin requests.
+const GRANTABLE_PERMISSIONS = [
+  'bookings', 'quotes', 'services', 'staff-pay', 'payments',
+  'withdrawals', 'workers', 'applicants', 'customers', 'blog', 'chat',
+];
+
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -15,7 +23,12 @@ router.post('/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET || 'cleaniq_secret_key_2026', { expiresIn: '1d' });
-    res.json({ token, username: admin.username, role: admin.role || 'superadmin' });
+    res.json({
+      token,
+      username: admin.username,
+      role: admin.role || 'superadmin',
+      permissions: admin.role === 'restricted' ? (admin.permissions || []) : [],
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -37,10 +50,10 @@ router.get('/admins', async (req, res) => {
 /**
  * POST /api/auth/admins
  * Create a new admin/staff account with a given role (e.g. a restricted
- * "booking-agent" account that can only create/view bookings)
+ * "restricted" account scoped to only the pages it's granted)
  */
 router.post('/admins', async (req, res) => {
-  const { username, email, password, role } = req.body;
+  const { username, email, password, role, permissions } = req.body;
   try {
     if (!username || !password) {
       return res.status(400).json({ message: 'Username and password are required' });
@@ -49,7 +62,20 @@ router.post('/admins', async (req, res) => {
     if (existing) {
       return res.status(400).json({ message: 'That username is already taken' });
     }
-    const admin = new Admin({ username, email, password, role: role || 'booking-agent' });
+    const finalRole = role === 'superadmin' ? 'superadmin' : 'restricted';
+    const finalPermissions =
+      finalRole === 'restricted'
+        ? (Array.isArray(permissions) ? permissions : []).filter((p) =>
+            GRANTABLE_PERMISSIONS.includes(p),
+          )
+        : [];
+    const admin = new Admin({
+      username,
+      email,
+      password,
+      role: finalRole,
+      permissions: finalPermissions,
+    });
     await admin.save();
 
     if (email) {
@@ -60,7 +86,13 @@ router.post('/admins', async (req, res) => {
       });
     }
 
-    res.status(201).json({ id: admin._id, username: admin.username, email: admin.email, role: admin.role });
+    res.status(201).json({
+      id: admin._id,
+      username: admin.username,
+      email: admin.email,
+      role: admin.role,
+      permissions: admin.permissions,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

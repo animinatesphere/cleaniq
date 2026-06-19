@@ -28,6 +28,7 @@ const Login = ({ onLogin }) => {
         localStorage.setItem('adminToken', data.token);
         localStorage.setItem('adminUser', data.username);
         localStorage.setItem('adminRole', data.role || 'superadmin');
+        localStorage.setItem('adminPermissions', JSON.stringify(data.permissions || []));
         onLogin(data.token);
       } else {
         setError(data.message || 'Invalid login credentials');

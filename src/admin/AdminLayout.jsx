@@ -39,12 +39,20 @@ const AdminLayout = () => {
   const navigate = useNavigate();
 
   const adminRole = localStorage.getItem("adminRole") || "superadmin";
-  const isBookingAgent = adminRole === "booking-agent";
+  const isBookingAgent = adminRole === "restricted";
+  const adminPermissions = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("adminPermissions") || "[]");
+    } catch {
+      return [];
+    }
+  })();
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
     localStorage.removeItem("adminRole");
+    localStorage.removeItem("adminPermissions");
     setIsAuthenticated(false);
   };
 
@@ -117,6 +125,7 @@ const AdminLayout = () => {
         {
           name: "Dashboard",
           path: "/admin",
+          key: "dashboard",
           icon: <LayoutDashboard size={20} />,
         },
       ],
@@ -127,16 +136,19 @@ const AdminLayout = () => {
         {
           name: "Bookings",
           path: "/admin/bookings",
+          key: "bookings",
           icon: <Calendar size={20} />,
         },
         {
           name: "Quotes",
           path: "/admin/quotes",
+          key: "quotes",
           icon: <FileText size={20} />,
         },
         {
           name: "Services",
           path: "/admin/services",
+          key: "services",
           icon: <ShieldCheck size={20} />,
         },
       ],
@@ -147,16 +159,19 @@ const AdminLayout = () => {
         {
           name: "Staff Pay",
           path: "/admin/staff-pay",
+          key: "staff-pay",
           icon: <DollarSign size={20} />,
         },
         {
           name: "Payment Approvals",
           path: "/admin/payments",
+          key: "payments",
           icon: <CheckCircle2 size={20} />,
         },
         {
           name: "Disbursement",
           path: "/admin/withdrawals",
+          key: "withdrawals",
           icon: <Wallet size={20} />,
         },
       ],
@@ -167,16 +182,19 @@ const AdminLayout = () => {
         {
           name: "Staff",
           path: "/admin/workers",
+          key: "workers",
           icon: <Briefcase size={20} />,
         },
         {
           name: "Applicants",
           path: "/admin/applicants",
+          key: "applicants",
           icon: <Users size={20} />,
         },
         {
           name: "Customers",
           path: "/admin/customers",
+          key: "customers",
           icon: <User size={20} />,
         },
       ],
@@ -184,10 +202,16 @@ const AdminLayout = () => {
     {
       label: "Content & Support",
       items: [
-        { name: "Blog", path: "/admin/blog", icon: <BookOpen size={20} /> },
+        {
+          name: "Blog",
+          path: "/admin/blog",
+          key: "blog",
+          icon: <BookOpen size={20} />,
+        },
         {
           name: "Chat Support",
           path: "/admin/chat",
+          key: "chat",
           icon: <MessageSquare size={20} />,
         },
       ],
@@ -198,38 +222,41 @@ const AdminLayout = () => {
         {
           name: "Settings",
           path: "/admin/settings",
+          key: "settings",
           icon: <Settings size={20} />,
         },
       ],
     },
   ];
 
-  // Booking-agent accounts only get the Bookings page — nothing else.
+  // Restricted accounts only see the pages their permissions list grants —
+  // Dashboard (revenue) and Settings are never shown to them, full stop.
   const menuGroups = isBookingAgent
-    ? [
-        {
-          label: "Operations",
-          items: [
-            {
-              name: "Bookings",
-              path: "/admin/bookings",
-              icon: <Calendar size={20} />,
-            },
-          ],
-        },
-      ]
+    ? fullMenuGroups
+        .map((group) => ({
+          ...group,
+          items: group.items.filter((item) =>
+            adminPermissions.includes(item.key),
+          ),
+        }))
+        .filter((group) => group.items.length > 0)
     : fullMenuGroups;
 
-  // Redirect a booking-agent account away from any route it isn't allowed to see.
+  const allowedPaths = menuGroups.flatMap((g) => g.items.map((i) => i.path));
+
+  // Redirect a restricted account away from any route it isn't allowed to see.
   useEffect(() => {
-    if (
-      isAuthenticated &&
-      isBookingAgent &&
-      !location.pathname.startsWith("/admin/bookings")
-    ) {
-      navigate("/admin/bookings", { replace: true });
+    if (!isAuthenticated || !isBookingAgent) return;
+    const isAllowed = allowedPaths.some((p) =>
+      p === "/admin"
+        ? location.pathname === "/admin"
+        : location.pathname.startsWith(p),
+    );
+    if (!isAllowed) {
+      navigate(allowedPaths[0] || "/admin/bookings", { replace: true });
     }
-  }, [isAuthenticated, isBookingAgent, location.pathname, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, isBookingAgent, location.pathname]);
 
   return (
     <div className="flex min-h-screen bg-[#F8FAFC]">

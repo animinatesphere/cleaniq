@@ -7,6 +7,22 @@ import {
   UserPlus, Users as UsersIcon, Mail
 } from 'lucide-react';
 
+// Pages a restricted admin account can be granted access to. Dashboard
+// (revenue) and Settings are intentionally excluded — never grantable.
+const PERMISSION_OPTIONS = [
+  { key: 'bookings', label: 'Bookings' },
+  { key: 'quotes', label: 'Quotes' },
+  { key: 'services', label: 'Services' },
+  { key: 'staff-pay', label: 'Staff Pay' },
+  { key: 'payments', label: 'Payment Approvals' },
+  { key: 'withdrawals', label: 'Disbursement' },
+  { key: 'workers', label: 'Staff' },
+  { key: 'applicants', label: 'Applicants' },
+  { key: 'customers', label: 'Customers' },
+  { key: 'blog', label: 'Blog' },
+  { key: 'chat', label: 'Chat Support' },
+];
+
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('services');
   const [services, setServices] = useState([]);
@@ -19,7 +35,7 @@ const Settings = () => {
   const [broadcast, setBroadcast] = useState({ subject: '', message: '' });
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
   const [passwordData, setPasswordData] = useState({ newPassword: '' });
-  const [newAdmin, setNewAdmin] = useState({ username: '', email: '', password: '', role: 'booking-agent' });
+  const [newAdmin, setNewAdmin] = useState({ username: '', email: '', password: '', role: 'restricted', permissions: [] });
   const [addingAdmin, setAddingAdmin] = useState(false);
   const [adminMsg, setAdminMsg] = useState({ type: '', text: '' });
 
@@ -60,7 +76,7 @@ const Settings = () => {
       const data = await res.json();
       if (res.ok) {
         setAdminMsg({ type: 'success', text: `Account created${newAdmin.email ? ' — invite email sent' : ''}.` });
-        setNewAdmin({ username: '', email: '', password: '', role: 'booking-agent' });
+        setNewAdmin({ username: '', email: '', password: '', role: 'restricted', permissions: [] });
         fetchData();
       } else {
         setAdminMsg({ type: 'error', text: data.message || 'Failed to create account' });
@@ -71,6 +87,15 @@ const Settings = () => {
       setAddingAdmin(false);
       setTimeout(() => setAdminMsg({ type: '', text: '' }), 4000);
     }
+  };
+
+  const togglePermission = (key) => {
+    setNewAdmin((prev) => ({
+      ...prev,
+      permissions: prev.permissions.includes(key)
+        ? prev.permissions.filter((p) => p !== key)
+        : [...prev.permissions, key],
+    }));
   };
 
   const handleDeleteAdmin = async (id) => {
@@ -362,16 +387,37 @@ const Settings = () => {
 
               <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
                 <h3 className="text-base font-bold text-slate-900 mb-1 flex items-center gap-2"><UserPlus size={18} className="text-primary" /> Add Team Member</h3>
-                <p className="text-sm text-slate-400 font-medium mb-6">Create a restricted account for staff who only need to create bookings — they won't see revenue, customers, or any other admin data.</p>
-                <form onSubmit={handleAddAdmin} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input type="text" placeholder="Username" value={newAdmin.username} onChange={e => setNewAdmin({...newAdmin, username: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" required />
-                  <input type="email" placeholder="Email (for login invite)" value={newAdmin.email} onChange={e => setNewAdmin({...newAdmin, email: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
-                  <input type="password" placeholder="Temporary Password" value={newAdmin.password} onChange={e => setNewAdmin({...newAdmin, password: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" required />
-                  <select value={newAdmin.role} onChange={e => setNewAdmin({...newAdmin, role: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
-                    <option value="booking-agent">Booking Agent (Bookings only)</option>
-                    <option value="superadmin">Superadmin (Full access)</option>
-                  </select>
-                  <button type="submit" disabled={addingAdmin} className="md:col-span-2 py-4 rounded-2xl bg-primary text-white font-bold text-sm shadow-sm hover:bg-primary-dark transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+                <p className="text-sm text-slate-400 font-medium mb-6">Create a restricted account and choose exactly which pages it can access. Revenue (Dashboard) and Settings are never accessible to restricted accounts.</p>
+                <form onSubmit={handleAddAdmin} className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" placeholder="Username" value={newAdmin.username} onChange={e => setNewAdmin({...newAdmin, username: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" required />
+                    <input type="email" placeholder="Email (for login invite)" value={newAdmin.email} onChange={e => setNewAdmin({...newAdmin, email: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
+                    <input type="password" placeholder="Temporary Password" value={newAdmin.password} onChange={e => setNewAdmin({...newAdmin, password: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" required />
+                    <select value={newAdmin.role} onChange={e => setNewAdmin({...newAdmin, role: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
+                      <option value="restricted">Restricted (choose pages below)</option>
+                      <option value="superadmin">Superadmin (Full access)</option>
+                    </select>
+                  </div>
+
+                  {newAdmin.role === 'restricted' && (
+                    <div>
+                      <p className="text-[11px] font-semibold text-slate-400 mb-2">Pages this account can access</p>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {PERMISSION_OPTIONS.map((opt) => (
+                          <button
+                            type="button"
+                            key={opt.key}
+                            onClick={() => togglePermission(opt.key)}
+                            className={`p-3 rounded-xl border text-xs font-semibold text-left transition-all ${newAdmin.permissions.includes(opt.key) ? 'bg-primary text-white border-primary shadow-sm' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-primary/30'}`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <button type="submit" disabled={addingAdmin} className="w-full py-4 rounded-2xl bg-primary text-white font-bold text-sm shadow-sm hover:bg-primary-dark transition-all disabled:opacity-60 flex items-center justify-center gap-2">
                     {addingAdmin ? <RefreshCw size={16} className="animate-spin" /> : <Plus size={16} />}
                     {addingAdmin ? 'Creating…' : 'Create Account'}
                   </button>
@@ -390,18 +436,23 @@ const Settings = () => {
                   )}
                   {admins.map((a) => (
                     <div key={a._id} className="p-5 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0">
                           {a.username?.[0]?.toUpperCase()}
                         </div>
                         <div className="min-w-0">
                           <p className="font-semibold text-slate-800 text-sm">{a.username}</p>
                           {a.email && <p className="text-[11px] text-slate-400 font-medium truncate flex items-center gap-1"><Mail size={10}/> {a.email}</p>}
+                          {a.role === 'restricted' && a.permissions?.length > 0 && (
+                            <p className="text-[10px] text-slate-400 font-medium mt-1 truncate">
+                              Access: {a.permissions.map(p => PERMISSION_OPTIONS.find(o => o.key === p)?.label || p).join(', ')}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <span className={`text-[10px] font-semibold uppercase px-2.5 py-1 rounded-full ${a.role === 'superadmin' ? 'bg-indigo-50 text-indigo-600' : 'bg-amber-50 text-amber-600'}`}>
-                          {a.role === 'superadmin' ? 'Superadmin' : 'Booking Agent'}
+                          {a.role === 'superadmin' ? 'Superadmin' : 'Restricted'}
                         </span>
                         <button onClick={() => handleDeleteAdmin(a._id)} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all"><Trash2 size={15}/></button>
                       </div>

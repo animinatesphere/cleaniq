@@ -407,201 +407,216 @@ function generateQuoteEmail(quote) {
 
   const itemsHtml = items
     .filter((i) => i.service || i.customService)
-    .map((item) => {
+    .map((item, idx) => {
       const isHourly = item.billingType === "hourly";
       const pricingLabel = isHourly
-        ? `${item.qty} hrs @ £${Number(item.unitPrice || 0).toFixed(2)}/hr`
-        : `Qty ${item.qty} × £${Number(item.unitPrice || 0).toFixed(2)}`;
+        ? `${item.qty} hrs &times; £${Number(item.unitPrice || 0).toFixed(2)}/hr`
+        : `Qty ${item.qty} &times; £${Number(item.unitPrice || 0).toFixed(2)}`;
+      const rowBg = idx % 2 === 0 ? "#ffffff" : "#f8fafc";
       return `
-    <tr style="border-bottom: 1px solid #e2e8f0;">
-      <td style="padding: 14px 16px; text-align: left;">
-        <p style="margin: 0; font-weight: 700; color: #0F172A; font-size: 14px;">${item.service || item.customService}</p>
-        ${item.description ? `<p style="margin: 6px 0 0; font-size: 12px; color: #64748b;"><strong>What's included:</strong> ${item.description}</p>` : ""}
-        <p style="margin: 6px 0 0; font-size: 11px; color: #94a3b8; font-weight: 600;">${pricingLabel}</p>
+    <tr style="background-color: ${rowBg};">
+      <td style="padding: 16px; border-bottom: 1px solid #e5e7eb; text-align: left; font-family: Arial, Helvetica, sans-serif;">
+        <p style="margin: 0; font-weight: bold; color: #0f172a; font-size: 14px;">${item.service || item.customService}</p>
+        ${item.description ? `<p style="margin: 6px 0 0; font-size: 12px; color: #64748b; line-height: 1.5;">${item.description}</p>` : ""}
+        <p style="margin: 6px 0 0; font-size: 11px; color: #94a3b8;">${pricingLabel}</p>
       </td>
-      <td style="padding: 14px 16px; text-align: center; color: #64748b; font-size: 14px;">${item.qty}${isHourly ? " hrs" : ""}</td>
-      <td style="padding: 14px 16px; text-align: right; color: #64748b; font-size: 14px;">£${Number(item.unitPrice || 0).toFixed(2)}${isHourly ? "/hr" : ""}</td>
-      <td style="padding: 14px 16px; text-align: right; font-weight: 700; color: #0F172A; font-size: 14px;">£${(Number(item.unitPrice || 0) * item.qty).toFixed(2)}</td>
-    </tr>
-  `;
+      <td style="padding: 16px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: bold; color: #0f172a; font-size: 14px; font-family: Arial, Helvetica, sans-serif; white-space: nowrap;">£${(Number(item.unitPrice || 0) * item.qty).toFixed(2)}</td>
+    </tr>`;
     })
     .join("");
 
+  const summaryRow = (label, value, opts = {}) => `
+    <tr>
+      <td style="padding: 8px 0; font-size: 13px; color: ${opts.color || "#64748b"}; font-family: Arial, Helvetica, sans-serif;">${label}</td>
+      <td style="padding: 8px 0; font-size: 13px; color: ${opts.color || "#0f172a"}; font-weight: ${opts.bold ? "bold" : "normal"}; text-align: right; font-family: Arial, Helvetica, sans-serif;">${value}</td>
+    </tr>`;
+
   return `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 750px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
-      <!-- PREMIUM HEADER -->
-      <div style="background: linear-gradient(135deg, #0F172A 0%, #1e293b 50%, #6EE7B7 100%); padding: 60px 40px; text-align: center; position: relative;">
-        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.05;">
-          <div style="font-size: 80px; font-weight: 900; color: white;">💼</div>
-        </div>
-        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 110px; height: 110px; margin-bottom: 20px; border-radius: 50%; object-fit: cover; border: 4px solid #6EE7B7; box-shadow: 0 10px 25px rgba(110, 231, 183, 0.2); position: relative; z-index: 1;" />
-        <h1 style="color: #6EE7B7; margin: 0; font-size: 36px; letter-spacing: -1px; font-weight: 800; position: relative; z-index: 1;">PROFESSIONAL SERVICE QUOTE</h1>
-        <p style="color: #cbd5e1; margin: 8px 0 0; font-size: 14px; position: relative; z-index: 1;">Cleaniq Services - Premium Cleaning Solutions</p>
-      </div>
+<!DOCTYPE html>
+<html>
+  <body style="margin: 0; padding: 0; background-color: #f1f5f9;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 32px 0;">
+      <tr>
+        <td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="width: 600px; max-width: 600px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
 
-      <!-- MAIN CONTENT -->
-      <div style="padding: 50px 40px;">
-        <!-- QUOTE REF & DATE -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 40px;">
-          <div style="background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #6366f1;">
-            <p style="margin: 0; font-size: 10px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 1px;">📋 Quote Reference</p>
-            <p style="margin: 12px 0 0 0; font-size: 26px; font-weight: 900; color: #0F172A; font-family: monospace;">${quoteRef}</p>
-          </div>
-          <div style="background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #dc2626;">
-            <p style="margin: 0; font-size: 10px; font-weight: 800; color: #991b1b; text-transform: uppercase; letter-spacing: 1px;">📅 Quote Date</p>
-            <p style="margin: 12px 0 0 0; font-size: 26px; font-weight: 900; color: #0F172A;">${date}</p>
-          </div>
-        </div>
-
-        <!-- COMPANY DETAILS -->
-        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 16px; padding: 28px; margin-bottom: 40px; border: 2px solid #0369a1;">
-          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #0369a1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">✓ Prepared For</p>
-          <p style="margin: 0 0 8px 0; font-size: 20px; font-weight: 900; color: #0F172A;">${companyName}</p>
-          ${contactName ? `<p style="margin: 8px 0; font-size: 14px; color: #0c4a6e; font-weight: 600;">👤 Contact: ${contactName}</p>` : ""}
-          ${phone ? `<p style="margin: 8px 0; font-size: 14px; color: #0c4a6e; font-weight: 600;">📱 Phone: ${phone}</p>` : ""}
-          ${address ? `<p style="margin: 8px 0; font-size: 14px; color: #0c4a6e; font-weight: 600;">📍 Address: ${address}</p>` : ""}
-        </div>
-
-        <!-- SERVICES TABLE -->
-        <div style="margin-bottom: 32px;">
-          <p style="margin: 0 0 16px 0; font-size: 13px; font-weight: 800; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; border-left: 4px solid #6EE7B7; padding-left: 12px;">🧹 Cleaning Services & Scope of Work</p>
-          <div style="overflow: hidden; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: white;">
-              <thead>
-                <tr style="background: linear-gradient(to right, #0f172a, #1e293b); border-bottom: 2px solid #e2e8f0;">
-                  <th style="padding: 16px; text-align: left; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Service & Details</th>
-                  <th style="padding: 16px; text-align: center; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Qty</th>
-                  <th style="padding: 16px; text-align: right; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Unit Price</th>
-                  <th style="padding: 16px; text-align: right; font-size: 11px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${itemsHtml}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- PRICING SUMMARY - PROFESSIONAL LAYOUT -->
-        <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 16px; padding: 32px; margin-bottom: 32px; border: 2px solid #cbd5e1;">
-          <p style="margin: 0 0 20px 0; font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 1px;">💰 Pricing Summary</p>
-
-          <div style="display: flex; justify-content: space-between; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">
-            <span style="font-size: 14px; color: #64748b;">Subtotal</span>
-            <span style="font-size: 16px; font-weight: 700; color: #0F172A;">£${subtotal.toFixed(2)}</span>
-          </div>
-
-          ${
-            discountAmount > 0
-              ? `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">
-            <span style="font-size: 14px; color: #64748b;">Discount (${discount}%)</span>
-            <span style="font-size: 16px; font-weight: 700; color: #10b981;">-£${discountAmount.toFixed(2)}</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;">
-            <span style="font-size: 14px; color: #64748b;">Subtotal after discount</span>
-            <span style="font-size: 16px; font-weight: 700; color: #0F172A;">£${subtotalAfterDiscount.toFixed(2)}</span>
-          </div>
-          `
-              : ""
-          }
-
-          ${
-            includeVat && vat > 0
-              ? `
-          <div style="display: flex; justify-content: space-between; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 2px solid #cbd5e1;">
-            <span style="font-size: 14px; color: #64748b;">VAT (${vatRate}%)</span>
-            <span style="font-size: 16px; font-weight: 700; color: #0F172A;">£${vat.toFixed(2)}</span>
-          </div>
-          `
-              : ""
-          }
-
-          <div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #6EE7B7 0%, #10b981 100%); border-radius: 12px;">
-            <span style="font-size: 16px; font-weight: 800; color: white;">GRAND TOTAL</span>
-            <span style="font-size: 20px; font-weight: 900; color: white;">£${grandTotal.toFixed(2)}${frequency !== "once" ? ` / ${frequencyLabel.toLowerCase()}` : ""}</span>
-          </div>
-
-          ${
-            depositRequired && depositAmount > 0
-              ? `
-          <div style="background: #eef2ff; border-radius: 12px; padding: 16px; border-left: 4px solid #6366f1;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-              <span style="font-size: 13px; font-weight: 700; color: #4f46e5;">Deposit Required (${depositPercent}%)</span>
-              <span style="font-size: 14px; font-weight: 800; color: #4f46e5;">£${depositAmount.toFixed(2)}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-              <span style="font-size: 13px; font-weight: 700; color: #4f46e5;">Balance Due</span>
-              <span style="font-size: 14px; font-weight: 800; color: #4f46e5;">£${balanceDue.toFixed(2)}</span>
-            </div>
-          </div>
-          `
-              : ""
-          }
-        </div>
-
-        <!-- PAYMENT TERMS -->
-        <div style="background: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 24px; border-left: 4px solid #f59e0b;">
-          <p style="margin: 0; font-size: 11px; font-weight: 800; color: #d97706; text-transform: uppercase; letter-spacing: 0.5px;">💳 Payment Terms</p>
-          <p style="margin: 12px 0 0 0; font-size: 14px; color: #92400e; font-weight: 600;">${paymentTerms}</p>
-        </div>
-
-        <!-- RECURRING NOTICE -->
-        ${
-          frequency !== "once"
-            ? `
-        <div style="background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); border-radius: 12px; padding: 20px; margin-bottom: 32px; border-left: 4px solid #6366f1;">
-          <p style="margin: 0; font-size: 12px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.5px;">📅 Recurring Service</p>
-          <p style="margin: 12px 0 0 0; font-size: 14px; color: #4f46e5; font-weight: 600;">This is a recurring contract with <strong>${frequencyLabel.toLowerCase()}</strong> billing. Services will be provided and invoiced accordingly.</p>
-        </div>
-        `
-            : ""
-        }
-
-        <!-- NOTES & TERMS -->
-        ${
-          notes
-            ? `
-        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%); border-radius: 12px; padding: 20px; margin-bottom: 24px; border-left: 4px solid #f59e0b;">
-          <p style="margin: 0; font-size: 12px; font-weight: 800; color: #d97706; text-transform: uppercase; letter-spacing: 0.5px;">📝 Terms & Conditions</p>
-          <p style="margin: 12px 0 0 0; font-size: 13px; color: #92400e; line-height: 1.7; font-weight: 500;">${notes}</p>
-        </div>
-        `
-            : ""
-        }
-
-        <!-- VALIDITY -->
-        <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 12px; padding: 20px; margin-bottom: 32px; border-left: 4px solid #10b981;">
-          <p style="margin: 0; font-size: 12px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 0.5px;">✓ Validity Period</p>
-          <p style="margin: 8px 0 0 0; font-size: 14px; color: #047857; font-weight: 600;">This quote is valid for <strong>${validDays} days</strong> from the date of issue. After this period, prices and availability are subject to change.</p>
-        </div>
-
-        <!-- CTA BUTTONS -->
-        <div style="text-align: center; margin-top: 40px; padding-top: 32px; border-top: 2px solid #e2e8f0;">
-          <p style="margin: 0 0 24px 0; font-size: 14px; color: #64748b; font-weight: 600;">Ready to proceed with this professional service quote?</p>
-          <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin: 0 auto; max-width: 100%;">
+            <!-- HEADER -->
             <tr>
-              <td align="center">
-                <a href="https://cleaniqservices.com/booking" style="display: inline-block; background: linear-gradient(135deg, #6EE7B7 0%, #10b981 100%); color: #0F172A; padding: 16px 40px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 20px rgba(110, 231, 183, 0.3);">Accept & Book Now</a>
-              </td>
-              <td style="width: 20px;"></td>
-              <td align="center">
-                <a href="https://cleaniqservices.com/pages/contact" style="display: inline-block; background: white; color: #0F172A; padding: 16px 40px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; border: 2px solid #0F172A;">Contact Us</a>
+              <td style="background-color: #0f172a; padding: 32px 40px; text-align: center;">
+                <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Services" style="height: 48px; width: auto; margin-bottom: 16px;" />
+                <p style="margin: 0; font-size: 11px; font-weight: bold; letter-spacing: 2px; color: #6ee7b7; text-transform: uppercase; font-family: Arial, Helvetica, sans-serif;">Service Quote</p>
               </td>
             </tr>
-          </table>
-        </div>
-      </div>
 
-      <!-- FOOTER -->
-      <div style="background: linear-gradient(135deg, #0F172A 0%, #1e293b 100%); padding: 40px; text-align: center; border-top: 2px solid #e2e8f0;">
-        <p style="margin: 0; font-size: 14px; font-weight: 700; color: #6EE7B7;">Cleaniq Services Limited</p>
-        <p style="margin: 12px 0 0 0; font-size: 12px; color: #cbd5e1;">Professional Cleaning Solutions</p>
-        <p style="margin: 12px 0 0 0; font-size: 12px; color: #94a3b8;">📧 info@cleaniqservices.com | 🌐 cleaniqservices.com | 📞 +44 7752 476368</p>
-        <p style="margin: 12px 0 0 0; font-size: 11px; color: #64748b;">&copy; 2026 Cleaniq Services. All rights reserved. This is a confidential quote.</p>
-      </div>
-    </div>
-  `;
+            <!-- INTRO -->
+            <tr>
+              <td style="padding: 40px 40px 0;">
+                <p style="margin: 0 0 4px; font-size: 13px; color: #64748b; font-family: Arial, Helvetica, sans-serif;">Quote Reference</p>
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="font-size: 22px; font-weight: bold; color: #0f172a; font-family: Arial, Helvetica, sans-serif;">${quoteRef}</td>
+                    <td style="text-align: right; font-size: 13px; color: #64748b; font-family: Arial, Helvetica, sans-serif;">${date}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- PREPARED FOR -->
+            <tr>
+              <td style="padding: 28px 40px 0;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                  <tr>
+                    <td style="padding: 20px 24px;">
+                      <p style="margin: 0 0 10px; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-family: Arial, Helvetica, sans-serif;">Prepared For</p>
+                      <p style="margin: 0; font-size: 16px; font-weight: bold; color: #0f172a; font-family: Arial, Helvetica, sans-serif;">${companyName}</p>
+                      ${contactName ? `<p style="margin: 6px 0 0; font-size: 13px; color: #475569; font-family: Arial, Helvetica, sans-serif;">Attn: ${contactName}</p>` : ""}
+                      ${phone ? `<p style="margin: 4px 0 0; font-size: 13px; color: #475569; font-family: Arial, Helvetica, sans-serif;">${phone}</p>` : ""}
+                      ${address ? `<p style="margin: 4px 0 0; font-size: 13px; color: #475569; font-family: Arial, Helvetica, sans-serif;">${address}</p>` : ""}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- GREETING -->
+            <tr>
+              <td style="padding: 28px 40px 0;">
+                <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #334155; font-family: Arial, Helvetica, sans-serif;">Thank you for the opportunity to quote for your cleaning requirements. Please find the full breakdown of services and pricing below.</p>
+              </td>
+            </tr>
+
+            <!-- SERVICES TABLE -->
+            <tr>
+              <td style="padding: 28px 40px 0;">
+                <p style="margin: 0 0 12px; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-family: Arial, Helvetica, sans-serif;">Services & Scope of Work</p>
+                <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e5e7eb; border-radius: 6px;">
+                  <tr style="background-color: #0f172a;">
+                    <td style="padding: 12px 16px; font-size: 11px; font-weight: bold; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; font-family: Arial, Helvetica, sans-serif;">Service</td>
+                    <td style="padding: 12px 16px; font-size: 11px; font-weight: bold; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; text-align: right; font-family: Arial, Helvetica, sans-serif;">Amount</td>
+                  </tr>
+                  ${itemsHtml}
+                </table>
+              </td>
+            </tr>
+
+            <!-- PRICING SUMMARY -->
+            <tr>
+              <td style="padding: 24px 40px 0;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td width="55%">&nbsp;</td>
+                    <td width="45%">
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        ${summaryRow("Subtotal", `£${subtotal.toFixed(2)}`)}
+                        ${discountAmount > 0 ? summaryRow(`Discount (${discount}%)`, `-£${discountAmount.toFixed(2)}`, { color: "#059669" }) : ""}
+                        ${discountAmount > 0 ? summaryRow("Subtotal after discount", `£${subtotalAfterDiscount.toFixed(2)}`) : ""}
+                        ${includeVat && vat > 0 ? summaryRow(`VAT (${vatRate}%)`, `£${vat.toFixed(2)}`) : ""}
+                      </table>
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 8px; border-top: 2px solid #0f172a;">
+                        <tr>
+                          <td style="padding: 12px 0 0; font-size: 14px; font-weight: bold; color: #0f172a; font-family: Arial, Helvetica, sans-serif;">Total${frequency !== "once" ? ` <span style="font-weight: normal; color: #64748b; font-size: 12px;">/ ${frequencyLabel.toLowerCase()}</span>` : ""}</td>
+                          <td style="padding: 12px 0 0; font-size: 18px; font-weight: bold; color: #0f172a; text-align: right; font-family: Arial, Helvetica, sans-serif;">£${grandTotal.toFixed(2)}</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            ${
+              depositRequired && depositAmount > 0
+                ? `
+            <tr>
+              <td style="padding: 20px 40px 0;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+                  <tr>
+                    <td style="padding: 16px 20px;">
+                      ${summaryRow(`Deposit required (${depositPercent}%)`, `£${depositAmount.toFixed(2)}`, { bold: true, color: "#0f172a" })}
+                      ${summaryRow("Balance due", `£${balanceDue.toFixed(2)}`, { bold: true, color: "#0f172a" })}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>`
+                : ""
+            }
+
+            <!-- PAYMENT TERMS / RECURRING / VALIDITY -->
+            <tr>
+              <td style="padding: 24px 40px 0;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding: 14px 0; border-top: 1px solid #e5e7eb; font-size: 13px; color: #475569; font-family: Arial, Helvetica, sans-serif;">
+                      <strong style="color: #0f172a;">Payment terms:</strong> ${paymentTerms}
+                    </td>
+                  </tr>
+                  ${
+                    frequency !== "once"
+                      ? `
+                  <tr>
+                    <td style="padding: 14px 0; border-top: 1px solid #e5e7eb; font-size: 13px; color: #475569; font-family: Arial, Helvetica, sans-serif;">
+                      <strong style="color: #0f172a;">Recurring service:</strong> billed ${frequencyLabel.toLowerCase()}.
+                    </td>
+                  </tr>`
+                      : ""
+                  }
+                  <tr>
+                    <td style="padding: 14px 0; border-top: 1px solid #e5e7eb; font-size: 13px; color: #475569; font-family: Arial, Helvetica, sans-serif;">
+                      <strong style="color: #0f172a;">Valid for:</strong> ${validDays} days from the date of issue.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            ${
+              notes
+                ? `
+            <tr>
+              <td style="padding: 4px 40px 0;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;">
+                  <tr>
+                    <td style="padding: 16px 20px;">
+                      <p style="margin: 0 0 6px; font-size: 11px; font-weight: bold; color: #92400e; text-transform: uppercase; letter-spacing: 0.5px; font-family: Arial, Helvetica, sans-serif;">Terms & Conditions</p>
+                      <p style="margin: 0; font-size: 13px; color: #78350f; line-height: 1.6; font-family: Arial, Helvetica, sans-serif;">${notes}</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>`
+                : ""
+            }
+
+            <!-- CTA -->
+            <tr>
+              <td style="padding: 32px 40px; text-align: center;">
+                <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                  <tr>
+                    <td style="border-radius: 6px; background-color: #005B41;">
+                      <a href="https://cleaniqservices.com/booking" style="display: inline-block; padding: 14px 36px; font-size: 14px; font-weight: bold; color: #ffffff; text-decoration: none; font-family: Arial, Helvetica, sans-serif;">Accept & Book Now</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin: 16px 0 0; font-size: 12px; color: #94a3b8; font-family: Arial, Helvetica, sans-serif;">Or reply to this email and we'll take care of the rest.</p>
+              </td>
+            </tr>
+
+            <!-- FOOTER -->
+            <tr>
+              <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 24px 40px; text-align: center;">
+                <p style="margin: 0; font-size: 13px; font-weight: bold; color: #0f172a; font-family: Arial, Helvetica, sans-serif;">Cleaniq Services Limited</p>
+                <p style="margin: 6px 0 0; font-size: 12px; color: #64748b; font-family: Arial, Helvetica, sans-serif;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7752 476368</p>
+                <p style="margin: 10px 0 0; font-size: 11px; color: #94a3b8; font-family: Arial, Helvetica, sans-serif;">This is a confidential quote intended solely for the recipient named above.</p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
 }
 
 function generateAdminNotificationEmail(quote) {

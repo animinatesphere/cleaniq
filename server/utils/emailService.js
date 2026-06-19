@@ -434,7 +434,7 @@ const templates = {
       </div>
       <div style="padding: 45px 40px; color: #1e293b; line-height: 1.6;">
         <h2 style="font-size: 20px; margin-top: 0; color: #0F172A;">Hi ${admin.username},</h2>
-        <p>An administrator account has been created for you on the <strong>Cleaniq Business Portal</strong>${admin.role === "booking-agent" ? ", with access to create and manage bookings" : ""}.</p>
+        <p>An administrator account has been created for you on the <strong>Cleaniq Business Portal</strong>${admin.role === "restricted" ? ", with access to specific sections only" : ""}.</p>
 
         <h3 style="font-size: 13px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 30px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Your Login Credentials</h3>
 

@@ -2329,21 +2329,25 @@ const Bookings = () => {
     }
   };
 
-  const exportToCSV = () => {
-    const headers = [
-      "Booking ID",
-      "Customer",
-      "Email",
-      "Phone",
-      "Service",
-      "Date",
-      "Time Slot",
-      "Price",
-      "Currency",
-      "Status",
-      "Address",
-    ];
-    const rows = bookings
+  const LEAD_EXPORT_HEADERS = [
+    "Booking ID",
+    "Customer",
+    "Email",
+    "Phone",
+    "Service",
+    "Date",
+    "Time Slot",
+    "Price",
+    "Currency",
+    "Status",
+    "Address",
+    "Lead Source",
+    "Supplies Provided By",
+    "Created By Admin",
+  ];
+
+  const leadExportRows = () =>
+    bookings
       .filter((b) => b.status !== "Blackout")
       .map((b) => [
         b.bookingId,
@@ -2351,16 +2355,24 @@ const Bookings = () => {
         b.customer?.email,
         b.customer?.phone,
         b.service,
-        new Date(b.schedule?.date).toLocaleDateString(),
+        b.schedule?.date ? new Date(b.schedule.date).toLocaleDateString() : "",
         b.schedule?.timeSlot,
         b.payment?.amount,
         b.payment?.currency,
         b.status,
         b.details?.address?.replace(/,/g, " "),
+        b.leadSource || "Organic",
+        b.suppliesProvidedBy || "",
+        b.createdByAdmin || "Customer (website)",
       ]);
+
+  const exportToCSV = () => {
+    const rows = leadExportRows();
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+      [LEAD_EXPORT_HEADERS.join(","), ...rows.map((r) => r.join(","))].join(
+        "\n",
+      );
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -2371,6 +2383,18 @@ const Bookings = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const exportToExcel = async () => {
+    const XLSX = await import("xlsx");
+    const rows = leadExportRows();
+    const worksheet = XLSX.utils.aoa_to_sheet([LEAD_EXPORT_HEADERS, ...rows]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings & Leads");
+    XLSX.writeFile(
+      workbook,
+      `CleanIQ_Bookings_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`,
+    );
   };
 
   const filteredBookings = useMemo(() => {
@@ -2566,12 +2590,21 @@ const Bookings = () => {
         </div>
         <div className="flex gap-2.5">
           {view === "list" && (
-            <button
-              onClick={exportToCSV}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
-            >
-              <Download size={15} /> Export CSV
-            </button>
+            <>
+              <button
+                onClick={exportToCSV}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
+              >
+                <Download size={15} /> CSV
+              </button>
+              <button
+                onClick={exportToExcel}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
+                title="Export bookings & leads to Excel"
+              >
+                <Download size={15} /> Excel
+              </button>
+            </>
           )}
           <button
             onClick={() => setShowCreateModal(true)}
@@ -2686,6 +2719,9 @@ const Bookings = () => {
                           {getPropertyData(b)["Bedroom"] || 0} Bed •{" "}
                           {b.details?.duration || 0}h Clean
                         </p>
+                        <span className="inline-block mt-1 text-[9px] font-semibold uppercase text-slate-400 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded-full">
+                          {b.leadSource || "Organic"}
+                        </span>
                       </td>
                       <td className="px-4 py-4 text-sm font-medium text-slate-700">
                         {new Date(b.schedule?.date).toLocaleDateString()}
