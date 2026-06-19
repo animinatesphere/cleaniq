@@ -400,8 +400,17 @@ const QuoteDetailModal = ({ quote, onClose }) => {
       <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-slate-100 px-8 py-5 flex justify-between items-center rounded-t-[32px] z-10">
           <div>
-            <h2 className="text-lg font-bold text-slate-800">
+            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
               {quote.quoteRef}
+              {quote.status === "accepted" ? (
+                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">
+                  Accepted
+                </span>
+              ) : (
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
+                  Sent
+                </span>
+              )}
             </h2>
             <p className="text-[11px] font-semibold text-slate-400 mt-0.5">
               Sent {new Date(quote.createdAt).toLocaleString("en-GB")}
@@ -415,9 +424,25 @@ const QuoteDetailModal = ({ quote, onClose }) => {
           </button>
         </div>
         <div className="p-8 space-y-6">
+          {quote.status === "accepted" && (
+            <div className="flex items-center gap-3 px-5 py-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
+              <CheckCircle2 size={20} className="text-emerald-600 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-bold text-emerald-800">
+                  This company accepted the quote
+                </p>
+                {quote.acceptedAt && (
+                  <p className="text-[11px] font-semibold text-emerald-600">
+                    Accepted {new Date(quote.acceptedAt).toLocaleString("en-GB")}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="bg-slate-50 rounded-3xl p-6 space-y-1">
             <p className="text-[11px] font-semibold text-slate-400 mb-2">
-              Sent To
+              Company Details
             </p>
             <p className="font-bold text-slate-800 text-lg">
               {quote.companyName}
@@ -1201,31 +1226,46 @@ const QuoteBuilder = () => {
                 </p>
               )}
               {!historyLoading &&
-                sentQuotes.map((q) => (
-                  <button
-                    key={q.quoteRef}
-                    onClick={() => setSelectedQuote(q)}
-                    className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all text-left"
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                      <CheckCircle2 size={16} className="text-emerald-500" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-800 truncate">
-                        {q.companyName}
-                      </p>
-                      <p className="text-[10px] font-semibold text-slate-400">
-                        {q.quoteRef} · £{Number(q.grandTotal || 0).toFixed(2)}
-                      </p>
-                    </div>
-                    <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest flex-shrink-0">
-                      {new Date(q.createdAt).toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "short",
-                      })}
-                    </span>
-                  </button>
-                ))}
+                sentQuotes.map((q) => {
+                  const isAccepted = q.status === "accepted";
+                  return (
+                    <button
+                      key={q.quoteRef}
+                      onClick={() => setSelectedQuote(q)}
+                      className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all text-left"
+                    >
+                      <div
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${isAccepted ? "bg-emerald-100" : "bg-slate-100"}`}
+                      >
+                        <CheckCircle2
+                          size={16}
+                          className={
+                            isAccepted ? "text-emerald-600" : "text-slate-400"
+                          }
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-slate-800 truncate flex items-center gap-1.5">
+                          {q.companyName}
+                          {isAccepted && (
+                            <span className="text-[8px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                              Accepted
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-[10px] font-semibold text-slate-400">
+                          {q.quoteRef} · £{Number(q.grandTotal || 0).toFixed(2)}
+                        </p>
+                      </div>
+                      <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest flex-shrink-0">
+                        {new Date(q.createdAt).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                        })}
+                      </span>
+                    </button>
+                  );
+                })}
             </div>
           </div>
         </div>

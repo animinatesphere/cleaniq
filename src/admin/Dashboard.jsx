@@ -9,7 +9,42 @@ import {
   ArrowDownRight,
   Receipt,
   X,
+  Download,
+  FileText,
+  CheckCircle2,
+  Megaphone,
 } from "lucide-react";
+
+const DASHBOARD_EXPORT_HEADERS = [
+  "Booking ID",
+  "Customer",
+  "Email",
+  "Phone",
+  "Service",
+  "Date",
+  "Status",
+  "Amount",
+  "Currency",
+  "Lead Source",
+  "Supplies Provided By",
+];
+
+const dashboardExportRows = (bookings) =>
+  bookings
+    .filter((b) => b.status !== "Blackout")
+    .map((b) => [
+      b.bookingId,
+      `${b.customer?.firstName || ""} ${b.customer?.lastName || ""}`.trim(),
+      b.customer?.email,
+      b.customer?.phone,
+      b.service,
+      b.schedule?.date ? new Date(b.schedule.date).toLocaleDateString() : "",
+      b.status,
+      b.payment?.amount,
+      b.payment?.currency,
+      b.leadSource || "Organic",
+      b.suppliesProvidedBy || "",
+    ]);
 
 // Customer initials, used for avatar chips.
 const initials = (b) => {
@@ -162,6 +197,7 @@ const Dashboard = () => {
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [detailSegment, setDetailSegment] = useState(null);
   const [quoteStats, setQuoteStats] = useState(null);
+  const [recentQuotes, setRecentQuotes] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [search, setSearch] = useState("");
 
@@ -179,12 +215,51 @@ const Dashboard = () => {
     }
   }, []);
 
+  const exportDashboardCSV = () => {
+    const rows = dashboardExportRows(bookings);
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [DASHBOARD_EXPORT_HEADERS.join(","), ...rows.map((r) => r.join(","))].join(
+        "\n",
+      );
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute(
+      "download",
+      `Cleaniq_Dashboard_${new Date().toLocaleDateString().replace(/\//g, "-")}.csv`,
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportDashboardExcel = async () => {
+    const XLSX = await import("xlsx");
+    const rows = dashboardExportRows(bookings);
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      DASHBOARD_EXPORT_HEADERS,
+      ...rows,
+    ]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings & Leads");
+    XLSX.writeFile(
+      workbook,
+      `Cleaniq_Dashboard_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`,
+    );
+  };
+
   useEffect(() => {
     fetchData();
     fetch(`${import.meta.env.VITE_API_URL}/quotes/stats`)
       .then((r) => r.json())
       .then((res) => {
         if (res.success) setQuoteStats(res.data);
+      })
+      .catch(() => {});
+    fetch(`${import.meta.env.VITE_API_URL}/quotes?limit=5`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success) setRecentQuotes(res.data);
       })
       .catch(() => {});
     fetch(`${import.meta.env.VITE_API_URL}/reviews`)
@@ -392,6 +467,19 @@ const Dashboard = () => {
     .sort((a, b) => b.total - a.total)
     .slice(0, 5);
 
+  // Leads by source
+  const leadSourceMap = {};
+  bookings
+    .filter((b) => b.status !== "Blackout")
+    .forEach((b) => {
+      const src = b.leadSource || "Organic";
+      leadSourceMap[src] = (leadSourceMap[src] || 0) + 1;
+    });
+  const leadSourceBreakdown = Object.entries(leadSourceMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+  const maxLeadCount = leadSourceBreakdown[0]?.[1] || 1;
+
   // Ratings summary
   const avgRating =
     reviews.length > 0
@@ -442,6 +530,20 @@ const Dashboard = () => {
               </button>
             ))}
           </div>
+          <button
+            onClick={exportDashboardCSV}
+            disabled={loading || bookings.length === 0}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-50 flex-shrink-0"
+          >
+            <Download size={15} /> CSV
+          </button>
+          <button
+            onClick={exportDashboardExcel}
+            disabled={loading || bookings.length === 0}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-50 flex-shrink-0"
+          >
+            <Download size={15} /> Excel
+          </button>
           <button
             onClick={fetchData}
             disabled={loading}
@@ -941,6 +1043,96 @@ const Dashboard = () => {
                 ))}
               </div>
             </>
+          )}
+        </div>
+      </div>
+
+      {/* Row 4: Recent Quotes / Leads by Source */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+          <div className="p-6 pb-3 flex justify-between items-center">
+            <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+              <FileText size={16} className="text-primary" /> Recent Quotes
+            </h3>
+            <button
+              onClick={() => navigate("/admin/quotes")}
+              className="text-[11px] font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1"
+            >
+              Quote History <ChevronRight size={12} />
+            </button>
+          </div>
+          <div className="px-3 pb-3">
+            {recentQuotes.length === 0 ? (
+              <p className="text-slate-400 text-sm font-semibold text-center py-8">
+                No quotes sent yet
+              </p>
+            ) : (
+              recentQuotes.map((q) => {
+                const isAccepted = q.status === "accepted";
+                return (
+                  <button
+                    key={q.quoteRef}
+                    onClick={() => navigate("/admin/quotes")}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
+                  >
+                    <div
+                      className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isAccepted ? "bg-emerald-100" : "bg-slate-100"}`}
+                    >
+                      <CheckCircle2
+                        size={16}
+                        className={isAccepted ? "text-emerald-600" : "text-slate-400"}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">
+                        {q.companyName}
+                      </p>
+                      <p className="text-[11px] font-medium text-slate-400">
+                        {q.quoteRef} · £{Number(q.grandTotal || 0).toFixed(2)}
+                      </p>
+                    </div>
+                    <span
+                      className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full flex-shrink-0 ${isAccepted ? "text-emerald-700 bg-emerald-50" : "text-slate-500 bg-slate-100"}`}
+                    >
+                      {isAccepted ? "Accepted" : "Sent"}
+                    </span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-6">
+          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2 mb-1">
+            <Megaphone size={16} className="text-primary" /> Leads by Source
+          </h3>
+          <p className="text-[11px] font-medium text-slate-400 mb-5">
+            Where your bookings come from
+          </p>
+          {leadSourceBreakdown.length === 0 ? (
+            <p className="text-slate-400 text-sm font-semibold text-center py-8">
+              No leads yet
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {leadSourceBreakdown.map(([source, count]) => (
+                <div key={source} className="flex items-center justify-between gap-3">
+                  <span className="text-[12px] font-semibold text-slate-600 w-28 flex-shrink-0 truncate">
+                    {source}
+                  </span>
+                  <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full"
+                      style={{ width: `${(count / maxLeadCount) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-[11px] font-bold text-slate-900 tabular-nums w-8 text-right">
+                    {count}
+                  </span>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

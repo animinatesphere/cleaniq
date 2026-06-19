@@ -42,7 +42,8 @@ const quoteSchema = new mongoose.Schema({
   depositAmount: { type: Number, default: 0 },
   balanceDue: { type: Number, default: 0 },
   notes: String,
-  status: { type: String, default: "sent" },
+  status: { type: String, default: "sent" }, // sent | accepted | declined
+  acceptedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
 });
 

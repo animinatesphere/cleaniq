@@ -254,6 +254,50 @@ router.get("/:quoteRef", async (req, res) => {
 });
 
 /**
+ * GET /api/quotes/:quoteRef/accept
+ * Public link clicked from the quote email — marks the quote as accepted,
+ * notifies the admin, and shows the company a simple confirmation page.
+ * No authentication, since the recipient is a company contact, not an admin.
+ */
+router.get("/:quoteRef/accept", async (req, res) => {
+  const { quoteRef } = req.params;
+  try {
+    const quote = await Quote.findOne({ quoteRef });
+
+    if (!quote) {
+      return res.status(404).send(generateSimplePage({
+        heading: "Quote not found",
+        message: "We couldn't find that quote. Please contact us directly and we'll help sort it out.",
+      }));
+    }
+
+    if (quote.status !== "accepted") {
+      quote.status = "accepted";
+      quote.acceptedAt = new Date();
+      await quote.save();
+
+      await sendEmail({
+        to: process.env.EMAIL_USER || "info@cleaniqservices.com",
+        subject: `✅ Quote Accepted - ${quote.companyName} | ${quote.quoteRef}`,
+        html: generateQuoteAcceptedAlert(quote),
+      });
+    }
+
+    res.send(generateSimplePage({
+      heading: "Quote Accepted 🎉",
+      message: `Thank you, ${quote.contactName || quote.companyName}! We've let our team know you'd like to go ahead with quote <strong>${quote.quoteRef}</strong>. We'll be in touch shortly to confirm the next steps.`,
+      ref: quote.quoteRef,
+    }));
+  } catch (error) {
+    console.error("Quote accept error:", error);
+    res.status(500).send(generateSimplePage({
+      heading: "Something went wrong",
+      message: "Please contact us directly so we can confirm your quote.",
+    }));
+  }
+});
+
+/**
  * POST /api/quotes/resend/:quoteRef
  * Resend an existing quote to the same or different email
  */
@@ -593,12 +637,15 @@ function generateQuoteEmail(quote) {
               <td style="padding: 32px 40px; text-align: center;">
                 <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                   <tr>
-                    <td style="border-radius: 6px; background-color: #005B41;">
-                      <a href="https://cleaniqservices.com/booking" style="display: inline-block; padding: 14px 36px; font-size: 14px; font-weight: bold; color: #ffffff; text-decoration: none; font-family: Arial, Helvetica, sans-serif;">Accept & Book Now</a>
+                    <td style="border-radius: 6px; background-color: #005B41; padding-right: 10px;">
+                      <a href="https://api.cleaniqservices.com/api/quotes/${quoteRef}/accept" style="display: inline-block; padding: 14px 32px; font-size: 14px; font-weight: bold; color: #ffffff; text-decoration: none; font-family: Arial, Helvetica, sans-serif;">Accept This Quote</a>
+                    </td>
+                    <td style="border-radius: 6px; border: 1px solid #cbd5e1;">
+                      <a href="mailto:info@cleaniqservices.com?subject=${encodeURIComponent(`Re: Quote ${quoteRef} - ${companyName}`)}" style="display: inline-block; padding: 14px 32px; font-size: 14px; font-weight: bold; color: #0f172a; text-decoration: none; font-family: Arial, Helvetica, sans-serif;">Reply With Questions</a>
                     </td>
                   </tr>
                 </table>
-                <p style="margin: 16px 0 0; font-size: 12px; color: #94a3b8; font-family: Arial, Helvetica, sans-serif;">Or reply to this email and we'll take care of the rest.</p>
+                <p style="margin: 16px 0 0; font-size: 12px; color: #94a3b8; font-family: Arial, Helvetica, sans-serif;">You can also simply reply to this email — it goes straight to our team.</p>
               </td>
             </tr>
 
@@ -663,6 +710,63 @@ function generateAdminNotificationEmail(quote) {
       </div>
     </div>
   `;
+}
+
+// Simple branded confirmation page shown when a company clicks the
+// "Accept This Quote" link from their email — this is a public, unauthenticated
+// page, so it's rendered server-side rather than requiring a frontend route.
+function generateSimplePage({ heading, message, ref }) {
+  return `
+<!DOCTYPE html>
+<html>
+  <head><meta charset="utf-8" /><title>Cleaniq Services</title></head>
+  <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Arial, Helvetica, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding: 48px 16px;">
+      <tr>
+        <td align="center">
+          <table width="480" cellpadding="0" cellspacing="0" style="width: 480px; max-width: 100%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+            <tr>
+              <td style="background-color: #0f172a; padding: 28px; text-align: center;">
+                <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Services" style="height: 40px;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 40px; text-align: center;">
+                <h1 style="margin: 0 0 16px; font-size: 22px; color: #0f172a;">${heading}</h1>
+                <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #475569;">${message}</p>
+                ${ref ? `<p style="margin: 24px 0 0; font-size: 12px; color: #94a3b8;">Reference: ${ref}</p>` : ""}
+                <a href="https://cleaniqservices.com" style="display: inline-block; margin-top: 28px; padding: 12px 28px; background-color: #005B41; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: bold;">Return to Cleaniq Services</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
+function generateQuoteAcceptedAlert(quote) {
+  return `
+    <div style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #059669; padding: 32px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 22px;">✅ Quote Accepted</h1>
+      </div>
+      <div style="padding: 32px;">
+        <p style="margin: 0 0 20px; font-size: 14px; color: #475569;"><strong>${quote.companyName}</strong> has accepted their quote. Here are the details:</p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8fafc; border-radius: 8px;">
+          <tr><td style="padding: 16px 20px 4px; font-size: 12px; color: #64748b;">Quote Ref</td></tr>
+          <tr><td style="padding: 0 20px 16px; font-size: 15px; font-weight: bold; color: #0f172a;">${quote.quoteRef}</td></tr>
+          <tr><td style="padding: 0 20px 4px; font-size: 12px; color: #64748b;">Company</td></tr>
+          <tr><td style="padding: 0 20px 16px; font-size: 15px; color: #0f172a;">${quote.companyName}${quote.contactName ? ` (Attn: ${quote.contactName})` : ""}</td></tr>
+          <tr><td style="padding: 0 20px 4px; font-size: 12px; color: #64748b;">Contact</td></tr>
+          <tr><td style="padding: 0 20px 16px; font-size: 15px; color: #0f172a;">${quote.email}${quote.phone ? ` &middot; ${quote.phone}` : ""}</td></tr>
+          <tr><td style="padding: 0 20px 4px; font-size: 12px; color: #64748b;">Total Value</td></tr>
+          <tr><td style="padding: 0 20px 20px; font-size: 18px; font-weight: bold; color: #059669;">£${Number(quote.grandTotal || 0).toFixed(2)}</td></tr>
+        </table>
+        <a href="https://cleaniqservices.com/admin/quotes" style="display: block; text-align: center; margin-top: 24px; background-color: #0f172a; color: #ffffff; padding: 14px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px;">View in Quote History</a>
+      </div>
+    </div>`;
 }
 
 function calculateNextSendDate(frequency) {
