@@ -80,6 +80,7 @@ const notificationsRoutes = require("./routes/notifications");
 const commentRoutes = require("./routes/comments");
 const workerChatRoutes = require("./routes/worker-chat");
 const quotesRoutes = require("./routes/quotes");
+const orgChartRoutes = require("./routes/orgchart");
 
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
@@ -259,6 +260,7 @@ app.use("/api/customer-bookings", customerBookingRoutes);
 app.use("/api/customer-chat", customerChatRoutes);
 app.use("/api/worker-chat", workerChatRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/org-chart", orgChartRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);

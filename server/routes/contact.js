@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { sendEmail } = require('../utils/emailService');
+const { sendEmail, templates } = require('../utils/emailService');
+const Lead = require('../models/Lead');
 
 // POST /api/contact — forward a contact form message to the organisation email
 router.post('/', async (req, res) => {
@@ -72,10 +73,45 @@ router.post('/', async (req, res) => {
       html,
     });
 
+    // Store as a lead so it's available for email marketing campaigns later.
+    const lead = await Lead.create({
+      name,
+      email,
+      phone: phone || '',
+      message,
+      source: 'Contact Form',
+    });
+
+    // One-time automated acknowledgement to the person who reached out.
+    try {
+      await sendEmail({
+        to: email,
+        subject: 'We received your message — Cleaniq Services',
+        html: templates.leadAcknowledgement(name),
+      });
+      lead.acknowledged = true;
+      await lead.save();
+    } catch (ackErr) {
+      console.error('Lead acknowledgement email error:', ackErr);
+    }
+
     res.json({ message: 'Message sent successfully.' });
   } catch (err) {
     console.error('Contact form email error:', err);
     res.status(500).json({ message: 'Failed to send message. Please try again.' });
+  }
+});
+
+/**
+ * GET /api/contact/leads
+ * List captured contact-form leads (for the admin Marketing/Leads view)
+ */
+router.get('/leads', async (req, res) => {
+  try {
+    const leads = await Lead.find().sort({ createdAt: -1 }).limit(500);
+    res.json(leads);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 

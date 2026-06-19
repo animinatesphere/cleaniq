@@ -32,7 +32,14 @@ const Settings = () => {
   const [editingServiceId, setEditingServiceId] = useState(null);
   const [editServiceData, setEditServiceData] = useState({});
   const [newService, setNewService] = useState({ name: '', rate: '', region: 'UK', type: 'Cleaning' });
-  const [broadcast, setBroadcast] = useState({ subject: '', message: '' });
+  const [broadcast, setBroadcast] = useState({
+    subject: '',
+    message: '',
+    recipientType: 'custom',
+    customEmails: '',
+  });
+  const [leads, setLeads] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
   const [passwordData, setPasswordData] = useState({ newPassword: '' });
   const [newAdmin, setNewAdmin] = useState({ username: '', email: '', password: '', role: 'restricted', permissions: [] });
@@ -55,6 +62,13 @@ const Settings = () => {
       } else if (activeTab === 'team') {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/admins`);
         setAdmins(await res.json());
+      } else if (activeTab === 'marketing') {
+        const [leadsRes, campaignsRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/contact/leads`),
+          fetch(`${import.meta.env.VITE_API_URL}/marketing/campaigns`),
+        ]);
+        setLeads(await leadsRes.json());
+        setCampaigns(await campaignsRes.json());
       }
     } catch (err) {
       console.error(err);
@@ -151,18 +165,37 @@ const Settings = () => {
 
   const handleSendBroadcast = async () => {
     if (!broadcast.subject || !broadcast.message) return alert('Please fill in both fields');
+    if (broadcast.recipientType === 'custom' && !broadcast.customEmails.trim()) {
+      return alert('Please enter at least one recipient email.');
+    }
     setSendingBroadcast(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/marketing/broadcast`, {
+      const recipients =
+        broadcast.recipientType === 'custom'
+          ? broadcast.customEmails
+              .split(/[\n,]+/)
+              .map((e) => e.trim())
+              .filter(Boolean)
+          : [];
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/marketing/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(broadcast)
+        body: JSON.stringify({
+          subject: broadcast.subject,
+          message: broadcast.message,
+          recipientType: broadcast.recipientType,
+          recipients,
+        }),
       });
+      const data = await res.json();
       if (res.ok) {
-        alert('Broadcast sent!');
-        setBroadcast({ subject: '', message: '' });
+        alert(data.message || 'Campaign sent!');
+        setBroadcast({ subject: '', message: '', recipientType: 'custom', customEmails: '' });
+        fetchData();
+      } else {
+        alert(data.message || 'Failed to send campaign.');
       }
-    } catch (err) { alert('Failed'); }
+    } catch (err) { alert('Failed to send campaign.'); }
     finally { setSendingBroadcast(false); }
   };
 
@@ -282,14 +315,72 @@ const Settings = () => {
           )}
 
           {activeTab === 'marketing' && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-6">
-              <h3 className="text-base font-bold text-slate-900">Marketing Broadcast</h3>
-              <div className="space-y-4">
+            <div className="space-y-6">
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-5">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Send Email Campaign</h3>
+                  <p className="text-sm text-slate-400 font-medium mt-1">Send to anyone, anytime — pick a recipient group or paste your own list.</p>
+                </div>
+
+                <div>
+                  <p className="text-[11px] font-semibold text-slate-400 mb-2">Recipients</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'custom', label: 'Custom List' },
+                      { id: 'all', label: 'All Customers' },
+                      { id: 'leads', label: `Leads (${leads.length})` },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setBroadcast({ ...broadcast, recipientType: opt.id })}
+                        className={`p-3 rounded-xl border text-xs font-bold transition-all ${broadcast.recipientType === opt.id ? 'bg-primary text-white border-primary shadow-sm' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-primary/30'}`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {broadcast.recipientType === 'custom' && (
+                  <textarea
+                    placeholder="Paste email addresses — separated by commas or one per line"
+                    value={broadcast.customEmails}
+                    onChange={e => setBroadcast({...broadcast, customEmails: e.target.value})}
+                    className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm h-24 resize-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                  />
+                )}
+
                 <input type="text" placeholder="Email Subject" value={broadcast.subject} onChange={e => setBroadcast({...broadcast, subject: e.target.value})} className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" />
                 <textarea placeholder="Your Message..." value={broadcast.message} onChange={e => setBroadcast({...broadcast, message: e.target.value})} className="w-full p-6 rounded-2xl bg-slate-50 border border-slate-100 font-bold h-48 resize-none" />
                 <button disabled={sendingBroadcast} onClick={handleSendBroadcast} className="w-full py-5 rounded-2xl bg-primary text-white font-bold flex items-center justify-center gap-2.5 disabled:opacity-50">
-                  {sendingBroadcast ? 'Sending...' : <><Send size={20} /> Send Broadcast</>}
+                  {sendingBroadcast ? 'Sending...' : <><Send size={20} /> Send Campaign</>}
                 </button>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="p-6 border-b border-slate-100">
+                  <h3 className="text-base font-bold text-slate-900">Recent Campaigns</h3>
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {campaigns.length === 0 ? (
+                    <p className="text-slate-400 font-medium text-sm text-center py-10">No campaigns sent yet.</p>
+                  ) : (
+                    campaigns.map((c) => (
+                      <div key={c._id} className="p-5 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-800 text-sm truncate">{c.subject}</p>
+                          <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                            {new Date(c.sentAt).toLocaleString('en-GB')} · {c.recipientType}
+                          </p>
+                        </div>
+                        <span className="text-[11px] font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full flex-shrink-0">
+                          {c.recipientCount} sent
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           )}

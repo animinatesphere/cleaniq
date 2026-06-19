@@ -87,6 +87,24 @@ const QuoteHistory = () => {
     fetchQuotes();
   }, []);
 
+  const stats = useMemo(() => {
+    const total = quotes.length;
+    const accepted = quotes.filter((q) => q.status === "accepted");
+    const declined = quotes.filter((q) => q.status === "declined");
+    const totalValue = quotes.reduce((s, q) => s + (q.grandTotal || 0), 0);
+    const acceptedValue = accepted.reduce((s, q) => s + (q.grandTotal || 0), 0);
+    const responded = accepted.length + declined.length;
+    return {
+      total,
+      acceptedCount: accepted.length,
+      declinedCount: declined.length,
+      pendingCount: total - responded,
+      totalValue,
+      acceptedValue,
+      acceptanceRate: responded > 0 ? (accepted.length / responded) * 100 : 0,
+    };
+  }, [quotes]);
+
   const filtered = useMemo(() => {
     if (!search) return quotes;
     const s = search.toLowerCase();
@@ -231,6 +249,27 @@ const QuoteHistory = () => {
             <Plus size={15} /> New Quote
           </button>
         </div>
+      </div>
+
+      {/* Quote Revenue Analytics */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm flex flex-wrap divide-y sm:divide-y-0 divide-x divide-slate-100">
+        {[
+          { label: "Total Quoted", value: `£${stats.totalValue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}` },
+          { label: "Accepted Value", value: `£${stats.acceptedValue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}` },
+          { label: "Acceptance Rate", value: `${stats.acceptanceRate.toFixed(0)}%` },
+          { label: "Accepted", value: stats.acceptedCount },
+          { label: "Declined", value: stats.declinedCount },
+          { label: "Awaiting Response", value: stats.pendingCount },
+        ].map((m) => (
+          <div key={m.label} className="flex-1 min-w-[140px] px-6 py-5">
+            <p className="text-[11px] font-semibold text-slate-400 mb-1.5">
+              {m.label}
+            </p>
+            <p className="text-xl font-bold text-slate-900 tabular-nums">
+              {m.value}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Table */}

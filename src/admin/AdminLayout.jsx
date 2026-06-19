@@ -22,6 +22,7 @@ import {
   DollarSign,
   FileText,
   History,
+  Building2,
 } from "lucide-react";
 import Login from "./Login";
 
@@ -227,6 +228,12 @@ const AdminLayout = () => {
     {
       label: "System",
       items: [
+        {
+          name: "Organization Chart",
+          path: "/admin/org-chart",
+          key: "org-chart",
+          icon: <Building2 size={20} />,
+        },
         {
           name: "Settings",
           path: "/admin/settings",

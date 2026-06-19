@@ -1357,6 +1357,26 @@ const templates = {
       </div>
     </div>
   `,
+
+  leadAcknowledgement: (name) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0F172A; padding: 40px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: auto; margin-bottom: 16px; border-radius: 12px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 24px; letter-spacing: -0.5px;">Thanks for Reaching Out!</h1>
+      </div>
+      <div style="padding: 40px; color: #1e293b; line-height: 1.7;">
+        <h2 style="font-size: 18px; margin-top: 0; color: #0F172A;">Hi ${name},</h2>
+        <p style="font-size: 14px; color: #334155;">We've received your message and a member of our team will get back to you shortly — usually within 1 business day.</p>
+        <p style="font-size: 14px; color: #334155;">In the meantime, feel free to browse our services or get an instant quote on our website.</p>
+        <div style="text-align: center; margin-top: 32px;">
+          <a href="https://cleaniqservices.com/services" style="display: inline-block; background-color: #0F172A; color: #6EE7B7; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px;">Browse Our Services</a>
+        </div>
+      </div>
+      <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #f1f5f9;">
+        <p style="margin: 0; font-size: 11px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
 };
 
 module.exports = { sendEmail, templates };

@@ -30,7 +30,6 @@ import {
   Waves,
   Refrigerator,
   Wind,
-  Megaphone,
   Sparkles,
 } from "lucide-react";
 // Stripe will be loaded lazily to reduce initial JS bundle size
@@ -173,19 +172,6 @@ const cleanKey = (str) =>
     .toLowerCase()
     .replace(/[^a-z0-9]/g, "")
     .trim();
-
-const LEAD_SOURCES = [
-  "Google",
-  "Bark",
-  "Checkatrade",
-  "MyJobQuote",
-  "MyBuilder",
-  "Instagram",
-  "Facebook",
-  "TikTok",
-  "Referral",
-  "Organic",
-];
 
 const Booking = () => {
   const { region } = useRegion();
@@ -1311,51 +1297,12 @@ const Booking = () => {
                                 }
                               />
                             </div>
-                            <div className="space-y-3">
-                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <Sparkles size={14} className="text-primary" />{" "}
-                                Who provides cleaning supplies & equipment?
+                            <div className="flex items-center gap-2 p-4 rounded-2xl bg-primary/5 border-2 border-primary/10">
+                              <Sparkles size={14} className="text-primary flex-shrink-0" />
+                              <p className="text-[11px] font-bold text-slate-500">
+                                All cleaning supplies & equipment are provided
+                                by Cleaniq Services — nothing for you to bring.
                               </p>
-                              <div className="grid grid-cols-2 gap-2">
-                                {["Cleaniq", "Customer"].map((opt) => (
-                                  <button
-                                    key={opt}
-                                    onClick={() =>
-                                      setFormData({
-                                        ...formData,
-                                        suppliesProvidedBy: opt,
-                                      })
-                                    }
-                                    className={`p-4 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${formData.suppliesProvidedBy === opt ? "border-primary bg-primary text-white shadow-md" : "border-slate-100 bg-white text-slate-400 hover:border-primary/30"}`}
-                                  >
-                                    {opt === "Cleaniq"
-                                      ? "Cleaniq provides"
-                                      : "I'll provide my own"}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="space-y-3">
-                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <Megaphone size={14} className="text-primary" />{" "}
-                                How did you hear about us?
-                              </p>
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                {LEAD_SOURCES.map((src) => (
-                                  <button
-                                    key={src}
-                                    onClick={() =>
-                                      setFormData({
-                                        ...formData,
-                                        leadSource: src,
-                                      })
-                                    }
-                                    className={`p-3 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${formData.leadSource === src ? "border-primary bg-primary text-white shadow-md" : "border-slate-100 bg-white text-slate-400 hover:border-primary/30"}`}
-                                  >
-                                    {src}
-                                  </button>
-                                ))}
-                              </div>
                             </div>
                           </div>
                         </div>

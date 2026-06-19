@@ -625,6 +625,8 @@ const QuoteBuilder = () => {
     phone: "",
     address: "",
     frequency: "once",
+    serviceDate: "",
+    serviceTimeSlot: "Morning (8am-12pm)",
     vatRate: 20,
     validDays: 30,
     includeVat: true,

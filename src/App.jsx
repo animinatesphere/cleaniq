@@ -43,6 +43,7 @@ import AdminWithdrawals from "./admin/AdminWithdrawals";
 import AdminPayments from "./admin/AdminPayments";
 import QuoteBuilder from "./admin/QuoteBuilder";
 import QuoteHistory from "./admin/QuoteHistory";
+import OrgChart from "./admin/OrgChart";
 
 function App() {
   const location = useLocation();
@@ -92,6 +93,7 @@ function App() {
               <Route path="blog" element={<AdminBlog />} />
               <Route path="quotes" element={<QuoteBuilder />} />
               <Route path="quotes/history" element={<QuoteHistory />} />
+              <Route path="org-chart" element={<OrgChart />} />
               <Route path="settings" element={<Settings />} />
               <Route path="chat" element={<Chat />} />
               <Route path="staff-pay" element={<StaffPay />} />
