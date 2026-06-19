@@ -345,6 +345,34 @@ router.post("/resend/:quoteRef", async (req, res) => {
 });
 
 /**
+ * DELETE /api/quotes/:quoteRef
+ * Permanently remove a quote from history
+ */
+router.delete("/:quoteRef", async (req, res) => {
+  try {
+    const { quoteRef } = req.params;
+    const quote = await Quote.findOneAndDelete({ quoteRef });
+    if (!quote) {
+      return res.status(404).json({
+        success: false,
+        message: "Quote not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Quote deleted",
+    });
+  } catch (error) {
+    console.error("Quote delete error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete quote",
+      error: error.message,
+    });
+  }
+});
+
+/**
  * POST /api/quotes/schedule
  * Schedule recurring quotes to be sent automatically
  */
