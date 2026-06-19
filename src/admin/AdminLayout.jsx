@@ -38,9 +38,13 @@ const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const adminRole = localStorage.getItem("adminRole") || "superadmin";
+  const isBookingAgent = adminRole === "booking-agent";
+
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
+    localStorage.removeItem("adminRole");
     setIsAuthenticated(false);
   };
 
@@ -100,13 +104,13 @@ const AdminLayout = () => {
         console.error(err);
       }
     };
-    if (isAuthenticated) fetchNotifications();
-  }, [isAuthenticated]);
+    if (isAuthenticated && !isBookingAgent) fetchNotifications();
+  }, [isAuthenticated, isBookingAgent]);
 
   if (!isAuthenticated)
     return <Login onLogin={() => setIsAuthenticated(true)} />;
 
-  const menuGroups = [
+  const fullMenuGroups = [
     {
       label: "Overview",
       items: [
@@ -199,6 +203,33 @@ const AdminLayout = () => {
       ],
     },
   ];
+
+  // Booking-agent accounts only get the Bookings page — nothing else.
+  const menuGroups = isBookingAgent
+    ? [
+        {
+          label: "Operations",
+          items: [
+            {
+              name: "Bookings",
+              path: "/admin/bookings",
+              icon: <Calendar size={20} />,
+            },
+          ],
+        },
+      ]
+    : fullMenuGroups;
+
+  // Redirect a booking-agent account away from any route it isn't allowed to see.
+  useEffect(() => {
+    if (
+      isAuthenticated &&
+      isBookingAgent &&
+      !location.pathname.startsWith("/admin/bookings")
+    ) {
+      navigate("/admin/bookings", { replace: true });
+    }
+  }, [isAuthenticated, isBookingAgent, location.pathname, navigate]);
 
   return (
     <div className="flex min-h-screen bg-[#F8FAFC]">
@@ -393,15 +424,15 @@ const AdminLayout = () => {
             )}
 
             <div
-              className="flex items-center gap-3 pl-2 group cursor-pointer"
-              onClick={() => navigate("/admin/settings")}
+              className={`flex items-center gap-3 pl-2 group ${isBookingAgent ? "" : "cursor-pointer"}`}
+              onClick={() => !isBookingAgent && navigate("/admin/settings")}
             >
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-black text-primary-dark leading-tight group-hover:text-primary transition-colors">
                   {localStorage.getItem("adminUser") || "Admin"}
                 </p>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                  Manager
+                  {isBookingAgent ? "Booking Agent" : "Manager"}
                 </p>
               </div>
               <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border-2 border-white shadow-sm group-hover:border-primary/20 transition-all">

@@ -27,6 +27,7 @@ const Login = ({ onLogin }) => {
       if (response.ok) {
         localStorage.setItem('adminToken', data.token);
         localStorage.setItem('adminUser', data.username);
+        localStorage.setItem('adminRole', data.role || 'superadmin');
         onLogin(data.token);
       } else {
         setError(data.message || 'Invalid login credentials');
@@ -61,7 +62,7 @@ const Login = ({ onLogin }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md text-white text-xs font-black uppercase tracking-widest"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md text-white text-xs font-bold uppercase tracking-widest"
           >
             <Sparkles size={14} className="text-secondary" />
             Admin Operations Portal
@@ -71,7 +72,7 @@ const Login = ({ onLogin }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.1]"
+            className="text-5xl md:text-6xl font-bold text-white tracking-tight leading-[1.1]"
           >
             Streamlining <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-emerald-200">
@@ -109,7 +110,7 @@ const Login = ({ onLogin }) => {
           </div>
 
           <div className="mb-10">
-            <h2 className="text-4xl font-black text-primary-dark tracking-tighter mb-3">Welcome Back</h2>
+            <h2 className="text-4xl font-bold text-primary-dark tracking-tighter mb-3">Welcome Back</h2>
             <p className="text-slate-500 font-medium">Please enter your credentials to access the admin operations center.</p>
           </div>
 
@@ -131,7 +132,7 @@ const Login = ({ onLogin }) => {
             </AnimatePresence>
 
             <div className="space-y-2 group">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-2 transition-colors group-focus-within:text-primary">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-2 transition-colors group-focus-within:text-primary">
                 Administrator ID
               </label>
               <div className="relative flex items-center">
@@ -149,7 +150,7 @@ const Login = ({ onLogin }) => {
 
             <div className="space-y-2 group">
               <div className="flex justify-between items-center ml-2">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-widest transition-colors group-focus-within:text-primary">
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest transition-colors group-focus-within:text-primary">
                   Password
                 </label>
               </div>
@@ -170,7 +171,7 @@ const Login = ({ onLogin }) => {
               <button 
                 type="submit"
                 disabled={loading}
-                className="w-full relative overflow-hidden bg-primary text-white py-5 rounded-[20px] font-black tracking-widest uppercase text-sm group hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20"
+                className="w-full relative overflow-hidden bg-primary text-white py-5 rounded-[20px] font-bold tracking-widest uppercase text-sm group hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20"
               >
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
                 <div className="relative flex items-center justify-center gap-3">

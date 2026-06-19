@@ -313,8 +313,8 @@ const Customers = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                <th className="px-4 py-5 w-12">
+              <tr className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.12em] bg-slate-50/60">
+                <th className="px-4 py-3.5 w-12">
                   <input
                     type="checkbox"
                     checked={
@@ -322,14 +322,14 @@ const Customers = () => {
                       filtered.length > 0
                     }
                     onChange={toggleSelectAllCustomers}
-                    className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
+                    className="w-4 h-4 rounded border-2 border-slate-300 cursor-pointer accent-primary"
                   />
                 </th>
-                <th className="px-8 py-5">Customer</th>
-                <th className="px-4 py-5">Contact</th>
-                <th className="px-4 py-5">Activity</th>
-                <th className="px-4 py-5">Total Spent</th>
-                <th className="px-8 py-5 text-right">Action</th>
+                <th className="px-6 py-3.5">Customer</th>
+                <th className="px-4 py-3.5">Contact</th>
+                <th className="px-4 py-3.5">Activity</th>
+                <th className="px-4 py-3.5">Total Spent</th>
+                <th className="px-6 py-3.5 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -339,70 +339,70 @@ const Customers = () => {
                   className={`transition-colors ${
                     selectedCustomers.has(c._id)
                       ? "bg-blue-50"
-                      : "hover:bg-slate-50/50"
+                      : "hover:bg-slate-50/80"
                   } group`}
                 >
-                  <td className="px-4 py-6 w-12">
+                  <td className="px-4 py-4 w-12">
                     <input
                       type="checkbox"
                       checked={selectedCustomers.has(c.email)}
                       onChange={() => toggleCustomerSelection(c.email)}
-                      className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
+                      className="w-4 h-4 rounded border-2 border-slate-300 cursor-pointer accent-primary"
                     />
                   </td>
-                  <td className="px-8 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-lg">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0">
                         {c.firstName[0]}
                       </div>
                       <div>
-                        <p className="font-bold text-primary-dark tracking-tight">
+                        <p className="font-semibold text-slate-800 text-sm">
                           {c.firstName} {c.lastName}
                         </p>
                         <span
-                          className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase ${c.region === "UK" ? "bg-blue-50 text-blue-600" : "bg-green-50 text-green-600"}`}
+                          className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase ${c.region === "UK" ? "bg-blue-50 text-blue-600" : "bg-green-50 text-green-600"}`}
                         >
                           {c.region}
                         </span>
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-6">
+                  <td className="px-4 py-4">
                     <p className="text-sm font-medium text-slate-600">
                       {c.email}
                     </p>
-                    <p className="text-xs font-black text-primary mt-0.5">
+                    <p className="text-xs font-semibold text-slate-400 mt-0.5">
                       {c.phone}
                     </p>
                   </td>
-                  <td className="px-4 py-6">
+                  <td className="px-4 py-4">
                     <div className="flex items-center gap-2">
-                      <ShoppingBag size={14} className="text-blue-500" />
-                      <span className="font-black text-primary-dark">
-                        {c.totalBookings} Bookings
+                      <ShoppingBag size={13} className="text-slate-400" />
+                      <span className="font-medium text-slate-600 text-sm">
+                        {c.totalBookings} bookings
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-6 font-black text-primary-dark">
+                  <td className="px-4 py-4 font-bold text-slate-900 text-sm tabular-nums">
                     £{c.totalSpent?.toLocaleString()}
                   </td>
-                  <td className="px-8 py-6 text-right flex items-center justify-end gap-2">
+                  <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
                     <button
                       onClick={() => {
                         setSelected(c);
                         setEditData(c);
                         setIsEditing(false);
                       }}
-                      className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all shadow-sm"
+                      className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
                     >
-                      <Eye size={18} />
+                      <Eye size={16} />
                     </button>
                     <button
                       onClick={() => handleDeleteCustomer(c.email)}
-                      className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all shadow-sm"
+                      className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all"
                       title="Delete customer"
                     >
-                      <Trash2 size={18} />
+                      <Trash2 size={16} />
                     </button>
                   </td>
                 </tr>
@@ -416,27 +416,27 @@ const Customers = () => {
       {selected && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md"
+            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
             onClick={() => setSelected(null)}
           />
-          <div className="relative w-full max-w-md bg-white rounded-4xl md:rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border-4 border-white">
-            <div className="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h3 className="text-xl font-black text-primary-dark">
+          <div className="relative w-full max-w-md bg-white rounded-[28px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+              <h3 className="text-base font-bold text-slate-900">
                 {isEditing ? "Edit Client" : "Client Profile"}
               </h3>
               <button
                 onClick={() => setSelected(null)}
-                className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors"
+                className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
-            <div className="p-6 md:p-8 space-y-6 max-h-[60vh] overflow-y-auto no-scrollbar">
+            <div className="p-6 space-y-5 max-h-[60vh] overflow-y-auto no-scrollbar">
               {isEditing ? (
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 ml-4 uppercase tracking-widest">
+                    <label className="text-[11px] font-semibold text-slate-400 ml-3">
                       First Name
                     </label>
                     <input
@@ -445,11 +445,11 @@ const Customers = () => {
                       onChange={(e) =>
                         setEditData({ ...editData, firstName: e.target.value })
                       }
-                      className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold"
+                      className="w-full p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 ml-4 uppercase tracking-widest">
+                    <label className="text-[11px] font-semibold text-slate-400 ml-3">
                       Last Name
                     </label>
                     <input
@@ -458,23 +458,23 @@ const Customers = () => {
                       onChange={(e) =>
                         setEditData({ ...editData, lastName: e.target.value })
                       }
-                      className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold"
+                      className="w-full p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 ml-4 uppercase tracking-widest">
+                    <label className="text-[11px] font-semibold text-slate-400 ml-3">
                       Email
                     </label>
                     <input
                       type="email"
                       value={editData.email}
                       disabled
-                      className="w-full p-4 rounded-2xl bg-slate-100 border border-slate-100 font-bold text-slate-400 cursor-not-allowed"
+                      className="w-full p-3.5 rounded-xl bg-slate-100 border border-slate-200 font-medium text-sm text-slate-400 cursor-not-allowed"
                       title="Email cannot be changed"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 ml-4 uppercase tracking-widest">
+                    <label className="text-[11px] font-semibold text-slate-400 ml-3">
                       Phone
                     </label>
                     <input
@@ -483,65 +483,65 @@ const Customers = () => {
                       onChange={(e) =>
                         setEditData({ ...editData, phone: e.target.value })
                       }
-                      className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold"
+                      className="w-full p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                     />
                   </div>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div className="text-center">
-                    <div className="w-20 h-20 rounded-4xl bg-primary/10 text-primary flex items-center justify-center text-4xl font-black mx-auto mb-6">
+                    <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                       {selected.firstName[0]}
                     </div>
-                    <h4 className="text-3xl font-black text-primary-dark tracking-tighter">
+                    <h4 className="text-xl font-bold text-slate-900 tracking-tight">
                       {selected.firstName} {selected.lastName}
                     </h4>
-                    <p className="text-slate-400 font-bold text-sm mt-2">
+                    <p className="text-slate-400 font-medium text-sm mt-1">
                       Customer Profile
                     </p>
                   </div>
 
                   {/* Contact Information */}
-                  <div className="space-y-3 p-6 rounded-3xl bg-slate-50 border border-slate-100">
-                    <h4 className="text-sm font-black text-primary-dark uppercase tracking-widest mb-4">
+                  <div className="space-y-3 p-5 rounded-2xl bg-slate-50 border border-slate-100">
+                    <h4 className="text-sm font-bold text-slate-800 mb-3">
                       Contact Information
                     </h4>
-                    <div className="space-y-4">
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                          <Mail size={18} />
+                    <div className="space-y-3.5">
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                          <Mail size={16} />
                         </div>
                         <div>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          <p className="text-[11px] font-semibold text-slate-400">
                             Email Address
                           </p>
-                          <p className="font-bold text-primary-dark mt-1">
+                          <p className="font-semibold text-slate-800 text-sm mt-0.5">
                             {selected.email}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                          <Phone size={18} />
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                          <Phone size={16} />
                         </div>
                         <div>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          <p className="text-[11px] font-semibold text-slate-400">
                             Phone Number
                           </p>
-                          <p className="font-bold text-primary-dark mt-1">
+                          <p className="font-semibold text-slate-800 text-sm mt-0.5">
                             {selected.phone || "Not provided"}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                          <MapPin size={18} />
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                          <MapPin size={16} />
                         </div>
                         <div>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          <p className="text-[11px] font-semibold text-slate-400">
                             Region
                           </p>
-                          <p className="font-bold text-primary-dark mt-1">
+                          <p className="font-semibold text-slate-800 text-sm mt-0.5">
                             {selected.region || "Not specified"}
                           </p>
                         </div>
@@ -550,58 +550,58 @@ const Customers = () => {
                   </div>
 
                   {/* Statistics */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-6 rounded-3xl bg-blue-50 border border-blue-100">
-                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100">
+                      <p className="text-[11px] font-semibold text-blue-600 mb-1">
                         Total Bookings
                       </p>
-                      <p className="text-3xl font-black text-blue-600">
+                      <p className="text-2xl font-bold text-blue-700 tabular-nums">
                         {selected.totalBookings}
                       </p>
                     </div>
-                    <div className="p-6 rounded-3xl bg-emerald-50 border border-emerald-100">
-                      <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2">
+                    <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
+                      <p className="text-[11px] font-semibold text-emerald-600 mb-1">
                         Total Spent
                       </p>
-                      <p className="text-2xl font-black text-emerald-600">
+                      <p className="text-2xl font-bold text-emerald-700 tabular-nums">
                         £{selected.totalSpent?.toLocaleString() || "0"}
                       </p>
                     </div>
                   </div>
 
                   {/* Booking History */}
-                  <div className="p-6 rounded-3xl bg-slate-50 border border-slate-100">
-                    <h4 className="text-sm font-black text-primary-dark mb-4 uppercase tracking-widest">
+                  <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+                    <h4 className="text-sm font-bold text-slate-800 mb-3">
                       Recent Bookings
                     </h4>
                     {loadingBookings ? (
-                      <p className="text-sm text-slate-400 font-bold animate-pulse">
+                      <p className="text-sm text-slate-400 font-medium animate-pulse">
                         Loading history...
                       </p>
                     ) : customerBookings.length > 0 ? (
-                      <div className="space-y-3 max-h-64 overflow-y-auto">
+                      <div className="space-y-2.5 max-h-64 overflow-y-auto">
                         {customerBookings.slice(0, 5).map((b) => (
                           <div
                             key={b._id}
-                            className="p-4 rounded-2xl bg-white border border-slate-200 flex justify-between items-center hover:border-primary/30 transition-all"
+                            className="p-3.5 rounded-xl bg-white border border-slate-200 flex justify-between items-center hover:border-primary/30 transition-all"
                           >
                             <div>
-                              <p className="font-bold text-sm text-primary-dark">
+                              <p className="font-semibold text-sm text-slate-800">
                                 {b.service}
                               </p>
-                              <p className="text-xs text-slate-400 font-bold mt-1">
+                              <p className="text-xs text-slate-400 font-medium mt-0.5">
                                 {new Date(
                                   b.schedule?.date || b.createdAt,
                                 ).toLocaleDateString()}
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="font-black text-primary-dark">
+                              <p className="font-bold text-slate-900 text-sm tabular-nums">
                                 {b.payment?.currency === "GBP" ? "£" : "₦"}
                                 {b.payment?.amount}
                               </p>
                               <span
-                                className={`text-[10px] font-black uppercase tracking-widest inline-block mt-1 px-2 py-1 rounded-lg ${b.status === "Completed" ? "bg-emerald-50 text-emerald-600" : b.status === "Cancelled" ? "bg-rose-50 text-rose-600" : "bg-amber-50 text-amber-600"}`}
+                                className={`text-[9px] font-semibold uppercase inline-block mt-1 px-2 py-0.5 rounded-full ${b.status === "Completed" ? "bg-emerald-50 text-emerald-600" : b.status === "Cancelled" ? "bg-rose-50 text-rose-600" : "bg-amber-50 text-amber-600"}`}
                               >
                                 {b.status}
                               </span>
@@ -615,7 +615,7 @@ const Customers = () => {
                         )}
                       </div>
                     ) : (
-                      <p className="text-sm text-slate-400 font-bold">
+                      <p className="text-sm text-slate-400 font-medium">
                         No bookings yet.
                       </p>
                     )}
@@ -624,35 +624,35 @@ const Customers = () => {
               )}
             </div>
 
-            <div className="p-6 md:p-8 border-t border-slate-100 bg-slate-50/50 flex gap-4">
+            <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex gap-3">
               {isEditing ? (
                 <>
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="flex-1 py-5 rounded-3xl bg-white border border-slate-200 text-xs font-black text-slate-500 uppercase tracking-widest hover:bg-slate-50 transition-all"
+                    className="flex-1 py-3 rounded-xl bg-white border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleUpdate}
-                    className="flex-1 py-5 rounded-3xl bg-primary text-white text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                    className="flex-1 py-3 rounded-xl bg-primary text-white text-sm font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-primary-dark transition-all"
                   >
-                    <Save size={18} /> Update Client
+                    <Save size={16} /> Update Client
                   </button>
                 </>
               ) : (
                 <>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="flex-1 py-5 rounded-3xl bg-primary text-white text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                    className="flex-1 py-3 rounded-xl bg-primary text-white text-sm font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-primary-dark transition-all"
                   >
-                    <Edit3 size={18} /> Modify Profile
+                    <Edit3 size={16} /> Modify Profile
                   </button>
                   <button
                     onClick={() => handleDeleteCustomer(selected.email)}
-                    className="flex-1 py-5 rounded-3xl bg-rose-50 text-rose-500 text-xs font-black uppercase tracking-widest border border-rose-200 hover:bg-rose-100 transition-all flex items-center justify-center gap-2"
+                    className="flex-1 py-3 rounded-xl bg-rose-50 text-rose-600 text-sm font-bold border border-rose-200 hover:bg-rose-100 transition-all flex items-center justify-center gap-2"
                   >
-                    <Trash2 size={18} /> Delete Customer
+                    <Trash2 size={16} /> Delete Customer
                   </button>
                 </>
               )}
@@ -665,31 +665,31 @@ const Customers = () => {
       {showBulkDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-primary-dark/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
             onClick={() => setShowBulkDeleteModal(false)}
           ></div>
-          <div className="relative bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-10 w-full max-w-md shadow-2xl border-4 border-white animate-in zoom-in-95 duration-200 text-center">
-            <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
-              <AlertTriangle size={40} />
+          <div className="relative bg-white rounded-[28px] p-8 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 text-center">
+            <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-5">
+              <AlertTriangle size={32} />
             </div>
-            <h3 className="text-2xl font-black text-primary-dark tracking-tight mb-2">
+            <h3 className="text-xl font-bold text-slate-900 tracking-tight mb-2">
               Delete {selectedCustomers.size} Client(s)?
             </h3>
-            <p className="text-slate-500 font-medium text-sm mb-8">
+            <p className="text-slate-400 font-medium text-sm mb-6">
               This action cannot be undone. The selected clients will be
               permanently removed from your database.
             </p>
 
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <button
                 onClick={() => setShowBulkDeleteModal(false)}
-                className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+                className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-semibold text-sm hover:bg-slate-200 transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleBulkDelete}
-                className="flex-1 py-3 bg-linear-to-r from-rose-500 to-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20 hover:scale-[1.02] transition-all"
+                className="flex-1 py-3 bg-rose-600 text-white rounded-xl font-bold text-sm shadow-sm hover:bg-rose-700 transition-all"
               >
                 Delete All
               </button>

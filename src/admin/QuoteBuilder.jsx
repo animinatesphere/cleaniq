@@ -71,7 +71,7 @@ const Toast = ({ msg, type, onClose }) => (
 const LineItem = ({ item, index, onChange, onRemove, services }) => (
   <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200 space-y-3">
     <div className="flex justify-between items-center">
-      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+      <span className="text-[11px] font-semibold text-slate-400">
         Line Item #{index + 1}
       </span>
       <button
@@ -83,13 +83,13 @@ const LineItem = ({ item, index, onChange, onRemove, services }) => (
     </div>
     <div className="grid sm:grid-cols-2 gap-3">
       <div className="sm:col-span-2">
-        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 block">
+        <label className="text-[11px] font-semibold text-slate-400 mb-1 block">
           Service
         </label>
         <select
           value={item.service}
           onChange={(e) => onChange(index, "service", e.target.value)}
-          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 transition-all"
+          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
         >
           <option value="">Select a service…</option>
           {services.map((s) => (
@@ -105,12 +105,12 @@ const LineItem = ({ item, index, onChange, onRemove, services }) => (
             placeholder="Custom service name"
             value={item.customService}
             onChange={(e) => onChange(index, "customService", e.target.value)}
-            className="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 transition-all"
+            className="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
           />
         )}
       </div>
       <div className="sm:col-span-2">
-        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 block">
+        <label className="text-[11px] font-semibold text-slate-400 mb-1 block">
           Cleaning Details — what will be cleaned (optional)
         </label>
         <textarea
@@ -118,7 +118,7 @@ const LineItem = ({ item, index, onChange, onRemove, services }) => (
           placeholder="e.g. 3-bed property: all bedrooms, 2 bathrooms, kitchen deep clean, hoovering & dusting throughout..."
           value={item.description}
           onChange={(e) => onChange(index, "description", e.target.value)}
-          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-medium text-slate-700 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 transition-all"
+          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-medium text-slate-700 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
         />
         <p className="text-[10px] text-slate-400 font-semibold mt-1">
           This shows up in the quote preview and the email sent to the
@@ -129,20 +129,20 @@ const LineItem = ({ item, index, onChange, onRemove, services }) => (
         <button
           type="button"
           onClick={() => onChange(index, "billingType", "flat")}
-          className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${item.billingType !== "hourly" ? "bg-indigo-600 text-white shadow" : "text-slate-500 hover:bg-slate-50"}`}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${item.billingType !== "hourly" ? "bg-primary text-white shadow" : "text-slate-500 hover:bg-slate-50"}`}
         >
           Flat Rate
         </button>
         <button
           type="button"
           onClick={() => onChange(index, "billingType", "hourly")}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition-all ${item.billingType === "hourly" ? "bg-indigo-600 text-white shadow" : "text-slate-500 hover:bg-slate-50"}`}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${item.billingType === "hourly" ? "bg-primary text-white shadow" : "text-slate-500 hover:bg-slate-50"}`}
         >
           <Clock size={12} /> Hourly Rate
         </button>
       </div>
       <div>
-        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 block">
+        <label className="text-[11px] font-semibold text-slate-400 mb-1 block">
           {item.billingType === "hourly" ? "Estimated Hours" : "Quantity / Visits"}
         </label>
         <input
@@ -151,11 +151,11 @@ const LineItem = ({ item, index, onChange, onRemove, services }) => (
           step={item.billingType === "hourly" ? "0.5" : "1"}
           value={item.qty}
           onChange={(e) => onChange(index, "qty", Number(e.target.value))}
-          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 transition-all"
+          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
         />
       </div>
       <div>
-        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 block">
+        <label className="text-[11px] font-semibold text-slate-400 mb-1 block">
           {item.billingType === "hourly" ? "Hourly Rate (£/hr)" : "Unit Price (£)"}
         </label>
         <input
@@ -165,16 +165,16 @@ const LineItem = ({ item, index, onChange, onRemove, services }) => (
           placeholder="0.00"
           value={item.unitPrice}
           onChange={(e) => onChange(index, "unitPrice", e.target.value)}
-          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 transition-all"
+          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
         />
       </div>
     </div>
     <div className="flex justify-end">
       <div className="px-4 py-2 bg-white rounded-2xl border border-slate-200 flex items-center gap-2">
-        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+        <span className="text-[11px] font-semibold text-slate-400">
           Subtotal:
         </span>
-        <span className="font-black text-slate-800 text-sm">
+        <span className="font-bold text-slate-800 text-sm">
           £
           {(Number(item.unitPrice || 0) * Number(item.qty || 1)).toLocaleString(
             "en-GB",
@@ -202,7 +202,7 @@ const PreviewModal = ({
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
     <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
       <div className="sticky top-0 bg-white border-b border-slate-100 px-8 py-5 flex justify-between items-center rounded-t-[32px] z-10">
-        <h2 className="text-lg font-black text-slate-800">Quote Preview</h2>
+        <h2 className="text-lg font-bold text-slate-800">Quote Preview</h2>
         <button
           onClick={onClose}
           className="w-9 h-9 rounded-2xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all"
@@ -213,7 +213,7 @@ const PreviewModal = ({
       <div className="p-8 space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-black text-slate-800">
+            <h1 className="text-2xl font-bold text-slate-800">
               SERVICE QUOTE
             </h1>
             <p className="text-sm text-slate-400 font-semibold mt-1">
@@ -221,10 +221,10 @@ const PreviewModal = ({
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
               Quote Ref
             </p>
-            <p className="text-sm font-black text-slate-800">
+            <p className="text-sm font-bold text-slate-800">
               CLQ-{Date.now().toString().slice(-6)}
             </p>
             <p className="text-xs text-slate-400 font-semibold mt-1">
@@ -237,10 +237,10 @@ const PreviewModal = ({
           </div>
         </div>
         <div className="bg-slate-50 rounded-3xl p-6 space-y-1">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+          <p className="text-[11px] font-semibold text-slate-400 mb-2">
             Prepared For
           </p>
-          <p className="font-black text-slate-800 text-lg">
+          <p className="font-bold text-slate-800 text-lg">
             {data.companyName || "—"}
           </p>
           {data.contactName && (
@@ -255,10 +255,10 @@ const PreviewModal = ({
           )}
         </div>
         {data.frequency !== "once" && (
-          <div className="flex items-center gap-3 px-5 py-3 bg-indigo-50 border border-indigo-200 rounded-2xl">
-            <Repeat2 size={18} className="text-indigo-600" />
+          <div className="flex items-center gap-3 px-5 py-3 bg-primary/5 border border-primary/20 rounded-2xl">
+            <Repeat2 size={18} className="text-primary" />
             <div>
-              <p className="text-xs font-black uppercase tracking-widest text-indigo-600">
+              <p className="text-xs font-bold uppercase tracking-widest text-primary">
                 Recurring Contract
               </p>
               <p className="text-sm font-bold text-slate-700">
@@ -271,13 +271,13 @@ const PreviewModal = ({
           </div>
         )}
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
+          <p className="text-[11px] font-semibold text-slate-400 mb-3">
             Services Included
           </p>
           <div className="overflow-hidden rounded-2xl border border-slate-200">
             <table className="w-full text-sm">
               <thead className="bg-slate-50">
-                <tr className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <tr className="text-[11px] font-semibold text-slate-400">
                   <th className="px-5 py-3 text-left">Service & Cleaning Details</th>
                   <th className="px-4 py-3 text-center">Qty</th>
                   <th className="px-4 py-3 text-right">Unit</th>
@@ -301,7 +301,7 @@ const PreviewModal = ({
                           </p>
                         )}
                         {item.billingType === "hourly" && (
-                          <p className="text-[10px] text-indigo-500 font-bold mt-1 flex items-center gap-1">
+                          <p className="text-[10px] text-primary/50 font-bold mt-1 flex items-center gap-1">
                             <Clock size={10} /> Billed hourly
                           </p>
                         )}
@@ -314,7 +314,7 @@ const PreviewModal = ({
                         £{Number(item.unitPrice || 0).toFixed(2)}
                         {item.billingType === "hourly" ? "/hr" : ""}
                       </td>
-                      <td className="px-5 py-4 text-right font-black text-slate-800">
+                      <td className="px-5 py-4 text-right font-bold text-slate-800">
                         £
                         {(
                           Number(item.unitPrice || 0) * item.qty
@@ -349,7 +349,7 @@ const PreviewModal = ({
               <span>£{vat.toFixed(2)}</span>
             </div>
           )}
-          <div className="flex justify-between text-base font-black text-slate-800 pt-3 border-t border-slate-200">
+          <div className="flex justify-between text-base font-bold text-slate-800 pt-3 border-t border-slate-200">
             <span>GRAND TOTAL</span>
             <span>
               £{grandTotal.toFixed(2)}
@@ -364,7 +364,7 @@ const PreviewModal = ({
           </div>
           {data.depositRequired && depositAmount > 0 && (
             <div className="mt-4 pt-4 border-t border-slate-200 space-y-2">
-              <div className="flex justify-between text-sm font-semibold text-indigo-600">
+              <div className="flex justify-between text-sm font-semibold text-primary">
                 <span>Deposit Required ({data.depositPercent}%)</span>
                 <span>£{depositAmount.toFixed(2)}</span>
               </div>
@@ -377,7 +377,7 @@ const PreviewModal = ({
         </div>
         {data.notes && (
           <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5">
-            <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-2">
               Notes & Terms
             </p>
             <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
@@ -400,10 +400,10 @@ const QuoteDetailModal = ({ quote, onClose }) => {
       <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-slate-100 px-8 py-5 flex justify-between items-center rounded-t-[32px] z-10">
           <div>
-            <h2 className="text-lg font-black text-slate-800">
+            <h2 className="text-lg font-bold text-slate-800">
               {quote.quoteRef}
             </h2>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+            <p className="text-[11px] font-semibold text-slate-400 mt-0.5">
               Sent {new Date(quote.createdAt).toLocaleString("en-GB")}
             </p>
           </div>
@@ -416,10 +416,10 @@ const QuoteDetailModal = ({ quote, onClose }) => {
         </div>
         <div className="p-8 space-y-6">
           <div className="bg-slate-50 rounded-3xl p-6 space-y-1">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+            <p className="text-[11px] font-semibold text-slate-400 mb-2">
               Sent To
             </p>
-            <p className="font-black text-slate-800 text-lg">
+            <p className="font-bold text-slate-800 text-lg">
               {quote.companyName}
             </p>
             {quote.contactName && (
@@ -436,15 +436,15 @@ const QuoteDetailModal = ({ quote, onClose }) => {
             )}
           </div>
 
-          <div className="flex items-center gap-3 px-5 py-3 bg-indigo-50 border border-indigo-200 rounded-2xl">
-            <Repeat2 size={18} className="text-indigo-600" />
+          <div className="flex items-center gap-3 px-5 py-3 bg-primary/5 border border-primary/20 rounded-2xl">
+            <Repeat2 size={18} className="text-primary" />
             <p className="text-sm font-bold text-slate-700">
               {frequencyLabel}
             </p>
           </div>
 
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
+            <p className="text-[11px] font-semibold text-slate-400 mb-3">
               Cleaning Services & Scope of Work
             </p>
             <div className="space-y-3">
@@ -457,7 +457,7 @@ const QuoteDetailModal = ({ quote, onClose }) => {
                     <p className="font-bold text-slate-800 text-sm">
                       {item.service || item.customService}
                     </p>
-                    <p className="font-black text-slate-800 text-sm whitespace-nowrap">
+                    <p className="font-bold text-slate-800 text-sm whitespace-nowrap">
                       £
                       {(
                         Number(item.unitPrice || 0) * Number(item.qty || 1)
@@ -472,7 +472,7 @@ const QuoteDetailModal = ({ quote, onClose }) => {
                       {item.description}
                     </p>
                   )}
-                  <p className="text-[11px] font-bold text-indigo-500 mt-1.5 flex items-center gap-1">
+                  <p className="text-[11px] font-bold text-primary/50 mt-1.5 flex items-center gap-1">
                     {item.billingType === "hourly" ? (
                       <>
                         <Clock size={11} /> {item.qty} hrs @ £
@@ -504,7 +504,7 @@ const QuoteDetailModal = ({ quote, onClose }) => {
                 <span>£{Number(quote.vat).toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between text-base font-black text-slate-800 pt-3 border-t border-slate-200">
+            <div className="flex justify-between text-base font-bold text-slate-800 pt-3 border-t border-slate-200">
               <span>GRAND TOTAL</span>
               <span>
                 £{Number(quote.grandTotal || 0).toFixed(2)}
@@ -515,7 +515,7 @@ const QuoteDetailModal = ({ quote, onClose }) => {
             </div>
             {quote.depositRequired && quote.depositAmount > 0 && (
               <div className="mt-4 pt-4 border-t border-slate-200 space-y-2">
-                <div className="flex justify-between text-sm font-semibold text-indigo-600">
+                <div className="flex justify-between text-sm font-semibold text-primary">
                   <span>Deposit Required ({quote.depositPercent}%)</span>
                   <span>£{Number(quote.depositAmount).toFixed(2)}</span>
                 </div>
@@ -529,7 +529,7 @@ const QuoteDetailModal = ({ quote, onClose }) => {
 
           {quote.notes && (
             <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5">
-              <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-2">
                 Notes & Terms
               </p>
               <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
@@ -550,7 +550,7 @@ const Toggle = ({ value, onChange, label }) => (
     onClick={() => onChange(!value)}
   >
     <div
-      className={`w-10 h-6 rounded-full transition-all relative ${value ? "bg-indigo-600" : "bg-slate-200"}`}
+      className={`w-10 h-6 rounded-full transition-all relative ${value ? "bg-primary" : "bg-slate-200"}`}
     >
       <div
         className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${value ? "left-5" : "left-1"}`}
@@ -739,8 +739,8 @@ const QuoteBuilder = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20 flex-shrink-0">
+          <h2 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
               <FileText size={20} className="text-white" />
             </div>
             Quote Builder
@@ -759,7 +759,7 @@ const QuoteBuilder = () => {
           <button
             onClick={handleSend}
             disabled={sending}
-            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-sm font-black transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-60"
+            className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-2xl text-sm font-bold transition-all shadow-lg shadow-primary/20 disabled:opacity-60"
           >
             {sending ? (
               <RefreshCw size={15} className="animate-spin" />
@@ -777,12 +777,12 @@ const QuoteBuilder = () => {
           {/* Company Details */}
           <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden">
             <div className="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
-              <Building2 size={18} className="text-indigo-500" />
+              <Building2 size={18} className="text-primary/50" />
               <div>
-                <h3 className="text-base font-black text-slate-800">
+                <h3 className="text-base font-bold text-slate-800">
                   Company Details
                 </h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <p className="text-[11px] font-semibold text-slate-400">
                   Who is this quote for?
                 </p>
               </div>
@@ -829,7 +829,7 @@ const QuoteBuilder = () => {
                   key={f.key}
                   className={f.span === 2 ? "sm:col-span-2" : ""}
                 >
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">
+                  <label className="text-[11px] font-semibold text-slate-400 mb-1.5 block">
                     {f.label}
                   </label>
                   <input
@@ -837,7 +837,7 @@ const QuoteBuilder = () => {
                     placeholder={f.placeholder}
                     value={form[f.key]}
                     onChange={(e) => updateForm(f.key, e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400 transition-all"
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
               ))}
@@ -847,12 +847,12 @@ const QuoteBuilder = () => {
           {/* Frequency */}
           <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden">
             <div className="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
-              <Repeat2 size={18} className="text-indigo-500" />
+              <Repeat2 size={18} className="text-primary/50" />
               <div>
-                <h3 className="text-base font-black text-slate-800">
+                <h3 className="text-base font-bold text-slate-800">
                   Frequency & Terms
                 </h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <p className="text-[11px] font-semibold text-slate-400">
                   How often will services be provided?
                 </p>
               </div>
@@ -860,13 +860,13 @@ const QuoteBuilder = () => {
             <div className="p-8 space-y-5">
               <div className="grid sm:grid-cols-3 gap-5">
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">
+                  <label className="text-[11px] font-semibold text-slate-400 mb-1.5 block">
                     Service Frequency
                   </label>
                   <select
                     value={form.frequency}
                     onChange={(e) => updateForm("frequency", e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400 transition-all"
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   >
                     {FREQUENCY_OPTIONS.map((o) => (
                       <option key={o.value} value={o.value}>
@@ -876,7 +876,7 @@ const QuoteBuilder = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">
+                  <label className="text-[11px] font-semibold text-slate-400 mb-1.5 block">
                     VAT Rate (%)
                   </label>
                   <input
@@ -885,11 +885,11 @@ const QuoteBuilder = () => {
                     max="100"
                     value={form.vatRate}
                     onChange={(e) => updateForm("vatRate", e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400 transition-all"
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">
+                  <label className="text-[11px] font-semibold text-slate-400 mb-1.5 block">
                     Valid for (days)
                   </label>
                   <input
@@ -897,7 +897,7 @@ const QuoteBuilder = () => {
                     min="1"
                     value={form.validDays}
                     onChange={(e) => updateForm("validDays", e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400 transition-all"
+                    className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
               </div>
@@ -916,12 +916,12 @@ const QuoteBuilder = () => {
 
               {/* Professional Payment Terms */}
               <div className="border-t border-slate-200 pt-5 space-y-5">
-                <h4 className="text-sm font-black text-slate-800">
+                <h4 className="text-sm font-bold text-slate-800">
                   Payment Terms
                 </h4>
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">
+                    <label className="text-[11px] font-semibold text-slate-400 mb-1.5 block">
                       Payment Terms
                     </label>
                     <select
@@ -929,7 +929,7 @@ const QuoteBuilder = () => {
                       onChange={(e) =>
                         updateForm("paymentTerms", e.target.value)
                       }
-                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400 transition-all"
+                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     >
                       <option value="Immediate">Immediate Payment</option>
                       <option value="Net 7">Net 7</option>
@@ -941,7 +941,7 @@ const QuoteBuilder = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">
+                    <label className="text-[11px] font-semibold text-slate-400 mb-1.5 block">
                       Discount (%)
                     </label>
                     <input
@@ -951,14 +951,14 @@ const QuoteBuilder = () => {
                       step="0.5"
                       value={form.discount}
                       onChange={(e) => updateForm("discount", e.target.value)}
-                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400 transition-all"
+                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       placeholder="0.00"
                     />
                   </div>
                 </div>
 
                 {/* Deposit/Retainer Option */}
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-indigo-50 border border-indigo-200">
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-primary/5 border border-primary/20">
                   <input
                     type="checkbox"
                     id="depositCheck"
@@ -970,7 +970,7 @@ const QuoteBuilder = () => {
                   />
                   <label
                     htmlFor="depositCheck"
-                    className="text-sm font-semibold text-indigo-700 cursor-pointer flex-1"
+                    className="text-sm font-semibold text-primary-dark cursor-pointer flex-1"
                   >
                     Require deposit/retainer payment
                   </label>
@@ -978,7 +978,7 @@ const QuoteBuilder = () => {
 
                 {form.depositRequired && (
                   <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5 block">
+                    <label className="text-[11px] font-semibold text-slate-400 mb-1.5 block">
                       Deposit (% of total)
                     </label>
                     <input
@@ -990,7 +990,7 @@ const QuoteBuilder = () => {
                       onChange={(e) =>
                         updateForm("depositPercent", e.target.value)
                       }
-                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400 transition-all"
+                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     />
                   </div>
                 )}
@@ -1002,19 +1002,19 @@ const QuoteBuilder = () => {
           <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden">
             <div className="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <Hash size={18} className="text-indigo-500" />
+                <Hash size={18} className="text-primary/50" />
                 <div>
-                  <h3 className="text-base font-black text-slate-800">
+                  <h3 className="text-base font-bold text-slate-800">
                     Services & Pricing
                   </h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  <p className="text-[11px] font-semibold text-slate-400">
                     Add individual line items
                   </p>
                 </div>
               </div>
               <button
                 onClick={addItem}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-2xl text-xs font-black border border-indigo-200 transition-all"
+                className="flex items-center gap-2 px-4 py-2 bg-primary/5 hover:bg-primary/10 text-primary rounded-2xl text-xs font-bold border border-primary/20 transition-all"
               >
                 <Plus size={14} /> Add Service
               </button>
@@ -1036,12 +1036,12 @@ const QuoteBuilder = () => {
           {/* Notes */}
           <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden">
             <div className="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
-              <Pencil size={18} className="text-indigo-500" />
+              <Pencil size={18} className="text-primary/50" />
               <div>
-                <h3 className="text-base font-black text-slate-800">
+                <h3 className="text-base font-bold text-slate-800">
                   Notes & Terms
                 </h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <p className="text-[11px] font-semibold text-slate-400">
                   Shown at the bottom of the quote
                 </p>
               </div>
@@ -1051,7 +1051,7 @@ const QuoteBuilder = () => {
                 rows={4}
                 value={form.notes}
                 onChange={(e) => updateForm("notes", e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 resize-none focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400/20 focus:border-indigo-400 transition-all"
+                className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 resize-none focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
             </div>
           </div>
@@ -1062,19 +1062,19 @@ const QuoteBuilder = () => {
           {/* Summary card */}
           <div className="bg-white border border-slate-200 rounded-[28px] shadow-sm overflow-hidden sticky top-24">
             <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
-              <h3 className="text-base font-black text-slate-800">
+              <h3 className="text-base font-bold text-slate-800">
                 Quote Summary
               </h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+              <p className="text-[11px] font-semibold text-slate-400 mt-0.5">
                 Live calculation
               </p>
             </div>
             <div className="p-6 space-y-4">
-              <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-100 space-y-0.5">
-                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400">
+              <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 space-y-0.5">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
                   Recipient
                 </p>
-                <p className="font-black text-slate-800 text-sm">
+                <p className="font-bold text-slate-800 text-sm">
                   {form.companyName || (
                     <span className="text-slate-300 font-normal">
                       Company name…
@@ -1091,8 +1091,8 @@ const QuoteBuilder = () => {
               </div>
 
               <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
-                <Repeat2 size={14} className="text-indigo-500" />
-                <span className="text-xs font-black text-slate-700">
+                <Repeat2 size={14} className="text-primary/50" />
+                <span className="text-xs font-bold text-slate-700">
                   {
                     FREQUENCY_OPTIONS.find((f) => f.value === form.frequency)
                       ?.label
@@ -1114,7 +1114,7 @@ const QuoteBuilder = () => {
                             ? item.customService
                             : item.service}
                         </span>
-                        <span className="font-black text-slate-800">
+                        <span className="font-bold text-slate-800">
                           £{(Number(item.unitPrice || 0) * item.qty).toFixed(2)}
                         </span>
                       </div>
@@ -1133,9 +1133,9 @@ const QuoteBuilder = () => {
                     <span>£{vat.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-base font-black text-slate-800 pt-2 border-t border-slate-200">
+                <div className="flex justify-between text-base font-bold text-slate-800 pt-2 border-t border-slate-200">
                   <span>Total</span>
-                  <span className="text-indigo-600">
+                  <span className="text-primary">
                     £{grandTotal.toFixed(2)}
                   </span>
                 </div>
@@ -1152,7 +1152,7 @@ const QuoteBuilder = () => {
               <button
                 onClick={handleSend}
                 disabled={sending}
-                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-sm font-black transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full py-3.5 bg-primary hover:bg-primary-dark text-white rounded-2xl text-sm font-bold transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {sending ? (
                   <RefreshCw size={16} className="animate-spin" />
@@ -1174,17 +1174,17 @@ const QuoteBuilder = () => {
           <div className="bg-white border border-slate-200 rounded-[28px] shadow-sm overflow-hidden">
             <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
-                  <History size={16} className="text-indigo-500" />
+                <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                  <History size={16} className="text-primary/50" />
                   Quote History
                 </h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                <p className="text-[11px] font-semibold text-slate-400 mt-0.5">
                   {showAllHistory ? "All quotes sent" : "Last 10 quotes"}
                 </p>
               </div>
               <button
                 onClick={toggleHistoryView}
-                className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-800 transition-colors flex-shrink-0"
+                className="text-[10px] font-bold text-primary uppercase tracking-widest hover:text-primary-dark transition-colors flex-shrink-0"
               >
                 {showAllHistory ? "Show Recent" : "View All"}
               </button>
@@ -1211,14 +1211,14 @@ const QuoteBuilder = () => {
                       <CheckCircle2 size={16} className="text-emerald-500" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black text-slate-800 truncate">
+                      <p className="text-xs font-bold text-slate-800 truncate">
                         {q.companyName}
                       </p>
                       <p className="text-[10px] font-semibold text-slate-400">
                         {q.quoteRef} · £{Number(q.grandTotal || 0).toFixed(2)}
                       </p>
                     </div>
-                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest flex-shrink-0">
+                    <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest flex-shrink-0">
                       {new Date(q.createdAt).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",

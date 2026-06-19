@@ -55,33 +55,52 @@ const AdminBookingPay = () => {
     }
   };
 
-  if (loading) return <div className="p-8">Loading...</div>;
-  if (!booking) return <div className="p-8">Booking not found.</div>;
+  if (loading)
+    return (
+      <div className="p-8 text-sm font-medium text-slate-400">Loading…</div>
+    );
+  if (!booking)
+    return (
+      <div className="p-8 text-sm font-medium text-slate-400">
+        Booking not found.
+      </div>
+    );
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h2 className="text-2xl font-black text-primary-dark mb-4">
-        Collect Payment for {booking.bookingId}
-      </h2>
-      <p className="mb-4">
-        Customer: {booking.customer.firstName} {booking.customer.lastName} —{" "}
-        {booking.customer.email}
-      </p>
-      <Elements stripe={stripePromise}>
-        <StripePayment
-          amount={booking.payment?.amount || 0}
-          currency={booking.payment?.currency || "GBP"}
-          customerInfo={{
-            firstName: booking.customer.firstName,
-            lastName: booking.customer.lastName,
-            email: booking.customer.email,
-            phone: booking.customer.phone,
-            serviceType: booking.service,
-          }}
-          bookingId={booking._id}
-          onPaymentSuccess={handlePaymentSuccess}
-        />
-      </Elements>
+    <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-700">
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+          Collect Payment
+        </h2>
+        <p className="text-sm text-slate-400 font-medium mt-1">
+          Booking ref {booking.bookingId}
+        </p>
+      </div>
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-6">
+        <p className="text-sm font-semibold text-slate-700">
+          {booking.customer.firstName} {booking.customer.lastName}
+        </p>
+        <p className="text-sm text-slate-400 font-medium">
+          {booking.customer.email}
+        </p>
+      </div>
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-6">
+        <Elements stripe={stripePromise}>
+          <StripePayment
+            amount={booking.payment?.amount || 0}
+            currency={booking.payment?.currency || "GBP"}
+            customerInfo={{
+              firstName: booking.customer.firstName,
+              lastName: booking.customer.lastName,
+              email: booking.customer.email,
+              phone: booking.customer.phone,
+              serviceType: booking.service,
+            }}
+            bookingId={booking._id}
+            onPaymentSuccess={handlePaymentSuccess}
+          />
+        </Elements>
+      </div>
     </div>
   );
 };

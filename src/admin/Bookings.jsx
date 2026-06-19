@@ -33,6 +33,19 @@ import {
 } from "lucide-react";
 import AdminCRM from "./AdminCRM";
 
+export const LEAD_SOURCES = [
+  "Bark",
+  "Checkatrade",
+  "MyJobQuote",
+  "MyBuilder",
+  "Instagram",
+  "Facebook",
+  "TikTok",
+  "Google",
+  "Referral",
+  "Organic",
+];
+
 const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showRecurring, setShowRecurring] = useState(false);
@@ -373,7 +386,7 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
       <div className="bg-white rounded-[40px] p-10 border border-slate-200 shadow-sm animate-in fade-in">
         <div className="flex justify-between items-center mb-10">
           <div>
-            <h3 className="text-2xl font-black text-primary-dark tracking-tighter">
+            <h3 className="text-2xl font-bold text-primary-dark tracking-tighter">
               {currentMonth.toLocaleString("default", { month: "long" })}{" "}
               <span className="text-primary">{currentMonth.getFullYear()}</span>
             </h3>
@@ -387,7 +400,7 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
                 setShowRecurring(!showRecurring);
                 setRecurringSuccess(null);
               }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all border-2"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all border-2"
               style={{
                 background: showRecurring
                   ? "linear-gradient(135deg,#0F172A,#1e3a5f)"
@@ -432,7 +445,7 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
             <div
               key={d}
-              className="text-[10px] font-black text-slate-300 uppercase text-center py-2"
+              className="text-[10px] font-bold text-slate-300 uppercase text-center py-2"
             >
               {d}
             </div>
@@ -472,14 +485,14 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
                       ${isBlocked ? "bg-rose-50 border-rose-200 text-rose-500" : hasBookings ? "bg-emerald-50 border-emerald-200 text-emerald-600" : "bg-slate-50 border-transparent text-slate-400 hover:border-primary/30"}
                     `}
                   >
-                    <span className="text-sm font-black">{date.getDate()}</span>
+                    <span className="text-sm font-bold">{date.getDate()}</span>
                     {isBlocked && (
-                      <span className="text-[7px] font-black uppercase absolute bottom-2">
+                      <span className="text-[7px] font-bold uppercase absolute bottom-2">
                         Blocked
                       </span>
                     )}
                     {hasBookings && !isBlocked && (
-                      <span className="text-[7px] font-black uppercase absolute bottom-2">
+                      <span className="text-[7px] font-bold uppercase absolute bottom-2">
                         {dayBookings.length} Booking
                         {dayBookings.length > 1 ? "s" : ""}
                       </span>
@@ -1532,7 +1545,7 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   return (
     <div className="bg-white rounded-[24px] md:rounded-[32px] p-4 md:p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
       <div className="flex justify-between items-center mb-6 md:mb-8">
-        <h3 className="font-black text-primary-dark tracking-tighter text-base md:text-lg">
+        <h3 className="font-bold text-primary-dark tracking-tighter text-base md:text-lg">
           {currentMonth.toLocaleString("default", { month: "long" })}{" "}
           <span className="text-primary">{currentMonth.getFullYear()}</span>
         </h3>
@@ -1557,7 +1570,7 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
           <div
             key={d}
-            className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase text-center py-2"
+            className="text-[8px] md:text-[10px] font-bold text-slate-300 uppercase text-center py-2"
           >
             {d}
           </div>
@@ -1579,18 +1592,18 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
                       `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
                     )
                   }
-                  className={`w-full h-full rounded-xl text-center flex items-center justify-center relative font-black text-sm transition-all ${isSelected(date) ? "bg-primary text-white shadow-lg" : booked ? "bg-rose-50 text-rose-300 cursor-not-allowed" : past ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-slate-50 text-slate-600 hover:bg-primary/10 hover:text-primary"}`}
+                  className={`w-full h-full rounded-xl text-center flex items-center justify-center relative font-bold text-sm transition-all ${isSelected(date) ? "bg-primary text-white shadow-lg" : booked ? "bg-rose-50 text-rose-300 cursor-not-allowed" : past ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-slate-50 text-slate-600 hover:bg-primary/10 hover:text-primary"}`}
                 >
-                  <span className="text-xs md:text-sm font-black">
+                  <span className="text-xs md:text-sm font-bold">
                     {date.getDate()}
                   </span>
                   {booked && (
-                    <span className="text-[6px] md:text-[7px] font-black uppercase text-rose-500 absolute top-0.5 md:top-1">
+                    <span className="text-[6px] md:text-[7px] font-bold uppercase text-rose-500 absolute top-0.5 md:top-1">
                       Taken
                     </span>
                   )}
                   {past && !booked && !isSelected(date) && (
-                    <span className="text-[5px] md:text-[6px] font-black uppercase text-amber-500 absolute top-0.5 md:top-1">
+                    <span className="text-[5px] md:text-[6px] font-bold uppercase text-amber-500 absolute top-0.5 md:top-1">
                       Past
                     </span>
                   )}
@@ -1632,6 +1645,8 @@ const Bookings = () => {
     schedule: { date: "", timeSlot: "", preferredTime: "" },
     payment: { amount: 0, currency: "GBP", status: "Pending" },
     status: "Pending",
+    leadSource: "Organic",
+    suppliesProvidedBy: "Cleaniq",
   });
   const [createStep, setCreateStep] = useState(1);
   const [servicesList, setServicesList] = useState([]);
@@ -2524,74 +2539,74 @@ const Bookings = () => {
       )}
 
       {statusMessage.text && (
-        <div className="fixed top-10 right-10 z-100 px-8 py-5 rounded-[32px] border shadow-2xl bg-primary-dark text-white font-black text-sm uppercase tracking-widest animate-in slide-in-from-right">
+        <div className="fixed top-6 right-6 z-100 px-6 py-4 rounded-2xl shadow-2xl bg-slate-900 text-white font-semibold text-sm animate-in slide-in-from-right">
           {statusMessage.text}
         </div>
       )}
 
-      <div className="bg-white p-6 md:p-8 rounded-[32px] md:rounded-[40px] border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black text-primary-dark tracking-tighter">
-            Command Center
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Bookings
           </h1>
-          <div className="flex gap-4 mt-2">
+          <div className="flex gap-5 mt-2">
             <button
               onClick={() => setView("list")}
-              className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${view === "list" ? "border-primary text-primary" : "border-transparent text-slate-400"}`}
+              className={`text-[11px] font-bold uppercase tracking-wider pb-1 border-b-2 transition-all ${view === "list" ? "border-primary text-primary" : "border-transparent text-slate-400 hover:text-slate-600"}`}
             >
               Booking List
             </button>
             <button
               onClick={() => setView("availability")}
-              className={`text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${view === "availability" ? "border-primary text-primary" : "border-transparent text-slate-400"}`}
+              className={`text-[11px] font-bold uppercase tracking-wider pb-1 border-b-2 transition-all ${view === "availability" ? "border-primary text-primary" : "border-transparent text-slate-400 hover:text-slate-600"}`}
             >
               Manage Availability
             </button>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2.5">
           {view === "list" && (
             <button
               onClick={exportToCSV}
-              className="p-4 px-8 rounded-2xl bg-slate-50 text-slate-500 hover:bg-slate-100 transition-all font-black text-[10px] uppercase tracking-widest border border-slate-200 flex items-center gap-2"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
             >
-              <Download size={16} /> Export CSV
+              <Download size={15} /> Export CSV
             </button>
           )}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="p-4 px-6 rounded-2xl bg-white text-primary border border-slate-200 hover:bg-slate-50 transition-all font-black text-[10px] uppercase tracking-widest"
+            className="px-4 py-2.5 rounded-xl bg-white text-primary border border-slate-200 hover:bg-slate-50 transition-all font-semibold text-sm"
           >
             Create Booking
           </button>
           <button
             onClick={fetchBookings}
-            className="p-4 px-8 rounded-2xl bg-primary text-white hover:scale-105 transition-all font-black text-[10px] uppercase tracking-widest border-none shadow-lg shadow-primary/20"
+            className="px-4 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-dark transition-all font-semibold text-sm shadow-sm"
           >
-            Refresh Data
+            Refresh
           </button>
         </div>
       </div>
 
       {view === "list" ? (
-        <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden animate-in fade-in">
-          <div className="p-6 border-b border-slate-100 flex items-center gap-4 bg-slate-50/30 justify-between flex-wrap">
-            <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border border-slate-200 flex-1 min-w-60">
-              <Search size={18} className="text-slate-400" />
+        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden animate-in fade-in">
+          <div className="p-5 border-b border-slate-100 flex items-center gap-4 justify-between flex-wrap">
+            <div className="flex items-center gap-2.5 px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-200 flex-1 min-w-60 focus-within:border-primary/50 transition-all">
+              <Search size={16} className="text-slate-400" />
               <input
                 type="text"
                 placeholder="Search bookings..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-transparent outline-none text-sm font-bold w-full"
+                className="bg-transparent outline-none text-sm font-medium w-full text-slate-700"
               />
             </div>
             {selectedBookings.size > 0 && (
               <button
                 onClick={() => setShowBulkDeleteModal(true)}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:shadow-lg text-white font-black transition-all flex items-center gap-2 text-sm"
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold transition-all flex items-center gap-2 text-sm"
               >
-                <Trash2 size={18} />
+                <Trash2 size={16} />
                 Delete ({selectedBookings.size})
               </button>
             )}
@@ -2600,8 +2615,8 @@ const Bookings = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                  <th className="px-4 py-5 w-12">
+                <tr className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.12em] bg-slate-50/60">
+                  <th className="px-4 py-3.5 w-12">
                     <input
                       type="checkbox"
                       checked={
@@ -2609,22 +2624,23 @@ const Bookings = () => {
                         filteredBookings.length > 0
                       }
                       onChange={toggleSelectAll}
-                      className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
+                      className="w-4 h-4 rounded border-2 border-slate-300 cursor-pointer accent-primary"
                     />
                   </th>
-                  <th className="px-8 py-5">Customer</th>
-                  <th className="px-4 py-5">Service</th>
-                  <th className="px-4 py-5">Date</th>
-                  <th className="px-4 py-5">Status</th>
-                  <th className="px-8 py-5 text-right">Actions</th>
+                  <th className="px-6 py-3.5">Customer</th>
+                  <th className="px-4 py-3.5">Service</th>
+                  <th className="px-4 py-3.5">Date</th>
+                  <th className="px-4 py-3.5">Worker</th>
+                  <th className="px-4 py-3.5">Status</th>
+                  <th className="px-6 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {loading ? (
                   <tr>
                     <td
-                      colSpan="5"
-                      className="py-20 text-center font-black text-slate-400 uppercase tracking-widest"
+                      colSpan="7"
+                      className="py-16 text-center font-semibold text-slate-400"
                     >
                       Loading...
                     </td>
@@ -2632,8 +2648,8 @@ const Bookings = () => {
                 ) : filteredBookings.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="6"
-                      className="py-20 text-center font-black text-slate-300 uppercase tracking-widest"
+                      colSpan="7"
+                      className="py-16 text-center font-semibold text-slate-300"
                     >
                       No matching entries
                     </td>
@@ -2642,62 +2658,62 @@ const Bookings = () => {
                   filteredBookings.map((b) => (
                     <tr
                       key={b._id}
-                      className={`group hover:bg-slate-50/50 transition-colors ${
+                      className={`group hover:bg-slate-50/80 transition-colors ${
                         selectedBookings.has(b._id) ? "bg-blue-50" : ""
                       }`}
                     >
-                      <td className="px-4 py-6 w-12">
+                      <td className="px-4 py-4 w-12">
                         <input
                           type="checkbox"
                           checked={selectedBookings.has(b._id)}
                           onChange={() => toggleBookingSelection(b._id)}
-                          className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
+                          className="w-4 h-4 rounded border-2 border-slate-300 cursor-pointer accent-primary"
                         />
                       </td>
-                      <td className="px-8 py-6">
-                        <p className="font-bold text-primary-dark">
+                      <td className="px-6 py-4">
+                        <p className="font-semibold text-slate-800 text-sm">
                           {b.customer?.firstName} {b.customer?.lastName}
                         </p>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                        <p className="text-[10px] text-slate-400 font-semibold">
                           {b.bookingId}
                         </p>
                       </td>
-                      <td className="px-4 py-6">
-                        <p className="text-sm font-bold text-slate-700">
+                      <td className="px-4 py-4">
+                        <p className="text-sm font-medium text-slate-700">
                           {b.service}
                         </p>
-                        <p className="text-[10px] text-primary font-black uppercase tracking-tighter">
+                        <p className="text-[10px] text-primary font-semibold">
                           {getPropertyData(b)["Bedroom"] || 0} Bed •{" "}
                           {b.details?.duration || 0}h Clean
                         </p>
                       </td>
-                      <td className="px-4 py-6 text-sm font-bold text-slate-700">
+                      <td className="px-4 py-4 text-sm font-medium text-slate-700">
                         {new Date(b.schedule?.date).toLocaleDateString()}
                         <br />
-                        <span className="text-[10px] text-primary uppercase">
+                        <span className="text-[10px] text-slate-400 font-semibold">
                           {b.schedule?.timeSlot}
                         </span>
                       </td>
-                      <td className="px-4 py-6">
+                      <td className="px-4 py-4">
                         {b.assignedWorkerName ? (
-                          <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                          <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">
                             {b.assignedWorkerName}
                           </span>
                         ) : (
-                          <span className="text-xs font-bold text-slate-300 italic">
+                          <span className="text-xs font-medium text-slate-300 italic">
                             Unassigned
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-6">
+                      <td className="px-4 py-4">
                         <span
-                          className={`px-3 py-1.5 rounded-xl text-[10px] font-black border uppercase tracking-tight ${getStatusColor(b.status)}`}
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-semibold border uppercase tracking-wide ${getStatusColor(b.status)}`}
                         >
                           {b.status}
                         </span>
                       </td>
-                      <td className="px-8 py-6 text-right">
-                        <div className="flex justify-end gap-2">
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-1.5">
                           <button
                             onClick={() => {
                               setSelectedBooking(b);
@@ -2705,25 +2721,25 @@ const Bookings = () => {
                               setIsEditing(false);
                               setShowRaw(false);
                             }}
-                            className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
+                            className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
                             title="View Booking"
                           >
-                            <Eye size={18} />
+                            <Eye size={16} />
                           </button>
                           <button
                             onClick={() => setCrmBooking(b)}
-                            className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all"
+                            className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all"
                             title="CRM Actions — Email, Invoice, Review, Payment Link"
                             style={{ position: "relative" }}
                           >
-                            <Sparkles size={18} />
+                            <Sparkles size={16} />
                           </button>
                           <button
                             onClick={() => handleDelete(b._id, b.bookingId)}
-                            className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-100 hover:text-rose-500 transition-all"
+                            className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-100 hover:text-rose-500 transition-all"
                             title="Delete Booking"
                           >
-                            <Trash2 size={18} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>
@@ -2755,7 +2771,7 @@ const Bookings = () => {
                   <Hash size={24} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black text-primary-dark tracking-tighter">
+                  <h3 className="text-2xl font-bold text-primary-dark tracking-tighter">
                     {isEditing ? "Edit Parameters" : "Entry Intelligence"}
                   </h3>
                   <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
@@ -2775,7 +2791,7 @@ const Bookings = () => {
                 <div className="space-y-8">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
+                      <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
                         First Name
                       </label>
                       <input
@@ -2794,7 +2810,7 @@ const Bookings = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
+                      <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
                         Last Name
                       </label>
                       <input
@@ -2813,7 +2829,7 @@ const Bookings = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
+                      <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
                         Phone
                       </label>
                       <input
@@ -2832,7 +2848,7 @@ const Bookings = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
+                      <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
                         Status
                       </label>
                       <select
@@ -2850,12 +2866,12 @@ const Bookings = () => {
                     </div>
                   </div>
                   <div className="p-8 rounded-[32px] bg-slate-50 border border-slate-100 space-y-4">
-                    <h4 className="text-xs font-black text-primary-dark uppercase tracking-widest">
+                    <h4 className="text-xs font-bold text-primary-dark uppercase tracking-widest">
                       Pricing & Logistics
                     </h4>
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-1">
-                        <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
+                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
                           Total Price ({editData.payment?.currency})
                         </label>
                         <div className="relative">
@@ -2875,12 +2891,12 @@ const Bookings = () => {
                                 },
                               })
                             }
-                            className="w-full p-4 pl-10 rounded-2xl bg-white border border-slate-200 font-black text-lg"
+                            className="w-full p-4 pl-10 rounded-2xl bg-white border border-slate-200 font-bold text-lg"
                           />
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
+                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
                           Worker Rate (£/hr)
                         </label>
                         <input
@@ -2892,12 +2908,12 @@ const Bookings = () => {
                               workerRate: Number(e.target.value) || 0,
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-black text-lg"
+                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold text-lg"
                           placeholder="0.00"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
+                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
                           Worker Expected Hours
                         </label>
                         <input
@@ -2909,7 +2925,7 @@ const Bookings = () => {
                               workerDuration: Number(e.target.value) || 0,
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-black text-lg"
+                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold text-lg"
                           placeholder="e.g. 2"
                         />
                       </div>
@@ -2923,12 +2939,12 @@ const Bookings = () => {
 
                         return (
                           <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 space-y-4 md:col-span-2">
-                            <h4 className="text-xs font-black text-primary-dark uppercase tracking-widest">
+                            <h4 className="text-xs font-bold text-primary-dark uppercase tracking-widest">
                               Schedule
                             </h4>
                             <div className="grid md:grid-cols-2 gap-6">
                               <div>
-                                <label className="text-[9px] font-black text-slate-400 ml-1 uppercase block mb-2">
+                                <label className="text-[9px] font-bold text-slate-400 ml-1 uppercase block mb-2">
                                   Booking Date
                                 </label>
                                 <CreateCalendar
@@ -2949,7 +2965,7 @@ const Bookings = () => {
                               </div>
 
                               <div className="space-y-3">
-                                <label className="text-[9px] font-black text-slate-400 ml-1 uppercase block">
+                                <label className="text-[9px] font-bold text-slate-400 ml-1 uppercase block">
                                   Time Slot
                                 </label>
                                 <div className="grid grid-cols-3 gap-2">
@@ -2999,7 +3015,7 @@ const Bookings = () => {
                                 </div>
 
                                 <div>
-                                  <label className="text-[9px] font-black text-slate-400 ml-1 uppercase block mb-2">
+                                  <label className="text-[9px] font-bold text-slate-400 ml-1 uppercase block mb-2">
                                     Or pick a flexible time
                                   </label>
                                   <div className="grid grid-cols-4 gap-2 mb-3">
@@ -3144,7 +3160,7 @@ const Bookings = () => {
                       })()}
                     </div>
                     <div className="space-y-1 pt-4">
-                      <label className="text-[9px] font-black text-slate-400 ml-4 uppercase">
+                      <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
                         Special Instructions
                       </label>
                       <textarea
@@ -3168,7 +3184,7 @@ const Bookings = () => {
                   <div className="grid md:grid-cols-3 gap-6">
                     <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 text-center">
                       <Mail size={20} className="text-primary mx-auto mb-2" />
-                      <p className="text-[9px] font-black text-slate-400 uppercase mb-1">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">
                         Email
                       </p>
                       <p className="text-xs font-bold text-primary-dark truncate">
@@ -3177,7 +3193,7 @@ const Bookings = () => {
                     </div>
                     <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 text-center">
                       <Phone size={20} className="text-primary mx-auto mb-2" />
-                      <p className="text-[9px] font-black text-slate-400 uppercase mb-1">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">
                         Contact
                       </p>
                       <p className="text-xs font-bold text-primary-dark">
@@ -3189,10 +3205,10 @@ const Bookings = () => {
                         size={20}
                         className="text-primary mx-auto mb-2"
                       />
-                      <p className="text-[9px] font-black text-slate-400 uppercase mb-1">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">
                         Payment
                       </p>
-                      <p className="text-xs font-black text-primary-dark">
+                      <p className="text-xs font-bold text-primary-dark">
                         {selectedBooking.payment?.currency === "GBP"
                           ? "£"
                           : "₦"}
@@ -3235,7 +3251,7 @@ const Bookings = () => {
                               alert("❌ Failed to confirm payment");
                             }
                           }}
-                          className="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[8px] font-black rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                          className="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[8px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                         >
                           Confirm
                         </button>
@@ -3248,7 +3264,7 @@ const Bookings = () => {
                             });
                             setShowAdditionalHoursModal(true);
                           }}
-                          className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-[8px] font-black rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                          className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-[8px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                         >
                           + Extra Hours
                         </button>
@@ -3265,10 +3281,10 @@ const Bookings = () => {
                             <User size={24} className="text-emerald-700" />
                           </div>
                           <div>
-                            <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">
+                            <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">
                               Assigned Worker
                             </p>
-                            <p className="text-sm font-black text-emerald-900">
+                            <p className="text-sm font-bold text-emerald-900">
                               {selectedBooking.assignedWorker?.firstName
                                 ? `${selectedBooking.assignedWorker.firstName} ${selectedBooking.assignedWorker.lastName}`
                                 : selectedBooking.assignedWorkerName}
@@ -3335,7 +3351,7 @@ const Bookings = () => {
 
                       {/* Live Cleaner Progress Timeline */}
                       <div className="w-full md:w-80 bg-white/70 backdrop-blur-sm p-5 rounded-2xl border border-emerald-100/50 flex flex-col justify-between">
-                        <h5 className="text-[10px] font-black text-emerald-800 uppercase tracking-widest mb-3 flex items-center gap-1">
+                        <h5 className="text-[10px] font-bold text-emerald-800 uppercase tracking-widest mb-3 flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                           Live Cleaner Progress
                         </h5>
@@ -3350,7 +3366,7 @@ const Bookings = () => {
                                   : "bg-white border-slate-300"
                               }`}
                             />
-                            <p className="text-xs font-black text-primary-dark">
+                            <p className="text-xs font-bold text-primary-dark">
                               Arrived at Customer
                             </p>
                             <p className="text-[10px] text-slate-400 font-medium">
@@ -3369,7 +3385,7 @@ const Bookings = () => {
                                   : "bg-white border-slate-300"
                               }`}
                             />
-                            <p className="text-xs font-black text-primary-dark">
+                            <p className="text-xs font-bold text-primary-dark">
                               Cleaning Commenced
                             </p>
                             <p className="text-[10px] text-slate-400 font-medium">
@@ -3388,7 +3404,7 @@ const Bookings = () => {
                                   : "bg-white border-slate-300"
                               }`}
                             />
-                            <p className="text-xs font-black text-primary-dark">
+                            <p className="text-xs font-bold text-primary-dark">
                               Cleaning Finished
                             </p>
                             <p className="text-[10px] text-slate-400 font-bold">
@@ -3409,7 +3425,7 @@ const Bookings = () => {
                           <MapPin size={20} />
                         </div>
                         <div>
-                          <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                          <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                             Full Address
                           </h4>
                           <p className="font-bold text-primary-dark leading-tight">
@@ -3422,7 +3438,7 @@ const Bookings = () => {
                           <Calendar size={20} />
                         </div>
                         <div>
-                          <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                          <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                             Booking Date
                           </h4>
                           <p className="font-bold text-primary-dark">
@@ -3444,14 +3460,14 @@ const Bookings = () => {
                           <Clock size={20} />
                         </div>
                         <div>
-                          <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                          <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                             Duration & Arrival Timing
                           </h4>
                           <p className="font-bold text-primary-dark">
                             {selectedBooking.details?.duration || 0}h Clean (
                             {selectedBooking.service})
                           </p>
-                          <p className="text-[11px] font-black text-slate-500 uppercase mt-1">
+                          <p className="text-[11px] font-bold text-slate-500 uppercase mt-1">
                             Slot:{" "}
                             {{
                               Morning: "Morning (8am – 12pm)",
@@ -3461,7 +3477,7 @@ const Bookings = () => {
                               selectedBooking.schedule?.timeSlot ||
                               "Not set"}
                           </p>
-                          <p className="text-[11px] font-black text-primary uppercase mt-1">
+                          <p className="text-[11px] font-bold text-primary uppercase mt-1">
                             Requested Arrival:{" "}
                             {getPreferredTime(selectedBooking) ||
                               "Not specified"}
@@ -3473,7 +3489,7 @@ const Bookings = () => {
                           <Info size={20} />
                         </div>
                         <div>
-                          <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                          <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                             Customer Notes / Instructions
                           </h4>
                           <p className="text-xs font-bold text-slate-500 leading-relaxed italic">
@@ -3490,7 +3506,7 @@ const Bookings = () => {
                       {Object.keys(getPropertyData(selectedBooking)).length >
                         0 && (
                         <div className="p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-[24px] border-2 border-indigo-200 space-y-4">
-                          <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+                          <h4 className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest flex items-center gap-2">
                             <HomeIcon size={16} className="text-indigo-600" />
                             Property Rooms
                           </h4>
@@ -3503,7 +3519,7 @@ const Bookings = () => {
                                   key={key}
                                   className="bg-white rounded-lg border-2 border-indigo-200 p-3 text-center hover:shadow-md transition-shadow"
                                 >
-                                  <p className="text-[10px] font-black text-indigo-600">
+                                  <p className="text-[10px] font-bold text-indigo-600">
                                     {qty}x
                                   </p>
                                   <p className="text-[9px] font-bold text-slate-700 mt-1 line-clamp-2">
@@ -3520,7 +3536,7 @@ const Bookings = () => {
                       {Object.keys(getExtrasData(selectedBooking)).length >
                         0 && (
                         <div className="p-6 bg-gradient-to-br from-rose-50 to-rose-100 rounded-[24px] border-2 border-rose-200 space-y-4">
-                          <h4 className="text-[10px] font-black text-rose-600 uppercase tracking-widest flex items-center gap-2">
+                          <h4 className="text-[10px] font-bold text-rose-600 uppercase tracking-widest flex items-center gap-2">
                             <Zap size={16} className="text-rose-600" /> Extra
                             Services
                           </h4>
@@ -3539,7 +3555,7 @@ const Bookings = () => {
                                       Qty: {qty}
                                     </p>
                                   </div>
-                                  <span className="inline-flex items-center justify-center w-6 h-6 bg-rose-600 text-white rounded-full text-xs font-black">
+                                  <span className="inline-flex items-center justify-center w-6 h-6 bg-rose-600 text-white rounded-full text-xs font-bold">
                                     ✓
                                   </span>
                                 </div>
@@ -3564,11 +3580,11 @@ const Bookings = () => {
                               : "🚫"}
                           </span>
                           <div>
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                               Pet on Premises
                             </p>
                             <p
-                              className={`font-black text-sm ${getPetInfo(selectedBooking) === "Yes" ? "text-amber-600" : "text-slate-500"}`}
+                              className={`font-bold text-sm ${getPetInfo(selectedBooking) === "Yes" ? "text-amber-600" : "text-slate-500"}`}
                             >
                               {getPetInfo(selectedBooking) === "Yes"
                                 ? "Yes — pet-friendly cleaning required"
@@ -3587,13 +3603,13 @@ const Bookings = () => {
                 <>
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="flex-1 py-5 rounded-3xl bg-white border border-slate-200 text-xs font-black text-slate-500 uppercase tracking-widest"
+                    className="flex-1 py-5 rounded-3xl bg-white border border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-widest"
                   >
                     Discard
                   </button>
                   <button
                     onClick={() => handleUpdate()}
-                    className="flex-1 py-5 rounded-3xl bg-primary text-white text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                    className="flex-1 py-5 rounded-3xl bg-primary text-white text-xs font-bold uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
                   >
                     <Save size={18} /> Sync Changes
                   </button>
@@ -3608,13 +3624,13 @@ const Bookings = () => {
                           status: "Cancelled",
                         });
                     }}
-                    className="flex-1 py-5 rounded-3xl bg-rose-50 text-rose-600 border border-rose-100 text-xs font-black uppercase tracking-widest hover:bg-rose-100 transition-all"
+                    className="flex-1 py-5 rounded-3xl bg-rose-50 text-rose-600 border border-rose-100 text-xs font-bold uppercase tracking-widest hover:bg-rose-100 transition-all"
                   >
                     Cancel Booking
                   </button>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="flex-1 py-5 rounded-3xl bg-primary text-white text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-3 hover:scale-[1.02] transition-all"
+                    className="flex-1 py-5 rounded-3xl bg-primary text-white text-xs font-bold uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-3 hover:scale-[1.02] transition-all"
                   >
                     <Edit3 size={18} /> Modify Entry
                   </button>
@@ -3636,7 +3652,7 @@ const Bookings = () => {
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-6 flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+                <h3 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
                   <Zap size={20} className="text-white" />
                   Additional Cleaning Hours
                 </h3>
@@ -3656,19 +3672,19 @@ const Bookings = () => {
             <div className="p-6 space-y-5">
               {/* Current Hours Info */}
               <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
-                <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider mb-2">
+                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-2">
                   Current Booking Details
                 </p>
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
                     <p className="text-slate-600 font-bold">Original Hours:</p>
-                    <p className="text-blue-700 font-black text-lg">
+                    <p className="text-blue-700 font-bold text-lg">
                       {selectedBooking.details?.duration || 0}h
                     </p>
                   </div>
                   <div>
                     <p className="text-slate-600 font-bold">Current Total:</p>
-                    <p className="text-blue-700 font-black text-lg">
+                    <p className="text-blue-700 font-bold text-lg">
                       {(selectedBooking.details?.additionalHoursPurchased ||
                         0) + (selectedBooking.details?.duration || 0)}
                       h
@@ -3679,7 +3695,7 @@ const Bookings = () => {
 
               {/* Additional Hours Input */}
               <div>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
                   📝 Additional Hours Needed
                 </label>
                 <input
@@ -3700,7 +3716,7 @@ const Bookings = () => {
 
               {/* Hourly Rate Input */}
               <div>
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
                   💷 Hourly Rate (£)
                 </label>
                 <input
@@ -3722,10 +3738,10 @@ const Bookings = () => {
               {/* Calculate Total */}
               {additionalHoursForm.hours && additionalHoursForm.hourlyRate && (
                 <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
-                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider mb-2">
+                  <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-2">
                     💰 Payment Amount
                   </p>
-                  <p className="text-3xl font-black text-emerald-700">
+                  <p className="text-3xl font-bold text-emerald-700">
                     £
                     {(
                       parseFloat(additionalHoursForm.hours || 0) *
@@ -3824,7 +3840,7 @@ const Bookings = () => {
                   !additionalHoursForm.hours ||
                   !additionalHoursForm.hourlyRate
                 }
-                className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-bold uppercase tracking-widest shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2"
               >
                 {additionalHoursForm.isGenerating ? (
                   <>
@@ -3854,7 +3870,7 @@ const Bookings = () => {
             {/* Header with Gradient */}
             <div className="bg-gradient-to-r from-primary via-blue-600 to-indigo-600 px-4 sm:px-6 lg:px-10 py-6 sm:py-8 flex items-center justify-between">
               <div>
-                <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
+                <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
                   <div className="bg-white/20 p-3 rounded-2xl">
                     <Plus size={24} className="text-white" />
                   </div>
@@ -3878,7 +3894,7 @@ const Bookings = () => {
                 {[1, 2, 3, 4].map((step) => (
                   <div key={step} className="flex items-center gap-3 flex-1">
                     <div
-                      className={`w-10 h-10 rounded-full font-black text-sm flex items-center justify-center transition-all ${
+                      className={`w-10 h-10 rounded-full font-bold text-sm flex items-center justify-center transition-all ${
                         step <= createStep
                           ? "bg-primary text-white shadow-lg scale-110"
                           : "bg-slate-100 text-slate-400"
@@ -3901,7 +3917,7 @@ const Bookings = () => {
                   (t, idx) => (
                     <div
                       key={t}
-                      className={`text-[10px] font-black uppercase tracking-wider ${
+                      className={`text-[10px] font-bold uppercase tracking-wider ${
                         createStep === idx + 1
                           ? "text-primary"
                           : idx + 1 < createStep
@@ -3923,7 +3939,7 @@ const Bookings = () => {
                   {createStep === 1 && (
                     <div className="space-y-6">
                       <div className="pb-4 border-b border-slate-200">
-                        <h4 className="text-2xl font-black text-primary-dark flex items-center gap-3">
+                        <h4 className="text-2xl font-bold text-primary-dark flex items-center gap-3">
                           <MapPin size={24} className="text-primary" />
                           Cleaning Location
                         </h4>
@@ -3935,7 +3951,7 @@ const Bookings = () => {
                       {/* Address and Postcode */}
                       <div className="space-y-3">
                         <div>
-                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
                             📍 Full Address{" "}
                             <span className="text-rose-500">*</span>
                           </label>
@@ -3970,7 +3986,7 @@ const Bookings = () => {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
                               📬 Postcode
                             </label>
                             <input
@@ -3986,7 +4002,7 @@ const Bookings = () => {
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
                               🔄 Frequency{" "}
                               <span className="text-rose-500">*</span>
                             </label>
@@ -4020,9 +4036,49 @@ const Bookings = () => {
                         </div>
                       </div>
 
+                      {/* Lead Source & Supplies */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
+                            📣 Where did this booking come from?
+                          </label>
+                          <select
+                            value={createData.leadSource || "Organic"}
+                            onChange={(e) =>
+                              handleFieldChange("leadSource", e.target.value)
+                            }
+                            className="w-full p-4 rounded-2xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium"
+                          >
+                            {LEAD_SOURCES.map((src) => (
+                              <option key={src} value={src}>
+                                {src}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
+                            🧴 Who provides cleaning supplies & equipment?
+                          </label>
+                          <select
+                            value={createData.suppliesProvidedBy || "Cleaniq"}
+                            onChange={(e) =>
+                              handleFieldChange(
+                                "suppliesProvidedBy",
+                                e.target.value,
+                              )
+                            }
+                            className="w-full p-4 rounded-2xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium"
+                          >
+                            <option value="Cleaniq">Cleaniq provides</option>
+                            <option value="Customer">Customer provides</option>
+                          </select>
+                        </div>
+                      </div>
+
                       {/* Service Selection */}
                       <div className="pt-2">
-                        <h5 className="font-black text-lg text-primary-dark mb-4 flex items-center gap-2">
+                        <h5 className="font-bold text-lg text-primary-dark mb-4 flex items-center gap-2">
                           🧹 Select Service Type{" "}
                           <span className="text-rose-500">*</span>
                         </h5>
@@ -4046,7 +4102,7 @@ const Bookings = () => {
                                 {s.tag}
                               </div>
                               {createData.service === s.id && (
-                                <div className="text-primary text-sm font-black mt-2">
+                                <div className="text-primary text-sm font-bold mt-2">
                                   ✓ Selected
                                 </div>
                               )}
@@ -4066,7 +4122,7 @@ const Bookings = () => {
                   {createStep === 2 && (
                     <div className="space-y-6">
                       <div className="pb-4 border-b border-slate-200">
-                        <h4 className="text-2xl font-black text-primary-dark flex items-center gap-3">
+                        <h4 className="text-2xl font-bold text-primary-dark flex items-center gap-3">
                           <HomeIcon size={24} className="text-primary" />
                           Home Details & Duration
                         </h4>
@@ -4078,7 +4134,7 @@ const Bookings = () => {
                       {/* Duration and Pet */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-white rounded-2xl border-2 border-slate-200">
                         <div className="sm:col-span-2">
-                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block flex items-center gap-1">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 block flex items-center gap-1">
                             ⏱️ Duration (Hours){" "}
                             <span className="text-rose-500">*</span>
                           </label>
@@ -4090,7 +4146,7 @@ const Bookings = () => {
                                   handleFieldChange("details.duration", hours)
                                 }
                                 type="button"
-                                className={`py-3 px-2 rounded-xl border-2 font-black text-sm transition-all transform hover:scale-105 ${
+                                className={`py-3 px-2 rounded-xl border-2 font-bold text-sm transition-all transform hover:scale-105 ${
                                   createData.details.duration === hours
                                     ? "border-primary bg-primary text-white shadow-lg"
                                     : "border-slate-200 bg-white text-primary hover:border-primary/50"
@@ -4107,7 +4163,7 @@ const Bookings = () => {
                           )}
                         </div>
                         <div>
-                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 block">
                             🐾 Has Pet
                           </label>
                           <select
@@ -4135,7 +4191,7 @@ const Bookings = () => {
                             : "border-slate-200"
                         }`}
                       >
-                        <h5 className="font-black text-base text-primary-dark mb-4 flex items-center gap-2">
+                        <h5 className="font-bold text-base text-primary-dark mb-4 flex items-center gap-2">
                           🛏️ Property Rooms
                           <span className="text-rose-500">*</span>
                         </h5>
@@ -4170,7 +4226,7 @@ const Bookings = () => {
                                 >
                                   <Minus size={16} />
                                 </button>
-                                <div className="w-6 text-center font-black text-primary text-sm">
+                                <div className="w-6 text-center font-bold text-primary text-sm">
                                   {createData.details[r] || 0}
                                 </div>
                                 <button
@@ -4208,7 +4264,7 @@ const Bookings = () => {
                   {createStep === 3 && (
                     <div className="space-y-6">
                       <div className="pb-4 border-b border-slate-200">
-                        <h4 className="text-2xl font-black text-primary-dark flex items-center gap-3">
+                        <h4 className="text-2xl font-bold text-primary-dark flex items-center gap-3">
                           <Zap size={24} className="text-primary" />
                           Extra Services
                         </h4>
@@ -4251,7 +4307,7 @@ const Bookings = () => {
                                       />
                                     </div>
                                     <div>
-                                      <p className="text-sm font-black text-primary-dark">
+                                      <p className="text-sm font-bold text-primary-dark">
                                         {extra.name}
                                       </p>
                                       <p className="text-xs font-bold text-slate-500 mt-1">
@@ -4291,7 +4347,7 @@ const Bookings = () => {
                                     >
                                       −
                                     </button>
-                                    <span className="text-lg font-black text-primary w-8 text-center">
+                                    <span className="text-lg font-bold text-primary w-8 text-center">
                                       {currentQty}
                                     </span>
                                     <button
@@ -4339,7 +4395,7 @@ const Bookings = () => {
                   {createStep === 4 && (
                     <div className="space-y-6">
                       <div className="pb-4 border-b border-slate-200">
-                        <h4 className="text-2xl font-black text-primary-dark flex items-center gap-3">
+                        <h4 className="text-2xl font-bold text-primary-dark flex items-center gap-3">
                           <DollarSign size={24} className="text-primary" />
                           Payment & Schedule
                         </h4>
@@ -4351,7 +4407,7 @@ const Bookings = () => {
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Calendar and Time */}
                         <div className="p-4 bg-white rounded-2xl border-2 border-slate-200">
-                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3 block flex items-center gap-1">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 block flex items-center gap-1">
                             📅 Select Date{" "}
                             <span className="text-rose-500">*</span>
                           </label>
@@ -4372,7 +4428,7 @@ const Bookings = () => {
 
                           <div className="mt-4 space-y-3">
                             <div className="space-y-3">
-                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block flex items-center gap-1">
+                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block flex items-center gap-1">
                                 🕐 Time Slot Selection
                               </label>
 
@@ -4455,7 +4511,7 @@ const Bookings = () => {
                                             slot.value
                                               ? "border-primary bg-primary text-white shadow-md"
                                               : isSlotBooked
-                                                ? "border-rose-200 bg-rose-50 text-rose-300 cursor-not-allowed opacity-50 font-black text-xs"
+                                                ? "border-rose-200 bg-rose-50 text-rose-300 cursor-not-allowed opacity-50 font-bold text-xs"
                                                 : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
                                           }`}
                                         >
@@ -4474,7 +4530,7 @@ const Bookings = () => {
 
                               <div className="p-6 bg-white rounded-xl border-2 border-slate-200 space-y-4">
                                 <div>
-                                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                                     <Clock size={16} className="text-primary" />
                                     Choose Your Flexible Time
                                   </p>
@@ -4600,7 +4656,7 @@ const Bookings = () => {
                                 {/* Custom Time Input */}
                                 <div className="border-t-2 border-slate-100 pt-4 space-y-3">
                                   <div className="flex items-center justify-between">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                       ⏰ Custom Time
                                     </p>
                                     {/* <button
@@ -4719,7 +4775,7 @@ const Bookings = () => {
                             {createData.schedule.timeSlot &&
                               createData.schedule.timeSlot !== "Flexible" && (
                                 <div>
-                                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 block">
+                                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
                                     ⏰ Preferred Arrival Time (Optional)
                                   </label>
                                   <input
@@ -4742,7 +4798,7 @@ const Bookings = () => {
 
                         {/* Customer Info */}
                         <div className="p-4 bg-white rounded-2xl border-2 border-slate-200 space-y-3">
-                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
                             👤 Customer Information
                           </label>
 
@@ -4868,18 +4924,18 @@ const Bookings = () => {
                       <div className="p-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-[10px] text-emerald-600 uppercase font-black tracking-wider">
+                            <p className="text-[10px] text-emerald-600 uppercase font-bold tracking-wider">
                               💰 Estimated Total
                             </p>
-                            <p className="text-3xl font-black text-emerald-700 mt-1">
+                            <p className="text-3xl font-bold text-emerald-700 mt-1">
                               £{createTotal}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-[10px] text-emerald-600 uppercase font-black tracking-wider">
+                            <p className="text-[10px] text-emerald-600 uppercase font-bold tracking-wider">
                               📊 Status
                             </p>
-                            <p className="font-black text-emerald-700 text-lg mt-1">
+                            <p className="font-bold text-emerald-700 text-lg mt-1">
                               {createData.status}
                             </p>
                           </div>
@@ -4893,7 +4949,7 @@ const Bookings = () => {
               {/* Sidebar Summary */}
               <div className="lg:col-span-4">
                 <div className="sticky top-6 bg-gradient-to-br from-primary via-blue-600 to-indigo-600 rounded-[28px] p-6 text-white shadow-xl border border-indigo-400/30 space-y-4">
-                  <h5 className="font-black text-lg flex items-center gap-2">
+                  <h5 className="font-bold text-lg flex items-center gap-2">
                     📋 Booking Summary
                   </h5>
 
@@ -4902,7 +4958,7 @@ const Bookings = () => {
                     <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
                       🧹 Service
                     </p>
-                    <div className="font-black text-lg mt-2">
+                    <div className="font-bold text-lg mt-2">
                       {createData.service || "Not selected"}
                     </div>
                   </div>
@@ -4961,10 +5017,10 @@ const Bookings = () => {
 
                   {/* Total Price Card */}
                   <div className="bg-white rounded-xl p-5 text-primary shadow-lg">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                       💰 Estimated Total
                     </p>
-                    <p className="text-3xl font-black text-primary mt-2">
+                    <p className="text-3xl font-bold text-primary mt-2">
                       £{createTotal}
                     </p>
                     <p className="text-xs text-slate-600 mt-2 font-bold">
@@ -4981,7 +5037,7 @@ const Bookings = () => {
                 {createStep > 1 && (
                   <button
                     onClick={() => setCreateStep((s) => Math.max(1, s - 1))}
-                    className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-black transition-colors border-2 border-slate-200"
+                    className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors border-2 border-slate-200"
                   >
                     ← Back
                   </button>
@@ -4993,7 +5049,7 @@ const Bookings = () => {
                   <button
                     onClick={handleNextStep}
                     disabled={Object.keys(formErrors).length > 0}
-                    className={`px-8 py-3 rounded-xl transition-all transform font-black border-2 flex items-center gap-2 ${
+                    className={`px-8 py-3 rounded-xl transition-all transform font-bold border-2 flex items-center gap-2 ${
                       Object.keys(formErrors).length > 0
                         ? "bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed"
                         : "bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg text-white hover:scale-105 border-primary"
@@ -5041,6 +5097,7 @@ const Bookings = () => {
                             currency: createData.payment?.currency || "GBP",
                             status: "Pending",
                           },
+                          createdByAdmin: localStorage.getItem("adminUser") || null,
                         };
                         const res = await fetch(
                           `${import.meta.env.VITE_API_URL}/bookings`,
@@ -5067,7 +5124,7 @@ const Bookings = () => {
                         });
                       }
                     }}
-                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-xl text-white font-black transition-all transform hover:scale-105 border-2 border-emerald-600 flex items-center gap-2"
+                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-xl text-white font-bold transition-all transform hover:scale-105 border-2 border-emerald-600 flex items-center gap-2"
                   >
                     <CheckCircle2 size={20} />
                     Create Booking
@@ -5088,7 +5145,7 @@ const Bookings = () => {
               <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 size={32} className="text-emerald-600" />
               </div>
-              <h2 className="text-2xl font-black text-slate-900 mb-2">
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">
                 Booking Created Successfully!
               </h2>
               <p className="text-sm text-slate-500">
@@ -5102,20 +5159,20 @@ const Bookings = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Booking Reference */}
                 <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 border border-slate-200">
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
                     📋 Booking Reference
                   </p>
-                  <p className="text-2xl font-black text-slate-900 font-mono">
+                  <p className="text-2xl font-bold text-slate-900 font-mono">
                     {successBooking.bookingId}
                   </p>
                 </div>
 
                 {/* Customer Info */}
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
                     👤 Customer
                   </p>
-                  <p className="text-lg font-black text-slate-900 mb-1">
+                  <p className="text-lg font-bold text-slate-900 mb-1">
                     {successBooking.customer.firstName}{" "}
                     {successBooking.customer.lastName}
                   </p>
@@ -5132,10 +5189,10 @@ const Bookings = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Service Type */}
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
                     🧹 Service Type
                   </p>
-                  <p className="text-lg font-black text-slate-900 mb-1">
+                  <p className="text-lg font-bold text-slate-900 mb-1">
                     {successBooking.service}
                   </p>
                   <p className="text-xs text-slate-600">
@@ -5148,10 +5205,10 @@ const Bookings = () => {
 
                 {/* Schedule */}
                 <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-6 border border-amber-200">
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
                     📅 Schedule
                   </p>
-                  <p className="text-lg font-black text-slate-900 mb-2">
+                  <p className="text-lg font-bold text-slate-900 mb-2">
                     {new Date(successBooking.schedule.date).toDateString()}
                   </p>
                   <p className="text-sm font-bold text-slate-700">
@@ -5162,10 +5219,10 @@ const Bookings = () => {
 
               {/* Row 3: Location */}
               <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-emerald-200">
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
                   📍 Location
                 </p>
-                <p className="text-lg font-black text-slate-900 mb-2">
+                <p className="text-lg font-bold text-slate-900 mb-2">
                   {successBooking.details.address}
                 </p>
                 <p className="text-sm text-slate-700">
@@ -5193,7 +5250,7 @@ const Bookings = () => {
                 );
                 return rooms.length > 0 ? (
                   <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-6 border border-indigo-200">
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
                       🏠 Property Rooms
                     </p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -5202,7 +5259,7 @@ const Bookings = () => {
                           key={room}
                           className="bg-white rounded-xl p-3 border border-indigo-200 flex flex-col items-center justify-center"
                         >
-                          <p className="text-xs font-black text-indigo-600">
+                          <p className="text-xs font-bold text-indigo-600">
                             {successBooking.details[room]}x
                           </p>
                           <p className="text-xs font-bold text-slate-700 text-center mt-1">
@@ -5219,7 +5276,7 @@ const Bookings = () => {
               {successBooking.details.extras &&
                 successBooking.details.extras.length > 0 && (
                   <div className="bg-gradient-to-br from-rose-50 to-rose-100 rounded-2xl p-6 border border-rose-200">
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
                       ⭐ Extra Services
                     </p>
                     <div className="grid sm:grid-cols-2 gap-3">
@@ -5245,7 +5302,7 @@ const Bookings = () => {
                                 </p>
                               )}
                             </div>
-                            <span className="inline-flex items-center justify-center w-5 h-5 bg-rose-600 text-white rounded-full text-[10px] font-black">
+                            <span className="inline-flex items-center justify-center w-5 h-5 bg-rose-600 text-white rounded-full text-[10px] font-bold">
                               ✓
                             </span>
                           </div>
@@ -5259,7 +5316,7 @@ const Bookings = () => {
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
                       💰 Total Amount
                     </p>
                     <p className="text-xs text-slate-600 mb-1">
@@ -5270,7 +5327,7 @@ const Bookings = () => {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-4xl font-black text-green-600">
+                    <p className="text-4xl font-bold text-green-600">
                       {successBooking.payment.currency === "GBP" ? "£" : "₦"}
                       {successBooking.payment.amount}
                     </p>
@@ -5320,13 +5377,13 @@ const Bookings = () => {
                   });
                   setCreateStep(1);
                 }}
-                className="w-full py-3 px-6 rounded-2xl bg-primary text-white font-black hover:bg-primary/90 transition-all"
+                className="w-full py-3 px-6 rounded-2xl bg-primary text-white font-bold hover:bg-primary/90 transition-all"
               >
                 Close & Create New Booking
               </button> */}
               <button
                 onClick={() => setShowSuccessModal(false)}
-                className="w-full py-3 px-6 rounded-2xl bg-slate-100 text-slate-700 font-black hover:bg-slate-200 transition-all"
+                className="w-full py-3 px-6 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-all"
               >
                 Close
               </button>
@@ -5347,7 +5404,7 @@ const Bookings = () => {
                 <Trash2 size={32} className="text-rose-500" />
               </div>
               <div>
-                <h3 className="text-2xl font-black text-primary-dark tracking-tighter">
+                <h3 className="text-2xl font-bold text-primary-dark tracking-tighter">
                   Delete {selectedBookings.size} Bookings?
                 </h3>
                 <p className="text-sm text-slate-500 mt-2">
@@ -5356,20 +5413,20 @@ const Bookings = () => {
                 </p>
               </div>
               <div className="bg-rose-50 border-2 border-rose-200 rounded-2xl p-4">
-                <p className="text-[10px] font-black text-rose-600 uppercase tracking-wider">
+                <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">
                   Warning: {selectedBookings.size} bookings will be deleted
                 </p>
               </div>
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={() => setShowBulkDeleteModal(false)}
-                  className="flex-1 py-3 px-6 rounded-2xl bg-slate-100 text-slate-700 font-black hover:bg-slate-200 transition-all border-2 border-slate-200"
+                  className="flex-1 py-3 px-6 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-all border-2 border-slate-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleBulkDelete}
-                  className="flex-1 py-3 px-6 rounded-2xl bg-gradient-to-r from-rose-500 to-red-600 text-white font-black hover:shadow-lg transition-all border-2 border-rose-600"
+                  className="flex-1 py-3 px-6 rounded-2xl bg-gradient-to-r from-rose-500 to-red-600 text-white font-bold hover:shadow-lg transition-all border-2 border-rose-600"
                 >
                   Delete All
                 </button>

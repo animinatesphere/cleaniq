@@ -29,6 +29,9 @@ const bookingSchema = new mongoose.Schema({
     capturedAt: Date, // When payment was captured (money deducted)
   },
   region: String,
+  leadSource: { type: String, default: "Organic" }, // Bark, Checkatrade, MyJobQuote, MyBuilder, Instagram, Facebook, TikTok, Google, Referral, Organic
+  suppliesProvidedBy: { type: String, default: null }, // "Customer" | "Cleaniq"
+  createdByAdmin: { type: String, default: null }, // username of the admin who created this booking, if created from the admin portal
   assignedWorker: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Worker",

@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Globe, Shield, 
+import {
+  Globe, Shield,
   Save, RefreshCw, Plus, Trash2,
   Sliders, Star, Edit3, X, Check,
-  Megaphone, Send, Key, ThumbsUp, ThumbsDown
+  Megaphone, Send, Key, ThumbsUp, ThumbsDown,
+  UserPlus, Users as UsersIcon, Mail
 } from 'lucide-react';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('services');
   const [services, setServices] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingServiceId, setEditingServiceId] = useState(null);
   const [editServiceData, setEditServiceData] = useState({});
@@ -17,6 +19,9 @@ const Settings = () => {
   const [broadcast, setBroadcast] = useState({ subject: '', message: '' });
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
   const [passwordData, setPasswordData] = useState({ newPassword: '' });
+  const [newAdmin, setNewAdmin] = useState({ username: '', email: '', password: '', role: 'booking-agent' });
+  const [addingAdmin, setAddingAdmin] = useState(false);
+  const [adminMsg, setAdminMsg] = useState({ type: '', text: '' });
 
   useEffect(() => {
     fetchData();
@@ -31,11 +36,52 @@ const Settings = () => {
       } else if (activeTab === 'reviews') {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/reviews`);
         setReviews(await res.json());
+      } else if (activeTab === 'team') {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/admins`);
+        setAdmins(await res.json());
       }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddAdmin = async (e) => {
+    e.preventDefault();
+    setAddingAdmin(true);
+    setAdminMsg({ type: '', text: '' });
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/admins`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAdmin),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAdminMsg({ type: 'success', text: `Account created${newAdmin.email ? ' — invite email sent' : ''}.` });
+        setNewAdmin({ username: '', email: '', password: '', role: 'booking-agent' });
+        fetchData();
+      } else {
+        setAdminMsg({ type: 'error', text: data.message || 'Failed to create account' });
+      }
+    } catch (err) {
+      setAdminMsg({ type: 'error', text: 'Failed to create account' });
+    } finally {
+      setAddingAdmin(false);
+      setTimeout(() => setAdminMsg({ type: '', text: '' }), 4000);
+    }
+  };
+
+  const handleDeleteAdmin = async (id) => {
+    if (!window.confirm('Remove this admin account permanently?')) return;
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/admins/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) fetchData();
+      else setAdminMsg({ type: 'error', text: data.message || 'Failed to delete account' });
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -118,12 +164,13 @@ const Settings = () => {
     { id: 'services', name: 'Services', icon: <Sliders size={18} /> },
     { id: 'marketing', name: 'Marketing', icon: <Megaphone size={18} /> },
     { id: 'reviews', name: 'Reviews', icon: <Star size={18} /> },
+    { id: 'team', name: 'Team Access', icon: <UsersIcon size={18} /> },
     { id: 'security', name: 'Security', icon: <Shield size={18} /> },
   ];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
-      <div className="flex flex-wrap gap-4 p-2 bg-slate-100 rounded-[28px] w-fit">
+      <div className="flex flex-wrap gap-4 p-2 bg-slate-100 rounded-2xl w-fit">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -141,8 +188,8 @@ const Settings = () => {
         <div className="lg:col-span-2 space-y-6">
           {activeTab === 'services' && (
             <div className="space-y-6">
-              <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm">
-                <h3 className="text-xl font-black text-primary-dark mb-6">Add Service</h3>
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <h3 className="text-base font-bold text-slate-900 mb-6">Add Service</h3>
                 <form onSubmit={handleAddService} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <input type="text" placeholder="Service Name" value={newService.name} onChange={e => setNewService({...newService, name: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" required />
                   <input type="number" placeholder="Rate" value={newService.rate} onChange={e => setNewService({...newService, rate: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" required />
@@ -150,18 +197,18 @@ const Settings = () => {
                     <option value="UK">UK (GBP)</option>
                     {/* <option value="NG">NG (NGN)</option> */}
                   </select>
-                  <button type="submit" className="btn-primary py-4 rounded-2xl font-black uppercase"><Plus size={18} /> Add</button>
+                  <button type="submit" className="btn-primary py-4 rounded-2xl font-bold uppercase"><Plus size={18} /> Add</button>
                 </form>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden">
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                 <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                  <h3 className="text-xl font-black text-primary-dark">Service List</h3>
+                  <h3 className="text-base font-bold text-slate-900">Service List</h3>
                   <RefreshCw size={18} className={loading ? 'animate-spin' : ''} onClick={fetchData} />
                 </div>
                 <div className="p-8 space-y-4">
                   {services.map((s) => (
-                    <div key={s._id} className="p-6 rounded-3xl border border-slate-100 bg-white flex items-center justify-between group">
+                    <div key={s._id} className="p-6 rounded-2xl border border-slate-100 bg-white flex items-center justify-between group">
                       <div className="flex-1">
                         {editingServiceId === s._id ? (
                           <div className="flex flex-col gap-3 w-full max-w-lg">
@@ -194,7 +241,7 @@ const Settings = () => {
                           <div>
                             <p className="font-bold text-primary-dark">{s.name}</p>
                             {s.description && <p className="text-xs text-slate-500 mt-1 mb-2 leading-relaxed">{s.description}</p>}
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{s.region} • {s.category || 'Extras'} • {s.region === 'UK' ? '£' : '₦'}{s.rate}/{s.type === 'hourly' ? 'hr' : 'flat'}</p>
+                            <p className="text-[11px] font-semibold text-slate-400">{s.region} • {s.category || 'Extras'} • {s.region === 'UK' ? '£' : '₦'}{s.rate}/{s.type === 'hourly' ? 'hr' : 'flat'}</p>
                           </div>
                         )}
                       </div>
@@ -210,12 +257,12 @@ const Settings = () => {
           )}
 
           {activeTab === 'marketing' && (
-            <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm space-y-6">
-              <h3 className="text-xl font-black text-primary-dark">Marketing Broadcast</h3>
+            <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-6">
+              <h3 className="text-base font-bold text-slate-900">Marketing Broadcast</h3>
               <div className="space-y-4">
                 <input type="text" placeholder="Email Subject" value={broadcast.subject} onChange={e => setBroadcast({...broadcast, subject: e.target.value})} className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold" />
-                <textarea placeholder="Your Message..." value={broadcast.message} onChange={e => setBroadcast({...broadcast, message: e.target.value})} className="w-full p-6 rounded-3xl bg-slate-50 border border-slate-100 font-bold h-48 resize-none" />
-                <button disabled={sendingBroadcast} onClick={handleSendBroadcast} className="w-full py-5 rounded-3xl bg-primary text-white font-black uppercase tracking-widest flex items-center justify-center gap-3 disabled:opacity-50">
+                <textarea placeholder="Your Message..." value={broadcast.message} onChange={e => setBroadcast({...broadcast, message: e.target.value})} className="w-full p-6 rounded-2xl bg-slate-50 border border-slate-100 font-bold h-48 resize-none" />
+                <button disabled={sendingBroadcast} onClick={handleSendBroadcast} className="w-full py-5 rounded-2xl bg-primary text-white font-bold flex items-center justify-center gap-2.5 disabled:opacity-50">
                   {sendingBroadcast ? 'Sending...' : <><Send size={20} /> Send Broadcast</>}
                 </button>
               </div>
@@ -224,11 +271,11 @@ const Settings = () => {
 
           {activeTab === 'reviews' && (
             <div className="space-y-6">
-              <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden">
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                 <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                   <div>
-                    <h3 className="text-xl font-black text-primary-dark">Customer Reviews</h3>
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Approve or reject submitted reviews</p>
+                    <h3 className="text-base font-bold text-slate-900">Customer Reviews</h3>
+                    <p className="text-[11px] font-semibold text-slate-400 mt-1">Approve or reject submitted reviews</p>
                   </div>
                   <RefreshCw size={18} className={loading ? 'animate-spin text-primary' : 'text-slate-400 cursor-pointer'} onClick={fetchData} />
                 </div>
@@ -242,16 +289,16 @@ const Settings = () => {
                     </div>
                   )}
                   {reviews.map((review) => (
-                    <div key={review._id} className="p-6 rounded-3xl border-2 border-slate-100 bg-white hover:border-slate-200 transition-all">
+                    <div key={review._id} className="p-6 rounded-2xl border-2 border-slate-100 bg-white hover:border-slate-200 transition-all">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center font-black text-primary-dark text-sm">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center font-bold text-primary-dark text-sm">
                               {(review.customerName || 'A')[0].toUpperCase()}
                             </div>
                             <div>
-                              <p className="font-black text-primary-dark text-sm">{review.customerName}</p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                              <p className="font-bold text-primary-dark text-sm">{review.customerName}</p>
+                              <p className="text-[11px] font-semibold text-slate-400">
                                 {new Date(review.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                               </p>
                             </div>
@@ -262,7 +309,7 @@ const Settings = () => {
                             </div>
                           </div>
                           <p className="text-slate-600 text-sm leading-relaxed mb-3">{review.comment}</p>
-                          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wide ${
                             review.status === 'Approved' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
                             review.status === 'Rejected' ? 'bg-rose-50 text-rose-500 border border-rose-200' :
                             'bg-amber-50 text-amber-600 border border-amber-200'
@@ -305,16 +352,76 @@ const Settings = () => {
             </div>
           )}
 
+          {activeTab === 'team' && (
+            <div className="space-y-6">
+              {adminMsg.text && (
+                <div className={`p-4 rounded-2xl border flex items-center gap-3 shadow-sm ${adminMsg.type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-rose-50 border-rose-100 text-rose-700'}`}>
+                  <p className="text-sm font-semibold">{adminMsg.text}</p>
+                </div>
+              )}
+
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <h3 className="text-base font-bold text-slate-900 mb-1 flex items-center gap-2"><UserPlus size={18} className="text-primary" /> Add Team Member</h3>
+                <p className="text-sm text-slate-400 font-medium mb-6">Create a restricted account for staff who only need to create bookings — they won't see revenue, customers, or any other admin data.</p>
+                <form onSubmit={handleAddAdmin} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input type="text" placeholder="Username" value={newAdmin.username} onChange={e => setNewAdmin({...newAdmin, username: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" required />
+                  <input type="email" placeholder="Email (for login invite)" value={newAdmin.email} onChange={e => setNewAdmin({...newAdmin, email: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
+                  <input type="password" placeholder="Temporary Password" value={newAdmin.password} onChange={e => setNewAdmin({...newAdmin, password: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" required />
+                  <select value={newAdmin.role} onChange={e => setNewAdmin({...newAdmin, role: e.target.value})} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
+                    <option value="booking-agent">Booking Agent (Bookings only)</option>
+                    <option value="superadmin">Superadmin (Full access)</option>
+                  </select>
+                  <button type="submit" disabled={addingAdmin} className="md:col-span-2 py-4 rounded-2xl bg-primary text-white font-bold text-sm shadow-sm hover:bg-primary-dark transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+                    {addingAdmin ? <RefreshCw size={16} className="animate-spin" /> : <Plus size={16} />}
+                    {addingAdmin ? 'Creating…' : 'Create Account'}
+                  </button>
+                </form>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                  <h3 className="text-base font-bold text-slate-900">Team Members</h3>
+                  <RefreshCw size={16} className={loading ? 'animate-spin text-primary' : 'text-slate-400 cursor-pointer'} onClick={fetchData} />
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {loading && <p className="text-slate-400 font-medium text-sm p-6">Loading…</p>}
+                  {!loading && admins.length === 0 && (
+                    <p className="text-slate-400 font-medium text-sm text-center py-10">No team accounts yet.</p>
+                  )}
+                  {admins.map((a) => (
+                    <div key={a._id} className="p-5 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0">
+                          {a.username?.[0]?.toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-800 text-sm">{a.username}</p>
+                          {a.email && <p className="text-[11px] text-slate-400 font-medium truncate flex items-center gap-1"><Mail size={10}/> {a.email}</p>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <span className={`text-[10px] font-semibold uppercase px-2.5 py-1 rounded-full ${a.role === 'superadmin' ? 'bg-indigo-50 text-indigo-600' : 'bg-amber-50 text-amber-600'}`}>
+                          {a.role === 'superadmin' ? 'Superadmin' : 'Booking Agent'}
+                        </span>
+                        <button onClick={() => handleDeleteAdmin(a._id)} className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all"><Trash2 size={15}/></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'security' && (
-            <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm space-y-6">
+            <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm space-y-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center"><Key size={24}/></div>
-                <h3 className="text-xl font-black text-primary-dark">Security Settings</h3>
+                <h3 className="text-base font-bold text-slate-900">Security Settings</h3>
               </div>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">New Password</label>
-                  <input type="password" placeholder="••••••••" value={passwordData.newPassword} onChange={e => setPasswordData({newPassword: e.target.value})} className="w-full p-5 rounded-[24px] border-2 border-slate-100 focus:border-primary focus:outline-none font-bold" />
+                  <label className="text-[11px] font-semibold text-slate-400 ml-4">New Password</label>
+                  <input type="password" placeholder="••••••••" value={passwordData.newPassword} onChange={e => setPasswordData({newPassword: e.target.value})} className="w-full p-5 rounded-xl border-2 border-slate-100 focus:border-primary focus:outline-none font-bold" />
                 </div>
                 <button onClick={async () => {
                   const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/change-password`, {
@@ -323,7 +430,7 @@ const Settings = () => {
                     body: JSON.stringify({ username: localStorage.getItem('adminUser'), newPassword: passwordData.newPassword })
                   });
                   if (res.ok) { alert('Password updated! Logging out...'); localStorage.clear(); window.location.reload(); }
-                }} className="btn-primary w-full py-5 rounded-3xl text-sm uppercase font-black tracking-widest">Update Password</button>
+                }} className="btn-primary w-full py-5 rounded-2xl text-sm font-bold">Update Password</button>
               </div>
             </div>
           )}

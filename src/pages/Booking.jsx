@@ -30,6 +30,8 @@ import {
   Waves,
   Refrigerator,
   Wind,
+  Megaphone,
+  Sparkles,
 } from "lucide-react";
 // Stripe will be loaded lazily to reduce initial JS bundle size
 import { Helmet } from "react-helmet-async";
@@ -172,6 +174,19 @@ const cleanKey = (str) =>
     .replace(/[^a-z0-9]/g, "")
     .trim();
 
+const LEAD_SOURCES = [
+  "Google",
+  "Bark",
+  "Checkatrade",
+  "MyJobQuote",
+  "MyBuilder",
+  "Instagram",
+  "Facebook",
+  "TikTok",
+  "Referral",
+  "Organic",
+];
+
 const Booking = () => {
   const { region } = useRegion();
   const { customer, loading: authLoading } = useCustomerAuth();
@@ -215,6 +230,8 @@ const Booking = () => {
       phone: "",
       specialInstructions: "",
       hasPet: null,
+      leadSource: "",
+      suppliesProvidedBy: "Cleaniq",
     };
   });
 
@@ -675,6 +692,8 @@ const Booking = () => {
         timeSlot: formData.timeSlot,
         preferredTime: formData.preferredTime,
       },
+      leadSource: formData.leadSource || "Organic",
+      suppliesProvidedBy: formData.suppliesProvidedBy || "Cleaniq",
       payment: {
         amount: totalPrice,
         currency: "GBP",
@@ -1291,6 +1310,52 @@ const Booking = () => {
                                   })
                                 }
                               />
+                            </div>
+                            <div className="space-y-3">
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <Sparkles size={14} className="text-primary" />{" "}
+                                Who provides cleaning supplies & equipment?
+                              </p>
+                              <div className="grid grid-cols-2 gap-2">
+                                {["Cleaniq", "Customer"].map((opt) => (
+                                  <button
+                                    key={opt}
+                                    onClick={() =>
+                                      setFormData({
+                                        ...formData,
+                                        suppliesProvidedBy: opt,
+                                      })
+                                    }
+                                    className={`p-4 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${formData.suppliesProvidedBy === opt ? "border-primary bg-primary text-white shadow-md" : "border-slate-100 bg-white text-slate-400 hover:border-primary/30"}`}
+                                  >
+                                    {opt === "Cleaniq"
+                                      ? "Cleaniq provides"
+                                      : "I'll provide my own"}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="space-y-3">
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <Megaphone size={14} className="text-primary" />{" "}
+                                How did you hear about us?
+                              </p>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                {LEAD_SOURCES.map((src) => (
+                                  <button
+                                    key={src}
+                                    onClick={() =>
+                                      setFormData({
+                                        ...formData,
+                                        leadSource: src,
+                                      })
+                                    }
+                                    className={`p-3 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${formData.leadSource === src ? "border-primary bg-primary text-white shadow-md" : "border-slate-100 bg-white text-slate-400 hover:border-primary/30"}`}
+                                  >
+                                    {src}
+                                  </button>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>

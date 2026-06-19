@@ -425,6 +425,38 @@ const templates = {
     </div>
   `,
 
+  adminAccountInvite: (admin) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0F172A; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0F172A; padding: 40px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 110px; height: auto; margin-bottom: 15px; border-radius: 12px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">Welcome to the Team! 🎉</h1>
+        <p style="color: #cbd5e1; margin-top: 5px; font-size: 15px;">Your Cleaniq Business Portal account is ready</p>
+      </div>
+      <div style="padding: 45px 40px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 20px; margin-top: 0; color: #0F172A;">Hi ${admin.username},</h2>
+        <p>An administrator account has been created for you on the <strong>Cleaniq Business Portal</strong>${admin.role === "booking-agent" ? ", with access to create and manage bookings" : ""}.</p>
+
+        <h3 style="font-size: 13px; color: #0F172A; text-transform: uppercase; letter-spacing: 1px; margin-top: 30px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Your Login Credentials</h3>
+
+        <div style="background-color: #F8FAFC; padding: 24px; border-radius: 20px; border: 1px solid #edf2f7;">
+          <p style="margin: 0 0 10px 0; font-size: 14px; color: #475569;"><strong>Username:</strong> <span style="font-family: monospace; font-size: 15px; color: #0F172A;">${admin.username}</span></p>
+          <p style="margin: 0; font-size: 14px; color: #475569;"><strong>Temporary Password:</strong> <span style="font-family: monospace; font-size: 15px; font-weight: bold; color: #0F172A;">${admin.tempPassword}</span></p>
+        </div>
+
+        <div style="text-align: center; margin: 35px 0 10px;">
+          <a href="https://cleaniqservices.com/admin" style="display: inline-block; background-color: #0F172A; color: #6EE7B7; padding: 18px 40px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 15px; box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.2);">Log In to Dashboard</a>
+        </div>
+
+        <p style="font-size: 13px; color: #64748b; margin-top: 25px; font-style: italic;">For security, please change your password as soon as you log in for the first time (Settings → Security).</p>
+
+        <div style="margin-top: 40px; padding-top: 25px; border-top: 1px solid #edf2f7; text-align: center;">
+          <p style="margin: 0; font-size: 14px; color: #94a3b8; font-weight: 600;">Welcome aboard!</p>
+          <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #0F172A;">The Cleaniq Operations Team</p>
+        </div>
+      </div>
+    </div>
+  `,
+
   paymentRequired: (booking, checkoutLink) => `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
       <div style="background-color: #0F172A; padding: 40px; text-align: center;">

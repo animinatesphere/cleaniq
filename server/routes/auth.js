@@ -3,6 +3,7 @@ const router = express.Router();
 const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { sendEmail, templates } = require('../utils/emailService');
 
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
@@ -14,7 +15,73 @@ router.post('/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET || 'cleaniq_secret_key_2026', { expiresIn: '1d' });
-    res.json({ token, username: admin.username });
+    res.json({ token, username: admin.username, role: admin.role || 'superadmin' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/**
+ * GET /api/auth/admins
+ * List all admin/staff accounts (excludes password hashes)
+ */
+router.get('/admins', async (req, res) => {
+  try {
+    const admins = await Admin.find().select('-password').sort({ createdAt: -1 });
+    res.json(admins);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/**
+ * POST /api/auth/admins
+ * Create a new admin/staff account with a given role (e.g. a restricted
+ * "booking-agent" account that can only create/view bookings)
+ */
+router.post('/admins', async (req, res) => {
+  const { username, email, password, role } = req.body;
+  try {
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required' });
+    }
+    const existing = await Admin.findOne({ username });
+    if (existing) {
+      return res.status(400).json({ message: 'That username is already taken' });
+    }
+    const admin = new Admin({ username, email, password, role: role || 'booking-agent' });
+    await admin.save();
+
+    if (email) {
+      await sendEmail({
+        to: email,
+        subject: 'Your Cleaniq Business Portal account is ready',
+        html: templates.adminAccountInvite({ username, role: admin.role, tempPassword: password }),
+      });
+    }
+
+    res.status(201).json({ id: admin._id, username: admin.username, email: admin.email, role: admin.role });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/**
+ * DELETE /api/auth/admins/:id
+ * Remove an admin/staff account
+ */
+router.delete('/admins/:id', async (req, res) => {
+  try {
+    const admin = await Admin.findById(req.params.id);
+    if (!admin) return res.status(404).json({ message: 'Admin not found' });
+    if (admin.role === 'superadmin') {
+      const superadminCount = await Admin.countDocuments({ role: 'superadmin' });
+      if (superadminCount <= 1) {
+        return res.status(400).json({ message: 'Cannot delete the last superadmin account' });
+      }
+    }
+    await Admin.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Admin account deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
