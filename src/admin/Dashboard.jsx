@@ -473,12 +473,14 @@ const Dashboard = () => {
     .filter((b) => b.status !== "Blackout")
     .forEach((b) => {
       const src = b.leadSource || "Organic";
-      leadSourceMap[src] = (leadSourceMap[src] || 0) + 1;
+      if (!leadSourceMap[src]) leadSourceMap[src] = { count: 0, revenue: 0 };
+      leadSourceMap[src].count++;
+      leadSourceMap[src].revenue += Number(b.payment?.amount || 0);
     });
   const leadSourceBreakdown = Object.entries(leadSourceMap)
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => b[1].count - a[1].count)
     .slice(0, 8);
-  const maxLeadCount = leadSourceBreakdown[0]?.[1] || 1;
+  const maxLeadCount = leadSourceBreakdown[0]?.[1].count || 1;
 
   // Ratings summary
   const avgRating =
@@ -1047,8 +1049,76 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Row 4: Recent Quotes / Leads by Source */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      {/* Row 4: Quote Conversion / Recent Quotes / Leads by Source */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-6">
+          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2 mb-1">
+            <FileText size={16} className="text-primary" /> Quote Conversion
+          </h3>
+          <p className="text-[11px] font-medium text-slate-400 mb-5">
+            Accept vs. decline rate, all-time
+          </p>
+          {!quoteStats || !quoteStats.total ? (
+            <p className="text-slate-400 text-sm font-semibold text-center py-8">
+              No quotes sent yet
+            </p>
+          ) : (
+            <>
+              <div className="flex items-end gap-2 mb-5">
+                <span className="text-3xl font-bold text-slate-900 tabular-nums">
+                  {(quoteStats.acceptanceRate || 0).toFixed(0)}%
+                </span>
+                <span className="text-[11px] font-medium text-slate-400 mb-1.5">
+                  acceptance rate
+                </span>
+              </div>
+              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex mb-5">
+                <div
+                  className="h-full bg-emerald-500"
+                  style={{
+                    width: `${((quoteStats.accepted || 0) / quoteStats.total) * 100}%`,
+                  }}
+                />
+                <div
+                  className="h-full bg-rose-400"
+                  style={{
+                    width: `${((quoteStats.declined || 0) / quoteStats.total) * 100}%`,
+                  }}
+                />
+              </div>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="flex items-center gap-2 font-semibold text-slate-600">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" /> Accepted
+                  </span>
+                  <span className="font-bold text-slate-900 tabular-nums">
+                    {quoteStats.accepted || 0} · £
+                    {(quoteStats.acceptedValue || 0).toLocaleString("en-GB", {
+                      maximumFractionDigits: 0,
+                    })}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="flex items-center gap-2 font-semibold text-slate-600">
+                    <span className="w-2 h-2 rounded-full bg-rose-400" /> Declined
+                  </span>
+                  <span className="font-bold text-slate-900 tabular-nums">
+                    {quoteStats.declined || 0}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="flex items-center gap-2 font-semibold text-slate-600">
+                    <span className="w-2 h-2 rounded-full bg-slate-300" /> Awaiting response
+                  </span>
+                  <span className="font-bold text-slate-900 tabular-nums">
+                    {quoteStats.pending ?? quoteStats.total}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
         <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
           <div className="p-6 pb-3 flex justify-between items-center">
             <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
@@ -1058,7 +1128,7 @@ const Dashboard = () => {
               onClick={() => navigate("/admin/quotes")}
               className="text-[11px] font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1"
             >
-              Quote History <ChevronRight size={12} />
+              History <ChevronRight size={12} />
             </button>
           </div>
           <div className="px-3 pb-3">
@@ -1069,6 +1139,7 @@ const Dashboard = () => {
             ) : (
               recentQuotes.map((q) => {
                 const isAccepted = q.status === "accepted";
+                const isDeclined = q.status === "declined";
                 return (
                   <button
                     key={q.quoteRef}
@@ -1076,12 +1147,16 @@ const Dashboard = () => {
                     className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
                   >
                     <div
-                      className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isAccepted ? "bg-emerald-100" : "bg-slate-100"}`}
+                      className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isAccepted ? "bg-emerald-100" : isDeclined ? "bg-rose-100" : "bg-slate-100"}`}
                     >
-                      <CheckCircle2
-                        size={16}
-                        className={isAccepted ? "text-emerald-600" : "text-slate-400"}
-                      />
+                      {isDeclined ? (
+                        <X size={16} className="text-rose-600" />
+                      ) : (
+                        <CheckCircle2
+                          size={16}
+                          className={isAccepted ? "text-emerald-600" : "text-slate-400"}
+                        />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-800 truncate">
@@ -1092,9 +1167,9 @@ const Dashboard = () => {
                       </p>
                     </div>
                     <span
-                      className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full flex-shrink-0 ${isAccepted ? "text-emerald-700 bg-emerald-50" : "text-slate-500 bg-slate-100"}`}
+                      className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full flex-shrink-0 ${isAccepted ? "text-emerald-700 bg-emerald-50" : isDeclined ? "text-rose-700 bg-rose-50" : "text-slate-500 bg-slate-100"}`}
                     >
-                      {isAccepted ? "Accepted" : "Sent"}
+                      {isAccepted ? "Accepted" : isDeclined ? "Declined" : "Sent"}
                     </span>
                   </button>
                 );
@@ -1116,19 +1191,22 @@ const Dashboard = () => {
             </p>
           ) : (
             <div className="space-y-3">
-              {leadSourceBreakdown.map(([source, count]) => (
+              {leadSourceBreakdown.map(([source, stats]) => (
                 <div key={source} className="flex items-center justify-between gap-3">
-                  <span className="text-[12px] font-semibold text-slate-600 w-28 flex-shrink-0 truncate">
+                  <span className="text-[12px] font-semibold text-slate-600 w-24 flex-shrink-0 truncate">
                     {source}
                   </span>
                   <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-primary rounded-full"
-                      style={{ width: `${(count / maxLeadCount) * 100}%` }}
+                      style={{ width: `${(stats.count / maxLeadCount) * 100}%` }}
                     />
                   </div>
                   <span className="text-[11px] font-bold text-slate-900 tabular-nums w-8 text-right">
-                    {count}
+                    {stats.count}
+                  </span>
+                  <span className="text-[10px] font-semibold text-slate-400 tabular-nums w-16 text-right flex-shrink-0">
+                    £{stats.revenue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}
                   </span>
                 </div>
               ))}

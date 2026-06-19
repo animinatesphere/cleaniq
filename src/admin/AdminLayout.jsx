@@ -21,6 +21,7 @@ import {
   Wallet,
   DollarSign,
   FileText,
+  History,
 } from "lucide-react";
 import Login from "./Login";
 
@@ -143,7 +144,14 @@ const AdminLayout = () => {
           name: "Quotes",
           path: "/admin/quotes",
           key: "quotes",
+          exact: true,
           icon: <FileText size={20} />,
+        },
+        {
+          name: "Quote History",
+          path: "/admin/quotes/history",
+          key: "quotes",
+          icon: <History size={20} />,
         },
         {
           name: "Services",
@@ -306,8 +314,8 @@ const AdminLayout = () => {
               </p>
               {group.items.map((item) => {
                 const isActive =
-                  item.path === "/admin"
-                    ? location.pathname === "/admin"
+                  item.path === "/admin" || item.exact
+                    ? location.pathname === item.path
                     : location.pathname.startsWith(item.path);
                 return (
                   <Link

@@ -26,6 +26,11 @@ const quoteSchema = new mongoose.Schema({
     default: "once",
   },
   date: String,
+  // First scheduled cleaning date/time — used to generate calendar bookings
+  // automatically once the quote is accepted (recurring frequencies generate
+  // a forward-looking series, not just a single booking).
+  serviceDate: { type: String, default: null },
+  serviceTimeSlot: { type: String, default: null },
   items: [quoteItemSchema],
   subtotal: { type: Number, default: 0 },
   discount: { type: Number, default: 0 },
@@ -44,6 +49,7 @@ const quoteSchema = new mongoose.Schema({
   notes: String,
   status: { type: String, default: "sent" }, // sent | accepted | declined
   acceptedAt: { type: Date, default: null },
+  declinedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
 });
 

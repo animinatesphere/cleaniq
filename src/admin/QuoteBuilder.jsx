@@ -21,7 +21,7 @@ import {
 
 const API = import.meta.env.VITE_API_URL;
 
-const FREQUENCY_OPTIONS = [
+export const FREQUENCY_OPTIONS = [
   { value: "once", label: "One-time Quote" },
   { value: "weekly", label: "Weekly (Every Week)" },
   { value: "biweekly", label: "Fortnightly" },
@@ -391,7 +391,7 @@ const PreviewModal = ({
 );
 
 // ── Quote Detail / History Modal ────────────────────────────────────────────────
-const QuoteDetailModal = ({ quote, onClose }) => {
+export const QuoteDetailModal = ({ quote, onClose }) => {
   const frequencyLabel =
     FREQUENCY_OPTIONS.find((f) => f.value === quote.frequency)?.label ||
     "One-time Quote";
@@ -402,11 +402,17 @@ const QuoteDetailModal = ({ quote, onClose }) => {
           <div>
             <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
               {quote.quoteRef}
-              {quote.status === "accepted" ? (
+              {quote.status === "accepted" && (
                 <span className="text-[9px] font-black uppercase tracking-widest text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">
                   Accepted
                 </span>
-              ) : (
+              )}
+              {quote.status === "declined" && (
+                <span className="text-[9px] font-black uppercase tracking-widest text-rose-700 bg-rose-100 px-2 py-1 rounded-full">
+                  Declined
+                </span>
+              )}
+              {(!quote.status || quote.status === "sent") && (
                 <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
                   Sent
                 </span>
@@ -434,6 +440,21 @@ const QuoteDetailModal = ({ quote, onClose }) => {
                 {quote.acceptedAt && (
                   <p className="text-[11px] font-semibold text-emerald-600">
                     Accepted {new Date(quote.acceptedAt).toLocaleString("en-GB")}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+          {quote.status === "declined" && (
+            <div className="flex items-center gap-3 px-5 py-4 bg-rose-50 border border-rose-200 rounded-2xl">
+              <X size={20} className="text-rose-600 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-bold text-rose-800">
+                  This company declined the quote
+                </p>
+                {quote.declinedAt && (
+                  <p className="text-[11px] font-semibold text-rose-600">
+                    Declined {new Date(quote.declinedAt).toLocaleString("en-GB")}
                   </p>
                 )}
               </div>
@@ -643,6 +664,49 @@ const QuoteBuilder = () => {
     loadHistory(10);
   }, [loadHistory]);
 
+  // If a quote was sent here for editing from Quote History, prefill the form.
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("cleaniq_quote_edit_draft");
+      if (!raw) return;
+      sessionStorage.removeItem("cleaniq_quote_edit_draft");
+      const draft = JSON.parse(raw);
+      setForm((f) => ({
+        ...f,
+        companyName: draft.companyName || "",
+        contactName: draft.contactName || "",
+        email: draft.email || "",
+        phone: draft.phone || "",
+        address: draft.address || "",
+        frequency: draft.frequency || "once",
+        vatRate: draft.vatRate ?? 20,
+        validDays: draft.validDays ?? 30,
+        includeVat: draft.includeVat ?? true,
+        paymentTerms: draft.paymentTerms || "Net 30",
+        depositRequired: draft.depositRequired || false,
+        depositPercent: draft.depositPercent || 0,
+        discount: draft.discount || 0,
+        notes: draft.notes || f.notes,
+      }));
+      setItems(
+        (draft.items || []).map((i) => ({
+          service: i.service || "",
+          customService: i.customService || "",
+          description: i.description || "",
+          billingType: i.billingType || "flat",
+          qty: i.qty || 1,
+          unitPrice: i.unitPrice ?? "",
+        })),
+      );
+      setToast({
+        msg: `Loaded ${draft.quoteRef} for editing — sending will create a new quote.`,
+        type: "success",
+      });
+    } catch {
+      // ignore malformed drafts
+    }
+  }, []);
+
   const toggleHistoryView = () => {
     const next = !showAllHistory;
     setShowAllHistory(next);
@@ -676,11 +740,14 @@ const QuoteBuilder = () => {
   const handleSend = async () => {
     if (!form.email)
       return setToast({
-        msg: "Please enter a company email address.",
+        msg: "Please enter an email address.",
         type: "error",
       });
     if (!form.companyName)
-      return setToast({ msg: "Please enter the company name.", type: "error" });
+      return setToast({
+        msg: "Please enter the customer or company name.",
+        type: "error",
+      });
     if (items.every((i) => !i.service && !i.customService))
       return setToast({
         msg: "Please add at least one service line item.",
@@ -771,7 +838,8 @@ const QuoteBuilder = () => {
             Quote Builder
           </h2>
           <p className="text-sm text-slate-400 font-medium mt-1 ml-14">
-            Create & send professional service quotes to companies
+            Create & send professional service quotes to anyone — companies
+            or individual customers
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -805,10 +873,11 @@ const QuoteBuilder = () => {
               <Building2 size={18} className="text-primary/50" />
               <div>
                 <h3 className="text-base font-bold text-slate-800">
-                  Company Details
+                  Recipient Details
                 </h3>
                 <p className="text-[11px] font-semibold text-slate-400">
-                  Who is this quote for?
+                  Who is this quote for? Works for companies and individual
+                  customers alike.
                 </p>
               </div>
             </div>
@@ -816,14 +885,14 @@ const QuoteBuilder = () => {
               {[
                 {
                   key: "companyName",
-                  label: "Company Name *",
+                  label: "Customer / Company Name *",
                   type: "text",
-                  placeholder: "e.g. Airbnb Host Ltd",
+                  placeholder: "e.g. Jane Smith or Airbnb Host Ltd",
                   span: 1,
                 },
                 {
                   key: "contactName",
-                  label: "Contact Person",
+                  label: "Contact Person (if different)",
                   type: "text",
                   placeholder: "e.g. Jane Smith",
                   span: 1,
@@ -832,7 +901,7 @@ const QuoteBuilder = () => {
                   key: "email",
                   label: "Email Address *",
                   type: "email",
-                  placeholder: "billing@company.com",
+                  placeholder: "name@example.com",
                   span: 1,
                 },
                 {
@@ -844,7 +913,7 @@ const QuoteBuilder = () => {
                 },
                 {
                   key: "address",
-                  label: "Company Address",
+                  label: "Address",
                   type: "text",
                   placeholder: "14 Business Park, London, EC1A 1BB",
                   span: 2,
@@ -926,6 +995,53 @@ const QuoteBuilder = () => {
                   />
                 </div>
               </div>
+
+              <div className="border-t border-slate-200 pt-5 space-y-1">
+                <h4 className="text-sm font-bold text-slate-800">
+                  First Service Date & Time
+                </h4>
+                <p className="text-[11px] text-slate-400 font-medium mb-4">
+                  {form.frequency === "once"
+                    ? "If the customer accepts, we'll automatically add this to the calendar."
+                    : "If accepted, we'll automatically schedule this recurring slot on the calendar going forward."}
+                </p>
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-400 mb-1.5 block">
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      value={form.serviceDate}
+                      onChange={(e) => updateForm("serviceDate", e.target.value)}
+                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-400 mb-1.5 block">
+                      Time Slot
+                    </label>
+                    <select
+                      value={form.serviceTimeSlot}
+                      onChange={(e) =>
+                        updateForm("serviceTimeSlot", e.target.value)
+                      }
+                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    >
+                      <option value="Morning (8am-12pm)">
+                        Morning (8am-12pm)
+                      </option>
+                      <option value="Afternoon (12pm-4pm)">
+                        Afternoon (12pm-4pm)
+                      </option>
+                      <option value="Evening (4pm-8pm)">
+                        Evening (4pm-8pm)
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-wrap gap-6">
                 <Toggle
                   value={form.includeVat}
@@ -1228,6 +1344,7 @@ const QuoteBuilder = () => {
               {!historyLoading &&
                 sentQuotes.map((q) => {
                   const isAccepted = q.status === "accepted";
+                  const isDeclined = q.status === "declined";
                   return (
                     <button
                       key={q.quoteRef}
@@ -1235,14 +1352,18 @@ const QuoteBuilder = () => {
                       className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all text-left"
                     >
                       <div
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${isAccepted ? "bg-emerald-100" : "bg-slate-100"}`}
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${isAccepted ? "bg-emerald-100" : isDeclined ? "bg-rose-100" : "bg-slate-100"}`}
                       >
-                        <CheckCircle2
-                          size={16}
-                          className={
-                            isAccepted ? "text-emerald-600" : "text-slate-400"
-                          }
-                        />
+                        {isDeclined ? (
+                          <X size={16} className="text-rose-600" />
+                        ) : (
+                          <CheckCircle2
+                            size={16}
+                            className={
+                              isAccepted ? "text-emerald-600" : "text-slate-400"
+                            }
+                          />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-slate-800 truncate flex items-center gap-1.5">
@@ -1250,6 +1371,11 @@ const QuoteBuilder = () => {
                           {isAccepted && (
                             <span className="text-[8px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full flex-shrink-0">
                               Accepted
+                            </span>
+                          )}
+                          {isDeclined && (
+                            <span className="text-[8px] font-black uppercase tracking-widest text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                              Declined
                             </span>
                           )}
                         </p>

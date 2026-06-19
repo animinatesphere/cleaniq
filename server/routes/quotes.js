@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { sendEmail } = require("../utils/emailService");
 const Quote = require("../models/Quote");
+const Booking = require("../models/Booking");
 
 const FREQUENCY_LABELS = {
   once: "One-time",
@@ -44,6 +45,8 @@ router.post("/send", async (req, res) => {
       balanceDue,
       discount,
       notes,
+      serviceDate,
+      serviceTimeSlot,
     } = req.body;
 
     // Validation
@@ -79,6 +82,8 @@ router.post("/send", async (req, res) => {
       balanceDue,
       discount,
       notes,
+      serviceDate,
+      serviceTimeSlot,
     };
 
     // Generate quote email HTML
@@ -167,7 +172,7 @@ router.get("/stats", async (req, res) => {
   try {
     const [total, allQuotes] = await Promise.all([
       Quote.countDocuments(),
-      Quote.find({}, "grandTotal createdAt"),
+      Quote.find({}, "grandTotal createdAt status"),
     ]);
 
     const totalQuotedValue = allQuotes.reduce(
@@ -183,9 +188,27 @@ router.get("/stats", async (req, res) => {
       );
     }).length;
 
+    const accepted = allQuotes.filter((q) => q.status === "accepted");
+    const declined = allQuotes.filter((q) => q.status === "declined");
+    const pending = allQuotes.filter(
+      (q) => q.status !== "accepted" && q.status !== "declined",
+    );
+    const acceptedValue = accepted.reduce((s, q) => s + (q.grandTotal || 0), 0);
+    const responded = accepted.length + declined.length;
+    const acceptanceRate = responded > 0 ? (accepted.length / responded) * 100 : 0;
+
     res.status(200).json({
       success: true,
-      data: { total, totalQuotedValue, thisMonthCount },
+      data: {
+        total,
+        totalQuotedValue,
+        thisMonthCount,
+        accepted: accepted.length,
+        declined: declined.length,
+        pending: pending.length,
+        acceptedValue,
+        acceptanceRate,
+      },
     });
   } catch (error) {
     console.error("Quote stats error:", error);
@@ -256,7 +279,7 @@ router.get("/:quoteRef", async (req, res) => {
 /**
  * GET /api/quotes/:quoteRef/accept
  * Public link clicked from the quote email — marks the quote as accepted,
- * notifies the admin, and shows the company a simple confirmation page.
+ * notifies the admin, and shows the company a proper confirmation page.
  * No authentication, since the recipient is a company contact, not an admin.
  */
 router.get("/:quoteRef/accept", async (req, res) => {
@@ -265,35 +288,70 @@ router.get("/:quoteRef/accept", async (req, res) => {
     const quote = await Quote.findOne({ quoteRef });
 
     if (!quote) {
-      return res.status(404).send(generateSimplePage({
-        heading: "Quote not found",
-        message: "We couldn't find that quote. Please contact us directly and we'll help sort it out.",
-      }));
+      return res.status(404).send(generateOutcomePage({ type: "notfound" }));
     }
 
-    if (quote.status !== "accepted") {
+    if (quote.status === "declined") {
+      // They already declined — let them flip to accepted, but don't silently
+      // resurrect a dead lead without telling the admin it changed.
+      quote.status = "accepted";
+      quote.acceptedAt = new Date();
+      quote.declinedAt = null;
+      await quote.save();
+      const bookingsCreated = await generateBookingsFromQuote(quote);
+      await sendEmail({
+        to: process.env.EMAIL_USER || "info@cleaniqservices.com",
+        subject: `✅ Quote Accepted (after declining) - ${quote.companyName} | ${quote.quoteRef}`,
+        html: generateQuoteResponseAlert(quote, "accepted", bookingsCreated),
+      });
+    } else if (quote.status !== "accepted") {
       quote.status = "accepted";
       quote.acceptedAt = new Date();
       await quote.save();
-
+      const bookingsCreated = await generateBookingsFromQuote(quote);
       await sendEmail({
         to: process.env.EMAIL_USER || "info@cleaniqservices.com",
         subject: `✅ Quote Accepted - ${quote.companyName} | ${quote.quoteRef}`,
-        html: generateQuoteAcceptedAlert(quote),
+        html: generateQuoteResponseAlert(quote, "accepted", bookingsCreated),
       });
     }
 
-    res.send(generateSimplePage({
-      heading: "Quote Accepted 🎉",
-      message: `Thank you, ${quote.contactName || quote.companyName}! We've let our team know you'd like to go ahead with quote <strong>${quote.quoteRef}</strong>. We'll be in touch shortly to confirm the next steps.`,
-      ref: quote.quoteRef,
-    }));
+    res.send(generateOutcomePage({ type: "accept", quote }));
   } catch (error) {
     console.error("Quote accept error:", error);
-    res.status(500).send(generateSimplePage({
-      heading: "Something went wrong",
-      message: "Please contact us directly so we can confirm your quote.",
-    }));
+    res.status(500).send(generateOutcomePage({ type: "error" }));
+  }
+});
+
+/**
+ * GET /api/quotes/:quoteRef/decline
+ * Public link clicked from the quote email — marks the quote as declined
+ * and notifies the admin, so a dead lead doesn't sit silently as "sent".
+ */
+router.get("/:quoteRef/decline", async (req, res) => {
+  const { quoteRef } = req.params;
+  try {
+    const quote = await Quote.findOne({ quoteRef });
+
+    if (!quote) {
+      return res.status(404).send(generateOutcomePage({ type: "notfound" }));
+    }
+
+    if (quote.status !== "declined") {
+      quote.status = "declined";
+      quote.declinedAt = new Date();
+      await quote.save();
+      await sendEmail({
+        to: process.env.EMAIL_USER || "info@cleaniqservices.com",
+        subject: `❌ Quote Declined - ${quote.companyName} | ${quote.quoteRef}`,
+        html: generateQuoteResponseAlert(quote, "declined"),
+      });
+    }
+
+    res.send(generateOutcomePage({ type: "decline", quote }));
+  } catch (error) {
+    console.error("Quote decline error:", error);
+    res.status(500).send(generateOutcomePage({ type: "error" }));
   }
 });
 
@@ -663,17 +721,25 @@ function generateQuoteEmail(quote) {
             <!-- CTA -->
             <tr>
               <td style="padding: 32px 40px; text-align: center;">
+                <p style="margin: 0 0 18px; font-size: 14px; color: #334155; font-family: Arial, Helvetica, sans-serif;">Ready to go ahead?</p>
                 <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                   <tr>
-                    <td style="border-radius: 6px; background-color: #005B41; padding-right: 10px;">
-                      <a href="https://api.cleaniqservices.com/api/quotes/${quoteRef}/accept" style="display: inline-block; padding: 14px 32px; font-size: 14px; font-weight: bold; color: #ffffff; text-decoration: none; font-family: Arial, Helvetica, sans-serif;">Accept This Quote</a>
-                    </td>
-                    <td style="border-radius: 6px; border: 1px solid #cbd5e1;">
-                      <a href="mailto:info@cleaniqservices.com?subject=${encodeURIComponent(`Re: Quote ${quoteRef} - ${companyName}`)}" style="display: inline-block; padding: 14px 32px; font-size: 14px; font-weight: bold; color: #0f172a; text-decoration: none; font-family: Arial, Helvetica, sans-serif;">Reply With Questions</a>
+                    <td style="border-radius: 6px; background-color: #005B41;">
+                      <a href="https://api.cleaniqservices.com/api/quotes/${quoteRef}/accept" style="display: inline-block; padding: 14px 40px; font-size: 14px; font-weight: bold; color: #ffffff; text-decoration: none; font-family: Arial, Helvetica, sans-serif;">Accept This Quote</a>
                     </td>
                   </tr>
                 </table>
-                <p style="margin: 16px 0 0; font-size: 12px; color: #94a3b8; font-family: Arial, Helvetica, sans-serif;">You can also simply reply to this email — it goes straight to our team.</p>
+                <table cellpadding="0" cellspacing="0" style="margin: 18px auto 0;">
+                  <tr>
+                    <td style="padding: 0 14px; font-size: 12px;">
+                      <a href="https://api.cleaniqservices.com/api/quotes/${quoteRef}/decline" style="color: #94a3b8; text-decoration: underline; font-family: Arial, Helvetica, sans-serif;">Not interested right now</a>
+                    </td>
+                    <td style="color: #cbd5e1;">|</td>
+                    <td style="padding: 0 14px; font-size: 12px;">
+                      <a href="mailto:info@cleaniqservices.com?subject=${encodeURIComponent(`Re: Quote ${quoteRef} - ${companyName}`)}" style="color: #0f172a; text-decoration: underline; font-weight: bold; font-family: Arial, Helvetica, sans-serif;">Reply with questions</a>
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
 
@@ -743,7 +809,72 @@ function generateAdminNotificationEmail(quote) {
 // Simple branded confirmation page shown when a company clicks the
 // "Accept This Quote" link from their email — this is a public, unauthenticated
 // page, so it's rendered server-side rather than requiring a frontend route.
-function generateSimplePage({ heading, message, ref }) {
+// Public-facing outcome page shown when a company clicks Accept/Decline from
+// their quote email. Unauthenticated, so it's rendered server-side rather
+// than requiring a frontend route + build.
+function generateOutcomePage({ type, quote }) {
+  const config = {
+    accept: {
+      badgeColor: "#059669",
+      badgeBg: "#d1fae5",
+      icon: "✓",
+      heading: "Quote Accepted",
+      message: `Thank you, ${quote?.contactName || quote?.companyName || "there"}! We've let our team know you'd like to go ahead with quote <strong>${quote?.quoteRef}</strong>.`,
+      steps: [
+        "Our team will review and confirm scheduling within 1 business day",
+        "You'll receive a booking confirmation with the visit date & time",
+        `${quote?.depositRequired ? "We'll send a secure payment link for the deposit" : "No deposit needed — we'll invoice per your agreed payment terms"}`,
+      ],
+    },
+    decline: {
+      badgeColor: "#64748b",
+      badgeBg: "#f1f5f9",
+      icon: "✕",
+      heading: "Quote Declined",
+      message: `No problem at all — thanks for letting us know, ${quote?.contactName || quote?.companyName || "there"}. We've closed out quote <strong>${quote?.quoteRef}</strong> on our end.`,
+      steps: [
+        "If the price or scope didn't quite fit, just reply to the original email — we're happy to revise it",
+        "If now isn't the right time, we'll be here whenever you're ready",
+      ],
+    },
+    notfound: {
+      badgeColor: "#dc2626",
+      badgeBg: "#fee2e2",
+      icon: "!",
+      heading: "Quote not found",
+      message: "We couldn't find that quote. Please contact us directly and we'll help sort it out.",
+      steps: [],
+    },
+    error: {
+      badgeColor: "#dc2626",
+      badgeBg: "#fee2e2",
+      icon: "!",
+      heading: "Something went wrong",
+      message: "Please contact us directly so we can confirm your quote.",
+      steps: [],
+    },
+  }[type];
+
+  const stepsHtml = config.steps.length
+    ? `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 28px; background-color: #f8fafc; border-radius: 8px;">
+      <tr><td style="padding: 18px 22px 6px; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">What happens next</td></tr>
+      ${config.steps
+        .map(
+          (s, i) => `
+      <tr>
+        <td style="padding: 8px 22px ${i === config.steps.length - 1 ? "18px" : "0"};">
+          <table cellpadding="0" cellspacing="0"><tr>
+            <td style="vertical-align: top; padding-right: 10px;"><span style="display: inline-block; width: 20px; height: 20px; border-radius: 50%; background-color: #0f172a; color: #ffffff; font-size: 11px; font-weight: bold; text-align: center; line-height: 20px;">${i + 1}</span></td>
+            <td style="font-size: 13px; line-height: 1.6; color: #334155;">${s}</td>
+          </tr></table>
+        </td>
+      </tr>`,
+        )
+        .join("")}
+    </table>`
+    : "";
+
   return `
 <!DOCTYPE html>
 <html>
@@ -752,17 +883,19 @@ function generateSimplePage({ heading, message, ref }) {
     <table width="100%" cellpadding="0" cellspacing="0" style="padding: 48px 16px;">
       <tr>
         <td align="center">
-          <table width="480" cellpadding="0" cellspacing="0" style="width: 480px; max-width: 100%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+          <table width="520" cellpadding="0" cellspacing="0" style="width: 520px; max-width: 100%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
             <tr>
               <td style="background-color: #0f172a; padding: 28px; text-align: center;">
                 <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Services" style="height: 40px;" />
               </td>
             </tr>
             <tr>
-              <td style="padding: 40px; text-align: center;">
-                <h1 style="margin: 0 0 16px; font-size: 22px; color: #0f172a;">${heading}</h1>
-                <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #475569;">${message}</p>
-                ${ref ? `<p style="margin: 24px 0 0; font-size: 12px; color: #94a3b8;">Reference: ${ref}</p>` : ""}
+              <td style="padding: 44px 40px; text-align: center;">
+                <span style="display: inline-block; width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background-color: ${config.badgeBg}; color: ${config.badgeColor}; font-size: 26px; font-weight: bold;">${config.icon}</span>
+                <h1 style="margin: 20px 0 12px; font-size: 22px; color: #0f172a;">${config.heading}</h1>
+                <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #475569;">${config.message}</p>
+                ${quote?.quoteRef ? `<p style="margin: 16px 0 0; font-size: 12px; color: #94a3b8;">Reference: ${quote.quoteRef}</p>` : ""}
+                ${stepsHtml}
                 <a href="https://cleaniqservices.com" style="display: inline-block; margin-top: 28px; padding: 12px 28px; background-color: #005B41; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: bold;">Return to Cleaniq Services</a>
               </td>
             </tr>
@@ -774,14 +907,15 @@ function generateSimplePage({ heading, message, ref }) {
 </html>`;
 }
 
-function generateQuoteAcceptedAlert(quote) {
+function generateQuoteResponseAlert(quote, outcome, bookingsCreated = 0) {
+  const isAccepted = outcome === "accepted";
   return `
     <div style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
-      <div style="background-color: #059669; padding: 32px; text-align: center;">
-        <h1 style="color: #ffffff; margin: 0; font-size: 22px;">✅ Quote Accepted</h1>
+      <div style="background-color: ${isAccepted ? "#059669" : "#475569"}; padding: 32px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 22px;">${isAccepted ? "✅ Quote Accepted" : "❌ Quote Declined"}</h1>
       </div>
       <div style="padding: 32px;">
-        <p style="margin: 0 0 20px; font-size: 14px; color: #475569;"><strong>${quote.companyName}</strong> has accepted their quote. Here are the details:</p>
+        <p style="margin: 0 0 20px; font-size: 14px; color: #475569;"><strong>${quote.companyName}</strong> has ${isAccepted ? "accepted" : "declined"} their quote.</p>
         <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8fafc; border-radius: 8px;">
           <tr><td style="padding: 16px 20px 4px; font-size: 12px; color: #64748b;">Quote Ref</td></tr>
           <tr><td style="padding: 0 20px 16px; font-size: 15px; font-weight: bold; color: #0f172a;">${quote.quoteRef}</td></tr>
@@ -790,11 +924,100 @@ function generateQuoteAcceptedAlert(quote) {
           <tr><td style="padding: 0 20px 4px; font-size: 12px; color: #64748b;">Contact</td></tr>
           <tr><td style="padding: 0 20px 16px; font-size: 15px; color: #0f172a;">${quote.email}${quote.phone ? ` &middot; ${quote.phone}` : ""}</td></tr>
           <tr><td style="padding: 0 20px 4px; font-size: 12px; color: #64748b;">Total Value</td></tr>
-          <tr><td style="padding: 0 20px 20px; font-size: 18px; font-weight: bold; color: #059669;">£${Number(quote.grandTotal || 0).toFixed(2)}</td></tr>
+          <tr><td style="padding: 0 20px ${bookingsCreated ? "4px" : "20px"}; font-size: 18px; font-weight: bold; color: ${isAccepted ? "#059669" : "#475569"};">£${Number(quote.grandTotal || 0).toFixed(2)}</td></tr>
+          ${
+            bookingsCreated
+              ? `<tr><td style="padding: 0 20px 20px; font-size: 13px; color: #059669; font-weight: bold;">📅 ${bookingsCreated} booking${bookingsCreated > 1 ? "s" : ""} added to the calendar automatically</td></tr>`
+              : ""
+          }
         </table>
         <a href="https://cleaniqservices.com/admin/quotes" style="display: block; text-align: center; margin-top: 24px; background-color: #0f172a; color: #ffffff; padding: 14px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px;">View in Quote History</a>
       </div>
     </div>`;
+}
+
+// When a quote with a scheduled service date/time is accepted, automatically
+// create the matching booking(s) so they appear on the calendar — a single
+// booking for one-time quotes, or a forward-looking series for recurring ones.
+async function generateBookingsFromQuote(quote) {
+  if (!quote.serviceDate) return 0;
+
+  const OCCURRENCES_BY_FREQUENCY = {
+    once: 1,
+    weekly: 12,
+    biweekly: 8,
+    monthly: 6,
+    quarterly: 4,
+    yearly: 2,
+  };
+  const occurrenceCount = OCCURRENCES_BY_FREQUENCY[quote.frequency] || 1;
+
+  const addInterval = (date, frequency, index) => {
+    const d = new Date(date);
+    switch (frequency) {
+      case "weekly":
+        d.setDate(d.getDate() + 7 * index);
+        break;
+      case "biweekly":
+        d.setDate(d.getDate() + 14 * index);
+        break;
+      case "monthly":
+        d.setMonth(d.getMonth() + index);
+        break;
+      case "quarterly":
+        d.setMonth(d.getMonth() + 3 * index);
+        break;
+      case "yearly":
+        d.setFullYear(d.getFullYear() + index);
+        break;
+      default:
+        break;
+    }
+    return d;
+  };
+
+  const serviceLabel =
+    quote.items
+      .map((i) => i.service || i.customService)
+      .filter(Boolean)
+      .join(", ") || "Quoted Cleaning Service";
+
+  const [firstName, ...rest] = (quote.contactName || quote.companyName || "Customer").split(" ");
+
+  const bookings = Array.from({ length: occurrenceCount }, (_, i) => ({
+    bookingId: `Q-${quote.quoteRef}-${i + 1}`,
+    customer: {
+      firstName: firstName || quote.companyName,
+      lastName: rest.join(" ") || quote.companyName,
+      email: quote.email,
+      phone: quote.phone || "",
+    },
+    service: serviceLabel,
+    details: {
+      address: quote.address || "",
+      frequency:
+        quote.frequency === "once"
+          ? "Once"
+          : FREQUENCY_LABELS[quote.frequency] || quote.frequency,
+      duration: 2,
+      notes: `Generated from accepted quote ${quote.quoteRef} (${quote.companyName})`,
+    },
+    schedule: {
+      date: addInterval(quote.serviceDate, quote.frequency, i),
+      timeSlot: quote.serviceTimeSlot || "Morning (8am-12pm)",
+    },
+    payment: {
+      amount: quote.grandTotal || 0,
+      currency: "GBP",
+      status: "Pending",
+    },
+    region: "UK",
+    leadSource: "Quote Accepted",
+    status: "Confirmed",
+  }));
+
+  await Booking.insertMany(bookings);
+  return bookings.length;
 }
 
 function calculateNextSendDate(frequency) {
