@@ -48,6 +48,7 @@ export const LEAD_SOURCES = [
 
 const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [calendarView, setCalendarView] = useState("month"); // "month" | "year"
   const [showRecurring, setShowRecurring] = useState(false);
   const [selectedDateForDetails, setSelectedDateForDetails] = useState(null);
   const [recurringLoading, setRecurringLoading] = useState(false);
@@ -198,11 +199,15 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
 
   const handlePrevMonth = () =>
     setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1),
+      calendarView === "year"
+        ? new Date(currentMonth.getFullYear() - 1, currentMonth.getMonth())
+        : new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1),
     );
   const handleNextMonth = () =>
     setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1),
+      calendarView === "year"
+        ? new Date(currentMonth.getFullYear() + 1, currentMonth.getMonth())
+        : new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1),
     );
 
   const days = [];
@@ -229,6 +234,42 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
       return bStr === dStr;
     });
   };
+
+  // Real (non-blackout) bookings, used for revenue totals on the calendar.
+  const isRealBooking = (b) =>
+    b.status !== "Blackout" && b.customer?.firstName !== "ADMIN_BLOCK";
+
+  const revenueForMonth = (year, month) =>
+    bookings
+      .filter((b) => {
+        if (!b.schedule?.date || !isRealBooking(b)) return false;
+        const d = new Date(b.schedule.date);
+        return d.getFullYear() === year && d.getMonth() === month;
+      })
+      .reduce((sum, b) => sum + Number(b.payment?.amount || 0), 0);
+
+  const bookingCountForMonth = (year, month) =>
+    bookings.filter((b) => {
+      if (!b.schedule?.date || !isRealBooking(b)) return false;
+      const d = new Date(b.schedule.date);
+      return d.getFullYear() === year && d.getMonth() === month;
+    }).length;
+
+  const currentMonthRevenue = revenueForMonth(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth(),
+  );
+
+  const yearMonths = Array.from({ length: 12 }, (_, m) => ({
+    month: m,
+    label: new Date(currentMonth.getFullYear(), m, 1).toLocaleString(
+      "default",
+      { month: "long" },
+    ),
+    revenue: revenueForMonth(currentMonth.getFullYear(), m),
+    count: bookingCountForMonth(currentMonth.getFullYear(), m),
+  }));
+  const yearTotalRevenue = yearMonths.reduce((s, m) => s + m.revenue, 0);
 
   // Calculate preview of dates that will be generated
   const getPreviewDates = () => {
@@ -384,48 +425,79 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
     <div className="space-y-6">
       {/* ── MAIN CALENDAR ───────────────────────────────────── */}
       <div className="bg-white rounded-[40px] p-10 border border-slate-200 shadow-sm animate-in fade-in">
-        <div className="flex justify-between items-center mb-10">
+        <div className="flex flex-wrap justify-between items-center gap-4 mb-10">
           <div>
             <h3 className="text-2xl font-bold text-primary-dark tracking-tighter">
-              {currentMonth.toLocaleString("default", { month: "long" })}{" "}
-              <span className="text-primary">{currentMonth.getFullYear()}</span>
+              {calendarView === "year" ? (
+                <span className="text-primary">{currentMonth.getFullYear()}</span>
+              ) : (
+                <>
+                  {currentMonth.toLocaleString("default", { month: "long" })}{" "}
+                  <span className="text-primary">{currentMonth.getFullYear()}</span>
+                </>
+              )}
             </h3>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-              Click any date to Block/Unblock
-            </p>
+            <div className="flex items-center gap-3 mt-1.5">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold">
+                £
+                {(calendarView === "year"
+                  ? yearTotalRevenue
+                  : currentMonthRevenue
+                ).toLocaleString("en-GB", { maximumFractionDigits: 0 })}{" "}
+                {calendarView === "year" ? "this year" : "this month"}
+              </span>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                {calendarView === "year"
+                  ? "Click a month to view its calendar"
+                  : "Click any date to Block/Unblock"}
+              </p>
+            </div>
           </div>
-          <div className="flex gap-3 items-center">
-            <button
-              onClick={() => {
-                setShowRecurring(!showRecurring);
-                setRecurringSuccess(null);
-              }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all border-2"
-              style={{
-                background: showRecurring
-                  ? "linear-gradient(135deg,#0F172A,#1e3a5f)"
-                  : "white",
-                color: showRecurring ? "#6EE7B7" : "#0F172A",
-                borderColor: showRecurring ? "#0F172A" : "#e2e8f0",
-              }}
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          <div className="flex gap-3 items-center flex-wrap">
+            <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
+              {["month", "year"].map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setCalendarView(v)}
+                  className={`px-3.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all capitalize ${calendarView === v ? "bg-primary text-white shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+            {calendarView === "month" && (
+              <button
+                onClick={() => {
+                  setShowRecurring(!showRecurring);
+                  setRecurringSuccess(null);
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all border-2"
+                style={{
+                  background: showRecurring
+                    ? "linear-gradient(135deg,#0F172A,#1e3a5f)"
+                    : "white",
+                  color: showRecurring ? "#6EE7B7" : "#0F172A",
+                  borderColor: showRecurring ? "#0F172A" : "#e2e8f0",
+                }}
               >
-                <path d="M17 1l4 4-4 4" />
-                <path d="M3 11V9a4 4 0 014-4h14" />
-                <path d="M7 23l-4-4 4-4" />
-                <path d="M21 13v2a4 4 0 01-4 4H3" />
-              </svg>
-              {showRecurring ? "Hide Recurring" : "Create Recurring Booking"}
-            </button>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 1l4 4-4 4" />
+                  <path d="M3 11V9a4 4 0 014-4h14" />
+                  <path d="M7 23l-4-4 4-4" />
+                  <path d="M21 13v2a4 4 0 01-4 4H3" />
+                </svg>
+                {showRecurring ? "Hide Recurring" : "Create Recurring Booking"}
+              </button>
+            )}
             <button
               onClick={handlePrevMonth}
               className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
@@ -441,78 +513,113 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-7 gap-2 mb-4">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-            <div
-              key={d}
-              className="text-[10px] font-bold text-slate-300 uppercase text-center py-2"
-            >
-              {d}
+        {calendarView === "year" ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {yearMonths.map((m) => (
+              <button
+                key={m.month}
+                onClick={() => {
+                  setCurrentMonth(
+                    new Date(currentMonth.getFullYear(), m.month, 1),
+                  );
+                  setCalendarView("month");
+                }}
+                className={`text-left p-5 rounded-[24px] border-2 transition-all ${m.count > 0 ? "bg-emerald-50 border-emerald-200 hover:border-emerald-400" : "bg-slate-50 border-transparent hover:border-primary/30"}`}
+              >
+                <p className="font-bold text-primary-dark text-base mb-2">
+                  {m.label}
+                </p>
+                <p className="text-xl font-bold text-slate-900 tabular-nums">
+                  £{m.revenue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                </p>
+                <p className="text-[11px] font-semibold text-slate-400 mt-0.5">
+                  {m.count} booking{m.count !== 1 ? "s" : ""}
+                </p>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-7 gap-2 mb-4">
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                <div
+                  key={d}
+                  className="text-[10px] font-bold text-slate-300 uppercase text-center py-2"
+                >
+                  {d}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="grid grid-cols-7 gap-3">
-          {days.map((date, i) => {
-            const dayBookings = getBookingsForDate(date);
-            const isBlocked = dayBookings.some(
-              (b) =>
-                b.status === "Blackout" ||
-                b.customer?.firstName === "ADMIN_BLOCK",
-            );
-            const hasBookings = dayBookings.some(
-              (b) =>
-                b.status !== "Blackout" &&
-                b.customer?.firstName !== "ADMIN_BLOCK",
-            );
-            // Highlight recurring bookings
-            const hasRecurring = dayBookings.some(
-              (b) => b.meta?.recurringGroup,
-            );
+            <div className="grid grid-cols-7 gap-3">
+              {days.map((date, i) => {
+                const dayBookings = getBookingsForDate(date);
+                const isBlocked = dayBookings.some(
+                  (b) =>
+                    b.status === "Blackout" ||
+                    b.customer?.firstName === "ADMIN_BLOCK",
+                );
+                const realDayBookings = dayBookings.filter(isRealBooking);
+                const hasBookings = realDayBookings.length > 0;
+                const dayRevenue = realDayBookings.reduce(
+                  (s, b) => s + Number(b.payment?.amount || 0),
+                  0,
+                );
+                // Highlight recurring bookings
+                const hasRecurring = dayBookings.some(
+                  (b) => b.meta?.recurringGroup,
+                );
 
-            return (
-              <div key={i} className="aspect-square">
-                {date ? (
-                  <button
-                    onClick={() =>
-                      setSelectedDateForDetails({
-                        date,
-                        isBlocked,
-                        bookingsOnDate: dayBookings,
-                      })
-                    }
-                    className={`w-full h-full rounded-[24px] flex flex-col items-center justify-center transition-all relative border-2 group
-                      ${isBlocked ? "bg-rose-50 border-rose-200 text-rose-500" : hasBookings ? "bg-emerald-50 border-emerald-200 text-emerald-600" : "bg-slate-50 border-transparent text-slate-400 hover:border-primary/30"}
-                    `}
-                  >
-                    <span className="text-sm font-bold">{date.getDate()}</span>
-                    {isBlocked && (
-                      <span className="text-[7px] font-bold uppercase absolute bottom-2">
-                        Blocked
-                      </span>
+                return (
+                  <div key={i} className="aspect-square">
+                    {date ? (
+                      <button
+                        onClick={() =>
+                          setSelectedDateForDetails({
+                            date,
+                            isBlocked,
+                            bookingsOnDate: dayBookings,
+                          })
+                        }
+                        className={`w-full h-full rounded-[24px] flex flex-col items-center justify-center transition-all relative border-2 group
+                          ${isBlocked ? "bg-rose-50 border-rose-200 text-rose-500" : hasBookings ? "bg-emerald-50 border-emerald-200 text-emerald-600" : "bg-slate-50 border-transparent text-slate-400 hover:border-primary/30"}
+                        `}
+                      >
+                        <span className="text-sm font-bold">{date.getDate()}</span>
+                        {isBlocked && (
+                          <span className="text-[7px] font-bold uppercase absolute bottom-2">
+                            Blocked
+                          </span>
+                        )}
+                        {hasBookings && !isBlocked && (
+                          <span className="text-[7px] font-bold uppercase absolute bottom-1.5 text-center leading-tight">
+                            {realDayBookings.length} Booking
+                            {realDayBookings.length > 1 ? "s" : ""}
+                            <br />£
+                            {dayRevenue.toLocaleString("en-GB", {
+                              maximumFractionDigits: 0,
+                            })}
+                          </span>
+                        )}
+                        {hasRecurring && !isBlocked && (
+                          <span
+                            className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-purple-400"
+                            title="Recurring"
+                          />
+                        )}
+                      </button>
+                    ) : (
+                      <div className="w-full h-full" />
                     )}
-                    {hasBookings && !isBlocked && (
-                      <span className="text-[7px] font-bold uppercase absolute bottom-2">
-                        {dayBookings.length} Booking
-                        {dayBookings.length > 1 ? "s" : ""}
-                      </span>
-                    )}
-                    {hasRecurring && !isBlocked && (
-                      <span
-                        className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-purple-400"
-                        title="Recurring"
-                      />
-                    )}
-                  </button>
-                ) : (
-                  <div className="w-full h-full" />
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
 
         {/* Legend */}
+        {calendarView === "month" && (
         <div className="flex gap-6 mt-8 pt-6 border-t border-slate-100 flex-wrap">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-emerald-300" />
@@ -539,8 +646,11 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
             </span>
           </div>
         </div>
+        )}
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">
-          💡 Click any date to view bookings and manage availability
+          {calendarView === "year"
+            ? "💡 Click any month to jump straight to its calendar"
+            : "💡 Click any date to view bookings and manage availability"}
         </p>
       </div>
 

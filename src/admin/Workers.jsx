@@ -28,12 +28,24 @@ const Workers = () => {
   const [selectedWorkers, setSelectedWorkers] = useState(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
+  const ROLE_OPTIONS = [
+    "Cleaner",
+    "Team Leader",
+    "Supervisor",
+    "Quality Assurance",
+    "Driver",
+    "Office Staff",
+    "Other",
+  ];
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
     region: region.id,
+    role: "Cleaner",
+    customRole: "",
   });
 
   const fetchWorkers = async () => {
@@ -55,10 +67,18 @@ const Workers = () => {
   const handleAddWorker = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...formData,
+        role:
+          formData.role === "Other"
+            ? formData.customRole.trim() || "Cleaner"
+            : formData.role,
+      };
+      delete payload.customRole;
       const response = await fetch(`${import.meta.env.VITE_API_URL}/workers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       const data = await response.json();
 
@@ -76,6 +96,8 @@ const Workers = () => {
           email: "",
           phone: "",
           region: region.id,
+          role: "Cleaner",
+          customRole: "",
         });
       } else {
         alert(data.error);
@@ -156,7 +178,7 @@ const Workers = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-primary-dark tracking-tight">
-            Worker Management
+            Staff Management
           </h1>
           <p className="text-slate-500 font-medium text-sm mt-1">
             Manage your cleaning staff and app access
@@ -325,9 +347,14 @@ const Workers = () => {
                           <p className="font-bold text-sm text-primary-dark">
                             {w.firstName} {w.lastName}
                           </p>
-                          <p className="text-[10px] font-black text-slate-400 uppercase">
-                            {w.workerId}
-                          </p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <p className="text-[10px] font-black text-slate-400 uppercase">
+                              {w.workerId}
+                            </p>
+                            <span className="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+                              {w.role || "Cleaner"}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -466,6 +493,36 @@ const Workers = () => {
                 }
                 className="w-full p-4 rounded-2xl bg-slate-50 border-none font-bold text-sm focus:ring-2 focus:ring-primary/20 outline-none"
               />
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 block">
+                  Job Position / Role
+                </label>
+                <select
+                  value={formData.role}
+                  onChange={(e) =>
+                    setFormData({ ...formData, role: e.target.value })
+                  }
+                  className="w-full p-4 rounded-2xl bg-slate-50 border-none font-bold text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+                >
+                  {ROLE_OPTIONS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+                {formData.role === "Other" && (
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter job position / role"
+                    value={formData.customRole}
+                    onChange={(e) =>
+                      setFormData({ ...formData, customRole: e.target.value })
+                    }
+                    className="w-full p-4 rounded-2xl bg-slate-50 border-none font-bold text-sm focus:ring-2 focus:ring-primary/20 outline-none mt-2"
+                  />
+                )}
+              </div>
               <button
                 type="submit"
                 className="w-full py-4 mt-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform"

@@ -15,14 +15,12 @@ router.get("/", async (req, res) => {
 // POST /api/org-chart — add a position
 router.post("/", async (req, res) => {
   try {
-    const { name, title, department, email, phone, parentId, order } = req.body;
+    const { name, title, department, parentId, order } = req.body;
     if (!title) return res.status(400).json({ message: "Title is required." });
     const position = await OrgPosition.create({
       name: name || "Vacant",
       title,
       department: department || "",
-      email: email || "",
-      phone: phone || "",
       parentId: parentId || null,
       order: order || 0,
     });

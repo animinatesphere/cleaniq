@@ -115,4 +115,38 @@ router.get('/leads', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/contact/leads/stats
+ * Lead counts for the dashboard — total, this week, this month.
+ */
+router.get('/leads/stats', async (req, res) => {
+  try {
+    const leads = await Lead.find({}, 'createdAt');
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const thisWeek = leads.filter((l) => new Date(l.createdAt) >= startOfWeek).length;
+    const thisMonth = leads.filter((l) => new Date(l.createdAt) >= startOfMonth).length;
+
+    res.json({ total: leads.length, thisWeek, thisMonth });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/**
+ * DELETE /api/contact/leads/:id
+ */
+router.delete('/leads/:id', async (req, res) => {
+  try {
+    await Lead.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Lead deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

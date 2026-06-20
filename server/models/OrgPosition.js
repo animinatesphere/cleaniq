@@ -4,8 +4,6 @@ const orgPositionSchema = new mongoose.Schema({
   name: { type: String, default: "Vacant" }, // person's name, or "Vacant" if unfilled
   title: { type: String, required: true }, // job title / role, e.g. "Operations Manager"
   department: { type: String, default: "" },
-  email: { type: String, default: "" },
-  phone: { type: String, default: "" },
   parentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "OrgPosition",

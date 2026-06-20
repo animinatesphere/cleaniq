@@ -306,6 +306,15 @@ const Services = () => {
             From regular home care to complex commercial maintenance, our team
             delivers excellence with every visit.
           </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-full bg-primary/5 border border-primary/10 text-primary font-bold text-xs md:text-sm"
+          >
+            <Truck size={16} /> All cleaning supplies & equipment are provided
+            by Cleaniq Services — nothing for you to bring.
+          </motion.div>
         </div>
 
         {/* Detailed Services */}

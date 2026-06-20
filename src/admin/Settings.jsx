@@ -13,6 +13,7 @@ const PERMISSION_OPTIONS = [
   { key: 'bookings', label: 'Bookings' },
   { key: 'quotes', label: 'Quotes' },
   { key: 'services', label: 'Services' },
+  { key: 'leads', label: 'Leads' },
   { key: 'staff-pay', label: 'Staff Pay' },
   { key: 'payments', label: 'Payment Approvals' },
   { key: 'withdrawals', label: 'Disbursement' },

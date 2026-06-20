@@ -465,7 +465,7 @@ router.get("/", async (req, res) => {
 // POST a new worker
 router.post("/", async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, region } = req.body;
+    const { firstName, lastName, email, phone, region, role } = req.body;
 
     // Check if email exists
     const existingWorker = await Worker.findOne({ email });
@@ -485,6 +485,7 @@ router.post("/", async (req, res) => {
       email,
       phone,
       region,
+      role: role || "Cleaner",
       status: "Pending",
       tempPassword,
       appAccessGranted: true,

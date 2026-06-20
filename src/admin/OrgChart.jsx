@@ -6,45 +6,71 @@ import {
   X,
   Printer,
   Building2,
-  Mail,
-  Phone,
+  User,
   RefreshCw,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
 
-const emptyForm = { name: "", title: "", department: "", email: "", phone: "", parentId: "" };
+const emptyForm = { name: "", title: "", department: "", parentId: "" };
 
-// Recursively render a position and its children as a classic org-chart tree.
+// Recursively render a position and its children as a classic org-chart tree,
+// styled to match a traditional government/compliance-style chart: a
+// highlighted top box, plain rounded boxes below, connected by simple lines.
+const nodeInitials = (node) => {
+  if (!node.name) return node.title?.[0]?.toUpperCase() || "?";
+  return node.name
+    .split(" ")
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+};
+
 const OrgNode = ({ node, childrenMap, onEdit, onAddChild, onDelete, isRoot }) => {
   const children = childrenMap[node._id] || [];
   return (
     <div className="flex flex-col items-center">
-      <div className="group relative bg-white border-2 border-slate-200 rounded-2xl px-5 py-4 shadow-sm hover:shadow-md hover:border-primary/40 transition-all min-w-[200px] text-center">
-        <p className="font-bold text-slate-900 text-sm">{node.title}</p>
-        <p className="text-[13px] text-primary font-semibold mt-0.5">
-          {node.name || "Vacant"}
-        </p>
-        {node.department && (
-          <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide mt-1">
-            {node.department}
+      <div
+        className={`group relative rounded-2xl shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 min-w-[200px] text-center overflow-hidden ${
+          isRoot
+            ? "bg-gradient-to-b from-amber-300 to-amber-400 border-2 border-amber-500 shadow-amber-200"
+            : "bg-white border border-slate-200"
+        }`}
+      >
+        <div className="px-6 pt-5 pb-4 flex flex-col items-center">
+          <div
+            className={`w-11 h-11 rounded-full flex items-center justify-center mb-2.5 font-bold text-sm ${
+              isRoot
+                ? "bg-slate-900 text-amber-300 shadow-sm"
+                : "bg-primary/10 text-primary"
+            }`}
+          >
+            {isRoot ? <User size={18} /> : nodeInitials(node)}
+          </div>
+          <p
+            className={`font-bold text-sm leading-tight ${isRoot ? "text-slate-900" : "text-slate-800"}`}
+          >
+            {node.title}
           </p>
-        )}
-        {(node.email || node.phone) && (
-          <div className="mt-2 pt-2 border-t border-slate-100 space-y-0.5">
-            {node.email && (
-              <p className="text-[10px] text-slate-400 flex items-center justify-center gap-1">
-                <Mail size={9} /> {node.email}
-              </p>
-            )}
-            {node.phone && (
-              <p className="text-[10px] text-slate-400 flex items-center justify-center gap-1">
-                <Phone size={9} /> {node.phone}
-              </p>
-            )}
+          <p
+            className={`text-[12px] font-semibold mt-1 ${isRoot ? "text-slate-700" : "text-primary"}`}
+          >
+            {node.name || "Vacant"}
+          </p>
+        </div>
+        {node.department && (
+          <div
+            className={`px-4 py-1.5 text-[9px] font-bold uppercase tracking-wide ${
+              isRoot
+                ? "bg-amber-500/30 text-slate-900"
+                : "bg-slate-50 text-slate-400 border-t border-slate-100"
+            }`}
+          >
+            {node.department}
           </div>
         )}
-        <div className="hidden print:hidden group-hover:flex absolute -top-3 -right-3 gap-1">
+        <div className="print:hidden flex absolute -top-3 -right-3 gap-1">
           <button
             onClick={() => onAddChild(node._id)}
             title="Add report"
@@ -59,37 +85,52 @@ const OrgNode = ({ node, childrenMap, onEdit, onAddChild, onDelete, isRoot }) =>
           >
             <Pencil size={11} />
           </button>
-          {!isRoot && (
-            <button
-              onClick={() => onDelete(node)}
-              title="Delete"
-              className="w-6 h-6 rounded-full bg-white border border-slate-200 text-slate-500 flex items-center justify-center shadow hover:text-rose-500"
-            >
-              <Trash2 size={11} />
-            </button>
-          )}
+          <button
+            onClick={() => onDelete(node)}
+            title="Delete"
+            className="w-6 h-6 rounded-full bg-white border border-slate-200 text-slate-500 flex items-center justify-center shadow hover:text-rose-500"
+          >
+            <Trash2 size={11} />
+          </button>
         </div>
       </div>
 
       {children.length > 0 && (
         <>
-          <div className="w-px h-8 bg-slate-300" />
-          <div className="flex gap-10 relative">
-            {children.length > 1 && (
-              <div className="absolute -top-0 left-0 right-0 h-px bg-slate-300" />
-            )}
-            {children.map((child) => (
-              <div key={child._id} className="flex flex-col items-center">
-                <div className="w-px h-0 bg-slate-300" />
-                <OrgNode
-                  node={child}
-                  childrenMap={childrenMap}
-                  onEdit={onEdit}
-                  onAddChild={onAddChild}
-                  onDelete={onDelete}
-                />
-              </div>
-            ))}
+          {/* Trunk line dropping from this box down to the children's bus line.
+              Uses a border, not a background color — borders always print,
+              backgrounds get stripped by browsers unless explicitly forced. */}
+          <div className="w-0 h-6 border-l-2 border-slate-400" />
+          <div className="flex">
+            {children.map((child, idx) => {
+              const isFirst = idx === 0;
+              const isLast = idx === children.length - 1;
+              return (
+                <div key={child._id} className="flex flex-col items-center px-5 relative">
+                  {/* Horizontal bus line — each child draws only its own half,
+                      so the segments meet exactly at the midpoint between
+                      boxes no matter how wide each box is. */}
+                  {children.length > 1 && (
+                    <div
+                      className="absolute top-0 h-0 border-t-2 border-slate-400"
+                      style={{
+                        left: isFirst ? "50%" : 0,
+                        right: isLast ? "50%" : 0,
+                      }}
+                    />
+                  )}
+                  {/* Vertical drop into this child, centered under its box */}
+                  <div className="w-0 h-6 border-l-2 border-slate-400" />
+                  <OrgNode
+                    node={child}
+                    childrenMap={childrenMap}
+                    onEdit={onEdit}
+                    onAddChild={onAddChild}
+                    onDelete={onDelete}
+                  />
+                </div>
+              );
+            })}
           </div>
         </>
       )}
@@ -140,8 +181,6 @@ const OrgChart = () => {
       name: node.name || "",
       title: node.title || "",
       department: node.department || "",
-      email: node.email || "",
-      phone: node.phone || "",
       parentId: node.parentId || "",
     });
     setShowModal(true);
@@ -210,6 +249,11 @@ const OrgChart = () => {
       </div>
 
       <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-10 overflow-x-auto print:border-none print:shadow-none">
+        {!loading && roots.length > 0 && (
+          <h3 className="text-center text-lg font-bold text-slate-900 mb-10 print:block hidden">
+            Cleaniq Services — Organizational Structure
+          </h3>
+        )}
         {loading ? (
           <div className="flex items-center justify-center py-20 text-slate-400">
             <RefreshCw size={20} className="animate-spin" />
@@ -294,22 +338,6 @@ const OrgChart = () => {
                   value={form.department}
                   onChange={(e) => setForm({ ...form, department: e.target.value })}
                   className="w-full p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                />
-                <input
-                  type="text"
-                  placeholder="Phone"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                 />
               </div>
               <div>

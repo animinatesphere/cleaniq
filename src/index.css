@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/* Force background colors (and not just text/borders) to actually print —
+   most browsers strip them by default unless "background graphics" is on. */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+
 @theme {
   --color-primary: #005B41;
   --color-primary-dark: #003B2A;

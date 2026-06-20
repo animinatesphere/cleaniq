@@ -7,6 +7,7 @@ const workerSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true },
   region: { type: String, required: true, enum: ["UK", "NG"] },
+  role: { type: String, default: "Cleaner" }, // Job position, e.g. Cleaner, Team Leader, Supervisor
   address: { type: String, default: "" },
   postcode: { type: String, default: "" },
   // Availability

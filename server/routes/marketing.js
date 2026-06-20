@@ -8,21 +8,68 @@ const { sendEmail } = require('../utils/emailService');
 
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-const campaignEmailHtml = (message) => `
-  <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden;">
-    <div style="background: #0F172A; padding: 30px; text-align: center; color: white;">
-      <h1 style="margin: 0; color: #6EE7B7;">Cleaniq Services</h1>
-    </div>
-    <div style="padding: 40px; color: #334155; line-height: 1.6;">
-      <p style="white-space: pre-wrap;">${message}</p>
-      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;" />
-      <p style="font-size: 12px; color: #94a3b8; text-align: center;">
-        You received this because you're a Cleaniq customer or contacted us about our services.
-        <br />UK & Nigeria Premium Cleaning Services
-      </p>
-    </div>
-  </div>
-`;
+// Professional, table-based campaign template — matches the quality of the
+// quote/booking emails and renders reliably across Outlook, Gmail, etc.
+const campaignEmailHtml = (subject, message) => `
+<!DOCTYPE html>
+<html>
+  <body style="margin: 0; padding: 0; background-color: #f1f5f9;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; padding: 32px 0;">
+      <tr>
+        <td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="width: 600px; max-width: 600px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+
+            <!-- HEADER -->
+            <tr>
+              <td style="background-color: #0f172a; padding: 36px 40px; text-align: center;">
+                <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Services" style="height: 48px; width: auto; margin-bottom: 14px;" />
+                <p style="margin: 0; font-size: 11px; font-weight: bold; letter-spacing: 2px; color: #6ee7b7; text-transform: uppercase; font-family: Arial, Helvetica, sans-serif;">Cleaniq Services</p>
+              </td>
+            </tr>
+
+            <!-- SUBJECT / HEADLINE -->
+            <tr>
+              <td style="padding: 40px 40px 0;">
+                <h1 style="margin: 0; font-size: 22px; color: #0f172a; font-family: Arial, Helvetica, sans-serif;">${subject}</h1>
+              </td>
+            </tr>
+
+            <!-- MESSAGE -->
+            <tr>
+              <td style="padding: 20px 40px 0;">
+                <p style="margin: 0; font-size: 14px; line-height: 1.8; color: #334155; white-space: pre-wrap; font-family: Arial, Helvetica, sans-serif;">${message}</p>
+              </td>
+            </tr>
+
+            <!-- CTA -->
+            <tr>
+              <td style="padding: 36px 40px; text-align: center;">
+                <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                  <tr>
+                    <td style="border-radius: 6px; background-color: #005B41;">
+                      <a href="https://cleaniqservices.com/booking" style="display: inline-block; padding: 14px 36px; font-size: 14px; font-weight: bold; color: #ffffff; text-decoration: none; font-family: Arial, Helvetica, sans-serif;">Book a Cleaning</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin: 16px 0 0; font-size: 12px; color: #94a3b8; font-family: Arial, Helvetica, sans-serif;">Or reply to this email — it goes straight to our team.</p>
+              </td>
+            </tr>
+
+            <!-- FOOTER -->
+            <tr>
+              <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 24px 40px; text-align: center;">
+                <p style="margin: 0; font-size: 13px; font-weight: bold; color: #0f172a; font-family: Arial, Helvetica, sans-serif;">Cleaniq Services Limited</p>
+                <p style="margin: 6px 0 0; font-size: 12px; color: #64748b; font-family: Arial, Helvetica, sans-serif;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7752 476368</p>
+                <p style="margin: 10px 0 0; font-size: 11px; color: #94a3b8; font-family: Arial, Helvetica, sans-serif;">You received this because you're a Cleaniq customer or contacted us about our services.</p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
 
 /**
  * POST /api/marketing/send
@@ -66,7 +113,7 @@ router.post('/send', async (req, res) => {
 
     console.log(`📢 Sending campaign "${subject}" to ${emails.length} recipient(s)...`);
 
-    const html = campaignEmailHtml(message);
+    const html = campaignEmailHtml(subject, message);
     const results = await Promise.allSettled(
       emails.map((email) => sendEmail({ to: email, subject, html })),
     );

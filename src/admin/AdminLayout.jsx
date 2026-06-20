@@ -23,9 +23,10 @@ import {
   FileText,
   History,
   Building2,
+  UserPlus,
 } from "lucide-react";
 import Login from "./Login";
-
+import logo from "../assets/logo DP2.jpg";
 const AdminLayout = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
     !!localStorage.getItem("adminToken"),
@@ -160,6 +161,12 @@ const AdminLayout = () => {
           key: "services",
           icon: <ShieldCheck size={20} />,
         },
+        {
+          name: "Leads",
+          path: "/admin/leads",
+          key: "leads",
+          icon: <UserPlus size={20} />,
+        },
       ],
     },
     {
@@ -274,7 +281,7 @@ const AdminLayout = () => {
   }, [isAuthenticated, isBookingAgent, location.pathname]);
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC]">
+    <div className="flex min-h-screen bg-[#F8FAFC] print:bg-white">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
@@ -285,18 +292,18 @@ const AdminLayout = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 ${isCollapsed ? "lg:w-22 lg:px-3" : ""} bg-white border-r border-slate-200 text-slate-600 p-6 flex flex-col transition-all duration-300 lg:translate-x-0 lg:static ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`print:hidden fixed inset-y-0 left-0 z-50 w-72 ${isCollapsed ? "lg:w-22 lg:px-3" : ""} bg-white border-r border-slate-200 text-slate-600 p-6 flex flex-col transition-all duration-300 lg:translate-x-0 lg:static ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div
           className={`flex items-center mb-10 ${isCollapsed ? "lg:justify-center" : "justify-between"}`}
         >
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
-              <ShieldCheck className="text-white" size={20} />
+              <img src={logo} alt="" />
             </div>
             <div className={isCollapsed ? "lg:hidden" : ""}>
-              <h1 className="font-black text-base leading-none uppercase tracking-tighter text-slate-900 whitespace-nowrap">
-                Cleaniq
+              <h1 className="font-black text-base leading-none  tracking-tighter text-slate-900 whitespace-nowrap">
+                Cleaniq Services
               </h1>
               <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest whitespace-nowrap">
                 Business Portal
@@ -370,7 +377,9 @@ const AdminLayout = () => {
             className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors ${isCollapsed ? "lg:justify-center" : ""}`}
           >
             <LogOut size={19} className="flex-shrink-0" />
-            <span className={`font-semibold text-sm ${isCollapsed ? "lg:hidden" : ""}`}>
+            <span
+              className={`font-semibold text-sm ${isCollapsed ? "lg:hidden" : ""}`}
+            >
               Logout
             </span>
           </button>
@@ -379,7 +388,7 @@ const AdminLayout = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 relative">
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 lg:px-10 py-4 flex items-center justify-between">
+        <header className="print:hidden sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 lg:px-10 py-4 flex items-center justify-between">
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden p-2 rounded-xl bg-slate-100 text-slate-600"
