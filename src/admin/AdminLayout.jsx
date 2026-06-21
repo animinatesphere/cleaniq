@@ -24,6 +24,8 @@ import {
   History,
   Building2,
   UserPlus,
+  ListChecks,
+  Repeat,
 } from "lucide-react";
 import Login from "./Login";
 import logo from "../assets/logo DP2.jpg";
@@ -166,6 +168,18 @@ const AdminLayout = () => {
           path: "/admin/leads",
           key: "leads",
           icon: <UserPlus size={20} />,
+        },
+        {
+          name: "Checklist",
+          path: "/admin/checklist",
+          key: "checklist",
+          icon: <ListChecks size={20} />,
+        },
+        {
+          name: "Recurring",
+          path: "/admin/recurring",
+          key: "recurring",
+          icon: <Repeat size={20} />,
         },
       ],
     },

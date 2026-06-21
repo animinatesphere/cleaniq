@@ -3,6 +3,7 @@ const router = express.Router();
 const { sendEmail } = require("../utils/emailService");
 const Quote = require("../models/Quote");
 const Booking = require("../models/Booking");
+const Lead = require("../models/Lead");
 
 const FREQUENCY_LABELS = {
   once: "One-time",
@@ -108,6 +109,26 @@ router.post("/send", async (req, res) => {
       ...quoteData,
       status: "sent",
     });
+
+    // Capture the recipient as a lead (name/email/phone) so they're
+    // available for future email marketing campaigns.
+    try {
+      const leadEmail = (email || "").trim().toLowerCase();
+      if (leadEmail) {
+        const existingLead = await Lead.findOne({ email: leadEmail });
+        if (!existingLead) {
+          await Lead.create({
+            name: contactName || companyName || "",
+            email: leadEmail,
+            phone: phone || "",
+            source: "Quote",
+            acknowledged: true,
+          });
+        }
+      }
+    } catch (leadErr) {
+      console.error("⚠️ Failed to capture quote lead:", leadErr.message);
+    }
 
     // Send copy to admin if requested
     if (sendCopy) {
@@ -1014,6 +1035,8 @@ async function generateBookingsFromQuote(quote) {
     region: "UK",
     leadSource: "Quote Accepted",
     status: "Confirmed",
+    meta:
+      occurrenceCount > 1 ? { recurringGroup: `Q-${quote.quoteRef}` } : {},
   }));
 
   await Booking.insertMany(bookings);

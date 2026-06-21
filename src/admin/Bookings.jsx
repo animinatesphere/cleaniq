@@ -1803,6 +1803,9 @@ const Bookings = () => {
     suppliesProvidedBy: "Cleaniq",
   });
   const [createStep, setCreateStep] = useState(1);
+  // When true, the booking is created already paid (cash/bank transfer taken
+  // outside the system) — no Stripe link or bank details are emailed.
+  const [noPaymentRequired, setNoPaymentRequired] = useState(false);
   const [servicesList, setServicesList] = useState([]);
   const [dynamicRates, setDynamicRates] = useState({});
   const [createTotal, setCreateTotal] = useState(0);
@@ -1813,6 +1816,7 @@ const Bookings = () => {
   const [statusMessage, setStatusMessage] = useState({ type: "", text: "" });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successBooking, setSuccessBooking] = useState(null);
+  const [markingCompleteId, setMarkingCompleteId] = useState(null);
   const [formErrors, setFormErrors] = useState({});
   const [fieldTouched, setFieldTouched] = useState({});
   const [selectedBookings, setSelectedBookings] = useState(new Set());
@@ -2435,6 +2439,47 @@ const Bookings = () => {
     }
   };
 
+  const handleMarkCompleted = async (booking) => {
+    if (
+      !window.confirm(
+        `Mark booking ${booking.bookingId} as completed? If payment is authorized via Stripe, it will be captured now and the customer will be emailed their receipt.`,
+      )
+    )
+      return;
+    setMarkingCompleteId(booking._id);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/bookings/${booking._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "Completed" }),
+        },
+      );
+      if (res.ok) {
+        const updated = await res.json();
+        if (selectedBooking?._id === booking._id) setSelectedBooking(updated);
+        setStatusMessage({
+          type: "success",
+          text: `Booking ${booking.bookingId} marked as completed`,
+        });
+        fetchBookings();
+      } else {
+        setStatusMessage({
+          type: "error",
+          text: "Failed to mark booking as completed",
+        });
+      }
+    } catch (error) {
+      setStatusMessage({
+        type: "error",
+        text: "Failed to mark booking as completed",
+      });
+    } finally {
+      setMarkingCompleteId(null);
+    }
+  };
+
   const handleDelete = async (id, bookingId) => {
     if (
       window.confirm(`Are you sure you want to delete booking ${bookingId}?`)
@@ -2761,10 +2806,23 @@ const Bookings = () => {
             </>
           )}
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => {
+              setNoPaymentRequired(false);
+              setShowCreateModal(true);
+            }}
             className="px-4 py-2.5 rounded-xl bg-white text-primary border border-slate-200 hover:bg-slate-50 transition-all font-semibold text-sm"
           >
             Create Booking
+          </button>
+          <button
+            onClick={() => {
+              setNoPaymentRequired(true);
+              setShowCreateModal(true);
+            }}
+            title="Create a booking that's already been paid (cash/bank transfer) — no Stripe link or bank details will be emailed"
+            className="px-4 py-2.5 rounded-xl bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-all font-semibold text-sm"
+          >
+            Create Booking (No Payment)
           </button>
           <button
             onClick={fetchBookings}
@@ -2924,6 +2982,17 @@ const Bookings = () => {
                           >
                             <Sparkles size={16} />
                           </button>
+                          {b.status !== "Completed" &&
+                            b.status !== "Cancelled" && (
+                              <button
+                                disabled={markingCompleteId === b._id}
+                                onClick={() => handleMarkCompleted(b)}
+                                className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600 transition-all disabled:opacity-50"
+                                title="Mark as Completed — captures authorized payment & emails receipt"
+                              >
+                                <CheckCircle2 size={16} />
+                              </button>
+                            )}
                           <button
                             onClick={() => handleDelete(b._id, b.bookingId)}
                             className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-100 hover:text-rose-500 transition-all"
@@ -2964,17 +3033,41 @@ const Bookings = () => {
                   <h3 className="text-2xl font-bold text-primary-dark tracking-tighter">
                     {isEditing ? "Edit Parameters" : "Entry Intelligence"}
                   </h3>
-                  <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
-                    {selectedBooking.bookingId}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
+                      {selectedBooking.bookingId}
+                    </p>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wide ${getStatusColor(selectedBooking.status)}`}
+                    >
+                      {selectedBooking.status}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <button
-                onClick={() => setSelectedBooking(null)}
-                className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                {!isEditing &&
+                  selectedBooking.status !== "Completed" &&
+                  selectedBooking.status !== "Cancelled" && (
+                    <button
+                      disabled={markingCompleteId === selectedBooking._id}
+                      onClick={() => handleMarkCompleted(selectedBooking)}
+                      title="Mark the job as done — captures any authorized payment and emails the customer their receipt"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all disabled:opacity-60"
+                    >
+                      <CheckCircle2 size={15} />
+                      {markingCompleteId === selectedBooking._id
+                        ? "Completing..."
+                        : "Mark as Completed"}
+                    </button>
+                  )}
+                <button
+                  onClick={() => setSelectedBooking(null)}
+                  className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
             <div className="p-6 md:p-8 space-y-10 overflow-y-auto custom-scrollbar flex-1 bg-white">
               {isEditing ? (
@@ -4054,7 +4147,10 @@ const Bookings = () => {
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 sm:p-6 lg:p-10">
           <div
             className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md"
-            onClick={() => setShowCreateModal(false)}
+            onClick={() => {
+              setShowCreateModal(false);
+              setNoPaymentRequired(false);
+            }}
           />
           <div className="relative w-full max-w-7xl bg-white rounded-[32px] overflow-hidden shadow-2xl overflow-y-auto max-h-[92vh] border border-slate-100 animate-in fade-in zoom-in-95">
             {/* Header with Gradient */}
@@ -4065,13 +4161,24 @@ const Bookings = () => {
                     <Plus size={24} className="text-white" />
                   </div>
                   New Booking
+                  {noPaymentRequired && (
+                    <span className="bg-emerald-400 text-emerald-950 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                      No Payment
+                    </span>
+                  )}
                 </h3>
                 <p className="text-white/80 text-[11px] font-bold uppercase tracking-widest mt-2">
-                  Step {createStep} of 4 • Create and assign a cleaning service
+                  Step {createStep} of 4 •{" "}
+                  {noPaymentRequired
+                    ? "Already paid — confirmation email only, no payment link"
+                    : "Create and assign a cleaning service"}
                 </p>
               </div>
               <button
-                onClick={() => setShowCreateModal(false)}
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setNoPaymentRequired(false);
+                }}
                 className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white transition-colors"
               >
                 <X size={24} />
@@ -5126,7 +5233,7 @@ const Bookings = () => {
                               📊 Status
                             </p>
                             <p className="font-bold text-emerald-700 text-lg mt-1">
-                              {createData.status}
+                              {noPaymentRequired ? "Completed" : createData.status}
                             </p>
                           </div>
                         </div>
@@ -5285,8 +5392,10 @@ const Bookings = () => {
                           payment: {
                             amount: createTotal,
                             currency: createData.payment?.currency || "GBP",
-                            status: "Pending",
+                            status: noPaymentRequired ? "Completed" : "Pending",
                           },
+                          status: noPaymentRequired ? "Completed" : createData.status,
+                          noPaymentRequired,
                           createdByAdmin: localStorage.getItem("adminUser") || null,
                         };
                         const res = await fetch(
@@ -5305,6 +5414,7 @@ const Bookings = () => {
                         setShowCreateModal(false);
                         setFormErrors({});
                         setFieldTouched({});
+                        setNoPaymentRequired(false);
                         fetchBookings();
                       } catch (err) {
                         console.error(err);

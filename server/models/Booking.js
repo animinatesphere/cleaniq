@@ -32,6 +32,11 @@ const bookingSchema = new mongoose.Schema({
   leadSource: { type: String, default: "Organic" }, // Bark, Checkatrade, MyJobQuote, MyBuilder, Instagram, Facebook, TikTok, Google, Referral, Organic
   suppliesProvidedBy: { type: String, default: null }, // "Customer" | "Cleaniq"
   createdByAdmin: { type: String, default: null }, // username of the admin who created this booking, if created from the admin portal
+  noPaymentRequired: { type: Boolean, default: false }, // true if payment was already collected outside the system (cash/bank transfer) when admin created the booking
+  checklist: {
+    type: [{ task: String, done: { type: Boolean, default: false } }],
+    default: [],
+  },
   assignedWorker: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Worker",

@@ -3,7 +3,29 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Customer = require('../models/Customer');
+const Lead = require('../models/Lead');
 const { sendEmail } = require('../utils/emailService');
+
+// Save a new customer as a lead (name/email/phone) for future marketing,
+// skipping anyone already captured by an earlier booking/quote/contact.
+const captureCustomerLead = async (customer) => {
+  try {
+    const email = (customer.email || '').trim().toLowerCase();
+    if (!email) return;
+    const existing = await Lead.findOne({ email });
+    if (!existing) {
+      await Lead.create({
+        name: `${customer.firstName || ''} ${customer.lastName || ''}`.trim(),
+        email,
+        phone: customer.phone || '',
+        source: 'Website Signup',
+        acknowledged: true,
+      });
+    }
+  } catch (err) {
+    console.error('⚠️ Failed to capture signup lead:', err.message);
+  }
+};
 
 
 const JWT_SECRET = process.env.JWT_SECRET || 'cleaniq_customer_secret_2024';
@@ -107,6 +129,7 @@ router.post('/verify-otp', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 12);
     const customer = new Customer({ firstName, lastName, email: email.toLowerCase(), phone, passwordHash });
     await customer.save();
+    await captureCustomerLead(customer);
 
     const token = jwt.sign(
       { id: customer._id, email: customer.email, firstName: customer.firstName, lastName: customer.lastName },
@@ -136,6 +159,7 @@ router.post('/register', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 12);
     const customer = new Customer({ firstName, lastName, email: email.toLowerCase(), phone: phone || '', passwordHash });
     await customer.save();
+    await captureCustomerLead(customer);
 
     const token = jwt.sign(
       { id: customer._id, email: customer.email, firstName: customer.firstName, lastName: customer.lastName },

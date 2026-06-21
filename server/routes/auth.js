@@ -9,8 +9,9 @@ const { sendEmail, templates } = require('../utils/emailService');
 // Settings (which includes this very admin-management screen) are never
 // grantable, regardless of what the creating superadmin requests.
 const GRANTABLE_PERMISSIONS = [
-  'bookings', 'quotes', 'services', 'leads', 'staff-pay', 'payments',
-  'withdrawals', 'workers', 'applicants', 'customers', 'blog', 'chat',
+  'bookings', 'quotes', 'services', 'leads', 'checklist', 'recurring',
+  'staff-pay', 'payments', 'withdrawals', 'workers', 'applicants',
+  'customers', 'blog', 'chat',
 ];
 
 router.post('/login', async (req, res) => {

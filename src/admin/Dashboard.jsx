@@ -715,6 +715,148 @@ const Dashboard = () => {
         />
       </div>
 
+      {/* Revenue & Lead Conversion Calendar */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6">
+        <div className="flex flex-wrap justify-between items-start gap-4 mb-5">
+          <div>
+            <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+              <CalendarRange size={16} className="text-primary" /> Revenue &
+              Lead Conversion
+            </h3>
+            <p className="text-[11px] font-medium text-slate-400 mt-1">
+              Click a start date, then an end date, to see totals for that
+              range
+            </p>
+          </div>
+          {(selStart || selEnd) && (
+            <button
+              onClick={() => {
+                setSelStart(null);
+                setSelEnd(null);
+              }}
+              className="text-[11px] font-bold text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1"
+            >
+              <X size={12} /> Clear selection
+            </button>
+          )}
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Calendar grid */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() =>
+                  setCalMonth(new Date(calYear, calMonthIdx - 1, 1))
+                }
+                className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <p className="text-sm font-bold text-slate-800">
+                {calMonth.toLocaleDateString("en-GB", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+              <button
+                onClick={() =>
+                  setCalMonth(new Date(calYear, calMonthIdx + 1, 1))
+                }
+                className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-7 gap-1.5 mb-2">
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                <div
+                  key={d}
+                  className="text-[9px] font-bold text-slate-300 uppercase text-center py-1"
+                >
+                  {d}
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1.5">
+              {calCells.map((day, i) => {
+                if (!day) return <div key={i} className="aspect-square" />;
+                const isStart =
+                  selStart && dateKey(day) === dateKey(selStart);
+                const isEnd = selEnd && dateKey(day) === dateKey(selEnd);
+                const inRange = inSelectedRange(day);
+                const isToday = dateKey(day) === dateKey(new Date());
+                return (
+                  <button
+                    key={i}
+                    onClick={() => handleCalDayClick(day)}
+                    className={`aspect-square rounded-lg flex items-center justify-center text-[11px] font-bold transition-all border
+                      ${
+                        isStart || isEnd
+                          ? "bg-primary text-white border-primary shadow-sm"
+                          : inRange
+                            ? "bg-primary/15 text-primary-dark border-primary/20"
+                            : isToday
+                              ? "border-primary/40 text-primary"
+                              : "border-transparent text-slate-500 hover:bg-slate-50 hover:border-slate-200"
+                      }`}
+                  >
+                    {day.getDate()}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Selected range summary */}
+          <div className="bg-gradient-to-br from-primary to-primary-dark rounded-2xl p-5 text-white flex flex-col justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-white/70 mb-1">
+                {selStart
+                  ? `${selStart.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} ${selEnd ? `– ${selEnd.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}`
+                  : "Select a date range"}
+              </p>
+              <p className="text-3xl font-bold tabular-nums">
+                £
+                {selectedRangeRevenue.toLocaleString("en-GB", {
+                  maximumFractionDigits: 0,
+                })}
+              </p>
+              <p className="text-[11px] font-medium text-white/70 mt-1">
+                Revenue earned
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mt-6">
+              <div className="bg-white/10 rounded-xl p-3">
+                <p className="text-xl font-bold tabular-nums">
+                  {bookingsInSelectedRange.length}
+                </p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-white/70">
+                  Bookings
+                </p>
+              </div>
+              <div className="bg-white/10 rounded-xl p-3">
+                <p className="text-xl font-bold tabular-nums">
+                  {leadsInSelectedRange.length}
+                </p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-white/70">
+                  Leads
+                </p>
+              </div>
+            </div>
+            <div className="mt-3 bg-white/10 rounded-xl p-3">
+              <p className="text-xl font-bold tabular-nums">
+                {selectedRangeConversionPct.toFixed(0)}%
+              </p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-white/70">
+                Lead → Booking Conversion
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Row 1: Trend chart + Donut */}
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">

@@ -3,6 +3,7 @@ const router = express.Router();
 const Booking = require("../models/Booking");
 const Worker = require("../models/Worker");
 const SystemSetting = require("../models/SystemSetting");
+const Lead = require("../models/Lead");
 const { sendEmail, templates } = require("../utils/emailService");
 
 // GET all bookings (Admin)
@@ -128,6 +129,26 @@ router.post("/", async (req, res) => {
 
     const newBooking = await booking.save();
 
+    // Capture the customer as a lead (name/email/phone) so they're
+    // available for future email marketing campaigns.
+    try {
+      const email = (newBooking.customer?.email || "").trim().toLowerCase();
+      if (email) {
+        const existingLead = await Lead.findOne({ email });
+        if (!existingLead) {
+          await Lead.create({
+            name: `${newBooking.customer?.firstName || ""} ${newBooking.customer?.lastName || ""}`.trim(),
+            email,
+            phone: newBooking.customer?.phone || "",
+            source: "Booking",
+            acknowledged: true,
+          });
+        }
+      }
+    } catch (leadErr) {
+      console.error("⚠️ Failed to capture booking lead:", leadErr.message);
+    }
+
     // ✅ Skip all emails for DEV MODE bookings (testing only)
     const isDevMode =
       newBooking.payment && newBooking.payment.method === "Dev Mode";
@@ -201,11 +222,16 @@ router.post("/", async (req, res) => {
           );
         }
       } else {
-        // Send Success Confirmation Email (payment already completed or admin booking)
+        // Send Success Confirmation Email (payment already completed or admin booking).
+        // Bookings created via "Create Booking (No Payment)" use a separate
+        // template with no Stripe link / bank transfer details, since the
+        // admin has already taken payment outside the system.
         await sendEmail({
           to: newBooking.customer.email,
           subject: `✓ Booking Successful - ${newBooking.bookingId}`,
-          html: templates.adminBookingCreatedEmail1(newBooking),
+          html: newBooking.noPaymentRequired
+            ? templates.adminBookingCreatedEmail2(newBooking)
+            : templates.adminBookingCreatedEmail1(newBooking),
         });
         console.log(
           `✅ Email sent to ${newBooking.customer.email} - Booking confirmation`,
@@ -656,6 +682,17 @@ router.post("/:id/create-payment-link", async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
+      // Authorize but don't capture — money is only deducted from the
+      // customer once the admin marks the job as Completed (see the
+      // capture-on-complete logic in the PUT /:id route below).
+      payment_intent_data: {
+        capture_method: "manual",
+        metadata: {
+          bookingId: String(booking._id),
+          bookingRef: booking.bookingId,
+          company: "Cleaniq Services",
+        },
+      },
       success_url: `https://cleaniqservices.com/account/dashboard?payment=success&booking=${booking.bookingId}`,
       cancel_url: `https://cleaniqservices.com/account/dashboard?payment=cancelled`,
       customer_email: booking.customer.email,

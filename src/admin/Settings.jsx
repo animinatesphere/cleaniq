@@ -14,6 +14,8 @@ const PERMISSION_OPTIONS = [
   { key: 'quotes', label: 'Quotes' },
   { key: 'services', label: 'Services' },
   { key: 'leads', label: 'Leads' },
+  { key: 'checklist', label: 'Checklist' },
+  { key: 'recurring', label: 'Recurring' },
   { key: 'staff-pay', label: 'Staff Pay' },
   { key: 'payments', label: 'Payment Approvals' },
   { key: 'withdrawals', label: 'Disbursement' },

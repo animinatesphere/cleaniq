@@ -45,6 +45,8 @@ import QuoteBuilder from "./admin/QuoteBuilder";
 import QuoteHistory from "./admin/QuoteHistory";
 import OrgChart from "./admin/OrgChart";
 import Leads from "./admin/Leads";
+import Checklist from "./admin/Checklist";
+import Recurring from "./admin/Recurring";
 
 function App() {
   const location = useLocation();
@@ -96,6 +98,8 @@ function App() {
               <Route path="quotes/history" element={<QuoteHistory />} />
               <Route path="org-chart" element={<OrgChart />} />
               <Route path="leads" element={<Leads />} />
+              <Route path="checklist" element={<Checklist />} />
+              <Route path="recurring" element={<Recurring />} />
               <Route path="settings" element={<Settings />} />
               <Route path="chat" element={<Chat />} />
               <Route path="staff-pay" element={<StaffPay />} />
