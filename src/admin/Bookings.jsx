@@ -248,6 +248,19 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
       })
       .reduce((sum, b) => sum + Number(b.payment?.amount || 0), 0);
 
+  // Returns the set of day-of-month numbers (1-31) that have at least one
+  // real booking, used to render the mini day grid in Year view.
+  const bookingDaysForMonth = (year, month) => {
+    const set = new Set();
+    bookings.forEach((b) => {
+      if (!b.schedule?.date || !isRealBooking(b)) return;
+      const d = new Date(b.schedule.date);
+      if (d.getFullYear() === year && d.getMonth() === month)
+        set.add(d.getDate());
+    });
+    return set;
+  };
+
   const bookingCountForMonth = (year, month) =>
     bookings.filter((b) => {
       if (!b.schedule?.date || !isRealBooking(b)) return false;
@@ -514,29 +527,60 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
         </div>
 
         {calendarView === "year" ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {yearMonths.map((m) => (
-              <button
-                key={m.month}
-                onClick={() => {
-                  setCurrentMonth(
-                    new Date(currentMonth.getFullYear(), m.month, 1),
-                  );
-                  setCalendarView("month");
-                }}
-                className={`text-left p-5 rounded-[24px] border-2 transition-all ${m.count > 0 ? "bg-emerald-50 border-emerald-200 hover:border-emerald-400" : "bg-slate-50 border-transparent hover:border-primary/30"}`}
-              >
-                <p className="font-bold text-primary-dark text-base mb-2">
-                  {m.label}
-                </p>
-                <p className="text-xl font-bold text-slate-900 tabular-nums">
-                  £{m.revenue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}
-                </p>
-                <p className="text-[11px] font-semibold text-slate-400 mt-0.5">
-                  {m.count} booking{m.count !== 1 ? "s" : ""}
-                </p>
-              </button>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {yearMonths.map((m) => {
+              const bookedDays = bookingDaysForMonth(
+                currentMonth.getFullYear(),
+                m.month,
+              );
+              const totalDays = daysInMonth(currentMonth.getFullYear(), m.month);
+              const startDay = startDayOfMonth(currentMonth.getFullYear(), m.month);
+              const cells = [];
+              for (let i = 0; i < startDay; i++) cells.push(null);
+              for (let d = 1; d <= totalDays; d++) cells.push(d);
+
+              return (
+                <div
+                  key={m.month}
+                  className={`text-left p-4 rounded-[20px] border-2 transition-all ${m.count > 0 ? "bg-emerald-50/60 border-emerald-200" : "bg-slate-50 border-transparent"}`}
+                >
+                  <button
+                    onClick={() => {
+                      setCurrentMonth(
+                        new Date(currentMonth.getFullYear(), m.month, 1),
+                      );
+                      setCalendarView("month");
+                    }}
+                    className="w-full flex items-center justify-between mb-3 hover:opacity-70 transition-opacity"
+                  >
+                    <span className="font-bold text-primary-dark text-sm">
+                      {m.label}
+                    </span>
+                    <span className="text-right">
+                      <span className="block text-sm font-bold text-slate-900 tabular-nums">
+                        £{m.revenue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                      </span>
+                      <span className="block text-[10px] font-semibold text-slate-400">
+                        {m.count} booking{m.count !== 1 ? "s" : ""}
+                      </span>
+                    </span>
+                  </button>
+                  <div className="grid grid-cols-7 gap-1">
+                    {cells.map((d, i) => (
+                      <div
+                        key={i}
+                        title={d && bookedDays.has(d) ? `${bookedDays.size ? "" : ""}Booking on ${m.label} ${d}` : undefined}
+                        className={`aspect-square rounded-[5px] flex items-center justify-center text-[8px] font-bold
+                          ${!d ? "" : bookedDays.has(d) ? "bg-emerald-400 text-white" : "bg-white text-slate-300 border border-slate-100"}
+                        `}
+                      >
+                        {d || ""}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <>

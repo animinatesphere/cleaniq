@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import {
   ChevronRight,
+  ChevronLeft,
   Search,
   RefreshCw,
   Star,
@@ -13,6 +14,7 @@ import {
   FileText,
   CheckCircle2,
   Megaphone,
+  CalendarRange,
 } from "lucide-react";
 
 const DASHBOARD_EXPORT_HEADERS = [
@@ -204,7 +206,14 @@ const Dashboard = () => {
   const [recentQuotes, setRecentQuotes] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [leadStats, setLeadStats] = useState(null);
+  const [leads, setLeads] = useState([]);
   const [search, setSearch] = useState("");
+
+  // Revenue & Leads calendar — pick a start date, then an end date, to see
+  // totals for that range.
+  const [calMonth, setCalMonth] = useState(new Date());
+  const [selStart, setSelStart] = useState(null);
+  const [selEnd, setSelEnd] = useState(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -275,6 +284,10 @@ const Dashboard = () => {
     fetch(`${import.meta.env.VITE_API_URL}/contact/leads/stats`)
       .then((r) => r.json())
       .then((data) => setLeadStats(data))
+      .catch(() => {});
+    fetch(`${import.meta.env.VITE_API_URL}/contact/leads`)
+      .then((r) => r.json())
+      .then((data) => setLeads(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, [fetchData]);
 
@@ -509,6 +522,73 @@ const Dashboard = () => {
       pct: reviews.length > 0 ? (count / reviews.length) * 100 : 0,
     };
   });
+
+  // Revenue & Lead Conversion calendar — click a start date then an end
+  // date to see totals for that range.
+  const calDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
+  const calStartDow = (y, m) => new Date(y, m, 1).getDay();
+  const calYear = calMonth.getFullYear();
+  const calMonthIdx = calMonth.getMonth();
+  const calCells = [];
+  for (let i = 0; i < calStartDow(calYear, calMonthIdx); i++) calCells.push(null);
+  for (let d = 1; d <= calDaysInMonth(calYear, calMonthIdx); d++)
+    calCells.push(new Date(calYear, calMonthIdx, d));
+
+  const dateKey = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+  const handleCalDayClick = (day) => {
+    if (!selStart || (selStart && selEnd)) {
+      setSelStart(day);
+      setSelEnd(null);
+    } else {
+      if (day < selStart) {
+        setSelEnd(selStart);
+        setSelStart(day);
+      } else {
+        setSelEnd(day);
+      }
+    }
+  };
+
+  const inSelectedRange = (day) => {
+    if (!selStart) return false;
+    const end = selEnd || selStart;
+    return day >= new Date(selStart.toDateString()) && day <= new Date(end.toDateString());
+  };
+
+  const rangeStartTime = selStart ? new Date(selStart.toDateString()).getTime() : null;
+  const rangeEndTime = selEnd
+    ? new Date(new Date(selEnd.toDateString()).getTime() + 86399999)
+    : selStart
+      ? new Date(new Date(selStart.toDateString()).getTime() + 86399999)
+      : null;
+
+  const bookingsInSelectedRange =
+    rangeStartTime != null
+      ? bookings.filter((b) => {
+          if (!b.schedule?.date || b.status === "Blackout" || b.customer?.firstName === "ADMIN_BLOCK")
+            return false;
+          const t = new Date(b.schedule.date).getTime();
+          return t >= rangeStartTime && t <= rangeEndTime.getTime();
+        })
+      : [];
+  const selectedRangeRevenue = bookingsInSelectedRange.reduce(
+    (s, b) => s + Number(b.payment?.amount || 0),
+    0,
+  );
+  const leadsInSelectedRange =
+    rangeStartTime != null
+      ? leads.filter((l) => {
+          if (!l.createdAt) return false;
+          const t = new Date(l.createdAt).getTime();
+          return t >= rangeStartTime && t <= rangeEndTime.getTime();
+        })
+      : [];
+  const selectedRangeConversionPct =
+    leadsInSelectedRange.length > 0
+      ? (bookingsInSelectedRange.length / leadsInSelectedRange.length) * 100
+      : 0;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
