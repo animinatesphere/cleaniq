@@ -437,8 +437,8 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
   return (
     <div className="space-y-6">
       {/* ── MAIN CALENDAR ───────────────────────────────────── */}
-      <div className="bg-white rounded-[40px] p-10 border border-slate-200 shadow-sm animate-in fade-in">
-        <div className="flex flex-wrap justify-between items-center gap-4 mb-10">
+      <div className="bg-white rounded-[28px] sm:rounded-[40px] p-4 sm:p-10 border border-slate-200 shadow-sm animate-in fade-in">
+        <div className="flex flex-wrap justify-between items-center gap-4 mb-6 sm:mb-10">
           <div>
             <h3 className="text-2xl font-bold text-primary-dark tracking-tighter">
               {calendarView === "year" ? (
@@ -595,7 +595,7 @@ const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-3">
+            <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
               {days.map((date, i) => {
                 const dayBookings = getBookingsForDate(date);
                 const isBlocked = dayBookings.some(
@@ -2787,7 +2787,7 @@ const Bookings = () => {
             </button>
           </div>
         </div>
-        <div className="flex gap-2.5">
+        <div className="flex flex-wrap gap-2.5 w-full md:w-auto">
           {view === "list" && (
             <>
               <button
@@ -3024,16 +3024,16 @@ const Bookings = () => {
             onClick={() => setSelectedBooking(null)}
           />
           <div className="relative w-full max-w-4xl bg-white rounded-[32px] md:rounded-[48px] shadow-2xl overflow-hidden border-4 border-white flex flex-col max-h-[90vh]">
-            <div className="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-lg">
-                  <Hash size={24} />
+            <div className="p-4 sm:p-6 md:p-8 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3 bg-slate-50/50 shrink-0">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-lg shrink-0">
+                  <Hash size={22} />
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-primary-dark tracking-tighter">
+                <div className="min-w-0">
+                  <h3 className="text-lg sm:text-2xl font-bold text-primary-dark tracking-tighter truncate">
                     {isEditing ? "Edit Parameters" : "Entry Intelligence"}
                   </h3>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
                       {selectedBooking.bookingId}
                     </p>
@@ -3045,7 +3045,7 @@ const Bookings = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap justify-end">
                 {!isEditing &&
                   selectedBooking.status !== "Completed" &&
                   selectedBooking.status !== "Cancelled" && (
@@ -3053,7 +3053,7 @@ const Bookings = () => {
                       disabled={markingCompleteId === selectedBooking._id}
                       onClick={() => handleMarkCompleted(selectedBooking)}
                       title="Mark the job as done — captures any authorized payment and emails the customer their receipt"
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all disabled:opacity-60"
+                      className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all disabled:opacity-60"
                     >
                       <CheckCircle2 size={15} />
                       {markingCompleteId === selectedBooking._id
@@ -3063,7 +3063,7 @@ const Bookings = () => {
                   )}
                 <button
                   onClick={() => setSelectedBooking(null)}
-                  className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors"
+                  className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors shrink-0"
                 >
                   <X size={20} />
                 </button>

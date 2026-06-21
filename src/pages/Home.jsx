@@ -725,16 +725,16 @@ const Home = () => {
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
           >
             {[
-              { city: "Manchester City", slug: "Manchester City" },
-              { city: "Salford", slug: "Salford" },
-              { city: "Bolton", slug: "Bolton" },
-              { city: "Bury", slug: "Bury" },
-              { city: "Oldham", slug: "Oldham" },
-              { city: "Rochdale", slug: "Rochdale" },
-              { city: "Stockport", slug: "Stockport" },
-              { city: "Tameside", slug: "Tameside" },
-              { city: "Trafford", slug: "Trafford" },
-              { city: "Wigan", slug: "Wigan" },
+              { city: "Manchester City", slug: "manchester-city" },
+              { city: "Salford", slug: "salford" },
+              { city: "Bolton", slug: "bolton" },
+              { city: "Bury", slug: "bury" },
+              { city: "Oldham", slug: "oldham" },
+              { city: "Rochdale", slug: "rochdale" },
+              { city: "Stockport", slug: "stockport" },
+              { city: "Tameside", slug: "tameside" },
+              { city: "Trafford", slug: "trafford" },
+              { city: "Wigan", slug: "wigan" },
             ].map((location) => {
               const serviceLabelMap = {
                 OfficeCleaning: "Office cleaning",

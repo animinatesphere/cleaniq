@@ -212,6 +212,7 @@ const Dashboard = () => {
   // Revenue & Leads calendar — pick a start date, then an end date, to see
   // totals for that range.
   const [calMonth, setCalMonth] = useState(new Date());
+  const [calOpen, setCalOpen] = useState(false);
   const [selStart, setSelStart] = useState(null);
   const [selEnd, setSelEnd] = useState(null);
 
@@ -715,35 +716,65 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Revenue & Lead Conversion Calendar */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6">
-        <div className="flex flex-wrap justify-between items-start gap-4 mb-5">
-          <div>
-            <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <CalendarRange size={16} className="text-primary" /> Revenue &
-              Lead Conversion
-            </h3>
-            <p className="text-[11px] font-medium text-slate-400 mt-1">
-              Click a start date, then an end date, to see totals for that
-              range
-            </p>
-          </div>
-          {(selStart || selEnd) && (
-            <button
-              onClick={() => {
-                setSelStart(null);
-                setSelEnd(null);
-              }}
-              className="text-[11px] font-bold text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1"
+      {/* Revenue & Lead Conversion Calendar — collapsed into a dropdown */}
+      <div className="relative inline-block">
+        <button
+          onClick={() => setCalOpen((v) => !v)}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-bold transition-all ${
+            calOpen
+              ? "bg-primary text-white border-primary"
+              : "bg-white text-slate-700 border-slate-200 hover:border-primary/40 hover:text-primary"
+          }`}
+        >
+          <CalendarRange size={16} />
+          Revenue & Lead Conversion
+          {selStart && (
+            <span
+              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${calOpen ? "bg-white/20" : "bg-primary/10 text-primary"}`}
             >
-              <X size={12} /> Clear selection
-            </button>
+              £
+              {selectedRangeRevenue.toLocaleString("en-GB", {
+                maximumFractionDigits: 0,
+              })}
+            </span>
           )}
-        </div>
+          <ChevronRight
+            size={14}
+            className={`transition-transform ${calOpen ? "rotate-90" : ""}`}
+          />
+        </button>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        {calOpen && (
+          <div className="absolute z-30 mt-2 w-[92vw] sm:w-[640px] max-w-[640px] bg-white border border-slate-200/80 rounded-2xl shadow-xl p-4 sm:p-6">
+            <div className="flex flex-wrap justify-between items-start gap-4 mb-5">
+              <p className="text-[11px] font-medium text-slate-400">
+                Click a start date, then an end date, to see totals for that
+                range
+              </p>
+              <div className="flex items-center gap-3">
+                {(selStart || selEnd) && (
+                  <button
+                    onClick={() => {
+                      setSelStart(null);
+                      setSelEnd(null);
+                    }}
+                    className="text-[11px] font-bold text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1"
+                  >
+                    <X size={12} /> Clear selection
+                  </button>
+                )}
+                <button
+                  onClick={() => setCalOpen(false)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-3 gap-6">
           {/* Calendar grid */}
-          <div className="lg:col-span-2">
+          <div className="sm:col-span-2">
             <div className="flex items-center justify-between mb-4">
               <button
                 onClick={() =>
@@ -854,7 +885,9 @@ const Dashboard = () => {
               </p>
             </div>
           </div>
-        </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Row 1: Trend chart + Donut */}

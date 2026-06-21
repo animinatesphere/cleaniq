@@ -3,6 +3,7 @@ const router = express.Router();
 const Worker = require("../models/Worker");
 const Booking = require("../models/Booking");
 const Notification = require("../models/Notification");
+const { moveToTrash } = require("../utils/trash");
 const jwt = require("jsonwebtoken");
 const { sendEmail, templates } = require("../utils/emailService");
 
@@ -624,7 +625,14 @@ router.get("/:id/conversations", async (req, res) => {
 // DELETE a worker (must come last to avoid route conflicts)
 router.delete("/:id", async (req, res) => {
   try {
-    await Worker.findByIdAndDelete(req.params.id);
+    const worker = await Worker.findById(req.params.id);
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+    await moveToTrash(
+      "Worker",
+      worker,
+      `${worker.firstName} ${worker.lastName} — ${worker.workerId}`,
+    );
+    await worker.deleteOne();
     res.json({ message: "Worker deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });

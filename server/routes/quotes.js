@@ -4,6 +4,7 @@ const { sendEmail } = require("../utils/emailService");
 const Quote = require("../models/Quote");
 const Booking = require("../models/Booking");
 const Lead = require("../models/Lead");
+const { moveToTrash } = require("../utils/trash");
 
 const FREQUENCY_LABELS = {
   once: "One-time",
@@ -430,13 +431,19 @@ router.post("/resend/:quoteRef", async (req, res) => {
 router.delete("/:quoteRef", async (req, res) => {
   try {
     const { quoteRef } = req.params;
-    const quote = await Quote.findOneAndDelete({ quoteRef });
+    const quote = await Quote.findOne({ quoteRef });
     if (!quote) {
       return res.status(404).json({
         success: false,
         message: "Quote not found",
       });
     }
+    await moveToTrash(
+      "Quote",
+      quote,
+      `${quote.quoteRef} — ${quote.companyName || quote.contactName || ""}`,
+    );
+    await quote.deleteOne();
     res.status(200).json({
       success: true,
       message: "Quote deleted",

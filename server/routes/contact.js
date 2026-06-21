@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { sendEmail, templates } = require('../utils/emailService');
 const Lead = require('../models/Lead');
+const { moveToTrash } = require('../utils/trash');
 
 // POST /api/contact — forward a contact form message to the organisation email
 router.post('/', async (req, res) => {
@@ -142,7 +143,10 @@ router.get('/leads/stats', async (req, res) => {
  */
 router.delete('/leads/:id', async (req, res) => {
   try {
-    await Lead.findByIdAndDelete(req.params.id);
+    const lead = await Lead.findById(req.params.id);
+    if (!lead) return res.status(404).json({ message: 'Lead not found' });
+    await moveToTrash('Lead', lead, `${lead.name} — ${lead.email}`);
+    await lead.deleteOne();
     res.json({ message: 'Lead deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

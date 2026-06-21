@@ -855,7 +855,7 @@ const templates = {
                 (extra) => `
               <li style="padding: 12px 0; border-bottom: 1px solid #d1fae5; font-size: 15px; color: #065f46; display: flex; align-items: center;">
                 <span style="display: inline-block; width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; margin-right: 14px; flex-shrink: 0;"></span>
-                <span style="font-weight: 600;">${extra}</span>
+                <span style="font-weight: 600;">${typeof extra === "object" && extra !== null ? `${extra.name} (x${extra.qty || 1})` : extra}</span>
               </li>
             `,
               )

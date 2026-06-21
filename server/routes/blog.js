@@ -4,6 +4,7 @@ const BlogPost = require("../models/BlogPost");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const { moveToTrash } = require("../utils/trash");
 
 // Create uploads directory if it doesn't exist
 const uploadDir = path.join(__dirname, "../uploads/blog");
@@ -200,19 +201,18 @@ router.put("/:id", upload.single("image"), async (req, res) => {
 // DELETE blog post
 router.delete("/:id", async (req, res) => {
   try {
-    const post = await BlogPost.findByIdAndDelete(req.params.id);
+    const post = await BlogPost.findById(req.params.id);
 
     if (!post) {
       return res.status(404).json({ error: "Blog post not found" });
     }
 
-    // Delete image file
-    const imagePath = path.join(__dirname, "..", "public", post.image);
-    if (fs.existsSync(imagePath)) {
-      fs.unlink(imagePath, (err) => {
-        if (err) console.error("Error deleting image:", err);
-      });
-    }
+    await moveToTrash("BlogPost", post, post.title);
+    await post.deleteOne();
+
+    // Note: the image file is left on disk (not deleted) so a restore from
+    // the Bin still has a working image. It's only removed if the trash
+    // item is permanently purged.
 
     res.json({ message: "Blog post deleted successfully" });
   } catch (error) {

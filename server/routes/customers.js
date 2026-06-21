@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Booking = require("../models/Booking");
 const Customer = require("../models/Customer");
+const { moveToTrash } = require("../utils/trash");
 
 // Get all customers - registered users + guest customers from bookings
 router.get("/", async (req, res) => {
@@ -131,16 +132,32 @@ router.get("/:email/bookings", async (req, res) => {
 router.delete("/:email", async (req, res) => {
   try {
     const { email } = req.params;
-    
+
     // Delete registered customer account if it exists
-    await Customer.findOneAndDelete({ email });
-    
+    const customer = await Customer.findOne({ email });
+    if (customer) {
+      await moveToTrash(
+        "Customer",
+        customer,
+        `${customer.firstName} ${customer.lastName} — ${customer.email}`,
+      );
+      await customer.deleteOne();
+    }
+
     // Delete all bookings associated with this email
+    const bookingsToTrash = await Booking.find({ "customer.email": email });
+    for (const booking of bookingsToTrash) {
+      await moveToTrash(
+        "Booking",
+        booking,
+        `${booking.bookingId} — ${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}`.trim(),
+      );
+    }
     const bookingResult = await Booking.deleteMany({ "customer.email": email });
-    
-    res.json({ 
+
+    res.json({
       message: "Customer and associated bookings deleted successfully",
-      deletedBookingsCount: bookingResult.deletedCount 
+      deletedBookingsCount: bookingResult.deletedCount
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

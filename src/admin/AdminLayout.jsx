@@ -26,6 +26,7 @@ import {
   UserPlus,
   ListChecks,
   Repeat,
+  Trash2,
 } from "lucide-react";
 import Login from "./Login";
 import logo from "../assets/logo DP2.jpg";
@@ -254,6 +255,12 @@ const AdminLayout = () => {
           path: "/admin/org-chart",
           key: "org-chart",
           icon: <Building2 size={20} />,
+        },
+        {
+          name: "Bin",
+          path: "/admin/bin",
+          key: "bin",
+          icon: <Trash2 size={20} />,
         },
         {
           name: "Settings",

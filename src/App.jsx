@@ -47,6 +47,7 @@ import OrgChart from "./admin/OrgChart";
 import Leads from "./admin/Leads";
 import Checklist from "./admin/Checklist";
 import Recurring from "./admin/Recurring";
+import Bin from "./admin/Bin";
 
 function App() {
   const location = useLocation();
@@ -72,7 +73,7 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogDetail />} />
-            <Route path="/locations/:city" element={<CityLanding />} />
+            <Route path="/cleaning/:city" element={<CityLanding />} />
             <Route path="/pages/contact" element={<Contact />} />
             <Route path="/pages/:serviceSlug" element={<ServiceDetail />} />
             <Route path="/locations/:area" element={<LocationDetail />} />
@@ -100,6 +101,7 @@ function App() {
               <Route path="leads" element={<Leads />} />
               <Route path="checklist" element={<Checklist />} />
               <Route path="recurring" element={<Recurring />} />
+              <Route path="bin" element={<Bin />} />
               <Route path="settings" element={<Settings />} />
               <Route path="chat" element={<Chat />} />
               <Route path="staff-pay" element={<StaffPay />} />

@@ -56,6 +56,123 @@ const LOCATIONS_MAP = {
       "Airbnb & Short-Let Turnovers",
       "Commercial & Office Cleaning"
     ]
+  },
+  "manchester-city": {
+    name: "Manchester City Centre",
+    title: "Cleaning Services Manchester City Centre | Cleaniq Services",
+    meta: "Trusted cleaners for Manchester city centre apartments, offices and Airbnbs. Deep cleaning, end of tenancy and commercial cleaning. Book online today.",
+    tagline: "Premium Cleaning for Manchester City Centre Living",
+    description: "Cleaniq Services is the go-to cleaning provider for Manchester's bustling city centre — from high-rise apartments in Deansgate and Ancoats to busy commercial units near Piccadilly. Our vetted, insured cleaners deliver consistent, 5-star results for residents, landlords and businesses alike.",
+    services: [
+      "End of Tenancy Cleaning in Manchester City Centre",
+      "One-Off Deep Cleaning",
+      "Airbnb & Short-Let Turnovers",
+      "Commercial & Office Cleaning"
+    ]
+  },
+  "bolton": {
+    name: "Bolton",
+    title: "Professional Cleaning Services in Bolton | Cleaniq Services",
+    meta: "Reliable home and office cleaning across Bolton. Deep cleaning, end of tenancy and regular cleans from fully vetted local cleaners. Get a free quote.",
+    tagline: "Bolton's Trusted Cleaning Specialists",
+    description: "Cleaniq Services brings dependable, high-standard cleaning to homes and businesses across Bolton. Whether it's a one-off deep clean before moving day or an ongoing regular clean, our local team treats every job with the same care and attention to detail.",
+    services: [
+      "End of Tenancy Cleaning in Bolton",
+      "One-Off Deep Cleaning",
+      "Regular Domestic Cleaning",
+      "Commercial & Office Cleaning"
+    ]
+  },
+  "bury": {
+    name: "Bury",
+    title: "Cleaning Services in Bury | Cleaniq Services",
+    meta: "Professional, insured cleaners serving Bury and the surrounding areas. End of tenancy, deep cleaning and regular cleans. Book your clean today.",
+    tagline: "Quality Cleaning You Can Rely On in Bury",
+    description: "From family homes to local businesses, Cleaniq Services delivers thorough, reliable cleaning across Bury. Our fully vetted cleaners use eco-friendly products and a consistent checklist-based process, so every visit meets the same high standard.",
+    services: [
+      "End of Tenancy Cleaning in Bury",
+      "One-Off Deep Cleaning",
+      "Regular Domestic Cleaning",
+      "Airbnb & Short-Let Turnovers"
+    ]
+  },
+  "oldham": {
+    name: "Oldham",
+    title: "Professional Cleaners in Oldham | Cleaniq Services",
+    meta: "Cleaniq Services offers expert deep cleaning, end of tenancy and regular cleaning across Oldham. Vetted, insured cleaners. Book online in minutes.",
+    tagline: "Dependable Cleaning Across Oldham",
+    description: "Cleaniq Services provides Oldham residents and businesses with thorough, professional cleaning they can count on. From end of tenancy cleans that satisfy strict landlord checklists to regular housekeeping, our local cleaners get the job done right every time.",
+    services: [
+      "End of Tenancy Cleaning in Oldham",
+      "One-Off Deep Cleaning",
+      "Regular Domestic Cleaning",
+      "Commercial & Office Cleaning"
+    ]
+  },
+  "rochdale": {
+    name: "Rochdale",
+    title: "Cleaning Services in Rochdale | Cleaniq Services",
+    meta: "Trusted home and commercial cleaning in Rochdale. End of tenancy, deep cleaning and Airbnb turnovers from fully vetted local cleaners.",
+    tagline: "Rochdale's Reliable Cleaning Partner",
+    description: "Cleaniq Services serves homes, landlords and businesses across Rochdale with meticulous, eco-friendly cleaning. Our vetted team handles everything from deep cleans and end of tenancy turnarounds to fast Airbnb changeovers.",
+    services: [
+      "End of Tenancy Cleaning in Rochdale",
+      "One-Off Deep Cleaning",
+      "Airbnb & Short-Let Turnovers",
+      "Commercial & Office Cleaning"
+    ]
+  },
+  "stockport": {
+    name: "Stockport",
+    title: "Professional Cleaning Services in Stockport | Cleaniq Services",
+    meta: "Stockport's trusted cleaning team for homes, offices and Airbnbs. Deep cleaning, end of tenancy and regular cleans. Book your local cleaner today.",
+    tagline: "Stockport's Go-To Professional Cleaners",
+    description: "Cleaniq Services delivers consistent, high-quality cleaning to homes and businesses throughout Stockport. From period properties near the town centre to modern offices, our vetted cleaners bring the same reliable standard to every job.",
+    services: [
+      "End of Tenancy Cleaning in Stockport",
+      "One-Off Deep Cleaning",
+      "Airbnb & Short-Let Turnovers",
+      "Commercial & Office Cleaning"
+    ]
+  },
+  "tameside": {
+    name: "Tameside",
+    title: "Cleaning Services in Tameside | Cleaniq Services",
+    meta: "Reliable cleaning across Tameside including Ashton-under-Lyne, Hyde and Stalybridge. End of tenancy, deep cleaning and regular cleans available.",
+    tagline: "Trusted Cleaning Across Tameside",
+    description: "Cleaniq Services covers the whole of Tameside, including Ashton-under-Lyne, Hyde and Stalybridge, with thorough, professional cleaning for homes and businesses. Our local, vetted cleaners follow a consistent checklist so you always know what to expect.",
+    services: [
+      "End of Tenancy Cleaning in Tameside",
+      "One-Off Deep Cleaning",
+      "Regular Domestic Cleaning",
+      "Commercial & Office Cleaning"
+    ]
+  },
+  "trafford": {
+    name: "Trafford",
+    title: "Professional Cleaners in Trafford | Cleaniq Services",
+    meta: "Cleaniq Services provides expert cleaning across Trafford, including Altrincham and Stretford. Deep cleaning, end of tenancy and Airbnb turnovers.",
+    tagline: "Premium Cleaning Across Trafford",
+    description: "From family homes in Altrincham to busy commercial spaces near Trafford Park, Cleaniq Services delivers dependable, high-standard cleaning across the borough. Our vetted, insured cleaners are trusted by residents, landlords and businesses alike.",
+    services: [
+      "End of Tenancy Cleaning in Trafford",
+      "One-Off Deep Cleaning",
+      "Airbnb & Short-Let Turnovers",
+      "Commercial & Office Cleaning"
+    ]
+  },
+  "wigan": {
+    name: "Wigan",
+    title: "Cleaning Services in Wigan | Cleaniq Services",
+    meta: "Trusted cleaners serving Wigan and the surrounding boroughs. End of tenancy, deep cleaning and regular domestic cleaning. Get a free quote today.",
+    tagline: "Wigan's Reliable Cleaning Specialists",
+    description: "Cleaniq Services brings dependable, professional cleaning to homes and businesses across Wigan. Whether you need a thorough one-off deep clean or ongoing regular visits, our local, fully vetted cleaners deliver consistent 5-star results.",
+    services: [
+      "End of Tenancy Cleaning in Wigan",
+      "One-Off Deep Cleaning",
+      "Regular Domestic Cleaning",
+      "Commercial & Office Cleaning"
+    ]
   }
 };
 

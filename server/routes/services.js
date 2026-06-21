@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Service = require("../models/Service");
+const { moveToTrash } = require("../utils/trash");
 
 // Get all services for a region
 router.get("/", async (req, res) => {
@@ -227,8 +228,10 @@ router.delete("/:id", async (req, res) => {
       return res.json({ message: "Fallback pseudo-service ignored" });
     }
 
-    const service = await Service.findByIdAndDelete(req.params.id);
+    const service = await Service.findById(req.params.id);
     if (!service) return res.status(404).json({ message: "Service not found" });
+    await moveToTrash("Service", service, service.name);
+    await service.deleteOne();
     res.json({ message: "Service deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });

@@ -5,6 +5,7 @@ const Worker = require("../models/Worker");
 const SystemSetting = require("../models/SystemSetting");
 const Lead = require("../models/Lead");
 const { sendEmail, templates } = require("../utils/emailService");
+const { moveToTrash } = require("../utils/trash");
 
 // GET all bookings (Admin)
 router.get("/", async (req, res) => {
@@ -25,6 +26,14 @@ router.get("/", async (req, res) => {
 router.delete("/all/delete", async (req, res) => {
   try {
     console.log("☢️ CLEARING ALL BOOKINGS...");
+    const all = await Booking.find({});
+    for (const booking of all) {
+      await moveToTrash(
+        "Booking",
+        booking,
+        `${booking.bookingId} — ${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}`.trim(),
+      );
+    }
     await Booking.deleteMany({});
     res.json({ message: "All bookings cleared successfully" });
   } catch (err) {
@@ -547,8 +556,14 @@ router.put("/:id", async (req, res) => {
 // DELETE a single booking (Admin)
 router.delete("/:id", async (req, res) => {
   try {
-    const booking = await Booking.findByIdAndDelete(req.params.id);
+    const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).json({ message: "Booking not found" });
+    await moveToTrash(
+      "Booking",
+      booking,
+      `${booking.bookingId} — ${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}`.trim(),
+    );
+    await booking.deleteOne();
     res.json({ message: "Booking deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
