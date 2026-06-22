@@ -24,6 +24,7 @@ const bookingSchema = new mongoose.Schema({
     currency: String,
     status: { type: String, default: "Pending" },
     method: String,
+    billingType: { type: String, default: "hourly" }, // "hourly" | "flat" — flat = one-off fixed price, not duration-based
     stripePaymentIntentId: String, // Store Stripe PaymentIntent ID for "authorize then capture"
     authorizedAt: Date, // When payment was authorized
     capturedAt: Date, // When payment was captured (money deducted)

@@ -1797,11 +1797,15 @@ const Bookings = () => {
       Bathroom: 0,
     },
     schedule: { date: "", timeSlot: "", preferredTime: "" },
-    payment: { amount: 0, currency: "GBP", status: "Pending" },
+    payment: { amount: 0, currency: "GBP", status: "Pending", billingType: "hourly" },
     status: "Pending",
     leadSource: "Organic",
     suppliesProvidedBy: "Cleaniq",
   });
+  // When billingType is "flat", createFlatAmount is used directly as the
+  // total instead of the auto-calculated hourly-rate × duration price —
+  // for one-off jobs the customer just wants to pay a single fixed price for.
+  const [createFlatAmount, setCreateFlatAmount] = useState("");
   const [createStep, setCreateStep] = useState(1);
   // When true, the booking is created already paid (cash/bank transfer taken
   // outside the system) — no Stripe link or bank details are emailed.
@@ -2057,6 +2061,10 @@ const Bookings = () => {
 
   // Pricing for admin create form
   useEffect(() => {
+    if (createData.payment?.billingType === "flat") {
+      setCreateTotal(Math.round((parseFloat(createFlatAmount) || 0) * 100) / 100);
+      return;
+    }
     const fd = createData.details || {};
     if (!createData.service) {
       setCreateTotal(0);
@@ -2080,7 +2088,7 @@ const Bookings = () => {
       });
     }
     setCreateTotal(Math.round(total * 100) / 100);
-  }, [createData, dynamicRates]);
+  }, [createData, dynamicRates, createFlatAmount]);
 
   // Validation functions
   const validateField = (fieldPath, value) => {
@@ -4150,6 +4158,7 @@ const Bookings = () => {
             onClick={() => {
               setShowCreateModal(false);
               setNoPaymentRequired(false);
+              setCreateFlatAmount("");
             }}
           />
           <div className="relative w-full max-w-7xl bg-white rounded-[32px] overflow-hidden shadow-2xl overflow-y-auto max-h-[92vh] border border-slate-100 animate-in fade-in zoom-in-95">
@@ -4178,6 +4187,7 @@ const Bookings = () => {
                 onClick={() => {
                   setShowCreateModal(false);
                   setNoPaymentRequired(false);
+                  setCreateFlatAmount("");
                 }}
                 className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white transition-colors"
               >
@@ -5217,6 +5227,65 @@ const Bookings = () => {
                         </div>
                       </div>
 
+                      {/* Billing Type */}
+                      <div className="p-4 bg-white rounded-2xl border-2 border-slate-200 space-y-3">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          💷 Billing Type
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleFieldChange("payment.billingType", "hourly")
+                            }
+                            className={`py-3 px-3 rounded-xl border-2 text-xs font-bold uppercase transition-all ${
+                              (createData.payment?.billingType || "hourly") === "hourly"
+                                ? "border-primary bg-primary text-white shadow-md"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                            }`}
+                          >
+                            Hourly Rate
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleFieldChange("payment.billingType", "flat")
+                            }
+                            className={`py-3 px-3 rounded-xl border-2 text-xs font-bold uppercase transition-all ${
+                              createData.payment?.billingType === "flat"
+                                ? "border-primary bg-primary text-white shadow-md"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                            }`}
+                          >
+                            Flat Rate (One-Off)
+                          </button>
+                        </div>
+                        {createData.payment?.billingType === "flat" && (
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                              Fixed Price for This Job
+                            </label>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
+                                £
+                              </span>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                placeholder="0.00"
+                                value={createFlatAmount}
+                                onChange={(e) => setCreateFlatAmount(e.target.value)}
+                                className="w-full pl-7 p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                              />
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-1.5">
+                              Overrides the hourly-rate calculation — the customer pays this single amount once.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
                       {/* Final Summary */}
                       <div className="p-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200">
                         <div className="flex items-center justify-between">
@@ -5393,6 +5462,7 @@ const Bookings = () => {
                             amount: createTotal,
                             currency: createData.payment?.currency || "GBP",
                             status: noPaymentRequired ? "Completed" : "Pending",
+                            billingType: createData.payment?.billingType || "hourly",
                           },
                           status: noPaymentRequired ? "Completed" : createData.status,
                           noPaymentRequired,
@@ -5415,6 +5485,7 @@ const Bookings = () => {
                         setFormErrors({});
                         setFieldTouched({});
                         setNoPaymentRequired(false);
+                        setCreateFlatAmount("");
                         fetchBookings();
                       } catch (err) {
                         console.error(err);
