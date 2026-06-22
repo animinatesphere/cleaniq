@@ -169,9 +169,19 @@ router.post("/", async (req, res) => {
         newBooking.payment.status === "Confirmed" ||
         newBooking.payment.method === "Card");
 
+    // Flat-rate bookings never get an automatic email at creation time —
+    // the admin sends an invoice manually (via CRM actions) whenever it's
+    // ready, for both flat-rate and hourly jobs. Admin/staff alerts below
+    // still fire as normal.
+    const isFlatRate = newBooking.payment?.billingType === "flat";
+
     if (!isDevMode) {
       // If payment is pending AND not yet paid via Stripe, send payment email with Stripe link
-      if (
+      if (isFlatRate) {
+        console.log(
+          `🔇 Flat-rate booking ${newBooking.bookingId} created — no automatic customer email sent. Send the invoice manually via CRM actions.`,
+        );
+      } else if (
         newBooking.payment &&
         newBooking.payment.status === "Pending" &&
         !isPaymentCompleted

@@ -4242,29 +4242,43 @@ const Bookings = () => {
                           </button>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                              ⏱️ Custom Hours
-                            </label>
-                            <input
-                              type="number"
-                              min="0.5"
-                              step="0.5"
-                              placeholder="e.g. 3"
-                              value={createData.details.duration || ""}
-                              onChange={(e) =>
-                                handleFieldChange(
-                                  "details.duration",
-                                  parseFloat(e.target.value) || 0,
-                                )
-                              }
-                              className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                            />
-                            <p className="text-[10px] text-slate-400 mt-1.5">
-                              Set any custom duration — not limited to preset hours.
+                        {createData.payment?.billingType === "flat" && (
+                          <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 border border-amber-200">
+                            <span className="text-amber-500">🔇</span>
+                            <p className="text-[11px] font-bold text-amber-700">
+                              No confirmation email is sent automatically for
+                              flat-rate bookings. Send the invoice yourself
+                              from the booking's CRM actions (✨) whenever
+                              you're ready.
                             </p>
                           </div>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {createData.payment?.billingType !== "flat" && (
+                            <div>
+                              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                                ⏱️ Custom Hours
+                              </label>
+                              <input
+                                type="number"
+                                min="0.5"
+                                step="0.5"
+                                placeholder="e.g. 3"
+                                value={createData.details.duration || ""}
+                                onChange={(e) =>
+                                  handleFieldChange(
+                                    "details.duration",
+                                    parseFloat(e.target.value) || 0,
+                                  )
+                                }
+                                className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                              />
+                              <p className="text-[10px] text-slate-400 mt-1.5">
+                                Set any custom duration — not limited to preset hours.
+                              </p>
+                            </div>
+                          )}
 
                           {createData.payment?.billingType === "flat" && (
                             <div>
