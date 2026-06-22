@@ -177,6 +177,14 @@ const templates = {
         </table>
       </div>
 
+      <!-- Bank Details -->
+      <div style="margin: 0 48px 32px; padding: 20px 24px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
+        <p style="margin: 0 0 10px; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">🏦 Our Bank Details</p>
+        <p style="margin: 0 0 4px; font-size: 13px; color: #0F172A;"><strong>Account Name:</strong> Cleaniq Services Limited</p>
+        <p style="margin: 0 0 4px; font-size: 13px; color: #0F172A;"><strong>Sort Code:</strong> 40-11-56</p>
+        <p style="margin: 0; font-size: 13px; color: #0F172A;"><strong>Account Number:</strong> 81106546</p>
+      </div>
+
       <!-- Thank you message -->
       <div style="margin: 0 48px 32px; padding: 20px 24px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 16px; border: 1px solid #86efac; text-align: center;">
         <p style="margin: 0; font-size: 14px; font-weight: 700; color: #065f46;">Thank you for choosing Cleaniq Services! 🌟</p>
