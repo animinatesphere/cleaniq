@@ -697,13 +697,20 @@ router.get("/:id/invoice", async (req, res) => {
     const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).send("<h1>Booking not found</h1>");
 
+    const { htmlToPdfBuffer } = require("../utils/pdf");
+    const pdf = await htmlToPdfBuffer(
+      templates.invoiceReceipt(booking),
+      `Cleaniq Services - Invoice ${booking.bookingId}`,
+    );
+
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="Invoice-${booking.bookingId}.html"`,
+      `attachment; filename="Cleaniq-Invoice-${booking.bookingId}.pdf"`,
     );
-    res.setHeader("Content-Type", "text/html");
-    res.send(templates.invoiceReceipt(booking));
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(pdf);
   } catch (err) {
+    console.error("Error generating invoice download:", err.message);
     res.status(500).send("<h1>Something went wrong</h1>");
   }
 });
