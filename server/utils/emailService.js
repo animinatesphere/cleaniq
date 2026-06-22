@@ -123,6 +123,9 @@ const templates = {
             <td align="right" style="vertical-align: top;">
               <p style="margin: 0; font-size: 28px; font-weight: 900; color: #0F172A; letter-spacing: -1px;">INVOICE</p>
               <p style="margin: 4px 0 0; font-size: 13px; color: #64748b; font-weight: 600;">INV-${booking.bookingId}</p>
+              <div style="margin-top: 12px; display: inline-block; background: #ecfdf5; border: 2px solid #6EE7B7; border-radius: 20px; padding: 4px 16px;">
+                <span style="font-size: 12px; font-weight: 900; color: #059669; text-transform: uppercase; letter-spacing: 1px;">✓ PAID</span>
+              </div>
             </td>
           </tr>
         </table>
@@ -188,14 +191,6 @@ const templates = {
             <td style="padding: 16px; text-align: right; font-size: 18px; font-weight: 900; color: #0F172A;">£${booking.payment.amount}</td>
           </tr>
         </table>
-      </div>
-
-      <!-- Bank Details -->
-      <div style="margin: 0 48px 32px; padding: 20px 24px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
-        <p style="margin: 0 0 10px; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">🏦 Our Bank Details</p>
-        <p style="margin: 0 0 4px; font-size: 13px; color: #0F172A;"><strong>Account Name:</strong> Cleaniq Services Limited</p>
-        <p style="margin: 0 0 4px; font-size: 13px; color: #0F172A;"><strong>Sort Code:</strong> 40-11-56</p>
-        <p style="margin: 0; font-size: 13px; color: #0F172A;"><strong>Account Number:</strong> 81106546</p>
       </div>
 
       <!-- Thank you message -->

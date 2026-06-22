@@ -2142,7 +2142,7 @@ const Bookings = () => {
     if (fieldPath === "details.duration") {
       if (!value || Number(value) < 0.5)
         return "Duration must be at least 0.5 hours";
-      if (Number(value) > 8) return "Duration must not exceed 8 hours";
+      if (Number(value) > 24) return "Duration must not exceed 24 hours";
       return "";
     }
     if (fieldPath === "details.Bedroom") {
@@ -2830,7 +2830,7 @@ const Bookings = () => {
             title="Create a booking that's already been paid (cash/bank transfer) — no Stripe link or bank details will be emailed"
             className="px-4 py-2.5 rounded-xl bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-all font-semibold text-sm"
           >
-            Create Booking (No Payment)
+            Create Booking (non pay)
           </button>
           <button
             onClick={fetchBookings}
@@ -4161,18 +4161,20 @@ const Bookings = () => {
               setCreateFlatAmount("");
             }}
           />
-          <div className="relative w-full max-w-7xl bg-white rounded-[32px] overflow-hidden shadow-2xl overflow-y-auto max-h-[92vh] border border-slate-100 animate-in fade-in zoom-in-95">
+          <div className="relative w-full max-w-7xl bg-white rounded-[32px] overflow-hidden shadow-[0_25px_70px_-15px_rgba(0,0,0,0.35)] overflow-y-auto max-h-[92vh] border border-slate-100 animate-in fade-in zoom-in-95">
             {/* Header with Gradient */}
-            <div className="bg-gradient-to-r from-primary via-blue-600 to-indigo-600 px-4 sm:px-6 lg:px-10 py-6 sm:py-8 flex items-center justify-between">
-              <div>
+            <div className="relative bg-gradient-to-r from-primary via-blue-600 to-indigo-600 px-4 sm:px-6 lg:px-10 py-6 sm:py-8 flex items-center justify-between overflow-hidden">
+              <div className="absolute -top-16 -right-10 w-48 h-48 bg-white/10 rounded-full pointer-events-none" />
+              <div className="absolute -bottom-20 left-1/3 w-56 h-56 bg-white/5 rounded-full pointer-events-none" />
+              <div className="relative z-10">
                 <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
-                  <div className="bg-white/20 p-3 rounded-2xl">
+                  <div className="bg-white/20 p-3 rounded-2xl shadow-inner">
                     <Plus size={24} className="text-white" />
                   </div>
                   New Booking
                   {noPaymentRequired && (
-                    <span className="bg-emerald-400 text-emerald-950 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-                      No Payment
+                    <span className="bg-emerald-400 text-emerald-950 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-md">
+                      Non Pay
                     </span>
                   )}
                 </h3>
@@ -4189,30 +4191,37 @@ const Bookings = () => {
                   setNoPaymentRequired(false);
                   setCreateFlatAmount("");
                 }}
-                className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white transition-colors"
+                className="relative z-10 p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white transition-colors"
               >
                 <X size={24} />
               </button>
             </div>
 
             {/* Progress Bar */}
-            <div className="px-4 sm:px-6 lg:px-10 pt-6">
+            <div className="px-4 sm:px-6 lg:px-10 pt-6 bg-slate-50/60">
               <div className="flex items-center gap-3">
-                {[1, 2, 3, 4].map((step) => (
+                {[
+                  { step: 1, icon: <MapPin size={18} /> },
+                  { step: 2, icon: <HomeIcon size={18} /> },
+                  { step: 3, icon: <Zap size={18} /> },
+                  { step: 4, icon: <DollarSign size={18} /> },
+                ].map(({ step, icon }) => (
                   <div key={step} className="flex items-center gap-3 flex-1">
                     <div
-                      className={`w-10 h-10 rounded-full font-bold text-sm flex items-center justify-center transition-all ${
-                        step <= createStep
-                          ? "bg-primary text-white shadow-lg scale-110"
-                          : "bg-slate-100 text-slate-400"
+                      className={`w-11 h-11 rounded-2xl font-bold text-sm flex items-center justify-center transition-all duration-300 ${
+                        step < createStep
+                          ? "bg-primary text-white shadow-lg"
+                          : step === createStep
+                            ? "bg-primary text-white shadow-lg scale-110 ring-4 ring-primary/20"
+                            : "bg-white text-slate-300 border-2 border-slate-200"
                       }`}
                     >
-                      {step < createStep ? <CheckCircle2 size={20} /> : step}
+                      {step < createStep ? <CheckCircle2 size={20} /> : icon}
                     </div>
                     {step < 4 && (
                       <div
-                        className={`h-1 flex-1 rounded-full transition-colors ${
-                          step < createStep ? "bg-primary" : "bg-slate-100"
+                        className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                          step < createStep ? "bg-primary" : "bg-slate-200"
                         }`}
                       />
                     )}
@@ -4253,6 +4262,91 @@ const Bookings = () => {
                         <p className="text-[11px] text-slate-500 uppercase tracking-widest mt-2 font-bold">
                           Where and what type of cleaning?
                         </p>
+                      </div>
+
+                      {/* Billing Type */}
+                      <div className="p-5 bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 space-y-4">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          💷 Billing Type
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleFieldChange("payment.billingType", "hourly")
+                            }
+                            className={`py-3.5 px-3 rounded-xl border-2 text-xs font-bold uppercase transition-all transform hover:scale-105 ${
+                              (createData.payment?.billingType || "hourly") === "hourly"
+                                ? "border-primary bg-primary text-white shadow-lg scale-105"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                            }`}
+                          >
+                            Hourly Rate
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleFieldChange("payment.billingType", "flat")
+                            }
+                            className={`py-3.5 px-3 rounded-xl border-2 text-xs font-bold uppercase transition-all transform hover:scale-105 ${
+                              createData.payment?.billingType === "flat"
+                                ? "border-primary bg-primary text-white shadow-lg scale-105"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                            }`}
+                          >
+                            Flat Rate (One-Off)
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                              ⏱️ Custom Hours
+                            </label>
+                            <input
+                              type="number"
+                              min="0.5"
+                              step="0.5"
+                              placeholder="e.g. 3"
+                              value={createData.details.duration || ""}
+                              onChange={(e) =>
+                                handleFieldChange(
+                                  "details.duration",
+                                  parseFloat(e.target.value) || 0,
+                                )
+                              }
+                              className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                            />
+                            <p className="text-[10px] text-slate-400 mt-1.5">
+                              Set any custom duration — not limited to preset hours.
+                            </p>
+                          </div>
+
+                          {createData.payment?.billingType === "flat" && (
+                            <div>
+                              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                                Fixed Price for This Job
+                              </label>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
+                                  £
+                                </span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  value={createFlatAmount}
+                                  onChange={(e) => setCreateFlatAmount(e.target.value)}
+                                  className="w-full pl-7 p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                />
+                              </div>
+                              <p className="text-[10px] text-slate-400 mt-1.5">
+                                Overrides the hourly calculation — customer pays this once.
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Address and Postcode */}
@@ -5227,65 +5321,6 @@ const Bookings = () => {
                         </div>
                       </div>
 
-                      {/* Billing Type */}
-                      <div className="p-4 bg-white rounded-2xl border-2 border-slate-200 space-y-3">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                          💷 Billing Type
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleFieldChange("payment.billingType", "hourly")
-                            }
-                            className={`py-3 px-3 rounded-xl border-2 text-xs font-bold uppercase transition-all ${
-                              (createData.payment?.billingType || "hourly") === "hourly"
-                                ? "border-primary bg-primary text-white shadow-md"
-                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
-                            }`}
-                          >
-                            Hourly Rate
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleFieldChange("payment.billingType", "flat")
-                            }
-                            className={`py-3 px-3 rounded-xl border-2 text-xs font-bold uppercase transition-all ${
-                              createData.payment?.billingType === "flat"
-                                ? "border-primary bg-primary text-white shadow-md"
-                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
-                            }`}
-                          >
-                            Flat Rate (One-Off)
-                          </button>
-                        </div>
-                        {createData.payment?.billingType === "flat" && (
-                          <div>
-                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                              Fixed Price for This Job
-                            </label>
-                            <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
-                                £
-                              </span>
-                              <input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                placeholder="0.00"
-                                value={createFlatAmount}
-                                onChange={(e) => setCreateFlatAmount(e.target.value)}
-                                className="w-full pl-7 p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                              />
-                            </div>
-                            <p className="text-[10px] text-slate-400 mt-1.5">
-                              Overrides the hourly-rate calculation — the customer pays this single amount once.
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
                       {/* Final Summary */}
                       <div className="p-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200">
                         <div className="flex items-center justify-between">
@@ -5366,15 +5401,22 @@ const Bookings = () => {
                     </div>
                   </div>
 
-                  {/* Duration Card */}
+                  {/* Duration & Billing Card */}
                   {createData.details.duration && (
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-colors">
-                      <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
-                        ⏱️ Duration
-                      </p>
-                      <div className="text-sm font-bold mt-2">
-                        {createData.details.duration} hours
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-colors flex items-center justify-between">
+                      <div>
+                        <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
+                          ⏱️ Duration
+                        </p>
+                        <div className="text-sm font-bold mt-2">
+                          {createData.details.duration} hours
+                        </div>
                       </div>
+                      <span className="text-[9px] font-bold uppercase tracking-wider bg-white/20 px-2.5 py-1 rounded-full">
+                        {createData.payment?.billingType === "flat"
+                          ? "Flat Rate"
+                          : "Hourly"}
+                      </span>
                     </div>
                   )}
 
