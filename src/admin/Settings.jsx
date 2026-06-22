@@ -11,6 +11,7 @@ import {
 // (revenue) and Settings are intentionally excluded — never grantable.
 const PERMISSION_OPTIONS = [
   { key: 'bookings', label: 'Bookings' },
+  { key: 'calendar', label: 'Calendar' },
   { key: 'quotes', label: 'Quotes' },
   { key: 'services', label: 'Services' },
   { key: 'leads', label: 'Leads' },

@@ -1297,12 +1297,28 @@ const Booking = () => {
                                 }
                               />
                             </div>
-                            <div className="flex items-center gap-2 p-4 rounded-2xl bg-primary/5 border-2 border-primary/10">
-                              <Sparkles size={14} className="text-primary flex-shrink-0" />
-                              <p className="text-[11px] font-bold text-slate-500">
-                                All cleaning supplies & equipment are provided
-                                by Cleaniq Services — nothing for you to bring.
+                            <div className="space-y-3">
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <Sparkles size={14} className="text-primary" />{" "}
+                                Who provides the cleaning supplies & equipment?
                               </p>
+                              <select
+                                className="w-full p-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-xs"
+                                value={formData.suppliesProvidedBy || "Cleaniq"}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    suppliesProvidedBy: e.target.value,
+                                  })
+                                }
+                              >
+                                <option value="Cleaniq">
+                                  Cleaniq Services provides everything
+                                </option>
+                                <option value="Customer">
+                                  I'll provide my own supplies & equipment
+                                </option>
+                              </select>
                             </div>
                           </div>
                         </div>

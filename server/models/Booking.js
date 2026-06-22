@@ -34,6 +34,7 @@ const bookingSchema = new mongoose.Schema({
   suppliesProvidedBy: { type: String, default: null }, // "Customer" | "Cleaniq"
   createdByAdmin: { type: String, default: null }, // username of the admin who created this booking, if created from the admin portal
   noPaymentRequired: { type: Boolean, default: false }, // true if payment was already collected outside the system (cash/bank transfer) when admin created the booking
+  skipConfirmationEmail: { type: Boolean, default: false }, // true to silently create the booking with no confirmation email — invoice/payment link/review request can still be sent manually via CRM actions
   checklist: {
     type: [{ task: String, done: { type: Boolean, default: false } }],
     default: [],

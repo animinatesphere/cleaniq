@@ -28,6 +28,7 @@ import {
   Repeat,
   Trash2,
   Mail,
+  CalendarDays,
 } from "lucide-react";
 import Login from "./Login";
 import logo from "../assets/logo DP2.jpg";
@@ -145,6 +146,12 @@ const AdminLayout = () => {
           path: "/admin/bookings",
           key: "bookings",
           icon: <Calendar size={20} />,
+        },
+        {
+          name: "Calendar",
+          path: "/admin/calendar",
+          key: "calendar",
+          icon: <CalendarDays size={20} />,
         },
         {
           name: "Quotes",

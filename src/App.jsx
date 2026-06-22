@@ -49,6 +49,7 @@ import Checklist from "./admin/Checklist";
 import Recurring from "./admin/Recurring";
 import Bin from "./admin/Bin";
 import EmailHistory from "./admin/EmailHistory";
+import Calendar from "./admin/Calendar";
 
 function App() {
   const location = useLocation();
@@ -90,6 +91,7 @@ function App() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="bookings" element={<Bookings />} />
+              <Route path="calendar" element={<Calendar />} />
               <Route path="bookings/pay/:id" element={<AdminBookingPay />} />
               <Route path="applicants" element={<Applicants />} />
               <Route path="customers" element={<Customers />} />

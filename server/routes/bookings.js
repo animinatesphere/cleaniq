@@ -230,7 +230,7 @@ router.post("/", async (req, res) => {
             paymentEmailErr.message,
           );
         }
-      } else {
+      } else if (!newBooking.skipConfirmationEmail) {
         // Send Success Confirmation Email (payment already completed or admin booking).
         // Bookings created via "Create Booking (No Payment)" use a separate
         // template with no Stripe link / bank transfer details, since the
@@ -244,6 +244,10 @@ router.post("/", async (req, res) => {
         });
         console.log(
           `✅ Email sent to ${newBooking.customer.email} - Booking confirmation`,
+        );
+      } else {
+        console.log(
+          `🔇 Confirmation email skipped for booking ${newBooking.bookingId} (admin opted out)`,
         );
       }
 

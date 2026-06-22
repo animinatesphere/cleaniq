@@ -46,7 +46,7 @@ export const LEAD_SOURCES = [
   "Organic",
 ];
 
-const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
+export const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarView, setCalendarView] = useState("month"); // "month" | "year"
   const [showRecurring, setShowRecurring] = useState(false);
@@ -1777,7 +1777,6 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
 };
 
 const Bookings = () => {
-  const [view, setView] = useState("list"); // 'list' or 'availability'
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [crmBooking, setCrmBooking] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -1810,6 +1809,10 @@ const Bookings = () => {
   // When true, the booking is created already paid (cash/bank transfer taken
   // outside the system) — no Stripe link or bank details are emailed.
   const [noPaymentRequired, setNoPaymentRequired] = useState(false);
+  // Only relevant for non-pay bookings — silently creates the booking with
+  // no confirmation email. Invoice/payment link/review request can still be
+  // sent manually afterwards via the CRM actions (Sparkles) button.
+  const [skipConfirmationEmail, setSkipConfirmationEmail] = useState(false);
   const [servicesList, setServicesList] = useState([]);
   const [dynamicRates, setDynamicRates] = useState({});
   const [createTotal, setCreateTotal] = useState(0);
@@ -2396,57 +2399,6 @@ const Bookings = () => {
     }
   };
 
-  const toggleAvailability = async (date, isCurrentlyBlocked) => {
-    const dStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-
-    if (isCurrentlyBlocked) {
-      const block = bookings.find((b) => {
-        if (b.customer?.firstName !== "ADMIN_BLOCK") return false;
-        const bDate = new Date(b.schedule.date);
-        return (
-          `${bDate.getFullYear()}-${String(bDate.getMonth() + 1).padStart(2, "0")}-${String(bDate.getDate()).padStart(2, "0")}` ===
-          dStr
-        );
-      });
-      if (block) {
-        try {
-          await fetch(`${import.meta.env.VITE_API_URL}/bookings/${block._id}`, {
-            method: "DELETE",
-          });
-          setStatusMessage({ type: "success", text: `Unlocked ${dStr}` });
-          fetchBookings();
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    } else {
-      const payload = {
-        bookingId: `LOCK-${Math.floor(1000 + Math.random() * 9000)}`,
-        customer: {
-          firstName: "ADMIN_BLOCK",
-          lastName: "SYSTEM",
-          email: "admin@cleaniq.com",
-          phone: "000",
-        },
-        service: "Availability Block",
-        status: "Blackout",
-        schedule: { date: dStr, timeSlot: "All Day" },
-        payment: { amount: 0, status: "N/A" },
-      };
-      try {
-        await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        setStatusMessage({ type: "success", text: `Blocked ${dStr}` });
-        fetchBookings();
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  };
-
   const handleMarkCompleted = async (booking) => {
     if (
       !window.confirm(
@@ -2780,42 +2732,25 @@ const Bookings = () => {
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
             Bookings
           </h1>
-          <div className="flex gap-5 mt-2">
-            <button
-              onClick={() => setView("list")}
-              className={`text-[11px] font-bold uppercase tracking-wider pb-1 border-b-2 transition-all ${view === "list" ? "border-primary text-primary" : "border-transparent text-slate-400 hover:text-slate-600"}`}
-            >
-              Booking List
-            </button>
-            <button
-              onClick={() => setView("availability")}
-              className={`text-[11px] font-bold uppercase tracking-wider pb-1 border-b-2 transition-all ${view === "availability" ? "border-primary text-primary" : "border-transparent text-slate-400 hover:text-slate-600"}`}
-            >
-              Manage Availability
-            </button>
-          </div>
         </div>
         <div className="flex flex-wrap gap-2.5 w-full md:w-auto">
-          {view === "list" && (
-            <>
-              <button
-                onClick={exportToCSV}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
-              >
-                <Download size={15} /> CSV
-              </button>
-              <button
-                onClick={exportToExcel}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
-                title="Export bookings & leads to Excel"
-              >
-                <Download size={15} /> Excel
-              </button>
-            </>
-          )}
+          <button
+            onClick={exportToCSV}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
+          >
+            <Download size={15} /> CSV
+          </button>
+          <button
+            onClick={exportToExcel}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
+            title="Export bookings & leads to Excel"
+          >
+            <Download size={15} /> Excel
+          </button>
           <button
             onClick={() => {
               setNoPaymentRequired(false);
+              setSkipConfirmationEmail(false);
               setShowCreateModal(true);
             }}
             className="px-4 py-2.5 rounded-xl bg-white text-primary border border-slate-200 hover:bg-slate-50 transition-all font-semibold text-sm"
@@ -2841,8 +2776,7 @@ const Bookings = () => {
         </div>
       </div>
 
-      {view === "list" ? (
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden animate-in fade-in">
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden animate-in fade-in">
           <div className="p-5 border-b border-slate-100 flex items-center gap-4 justify-between flex-wrap">
             <div className="flex items-center gap-2.5 px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-200 flex-1 min-w-60 focus-within:border-primary/50 transition-all">
               <Search size={16} className="text-slate-400" />
@@ -3017,13 +2951,6 @@ const Bookings = () => {
             </table>
           </div>
         </div>
-      ) : (
-        <AdminCalendar
-          bookings={bookings}
-          onToggleDate={toggleAvailability}
-          onBookingsCreated={fetchBookings}
-        />
-      )}
 
       {selectedBooking && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
@@ -4159,6 +4086,7 @@ const Bookings = () => {
               setShowCreateModal(false);
               setNoPaymentRequired(false);
               setCreateFlatAmount("");
+              setSkipConfirmationEmail(false);
             }}
           />
           <div className="relative w-full max-w-7xl bg-white rounded-[32px] overflow-hidden shadow-[0_25px_70px_-15px_rgba(0,0,0,0.35)] overflow-y-auto max-h-[92vh] border border-slate-100 animate-in fade-in zoom-in-95">
@@ -4181,15 +4109,31 @@ const Bookings = () => {
                 <p className="text-white/80 text-[11px] font-bold uppercase tracking-widest mt-2">
                   Step {createStep} of 4 •{" "}
                   {noPaymentRequired
-                    ? "Already paid — confirmation email only, no payment link"
+                    ? skipConfirmationEmail
+                      ? "Already paid — no email will be sent"
+                      : "Already paid — confirmation email only, no payment link"
                     : "Create and assign a cleaning service"}
                 </p>
+                {noPaymentRequired && (
+                  <label className="relative z-10 flex items-center gap-2 mt-3 text-white/90 text-[11px] font-bold cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={skipConfirmationEmail}
+                      onChange={(e) =>
+                        setSkipConfirmationEmail(e.target.checked)
+                      }
+                      className="w-4 h-4 rounded accent-emerald-400"
+                    />
+                    Don't send a confirmation email for this booking
+                  </label>
+                )}
               </div>
               <button
                 onClick={() => {
                   setShowCreateModal(false);
                   setNoPaymentRequired(false);
                   setCreateFlatAmount("");
+                  setSkipConfirmationEmail(false);
                 }}
                 className="relative z-10 p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white transition-colors"
               >
@@ -4294,7 +4238,7 @@ const Bookings = () => {
                                 : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
                             }`}
                           >
-                            Flat Rate (One-Off)
+                            Flat Rate
                           </button>
                         </div>
 
@@ -4540,7 +4484,7 @@ const Bookings = () => {
                             <span className="text-rose-500">*</span>
                           </label>
                           <div className="grid grid-cols-4 gap-2">
-                            {[2, 3, 4, 5, 6, 7, 8].map((hours) => (
+                            {[2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20].map((hours) => (
                               <button
                                 key={hours}
                                 onClick={() =>
@@ -5401,24 +5345,35 @@ const Bookings = () => {
                     </div>
                   </div>
 
-                  {/* Duration & Billing Card */}
-                  {createData.details.duration && (
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-colors flex items-center justify-between">
+                  {/* Billing Card */}
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-colors flex items-center justify-between">
+                    {createData.payment?.billingType === "flat" ? (
                       <div>
                         <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
-                          ⏱️ Duration
+                          💷 Billing
                         </p>
                         <div className="text-sm font-bold mt-2">
-                          {createData.details.duration} hours
+                          Flat Rate
                         </div>
                       </div>
-                      <span className="text-[9px] font-bold uppercase tracking-wider bg-white/20 px-2.5 py-1 rounded-full">
-                        {createData.payment?.billingType === "flat"
-                          ? "Flat Rate"
-                          : "Hourly"}
-                      </span>
-                    </div>
-                  )}
+                    ) : (
+                      createData.details.duration && (
+                        <div>
+                          <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
+                            ⏱️ Duration
+                          </p>
+                          <div className="text-sm font-bold mt-2">
+                            {createData.details.duration} hours
+                          </div>
+                        </div>
+                      )
+                    )}
+                    <span className="text-[9px] font-bold uppercase tracking-wider bg-white/20 px-2.5 py-1 rounded-full">
+                      {createData.payment?.billingType === "flat"
+                        ? "Flat Rate"
+                        : "Hourly"}
+                    </span>
+                  </div>
 
                   {/* Price Divider */}
                   <div className="h-px bg-white/20"></div>
@@ -5508,6 +5463,8 @@ const Bookings = () => {
                           },
                           status: noPaymentRequired ? "Completed" : createData.status,
                           noPaymentRequired,
+                          skipConfirmationEmail:
+                            noPaymentRequired && skipConfirmationEmail,
                           createdByAdmin: localStorage.getItem("adminUser") || null,
                         };
                         const res = await fetch(
@@ -5528,6 +5485,7 @@ const Bookings = () => {
                         setFieldTouched({});
                         setNoPaymentRequired(false);
                         setCreateFlatAmount("");
+                        setSkipConfirmationEmail(false);
                         fetchBookings();
                       } catch (err) {
                         console.error(err);
