@@ -48,6 +48,7 @@ import Leads from "./admin/Leads";
 import Checklist from "./admin/Checklist";
 import Recurring from "./admin/Recurring";
 import Bin from "./admin/Bin";
+import EmailHistory from "./admin/EmailHistory";
 
 function App() {
   const location = useLocation();
@@ -102,6 +103,7 @@ function App() {
               <Route path="checklist" element={<Checklist />} />
               <Route path="recurring" element={<Recurring />} />
               <Route path="bin" element={<Bin />} />
+              <Route path="email-history" element={<EmailHistory />} />
               <Route path="settings" element={<Settings />} />
               <Route path="chat" element={<Chat />} />
               <Route path="staff-pay" element={<StaffPay />} />

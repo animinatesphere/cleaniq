@@ -27,6 +27,7 @@ import {
   ListChecks,
   Repeat,
   Trash2,
+  Mail,
 } from "lucide-react";
 import Login from "./Login";
 import logo from "../assets/logo DP2.jpg";
@@ -181,6 +182,12 @@ const AdminLayout = () => {
           path: "/admin/recurring",
           key: "recurring",
           icon: <Repeat size={20} />,
+        },
+        {
+          name: "Email History",
+          path: "/admin/email-history",
+          key: "email-history",
+          icon: <Mail size={20} />,
         },
       ],
     },

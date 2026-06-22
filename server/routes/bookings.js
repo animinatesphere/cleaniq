@@ -590,6 +590,124 @@ router.post("/:id/resend", async (req, res) => {
   }
 });
 
+// GET /api/bookings/:id/confirm-payment-sent — public link clicked from the
+// bank-transfer email. Flips the booking to Confirmed and alerts admin to
+// verify the transfer actually landed.
+router.get("/:id/confirm-payment-sent", async (req, res) => {
+  const outcomePage = (heading, message, color = "#059669", bg = "#d1fae5", icon = "✓") => `
+<!DOCTYPE html>
+<html>
+  <head><meta charset="utf-8" /><title>Cleaniq Services</title></head>
+  <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Arial, Helvetica, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding: 48px 16px;">
+      <tr>
+        <td align="center">
+          <table width="520" cellpadding="0" cellspacing="0" style="width: 520px; max-width: 100%; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+            <tr>
+              <td style="background-color: #0f172a; padding: 28px; text-align: center;">
+                <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Services" style="height: 40px;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 44px 40px; text-align: center;">
+                <span style="display: inline-block; width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background-color: ${bg}; color: ${color}; font-size: 26px; font-weight: bold;">${icon}</span>
+                <h1 style="margin: 20px 0 12px; font-size: 22px; color: #0f172a;">${heading}</h1>
+                <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #475569;">${message}</p>
+                <a href="https://cleaniqservices.com" style="display: inline-block; margin-top: 28px; padding: 12px 28px; background-color: #005B41; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: bold;">Return to Cleaniq Services</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res
+        .status(404)
+        .send(
+          outcomePage(
+            "Booking not found",
+            "We couldn't find that booking. Please contact us directly and we'll help sort it out.",
+            "#dc2626",
+            "#fee2e2",
+            "!",
+          ),
+        );
+    }
+
+    if (booking.status !== "Completed" && booking.status !== "Cancelled") {
+      booking.status = "Confirmed";
+      booking.meta = booking.meta || {};
+      booking.meta.paymentSentReportedAt = new Date();
+      await booking.save();
+
+      try {
+        await sendEmail({
+          to: process.env.EMAIL_USER || "admin@cleaniqservices.com",
+          subject: `💷 Customer reports payment sent — Booking ${booking.bookingId}`,
+          html: `
+            <div style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+              <div style="background-color: #059669; padding: 28px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 20px;">💷 Payment Reported</h1>
+              </div>
+              <div style="padding: 28px;">
+                <p style="margin: 0 0 16px; font-size: 14px; color: #475569;"><strong>${booking.customer.firstName} ${booking.customer.lastName}</strong> says they've sent the bank transfer for booking <strong>${booking.bookingId}</strong>. Please verify it's landed before assigning a cleaner.</p>
+                <p style="margin: 0 0 8px; font-size: 13px; color: #64748b;"><strong>Amount:</strong> £${booking.payment?.amount || 0}</p>
+                <p style="margin: 0 0 8px; font-size: 13px; color: #64748b;"><strong>Customer Email:</strong> ${booking.customer.email}</p>
+                <a href="https://cleaniqservices.com/admin/bookings" style="display: inline-block; margin-top: 16px; background-color: #0f172a; color: #ffffff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px;">View in Admin</a>
+              </div>
+            </div>
+          `,
+        });
+      } catch (emailErr) {
+        console.error("⚠️ Failed to send payment-reported alert:", emailErr.message);
+      }
+    }
+
+    res.send(
+      outcomePage(
+        "Thanks — We've Got It!",
+        `We've marked your booking <strong>${booking.bookingId}</strong> as confirmed and our team will verify the transfer shortly.`,
+      ),
+    );
+  } catch (err) {
+    console.error("Error confirming payment sent:", err);
+    res
+      .status(500)
+      .send(
+        outcomePage(
+          "Something went wrong",
+          "Please contact us directly so we can confirm your booking.",
+          "#dc2626",
+          "#fee2e2",
+          "!",
+        ),
+      );
+  }
+});
+
+// GET /api/bookings/:id/invoice — public link from booking emails so the
+// customer can view/download their receipt anytime, not just from the inbox.
+router.get("/:id/invoice", async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).send("<h1>Booking not found</h1>");
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="Invoice-${booking.bookingId}.html"`,
+    );
+    res.setHeader("Content-Type", "text/html");
+    res.send(templates.invoiceReceipt(booking));
+  } catch (err) {
+    res.status(500).send("<h1>Something went wrong</h1>");
+  }
+});
+
 // ─── CRM: SEND BOOKING CONFIRMATION ──────────────────────────────────────────
 router.post("/:id/send-confirmation", async (req, res) => {
   try {

@@ -82,6 +82,7 @@ const workerChatRoutes = require("./routes/worker-chat");
 const quotesRoutes = require("./routes/quotes");
 const orgChartRoutes = require("./routes/orgchart");
 const trashRoutes = require("./routes/trash");
+const emailLogsRoutes = require("./routes/emailLogs");
 
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
@@ -263,6 +264,7 @@ app.use("/api/worker-chat", workerChatRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/org-chart", orgChartRoutes);
 app.use("/api/trash", trashRoutes);
+app.use("/api/email-logs", emailLogsRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);

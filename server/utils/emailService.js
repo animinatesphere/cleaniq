@@ -5,10 +5,23 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
+// Log every email the app sends so the admin Email History page can show
+// (and let staff download) anything that's gone out — best-effort, never
+// blocks or fails the actual send.
+const logEmail = ({ to, subject, html, success }) => {
+  try {
+    const EmailLog = require("../models/EmailLog");
+    EmailLog.create({ to, subject, html, success }).catch(() => {});
+  } catch {
+    // ignore — logging must never break email sending
+  }
+};
+
 const sendEmail = async ({ to, subject, html }) => {
   try {
     if (!resend) {
       console.error("❌ EMAIL ERROR: RESEND_API_KEY is missing in .env");
+      logEmail({ to, subject, html, success: false });
       return false;
     }
 
@@ -22,13 +35,16 @@ const sendEmail = async ({ to, subject, html }) => {
 
     if (error) {
       console.error("❌ RESEND ERROR DETAILS:", JSON.stringify(error, null, 2));
+      logEmail({ to, subject, html, success: false });
       return false;
     }
 
     console.log("✅ Email sent successfully! ID:", data.id);
+    logEmail({ to, subject, html, success: true });
     return true;
   } catch (error) {
     console.error("❌ CRITICAL EMAIL ERROR:", error);
+    logEmail({ to, subject, html, success: false });
     return false;
   }
 };
@@ -190,7 +206,7 @@ const templates = {
 
       <!-- CTA -->
       <div style="text-align: center; padding: 0 48px 40px;">
-        <a href="https://cleaniqservices.com/account/dashboard" style="display: inline-block; background: #0F172A; color: #6EE7B7; padding: 16px 36px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 14px; letter-spacing: 0.5px;">View Your Dashboard</a>
+        <a href="https://api.cleaniqservices.com/api/bookings/${booking._id}/invoice" style="display: inline-block; background: #0F172A; color: #6EE7B7; padding: 16px 36px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 14px; letter-spacing: 0.5px;">Download Receipt</a>
       </div>
 
       <!-- Footer -->
@@ -737,6 +753,10 @@ const templates = {
           </div>
           <div style="margin-top: 16px; padding: 12px; background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 8px;">
             <p style="margin: 0; font-size: 13px; color: #b45309;"><strong>Reference Code:</strong> ${booking.bookingId}</p>
+          </div>
+          <div style="margin-top: 20px; text-align: center;">
+            <a href="https://api.cleaniqservices.com/api/bookings/${booking._id}/confirm-payment-sent" style="display: inline-block; background-color: #059669; color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.2);">✓ I've Sent the Payment</a>
+            <p style="margin: 10px 0 0 0; font-size: 12px; color: #94a3b8;">Click once you've completed the bank transfer — we'll confirm your booking and our team will verify the payment.</p>
           </div>
         </div>
 
