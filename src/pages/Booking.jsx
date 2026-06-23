@@ -1083,13 +1083,33 @@ const Booking = () => {
                             </p>
                           </div>
                           <div className="mb-8">
+                            <div className="grid grid-cols-5 sm:grid-cols-6 gap-2 max-h-44 overflow-y-auto p-1 mb-4">
+                              {Array.from({ length: 50 }, (_, i) => i + 1).map(
+                                (hours) => (
+                                  <button
+                                    key={hours}
+                                    type="button"
+                                    onClick={() =>
+                                      setFormData({ ...formData, duration: hours })
+                                    }
+                                    className={`py-2.5 rounded-xl border-2 font-black text-xs transition-all ${
+                                      formData.duration === hours
+                                        ? "border-primary bg-primary text-white shadow-md"
+                                        : "border-slate-200 bg-white text-primary hover:border-primary/50"
+                                    }`}
+                                  >
+                                    {hours}
+                                  </button>
+                                ),
+                              )}
+                            </div>
                             <div className="relative">
                               <input
                                 type="number"
                                 min="1"
                                 max="50"
                                 step="1"
-                                placeholder="e.g. 3"
+                                placeholder="Or type a custom number"
                                 value={formData.duration || ""}
                                 onChange={(e) => {
                                   const val = parseInt(e.target.value, 10);
