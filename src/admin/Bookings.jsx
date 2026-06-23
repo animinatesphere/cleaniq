@@ -4529,13 +4529,33 @@ const Bookings = () => {
                             ⏱️ Duration (Hours){" "}
                             <span className="text-rose-500">*</span>
                           </label>
+                          <div className="grid grid-cols-8 sm:grid-cols-10 gap-1.5 max-h-36 overflow-y-auto p-1 mb-3 bg-slate-50 rounded-xl border border-slate-100">
+                            {Array.from({ length: 50 }, (_, i) => i + 1).map(
+                              (hours) => (
+                                <button
+                                  key={hours}
+                                  type="button"
+                                  onClick={() =>
+                                    handleFieldChange("details.duration", hours)
+                                  }
+                                  className={`py-1.5 rounded-lg border text-[11px] font-bold transition-all ${
+                                    createData.details.duration === hours
+                                      ? "border-primary bg-primary text-white shadow-sm"
+                                      : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                  }`}
+                                >
+                                  {hours}
+                                </button>
+                              ),
+                            )}
+                          </div>
                           <div className="relative max-w-xs">
                             <input
                               type="number"
                               min="1"
                               max="50"
                               step="1"
-                              placeholder="e.g. 3"
+                              placeholder="Or type a custom number"
                               value={createData.details.duration || ""}
                               onChange={(e) => {
                                 const val = parseInt(e.target.value, 10);
