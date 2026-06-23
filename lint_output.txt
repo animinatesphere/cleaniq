@@ -1,0 +1,151 @@
+﻿
+C:\Users\HP\cleaniq\server\index.js
+    1:17  error  'require' is not defined       no-undef
+    2:18  error  'require' is not defined       no-undef
+    3:14  error  'require' is not defined       no-undef
+    4:14  error  'require' is not defined       no-undef
+    5:1   error  'require' is not defined       no-undef
+    8:14  error  'process' is not defined       no-undef
+   28:7   error  'process' is not defined       no-undef
+   37:12  error  'e' is defined but never used  no-unused-vars
+   46:46  error  '__dirname' is not defined     no-undef
+   50:3   error  'process' is not defined       no-undef
+   62:23  error  'require' is not defined       no-undef
+   63:27  error  'require' is not defined       no-undef
+   64:23  error  'require' is not defined       no-undef
+   65:24  error  'require' is not defined       no-undef
+   66:20  error  'require' is not defined       no-undef
+   67:23  error  'require' is not defined       no-undef
+   68:22  error  'require' is not defined       no-undef
+   69:25  error  'require' is not defined       no-undef
+   70:22  error  'require' is not defined       no-undef
+   71:23  error  'require' is not defined       no-undef
+   72:28  error  'require' is not defined       no-undef
+   73:31  error  'require' is not defined       no-undef
+   74:28  error  'require' is not defined       no-undef
+   75:23  error  'require' is not defined       no-undef
+   76:20  error  'require' is not defined       no-undef
+   77:26  error  'require' is not defined       no-undef
+   78:24  error  'require' is not defined       no-undef
+   79:29  error  'require' is not defined       no-undef
+   80:23  error  'require' is not defined       no-undef
+   81:26  error  'require' is not defined       no-undef
+   82:22  error  'require' is not defined       no-undef
+   83:24  error  'require' is not defined       no-undef
+   84:21  error  'require' is not defined       no-undef
+   85:25  error  'require' is not defined       no-undef
+   86:29  error  'require' is not defined       no-undef
+  102:16  error  'require' is not defined       no-undef
+  102:34  error  'process' is not defined       no-undef
+  103:17  error  'require' is not defined       no-undef
+  104:34  error  'require' is not defined       no-undef
+  105:31  error  'process' is not defined       no-undef
+
+C:\Users\HP\cleaniq\server\routes\auth.js
+    1:17  error  'require' is not defined  no-undef
+    3:15  error  'require' is not defined  no-undef
+    4:16  error  'require' is not defined  no-undef
+    5:13  error  'require' is not defined  no-undef
+    6:34  error  'require' is not defined  no-undef
+   26:47  error  'process' is not defined  no-undef
+  137:1   error  'module' is not defined   no-undef
+
+C:\Users\HP\cleaniq\server\routes\bookings.js
+    1:17  error  'require' is not defined                          no-undef
+    3:17  error  'require' is not defined                          no-undef
+    4:16  error  'require' is not defined                          no-undef
+    5:23  error  'require' is not defined                          no-undef
+    6:14  error  'require' is not defined                          no-undef
+    7:34  error  'require' is not defined                          no-undef
+    8:25  error  'require' is not defined                          no-undef
+   62:19  error  'serviceType' is assigned a value but never used  no-unused-vars
+  205:26  error  'require' is not defined                          no-undef
+  205:44  error  'process' is not defined                          no-undef
+  237:29  error  'process' is not defined                          no-undef
+  238:28  error  'process' is not defined                          no-undef
+  280:13  error  'process' is not defined                          no-undef
+  366:24  error  'require' is not defined                          no-undef
+  398:36  error  'require' is not defined                          no-undef
+  399:33  error  'require' is not defined                          no-undef
+  528:26  error  'require' is not defined                          no-undef
+  528:44  error  'process' is not defined                          no-undef
+  678:15  error  'process' is not defined                          no-undef
+  728:33  error  'require' is not defined                          no-undef
+  835:20  error  'require' is not defined                          no-undef
+  835:38  error  'process' is not defined                          no-undef
+  910:1   error  'module' is not defined                           no-undef
+
+C:\Users\HP\cleaniq\server\routes\customInvoice.js
+   1:17  error  'require' is not defined  no-undef
+   3:34  error  'require' is not defined  no-undef
+   4:29  error  'require' is not defined  no-undef
+  53:1   error  'module' is not defined   no-undef
+
+C:\Users\HP\cleaniq\server\utils\emailService.js
+     1:20  error  'require' is not defined         no-undef
+     4:16  error  'process' is not defined         no-undef
+     5:16  error  'process' is not defined         no-undef
+    13:22  error  'require' is not defined         no-undef
+   695:25  error  'idx' is defined but never used  no-unused-vars
+  1531:1   error  'module' is not defined          no-undef
+
+C:\Users\HP\cleaniq\src\App.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+C:\Users\HP\cleaniq\src\admin\AdminLayout.jsx
+  312:3  error  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?  react-hooks/rules-of-hooks
+
+C:\Users\HP\cleaniq\src\admin\InvoiceBuilder.jsx
+   1:8   error  'React' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            no-unused-vars
+  30:30  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  28 | const InvoiceBuilder = () => {
+  29 |   const [invoiceNumber, setInvoiceNumber] = useState(
+> 30 |     `INV-${Math.floor(1000 + Math.random() * 9000)}`,
+     |                              ^^^^^^^^^^^^^ Cannot call impure function
+  31 |   );
+  32 |   const [customerName, setCustomerName] = useState("");
+  33 |   const [customerEmail, setCustomerEmail] = useState("");  react-hooks/purity
+
+C:\Users\HP\cleaniq\src\admin\Settings.jsx
+    1:8   error    'React' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    no-unused-vars
+    3:3   error    'Globe' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    no-unused-vars
+    4:3   error    'Save' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     no-unused-vars
+   56:5   error    Error: Cannot access variable before it is declared
+
+`fetchData` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  54 |
+  55 |   useEffect(() => {
+> 56 |     fetchData();
+     |     ^^^^^^^^^ `fetchData` accessed before it is declared
+  57 |   }, [activeTab]);
+  58 |
+  59 |   const fetchData = async () => {
+
+  57 |   }, [activeTab]);
+  58 |
+> 59 |   const fetchData = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 60 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 61 |     try {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 83 |     }
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 84 |   };
+     | ^^^^^ `fetchData` is declared here
+  85 |
+  86 |   const handleAddAdmin = async (e) => {
+  87 |     e.preventDefault();  react-hooks/immutability
+   57:6   warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+  104:14  error    'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      no-unused-vars
+  154:14  error    'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      no-unused-vars
+  169:14  error    'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      no-unused-vars
+  204:14  error    'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      no-unused-vars
+
+✖ 93 problems (92 errors, 1 warning)
+

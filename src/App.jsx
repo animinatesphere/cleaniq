@@ -49,6 +49,7 @@ import Checklist from "./admin/Checklist";
 import Recurring from "./admin/Recurring";
 import Bin from "./admin/Bin";
 import EmailHistory from "./admin/EmailHistory";
+import InvoiceBuilder from "./admin/InvoiceBuilder";
 import Calendar from "./admin/Calendar";
 
 function App() {
@@ -106,6 +107,7 @@ function App() {
               <Route path="recurring" element={<Recurring />} />
               <Route path="bin" element={<Bin />} />
               <Route path="email-history" element={<EmailHistory />} />
+              <Route path="invoice-builder" element={<InvoiceBuilder />} />
               <Route path="settings" element={<Settings />} />
               <Route path="chat" element={<Chat />} />
               <Route path="staff-pay" element={<StaffPay />} />

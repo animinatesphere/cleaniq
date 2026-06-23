@@ -22,6 +22,20 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET a single booking by its human-readable reference (e.g. BK-1234) —
+// used by the Invoice Builder's "Load Booking" lookup.
+router.get("/by-ref/:bookingId", async (req, res) => {
+  try {
+    const booking = await Booking.findOne({
+      bookingId: new RegExp(`^${req.params.bookingId}$`, "i"),
+    });
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+    res.json(booking);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // DELETE ALL bookings (Admin) - IMPORTANT: Must be above /:id
 router.delete("/all/delete", async (req, res) => {
   try {

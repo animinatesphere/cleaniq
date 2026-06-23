@@ -29,6 +29,7 @@ import {
   Trash2,
   Mail,
   CalendarDays,
+  FileSignature,
 } from "lucide-react";
 import Login from "./Login";
 import logo from "../assets/logo DP2.jpg";
@@ -195,6 +196,12 @@ const AdminLayout = () => {
           path: "/admin/email-history",
           key: "email-history",
           icon: <Mail size={20} />,
+        },
+        {
+          name: "Invoice Builder",
+          path: "/admin/invoice-builder",
+          key: "invoice-builder",
+          icon: <FileSignature size={20} />,
         },
       ],
     },

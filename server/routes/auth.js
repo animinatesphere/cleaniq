@@ -10,8 +10,8 @@ const { sendEmail, templates } = require('../utils/emailService');
 // grantable, regardless of what the creating superadmin requests.
 const GRANTABLE_PERMISSIONS = [
   'bookings', 'calendar', 'quotes', 'services', 'leads', 'checklist',
-  'recurring', 'email-history', 'staff-pay', 'payments', 'withdrawals',
-  'workers', 'applicants', 'customers', 'blog', 'chat',
+  'recurring', 'email-history', 'invoice-builder', 'staff-pay', 'payments',
+  'withdrawals', 'workers', 'applicants', 'customers', 'blog', 'chat',
 ];
 
 router.post('/login', async (req, res) => {

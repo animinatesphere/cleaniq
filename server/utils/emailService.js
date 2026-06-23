@@ -1401,6 +1401,131 @@ const templates = {
       </div>
     </div>
   `,
+
+  // Free-form invoice built in the admin Invoice Builder — every field
+  // (items, notes, payment instructions, paid badge) is supplied by the
+  // admin rather than derived from a fixed Booking record.
+  customInvoice: (data) => {
+    const {
+      invoiceNumber = "",
+      customerName = "",
+      customerEmail = "",
+      invoiceDate = new Date().toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }),
+      items = [],
+      notes = "",
+      paymentInstructions = "",
+      showPaidBadge = false,
+      currencySymbol = "£",
+    } = data;
+
+    const subtotal = items.reduce(
+      (sum, i) => sum + (Number(i.qty) || 0) * (Number(i.rate) || 0),
+      0,
+    );
+
+    return `
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0;">
+      <div style="background: #ffffff; padding: 40px 48px 24px; border-bottom: 3px solid #0F172A;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td>
+              <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq" style="width: 80px; height: auto; border-radius: 8px;" />
+              <p style="margin: 8px 0 0; font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Professional Cleaning Services</p>
+            </td>
+            <td align="right" style="vertical-align: top;">
+              <p style="margin: 0; font-size: 28px; font-weight: 900; color: #0F172A; letter-spacing: -1px;">INVOICE</p>
+              ${invoiceNumber ? `<p style="margin: 4px 0 0; font-size: 13px; color: #64748b; font-weight: 600;">${invoiceNumber}</p>` : ""}
+              ${
+                showPaidBadge
+                  ? `<div style="margin-top: 12px; display: inline-block; background: #ecfdf5; border: 2px solid #6EE7B7; border-radius: 20px; padding: 4px 16px;">
+                <span style="font-size: 12px; font-weight: 900; color: #059669; text-transform: uppercase; letter-spacing: 1px;">✓ PAID</span>
+              </div>`
+                  : ""
+              }
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="padding: 32px 48px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="vertical-align: top; width: 50%;">
+              <p style="margin: 0 0 6px; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px;">Billed To</p>
+              <p style="margin: 0; font-size: 15px; font-weight: 800; color: #0F172A;">${customerName}</p>
+              <p style="margin: 2px 0; font-size: 13px; color: #64748b;">${customerEmail}</p>
+            </td>
+            <td style="vertical-align: top; text-align: right;">
+              <p style="margin: 0 0 6px; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px;">Invoice Date</p>
+              <p style="margin: 0; font-size: 13px; color: #334155;">${invoiceDate}</p>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="padding: 28px 48px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+          <thead>
+            <tr style="background: #0F172A;">
+              <th style="padding: 12px 16px; text-align: left; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Description</th>
+              <th style="padding: 12px 16px; text-align: center; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Qty</th>
+              <th style="padding: 12px 16px; text-align: right; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Rate</th>
+              <th style="padding: 12px 16px; text-align: right; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items
+              .map(
+                (item) => `
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+              <td style="padding: 16px; font-size: 14px; color: #0F172A; font-weight: 600;">${item.description || ""}</td>
+              <td style="padding: 16px; text-align: center; font-size: 14px; color: #334155;">${item.qty || 1}</td>
+              <td style="padding: 16px; text-align: right; font-size: 14px; color: #334155;">${currencySymbol}${Number(item.rate || 0).toFixed(2)}</td>
+              <td style="padding: 16px; text-align: right; font-size: 14px; font-weight: 700; color: #0F172A;">${currencySymbol}${((Number(item.qty) || 0) * (Number(item.rate) || 0)).toFixed(2)}</td>
+            </tr>`,
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="padding: 0 48px 32px; margin-top: 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+          <tr style="background: #f8fafc; border-top: 2px solid #0F172A;">
+            <td colspan="3" style="padding: 16px; text-align: right; font-size: 15px; font-weight: 900; color: #0F172A;">TOTAL:</td>
+            <td style="padding: 16px; text-align: right; font-size: 18px; font-weight: 900; color: #0F172A;">${currencySymbol}${subtotal.toFixed(2)}</td>
+          </tr>
+        </table>
+      </div>
+
+      ${
+        paymentInstructions
+          ? `<div style="margin: 0 48px 32px; padding: 20px 24px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
+        <p style="margin: 0 0 8px; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">💳 How to Pay</p>
+        <p style="margin: 0; font-size: 13px; color: #0F172A; white-space: pre-line; line-height: 1.6;">${paymentInstructions}</p>
+      </div>`
+          : ""
+      }
+
+      ${
+        notes
+          ? `<div style="margin: 0 48px 32px; padding: 20px 24px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 16px; border: 1px solid #86efac;">
+        <p style="margin: 0; font-size: 13px; color: #065f46; white-space: pre-line; line-height: 1.6;">${notes}</p>
+      </div>`
+          : ""
+      }
+
+      <div style="background-color: #f8fafc; padding: 24px 48px; border-top: 1px solid #e2e8f0; text-align: center;">
+        <p style="margin: 0 0 8px 0; font-size: 12px; color: #94a3b8; font-weight: 600;">Cleaniq Services Limited · cleaniqservices.com · support@cleaniqservices.com</p>
+        <p style="margin: 0; font-size: 11px; color: #cbd5e1;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+  },
 };
 
 module.exports = { sendEmail, templates };
