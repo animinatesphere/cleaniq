@@ -123,9 +123,13 @@ const templates = {
             <td align="right" style="vertical-align: top;">
               <p style="margin: 0; font-size: 28px; font-weight: 900; color: #0F172A; letter-spacing: -1px;">INVOICE</p>
               <p style="margin: 4px 0 0; font-size: 13px; color: #64748b; font-weight: 600;">INV-${booking.bookingId}</p>
-              <div style="margin-top: 12px; display: inline-block; background: #ecfdf5; border: 2px solid #6EE7B7; border-radius: 20px; padding: 4px 16px;">
+              ${
+                booking.noPaymentRequired
+                  ? ""
+                  : `<div style="margin-top: 12px; display: inline-block; background: #ecfdf5; border: 2px solid #6EE7B7; border-radius: 20px; padding: 4px 16px;">
                 <span style="font-size: 12px; font-weight: 900; color: #059669; text-transform: uppercase; letter-spacing: 1px;">✓ PAID</span>
-              </div>
+              </div>`
+              }
             </td>
           </tr>
         </table>
@@ -158,7 +162,7 @@ const templates = {
           <thead>
             <tr style="background: #0F172A;">
               <th style="padding: 12px 16px; text-align: left; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Description</th>
-              <th style="padding: 12px 16px; text-align: center; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Duration</th>
+              <th style="padding: 12px 16px; text-align: center; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">${booking.payment?.billingType === "flat" ? "Billing" : "Duration"}</th>
               <th style="padding: 12px 16px; text-align: right; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Amount</th>
             </tr>
           </thead>
@@ -168,7 +172,7 @@ const templates = {
                 ${booking.service}
                 ${booking.details?.address ? `<br><span style="font-size: 12px; color: #64748b; font-weight: 400;">📍 ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ", " + booking.details.postcode : ""}</span>` : ""}
               </td>
-              <td style="padding: 16px; text-align: center; font-size: 14px; color: #334155;">${booking.details?.duration || "N/A"} hrs</td>
+              <td style="padding: 16px; text-align: center; font-size: 14px; color: #334155;">${booking.payment?.billingType === "flat" ? "Flat Rate" : `${booking.details?.duration || "N/A"} hrs`}</td>
               <td style="padding: 16px; text-align: right; font-size: 14px; font-weight: 700; color: #0F172A;">£${booking.payment.amount}</td>
             </tr>
           </tbody>

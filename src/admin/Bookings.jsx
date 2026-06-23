@@ -2143,9 +2143,9 @@ const Bookings = () => {
       return "";
     }
     if (fieldPath === "details.duration") {
-      if (!value || Number(value) < 0.5)
-        return "Duration must be at least 0.5 hours";
-      if (Number(value) > 24) return "Duration must not exceed 24 hours";
+      if (!value || Number(value) < 1)
+        return "Duration must be at least 1 hour";
+      if (Number(value) > 50) return "Duration must not exceed 50 hours";
       return "";
     }
     if (fieldPath === "details.Bedroom") {
@@ -4262,20 +4262,24 @@ const Bookings = () => {
                               </label>
                               <input
                                 type="number"
-                                min="0.5"
-                                step="0.5"
+                                min="1"
+                                max="50"
+                                step="1"
                                 placeholder="e.g. 3"
                                 value={createData.details.duration || ""}
-                                onChange={(e) =>
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value, 10);
                                   handleFieldChange(
                                     "details.duration",
-                                    parseFloat(e.target.value) || 0,
-                                  )
-                                }
+                                    Number.isNaN(val)
+                                      ? 0
+                                      : Math.min(50, Math.max(1, val)),
+                                  );
+                                }}
                                 className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                               />
                               <p className="text-[10px] text-slate-400 mt-1.5">
-                                Set any custom duration — not limited to preset hours.
+                                Any custom duration from 1 to 50 hours.
                               </p>
                             </div>
                           )}
@@ -4497,24 +4501,36 @@ const Bookings = () => {
                             ⏱️ Duration (Hours){" "}
                             <span className="text-rose-500">*</span>
                           </label>
-                          <div className="grid grid-cols-4 gap-2">
-                            {[2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20].map((hours) => (
-                              <button
-                                key={hours}
-                                onClick={() =>
-                                  handleFieldChange("details.duration", hours)
-                                }
-                                type="button"
-                                className={`py-3 px-2 rounded-xl border-2 font-bold text-sm transition-all transform hover:scale-105 ${
-                                  createData.details.duration === hours
-                                    ? "border-primary bg-primary text-white shadow-lg"
-                                    : "border-slate-200 bg-white text-primary hover:border-primary/50"
-                                }`}
-                              >
-                                {hours}h
-                              </button>
-                            ))}
+                          <div className="relative max-w-xs">
+                            <input
+                              type="number"
+                              min="1"
+                              max="50"
+                              step="1"
+                              placeholder="e.g. 3"
+                              value={createData.details.duration || ""}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value, 10);
+                                handleFieldChange(
+                                  "details.duration",
+                                  Number.isNaN(val)
+                                    ? 0
+                                    : Math.min(50, Math.max(1, val)),
+                                );
+                              }}
+                              className={`w-full p-4 rounded-2xl border-2 transition-all text-sm font-bold focus:outline-none focus:ring-2 ${
+                                formErrors["details.duration"]
+                                  ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500"
+                                  : "border-slate-200 focus:ring-primary/30 focus:border-primary"
+                              }`}
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              hours
+                            </span>
                           </div>
+                          <p className="text-[10px] text-slate-400 mt-2">
+                            Any custom duration from 1 to 50 hours.
+                          </p>
                           {formErrors["details.duration"] && (
                             <p className="text-rose-500 text-[10px] font-bold mt-2">
                               {formErrors["details.duration"]}

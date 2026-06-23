@@ -1,25 +1,28 @@
 const puppeteer = require("puppeteer");
-
-let browserPromise = null;
-// Reuse a single browser instance across requests instead of launching a
-// fresh one (and downloading/booting Chromium) on every invoice download.
-function getBrowser() {
-  if (!browserPromise) {
-    browserPromise = puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-  }
-  return browserPromise;
-}
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 
 // Renders an HTML invoice snippet into a downloadable PDF buffer. The
 // document <title> becomes the PDF's metadata title, so it shows
 // "Cleaniq Services" in the PDF viewer/tab instead of a random filename.
+//
+// A fresh browser + unique profile directory is used per call (instead of a
+// long-lived shared instance) so a leftover/orphaned Chromium process from a
+// previous run can never collide with — and block — a new launch.
 async function htmlToPdfBuffer(innerHtml, title = "Cleaniq Services") {
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  const userDataDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "cleaniq-invoice-pdf-"),
+  );
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    userDataDir,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+
   try {
+    const page = await browser.newPage();
     const fullHtml = `<!DOCTYPE html>
 <html>
   <head>
@@ -37,7 +40,8 @@ async function htmlToPdfBuffer(innerHtml, title = "Cleaniq Services") {
     });
     return pdf;
   } finally {
-    await page.close();
+    await browser.close();
+    fs.rm(userDataDir, { recursive: true, force: true }, () => {});
   }
 }
 

@@ -1082,28 +1082,33 @@ const Booking = () => {
                               Select duration for the cleaning
                             </p>
                           </div>
-                          <div className="grid grid-cols-3 gap-3 mb-8">
-                            {[2, 3, 4, 5, 6, 7].map((hours) => (
-                              <button
-                                key={hours}
-                                onClick={() =>
+                          <div className="mb-8">
+                            <div className="relative">
+                              <input
+                                type="number"
+                                min="1"
+                                max="50"
+                                step="1"
+                                placeholder="e.g. 3"
+                                value={formData.duration || ""}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value, 10);
                                   setFormData({
                                     ...formData,
-                                    duration: hours,
-                                  })
-                                }
-                                className={`py-5 px-2 rounded-2xl border-2 font-black text-sm transition-all transform hover:scale-105 ${
-                                  formData.duration === hours
-                                    ? "border-primary bg-primary text-white shadow-lg scale-110"
-                                    : "border-slate-200 bg-white text-primary hover:border-primary/50"
-                                }`}
-                              >
-                                {hours}
-                                <span className="block text-[10px] font-bold opacity-80 mt-1">
-                                  hours
-                                </span>
-                              </button>
-                            ))}
+                                    duration: Number.isNaN(val)
+                                      ? ""
+                                      : Math.min(50, Math.max(1, val)),
+                                  });
+                                }}
+                                className="w-full py-5 px-6 rounded-2xl border-2 border-slate-200 bg-white font-black text-2xl text-primary text-center focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                              />
+                              <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                hours
+                              </span>
+                            </div>
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-3 text-center">
+                              Choose any duration from 1 to 50 hours
+                            </p>
                           </div>
                           <div className="grid grid-cols-3 gap-2">
                             {["Once", "Weekly", "Fortnightly"].map((f) => (
