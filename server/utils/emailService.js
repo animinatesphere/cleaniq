@@ -1420,6 +1420,7 @@ const templates = {
       paymentInstructions = "",
       showPaidBadge = false,
       currencySymbol = "£",
+      paymentLink = "",
     } = data;
 
     const subtotal = items.reduce(
@@ -1428,21 +1429,22 @@ const templates = {
     );
 
     return `
-    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0;">
-      <div style="background: #ffffff; padding: 40px 48px 24px; border-bottom: 3px solid #0F172A;">
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 640px; margin: 0 auto; background: #f1f5f9; padding: 24px;">
+    <div style="background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 40px -10px rgba(15,23,42,0.15);">
+      <div style="background: linear-gradient(135deg, #0F172A 0%, #1e293b 100%); padding: 40px 48px;">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
             <td>
-              <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq" style="width: 80px; height: auto; border-radius: 8px;" />
-              <p style="margin: 8px 0 0; font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Professional Cleaning Services</p>
+              <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq" style="width: 72px; height: auto; border-radius: 12px;" />
+              <p style="margin: 10px 0 0; font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;">Professional Cleaning Services</p>
             </td>
             <td align="right" style="vertical-align: top;">
-              <p style="margin: 0; font-size: 28px; font-weight: 900; color: #0F172A; letter-spacing: -1px;">INVOICE</p>
-              ${invoiceNumber ? `<p style="margin: 4px 0 0; font-size: 13px; color: #64748b; font-weight: 600;">${invoiceNumber}</p>` : ""}
+              <p style="margin: 0; font-size: 30px; font-weight: 900; color: #ffffff; letter-spacing: -1px;">INVOICE</p>
+              ${invoiceNumber ? `<p style="margin: 4px 0 0; font-size: 13px; color: #6EE7B7; font-weight: 700;">${invoiceNumber}</p>` : ""}
               ${
                 showPaidBadge
-                  ? `<div style="margin-top: 12px; display: inline-block; background: #ecfdf5; border: 2px solid #6EE7B7; border-radius: 20px; padding: 4px 16px;">
-                <span style="font-size: 12px; font-weight: 900; color: #059669; text-transform: uppercase; letter-spacing: 1px;">✓ PAID</span>
+                  ? `<div style="margin-top: 14px; display: inline-block; background: #6EE7B7; border-radius: 20px; padding: 5px 18px;">
+                <span style="font-size: 12px; font-weight: 900; color: #064e3b; text-transform: uppercase; letter-spacing: 1px;">✓ PAID</span>
               </div>`
                   : ""
               }
@@ -1451,41 +1453,41 @@ const templates = {
         </table>
       </div>
 
-      <div style="padding: 32px 48px 0;">
+      <div style="padding: 36px 48px 0;">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
             <td style="vertical-align: top; width: 50%;">
               <p style="margin: 0 0 6px; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px;">Billed To</p>
-              <p style="margin: 0; font-size: 15px; font-weight: 800; color: #0F172A;">${customerName}</p>
+              <p style="margin: 0; font-size: 16px; font-weight: 800; color: #0F172A;">${customerName}</p>
               <p style="margin: 2px 0; font-size: 13px; color: #64748b;">${customerEmail}</p>
             </td>
             <td style="vertical-align: top; text-align: right;">
               <p style="margin: 0 0 6px; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px;">Invoice Date</p>
-              <p style="margin: 0; font-size: 13px; color: #334155;">${invoiceDate}</p>
+              <p style="margin: 0; font-size: 13px; color: #334155; font-weight: 600;">${invoiceDate}</p>
             </td>
           </tr>
         </table>
       </div>
 
       <div style="padding: 28px 48px 0;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; border-radius: 14px; overflow: hidden;">
           <thead>
             <tr style="background: #0F172A;">
-              <th style="padding: 12px 16px; text-align: left; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Description</th>
-              <th style="padding: 12px 16px; text-align: center; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Qty</th>
-              <th style="padding: 12px 16px; text-align: right; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Rate</th>
-              <th style="padding: 12px 16px; text-align: right; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Amount</th>
+              <th style="padding: 14px 16px; text-align: left; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Description</th>
+              <th style="padding: 14px 16px; text-align: center; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Qty</th>
+              <th style="padding: 14px 16px; text-align: right; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Rate</th>
+              <th style="padding: 14px 16px; text-align: right; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Amount</th>
             </tr>
           </thead>
           <tbody>
             ${items
               .map(
-                (item) => `
-            <tr style="border-bottom: 1px solid #f1f5f9;">
-              <td style="padding: 16px; font-size: 14px; color: #0F172A; font-weight: 600;">${item.description || ""}</td>
-              <td style="padding: 16px; text-align: center; font-size: 14px; color: #334155;">${item.qty || 1}</td>
-              <td style="padding: 16px; text-align: right; font-size: 14px; color: #334155;">${currencySymbol}${Number(item.rate || 0).toFixed(2)}</td>
-              <td style="padding: 16px; text-align: right; font-size: 14px; font-weight: 700; color: #0F172A;">${currencySymbol}${((Number(item.qty) || 0) * (Number(item.rate) || 0)).toFixed(2)}</td>
+                (item, idx) => `
+            <tr style="background: ${idx % 2 === 0 ? "#ffffff" : "#f8fafc"};">
+              <td style="padding: 16px; font-size: 14px; color: #0F172A; font-weight: 600; border-bottom: 1px solid #f1f5f9;">${item.description || ""}</td>
+              <td style="padding: 16px; text-align: center; font-size: 14px; color: #334155; border-bottom: 1px solid #f1f5f9;">${item.qty || 1}</td>
+              <td style="padding: 16px; text-align: right; font-size: 14px; color: #334155; border-bottom: 1px solid #f1f5f9;">${currencySymbol}${Number(item.rate || 0).toFixed(2)}</td>
+              <td style="padding: 16px; text-align: right; font-size: 14px; font-weight: 700; color: #0F172A; border-bottom: 1px solid #f1f5f9;">${currencySymbol}${((Number(item.qty) || 0) * (Number(item.rate) || 0)).toFixed(2)}</td>
             </tr>`,
               )
               .join("")}
@@ -1495,16 +1497,24 @@ const templates = {
 
       <div style="padding: 0 48px 32px; margin-top: 0;">
         <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
-          <tr style="background: #f8fafc; border-top: 2px solid #0F172A;">
-            <td colspan="3" style="padding: 16px; text-align: right; font-size: 15px; font-weight: 900; color: #0F172A;">TOTAL:</td>
-            <td style="padding: 16px; text-align: right; font-size: 18px; font-weight: 900; color: #0F172A;">${currencySymbol}${subtotal.toFixed(2)}</td>
+          <tr style="background: linear-gradient(135deg, #f0fdf4, #dcfce7);">
+            <td colspan="3" style="padding: 18px; text-align: right; font-size: 15px; font-weight: 900; color: #065f46; border-radius: 14px 0 0 14px;">TOTAL DUE:</td>
+            <td style="padding: 18px; text-align: right; font-size: 20px; font-weight: 900; color: #065f46; border-radius: 0 14px 14px 0;">${currencySymbol}${subtotal.toFixed(2)}</td>
           </tr>
         </table>
       </div>
 
       ${
+        paymentLink
+          ? `<div style="text-align: center; padding: 0 48px 32px;">
+        <a href="${paymentLink}" style="display: inline-block; background: linear-gradient(135deg, #635bff, #4f46e5); color: #ffffff; padding: 16px 40px; border-radius: 14px; text-decoration: none; font-weight: 800; font-size: 15px; letter-spacing: 0.3px; box-shadow: 0 8px 20px -4px rgba(79,70,229,0.4);">💳 Pay Now Securely</a>
+      </div>`
+          : ""
+      }
+
+      ${
         paymentInstructions
-          ? `<div style="margin: 0 48px 32px; padding: 20px 24px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
+          ? `<div style="margin: 0 48px 32px; padding: 22px 24px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">
         <p style="margin: 0 0 8px; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">💳 How to Pay</p>
         <p style="margin: 0; font-size: 13px; color: #0F172A; white-space: pre-line; line-height: 1.6;">${paymentInstructions}</p>
       </div>`
@@ -1513,16 +1523,17 @@ const templates = {
 
       ${
         notes
-          ? `<div style="margin: 0 48px 32px; padding: 20px 24px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 16px; border: 1px solid #86efac;">
+          ? `<div style="margin: 0 48px 32px; padding: 22px 24px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 16px; border: 1px solid #86efac;">
         <p style="margin: 0; font-size: 13px; color: #065f46; white-space: pre-line; line-height: 1.6;">${notes}</p>
       </div>`
           : ""
       }
 
-      <div style="background-color: #f8fafc; padding: 24px 48px; border-top: 1px solid #e2e8f0; text-align: center;">
-        <p style="margin: 0 0 8px 0; font-size: 12px; color: #94a3b8; font-weight: 600;">Cleaniq Services Limited · cleaniqservices.com · support@cleaniqservices.com</p>
-        <p style="margin: 0; font-size: 11px; color: #cbd5e1;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      <div style="background-color: #0F172A; padding: 28px 48px; text-align: center;">
+        <p style="margin: 0 0 6px 0; font-size: 12px; color: #94a3b8; font-weight: 600;">Cleaniq Services Limited · cleaniqservices.com · support@cleaniqservices.com</p>
+        <p style="margin: 0; font-size: 11px; color: #64748b;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
       </div>
+    </div>
     </div>
   `;
   },

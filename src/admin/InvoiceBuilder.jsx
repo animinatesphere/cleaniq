@@ -7,6 +7,8 @@ import {
   Download,
   X,
   Search,
+  CreditCard,
+  Copy,
 } from "lucide-react";
 import logo from "../assets/logo DP2.jpg";
 
@@ -43,6 +45,8 @@ const InvoiceBuilder = () => {
   const [bookingRef, setBookingRef] = useState("");
   const [loadingBooking, setLoadingBooking] = useState(false);
   const [loadedBookingId, setLoadedBookingId] = useState(null);
+  const [paymentLink, setPaymentLink] = useState("");
+  const [generatingLink, setGeneratingLink] = useState(false);
 
   const subtotal = useMemo(
     () =>
@@ -84,9 +88,10 @@ const InvoiceBuilder = () => {
         `${data.customer?.firstName || ""} ${data.customer?.lastName || ""}`.trim(),
       );
       setCustomerEmail(data.customer?.email || "");
+      const isFlatRate = data.payment?.billingType === "flat";
       setItems([
         {
-          description: `${data.service || "Cleaning Service"}${data.details?.duration ? ` (${data.details.duration} hrs)` : ""}`,
+          description: `${data.service || "Cleaning Service"}${!isFlatRate && data.details?.duration ? ` (${data.details.duration} hrs)` : ""}`,
           qty: 1,
           rate: Number(data.payment?.amount || 0),
         },
@@ -116,7 +121,35 @@ const InvoiceBuilder = () => {
     paymentInstructions,
     showPaidBadge,
     currencySymbol: "£",
+    paymentLink,
+    bookingId: loadedBookingId,
   });
+
+  const handleGeneratePaymentLink = async () => {
+    if (subtotal <= 0) {
+      setToast({ msg: "Add items with an amount first", type: "error" });
+      return;
+    }
+    setGeneratingLink(true);
+    try {
+      const res = await fetch(`${API}/custom-invoice/payment-link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload()),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setPaymentLink(data.url);
+      setToast({ msg: "Stripe payment link generated", type: "success" });
+    } catch (err) {
+      setToast({
+        msg: err.message || "Failed to generate payment link",
+        type: "error",
+      });
+    } finally {
+      setGeneratingLink(false);
+    }
+  };
 
   const handleSend = async () => {
     if (!customerEmail || items.length === 0 || !items[0].description) {
@@ -346,6 +379,52 @@ const InvoiceBuilder = () => {
             />
           </div>
 
+          <div className="p-4 rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/50">
+            <label className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+              <CreditCard size={13} /> Stripe Pay Now Button (optional)
+            </label>
+            {paymentLink ? (
+              <div className="flex gap-2 items-center">
+                <input
+                  readOnly
+                  value={paymentLink}
+                  className="flex-1 p-2.5 rounded-lg border border-indigo-200 bg-white text-xs font-medium text-indigo-700 truncate"
+                />
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(paymentLink);
+                    setToast({ msg: "Link copied", type: "success" });
+                  }}
+                  className="p-2.5 rounded-lg bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-100 transition-all"
+                >
+                  <Copy size={14} />
+                </button>
+                <button
+                  onClick={() => setPaymentLink("")}
+                  className="p-2.5 rounded-lg bg-white border border-rose-200 text-rose-500 hover:bg-rose-50 transition-all"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleGeneratePaymentLink}
+                disabled={generatingLink}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700 transition-all disabled:opacity-60"
+              >
+                <CreditCard size={14} />
+                {generatingLink
+                  ? "Generating..."
+                  : "Generate Stripe Payment Link"}
+              </button>
+            )}
+            <p className="text-[10px] text-indigo-500/80 mt-1.5">
+              Adds a secure "Pay Now" button to the invoice for the full
+              total — generate it only when you actually want the customer to
+              pay by card.
+            </p>
+          </div>
+
           <div>
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
               Notes
@@ -382,26 +461,26 @@ const InvoiceBuilder = () => {
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">
             Live Preview
           </p>
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 text-[13px] font-sans">
-            <div className="flex justify-between items-start pb-4 border-b-2 border-slate-900">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden text-[13px] font-sans">
+            <div className="flex justify-between items-start p-6 bg-gradient-to-br from-slate-900 to-slate-800">
               <div>
                 <img src={logo} alt="Cleaniq Services" className="h-10 rounded-lg mb-2" />
-                <p className="text-[10px] text-slate-500 uppercase tracking-wide">
+                <p className="text-[10px] text-slate-400 uppercase tracking-wide">
                   Professional Cleaning Services
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-black text-xl">INVOICE</p>
-                <p className="text-xs text-slate-500">{invoiceNumber}</p>
+                <p className="font-black text-xl text-white">INVOICE</p>
+                <p className="text-xs text-emerald-300 font-bold">{invoiceNumber}</p>
                 {showPaidBadge && (
-                  <span className="inline-block mt-2 px-3 py-0.5 rounded-full bg-emerald-50 border-2 border-emerald-300 text-emerald-700 text-[10px] font-black uppercase">
+                  <span className="inline-block mt-2 px-3 py-0.5 rounded-full bg-emerald-300 text-emerald-950 text-[10px] font-black uppercase">
                     ✓ Paid
                   </span>
                 )}
               </div>
             </div>
 
-            <div className="flex justify-between mt-5 text-xs">
+            <div className="flex justify-between mt-5 text-xs px-6">
               <div>
                 <p className="text-[9px] font-black text-slate-400 uppercase">
                   Billed To
@@ -421,66 +500,88 @@ const InvoiceBuilder = () => {
               </div>
             </div>
 
-            <table className="w-full mt-5 text-xs">
-              <thead>
-                <tr className="bg-slate-900 text-emerald-300">
-                  <th className="text-left p-2 font-bold uppercase text-[9px]">
-                    Description
-                  </th>
-                  <th className="text-center p-2 font-bold uppercase text-[9px]">
-                    Qty
-                  </th>
-                  <th className="text-right p-2 font-bold uppercase text-[9px]">
-                    Rate
-                  </th>
-                  <th className="text-right p-2 font-bold uppercase text-[9px]">
-                    Amount
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, idx) => (
-                  <tr key={idx} className="border-b border-slate-100">
-                    <td className="p-2">{item.description || "—"}</td>
-                    <td className="p-2 text-center">{item.qty || 0}</td>
-                    <td className="p-2 text-right">
-                      £{Number(item.rate || 0).toFixed(2)}
-                    </td>
-                    <td className="p-2 text-right font-bold">
-                      £
-                      {(
-                        (Number(item.qty) || 0) * (Number(item.rate) || 0)
-                      ).toFixed(2)}
-                    </td>
+            <div className="px-6 pb-6">
+              <table className="w-full mt-5 text-xs rounded-lg overflow-hidden">
+                <thead>
+                  <tr className="bg-slate-900 text-emerald-300">
+                    <th className="text-left p-2.5 font-bold uppercase text-[9px]">
+                      Description
+                    </th>
+                    <th className="text-center p-2.5 font-bold uppercase text-[9px]">
+                      Qty
+                    </th>
+                    <th className="text-right p-2.5 font-bold uppercase text-[9px]">
+                      Rate
+                    </th>
+                    <th className="text-right p-2.5 font-bold uppercase text-[9px]">
+                      Amount
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {items.map((item, idx) => (
+                    <tr
+                      key={idx}
+                      className={idx % 2 === 0 ? "bg-white" : "bg-slate-50"}
+                    >
+                      <td className="p-2.5 border-b border-slate-100">
+                        {item.description || "—"}
+                      </td>
+                      <td className="p-2.5 text-center border-b border-slate-100">
+                        {item.qty || 0}
+                      </td>
+                      <td className="p-2.5 text-right border-b border-slate-100">
+                        £{Number(item.rate || 0).toFixed(2)}
+                      </td>
+                      <td className="p-2.5 text-right font-bold border-b border-slate-100">
+                        £
+                        {(
+                          (Number(item.qty) || 0) * (Number(item.rate) || 0)
+                        ).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
 
-            <div className="flex justify-end mt-2 bg-slate-50 p-3 rounded-lg">
-              <p className="font-black text-sm">
-                TOTAL: £{subtotal.toFixed(2)}
-              </p>
+              <div className="flex justify-end mt-3 bg-gradient-to-r from-emerald-50 to-emerald-100 p-3.5 rounded-xl">
+                <p className="font-black text-sm text-emerald-800">
+                  TOTAL DUE: £{subtotal.toFixed(2)}
+                </p>
+              </div>
+
+              {paymentLink && (
+                <div className="flex justify-center mt-4">
+                  <a
+                    href={paymentLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-200"
+                  >
+                    💳 Pay Now Securely
+                  </a>
+                </div>
+              )}
+
+              {paymentInstructions && (
+                <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <p className="text-[9px] font-black text-slate-400 uppercase mb-1">
+                    How to Pay
+                  </p>
+                  <p className="whitespace-pre-line text-slate-700">
+                    {paymentInstructions}
+                  </p>
+                </div>
+              )}
+
+              {notes && (
+                <div className="mt-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                  <p className="whitespace-pre-line text-emerald-800">
+                    {notes}
+                  </p>
+                </div>
+              )}
             </div>
-
-            {paymentInstructions && (
-              <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <p className="text-[9px] font-black text-slate-400 uppercase mb-1">
-                  How to Pay
-                </p>
-                <p className="whitespace-pre-line text-slate-700">
-                  {paymentInstructions}
-                </p>
-              </div>
-            )}
-
-            {notes && (
-              <div className="mt-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                <p className="whitespace-pre-line text-emerald-800">
-                  {notes}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>

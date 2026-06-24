@@ -5536,10 +5536,14 @@ const Bookings = () => {
                           payment: {
                             amount: createTotal,
                             currency: createData.payment?.currency || "GBP",
-                            status: noPaymentRequired ? "Completed" : "Pending",
+                            // Non-pay bookings haven't actually been paid yet —
+                            // they stay Pending until an invoice is sent
+                            // (→ Confirmed) and the job is done (→ Completed,
+                            // which is also when money is actually captured).
+                            status: "Pending",
                             billingType: createData.payment?.billingType || "hourly",
                           },
-                          status: noPaymentRequired ? "Completed" : createData.status,
+                          status: createData.status,
                           noPaymentRequired,
                           skipConfirmationEmail:
                             noPaymentRequired && skipConfirmationEmail,

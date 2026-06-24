@@ -1041,7 +1041,10 @@ async function generateBookingsFromQuote(quote) {
     },
     region: "UK",
     leadSource: "Quote Accepted",
-    status: "Confirmed",
+    // Accepting a quote doesn't mean payment has happened yet — stays
+    // Pending until an invoice is sent (Confirmed) and the job is done
+    // (Completed).
+    status: "Pending",
     meta:
       occurrenceCount > 1 ? { recurringGroup: `Q-${quote.quoteRef}` } : {},
   }));
