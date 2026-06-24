@@ -173,6 +173,12 @@ const cleanKey = (str) =>
     .replace(/[^a-z0-9]/g, "")
     .trim();
 
+// Matches the "Cleaning Supply" extra service in the database — its rate is
+// added to the total when Cleaniq provides supplies, and skipped when the
+// customer provides their own. Admin can change the price anytime from the
+// Services list since it's just a normal Extras-category service.
+const SUPPLIES_EXTRA_NAME = "Cleaning Supply";
+
 const Booking = () => {
   const { region } = useRegion();
   const { customer, loading: authLoading } = useCustomerAuth();
@@ -534,6 +540,20 @@ const Booking = () => {
     fetchExistingBookings();
     fetchRates();
   }, [region.id]);
+
+  // Keep the "Cleaning Supply" extra in sync with who's providing supplies —
+  // charged when Cleaniq brings everything, skipped when the customer does.
+  useEffect(() => {
+    setFormData((prev) => {
+      const shouldCharge = (prev.suppliesProvidedBy || "Cleaniq") === "Cleaniq";
+      const current = prev.extras[SUPPLIES_EXTRA_NAME] || 0;
+      if (shouldCharge === current > 0) return prev;
+      const extras = { ...prev.extras };
+      if (shouldCharge) extras[SUPPLIES_EXTRA_NAME] = 1;
+      else delete extras[SUPPLIES_EXTRA_NAME];
+      return { ...prev, extras };
+    });
+  }, [formData.suppliesProvidedBy]);
 
   // Pricing Logic - Comprehensive Engine
   useEffect(() => {
@@ -1179,6 +1199,11 @@ const Booking = () => {
                                     .toLowerCase()
                                     .replace(/[^a-z0-9]/g, "")
                                     .trim();
+                                // Cleaning Supply is controlled by the "Who
+                                // provides supplies?" question below, not a
+                                // manual toggle here.
+                                if (clean(s.name) === clean(SUPPLIES_EXTRA_NAME))
+                                  return false;
                                 return !baseServices.some(
                                   (base) => clean(base) === clean(s.name),
                                 );
@@ -1338,7 +1363,11 @@ const Booking = () => {
                                 }
                               >
                                 <option value="Cleaniq">
-                                  Cleaniq Services provides everything
+                                  Cleaniq Services provides everything (+
+                                  {region.symbol}
+                                  {dynamicRates[cleanKey(SUPPLIES_EXTRA_NAME)] ||
+                                    10}
+                                  )
                                 </option>
                                 <option value="Customer">
                                   I'll provide my own supplies & equipment
@@ -1378,95 +1407,6 @@ const Booking = () => {
                           />
                           {formData.date && (
                             <div className="space-y-4">
-                              <div className="bg-white p-4 rounded-2xl border-2 border-slate-200">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">
-                                  📅 Time Slot Selection
-                                  (Morning/Afternoon/Evening)
-                                </p>
-                                <div className="grid grid-cols-3 gap-3">
-                                  {(() => {
-                                    const allSlots = [
-                                      {
-                                        label: "Morning (8am-12pm)",
-                                        limit: 12,
-                                      },
-                                      {
-                                        label: "Afternoon (12pm-4pm)",
-                                        limit: 16,
-                                      },
-                                      { label: "Evening (4pm-8pm)", limit: 20 },
-                                    ];
-
-                                    let availableSlots = allSlots;
-                                    if (formData.date) {
-                                      const selectedDate = new Date(
-                                        formData.date,
-                                      );
-                                      const today = new Date();
-                                      if (
-                                        selectedDate.getDate() ===
-                                          today.getDate() &&
-                                        selectedDate.getMonth() ===
-                                          today.getMonth() &&
-                                        selectedDate.getFullYear() ===
-                                          today.getFullYear()
-                                      ) {
-                                        // Use local time (respects the user's browser timezone automatically)
-                                        const currentHour = today.getHours();
-                                        const currentMinute =
-                                          today.getMinutes();
-                                        // Add a 30-min buffer so they can't book a slot that starts too soon
-                                        const effectiveHour =
-                                          currentMinute >= 30
-                                            ? currentHour + 1
-                                            : currentHour;
-
-                                        availableSlots = allSlots.filter(
-                                          (s) => effectiveHour < s.limit,
-                                        );
-                                        if (availableSlots.length === 0) {
-                                          availableSlots = []; // All slots passed — show no standard slots
-                                        }
-                                      }
-                                    }
-
-                                    return availableSlots.map((s) => {
-                                      const slot = s.label;
-                                      const isSlotBooked =
-                                        bookedSlotsByDate[
-                                          formData.date
-                                        ]?.includes(slot);
-                                      return (
-                                        <button
-                                          key={slot}
-                                          disabled={isSlotBooked}
-                                          onClick={() =>
-                                            setFormData({
-                                              ...formData,
-                                              timeSlot: slot,
-                                            })
-                                          }
-                                          className={`p-4 rounded-2xl border-2 text-[10px] font-black uppercase transition-all transform hover:scale-105 ${
-                                            formData.timeSlot === slot
-                                              ? "border-primary bg-primary text-white shadow-md scale-110"
-                                              : isSlotBooked
-                                                ? "border-rose-200 bg-rose-50 text-rose-400 cursor-not-allowed opacity-60"
-                                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
-                                          }`}
-                                        >
-                                          {slot.split("(")[0].trim()}
-                                          {isSlotBooked && (
-                                            <span className="block text-[8px] mt-1">
-                                              Booked
-                                            </span>
-                                          )}
-                                        </button>
-                                      );
-                                    });
-                                  })()}
-                                </div>
-                              </div>
-
                               <div className="bg-white p-6 rounded-2xl border-2 border-slate-200 space-y-4">
                                 <div>
                                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">

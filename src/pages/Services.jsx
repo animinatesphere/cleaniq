@@ -312,8 +312,8 @@ const Services = () => {
             transition={{ delay: 0.15 }}
             className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-full bg-primary/5 border border-primary/10 text-primary font-bold text-xs md:text-sm"
           >
-            <Truck size={16} /> All cleaning supplies & equipment are provided
-            by Cleaniq Services — nothing for you to bring.
+            <Truck size={16} /> You choose: we bring all supplies &
+            equipment, or you provide your own and save.
           </motion.div>
         </div>
 
