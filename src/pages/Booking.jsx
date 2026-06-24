@@ -545,7 +545,7 @@ const Booking = () => {
   // charged when Cleaniq brings everything, skipped when the customer does.
   useEffect(() => {
     setFormData((prev) => {
-      const shouldCharge = (prev.suppliesProvidedBy || "Cleaniq") === "Cleaniq";
+      const shouldCharge = prev.suppliesProvidedBy === "Cleaniq";
       const current = prev.extras[SUPPLIES_EXTRA_NAME] || 0;
       if (shouldCharge === current > 0) return prev;
       const extras = { ...prev.extras };
