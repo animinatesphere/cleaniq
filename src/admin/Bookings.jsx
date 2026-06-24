@@ -30,6 +30,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   Sparkles,
+  ChevronDown,
 } from "lucide-react";
 import AdminCRM from "./AdminCRM";
 
@@ -1809,6 +1810,7 @@ const Bookings = () => {
   // When true, the booking is created already paid (cash/bank transfer taken
   // outside the system) — no Stripe link or bank details are emailed.
   const [noPaymentRequired, setNoPaymentRequired] = useState(false);
+  const [showCreateMenu, setShowCreateMenu] = useState(false);
   // Only relevant for non-pay bookings — silently creates the booking with
   // no confirmation email. Invoice/payment link/review request can still be
   // sent manually afterwards via the CRM actions (Sparkles) button.
@@ -2747,26 +2749,61 @@ const Bookings = () => {
           >
             <Download size={15} /> Excel
           </button>
-          <button
-            onClick={() => {
-              setNoPaymentRequired(false);
-              setSkipConfirmationEmail(false);
-              setShowCreateModal(true);
-            }}
-            className="px-4 py-2.5 rounded-xl bg-white text-primary border border-slate-200 hover:bg-slate-50 transition-all font-semibold text-sm"
-          >
-            Create Booking
-          </button>
-          <button
-            onClick={() => {
-              setNoPaymentRequired(true);
-              setShowCreateModal(true);
-            }}
-            title="Create a booking that's already been paid (cash/bank transfer) — no Stripe link or bank details will be emailed"
-            className="px-4 py-2.5 rounded-xl bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50 transition-all font-semibold text-sm"
-          >
-            Create Booking (non pay)
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowCreateMenu((v) => !v)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-primary border border-slate-200 hover:bg-slate-50 transition-all font-semibold text-sm"
+            >
+              Create Booking
+              <ChevronDown
+                size={15}
+                className={`transition-transform ${showCreateMenu ? "rotate-180" : ""}`}
+              />
+            </button>
+            {showCreateMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowCreateMenu(false)}
+                />
+                <div className="absolute z-50 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+                  <button
+                    onClick={() => {
+                      setNoPaymentRequired(false);
+                      setSkipConfirmationEmail(false);
+                      setShowCreateModal(true);
+                      setShowCreateMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-all"
+                  >
+                    <p className="text-sm font-semibold text-slate-800">
+                      Create Booking
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      Standard flow — payment link / bank details emailed
+                    </p>
+                  </button>
+                  <div className="h-px bg-slate-100" />
+                  <button
+                    onClick={() => {
+                      setNoPaymentRequired(true);
+                      setShowCreateModal(true);
+                      setShowCreateMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-emerald-50 transition-all"
+                  >
+                    <p className="text-sm font-semibold text-emerald-700">
+                      Create Booking (non pay)
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      Already paid (cash/bank transfer) — no Stripe link or
+                      bank details emailed
+                    </p>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
           <button
             onClick={fetchBookings}
             className="px-4 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-dark transition-all font-semibold text-sm shadow-sm"

@@ -999,14 +999,9 @@ const QuoteBuilder = () => {
               </div>
 
               <div className="border-t border-slate-200 pt-5 space-y-1">
-                <h4 className="text-sm font-bold text-slate-800">
-                  First Service Date & Time
+                <h4 className="text-sm font-bold text-slate-800 mb-4">
+                  Date and Time
                 </h4>
-                <p className="text-[11px] text-slate-400 font-medium mb-4">
-                  {form.frequency === "once"
-                    ? "If the customer accepts, we'll automatically add this to the calendar."
-                    : "If accepted, we'll automatically schedule this recurring slot on the calendar going forward."}
-                </p>
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
                     <label className="text-[11px] font-semibold text-slate-400 mb-1.5 block">

@@ -94,7 +94,7 @@ router.post("/send", async (req, res) => {
     // Send email to company
     const emailSent = await sendEmail({
       to: email,
-      subject: `Professional Service Quote - Ref: ${quoteRef} | Cleaniq Services`,
+      subject: `Professional Cleaning Service Quote ${quoteRef}`,
       html: quoteHtml,
     });
 
@@ -399,7 +399,7 @@ router.post("/resend/:quoteRef", async (req, res) => {
 
     const emailSent = await sendEmail({
       to: targetEmail,
-      subject: `Professional Service Quote - Ref: ${quoteRef} | Cleaniq Services`,
+      subject: `Professional Cleaning Service Quote ${quoteRef}`,
       html: quoteHtml,
     });
 

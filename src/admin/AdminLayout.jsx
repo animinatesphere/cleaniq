@@ -198,7 +198,7 @@ const AdminLayout = () => {
           icon: <Mail size={20} />,
         },
         {
-          name: "Invoice Builder",
+          name: "Invoice ",
           path: "/admin/invoice-builder",
           key: "invoice-builder",
           icon: <FileSignature size={20} />,
