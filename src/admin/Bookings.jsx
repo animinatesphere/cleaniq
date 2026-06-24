@@ -2198,7 +2198,8 @@ const Bookings = () => {
     let isValid = true;
 
     if (step === 1) {
-      // Step 1: Location & Service
+      // Step 1: Location, Billing & Service — flat-rate jobs don't need an hourly duration
+      const isFlatRate = createData.payment?.billingType === "flat";
       const addressErr = validateField(
         "details.address",
         createData.details?.address,
@@ -2208,6 +2209,9 @@ const Bookings = () => {
         createData.details?.frequency,
       );
       const serviceErr = validateField("service", createData.service);
+      const durationErr = isFlatRate
+        ? ""
+        : validateField("details.duration", createData.details?.duration);
       if (addressErr) {
         errors["details.address"] = addressErr;
         isValid = false;
@@ -2220,12 +2224,12 @@ const Bookings = () => {
         errors.service = serviceErr;
         isValid = false;
       }
+      if (durationErr) {
+        errors["details.duration"] = durationErr;
+        isValid = false;
+      }
     } else if (step === 2) {
-      // Step 2: Home & Duration
-      const durationErr = validateField(
-        "details.duration",
-        createData.details?.duration,
-      );
+      // Step 2: Home details (duration is set in Step 1)
       const bedroomsErr = validateField(
         "details.Bedroom",
         createData.details?.Bedroom,
@@ -2234,10 +2238,6 @@ const Bookings = () => {
         "details.Bathroom",
         createData.details?.Bathroom,
       );
-      if (durationErr) {
-        errors["details.duration"] = durationErr;
-        isValid = false;
-      }
       if (bedroomsErr) {
         errors["details.Bedroom"] = bedroomsErr;
         isValid = false;
@@ -4250,51 +4250,90 @@ const Bookings = () => {
                         <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
                           💷 Billing Type
                         </label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-3">
                           <button
                             type="button"
                             onClick={() =>
                               handleFieldChange("payment.billingType", "hourly")
                             }
-                            className={`py-3.5 px-3 rounded-xl border-2 text-xs font-bold uppercase transition-all transform hover:scale-105 ${
+                            className={`flex flex-col items-center gap-1 py-4 px-3 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${
                               (createData.payment?.billingType || "hourly") === "hourly"
-                                ? "border-primary bg-primary text-white shadow-lg scale-105"
+                                ? "border-primary bg-primary text-white shadow-lg scale-[1.02]"
                                 : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
                             }`}
                           >
-                            Hourly Rate
+                            <Clock size={18} />
+                            <span className="text-xs font-bold uppercase">
+                              Hourly Rate
+                            </span>
+                            <span
+                              className={`text-[10px] ${(createData.payment?.billingType || "hourly") === "hourly" ? "text-white/70" : "text-slate-400"}`}
+                            >
+                              Priced by duration
+                            </span>
                           </button>
                           <button
                             type="button"
                             onClick={() =>
                               handleFieldChange("payment.billingType", "flat")
                             }
-                            className={`py-3.5 px-3 rounded-xl border-2 text-xs font-bold uppercase transition-all transform hover:scale-105 ${
+                            className={`flex flex-col items-center gap-1 py-4 px-3 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${
                               createData.payment?.billingType === "flat"
-                                ? "border-primary bg-primary text-white shadow-lg scale-105"
+                                ? "border-primary bg-primary text-white shadow-lg scale-[1.02]"
                                 : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
                             }`}
                           >
-                            Flat Rate
+                            <DollarSign size={18} />
+                            <span className="text-xs font-bold uppercase">
+                              Flat Rate
+                            </span>
+                            <span
+                              className={`text-[10px] ${createData.payment?.billingType === "flat" ? "text-white/70" : "text-slate-400"}`}
+                            >
+                              One fixed price
+                            </span>
                           </button>
                         </div>
 
-                        {createData.payment?.billingType === "flat" && (
-                          <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 border border-amber-200">
-                            <span className="text-amber-500">🔇</span>
-                            <p className="text-[11px] font-bold text-amber-700">
-                              No confirmation email is sent automatically for
-                              flat-rate bookings. Send the invoice yourself
-                              from the booking's CRM actions (✨) whenever
-                              you're ready.
-                            </p>
-                          </div>
-                        )}
-
-                        {createData.payment?.billingType !== "flat" && (
+                        {createData.payment?.billingType === "flat" ? (
+                          <>
+                            <div>
+                              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                                Fixed Price for This Job
+                              </label>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
+                                  £
+                                </span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  placeholder="0.00"
+                                  value={createFlatAmount}
+                                  onChange={(e) => setCreateFlatAmount(e.target.value)}
+                                  className="w-full pl-7 p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                />
+                              </div>
+                              <p className="text-[10px] text-slate-400 mt-1.5">
+                                Overrides the hourly calculation — customer pays this once. No hourly duration is needed for flat-rate jobs.
+                              </p>
+                            </div>
+                            <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 border border-amber-200">
+                              <span className="text-amber-500">🔇</span>
+                              <p className="text-[11px] font-bold text-amber-700">
+                                No confirmation email is sent automatically for
+                                flat-rate bookings. Send the invoice yourself
+                                from the booking's CRM actions (✨) whenever
+                                you're ready.
+                              </p>
+                            </div>
+                          </>
+                        ) : (
                           <div>
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                              ⏱️ Custom Hours
+                              ⏱️ Hours{" "}
+                              <span className="text-rose-500">*</span>
                             </label>
                             <div className="grid grid-cols-8 sm:grid-cols-10 gap-1.5 max-h-36 overflow-y-auto p-1 mb-2 bg-white rounded-xl border border-slate-100">
                               {Array.from({ length: 50 }, (_, i) => i + 1).map(
@@ -4319,12 +4358,7 @@ const Bookings = () => {
                                 ),
                               )}
                             </div>
-                          </div>
-                        )}
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {createData.payment?.billingType !== "flat" && (
-                            <div>
+                            <div className="relative">
                               <input
                                 type="number"
                                 min="1"
@@ -4341,39 +4375,26 @@ const Bookings = () => {
                                       : Math.min(50, Math.max(1, val)),
                                   );
                                 }}
-                                className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                className={`w-full p-3 rounded-xl border-2 transition-all text-sm font-bold focus:outline-none focus:ring-2 ${
+                                  formErrors["details.duration"]
+                                    ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500"
+                                    : "border-slate-200 focus:ring-primary/30 focus:border-primary"
+                                }`}
                               />
-                              <p className="text-[10px] text-slate-400 mt-1.5">
-                                Any custom duration from 1 to 50 hours.
-                              </p>
+                              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                hours
+                              </span>
                             </div>
-                          )}
-
-                          {createData.payment?.billingType === "flat" && (
-                            <div>
-                              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                                Fixed Price for This Job
-                              </label>
-                              <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
-                                  £
-                                </span>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  placeholder="0.00"
-                                  value={createFlatAmount}
-                                  onChange={(e) => setCreateFlatAmount(e.target.value)}
-                                  className="w-full pl-7 p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                                />
-                              </div>
-                              <p className="text-[10px] text-slate-400 mt-1.5">
-                                Overrides the hourly calculation — customer pays this once.
+                            <p className="text-[10px] text-slate-400 mt-1.5">
+                              Any custom duration from 1 to 50 hours — drives the price automatically.
+                            </p>
+                            {formErrors["details.duration"] && (
+                              <p className="text-rose-500 text-[10px] font-bold mt-1.5">
+                                {formErrors["details.duration"]}
                               </p>
-                            </div>
-                          )}
-                        </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {/* Address and Postcode */}
@@ -4552,76 +4573,36 @@ const Bookings = () => {
                       <div className="pb-4 border-b border-slate-200">
                         <h4 className="text-2xl font-bold text-primary-dark flex items-center gap-3">
                           <HomeIcon size={24} className="text-primary" />
-                          Home Details & Duration
+                          Home Details
                         </h4>
                         <p className="text-[11px] text-slate-500 uppercase tracking-widest mt-2 font-bold">
-                          Specify property rooms and cleaning hours
+                          Specify property rooms
                         </p>
                       </div>
 
-                      {/* Duration and Pet */}
+                      {/* Duration summary and Pet */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-white rounded-2xl border-2 border-slate-200">
-                        <div className="sm:col-span-2">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 block flex items-center gap-1">
-                            ⏱️ Duration (Hours){" "}
-                            <span className="text-rose-500">*</span>
-                          </label>
-                          <div className="grid grid-cols-8 sm:grid-cols-10 gap-1.5 max-h-36 overflow-y-auto p-1 mb-3 bg-slate-50 rounded-xl border border-slate-100">
-                            {Array.from({ length: 50 }, (_, i) => i + 1).map(
-                              (hours) => (
-                                <button
-                                  key={hours}
-                                  type="button"
-                                  onClick={() =>
-                                    handleFieldChange("details.duration", hours)
-                                  }
-                                  className={`py-1.5 rounded-lg border text-[11px] font-bold transition-all ${
-                                    createData.details.duration === hours
-                                      ? "border-primary bg-primary text-white shadow-sm"
-                                      : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
-                                  }`}
-                                >
-                                  {hours}
-                                </button>
-                              ),
-                            )}
-                          </div>
-                          <div className="relative max-w-xs">
-                            <input
-                              type="number"
-                              min="1"
-                              max="50"
-                              step="1"
-                              placeholder="Or type a custom number"
-                              value={createData.details.duration || ""}
-                              onChange={(e) => {
-                                const val = parseInt(e.target.value, 10);
-                                handleFieldChange(
-                                  "details.duration",
-                                  Number.isNaN(val)
-                                    ? 0
-                                    : Math.min(50, Math.max(1, val)),
-                                );
-                              }}
-                              className={`w-full p-4 rounded-2xl border-2 transition-all text-sm font-bold focus:outline-none focus:ring-2 ${
-                                formErrors["details.duration"]
-                                  ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500"
-                                  : "border-slate-200 focus:ring-primary/30 focus:border-primary"
-                              }`}
-                            />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                              hours
-                            </span>
-                          </div>
-                          <p className="text-[10px] text-slate-400 mt-2">
-                            Any custom duration from 1 to 50 hours.
-                          </p>
-                          {formErrors["details.duration"] && (
-                            <p className="text-rose-500 text-[10px] font-bold mt-2">
-                              {formErrors["details.duration"]}
+                        {createData.payment?.billingType === "flat" ? (
+                          <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+                            <DollarSign size={20} className="text-emerald-600 shrink-0" />
+                            <p className="text-xs font-bold text-emerald-700">
+                              Flat-rate job — no hourly duration needed. The
+                              fixed price you set in Step 1 covers the whole
+                              job.
                             </p>
-                          )}
-                        </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                            <Clock size={20} className="text-primary shrink-0" />
+                            <p className="text-xs font-bold text-slate-700">
+                              Duration: {createData.details.duration || "—"}{" "}
+                              hour{createData.details.duration === 1 ? "" : "s"}{" "}
+                              <span className="text-slate-400 font-medium">
+                                (set in Step 1)
+                              </span>
+                            </p>
+                          </div>
+                        )}
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 block">
                             🐾 Has Pet
