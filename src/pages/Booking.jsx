@@ -639,6 +639,12 @@ const Booking = () => {
         showNotification("Please select parking and access options.");
         return;
       }
+      if (!formData.suppliesProvidedBy) {
+        showNotification(
+          "Please tell us who's providing the cleaning supplies & equipment.",
+        );
+        return;
+      }
     }
 
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1350,11 +1356,16 @@ const Booking = () => {
                             <div className="space-y-3">
                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                                 <Sparkles size={14} className="text-primary" />{" "}
-                                Who provides the cleaning supplies & equipment?
+                                Who provides the cleaning supplies &
+                                equipment? <span className="text-rose-500">*</span>
                               </p>
                               <select
-                                className="w-full p-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-xs"
-                                value={formData.suppliesProvidedBy || "Cleaniq"}
+                                className={`w-full p-5 rounded-2xl border-2 shadow-sm outline-none font-bold text-xs transition-all ${
+                                  formData.suppliesProvidedBy
+                                    ? "bg-slate-50 border-transparent focus:border-primary/30"
+                                    : "bg-rose-50 border-rose-200 text-rose-500"
+                                }`}
+                                value={formData.suppliesProvidedBy || ""}
                                 onChange={(e) =>
                                   setFormData({
                                     ...formData,
@@ -1362,6 +1373,9 @@ const Booking = () => {
                                   })
                                 }
                               >
+                                <option value="" disabled>
+                                  -- Please select an option --
+                                </option>
                                 <option value="Cleaniq">
                                   Cleaniq Services provides everything (+
                                   {region.symbol}
@@ -1373,6 +1387,12 @@ const Booking = () => {
                                   I'll provide my own supplies & equipment
                                 </option>
                               </select>
+                              {!formData.suppliesProvidedBy && (
+                                <p className="text-[10px] font-bold text-rose-500">
+                                  This selection is required before you can
+                                  continue.
+                                </p>
+                              )}
                             </div>
                           </div>
                         </div>
