@@ -223,7 +223,7 @@ const Booking = () => {
       specialInstructions: "",
       hasPet: null,
       leadSource: "",
-      suppliesProvidedBy: "Cleaniq",
+      suppliesProvidedBy: "",
     };
   });
 
