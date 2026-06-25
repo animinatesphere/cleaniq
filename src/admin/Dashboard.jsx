@@ -15,10 +15,6 @@ import {
   CheckCircle2,
   Megaphone,
   CalendarRange,
-  Globe,
-  Users,
-  MousePointerClick,
-  Smartphone,
 } from "lucide-react";
 
 const DASHBOARD_EXPORT_HEADERS = [
@@ -212,9 +208,6 @@ const Dashboard = () => {
   const [leadStats, setLeadStats] = useState(null);
   const [leads, setLeads] = useState([]);
   const [search, setSearch] = useState("");
-  const [siteAnalytics, setSiteAnalytics] = useState(null);
-  const [siteAnalyticsError, setSiteAnalyticsError] = useState(false);
-  const [analyticsDays, setAnalyticsDays] = useState(28);
 
   // Revenue & Leads calendar — pick a start date, then an end date, to see
   // totals for that range.
@@ -298,21 +291,6 @@ const Dashboard = () => {
       .then((data) => setLeads(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, [fetchData]);
-
-  // Website traffic from Google Analytics (GA4) — separate effect since it
-  // re-fetches whenever the admin changes the date range.
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/analytics/overview?days=${analyticsDays}`)
-      .then((r) => {
-        if (!r.ok) throw new Error("not configured");
-        return r.json();
-      })
-      .then((data) => {
-        setSiteAnalytics(data);
-        setSiteAnalyticsError(false);
-      })
-      .catch(() => setSiteAnalyticsError(true));
-  }, [analyticsDays]);
 
   // Revenue by status
   const completed = bookings.filter((b) => b.status === "Completed");
@@ -909,178 +887,6 @@ const Dashboard = () => {
           </div>
             </div>
           </div>
-        )}
-      </div>
-
-      {/* Website Analytics (Google Analytics) */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6">
-        <div className="flex flex-wrap justify-between items-start gap-4 mb-5">
-          <div>
-            <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <Globe size={16} className="text-primary" /> Website Analytics
-            </h3>
-            <p className="text-[11px] font-medium text-slate-400 mt-1">
-              Live traffic data from Google Analytics
-            </p>
-          </div>
-          <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
-            {[7, 28, 90].map((d) => (
-              <button
-                key={d}
-                onClick={() => setAnalyticsDays(d)}
-                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                  analyticsDays === d
-                    ? "bg-primary text-white shadow-sm"
-                    : "text-slate-400 hover:text-slate-600"
-                }`}
-              >
-                {d}D
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {siteAnalyticsError ? (
-          <div className="text-center py-12">
-            <Globe size={28} className="text-slate-200 mx-auto mb-3" />
-            <p className="text-sm font-semibold text-slate-400">
-              Google Analytics isn't connected yet
-            </p>
-            <p className="text-[11px] text-slate-400 mt-1">
-              Add GA4_PROPERTY_ID and GA4_SERVICE_ACCOUNT_JSON to the server's
-              environment variables.
-            </p>
-          </div>
-        ) : !siteAnalytics ? (
-          <p className="text-center py-12 text-sm text-slate-400">
-            Loading analytics...
-          </p>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <div className="flex items-center gap-1.5 text-slate-400 mb-1.5">
-                  <Users size={13} />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">
-                    Visitors
-                  </span>
-                </div>
-                <p className="text-xl font-bold text-slate-900 tabular-nums">
-                  {siteAnalytics.totals.activeUsers.toLocaleString("en-GB")}
-                </p>
-              </div>
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <div className="flex items-center gap-1.5 text-slate-400 mb-1.5">
-                  <MousePointerClick size={13} />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">
-                    Sessions
-                  </span>
-                </div>
-                <p className="text-xl font-bold text-slate-900 tabular-nums">
-                  {siteAnalytics.totals.sessions.toLocaleString("en-GB")}
-                </p>
-              </div>
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <div className="flex items-center gap-1.5 text-slate-400 mb-1.5">
-                  <FileText size={13} />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">
-                    Page Views
-                  </span>
-                </div>
-                <p className="text-xl font-bold text-slate-900 tabular-nums">
-                  {siteAnalytics.totals.pageViews.toLocaleString("en-GB")}
-                </p>
-              </div>
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                <div className="flex items-center gap-1.5 text-slate-400 mb-1.5">
-                  <ArrowUpRight size={13} />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">
-                    New Users
-                  </span>
-                </div>
-                <p className="text-xl font-bold text-slate-900 tabular-nums">
-                  {siteAnalytics.totals.newUsers.toLocaleString("en-GB")}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">
-                  Top Pages
-                </p>
-                <div className="space-y-2">
-                  {siteAnalytics.topPages.length === 0 ? (
-                    <p className="text-xs text-slate-300">No data yet</p>
-                  ) : (
-                    siteAnalytics.topPages.map((p, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between gap-2"
-                      >
-                        <span className="text-xs font-semibold text-slate-600 truncate flex-1 min-w-0">
-                          {p.path}
-                        </span>
-                        <span className="text-xs font-bold text-slate-900 tabular-nums">
-                          {p.views}
-                        </span>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">
-                  Traffic Sources
-                </p>
-                <div className="space-y-2">
-                  {siteAnalytics.topSources.length === 0 ? (
-                    <p className="text-xs text-slate-300">No data yet</p>
-                  ) : (
-                    siteAnalytics.topSources.map((s, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between gap-2"
-                      >
-                        <span className="text-xs font-semibold text-slate-600 truncate flex-1 min-w-0">
-                          {s.sourceMedium}
-                        </span>
-                        <span className="text-xs font-bold text-slate-900 tabular-nums">
-                          {s.sessions}
-                        </span>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                  <Smartphone size={12} /> Devices
-                </p>
-                <div className="space-y-2">
-                  {siteAnalytics.devices.length === 0 ? (
-                    <p className="text-xs text-slate-300">No data yet</p>
-                  ) : (
-                    siteAnalytics.devices.map((d, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between gap-2"
-                      >
-                        <span className="text-xs font-semibold text-slate-600 capitalize truncate flex-1 min-w-0">
-                          {d.category}
-                        </span>
-                        <span className="text-xs font-bold text-slate-900 tabular-nums">
-                          {d.sessions}
-                        </span>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          </>
         )}
       </div>
 

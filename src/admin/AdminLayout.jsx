@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
+  Globe,
   Calendar,
   Users,
   Settings,
@@ -136,6 +137,12 @@ const AdminLayout = () => {
           path: "/admin",
           key: "dashboard",
           icon: <LayoutDashboard size={20} />,
+        },
+        {
+          name: "Analytics",
+          path: "/admin/analytics",
+          key: "analytics",
+          icon: <Globe size={20} />,
         },
       ],
     },
