@@ -413,38 +413,76 @@ const templates = {
     </div>
   `,
 
-  staffAppInvite: (staff) => `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0A5C43; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
-      <div style="background-color: #0A5C43; padding: 40px; text-align: center;">
-        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 110px; height: auto; margin-bottom: 15px; border-radius: 12px;" />
-        <h1 style="color: #6EE7B7; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">Welcome to Cleaniq! 🎉</h1>
-        <p style="color: #E6F4F1; margin-top: 5px; font-size: 15px;">Your Cleaniq Staff Account has been created</p>
-      </div>
-      <div style="padding: 45px 40px; color: #1e293b; line-height: 1.6;">
-        <h2 style="font-size: 20px; margin-top: 0; color: #0A5C43;">Hi ${staff.firstName},</h2>
-        <p>Congratulations! You have been registered as an official member of the <strong>Cleaniq Services</strong> cleaning staff team.</p>
-        <p>To start accepting jobs and tracking your completed cleans, download our staff application using the secure link below:</p>
-        
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="https://expo.dev/artifacts/eas/j8DzdUDFEfmfLUiK7QVUSG.apk" style="display: inline-block; background-color: #0A5C43; color: white; padding: 18px 36px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 15px; box-shadow: 0 10px 15px -3px rgba(10, 92, 67, 0.2);">Download Cleaniq Staff App</a>
+  staffAppInvite: (staff) => {
+    const androidLink = "https://expo.dev/artifacts/eas/j8DzdUDFEfmfLUiK7QVUSG.apk";
+    // Plug in the TestFlight public link here once it's live (App Store Connect → TestFlight → External Testing).
+    const iosLink = process.env.IOS_TESTFLIGHT_LINK || "https://testflight.apple.com/join/PLACEHOLDER";
+
+    return `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; background-color: #f1f5f9; padding: 24px 0;">
+      <div style="max-width: 600px; margin: auto; border-radius: 28px; overflow: hidden; background-color: #ffffff; box-shadow: 0 20px 40px -10px rgba(10,92,67,0.15);">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #0A5C43 0%, #063D2C 100%); padding: 48px 40px; text-align: center; position: relative;">
+          <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Service Pro" style="width: 96px; height: auto; margin-bottom: 18px; border-radius: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.25);" />
+          <p style="margin: 0; font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: #6EE7B7;">Cleaniq Service Pro</p>
+          <h1 style="color: #ffffff; margin: 10px 0 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px;">Welcome to the Team! 🎉</h1>
+          <p style="color: rgba(255,255,255,0.75); margin-top: 8px; font-size: 14px; font-weight: 500;">Your staff account is ready to go</p>
         </div>
 
-        <h3 style="font-size: 15px; color: #0A5C43; text-transform: uppercase; letter-spacing: 1px; margin-top: 35px; margin-bottom: 15px; border-left: 4px solid #6EE7B7; padding-left: 10px;">Your Login Credentials</h3>
-        
-        <div style="background-color: #F8FAFC; padding: 24px; border-radius: 20px; border: 1px solid #edf2f7;">
-          <p style="margin: 0 0 10px 0; font-size: 14px; color: #475569;"><strong>Login Email:</strong> <span style="font-family: monospace; font-size: 15px; color: #0F172A;">${staff.email}</span></p>
-          <p style="margin: 0; font-size: 14px; color: #475569;"><strong>Temporary Password:</strong> <span style="font-family: monospace; font-size: 15px; font-weight: bold; color: #0A5C43;">${staff.tempPassword}</span></p>
+        <!-- Body -->
+        <div style="padding: 44px 40px; color: #1e293b; line-height: 1.7;">
+          <h2 style="font-size: 19px; margin-top: 0; color: #0A5C43; font-weight: 800;">Hi ${staff.firstName},</h2>
+          <p style="font-size: 15px; color: #475569;">Congratulations! You've been registered as an official member of the <strong>Cleaniq Services</strong> cleaning team. Everything you need to find, accept, and manage jobs lives in one place: the <strong>Cleaniq Service Pro</strong> app.</p>
+
+          <!-- Download buttons -->
+          <div style="margin: 32px 0; text-align: center;">
+            <p style="margin: 0 0 16px; font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px;">Download Cleaniq Service Pro</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 420px; margin: 0 auto;">
+              <tr>
+                <td style="padding: 0 6px 0 0; width: 50%;">
+                  <a href="${iosLink}" style="display: block; background-color: #0F172A; color: #ffffff; padding: 16px 12px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 13px; text-align: center;">📱 iOS<br/><span style="font-size:11px; font-weight: 600; color: #94a3b8;">via TestFlight</span></a>
+                </td>
+                <td style="padding: 0 0 0 6px; width: 50%;">
+                  <a href="${androidLink}" style="display: block; background-color: #0A5C43; color: #ffffff; padding: 16px 12px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 13px; text-align: center;">🤖 Android<br/><span style="font-size:11px; font-weight: 600; color: #d1fae5;">Direct APK</span></a>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Credentials -->
+          <h3 style="font-size: 13px; color: #0A5C43; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 36px; margin-bottom: 14px; font-weight: 800; border-left: 4px solid #6EE7B7; padding-left: 12px;">Your Login Credentials</h3>
+          <div style="background-color: #F8FAFC; padding: 24px; border-radius: 20px; border: 1px solid #edf2f7;">
+            <p style="margin: 0 0 12px 0; font-size: 13px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Login Email</p>
+            <p style="margin: 0 0 18px 0; font-size: 15px; font-family: monospace; color: #0F172A; font-weight: 700;">${staff.email}</p>
+            <p style="margin: 0 0 12px 0; font-size: 13px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Temporary Password</p>
+            <p style="margin: 0; font-size: 15px; font-family: monospace; color: #0A5C43; font-weight: 800;">${staff.tempPassword}</p>
+          </div>
+          <p style="font-size: 13px; color: #64748b; margin-top: 18px; font-style: italic;">For security, please change your password from inside the app as soon as you log in for the first time.</p>
+
+          <!-- What's next -->
+          <div style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); padding: 24px; border-radius: 20px; margin-top: 32px; border: 1px solid #86efac;">
+            <h3 style="margin: 0 0 14px; font-size: 13px; color: #065f46; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">✓ What Happens Next</h3>
+            <ol style="margin: 0; padding-left: 20px; color: #065f46;">
+              <li style="margin-bottom: 8px; font-size: 14px;">Install Cleaniq Service Pro using the button for your phone above</li>
+              <li style="margin-bottom: 8px; font-size: 14px;">Log in with the credentials above and set a new password</li>
+              <li style="font-size: 14px;">Browse the Jobs feed and accept your first cleaning job</li>
+            </ol>
+          </div>
+
+          <div style="margin-top: 36px; padding-top: 24px; border-top: 1px solid #edf2f7; text-align: center;">
+            <p style="margin: 0; font-size: 13px; color: #94a3b8; font-weight: 600;">Welcome aboard!</p>
+            <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: 800; color: #0A5C43;">The Cleaniq Operations Team</p>
+          </div>
         </div>
 
-        <p style="font-size: 13px; color: #64748b; margin-top: 20px; font-style: italic;">Note: For security reasons, please change your password inside the app settings as soon as you log in for the first time.</p>
-
-        <div style="margin-top: 40px; padding-top: 25px; border-top: 1px solid #edf2f7; text-align: center;">
-          <p style="margin: 0; font-size: 14px; color: #94a3b8; font-weight: 600;">Welcome aboard!</p>
-          <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #0A5C43;">The Cleaniq Operations Team</p>
+        <!-- Footer -->
+        <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #f1f5f9;">
+          <p style="margin: 0; font-size: 11px; color: #94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
         </div>
       </div>
     </div>
-  `,
+  `;
+  },
 
   adminAccountInvite: (admin) => `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0F172A; border-radius: 24px; overflow: hidden; background-color: #ffffff;">

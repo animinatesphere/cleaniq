@@ -119,6 +119,8 @@ const LoginScreen = () => {
       colors={[colors.primary, colors.primaryDark]}
       style={styles.container}
     >
+      <View pointerEvents="none" style={styles.glowTopRight} />
+      <View pointerEvents="none" style={styles.glowBottomLeft} />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardWrapper}
@@ -141,6 +143,8 @@ const LoginScreen = () => {
               style={styles.logo}
               resizeMode="contain"
             />
+            <Text style={styles.brandTitle}>Cleaniq Services</Text>
+            <Text style={styles.brandTagline}>Staff Portal</Text>
           </View>
 
           <GlassCard radius={cardRadius} style={styles.card}>
@@ -231,6 +235,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  glowTopRight: {
+    position: "absolute",
+    top: -80,
+    right: -60,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: "rgba(110,231,183,0.18)",
+  },
+  glowBottomLeft: {
+    position: "absolute",
+    bottom: -90,
+    left: -70,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: "rgba(255,255,255,0.06)",
+  },
   keyboardWrapper: {
     flex: 1,
   },
@@ -246,6 +268,21 @@ const styles = StyleSheet.create({
   logo: {
     width: 120,
     height: 60,
+    marginBottom: 10,
+  },
+  brandTitle: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: colors.textOnDark,
+    letterSpacing: 0.5,
+  },
+  brandTagline: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.textOnDarkMuted,
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    marginTop: 2,
   },
   card: {
     width: "100%",
