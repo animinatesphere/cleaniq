@@ -363,7 +363,8 @@ const templates = {
 
         <div style="text-align: center; margin-top: 35px;">
           <p style="margin-bottom: 15px; font-weight: bold; color: #0A5C43;">Accept it now before another staff does!</p>
-          <a href="https://cleaniqservices.com" style="display: inline-block; background-color: #0A5C43; color: white; padding: 18px 36px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(10, 92, 67, 0.2);">Open Cleaniq Staff App</a>
+          <a href="cleaniqworker://home" style="display: inline-block; background-color: #0A5C43; color: white; padding: 18px 36px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(10, 92, 67, 0.2);">View Job in Staff App</a>
+          <p style="margin: 14px 0 0; font-size: 11px; color: #94a3b8;">Opens the Cleaniq Staff App directly — make sure it's installed on your phone.</p>
         </div>
       </div>
     </div>

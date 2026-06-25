@@ -237,8 +237,20 @@ const AppNavigation = () => {
     return <OnboardingScreen onFinished={() => setHasOnboarded(true)} />;
   }
 
+  // Lets tapping "View Job" in the new-job-alert email open this exact job
+  // inside the app instead of just opening the website.
+  const linking = {
+    prefixes: ["cleaniqworker://"],
+    config: {
+      screens: {
+        MainTabs: "home",
+        AcceptedBookingDetail: "job/:bookingId",
+      },
+    },
+  };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {userToken == null ? (
           // No token found, user isn't signed in
