@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getOverview } = require("../utils/analytics");
+const { getOverview, getRealtime } = require("../utils/analytics");
 
 // GET /api/analytics/overview?days=28 — website traffic summary from GA4
 router.get("/overview", async (req, res) => {
@@ -10,6 +10,17 @@ router.get("/overview", async (req, res) => {
     res.json(data);
   } catch (err) {
     console.error("GA4 analytics error:", err.message);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/analytics/realtime — visitors on the site right now
+router.get("/realtime", async (req, res) => {
+  try {
+    const data = await getRealtime();
+    res.json(data);
+  } catch (err) {
+    console.error("GA4 realtime error:", err.message);
     res.status(500).json({ message: err.message });
   }
 });

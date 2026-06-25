@@ -96,6 +96,7 @@ const Analytics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [hoveredPoint, setHoveredPoint] = useState(null);
+  const [liveUsers, setLiveUsers] = useState(null);
 
   const fetchAnalytics = () => {
     setLoading(true);
@@ -112,10 +113,23 @@ const Analytics = () => {
       .finally(() => setLoading(false));
   };
 
+  const fetchRealtime = () => {
+    fetch(`${API}/analytics/realtime`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((res) => setLiveUsers(res ? res.activeUsers : null))
+      .catch(() => setLiveUsers(null));
+  };
+
   useEffect(() => {
     fetchAnalytics();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days]);
+
+  useEffect(() => {
+    fetchRealtime();
+    const interval = setInterval(fetchRealtime, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const trendPoints = useMemo(() => {
     if (!data?.trend?.length) return [];
@@ -137,6 +151,14 @@ const Analytics = () => {
     data?.topSources?.reduce((s, src) => s + src.sessions, 0) || 0;
   const totalDeviceSessions =
     data?.devices?.reduce((s, d) => s + d.sessions, 0) || 0;
+  const totalLandingSessions =
+    data?.landingPages?.reduce((s, p) => s + p.sessions, 0) || 0;
+  const totalCitySessions =
+    data?.topCities?.reduce((s, c) => s + c.sessions, 0) || 0;
+  const totalBrowserSessions =
+    data?.browsers?.reduce((s, b) => s + b.sessions, 0) || 0;
+  const totalNewVsReturning =
+    data?.newVsReturning?.reduce((s, r) => s + r.sessions, 0) || 1;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
@@ -150,6 +172,20 @@ const Analytics = () => {
           </p>
         </div>
         <div className="flex items-center gap-2.5">
+          {liveUsers !== null && (
+            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 shadow-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="text-[11px] font-bold text-slate-700 tabular-nums">
+                {liveUsers}
+              </span>
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                online now
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
             {PERIODS.map((p) => (
               <button
@@ -375,6 +411,66 @@ const Analytics = () => {
               }}
             />
           </div>
+
+          {/* More breakdowns */}
+          <div className="grid lg:grid-cols-3 gap-6">
+            <BreakdownList
+              title="Landing Pages"
+              items={data.landingPages}
+              valueKey="sessions"
+              total={totalLandingSessions}
+              renderLabel={(p) => p.path}
+            />
+            <BreakdownList
+              title="Top Cities"
+              items={data.topCities}
+              valueKey="sessions"
+              total={totalCitySessions}
+              renderLabel={(c) => c.city}
+            />
+            <BreakdownList
+              title="Browsers"
+              items={data.browsers}
+              valueKey="sessions"
+              total={totalBrowserSessions}
+              renderLabel={(b) => b.browser}
+            />
+          </div>
+
+          {/* New vs Returning */}
+          {data.newVsReturning.length > 0 && (
+            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5 sm:p-6">
+              <h3 className="text-sm font-bold text-slate-800 mb-4">
+                New vs Returning Visitors
+              </h3>
+              <div className="flex h-3 rounded-full overflow-hidden bg-slate-100 mb-3">
+                {data.newVsReturning.map((r, i) => (
+                  <div
+                    key={i}
+                    className={i === 0 ? "bg-primary" : "bg-secondary"}
+                    style={{
+                      width: `${(r.sessions / totalNewVsReturning) * 100}%`,
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-6">
+                {data.newVsReturning.map((r, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span
+                      className={`w-2.5 h-2.5 rounded-full ${i === 0 ? "bg-primary" : "bg-secondary"}`}
+                    />
+                    <span className="text-xs font-semibold text-slate-600 capitalize">
+                      {r.type === "new" ? "New" : "Returning"}
+                    </span>
+                    <span className="text-xs font-bold text-slate-900 tabular-nums">
+                      {((r.sessions / totalNewVsReturning) * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

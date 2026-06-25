@@ -41,6 +41,8 @@ async function getOverview(days = 28) {
       { name: "screenPageViews" },
       { name: "averageSessionDuration" },
       { name: "bounceRate" },
+      { name: "engagementRate" },
+      { name: "engagedSessions" },
     ],
   });
 
@@ -52,6 +54,8 @@ async function getOverview(days = 28) {
     pageViews: Number(totalsRow[3]?.value || 0),
     avgSessionDurationSec: Number(totalsRow[4]?.value || 0),
     bounceRate: Number(totalsRow[5]?.value || 0),
+    engagementRate: Number(totalsRow[6]?.value || 0),
+    engagedSessions: Number(totalsRow[7]?.value || 0),
   };
 
   const [trendRes] = await analyticsDataClient.runReport({
@@ -92,7 +96,73 @@ async function getOverview(days = 28) {
   });
   const devices = rowsToObjects(devicesRes, ["category"], ["sessions"]);
 
-  return { totals, trend, topPages, topSources, devices };
+  const [citiesRes] = await analyticsDataClient.runReport({
+    property: propertyPath(),
+    dateRanges: [{ startDate: `${days}daysAgo`, endDate: "today" }],
+    dimensions: [{ name: "city" }],
+    metrics: [{ name: "sessions" }],
+    orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+    limit: 6,
+  });
+  const topCities = rowsToObjects(citiesRes, ["city"], ["sessions"]).filter(
+    (c) => c.city && c.city !== "(not set)",
+  );
+
+  const [browsersRes] = await analyticsDataClient.runReport({
+    property: propertyPath(),
+    dateRanges: [{ startDate: `${days}daysAgo`, endDate: "today" }],
+    dimensions: [{ name: "browser" }],
+    metrics: [{ name: "sessions" }],
+    orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+    limit: 5,
+  });
+  const browsers = rowsToObjects(browsersRes, ["browser"], ["sessions"]);
+
+  const [landingRes] = await analyticsDataClient.runReport({
+    property: propertyPath(),
+    dateRanges: [{ startDate: `${days}daysAgo`, endDate: "today" }],
+    dimensions: [{ name: "landingPagePlusQueryString" }],
+    metrics: [{ name: "sessions" }],
+    orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+    limit: 6,
+  });
+  const landingPages = rowsToObjects(landingRes, ["path"], ["sessions"]);
+
+  const [newVsReturningRes] = await analyticsDataClient.runReport({
+    property: propertyPath(),
+    dateRanges: [{ startDate: `${days}daysAgo`, endDate: "today" }],
+    dimensions: [{ name: "newVsReturning" }],
+    metrics: [{ name: "sessions" }],
+  });
+  const newVsReturning = rowsToObjects(
+    newVsReturningRes,
+    ["type"],
+    ["sessions"],
+  ).filter((r) => r.type && r.type !== "(not set)");
+
+  return {
+    totals,
+    trend,
+    topPages,
+    topSources,
+    devices,
+    topCities,
+    browsers,
+    landingPages,
+    newVsReturning,
+  };
 }
 
-module.exports = { getOverview };
+// Visitors on the site right now (last 30 minutes), for a "Live" indicator.
+async function getRealtime() {
+  const analyticsDataClient = getClient();
+  const [response] = await analyticsDataClient.runRealtimeReport({
+    property: propertyPath(),
+    metrics: [{ name: "activeUsers" }],
+  });
+  return {
+    activeUsers: Number(response.rows?.[0]?.metricValues?.[0]?.value || 0),
+  };
+}
+
+module.exports = { getOverview, getRealtime };
