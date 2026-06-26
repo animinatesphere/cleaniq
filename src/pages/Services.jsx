@@ -77,6 +77,12 @@ const Services = () => {
       cleanName.includes("moving")
     )
       return "tenancy";
+    if (
+      cleanName.includes("construction") ||
+      cleanName.includes("renovation") ||
+      cleanName.includes("builders")
+    )
+      return "construction";
     return "residential";
   };
 
@@ -169,11 +175,37 @@ const Services = () => {
       defaultRateUK: "From £29.90/hr",
       defaultRateNG: "From ₦30,000",
     },
+    construction: {
+      icon: <ShieldCheck className="text-secondary" size={40} />,
+      image:
+        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=2000&auto=format&fit=crop",
+      features: [
+        "Dust & debris removal from all surfaces.",
+        "Window, frame & sill cleaning.",
+        "Floor deep clean & polish.",
+        "Light fixture & vent dusting.",
+        "Removal of paint, plaster & adhesive residue.",
+        "Final detailed inspection clean.",
+      ],
+      tag: "Post-renovation specialist",
+      defaultName: "Post Construction Cleaning",
+      defaultDesc:
+        "Specialist post-construction and renovation cleaning to clear dust, debris and residue, leaving your property spotless and ready to use.",
+      defaultRateUK: "From £26.90/hr",
+      defaultRateNG: "From ₦28,000",
+    },
   };
 
   const serviceDetails = React.useMemo(() => {
     const bases = dbServices.filter((s) => s.category === "Base");
-    const keys = ["residential", "commercial", "move", "airbnb", "tenancy"];
+    const keys = [
+      "residential",
+      "commercial",
+      "move",
+      "airbnb",
+      "tenancy",
+      "construction",
+    ];
 
     const mapped = bases.map((s) => {
       const key = getLayoutKey(s.name);
