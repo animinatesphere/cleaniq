@@ -12,6 +12,7 @@ import {
 const PERMISSION_OPTIONS = [
   { key: 'bookings', label: 'Bookings' },
   { key: 'calendar', label: 'Calendar' },
+  { key: 'rota', label: 'Rota' },
   { key: 'quotes', label: 'Quotes' },
   { key: 'services', label: 'Services' },
   { key: 'leads', label: 'Leads' },

@@ -9,7 +9,7 @@ const { sendEmail, templates } = require('../utils/emailService');
 // Settings (which includes this very admin-management screen) are never
 // grantable, regardless of what the creating superadmin requests.
 const GRANTABLE_PERMISSIONS = [
-  'bookings', 'calendar', 'quotes', 'services', 'leads', 'checklist',
+  'bookings', 'calendar', 'rota', 'quotes', 'services', 'leads', 'checklist',
   'recurring', 'email-history', 'invoice-builder', 'staff-pay', 'payments',
   'withdrawals', 'expenses', 'workers', 'applicants', 'customers', 'blog',
   'chat',

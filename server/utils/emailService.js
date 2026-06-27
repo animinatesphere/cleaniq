@@ -370,6 +370,34 @@ const templates = {
     </div>
   `,
 
+  staffShiftAssigned: (booking, worker) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0A5C43; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0A5C43; padding: 35px; text-align: center;">
+        <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Logo" style="width: 100px; height: auto; margin-bottom: 10px; border-radius: 8px;" />
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 24px;">New Shift Assigned 📅</h1>
+        <p style="color: #E6F4F1; margin-top: 5px; font-size: 14px;">Cleaniq Service Pro has scheduled you for a clean</p>
+      </div>
+      <div style="padding: 30px; color: #1e293b; line-height: 1.6;">
+        <h2 style="font-size: 18px; margin-top: 0; color: #0A5C43;">Hi ${worker.firstName},</h2>
+        <p>The admin team has scheduled you for the following shift. This is already confirmed — no need to accept it from your feed.</p>
+
+        <div style="background-color: #F8FAFC; padding: 20px; border-radius: 16px; border: 1px solid #edf2f7; margin-bottom: 25px;">
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Service:</strong> ${booking.service}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Date:</strong> ${new Date(booking.schedule?.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Time Slot:</strong> ${booking.schedule?.timeSlot || "N/A"}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Your Hours:</strong> ${booking.workerDuration || booking.details?.duration || "N/A"} Hours</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Customer:</strong> ${booking.customer?.firstName} ${booking.customer?.lastName}</p>
+          <p style="margin: 5px 0; font-size: 14px;"><strong>Address:</strong> ${booking.details?.address || "See app for details"}</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 35px;">
+          <a href="cleaniqworker://home" style="display: inline-block; background-color: #0A5C43; color: white; padding: 18px 36px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(10, 92, 67, 0.2);">View in Staff App</a>
+          <p style="margin: 14px 0 0; font-size: 11px; color: #94a3b8;">Check your Schedule tab for the full shift details.</p>
+        </div>
+      </div>
+    </div>
+  `,
+
   newChatMessageToAdminAlert: (staff, text) => `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 2px solid #0F172A; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
       <div style="background-color: #0F172A; padding: 30px; text-align: center;">

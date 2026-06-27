@@ -191,6 +191,57 @@ router.post("/jobs/:id/accept", async (req, res) => {
   }
 });
 
+// PUT admin directly assigns a worker to a booking (rota/shift assignment) —
+// distinct from a worker self-accepting from the open jobs feed.
+router.put("/jobs/:id/assign", async (req, res) => {
+  try {
+    const { workerId, workerDuration, workerRate } = req.body;
+    if (!workerId) return res.status(400).json({ error: "workerId is required" });
+
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+
+    const worker = await Worker.findById(workerId);
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+
+    booking.assignedWorker = worker._id;
+    booking.assignedWorkerName = `${worker.firstName} ${worker.lastName}`;
+    if (workerDuration != null && workerDuration !== "") {
+      booking.workerDuration = Number(workerDuration);
+    }
+    if (workerRate != null && workerRate !== "") {
+      booking.workerRate = Number(workerRate);
+    }
+    if (booking.status === "Confirmed" || booking.status === "Pending") {
+      booking.status = "Assigned";
+    }
+    booking.jobAcceptedTime = booking.jobAcceptedTime || new Date();
+    await booking.save();
+
+    await Notification.create({
+      workerId: worker._id,
+      title: "New Shift Assigned",
+      message: `You've been scheduled for ${booking.service} on ${new Date(booking.schedule?.date).toLocaleDateString("en-GB")} (${booking.schedule?.timeSlot || ""}). Check your schedule.`,
+      type: "info",
+    });
+
+    try {
+      await sendEmail({
+        to: worker.email,
+        subject: `📅 New Shift Assigned — ${booking.bookingId}`,
+        html: templates.staffShiftAssigned(booking, worker),
+      });
+    } catch (emailErr) {
+      console.error("⚠️ Failed to send shift assignment email:", emailErr.message);
+    }
+
+    res.json({ message: "Worker assigned to shift", booking });
+  } catch (error) {
+    console.error("Error assigning worker to shift:", error);
+    res.status(500).json({ error: "Internal server error assigning shift" });
+  }
+});
+
 // POST cancel accepted job
 router.post("/jobs/:id/cancel", async (req, res) => {
   try {

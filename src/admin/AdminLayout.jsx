@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Globe,
   Receipt,
+  CalendarRange,
   Calendar,
   Users,
   Settings,
@@ -167,6 +168,12 @@ const AdminLayout = () => {
           path: "/admin/calendar",
           key: "calendar",
           icon: <CalendarDays size={20} />,
+        },
+        {
+          name: "Rota",
+          path: "/admin/rota",
+          key: "rota",
+          icon: <CalendarRange size={20} />,
         },
         {
           name: "Quotes",
