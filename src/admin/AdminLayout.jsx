@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Globe,
+  Receipt,
   Calendar,
   Users,
   Settings,
@@ -143,6 +144,12 @@ const AdminLayout = () => {
           path: "/admin/analytics",
           key: "analytics",
           icon: <Globe size={20} />,
+        },
+        {
+          name: "Expense Tracker",
+          path: "/admin/expenses",
+          key: "expenses",
+          icon: <Receipt size={20} />,
         },
       ],
     },

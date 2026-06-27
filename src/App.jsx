@@ -51,6 +51,7 @@ import Bin from "./admin/Bin";
 import EmailHistory from "./admin/EmailHistory";
 import InvoiceBuilder from "./admin/InvoiceBuilder";
 import Analytics from "./admin/Analytics";
+import Expenses from "./admin/Expenses";
 import Calendar from "./admin/Calendar";
 
 function App() {
@@ -110,6 +111,7 @@ function App() {
               <Route path="email-history" element={<EmailHistory />} />
               <Route path="invoice-builder" element={<InvoiceBuilder />} />
               <Route path="analytics" element={<Analytics />} />
+              <Route path="expenses" element={<Expenses />} />
               <Route path="settings" element={<Settings />} />
               <Route path="chat" element={<Chat />} />
               <Route path="staff-pay" element={<StaffPay />} />

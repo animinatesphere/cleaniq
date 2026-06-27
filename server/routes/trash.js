@@ -10,6 +10,7 @@ const MODELS = {
   Quote: () => require("../models/Quote"),
   BlogPost: () => require("../models/BlogPost"),
   Service: () => require("../models/Service"),
+  Expense: () => require("../models/Expense"),
 };
 
 // GET /api/trash — list everything currently in the bin

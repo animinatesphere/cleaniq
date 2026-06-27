@@ -22,6 +22,7 @@ const PERMISSION_OPTIONS = [
   { key: 'staff-pay', label: 'Staff Pay' },
   { key: 'payments', label: 'Payment Approvals' },
   { key: 'withdrawals', label: 'Disbursement' },
+  { key: 'expenses', label: 'Expense Tracker' },
   { key: 'workers', label: 'Staff' },
   { key: 'applicants', label: 'Applicants' },
   { key: 'customers', label: 'Customers' },

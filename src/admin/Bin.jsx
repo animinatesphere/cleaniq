@@ -18,6 +18,7 @@ const TYPE_LABELS = {
   Quote: "Quote",
   BlogPost: "Blog Post",
   Service: "Service",
+  Expense: "Expense",
 };
 
 const TYPE_COLORS = {
@@ -28,6 +29,7 @@ const TYPE_COLORS = {
   Quote: "bg-indigo-50 text-indigo-600",
   BlogPost: "bg-pink-50 text-pink-600",
   Service: "bg-cyan-50 text-cyan-600",
+  Expense: "bg-orange-50 text-orange-600",
 };
 
 const Toast = ({ msg, type, onClose }) => (

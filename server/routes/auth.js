@@ -11,7 +11,8 @@ const { sendEmail, templates } = require('../utils/emailService');
 const GRANTABLE_PERMISSIONS = [
   'bookings', 'calendar', 'quotes', 'services', 'leads', 'checklist',
   'recurring', 'email-history', 'invoice-builder', 'staff-pay', 'payments',
-  'withdrawals', 'workers', 'applicants', 'customers', 'blog', 'chat',
+  'withdrawals', 'expenses', 'workers', 'applicants', 'customers', 'blog',
+  'chat',
 ];
 
 router.post('/login', async (req, res) => {

@@ -12,6 +12,7 @@ const trashSchema = new mongoose.Schema({
       "Quote",
       "BlogPost",
       "Service",
+      "Expense",
     ],
   },
   originalId: { type: String, required: true },
