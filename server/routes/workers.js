@@ -45,6 +45,16 @@ router.post("/login", async (req, res) => {
       await worker.save();
     }
 
+    // Workers who already filled in their address/bank details before this
+    // flag existed shouldn't be blocked by the "Complete Your Profile" gate.
+    const hasCompletedProfileData = Boolean(
+      worker.address && worker.postcode && worker.bankDetails?.accountNumber,
+    );
+    if (hasCompletedProfileData && !worker.profileCompleted) {
+      worker.profileCompleted = true;
+      await worker.save();
+    }
+
     // Generate JWT token
     const token = jwt.sign(
       { workerId: worker._id, email: worker.email, region: worker.region },
@@ -66,6 +76,9 @@ router.post("/login", async (req, res) => {
         region: worker.region,
         rating: worker.rating || 5.0,
         jobsCompleted: worker.jobsCompleted || 0,
+        address: worker.address || "",
+        postcode: worker.postcode || "",
+        profileCompleted: worker.profileCompleted || false,
         bankDetails: worker.bankDetails || {},
         wallet: worker.wallet || {
           totalEarned: 0,
@@ -733,6 +746,16 @@ router.put("/:id/profile", async (req, res) => {
         ...worker.bankDetails,
         ...bankDetails,
       };
+    }
+
+    // Once the essentials are filled in, the mandatory "Complete Your
+    // Profile" gate in the app no longer needs to show.
+    if (
+      worker.address &&
+      worker.postcode &&
+      worker.bankDetails?.accountNumber
+    ) {
+      worker.profileCompleted = true;
     }
 
     await worker.save();

@@ -45,6 +45,7 @@ const workerSchema = new mongoose.Schema({
     default: "Pending",
     enum: ["Active", "Pending", "Suspended"],
   },
+  profileCompleted: { type: Boolean, default: false }, // must fill in address/bank details before using the app
   tempPassword: { type: String },
   appAccessGranted: { type: Boolean, default: false },
   rating: { type: Number, default: 5.0 },

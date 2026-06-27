@@ -24,9 +24,11 @@ try {
   console.log("Bypassing expo-notifications in this client:", err.message);
 }
 
+import { C } from "./src/theme/flat";
 import { AuthProvider, AuthContext } from "./src/context/AuthContext";
 import { NotificationProvider } from "./src/context/NotificationContext";
 import OnboardingScreen from "./src/screens/OnboardingScreen";
+import CompleteProfileScreen from "./src/screens/CompleteProfileScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import NotificationScreen from "./src/screens/NotificationScreen";
@@ -84,22 +86,21 @@ const TabNavigator = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: "#1E40AF",
-        tabBarInactiveTintColor: "#9CA3AF",
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: "#FFFFFF",
+        tabBarInactiveTintColor: C.textMuted,
         tabBarStyle: {
-          backgroundColor: "#FFFFFF",
-          borderTopWidth: 1,
-          borderTopColor: "#E5E7EB",
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 65,
+          backgroundColor: C.card,
+          borderTopWidth: 0,
+          paddingTop: 10,
+          height: 70,
+          shadowColor: "#0F172A",
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          elevation: 12,
         },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "600",
-          marginTop: 4,
-        },
-        tabBarIcon: ({ color, size }) => {
+        tabBarIcon: ({ color, focused }) => {
           let Icon = Home;
 
           if (route.name === "HomeTab") Icon = Home;
@@ -108,35 +109,37 @@ const TabNavigator = () => {
           else if (route.name === "MessagesTab") Icon = MessageSquare;
           else if (route.name === "AccountTab") Icon = User;
 
-          return <Icon size={24} color={color} strokeWidth={2} />;
+          return (
+            <View
+              style={
+                focused
+                  ? {
+                      width: 44,
+                      height: 44,
+                      borderRadius: 22,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: C.primary,
+                    }
+                  : {
+                      width: 44,
+                      height: 44,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }
+              }
+            >
+              <Icon size={22} color={color} strokeWidth={2} />
+            </View>
+          );
         },
       })}
     >
-      <Tab.Screen
-        name="HomeTab"
-        component={HomeScreen}
-        options={{ tabBarLabel: "Home" }}
-      />
-      <Tab.Screen
-        name="NotificationTab"
-        component={NotificationScreen}
-        options={{ tabBarLabel: "Notification" }}
-      />
-      <Tab.Screen
-        name="ScheduleTab"
-        component={ScheduleScreen}
-        options={{ tabBarLabel: "Schedule" }}
-      />
-      <Tab.Screen
-        name="MessagesTab"
-        component={MessagesScreen}
-        options={{ tabBarLabel: "Messages" }}
-      />
-      <Tab.Screen
-        name="AccountTab"
-        component={MyAccountScreen}
-        options={{ tabBarLabel: "My Account" }}
-      />
+      <Tab.Screen name="HomeTab" component={HomeScreen} />
+      <Tab.Screen name="NotificationTab" component={NotificationScreen} />
+      <Tab.Screen name="ScheduleTab" component={ScheduleScreen} />
+      <Tab.Screen name="MessagesTab" component={MessagesScreen} />
+      <Tab.Screen name="AccountTab" component={MyAccountScreen} />
     </Tab.Navigator>
   );
 };
@@ -235,6 +238,12 @@ const AppNavigation = () => {
   // Display stunning animated onboarding screens for first-time launch
   if (!hasOnboarded) {
     return <OnboardingScreen onFinished={() => setHasOnboarded(true)} />;
+  }
+
+  // New workers must fill in their address & bank details before they can
+  // browse or accept any jobs.
+  if (userToken && workerInfo && !workerInfo.profileCompleted) {
+    return <CompleteProfileScreen />;
   }
 
   // Lets tapping "View Job" in the new-job-alert email open this exact job

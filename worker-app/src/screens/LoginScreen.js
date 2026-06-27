@@ -12,17 +12,15 @@ import {
   Image,
   ScrollView,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as LocalAuthentication from "expo-local-authentication";
 import { AuthContext } from "../context/AuthContext";
 import { Mail, Lock, Fingerprint } from "lucide-react-native";
-import GlassCard from "../components/GlassCard";
-import { colors, radii } from "../theme/glass";
+import Card from "../components/Card";
+import { C, cardShadow } from "../theme/flat";
 import {
   responsiveFontSize,
   getResponsivePadding,
-  getResponsiveBorderRadius,
   isBigScreen,
 } from "../utils/responsive";
 
@@ -112,15 +110,9 @@ const LoginScreen = () => {
   };
 
   const horizontalPadding = getResponsivePadding();
-  const cardRadius = getResponsiveBorderRadius(radii.lg);
 
   return (
-    <LinearGradient
-      colors={[colors.primary, colors.primaryDark]}
-      style={styles.container}
-    >
-      <View pointerEvents="none" style={styles.glowTopRight} />
-      <View pointerEvents="none" style={styles.glowBottomLeft} />
+    <View style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardWrapper}
@@ -130,7 +122,7 @@ const LoginScreen = () => {
             styles.scrollContent,
             {
               paddingHorizontal: horizontalPadding,
-              maxWidth: isBigScreen() ? 480 : undefined,
+              maxWidth: isBigScreen() ? 390 : undefined,
               alignSelf: "center",
               width: "100%",
             },
@@ -138,120 +130,90 @@ const LoginScreen = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.logoWrap}>
-            <Image
-              source={require("../../assets/logo.jpg")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
+            <View style={[styles.logoCircle, cardShadow]}>
+              <Image
+                source={require("../../assets/logo.jpg")}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </View>
             <Text style={styles.brandTitle}>Cleaniq Services</Text>
             <Text style={styles.brandTagline}>Staff Portal</Text>
           </View>
 
-          <GlassCard radius={cardRadius} style={styles.card}>
-            <View style={[styles.formContainer, { padding: horizontalPadding }]}>
-              <Text
-                style={[
-                  styles.welcomeText,
-                  { fontSize: responsiveFontSize(26) },
-                ]}
-              >
-                Welcome back
-              </Text>
-              <Text style={styles.subtitle}>
-                Enter your details to access your jobs.
-              </Text>
+          <Card style={styles.card}>
+            <Text style={styles.welcomeText}>Welcome back</Text>
+            <Text style={styles.subtitle}>
+              Enter your details to access your jobs.
+            </Text>
 
-              <View style={styles.form}>
-                <View style={styles.inputWrapper}>
-                  <Mail
-                    size={20}
-                    color={colors.textOnDarkMuted}
-                    style={styles.inputIcon}
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Email Address"
-                    placeholderTextColor={colors.textOnDarkMuted}
-                    value={email}
-                    onChangeText={setEmail}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                  />
-                </View>
-
-                <View style={styles.inputWrapper}>
-                  <Lock
-                    size={20}
-                    color={colors.textOnDarkMuted}
-                    style={styles.inputIcon}
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Temporary Password"
-                    placeholderTextColor={colors.textOnDarkMuted}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                  />
-                </View>
-
-                <View style={styles.actionsRow}>
-                  <TouchableOpacity
-                    style={[styles.loginButton, { flex: 1 }]}
-                    onPress={handleLogin}
-                    disabled={isLoggingIn}
-                  >
-                    {isLoggingIn ? (
-                      <ActivityIndicator color="#FFFFFF" />
-                    ) : (
-                      <Text style={styles.loginButtonText}>LOG IN</Text>
-                    )}
-                  </TouchableOpacity>
-
-                  {isBiometricSupported && (
-                    <TouchableOpacity
-                      style={styles.biometricButton}
-                      onPress={handleBiometricAuth}
-                      disabled={isLoggingIn}
-                    >
-                      <Fingerprint size={26} color={colors.textOnDark} />
-                    </TouchableOpacity>
-                  )}
-                </View>
+            <View style={styles.form}>
+              <View style={styles.inputWrapper}>
+                <Mail size={19} color={C.textMuted} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Email Address"
+                  placeholderTextColor={C.textMuted}
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
               </View>
 
-              <Text style={styles.footerText}>
-                Having trouble? Contact your regional manager.
-              </Text>
+              <View style={styles.inputWrapper}>
+                <Lock size={19} color={C.textMuted} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Temporary Password"
+                  placeholderTextColor={C.textMuted}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                />
+              </View>
+
+              <View style={styles.actionsRow}>
+                <TouchableOpacity
+                  style={[styles.loginButton, cardShadow]}
+                  onPress={handleLogin}
+                  disabled={isLoggingIn}
+                  activeOpacity={0.85}
+                >
+                  {isLoggingIn ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.loginButtonText}>LOG IN</Text>
+                  )}
+                </TouchableOpacity>
+
+                {isBiometricSupported && (
+                  <TouchableOpacity
+                    style={[styles.biometricButton, cardShadow]}
+                    onPress={handleBiometricAuth}
+                    disabled={isLoggingIn}
+                    activeOpacity={0.85}
+                  >
+                    <Fingerprint size={24} color={C.primary} />
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
-          </GlassCard>
+
+            <Text style={styles.footerText}>
+              Having trouble? Contact your regional manager.
+            </Text>
+          </Card>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  glowTopRight: {
-    position: "absolute",
-    top: -80,
-    right: -60,
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    backgroundColor: "rgba(110,231,183,0.18)",
-  },
-  glowBottomLeft: {
-    position: "absolute",
-    bottom: -90,
-    left: -70,
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: C.bg,
   },
   keyboardWrapper: {
     flex: 1,
@@ -265,40 +227,49 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 28,
   },
+  logoCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    marginBottom: 14,
+    backgroundColor: C.card,
+  },
   logo: {
-    width: 120,
-    height: 60,
-    marginBottom: 10,
+    width: 64,
+    height: 64,
   },
   brandTitle: {
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: "900",
-    color: colors.textOnDark,
+    color: C.textDark,
     letterSpacing: 0.5,
   },
   brandTagline: {
     fontSize: 12,
-    fontWeight: "600",
-    color: colors.textOnDarkMuted,
+    fontWeight: "700",
+    color: C.textMed,
     textTransform: "uppercase",
     letterSpacing: 1.5,
     marginTop: 2,
   },
   card: {
     width: "100%",
-  },
-  formContainer: {
-    width: "100%",
+    borderRadius: 28,
+    padding: 28,
   },
   welcomeText: {
+    fontSize: 24,
     fontWeight: "900",
-    color: colors.textOnDark,
+    color: C.textDark,
     marginBottom: 6,
   },
   subtitle: {
     fontSize: 14,
-    color: colors.textOnDarkMuted,
-    marginBottom: 30,
+    color: C.textMed,
+    marginBottom: 28,
     fontWeight: "500",
   },
   form: {
@@ -307,12 +278,12 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.12)",
+    backgroundColor: C.bg,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.25)",
-    borderRadius: radii.md,
+    borderColor: C.border,
+    borderRadius: 16,
     paddingHorizontal: 18,
-    height: 58,
+    height: 56,
   },
   inputIcon: {
     marginRight: 14,
@@ -320,47 +291,41 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: "100%",
-    color: colors.textOnDark,
+    color: C.textDark,
     fontSize: 15,
     fontWeight: "600",
   },
   actionsRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 14,
     marginTop: 6,
   },
   loginButton: {
-    backgroundColor: colors.accent,
-    height: 58,
-    borderRadius: radii.md,
+    flex: 1,
+    height: 56,
+    borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 6,
+    backgroundColor: C.primary,
   },
   loginButtonText: {
-    color: colors.primaryDark,
+    color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "900",
     letterSpacing: 2,
   },
   biometricButton: {
-    width: 58,
-    height: 58,
-    borderRadius: radii.md,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    justifyContent: "center",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
+    justifyContent: "center",
+    backgroundColor: C.primaryLight,
   },
   footerText: {
     marginTop: 24,
     textAlign: "center",
-    color: colors.textOnDarkMuted,
+    color: C.textMed,
     fontSize: 12,
     fontWeight: "600",
   },
