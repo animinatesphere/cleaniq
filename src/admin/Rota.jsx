@@ -8,6 +8,10 @@ import {
   UserPlus,
   Clock,
   MapPin,
+  Users,
+  CheckCircle2,
+  AlertTriangle,
+  Hourglass,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -35,6 +39,39 @@ const startOfWeek = (date) => {
 
 const isRealBooking = (b) =>
   b.status !== "Blackout" && b.customer?.firstName !== "ADMIN_BLOCK";
+
+const initials = (firstName, lastName) =>
+  `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase() || "?";
+
+const hoursOf = (b) => Number(b.workerDuration || b.details?.duration || 0);
+
+const urgencyTag = (date) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(date);
+  target.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((target - today) / 86400000);
+  if (diffDays < 0) return { label: "Overdue", color: "bg-rose-100 text-rose-700" };
+  if (diffDays === 0) return { label: "Today", color: "bg-rose-50 text-rose-600" };
+  if (diffDays === 1) return { label: "Tomorrow", color: "bg-amber-50 text-amber-600" };
+  return { label: "This week", color: "bg-slate-100 text-slate-500" };
+};
+
+const KpiCard = ({ icon: Icon, label, value, accent }) => (
+  <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-4 flex items-center gap-3">
+    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${accent}`}>
+      <Icon size={17} />
+    </div>
+    <div className="min-w-0">
+      <p className="text-xl font-bold text-slate-900 tabular-nums leading-none">
+        {value}
+      </p>
+      <p className="text-[10px] font-semibold text-slate-400 mt-1 truncate">
+        {label}
+      </p>
+    </div>
+  </div>
+);
 
 const Rota = () => {
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date()));
@@ -78,6 +115,8 @@ const Rota = () => {
   const dateKey = (d) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
+  const todayKey = dateKey(new Date());
+
   const weekBookings = useMemo(() => {
     const startKey = dateKey(days[0]);
     const endKey = dateKey(days[6]);
@@ -89,8 +128,21 @@ const Rota = () => {
   }, [bookings, days]);
 
   const unassigned = useMemo(
-    () => weekBookings.filter((b) => !b.assignedWorker && !b.assignedWorkerName),
+    () =>
+      weekBookings
+        .filter((b) => !b.assignedWorker && !b.assignedWorkerName)
+        .sort((a, b) => new Date(a.schedule.date) - new Date(b.schedule.date)),
     [weekBookings],
+  );
+
+  const assignedThisWeek = useMemo(
+    () => weekBookings.filter((b) => b.assignedWorker || b.assignedWorkerName),
+    [weekBookings],
+  );
+
+  const totalHoursThisWeek = useMemo(
+    () => assignedThisWeek.reduce((s, b) => s + hoursOf(b), 0),
+    [assignedThisWeek],
   );
 
   const shiftsFor = (workerId, day) => {
@@ -103,6 +155,17 @@ const Rota = () => {
       return assignedId === workerId && dateKey(new Date(b.schedule.date)) === k;
     });
   };
+
+  const totalHoursForWorker = (workerId) =>
+    assignedThisWeek
+      .filter((b) => {
+        const assignedId =
+          typeof b.assignedWorker === "object"
+            ? b.assignedWorker?._id
+            : b.assignedWorker;
+        return assignedId === workerId;
+      })
+      .reduce((s, b) => s + hoursOf(b), 0);
 
   const openAssign = (booking) => {
     setAssignTarget(booking);
@@ -192,70 +255,143 @@ const Rota = () => {
         </div>
       </div>
 
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <KpiCard
+          icon={Users}
+          label="Active Staff"
+          value={workers.length}
+          accent="bg-blue-50 text-blue-600"
+        />
+        <KpiCard
+          icon={CheckCircle2}
+          label="Shifts Assigned"
+          value={assignedThisWeek.length}
+          accent="bg-emerald-50 text-emerald-600"
+        />
+        <KpiCard
+          icon={AlertTriangle}
+          label="Unassigned"
+          value={unassigned.length}
+          accent={
+            unassigned.length > 0
+              ? "bg-rose-50 text-rose-600"
+              : "bg-slate-100 text-slate-400"
+          }
+        />
+        <KpiCard
+          icon={Hourglass}
+          label="Hours Scheduled"
+          value={`${totalHoursThisWeek}h`}
+          accent="bg-violet-50 text-violet-600"
+        />
+      </div>
+
       <div className="grid lg:grid-cols-4 gap-6">
         {/* Rota grid */}
         <div className="lg:col-span-3 bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[800px]">
+            <table className="w-full text-left border-collapse min-w-[860px]">
               <thead>
                 <tr className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider bg-slate-50/60">
-                  <th className="px-4 py-3 sticky left-0 bg-slate-50/60">Worker</th>
-                  {days.map((d) => (
-                    <th key={dateKey(d)} className="px-3 py-3 text-center">
-                      {d.toLocaleDateString("en-GB", { weekday: "short" })}
-                      <br />
-                      <span className="text-slate-300">
-                        {d.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                      </span>
-                    </th>
-                  ))}
+                  <th className="px-4 py-3.5 sticky left-0 bg-slate-50/60 z-10">
+                    Worker
+                  </th>
+                  {days.map((d) => {
+                    const isToday = dateKey(d) === todayKey;
+                    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                    return (
+                      <th
+                        key={dateKey(d)}
+                        className={`px-3 py-3.5 text-center ${isToday ? "bg-primary/10" : isWeekend ? "bg-slate-100/60" : ""}`}
+                      >
+                        <span className={isToday ? "text-primary" : ""}>
+                          {d.toLocaleDateString("en-GB", { weekday: "short" })}
+                        </span>
+                        <br />
+                        <span className={isToday ? "text-primary font-bold" : "text-slate-300"}>
+                          {d.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                        </span>
+                      </th>
+                    );
+                  })}
+                  <th className="px-4 py-3.5 text-center whitespace-nowrap">
+                    Total Hrs
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {loading ? (
                   <tr>
-                    <td colSpan="8" className="py-16 text-center font-semibold text-slate-400">
+                    <td colSpan="9" className="py-16 text-center font-semibold text-slate-400">
                       Loading...
                     </td>
                   </tr>
                 ) : workers.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="py-16 text-center font-semibold text-slate-300">
+                    <td colSpan="9" className="py-16 text-center font-semibold text-slate-300">
                       No active staff
                     </td>
                   </tr>
                 ) : (
                   workers.map((w) => (
-                    <tr key={w._id}>
-                      <td className="px-4 py-3 text-xs font-bold text-slate-700 whitespace-nowrap sticky left-0 bg-white">
-                        {w.firstName} {w.lastName}
+                    <tr key={w._id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="px-4 py-3 sticky left-0 bg-white z-10">
+                        <div className="flex items-center gap-2.5 whitespace-nowrap">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold shrink-0">
+                            {initials(w.firstName, w.lastName)}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-slate-700">
+                              {w.firstName} {w.lastName}
+                            </p>
+                            {w.role && (
+                              <p className="text-[9px] text-slate-400 font-semibold">
+                                {w.role}
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </td>
                       {days.map((d) => {
                         const shifts = shiftsFor(w._id, d);
+                        const isToday = dateKey(d) === todayKey;
+                        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
                         return (
-                          <td key={dateKey(d)} className="px-2 py-2 align-top">
-                            <div className="space-y-1.5 min-w-[100px]">
-                              {shifts.map((s) => (
-                                <div
-                                  key={s._id}
-                                  className="bg-emerald-50 border border-emerald-200 rounded-lg p-2"
-                                  title={s.details?.address}
-                                >
-                                  <p className="text-[10px] font-bold text-emerald-700 truncate">
-                                    {s.service}
-                                  </p>
-                                  <p className="text-[9px] text-emerald-600 font-semibold">
-                                    {s.schedule?.timeSlot}
-                                    {s.workerDuration
-                                      ? ` · ${s.workerDuration}h`
-                                      : ""}
-                                  </p>
-                                </div>
-                              ))}
+                          <td
+                            key={dateKey(d)}
+                            className={`px-2 py-2 align-top ${isToday ? "bg-primary/5" : isWeekend ? "bg-slate-50/40" : ""}`}
+                          >
+                            <div className="space-y-1.5 min-w-[110px]">
+                              {shifts.length === 0 ? (
+                                <div className="h-10 rounded-lg border border-dashed border-slate-100" />
+                              ) : (
+                                shifts.map((s) => (
+                                  <div
+                                    key={s._id}
+                                    className="bg-emerald-50 border-l-2 border-emerald-400 rounded-lg p-2"
+                                    title={s.details?.address}
+                                  >
+                                    <p className="text-[10px] font-bold text-emerald-700 truncate">
+                                      {s.service}
+                                    </p>
+                                    <p className="text-[9px] text-emerald-600 font-semibold flex items-center gap-1">
+                                      <Clock size={9} />
+                                      {s.schedule?.timeSlot}
+                                      {s.workerDuration ? ` · ${s.workerDuration}h` : ""}
+                                    </p>
+                                  </div>
+                                ))
+                              )}
                             </div>
                           </td>
                         );
                       })}
+                      <td className="px-4 py-3 text-center">
+                        <span className="text-xs font-bold text-slate-700 tabular-nums bg-slate-100 px-2.5 py-1 rounded-full">
+                          {totalHoursForWorker(w._id)}h
+                        </span>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -266,8 +402,9 @@ const Rota = () => {
 
         {/* Unassigned this week */}
         <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5">
-          <h3 className="text-sm font-bold text-slate-800 mb-1">
-            Unassigned This Week
+          <h3 className="text-sm font-bold text-slate-800 mb-1 flex items-center gap-2">
+            <AlertTriangle size={14} className="text-rose-500" /> Unassigned
+            This Week
           </h3>
           <p className="text-[11px] text-slate-400 mb-4">
             {unassigned.length} booking{unassigned.length !== 1 ? "s" : ""}{" "}
@@ -275,39 +412,50 @@ const Rota = () => {
           </p>
           <div className="space-y-3 max-h-[480px] overflow-y-auto">
             {unassigned.length === 0 ? (
-              <p className="text-xs text-slate-300 text-center py-8">
-                Everything's covered 🎉
-              </p>
+              <div className="text-center py-10">
+                <CheckCircle2 size={28} className="text-emerald-200 mx-auto mb-2" />
+                <p className="text-xs text-slate-300">Everything's covered</p>
+              </div>
             ) : (
-              unassigned.map((b) => (
-                <div
-                  key={b._id}
-                  className="p-3 rounded-xl border border-slate-200 bg-slate-50"
-                >
-                  <p className="text-xs font-bold text-slate-800">
-                    {b.service}
-                  </p>
-                  <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-1">
-                    <Clock size={11} />{" "}
-                    {new Date(b.schedule.date).toLocaleDateString("en-GB", {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                    })}{" "}
-                    · {b.schedule?.timeSlot}
-                  </p>
-                  <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 truncate">
-                    <MapPin size={11} className="shrink-0" />{" "}
-                    {b.details?.address}
-                  </p>
-                  <button
-                    onClick={() => openAssign(b)}
-                    className="w-full mt-2.5 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary-dark transition-all"
+              unassigned.map((b) => {
+                const tag = urgencyTag(b.schedule.date);
+                return (
+                  <div
+                    key={b._id}
+                    className="p-3 rounded-xl border border-slate-200 bg-slate-50 hover:border-primary/30 transition-all"
                   >
-                    <UserPlus size={12} /> Assign Worker
-                  </button>
-                </div>
-              ))
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <p className="text-xs font-bold text-slate-800 truncate">
+                        {b.service}
+                      </p>
+                      <span
+                        className={`text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full shrink-0 ${tag.color}`}
+                      >
+                        {tag.label}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-1">
+                      <Clock size={11} />{" "}
+                      {new Date(b.schedule.date).toLocaleDateString("en-GB", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                      })}{" "}
+                      · {b.schedule?.timeSlot}
+                    </p>
+                    <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 truncate">
+                      <MapPin size={11} className="shrink-0" />{" "}
+                      {b.details?.address}
+                    </p>
+                    <button
+                      onClick={() => openAssign(b)}
+                      className="w-full mt-2.5 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary-dark transition-all"
+                    >
+                      <UserPlus size={12} /> Assign Worker
+                    </button>
+                  </div>
+                );
+              })
             )}
           </div>
         </div>

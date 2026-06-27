@@ -45,6 +45,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
   const [actionLoading, setActionLoading] = useState(null);
   const [showSuggestTime, setShowSuggestTime] = useState(false);
   const [suggestedTime, setSuggestedTime] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     fetchOfferDetails();
@@ -85,18 +86,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
               // Trigger notification update to fetch new "Job Accepted" notification immediately
               triggerNotificationUpdate();
-
-              Alert.alert(
-                "✅ Job Accepted!",
-                "The job has been added to your Activity tab.",
-                [
-                  {
-                    text: "View My Jobs",
-                    onPress: () =>
-                      navigation.navigate("HomeTab", { tab: "activity" }),
-                  },
-                ],
-              );
+              setShowSuccessModal(true);
             } catch (error) {
               Alert.alert(
                 "Error",
@@ -555,6 +545,67 @@ const OfferDetailScreen = ({ route, navigation }) => {
           </View>
         </View>
       </Modal>
+
+      {/* Job Accepted — Success Modal */}
+      <Modal
+        visible={showSuccessModal}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setShowSuccessModal(false)}
+      >
+        <View style={styles.successOverlay}>
+          <View style={styles.successCard}>
+            <View style={styles.successIconRing}>
+              <View style={styles.successIconCircle}>
+                <CheckCircle size={36} color="#fff" />
+              </View>
+            </View>
+            <Text style={styles.successTitle}>Job Accepted!</Text>
+            <Text style={styles.successSub}>
+              {offer.service || "This cleaning job"} has been added to your
+              schedule.
+            </Text>
+
+            <View style={styles.successSummary}>
+              <View style={styles.successSummaryRow}>
+                <Calendar size={14} color="#1A7A4A" />
+                <Text style={styles.successSummaryText}>
+                  {offerDate.toLocaleDateString("en-GB", {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                  })}
+                </Text>
+              </View>
+              <View style={styles.successSummaryRow}>
+                <Clock size={14} color="#1A7A4A" />
+                <Text style={styles.successSummaryText}>
+                  {getDisplayTime(offer.schedule)}
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={styles.successPrimaryBtn}
+              onPress={() => {
+                setShowSuccessModal(false);
+                navigation.navigate("MainTabs", {
+                  screen: "HomeTab",
+                  params: { tab: "activity" },
+                });
+              }}
+            >
+              <Text style={styles.successPrimaryBtnText}>View My Jobs</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.successSecondaryBtn}
+              onPress={() => setShowSuccessModal(false)}
+            >
+              <Text style={styles.successSecondaryBtnText}>Stay Here</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -858,6 +909,100 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sendBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
+
+  // Job Accepted success modal
+  successOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(15,23,42,0.55)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 28,
+  },
+  successCard: {
+    backgroundColor: "#fff",
+    borderRadius: 28,
+    padding: 28,
+    width: "100%",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  successIconRing: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: "#D1FAE5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 18,
+  },
+  successIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#1A7A4A",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  successTitle: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#1A2E22",
+    marginBottom: 6,
+    textAlign: "center",
+  },
+  successSub: {
+    fontSize: 13,
+    color: "#6B7280",
+    textAlign: "center",
+    lineHeight: 19,
+    marginBottom: 18,
+  },
+  successSummary: {
+    flexDirection: "row",
+    gap: 16,
+    backgroundColor: "#F4F8F4",
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    marginBottom: 22,
+  },
+  successSummaryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  successSummaryText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#1A2E22",
+  },
+  successPrimaryBtn: {
+    backgroundColor: "#1A7A4A",
+    borderRadius: 14,
+    paddingVertical: 14,
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  successPrimaryBtnText: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#fff",
+  },
+  successSecondaryBtn: {
+    paddingVertical: 10,
+    width: "100%",
+    alignItems: "center",
+  },
+  successSecondaryBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#6B7280",
+  },
 });
 
 export default OfferDetailScreen;
