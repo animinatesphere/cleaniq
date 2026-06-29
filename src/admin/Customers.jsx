@@ -29,6 +29,9 @@ const Customers = () => {
   const [statusMessage, setStatusMessage] = useState({ type: "", text: "" });
   const [selectedCustomers, setSelectedCustomers] = useState(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [editingPriceId, setEditingPriceId] = useState(null);
+  const [editingPriceValue, setEditingPriceValue] = useState("");
+  const [savingPriceId, setSavingPriceId] = useState(null);
 
   // Clear status message after 3 seconds
   useEffect(() => {
@@ -100,6 +103,45 @@ const Customers = () => {
       }
     } catch {
       setStatusMessage({ type: "error", text: "Failed to update client" });
+    }
+  };
+
+  const handleSaveBookingPrice = async (bookingId) => {
+    const amount = parseFloat(editingPriceValue);
+    if (isNaN(amount) || amount < 0) {
+      setStatusMessage({ type: "error", text: "Enter a valid price" });
+      return;
+    }
+    setSavingPriceId(bookingId);
+    try {
+      const booking = customerBookings.find((b) => b._id === bookingId);
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/bookings/${bookingId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            payment: { ...booking?.payment, amount },
+          }),
+        },
+      );
+      if (res.ok) {
+        setCustomerBookings((prev) =>
+          prev.map((b) =>
+            b._id === bookingId
+              ? { ...b, payment: { ...b.payment, amount } }
+              : b,
+          ),
+        );
+        setEditingPriceId(null);
+        setStatusMessage({ type: "success", text: "Price updated" });
+      } else {
+        setStatusMessage({ type: "error", text: "Failed to update price" });
+      }
+    } catch {
+      setStatusMessage({ type: "error", text: "Failed to update price" });
+    } finally {
+      setSavingPriceId(null);
     }
   };
 
@@ -419,20 +461,20 @@ const Customers = () => {
             className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
             onClick={() => setSelected(null)}
           />
-          <div className="relative w-full max-w-md bg-white rounded-[28px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <div className="relative w-full max-w-lg bg-white rounded-[28px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-primary/5 via-slate-50 to-slate-50">
               <h3 className="text-base font-bold text-slate-900">
                 {isEditing ? "Edit Client" : "Client Profile"}
               </h3>
               <button
                 onClick={() => setSelected(null)}
-                className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors"
+                className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-colors"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="p-6 space-y-5 max-h-[60vh] overflow-y-auto no-scrollbar">
+            <div className="p-6 space-y-5 max-h-[65vh] overflow-y-auto no-scrollbar">
               {isEditing ? (
                 <div className="space-y-4">
                   <div className="space-y-1">
@@ -490,7 +532,7 @@ const Customers = () => {
               ) : (
                 <div className="space-y-5">
                   <div className="text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-lg shadow-primary/20">
                       {selected.firstName[0]}
                     </div>
                     <h4 className="text-xl font-bold text-slate-900 tracking-tight">
@@ -570,44 +612,111 @@ const Customers = () => {
                   </div>
 
                   {/* Booking History */}
-                  <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100">
-                    <h4 className="text-sm font-bold text-slate-800 mb-3">
-                      Recent Bookings
-                    </h4>
+                  <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/50 border border-slate-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-bold text-slate-800">
+                        Recent Bookings
+                      </h4>
+                      {customerBookings.length > 0 && (
+                        <span className="text-[10px] font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+                          {customerBookings.length} total
+                        </span>
+                      )}
+                    </div>
                     {loadingBookings ? (
                       <p className="text-sm text-slate-400 font-medium animate-pulse">
                         Loading history...
                       </p>
                     ) : customerBookings.length > 0 ? (
-                      <div className="space-y-2.5 max-h-64 overflow-y-auto">
-                        {customerBookings.slice(0, 5).map((b) => (
-                          <div
-                            key={b._id}
-                            className="p-3.5 rounded-xl bg-white border border-slate-200 flex justify-between items-center hover:border-primary/30 transition-all"
-                          >
-                            <div>
-                              <p className="font-semibold text-sm text-slate-800">
-                                {b.service}
-                              </p>
-                              <p className="text-xs text-slate-400 font-medium mt-0.5">
-                                {new Date(
-                                  b.schedule?.date || b.createdAt,
-                                ).toLocaleDateString()}
-                              </p>
+                      <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+                        {customerBookings.slice(0, 5).map((b) => {
+                          const currencySymbol =
+                            b.payment?.currency === "GBP" ? "£" : "₦";
+                          const isEditingPrice = editingPriceId === b._id;
+                          return (
+                            <div
+                              key={b._id}
+                              className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:border-primary/30 hover:shadow-md transition-all"
+                            >
+                              <div className="flex justify-between items-start gap-3">
+                                <div className="min-w-0">
+                                  <p className="font-semibold text-sm text-slate-800 truncate">
+                                    {b.service}
+                                  </p>
+                                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                    {new Date(
+                                      b.schedule?.date || b.createdAt,
+                                    ).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <div className="text-right shrink-0">
+                                  {isEditingPrice ? (
+                                    <div className="flex items-center gap-1">
+                                      <div className="relative">
+                                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                                          {currencySymbol}
+                                        </span>
+                                        <input
+                                          type="number"
+                                          autoFocus
+                                          value={editingPriceValue}
+                                          onChange={(e) =>
+                                            setEditingPriceValue(
+                                              e.target.value,
+                                            )
+                                          }
+                                          className="w-20 pl-5 pr-1 py-1 rounded-lg bg-white border-2 border-primary text-sm font-bold tabular-nums focus:outline-none"
+                                        />
+                                      </div>
+                                      <button
+                                        onClick={() =>
+                                          handleSaveBookingPrice(b._id)
+                                        }
+                                        disabled={savingPriceId === b._id}
+                                        className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                                        title="Save price"
+                                      >
+                                        <Save size={13} />
+                                      </button>
+                                      <button
+                                        onClick={() => setEditingPriceId(null)}
+                                        className="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-colors"
+                                        title="Cancel"
+                                      >
+                                        <X size={13} />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      onClick={() => {
+                                        setEditingPriceId(b._id);
+                                        setEditingPriceValue(
+                                          String(b.payment?.amount ?? ""),
+                                        );
+                                      }}
+                                      className="group flex items-center gap-1.5 hover:bg-primary/5 rounded-lg px-2 py-1 -mr-2 transition-colors"
+                                      title="Edit price"
+                                    >
+                                      <p className="font-bold text-slate-900 text-sm tabular-nums">
+                                        {currencySymbol}
+                                        {b.payment?.amount}
+                                      </p>
+                                      <Edit3
+                                        size={11}
+                                        className="text-slate-300 group-hover:text-primary transition-colors"
+                                      />
+                                    </button>
+                                  )}
+                                  <span
+                                    className={`text-[9px] font-semibold uppercase inline-block mt-1 px-2 py-0.5 rounded-full ${b.status === "Completed" ? "bg-emerald-50 text-emerald-600" : b.status === "Cancelled" ? "bg-rose-50 text-rose-600" : "bg-amber-50 text-amber-600"}`}
+                                  >
+                                    {b.status}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <p className="font-bold text-slate-900 text-sm tabular-nums">
-                                {b.payment?.currency === "GBP" ? "£" : "₦"}
-                                {b.payment?.amount}
-                              </p>
-                              <span
-                                className={`text-[9px] font-semibold uppercase inline-block mt-1 px-2 py-0.5 rounded-full ${b.status === "Completed" ? "bg-emerald-50 text-emerald-600" : b.status === "Cancelled" ? "bg-rose-50 text-rose-600" : "bg-amber-50 text-amber-600"}`}
-                              >
-                                {b.status}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                         {customerBookings.length > 5 && (
                           <p className="text-xs text-slate-400 text-center pt-2">
                             +{customerBookings.length - 5} more bookings

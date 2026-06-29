@@ -33,6 +33,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import AdminCRM from "./AdminCRM";
+import { buildBookedRanges, overlapsExistingRange } from "../utils/timeOverlap";
 
 export const LEAD_SOURCES = [
   "Bark",
@@ -3304,23 +3305,20 @@ const Bookings = () => {
                                       ];
 
                                       // fetch any flexible-time bookings already on this date, excluding this booking itself
-                                      let bookedTimes = [];
+                                      let bookedRanges = [];
                                       if (editDateStr) {
-                                        bookedTimes = bookings
-                                          .filter((b) => {
+                                        const bookingsOnDate = bookings.filter(
+                                          (b) => {
                                             if (b._id === selectedBooking?._id)
                                               return false;
                                             if (!b.schedule?.date) return false;
                                             const d = new Date(b.schedule.date);
                                             const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-                                            return (
-                                              dStr === editDateStr &&
-                                              b.schedule?.timeSlot ===
-                                                "Flexible"
-                                            );
-                                          })
-                                          .map((b) => b.schedule.preferredTime)
-                                          .filter(Boolean);
+                                            return dStr === editDateStr;
+                                          },
+                                        );
+                                        bookedRanges =
+                                          buildBookedRanges(bookingsOnDate);
                                       }
 
                                       const isTodaySelected = (() => {
@@ -3351,8 +3349,13 @@ const Bookings = () => {
                                         : allQuickTimes;
 
                                       return quickTimes.map((time) => {
-                                        const isBooked =
-                                          bookedTimes.includes(time);
+                                        const isBooked = overlapsExistingRange(
+                                          time,
+                                          editData.details?.duration ||
+                                            editData.workerDuration ||
+                                            1,
+                                          bookedRanges,
+                                        );
                                         return (
                                           <button
                                             key={time}
@@ -5173,24 +5176,21 @@ const Bookings = () => {
                                       "20:00",
                                     ];
 
-                                    // Get booked times for the selected date
+                                    // Get booked ranges for the selected date
                                     const selectedDateStr =
                                       createData.schedule.date;
-                                    let bookedTimes = [];
+                                    let bookedRanges = [];
                                     if (selectedDateStr && bookedDates) {
-                                      // Find bookings for this date
-                                      bookedTimes = bookings
-                                        .filter((b) => {
+                                      const bookingsOnDate = bookings.filter(
+                                        (b) => {
                                           if (!b.schedule?.date) return false;
                                           const d = new Date(b.schedule.date);
                                           const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-                                          return (
-                                            dStr === selectedDateStr &&
-                                            b.schedule?.timeSlot === "Flexible"
-                                          );
-                                        })
-                                        .map((b) => b.schedule.preferredTime)
-                                        .filter(Boolean);
+                                          return dStr === selectedDateStr;
+                                        },
+                                      );
+                                      bookedRanges =
+                                        buildBookedRanges(bookingsOnDate);
                                     }
 
                                     const isTodaySelected = (() => {
@@ -5220,8 +5220,11 @@ const Bookings = () => {
                                       : allQuickTimes;
 
                                     return quickTimes.map((time) => {
-                                      const isBooked =
-                                        bookedTimes.includes(time);
+                                      const isBooked = overlapsExistingRange(
+                                        time,
+                                        createData.details?.duration || 1,
+                                        bookedRanges,
+                                      );
                                       return (
                                         <button
                                           key={time}

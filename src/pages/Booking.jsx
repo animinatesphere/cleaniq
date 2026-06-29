@@ -38,6 +38,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import StripePayment from "../component/StripePayment";
 import { useCustomerAuth } from "../context/CustomerAuthContext";
+import { buildBookedRanges, overlapsExistingRange } from "../utils/timeOverlap";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -190,7 +191,7 @@ const Booking = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const [bookedDates, setBookedDates] = useState([]);
-  const [bookedSlotsByDate, setBookedSlotsByDate] = useState({});
+  const [flexibleRangesByDate, setFlexibleRangesByDate] = useState({});
 
   // Initialize formData with localStorage backup (drafts older than 24h are discarded)
   const [formData, setFormData] = useState(() => {
@@ -250,6 +251,15 @@ const Booking = () => {
       localStorage.removeItem("ciq_booking_draft");
     }
   }, [isSubmitted]);
+
+  // Clear the draft when the customer navigates away from this page entirely
+  // (e.g. to Services and back) - the draft is only meant to survive an
+  // accidental same-page refresh, not linger across separate visits.
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem("ciq_booking_draft");
+    };
+  }, []);
 
   useEffect(() => {
     if (!customer) return;
@@ -458,6 +468,7 @@ const Booking = () => {
 
         // Group booking slots by date - includes both standard slots and flexible times
         const slotsMap = {};
+        const bookingsByDate = {};
         data.forEach((b) => {
           if (b.schedule?.date) {
             const d = new Date(b.schedule.date);
@@ -466,6 +477,10 @@ const Booking = () => {
             if (!slotsMap[dateStr]) {
               slotsMap[dateStr] = [];
             }
+            if (!bookingsByDate[dateStr]) {
+              bookingsByDate[dateStr] = [];
+            }
+            bookingsByDate[dateStr].push(b);
 
             // Add standard time slot if present
             if (b.schedule?.timeSlot && b.schedule.timeSlot !== "Flexible") {
@@ -486,6 +501,16 @@ const Booking = () => {
           }
         });
 
+        // Build the full occupied [start, end) window for each Flexible
+        // booking on each date, using its own duration - not just its exact
+        // start time - so overlapping start times within an already-booked
+        // job's window get blocked too (a cleaner can't be in two places).
+        const rangesMap = {};
+        Object.keys(bookingsByDate).forEach((dateStr) => {
+          rangesMap[dateStr] = buildBookedRanges(bookingsByDate[dateStr]);
+        });
+        setFlexibleRangesByDate(rangesMap);
+
         // A date is fully booked ONLY if all three standard slots are taken
         const fullyBookedDates = Object.keys(slotsMap).filter((dateStr) => {
           const slots = slotsMap[dateStr];
@@ -502,7 +527,6 @@ const Booking = () => {
           fullyBookedDates,
         );
 
-        setBookedSlotsByDate(slotsMap);
         setBookedDates(fullyBookedDates);
       } catch (err) {
         console.error("[AVAILABILITY] Error fetching booked dates:", err);
@@ -744,73 +768,92 @@ const Booking = () => {
     }
   };
 
-  // Dev mode submit - skip payment processing
-  // const handleDevModeSubmit = async () => {
-  //   if (!formData.serviceType) {
-  //     console.error("Submission Blocked: Service type is missing.");
-  //     showNotification(
-  //       "Please select a service type before completing your booking.",
-  //     );
-  //     return;
-  //   }
+  // Dev mode submit - skip payment processing. Includes a rate breakdown in
+  // the console so pricing mismatches (e.g. an extra not adding to the
+  // total) can be diagnosed without spending real money on a test payment.
+  const handleDevModeSubmit = async () => {
+    if (!formData.serviceType) {
+      console.error("Submission Blocked: Service type is missing.");
+      showNotification(
+        "Please select a service type before completing your booking.",
+      );
+      return;
+    }
 
-  //   const bookingPayload = {
-  //     bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
-  //     customer: {
-  //       firstName: formData.firstName || "Customer",
-  //       lastName: formData.lastName || "User",
-  //       email: formData.email || "pending@cleaniq.com",
-  //       phone: formData.phone || "000",
-  //     },
-  //     service: formData.serviceType,
-  //     details: {
-  //       address: `${formData.address}${formData.addressLine2 ? ", " + formData.addressLine2 : ""}${formData.postcode ? ", " + formData.postcode : ""}`,
-  //       frequency: formData.frequency,
-  //       duration: formData.duration,
-  //       extras: [
-  //         ...Object.entries(formData.extras)
-  //           .filter((entry) => entry[1] > 0)
-  //           .map(([n, q]) => `${n} (x${q})`),
-  //         ...Object.entries(formData.property)
-  //           .filter((entry) => entry[1] > 0)
-  //           .map(([n, q]) => `${n} (x${q})`),
-  //         `Parking: ${formData.parking}`,
-  //         `Entry: ${formData.keyAccess}`,
-  //         `Pet on premises: ${formData.hasPet || "Not specified"}`,
-  //         `Instructions: ${formData.specialInstructions || "None"}`,
-  //       ],
-  //     },
-  //     schedule: {
-  //       date: formData.date,
-  //       timeSlot: formData.timeSlot,
-  //       preferredTime: formData.preferredTime,
-  //     },
-  //     payment: {
-  //       amount: totalPrice,
-  //       currency: "GBP",
-  //       method: "Dev Mode",
-  //       transactionId: "DEV-TEST-NO-PAYMENT",
-  //     },
-  //     region: region.id,
-  //   };
-  //   setIsSubmitting(true);
-  //   try {
-  //     const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(bookingPayload),
-  //     });
-  //     if (response.ok) {
-  //       setIsSubmitted(true);
-  //       console.log("✅ [DEV MODE] Booking submitted without payment!");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error saving booking:", error);
-  //     showNotification("Error submitting booking. Please try again.");
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
+    console.log("🧪 [DEV MODE] Rate breakdown:", {
+      region: region.id,
+      serviceType: formData.serviceType,
+      baseRate: dynamicRates[cleanKey(formData.serviceType)],
+      duration: formData.duration,
+      extras: formData.extras,
+      extraRates: Object.keys(formData.extras).map((name) => ({
+        name,
+        qty: formData.extras[name],
+        rateFound: dynamicRates[cleanKey(name)],
+      })),
+      totalPrice,
+    });
+
+    const bookingPayload = {
+      bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
+      customer: {
+        firstName: formData.firstName || "Customer",
+        lastName: formData.lastName || "User",
+        email: formData.email || "pending@cleaniq.com",
+        phone: formData.phone || "000",
+      },
+      service: formData.serviceType,
+      details: {
+        address: `${formData.address}${formData.addressLine2 ? ", " + formData.addressLine2 : ""}${formData.postcode ? ", " + formData.postcode : ""}`,
+        frequency: formData.frequency,
+        duration: formData.duration,
+        extras: [
+          ...Object.entries(formData.extras)
+            .filter((entry) => entry[1] > 0)
+            .map(([n, q]) => `${n} (x${q})`),
+          ...Object.entries(formData.property)
+            .filter((entry) => entry[1] > 0)
+            .map(([n, q]) => `${n} (x${q})`),
+          `Parking: ${formData.parking}`,
+          `Entry: ${formData.keyAccess}`,
+          `Pet on premises: ${formData.hasPet || "Not specified"}`,
+          `Instructions: ${formData.specialInstructions || "None"}`,
+        ],
+      },
+      schedule: {
+        date: formData.date,
+        timeSlot: formData.timeSlot,
+        preferredTime: formData.preferredTime,
+      },
+      leadSource: formData.leadSource || "Organic",
+      suppliesProvidedBy: formData.suppliesProvidedBy || "Cleaniq",
+      payment: {
+        amount: totalPrice,
+        currency: "GBP",
+        method: "Dev Mode",
+        transactionId: "DEV-TEST-NO-PAYMENT",
+      },
+      region: region.id,
+    };
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingPayload),
+      });
+      if (response.ok) {
+        localStorage.removeItem("ciq_booking_draft");
+        setIsSubmitted(true);
+        console.log("✅ [DEV MODE] Booking submitted without payment!");
+      }
+    } catch (error) {
+      console.error("Error saving booking:", error);
+      showNotification("Error submitting booking. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (authLoading) {
     return <LoadingOverlay message="Loading account..." />;
@@ -1513,10 +1556,12 @@ const Booking = () => {
                                       : allQuickTimes;
 
                                     return quickTimes.map((time) => {
-                                      const isBooked =
-                                        bookedSlotsByDate[
-                                          formData.date
-                                        ]?.includes(time);
+                                      const isBooked = overlapsExistingRange(
+                                        time,
+                                        formData.duration,
+                                        flexibleRangesByDate[formData.date] ||
+                                          [],
+                                      );
                                       return (
                                         <button
                                           key={time}
@@ -1804,26 +1849,31 @@ const Booking = () => {
                                   />
                                 </Elements>
 
-                                {/* Dev Mode: Skip Payment Button */}
-                                {/* <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl flex items-center justify-between">
-                                  <div>
-                                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider">
-                                      🧪 Dev Mode: Test Booking
-                                    </p>
-                                    <p className="text-[8px] text-blue-600 mt-1">
-                                      Submit without payment for testing
-                                    </p>
+                                {/* Dev Mode: Skip Payment Button - only ever rendered in
+                                    local `npm run dev`, never in a production build, so
+                                    real customers can never see or trigger it. */}
+                                {import.meta.env.DEV && (
+                                  <div className="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl flex items-center justify-between">
+                                    <div>
+                                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-wider">
+                                        🧪 Dev Mode: Test Booking
+                                      </p>
+                                      <p className="text-[8px] text-blue-600 mt-1">
+                                        Submit without payment for testing -
+                                        check console for rate breakdown
+                                      </p>
+                                    </div>
+                                    <button
+                                      onClick={handleDevModeSubmit}
+                                      disabled={isSubmitting}
+                                      className="ml-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-black text-[9px] px-4 py-2 rounded-xl whitespace-nowrap transition-all"
+                                    >
+                                      {isSubmitting
+                                        ? "Submitting..."
+                                        : "Skip Payment"}
+                                    </button>
                                   </div>
-                                  <button
-                                    onClick={handleDevModeSubmit}
-                                    disabled={isSubmitting}
-                                    className="ml-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-black text-[9px] px-4 py-2 rounded-xl whitespace-nowrap transition-all"
-                                  >
-                                    {isSubmitting
-                                      ? "Submitting..."
-                                      : "Skip Payment"}
-                                  </button>
-                                </div> */}
+                                )}
                               </div>
                             )}
                           </div>
