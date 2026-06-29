@@ -117,6 +117,29 @@ router.get('/leads', async (req, res) => {
 });
 
 /**
+ * POST /api/contact/leads
+ * Manually add a lead from the admin Leads page.
+ */
+router.post('/leads', async (req, res) => {
+  try {
+    const { name, email, phone, message, source } = req.body;
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Name and email are required' });
+    }
+    const lead = await Lead.create({
+      name,
+      email,
+      phone: phone || '',
+      message: message || '',
+      source: source || 'Manual',
+    });
+    res.status(201).json(lead);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/**
  * GET /api/contact/leads/stats
  * Lead counts for the dashboard — total, this week, this month.
  */

@@ -9,6 +9,7 @@ import {
   RefreshCw,
   Download,
   Users,
+  UserPlus,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -33,6 +34,14 @@ const Leads = () => {
   const [emailForm, setEmailForm] = useState({ subject: "", message: "" });
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [adding, setAdding] = useState(false);
 
   const fetchLeads = () => {
     setLoading(true);
@@ -46,6 +55,33 @@ const Leads = () => {
   useEffect(() => {
     fetchLeads();
   }, []);
+
+  const handleAddLead = async () => {
+    if (!addForm.name.trim() || !addForm.email.trim()) {
+      setToast({ msg: "Name and email are required", type: "error" });
+      return;
+    }
+    setAdding(true);
+    try {
+      const res = await fetch(`${API}/contact/leads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(addForm),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to add lead");
+      }
+      setToast({ msg: "Lead added", type: "success" });
+      setShowAddModal(false);
+      setAddForm({ name: "", email: "", phone: "", message: "" });
+      fetchLeads();
+    } catch (err) {
+      setToast({ msg: err.message, type: "error" });
+    } finally {
+      setAdding(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     if (!search) return leads;
@@ -153,10 +189,16 @@ const Leads = () => {
             Leads
           </h2>
           <p className="text-sm text-slate-400 font-medium mt-1">
-            {loading ? "Loading…" : `${leads.length} leads captured from Contact Us`}
+            {loading ? "Loading…" : `${leads.length} leads total`}
           </p>
         </div>
         <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold shadow-sm hover:bg-primary-dark transition-all"
+          >
+            <UserPlus size={15} /> Add Lead
+          </button>
           <button
             onClick={exportCSV}
             className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
@@ -331,6 +373,82 @@ const Leads = () => {
               >
                 {sending ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
                 {sending ? "Sending…" : "Send Email"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+              <h3 className="text-base font-bold text-slate-900">
+                Add Lead
+              </h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleAddLead();
+              }}
+              className="p-6 space-y-4"
+            >
+              <input
+                type="text"
+                required
+                placeholder="Name"
+                value={addForm.name}
+                onChange={(e) =>
+                  setAddForm({ ...addForm, name: e.target.value })
+                }
+                className="w-full p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              />
+              <input
+                type="email"
+                required
+                placeholder="Email"
+                value={addForm.email}
+                onChange={(e) =>
+                  setAddForm({ ...addForm, email: e.target.value })
+                }
+                className="w-full p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              />
+              <input
+                type="text"
+                placeholder="Phone (optional)"
+                value={addForm.phone}
+                onChange={(e) =>
+                  setAddForm({ ...addForm, phone: e.target.value })
+                }
+                className="w-full p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              />
+              <textarea
+                placeholder="Notes (optional)"
+                rows={4}
+                value={addForm.message}
+                onChange={(e) =>
+                  setAddForm({ ...addForm, message: e.target.value })
+                }
+                className="w-full p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm resize-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              />
+              <button
+                type="submit"
+                disabled={adding}
+                className="w-full py-3.5 rounded-xl bg-primary text-white font-bold text-sm shadow-sm hover:bg-primary-dark transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {adding ? (
+                  <RefreshCw size={16} className="animate-spin" />
+                ) : (
+                  <UserPlus size={16} />
+                )}
+                {adding ? "Adding…" : "Add Lead"}
               </button>
             </form>
           </div>
