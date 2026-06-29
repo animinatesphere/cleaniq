@@ -7,7 +7,8 @@ const Withdrawal = require("../models/Withdrawal");
 const { sendEmail, templates } = require("../utils/emailService");
 
 router.post("/create-intent", async (req, res) => {
-  const { amount, currency, customerName, service, bookingId } = req.body;
+  const { amount, currency, customerName, service, bookingId, deferCapture } =
+    req.body;
 
   try {
     // Safety: Ensure we have a valid amount
@@ -15,13 +16,17 @@ router.post("/create-intent", async (req, res) => {
       return res.status(400).json({ message: "Invalid amount" });
     }
 
-    // Create a PaymentIntent
+    // Create a PaymentIntent. When deferCapture is set (customer self-service
+    // bookings on the website), the card is only authorized here — the hold
+    // is captured for real later, when the job is marked Completed. Admin
+    // payment links keep the existing immediate-capture behaviour.
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100), // Stripe uses cents/pence
       currency: currency.toLowerCase(),
       automatic_payment_methods: {
         enabled: true,
       },
+      ...(deferCapture ? { capture_method: "manual" } : {}),
       metadata: Object.assign(
         {
           company: "Cleaniq Services",

@@ -747,6 +747,12 @@ const Booking = () => {
         currency: "GBP",
         method: "Stripe",
         transactionId: paymentIntent.id,
+        // Card was only authorized (capture_method: "manual"), not charged
+        // yet — the actual capture happens when the job is marked
+        // Completed, via the existing capture-on-complete logic.
+        stripePaymentIntentId: paymentIntent.id,
+        status: "Authorized",
+        authorizedAt: new Date().toISOString(),
       },
       region: region.id,
     };
@@ -1847,6 +1853,7 @@ const Booking = () => {
                                     currency="GBP"
                                     customerInfo={formData}
                                     onPaymentSuccess={handlePaymentSuccess}
+                                    deferCapture
                                   />
                                 </Elements>
 

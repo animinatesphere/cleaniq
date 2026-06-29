@@ -501,6 +501,54 @@ router.post("/jobs/:id/complete", async (req, res) => {
       }
     }
 
+    // CAPTURE AUTHORIZED PAYMENT when the worker marks the job complete —
+    // mirrors the same capture-on-complete logic in bookings.js PUT /:id,
+    // since jobs are most commonly completed from the worker app, not the
+    // admin dashboard.
+    if (
+      booking.payment?.stripePaymentIntentId &&
+      booking.payment.status === "Authorized"
+    ) {
+      try {
+        const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+        const capturedPayment = await stripe.paymentIntents.capture(
+          booking.payment.stripePaymentIntentId,
+        );
+        booking.payment.status = "Completed";
+        booking.payment.capturedAt = new Date();
+        await booking.save();
+        console.log(
+          `💳 ✅ Payment captured for booking ${booking.bookingId} - Status: ${capturedPayment.status}`,
+        );
+
+        try {
+          await sendEmail({
+            to: booking.customer.email,
+            subject: `✓ Payment Captured: Cleaniq Booking ${booking.bookingId}`,
+            html: `
+              <h2>Payment Captured</h2>
+              <p>Hi ${booking.customer.firstName},</p>
+              <p>Your cleaning service has been completed successfully!</p>
+              <p><strong>Booking Reference:</strong> ${booking.bookingId}</p>
+              <p><strong>Service:</strong> ${booking.service}</p>
+              <p><strong>Amount Charged:</strong> ${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
+              <p>Your payment has been successfully processed. Thank you for choosing Cleaniq!</p>
+            `,
+          });
+        } catch (emailErr) {
+          console.error(
+            "⚠️ Failed to send payment capture email:",
+            emailErr,
+          );
+        }
+      } catch (captureErr) {
+        console.error(
+          `❌ Failed to capture payment for booking ${booking.bookingId}:`,
+          captureErr.message,
+        );
+      }
+    }
+
     // Send email log to Admin
     await sendEmail({
       to: process.env.EMAIL_USER || "admin@cleaniqservices.com",

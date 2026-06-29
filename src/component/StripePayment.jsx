@@ -16,6 +16,7 @@ const StripePayment = ({
   onPaymentSuccess,
   customerInfo,
   bookingId,
+  deferCapture,
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -43,6 +44,7 @@ const StripePayment = ({
               customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
               service: customerInfo.serviceType,
               bookingId: bookingId || undefined,
+              deferCapture: deferCapture || undefined,
             }),
           },
         );
