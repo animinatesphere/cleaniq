@@ -4,6 +4,7 @@
     "slug": "cleaniq-worker",
     "scheme": "cleaniqworker",
     "version": "1.0.0",
+    "platforms": ["ios", "android"],
     "orientation": "portrait",
     "icon": "./assets/icon.jpg",
     "userInterfaceStyle": "light",
@@ -13,7 +14,7 @@
       "backgroundColor": "#0A5C43"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.cleaniq.worker",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false

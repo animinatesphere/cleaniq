@@ -13,28 +13,34 @@ import {
 import { AuthContext, API_URL } from "../context/AuthContext";
 import { MessageSquare, Search, ChevronRight } from "lucide-react-native";
 import axios from "axios";
+import {
+  NEU_BG,
+  neuRaisedSm,
+  neuInset,
+  neuCircle,
+} from "../theme/neumorphic";
 
 // ── Design tokens ──────────────────────────────────────────
 const C = {
-  bg: "#FFFFFF",
+  bg: "#F4F6F8",
   surface: "#FFFFFF",
-  surfaceUnread: "#F0FDF9",
-  surfaceMuted: "#F8FFFE",
+  surfaceUnread: "#E8F5EE",
+  surfaceMuted: "#F4F6F8",
 
-  border: "#E6F7F1",
-  borderUnread: "#6EE7B7",
-  borderInput: "#D1FAE5",
+  border: "#EEF1F4",
+  borderUnread: "#0F6B4C",
+  borderInput: "#EEF1F4",
 
-  green: "#10B981",
-  greenDark: "#059669",
-  greenDeep: "#047857",
-  greenDim: "#D1FAE5",
-  greenPale: "#ECFDF5",
+  green: "#0F6B4C",
+  greenDark: "#0A5C43",
+  greenDeep: "#074936",
+  greenDim: "#CFE8DC",
+  greenPale: "#E8F5EE",
 
   text: "#111827",
   textSub: "#6B7280",
   textMute: "#9CA3AF",
-  textGreen: "#065F46",
+  textGreen: "#0A5C43",
 };
 
 const MessagesScreen = ({ navigation }) => {
@@ -251,13 +257,13 @@ const MessagesScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: C.bg,
+    backgroundColor: NEU_BG,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: C.bg,
+    backgroundColor: NEU_BG,
   },
 
   // ── Header ────────────────────────────────────────────────
@@ -267,7 +273,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: C.surface,
+    backgroundColor: NEU_BG,
   },
   headerDivider: {
     height: 2,
@@ -275,12 +281,9 @@ const styles = StyleSheet.create({
     opacity: 0.15,
   },
   headerIconWrap: {
+    ...neuCircle,
     width: 38,
     height: 38,
-    borderRadius: 19,
-    backgroundColor: C.greenPale,
-    borderWidth: 1,
-    borderColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -312,22 +315,18 @@ const styles = StyleSheet.create({
 
   // ── Search ────────────────────────────────────────────────
   searchContainer: {
-    backgroundColor: C.surface,
+    backgroundColor: NEU_BG,
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
   },
   searchBar: {
+    ...neuInset,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: C.greenPale,
     borderRadius: 14,
     paddingHorizontal: 14,
     height: 44,
-    borderWidth: 1,
-    borderColor: C.borderInput,
   },
   searchInput: {
     flex: 1,
@@ -349,26 +348,16 @@ const styles = StyleSheet.create({
 
   // ── Conversation Card ──────────────────────────────────────
   card: {
+    ...neuRaisedSm,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: C.surface,
     borderRadius: 16,
     padding: 14,
-    borderWidth: 1,
-    borderColor: C.border,
-    shadowColor: "#10B981",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 2,
     overflow: "hidden",
   },
   cardUnread: {
     backgroundColor: C.surfaceUnread,
     borderColor: C.borderUnread,
-    shadowOpacity: 0.13,
-    shadowRadius: 14,
-    elevation: 3,
   },
   accentBar: {
     position: "absolute",
@@ -383,16 +372,13 @@ const styles = StyleSheet.create({
 
   // ── Avatar ────────────────────────────────────────────────
   avatar: {
+    ...neuCircle,
     width: 50,
     height: 50,
-    borderRadius: 25,
-    backgroundColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
     position: "relative",
-    borderWidth: 2,
-    borderColor: C.greenDim,
   },
   avatarUnread: {
     borderColor: C.green,
@@ -500,12 +486,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   emptyIconWrap: {
+    ...neuCircle,
     width: 80,
     height: 80,
-    borderRadius: 40,
-    backgroundColor: C.greenPale,
-    borderWidth: 1.5,
-    borderColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,

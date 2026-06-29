@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
 import { getDisplayTime } from "../utils/timeUtils";
+
+const formatJobAddress = (job, fallback) => {
+  const addr = job.details?.address || job.address || "";
+  const postcode = job.details?.postcode || "";
+  const full = addr + (postcode && !addr.includes(postcode) ? ", " + postcode : "");
+  return full || fallback;
+};
 import {
   View,
   Text,
@@ -15,6 +22,15 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { AuthContext, API_URL } from "../context/AuthContext";
+import { NotificationContext } from "../context/NotificationContext";
+import SearchBar from "../components/SearchBar";
+import {
+  NEU_BG,
+  neuRaised,
+  neuRaisedSm,
+  neuInset,
+  neuCircle,
+} from "../theme/neumorphic";
 import {
   responsiveWidth,
   responsiveHeight,
@@ -43,11 +59,14 @@ import {
   Award,
   ArrowUpRight,
   Zap,
+  Bell,
 } from "lucide-react-native";
 import axios from "axios";
 
 const HomeScreen = ({ navigation, route }) => {
   const { workerInfo } = useContext(AuthContext);
+  const { triggerNotificationUpdate, unreadCount } =
+    useContext(NotificationContext);
   const [activeTab, setActiveTab] = useState("activity"); // 'activity', 'offers', 'history', 'payments'
 
   const [availableJobs, setAvailableJobs] = useState([]);
@@ -86,13 +105,16 @@ const HomeScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
+  const [offersSearch, setOffersSearch] = useState("");
 
   const fetchData = async () => {
     try {
       if (!workerInfo?.id) return;
 
       const [availableRes, myJobsRes] = await Promise.all([
-        axios.get(`${API_URL}/workers/jobs`),
+        axios.get(`${API_URL}/workers/jobs`, {
+          params: { region: workerInfo.region },
+        }),
         axios.get(`${API_URL}/workers/jobs/my-jobs/${workerInfo.id}`),
       ]);
 
@@ -158,6 +180,35 @@ const HomeScreen = ({ navigation, route }) => {
     } finally {
       setRefreshing(false);
     }
+  };
+
+  const handleQuickAccept = (job) => {
+    const jobId = job._id || job.bookingId;
+    Alert.alert("Accept Job", "Are you sure you want to accept this job?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Accept",
+        onPress: async () => {
+          setActionLoading(jobId);
+          try {
+            await axios.post(`${API_URL}/workers/jobs/${jobId}/accept`, {
+              workerId: workerInfo.id,
+              workerName: `${workerInfo.firstName} ${workerInfo.lastName}`,
+            });
+            triggerNotificationUpdate();
+            await fetchData();
+            Alert.alert("Job Accepted!", "Check your Active tab for details.");
+          } catch (error) {
+            Alert.alert(
+              "Error",
+              error.response?.data?.error || "Failed to accept job",
+            );
+          } finally {
+            setActionLoading(null);
+          }
+        },
+      },
+    ]);
   };
 
   const fetchWalletData = async () => {
@@ -301,7 +352,7 @@ const HomeScreen = ({ navigation, route }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6C63FF" />
+        <ActivityIndicator size="large" color="#0F6B4C" />
       </View>
     );
   }
@@ -309,13 +360,13 @@ const HomeScreen = ({ navigation, route }) => {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case "completed":
-        return "#00C896";
+        return "#0F6B4C";
       case "in_progress":
         return "#4F9EFF";
       case "pending":
         return "#FFB547";
       case "assigned":
-        return "#6C63FF";
+        return "#0F6B4C";
       default:
         return "#9CA3AF";
     }
@@ -337,7 +388,7 @@ const HomeScreen = ({ navigation, route }) => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={["#6C63FF"]}
+          colors={["#0F6B4C"]}
         />
       }
     >
@@ -417,15 +468,15 @@ const HomeScreen = ({ navigation, route }) => {
       {/* Stats Grid */}
       <View style={styles.statsGrid}>
         <View style={styles.statCard}>
-          <View style={[styles.statIcon, { backgroundColor: "#EEF0FF" }]}>
-            <Briefcase size={18} color="#6C63FF" />
+          <View style={[styles.statIcon, { backgroundColor: "#E8F5EE" }]}>
+            <Briefcase size={18} color="#0F6B4C" />
           </View>
           <Text style={styles.statValue}>{activityStats.offersAccepted}</Text>
           <Text style={styles.statLabel}>Jobs Done</Text>
         </View>
         <View style={styles.statCard}>
-          <View style={[styles.statIcon, { backgroundColor: "#E6FBF4" }]}>
-            <Users size={18} color="#00C896" />
+          <View style={[styles.statIcon, { backgroundColor: "#E8F5EE" }]}>
+            <Users size={18} color="#0F6B4C" />
           </View>
           <Text style={styles.statValue}>{activityStats.customersServed}</Text>
           <Text style={styles.statLabel}>Clients</Text>
@@ -525,7 +576,7 @@ const HomeScreen = ({ navigation, route }) => {
                 <View style={styles.jobMetaItem}>
                   <MapPin size={13} color="#9CA3AF" />
                   <Text style={styles.jobMetaText} numberOfLines={1}>
-                    {(job.details?.address || job.address || '') + (job.details?.postcode ? ', ' + job.details.postcode : '') || 'Address pending'}
+                    {formatJobAddress(job, "Address pending")}
                   </Text>
                 </View>
               </View>
@@ -577,7 +628,7 @@ const HomeScreen = ({ navigation, route }) => {
                       }
                     >
                       <Text style={styles.viewBtnText}>Details</Text>
-                      <ChevronRight size={14} color="#6C63FF" />
+                      <ChevronRight size={14} color="#0F6B4C" />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -598,7 +649,7 @@ const HomeScreen = ({ navigation, route }) => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={["#6C63FF"]}
+          colors={["#0F6B4C"]}
         />
       }
     >
@@ -687,7 +738,7 @@ const HomeScreen = ({ navigation, route }) => {
                 <View style={styles.jobMetaItem}>
                   <MapPin size={13} color="#9CA3AF" />
                   <Text style={styles.jobMetaText} numberOfLines={1}>
-                    {(job.details?.address || job.address || '') + (job.details?.postcode ? ', ' + job.details.postcode : '') || 'Address pending'}
+                    {formatJobAddress(job, "Address pending")}
                   </Text>
                 </View>
               </View>
@@ -715,7 +766,7 @@ const HomeScreen = ({ navigation, route }) => {
                   }
                 >
                   <Text style={styles.viewBtnText}>Details</Text>
-                  <ChevronRight size={14} color="#6C63FF" />
+                  <ChevronRight size={14} color="#0F6B4C" />
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
@@ -726,6 +777,22 @@ const HomeScreen = ({ navigation, route }) => {
     </ScrollView>
   );
 
+  const filteredOffers = availableJobs.filter((job) => {
+    if (!offersSearch.trim()) return true;
+    const q = offersSearch.trim().toLowerCase();
+    const haystack = [
+      job.service,
+      job.serviceType,
+      job.details?.address,
+      job.address,
+      job.details?.postcode,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(q);
+  });
+
   const renderOffersTab = () => (
     <ScrollView
       style={styles.tabContent}
@@ -734,7 +801,7 @@ const HomeScreen = ({ navigation, route }) => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={["#6C63FF"]}
+          colors={["#0F6B4C"]}
         />
       }
     >
@@ -747,19 +814,33 @@ const HomeScreen = ({ navigation, route }) => {
         </Text>
       </View>
 
-      {availableJobs.length === 0 ? (
+      <View style={styles.offersSearchWrap}>
+        <SearchBar
+          value={offersSearch}
+          onChangeText={setOffersSearch}
+          placeholder="Search by service or area..."
+        />
+      </View>
+
+      {filteredOffers.length === 0 ? (
         <View style={styles.emptyState}>
           <View style={styles.emptyIconRing}>
             <AlertCircle size={32} color="#C4C9D4" />
           </View>
-          <Text style={styles.emptyTitle}>No offers available</Text>
+          <Text style={styles.emptyTitle}>
+            {availableJobs.length === 0
+              ? "No offers available"
+              : "No matches found"}
+          </Text>
           <Text style={styles.emptySubtitle}>
-            You'll be notified when jobs come in
+            {availableJobs.length === 0
+              ? "You'll be notified when jobs come in"
+              : "Try a different search term"}
           </Text>
         </View>
       ) : (
         <View style={styles.cardList}>
-          {availableJobs.map((job) => (
+          {filteredOffers.map((job) => (
             <TouchableOpacity
               key={job._id || job.bookingId}
               style={styles.offerCard}
@@ -790,10 +871,10 @@ const HomeScreen = ({ navigation, route }) => {
                   <View
                     style={[
                       styles.offerDetailIcon,
-                      { backgroundColor: "#EEF0FF" },
+                      { backgroundColor: "#E8F5EE" },
                     ]}
                   >
-                    <Calendar size={13} color="#6C63FF" />
+                    <Calendar size={13} color="#0F6B4C" />
                   </View>
                   <Text style={styles.offerDetailText}>
                     {job.schedule?.date
@@ -819,7 +900,7 @@ const HomeScreen = ({ navigation, route }) => {
                     <MapPin size={13} color="#EF4444" />
                   </View>
                   <Text style={styles.offerDetailText} numberOfLines={2}>
-                    {(job.details?.address || job.address || '') + (job.details?.postcode ? ', ' + job.details.postcode : '') || 'Area revealed after accepting'}
+                    {formatJobAddress(job, "Area revealed after accepting")}
                   </Text>
                 </View>
                 <View style={styles.offerDetailRow}>
@@ -856,9 +937,33 @@ const HomeScreen = ({ navigation, route }) => {
                     ).toFixed(2)}
                   </Text>
                 </View>
-                <TouchableOpacity style={styles.reviewOfferBtn}>
-                  <Text style={styles.reviewOfferBtnText}>Review</Text>
-                  <ArrowUpRight size={15} color="#FFFFFF" />
+              </View>
+
+              <View style={styles.offerBtnRow}>
+                <TouchableOpacity
+                  style={styles.viewDetailsBtn}
+                  onPress={() =>
+                    navigation.navigate("OfferDetail", {
+                      offerId: job._id || job.bookingId,
+                      offer: job,
+                    })
+                  }
+                >
+                  <Text style={styles.viewDetailsBtnText}>View Details</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.acceptJobBtn}
+                  onPress={() => handleQuickAccept(job)}
+                  disabled={actionLoading === (job._id || job.bookingId)}
+                >
+                  {actionLoading === (job._id || job.bookingId) ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <Text style={styles.acceptJobBtnText}>Accept Job</Text>
+                      <ArrowUpRight size={15} color="#FFFFFF" />
+                    </>
+                  )}
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
@@ -877,7 +982,7 @@ const HomeScreen = ({ navigation, route }) => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={["#6C63FF"]}
+          colors={["#0F6B4C"]}
         />
       }
     >
@@ -903,7 +1008,7 @@ const HomeScreen = ({ navigation, route }) => {
 
       {paymentLoading && (
         <View style={styles.loadingCenter}>
-          <ActivityIndicator size="large" color="#6C63FF" />
+          <ActivityIndicator size="large" color="#0F6B4C" />
         </View>
       )}
 
@@ -1005,10 +1110,10 @@ const HomeScreen = ({ navigation, route }) => {
                           {
                             backgroundColor:
                               withdrawal.status === "approved"
-                                ? "#E6FBF4"
+                                ? "#E8F5EE"
                                 : withdrawal.status === "pending"
                                   ? "#FFF7E6"
-                                  : "#EEF0FF",
+                                  : "#E8F5EE",
                           },
                         ]}
                       >
@@ -1018,10 +1123,10 @@ const HomeScreen = ({ navigation, route }) => {
                             {
                               color:
                                 withdrawal.status === "approved"
-                                  ? "#00C896"
+                                  ? "#0F6B4C"
                                   : withdrawal.status === "pending"
                                     ? "#FFB547"
-                                    : "#6C63FF",
+                                    : "#0F6B4C",
                             },
                           ]}
                         >
@@ -1074,7 +1179,7 @@ const HomeScreen = ({ navigation, route }) => {
                   <View key={index} style={styles.receivedItem}>
                     <View>
                       <View style={styles.receivedSuccessRow}>
-                        <CheckCircle size={14} color="#00C896" />
+                        <CheckCircle size={14} color="#0F6B4C" />
                         <Text style={styles.receivedSuccessText}>
                           Transferred
                         </Text>
@@ -1110,6 +1215,39 @@ const HomeScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Greeting header */}
+      <View style={styles.topGreetingHeader}>
+        <View>
+          <Text style={styles.greetingHello}>
+            Hello, {workerInfo?.firstName || "there"}
+          </Text>
+          <Text style={styles.greetingSub}>Let's find you some jobs</Text>
+        </View>
+        <View style={styles.greetingActions}>
+          <TouchableOpacity
+            style={styles.bellBtn}
+            onPress={() => navigation.navigate("NotificationTab")}
+          >
+            <Bell size={20} color="#1A1A1A" />
+            {unreadCount > 0 && (
+              <View style={styles.bellDot}>
+                <Text style={styles.bellDotText}>
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.avatarBtn}
+            onPress={() => navigation.navigate("AccountTab")}
+          >
+            <Text style={styles.avatarBtnText}>
+              {(workerInfo?.firstName || "?").charAt(0).toUpperCase()}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       {/* Top tab bar */}
       <View style={styles.topNav}>
         <View style={styles.tabBar}>
@@ -1160,32 +1298,102 @@ const HomeScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F4F5F9" },
+  container: { flex: 1, backgroundColor: NEU_BG },
 
   // ── Top Nav ──────────────────────────────────────────────
+  topGreetingHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: NEU_BG,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 14,
+  },
+  greetingHello: {
+    fontSize: responsiveFontSize(18),
+    fontWeight: "800",
+    color: "#1A1A1A",
+  },
+  greetingSub: {
+    fontSize: responsiveFontSize(12),
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  greetingActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  bellBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    ...neuCircle,
+  },
+  bellDot: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#EF4444",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 3,
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
+  },
+  bellDotText: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: "#FFFFFF",
+  },
+  avatarBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#0F6B4C",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#0A5C43",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  avatarBtnText: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#FFFFFF",
+  },
   topNav: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: NEU_BG,
     paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 0,
-    borderBottomWidth: 1,
-    borderBottomColor: "#EBEBF0",
+    paddingBottom: 12,
   },
   tabBar: {
     flexDirection: "row",
+    borderRadius: 16,
+    padding: 4,
+    gap: 4,
+    ...neuInset,
   },
   tabItem: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 2.5,
-    borderBottomColor: "transparent",
+    paddingVertical: 9,
+    borderRadius: 12,
     gap: 5,
   },
   tabItemActive: {
-    borderBottomColor: "#6C63FF",
+    ...neuRaisedSm,
+    borderRadius: 12,
   },
   tabItemText: {
     fontSize: responsiveFontSize(13),
@@ -1193,7 +1401,7 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
   },
   tabItemTextActive: {
-    color: "#6C63FF",
+    color: "#0F6B4C",
     fontWeight: "700",
   },
   tabBadge: {
@@ -1216,7 +1424,7 @@ const styles = StyleSheet.create({
     paddingVertical: isSmallScreen() ? 30 : 48,
     alignItems: "center",
   },
-  tabContent: { flex: 1 },
+  tabContent: { flex: 1, backgroundColor: NEU_BG },
 
   // ── Greeting ─────────────────────────────────────────────
   greetingHeader: {
@@ -1236,7 +1444,7 @@ const styles = StyleSheet.create({
   greetingText: {
     fontSize: responsiveFontSize(22),
     fontWeight: "800",
-    color: "#1A1D2E",
+    color: "#1A1A1A",
   },
   ratingChip: {
     flexDirection: "row",
@@ -1246,6 +1454,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 20,
+    shadowColor: "#A3B1C6",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 3,
   },
   ratingChipText: {
     fontSize: responsiveFontSize(13),
@@ -1259,13 +1472,13 @@ const styles = StyleSheet.create({
     marginBottom: getResponsiveMargin(),
   },
   balanceHeroInner: {
-    backgroundColor: "#1A1D2E",
+    backgroundColor: "#1A1A1A",
     borderRadius: getResponsiveBorderRadius(24),
     padding: isSmallScreen() ? 20 : 24,
-    shadowColor: "#1A1D2E",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
+    shadowColor: "#A3B1C6",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 18,
     elevation: 8,
   },
   balanceTopRow: {
@@ -1283,7 +1496,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#00C896",
+    backgroundColor: "#0F6B4C",
   },
   balanceLabel: {
     fontSize: responsiveFontSize(12),
@@ -1353,15 +1566,10 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
     borderRadius: getResponsiveBorderRadius(18),
     padding: isSmallScreen() ? 12 : 16,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 1,
+    ...neuRaisedSm,
   },
   statIcon: {
     width: isSmallScreen() ? 36 : 42,
@@ -1374,7 +1582,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: responsiveFontSize(isSmallScreen() ? 17 : 20),
     fontWeight: "800",
-    color: "#1A1D2E",
+    color: "#1A1A1A",
     marginBottom: 2,
   },
   statLabel: {
@@ -1396,10 +1604,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: responsiveFontSize(16),
     fontWeight: "800",
-    color: "#1A1D2E",
+    color: "#1A1A1A",
   },
   countPill: {
-    backgroundColor: "#EEF0FF",
+    backgroundColor: "#E8F5EE",
     borderRadius: 10,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -1408,7 +1616,7 @@ const styles = StyleSheet.create({
   countPillText: {
     fontSize: responsiveFontSize(11),
     fontWeight: "700",
-    color: "#6C63FF",
+    color: "#0F6B4C",
   },
 
   // ── Job Cards ─────────────────────────────────────────────
@@ -1417,14 +1625,9 @@ const styles = StyleSheet.create({
     gap: getResponsiveGap(12),
   },
   jobCard: {
-    backgroundColor: "#FFFFFF",
     borderRadius: getResponsiveBorderRadius(20),
     padding: isSmallScreen() ? 14 : 18,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
+    ...neuRaised,
   },
   jobCardTop: {
     flexDirection: "row",
@@ -1436,7 +1639,7 @@ const styles = StyleSheet.create({
   jobService: {
     fontSize: responsiveFontSize(15),
     fontWeight: "800",
-    color: "#1A1D2E",
+    color: "#1A1A1A",
     marginBottom: 3,
   },
   jobCustomer: {
@@ -1495,7 +1698,7 @@ const styles = StyleSheet.create({
   estPayValue: {
     fontSize: responsiveFontSize(isSmallScreen() ? 17 : 20),
     fontWeight: "800",
-    color: "#00C896",
+    color: "#0F6B4C",
   },
   jobActions: {
     flexDirection: "row",
@@ -1510,7 +1713,7 @@ const styles = StyleSheet.create({
     borderColor: "#FECACA",
   },
   arriveBtn: {
-    backgroundColor: "#6C63FF",
+    backgroundColor: "#0F6B4C",
     paddingHorizontal: isSmallScreen() ? 14 : 18,
     paddingVertical: isSmallScreen() ? 9 : 11,
     borderRadius: getResponsiveBorderRadius(12),
@@ -1524,13 +1727,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: "#EEF0FF",
+    backgroundColor: "#E8F5EE",
     paddingHorizontal: isSmallScreen() ? 10 : 12,
     paddingVertical: isSmallScreen() ? 7 : 9,
     borderRadius: getResponsiveBorderRadius(12),
   },
   viewBtnText: {
-    color: "#6C63FF",
+    color: "#0F6B4C",
     fontWeight: "700",
     fontSize: responsiveFontSize(12),
   },
@@ -1544,16 +1747,16 @@ const styles = StyleSheet.create({
   emptyIconRing: {
     width: isSmallScreen() ? 64 : 80,
     height: isSmallScreen() ? 64 : 80,
-    borderRadius: isSmallScreen() ? 32 : 40,
-    backgroundColor: "#F3F4F6",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
+    ...neuInset,
+    borderRadius: isSmallScreen() ? 32 : 40,
   },
   emptyTitle: {
     fontSize: responsiveFontSize(16),
     fontWeight: "700",
-    color: "#1A1D2E",
+    color: "#1A1A1A",
     marginBottom: 6,
   },
   emptySubtitle: {
@@ -1571,7 +1774,7 @@ const styles = StyleSheet.create({
   offersPageTitle: {
     fontSize: responsiveFontSize(22),
     fontWeight: "800",
-    color: "#1A1D2E",
+    color: "#1A1A1A",
     marginBottom: 3,
   },
   offersPageSub: {
@@ -1579,15 +1782,14 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
     fontWeight: "500",
   },
+  offersSearchWrap: {
+    paddingHorizontal: getResponsivePadding(),
+    paddingBottom: 16,
+  },
   offerCard: {
-    backgroundColor: "#FFFFFF",
     borderRadius: getResponsiveBorderRadius(20),
     padding: isSmallScreen() ? 14 : 18,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.07,
-    shadowRadius: 14,
-    elevation: 3,
+    ...neuRaised,
   },
   offerTop: {
     flexDirection: "row",
@@ -1596,7 +1798,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   offerServiceTag: {
-    backgroundColor: "#F4F5F9",
+    backgroundColor: "#F4F6F8",
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: getResponsiveBorderRadius(8),
@@ -1604,7 +1806,7 @@ const styles = StyleSheet.create({
   offerServiceTagText: {
     fontSize: responsiveFontSize(12),
     fontWeight: "700",
-    color: "#1A1D2E",
+    color: "#1A1A1A",
   },
   offerRateBox: {
     flexDirection: "row",
@@ -1614,7 +1816,7 @@ const styles = StyleSheet.create({
   offerRateValue: {
     fontSize: responsiveFontSize(20),
     fontWeight: "800",
-    color: "#00C896",
+    color: "#0F6B4C",
   },
   offerRatePer: {
     fontSize: responsiveFontSize(12),
@@ -1662,18 +1864,42 @@ const styles = StyleSheet.create({
   offerPayoutValue: {
     fontSize: responsiveFontSize(isSmallScreen() ? 18 : 22),
     fontWeight: "800",
-    color: "#1A1D2E",
+    color: "#1A1A1A",
   },
-  reviewOfferBtn: {
+  offerBtnRow: {
     flexDirection: "row",
+    gap: 10,
+    marginTop: 14,
+  },
+  viewDetailsBtn: {
+    flex: 1,
     alignItems: "center",
-    gap: 4,
-    backgroundColor: "#1A1D2E",
-    paddingHorizontal: isSmallScreen() ? 14 : 18,
-    paddingVertical: isSmallScreen() ? 9 : 11,
+    justifyContent: "center",
+    paddingVertical: isSmallScreen() ? 10 : 12,
+    ...neuInset,
     borderRadius: getResponsiveBorderRadius(12),
   },
-  reviewOfferBtnText: {
+  viewDetailsBtnText: {
+    color: "#0F6B4C",
+    fontWeight: "700",
+    fontSize: responsiveFontSize(13),
+  },
+  acceptJobBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    backgroundColor: "#0F6B4C",
+    paddingVertical: isSmallScreen() ? 10 : 12,
+    borderRadius: getResponsiveBorderRadius(12),
+    shadowColor: "#0A5C43",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.4,
+    shadowRadius: 9,
+    elevation: 5,
+  },
+  acceptJobBtnText: {
     color: "#FFFFFF",
     fontWeight: "700",
     fontSize: responsiveFontSize(13),
@@ -1682,19 +1908,23 @@ const styles = StyleSheet.create({
   // ── Payments ──────────────────────────────────────────────
   subTabBar: {
     flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#EBEBF0",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: NEU_BG,
+    marginHorizontal: getResponsivePadding(),
+    marginTop: 8,
+    borderRadius: 14,
+    padding: 4,
+    gap: 4,
+    ...neuInset,
   },
   subTab: {
     flex: 1,
-    paddingVertical: isSmallScreen() ? 10 : 13,
+    paddingVertical: isSmallScreen() ? 8 : 11,
     alignItems: "center",
-    borderBottomWidth: 2.5,
-    borderBottomColor: "transparent",
+    borderRadius: 10,
   },
   subTabActive: {
-    borderBottomColor: "#6C63FF",
+    ...neuRaisedSm,
+    borderRadius: 10,
   },
   subTabText: {
     fontSize: responsiveFontSize(13),
@@ -1702,7 +1932,7 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
   },
   subTabTextActive: {
-    color: "#6C63FF",
+    color: "#0F6B4C",
     fontWeight: "700",
   },
   paySection: {
@@ -1712,16 +1942,21 @@ const styles = StyleSheet.create({
   paySectionTitle: {
     fontSize: responsiveFontSize(16),
     fontWeight: "800",
-    color: "#1A1D2E",
+    color: "#1A1A1A",
     marginBottom: 14,
   },
   nextPayCard: {
-    backgroundColor: "#EEF0FF",
+    backgroundColor: "#E8F5EE",
     borderRadius: getResponsiveBorderRadius(16),
     padding: isSmallScreen() ? 14 : 18,
     marginBottom: 16,
     borderLeftWidth: 4,
-    borderLeftColor: "#6C63FF",
+    borderLeftColor: "#0F6B4C",
+    shadowColor: "#A3B1C6",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 5,
   },
   nextPayCardLabel: {
     fontSize: responsiveFontSize(11),
@@ -1732,7 +1967,7 @@ const styles = StyleSheet.create({
   nextPayCardDate: {
     fontSize: responsiveFontSize(isSmallScreen() ? 16 : 18),
     fontWeight: "800",
-    color: "#6C63FF",
+    color: "#0F6B4C",
     marginBottom: 10,
   },
   nextPayCardRow: {
@@ -1742,14 +1977,14 @@ const styles = StyleSheet.create({
   },
   nextPayCardType: {
     fontSize: responsiveFontSize(12),
-    color: "#6C63FF",
+    color: "#0F6B4C",
     fontWeight: "600",
     textTransform: "capitalize",
   },
   nextPayCardTotal: {
     fontSize: responsiveFontSize(isSmallScreen() ? 16 : 18),
     fontWeight: "800",
-    color: "#1A1D2E",
+    color: "#1A1A1A",
   },
   payJobList: {
     gap: getResponsiveGap(10),
@@ -1758,16 +1993,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
     borderRadius: getResponsiveBorderRadius(14),
     padding: isSmallScreen() ? 12 : 14,
     borderLeftWidth: 3,
-    borderLeftColor: "#00C896",
+    borderLeftColor: "#0F6B4C",
+    ...neuRaisedSm,
   },
   payJobService: {
     fontSize: responsiveFontSize(13),
     fontWeight: "700",
-    color: "#1A1D2E",
+    color: "#1A1A1A",
     marginBottom: 3,
   },
   payJobDate: {
@@ -1777,14 +2012,14 @@ const styles = StyleSheet.create({
   payJobAmount: {
     fontSize: responsiveFontSize(15),
     fontWeight: "800",
-    color: "#00C896",
+    color: "#0F6B4C",
   },
   withdrawalItem: {
-    backgroundColor: "#FFFFFF",
     borderRadius: getResponsiveBorderRadius(14),
     padding: isSmallScreen() ? 12 : 14,
     borderLeftWidth: 3,
     borderLeftColor: "#FFB547",
+    ...neuRaisedSm,
   },
   withdrawalItemTop: {
     flexDirection: "row",
@@ -1795,7 +2030,7 @@ const styles = StyleSheet.create({
   withdrawalItemAmount: {
     fontSize: responsiveFontSize(16),
     fontWeight: "800",
-    color: "#1A1D2E",
+    color: "#1A1A1A",
   },
   withdrawalStatusChip: {
     paddingHorizontal: 10,
@@ -1812,12 +2047,17 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
   },
   totalReceivedBanner: {
-    backgroundColor: "#E6FBF4",
+    backgroundColor: "#E8F5EE",
     borderRadius: getResponsiveBorderRadius(16),
     padding: isSmallScreen() ? 14 : 18,
     marginBottom: 16,
     borderLeftWidth: 4,
-    borderLeftColor: "#00C896",
+    borderLeftColor: "#0F6B4C",
+    shadowColor: "#A3B1C6",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 5,
   },
   totalReceivedBannerLabel: {
     fontSize: responsiveFontSize(11),
@@ -1828,17 +2068,17 @@ const styles = StyleSheet.create({
   totalReceivedBannerAmount: {
     fontSize: responsiveFontSize(isSmallScreen() ? 22 : 26),
     fontWeight: "800",
-    color: "#00C896",
+    color: "#0F6B4C",
   },
   receivedItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
     borderRadius: getResponsiveBorderRadius(14),
     padding: isSmallScreen() ? 12 : 14,
     borderLeftWidth: 3,
-    borderLeftColor: "#00C896",
+    borderLeftColor: "#0F6B4C",
+    ...neuRaisedSm,
   },
   receivedSuccessRow: {
     flexDirection: "row",
@@ -1849,7 +2089,7 @@ const styles = StyleSheet.create({
   receivedSuccessText: {
     fontSize: responsiveFontSize(12),
     fontWeight: "700",
-    color: "#00C896",
+    color: "#0F6B4C",
   },
   receivedDate: {
     fontSize: responsiveFontSize(11),
@@ -1864,7 +2104,7 @@ const styles = StyleSheet.create({
   receivedAmount: {
     fontSize: responsiveFontSize(17),
     fontWeight: "800",
-    color: "#00C896",
+    color: "#0F6B4C",
   },
 });
 

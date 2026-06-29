@@ -24,21 +24,28 @@ import {
   Check,
 } from "lucide-react-native";
 import axios from "axios";
+import {
+  NEU_BG,
+  neuRaised,
+  neuRaisedSm,
+  neuInset,
+  neuCircle,
+} from "../theme/neumorphic";
 
 // ── Design tokens ──────────────────────────────────────────
 const C = {
-  bg: "#FFFFFF",
+  bg: "#F4F6F8",
   surface: "#FFFFFF",
-  surfaceMuted: "#F6FEFC",
+  surfaceMuted: "#F4F6F8",
 
-  border: "#E6F7F1",
-  borderStrong: "#D1FAE5",
+  border: "#EEF1F4",
+  borderStrong: "#CFE8DC",
 
-  green: "#10B981",
-  greenDark: "#059669",
-  greenDeep: "#047857",
-  greenDim: "#D1FAE5",
-  greenPale: "#ECFDF5",
+  green: "#0F6B4C",
+  greenDark: "#0A5C43",
+  greenDeep: "#074936",
+  greenDim: "#CFE8DC",
+  greenPale: "#E8F5EE",
 
   amber: "#F59E0B",
   blue: "#3B82F6",
@@ -463,13 +470,13 @@ const ScheduleScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: C.bg,
+    backgroundColor: NEU_BG,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: C.bg,
+    backgroundColor: NEU_BG,
   },
 
   // ── Header ────────────────────────────────────────────────
@@ -479,7 +486,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: C.surface,
+    backgroundColor: NEU_BG,
   },
   headerDivider: {
     height: 2,
@@ -487,12 +494,9 @@ const styles = StyleSheet.create({
     opacity: 0.15,
   },
   headerIconWrap: {
+    ...neuCircle,
     width: 38,
     height: 38,
-    borderRadius: 19,
-    backgroundColor: C.greenPale,
-    borderWidth: 1,
-    borderColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -506,20 +510,24 @@ const styles = StyleSheet.create({
   // ── Tabs ──────────────────────────────────────────────────
   tabBar: {
     flexDirection: "row",
-    backgroundColor: C.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
-    paddingHorizontal: 8,
+    ...neuInset,
+    marginHorizontal: 16,
+    marginTop: 4,
+    marginBottom: 8,
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
   },
   tabItem: {
     flex: 1,
-    paddingVertical: 13,
+    paddingVertical: 11,
     alignItems: "center",
-    borderBottomWidth: 2,
-    borderBottomColor: "transparent",
+    borderRadius: 9,
+    marginHorizontal: 2,
   },
   tabItemActive: {
-    borderBottomColor: C.green,
+    ...neuRaisedSm,
+    borderRadius: 9,
   },
   tabText: {
     fontSize: 13,
@@ -542,15 +550,8 @@ const styles = StyleSheet.create({
 
   // ── Job Card ──────────────────────────────────────────────
   jobCard: {
-    backgroundColor: C.surface,
+    ...neuRaisedSm,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: C.border,
-    shadowColor: "#10B981",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 2,
     flexDirection: "row",
     overflow: "hidden",
     marginBottom: 2,
@@ -633,10 +634,9 @@ const styles = StyleSheet.create({
     borderColor: C.border,
   },
   locationIconWrap: {
+    ...neuCircle,
     width: 24,
     height: 24,
-    borderRadius: 12,
-    backgroundColor: C.greenPale,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -690,12 +690,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   emptyIconWrap: {
+    ...neuCircle,
     width: 80,
     height: 80,
-    borderRadius: 40,
-    backgroundColor: C.greenPale,
-    borderWidth: 1.5,
-    borderColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
@@ -719,16 +716,9 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   calendarCard: {
-    backgroundColor: C.surface,
+    ...neuRaised,
     borderRadius: 20,
     padding: 16,
-    borderWidth: 1,
-    borderColor: C.border,
-    shadowColor: "#10B981",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 2,
   },
   monthNav: {
     flexDirection: "row",
@@ -740,12 +730,9 @@ const styles = StyleSheet.create({
     borderBottomColor: C.border,
   },
   monthNavBtn: {
+    ...neuCircle,
     width: 36,
     height: 36,
-    borderRadius: 18,
-    backgroundColor: C.greenPale,
-    borderWidth: 1,
-    borderColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -824,11 +811,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     paddingVertical: 10,
     paddingHorizontal: 8,
-    backgroundColor: C.greenPale,
+    ...neuInset,
     borderRadius: 10,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: C.border,
   },
   legendItem: {
     flexDirection: "row",

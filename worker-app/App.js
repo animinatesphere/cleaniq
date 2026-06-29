@@ -25,6 +25,7 @@ try {
 }
 
 import { C } from "./src/theme/flat";
+import { NEU_BG } from "./src/theme/neumorphic";
 import { AuthProvider, AuthContext } from "./src/context/AuthContext";
 import { NotificationProvider } from "./src/context/NotificationContext";
 import OnboardingScreen from "./src/screens/OnboardingScreen";
@@ -90,13 +91,13 @@ const TabNavigator = () => {
         tabBarActiveTintColor: "#FFFFFF",
         tabBarInactiveTintColor: C.textMuted,
         tabBarStyle: {
-          backgroundColor: C.card,
+          backgroundColor: NEU_BG,
           borderTopWidth: 0,
           paddingTop: 10,
           height: 70,
-          shadowColor: "#0F172A",
+          shadowColor: "#A3B1C6",
           shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.08,
+          shadowOpacity: 0.4,
           shadowRadius: 12,
           elevation: 12,
         },
@@ -120,6 +121,11 @@ const TabNavigator = () => {
                       alignItems: "center",
                       justifyContent: "center",
                       backgroundColor: C.primary,
+                      shadowColor: "#0A5C43",
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.4,
+                      shadowRadius: 8,
+                      elevation: 4,
                     }
                   : {
                       width: 44,

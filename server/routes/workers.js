@@ -102,13 +102,15 @@ const generateTempPassword = () => {
   );
 };
 
-// GET available jobs (all bookings without region restriction)
+// GET available jobs — pass ?region=UK or ?region=NG to only see jobs in
+// the worker's own area (defaults to all regions if omitted).
 router.get("/jobs", async (req, res) => {
   try {
-    // Fetch bookings that need cleaning (Confirmed or Pending)
-    const jobs = await Booking.find({
-      status: { $in: ["Confirmed", "Pending"] },
-    }).sort({ createdAt: -1 });
+    const { region } = req.query;
+    const filter = { status: { $in: ["Confirmed", "Pending"] } };
+    if (region) filter.region = region;
+
+    const jobs = await Booking.find(filter).sort({ createdAt: -1 });
 
     res.json(jobs);
   } catch (error) {

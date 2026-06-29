@@ -15,8 +15,9 @@ import { MapPin, Hash, Landmark, User, CreditCard } from "lucide-react-native";
 import axios from "axios";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import Card from "../components/Card";
-import { C, cardShadow } from "../theme/flat";
+import { C } from "../theme/flat";
 import { getResponsivePadding, isBigScreen } from "../utils/responsive";
+import { NEU_BG, neuRaised, neuInset, neuGreenRaised } from "../theme/neumorphic";
 
 const Field = ({ icon, ...props }) => (
   <View style={styles.inputWrapper}>
@@ -33,6 +34,7 @@ const CompleteProfileScreen = () => {
   const { workerInfo, updateWorkerInfo } = useContext(AuthContext);
   const [address, setAddress] = useState("");
   const [postcode, setPostcode] = useState("");
+  const [bankName, setBankName] = useState("");
   const [accountName, setAccountName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [sortCode, setSortCode] = useState("");
@@ -43,7 +45,12 @@ const CompleteProfileScreen = () => {
       Alert.alert("Missing details", "Please enter your address and postcode.");
       return;
     }
-    if (!accountName.trim() || !accountNumber.trim() || !sortCode.trim()) {
+    if (
+      !bankName.trim() ||
+      !accountName.trim() ||
+      !accountNumber.trim() ||
+      !sortCode.trim()
+    ) {
       Alert.alert(
         "Missing bank details",
         "We need your bank details so we can pay you for completed jobs.",
@@ -59,6 +66,7 @@ const CompleteProfileScreen = () => {
           address: address.trim(),
           postcode: postcode.trim(),
           bankDetails: {
+            bankName: bankName.trim(),
             accountName: accountName.trim(),
             accountNumber: accountNumber.trim(),
             sortCode: sortCode.trim(),
@@ -128,6 +136,12 @@ const CompleteProfileScreen = () => {
               Bank Details (for getting paid)
             </Text>
             <Field
+              icon={<Landmark size={18} color={C.textMuted} />}
+              placeholder="Bank name"
+              value={bankName}
+              onChangeText={setBankName}
+            />
+            <Field
               icon={<User size={18} color={C.textMuted} />}
               placeholder="Account holder name"
               value={accountName}
@@ -149,7 +163,7 @@ const CompleteProfileScreen = () => {
             />
 
             <TouchableOpacity
-              style={[styles.saveBtn, cardShadow]}
+              style={styles.saveBtn}
               onPress={handleSave}
               disabled={saving}
               activeOpacity={0.85}
@@ -168,7 +182,7 @@ const CompleteProfileScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.bg },
+  container: { flex: 1, backgroundColor: NEU_BG },
   scrollContent: {
     flexGrow: 1,
     justifyContent: "center",
@@ -190,6 +204,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   card: {
+    ...neuRaised,
     borderRadius: 28,
     padding: 24,
     gap: 12,
@@ -205,9 +220,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: C.bg,
-    borderWidth: 1,
-    borderColor: C.border,
+    ...neuInset,
     borderRadius: 14,
     paddingHorizontal: 16,
     height: 52,
@@ -221,7 +234,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   saveBtn: {
-    backgroundColor: C.primary,
+    ...neuGreenRaised,
     borderRadius: 999,
     height: 54,
     alignItems: "center",

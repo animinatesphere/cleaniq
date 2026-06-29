@@ -34,6 +34,14 @@ import {
   Timer,
 } from "lucide-react-native";
 import axios from "axios";
+import {
+  NEU_BG,
+  neuRaised,
+  neuRaisedSm,
+  neuInset,
+  neuCircle,
+  neuGreenRaised,
+} from "../theme/neumorphic";
 
 const OfferDetailScreen = ({ route, navigation }) => {
   const { offerId } = route.params;
@@ -226,7 +234,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1A7A4A" />
+        <ActivityIndicator size="large" color="#0F6B4C" />
         <Text style={styles.loadingText}>Loading job details...</Text>
       </View>
     );
@@ -246,7 +254,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1A7A4A" />
+      <StatusBar barStyle="light-content" backgroundColor="#0F6B4C" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -328,7 +336,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
           <Text style={styles.sectionTitle}>📅 Schedule</Text>
           <View style={styles.scheduleRow}>
             <View style={styles.scheduleCard}>
-              <Calendar size={18} color="#1A7A4A" />
+              <Calendar size={18} color="#0F6B4C" />
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.scheduleLabel}>Date</Text>
                 <Text style={styles.scheduleValue}>
@@ -368,9 +376,18 @@ const OfferDetailScreen = ({ route, navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📍 Location</Text>
           <View style={styles.locationCard}>
-            <MapPin size={20} color="#1A7A4A" />
+            <MapPin size={20} color="#0F6B4C" />
             <Text style={styles.locationText}>
-              {(offer.details?.address || '') + (offer.details?.postcode ? ', ' + offer.details.postcode : '') || "Address not specified"}
+              {(() => {
+                const addr = offer.details?.address || "";
+                const postcode = offer.details?.postcode || "";
+                const full =
+                  addr +
+                  (postcode && !addr.includes(postcode)
+                    ? ", " + postcode
+                    : "");
+                return full || "Address not specified";
+              })()}
             </Text>
           </View>
         </View>
@@ -382,7 +399,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
             <View style={styles.tagsWrap}>
               {rooms.map((r, i) => (
                 <View key={i} style={styles.roomTag}>
-                  <Home size={12} color="#1A7A4A" />
+                  <Home size={12} color="#0F6B4C" />
                   <Text style={styles.roomTagText}>{r}</Text>
                 </View>
               ))}
@@ -431,7 +448,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
           </View>
           {instructions && instructions !== "None" && (
             <View style={styles.instructionBox}>
-              <FileText size={14} color="#1A7A4A" />
+              <FileText size={14} color="#0F6B4C" />
               <Text style={styles.instructionText}>{instructions}</Text>
             </View>
           )}
@@ -485,7 +502,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
             onPress={() => setShowSuggestTime(true)}
             disabled={actionLoading !== null}
           >
-            <Clock size={16} color="#1A7A4A" />
+            <Clock size={16} color="#0F6B4C" />
             <Text style={styles.suggestBtnText}>Suggest Another Time</Text>
           </TouchableOpacity>
 
@@ -568,7 +585,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
             <View style={styles.successSummary}>
               <View style={styles.successSummaryRow}>
-                <Calendar size={14} color="#1A7A4A" />
+                <Calendar size={14} color="#0F6B4C" />
                 <Text style={styles.successSummaryText}>
                   {offerDate.toLocaleDateString("en-GB", {
                     weekday: "short",
@@ -578,7 +595,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
                 </Text>
               </View>
               <View style={styles.successSummaryRow}>
-                <Clock size={14} color="#1A7A4A" />
+                <Clock size={14} color="#0F6B4C" />
                 <Text style={styles.successSummaryText}>
                   {getDisplayTime(offer.schedule)}
                 </Text>
@@ -611,18 +628,18 @@ const OfferDetailScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F4F8F4" },
+  container: { flex: 1, backgroundColor: NEU_BG },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F4F8F4",
+    backgroundColor: NEU_BG,
   },
   loadingText: { marginTop: 12, color: "#4B7A5A", fontSize: 14 },
 
   // Header
   header: {
-    backgroundColor: "#1A7A4A",
+    backgroundColor: "#0F6B4C",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -631,20 +648,19 @@ const styles = StyleSheet.create({
     paddingTop: 18,
   },
   backBtn: {
+    ...neuCircle,
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.18)",
     justifyContent: "center",
     alignItems: "center",
   },
   headerTitle: { fontSize: 17, fontWeight: "700", color: "#fff" },
 
-  content: { flex: 1 },
+  content: { flex: 1, backgroundColor: NEU_BG },
 
   // Hero Card
   heroCard: {
-    backgroundColor: "#1A7A4A",
+    backgroundColor: "#0F6B4C",
     marginHorizontal: 0,
     paddingHorizontal: 16,
     paddingBottom: 20,
@@ -714,14 +730,12 @@ const styles = StyleSheet.create({
   // Schedule
   scheduleRow: { flexDirection: "row", gap: 10 },
   scheduleCard: {
+    ...neuRaisedSm,
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
     borderRadius: 14,
     padding: 14,
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
   },
   scheduleLabel: {
     fontSize: 10,
@@ -738,14 +752,12 @@ const styles = StyleSheet.create({
 
   // Location
   locationCard: {
-    backgroundColor: "#fff",
+    ...neuRaisedSm,
     borderRadius: 14,
     padding: 16,
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
   },
   locationText: {
     flex: 1,
@@ -768,7 +780,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#A7D9B8",
   },
-  roomTagText: { fontSize: 13, fontWeight: "600", color: "#1A6638" },
+  roomTagText: { fontSize: 13, fontWeight: "600", color: "#0A5C43" },
   serviceTag: { backgroundColor: "#FFFBEB", borderColor: "#FDE68A" },
 
   // Property Info
@@ -779,15 +791,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   infoChip: {
+    ...neuRaisedSm,
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#fff",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
   },
   infoChipText: { fontSize: 12, color: "#3A5A44", fontWeight: "500" },
   instructionBox: {
@@ -800,24 +810,22 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: "#A7D9B8",
   },
-  instructionText: { flex: 1, fontSize: 13, color: "#1A5C33", lineHeight: 18 },
+  instructionText: { flex: 1, fontSize: 13, color: "#0A5C43", lineHeight: 18 },
 
   // Customer
   customerCard: {
-    backgroundColor: "#fff",
+    ...neuRaisedSm,
     borderRadius: 14,
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
   },
   customerAvatar: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#1A7A4A",
+    backgroundColor: "#0F6B4C",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -835,38 +843,30 @@ const styles = StyleSheet.create({
   // Action Buttons
   actionsContainer: { paddingHorizontal: 16, marginTop: 16, gap: 10 },
   acceptBtn: {
-    backgroundColor: "#1A7A4A",
+    ...neuGreenRaised,
     borderRadius: 16,
     paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    shadowColor: "#1A7A4A",
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 6,
   },
   acceptBtnText: { fontSize: 16, fontWeight: "800", color: "#fff" },
   suggestBtn: {
-    backgroundColor: "#EAF5EE",
+    ...neuInset,
     borderRadius: 16,
     paddingVertical: 14,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    borderWidth: 1.5,
-    borderColor: "#86C99A",
   },
-  suggestBtnText: { fontSize: 14, fontWeight: "700", color: "#1A7A4A" },
+  suggestBtnText: { fontSize: 14, fontWeight: "700", color: "#0F6B4C" },
   rejectBtn: {
-    backgroundColor: "#FEF2F2",
+    ...neuInset,
     borderRadius: 16,
     paddingVertical: 14,
     alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "#FECACA",
   },
   rejectBtnText: { fontSize: 14, fontWeight: "700", color: "#EF4444" },
 
@@ -891,19 +891,17 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 18, fontWeight: "800", color: "#1A2E22" },
   modalSub: { fontSize: 13, color: "#6B7280", marginBottom: 16 },
   timeInput: {
-    backgroundColor: "#F9FAFB",
+    ...neuInset,
     borderRadius: 14,
     padding: 14,
     fontSize: 14,
     color: "#1A2E22",
     minHeight: 80,
     textAlignVertical: "top",
-    borderWidth: 1,
-    borderColor: "#D1E8D8",
     marginBottom: 16,
   },
   sendBtn: {
-    backgroundColor: "#1A7A4A",
+    backgroundColor: "#0F6B4C",
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: "center",
@@ -919,16 +917,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
   },
   successCard: {
-    backgroundColor: "#fff",
+    ...neuRaised,
     borderRadius: 28,
     padding: 28,
     width: "100%",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
-    elevation: 10,
   },
   successIconRing: {
     width: 88,
@@ -940,10 +933,10 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   successIconCircle: {
+    ...neuCircle,
     width: 64,
     height: 64,
-    borderRadius: 32,
-    backgroundColor: "#1A7A4A",
+    backgroundColor: "#0F6B4C",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -964,7 +957,7 @@ const styles = StyleSheet.create({
   successSummary: {
     flexDirection: "row",
     gap: 16,
-    backgroundColor: "#F4F8F4",
+    backgroundColor: "#F4F6F8",
     borderRadius: 16,
     paddingVertical: 12,
     paddingHorizontal: 18,
@@ -981,7 +974,7 @@ const styles = StyleSheet.create({
     color: "#1A2E22",
   },
   successPrimaryBtn: {
-    backgroundColor: "#1A7A4A",
+    ...neuGreenRaised,
     borderRadius: 14,
     paddingVertical: 14,
     width: "100%",

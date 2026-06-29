@@ -15,20 +15,28 @@ import {
 import { AuthContext, API_URL } from "../context/AuthContext";
 import { Send, ChevronLeft, ShieldAlert } from "lucide-react-native";
 import axios from "axios";
+import {
+  NEU_BG,
+  neuRaised,
+  neuRaisedSm,
+  neuInset,
+  neuCircle,
+  neuGreenRaised,
+} from "../theme/neumorphic";
 
 // ── Design tokens ──────────────────────────────────────────
 const C = {
-  bg: "#F6FEFC",
+  bg: "#F4F6F8",
   surface: "#FFFFFF",
 
-  border: "#E6F7F1",
-  borderInput: "#D1FAE5",
+  border: "#EEF1F4",
+  borderInput: "#EEF1F4",
 
-  green: "#10B981",
-  greenDark: "#059669",
-  greenDeep: "#047857",
-  greenDim: "#D1FAE5",
-  greenPale: "#ECFDF5",
+  green: "#0F6B4C",
+  greenDark: "#0A5C43",
+  greenDeep: "#074936",
+  greenDim: "#CFE8DC",
+  greenPale: "#E8F5EE",
 
   text: "#111827",
   textSub: "#6B7280",
@@ -37,7 +45,7 @@ const C = {
   textOnGreenMute: "#A7F3D0",
 
   theirBubble: "#FFFFFF",
-  theirBorder: "#E6F7F1",
+  theirBorder: "#EEF1F4",
 };
 
 const ChatWithCustomerScreen = ({ route, navigation }) => {
@@ -259,7 +267,7 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: C.surface,
+    backgroundColor: NEU_BG,
   },
 
   // ── Header ────────────────────────────────────────────────
@@ -268,7 +276,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: C.surface,
+    backgroundColor: NEU_BG,
     gap: 10,
   },
   headerDivider: {
@@ -277,12 +285,9 @@ const styles = StyleSheet.create({
     opacity: 0.15,
   },
   backBtn: {
+    ...neuCircle,
     width: 38,
     height: 38,
-    borderRadius: 19,
-    backgroundColor: C.greenPale,
-    borderWidth: 1,
-    borderColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -293,9 +298,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   headerAvatar: {
+    ...neuCircle,
     width: 38,
     height: 38,
-    borderRadius: 19,
     backgroundColor: C.green,
     justifyContent: "center",
     alignItems: "center",
@@ -320,12 +325,9 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   infoBtn: {
+    ...neuCircle,
     width: 38,
     height: 38,
-    borderRadius: 19,
-    backgroundColor: C.greenPale,
-    borderWidth: 1,
-    borderColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -335,13 +337,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: C.bg,
+    backgroundColor: NEU_BG,
   },
   messagesList: {
     paddingVertical: 16,
     paddingHorizontal: 16,
     gap: 8,
-    backgroundColor: C.bg,
+    backgroundColor: NEU_BG,
     flexGrow: 1,
   },
 
@@ -360,9 +362,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   theirAvatar: {
+    ...neuCircle,
     width: 30,
     height: 30,
-    borderRadius: 15,
     backgroundColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
@@ -435,20 +437,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   emptyAvatarLarge: {
+    ...neuCircle,
     width: 72,
     height: 72,
-    borderRadius: 36,
     backgroundColor: C.green,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
     borderWidth: 3,
     borderColor: C.greenDim,
-    shadowColor: C.green,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
   },
   emptyAvatarText: {
     fontSize: 26,
@@ -470,7 +467,7 @@ const styles = StyleSheet.create({
 
   // ── Input ─────────────────────────────────────────────────
   inputOuter: {
-    backgroundColor: C.surface,
+    backgroundColor: NEU_BG,
     borderTopWidth: 1,
     borderTopColor: C.border,
     paddingVertical: 12,
@@ -482,8 +479,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   input: {
+    ...neuInset,
     flex: 1,
-    backgroundColor: C.greenPale,
     borderRadius: 22,
     paddingHorizontal: 18,
     paddingVertical: 11,
@@ -492,21 +489,14 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     maxHeight: 100,
     minHeight: 44,
-    borderWidth: 1,
-    borderColor: C.borderInput,
   },
   sendBtn: {
+    ...neuGreenRaised,
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: C.green,
+    borderRadius: 999,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: C.green,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
-    elevation: 4,
   },
   sendBtnDisabled: {
     backgroundColor: C.greenDim,

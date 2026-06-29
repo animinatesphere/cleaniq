@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
 import { getDisplayTime } from "../utils/timeUtils";
 import {
+  NEU_BG,
+  neuRaised,
+  neuRaisedSm,
+  neuInset,
+  neuCircle,
+  neuGreenRaised,
+} from "../theme/neumorphic";
+import {
   View,
   Text,
   StyleSheet,
@@ -186,10 +194,10 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         label: "In Progress",
         next: "complete",
         nextLabel: "Complete Service",
-        nextColor: "#1A7A4A",
+        nextColor: "#0F6B4C",
       },
       Completed: {
-        color: "#1A7A4A",
+        color: "#0F6B4C",
         bg: "#EAF5EE",
         label: "Completed",
         next: null,
@@ -210,7 +218,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1A7A4A" />
+        <ActivityIndicator size="large" color="#0F6B4C" />
         <Text style={styles.loadingText}>Loading booking...</Text>
       </View>
     );
@@ -234,7 +242,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1A7A4A" />
+      <StatusBar barStyle="light-content" backgroundColor="#0F6B4C" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -259,7 +267,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {/* Service Banner */}
         <View style={styles.serviceBanner}>
           <View style={styles.serviceBannerLeft}>
-            <Sparkles size={22} color="#1A7A4A" />
+            <Sparkles size={22} color="#0F6B4C" />
             <View style={{ marginLeft: 12 }}>
               <Text style={styles.serviceName}>
                 {booking.service || "Cleaning Service"}
@@ -287,7 +295,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {/* Quick Action Buttons */}
         <View style={styles.quickActions}>
           <TouchableOpacity style={styles.quickBtn} onPress={handleMessage}>
-            <MessageSquare size={20} color="#1A7A4A" />
+            <MessageSquare size={20} color="#0F6B4C" />
             <Text style={styles.quickBtnText}>Message</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -361,7 +369,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
           <Text style={styles.sectionTitle}>📅 Schedule</Text>
           <View style={styles.scheduleRow}>
             <View style={styles.scheduleCard}>
-              <Calendar size={18} color="#1A7A4A" />
+              <Calendar size={18} color="#0F6B4C" />
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.scheduleLabel}>Date</Text>
                 <Text style={styles.scheduleValue}>
@@ -401,9 +409,18 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📍 Location</Text>
           <View style={styles.locationCard}>
-            <MapPin size={20} color="#1A7A4A" />
+            <MapPin size={20} color="#0F6B4C" />
             <Text style={styles.locationText}>
-              {(booking.details?.address || '') + (booking.details?.postcode ? ', ' + booking.details.postcode : '') || "Address not specified"}
+              {(() => {
+                const addr = booking.details?.address || "";
+                const postcode = booking.details?.postcode || "";
+                const full =
+                  addr +
+                  (postcode && !addr.includes(postcode)
+                    ? ", " + postcode
+                    : "");
+                return full || "Address not specified";
+              })()}
             </Text>
           </View>
         </View>
@@ -415,7 +432,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             <View style={styles.tagsWrap}>
               {rooms.map((r, i) => (
                 <View key={i} style={styles.roomTag}>
-                  <Home size={12} color="#1A7A4A" />
+                  <Home size={12} color="#0F6B4C" />
                   <Text style={styles.roomTagText}>{r}</Text>
                 </View>
               ))}
@@ -465,7 +482,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
           </View>
           {instructions && instructions !== "None" && (
             <View style={styles.instructionBox}>
-              <FileText size={14} color="#1A7A4A" />
+              <FileText size={14} color="#0F6B4C" />
               <Text style={styles.instructionText}>{instructions}</Text>
             </View>
           )}
@@ -503,7 +520,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 Estimated Total
               </Text>
               <Text
-                style={[styles.payRowValue, { color: "#1A7A4A", fontSize: 18 }]}
+                style={[styles.payRowValue, { color: "#0F6B4C", fontSize: 18 }]}
               >
                 £
                 {(
@@ -521,7 +538,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {/* Completed State */}
         {booking.status === "Completed" && (
           <View style={styles.completedBanner}>
-            <CheckCircle size={24} color="#1A7A4A" />
+            <CheckCircle size={24} color="#0F6B4C" />
             <Text style={styles.completedText}>
               Service Completed — Well done! 🎉
             </Text>
@@ -535,17 +552,17 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F4F8F4" },
+  container: { flex: 1, backgroundColor: NEU_BG },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F4F8F4",
+    backgroundColor: NEU_BG,
   },
   loadingText: { marginTop: 12, color: "#4B7A5A", fontSize: 14 },
 
   header: {
-    backgroundColor: "#1A7A4A",
+    backgroundColor: "#0F6B4C",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -556,10 +573,9 @@ const styles = StyleSheet.create({
   backBtn: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.18)",
     justifyContent: "center",
     alignItems: "center",
+    ...neuCircle,
   },
   headerTitle: {
     fontSize: 17,
@@ -575,18 +591,16 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
 
-  content: { flex: 1 },
+  content: { flex: 1, backgroundColor: NEU_BG },
 
   serviceBanner: {
-    backgroundColor: "#fff",
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 16,
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
+    ...neuRaised,
   },
   serviceBannerLeft: { flex: 1, flexDirection: "row", alignItems: "center" },
   serviceName: { fontSize: 16, fontWeight: "800", color: "#1A2E22" },
@@ -599,18 +613,16 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: "#A7D9B8",
   },
-  earningsAmount: { fontSize: 20, fontWeight: "800", color: "#1A7A4A" },
+  earningsAmount: { fontSize: 20, fontWeight: "800", color: "#0F6B4C" },
   earningsLabel: { fontSize: 10, color: "#4B7A5A", marginTop: 2 },
 
   quickActions: {
     flexDirection: "row",
     marginHorizontal: 16,
     marginTop: 12,
-    backgroundColor: "#fff",
     borderRadius: 16,
     overflow: "hidden",
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
+    ...neuInset,
   },
   quickBtn: { flex: 1, alignItems: "center", paddingVertical: 14, gap: 4 },
   quickBtnText: { fontSize: 11, fontWeight: "600", color: "#3A5A44" },
@@ -623,10 +635,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     marginTop: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
+    ...neuGreenRaised,
   },
   mainActionText: { fontSize: 16, fontWeight: "800", color: "#fff" },
 
@@ -645,11 +654,9 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
     borderRadius: 14,
     padding: 14,
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
+    ...neuRaisedSm,
   },
   scheduleLabel: {
     fontSize: 10,
@@ -665,14 +672,12 @@ const styles = StyleSheet.create({
   },
 
   locationCard: {
-    backgroundColor: "#fff",
     borderRadius: 14,
     padding: 16,
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
+    ...neuRaisedSm,
   },
   locationText: {
     flex: 1,
@@ -694,7 +699,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#A7D9B8",
   },
-  roomTagText: { fontSize: 13, fontWeight: "600", color: "#1A6638" },
+  roomTagText: { fontSize: 13, fontWeight: "600", color: "#0A5C43" },
   serviceTag: { backgroundColor: "#FFFBEB", borderColor: "#FDE68A" },
 
   infoGrid: {
@@ -707,12 +712,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#fff",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
+    ...neuInset,
   },
   infoChipText: { fontSize: 12, color: "#3A5A44", fontWeight: "500" },
   instructionBox: {
@@ -728,11 +731,9 @@ const styles = StyleSheet.create({
   instructionText: { flex: 1, fontSize: 13, color: "#1A5C33", lineHeight: 18 },
 
   payCard: {
-    backgroundColor: "#fff",
     borderRadius: 14,
     padding: 16,
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
+    ...neuRaised,
   },
   payRow: {
     flexDirection: "row",

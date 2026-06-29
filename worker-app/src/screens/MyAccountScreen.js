@@ -34,6 +34,14 @@ import {
   Check,
 } from "lucide-react-native";
 import axios from "axios";
+import {
+  NEU_BG,
+  neuRaised,
+  neuRaisedSm,
+  neuInset,
+  neuCircle,
+  neuGreenRaised,
+} from "../theme/neumorphic";
 
 const MyAccountScreen = ({ navigation }) => {
   const { workerInfo, logout, updateWorkerInfo } = useContext(AuthContext);
@@ -58,6 +66,7 @@ const MyAccountScreen = ({ navigation }) => {
     phone: workerInfo?.phone || "",
     address: workerInfo?.address || "",
     postcode: workerInfo?.postcode || "",
+    bankName: workerInfo?.bankDetails?.bankName || "",
     accountName: workerInfo?.bankDetails?.accountName || "",
     accountNumber: workerInfo?.bankDetails?.accountNumber || "",
     sortCode: workerInfo?.bankDetails?.sortCode || "",
@@ -177,6 +186,7 @@ const MyAccountScreen = ({ navigation }) => {
         address: formData.address,
         postcode: formData.postcode,
         bankDetails: {
+          bankName: formData.bankName,
           accountName: formData.accountName,
           accountNumber: formData.accountNumber,
           sortCode: formData.sortCode,
@@ -193,6 +203,7 @@ const MyAccountScreen = ({ navigation }) => {
         address: formData.address,
         postcode: formData.postcode,
         bankDetails: {
+          bankName: formData.bankName,
           accountName: formData.accountName,
           accountNumber: formData.accountNumber,
           sortCode: formData.sortCode,
@@ -236,7 +247,7 @@ const MyAccountScreen = ({ navigation }) => {
           {isEditing ? (
             <X size={20} color="#EF4444" />
           ) : (
-            <Edit2 size={20} color="#1A7A4A" />
+            <Edit2 size={20} color="#0F6B4C" />
           )}
         </TouchableOpacity>
       </View>
@@ -266,7 +277,7 @@ const MyAccountScreen = ({ navigation }) => {
               <View
                 style={[styles.statIconCircle, { backgroundColor: "#EAF5EE" }]}
               >
-                <Briefcase size={20} color="#1A7A4A" />
+                <Briefcase size={20} color="#0F6B4C" />
               </View>
               <Text style={styles.statValue}>
                 {workerInfo?.jobsCompleted || 0}
@@ -278,7 +289,7 @@ const MyAccountScreen = ({ navigation }) => {
               <View
                 style={[styles.statIconCircle, { backgroundColor: "#EAF5EE" }]}
               >
-                <TrendingUp size={20} color="#1A7A4A" />
+                <TrendingUp size={20} color="#0F6B4C" />
               </View>
               <Text style={styles.statValue}>
                 {workerInfo?.rating ? workerInfo.rating.toFixed(1) : "5.0"}
@@ -322,6 +333,15 @@ const MyAccountScreen = ({ navigation }) => {
             <Text style={styles.hintText}>
               This is used for your weekly payouts.
             </Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Bank Name</Text>
+              <TextInput
+                style={styles.input}
+                value={formData.bankName}
+                onChangeText={(t) => handleEditChange("bankName", t)}
+                placeholder="e.g. Barclays"
+              />
+            </View>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Account Name</Text>
               <TextInput
@@ -371,7 +391,7 @@ const MyAccountScreen = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Contact Info</Text>
               <View style={styles.infoCard}>
                 <View style={styles.infoRow}>
-                  <Mail size={18} color="#1A7A4A" />
+                  <Mail size={18} color="#0F6B4C" />
                   <View style={styles.infoTextContainer}>
                     <Text style={styles.infoLabel}>Email</Text>
                     <Text style={styles.infoValue}>{workerInfo?.email}</Text>
@@ -379,7 +399,7 @@ const MyAccountScreen = ({ navigation }) => {
                 </View>
                 <View style={styles.infoDivider} />
                 <View style={styles.infoRow}>
-                  <Phone size={18} color="#1A7A4A" />
+                  <Phone size={18} color="#0F6B4C" />
                   <View style={styles.infoTextContainer}>
                     <Text style={styles.infoLabel}>Phone</Text>
                     <Text style={styles.infoValue}>
@@ -394,7 +414,17 @@ const MyAccountScreen = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Bank Details</Text>
               <View style={styles.infoCard}>
                 <View style={styles.infoRow}>
-                  <CreditCard size={18} color="#1A7A4A" />
+                  <CreditCard size={18} color="#0F6B4C" />
+                  <View style={styles.infoTextContainer}>
+                    <Text style={styles.infoLabel}>Bank Name</Text>
+                    <Text style={styles.infoValue}>
+                      {workerInfo?.bankDetails?.bankName || "Not set"}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.infoDivider} />
+                <View style={styles.infoRow}>
+                  <View style={{ width: 18 }} />
                   <View style={styles.infoTextContainer}>
                     <Text style={styles.infoLabel}>Account Name</Text>
                     <Text style={styles.infoValue}>
@@ -432,14 +462,14 @@ const MyAccountScreen = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Wallet & Payments</Text>
               {walletLoading ? (
                 <View style={styles.loadingBox}>
-                  <ActivityIndicator color="#1A7A4A" />
+                  <ActivityIndicator color="#0F6B4C" />
                 </View>
               ) : (
                 <>
                   <View style={styles.walletCard}>
                     <View style={styles.walletHeader}>
                       <View style={styles.walletIconBox}>
-                        <Wallet size={24} color="#1A7A4A" />
+                        <Wallet size={24} color="#0F6B4C" />
                       </View>
                       <View>
                         <Text style={styles.walletLabel}>
@@ -498,7 +528,7 @@ const MyAccountScreen = ({ navigation }) => {
                   </View>
 
                   <View style={styles.walletNote}>
-                    <AlertCircle size={16} color="#1A7A4A" />
+                    <AlertCircle size={16} color="#0F6B4C" />
                     <Text style={styles.walletNoteText}>
                       To request a withdrawal, go to your Dashboard
                     </Text>
@@ -526,7 +556,7 @@ const MyAccountScreen = ({ navigation }) => {
                               ]}
                             >
                               {withdrawal.status === "completed" && (
-                                <Check size={14} color="#1A7A4A" />
+                                <Check size={14} color="#0F6B4C" />
                               )}
                               {withdrawal.status === "pending" && (
                                 <AlertCircle size={14} color="#F59E0B" />
@@ -552,7 +582,7 @@ const MyAccountScreen = ({ navigation }) => {
                               {
                                 color:
                                   withdrawal.status === "completed"
-                                    ? "#1A7A4A"
+                                    ? "#0F6B4C"
                                     : withdrawal.status === "pending"
                                       ? "#F59E0B"
                                       : "#EF4444",
@@ -626,7 +656,7 @@ const MyAccountScreen = ({ navigation }) => {
               <View style={styles.modalSection}>
                 <Text style={styles.modalLabel}>Withdrawal Amount</Text>
                 <View style={styles.withdrawInputContainer}>
-                  <DollarSign size={20} color="#1A7A4A" />
+                  <DollarSign size={20} color="#0F6B4C" />
                   <TextInput
                     style={styles.withdrawInput}
                     placeholder="Enter amount"
@@ -645,7 +675,10 @@ const MyAccountScreen = ({ navigation }) => {
                 <Text style={styles.modalLabel}>Bank Account</Text>
                 <View style={styles.bankDetailsBox}>
                   <Text style={styles.bankDetailText}>
-                    {workerInfo?.bankDetails?.accountName || "No bank details"}
+                    {workerInfo?.bankDetails?.bankName || "No bank details"}
+                  </Text>
+                  <Text style={styles.bankDetailText}>
+                    {workerInfo?.bankDetails?.accountName || ""}
                   </Text>
                   <Text style={styles.bankDetailText}>
                     {workerInfo?.bankDetails?.accountNumber
@@ -694,14 +727,14 @@ const MyAccountScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F4F8F4" },
+  container: { flex: 1, backgroundColor: NEU_BG },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: NEU_BG,
     borderBottomWidth: 0.5,
     borderBottomColor: "#D1E8D8",
   },
@@ -710,10 +743,10 @@ const styles = StyleSheet.create({
   content: { flex: 1 },
   profileHeader: { alignItems: "center", paddingVertical: 24 },
   avatarLarge: {
+    ...neuCircle,
     width: 90,
     height: 90,
-    borderRadius: 45,
-    backgroundColor: "#1A7A4A",
+    backgroundColor: "#0F6B4C",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
@@ -731,7 +764,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
-    borderColor: "#F4F8F4",
+    borderColor: NEU_BG,
   },
   profileName: {
     fontSize: 24,
@@ -741,14 +774,12 @@ const styles = StyleSheet.create({
   },
   profileEmail: { fontSize: 14, color: "#4B7A5A", fontWeight: "500" },
   statsContainer: {
+    ...neuRaised,
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
     marginHorizontal: 16,
     borderRadius: 20,
     paddingVertical: 16,
     marginBottom: 24,
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
   },
   statBox: { flex: 1, alignItems: "center" },
   statIconCircle: {
@@ -779,11 +810,9 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   infoCard: {
-    backgroundColor: "#FFFFFF",
+    ...neuRaisedSm,
     borderRadius: 20,
     paddingHorizontal: 16,
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
   },
   infoRow: {
     flexDirection: "row",
@@ -801,14 +830,12 @@ const styles = StyleSheet.create({
   infoValue: { fontSize: 15, fontWeight: "600", color: "#1A2E22" },
   infoDivider: { height: 1, backgroundColor: "#EAF5EE", marginLeft: 34 },
   settingItem: {
-    backgroundColor: "#FFFFFF",
+    ...neuRaisedSm,
     borderRadius: 20,
     padding: 16,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
   },
   settingTitle: {
     fontSize: 15,
@@ -818,17 +845,15 @@ const styles = StyleSheet.create({
   },
   settingSubtitle: { fontSize: 12, color: "#86A892" },
   logoutButton: {
+    ...neuInset,
     marginHorizontal: 16,
     marginTop: 32,
     paddingVertical: 16,
     borderRadius: 16,
-    backgroundColor: "#FEF2F2",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    borderWidth: 0.5,
-    borderColor: "#FECACA",
   },
   logoutButtonText: { fontSize: 15, fontWeight: "700", color: "#EF4444" },
   editForm: { paddingHorizontal: 16 },
@@ -854,39 +879,30 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   input: {
-    backgroundColor: "#FFFFFF",
+    ...neuInset,
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 15,
     color: "#1A2E22",
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
     fontWeight: "500",
   },
   saveButton: {
-    backgroundColor: "#1A7A4A",
+    ...neuGreenRaised,
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
     marginTop: 24,
     marginBottom: 40,
-    shadowColor: "#1A7A4A",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
   },
   saveButtonText: { fontSize: 16, fontWeight: "700", color: "#FFFFFF" },
   walletCard: {
-    backgroundColor: "#FFFFFF",
+    ...neuRaisedSm,
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
     borderLeftWidth: 4,
-    borderLeftColor: "#1A7A4A",
+    borderLeftColor: "#0F6B4C",
   },
   walletHeader: { flexDirection: "row", alignItems: "center", gap: 16 },
   walletIconBox: {
@@ -901,12 +917,12 @@ const styles = StyleSheet.create({
   walletAmount: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#1A7A4A",
+    color: "#0F6B4C",
     marginTop: 4,
   },
   walletStatsRow: {
     flexDirection: "row",
-    backgroundColor: "#F4F8F4",
+    backgroundColor: "#F4F6F8",
     borderRadius: 16,
     padding: 12,
     marginBottom: 16,
@@ -921,7 +937,7 @@ const styles = StyleSheet.create({
   },
   walletStatDivider: { width: 1, backgroundColor: "#D1E8D8" },
   withdrawButton: {
-    backgroundColor: "#1A7A4A",
+    ...neuGreenRaised,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -929,22 +945,15 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     marginBottom: 20,
-    shadowColor: "#1A7A4A",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
   },
   withdrawButtonText: { fontSize: 15, fontWeight: "700", color: "#FFFFFF" },
   upcomingPaymentsSection: {
-    backgroundColor: "#FFFFFF",
+    ...neuRaisedSm,
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,
     borderLeftWidth: 5,
     borderLeftColor: "#F59E0B",
-    borderWidth: 0.5,
-    borderColor: "#D1E8D8",
   },
   upcomingTitle: {
     fontSize: 14,
@@ -1029,7 +1038,7 @@ const styles = StyleSheet.create({
   walletNoteText: {
     flex: 1,
     fontSize: 13,
-    color: "#1A5C33",
+    color: "#0A5C43",
     fontWeight: "500",
   },
   historySection: { marginTop: 12 },
@@ -1096,12 +1105,12 @@ const styles = StyleSheet.create({
     color: "#4B7A5A",
     marginBottom: 8,
   },
-  modalBalance: { fontSize: 28, fontWeight: "800", color: "#1A7A4A" },
+  modalBalance: { fontSize: 28, fontWeight: "800", color: "#0F6B4C" },
   withdrawInputContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: "#F4F8F4",
+    backgroundColor: "#F4F6F8",
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -1111,11 +1120,11 @@ const styles = StyleSheet.create({
   withdrawInput: { flex: 1, fontSize: 16, color: "#1A2E22", fontWeight: "600" },
   modalHint: { fontSize: 12, color: "#4B7A5A", marginTop: 8 },
   bankDetailsBox: {
-    backgroundColor: "#F4F8F4",
+    backgroundColor: "#F4F6F8",
     borderRadius: 12,
     padding: 12,
     borderLeftWidth: 4,
-    borderLeftColor: "#1A7A4A",
+    borderLeftColor: "#0F6B4C",
   },
   bankDetailText: {
     fontSize: 13,
@@ -1152,10 +1161,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   modalConfirmButton: {
+    ...neuGreenRaised,
     flex: 1,
     paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: "#1A7A4A",
     justifyContent: "center",
     alignItems: "center",
   },

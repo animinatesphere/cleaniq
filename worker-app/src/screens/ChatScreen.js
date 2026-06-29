@@ -15,22 +15,29 @@ import {
 import { AuthContext, API_URL } from "../context/AuthContext";
 import { Send, ChevronLeft, MessageSquare } from "lucide-react-native";
 import axios from "axios";
+import {
+  NEU_BG,
+  neuRaisedSm,
+  neuInset,
+  neuCircle,
+  neuGreenRaised,
+} from "../theme/neumorphic";
 
 // ── Design tokens ──────────────────────────────────────────
 const C = {
-  bg: "#FFFFFF",
-  chatBg: "#F6FEFC",
+  bg: "#F4F6F8",
+  chatBg: "#F4F6F8",
   surface: "#FFFFFF",
 
-  border: "#E6F7F1",
-  borderInput: "#D1FAE5",
+  border: "#EEF1F4",
+  borderInput: "#EEF1F4",
 
-  green: "#10B981",
-  greenDark: "#059669",
-  greenDeep: "#047857",
-  greenBubble: "#10B981",
-  greenDim: "#D1FAE5",
-  greenPale: "#ECFDF5",
+  green: "#0F6B4C",
+  greenDark: "#0A5C43",
+  greenDeep: "#074936",
+  greenBubble: "#0F6B4C",
+  greenDim: "#CFE8DC",
+  greenPale: "#E8F5EE",
 
   text: "#111827",
   textSub: "#6B7280",
@@ -40,7 +47,7 @@ const C = {
 
   theirBubble: "#FFFFFF",
   theirText: "#1F2937",
-  theirBorder: "#E6F7F1",
+  theirBorder: "#EEF1F4",
   theirTimestamp: "#9CA3AF",
 };
 
@@ -250,17 +257,17 @@ const ChatScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: C.bg,
+    backgroundColor: NEU_BG,
   },
   container: {
     flex: 1,
-    backgroundColor: C.chatBg,
+    backgroundColor: NEU_BG,
   },
 
   // ── Header ────────────────────────────────────────────────
   header: {
+    ...neuRaisedSm,
     height: 66,
-    backgroundColor: C.surface,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
@@ -272,12 +279,9 @@ const styles = StyleSheet.create({
     opacity: 0.15,
   },
   backBtn: {
+    ...neuCircle,
     width: 38,
     height: 38,
-    borderRadius: 19,
-    backgroundColor: C.greenPale,
-    borderWidth: 1,
-    borderColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -288,12 +292,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   headerAvatarWrap: {
+    ...neuCircle,
     width: 38,
     height: 38,
-    borderRadius: 19,
-    backgroundColor: C.greenPale,
-    borderWidth: 1,
-    borderColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -357,16 +358,14 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   avatar: {
+    ...neuCircle,
     width: 32,
     height: 32,
-    borderRadius: 16,
     backgroundColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 8,
     alignSelf: "flex-end",
-    borderWidth: 1,
-    borderColor: C.greenDim,
   },
   avatarText: {
     fontSize: 11,
@@ -429,37 +428,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 14,
     paddingVertical: 12,
-    backgroundColor: C.surface,
-    borderTopWidth: 1,
-    borderTopColor: C.border,
+    backgroundColor: NEU_BG,
     gap: 10,
   },
   textInput: {
+    ...neuInset,
     flex: 1,
     minHeight: 44,
     maxHeight: 100,
-    backgroundColor: C.greenPale,
     borderRadius: 22,
     paddingHorizontal: 18,
     paddingVertical: 10,
     fontSize: 14,
     color: C.text,
     fontWeight: "500",
-    borderWidth: 1,
-    borderColor: C.borderInput,
   },
   sendBtn: {
+    ...neuGreenRaised,
+    borderRadius: 999,
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: C.green,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: C.green,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
-    elevation: 4,
   },
   sendBtnDisabled: {
     backgroundColor: C.greenDim,
@@ -475,12 +465,10 @@ const styles = StyleSheet.create({
     marginTop: 60,
   },
   emptyIconWrap: {
+    ...neuCircle,
     width: 72,
     height: 72,
-    borderRadius: 36,
     backgroundColor: C.greenPale,
-    borderWidth: 1.5,
-    borderColor: C.greenDim,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 18,

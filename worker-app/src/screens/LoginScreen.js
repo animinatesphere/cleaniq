@@ -17,12 +17,19 @@ import * as LocalAuthentication from "expo-local-authentication";
 import { AuthContext } from "../context/AuthContext";
 import { Mail, Lock, Fingerprint } from "lucide-react-native";
 import Card from "../components/Card";
-import { C, cardShadow } from "../theme/flat";
+import { C } from "../theme/flat";
 import {
   responsiveFontSize,
   getResponsivePadding,
   isBigScreen,
 } from "../utils/responsive";
+import {
+  NEU_BG,
+  neuRaised,
+  neuInset,
+  neuCircle,
+  neuGreenRaised,
+} from "../theme/neumorphic";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -130,7 +137,7 @@ const LoginScreen = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.logoWrap}>
-            <View style={[styles.logoCircle, cardShadow]}>
+            <View style={[styles.logoCircle, neuCircle]}>
               <Image
                 source={require("../../assets/logo.jpg")}
                 style={styles.logo}
@@ -141,7 +148,7 @@ const LoginScreen = () => {
             <Text style={styles.brandTagline}>Staff Portal</Text>
           </View>
 
-          <Card style={styles.card}>
+          <Card style={[styles.card, neuRaised]}>
             <Text style={styles.welcomeText}>Welcome back</Text>
             <Text style={styles.subtitle}>
               Enter your details to access your jobs.
@@ -175,7 +182,7 @@ const LoginScreen = () => {
 
               <View style={styles.actionsRow}>
                 <TouchableOpacity
-                  style={[styles.loginButton, cardShadow]}
+                  style={[styles.loginButton, neuGreenRaised]}
                   onPress={handleLogin}
                   disabled={isLoggingIn}
                   activeOpacity={0.85}
@@ -189,7 +196,7 @@ const LoginScreen = () => {
 
                 {isBiometricSupported && (
                   <TouchableOpacity
-                    style={[styles.biometricButton, cardShadow]}
+                    style={[styles.biometricButton, neuCircle]}
                     onPress={handleBiometricAuth}
                     disabled={isLoggingIn}
                     activeOpacity={0.85}
@@ -213,7 +220,7 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: C.bg,
+    backgroundColor: NEU_BG,
   },
   keyboardWrapper: {
     flex: 1,
@@ -235,7 +242,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     overflow: "hidden",
     marginBottom: 14,
-    backgroundColor: C.card,
   },
   logo: {
     width: 64,
@@ -278,9 +284,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: C.bg,
-    borderWidth: 1,
-    borderColor: C.border,
+    ...neuInset,
     borderRadius: 16,
     paddingHorizontal: 18,
     height: 56,
@@ -306,7 +310,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: C.primary,
   },
   loginButtonText: {
     color: "#FFFFFF",
@@ -320,7 +323,6 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: C.primaryLight,
   },
   footerText: {
     marginTop: 24,

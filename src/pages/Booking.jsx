@@ -192,12 +192,21 @@ const Booking = () => {
   const [bookedDates, setBookedDates] = useState([]);
   const [bookedSlotsByDate, setBookedSlotsByDate] = useState({});
 
-  // Initialize formData with localStorage backup
+  // Initialize formData with localStorage backup (drafts older than 24h are discarded)
   const [formData, setFormData] = useState(() => {
     const saved = localStorage.getItem("ciq_booking_draft");
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+        if (
+          parsed.__savedAt &&
+          Date.now() - parsed.__savedAt < DRAFT_MAX_AGE_MS
+        ) {
+          delete parsed.__savedAt;
+          return parsed;
+        }
+        localStorage.removeItem("ciq_booking_draft");
       } catch {
         localStorage.removeItem("ciq_booking_draft");
       }
@@ -229,7 +238,10 @@ const Booking = () => {
 
   // Save formData to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem("ciq_booking_draft", JSON.stringify(formData));
+    localStorage.setItem(
+      "ciq_booking_draft",
+      JSON.stringify({ ...formData, __savedAt: Date.now() }),
+    );
   }, [formData]);
 
   // Clear localStorage after successful submission
@@ -721,7 +733,10 @@ const Booking = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingPayload),
       });
-      if (response.ok) setIsSubmitted(true);
+      if (response.ok) {
+        localStorage.removeItem("ciq_booking_draft");
+        setIsSubmitted(true);
+      }
     } catch (error) {
       console.error("Error saving booking:", error);
     } finally {

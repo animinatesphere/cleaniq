@@ -3414,24 +3414,186 @@ const Bookings = () => {
                         );
                       })()}
                     </div>
-                    <div className="space-y-1 pt-4">
+                  </div>
+
+                  <div className="p-8 rounded-[32px] bg-slate-50 border border-slate-100 space-y-4">
+                    <h4 className="text-xs font-bold text-primary-dark uppercase tracking-widest">
+                      Address & Contact
+                    </h4>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-1 md:col-span-2">
+                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                          Address
+                        </label>
+                        <input
+                          type="text"
+                          value={editData.details?.address || ""}
+                          onChange={(e) =>
+                            setEditData({
+                              ...editData,
+                              details: {
+                                ...editData.details,
+                                address: e.target.value,
+                              },
+                            })
+                          }
+                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                          Postcode
+                        </label>
+                        <input
+                          type="text"
+                          value={editData.details?.postcode || ""}
+                          onChange={(e) =>
+                            setEditData({
+                              ...editData,
+                              details: {
+                                ...editData.details,
+                                postcode: e.target.value,
+                              },
+                            })
+                          }
+                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          value={editData.customer?.email || ""}
+                          onChange={(e) =>
+                            setEditData({
+                              ...editData,
+                              customer: {
+                                ...editData.customer,
+                                email: e.target.value,
+                              },
+                            })
+                          }
+                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-8 rounded-[32px] bg-slate-50 border border-slate-100 space-y-4">
+                    <h4 className="text-xs font-bold text-primary-dark uppercase tracking-widest">
+                      Job Details
+                    </h4>
+                    <div className="grid md:grid-cols-3 gap-6">
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                          Frequency
+                        </label>
+                        <select
+                          value={editData.details?.frequency || "Once"}
+                          onChange={(e) =>
+                            setEditData({
+                              ...editData,
+                              details: {
+                                ...editData.details,
+                                frequency: e.target.value,
+                              },
+                            })
+                          }
+                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
+                        >
+                          <option value="Once">Once</option>
+                          <option value="Weekly">Weekly</option>
+                          <option value="Bi-weekly">Bi-weekly</option>
+                          <option value="Monthly">Monthly</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                          Duration (hours)
+                        </label>
+                        <input
+                          type="number"
+                          value={editData.details?.duration || ""}
+                          onChange={(e) =>
+                            setEditData({
+                              ...editData,
+                              details: {
+                                ...editData.details,
+                                duration: Number(e.target.value) || 0,
+                              },
+                            })
+                          }
+                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                          Supplies Provided By
+                        </label>
+                        <select
+                          value={editData.suppliesProvidedBy || ""}
+                          onChange={(e) =>
+                            setEditData({
+                              ...editData,
+                              suppliesProvidedBy: e.target.value,
+                            })
+                          }
+                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
+                        >
+                          <option value="">Not specified</option>
+                          <option value="Cleaniq">Cleaniq</option>
+                          <option value="Customer">Customer</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="space-y-1 pt-2">
                       <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
-                        Special Instructions
+                        Extra Services & Add-ons (one per line)
                       </label>
                       <textarea
-                        value={getNotes(editData)}
+                        value={(editData.details?.extras || []).join("\n")}
                         onChange={(e) =>
                           setEditData({
                             ...editData,
                             details: {
                               ...editData.details,
-                              notes: e.target.value,
+                              extras: e.target.value
+                                .split("\n")
+                                .map((line) => line.trim())
+                                .filter(Boolean),
                             },
                           })
                         }
-                        className="w-full p-4 rounded-xl bg-white border border-slate-200 font-bold text-xs h-24 resize-none"
+                        placeholder="e.g. Oven Clean (x1)&#10;Parking: Available on-site&#10;Entry: I will be home"
+                        className="w-full p-4 rounded-xl bg-white border border-slate-200 font-bold text-xs h-28 resize-none"
                       />
+                      <p className="text-[10px] text-slate-400 ml-4">
+                        Each line becomes one item — rooms, add-ons, parking,
+                        access, and pet info are all stored here as plain
+                        text lines.
+                      </p>
                     </div>
+                  </div>
+
+                  <div className="space-y-1 pt-4">
+                    <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                      Special Instructions
+                    </label>
+                    <textarea
+                      value={getNotes(editData)}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          details: {
+                            ...editData.details,
+                            notes: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full p-4 rounded-xl bg-white border border-slate-200 font-bold text-xs h-24 resize-none"
+                    />
                   </div>
                 </div>
               ) : (

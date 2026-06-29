@@ -26,6 +26,7 @@ const workerSchema = new mongoose.Schema({
 
   // Bank Details
   bankDetails: {
+    bankName: { type: String, default: "" },
     accountName: { type: String, default: "" },
     accountNumber: { type: String, default: "" },
     sortCode: { type: String, default: "" },
