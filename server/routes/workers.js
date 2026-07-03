@@ -825,6 +825,87 @@ router.put("/:id/profile", async (req, res) => {
   }
 });
 
+// PUT update worker's current location - called repeatedly by the worker
+// app while location sharing is switched on for an active job. Sharing is
+// always an explicit, worker-initiated toggle (foreground only) - never
+// silent background tracking.
+router.put("/:id/location", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { lat, lng, sharing, bookingId } = req.body;
+
+    const worker = await Worker.findById(id);
+    if (!worker) {
+      return res.status(404).json({ error: "Worker not found" });
+    }
+
+    if (sharing === false) {
+      worker.location = {
+        ...worker.location,
+        sharing: false,
+        activeBookingId: null,
+      };
+      await worker.save();
+      return res.json({ message: "Location sharing turned off" });
+    }
+
+    if (typeof lat !== "number" || typeof lng !== "number") {
+      return res.status(400).json({ error: "lat and lng are required" });
+    }
+
+    worker.location = {
+      lat,
+      lng,
+      lastUpdated: new Date(),
+      sharing: true,
+      activeBookingId: bookingId || worker.location?.activeBookingId || null,
+    };
+    await worker.save();
+
+    res.json({ message: "Location updated", location: worker.location });
+  } catch (error) {
+    console.error("Error updating worker location:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET a booking's assigned worker's current shared location - used by
+// admin (and later the customer app) to show where the worker is.
+router.get("/jobs/:id/worker-location", async (req, res) => {
+  try {
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+    if (!booking.assignedWorker) {
+      return res.status(404).json({ error: "No worker assigned to this job" });
+    }
+
+    const worker = await Worker.findById(booking.assignedWorker);
+    if (!worker) {
+      return res.status(404).json({ error: "Worker not found" });
+    }
+
+    if (
+      !worker.location?.sharing ||
+      worker.location?.activeBookingId !== String(booking._id)
+    ) {
+      return res.json({ sharing: false });
+    }
+
+    res.json({
+      sharing: true,
+      lat: worker.location.lat,
+      lng: worker.location.lng,
+      lastUpdated: worker.location.lastUpdated,
+      workerName: `${worker.firstName} ${worker.lastName}`,
+    });
+  } catch (error) {
+    console.error("Error fetching worker location:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // PUT update worker availability
 router.put("/:id/availability", async (req, res) => {
   try {

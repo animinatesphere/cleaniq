@@ -212,6 +212,35 @@ router.get('/me', verifyCustomer, async (req, res) => {
   }
 });
 
+// PATCH /api/customer-auth/profile  (update name + phone)
+router.patch('/profile', verifyCustomer, async (req, res) => {
+  try {
+    const { firstName, lastName, phone } = req.body;
+    const updates = {};
+    if (firstName) updates.firstName = firstName.trim();
+    if (lastName)  updates.lastName  = lastName.trim();
+    if (phone !== undefined) updates.phone = phone.trim();
+
+    const customer = await Customer.findByIdAndUpdate(
+      req.customer.id,
+      { $set: updates },
+      { new: true, select: '-passwordHash' },
+    );
+    if (!customer) return res.status(404).json({ message: 'Customer not found' });
+    res.json({
+      customer: {
+        id: customer._id,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
 module.exports.verifyCustomer = verifyCustomer;
 module.exports.JWT_SECRET = JWT_SECRET;

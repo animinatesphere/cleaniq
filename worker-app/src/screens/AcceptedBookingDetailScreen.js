@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+  useRef,
+} from "react";
+import * as Location from "expo-location";
 import { getDisplayTime } from "../utils/timeUtils";
 import {
   NEU_BG,
@@ -40,6 +47,7 @@ import {
   Play,
   Flag,
   AlertCircle,
+  Radio,
 } from "lucide-react-native";
 import axios from "axios";
 
@@ -50,6 +58,9 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
+  const [sharingLocation, setSharingLocation] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const locationSubscription = useRef(null);
 
   const isJobTomorrowOrLater = useCallback(() => {
     if (!booking || !booking.schedule || !booking.schedule.date) return false;
@@ -155,6 +166,85 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     });
   };
 
+  // Foreground-only location sharing - explicitly turned on by the worker,
+  // never runs silently in the background. Updates stop the moment the
+  // worker toggles it off, leaves this screen, or the job is completed.
+  const stopSharingLocation = useCallback(
+    async (notifyServer = true) => {
+      if (locationSubscription.current) {
+        locationSubscription.current.remove();
+        locationSubscription.current = null;
+      }
+      setSharingLocation(false);
+      if (notifyServer && workerInfo?.id) {
+        try {
+          await axios.put(`${API_URL}/workers/${workerInfo.id}/location`, {
+            sharing: false,
+          });
+        } catch (error) {
+          console.error("Error stopping location sharing:", error);
+        }
+      }
+    },
+    [workerInfo?.id],
+  );
+
+  const toggleLocationSharing = async () => {
+    if (sharingLocation) {
+      await stopSharingLocation();
+      return;
+    }
+
+    setLocationLoading(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Location Permission Needed",
+          "Turn on location access so the customer can see when you're on the way.",
+        );
+        return;
+      }
+
+      const sub = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.Balanced,
+          timeInterval: 15000,
+          distanceInterval: 25,
+        },
+        (position) => {
+          axios
+            .put(`${API_URL}/workers/${workerInfo.id}/location`, {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+              sharing: true,
+              bookingId: booking?._id,
+            })
+            .catch((error) =>
+              console.error("Error sending location update:", error),
+            );
+        },
+      );
+      locationSubscription.current = sub;
+      setSharingLocation(true);
+    } catch (error) {
+      console.error("Error starting location sharing:", error);
+      Alert.alert("Error", "Could not start location sharing.");
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
+  // Stop sharing automatically when leaving this screen.
+  useEffect(() => {
+    return () => {
+      if (locationSubscription.current) {
+        locationSubscription.current.remove();
+        locationSubscription.current = null;
+      }
+    };
+  }, []);
+
   const doAction = async (endpoint, nextStatus, successMsg) => {
     setActionLoading(endpoint);
     try {
@@ -162,6 +252,9 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         `${API_URL}/workers/jobs/${bookingId}/${endpoint}`,
       );
       setBooking((prev) => ({ ...prev, status: nextStatus }));
+      if (nextStatus === "Completed" && sharingLocation) {
+        stopSharingLocation();
+      }
       Alert.alert("✅ Done", successMsg);
     } catch (error) {
       Alert.alert("Error", error.response?.data?.error || "Action failed");
@@ -291,6 +384,53 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             </View>
           )}
         </View>
+
+        {/* Share Location Toggle */}
+        {booking.status !== "Completed" && (
+          <View style={styles.locationShareCard}>
+            <View style={styles.locationShareLeft}>
+              <View
+                style={[
+                  styles.locationShareIcon,
+                  sharingLocation && styles.locationShareIconActive,
+                ]}
+              >
+                <Radio
+                  size={18}
+                  color={sharingLocation ? "#FFFFFF" : "#0F6B4C"}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.locationShareTitle}>
+                  {sharingLocation
+                    ? "Sharing your location"
+                    : "Share my location"}
+                </Text>
+                <Text style={styles.locationShareSub}>
+                  {sharingLocation
+                    ? "Customer can see you're on the way"
+                    : "Let the customer know when you're close"}
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              onPress={toggleLocationSharing}
+              disabled={locationLoading}
+              style={[
+                styles.locationShareToggle,
+                sharingLocation && styles.locationShareToggleActive,
+              ]}
+            >
+              {locationLoading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={styles.locationShareToggleText}>
+                  {sharingLocation ? "Stop" : "Start"}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Quick Action Buttons */}
         <View style={styles.quickActions}>
@@ -615,6 +755,61 @@ const styles = StyleSheet.create({
   },
   earningsAmount: { fontSize: 20, fontWeight: "800", color: "#0F6B4C" },
   earningsLabel: { fontSize: 10, color: "#4B7A5A", marginTop: 2 },
+
+  locationShareCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginHorizontal: 16,
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 16,
+    gap: 10,
+    ...neuRaisedSm,
+  },
+  locationShareLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+  },
+  locationShareIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#E8F5EE",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  locationShareIconActive: {
+    backgroundColor: "#0F6B4C",
+  },
+  locationShareTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#1A1A1A",
+  },
+  locationShareSub: {
+    fontSize: 11,
+    color: "#6B7280",
+    marginTop: 1,
+  },
+  locationShareToggle: {
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 12,
+    backgroundColor: "#0F6B4C",
+    minWidth: 64,
+    alignItems: "center",
+  },
+  locationShareToggleActive: {
+    backgroundColor: "#EF4444",
+  },
+  locationShareToggleText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "700",
+  },
 
   quickActions: {
     flexDirection: "row",
