@@ -218,7 +218,7 @@ const BookingScreen = ({ navigation }) => {
     address:             "",
     postcode:            "",
     frequency:           "Once",
-    duration:            2,
+    duration:            1,
     bedrooms:            1,
     bathrooms:           1,
     kitchens:            1,
@@ -520,16 +520,16 @@ const BookingScreen = ({ navigation }) => {
         {/* ══ STEP 1 ═════════════════════════════════════════════════════════ */}
         {step === 1 && (
           <View style={styles.stepBody}>
-            <SectionLabel title="How many hours?" sub="Minimum 2 hours" />
+            <SectionLabel title="How many hours?" sub="From 1 hour" />
 
             {/* Duration large picker */}
             <View style={[styles.durationCard, cardShadow]}>
               <TouchableOpacity
-                style={[styles.durationBtn, form.duration <= 2 && styles.durationBtnOff]}
-                onPress={() => set("duration", Math.max(2, form.duration - 1))}
-                disabled={form.duration <= 2}
+                style={[styles.durationBtn, form.duration <= 1 && styles.durationBtnOff]}
+                onPress={() => set("duration", Math.max(1, form.duration - 1))}
+                disabled={form.duration <= 1}
               >
-                <Minus size={20} color={form.duration <= 2 ? C.textMuted : C.primary} strokeWidth={2.5} />
+                <Minus size={20} color={form.duration <= 1 ? C.textMuted : C.primary} strokeWidth={2.5} />
               </TouchableOpacity>
               <View style={styles.durationCenter}>
                 <Text style={styles.durationNum}>{form.duration}</Text>
