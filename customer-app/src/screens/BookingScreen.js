@@ -330,7 +330,7 @@ const BookingScreen = ({ navigation }) => {
           receptionRooms: form.receptionRooms,
         },
         extras:   form.extras,
-        schedule: { date: dateStr(form.date), time: form.timeSlot },
+        schedule: { date: dateStr(form.date), time: form.timeSlot, timeSlot: form.timeSlot },
         suppliesProvidedBy: form.suppliesProvidedBy,
         hasPet:  form.hasPet,
         payment: { amount: total, method: "Invoice", status: "Pending", billingType: "hourly" },
@@ -408,6 +408,16 @@ const BookingScreen = ({ navigation }) => {
   // ── Calendar ─────────────────────────────────────────────────────────────────
   const calDays = buildCalendar(calYear, calMonth);
   const isPast  = (d) => { if (!d) return false; const t = new Date(); t.setHours(0,0,0,0); return d < t; };
+
+  // Grey out time slots that have already passed on today's date
+  const isPastTime = (slot) => {
+    if (!form.date) return false;
+    if (dateStr(form.date) !== dateStr(new Date())) return false;
+    const [h, m] = slot.split(":").map(Number);
+    const now = new Date();
+    // Add 30-min buffer so customers can't book something starting very soon
+    return h * 60 + m <= now.getHours() * 60 + now.getMinutes() + 30;
+  };
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
@@ -722,7 +732,13 @@ const BookingScreen = ({ navigation }) => {
 
             <SectionLabel
               title="Start time"
-              sub={availLoading ? "Checking availability..." : bookedSlots.length > 0 ? `${bookedSlots.length} slot(s) already booked` : "All slots available"}
+              sub={
+                availLoading
+                  ? "Checking availability..."
+                  : bookedSlots.length > 0
+                  ? `${bookedSlots.length} slot(s) already taken on this date`
+                  : "Choose your preferred start time"
+              }
             />
             {availLoading ? (
               <View style={styles.availLoader}>
@@ -732,25 +748,28 @@ const BookingScreen = ({ navigation }) => {
             ) : (
               <View style={styles.timeGrid}>
                 {TIME_SLOTS.map((t) => {
-                  const sel    = form.timeSlot === t;
-                  const booked = bookedSlots.includes(t);
+                  const sel      = form.timeSlot === t;
+                  const booked   = bookedSlots.includes(t);
+                  const pastTime = isPastTime(t);
+                  const disabled = booked || pastTime;
                   return (
                     <TouchableOpacity
                       key={t}
                       style={[
                         styles.timeChip,
-                        sel    && styles.timeChipOn,
-                        booked && styles.timeChipBooked,
+                        sel      && styles.timeChipOn,
+                        disabled && styles.timeChipBooked,
                       ]}
-                      onPress={() => !booked && set("timeSlot", t)}
-                      disabled={booked}
+                      onPress={() => !disabled && set("timeSlot", t)}
+                      disabled={disabled}
                       activeOpacity={0.8}
                     >
-                      <Clock size={12} color={booked ? "#C0CACC" : sel ? "#fff" : C.textMuted} style={{ marginRight: 5 }} />
-                      <Text style={[styles.timeChipTxt, sel && styles.timeChipTxtOn, booked && styles.timeChipTxtBooked]}>
+                      <Clock size={12} color={disabled ? "#C0CACC" : sel ? "#fff" : C.textMuted} style={{ marginRight: 5 }} />
+                      <Text style={[styles.timeChipTxt, sel && styles.timeChipTxtOn, disabled && styles.timeChipTxtBooked]}>
                         {t}
                       </Text>
-                      {booked && <Text style={styles.timeChipBookedTag}> Full</Text>}
+                      {booked   && <Text style={styles.timeChipBookedTag}> Full</Text>}
+                      {pastTime && <Text style={styles.timeChipBookedTag}> Past</Text>}
                     </TouchableOpacity>
                   );
                 })}

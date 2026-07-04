@@ -25,3 +25,12 @@ dist-ssr
 
 # Environment Variables
 .env
+
+# Video project (large files)
+cleaniq-video/
+
+# Mobile app build artifacts
+customer-app/.expo/
+customer-app/node_modules/
+worker-app/.expo/
+worker-app/node_modules/

@@ -4,7 +4,11 @@
     "slug": "cleaniq-customer",
     "scheme": "cleaniqcustomer",
     "version": "1.0.0",
-    "platforms": ["web", "ios", "android"],
+    "platforms": [
+      "web",
+      "ios",
+      "android"
+    ],
     "orientation": "portrait",
     "icon": "./assets/icon.jpg",
     "userInterfaceStyle": "light",
@@ -26,12 +30,21 @@
         "backgroundColor": "#0A5C43",
         "foregroundImage": "./assets/icon.jpg"
       },
-      "permissions": ["android.permission.POST_NOTIFICATIONS"]
+      "permissions": [
+        "android.permission.POST_NOTIFICATIONS"
+      ]
     },
-    "plugins": [["expo-updates", { "username": "hexcode" }]],
+    "plugins": [
+      [
+        "expo-updates",
+        {
+          "username": "hexcode"
+        }
+      ]
+    ],
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "15337943-4313-40d1-b40f-81988d4b3be3"
       }
     },
     "runtimeVersion": {
@@ -39,6 +52,7 @@
     },
     "updates": {
       "enabled": false
-    }
+    },
+    "owner": "hexcode"
   }
 }

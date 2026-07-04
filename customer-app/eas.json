@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 20.0.0"
+    "version": ">= 20.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -11,10 +12,7 @@
       }
     },
     "preview": {
-      "distribution": "internal",
-      "ios": {
-        "distribution": "internal"
-      }
+      "distribution": "internal"
     },
     "production": {
       "autoIncrement": true,
@@ -26,9 +24,7 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "cleaniqservices@gmail.com",
-        "ascAppId": "",
-        "appleTeamId": ""
+        "appleId": "cleaniqservices@gmail.com"
       }
     }
   }
