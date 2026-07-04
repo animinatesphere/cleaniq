@@ -1175,13 +1175,16 @@ const Booking = () => {
                           </div>
                           <div className="mb-8">
                             <div className="grid grid-cols-5 sm:grid-cols-6 gap-2 max-h-44 overflow-y-auto p-1 mb-4">
-                              {Array.from({ length: 50 }, (_, i) => i + 1).map(
+                              {Array.from({ length: 50 }, (_, i) => i + 2).map(
                                 (hours) => (
                                   <button
                                     key={hours}
                                     type="button"
                                     onClick={() =>
-                                      setFormData({ ...formData, duration: hours })
+                                      setFormData({
+                                        ...formData,
+                                        duration: hours,
+                                      })
                                     }
                                     className={`py-2.5 rounded-xl border-2 font-black text-xs transition-all ${
                                       formData.duration === hours
@@ -1208,7 +1211,7 @@ const Booking = () => {
                                     ...formData,
                                     duration: Number.isNaN(val)
                                       ? ""
-                                      : Math.min(50, Math.max(1, val)),
+                                      : Math.min(50, Math.max(2, val)),
                                   });
                                 }}
                                 className="w-full py-5 px-6 rounded-2xl border-2 border-slate-200 bg-white font-black text-2xl text-primary text-center focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
@@ -1218,7 +1221,7 @@ const Booking = () => {
                               </span>
                             </div>
                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-3 text-center">
-                              Choose any duration from 1 to 50 hours
+                              Choose any duration from 2 to 50 hours
                             </p>
                           </div>
                           <div className="grid grid-cols-3 gap-2">
@@ -1273,7 +1276,9 @@ const Booking = () => {
                                 // Cleaning Supply is controlled by the "Who
                                 // provides supplies?" question below, not a
                                 // manual toggle here.
-                                if (clean(s.name) === clean(SUPPLIES_EXTRA_NAME))
+                                if (
+                                  clean(s.name) === clean(SUPPLIES_EXTRA_NAME)
+                                )
                                   return false;
                                 return !baseServices.some(
                                   (base) => clean(base) === clean(s.name),
@@ -1421,8 +1426,8 @@ const Booking = () => {
                             <div className="space-y-3">
                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                                 <Sparkles size={14} className="text-primary" />{" "}
-                                Who provides the cleaning supplies &
-                                equipment? <span className="text-rose-500">*</span>
+                                Who provides the cleaning supplies & equipment?{" "}
+                                <span className="text-rose-500">*</span>
                               </p>
                               <select
                                 className={`w-full p-5 rounded-2xl border-2 shadow-sm outline-none font-bold text-xs transition-all ${
@@ -1444,8 +1449,9 @@ const Booking = () => {
                                 <option value="Cleaniq">
                                   Cleaniq Services provides everything (+
                                   {region.symbol}
-                                  {dynamicRates[cleanKey(SUPPLIES_EXTRA_NAME)] ||
-                                    10}
+                                  {dynamicRates[
+                                    cleanKey(SUPPLIES_EXTRA_NAME)
+                                  ] || 10}
                                   )
                                 </option>
                                 <option value="Customer">
