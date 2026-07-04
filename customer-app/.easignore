@@ -1,0 +1,13 @@
+node_modules/
+.expo/
+.git/
+android/
+ios/
+*.log
+*.map
+
+# Other apps in the monorepo — not needed for this build
+../server/
+../worker-app/
+../cleaniq-video/
+../src/
