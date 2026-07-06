@@ -2710,9 +2710,12 @@ const Bookings = () => {
   };
 
   const fmtTimeRange = (b) => {
-    const start = getPreferredTime(b);
+    const start =
+      getPreferredTime(b) ||
+      (b?.schedule?.time?.includes(":") ? b.schedule.time : null) ||
+      (b?.schedule?.timeSlot?.includes(":") ? b.schedule.timeSlot : null);
     const dur = b?.details?.duration;
-    if (!start || !String(start).includes(":") || !dur) return start || "";
+    if (!start || !dur) return start || "";
     const [h, m] = String(start).split(":").map(Number);
     const fmt = (min) => {
       const hr = Math.floor(min / 60) % 24;

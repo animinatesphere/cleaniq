@@ -5,25 +5,37 @@ export const timeToMinutes = (time) => {
   return h * 60 + m;
 };
 
-// True if `startTime` falls inside any existing booked [start, end) window.
-// We only block slots whose START TIME lands within a booked range — we don't
-// extend by the new booking's duration, because other cleaners can handle
-// concurrent jobs. Prevents selecting a time mid-way through an existing clean.
+// True if `startTime` falls inside any existing booked [start, end] window
+// (inclusive on both ends — a new booking cannot start at the exact moment
+// another job finishes, since the cleaner would have zero travel/reset time).
 export const overlapsExistingRange = (startTime, _durationHours, ranges) => {
   const start = timeToMinutes(startTime);
   if (start === null) return false;
-  return ranges.some((r) => start >= r.start && start < r.end);
+  return ranges.some((r) => start >= r.start && start <= r.end);
+};
+
+// Returns the actual start time in "HH:MM" format for any booking,
+// regardless of whether it came from the web app (timeSlot="Flexible",
+// preferredTime="HH:MM") or the customer app (timeSlot="HH:MM", no preferredTime).
+const getBookingStartTime = (b) => {
+  if (b.schedule?.preferredTime) return b.schedule.preferredTime;
+  if (b.schedule?.time && b.schedule.time.includes(":")) return b.schedule.time;
+  if (b.schedule?.timeSlot && b.schedule.timeSlot.includes(":")) return b.schedule.timeSlot;
+  return null;
 };
 
 // Builds a list of { start, end } minute ranges (in minutes-since-midnight)
-// for every Flexible-time booking on a given date, using each booking's own
-// duration so the full occupied window is blocked, not just its start time.
+// for every timed booking on a given date. Handles both formats:
+//   • Web/admin:       timeSlot="Flexible", preferredTime="HH:MM"
+//   • Customer app:    timeSlot="HH:MM", time="HH:MM"
 export const buildBookedRanges = (bookingsOnDate) =>
   bookingsOnDate
-    .filter((b) => b.schedule?.timeSlot === "Flexible" && b.schedule?.preferredTime)
     .map((b) => {
-      const start = timeToMinutes(b.schedule.preferredTime);
+      const timeStr = getBookingStartTime(b);
+      if (!timeStr) return null;
+      const start = timeToMinutes(timeStr);
+      if (start === null) return null;
       const duration = b.details?.duration || b.workerDuration || 1;
-      return { start, end: start + duration * 60 };
+      return { start, end: start + Number(duration) * 60 };
     })
-    .filter((r) => r.start !== null);
+    .filter(Boolean);
