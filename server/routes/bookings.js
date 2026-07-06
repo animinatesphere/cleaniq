@@ -361,7 +361,9 @@ router.put("/:id", async (req, res) => {
         `✅ Booking ${updatedBooking.bookingId} marked as completed. Sending invoice receipt...`,
       );
 
-      // Update worker wallet with earned amount
+      // Update worker wallet with earned amount — isolated so a failure here
+      // never prevents the invoice email from being sent below.
+      try {
       if (updatedBooking.assignedWorker) {
         const Worker = require("../models/Worker");
         const workerEarnings =
@@ -518,6 +520,9 @@ router.put("/:id", async (req, res) => {
           }
         }
       }
+      } catch (walletErr) {
+        console.error("⚠️ Worker wallet update failed (invoice will still send):", walletErr.message);
+      }
 
       // CAPTURE AUTHORIZED PAYMENT when booking is completed
       if (
@@ -568,11 +573,16 @@ router.put("/:id", async (req, res) => {
         }
       }
 
-      await sendEmail({
-        to: updatedBooking.customer.email,
-        subject: `Your Cleaniq Invoice & Receipt: ${updatedBooking.bookingId}`,
-        html: templates.invoiceReceipt(updatedBooking),
-      });
+      try {
+        await sendEmail({
+          to: updatedBooking.customer.email,
+          subject: `Your Cleaniq Invoice & Receipt: ${updatedBooking.bookingId}`,
+          html: templates.invoiceReceipt(updatedBooking),
+        });
+        console.log(`📧 Invoice email sent to ${updatedBooking.customer.email} for booking ${updatedBooking.bookingId}`);
+      } catch (invoiceErr) {
+        console.error(`❌ Failed to send invoice email for ${updatedBooking.bookingId}:`, invoiceErr.message);
+      }
     }
 
     res.json(updatedBooking);

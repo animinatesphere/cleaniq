@@ -5,15 +5,14 @@ export const timeToMinutes = (time) => {
   return h * 60 + m;
 };
 
-// True if a job starting at `startTime` for `durationHours` would overlap
-// any existing [start, end) range in `ranges`. A cleaner can only be in one
-// place at a time, so any overlap - not just an exact time match - blocks
-// the slot.
-export const overlapsExistingRange = (startTime, durationHours, ranges) => {
+// True if `startTime` falls inside any existing booked [start, end) window.
+// We only block slots whose START TIME lands within a booked range — we don't
+// extend by the new booking's duration, because other cleaners can handle
+// concurrent jobs. Prevents selecting a time mid-way through an existing clean.
+export const overlapsExistingRange = (startTime, _durationHours, ranges) => {
   const start = timeToMinutes(startTime);
   if (start === null) return false;
-  const end = start + (durationHours || 0) * 60;
-  return ranges.some((r) => start < r.end && r.start < end);
+  return ranges.some((r) => start >= r.start && start < r.end);
 };
 
 // Builds a list of { start, end } minute ranges (in minutes-since-midnight)
