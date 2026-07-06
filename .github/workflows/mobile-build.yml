@@ -32,7 +32,7 @@ jobs:
         working-directory: customer-app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas submit --platform ios --profile production --non-interactive
+        run: eas submit --platform ios --profile production --latest --non-interactive
 
   build-customer-android:
     name: Customer App — Android
@@ -77,7 +77,7 @@ jobs:
         working-directory: worker-app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas submit --platform ios --profile production --non-interactive
+        run: eas submit --platform ios --profile production --latest --non-interactive
 
   build-worker-android:
     name: Worker App — Android
