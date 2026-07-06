@@ -5,13 +5,13 @@ export const timeToMinutes = (time) => {
   return h * 60 + m;
 };
 
-// True if `startTime` falls inside any existing booked [start, end] window
-// (inclusive on both ends — a new booking cannot start at the exact moment
-// another job finishes, since the cleaner would have zero travel/reset time).
+// True if `startTime` falls inside any existing booked [start, end) window.
+// The end already includes a 30-min rest buffer (see buildBookedRanges),
+// so a slot landing in that buffer is also correctly blocked here.
 export const overlapsExistingRange = (startTime, _durationHours, ranges) => {
   const start = timeToMinutes(startTime);
   if (start === null) return false;
-  return ranges.some((r) => start >= r.start && start <= r.end);
+  return ranges.some((r) => start >= r.start && start < r.end);
 };
 
 // Returns the actual start time in "HH:MM" format for any booking,
@@ -36,6 +36,7 @@ export const buildBookedRanges = (bookingsOnDate) =>
       const start = timeToMinutes(timeStr);
       if (start === null) return null;
       const duration = b.details?.duration || b.workerDuration || 1;
-      return { start, end: start + Number(duration) * 60 };
+      // +30 min rest buffer so the slot immediately after the job is also blocked.
+      return { start, end: start + Number(duration) * 60 + 30 };
     })
     .filter(Boolean);

@@ -99,7 +99,7 @@ const Services = () => {
         "Bed making & tidying.",
         "Trash removal.",
       ],
-      tag: "Reliable domestic cleaners",
+      tag: "Reliable domestic Cleaners",
       defaultName: "Residential Cleaning",
       defaultDesc: "Reliable, weekly or bi-weekly cleaning for your home.",
       defaultRateUK: "From £17.90/hr",
@@ -199,11 +199,11 @@ const Services = () => {
   const serviceDetails = React.useMemo(() => {
     const bases = dbServices.filter((s) => s.category === "Base");
     const keys = [
+      "tenancy",
       "residential",
       "commercial",
       "move",
       "airbnb",
-      "tenancy",
       "construction",
     ];
 
