@@ -36,6 +36,20 @@ const PAYMENT_STATUS_MAP = {
 const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "TBC";
 
+const formatTimeRange = (startTime, duration) => {
+  if (!startTime || !String(startTime).includes(":")) return startTime || "—";
+  const [h, m] = String(startTime).split(":").map(Number);
+  const fmt = (totalMin) => {
+    const hr = Math.floor(totalMin / 60) % 24;
+    const mn = totalMin % 60;
+    const period = hr >= 12 ? "PM" : "AM";
+    return `${hr % 12 || 12}:${String(mn).padStart(2, "0")} ${period}`;
+  };
+  const startMin = h * 60 + m;
+  if (!duration || isNaN(Number(duration))) return fmt(startMin);
+  return `${fmt(startMin)} — ${fmt(startMin + Number(duration) * 60)}`;
+};
+
 const InfoRow = ({ icon: Icon, label, value, valueStyle }) => (
   <View style={styles.infoRow}>
     <View style={styles.infoIcon}><Icon size={15} color={C.primary} /></View>
@@ -208,7 +222,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
         {/* Booking info */}
         <SectionCard title="Booking Details">
           <InfoRow icon={CalendarDays} label="Date"     value={fmtDate(booking.schedule?.date)} />
-          <InfoRow icon={Clock}        label="Time"     value={booking.schedule?.time || booking.schedule?.timeSlot} />
+          <InfoRow icon={Clock}        label="Time"     value={formatTimeRange(booking.schedule?.preferredTime || booking.schedule?.time || booking.schedule?.timeSlot, booking.details?.duration)} />
           <InfoRow icon={MapPin}       label="Address"  value={booking.details?.address} />
           <InfoRow icon={Clock}        label="Duration" value={`${booking.details?.duration || "—"} hours`} />
           <InfoRow icon={User}         label="Worker"   value={booking.assignedWorkerName || "Not yet assigned"} />
