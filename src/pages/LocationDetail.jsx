@@ -68,7 +68,29 @@ const LOCATIONS_MAP = {
       "One-Off Deep Cleaning",
       "Airbnb & Short-Let Turnovers",
       "Commercial & Office Cleaning"
-    ]
+    ],
+    faqs: [
+      {
+        q: "Do you offer end of tenancy cleaning in Manchester City Centre?",
+        a: "Yes, Cleaniq Services provides professional end of tenancy cleaning across Manchester City Centre from our Swan Street office, helping tenants secure their full deposits. We follow a landlord-approved checklist and offer a 48-hour re-clean guarantee.",
+      },
+      {
+        q: "How quickly can you book a cleaner in Manchester City Centre?",
+        a: "We offer same-day and next-day bookings across Manchester City Centre, including Deansgate, Ancoats, Northern Quarter, and Piccadilly. Book online in under 60 seconds or call +44 7752 476368.",
+      },
+      {
+        q: "What cleaning services do you provide in Manchester City Centre?",
+        a: "We offer end of tenancy cleaning, deep cleaning, Airbnb and short-let turnovers, office and commercial cleaning, and general domestic cleaning across all Manchester City Centre postcodes including M1, M2, M3, M4, and M15.",
+      },
+      {
+        q: "Are your Manchester City Centre cleaners vetted and insured?",
+        a: "Yes. Every Cleaniq cleaner serving Manchester City Centre is background-checked, fully insured, and trained to our quality standard. We never send unvetted staff into your home or business.",
+      },
+      {
+        q: "Do you clean Airbnb and short-let apartments in Manchester City Centre?",
+        a: "Yes. We specialise in fast Airbnb turnovers for short-let properties across Manchester City Centre. Our team handles linen changes, restocking, and guest-ready quality checks — matching your check-out and check-in schedule.",
+      },
+    ],
   },
   "bolton": {
     name: "Bolton",
@@ -205,6 +227,36 @@ const LocationDetail = () => {
         />
         <meta property="og:title" content={locationData.title} />
         <meta property="og:description" content={locationData.meta} />
+        {locationData.faqs && (
+          <script type="application/ld+json">{JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "LocalBusiness",
+                "name": "Cleaniq Services",
+                "url": "https://www.cleaniqservices.com",
+                "telephone": "+447752476368",
+                "address": {
+                  "@type": "PostalAddress",
+                  "streetAddress": "20 Swan St",
+                  "addressLocality": "Manchester",
+                  "postalCode": "M4 5JW",
+                  "addressCountry": "GB"
+                },
+                "areaServed": locationData.name,
+                "priceRange": "££"
+              },
+              {
+                "@type": "FAQPage",
+                "mainEntity": locationData.faqs.map(f => ({
+                  "@type": "Question",
+                  "name": f.q,
+                  "acceptedAnswer": { "@type": "Answer", "text": f.a }
+                }))
+              }
+            ]
+          })}</script>
+        )}
       </Helmet>
       
       <div className="max-w-5xl mx-auto px-6 space-y-12">
@@ -329,6 +381,33 @@ const LocationDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* FAQ Section — shown only for locations that have FAQs */}
+        {locationData.faqs && (
+          <div className="bg-white border border-slate-100 rounded-[40px] p-8 md:p-12 shadow-sm">
+            <div className="mb-8">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-4">
+                FAQs
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-primary-dark tracking-tight">
+                Frequently Asked Questions — Cleaning in {locationData.name}
+              </h2>
+            </div>
+            <div className="space-y-4">
+              {locationData.faqs.map((faq, i) => (
+                <details key={i} className="group border border-slate-100 rounded-2xl overflow-hidden">
+                  <summary className="flex items-center justify-between p-5 cursor-pointer font-bold text-slate-800 text-sm hover:bg-slate-50 transition-colors list-none">
+                    <span>{faq.q}</span>
+                    <span className="text-primary font-black text-lg group-open:rotate-45 transition-transform shrink-0 ml-4">+</span>
+                  </summary>
+                  <div className="px-5 pb-5 text-slate-500 text-sm font-medium leading-relaxed border-t border-slate-100 pt-4">
+                    {faq.a}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
