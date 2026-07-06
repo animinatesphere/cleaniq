@@ -153,6 +153,14 @@ const Home = () => {
           mainEntity: [
             {
               "@type": "Question",
+              name: "Do you offer end of tenancy cleaning in Manchester City Centre?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Yes, Cleaniq Services provides professional end of tenancy cleaning across Manchester City Centre from our Swan Street office, helping tenants secure their full deposits.",
+              },
+            },
+            {
+              "@type": "Question",
               name: "How do you vet your cleaners?",
               acceptedAnswer: {
                 "@type": "Answer",
@@ -592,6 +600,10 @@ const Home = () => {
 
           <div className="space-y-4">
             {[
+              {
+                q: "Do you offer end of tenancy cleaning in Manchester City Centre?",
+                a: "Yes, Cleaniq Services provides professional end of tenancy cleaning across Manchester City Centre from our Swan Street office, helping tenants secure their full deposits.",
+              },
               {
                 q: "How do you vet your cleaners?",
                 a: "Every cleaner undergoes a rigorous multi-stage vetting process, including face-to-face interviews, background checks, and practical skills assessments.",

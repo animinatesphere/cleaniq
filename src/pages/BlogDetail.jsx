@@ -192,6 +192,38 @@ const BlogDetail = () => {
             content={`https://www.cleaniqservices.com${post.image}`}
           />
         )}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Do you offer end of tenancy cleaning in Manchester City Centre?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Yes, Cleaniq Services provides professional end of tenancy cleaning across Manchester City Centre from our Swan Street office, helping tenants secure their full deposits.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "How do I book a cleaning service with Cleaniq?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "You can book online in 60 seconds at cleaniqservices.com/booking — simply choose your service, pick a date and time, and a vetted professional will be assigned to you.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Are Cleaniq cleaners background checked?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Yes, every Cleaniq cleaner undergoes a rigorous vetting process including face-to-face interviews, DBS background checks, and practical skills assessments before joining our platform.",
+                },
+              },
+            ],
+          })}
+        </script>
       </Helmet>
 
       <div className="min-h-screen bg-white">
