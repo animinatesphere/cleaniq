@@ -1,532 +1,334 @@
-import React, { useState, useContext, useCallback, useEffect } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
   TouchableOpacity, ActivityIndicator, RefreshControl,
-  Linking, Platform, Dimensions, Image, ImageBackground,
+  TextInput, Platform, Image,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect } from "@react-navigation/native";
 import {
-  CalendarDays, Clock, MapPin, ChevronRight, Radio,
-  Home, Building2, Hotel, HardHat, KeyRound, Sparkles,
-  Shield, Leaf, RefreshCcw, Star, Bell, CheckCircle2,
-  TrendingUp, Zap, User, BadgeCheck, Headphones,
-  Navigation2, MessageCircle, Package,
+  Search, SlidersHorizontal, Bell, Star,
+  CalendarDays, CheckCircle, Clock, ChevronRight, Eye,
 } from "lucide-react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
-import { C, cardShadow, shadow } from "../theme/flat";
+import { C } from "../theme/flat";
 
-const { width } = Dimensions.get("window");
+// ── Static photos mapped by service name keywords ─────────────────────────────
+const SVC_PHOTOS = {
+  residential: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=75",
+  tenancy:     "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400&q=75",
+  office:      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=75",
+  deep:        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=75",
+  airbnb:      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=75",
+  construct:   "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&q=75",
+  default:     "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400&q=75",
+};
 
-// ── Service icon mapping ──────────────────────────────────────────────────────
-const serviceIcon = (name = "") => {
+const CAT_PHOTOS = {
+  residential: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&q=70",
+  tenancy:     "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&q=70",
+  office:      "https://images.unsplash.com/photo-1497366754035-f200581a82e9?w=200&q=70",
+  deep:        "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200&q=70",
+  airbnb:      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=200&q=70",
+  construct:   "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=200&q=70",
+  default:     "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200&q=70",
+};
+
+const getPhotoKey = (name = "") => {
   const n = name.toLowerCase();
-  if (n.includes("residential") || n.includes("domestic") || n.includes("house"))
-    return { Icon: Home,      color: C.primary,  bg: C.primaryLight };
-  if (n.includes("tenancy") || n.includes("move"))
-    return { Icon: KeyRound,  color: C.purple,   bg: C.purpleBg    };
-  if (n.includes("office") || n.includes("commercial"))
-    return { Icon: Building2, color: C.info,     bg: C.infoBg      };
-  if (n.includes("airbnb") || n.includes("short") || n.includes("holiday"))
-    return { Icon: Hotel,     color: C.orange,   bg: C.orangeBg    };
-  if (n.includes("deep") || n.includes("thorough"))
-    return { Icon: Sparkles,  color: "#DB2777",  bg: "#FDF2F8"     };
-  if (n.includes("construct") || n.includes("build") || n.includes("renovation"))
-    return { Icon: HardHat,   color: "#B45309",  bg: "#FFFBEB"     };
-  return { Icon: Package, color: C.primary, bg: C.primaryLight };
+  if (n.includes("residential") || n.includes("domestic") || n.includes("house")) return "residential";
+  if (n.includes("tenancy") || n.includes("move"))  return "tenancy";
+  if (n.includes("office")  || n.includes("commercial")) return "office";
+  if (n.includes("deep")    || n.includes("thorough"))   return "deep";
+  if (n.includes("airbnb")  || n.includes("short"))      return "airbnb";
+  if (n.includes("construct") || n.includes("build"))    return "construct";
+  return "default";
+};
+
+// ── Availability helpers ──────────────────────────────────────────────────────
+const timeToMins = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+
+const buildRanges = (bookings) =>
+  bookings.map((b) => {
+    const t =
+      b.schedule?.preferredTime ||
+      (b.schedule?.time?.includes(":") ? b.schedule.time : null) ||
+      (b.schedule?.timeSlot?.includes(":") ? b.schedule.timeSlot : null);
+    if (!t) return null;
+    const start = timeToMins(t);
+    const dur   = b.details?.duration ?? 1;
+    const buf   = b.customer?.firstName === "ADMIN_BLOCK" ? 0 : 30;
+    return { start, end: start + Number(dur) * 60 + buf };
+  }).filter(Boolean);
+
+const nextAvailableSlot = (ranges) => {
+  const now    = new Date();
+  const curMin = now.getHours() * 60 + now.getMinutes();
+  // Round up to next 30-min boundary, min 8am
+  let slot = Math.max(8 * 60, Math.ceil((curMin + 30) / 30) * 30);
+  while (slot < 20 * 60) {
+    if (!ranges.some((r) => slot >= r.start && slot < r.end)) {
+      const h  = Math.floor(slot / 60);
+      const m  = slot % 60;
+      const p  = h >= 12 ? "PM" : "AM";
+      return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${p}`;
+    }
+    slot += 30;
+  }
+  return null;
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const STATUS_MAP = {
-  Completed:    { color: C.success,  bg: C.successBg,  label: "Completed"   },
-  Cancelled:    { color: C.error,    bg: C.errorBg,    label: "Cancelled"   },
-  "In Progress":{ color: C.warning,  bg: C.warningBg,  label: "In Progress" },
-  Cleaning:     { color: C.warning,  bg: C.warningBg,  label: "Cleaning"    },
-  Arrived:      { color: C.warning,  bg: C.warningBg,  label: "Arrived"     },
-  Assigned:     { color: C.info,     bg: C.infoBg,     label: "Assigned"    },
-  Pending:      { color: "#F59E0B",  bg: C.warningBg,  label: "Pending"     },
-  Confirmed:    { color: C.purple,   bg: C.purpleBg,   label: "Confirmed"   },
-  Authorized:   { color: "#06B6D4",  bg: "#ECFEFF",    label: "Authorized"  },
-};
-
-const fmtDate = (d) =>
-  d ? new Date(d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) : "TBC";
-
 const greeting = () => {
   const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
+  if (h < 12) return "Good morning,";
+  if (h < 17) return "Good afternoon,";
+  return "Good evening,";
 };
 
-const fmtUpdated = (d) => {
-  if (!d) return "";
-  const secs = Math.round((Date.now() - new Date(d).getTime()) / 1000);
-  if (secs < 60) return "Just now";
-  return `${Math.round(secs / 60)}m ago`;
-};
-
-// ── Sub-components ─────────────────────────────────────────────────────────────
-const StatusChip = ({ status }) => {
-  const meta = STATUS_MAP[status] || { color: C.textMuted, bg: C.surfaceAlt, label: status };
-  return (
-    <View style={[S.chip, { backgroundColor: meta.bg }]}>
-      <Text style={[S.chipTxt, { color: meta.color }]}>{meta.label}</Text>
-    </View>
-  );
-};
-
-const WorkerRow = ({ bookingId }) => {
-  const [loc, setLoc] = useState(null);
-  useEffect(() => {
-    let iv;
-    const poll = async () => {
-      try {
-        const r = await axios.get(`${API_URL}/workers/jobs/${bookingId}/worker-location`);
-        setLoc(r.data);
-      } catch { setLoc(null); }
-    };
-    poll();
-    iv = setInterval(poll, 20000);
-    return () => clearInterval(iv);
-  }, [bookingId]);
-  if (!loc?.sharing) return null;
-  return (
-    <TouchableOpacity
-      style={S.locationRow}
-      onPress={() => Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`)}
-      activeOpacity={0.8}
-    >
-      <View style={S.locationDot}><Radio size={10} color="#fff" /></View>
-      <Text style={S.locationTxt} numberOfLines={1}>{loc.workerName} is on the way — tap to track</Text>
-      <ChevronRight size={13} color={C.primary} />
-    </TouchableOpacity>
-  );
-};
-
-const LiveTrackerCard = ({ booking, navigation }) => {
-  const [loc, setLoc] = useState(null);
-  useEffect(() => {
-    let iv;
-    const poll = async () => {
-      try {
-        const r = await axios.get(`${API_URL}/workers/jobs/${booking.bookingId}/worker-location`);
-        setLoc(r.data?.sharing ? r.data : null);
-      } catch { setLoc(null); }
-    };
-    poll(); iv = setInterval(poll, 5000);
-    return () => clearInterval(iv);
-  }, [booking.bookingId]);
-  if (!loc) return null;
-  return (
-    <TouchableOpacity activeOpacity={0.92} onPress={() => navigation.navigate("BookingDetail", { booking })}>
-      <LinearGradient colors={["#064D36", "#0F6B4C"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={S.trackerCard}>
-        <View style={S.trackerCircle1} /><View style={S.trackerCircle2} />
-        <View style={S.trackerHeader}>
-          <View style={S.trackerLiveRow}>
-            <View style={S.trackerPulse} />
-            <Text style={S.trackerLiveTxt}>LIVE TRACKING</Text>
-          </View>
-          <Text style={S.trackerUpdated}>Updated {fmtUpdated(loc.lastUpdated)}</Text>
-        </View>
-        <View style={S.trackerWorkerRow}>
-          <View style={S.trackerAvatar}>
-            <Text style={S.trackerAvatarTxt}>
-              {(loc.workerName || "W").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
-            </Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={S.trackerWorkerName}>{loc.workerName}</Text>
-            <Text style={S.trackerWorkerSub}>Your cleaner is on the way</Text>
-          </View>
-          <Navigation2 size={20} color="rgba(255,255,255,0.7)" />
-        </View>
-        <View style={S.trackerActions}>
-          <TouchableOpacity
-            style={S.trackerMapBtn}
-            onPress={() => Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`)}
-            activeOpacity={0.85}
-          >
-            <MapPin size={14} color={C.primary} />
-            <Text style={S.trackerMapTxt}>Open in Maps</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={S.trackerChatBtn}
-            onPress={() => navigation.navigate("Chat", { bookingId: booking.bookingId, workerName: loc.workerName, bookingRef: booking.bookingId })}
-            activeOpacity={0.85}
-          >
-            <MessageCircle size={14} color="#fff" />
-            <Text style={S.trackerChatTxt}>Message</Text>
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
-    </TouchableOpacity>
-  );
-};
-
-// ── ServiceCard ───────────────────────────────────────────────────────────────
-const ServiceCard = ({ service, onPress }) => {
-  const { Icon, color, bg } = serviceIcon(service.name);
-  const priceLabel = service.rate
-    ? `From £${Number(service.rate).toFixed(2)}${service.type === "hourly" ? "/hr" : ""}`
-    : "Get a quote";
-  return (
-    <TouchableOpacity style={[S.svcCard, cardShadow]} onPress={onPress} activeOpacity={0.82}>
-      <View style={[S.svcIconWrap, { backgroundColor: bg }]}>
-        <Icon size={22} color={color} strokeWidth={1.8} />
-      </View>
-      <View style={S.svcTextBlock}>
-        <Text style={S.svcLabel} numberOfLines={1}>{service.name}</Text>
-        <Text style={[S.svcPrice, { color }]}>{priceLabel}</Text>
-      </View>
-      <View style={[S.svcArrow, { backgroundColor: bg }]}>
-        <ChevronRight size={14} color={color} />
-      </View>
-    </TouchableOpacity>
-  );
+const todayISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
 // ── Main Screen ───────────────────────────────────────────────────────────────
 const HomeScreen = ({ navigation }) => {
   const { customerInfo } = useContext(AuthContext);
-  const [bookings, setBookings]   = useState([]);
-  const [services, setServices]   = useState([]);
-  const [loading, setLoading]     = useState(true);
+  const [services,   setServices]   = useState([]);
+  const [nextSlot,   setNextSlot]   = useState(null);
+  const [loading,    setLoading]    = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [search,     setSearch]     = useState("");
 
   const fetchAll = async () => {
     try {
-      const [bRes, sRes] = await Promise.all([
-        axios.get(`${API_URL}/customer-bookings`, {
-          headers: (await AsyncStorage.getItem("customerToken"))
-            ? { Authorization: `Bearer ${await AsyncStorage.getItem("customerToken")}` }
-            : {},
-        }),
-        axios.get(`${API_URL}/services?region=UK`),
+      const token = await AsyncStorage.getItem("customerToken");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const [sRes, bRes] = await Promise.all([
+        axios.get(`${API_URL}/services?region=UK`, { headers }),
+        axios.get(`${API_URL}/bookings?date=${todayISO()}`, { headers }).catch(() => ({ data: [] })),
       ]);
-      setBookings(bRes.data || []);
-      // Only "Base" (general) services
-      setServices((sRes.data || []).filter(s => s.category === "Base"));
-    } catch { }
+
+      const base = (sRes.data || []).filter((s) => s.category === "Base");
+      setServices(base);
+
+      const ranges = buildRanges(bRes.data || []);
+      setNextSlot(nextAvailableSlot(ranges));
+    } catch {}
     finally { setLoading(false); setRefreshing(false); }
   };
 
   useFocusEffect(useCallback(() => { fetchAll(); }, []));
   const onRefresh = () => { setRefreshing(true); fetchAll(); };
 
-  const active    = bookings.filter(b => !["Completed","Cancelled"].includes(b.status));
-  const completed = bookings.filter(b => b.status === "Completed");
-  const next      = active.find(b => b.schedule?.date) || active[0];
-  const lastClean = completed[0];
-  const totalSpent = bookings.reduce((s, b) => s + (Number(b.payment?.amount) || 0), 0);
-  const initials  = [customerInfo?.firstName?.[0], customerInfo?.lastName?.[0]].filter(Boolean).join("").toUpperCase() || "U";
+  const firstName = customerInfo?.firstName || "there";
+  const initials  = [customerInfo?.firstName?.[0], customerInfo?.lastName?.[0]]
+    .filter(Boolean).join("").toUpperCase() || "U";
 
-  const lowestRate = services.length
-    ? Math.min(...services.map(s => Number(s.rate) || 99).filter(r => r > 0))
-    : null;
-  const ctaPrice = lowestRate ? `From £${lowestRate.toFixed(2)}/hr` : "Book Now";
-
-  if (loading)
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: C.primary }}>
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: C.bg }}>
-          <ActivityIndicator size="large" color={C.primary} />
-        </View>
-      </SafeAreaView>
-    );
+  const filtered = search.trim()
+    ? services.filter((s) => s.name?.toLowerCase().includes(search.toLowerCase()))
+    : services;
 
   return (
     <SafeAreaView style={S.root}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} />}
-        stickyHeaderIndices={[0]}
+        contentContainerStyle={S.scroll}
       >
-        {/* ── Sticky gradient header ─────────────────────────────── */}
-        <LinearGradient colors={["#064D36", "#0F6B4C", "#138a5e"]} style={S.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-          {/* Decorative blobs */}
-          <View style={S.blob1} /><View style={S.blob2} />
 
-          {/* Top row */}
-          <View style={S.headerRow}>
-            <View>
-              <Text style={S.greetingTxt}>{greeting()}</Text>
-              <Text style={S.nameTxt}>{customerInfo?.firstName || "there"} 👋</Text>
-            </View>
-            <View style={S.headerActions}>
-              <TouchableOpacity style={S.iconBtn} onPress={() => navigation.navigate("Bookings")}>
-                <Bell size={18} color="rgba(255,255,255,0.9)" />
-                {active.length > 0 && <View style={S.badgeDot} />}
-              </TouchableOpacity>
-              <TouchableOpacity style={S.avatarBtn} onPress={() => navigation.navigate("Profile")} activeOpacity={0.8}>
-                <Text style={S.avatarTxt}>{initials}</Text>
-              </TouchableOpacity>
-            </View>
+        {/* ── Header ─────────────────────────────────────────────── */}
+        <View style={S.header}>
+          <View>
+            <Text style={S.welcomeTxt}>{greeting()}</Text>
+            <Text style={S.nameTxt}>Hello, {firstName} 👋</Text>
           </View>
-
-          {/* ── Hero card ── */}
-          {next ? (
-            <TouchableOpacity
-              style={S.heroCard}
-              onPress={() => navigation.navigate("BookingDetail", { booking: next })}
-              activeOpacity={0.93}
-            >
-              <View style={S.heroCardTop}>
-                <View style={S.heroLabelRow}>
-                  <View style={S.heroLiveDot} />
-                  <Text style={S.heroLabelTxt}>
-                    {["Arrived","Cleaning","In Progress"].includes(next.status) ? "In Progress" : "Upcoming Clean"}
-                  </Text>
-                </View>
-                <StatusChip status={next.status} />
-              </View>
-              <Text style={S.heroService}>{next.service}</Text>
-              <View style={S.heroMeta}>
-                <View style={S.heroMetaItem}><CalendarDays size={12} color={C.textMuted} /><Text style={S.heroMetaTxt}>{fmtDate(next.schedule?.date)}</Text></View>
-                {next.schedule?.time && <View style={S.heroMetaItem}><Clock size={12} color={C.textMuted} /><Text style={S.heroMetaTxt}>{next.schedule.time}</Text></View>}
-                <View style={S.heroMetaItem}><MapPin size={12} color={C.textMuted} /><Text style={S.heroMetaTxt} numberOfLines={1}>{next.details?.address || "Address on file"}</Text></View>
-                {next.assignedWorkerName && <View style={S.heroMetaItem}><User size={12} color={C.textMuted} /><Text style={S.heroMetaTxt}>{next.assignedWorkerName}</Text></View>}
-              </View>
-              <View style={S.heroCardFooter}>
-                {next.payment?.amount > 0 && <Text style={S.heroPrice}>£{Number(next.payment.amount).toFixed(2)}</Text>}
-                <View style={S.heroViewBtn}><Text style={S.heroViewTxt}>View Details</Text><ChevronRight size={14} color={C.primary} /></View>
-              </View>
-              <WorkerRow bookingId={next._id} />
+          <View style={S.headerRight}>
+            <TouchableOpacity style={S.iconCircle} onPress={() => navigation.navigate("Bookings")}>
+              <Bell size={19} color="#1A1A2E" strokeWidth={1.7} />
             </TouchableOpacity>
-          ) : completed.length > 0 ? (
-            <View style={S.heroCard}>
-              <View style={S.heroCardTop}>
-                <View style={S.heroLabelRow}><TrendingUp size={13} color={C.primary} /><Text style={S.heroLabelTxt}>Your Activity</Text></View>
-              </View>
-              <View style={S.heroActivityRow}>
-                {[
-                  { val: completed.length, lbl: "Cleans done" },
-                  { val: `£${totalSpent.toFixed(0)}`, lbl: "Total spent" },
-                  { val: lastClean ? fmtDate(lastClean.schedule?.date) : "—", lbl: "Last clean" },
-                ].map((item, i, arr) => (
-                  <React.Fragment key={item.lbl}>
-                    <View style={S.heroActivityItem}>
-                      <Text style={S.heroActivityVal}>{item.val}</Text>
-                      <Text style={S.heroActivityLbl}>{item.lbl}</Text>
-                    </View>
-                    {i < arr.length - 1 && <View style={S.heroActivityDiv} />}
-                  </React.Fragment>
-                ))}
-              </View>
-              <TouchableOpacity style={S.heroCtaBtn} onPress={() => navigation.navigate("Booking")} activeOpacity={0.85}>
-                <Zap size={15} color="#fff" />
-                <Text style={S.heroCtaTxt}>Book Your Next Clean</Text>
-                <ChevronRight size={15} color="rgba(255,255,255,0.7)" />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={S.heroCard}>
-              <View style={S.heroCardTop}>
-                <View style={S.heroLabelRow}><Sparkles size={13} color={C.primary} /><Text style={S.heroLabelTxt}>Welcome to Cleaniq</Text></View>
-              </View>
-              <Text style={S.heroWelcomeTitle}>Your first spotless home is one tap away</Text>
-              <View style={S.heroPills}>
-                {["DBS Checked","48hr Guarantee","Fully Insured"].map(t => (
-                  <View key={t} style={S.heroPill}>
-                    <CheckCircle2 size={11} color={C.primary} strokeWidth={2.5} />
-                    <Text style={S.heroPillTxt}>{t}</Text>
-                  </View>
-                ))}
-              </View>
-              <TouchableOpacity style={S.heroCtaBtn} onPress={() => navigation.navigate("Booking")} activeOpacity={0.85}>
-                <Zap size={15} color="#fff" />
-                <Text style={S.heroCtaTxt}>{ctaPrice}</Text>
-                <ChevronRight size={15} color="rgba(255,255,255,0.7)" />
-              </TouchableOpacity>
-            </View>
-          )}
-        </LinearGradient>
-
-        {/* ── Body ─────────────────────────────────────────────────── */}
-        <View style={S.body}>
-
-          {/* Live tracker */}
-          {next?.assignedWorker && <LiveTrackerCard booking={next} navigation={navigation} />}
-
-          {/* Book now banner */}
-          <TouchableOpacity style={[S.banner, cardShadow]} onPress={() => navigation.navigate("Booking")} activeOpacity={0.9}>
-            <ImageBackground
-              source={{ uri: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80" }}
-              style={S.bannerBg} imageStyle={{ borderRadius: 20 }}
-            >
-              <LinearGradient colors={["rgba(6,77,54,0.92)", "rgba(15,107,76,0.75)"]}
-                style={S.bannerOverlay} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-                <View style={{ flex: 1, gap: 4 }}>
-                  <View style={S.bannerTag}>
-                    <Zap size={10} color={C.primary} strokeWidth={2.5} />
-                    <Text style={S.bannerTagTxt}>Book in 60 seconds</Text>
-                  </View>
-                  <Text style={S.bannerTitle}>{next ? "Book Another Clean" : "Book Your First Clean"}</Text>
-                  <Text style={S.bannerSub}>{ctaPrice} · Vetted professionals</Text>
-                </View>
-                <View style={S.bannerArrow}><ChevronRight size={22} color={C.primary} /></View>
-              </LinearGradient>
-            </ImageBackground>
-          </TouchableOpacity>
-
-          {/* Recent cleans */}
-          {completed.length > 0 && (
-            <View>
-              <View style={S.sectionHead}>
-                <Text style={S.sectionTitle}>Recent Cleans</Text>
-                <TouchableOpacity onPress={() => navigation.navigate("Bookings")}>
-                  <Text style={S.sectionLink}>See all</Text>
-                </TouchableOpacity>
-              </View>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={S.recentScroll}>
-                {completed.slice(0, 5).map(b => (
-                  <TouchableOpacity key={b._id} style={[S.recentCard, cardShadow]}
-                    onPress={() => navigation.navigate("BookingDetail", { booking: b })} activeOpacity={0.85}>
-                    <View style={S.recentIcon}><CalendarDays size={18} color={C.primary} /></View>
-                    <Text style={S.recentSvc} numberOfLines={2}>{b.service}</Text>
-                    <Text style={S.recentDate}>{fmtDate(b.schedule?.date)}</Text>
-                    {b.payment?.amount > 0 && <Text style={S.recentPrice}>£{Number(b.payment.amount).toFixed(2)}</Text>}
-                  </TouchableOpacity>
-                ))}
-                <TouchableOpacity style={[S.recentCard, S.recentBookAgain, cardShadow]}
-                  onPress={() => navigation.navigate("Booking")} activeOpacity={0.85}>
-                  <View style={S.recentBookAgainIcon}><ChevronRight size={22} color="#fff" /></View>
-                  <Text style={S.recentBookAgainTxt}>Book{"\n"}Again</Text>
-                </TouchableOpacity>
-              </ScrollView>
-            </View>
-          )}
-
-          {/* Stats strip */}
-          <View style={[S.statsCard, cardShadow]}>
-            {[
-              { val: "4.9★", lbl: "Rating"    },
-              { val: "2k+",  lbl: "Cleans"    },
-              { val: "500+", lbl: "Pros"       },
-              { val: "98%",  lbl: "Satisfied"  },
-            ].map((s, i) => (
-              <React.Fragment key={s.lbl}>
-                <View style={S.statItem}>
-                  <Text style={S.statVal}>{s.val}</Text>
-                  <Text style={S.statLbl}>{s.lbl}</Text>
-                </View>
-                {i < 3 && <View style={S.statDiv} />}
-              </React.Fragment>
-            ))}
-          </View>
-
-          {/* Services — fetched from API */}
-          {services.length > 0 && (
-            <View>
-              <View style={S.sectionHead}>
-                <Text style={S.sectionTitle}>Our Services</Text>
-                <TouchableOpacity onPress={() => navigation.navigate("Booking")}>
-                  <Text style={S.sectionLink}>Book now</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={S.servicesGrid}>
-                {services.map(svc => (
-                  <ServiceCard key={svc._id || svc.name} service={svc} onPress={() => navigation.navigate("Booking")} />
-                ))}
-              </View>
-            </View>
-          )}
-
-          {/* How it works */}
-          <View style={[S.howCard, cardShadow]}>
-            <Text style={S.howTitle}>How It Works</Text>
-            <View style={S.howSteps}>
-              {[
-                { n: "1", title: "Book Online",   sub: "Choose service, date & time"    },
-                { n: "2", title: "We Match You",  sub: "A vetted pro is assigned"        },
-                { n: "3", title: "Spotless Home", sub: "Sit back — we handle it all"    },
-              ].map((step, i) => (
-                <React.Fragment key={step.n}>
-                  <View style={S.howStep}>
-                    <LinearGradient colors={["#0F6B4C","#138a5e"]} style={S.howNum}>
-                      <Text style={S.howNumTxt}>{step.n}</Text>
-                    </LinearGradient>
-                    <Text style={S.howStepTitle}>{step.title}</Text>
-                    <Text style={S.howStepSub}>{step.sub}</Text>
-                  </View>
-                  {i < 2 && <View style={S.howDash} />}
-                </React.Fragment>
-              ))}
-            </View>
-          </View>
-
-          {/* Photo mosaic */}
-          <View style={S.mosaic}>
-            <View style={[S.mosaicMain, cardShadow]}>
-              <Image source={{ uri: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&q=80" }} style={S.mosaicImgMain} />
-              <LinearGradient colors={["transparent","rgba(6,77,54,0.85)"]} style={S.mosaicOverlay}>
-                <Text style={S.mosaicLabel}>Residential</Text>
-              </LinearGradient>
-            </View>
-            <View style={S.mosaicCol}>
-              {[
-                { uri: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80", label: "Kitchen" },
-                { uri: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80", label: "Deep Clean" },
-              ].map(img => (
-                <View key={img.label} style={[S.mosaicSm, cardShadow]}>
-                  <Image source={{ uri: img.uri }} style={S.mosaicImgSm} />
-                  <LinearGradient colors={["transparent","rgba(6,77,54,0.8)"]} style={S.mosaicOverlay}>
-                    <Text style={S.mosaicLabel}>{img.label}</Text>
-                  </LinearGradient>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Why Cleaniq */}
-          <View style={[S.trustCard, cardShadow]}>
-            <Text style={S.trustTitle}>Why Cleaniq?</Text>
-            <View style={S.trustGrid}>
-              {[
-                { Icon: BadgeCheck, txt: "DBS Checked",    sub: "All staff verified"         },
-                { Icon: RefreshCcw, txt: "48hr Guarantee", sub: "Free re-clean if unhappy"   },
-                { Icon: Leaf,       txt: "Eco Friendly",   sub: "Green certified products"   },
-                { Icon: Headphones, txt: "24/7 Support",   sub: "Always here for you"        },
-              ].map(({ Icon, txt, sub }) => (
-                <View key={txt} style={S.trustItem}>
-                  <LinearGradient colors={["#0F6B4C","#138a5e"]} style={S.trustIconWrap}>
-                    <Icon size={17} color="#fff" strokeWidth={1.8} />
-                  </LinearGradient>
-                  <View style={{ flex: 1 }}>
-                    <Text style={S.trustTxt}>{txt}</Text>
-                    <Text style={S.trustSub}>{sub}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Footer CTA */}
-          <TouchableOpacity style={[S.footerCta, cardShadow]} onPress={() => navigation.navigate("Booking")} activeOpacity={0.88}>
-            <LinearGradient colors={["#064D36","#0F6B4C"]} style={S.footerCtaGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-              <View style={S.footerCtaBlob} />
-              <View style={{ flex: 1 }}>
-                <Text style={S.footerCtaTitle}>Ready for a spotless home?</Text>
-                <Text style={S.footerCtaSub}>{ctaPrice} · DBS Checked · Insured</Text>
-              </View>
-              <View style={S.footerCtaArrow}><ChevronRight size={20} color={C.primary} /></View>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Links */}
-          <View style={S.footer}>
-            <TouchableOpacity onPress={() => Linking.openURL("tel:+447752476368")}>
-              <Text style={S.footerLink}>+44 7752 476368</Text>
-            </TouchableOpacity>
-            <Text style={S.footerDot}>·</Text>
-            <TouchableOpacity onPress={() => Linking.openURL("https://www.cleaniqservices.com")}>
-              <Text style={S.footerLink}>cleaniqservices.com</Text>
+            <TouchableOpacity style={S.avatarCircle} onPress={() => navigation.navigate("Profile")}>
+              <Text style={S.avatarTxt}>{initials}</Text>
             </TouchableOpacity>
           </View>
-          <View style={{ height: 20 }} />
         </View>
+
+        {/* ── Search ─────────────────────────────────────────────── */}
+        <View style={S.searchRow}>
+          <View style={S.searchBox}>
+            <Search size={15} color="#9CA3AF" strokeWidth={2} />
+            <TextInput
+              style={S.searchInput}
+              placeholder="Search For service..."
+              placeholderTextColor="#9CA3AF"
+              value={search}
+              onChangeText={setSearch}
+            />
+          </View>
+          <TouchableOpacity style={S.filterBtn}>
+            <SlidersHorizontal size={17} color="#374151" strokeWidth={1.8} />
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Categories ─────────────────────────────────────────── */}
+        <View style={S.sectionHead}>
+          <Text style={S.sectionTitle}>Categories</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Booking")}>
+            <Text style={S.viewAll}>View All</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={S.catScroll}>
+          {loading
+            ? Array.from({ length: 5 }).map((_, i) => <View key={i} style={S.catSkeleton} />)
+            : services.map((svc, i) => {
+                const key  = getPhotoKey(svc.name);
+                const isFirst = i === 0;
+                return (
+                  <TouchableOpacity
+                    key={svc._id || i}
+                    style={S.catItem}
+                    onPress={() => navigation.navigate("Booking")}
+                    activeOpacity={0.82}
+                  >
+                    <View style={[S.catCircleWrap, isFirst && S.catCircleActive]}>
+                      <Image
+                        source={{ uri: CAT_PHOTOS[key] }}
+                        style={S.catPhoto}
+                      />
+                      {isFirst && <View style={S.catOverlay} />}
+                    </View>
+                    <Text style={[S.catLabel, isFirst && S.catLabelActive]} numberOfLines={2}>
+                      {(svc.name || "").replace(" Cleaning", "").replace(" Clean", "")}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+        </ScrollView>
+
+        {/* ── Promo banner ───────────────────────────────────────── */}
+        <TouchableOpacity style={S.promo} onPress={() => navigation.navigate("Booking")} activeOpacity={0.9}>
+          {/* Background photo */}
+          <Image
+            source={{ uri: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80" }}
+            style={S.promoBgImg}
+            resizeMode="cover"
+          />
+          {/* Dark overlay */}
+          <View style={S.promoDark} />
+
+          {/* Left content */}
+          <View style={S.promoContent}>
+            <View style={S.promoTag}>
+              <Text style={S.promoTagTxt}>Limited offer</Text>
+            </View>
+            <Text style={S.promoTitle}>Smart Home{"\n"}Service</Text>
+            <TouchableOpacity style={S.promoBtn} onPress={() => navigation.navigate("Booking")}>
+              <CalendarDays size={12} color="#fff" />
+              <Text style={S.promoBtnTxt}>Book Now</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Discount badge */}
+          <View style={S.discBadge}>
+            <Text style={S.discVal}>30%</Text>
+            <Text style={S.discOff}>OFF</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* ── Next available ─────────────────────────────────────── */}
+        {nextSlot && (
+          <View style={S.availRow}>
+            <View style={S.availDot} />
+            <Clock size={13} color={C.primary} strokeWidth={2} />
+            <Text style={S.availTxt}>Next available slot today: <Text style={S.availTime}>{nextSlot}</Text></Text>
+          </View>
+        )}
+
+        {/* ── Popular services ───────────────────────────────────── */}
+        <View style={S.sectionHead}>
+          <Text style={S.sectionTitle}>Popular services</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Booking")}>
+            <Text style={S.viewAll}>View All</Text>
+          </TouchableOpacity>
+        </View>
+
+        {loading ? (
+          <ActivityIndicator size="small" color={C.primary} style={{ marginTop: 20 }} />
+        ) : filtered.length === 0 ? (
+          <Text style={S.emptyTxt}>
+            {search ? "No services match your search." : "No services available."}
+          </Text>
+        ) : (
+          <View style={S.cardList}>
+            {filtered.map((svc, i) => {
+              const key   = getPhotoKey(svc.name);
+              const photo = svc.image || SVC_PHOTOS[key];
+              const price = svc.rate
+                ? `£${Number(svc.rate).toFixed(2)}/hr`
+                : "Quote on request";
+              const shortDesc = svc.description
+                ? svc.description.slice(0, 55) + (svc.description.length > 55 ? "…" : "")
+                : `Professional ${svc.name?.toLowerCase()} by vetted experts.`;
+
+              return (
+                <View key={svc._id || i} style={S.svcCard}>
+                  {/* Photo */}
+                  <View style={S.svcImgWrap}>
+                    <Image source={{ uri: photo }} style={S.svcImg} resizeMode="cover" />
+                  </View>
+
+                  {/* Info */}
+                  <View style={S.svcBody}>
+                    <View style={S.svcTopRow}>
+                      <Text style={S.svcName} numberOfLines={1}>{svc.name}</Text>
+                      <View style={S.ratingPill}>
+                        <Star size={10} color="#F59E0B" fill="#F59E0B" strokeWidth={0} />
+                        <Text style={S.ratingTxt}>4.9</Text>
+                      </View>
+                    </View>
+
+                    <Text style={S.svcDesc} numberOfLines={2}>{shortDesc}</Text>
+
+                    <View style={S.svcMidRow}>
+                      <Text style={S.svcPrice}>{price}</Text>
+                      {nextSlot && (
+                        <View style={S.slotTag}>
+                          <Clock size={9} color={C.primary} strokeWidth={2.5} />
+                          <Text style={S.slotTxt}>{nextSlot}</Text>
+                        </View>
+                      )}
+                    </View>
+
+                    {/* Buttons */}
+                    <View style={S.btnRow}>
+                      <TouchableOpacity
+                        style={S.detailBtn}
+                        onPress={() => navigation.navigate("Booking")}
+                        activeOpacity={0.8}
+                      >
+                        <Eye size={12} color="#374151" strokeWidth={2} />
+                        <Text style={S.detailBtnTxt}>View Details</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={S.bookBtn}
+                        onPress={() => navigation.navigate("Booking")}
+                        activeOpacity={0.85}
+                      >
+                        <CalendarDays size={12} color="#fff" strokeWidth={2} />
+                        <Text style={S.bookBtnTxt}>Book Now</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )}
+
+        <View style={{ height: 110 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -534,280 +336,193 @@ const HomeScreen = ({ navigation }) => {
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const S = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg },
+  root:   { flex: 1, backgroundColor: "#F9FAFB" },
+  scroll: { paddingBottom: 20 },
 
   // Header
   header: {
-    paddingTop: Platform.OS === "android" ? 36 : 8,
-    paddingBottom: 24,
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
     paddingHorizontal: 20,
-    overflow: "hidden",
-  },
-  blob1: {
-    position: "absolute", width: 200, height: 200, borderRadius: 100,
-    backgroundColor: "rgba(255,255,255,0.05)", top: -60, right: -60,
-  },
-  blob2: {
-    position: "absolute", width: 130, height: 130, borderRadius: 65,
-    backgroundColor: "rgba(255,255,255,0.04)", bottom: 20, left: -40,
-  },
-  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 18 },
-  greetingTxt: { fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: "500" },
-  nameTxt: { fontSize: 26, fontWeight: "900", color: "#fff", marginTop: 2 },
-  headerActions: { flexDirection: "row", alignItems: "center", gap: 10 },
-  iconBtn: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    alignItems: "center", justifyContent: "center",
-  },
-  badgeDot: {
-    position: "absolute", width: 8, height: 8, borderRadius: 4,
-    backgroundColor: "#FCD34D", top: 8, right: 8,
-    borderWidth: 1.5, borderColor: "#0F6B4C",
-  },
-  avatarBtn: {
-    width: 42, height: 42, borderRadius: 21,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center", justifyContent: "center",
-    borderWidth: 2, borderColor: "rgba(255,255,255,0.35)",
-  },
-  avatarTxt: { fontSize: 14, fontWeight: "900", color: "#fff" },
-
-  // Hero card
-  heroCard: {
+    paddingTop: Platform.OS === "android" ? 18 : 10,
+    paddingBottom: 6,
     backgroundColor: "#fff",
-    borderRadius: 20, padding: 18,
-    shadowColor: "#000", shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.14, shadowRadius: 16, elevation: 8,
   },
-  heroCardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 },
-  heroLabelRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  heroLiveDot: {
-    width: 8, height: 8, borderRadius: 4, backgroundColor: C.success,
-    shadowColor: C.success, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.9, shadowRadius: 5,
-  },
-  heroLabelTxt: { fontSize: 11, fontWeight: "700", color: C.textMuted, textTransform: "uppercase", letterSpacing: 0.6 },
-  heroService: { fontSize: 22, fontWeight: "900", color: C.textDark, marginBottom: 10 },
-  heroMeta: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 },
-  heroMetaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
-  heroMetaTxt: { fontSize: 12, color: C.textMed, fontWeight: "500", maxWidth: 130 },
-  heroCardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 4, marginBottom: 4 },
-  heroPrice: { fontSize: 20, fontWeight: "900", color: C.primary },
-  heroViewBtn: { flexDirection: "row", alignItems: "center", gap: 2 },
-  heroViewTxt: { fontSize: 13, fontWeight: "700", color: C.primary },
-
-  // Hero states 2 & 3
-  heroActivityRow: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
-  heroActivityItem: { flex: 1, alignItems: "center", gap: 2 },
-  heroActivityVal: { fontSize: 18, fontWeight: "900", color: C.textDark },
-  heroActivityLbl: { fontSize: 11, color: C.textMuted, fontWeight: "500" },
-  heroActivityDiv: { width: 1, height: 32, backgroundColor: C.border },
-  heroWelcomeTitle: { fontSize: 15, fontWeight: "700", color: C.textDark, marginBottom: 12, lineHeight: 22 },
-  heroPills: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 14 },
-  heroPill: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    backgroundColor: C.primaryLight, borderRadius: 8,
-    paddingHorizontal: 8, paddingVertical: 4,
-  },
-  heroPillTxt: { fontSize: 11, fontWeight: "700", color: C.primary },
-  heroCtaBtn: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
-    backgroundColor: C.primary, borderRadius: 14,
-    paddingVertical: 13, paddingHorizontal: 16,
-  },
-  heroCtaTxt: { flex: 1, fontSize: 14, fontWeight: "800", color: "#fff" },
-
-  // Location row
-  locationRow: {
-    flexDirection: "row", alignItems: "center", gap: 8,
-    backgroundColor: C.primaryLight, borderRadius: 12,
-    padding: 11, marginTop: 12, borderWidth: 1, borderColor: "#BBE8D5",
-  },
-  locationDot: {
-    width: 22, height: 22, borderRadius: 11,
-    backgroundColor: C.primary, alignItems: "center", justifyContent: "center",
-  },
-  locationTxt: { flex: 1, fontSize: 12, fontWeight: "600", color: C.primaryDark },
-
-  chip: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: 9999 },
-  chipTxt: { fontSize: 11, fontWeight: "700" },
-
-  // Body
-  body: { padding: 16, gap: 20 },
-
-  // Book now banner
-  banner: { borderRadius: 20, overflow: "hidden", height: 112 },
-  bannerBg: { width: "100%", height: "100%" },
-  bannerOverlay: {
-    flex: 1, flexDirection: "row", alignItems: "center",
-    paddingHorizontal: 18, paddingVertical: 16, gap: 12, borderRadius: 20,
-  },
-  bannerTag: {
-    flexDirection: "row", alignItems: "center", gap: 4,
-    backgroundColor: "#fff", borderRadius: 8,
-    paddingHorizontal: 8, paddingVertical: 3, alignSelf: "flex-start",
-  },
-  bannerTagTxt: { fontSize: 10, fontWeight: "800", color: C.primary },
-  bannerTitle: { fontSize: 18, fontWeight: "900", color: "#fff" },
-  bannerSub: { fontSize: 12, color: "rgba(255,255,255,0.75)" },
-  bannerArrow: {
+  welcomeTxt: { fontSize: 13, color: "#9CA3AF", fontWeight: "500" },
+  nameTxt:    { fontSize: 24, fontWeight: "800", color: "#111827", marginTop: 1 },
+  headerRight:{ flexDirection: "row", alignItems: "center", gap: 10 },
+  iconCircle: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: "#fff", alignItems: "center", justifyContent: "center",
+    backgroundColor: "#F3F4F6",
+    alignItems: "center", justifyContent: "center",
+  },
+  avatarCircle: {
+    width: 46, height: 46, borderRadius: 23,
+    backgroundColor: C.primary,
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 2, borderColor: "#DCFCE7",
+  },
+  avatarTxt: { fontSize: 15, fontWeight: "900", color: "#fff" },
+
+  // Search
+  searchRow: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    paddingHorizontal: 20, paddingVertical: 14,
+    backgroundColor: "#fff",
+  },
+  searchBox: {
+    flex: 1, flexDirection: "row", alignItems: "center", gap: 10,
+    backgroundColor: "#F3F4F6", borderRadius: 14,
+    paddingHorizontal: 14, paddingVertical: 12,
+  },
+  searchInput: { flex: 1, fontSize: 14, color: "#111827", padding: 0 },
+  filterBtn: {
+    width: 48, height: 48, borderRadius: 14,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center", justifyContent: "center",
   },
 
   // Section
-  sectionHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 14 },
-  sectionTitle: { fontSize: 20, fontWeight: "900", color: C.textDark },
-  sectionLink: { fontSize: 13, color: C.primary, fontWeight: "700" },
+  sectionHead: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    paddingHorizontal: 20, marginTop: 20, marginBottom: 14,
+  },
+  sectionTitle: { fontSize: 18, fontWeight: "800", color: "#111827" },
+  viewAll:      { fontSize: 13, fontWeight: "600", color: C.primary },
 
-  // Recent cleans
-  recentScroll: { gap: 10, paddingBottom: 4 },
-  recentCard: {
-    width: 145, backgroundColor: C.surface, borderRadius: 18,
-    padding: 14, gap: 6, borderWidth: 1, borderColor: C.border,
-  },
-  recentIcon: {
-    width: 40, height: 40, borderRadius: 12,
-    backgroundColor: C.primaryLight, alignItems: "center", justifyContent: "center",
-  },
-  recentSvc: { fontSize: 13, fontWeight: "700", color: C.textDark, lineHeight: 18 },
-  recentDate: { fontSize: 11, color: C.textMuted, fontWeight: "500" },
-  recentPrice: { fontSize: 15, fontWeight: "900", color: C.primary, marginTop: 2 },
-  recentBookAgain: { backgroundColor: C.primary, borderColor: C.primary, alignItems: "center", justifyContent: "center" },
-  recentBookAgainIcon: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center", justifyContent: "center", marginBottom: 6,
-  },
-  recentBookAgainTxt: { fontSize: 13, fontWeight: "800", color: "#fff", textAlign: "center", lineHeight: 18 },
+  // Categories
+  catScroll:   { paddingLeft: 20, paddingRight: 8, gap: 14 },
+  catItem:     { alignItems: "center", gap: 7, width: 72 },
+  catSkeleton: { width: 68, height: 68, borderRadius: 34, backgroundColor: "#E5E7EB", marginRight: 14 },
 
-  // Stats
-  statsCard: {
-    backgroundColor: C.surface, borderRadius: 20,
-    flexDirection: "row", paddingVertical: 18,
-    borderWidth: 1, borderColor: C.border,
+  catCircleWrap: {
+    width: 68, height: 68, borderRadius: 34,
+    overflow: "hidden",
+    borderWidth: 2, borderColor: "#E5E7EB",
   },
-  statItem: { flex: 1, alignItems: "center", gap: 2 },
-  statVal: { fontSize: 20, fontWeight: "900", color: C.textDark },
-  statLbl: { fontSize: 10, color: C.textMuted, fontWeight: "600" },
-  statDiv: { width: 1, backgroundColor: C.border },
+  catCircleActive: { borderColor: C.primary, borderWidth: 2.5 },
+  catPhoto:  { width: "100%", height: "100%" },
+  catOverlay:{
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(15,107,76,0.3)",
+  },
+  catLabel:       { fontSize: 11, fontWeight: "600", color: "#374151", textAlign: "center", lineHeight: 15 },
+  catLabelActive: { color: C.primary, fontWeight: "700" },
 
-  // Services
-  servicesGrid: { gap: 10 },
-  svcCard: {
-    flexDirection: "row", alignItems: "center", gap: 14,
-    backgroundColor: C.surface, borderRadius: 18, padding: 14,
-    borderWidth: 1, borderColor: C.border,
+  // Promo
+  promo: {
+    marginHorizontal: 20, marginTop: 22, borderRadius: 20,
+    height: 158, overflow: "hidden",
+    flexDirection: "row", alignItems: "center",
   },
-  svcIconWrap: { width: 50, height: 50, borderRadius: 15, alignItems: "center", justifyContent: "center" },
-  svcTextBlock: { flex: 1 },
-  svcLabel: { fontSize: 14, fontWeight: "800", color: C.textDark },
-  svcPrice: { fontSize: 12, fontWeight: "700", marginTop: 2 },
-  svcArrow: { width: 30, height: 30, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-
-  // How it works
-  howCard: {
-    backgroundColor: C.surface, borderRadius: 20, padding: 20,
-    borderWidth: 1, borderColor: C.border,
+  promoBgImg: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
+  promoDark:  { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(10,70,40,0.78)" },
+  promoContent: { flex: 1, paddingLeft: 22, paddingVertical: 20, gap: 10, zIndex: 2 },
+  promoTag: {
+    alignSelf: "flex-start",
+    backgroundColor: "#fff",
+    borderRadius: 8, paddingHorizontal: 9, paddingVertical: 4,
   },
-  howTitle: { fontSize: 20, fontWeight: "900", color: C.textDark, marginBottom: 20 },
-  howSteps: { flexDirection: "row", alignItems: "flex-start" },
-  howStep: { flex: 1, alignItems: "center", gap: 6 },
-  howNum: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", marginBottom: 6 },
-  howNumTxt: { fontSize: 16, fontWeight: "900", color: "#fff" },
-  howStepTitle: { fontSize: 12, fontWeight: "800", color: C.textDark, textAlign: "center" },
-  howStepSub: { fontSize: 10, color: C.textMuted, textAlign: "center", lineHeight: 14 },
-  howDash: { width: 20, height: 2, backgroundColor: C.border, marginTop: 18 },
-
-  // Photo mosaic
-  mosaic: { flexDirection: "row", gap: 10, height: 200 },
-  mosaicMain: { flex: 1, borderRadius: 18, overflow: "hidden" },
-  mosaicCol: { flex: 1, gap: 10 },
-  mosaicSm: { flex: 1, borderRadius: 14, overflow: "hidden" },
-  mosaicImgMain: { width: "100%", height: "100%", resizeMode: "cover" },
-  mosaicImgSm: { width: "100%", height: "100%", resizeMode: "cover" },
-  mosaicOverlay: {
-    position: "absolute", bottom: 0, left: 0, right: 0,
-    paddingHorizontal: 10, paddingBottom: 10, paddingTop: 30, justifyContent: "flex-end",
+  promoTagTxt:  { fontSize: 10, fontWeight: "800", color: C.primary },
+  promoTitle:   { fontSize: 22, fontWeight: "900", color: "#fff", lineHeight: 28 },
+  promoBtn: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderWidth: 1, borderColor: "rgba(255,255,255,0.4)",
+    borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8,
+    alignSelf: "flex-start",
   },
-  mosaicLabel: { fontSize: 12, fontWeight: "800", color: "#fff" },
-
-  // Trust
-  trustCard: { backgroundColor: C.surface, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: C.border },
-  trustTitle: { fontSize: 20, fontWeight: "900", color: C.textDark, marginBottom: 18 },
-  trustGrid: { gap: 14 },
-  trustItem: { flexDirection: "row", alignItems: "center", gap: 12 },
-  trustIconWrap: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  trustTxt: { fontSize: 14, fontWeight: "700", color: C.textDark },
-  trustSub: { fontSize: 11, color: C.textMuted, marginTop: 1 },
-
-  // Footer CTA
-  footerCta: { borderRadius: 20, overflow: "hidden" },
-  footerCtaGrad: { flexDirection: "row", alignItems: "center", padding: 20, gap: 14, overflow: "hidden" },
-  footerCtaBlob: {
-    position: "absolute", width: 120, height: 120, borderRadius: 60,
-    backgroundColor: "rgba(255,255,255,0.05)", top: -30, right: 40,
-  },
-  footerCtaTitle: { fontSize: 17, fontWeight: "900", color: "#fff" },
-  footerCtaSub: { fontSize: 12, color: "rgba(255,255,255,0.65)", marginTop: 3 },
-  footerCtaArrow: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: "#fff", alignItems: "center", justifyContent: "center",
-  },
-
-  // Footer links
-  footer: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
-    paddingVertical: 16, marginBottom: 80,
-    borderTopWidth: 1, borderTopColor: C.border,
-  },
-  footerLink: { fontSize: 12, color: C.primary, fontWeight: "600" },
-  footerDot: { color: C.textMuted },
-
-  // Live tracker
-  trackerCard: {
-    borderRadius: 20, overflow: "hidden", padding: 18,
-    shadowColor: "#064D36", shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3, shadowRadius: 14, elevation: 6,
-  },
-  trackerCircle1: {
-    position: "absolute", width: 140, height: 140, borderRadius: 70,
-    backgroundColor: "rgba(255,255,255,0.04)", top: -40, right: -30,
-  },
-  trackerCircle2: {
-    position: "absolute", width: 90, height: 90, borderRadius: 45,
-    backgroundColor: "rgba(255,255,255,0.06)", bottom: -20, left: 20,
-  },
-  trackerHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 14 },
-  trackerLiveRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  trackerPulse: {
-    width: 8, height: 8, borderRadius: 4, backgroundColor: "#4ADE80",
-    shadowColor: "#4ADE80", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 6,
-  },
-  trackerLiveTxt: { fontSize: 10, fontWeight: "900", color: "rgba(255,255,255,0.9)", letterSpacing: 1.2 },
-  trackerUpdated: { fontSize: 10, color: "rgba(255,255,255,0.45)", fontWeight: "500" },
-  trackerWorkerRow: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 16 },
-  trackerAvatar: {
-    width: 46, height: 46, borderRadius: 23,
-    backgroundColor: "rgba(255,255,255,0.15)",
+  promoBtnTxt: { fontSize: 12, fontWeight: "700", color: "#fff" },
+  discBadge: {
+    width: 64, height: 64, borderRadius: 32,
+    backgroundColor: "#F59E0B",
     alignItems: "center", justifyContent: "center",
-    borderWidth: 2, borderColor: "rgba(255,255,255,0.25)",
+    marginRight: 22, zIndex: 2,
   },
-  trackerAvatarTxt: { fontSize: 15, fontWeight: "900", color: "#fff" },
-  trackerWorkerName: { fontSize: 16, fontWeight: "800", color: "#fff" },
-  trackerWorkerSub: { fontSize: 12, color: "rgba(255,255,255,0.6)", marginTop: 2 },
-  trackerActions: { flexDirection: "row", gap: 10 },
-  trackerMapBtn: {
-    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
-    backgroundColor: "#fff", borderRadius: 12, paddingVertical: 11,
+  discVal: { fontSize: 17, fontWeight: "900", color: "#fff", lineHeight: 20 },
+  discOff: { fontSize: 10, fontWeight: "800", color: "#fff" },
+
+  // Availability row
+  availRow: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: "#F0FDF4",
+    marginHorizontal: 20, marginTop: 14,
+    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10,
+    borderWidth: 1, borderColor: "#BBF7D0",
   },
-  trackerMapTxt: { fontSize: 13, fontWeight: "700", color: C.primary },
-  trackerChatBtn: {
-    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
-    backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 12, paddingVertical: 11,
-    borderWidth: 1, borderColor: "rgba(255,255,255,0.2)",
+  availDot: {
+    width: 7, height: 7, borderRadius: 3.5,
+    backgroundColor: C.primary,
   },
-  trackerChatTxt: { fontSize: 13, fontWeight: "700", color: "#fff" },
+  availTxt:  { fontSize: 12, color: "#374151", fontWeight: "500", flex: 1 },
+  availTime: { fontWeight: "800", color: C.primary },
+
+  // Service cards
+  emptyTxt: {
+    textAlign: "center", color: "#9CA3AF",
+    marginTop: 32, fontSize: 14, fontWeight: "500",
+  },
+
+  cardList: { paddingHorizontal: 20, gap: 14 },
+
+  svcCard: {
+    backgroundColor: "#fff",
+    borderRadius: 18,
+    overflow: "hidden",
+    borderWidth: 1, borderColor: "#E5E7EB",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+
+  // Photo top band
+  svcImgWrap: { width: "100%", height: 140 },
+  svcImg:     { width: "100%", height: "100%" },
+
+  // Card body
+  svcBody: { padding: 14, gap: 6 },
+
+  svcTopRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  svcName:   { fontSize: 16, fontWeight: "800", color: "#111827", flex: 1, marginRight: 8 },
+
+  ratingPill: {
+    flexDirection: "row", alignItems: "center", gap: 3,
+    backgroundColor: "#FFFBEB",
+    borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3,
+  },
+  ratingTxt: { fontSize: 11, fontWeight: "700", color: "#92400E" },
+
+  svcDesc: { fontSize: 12, color: "#6B7280", lineHeight: 18 },
+
+  svcMidRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  svcPrice:  { fontSize: 16, fontWeight: "900", color: C.primary },
+
+  slotTag: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    backgroundColor: "#F0FDF4", borderRadius: 7,
+    paddingHorizontal: 7, paddingVertical: 3,
+    borderWidth: 1, borderColor: "#BBF7D0",
+  },
+  slotTxt: { fontSize: 10, fontWeight: "700", color: C.primary },
+
+  // Buttons
+  btnRow: {
+    flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4,
+  },
+  detailBtn: {
+    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5,
+    borderWidth: 1.5, borderColor: "#D1D5DB",
+    borderRadius: 12, paddingVertical: 10,
+  },
+  detailBtnTxt: { fontSize: 12, fontWeight: "700", color: "#374151" },
+
+  bookBtn: {
+    flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5,
+    backgroundColor: C.primary,
+    borderRadius: 12, paddingVertical: 10,
+  },
+  bookBtnTxt: { fontSize: 12, fontWeight: "700", color: "#fff" },
 });
 
 export default HomeScreen;
