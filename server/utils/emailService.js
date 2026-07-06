@@ -27,7 +27,7 @@ const sendEmail = async ({ to, subject, html }) => {
 
     console.log(`📧 Resend: Attempting to send email to: ${to}...`);
     const { data, error } = await resend.emails.send({
-      from: "Cleaniq Services <info@cleaniqservices.com>",
+      from: "Cleaniq Services <noreply@cleaniqservices.com>",
       to: to,
       subject: subject,
       html: html,
