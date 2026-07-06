@@ -3,6 +3,8 @@ const router = express.Router();
 const WorkerCustomerMessage = require("../models/WorkerCustomerMessage");
 const Booking = require("../models/Booking");
 const Worker = require("../models/Worker");
+const Customer = require("../models/Customer");
+const { sendCustomerPush } = require("../utils/pushNotifications");
 
 // Helper: verify worker owns the booking
 const verifyWorkerOwnsBooking = async (bookingId, workerId) => {
@@ -93,9 +95,19 @@ router.post("/:bookingId", async (req, res) => {
 
     await message.save();
 
-    console.log(
-      `💬 Worker ${workerName} sent message to customer for booking ${bookingId}`,
-    );
+    // Notify customer via push
+    try {
+      const customer = await Customer.findOne({ email: (booking.customer?.email || "").toLowerCase() });
+      if (customer?.expoPushToken) {
+        await sendCustomerPush(customer.expoPushToken, {
+          title: `Message from ${workerName.split(" ")[0]}`,
+          body: text.trim().length > 60 ? text.trim().slice(0, 57) + "…" : text.trim(),
+          data: { bookingId, type: "chat" },
+        });
+      }
+    } catch {}
+
+    console.log(`💬 Worker ${workerName} sent message to customer for booking ${bookingId}`);
     res.status(201).json(message);
   } catch (error) {
     console.error("Error sending message:", error);

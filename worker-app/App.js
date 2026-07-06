@@ -26,7 +26,7 @@ try {
 
 import { C } from "./src/theme/flat";
 import { NEU_BG } from "./src/theme/neumorphic";
-import { AuthProvider, AuthContext } from "./src/context/AuthContext";
+import { AuthProvider, AuthContext, API_URL } from "./src/context/AuthContext";
 import { NotificationProvider } from "./src/context/NotificationContext";
 import OnboardingScreen from "./src/screens/OnboardingScreen";
 import CompleteProfileScreen from "./src/screens/CompleteProfileScreen";
@@ -199,6 +199,26 @@ const AppNavigation = () => {
       }
     })();
   }, []);
+
+  // Register push token for chat notifications
+  useEffect(() => {
+    if (!userToken || !workerInfo?.id) return;
+    (async () => {
+      try {
+        if (!Notifications?.getPermissionsAsync) return;
+        const { status } = await Notifications.getPermissionsAsync();
+        if (status !== "granted") return;
+        const { data: pushToken } = await Notifications.getExpoPushTokenAsync({});
+        if (pushToken) {
+          const axiosMod = require("axios").default;
+          await axiosMod.post(`${API_URL}/workers/push-token`, {
+            workerId: workerInfo.id || workerInfo._id,
+            token: pushToken,
+          });
+        }
+      } catch {}
+    })();
+  }, [userToken, workerInfo?.id]);
 
   // Start notification polling when user logs in, stop when logs out
   useEffect(() => {

@@ -66,8 +66,9 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
 
   const fetchMessages = async () => {
     try {
+      const workerId = workerInfo?._id || workerInfo?.id;
       const response = await axios.get(
-        `${API_URL}/workers/bookings/${bookingId}/messages`,
+        `${API_URL}/worker-chat/${bookingId}?workerId=${workerId}`,
       );
       setMessages(response.data || []);
       setTimeout(() => {
@@ -86,14 +87,13 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
     setInputMessage("");
     setSending(true);
     try {
+      const workerId = workerInfo?._id || workerInfo?.id;
       const response = await axios.post(
-        `${API_URL}/workers/bookings/${bookingId}/messages`,
+        `${API_URL}/worker-chat/${bookingId}`,
         {
-          senderId: workerInfo.id,
-          senderType: "worker",
-          senderName: `${workerInfo.firstName} ${workerInfo.lastName}`,
-          message: messageText,
-          customerId,
+          text: messageText,
+          workerId,
+          workerName: `${workerInfo.firstName} ${workerInfo.lastName}`,
         },
       );
       setMessages((prev) => [...prev, response.data]);
@@ -119,7 +119,7 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
     : "C";
 
   const renderMessage = ({ item }) => {
-    const isWorker = item.senderType === "worker";
+    const isWorker = item.senderType === "Worker" || item.senderType === "worker";
     return (
       <View
         style={[styles.messageRow, isWorker ? styles.myRow : styles.theirRow]}
@@ -141,7 +141,7 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
               isWorker ? styles.myBubbleText : styles.theirBubbleText,
             ]}
           >
-            {item.message}
+            {item.text || item.message}
           </Text>
           <Text
             style={[

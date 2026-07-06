@@ -212,6 +212,18 @@ router.get('/me', verifyCustomer, async (req, res) => {
   }
 });
 
+// POST /api/customer-auth/push-token
+router.post("/push-token", verifyCustomer, async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ message: "token is required" });
+    await Customer.findByIdAndUpdate(req.customer.id, { expoPushToken: token });
+    res.json({ message: "Push token saved." });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // PATCH /api/customer-auth/profile  (update name + phone)
 router.patch('/profile', verifyCustomer, async (req, res) => {
   try {

@@ -5,7 +5,8 @@ const customerSchema = new mongoose.Schema({
   lastName:  { type: String, required: true },
   email:     { type: String, required: true, unique: true, lowercase: true },
   phone:     { type: String, default: '' },
-  passwordHash: { type: String, required: true },
+  passwordHash:   { type: String, required: true },
+  expoPushToken:  { type: String, default: "" },
   createdAt: { type: Date, default: Date.now }
 });
 

@@ -22,7 +22,7 @@ const ServicesManagement = () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${activeRegion}`);
       const data = await response.json();
       const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-      const baseNames = ['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning', 'End of Tenancy'];
+      const baseNames = ['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning', 'End of Tenancy', 'General Cleaning'];
       const roomNames = ['Bedroom', 'Bathroom', 'Cloakroom', 'Kitchen', 'Utility Room', 'Reception Room', 'Conservatory'];
 
       const mappedData = data.map(s => {

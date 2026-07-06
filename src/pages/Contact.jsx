@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
@@ -10,11 +10,23 @@ const Contact = () => {
     name: "",
     email: "",
     phone: "",
+    service: "",
     subject: "",
     message: "",
   });
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [errorMsg, setErrorMsg] = useState("");
+  const [serviceNames, setServiceNames] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API}/services?region=UK`)
+      .then((r) => r.json())
+      .then((data) => {
+        const names = [...new Set(data.map((s) => s.name))].sort();
+        setServiceNames(names);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -33,7 +45,7 @@ const Contact = () => {
 
       if (res.ok) {
         setStatus("success");
-        setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+        setFormData({ name: "", email: "", phone: "", service: "", subject: "", message: "" });
       } else {
         const data = await res.json();
         setErrorMsg(data.message || "Something went wrong. Please try again.");
@@ -237,16 +249,31 @@ const Contact = () => {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 ml-1 uppercase tracking-widest">Subject</label>
-                  <input
-                    type="text"
-                    name="subject"
-                    placeholder="e.g. Quote for deep clean"
-                    value={formData.subject}
+                  <label className="text-[10px] font-black text-slate-400 ml-1 uppercase tracking-widest">Service</label>
+                  <select
+                    name="service"
+                    value={formData.service}
                     onChange={handleChange}
                     className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold focus:outline-none focus:border-primary text-slate-700 text-sm transition-colors"
-                  />
+                  >
+                    <option value="">Select a service…</option>
+                    {serviceNames.map((name) => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
                 </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 ml-1 uppercase tracking-widest">Subject</label>
+                <input
+                  type="text"
+                  name="subject"
+                  placeholder="e.g. Quote for deep clean"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold focus:outline-none focus:border-primary text-slate-700 text-sm transition-colors"
+                />
               </div>
 
               <div className="space-y-1">

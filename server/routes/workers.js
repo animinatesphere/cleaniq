@@ -6,6 +6,15 @@ const Notification = require("../models/Notification");
 const { moveToTrash } = require("../utils/trash");
 const jwt = require("jsonwebtoken");
 const { sendEmail, templates } = require("../utils/emailService");
+const Customer = require("../models/Customer");
+const { sendCustomerPush } = require("../utils/pushNotifications");
+
+const notifyCustomer = async (booking, { title, body }) => {
+  try {
+    const customer = await Customer.findOne({ email: (booking.customer?.email || "").toLowerCase() });
+    if (customer?.expoPushToken) await sendCustomerPush(customer.expoPushToken, { title, body, data: { bookingId: booking.bookingId } });
+  } catch (err) { console.error("Customer push error:", err.message); }
+};
 
 const findBookingByIdOrBookingId = async (id) => {
   if (id.match(/^[0-9a-fA-F]{24}$/)) {
@@ -91,6 +100,18 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Login error detailed:", error);
     res.status(500).json({ error: "Internal server error during login" });
+  }
+});
+
+// Save worker push token for notifications
+router.post("/push-token", async (req, res) => {
+  try {
+    const { workerId, token } = req.body;
+    if (!workerId || !token) return res.status(400).json({ error: "workerId and token required" });
+    await Worker.findByIdAndUpdate(workerId, { expoPushToken: token });
+    res.json({ message: "Push token saved." });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -186,6 +207,12 @@ router.post("/jobs/:id/accept", async (req, res) => {
       title: "Job Accepted",
       message: `You have successfully accepted the job for ${booking.customer?.firstName} (${booking.service}). Check your schedule.`,
       type: "success",
+    });
+
+    // Notify customer
+    await notifyCustomer(booking, {
+      title: "Cleaner Assigned!",
+      body: `${workerName} has accepted your ${booking.service} booking. See you on ${new Date(booking.schedule?.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}.`,
     });
 
     // Send email log to Admin
@@ -362,6 +389,12 @@ router.post("/jobs/:id/arrive", async (req, res) => {
     booking.jobArrivedTime = new Date();
     await booking.save();
 
+    // Notify customer
+    await notifyCustomer(booking, {
+      title: "Your Cleaner Has Arrived!",
+      body: `${booking.assignedWorkerName} is at your door. Open up and let the magic happen.`,
+    });
+
     // Send email log to Admin
     await sendEmail({
       to: process.env.EMAIL_USER || "admin@cleaniqservices.com",
@@ -390,6 +423,12 @@ router.post("/jobs/:id/start", async (req, res) => {
     booking.status = "Cleaning";
     booking.jobStartTime = new Date();
     await booking.save();
+
+    // Notify customer
+    await notifyCustomer(booking, {
+      title: "Cleaning Has Started!",
+      body: `${booking.assignedWorkerName} has started your ${booking.service}. Sit back and relax.`,
+    });
 
     // Send email log to Admin
     await sendEmail({
@@ -548,6 +587,12 @@ router.post("/jobs/:id/complete", async (req, res) => {
         );
       }
     }
+
+    // Notify customer
+    await notifyCustomer(booking, {
+      title: "All Done — Spotless!",
+      body: `Your ${booking.service} is complete. Check your inbox for the invoice. Thank you for choosing Cleaniq!`,
+    });
 
     // Send email log to Admin
     await sendEmail({
@@ -822,6 +867,28 @@ router.put("/:id/profile", async (req, res) => {
   } catch (error) {
     console.error("Error updating worker profile:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /api/workers/active-locations — admin: all workers currently sharing location
+router.get("/active-locations", async (req, res) => {
+  try {
+    const workers = await Worker.find({ "location.sharing": true })
+      .select("firstName lastName workerId location assignedWorker")
+      .lean();
+    res.json(
+      workers.map((w) => ({
+        id: w._id,
+        name: `${w.firstName} ${w.lastName}`,
+        workerId: w.workerId,
+        lat: w.location?.lat,
+        lng: w.location?.lng,
+        lastUpdated: w.location?.lastUpdated,
+        activeBookingId: w.location?.activeBookingId,
+      }))
+    );
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

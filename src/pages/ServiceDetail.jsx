@@ -767,6 +767,148 @@ const POST_CONSTRUCTION_EXTENDED = {
   seoFooter: `Cleaniq Services provides professional post-construction cleaning, builders cleans, and renovation cleaning across Manchester. Whether you need a post-build clean in Manchester City Centre, Salford, Ancoats, Stockport, or Didsbury — our industrial-equipped team delivers a handover-ready finish. Book your Manchester post-construction cleaning service online or call +44 7752 476368.`,
 };
 
+const GENERAL_EXTENDED = {
+  intro: `Sometimes you just need a clean, fresh home without the fuss. Cleaniq's general cleaning service in Manchester gives you a thorough, professional tidy-up of your entire home — every week, fortnight, or as a one-off when life gets busy. Trusted local cleaners, eco-friendly products, and a finish you'll actually notice.`,
+
+  whyChoosePoints: [
+    {
+      icon: <BadgeCheck size={22} />,
+      title: "Vetted & Trusted Cleaners",
+      body: "Every cleaner is background-checked, fully insured, and trained to our quality standard — so you can relax knowing your home is in safe hands.",
+    },
+    {
+      icon: <ShieldCheck size={22} />,
+      title: "Eco-Friendly Products",
+      body: "We use non-toxic, family-safe, and pet-friendly cleaning solutions that are tough on dirt but gentle on your home and the environment.",
+    },
+    {
+      icon: <Clock size={22} />,
+      title: "Flexible Scheduling",
+      body: "Book a one-off clean or set up a recurring weekly or fortnightly slot. We work around your schedule — including evenings and weekends.",
+    },
+    {
+      icon: <Sparkles size={22} />,
+      title: "Whole-Home Coverage",
+      body: "From kitchen surfaces to bathroom tiles and bedroom floors — our general clean covers every room in your home from top to bottom.",
+    },
+  ],
+
+  checklist: {
+    heading: "General Cleaning Checklist — Manchester",
+    intro: "Our standard general clean covers all key areas of your home. Here is exactly what is included on every visit:",
+    rooms: [
+      {
+        room: "Kitchen",
+        tasks: [
+          "Wipe down all worktops, splashbacks, and surfaces",
+          "Clean exterior of oven, microwave, and fridge",
+          "Degrease hob and extractor filter",
+          "Sink and tap scrub and polish",
+          "Wipe cabinet fronts and handles",
+          "Sweep and mop hard floors",
+          "Empty and reline bins",
+        ],
+      },
+      {
+        room: "Bathrooms & Toilets",
+        tasks: [
+          "Scrub and disinfect toilet bowl, seat, and cistern",
+          "Clean and descale shower, bath, and taps",
+          "Wipe tiles, mirrors, and glass surfaces",
+          "Clean sink and vanity unit",
+          "Mop floor and wipe skirting boards",
+          "Restock toilet paper and fold towels if provided",
+        ],
+      },
+      {
+        room: "Living Areas & Bedrooms",
+        tasks: [
+          "Dust all surfaces, shelves, and furniture",
+          "Vacuum upholstered furniture and cushions",
+          "Vacuum and mop all floors",
+          "Clean mirrors and glass surfaces",
+          "Empty bins and replace liners",
+          "Tidy and straighten cushions and throws",
+          "Wipe light switches, door handles, and skirting boards",
+        ],
+      },
+      {
+        room: "Hallways & Stairs",
+        tasks: [
+          "Vacuum stairs and landing",
+          "Dust banisters and handrails",
+          "Wipe down door frames and skirting boards",
+          "Mop hard hallway floors",
+        ],
+      },
+    ],
+  },
+
+  whyMatters: {
+    heading: "Why Regular Professional Cleaning Makes a Difference",
+    body: [
+      "A consistent cleaning routine does more than keep your home looking good — it reduces allergens, bacteria, and dust build-up that can affect your family's health over time. Professional cleaners are trained to reach the spots that get missed in a quick home tidy: behind appliances, inside cupboard hinges, along skirting boards, and in bathroom grout lines.",
+      "Many of our customers find that booking a regular fortnightly clean removes the mental load of keeping on top of housework — freeing up time for the things that matter. Whether you work long hours, have young children, or simply want your home maintained to a high standard, a regular Cleaniq general clean is the simplest way to stay on top of it.",
+      "Our eco-friendly cleaning products mean no harsh chemical smells left in your home and no risk to children or pets. We bring everything we need, show up on time, and leave your home genuinely clean — not just surface-wiped.",
+    ],
+  },
+
+  faqs: [
+    {
+      q: "What is included in a general cleaning service?",
+      a: "Our general clean covers all main living areas: kitchen surfaces and appliances, bathrooms and toilets, bedroom and living room dusting and vacuuming, hard floor mopping, and bin emptying. You can also request specific extras when booking.",
+    },
+    {
+      q: "How often should I book a general clean?",
+      a: "Most customers book fortnightly, which keeps the home in great condition between cleans. Weekly cleans are popular for larger families or busy households. One-off cleans are also available for any occasion.",
+    },
+    {
+      q: "Do I need to be home during the clean?",
+      a: "No — many of our regular customers provide a key or entry code and go about their day. All our cleaners are vetted, insured, and trusted to work independently in your home.",
+    },
+    {
+      q: "Do you bring your own cleaning products and equipment?",
+      a: "Yes. We bring all necessary eco-friendly cleaning products and equipment unless you prefer us to use your own supplies — just let us know when booking.",
+    },
+    {
+      q: "What Manchester areas do you cover for general cleaning?",
+      a: "We cover all of Greater Manchester including City Centre, Salford, Didsbury, Chorlton, Stockport, Trafford, Wythenshawe, Ancoats, and surrounding postcodes.",
+    },
+  ],
+
+  testimonials: [
+    {
+      name: "Sarah M.",
+      location: "Didsbury, Manchester",
+      rating: 5,
+      text: "I've had Cleaniq coming fortnightly for 6 months now. The house is always spotless when I get home and the team are so professional and friendly. Highly recommend.",
+    },
+    {
+      name: "James T.",
+      location: "Salford",
+      rating: 5,
+      text: "Booked a one-off general clean before my parents visited. Absolutely brilliant — every room was immaculate. Will definitely be booking again.",
+    },
+    {
+      name: "Priya K.",
+      location: "Chorlton, Manchester",
+      rating: 5,
+      text: "Reliable, thorough, and the eco products mean no chemical smell in my flat. Really happy with the quality. Worth every penny.",
+    },
+  ],
+
+  image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1200&q=80",
+  imageAlt: "Professional cleaner tidying a bright, clean living room in Manchester",
+
+  areas: [
+    "Manchester City Centre", "Salford", "Didsbury", "Chorlton", "Stretford",
+    "Ancoats", "Hulme", "Fallowfield", "Withington", "Stockport",
+    "Trafford", "Wythenshawe",
+  ],
+
+  seoFooter: `Cleaniq Services provides reliable general cleaning for homes and apartments across Manchester. Whether you need a regular weekly or fortnightly clean in Manchester City Centre, Didsbury, Chorlton, Salford, or Stockport — our vetted, eco-friendly cleaning team delivers a consistently high standard on every visit. Book your Manchester general cleaning service online or call +44 7752 476368.`,
+};
+
 const SERVICES_MAP = {
   "end-of-tenancy-cleaning-manchester": {
     title: "End of Tenancy Cleaning Manchester | Cleaniq Services",
@@ -842,6 +984,21 @@ const SERVICES_MAP = {
       "Ready-to-live handover certification cleans",
     ],
     extended: "POST",
+  },
+  "general-cleaning-manchester": {
+    title: "General Cleaning Manchester | Professional Home Cleaners | Cleaniq",
+    meta: "Reliable general cleaning services in Manchester. Regular home cleans, flexible scheduling, and eco-friendly products. Book trusted local cleaners with Cleaniq Services.",
+    heading: "General Cleaning Services in Manchester",
+    tagline: "Reliable, Regular, Refreshingly Clean.",
+    description:
+      "Keep your home consistently spotless with our dependable general cleaning service. Whether you need a one-off clean or a regular weekly or fortnightly schedule, our professional cleaners handle every room thoroughly — leaving your home fresh, tidy, and hygienically clean.",
+    points: [
+      "Flexible one-off, weekly, or fortnightly scheduling options",
+      "Full room cleaning — kitchens, bathrooms, living areas, bedrooms",
+      "Eco-friendly, non-toxic cleaning products safe for families & pets",
+      "Vetted, insured, and background-checked professional cleaners",
+    ],
+    extended: "GENERAL",
   },
 };
 
@@ -956,6 +1113,7 @@ const EXTENDED_MAP = {
   AIRBNB: AIRBNB_EXTENDED,
   OFFICE: OFFICE_EXTENDED,
   POST: POST_CONSTRUCTION_EXTENDED,
+  GENERAL: GENERAL_EXTENDED,
 };
 /* ─── MAIN PAGE ─────────────────────────────────────────────────── */
 const ServiceDetail = () => {

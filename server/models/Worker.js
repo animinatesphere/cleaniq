@@ -58,6 +58,7 @@ const workerSchema = new mongoose.Schema({
     sharing: { type: Boolean, default: false }, // true while the worker has location sharing switched on for an active job
     activeBookingId: { type: String, default: null }, // which job this location is being shared for
   },
+  expoPushToken: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
   meta: mongoose.Schema.Types.Mixed,
 });

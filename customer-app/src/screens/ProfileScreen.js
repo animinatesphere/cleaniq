@@ -616,14 +616,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: "center",
   },
-  backBtn: {
-    position: "absolute",
-    top: Platform.OS === "android" ? 44 : 62,
-    left: 20,
-    width: 38, height: 38, borderRadius: 19,
-    backgroundColor: "rgba(255,255,255,0.14)",
-    alignItems: "center", justifyContent: "center",
-  },
+  backBtn: { display: "none" },
   avatarWrap: { position: "relative", marginBottom: 14 },
   avatarGrad: {
     width: 84, height: 84, borderRadius: 42,

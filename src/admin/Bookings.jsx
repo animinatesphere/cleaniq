@@ -2443,6 +2443,22 @@ const Bookings = () => {
     }
   };
 
+  const handleQuickStatusChange = async (bookingId, newStatus) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings/${bookingId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        setStatusMessage({ type: "success", text: `Status updated to ${newStatus}` });
+        fetchBookings();
+      }
+    } catch {
+      setStatusMessage({ type: "error", text: "Failed to update status" });
+    }
+  };
+
   const handleDelete = async (id, bookingId) => {
     if (
       window.confirm(`Are you sure you want to delete booking ${bookingId}?`)
@@ -2883,7 +2899,8 @@ const Bookings = () => {
                   filteredBookings.map((b) => (
                     <tr
                       key={b._id}
-                      className={`group hover:bg-slate-50/80 transition-colors ${
+                      onClick={() => { setSelectedBooking(b); setEditData(b); setIsEditing(false); setShowRaw(false); }}
+                      className={`group hover:bg-slate-50/80 transition-colors cursor-pointer ${
                         selectedBookings.has(b._id) ? "bg-blue-50" : ""
                       }`}
                     >
@@ -2933,12 +2950,16 @@ const Bookings = () => {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-semibold border uppercase tracking-wide ${getStatusColor(b.status)}`}
+                      <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                        <select
+                          value={b.status}
+                          onChange={(e) => handleQuickStatusChange(b._id, e.target.value)}
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-semibold border uppercase tracking-wide cursor-pointer appearance-none bg-transparent ${getStatusColor(b.status)}`}
                         >
-                          {b.status}
-                        </span>
+                          {["Pending","Confirmed","Assigned","Arrived","In Progress","Completed","Cancelled"].map(s => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-1.5">

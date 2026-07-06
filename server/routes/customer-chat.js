@@ -3,7 +3,9 @@ const router = express.Router();
 const CustomerMessage = require("../models/CustomerMessage");
 const WorkerCustomerMessage = require("../models/WorkerCustomerMessage");
 const Booking = require("../models/Booking");
+const Worker = require("../models/Worker");
 const { verifyCustomer } = require("./customer-auth");
+const { sendCustomerPush } = require("../utils/pushNotifications");
 
 // Helper: verify customer owns the booking
 const verifyOwnership = async (bookingId, customerEmail) => {
@@ -199,9 +201,22 @@ router.post("/worker-messages/:bookingId", verifyCustomer, async (req, res) => {
     });
 
     await message.save();
-    console.log(
-      `💬 Customer replied to worker for booking ${req.params.bookingId}`,
-    );
+
+    // Notify worker via push
+    try {
+      if (booking.assignedWorker) {
+        const worker = await Worker.findById(booking.assignedWorker);
+        if (worker?.expoPushToken) {
+          await sendCustomerPush(worker.expoPushToken, {
+            title: `Message from ${req.customer.firstName}`,
+            body: text.trim().length > 60 ? text.trim().slice(0, 57) + "…" : text.trim(),
+            data: { bookingId: req.params.bookingId, type: "chat" },
+          });
+        }
+      }
+    } catch {}
+
+    console.log(`💬 Customer replied to worker for booking ${req.params.bookingId}`);
     res.status(201).json(message);
   } catch (err) {
     res.status(500).json({ message: err.message });
