@@ -954,21 +954,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => 
                                   color: "#94a3b8",
                                 }}
                               >
-                                {(() => {
-                                  const start = b.schedule?.preferredTime || b.schedule?.time;
-                                  const dur = b.details?.duration;
-                                  if (start && start.includes(":") && dur) {
-                                    const [h, m] = start.split(":").map(Number);
-                                    const fmt = (min) => {
-                                      const hr = Math.floor(min / 60) % 24;
-                                      const mn = min % 60;
-                                      return `${hr % 12 || 12}:${String(mn).padStart(2, "0")} ${hr >= 12 ? "PM" : "AM"}`;
-                                    };
-                                    const s = h * 60 + m;
-                                    return `${fmt(s)} — ${fmt(s + Number(dur) * 60)}`;
-                                  }
-                                  return [b.schedule?.timeSlot, start].filter(Boolean).join(" · ");
-                                })()}{" "}
+                                {fmtTimeRange(b) || b.schedule?.timeSlot || ""}{" "}
                                 · {b.bookingId}
                               </p>
                             </div>
@@ -2723,6 +2709,20 @@ const Bookings = () => {
     );
   };
 
+  const fmtTimeRange = (b) => {
+    const start = getPreferredTime(b);
+    const dur = b?.details?.duration;
+    if (!start || !String(start).includes(":") || !dur) return start || "";
+    const [h, m] = String(start).split(":").map(Number);
+    const fmt = (min) => {
+      const hr = Math.floor(min / 60) % 24;
+      const mn = min % 60;
+      return `${hr % 12 || 12}:${String(mn).padStart(2, "0")} ${hr >= 12 ? "PM" : "AM"}`;
+    };
+    const s = h * 60 + m;
+    return `${fmt(s)} — ${fmt(s + Number(dur) * 60)}`;
+  };
+
   const getLogistics = (b) => {
     if (!b) return { parking: "Not specified", access: "Not specified" };
     let parking = b.details?.parking || b.parking || "Not specified";
@@ -2947,7 +2947,9 @@ const Bookings = () => {
                         {new Date(b.schedule?.date).toLocaleDateString()}
                         <br />
                         <span className="text-[10px] text-slate-400 font-semibold">
-                          {b.schedule?.timeSlot}
+                          {b.schedule?.timeSlot === "Flexible"
+                            ? fmtTimeRange(b) || b.schedule?.timeSlot
+                            : b.schedule?.timeSlot}
                         </span>
                       </td>
                       <td className="px-4 py-4">
@@ -3930,8 +3932,9 @@ const Bookings = () => {
                               "Not set"}
                           </p>
                           <p className="text-[11px] font-bold text-primary uppercase mt-1">
-                            Requested Arrival:{" "}
-                            {getPreferredTime(selectedBooking) ||
+                            Arrival → Finish:{" "}
+                            {fmtTimeRange(selectedBooking) ||
+                              getPreferredTime(selectedBooking) ||
                               "Not specified"}
                           </p>
                         </div>
