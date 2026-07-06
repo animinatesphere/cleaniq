@@ -19,28 +19,29 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: customer-app/package-lock.json
 
       - name: Install EAS CLI
-        run: npm install -g eas-cli
+        run: npm install -g eas-cli@latest
 
       - name: Install dependencies
         working-directory: customer-app
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Build iOS & Android
         working-directory: customer-app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_BUILD_NO_EXPO_GO_WARNING: "1"
         run: eas build --platform all --profile production --non-interactive
 
-      - name: Submit to App Store & Play Store
+      - name: Submit to App Store
         working-directory: customer-app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas submit --platform all --profile production --non-interactive
+        run: eas submit --platform ios --profile production --non-interactive
 
   build-worker-app:
     name: Worker App — Build & Submit
@@ -52,25 +53,26 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: worker-app/package-lock.json
 
       - name: Install EAS CLI
-        run: npm install -g eas-cli
+        run: npm install -g eas-cli@latest
 
       - name: Install dependencies
         working-directory: worker-app
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Build iOS & Android
         working-directory: worker-app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_BUILD_NO_EXPO_GO_WARNING: "1"
         run: eas build --platform all --profile production --non-interactive
 
-      - name: Submit to App Store & Play Store
+      - name: Submit to App Store
         working-directory: worker-app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas submit --platform all --profile production --non-interactive
+        run: eas submit --platform ios --profile production --non-interactive
