@@ -1,13 +1,33 @@
+node_modules
 node_modules/
+**/node_modules
+**/node_modules/
+.expo
 .expo/
+.git
 .git/
-android/
-ios/
+android
+ios
 *.log
 *.map
+*.tgz
+**/*.tgz
+**/*.node
+**/CHANGELOG.md
+**/README.md
+**/.yarn
+**/.cache
 
 # Other apps in the monorepo — not needed for this build
+../server
 ../server/
+../worker-app
 ../worker-app/
+../cleaniq-video
 ../cleaniq-video/
+../src
 ../src/
+../node_modules
+../node_modules/
+../.git
+../.git/

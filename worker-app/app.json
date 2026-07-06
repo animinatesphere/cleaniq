@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "Cleaniq",
+    "name": "Cleaniq Services Pro",
     "slug": "cleaniq-worker",
     "scheme": "cleaniqworker",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "platforms": ["ios", "android"],
     "orientation": "portrait",
     "icon": "./assets/icon.jpg",

@@ -1,0 +1,76 @@
+name: Build & Submit Mobile Apps
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'customer-app/**'
+      - 'worker-app/**'
+
+jobs:
+  build-customer-app:
+    name: Customer App — Build & Submit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: customer-app/package-lock.json
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Install dependencies
+        working-directory: customer-app
+        run: npm install
+
+      - name: Build iOS & Android
+        working-directory: customer-app
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas build --platform all --profile production --non-interactive
+
+      - name: Submit to App Store & Play Store
+        working-directory: customer-app
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas submit --platform all --profile production --non-interactive
+
+  build-worker-app:
+    name: Worker App — Build & Submit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: worker-app/package-lock.json
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Install dependencies
+        working-directory: worker-app
+        run: npm install
+
+      - name: Build iOS & Android
+        working-directory: worker-app
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas build --platform all --profile production --non-interactive
+
+      - name: Submit to App Store & Play Store
+        working-directory: worker-app
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas submit --platform all --profile production --non-interactive
