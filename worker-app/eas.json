@@ -18,7 +18,14 @@
     },
     "production": {
       "autoIncrement": true,
-      "channel": "production"
+      "channel": "production",
+      "android": {
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease"
+      },
+      "env": {
+        "GRADLE_OPTS": "-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError"
+      }
     }
   },
   "submit": {

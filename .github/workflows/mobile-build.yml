@@ -9,70 +9,92 @@ on:
       - 'worker-app/**'
 
 jobs:
-  build-customer-app:
-    name: Customer App — Build & Submit
+  build-customer-ios:
+    name: Customer App — iOS
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: customer-app/package-lock.json
-
-      - name: Install EAS CLI
-        run: npm install -g eas-cli@latest
-
-      - name: Install dependencies
+      - run: npm install -g eas-cli@latest
+      - run: npm install --legacy-peer-deps
         working-directory: customer-app
-        run: npm install --legacy-peer-deps
-
-      - name: Build iOS & Android
+      - name: Build iOS
         working-directory: customer-app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           EAS_BUILD_NO_EXPO_GO_WARNING: "1"
-        run: eas build --platform all --profile production --non-interactive
-
+        run: eas build --platform ios --profile production --non-interactive
       - name: Submit to App Store
         working-directory: customer-app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: eas submit --platform ios --profile production --non-interactive
 
-  build-worker-app:
-    name: Worker App — Build & Submit
+  build-customer-android:
+    name: Customer App — Android
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: customer-app/package-lock.json
+      - run: npm install -g eas-cli@latest
+      - run: npm install --legacy-peer-deps
+        working-directory: customer-app
+      - name: Build Android
+        working-directory: customer-app
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_BUILD_NO_EXPO_GO_WARNING: "1"
+        run: eas build --platform android --profile production --non-interactive
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+  build-worker-ios:
+    name: Worker App — iOS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: worker-app/package-lock.json
-
-      - name: Install EAS CLI
-        run: npm install -g eas-cli@latest
-
-      - name: Install dependencies
+      - run: npm install -g eas-cli@latest
+      - run: npm install --legacy-peer-deps
         working-directory: worker-app
-        run: npm install --legacy-peer-deps
-
-      - name: Build iOS & Android
+      - name: Build iOS
         working-directory: worker-app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           EAS_BUILD_NO_EXPO_GO_WARNING: "1"
-        run: eas build --platform all --profile production --non-interactive
-
+        run: eas build --platform ios --profile production --non-interactive
       - name: Submit to App Store
         working-directory: worker-app
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: eas submit --platform ios --profile production --non-interactive
+
+  build-worker-android:
+    name: Worker App — Android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: worker-app/package-lock.json
+      - run: npm install -g eas-cli@latest
+      - run: npm install --legacy-peer-deps
+        working-directory: worker-app
+      - name: Build Android
+        working-directory: worker-app
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_BUILD_NO_EXPO_GO_WARNING: "1"
+        run: eas build --platform android --profile production --non-interactive
