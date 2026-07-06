@@ -35,8 +35,10 @@ export const buildBookedRanges = (bookingsOnDate) =>
       if (!timeStr) return null;
       const start = timeToMinutes(timeStr);
       if (start === null) return null;
-      const duration = b.details?.duration || b.workerDuration || 1;
-      // +30 min rest buffer so the slot immediately after the job is also blocked.
-      return { start, end: start + Number(duration) * 60 + 30 };
+      // Admin-blocked slots carry no rest buffer — they're pure availability markers.
+      const isAdminBlock = b.customer?.firstName === "ADMIN_BLOCK";
+      const duration = b.details?.duration ?? b.workerDuration ?? (isAdminBlock ? 0.5 : 1);
+      const buffer = isAdminBlock ? 0 : 30;
+      return { start, end: start + Number(duration) * 60 + buffer };
     })
     .filter(Boolean);

@@ -48,7 +48,28 @@ export const LEAD_SOURCES = [
   "Organic",
 ];
 
-export const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => {
+// Module-level utility — used by both AdminCalendar and the main Bookings component.
+const fmtTimeRange = (b) => {
+  const start =
+    b?.schedule?.preferredTime ||
+    b?.details?.preferredTime ||
+    b?.meta?.preferredTime ||
+    b?.preferredTime ||
+    (b?.schedule?.time?.includes(":") ? b.schedule.time : null) ||
+    (b?.schedule?.timeSlot?.includes(":") ? b.schedule.timeSlot : null);
+  const dur = b?.details?.duration;
+  if (!start || !dur) return start || "";
+  const [h, m] = String(start).split(":").map(Number);
+  const fmt = (min) => {
+    const hr = Math.floor(min / 60) % 24;
+    const mn = min % 60;
+    return `${hr % 12 || 12}:${String(mn).padStart(2, "0")} ${hr >= 12 ? "PM" : "AM"}`;
+  };
+  const s = h * 60 + m;
+  return `${fmt(s)} — ${fmt(s + Number(dur) * 60)}`;
+};
+
+export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBookingsCreated }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarView, setCalendarView] = useState("month"); // "month" | "year"
   const [showRecurring, setShowRecurring] = useState(false);
@@ -600,58 +621,77 @@ export const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => 
             <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
               {days.map((date, i) => {
                 const dayBookings = getBookingsForDate(date);
-                const isBlocked = dayBookings.some(
-                  (b) =>
-                    b.status === "Blackout" ||
-                    b.customer?.firstName === "ADMIN_BLOCK",
+                const isDayBlocked = dayBookings.some(
+                  (b) => b.status === "Blackout" && b.schedule?.timeSlot === "All Day",
+                );
+                const hasAdminSlotBlocks = dayBookings.some(
+                  (b) => b.status === "Blackout" && b.schedule?.preferredTime,
                 );
                 const realDayBookings = dayBookings.filter(isRealBooking);
                 const hasBookings = realDayBookings.length > 0;
+                const hasAnyBlock = isDayBlocked || hasAdminSlotBlocks || hasBookings;
                 const dayRevenue = realDayBookings.reduce(
                   (s, b) => s + Number(b.payment?.amount || 0),
                   0,
                 );
-                // Highlight recurring bookings
-                const hasRecurring = dayBookings.some(
-                  (b) => b.meta?.recurringGroup,
-                );
+                const hasRecurring = dayBookings.some((b) => b.meta?.recurringGroup);
+
+                // Mini slot indicator — count booked + blocked time slots
+                const bookedSlotCount = realDayBookings.filter((b) =>
+                  b.schedule?.preferredTime || b.schedule?.time?.includes(":")
+                ).length;
+                const adminSlotCount = dayBookings.filter(
+                  (b) => b.status === "Blackout" && b.schedule?.preferredTime,
+                ).length;
+                const totalOccupied = bookedSlotCount + adminSlotCount;
+
+                const cellClass = isDayBlocked
+                  ? "bg-rose-50 border-rose-300 text-rose-500"
+                  : hasBookings
+                  ? "bg-amber-50 border-amber-300 text-amber-700"
+                  : hasAdminSlotBlocks
+                  ? "bg-rose-50 border-rose-200 text-rose-400"
+                  : "bg-slate-50 border-transparent text-slate-400 hover:border-primary/30";
 
                 return (
                   <div key={i} className="aspect-square">
                     {date ? (
                       <button
-                        onClick={() =>
-                          setSelectedDateForDetails({
-                            date,
-                            isBlocked,
-                            bookingsOnDate: dayBookings,
-                          })
-                        }
-                        className={`w-full h-full rounded-[24px] flex flex-col items-center justify-center transition-all relative border-2 group
-                          ${isBlocked ? "bg-rose-50 border-rose-200 text-rose-500" : hasBookings ? "bg-emerald-50 border-emerald-200 text-emerald-600" : "bg-slate-50 border-transparent text-slate-400 hover:border-primary/30"}
-                        `}
+                        onClick={() => setSelectedDateForDetails({ date })}
+                        className={`w-full h-full rounded-[24px] flex flex-col items-center justify-center transition-all relative border-2 group ${cellClass}`}
                       >
                         <span className="text-sm font-bold">{date.getDate()}</span>
-                        {isBlocked && (
+                        {isDayBlocked && (
                           <span className="text-[7px] font-bold uppercase absolute bottom-2">
                             Blocked
                           </span>
                         )}
-                        {hasBookings && !isBlocked && (
-                          <span className="text-[7px] font-bold uppercase absolute bottom-1.5 text-center leading-tight">
-                            {realDayBookings.length} Booking
-                            {realDayBookings.length > 1 ? "s" : ""}
-                            <br />£
-                            {dayRevenue.toLocaleString("en-GB", {
-                              maximumFractionDigits: 0,
-                            })}
+                        {hasBookings && !isDayBlocked && (
+                          <span className="text-[7px] font-bold uppercase absolute bottom-1 text-center leading-tight px-1">
+                            {realDayBookings.length} booked
+                            {dayRevenue > 0 && <><br />£{dayRevenue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}</>}
                           </span>
                         )}
-                        {hasRecurring && !isBlocked && (
+                        {!hasBookings && hasAdminSlotBlocks && (
+                          <span className="text-[7px] font-bold uppercase absolute bottom-2">
+                            {adminSlotCount} blocked
+                          </span>
+                        )}
+                        {hasRecurring && !isDayBlocked && (
                           <span
                             className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-purple-400"
                             title="Recurring"
                           />
+                        )}
+                        {totalOccupied > 0 && !isDayBlocked && (
+                          <span className="absolute top-1.5 left-1.5 flex gap-0.5">
+                            {Array.from({ length: Math.min(totalOccupied, 4) }).map((_, k) => (
+                              <span
+                                key={k}
+                                className={`w-1 h-1 rounded-full ${k < bookedSlotCount ? "bg-amber-400" : "bg-rose-400"}`}
+                              />
+                            ))}
+                          </span>
                         )}
                       </button>
                     ) : (
@@ -668,28 +708,20 @@ export const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => 
         {calendarView === "month" && (
         <div className="flex gap-6 mt-8 pt-6 border-t border-slate-100 flex-wrap">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-emerald-300" />
-            <span className="text-[11px] font-bold text-slate-400">
-              Has Bookings
-            </span>
+            <div className="w-3 h-3 rounded-full bg-amber-400" />
+            <span className="text-[11px] font-bold text-slate-400">Has Bookings</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-rose-300" />
-            <span className="text-[11px] font-bold text-slate-400">
-              Blocked
-            </span>
+            <div className="w-3 h-3 rounded-full bg-rose-400" />
+            <span className="text-[11px] font-bold text-slate-400">Blocked</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-purple-400" />
-            <span className="text-[11px] font-bold text-slate-400">
-              Recurring
-            </span>
+            <span className="text-[11px] font-bold text-slate-400">Recurring</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-slate-200" />
-            <span className="text-[11px] font-bold text-slate-400">
-              Available
-            </span>
+            <span className="text-[11px] font-bold text-slate-400">Available</span>
           </div>
         </div>
         )}
@@ -703,7 +735,12 @@ export const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => 
       {/* Date Details Modal */}
       {selectedDateForDetails &&
         (() => {
-          const { date, isBlocked, bookingsOnDate } = selectedDateForDetails;
+          const { date } = selectedDateForDetails;
+          // Re-derive live from the current bookings prop so slot toggles reflect immediately.
+          const bookingsOnDate = getBookingsForDate(date);
+          const isBlocked = bookingsOnDate.some(
+            (b) => b.status === "Blackout" && b.schedule?.timeSlot === "All Day",
+          );
           const dStr = date.toLocaleDateString("en-GB", {
             weekday: "long",
             day: "numeric",
@@ -721,6 +758,42 @@ export const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => 
             Completed: "#6366F1",
             Cancelled: "#EF4444",
             Accepted: "#0EA5E9",
+          };
+
+          // Time slot grid data
+          const TIME_SLOTS = [];
+          for (let h = 8; h <= 19; h++) {
+            TIME_SLOTS.push(`${String(h).padStart(2, "0")}:00`);
+            TIME_SLOTS.push(`${String(h).padStart(2, "0")}:30`);
+          }
+          TIME_SLOTS.push("20:00");
+
+          // Map each slot to its state
+          const adminBlockedBySlot = {};
+          bookingsOnDate
+            .filter(
+              (b) =>
+                b.customer?.firstName === "ADMIN_BLOCK" &&
+                b.status === "Blackout" &&
+                b.schedule?.preferredTime,
+            )
+            .forEach((b) => {
+              adminBlockedBySlot[b.schedule.preferredTime] = b;
+            });
+
+          const realBookingsBySlot = {};
+          realBookings.forEach((b) => {
+            const t =
+              b.schedule?.preferredTime ||
+              (b.schedule?.time?.includes(":") ? b.schedule.time : null) ||
+              (b.schedule?.timeSlot?.includes(":") ? b.schedule.timeSlot : null);
+            if (t) realBookingsBySlot[t] = (realBookingsBySlot[t] || []).concat(b);
+          });
+
+          const fmtSlot = (t) => {
+            const [h, m] = t.split(":").map(Number);
+            const period = h >= 12 ? "PM" : "AM";
+            return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${period}`;
           };
           return (
             <div
@@ -960,6 +1033,77 @@ export const AdminCalendar = ({ bookings, onToggleDate, onBookingsCreated }) => 
                             </div>
                           </div>
                         ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Time Slot Grid */}
+                  {onToggleTimeSlot && (
+                    <div style={{ marginTop: "20px", paddingTop: "20px", borderTop: "1px solid #f1f5f9" }}>
+                      <p style={{ margin: "0 0 12px", fontSize: "11px", fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: "1px" }}>
+                        Time Slot Availability
+                      </p>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
+                        {[
+                          { dot: "#10b981", label: "Available" },
+                          { dot: "#f59e0b", label: "Booked" },
+                          { dot: "#ef4444", label: "Blocked" },
+                        ].map(({ dot, label }) => (
+                          <span key={label} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "10px", fontWeight: 700, color: "#94a3b8" }}>
+                            <span style={{ width: 8, height: 8, borderRadius: "50%", background: dot, display: "inline-block" }} />
+                            {label}
+                          </span>
+                        ))}
+                        <span style={{ fontSize: "10px", color: "#cbd5e1", marginLeft: "auto" }}>Click to block / unblock</span>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "5px" }}>
+                        {TIME_SLOTS.map((slot) => {
+                          const isAdminBlocked = !!adminBlockedBySlot[slot];
+                          const hasRealBooking = !!realBookingsBySlot[slot];
+                          const bg = isAdminBlocked
+                            ? "#fee2e2"
+                            : hasRealBooking
+                            ? "#fef3c7"
+                            : "#f0fdf4";
+                          const color = isAdminBlocked
+                            ? "#dc2626"
+                            : hasRealBooking
+                            ? "#d97706"
+                            : "#059669";
+                          const border = isAdminBlocked
+                            ? "1px solid #fca5a5"
+                            : hasRealBooking
+                            ? "1px solid #fcd34d"
+                            : "1px solid #bbf7d0";
+                          return (
+                            <button
+                              key={slot}
+                              disabled={hasRealBooking}
+                              onClick={() => onToggleTimeSlot(date, slot, adminBlockedBySlot[slot] || null)}
+                              title={
+                                hasRealBooking
+                                  ? `${realBookingsBySlot[slot].length} booking(s)`
+                                  : isAdminBlocked
+                                  ? "Click to unblock"
+                                  : "Click to block"
+                              }
+                              style={{
+                                padding: "5px 2px",
+                                borderRadius: "8px",
+                                border,
+                                background: bg,
+                                color,
+                                fontSize: "9px",
+                                fontWeight: 800,
+                                cursor: hasRealBooking ? "default" : "pointer",
+                                textAlign: "center",
+                                opacity: hasRealBooking ? 0.8 : 1,
+                              }}
+                            >
+                              {fmtSlot(slot)}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -1824,6 +1968,7 @@ const Bookings = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successBooking, setSuccessBooking] = useState(null);
   const [markingCompleteId, setMarkingCompleteId] = useState(null);
+  const [openActionMenu, setOpenActionMenu] = useState(null);
   const [formErrors, setFormErrors] = useState({});
   const [fieldTouched, setFieldTouched] = useState({});
   const [selectedBookings, setSelectedBookings] = useState(new Set());
@@ -2709,23 +2854,6 @@ const Bookings = () => {
     );
   };
 
-  const fmtTimeRange = (b) => {
-    const start =
-      getPreferredTime(b) ||
-      (b?.schedule?.time?.includes(":") ? b.schedule.time : null) ||
-      (b?.schedule?.timeSlot?.includes(":") ? b.schedule.timeSlot : null);
-    const dur = b?.details?.duration;
-    if (!start || !dur) return start || "";
-    const [h, m] = String(start).split(":").map(Number);
-    const fmt = (min) => {
-      const hr = Math.floor(min / 60) % 24;
-      const mn = min % 60;
-      return `${hr % 12 || 12}:${String(mn).padStart(2, "0")} ${hr >= 12 ? "PM" : "AM"}`;
-    };
-    const s = h * 60 + m;
-    return `${fmt(s)} — ${fmt(s + Number(dur) * 60)}`;
-  };
-
   const getLogistics = (b) => {
     if (!b) return { parking: "Not specified", access: "Not specified" };
     let parking = b.details?.parking || b.parking || "Not specified";
@@ -2979,44 +3107,58 @@ const Bookings = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-1.5">
-                          <button
-                            onClick={() => {
-                              setSelectedBooking(b);
-                              setEditData(b);
-                              setIsEditing(false);
-                              setShowRaw(false);
-                            }}
-                            className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
-                            title="View Booking"
-                          >
-                            <Eye size={16} />
-                          </button>
-                          <button
-                            onClick={() => setCrmBooking(b)}
-                            className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all"
-                            title="CRM Actions — Email, Invoice, Review, Payment Link"
-                            style={{ position: "relative" }}
-                          >
-                            <Sparkles size={16} />
-                          </button>
-                          {b.status !== "Completed" &&
-                            b.status !== "Cancelled" && (
-                              <button
-                                disabled={markingCompleteId === b._id}
-                                onClick={() => handleMarkCompleted(b)}
-                                className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600 transition-all disabled:opacity-50"
-                                title="Mark as Completed — captures authorized payment & emails receipt"
-                              >
-                                <CheckCircle2 size={16} />
-                              </button>
+                          <div className="relative" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => setOpenActionMenu(openActionMenu === b._id ? null : b._id)}
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 text-slate-500 hover:bg-primary/10 hover:text-primary transition-all text-[11px] font-bold border border-slate-200"
+                            >
+                              Actions <ChevronDown size={13} />
+                            </button>
+                            {openActionMenu === b._id && (
+                              <>
+                                <div
+                                  className="fixed inset-0 z-40"
+                                  onClick={() => setOpenActionMenu(null)}
+                                />
+                                <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 min-w-[170px] overflow-hidden">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedBooking(b);
+                                      setEditData(b);
+                                      setIsEditing(false);
+                                      setShowRaw(false);
+                                      setOpenActionMenu(null);
+                                    }}
+                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-semibold text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                                  >
+                                    <Eye size={14} className="text-slate-400" /> View Details
+                                  </button>
+                                  <button
+                                    onClick={() => { setCrmBooking(b); setOpenActionMenu(null); }}
+                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-semibold text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                                  >
+                                    <Sparkles size={14} className="text-emerald-500" /> CRM Actions
+                                  </button>
+                                  {b.status !== "Completed" && b.status !== "Cancelled" && (
+                                    <button
+                                      disabled={markingCompleteId === b._id}
+                                      onClick={() => { handleMarkCompleted(b); setOpenActionMenu(null); }}
+                                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-semibold text-slate-700 hover:bg-emerald-50 transition-colors text-left disabled:opacity-40"
+                                    >
+                                      <CheckCircle2 size={14} className="text-emerald-500" /> Mark Completed
+                                    </button>
+                                  )}
+                                  <div className="border-t border-slate-100 my-1" />
+                                  <button
+                                    onClick={() => { handleDelete(b._id, b.bookingId); setOpenActionMenu(null); }}
+                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-semibold text-rose-500 hover:bg-rose-50 transition-colors text-left"
+                                  >
+                                    <Trash2 size={14} /> Delete
+                                  </button>
+                                </div>
+                              </>
                             )}
-                          <button
-                            onClick={() => handleDelete(b._id, b.bookingId)}
-                            className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-100 hover:text-rose-500 transition-all"
-                            title="Delete Booking"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          </div>
                         </div>
                       </td>
                     </tr>

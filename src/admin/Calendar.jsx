@@ -29,12 +29,47 @@ const Calendar = () => {
     return () => clearTimeout(timer);
   }, [statusMessage]);
 
+  const toggleTimeSlot = async (date, time, existingBlock) => {
+    const dStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    if (existingBlock) {
+      try {
+        await fetch(`${import.meta.env.VITE_API_URL}/bookings/${existingBlock._id}`, { method: "DELETE" });
+        setStatusMessage({ type: "success", text: `✅ Unblocked ${time} on ${dStr}` });
+        fetchBookings();
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      const payload = {
+        bookingId: `TBLOCK-${Date.now()}`,
+        customer: { firstName: "ADMIN_BLOCK", lastName: "SYSTEM", email: "admin@cleaniq.com", phone: "000" },
+        service: "Time Block",
+        status: "Blackout",
+        schedule: { date: dStr, timeSlot: "Flexible", preferredTime: time },
+        details: { duration: 0.5 },
+        payment: { amount: 0, status: "N/A" },
+      };
+      try {
+        await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        setStatusMessage({ type: "success", text: `⛔ Blocked ${time} on ${dStr}` });
+        fetchBookings();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
   const toggleAvailability = async (date, isCurrentlyBlocked) => {
     const dStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
     if (isCurrentlyBlocked) {
       const block = bookings.find((b) => {
         if (b.customer?.firstName !== "ADMIN_BLOCK") return false;
+        if (b.schedule?.timeSlot !== "All Day") return false;
         const bDate = new Date(b.schedule.date);
         return (
           `${bDate.getFullYear()}-${String(bDate.getMonth() + 1).padStart(2, "0")}-${String(bDate.getDate()).padStart(2, "0")}` ===
@@ -101,6 +136,7 @@ const Calendar = () => {
       <AdminCalendar
         bookings={bookings}
         onToggleDate={toggleAvailability}
+        onToggleTimeSlot={toggleTimeSlot}
         onBookingsCreated={fetchBookings}
       />
     </div>
