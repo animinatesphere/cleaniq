@@ -54,6 +54,7 @@ import Analytics from "./admin/Analytics";
 import Expenses from "./admin/Expenses";
 import Rota from "./admin/Rota";
 import Calendar from "./admin/Calendar";
+import NewBookingPage from "./admin/NewBookingPage";
 
 function App() {
   const location = useLocation();
@@ -95,6 +96,7 @@ function App() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="bookings" element={<Bookings />} />
+              <Route path="bookings/new" element={<NewBookingPage />} />
               <Route path="calendar" element={<Calendar />} />
               <Route path="bookings/pay/:id" element={<AdminBookingPay />} />
               <Route path="applicants" element={<Applicants />} />

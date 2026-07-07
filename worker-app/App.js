@@ -41,6 +41,7 @@ import AcceptedBookingDetailScreen from "./src/screens/AcceptedBookingDetailScre
 import ChatWithCustomerScreen from "./src/screens/ChatWithCustomerScreen";
 import ChatScreen from "./src/screens/ChatScreen";
 import notificationService from "./src/utils/notificationService";
+import { navigationRef } from "./src/utils/navigationRef";
 
 // Catch all unhandled runtime errors and print them straight to the computer terminal
 if (global.ErrorUtils) {
@@ -285,7 +286,7 @@ const AppNavigation = () => {
   };
 
   return (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer ref={navigationRef} linking={linking}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {userToken == null ? (
           // No token found, user isn't signed in

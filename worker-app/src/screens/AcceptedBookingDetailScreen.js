@@ -6,6 +6,7 @@ import React, {
   useRef,
 } from "react";
 import * as Location from "expo-location";
+import * as ImagePicker from "expo-image-picker";
 import { getDisplayTime } from "../utils/timeUtils";
 import {
   NEU_BG,
@@ -26,6 +27,7 @@ import {
   Alert,
   Linking,
   StatusBar,
+  Image,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { AuthContext, API_URL } from "../context/AuthContext";
@@ -48,6 +50,9 @@ import {
   Flag,
   AlertCircle,
   Radio,
+  Camera,
+  ImageIcon,
+  CheckCircle2,
 } from "lucide-react-native";
 import axios from "axios";
 
@@ -62,6 +67,11 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   const [locationLoading, setLocationLoading] = useState(false);
   const locationSubscription = useRef(null);
 
+  // Before & after photos
+  const [beforePhoto, setBeforePhoto] = useState(null);
+  const [afterPhoto, setAfterPhoto] = useState(null);
+  const [photoUploading, setPhotoUploading] = useState(null); // "before" | "after" | null
+
   const isJobTomorrowOrLater = useCallback(() => {
     if (!booking || !booking.schedule || !booking.schedule.date) return false;
     const jobDate = new Date(booking.schedule.date);
@@ -75,12 +85,58 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     try {
       const res = await axios.get(`${API_URL}/workers/jobs/${bookingId}`);
       setBooking(res.data);
+      // Restore any photos already uploaded for this booking
+      if (res.data?.photos?.before) setBeforePhoto(res.data.photos.before);
+      if (res.data?.photos?.after)  setAfterPhoto(res.data.photos.after);
     } catch (error) {
       console.error("Error fetching booking:", error);
       Alert.alert("Error", "Failed to load booking details");
       navigation.goBack();
     } finally {
       setLoading(false);
+    }
+  };
+
+  const takePhoto = async (type) => {
+    // Ask for camera permission
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Camera Permission Required",
+        "Please allow camera access to take before/after photos.",
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.75,
+      base64: true,
+    });
+
+    if (result.canceled) return;
+
+    const asset = result.assets[0];
+    const photoData = `data:image/jpeg;base64,${asset.base64}`;
+
+    // Show preview immediately
+    if (type === "before") setBeforePhoto(asset.uri);
+    else setAfterPhoto(asset.uri);
+
+    // Upload to server
+    setPhotoUploading(type);
+    try {
+      await axios.post(`${API_URL}/workers/jobs/${bookingId}/photos`, {
+        type,
+        photo: photoData,
+      });
+    } catch (err) {
+      console.warn("Photo upload failed, stored locally:", err?.message);
+      // Keep the local preview even if upload fails
+    } finally {
+      setPhotoUploading(null);
     }
   };
 
@@ -246,11 +302,26 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   }, []);
 
   const doAction = async (endpoint, nextStatus, successMsg) => {
+    // Require before photo before starting
+    if (endpoint === "start" && !beforePhoto) {
+      Alert.alert(
+        "Before Photo Required",
+        "Please take a before photo of the property before you start cleaning.",
+      );
+      return;
+    }
+    // Require after photo before completing
+    if (endpoint === "complete" && !afterPhoto) {
+      Alert.alert(
+        "After Photo Required",
+        "Please take an after photo to show the completed clean before marking as done.",
+      );
+      return;
+    }
+
     setActionLoading(endpoint);
     try {
-      const res = await axios.post(
-        `${API_URL}/workers/jobs/${bookingId}/${endpoint}`,
-      );
+      await axios.post(`${API_URL}/workers/jobs/${bookingId}/${endpoint}`);
       setBooking((prev) => ({ ...prev, status: nextStatus }));
       if (nextStatus === "Completed" && sharingLocation) {
         stopSharingLocation();
@@ -501,6 +572,123 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 </>
               )}
             </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ── Before & After Photos ───────────────────────────── */}
+        {["Arrived", "In Progress", "Completed"].includes(booking.status) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>📸 Before & After Photos</Text>
+
+            {/* Before Photo */}
+            <View style={styles.photoBlock}>
+              <View style={styles.photoLabelRow}>
+                <View style={[styles.photoTypeBadge, { backgroundColor: "#FEF3C7" }]}>
+                  <Text style={[styles.photoTypeTxt, { color: "#92400E" }]}>BEFORE</Text>
+                </View>
+                {beforePhoto && (
+                  <View style={styles.photoTakenTag}>
+                    <CheckCircle2 size={11} color="#0F6B4C" strokeWidth={2.5} />
+                    <Text style={styles.photoTakenTxt}>Photo taken</Text>
+                  </View>
+                )}
+              </View>
+
+              {beforePhoto ? (
+                <View style={styles.photoPreviewWrap}>
+                  <Image source={{ uri: beforePhoto }} style={styles.photoPreview} resizeMode="cover" />
+                  {booking.status !== "Completed" && (
+                    <TouchableOpacity
+                      style={styles.retakeBtn}
+                      onPress={() => takePhoto("before")}
+                    >
+                      <Camera size={13} color="#fff" />
+                      <Text style={styles.retakeTxt}>Retake</Text>
+                    </TouchableOpacity>
+                  )}
+                  {photoUploading === "before" && (
+                    <View style={styles.photoUploadOverlay}>
+                      <ActivityIndicator color="#fff" />
+                      <Text style={styles.photoUploadTxt}>Uploading...</Text>
+                    </View>
+                  )}
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={styles.photoSnapBtn}
+                  onPress={() => takePhoto("before")}
+                  disabled={booking.status === "Completed"}
+                >
+                  {photoUploading === "before" ? (
+                    <ActivityIndicator color="#0F6B4C" />
+                  ) : (
+                    <>
+                      <View style={styles.photoSnapIcon}>
+                        <Camera size={26} color="#0F6B4C" />
+                      </View>
+                      <Text style={styles.photoSnapTxt}>Tap to take BEFORE photo</Text>
+                      <Text style={styles.photoSnapSub}>Required before you start cleaning</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* After Photo — only shown once cleaning has started */}
+            {["In Progress", "Completed"].includes(booking.status) && (
+              <View style={[styles.photoBlock, { marginTop: 14 }]}>
+                <View style={styles.photoLabelRow}>
+                  <View style={[styles.photoTypeBadge, { backgroundColor: "#DCFCE7" }]}>
+                    <Text style={[styles.photoTypeTxt, { color: "#166534" }]}>AFTER</Text>
+                  </View>
+                  {afterPhoto && (
+                    <View style={styles.photoTakenTag}>
+                      <CheckCircle2 size={11} color="#0F6B4C" strokeWidth={2.5} />
+                      <Text style={styles.photoTakenTxt}>Photo taken</Text>
+                    </View>
+                  )}
+                </View>
+
+                {afterPhoto ? (
+                  <View style={styles.photoPreviewWrap}>
+                    <Image source={{ uri: afterPhoto }} style={styles.photoPreview} resizeMode="cover" />
+                    {booking.status !== "Completed" && (
+                      <TouchableOpacity
+                        style={styles.retakeBtn}
+                        onPress={() => takePhoto("after")}
+                      >
+                        <Camera size={13} color="#fff" />
+                        <Text style={styles.retakeTxt}>Retake</Text>
+                      </TouchableOpacity>
+                    )}
+                    {photoUploading === "after" && (
+                      <View style={styles.photoUploadOverlay}>
+                        <ActivityIndicator color="#fff" />
+                        <Text style={styles.photoUploadTxt}>Uploading...</Text>
+                      </View>
+                    )}
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.photoSnapBtn}
+                    onPress={() => takePhoto("after")}
+                    disabled={booking.status === "Completed"}
+                  >
+                    {photoUploading === "after" ? (
+                      <ActivityIndicator color="#0F6B4C" />
+                    ) : (
+                      <>
+                        <View style={[styles.photoSnapIcon, { backgroundColor: "#DCFCE7" }]}>
+                          <Camera size={26} color="#0F6B4C" />
+                        </View>
+                        <Text style={styles.photoSnapTxt}>Tap to take AFTER photo</Text>
+                        <Text style={styles.photoSnapSub}>Required before marking job complete</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
           </View>
         )}
 
@@ -953,6 +1141,87 @@ const styles = StyleSheet.create({
     borderColor: "#A7D9B8",
   },
   completedText: { fontSize: 14, fontWeight: "700", color: "#1A5C33" },
+
+  // Before & After Photos
+  photoBlock: {
+    borderRadius: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#D1FAE5",
+    backgroundColor: "#F9FAFB",
+  },
+  photoLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 12,
+    paddingBottom: 8,
+  },
+  photoTypeBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  photoTypeTxt: { fontSize: 11, fontWeight: "900", letterSpacing: 0.8 },
+  photoTakenTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#DCFCE7",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  photoTakenTxt: { fontSize: 10, fontWeight: "700", color: "#0F6B4C" },
+
+  photoSnapBtn: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 24,
+    gap: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+  },
+  photoSnapIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#EAF5EE",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  photoSnapTxt: { fontSize: 14, fontWeight: "700", color: "#1A2E22" },
+  photoSnapSub: { fontSize: 11, color: "#6B7280", fontWeight: "500" },
+
+  photoPreviewWrap: {
+    width: "100%",
+    height: 200,
+    position: "relative",
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+  },
+  photoPreview: { width: "100%", height: "100%" },
+  retakeBtn: {
+    position: "absolute",
+    bottom: 10,
+    right: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  retakeTxt: { fontSize: 11, fontWeight: "700", color: "#fff" },
+  photoUploadOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  photoUploadTxt: { fontSize: 12, fontWeight: "700", color: "#fff" },
 });
 
 export default AcceptedBookingDetailScreen;

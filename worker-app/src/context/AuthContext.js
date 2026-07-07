@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { resetToLogin } from "../utils/navigationRef";
 
 export const AuthContext = createContext();
 
@@ -51,12 +52,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    setIsLoading(true);
-    await AsyncStorage.removeItem("workerToken");
-    await AsyncStorage.removeItem("workerInfo");
-    setUserToken(null);
-    setWorkerInfo(null);
-    setIsLoading(false);
+    try {
+      await AsyncStorage.multiRemove(["workerToken", "workerInfo"]);
+    } catch (e) {
+      console.log("Logout storage error:", e);
+    } finally {
+      setUserToken(null);
+      setWorkerInfo(null);
+      resetToLogin();
+    }
   };
 
   const checkLoginState = async () => {

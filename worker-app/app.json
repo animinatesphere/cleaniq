@@ -4,7 +4,7 @@
     "slug": "cleaniq-worker",
     "scheme": "cleaniqworker",
     "version": "1.1.0",
-    "platforms": ["ios", "android"],
+    "platforms": ["ios", "android", "web"],
     "orientation": "portrait",
     "icon": "./assets/icon.jpg",
     "userInterfaceStyle": "light",

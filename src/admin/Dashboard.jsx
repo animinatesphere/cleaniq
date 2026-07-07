@@ -208,6 +208,7 @@ const Dashboard = () => {
   const [leadStats, setLeadStats] = useState(null);
   const [leads, setLeads] = useState([]);
   const [search, setSearch] = useState("");
+  const [expenseStats, setExpenseStats] = useState(null);
 
   // Revenue & Leads calendar — pick a start date, then an end date, to see
   // totals for that range.
@@ -290,6 +291,10 @@ const Dashboard = () => {
       .then((r) => r.json())
       .then((data) => setLeads(Array.isArray(data) ? data : []))
       .catch(() => {});
+    fetch(`${import.meta.env.VITE_API_URL}/expenses/stats`)
+      .then((r) => r.json())
+      .then((data) => setExpenseStats(data))
+      .catch(() => {});
   }, [fetchData]);
 
   // Revenue by status
@@ -301,10 +306,12 @@ const Dashboard = () => {
 
   const rev = (arr) =>
     arr.reduce((s, b) => s + Number(b.payment?.amount || 0), 0);
-  const totalRevenue = rev(bookings);
   const completedRevenue = rev(completed);
+  const totalRevenue = completedRevenue; // only completed jobs count as revenue
   const pendingRevenue = rev(pending);
   const cancelledRevenue = rev(cancelled);
+  const totalExpenses = expenseStats?.allTime || 0;
+  const netRevenue = completedRevenue - totalExpenses;
 
   // Revenue trend chart: buckets by day/week/month depending on the
   // selected range, plus a comparison vs. the prior period.
@@ -367,7 +374,7 @@ const Dashboard = () => {
     const series = ranges.map(({ start, end, label }) => {
       const inBucket = bookings.filter((b) => {
         const d = new Date(b.createdAt || b.schedule?.date);
-        return d >= start && d <= end;
+        return d >= start && d <= end && b.status === "Completed";
       });
       return { label, revenue: rev(inBucket), count: inBucket.length };
     });
@@ -391,7 +398,7 @@ const Dashboard = () => {
   const prevRangeRevenue = rev(
     bookings.filter((b) => {
       const d = new Date(b.createdAt || b.schedule?.date);
-      return d >= prevPeriodStart && d <= prevPeriodEnd;
+      return d >= prevPeriodStart && d <= prevPeriodEnd && b.status === "Completed";
     }),
   );
   const rangeChangePct =
@@ -409,10 +416,11 @@ const Dashboard = () => {
   const trendLinePoints = trendPoints.map((p) => `${p.x},${p.y}`).join(" ");
   const trendLabelStep = Math.max(1, Math.ceil(trendSeries.length / 7));
 
-  // Revenue split donut (Completed / Pending / Cancelled)
+  // Revenue split donut (Completed / Expenses / Pending / Cancelled)
   const donutSegments = [
     { label: "Completed", value: completedRevenue, color: "#005B41" },
-    { label: "Pending", value: pendingRevenue, color: "#3CC7FF" },
+    { label: "Expenses",  value: totalExpenses,    color: "#EF4444" },
+    { label: "Pending",   value: pendingRevenue,   color: "#3CC7FF" },
     { label: "Cancelled", value: cancelledRevenue, color: "#E2E8F0" },
   ];
   const donutTotal = donutSegments.reduce((s, d) => s + d.value, 0) || 1;
@@ -574,10 +582,10 @@ const Dashboard = () => {
           return t >= rangeStartTime && t <= rangeEndTime.getTime();
         })
       : [];
-  const selectedRangeRevenue = bookingsInSelectedRange.reduce(
-    (s, b) => s + Number(b.payment?.amount || 0),
-    0,
-  );
+  // Only completed bookings count as earned revenue
+  const selectedRangeRevenue = bookingsInSelectedRange
+    .filter((b) => b.status === "Completed")
+    .reduce((s, b) => s + Number(b.payment?.amount || 0), 0);
   const leadsInSelectedRange =
     rangeStartTime != null
       ? leads.filter((l) => {
@@ -652,68 +660,94 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Metrics strip */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+      {/* Booking count strip */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         <Metric
           label="Total Bookings"
           value={bookings.length.toLocaleString("en-GB")}
-          onClick={() =>
-            setDetailSegment({
-              title: "Total Bookings",
-              bookings,
-              total: totalRevenue,
-            })
-          }
+          onClick={() => setDetailSegment({ title:"Total Bookings", bookings, total:totalRevenue })}
         />
         <Metric
           label="Completed"
           value={completed.length.toLocaleString("en-GB")}
-          onClick={() =>
-            setDetailSegment({
-              title: "Completed Bookings",
-              bookings: completed,
-              total: completedRevenue,
-            })
-          }
+          onClick={() => setDetailSegment({ title:"Completed Bookings", bookings:completed, total:completedRevenue })}
         />
         <Metric
           label="Pending"
           value={pending.length.toLocaleString("en-GB")}
-          onClick={() =>
-            setDetailSegment({
-              title: "Pending Bookings",
-              bookings: pending,
-              total: pendingRevenue,
-            })
-          }
+          onClick={() => setDetailSegment({ title:"Pending Bookings", bookings:pending, total:pendingRevenue })}
         />
         <Metric
           label="Cancelled"
           value={cancelled.length.toLocaleString("en-GB")}
-          onClick={() =>
-            setDetailSegment({
-              title: "Cancelled Bookings",
-              bookings: cancelled,
-              total: cancelledRevenue,
-            })
-          }
-        />
-        <Metric
-          label="Total Revenue"
-          value={`£${totalRevenue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}`}
-          onClick={() =>
-            setDetailSegment({
-              title: "Total Revenue",
-              bookings,
-              total: totalRevenue,
-            })
-          }
+          onClick={() => setDetailSegment({ title:"Cancelled Bookings", bookings:cancelled, total:cancelledRevenue })}
         />
         <Metric
           label="Quotes Sent"
           value={quoteStats ? quoteStats.total : loading ? "—" : 0}
           onClick={() => navigate("/admin/quotes")}
         />
+      </div>
+
+      {/* Financial summary row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Gross Revenue */}
+        <button
+          onClick={() => setDetailSegment({ title:"Completed Revenue", bookings:completed, total:completedRevenue })}
+          className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5 text-left hover:border-primary/40 transition-all group"
+        >
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Gross Revenue</p>
+          <p className="text-3xl font-bold text-slate-900 tabular-nums">
+            £{completedRevenue.toLocaleString("en-GB",{maximumFractionDigits:0})}
+          </p>
+          <p className="text-[11px] text-slate-400 mt-1">{completed.length} completed bookings</p>
+        </button>
+
+        {/* Pending Revenue */}
+        <button
+          onClick={() => setDetailSegment({ title:"Pending Revenue", bookings:pending, total:pendingRevenue })}
+          className="bg-white border border-amber-100 rounded-2xl shadow-sm p-5 text-left hover:border-amber-300 transition-all group"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pending Revenue</p>
+            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Awaiting</span>
+          </div>
+          <p className="text-3xl font-bold text-amber-500 tabular-nums">
+            £{pendingRevenue.toLocaleString("en-GB",{maximumFractionDigits:0})}
+          </p>
+          <p className="text-[11px] text-slate-400 mt-1">{pending.length} job{pending.length !== 1 ? "s" : ""} not yet completed</p>
+        </button>
+
+        {/* Expenses (negative) */}
+        <button
+          onClick={() => navigate("/admin/expenses")}
+          className="bg-white border border-red-100 rounded-2xl shadow-sm p-5 text-left hover:border-red-300 transition-all group"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Total Expenses</p>
+            <span className="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Deducted</span>
+          </div>
+          <p className="text-3xl font-bold text-red-500 tabular-nums">
+            −£{totalExpenses.toLocaleString("en-GB",{maximumFractionDigits:0})}
+          </p>
+          <p className="text-[11px] text-slate-400 mt-1">View Expense Tracker →</p>
+        </button>
+
+        {/* Net Revenue */}
+        <div className={`rounded-2xl shadow-sm p-5 ${netRevenue >= 0 ? "bg-primary text-white" : "bg-red-600 text-white"}`}>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-2">Net Revenue</p>
+          <p className="text-3xl font-bold tabular-nums">
+            £{netRevenue.toLocaleString("en-GB",{maximumFractionDigits:0})}
+          </p>
+          <div className="mt-3 pt-3 border-t border-white/20 flex items-center justify-between text-[11px] font-medium text-white/70">
+            <span>Gross −£{Math.round(totalExpenses).toLocaleString("en-GB")} expenses</span>
+            {totalExpenses > 0 && completedRevenue > 0 && (
+              <span className="font-bold text-white">
+                {((netRevenue / completedRevenue) * 100).toFixed(0)}% margin
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Revenue & Lead Conversion Calendar — collapsed into a dropdown */}
@@ -1037,7 +1071,7 @@ const Dashboard = () => {
         <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6">
           <h3 className="text-base font-bold text-slate-800">Revenue Split</h3>
           <p className="text-[11px] font-medium text-slate-400 mt-0.5 mb-6">
-            Total bookings: {bookings.length.toLocaleString("en-GB")}
+            Net: £{Math.max(netRevenue,0).toLocaleString("en-GB",{maximumFractionDigits:0})} after £{totalExpenses.toLocaleString("en-GB",{maximumFractionDigits:0})} expenses
           </p>
           <div className="relative w-40 h-40 mx-auto mb-6">
             <svg viewBox="0 0 42 42" className="w-full h-full -rotate-0">
@@ -1067,10 +1101,10 @@ const Dashboard = () => {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <p className="text-xl font-bold text-slate-900 tabular-nums">
-                £{(totalRevenue / 1000).toFixed(1)}k
+                £{(Math.max(netRevenue,0) / 1000).toFixed(1)}k
               </p>
               <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                Total
+                Net
               </p>
             </div>
           </div>

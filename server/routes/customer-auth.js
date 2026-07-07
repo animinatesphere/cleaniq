@@ -187,6 +187,11 @@ router.post('/login', async (req, res) => {
     const valid = await bcrypt.compare(password, customer.passwordHash);
     if (!valid) return res.status(401).json({ message: 'Invalid email or password.' });
 
+    await Customer.findByIdAndUpdate(customer._id, {
+      $set:  { lastLoginAt: new Date() },
+      $inc:  { loginCount: 1 },
+    });
+
     const token = jwt.sign(
       { id: customer._id, email: customer.email, firstName: customer.firstName, lastName: customer.lastName },
       JWT_SECRET,
@@ -196,6 +201,16 @@ router.post('/login', async (req, res) => {
       token,
       customer: { id: customer._id, firstName: customer.firstName, lastName: customer.lastName, email: customer.email, phone: customer.phone }
     });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/customer-auth/logout  (record logout time)
+router.post('/logout', verifyCustomer, async (req, res) => {
+  try {
+    await Customer.findByIdAndUpdate(req.customer.id, { $set: { lastLogoutAt: new Date() } });
+    res.json({ message: 'Logged out.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

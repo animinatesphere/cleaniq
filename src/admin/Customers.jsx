@@ -1,811 +1,752 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import {
-  Search,
-  Mail,
-  Phone,
-  MapPin,
-  ShoppingBag,
-  Download,
-  X,
-  Edit3,
-  Save,
-  Eye,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  Trash2,
+  Search, Download, X, Edit3, Save, CheckCircle2, XCircle,
+  Trash2, Mail, Phone, MapPin, ShoppingBag, LogIn, LogOut,
+  Calendar, Clock, RefreshCw, User, Activity,
+  CreditCard, Globe, AlertTriangle, UserPlus, Eye, EyeOff,
 } from "lucide-react";
 
+/* ── Tiny shadcn-style primitives (Tailwind only, no extra deps) ─────────── */
+const Badge = ({ children, variant = "default" }) => {
+  const cls = {
+    default:     "bg-zinc-100 text-zinc-700 border-zinc-200",
+    success:     "bg-emerald-50 text-emerald-700 border-emerald-200",
+    warning:     "bg-amber-50  text-amber-700  border-amber-200",
+    destructive: "bg-red-50    text-red-700    border-red-200",
+    blue:        "bg-blue-50   text-blue-700   border-blue-200",
+  }[variant] || "bg-zinc-100 text-zinc-700 border-zinc-200";
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border ${cls}`}>
+      {children}
+    </span>
+  );
+};
+
+const Btn = ({ children, variant = "default", size = "md", className = "", ...props }) => {
+  const base = "inline-flex items-center gap-1.5 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed";
+  const sizes = { sm: "px-3 py-1.5 text-xs rounded-md", md: "px-4 py-2 text-sm rounded-lg", lg: "px-5 py-2.5 text-sm rounded-lg" };
+  const variants = {
+    default:     "bg-zinc-900 text-white hover:bg-zinc-700",
+    outline:     "border border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50",
+    ghost:       "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
+    destructive: "bg-red-600 text-white hover:bg-red-700",
+    success:     "bg-emerald-600 text-white hover:bg-emerald-700",
+  };
+  return (
+    <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...props}>
+      {children}
+    </button>
+  );
+};
+
+const Input = ({ label, ...props }) => (
+  <div className="space-y-1.5">
+    {label && <label className="text-xs font-medium text-zinc-600">{label}</label>}
+    <input
+      className="w-full h-9 px-3 text-sm border border-zinc-200 rounded-lg bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 transition"
+      {...props}
+    />
+  </div>
+);
+
+const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" }) : "—";
+const fmtDateTime = (d) => d ? new Date(d).toLocaleString("en-GB", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }) : "Never";
+const timeSince = (d) => {
+  if (!d) return null;
+  const diff = Date.now() - new Date(d).getTime();
+  const mins  = Math.floor(diff / 60000);
+  const hours = Math.floor(mins / 60);
+  const days  = Math.floor(hours / 24);
+  if (mins < 1)    return "Just now";
+  if (mins < 60)   return `${mins}m ago`;
+  if (hours < 24)  return `${hours}h ago`;
+  if (days < 7)    return `${days}d ago`;
+  return fmtDate(d);
+};
+
+/* ─────────────────────────────────────────────────────────────────────────── */
 const Customers = () => {
-  const [customers, setCustomers] = useState([]);
-  // eslint-disable-next-line no-unused-vars
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({});
-  const [customerBookings, setCustomerBookings] = useState([]);
+  const [customers,       setCustomers]       = useState([]);
+  const [loading,         setLoading]         = useState(true);
+  const [refreshing,      setRefreshing]      = useState(false);
+  const [search,          setSearch]          = useState("");
+  const [statusFilter,    setStatusFilter]    = useState("all");
+  const [selected,        setSelected]        = useState(null);
+  const [isEditing,       setIsEditing]       = useState(false);
+  const [editData,        setEditData]        = useState({});
+  const [saving,          setSaving]          = useState(false);
+  const [customerBookings,setCustomerBookings]= useState([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
-  const [statusMessage, setStatusMessage] = useState({ type: "", text: "" });
-  const [selectedCustomers, setSelectedCustomers] = useState(new Set());
-  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
-  const [editingPriceId, setEditingPriceId] = useState(null);
-  const [editingPriceValue, setEditingPriceValue] = useState("");
-  const [savingPriceId, setSavingPriceId] = useState(null);
+  const [toast,           setToast]           = useState(null);
+  const [selectedIds,     setSelectedIds]     = useState(new Set());
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [showCreate,      setShowCreate]      = useState(false);
+  const [createData,      setCreateData]      = useState({ firstName:"", lastName:"", email:"", phone:"", password:"" });
+  const [showCreatePw,    setShowCreatePw]    = useState(false);
+  const [creating,        setCreating]        = useState(false);
+  const [activeDetailTab, setActiveDetailTab] = useState("overview");
 
-  // Clear status message after 3 seconds
-  useEffect(() => {
-    if (statusMessage.text) {
-      const timer = setTimeout(
-        () => setStatusMessage({ type: "", text: "" }),
-        3000,
-      );
-      return () => clearTimeout(timer);
-    }
-  }, [statusMessage]);
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
-  const fetchCustomers = useCallback(async () => {
-    setLoading(true);
+  const fetchCustomers = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true); else setRefreshing(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/customers`);
-      const data = await response.json();
-      setCustomers(data);
-    } catch (error) {
-      console.error("Error fetching customers:", error);
+      const res  = await fetch(`${import.meta.env.VITE_API_URL}/customers`);
+      const data = await res.json();
+      setCustomers(Array.isArray(data) ? data : []);
+    } catch {
+      showToast("Failed to load customers", "error");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
-  useEffect(() => {
-    // eslint-disable-next-line
-    fetchCustomers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => { fetchCustomers(); }, [fetchCustomers]);
 
+  // Fetch booking history when a customer is selected
   useEffect(() => {
-    if (selected && !isEditing) {
-      const fetchHistory = async () => {
-        setLoadingBookings(true);
-        try {
-          const res = await fetch(
-            `${import.meta.env.VITE_API_URL}/customers/${selected.email}/bookings`,
-          );
-          const data = await res.json();
-          setCustomerBookings(data);
-        } catch {
-          // Error fetching bookings
-        } finally {
-          setLoadingBookings(false);
-        }
-      };
-      fetchHistory();
-    } else {
-      setCustomerBookings([]);
-    }
-  }, [selected, isEditing]);
+    if (!selected) { setCustomerBookings([]); return; }
+    const go = async () => {
+      setLoadingBookings(true);
+      try {
+        const res  = await fetch(`${import.meta.env.VITE_API_URL}/customers/${selected.email}/bookings`);
+        const data = await res.json();
+        setCustomerBookings(Array.isArray(data) ? data : []);
+      } catch { setCustomerBookings([]); }
+      finally  { setLoadingBookings(false); }
+    };
+    go();
+  }, [selected]);
 
   const handleUpdate = async () => {
+    setSaving(true);
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/customers/${selected.email}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editData),
-        },
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/customers/${selected.email}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editData),
+      });
       if (res.ok) {
-        fetchCustomers();
+        await fetchCustomers(true);
+        setSelected({ ...selected, ...editData });
         setIsEditing(false);
-        setSelected(null);
-        setStatusMessage({ type: "success", text: "Client info updated" });
+        showToast("Customer updated");
+      } else {
+        showToast("Failed to update customer", "error");
       }
     } catch {
-      setStatusMessage({ type: "error", text: "Failed to update client" });
+      showToast("Failed to update customer", "error");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleSaveBookingPrice = async (bookingId) => {
-    const amount = parseFloat(editingPriceValue);
-    if (isNaN(amount) || amount < 0) {
-      setStatusMessage({ type: "error", text: "Enter a valid price" });
-      return;
-    }
-    setSavingPriceId(bookingId);
+  const handleDelete = async (email) => {
     try {
-      const booking = customerBookings.find((b) => b._id === bookingId);
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/bookings/${bookingId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            payment: { ...booking?.payment, amount },
-          }),
-        },
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/customers/${email}`, { method: "DELETE" });
       if (res.ok) {
-        setCustomerBookings((prev) =>
-          prev.map((b) =>
-            b._id === bookingId
-              ? { ...b, payment: { ...b.payment, amount } }
-              : b,
-          ),
-        );
-        setEditingPriceId(null);
-        setStatusMessage({ type: "success", text: "Price updated" });
+        await fetchCustomers(true);
+        if (selected?.email === email) setSelected(null);
+        showToast("Customer deleted");
       } else {
-        setStatusMessage({ type: "error", text: "Failed to update price" });
+        showToast("Failed to delete customer", "error");
       }
     } catch {
-      setStatusMessage({ type: "error", text: "Failed to update price" });
+      showToast("Failed to delete customer", "error");
     } finally {
-      setSavingPriceId(null);
+      setShowDeleteConfirm(null);
+    }
+  };
+
+  const handleCreate = async () => {
+    const { firstName, lastName, email, password } = createData;
+    if (!firstName || !lastName || !email || !password) {
+      showToast("Please fill in all required fields", "error");
+      return;
+    }
+    setCreating(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/customers/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(createData),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        await fetchCustomers(true);
+        setShowCreate(false);
+        setCreateData({ firstName:"", lastName:"", email:"", phone:"", password:"" });
+        showToast("Account created — login details sent to customer");
+      } else {
+        showToast(data.message || "Failed to create account", "error");
+      }
+    } catch {
+      showToast("Failed to create account", "error");
+    } finally {
+      setCreating(false);
     }
   };
 
   const downloadCSV = () => {
-    if (customers.length === 0) return;
-    const headers = [
-      "Name",
-      "Email",
-      "Phone",
-      "Region",
-      "Total Bookings",
-      "Total Spent",
-    ];
-    const rows = filtered.map((c) => [
-      c.firstName + " " + c.lastName,
-      c.email,
-      c.phone,
-      c.region,
-      c.totalBookings,
-      c.totalSpent,
+    const headers = ["Name","Email","Phone","Region","Bookings","Total Spent","Last Login","Created"];
+    const rows    = filtered.map(c => [
+      `${c.firstName} ${c.lastName}`, c.email, c.phone || "", c.region || "",
+      c.totalBookings || 0, c.totalSpent || 0,
+      c.lastLoginAt ? new Date(c.lastLoginAt).toISOString() : "",
+      c.createdAt   ? new Date(c.createdAt).toISOString()   : "",
     ]);
-    const csv =
-      "data:text/csv;charset=utf-8," +
-      headers.join(",") +
-      "\n" +
-      rows.map((r) => r.join(",")).join("\n");
-    const link = document.createElement("a");
-    link.setAttribute("href", encodeURI(csv));
-    link.setAttribute(
-      "download",
-      `cleaniq_customers_${new Date().toISOString().split("T")[0]}.csv`,
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleBulkDelete = async () => {
-    try {
-      const ids = Array.from(selectedCustomers);
-      await Promise.all(
-        ids.map((customerId) =>
-          fetch(`${import.meta.env.VITE_API_URL}/customers/${customerId}`, {
-            method: "DELETE",
-          }),
-        ),
-      );
-      fetchCustomers();
-      setSelectedCustomers(new Set());
-      setShowBulkDeleteModal(false);
-      setStatusMessage({
-        type: "success",
-        text: `${ids.length} client(s) deleted successfully`,
-      });
-    } catch (error) {
-      console.error("Error deleting customers:", error);
-      setStatusMessage({ type: "error", text: "Failed to delete clients" });
-    }
-  };
-
-  const toggleCustomerSelection = (customerId) => {
-    const newSet = new Set(selectedCustomers);
-    if (newSet.has(customerId)) {
-      newSet.delete(customerId);
-    } else {
-      newSet.add(customerId);
-    }
-    setSelectedCustomers(newSet);
-  };
-
-  const toggleSelectAllCustomers = () => {
-    if (selectedCustomers.size === filtered.length) {
-      setSelectedCustomers(new Set());
-    } else {
-      setSelectedCustomers(new Set(filtered.map((c) => c.email)));
-    }
-  };
-
-  const handleDeleteCustomer = async (customerId) => {
-    if (!window.confirm("⚠️ Are you sure you want to delete this customer?")) {
-      return;
-    }
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/customers/${customerId}`,
-        { method: "DELETE" },
-      );
-      if (res.ok) {
-        fetchCustomers();
-        setSelected(null);
-        setStatusMessage({ type: "success", text: "Customer deleted successfully" });
-      }
-    } catch (error) {
-      console.error("Error deleting customer:", error);
-      setStatusMessage({ type: "error", text: "Failed to delete customer" });
-    }
+    const csv  = [headers, ...rows].map(r => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement("a"), { href: url, download: `customers_${Date.now()}.csv` });
+    a.click(); URL.revokeObjectURL(url);
   };
 
   const filtered = useMemo(() => {
-    return customers.filter(
-      (c) =>
-        `${c.firstName} ${c.lastName}`
-          .toLowerCase()
-          .includes(search.toLowerCase()) ||
-        c.email?.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [customers, search]);
+    let list = customers;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(c =>
+        `${c.firstName} ${c.lastName}`.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q) ||
+        c.phone?.includes(q)
+      );
+    }
+    if (statusFilter !== "all") {
+      if (statusFilter === "active")   list = list.filter(c => c.lastLoginAt);
+      if (statusFilter === "inactive") list = list.filter(c => !c.lastLoginAt);
+    }
+    return list;
+  }, [customers, search, statusFilter]);
+
+  const stats = useMemo(() => ({
+    total:     customers.length,
+    active:    customers.filter(c => c.lastLoginAt).length,
+    newToday:  customers.filter(c => c.createdAt && new Date(c.createdAt) > new Date(Date.now() - 86400000)).length,
+    totalSpent:customers.reduce((s, c) => s + (c.totalSpent || 0), 0),
+  }), [customers]);
+
+  const openCustomer = (c) => {
+    setSelected(c);
+    setEditData(c);
+    setIsEditing(false);
+    setActiveDetailTab("overview");
+  };
 
   return (
-    <div className="space-y-6 pb-20 relative">
-      {/* Notifications */}
-      {statusMessage.text && (
-        <div
-          className={`fixed top-6 right-6 z-9999 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 font-bold text-sm transition-all duration-300 ${
-            statusMessage.type === "success"
-              ? "bg-emerald-600 text-white"
-              : "bg-rose-600 text-white"
-          }`}
-        >
-          {statusMessage.type === "success" ? (
-            <CheckCircle2 size={18} />
-          ) : (
-            <XCircle size={18} />
-          )}
-          {statusMessage.text}
+    <div className="min-h-screen bg-zinc-50">
+
+      {/* ── Toast ──────────────────────────────────────────────────────── */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-[9999] flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg text-sm font-medium border
+          ${toast.type === "success" ? "bg-white border-emerald-200 text-emerald-800" : "bg-white border-red-200 text-red-800"}`}>
+          {toast.type === "success" ? <CheckCircle2 size={16} className="text-emerald-600"/> : <XCircle size={16} className="text-red-600"/>}
+          {toast.msg}
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Customers
-          </h2>
-          <p className="text-sm text-slate-400 font-medium mt-1">
-            Manage your client base
-          </p>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={downloadCSV}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
-          >
-            <Download size={15} /> Export CSV
-          </button>
-          <button
-            onClick={async () => {
-              if (
-                window.confirm("⚠️ DELETE ALL CUSTOMERS? This is dangerous.")
-              ) {
-                await fetch(
-                  `${import.meta.env.VITE_API_URL}/customers/all/delete`,
-                  { method: "DELETE" },
-                );
-                fetchCustomers();
-              }
-            }}
-            className="px-4 py-2.5 bg-rose-50 text-rose-600 rounded-xl text-sm font-semibold hover:bg-rose-100 transition-all border border-rose-100"
-          >
-            Clear All
-          </button>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm flex flex-wrap divide-y sm:divide-y-0 divide-x divide-slate-100">
-        {[
-          {
-            label: "Total Clients",
-            value: customers.length,
-          },
-          {
-            label: "UK Region",
-            value: customers.filter((c) => c.region === "UK").length,
-          },
-        ].map((s, i) => (
-          <div key={i} className="flex-1 min-w-[140px] px-6 py-5">
-            <p className="text-[11px] font-semibold text-slate-400 mb-1.5">
-              {s.label}
-            </p>
-            <p className="text-xl font-bold text-slate-900 tabular-nums">
-              {s.value}
-            </p>
+      {/* ── Delete confirm dialog ──────────────────────────────────────── */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4 bg-black/40">
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-xl p-6 w-full max-w-sm">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
+              <AlertTriangle size={22} className="text-red-600"/>
+            </div>
+            <h3 className="text-base font-semibold text-zinc-900 text-center mb-1">Delete customer?</h3>
+            <p className="text-sm text-zinc-500 text-center mb-6">This action cannot be undone. All their data will be permanently removed.</p>
+            <div className="flex gap-3">
+              <Btn variant="outline" className="flex-1 justify-center" onClick={() => setShowDeleteConfirm(null)}>Cancel</Btn>
+              <Btn variant="destructive" className="flex-1 justify-center" onClick={() => handleDelete(showDeleteConfirm)}>Delete</Btn>
+            </div>
           </div>
-        ))}
-      </div>
-
-      {/* Search and Table */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-200 w-full md:w-80 focus-within:border-primary/50 transition-all">
-            <Search size={16} className="text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search by name or email..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="bg-transparent outline-none text-sm font-medium w-full text-slate-700"
-            />
-          </div>
-          {selectedCustomers.size > 0 && (
-            <button
-              onClick={() => setShowBulkDeleteModal(true)}
-              className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold transition-all flex items-center gap-2 text-sm whitespace-nowrap"
-            >
-              Delete ({selectedCustomers.size})
-            </button>
-          )}
         </div>
+      )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.12em] bg-slate-50/60">
-                <th className="px-4 py-3.5 w-12">
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedCustomers.size === filtered.length &&
-                      filtered.length > 0
-                    }
-                    onChange={toggleSelectAllCustomers}
-                    className="w-4 h-4 rounded border-2 border-slate-300 cursor-pointer accent-primary"
-                  />
-                </th>
-                <th className="px-6 py-3.5">Customer</th>
-                <th className="px-4 py-3.5">Contact</th>
-                <th className="px-4 py-3.5">Activity</th>
-                <th className="px-4 py-3.5">Total Spent</th>
-                <th className="px-6 py-3.5 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filtered.map((c) => (
-                <tr
-                  key={c.email}
-                  className={`transition-colors ${
-                    selectedCustomers.has(c._id)
-                      ? "bg-blue-50"
-                      : "hover:bg-slate-50/80"
-                  } group`}
-                >
-                  <td className="px-4 py-4 w-12">
-                    <input
-                      type="checkbox"
-                      checked={selectedCustomers.has(c.email)}
-                      onChange={() => toggleCustomerSelection(c.email)}
-                      className="w-4 h-4 rounded border-2 border-slate-300 cursor-pointer accent-primary"
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0">
-                        {c.firstName[0]}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-800 text-sm">
-                          {c.firstName} {c.lastName}
-                        </p>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase ${c.region === "UK" ? "bg-blue-50 text-blue-600" : "bg-green-50 text-green-600"}`}
-                        >
-                          {c.region}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <p className="text-sm font-medium text-slate-600">
-                      {c.email}
-                    </p>
-                    <p className="text-xs font-semibold text-slate-400 mt-0.5">
-                      {c.phone}
-                    </p>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-2">
-                      <ShoppingBag size={13} className="text-slate-400" />
-                      <span className="font-medium text-slate-600 text-sm">
-                        {c.totalBookings} bookings
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 font-bold text-slate-900 text-sm tabular-nums">
-                    £{c.totalSpent?.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => {
-                        setSelected(c);
-                        setEditData(c);
-                        setIsEditing(false);
-                      }}
-                      className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
-                    >
-                      <Eye size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCustomer(c.email)}
-                      className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all"
-                      title="Delete customer"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Modal */}
-      {selected && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
-            onClick={() => setSelected(null)}
-          />
-          <div className="relative w-full max-w-lg bg-white rounded-[28px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-primary/5 via-slate-50 to-slate-50">
-              <h3 className="text-base font-bold text-slate-900">
-                {isEditing ? "Edit Client" : "Client Profile"}
-              </h3>
-              <button
-                onClick={() => setSelected(null)}
-                className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-colors"
-              >
-                <X size={18} />
+      {/* ── Create Account Modal ───────────────────────────────────────── */}
+      {showCreate && (
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4 bg-black/40">
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center">
+                  <UserPlus size={15} className="text-white"/>
+                </div>
+                <h3 className="text-base font-semibold text-zinc-900">Create Customer Account</h3>
+              </div>
+              <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-md text-zinc-400 hover:bg-zinc-100">
+                <X size={16}/>
               </button>
             </div>
-
-            <div className="p-6 space-y-5 max-h-[65vh] overflow-y-auto no-scrollbar">
-              {isEditing ? (
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-semibold text-slate-400 ml-3">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      value={editData.firstName}
-                      onChange={(e) =>
-                        setEditData({ ...editData, firstName: e.target.value })
-                      }
-                      className="w-full p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-semibold text-slate-400 ml-3">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      value={editData.lastName}
-                      onChange={(e) =>
-                        setEditData({ ...editData, lastName: e.target.value })
-                      }
-                      className="w-full p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-semibold text-slate-400 ml-3">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={editData.email}
-                      disabled
-                      className="w-full p-3.5 rounded-xl bg-slate-100 border border-slate-200 font-medium text-sm text-slate-400 cursor-not-allowed"
-                      title="Email cannot be changed"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-semibold text-slate-400 ml-3">
-                      Phone
-                    </label>
-                    <input
-                      type="text"
-                      value={editData.phone}
-                      onChange={(e) =>
-                        setEditData({ ...editData, phone: e.target.value })
-                      }
-                      className="w-full p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                    />
-                  </div>
+            <div className="px-6 py-5 space-y-4">
+              <p className="text-sm text-zinc-500">The customer will receive an email with their login credentials.</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Input label="First Name *" placeholder="Jane" value={createData.firstName} onChange={e => setCreateData({...createData, firstName:e.target.value})}/>
+                <Input label="Last Name *"  placeholder="Smith" value={createData.lastName}  onChange={e => setCreateData({...createData, lastName:e.target.value})}/>
+              </div>
+              <Input label="Email Address *" type="email" placeholder="jane@example.com" value={createData.email} onChange={e => setCreateData({...createData, email:e.target.value})}/>
+              <Input label="Phone (optional)" type="tel" placeholder="+44 7700 000000" value={createData.phone} onChange={e => setCreateData({...createData, phone:e.target.value})}/>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-zinc-600">Password *</label>
+                <div className="relative">
+                  <input
+                    type={showCreatePw ? "text" : "password"}
+                    placeholder="Set a temporary password"
+                    value={createData.password}
+                    onChange={e => setCreateData({...createData, password:e.target.value})}
+                    className="w-full h-9 px-3 pr-10 text-sm border border-zinc-200 rounded-lg bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 transition"
+                  />
+                  <button type="button" onClick={() => setShowCreatePw(p => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+                    {showCreatePw ? <EyeOff size={14}/> : <Eye size={14}/>}
+                  </button>
                 </div>
-              ) : (
-                <div className="space-y-5">
-                  <div className="text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-lg shadow-primary/20">
-                      {selected.firstName[0]}
-                    </div>
-                    <h4 className="text-xl font-bold text-slate-900 tracking-tight">
-                      {selected.firstName} {selected.lastName}
-                    </h4>
-                    <p className="text-slate-400 font-medium text-sm mt-1">
-                      Customer Profile
-                    </p>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-zinc-200 flex gap-3 justify-end">
+              <Btn variant="outline" onClick={() => setShowCreate(false)}>Cancel</Btn>
+              <Btn onClick={handleCreate} disabled={creating}>
+                {creating ? <RefreshCw size={12} className="animate-spin"/> : <Mail size={12}/>}
+                Create &amp; Send Email
+              </Btn>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className={`flex h-screen overflow-hidden transition-all`}>
+
+        {/* ── Main list panel ──────────────────────────────────────────── */}
+        <div className={`flex flex-col overflow-hidden transition-all ${selected ? "w-0 md:w-1/2 lg:w-[55%]" : "w-full"}`}>
+
+          {/* Header */}
+          <div className="bg-white border-b border-zinc-200 px-6 py-5 flex-shrink-0">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h1 className="text-xl font-semibold text-zinc-900">Customers</h1>
+                <p className="text-sm text-zinc-500 mt-0.5">{customers.length.toLocaleString()} total accounts</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Btn variant="outline" size="sm" onClick={() => fetchCustomers(true)} disabled={refreshing}>
+                  <RefreshCw size={13} className={refreshing ? "animate-spin" : ""}/>
+                  Refresh
+                </Btn>
+                <Btn variant="outline" size="sm" onClick={downloadCSV}>
+                  <Download size={13}/> Export
+                </Btn>
+                <Btn size="sm" onClick={() => setShowCreate(true)}>
+                  <UserPlus size={13}/> Create Account
+                </Btn>
+              </div>
+            </div>
+
+            {/* Stats strip */}
+            <div className="grid grid-cols-4 gap-3 mb-5">
+              {[
+                { label:"Total",      value: stats.total,                   color:"text-zinc-900" },
+                { label:"Active",     value: stats.active,                  color:"text-emerald-700" },
+                { label:"New today",  value: stats.newToday,                color:"text-blue-700" },
+                { label:"Revenue",    value: `£${stats.totalSpent.toLocaleString()}`, color:"text-zinc-900" },
+              ].map(s => (
+                <div key={s.label} className="bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-3">
+                  <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide mb-1">{s.label}</p>
+                  <p className={`text-lg font-bold tabular-nums ${s.color}`}>{s.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Search + filter */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"/>
+                <input
+                  type="text"
+                  placeholder="Search by name, email or phone..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full h-9 pl-9 pr-4 text-sm border border-zinc-200 rounded-lg bg-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 transition"
+                />
+              </div>
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="h-9 px-3 text-sm border border-zinc-200 rounded-lg bg-white text-zinc-800 focus:outline-none cursor-pointer"
+              >
+                <option value="all">All</option>
+                <option value="active">Active</option>
+                <option value="inactive">Never logged in</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="flex-1 overflow-y-auto">
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <RefreshCw size={20} className="animate-spin text-zinc-400"/>
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-64 text-zinc-400">
+                <User size={32} strokeWidth={1.5} className="mb-3"/>
+                <p className="text-sm font-medium">No customers found</p>
+              </div>
+            ) : (
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="sticky top-0 bg-zinc-50 border-b border-zinc-200 z-10">
+                  <tr>
+                    <th className="px-4 py-3 w-10">
+                      <input type="checkbox"
+                        checked={selectedIds.size === filtered.length && filtered.length > 0}
+                        onChange={() => selectedIds.size === filtered.length
+                          ? setSelectedIds(new Set())
+                          : setSelectedIds(new Set(filtered.map(c => c.email)))
+                        }
+                        className="rounded border-zinc-300 accent-zinc-900"
+                      />
+                    </th>
+                    <th className="px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wide">Customer</th>
+                    <th className="px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wide hidden md:table-cell">Contact</th>
+                    <th className="px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wide hidden lg:table-cell">Last Login</th>
+                    <th className="px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wide">Bookings</th>
+                    <th className="px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wide text-right">Spent</th>
+                    <th className="px-4 py-3 w-10"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100 bg-white">
+                  {filtered.map(c => (
+                    <tr
+                      key={c.email}
+                      onClick={() => openCustomer(c)}
+                      className={`cursor-pointer hover:bg-zinc-50 transition-colors ${selected?.email === c.email ? "bg-zinc-50" : ""}`}
+                    >
+                      <td className="px-4 py-3.5" onClick={e => e.stopPropagation()}>
+                        <input type="checkbox"
+                          checked={selectedIds.has(c.email)}
+                          onChange={() => {
+                            const s = new Set(selectedIds);
+                            s.has(c.email) ? s.delete(c.email) : s.add(c.email);
+                            setSelectedIds(s);
+                          }}
+                          className="rounded border-zinc-300 accent-zinc-900"
+                        />
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                            {(c.firstName?.[0] || "?").toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium text-zinc-900">{c.firstName} {c.lastName}</p>
+                            <p className="text-xs text-zinc-500 mt-0.5">{c.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 hidden md:table-cell">
+                        <p className="text-zinc-700">{c.phone || "—"}</p>
+                        {c.region && <Badge variant="blue">{c.region}</Badge>}
+                      </td>
+                      <td className="px-4 py-3.5 hidden lg:table-cell">
+                        {c.lastLoginAt ? (
+                          <div>
+                            <p className="text-zinc-700 text-xs">{timeSince(c.lastLoginAt)}</p>
+                            <p className="text-zinc-400 text-[11px]">{fmtDate(c.lastLoginAt)}</p>
+                          </div>
+                        ) : (
+                          <Badge variant="warning">Never logged in</Badge>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className="font-medium text-zinc-900">{c.totalBookings || 0}</span>
+                      </td>
+                      <td className="px-4 py-3.5 text-right font-semibold text-zinc-900 tabular-nums">
+                        £{(c.totalSpent || 0).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3.5" onClick={e => e.stopPropagation()}>
+                        <button
+                          onClick={() => setShowDeleteConfirm(c.email)}
+                          className="p-1.5 rounded-md text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                        >
+                          <Trash2 size={14}/>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+
+        {/* ── Detail panel ─────────────────────────────────────────────── */}
+        {selected && (
+          <div className="w-full md:w-1/2 lg:w-[45%] flex flex-col border-l border-zinc-200 bg-white overflow-hidden">
+
+            {/* Panel header */}
+            <div className="px-6 py-4 border-b border-zinc-200 flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-zinc-900 text-white flex items-center justify-center text-sm font-bold">
+                  {(selected.firstName?.[0] || "?").toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-semibold text-zinc-900">{selected.firstName} {selected.lastName}</p>
+                  <p className="text-xs text-zinc-500">Joined {fmtDate(selected.createdAt)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {isEditing ? (
+                  <>
+                    <Btn variant="outline" size="sm" onClick={() => setIsEditing(false)}>Cancel</Btn>
+                    <Btn size="sm" onClick={handleUpdate} disabled={saving}>
+                      {saving ? <RefreshCw size={12} className="animate-spin"/> : <Save size={12}/>}
+                      Save
+                    </Btn>
+                  </>
+                ) : (
+                  <Btn variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                    <Edit3 size={12}/> Edit
+                  </Btn>
+                )}
+                <button
+                  onClick={() => { setSelected(null); setIsEditing(false); }}
+                  className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all"
+                >
+                  <X size={16}/>
+                </button>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-zinc-200 px-6 flex-shrink-0">
+              {[
+                { key:"overview", label:"Overview" },
+                { key:"activity", label:"Login Activity" },
+                { key:"bookings", label:"Bookings" },
+              ].map(t => (
+                <button
+                  key={t.key}
+                  onClick={() => setActiveDetailTab(t.key)}
+                  className={`py-3 px-1 mr-6 text-sm font-medium border-b-2 transition-all ${
+                    activeDetailTab === t.key
+                      ? "border-zinc-900 text-zinc-900"
+                      : "border-transparent text-zinc-500 hover:text-zinc-700"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Panel body */}
+            <div className="flex-1 overflow-y-auto px-6 py-5">
+
+              {/* ── OVERVIEW TAB ─────────────────────────────────────── */}
+              {activeDetailTab === "overview" && (
+                <div className="space-y-6">
+
+                  {/* Quick stats */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { label:"Bookings",    value: selected.totalBookings || 0 },
+                      { label:"Total Spent", value: `£${(selected.totalSpent||0).toLocaleString()}` },
+                      { label:"Region",      value: selected.region || "—" },
+                    ].map(s => (
+                      <div key={s.label} className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
+                        <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide mb-1">{s.label}</p>
+                        <p className="text-base font-bold text-zinc-900">{s.value}</p>
+                      </div>
+                    ))}
                   </div>
 
-                  {/* Contact Information */}
-                  <div className="space-y-3 p-5 rounded-2xl bg-slate-50 border border-slate-100">
-                    <h4 className="text-sm font-bold text-slate-800 mb-3">
-                      Contact Information
-                    </h4>
-                    <div className="space-y-3.5">
-                      <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                          <Mail size={16} />
-                        </div>
-                        <div>
-                          <p className="text-[11px] font-semibold text-slate-400">
-                            Email Address
-                          </p>
-                          <p className="font-semibold text-slate-800 text-sm mt-0.5">
-                            {selected.email}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                          <Phone size={16} />
-                        </div>
-                        <div>
-                          <p className="text-[11px] font-semibold text-slate-400">
-                            Phone Number
-                          </p>
-                          <p className="font-semibold text-slate-800 text-sm mt-0.5">
-                            {selected.phone || "Not provided"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                          <MapPin size={16} />
-                        </div>
-                        <div>
-                          <p className="text-[11px] font-semibold text-slate-400">
-                            Region
-                          </p>
-                          <p className="font-semibold text-slate-800 text-sm mt-0.5">
-                            {selected.region || "Not specified"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Statistics */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100">
-                      <p className="text-[11px] font-semibold text-blue-600 mb-1">
-                        Total Bookings
-                      </p>
-                      <p className="text-2xl font-bold text-blue-700 tabular-nums">
-                        {selected.totalBookings}
-                      </p>
-                    </div>
-                    <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
-                      <p className="text-[11px] font-semibold text-emerald-600 mb-1">
-                        Total Spent
-                      </p>
-                      <p className="text-2xl font-bold text-emerald-700 tabular-nums">
-                        £{selected.totalSpent?.toLocaleString() || "0"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Booking History */}
-                  <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/50 border border-slate-100">
+                  {/* Personal info */}
+                  <div>
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-sm font-bold text-slate-800">
-                        Recent Bookings
-                      </h4>
-                      {customerBookings.length > 0 && (
-                        <span className="text-[10px] font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
-                          {customerBookings.length} total
-                        </span>
+                      <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Personal Information</h3>
+                    </div>
+                    <div className="border border-zinc-200 rounded-lg divide-y divide-zinc-100">
+                      {isEditing ? (
+                        <div className="p-4 space-y-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <Input label="First Name" value={editData.firstName || ""} onChange={e => setEditData({...editData, firstName:e.target.value})}/>
+                            <Input label="Last Name"  value={editData.lastName  || ""} onChange={e => setEditData({...editData, lastName:e.target.value})}/>
+                          </div>
+                          <Input label="Email"   type="email" value={editData.email   || ""} onChange={e => setEditData({...editData, email:e.target.value})}/>
+                          <Input label="Phone"   type="tel"   value={editData.phone   || ""} onChange={e => setEditData({...editData, phone:e.target.value})}/>
+                          <Input label="Address"              value={editData.address || ""} onChange={e => setEditData({...editData, address:e.target.value})}/>
+                          <Input label="Region"               value={editData.region  || ""} onChange={e => setEditData({...editData, region:e.target.value})}/>
+                        </div>
+                      ) : (
+                        <>
+                          {[
+                            { Icon:User,     label:"Full name",    value:`${selected.firstName} ${selected.lastName}` },
+                            { Icon:Mail,     label:"Email",        value:selected.email },
+                            { Icon:Phone,    label:"Phone",        value:selected.phone  || "Not set" },
+                            { Icon:MapPin,   label:"Address",      value:selected.address || "Not set" },
+                            { Icon:Globe,    label:"Region",       value:selected.region  || "Not set" },
+                            { Icon:Calendar, label:"Registered",   value:fmtDate(selected.createdAt) },
+                          ].map(({Icon,label,value}) => (
+                            <div key={label} className="flex items-center gap-3 px-4 py-3">
+                              <Icon size={14} className="text-zinc-400 flex-shrink-0"/>
+                              <span className="text-xs text-zinc-500 w-24 flex-shrink-0">{label}</span>
+                              <span className="text-sm text-zinc-800 font-medium truncate">{value}</span>
+                            </div>
+                          ))}
+                        </>
                       )}
                     </div>
-                    {loadingBookings ? (
-                      <p className="text-sm text-slate-400 font-medium animate-pulse">
-                        Loading history...
-                      </p>
-                    ) : customerBookings.length > 0 ? (
-                      <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
-                        {customerBookings.slice(0, 5).map((b) => {
-                          const currencySymbol =
-                            b.payment?.currency === "GBP" ? "£" : "₦";
-                          const isEditingPrice = editingPriceId === b._id;
-                          return (
-                            <div
-                              key={b._id}
-                              className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm hover:border-primary/30 hover:shadow-md transition-all"
-                            >
-                              <div className="flex justify-between items-start gap-3">
-                                <div className="min-w-0">
-                                  <p className="font-semibold text-sm text-slate-800 truncate">
-                                    {b.service}
-                                  </p>
-                                  <p className="text-xs text-slate-400 font-medium mt-0.5">
-                                    {new Date(
-                                      b.schedule?.date || b.createdAt,
-                                    ).toLocaleDateString()}
-                                  </p>
-                                </div>
-                                <div className="text-right shrink-0">
-                                  {isEditingPrice ? (
-                                    <div className="flex items-center gap-1">
-                                      <div className="relative">
-                                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                                          {currencySymbol}
-                                        </span>
-                                        <input
-                                          type="number"
-                                          autoFocus
-                                          value={editingPriceValue}
-                                          onChange={(e) =>
-                                            setEditingPriceValue(
-                                              e.target.value,
-                                            )
-                                          }
-                                          className="w-20 pl-5 pr-1 py-1 rounded-lg bg-white border-2 border-primary text-sm font-bold tabular-nums focus:outline-none"
-                                        />
-                                      </div>
-                                      <button
-                                        onClick={() =>
-                                          handleSaveBookingPrice(b._id)
-                                        }
-                                        disabled={savingPriceId === b._id}
-                                        className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-100 transition-colors disabled:opacity-50"
-                                        title="Save price"
-                                      >
-                                        <Save size={13} />
-                                      </button>
-                                      <button
-                                        onClick={() => setEditingPriceId(null)}
-                                        className="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-colors"
-                                        title="Cancel"
-                                      >
-                                        <X size={13} />
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <button
-                                      onClick={() => {
-                                        setEditingPriceId(b._id);
-                                        setEditingPriceValue(
-                                          String(b.payment?.amount ?? ""),
-                                        );
-                                      }}
-                                      className="group flex items-center gap-1.5 hover:bg-primary/5 rounded-lg px-2 py-1 -mr-2 transition-colors"
-                                      title="Edit price"
-                                    >
-                                      <p className="font-bold text-slate-900 text-sm tabular-nums">
-                                        {currencySymbol}
-                                        {b.payment?.amount}
-                                      </p>
-                                      <Edit3
-                                        size={11}
-                                        className="text-slate-300 group-hover:text-primary transition-colors"
-                                      />
-                                    </button>
-                                  )}
-                                  <span
-                                    className={`text-[9px] font-semibold uppercase inline-block mt-1 px-2 py-0.5 rounded-full ${b.status === "Completed" ? "bg-emerald-50 text-emerald-600" : b.status === "Cancelled" ? "bg-rose-50 text-rose-600" : "bg-amber-50 text-amber-600"}`}
-                                  >
-                                    {b.status}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                        {customerBookings.length > 5 && (
-                          <p className="text-xs text-slate-400 text-center pt-2">
-                            +{customerBookings.length - 5} more bookings
-                          </p>
+                  </div>
+
+                  {/* Account status */}
+                  <div>
+                    <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Account Status</h3>
+                    <div className="border border-zinc-200 rounded-lg divide-y divide-zinc-100">
+                      <div className="flex items-center gap-3 px-4 py-3">
+                        <LogIn size={14} className="text-zinc-400"/>
+                        <span className="text-xs text-zinc-500 w-24">Last login</span>
+                        <span className="text-sm font-medium text-zinc-800">{fmtDateTime(selected.lastLoginAt)}</span>
+                        {selected.lastLoginAt && (
+                          <Badge variant="success">{timeSince(selected.lastLoginAt)}</Badge>
                         )}
                       </div>
-                    ) : (
-                      <p className="text-sm text-slate-400 font-medium">
-                        No bookings yet.
-                      </p>
-                    )}
+                      <div className="flex items-center gap-3 px-4 py-3">
+                        <LogOut size={14} className="text-zinc-400"/>
+                        <span className="text-xs text-zinc-500 w-24">Last logout</span>
+                        <span className="text-sm font-medium text-zinc-800">{fmtDateTime(selected.lastLogoutAt)}</span>
+                      </div>
+                      <div className="flex items-center gap-3 px-4 py-3">
+                        <Activity size={14} className="text-zinc-400"/>
+                        <span className="text-xs text-zinc-500 w-24">Total logins</span>
+                        <span className="text-sm font-medium text-zinc-800">{selected.loginCount || 0}</span>
+                      </div>
+                    </div>
                   </div>
+                </div>
+              )}
+
+              {/* ── ACTIVITY TAB ─────────────────────────────────────── */}
+              {activeDetailTab === "activity" && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 p-3 bg-zinc-50 border border-zinc-200 rounded-lg">
+                    <Activity size={14} className="text-zinc-500"/>
+                    <p className="text-xs text-zinc-600 font-medium">
+                      Login history shows the last 50 sessions for this customer.
+                    </p>
+                  </div>
+
+                  {/* Summary row */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
+                      <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide mb-1">Last Login</p>
+                      <p className="text-sm font-semibold text-zinc-900">{timeSince(selected.lastLoginAt) || "Never"}</p>
+                      <p className="text-[11px] text-zinc-400">{fmtDateTime(selected.lastLoginAt)}</p>
+                    </div>
+                    <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
+                      <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide mb-1">Last Logout</p>
+                      <p className="text-sm font-semibold text-zinc-900">{timeSince(selected.lastLogoutAt) || "Never"}</p>
+                      <p className="text-[11px] text-zinc-400">{fmtDateTime(selected.lastLogoutAt)}</p>
+                    </div>
+                  </div>
+
+                  {/* Login history timeline */}
+                  {selected.loginHistory?.length > 0 ? (
+                    <div className="space-y-1">
+                      <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Session History</h3>
+                      {selected.loginHistory.slice().reverse().map((session, i) => (
+                        <div key={i} className="flex items-start gap-3 p-3 rounded-lg border border-zinc-100 bg-white hover:border-zinc-200 transition-all">
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
+                            session.action === "logout" ? "bg-zinc-100" : "bg-emerald-50"
+                          }`}>
+                            {session.action === "logout"
+                              ? <LogOut size={13} className="text-zinc-500"/>
+                              : <LogIn  size={13} className="text-emerald-600"/>
+                            }
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-medium text-zinc-800 capitalize">{session.action || "Login"}</p>
+                              <p className="text-[11px] text-zinc-400">{timeSince(session.timestamp)}</p>
+                            </div>
+                            <p className="text-xs text-zinc-500 mt-0.5">{fmtDateTime(session.timestamp)}</p>
+                            {session.device && <p className="text-[11px] text-zinc-400 mt-0.5">{session.device}</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12 text-zinc-400">
+                      <Clock size={28} strokeWidth={1.5} className="mb-3"/>
+                      <p className="text-sm font-medium">No login history available</p>
+                      <p className="text-xs mt-1">Sessions are recorded when the customer logs in or out</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── BOOKINGS TAB ─────────────────────────────────────── */}
+              {activeDetailTab === "bookings" && (
+                <div>
+                  {loadingBookings ? (
+                    <div className="flex items-center justify-center h-40">
+                      <RefreshCw size={18} className="animate-spin text-zinc-400"/>
+                    </div>
+                  ) : customerBookings.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-zinc-400">
+                      <ShoppingBag size={28} strokeWidth={1.5} className="mb-3"/>
+                      <p className="text-sm font-medium">No bookings yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-xs text-zinc-500 mb-3">{customerBookings.length} booking{customerBookings.length !== 1 ? "s" : ""} found</p>
+                      {customerBookings.map(b => {
+                        const statusColor = {
+                          completed: "success", "in progress": "blue",
+                          pending: "warning", cancelled: "destructive",
+                        }[b.status?.toLowerCase()] || "default";
+                        return (
+                          <div key={b._id} className="border border-zinc-200 rounded-lg p-4 bg-white hover:border-zinc-300 transition-all">
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <p className="font-medium text-zinc-900 text-sm">{b.service || "Cleaning Service"}</p>
+                              <Badge variant={statusColor}>{b.status}</Badge>
+                            </div>
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-zinc-500">
+                              <div className="flex items-center gap-1.5">
+                                <Calendar size={11}/>
+                                <span>{fmtDate(b.schedule?.date || b.preferredDate)}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <CreditCard size={11}/>
+                                <span className="font-semibold text-zinc-800">£{b.payment?.amount?.toFixed(2) || "0.00"}</span>
+                              </div>
+                              {b.details?.address && (
+                                <div className="flex items-center gap-1.5 col-span-2">
+                                  <MapPin size={11}/>
+                                  <span className="truncate">{b.details.address}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex gap-3">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="flex-1 py-3 rounded-xl bg-white border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleUpdate}
-                    className="flex-1 py-3 rounded-xl bg-primary text-white text-sm font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-primary-dark transition-all"
-                  >
-                    <Save size={16} /> Update Client
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="flex-1 py-3 rounded-xl bg-primary text-white text-sm font-bold shadow-sm flex items-center justify-center gap-2 hover:bg-primary-dark transition-all"
-                  >
-                    <Edit3 size={16} /> Modify Profile
-                  </button>
-                  <button
-                    onClick={() => handleDeleteCustomer(selected.email)}
-                    className="flex-1 py-3 rounded-xl bg-rose-50 text-rose-600 text-sm font-bold border border-rose-200 hover:bg-rose-100 transition-all flex items-center justify-center gap-2"
-                  >
-                    <Trash2 size={16} /> Delete Customer
-                  </button>
-                </>
-              )}
-            </div>
+            {/* Panel footer — danger zone */}
+            {!isEditing && (
+              <div className="px-6 py-4 border-t border-zinc-200 flex-shrink-0">
+                <Btn variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                  onClick={() => setShowDeleteConfirm(selected.email)}>
+                  <Trash2 size={12}/> Delete account
+                </Btn>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-
-      {/* Bulk Delete Modal */}
-      {showBulkDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
-            onClick={() => setShowBulkDeleteModal(false)}
-          ></div>
-          <div className="relative bg-white rounded-[28px] p-8 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 text-center">
-            <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-5">
-              <AlertTriangle size={32} />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 tracking-tight mb-2">
-              Delete {selectedCustomers.size} Client(s)?
-            </h3>
-            <p className="text-slate-400 font-medium text-sm mb-6">
-              This action cannot be undone. The selected clients will be
-              permanently removed from your database.
-            </p>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowBulkDeleteModal(false)}
-                className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-semibold text-sm hover:bg-slate-200 transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleBulkDelete}
-                className="flex-1 py-3 bg-rose-600 text-white rounded-xl font-bold text-sm shadow-sm hover:bg-rose-700 transition-all"
-              >
-                Delete All
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

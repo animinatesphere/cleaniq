@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   Eye,
@@ -1920,6 +1921,7 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
 };
 
 const Bookings = () => {
+  const navigate = useNavigate();
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [crmBooking, setCrmBooking] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -2911,9 +2913,9 @@ const Bookings = () => {
           <div className="relative">
             <button
               onClick={() => setShowCreateMenu((v) => !v)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-primary border border-slate-200 hover:bg-slate-50 transition-all font-semibold text-sm"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 text-white border border-zinc-900 hover:bg-zinc-700 transition-all font-semibold text-sm"
             >
-              Create Booking
+              New Booking
               <ChevronDown
                 size={15}
                 className={`transition-transform ${showCreateMenu ? "rotate-180" : ""}`}
@@ -2925,13 +2927,11 @@ const Bookings = () => {
                   className="fixed inset-0 z-40"
                   onClick={() => setShowCreateMenu(false)}
                 />
-                <div className="absolute z-50 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+                <div className="absolute right-0 z-50 mt-2 w-68 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden" style={{minWidth:"17rem"}}>
                   <button
                     onClick={() => {
-                      setNoPaymentRequired(false);
-                      setSkipConfirmationEmail(false);
-                      setShowCreateModal(true);
                       setShowCreateMenu(false);
+                      navigate("/admin/bookings/new");
                     }}
                     className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-all"
                   >
@@ -2945,9 +2945,8 @@ const Bookings = () => {
                   <div className="h-px bg-slate-100" />
                   <button
                     onClick={() => {
-                      setNoPaymentRequired(true);
-                      setShowCreateModal(true);
                       setShowCreateMenu(false);
+                      navigate("/admin/bookings/new", { state: { noPaymentRequired: true } });
                     }}
                     className="w-full text-left px-4 py-3 hover:bg-emerald-50 transition-all"
                   >
@@ -2955,8 +2954,7 @@ const Bookings = () => {
                       Create Booking (non pay)
                     </p>
                     <p className="text-[11px] text-slate-400 mt-0.5">
-                      Already paid (cash/bank transfer) — no Stripe link or
-                      bank details emailed
+                      Already paid — no Stripe link or email sent
                     </p>
                   </button>
                 </div>

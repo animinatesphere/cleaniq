@@ -223,15 +223,9 @@ const MyAccountScreen = ({ navigation }) => {
   };
 
   const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to log out?", [
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: async () => {
-          await logout();
-        },
-      },
+      { text: "Log Out", style: "destructive", onPress: logout },
     ]);
   };
 
