@@ -134,7 +134,6 @@ router.get("/jobs", async (req, res) => {
     const { region } = req.query;
     const filter = {
       status: { $in: ["Confirmed", "Authorized", "Accepted"] },
-      $or: [{ assignedWorker: null }, { assignedWorker: { $exists: false } }],
     };
     if (region) filter.region = region;
 

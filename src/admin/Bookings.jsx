@@ -5904,7 +5904,7 @@ const Bookings = () => {
                             status: "Pending",
                             billingType: createData.payment?.billingType || "hourly",
                           },
-                          status: createData.status,
+                          status: noPaymentRequired ? "Confirmed" : createData.status,
                           noPaymentRequired,
                           skipConfirmationEmail:
                             noPaymentRequired && skipConfirmationEmail,

@@ -199,10 +199,6 @@ const HomeScreen = ({ navigation, route }) => {
     finally { setActionLoading(null); }
   };
 
-  if (loading) return (
-    <View style={S.loading}><ActivityIndicator size="large" color={C.primary} /></View>
-  );
-
   const activeJobs    = myJobs.filter(j=>!["Completed","completed"].includes(j.status));
   const completedJobs = myJobs.filter(j=>["Completed","completed"].includes(j.status));
   const filteredOffers = availableJobs.filter(job=>{
@@ -653,6 +649,10 @@ const HomeScreen = ({ navigation, route }) => {
   // ── Shell ──────────────────────────────────────────────────────────────────
   return (
     <SafeAreaView style={S.root}>
+      {loading && (
+        <View style={S.loading}><ActivityIndicator size="large" color={C.primary} /></View>
+      )}
+      {!loading && <>
       {/* Header */}
       <View style={S.header}>
         <View style={{flexDirection:"row",alignItems:"center",gap:12}}>
@@ -701,11 +701,12 @@ const HomeScreen = ({ navigation, route }) => {
       </View>
 
       <View style={{flex:1,backgroundColor:C.bg}}>
-        {activeTab==="activity"  && <ActivityTab/>}
-        {activeTab==="history"   && <HistoryTab/>}
-        {activeTab==="offers"    && <OffersTab/>}
-        {activeTab==="payments"  && <PaymentsTab/>}
+        {activeTab==="activity"  && ActivityTab()}
+        {activeTab==="history"   && HistoryTab()}
+        {activeTab==="offers"    && OffersTab()}
+        {activeTab==="payments"  && PaymentsTab()}
       </View>
+      </>}
     </SafeAreaView>
   );
 };

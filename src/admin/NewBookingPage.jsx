@@ -324,7 +324,7 @@ const NewBookingPage = () => {
           status: "Pending",
           billingType: data.payment?.billingType||"hourly",
         },
-        status: data.status,
+        status: noPaymentRequired ? "Confirmed" : data.status,
         noPaymentRequired,
         skipConfirmationEmail: noPaymentRequired && skipEmail,
         createdByAdmin: localStorage.getItem("adminUser")||null,
