@@ -95,6 +95,7 @@ const tasksRoutes = require("./routes/tasks");
 const complaintsRoutes = require("./routes/complaints");
 const contractsRoutes = require("./routes/contracts");
 const referralsRoutes = require("./routes/referrals");
+const leadsRoutes = require("./routes/leads");
 
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
@@ -312,6 +313,7 @@ app.use("/api/tasks", tasksRoutes);
 app.use("/api/complaints", complaintsRoutes);
 app.use("/api/contracts", contractsRoutes);
 app.use("/api/referrals", referralsRoutes);
+app.use("/api/leads", leadsRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);

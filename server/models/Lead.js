@@ -5,8 +5,14 @@ const leadSchema = new mongoose.Schema({
   email: { type: String, required: true, lowercase: true },
   phone: { type: String, default: "" },
   message: { type: String, default: "" },
-  source: { type: String, default: "Contact Form" }, // Contact Form, Quote, Booking, etc.
-  acknowledged: { type: Boolean, default: false }, // one-time "thanks for reaching out" email sent
+  serviceInterest: { type: String, default: "" },
+  source: { type: String, default: "Contact Form" },
+  stage: {
+    type: String,
+    enum: ["New", "Quoted", "Follow-up", "Booked", "Lost"],
+    default: "New",
+  },
+  acknowledged: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 
