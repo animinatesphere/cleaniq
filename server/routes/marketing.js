@@ -140,6 +140,58 @@ router.post('/send', async (req, res) => {
 });
 
 /**
+ * POST /api/marketing/campaign
+ * Send a campaign by segment with a name field (used by Campaigns.jsx)
+ */
+router.post('/campaign', async (req, res) => {
+  const { name, segment, subject, body, targetEmails = [] } = req.body;
+
+  if (!subject || !body) {
+    return res.status(400).json({ message: 'Subject and body are required.' });
+  }
+  if (!targetEmails.length) {
+    return res.status(400).json({ message: 'No recipients provided.' });
+  }
+
+  const validEmails = [...new Set(
+    targetEmails.filter(e => isValidEmail(e.trim())).map(e => e.trim().toLowerCase())
+  )];
+  if (!validEmails.length) {
+    return res.status(400).json({ message: 'No valid recipients found.' });
+  }
+
+  try {
+    console.log(`📢 Sending campaign "${subject}" to ${validEmails.length} recipient(s)...`);
+    const html = campaignEmailHtml(subject, body);
+    const results = await Promise.allSettled(
+      validEmails.map((email) => sendEmail({ to: email, subject, html })),
+    );
+    const sentCount = results.filter(r => r.status === 'fulfilled' && r.value).length;
+
+    const campaign = await Campaign.create({
+      name: name || subject,
+      subject,
+      body,
+      message: body,
+      segment: segment || 'custom',
+      recipientType: ['all', 'leads'].includes(segment) ? segment : 'custom',
+      recipients: validEmails,
+      recipientCount: validEmails.length,
+      sentCount,
+      status: 'sent',
+    });
+
+    res.json({
+      message: `Campaign sent to ${sentCount} of ${validEmails.length} recipient(s).`,
+      campaign,
+    });
+  } catch (error) {
+    console.error('Campaign send error:', error);
+    res.status(500).json({ message: 'Failed to send campaign.' });
+  }
+});
+
+/**
  * GET /api/marketing/campaigns
  * Recent campaign history
  */

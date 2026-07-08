@@ -56,6 +56,14 @@ import Rota from "./admin/Rota";
 import Calendar from "./admin/Calendar";
 import NewBookingPage from "./admin/NewBookingPage";
 import Automations from "./admin/Automations";
+import Pipeline from "./admin/Pipeline";
+import Tasks from "./admin/Tasks";
+import Complaints from "./admin/Complaints";
+import Contracts from "./admin/Contracts";
+import WorkerPerformance from "./admin/WorkerPerformance";
+import Referrals from "./admin/Referrals";
+import Campaigns from "./admin/Campaigns";
+import CustomerProfile from "./admin/CustomerProfile";
 
 function App() {
   const location = useLocation();
@@ -123,6 +131,14 @@ function App() {
               <Route path="withdrawals" element={<AdminWithdrawals />} />
               <Route path="payments" element={<AdminPayments />} />
               <Route path="automations" element={<Automations />} />
+              <Route path="pipeline" element={<Pipeline />} />
+              <Route path="tasks" element={<Tasks />} />
+              <Route path="complaints" element={<Complaints />} />
+              <Route path="contracts" element={<Contracts />} />
+              <Route path="worker-performance" element={<WorkerPerformance />} />
+              <Route path="referrals" element={<Referrals />} />
+              <Route path="campaigns" element={<Campaigns />} />
+              <Route path="customers/:id" element={<CustomerProfile />} />
             </Route>
           </Routes>
         </main>

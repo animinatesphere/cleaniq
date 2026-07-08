@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const Booking = require("../models/Booking");
 const Customer = require("../models/Customer");
+const Lead = require("../models/Lead");
 const { moveToTrash } = require("../utils/trash");
 const { sendEmail } = require("../utils/emailService");
 
@@ -227,6 +228,88 @@ router.delete("/:email", async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /:id/timeline — booking + lead history for a registered customer, sorted by date desc
+router.get('/segments/summary', async (req, res) => {
+  try {
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+
+    const bookingStats = await Booking.aggregate([
+      {
+        $group: {
+          _id: '$customer.email',
+          totalBookings: { $sum: 1 },
+          lastBooking: { $max: '$schedule.date' },
+        },
+      },
+    ]);
+
+    let vip = 0, regular = 0, newCust = 0, atRisk = 0;
+    for (const stat of bookingStats) {
+      const count = stat.totalBookings;
+      const lastDate = stat.lastBooking ? new Date(stat.lastBooking) : null;
+      if (count >= 5) vip++;
+      else if (count >= 2) regular++;
+      else newCust++;
+      if (lastDate && lastDate < ninetyDaysAgo) atRisk++;
+    }
+
+    const commercial = await Customer.countDocuments({ tags: { $regex: /commercial/i } });
+
+    res.json({ VIP: vip, Regular: regular, New: newCust, 'At Risk': atRisk, Commercial: commercial });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.get('/:id/timeline', async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.params.id);
+    if (!customer) return res.status(404).json({ message: 'Customer not found' });
+
+    const [bookings, leads] = await Promise.all([
+      Booking.find({ 'customer.email': customer.email }).select('bookingId service schedule status createdAt'),
+      Lead.find({ email: customer.email }).select('name message source createdAt'),
+    ]);
+
+    const timeline = [
+      ...bookings.map((b) => ({
+        type: 'booking',
+        date: b.schedule && b.schedule.date ? b.schedule.date : b.createdAt,
+        title: b.service,
+        status: b.status,
+        ref: b.bookingId,
+      })),
+      ...leads.map((l) => ({
+        type: 'lead',
+        date: l.createdAt,
+        title: l.source || 'Enquiry',
+        status: null,
+        ref: null,
+      })),
+    ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.json(timeline);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.patch('/:id/tags', async (req, res) => {
+  try {
+    const { tags } = req.body;
+    if (!Array.isArray(tags)) return res.status(400).json({ message: 'tags must be an array' });
+    const customer = await Customer.findByIdAndUpdate(
+      req.params.id,
+      { tags },
+      { new: true, select: '-passwordHash' }
+    );
+    if (!customer) return res.status(404).json({ message: 'Customer not found' });
+    res.json(customer);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
 

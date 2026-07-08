@@ -14,7 +14,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:8081",
     ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // ✅ added OPTIONS
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // ✅ added OPTIONS
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
@@ -91,6 +91,10 @@ const customInvoiceRoutes = require("./routes/customInvoice");
 const analyticsRoutes = require("./routes/analytics");
 const expensesRoutes = require("./routes/expenses");
 const automationsRoutes = require("./routes/automations");
+const tasksRoutes = require("./routes/tasks");
+const complaintsRoutes = require("./routes/complaints");
+const contractsRoutes = require("./routes/contracts");
+const referralsRoutes = require("./routes/referrals");
 
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
@@ -304,6 +308,10 @@ app.use("/api/email-logs", emailLogsRoutes);
 app.use("/api/custom-invoice", customInvoiceRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/expenses", expensesRoutes);
+app.use("/api/tasks", tasksRoutes);
+app.use("/api/complaints", complaintsRoutes);
+app.use("/api/contracts", contractsRoutes);
+app.use("/api/referrals", referralsRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);

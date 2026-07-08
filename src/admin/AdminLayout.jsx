@@ -34,6 +34,13 @@ import {
   CalendarDays,
   FileSignature,
   Zap,
+  KanbanSquare,
+  ClipboardList,
+  AlertTriangle,
+  FileCheck,
+  BarChart2,
+  Share2,
+  Megaphone,
 } from "lucide-react";
 import Login from "./Login";
 import logo from "../assets/logo DP2.jpg";
@@ -202,6 +209,18 @@ const AdminLayout = () => {
           icon: <UserPlus size={20} />,
         },
         {
+          name: "Pipeline",
+          path: "/admin/pipeline",
+          key: "pipeline",
+          icon: <KanbanSquare size={20} />,
+        },
+        {
+          name: "Campaigns",
+          path: "/admin/campaigns",
+          key: "campaigns",
+          icon: <Megaphone size={20} />,
+        },
+        {
           name: "Checklist",
           path: "/admin/checklist",
           key: "checklist",
@@ -230,6 +249,41 @@ const AdminLayout = () => {
           path: "/admin/invoice-builder",
           key: "invoice-builder",
           icon: <FileSignature size={20} />,
+        },
+      ],
+    },
+    {
+      label: "CRM",
+      items: [
+        {
+          name: "Tasks",
+          path: "/admin/tasks",
+          key: "tasks",
+          icon: <ClipboardList size={20} />,
+        },
+        {
+          name: "Complaints",
+          path: "/admin/complaints",
+          key: "complaints",
+          icon: <AlertTriangle size={20} />,
+        },
+        {
+          name: "Contracts",
+          path: "/admin/contracts",
+          key: "contracts",
+          icon: <FileCheck size={20} />,
+        },
+        {
+          name: "Worker Performance",
+          path: "/admin/worker-performance",
+          key: "worker-performance",
+          icon: <BarChart2 size={20} />,
+        },
+        {
+          name: "Referrals",
+          path: "/admin/referrals",
+          key: "referrals",
+          icon: <Share2 size={20} />,
         },
       ],
     },

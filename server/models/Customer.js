@@ -10,6 +10,7 @@ const customerSchema = new mongoose.Schema({
   lastLoginAt:    { type: Date, default: null },
   lastLogoutAt:   { type: Date, default: null },
   loginCount:     { type: Number, default: 0 },
+  tags: { type: [String], default: [] },
   createdAt: { type: Date, default: Date.now }
 });
 
