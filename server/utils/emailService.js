@@ -1606,4 +1606,200 @@ const templates = {
   },
 };
 
-module.exports = { sendEmail, templates };
+// ─── Automation Templates ───────────────────────────────────────────────────
+const automationTemplates = {
+  bookingReminder24h: ({ firstName, service, date, bookingRef, amount }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:#0F172A;padding:36px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">Your clean is tomorrow 📅</h1>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.7;">
+        <h2 style="margin-top:0;font-size:20px;">Hi ${firstName},</h2>
+        <p>Just a friendly reminder that your <strong>${service}</strong> is scheduled for <strong>tomorrow, ${date}</strong>.</p>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:20px;margin:24px 0;">
+          <p style="margin:4px 0;font-size:14px;"><strong>Booking Ref:</strong> ${bookingRef}</p>
+          <p style="margin:4px 0;font-size:14px;"><strong>Service:</strong> ${service}</p>
+          <p style="margin:4px 0;font-size:14px;"><strong>Date:</strong> ${date}</p>
+          ${amount ? `<p style="margin:4px 0;font-size:14px;"><strong>Amount:</strong> £${amount}</p>` : ""}
+        </div>
+        <p style="font-size:14px;color:#475569;">Please ensure access to the property and any special instructions have been passed on to our team.</p>
+        <div style="text-align:center;margin-top:32px;">
+          <a href="https://cleaniqservices.com/account/dashboard" style="background:#0F172A;color:#6EE7B7;padding:16px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;">View Booking</a>
+        </div>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  bookingReminder3h: ({ firstName, service, date, bookingRef }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:#0A5C43;padding:36px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">Your cleaner is on the way! 🧹</h1>
+        <p style="color:#d1fae5;margin-top:8px;font-size:14px;">Arriving in approximately 3 hours</p>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.7;">
+        <h2 style="margin-top:0;font-size:20px;">Hi ${firstName},</h2>
+        <p>Your <strong>${service}</strong> team is on the way and will arrive in approximately <strong>3 hours</strong>.</p>
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:16px;padding:20px;margin:24px 0;">
+          <p style="margin:4px 0;font-size:14px;"><strong>Booking Ref:</strong> ${bookingRef}</p>
+          <p style="margin:4px 0;font-size:14px;"><strong>Service:</strong> ${service}</p>
+          <p style="margin:4px 0;font-size:14px;"><strong>Date:</strong> ${date}</p>
+        </div>
+        <p style="font-size:14px;color:#475569;">Please make sure our team can access the property. If you need to reach us, reply to this email or call us.</p>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  reviewRequest: ({ firstName, service, reviewUrl }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:#0F172A;padding:36px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">How was your clean? ⭐</h1>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.7;text-align:center;">
+        <h2 style="margin-top:0;font-size:20px;">Hi ${firstName},</h2>
+        <p style="font-size:15px;">We hope you're delighted with your <strong>${service}</strong> today!</p>
+        <p style="font-size:14px;color:#475569;">Your feedback means the world to us and helps other customers find Cleaniq. It only takes 30 seconds.</p>
+        <div style="margin:32px 0;">
+          <div style="font-size:32px;letter-spacing:4px;margin-bottom:16px;">⭐⭐⭐⭐⭐</div>
+          <a href="${reviewUrl}" style="background:#0F172A;color:#6EE7B7;padding:18px 40px;border-radius:14px;text-decoration:none;font-weight:800;font-size:15px;display:inline-block;">Leave a Google Review</a>
+        </div>
+        <p style="font-size:13px;color:#94a3b8;">Thank you so much — we look forward to serving you again.</p>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  referralOffer: ({ firstName }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#0F172A,#1e3a8a);padding:40px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">Share Cleaniq, Both Save! 🎁</h1>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.7;text-align:center;">
+        <h2 style="margin-top:0;font-size:20px;">Hi ${firstName},</h2>
+        <p style="font-size:15px;">Thank you for choosing Cleaniq. We'd love for your friends and family to experience the same standard of clean.</p>
+        <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:2px solid #86efac;border-radius:20px;padding:28px;margin:28px 0;">
+          <p style="margin:0;font-size:13px;font-weight:800;color:#065f46;text-transform:uppercase;letter-spacing:1px;">Referral Offer</p>
+          <p style="margin:8px 0;font-size:28px;font-weight:900;color:#0F172A;">£20 off for them</p>
+          <p style="margin:0;font-size:14px;color:#064E3B;font-weight:600;">when they book their first Cleaniq service</p>
+        </div>
+        <p style="font-size:14px;color:#475569;">Simply ask them to mention your name when booking or forward this email.</p>
+        <a href="https://cleaniqservices.com/booking" style="background:#0F172A;color:#6EE7B7;padding:16px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;margin-top:12px;">Book for a Friend</a>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  rebookingDiscount: ({ firstName, service }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:#0F172A;padding:36px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">Time for another clean? 🧹</h1>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.7;text-align:center;">
+        <h2 style="margin-top:0;font-size:20px;">Hi ${firstName},</h2>
+        <p style="font-size:15px;">It's been a few days since your <strong>${service}</strong> — we hope you loved the results!</p>
+        <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #fcd34d;border-radius:20px;padding:28px;margin:28px 0;">
+          <p style="margin:0;font-size:13px;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:1px;">Exclusive Returning Customer Offer</p>
+          <p style="margin:10px 0 4px;font-size:36px;font-weight:900;color:#0F172A;">10% OFF</p>
+          <p style="margin:0;font-size:14px;color:#92400e;font-weight:600;">your next booking — valid this week only</p>
+        </div>
+        <p style="font-size:14px;color:#475569;">Use code <strong>RETURN10</strong> when you book online, or simply reply to this email.</p>
+        <a href="https://cleaniqservices.com/booking" style="background:#0F172A;color:#6EE7B7;padding:16px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;margin-top:12px;">Book Again</a>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  quoteFollowup24h: ({ firstName, service, quoteRef, amount }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:#0F172A;padding:36px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">Still thinking about it? 💭</h1>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.7;">
+        <h2 style="margin-top:0;font-size:20px;">Hi ${firstName},</h2>
+        <p style="font-size:15px;">We sent you a quote yesterday for your <strong>${service}</strong> and wanted to check in — do you have any questions?</p>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:20px;margin:24px 0;">
+          <p style="margin:4px 0;font-size:14px;"><strong>Quote Ref:</strong> ${quoteRef}</p>
+          <p style="margin:4px 0;font-size:14px;"><strong>Service:</strong> ${service}</p>
+          ${amount ? `<p style="margin:4px 0;font-size:14px;"><strong>Quoted Price:</strong> £${amount}</p>` : ""}
+        </div>
+        <p style="font-size:14px;color:#475569;">We're happy to answer any questions or adjust the quote to better suit your needs. Simply reply to this email or call us.</p>
+        <div style="text-align:center;margin-top:32px;">
+          <a href="https://cleaniqservices.com/booking" style="background:#0F172A;color:#6EE7B7;padding:16px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;">Book Now</a>
+        </div>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  quoteFollowup3d: ({ firstName, service, quoteRef, amount }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:#0F172A;padding:36px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">Following up on your quote 📋</h1>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.7;">
+        <h2 style="margin-top:0;font-size:20px;">Hi ${firstName},</h2>
+        <p style="font-size:15px;">We sent you a quote for <strong>${service}</strong> a few days ago and just wanted to follow up.</p>
+        <p style="font-size:14px;color:#475569;">Our availability is filling up. If you'd like to secure your preferred date, we'd recommend booking soon.</p>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:20px;margin:24px 0;">
+          <p style="margin:4px 0;font-size:14px;"><strong>Quote Ref:</strong> ${quoteRef}</p>
+          <p style="margin:4px 0;font-size:14px;"><strong>Service:</strong> ${service}</p>
+          ${amount ? `<p style="margin:4px 0;font-size:14px;"><strong>Quoted Price:</strong> £${amount}</p>` : ""}
+        </div>
+        <div style="text-align:center;margin-top:32px;">
+          <a href="https://cleaniqservices.com/booking" style="background:#0F172A;color:#6EE7B7;padding:16px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;">Confirm My Booking</a>
+        </div>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  lostLead7d: ({ firstName, service, quoteRef }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#0F172A,#1e3a8a);padding:40px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">We're still here for you 💚</h1>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.7;">
+        <h2 style="margin-top:0;font-size:20px;">Hi ${firstName},</h2>
+        <p style="font-size:15px;">We noticed you requested a quote for <strong>${service}</strong> but haven't booked yet — no worries at all, life gets busy!</p>
+        <p style="font-size:14px;color:#475569;">We're still happy to help and want to make it easy for you to get started. Here's a little something from us:</p>
+        <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #fcd34d;border-radius:20px;padding:28px;margin:28px 0;text-align:center;">
+          <p style="margin:0;font-size:13px;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:1px;">Special Offer — Book This Week</p>
+          <p style="margin:10px 0 4px;font-size:36px;font-weight:900;color:#0F172A;">10% OFF</p>
+          <p style="margin:0;font-size:14px;color:#92400e;font-weight:700;">Quote Reference: ${quoteRef}</p>
+        </div>
+        <p style="font-size:14px;color:#475569;">Simply reply to this email or book online — mention your quote reference and we'll apply the discount automatically.</p>
+        <div style="text-align:center;margin-top:32px;">
+          <a href="https://cleaniqservices.com/booking" style="background:#0F172A;color:#6EE7B7;padding:16px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;">Claim My 10% Off</a>
+        </div>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+};
+
+module.exports = { sendEmail, templates, automationTemplates };

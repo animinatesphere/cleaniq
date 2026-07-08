@@ -5,6 +5,7 @@ const Quote = require("../models/Quote");
 const Booking = require("../models/Booking");
 const Lead = require("../models/Lead");
 const { moveToTrash } = require("../utils/trash");
+const { scheduleTask } = require("../utils/automationEngine");
 
 const FREQUENCY_LABELS = {
   once: "One-time",
@@ -138,6 +139,27 @@ router.post("/send", async (req, res) => {
         subject: `Quote Sent - ${companyName} | ${quoteRef}`,
         html: generateAdminNotificationEmail(quoteRecord),
       });
+    }
+
+    // Schedule quote follow-up automations
+    try {
+      const now = new Date();
+      const firstName = contactName || companyName || "there";
+      const serviceLabel = items?.[0]?.description || "cleaning service";
+      const totalAmount = grandTotal || subtotal;
+      const payload = {
+        quoteId: quoteRecord._id.toString(),
+        quoteRef,
+        email,
+        firstName,
+        service: serviceLabel,
+        amount: totalAmount,
+      };
+      await scheduleTask("quote_followup_24h", new Date(now.getTime() + 24 * 60 * 60 * 1000), payload);
+      await scheduleTask("quote_followup_3d",  new Date(now.getTime() + 3  * 24 * 60 * 60 * 1000), payload);
+      await scheduleTask("lost_lead_7d",       new Date(now.getTime() + 7  * 24 * 60 * 60 * 1000), payload);
+    } catch (schedErr) {
+      console.error("⚠️ Failed to schedule quote automations:", schedErr.message);
     }
 
     res.status(200).json({

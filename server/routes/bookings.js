@@ -6,6 +6,7 @@ const SystemSetting = require("../models/SystemSetting");
 const Lead = require("../models/Lead");
 const { sendEmail, templates } = require("../utils/emailService");
 const { moveToTrash } = require("../utils/trash");
+const { scheduleTask } = require("../utils/automationEngine");
 
 // GET all bookings (Admin)
 router.get("/", async (req, res) => {
@@ -325,6 +326,34 @@ router.post("/", async (req, res) => {
       }
     }
 
+    // Schedule booking reminders for confirmed bookings (payment done or noPaymentRequired)
+    try {
+      const isConfirmed = newBooking.noPaymentRequired ||
+        ["Confirmed", "Authorized"].includes(newBooking.status);
+      const bookingDate = newBooking.schedule?.date ? new Date(newBooking.schedule.date) : null;
+      if (isConfirmed && bookingDate && bookingDate > new Date()) {
+        const payload = {
+          bookingId: newBooking._id.toString(),
+          bookingRef: newBooking.bookingId,
+          email: newBooking.customer?.email,
+          firstName: newBooking.customer?.firstName,
+          service: newBooking.service,
+          date: bookingDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
+          amount: newBooking.payment?.amount,
+        };
+        const ms24h = 24 * 60 * 60 * 1000;
+        const ms3h  = 3  * 60 * 60 * 1000;
+        if (bookingDate - ms24h > new Date()) {
+          await scheduleTask("booking_reminder_24h", new Date(bookingDate - ms24h), payload);
+        }
+        if (bookingDate - ms3h > new Date()) {
+          await scheduleTask("booking_reminder_3h", new Date(bookingDate - ms3h), payload);
+        }
+      }
+    } catch (schedErr) {
+      console.error("⚠️ Failed to schedule booking reminders:", schedErr.message);
+    }
+
     res.status(201).json(newBooking);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -582,6 +611,24 @@ router.put("/:id", async (req, res) => {
         console.log(`📧 Invoice email sent to ${updatedBooking.customer.email} for booking ${updatedBooking.bookingId}`);
       } catch (invoiceErr) {
         console.error(`❌ Failed to send invoice email for ${updatedBooking.bookingId}:`, invoiceErr.message);
+      }
+
+      // Schedule post-service automation sequence
+      try {
+        const now = new Date();
+        const payload = {
+          bookingId: updatedBooking._id.toString(),
+          bookingRef: updatedBooking.bookingId,
+          email: updatedBooking.customer?.email,
+          firstName: updatedBooking.customer?.firstName,
+          service: updatedBooking.service,
+        };
+        await scheduleTask("review_request_2h",     new Date(now.getTime() + 2  * 60 * 60 * 1000), payload);
+        await scheduleTask("referral_offer_48h",    new Date(now.getTime() + 48 * 60 * 60 * 1000), payload);
+        await scheduleTask("rebooking_discount_3d", new Date(now.getTime() + 72 * 60 * 60 * 1000), payload);
+        console.log(`⚙️ Post-service automations scheduled for booking ${updatedBooking.bookingId}`);
+      } catch (schedErr) {
+        console.error("⚠️ Failed to schedule post-service automations:", schedErr.message);
       }
     }
 

@@ -33,6 +33,7 @@ import {
   Mail,
   CalendarDays,
   FileSignature,
+  Zap,
 } from "lucide-react";
 import Login from "./Login";
 import logo from "../assets/logo DP2.jpg";
@@ -217,6 +218,12 @@ const AdminLayout = () => {
           path: "/admin/email-history",
           key: "email-history",
           icon: <Mail size={20} />,
+        },
+        {
+          name: "Automations",
+          path: "/admin/automations",
+          key: "automations",
+          icon: <Zap size={20} />,
         },
         {
           name: "Invoice ",

@@ -50,7 +50,11 @@ const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/cleaniq";
 mongoose
   .connect(MONGODB_URI)
-  .then(() => console.log("✅ Connected to MongoDB"))
+  .then(() => {
+    console.log("✅ Connected to MongoDB");
+    const { startAutomationEngine } = require("./utils/automationEngine");
+    startAutomationEngine();
+  })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // Routes (To be added)
@@ -86,6 +90,7 @@ const emailLogsRoutes = require("./routes/emailLogs");
 const customInvoiceRoutes = require("./routes/customInvoice");
 const analyticsRoutes = require("./routes/analytics");
 const expensesRoutes = require("./routes/expenses");
+const automationsRoutes = require("./routes/automations");
 
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
@@ -99,8 +104,10 @@ app.use("/api/properties", propertiesRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/quotes", quotesRoutes);
+app.use("/api/automations", automationsRoutes);
 
 // Stripe webhook endpoint (raw body required)
+const { scheduleTask } = require("./utils/automationEngine");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "");
 const Booking = require("./models/Booking");
 const { sendEmail, templates } = require("./utils/emailService");
@@ -153,6 +160,32 @@ app.post(
               subject: `✓ Payment Authorized: Cleaniq Booking ${booking.bookingId}`,
               html: templates.adminBookingCreatedEmail1(booking), // Use success template
             });
+
+            // Schedule booking reminders now that payment is confirmed
+            try {
+              const bookingDate = booking.schedule?.date ? new Date(booking.schedule.date) : null;
+              if (bookingDate && bookingDate > new Date()) {
+                const payload = {
+                  bookingId: booking._id.toString(),
+                  bookingRef: booking.bookingId,
+                  email: booking.customer?.email,
+                  firstName: booking.customer?.firstName,
+                  service: booking.service,
+                  date: bookingDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
+                  amount: booking.payment?.amount,
+                };
+                const ms24h = 24 * 60 * 60 * 1000;
+                const ms3h  = 3  * 60 * 60 * 1000;
+                if (bookingDate - ms24h > Date.now()) {
+                  await scheduleTask("booking_reminder_24h", new Date(bookingDate - ms24h), payload);
+                }
+                if (bookingDate - ms3h > Date.now()) {
+                  await scheduleTask("booking_reminder_3h", new Date(bookingDate - ms3h), payload);
+                }
+              }
+            } catch (schedErr) {
+              console.error("⚠️ Failed to schedule Stripe booking reminders:", schedErr.message);
+            }
 
             console.log(
               `✅ Payment authorized for booking ${bookingId}, awaiting completion to capture`,

@@ -55,6 +55,7 @@ import Expenses from "./admin/Expenses";
 import Rota from "./admin/Rota";
 import Calendar from "./admin/Calendar";
 import NewBookingPage from "./admin/NewBookingPage";
+import Automations from "./admin/Automations";
 
 function App() {
   const location = useLocation();
@@ -121,6 +122,7 @@ function App() {
               <Route path="staff-pay" element={<StaffPay />} />
               <Route path="withdrawals" element={<AdminWithdrawals />} />
               <Route path="payments" element={<AdminPayments />} />
+              <Route path="automations" element={<Automations />} />
             </Route>
           </Routes>
         </main>
