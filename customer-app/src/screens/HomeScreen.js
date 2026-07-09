@@ -12,6 +12,11 @@ import {
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
+
+const requireAuth = (navigation, action) => {
+  if (!action) return navigation.navigate("Login");
+  action();
+};
 import { C } from "../theme/flat";
 
 // ── Static photos mapped by service name keywords ─────────────────────────────
@@ -94,7 +99,11 @@ const todayISO = () => {
 
 // ── Main Screen ───────────────────────────────────────────────────────────────
 const HomeScreen = ({ navigation }) => {
-  const { customerInfo } = useContext(AuthContext);
+  const { customerInfo, userToken } = useContext(AuthContext);
+  const goBook = () => {
+    if (!userToken) { navigation.navigate("Login"); return; }
+    navigation.navigate("Booking");
+  };
   const [services,   setServices]   = useState([]);
   const [nextSlot,   setNextSlot]   = useState(null);
   const [loading,    setLoading]    = useState(true);
@@ -175,7 +184,7 @@ const HomeScreen = ({ navigation }) => {
         {/* ── Categories ─────────────────────────────────────────── */}
         <View style={S.sectionHead}>
           <Text style={S.sectionTitle}>Categories</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Booking")}>
+          <TouchableOpacity onPress={goBook}>
             <Text style={S.viewAll}>View All</Text>
           </TouchableOpacity>
         </View>
@@ -190,7 +199,7 @@ const HomeScreen = ({ navigation }) => {
                   <TouchableOpacity
                     key={svc._id || i}
                     style={S.catItem}
-                    onPress={() => navigation.navigate("Booking")}
+                    onPress={goBook}
                     activeOpacity={0.82}
                   >
                     <View style={[S.catCircleWrap, isFirst && S.catCircleActive]}>
@@ -209,7 +218,7 @@ const HomeScreen = ({ navigation }) => {
         </ScrollView>
 
         {/* ── Promo banner ───────────────────────────────────────── */}
-        <TouchableOpacity style={S.promo} onPress={() => navigation.navigate("Booking")} activeOpacity={0.9}>
+        <TouchableOpacity style={S.promo} onPress={goBook} activeOpacity={0.9}>
           {/* Background photo */}
           <Image
             source={{ uri: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80" }}
@@ -225,7 +234,7 @@ const HomeScreen = ({ navigation }) => {
               <Text style={S.promoTagTxt}>Limited offer</Text>
             </View>
             <Text style={S.promoTitle}>Smart Home{"\n"}Service</Text>
-            <TouchableOpacity style={S.promoBtn} onPress={() => navigation.navigate("Booking")}>
+            <TouchableOpacity style={S.promoBtn} onPress={goBook}>
               <CalendarDays size={12} color="#fff" />
               <Text style={S.promoBtnTxt}>Book Now</Text>
             </TouchableOpacity>
@@ -250,7 +259,7 @@ const HomeScreen = ({ navigation }) => {
         {/* ── Popular services ───────────────────────────────────── */}
         <View style={S.sectionHead}>
           <Text style={S.sectionTitle}>Popular services</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Booking")}>
+          <TouchableOpacity onPress={goBook}>
             <Text style={S.viewAll}>View All</Text>
           </TouchableOpacity>
         </View>
@@ -306,7 +315,7 @@ const HomeScreen = ({ navigation }) => {
                     <View style={S.btnRow}>
                       <TouchableOpacity
                         style={S.detailBtn}
-                        onPress={() => navigation.navigate("Booking")}
+                        onPress={goBook}
                         activeOpacity={0.8}
                       >
                         <Eye size={12} color="#374151" strokeWidth={2} />
@@ -314,7 +323,7 @@ const HomeScreen = ({ navigation }) => {
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={S.bookBtn}
-                        onPress={() => navigation.navigate("Booking")}
+                        onPress={goBook}
                         activeOpacity={0.85}
                       >
                         <CalendarDays size={12} color="#fff" strokeWidth={2} />

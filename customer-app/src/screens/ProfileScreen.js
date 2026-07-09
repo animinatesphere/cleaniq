@@ -118,7 +118,24 @@ const SectionCard = ({ title, subtitle, children, action, actionLabel }) => (
 
 // ═══════════════════════════════════════════════════════════════════════════════
 const ProfileScreen = ({ navigation }) => {
-  const { customerInfo, updateProfile, logout } = useContext(AuthContext);
+  const { customerInfo, userToken, updateProfile, logout } = useContext(AuthContext);
+
+  if (!userToken) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB", alignItems: "center", justifyContent: "center", padding: 32 }}>
+        <User size={48} color={C.textMuted} strokeWidth={1.2} />
+        <Text style={{ fontSize: 20, fontWeight: "800", color: "#111827", marginTop: 16, textAlign: "center" }}>Sign in to view your profile</Text>
+        <Text style={{ fontSize: 13, color: C.textMuted, marginTop: 8, textAlign: "center", lineHeight: 20 }}>Log in or create a free account to manage your profile and settings.</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Login")}
+          style={{ marginTop: 28, backgroundColor: C.primary, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 40 }}
+          activeOpacity={0.85}
+        >
+          <Text style={{ color: "#fff", fontWeight: "800", fontSize: 15 }}>Log In / Sign Up</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   // Personal info state
   const [firstName, setFirstName] = useState(customerInfo?.firstName || "");

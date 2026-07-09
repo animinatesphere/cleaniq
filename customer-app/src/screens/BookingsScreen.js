@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useContext } from "react";
 import {
   View, Text, StyleSheet, SafeAreaView, FlatList,
   TouchableOpacity, ActivityIndicator, Platform,
@@ -10,7 +10,7 @@ import {
 } from "lucide-react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_URL } from "../context/AuthContext";
+import { AuthContext, API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
 
 const STATUS_MAP = {
@@ -88,7 +88,23 @@ const EmptyState = ({ label, onBook }) => (
   </View>
 );
 
+const AuthGate = ({ navigation }) => (
+  <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB", alignItems: "center", justifyContent: "center", padding: 32 }}>
+    <ClipboardList size={48} color={C.textMuted} strokeWidth={1.2} />
+    <Text style={{ fontSize: 20, fontWeight: "800", color: "#111827", marginTop: 16, textAlign: "center" }}>Sign in to view bookings</Text>
+    <Text style={{ fontSize: 13, color: C.textMuted, marginTop: 8, textAlign: "center", lineHeight: 20 }}>Log in or create a free account to manage your cleaning bookings.</Text>
+    <TouchableOpacity
+      onPress={() => navigation.navigate("Login")}
+      style={{ marginTop: 28, backgroundColor: C.primary, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 40 }}
+      activeOpacity={0.85}
+    >
+      <Text style={{ color: "#fff", fontWeight: "800", fontSize: 15 }}>Log In / Sign Up</Text>
+    </TouchableOpacity>
+  </SafeAreaView>
+);
+
 const BookingsScreen = ({ navigation }) => {
+  const { userToken } = useContext(AuthContext);
   const [bookings,   setBookings]   = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -104,7 +120,9 @@ const BookingsScreen = ({ navigation }) => {
     } catch {} finally { setLoading(false); setRefreshing(false); }
   };
 
-  useFocusEffect(useCallback(() => { fetchBookings(); }, []));
+  useFocusEffect(useCallback(() => { if (userToken) fetchBookings(); }, [userToken]));
+
+  if (!userToken) return <AuthGate navigation={navigation} />;
 
   const upcoming = bookings.filter((b) => !["Completed", "Cancelled"].includes(b.status));
   const past     = bookings.filter((b) =>  ["Completed", "Cancelled"].includes(b.status));

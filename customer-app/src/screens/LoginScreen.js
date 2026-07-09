@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -12,34 +12,21 @@ import {
   ScrollView,
   Image,
   Dimensions,
-  Animated,
+  StatusBar,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  User,
-  Phone,
-  ChevronRight,
+  Mail, Lock, Eye, EyeOff, User, Phone, ChevronRight, X,
 } from "lucide-react-native";
 import { AuthContext } from "../context/AuthContext";
 import { C } from "../theme/flat";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
-// ─── Input row ───────────────────────────────────────────────────────────────
 const Field = ({
-  icon,
-  placeholder,
-  value,
-  onChangeText,
-  keyboardType = "default",
-  autoCapitalize = "none",
-  secureTextEntry = false,
-  rightIcon,
-  onRightPress,
+  icon, placeholder, value, onChangeText,
+  keyboardType = "default", autoCapitalize = "none",
+  secureTextEntry = false, rightIcon, onRightPress,
 }) => (
   <View style={styles.fieldRow}>
     <View style={styles.fieldIcon}>{icon}</View>
@@ -62,19 +49,16 @@ const Field = ({
   </View>
 );
 
-// ─── Main screen ─────────────────────────────────────────────────────────────
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const { login, register } = useContext(AuthContext);
 
-  const [tab, setTab] = useState("login"); // "login" | "signup"
+  const [tab, setTab] = useState("login");
   const [loading, setLoading] = useState(false);
 
-  // Login fields
   const [loginEmail, setLoginEmail]       = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPwd, setShowLoginPwd]   = useState(false);
 
-  // Signup fields
   const [firstName, setFirstName]           = useState("");
   const [lastName, setLastName]             = useState("");
   const [signupEmail, setSignupEmail]       = useState("");
@@ -84,7 +68,6 @@ const LoginScreen = () => {
   const [showSignupPwd, setShowSignupPwd]   = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 
-  // ── handlers ──────────────────────────────────────────────────────────────
   const handleLogin = async () => {
     if (!loginEmail.trim() || !loginPassword.trim()) {
       return Alert.alert("Missing details", "Please enter your email and password.");
@@ -92,7 +75,11 @@ const LoginScreen = () => {
     setLoading(true);
     const result = await login(loginEmail.trim().toLowerCase(), loginPassword);
     setLoading(false);
-    if (!result.success) Alert.alert("Login failed", result.message);
+    if (result.success) {
+      navigation.canGoBack() ? navigation.goBack() : null;
+    } else {
+      Alert.alert("Login failed", result.message);
+    }
   };
 
   const handleSignup = async () => {
@@ -110,17 +97,17 @@ const LoginScreen = () => {
     }
     setLoading(true);
     const result = await register(
-      firstName.trim(),
-      lastName.trim(),
-      signupEmail.trim().toLowerCase(),
-      phone.trim(),
-      signupPassword,
+      firstName.trim(), lastName.trim(),
+      signupEmail.trim().toLowerCase(), phone.trim(), signupPassword,
     );
     setLoading(false);
-    if (!result.success) Alert.alert("Sign up failed", result.message);
+    if (result.success) {
+      navigation.canGoBack() ? navigation.goBack() : null;
+    } else {
+      Alert.alert("Sign up failed", result.message);
+    }
   };
 
-  // ── render ────────────────────────────────────────────────────────────────
   const isLogin = tab === "login";
 
   return (
@@ -128,21 +115,40 @@ const LoginScreen = () => {
       style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      {/* ── Green header ── */}
-      <LinearGradient
-        colors={["#0F6B4C", "#083d2b"]}
-        style={styles.header}
-      >
-        <View style={styles.logoWrap}>
-          <Image
-            source={require("../../assets/logo.jpg")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+      <StatusBar barStyle="light-content" />
+
+      {/* ── Hero photo with dark overlay ── */}
+      <View style={styles.hero}>
+        <Image
+          source={{ uri: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80" }}
+          style={styles.heroBg}
+          resizeMode="cover"
+        />
+        <LinearGradient
+          colors={["rgba(8,61,43,0.55)", "rgba(8,61,43,0.92)"]}
+          style={styles.heroOverlay}
+        />
+
+        {/* Skip / close button */}
+        {navigation.canGoBack() && (
+          <TouchableOpacity style={styles.skipBtn} onPress={() => navigation.goBack()}>
+            <X size={18} color="rgba(255,255,255,0.85)" strokeWidth={2.5} />
+          </TouchableOpacity>
+        )}
+
+        {/* Brand */}
+        <View style={styles.brand}>
+          <View style={styles.logoWrap}>
+            <Image
+              source={require("../../assets/logo.jpg")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
+          <Text style={styles.brandName}>Cleaniq Services</Text>
+          <Text style={styles.brandTag}>Professional cleaning, on demand.</Text>
         </View>
-        <Text style={styles.brandName}>Cleaniq Services</Text>
-        <Text style={styles.brandTag}>Professional cleaning, on demand.</Text>
-      </LinearGradient>
+      </View>
 
       {/* ── White card ── */}
       <ScrollView
@@ -160,18 +166,14 @@ const LoginScreen = () => {
               onPress={() => setTab("login")}
               activeOpacity={0.8}
             >
-              <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>
-                Log In
-              </Text>
+              <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>Log In</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tabBtn, !isLogin && styles.tabBtnActive]}
               onPress={() => setTab("signup")}
               activeOpacity={0.8}
             >
-              <Text style={[styles.tabText, !isLogin && styles.tabTextActive]}>
-                Sign Up
-              </Text>
+              <Text style={[styles.tabText, !isLogin && styles.tabTextActive]}>Sign Up</Text>
             </TouchableOpacity>
           </View>
 
@@ -196,11 +198,7 @@ const LoginScreen = () => {
                 value={loginPassword}
                 onChangeText={setLoginPassword}
                 secureTextEntry={!showLoginPwd}
-                rightIcon={
-                  showLoginPwd
-                    ? <EyeOff size={18} color={C.textMuted} />
-                    : <Eye size={18} color={C.textMuted} />
-                }
+                rightIcon={showLoginPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
                 onRightPress={() => setShowLoginPwd((v) => !v)}
               />
 
@@ -224,12 +222,20 @@ const LoginScreen = () => {
                 )}
               </TouchableOpacity>
 
+              {/* Signup link under login button */}
               <TouchableOpacity onPress={() => setTab("signup")} style={styles.switchWrap}>
                 <Text style={styles.switchText}>
-                  Don't have an account?{" "}
-                  <Text style={styles.switchLink}>Sign up</Text>
+                  Don't have an account?{"  "}
+                  <Text style={styles.switchLink}>Sign up free</Text>
                 </Text>
               </TouchableOpacity>
+
+              {/* Browse without account */}
+              {navigation.canGoBack() && (
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.guestWrap}>
+                  <Text style={styles.guestText}>Continue browsing without account</Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
 
@@ -290,11 +296,7 @@ const LoginScreen = () => {
                 value={signupPassword}
                 onChangeText={setSignupPassword}
                 secureTextEntry={!showSignupPwd}
-                rightIcon={
-                  showSignupPwd
-                    ? <EyeOff size={18} color={C.textMuted} />
-                    : <Eye size={18} color={C.textMuted} />
-                }
+                rightIcon={showSignupPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
                 onRightPress={() => setShowSignupPwd((v) => !v)}
               />
               <Field
@@ -303,11 +305,7 @@ const LoginScreen = () => {
                 value={confirmPwd}
                 onChangeText={setConfirmPwd}
                 secureTextEntry={!showConfirmPwd}
-                rightIcon={
-                  showConfirmPwd
-                    ? <EyeOff size={18} color={C.textMuted} />
-                    : <Eye size={18} color={C.textMuted} />
-                }
+                rightIcon={showConfirmPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
                 onRightPress={() => setShowConfirmPwd((v) => !v)}
               />
 
@@ -329,10 +327,16 @@ const LoginScreen = () => {
 
               <TouchableOpacity onPress={() => setTab("login")} style={styles.switchWrap}>
                 <Text style={styles.switchText}>
-                  Already have an account?{" "}
+                  Already have an account?{"  "}
                   <Text style={styles.switchLink}>Log in</Text>
                 </Text>
               </TouchableOpacity>
+
+              {navigation.canGoBack() && (
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.guestWrap}>
+                  <Text style={styles.guestText}>Continue browsing without account</Text>
+                </TouchableOpacity>
+              )}
 
               <Text style={styles.terms}>
                 By signing up you agree to our{" "}
@@ -347,43 +351,63 @@ const LoginScreen = () => {
   );
 };
 
-// ─── Styles ──────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#083d2b" },
 
-  // Header
-  header: {
-    paddingTop: Platform.OS === "ios" ? 64 : 48,
-    paddingBottom: 36,
+  // Hero photo header
+  hero: {
+    height: height * 0.32,
+    position: "relative",
+    justifyContent: "flex-end",
+  },
+  heroBg: {
+    ...StyleSheet.absoluteFillObject,
+    width: "100%",
+    height: "100%",
+  },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  skipBtn: {
+    position: "absolute",
+    top: Platform.OS === "ios" ? 56 : 40,
+    right: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(0,0,0,0.3)",
     alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  brand: {
+    alignItems: "center",
+    paddingBottom: 28,
+    zIndex: 2,
   },
   logoWrap: {
-    width: 90,
-    height: 90,
-    borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.12)",
+    width: 72,
+    height: 72,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.15)",
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
-    marginBottom: 14,
+    marginBottom: 10,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: "rgba(255,255,255,0.25)",
   },
-  logo: {
-    width: 90,
-    height: 90,
-  },
+  logo: { width: 72, height: 72 },
   brandName: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "800",
     color: "#FFFFFF",
     letterSpacing: 0.3,
   },
   brandTag: {
-    fontSize: 13,
+    fontSize: 12,
     color: "rgba(255,255,255,0.65)",
-    marginTop: 4,
-    letterSpacing: 0.2,
+    marginTop: 3,
   },
 
   // Scroll + card
@@ -409,10 +433,8 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   tabBtn: {
-    flex: 1,
-    paddingVertical: 11,
-    alignItems: "center",
-    borderRadius: 999,
+    flex: 1, paddingVertical: 11,
+    alignItems: "center", borderRadius: 999,
   },
   tabBtnActive: {
     backgroundColor: "#FFFFFF",
@@ -422,111 +444,57 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  tabText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: C.textMuted,
-  },
-  tabTextActive: {
-    color: C.primary,
-    fontWeight: "800",
-  },
+  tabText: { fontSize: 14, fontWeight: "600", color: C.textMuted },
+  tabTextActive: { color: C.primary, fontWeight: "800" },
 
   // Form
   form: { gap: 12 },
-  formTitle: {
-    fontSize: 22,
-    fontWeight: "900",
-    color: C.textDark,
-    marginBottom: 2,
-  },
-  formSub: {
-    fontSize: 13,
-    color: C.textMed,
-    lineHeight: 19,
-    marginBottom: 8,
-  },
+  formTitle: { fontSize: 22, fontWeight: "900", color: C.textDark, marginBottom: 2 },
+  formSub: { fontSize: 13, color: C.textMed, lineHeight: 19, marginBottom: 8 },
 
-  // Name row
-  nameRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
+  nameRow: { flexDirection: "row", gap: 10 },
   halfField: { flex: 1 },
 
   // Field
   fieldRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "row", alignItems: "center",
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: "#E8EDF0",
-    paddingHorizontal: 14,
-    height: 54,
+    borderRadius: 16, borderWidth: 1.5, borderColor: "#E8EDF0",
+    paddingHorizontal: 14, height: 54,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
   },
   fieldIcon: { marginRight: 10 },
-  fieldInput: {
-    flex: 1,
-    height: "100%",
-    fontSize: 14,
-    fontWeight: "500",
-    color: C.textDark,
-  },
+  fieldInput: { flex: 1, height: "100%", fontSize: 14, fontWeight: "500", color: C.textDark },
   fieldRight: { paddingLeft: 8 },
 
-  // Forgot
   forgotWrap: { alignItems: "flex-end", marginTop: -4 },
-  forgotText: {
-    fontSize: 13,
-    color: C.primary,
-    fontWeight: "600",
-  },
+  forgotText: { fontSize: 13, color: C.primary, fontWeight: "600" },
 
-  // CTA button
+  // CTA
   cta: {
-    backgroundColor: C.primary,
-    borderRadius: 999,
-    height: 56,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
+    backgroundColor: C.primary, borderRadius: 999, height: 56,
+    alignItems: "center", justifyContent: "center", marginTop: 8,
     shadowColor: C.primary,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    elevation: 6,
+    shadowOpacity: 0.35, shadowRadius: 14, elevation: 6,
   },
   ctaDisabled: { opacity: 0.65 },
-  ctaInner: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  ctaText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "800",
-    letterSpacing: 0.3,
-  },
+  ctaInner: { flexDirection: "row", alignItems: "center", gap: 6 },
+  ctaText: { color: "#FFFFFF", fontSize: 16, fontWeight: "800", letterSpacing: 0.3 },
 
-  // Switch
+  // Switch / guest
   switchWrap: { alignItems: "center", marginTop: 8 },
   switchText: { fontSize: 13, color: C.textMed },
   switchLink: { color: C.primary, fontWeight: "700" },
 
-  // Terms
+  guestWrap: { alignItems: "center", marginTop: 4 },
+  guestText: { fontSize: 12, color: C.textMuted, textDecorationLine: "underline" },
+
   terms: {
-    fontSize: 11.5,
-    color: C.textMuted,
-    textAlign: "center",
-    lineHeight: 17,
-    marginTop: 4,
+    fontSize: 11.5, color: C.textMuted,
+    textAlign: "center", lineHeight: 17, marginTop: 4,
   },
   termsLink: { color: C.primary },
 });
