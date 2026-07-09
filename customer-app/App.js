@@ -71,6 +71,8 @@ const MainTabs = () => (
 
 const registerForPushNotificationsAsync = async () => {
   if (Platform.OS === "web") return null;
+  // expo-notifications push tokens not supported in Expo Go since SDK 53
+  if (Constants.appOwnership === "expo") return null;
   try {
     const { status: existing } = await Notifications.getPermissionsAsync();
     let finalStatus = existing;
@@ -125,11 +127,13 @@ const AppNavigation = () => {
       }
     })();
 
-    notifListener.current   = Notifications.addNotificationReceivedListener(() => {});
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {});
+    if (Constants.appOwnership !== "expo") {
+      notifListener.current    = Notifications.addNotificationReceivedListener(() => {});
+      responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {});
+    }
     return () => {
-      Notifications.removeNotificationSubscription(notifListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
+      if (notifListener.current)   Notifications.removeNotificationSubscription(notifListener.current);
+      if (responseListener.current) Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, [userToken]);
 
