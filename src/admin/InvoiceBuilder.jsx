@@ -40,7 +40,6 @@ const InvoiceBuilder = () => {
   );
   const [showPaidBadge, setShowPaidBadge] = useState(false);
   const [sending, setSending] = useState(false);
-  const [downloading, setDownloading] = useState(false);
   const [toast, setToast] = useState(null);
   const [bookingRef, setBookingRef] = useState("");
   const [loadingBooking, setLoadingBooking] = useState(false);
@@ -196,29 +195,70 @@ const InvoiceBuilder = () => {
     }
   };
 
-  const handleDownload = async () => {
-    setDownloading(true);
-    try {
-      const res = await fetch(`${API}/custom-invoice/pdf`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(buildPayload()),
-      });
-      if (!res.ok) throw new Error("Failed to generate PDF");
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `Cleaniq-Invoice-${invoiceNumber}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      setToast({ msg: err.message || "Download failed", type: "error" });
-    } finally {
-      setDownloading(false);
-    }
+  const handleDownload = () => {
+    const total = items.reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.rate) || 0), 0);
+    const rows = items.map((item) => `
+      <tr>
+        <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;">${item.description || "—"}</td>
+        <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:right;">${item.qty || 0}</td>
+        <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:right;">£${Number(item.rate || 0).toFixed(2)}</td>
+        <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">£${((Number(item.qty) || 0) * (Number(item.rate) || 0)).toFixed(2)}</td>
+      </tr>`).join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Cleaniq Invoice ${invoiceNumber}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#1e293b;}
+  @media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact;}}
+  .hdr{background:#0f172a;padding:36px 40px;display:flex;justify-content:space-between;align-items:flex-start;}
+  .co{color:#fff;font-size:20px;font-weight:900;} .co-tag{color:#94a3b8;font-size:11px;margin-top:4px;}
+  .inv-lbl{color:#fff;font-size:28px;font-weight:900;text-align:right;}
+  .inv-num{color:#6ee7b7;font-size:13px;font-weight:700;text-align:right;margin-top:4px;}
+  .paid{display:inline-block;margin-top:8px;padding:3px 12px;background:#6ee7b7;color:#052e16;border-radius:999px;font-size:10px;font-weight:900;text-transform:uppercase;}
+  .body{padding:36px 40px;}
+  .meta{display:flex;justify-content:space-between;margin-bottom:32px;}
+  .ml{font-size:9px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+  .mn{font-size:15px;font-weight:700;color:#0f172a;} .me{font-size:13px;color:#64748b;margin-top:2px;}
+  table{width:100%;border-collapse:collapse;margin-bottom:20px;}
+  thead tr{background:#0f172a;}
+  thead th{padding:10px 14px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#6ee7b7;text-align:left;}
+  thead th:last-child,thead th:nth-child(2),thead th:nth-child(3){text-align:right;}
+  .total-row{display:flex;justify-content:flex-end;margin-bottom:24px;}
+  .total-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;}
+  .total-lbl{font-size:9px;font-weight:800;color:#166534;text-transform:uppercase;letter-spacing:1px;}
+  .total-amt{font-size:22px;font-weight:900;color:#166534;margin-top:4px;}
+  .sec{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;margin-bottom:12px;}
+  .sec-lbl{font-size:9px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+  .sec-txt{font-size:12px;color:#334155;white-space:pre-line;line-height:1.6;}
+  .notes{background:#f0fdf4;border-color:#bbf7d0;} .notes .sec-txt{color:#166534;}
+  .footer{margin-top:40px;padding-top:20px;border-top:1px solid #e2e8f0;text-align:center;}
+  .ft-co{font-size:13px;font-weight:700;color:#0f172a;} .ft-ct{font-size:11px;color:#64748b;margin-top:4px;}
+</style></head><body>
+<div class="hdr">
+  <div><div class="co">Cleaniq Services</div><div class="co-tag">Professional Cleaning Services</div></div>
+  <div><div class="inv-lbl">INVOICE</div><div class="inv-num">${invoiceNumber}</div>${showPaidBadge ? '<div class="paid">✓ PAID</div>' : ""}</div>
+</div>
+<div class="body">
+  <div class="meta">
+    <div><div class="ml">Billed To</div><div class="mn">${customerName || "—"}</div><div class="me">${customerEmail || ""}</div></div>
+    <div style="text-align:right"><div class="ml">Date</div><div class="mn">${invoiceDate}</div></div>
+  </div>
+  <table>
+    <thead><tr><th>Description</th><th style="text-align:right">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="total-row"><div class="total-box"><div class="total-lbl">Total Due</div><div class="total-amt">£${total.toFixed(2)}</div></div></div>
+  ${paymentInstructions ? `<div class="sec"><div class="sec-lbl">How to Pay</div><div class="sec-txt">${paymentInstructions}</div></div>` : ""}
+  ${notes ? `<div class="sec notes"><div class="sec-txt">${notes}</div></div>` : ""}
+  <div class="footer"><div class="ft-co">Cleaniq Services Limited</div><div class="ft-ct">info@cleaniqservices.com · cleaniqservices.com · +44 7752 476368</div></div>
+</div>
+<script>window.onload=function(){window.print();}</script>
+</body></html>`;
+
+    const w = window.open("", "_blank");
+    w.document.write(html);
+    w.document.close();
   };
 
   return (
@@ -439,11 +479,10 @@ const InvoiceBuilder = () => {
           <div className="flex gap-3 pt-2">
             <button
               onClick={handleDownload}
-              disabled={downloading}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-all disabled:opacity-60"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-all"
             >
               <Download size={15} />
-              {downloading ? "Generating..." : "Download PDF"}
+              Download PDF
             </button>
             <button
               onClick={handleSend}

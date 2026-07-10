@@ -5,7 +5,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import axios from "axios";
 import { Home, CalendarDays, User } from "lucide-react-native";
@@ -20,13 +19,26 @@ import ChatScreen from "./src/screens/ChatScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import { C } from "./src/theme/flat";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge:  true,
-  }),
-});
+// Never import expo-notifications at module level — in Expo Go SDK 53 the module
+// itself calls addPushTokenListener during initialisation and crashes immediately.
+// Instead, lazy-require it only in real builds where it actually works.
+const isExpoGo = Constants.appOwnership === "expo";
+
+function getNotifications() {
+  if (isExpoGo) return null;
+  return require("expo-notifications");
+}
+
+// Set the notification handler once at startup (real builds only).
+if (!isExpoGo) {
+  getNotifications().setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge:  true,
+    }),
+  });
+}
 
 const Stack = createNativeStackNavigator();
 const Tab   = createBottomTabNavigator();
@@ -70,9 +82,8 @@ const MainTabs = () => (
 );
 
 const registerForPushNotificationsAsync = async () => {
-  if (Platform.OS === "web") return null;
-  // expo-notifications push tokens not supported in Expo Go since SDK 53
-  if (Constants.appOwnership === "expo") return null;
+  if (Platform.OS === "web" || isExpoGo) return null;
+  const Notifications = getNotifications();
   try {
     const { status: existing } = await Notifications.getPermissionsAsync();
     let finalStatus = existing;
@@ -103,7 +114,7 @@ const AppNavigation = () => {
   const { isLoading, userToken } = useContext(AuthContext);
   const [hasOnboarded,    setHasOnboarded]    = useState(false);
   const [checkingOnboard, setCheckingOnboard] = useState(true);
-  const notifListener   = useRef();
+  const notifListener    = useRef();
   const responseListener = useRef();
 
   useEffect(() => {
@@ -116,7 +127,9 @@ const AppNavigation = () => {
   }, []);
 
   useEffect(() => {
-    if (!userToken) return;
+    if (!userToken || isExpoGo) return;
+    const Notifications = getNotifications();
+
     (async () => {
       const pushToken = await registerForPushNotificationsAsync();
       if (pushToken) {
@@ -127,12 +140,11 @@ const AppNavigation = () => {
       }
     })();
 
-    if (Constants.appOwnership !== "expo") {
-      notifListener.current    = Notifications.addNotificationReceivedListener(() => {});
-      responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {});
-    }
+    notifListener.current    = Notifications.addNotificationReceivedListener(() => {});
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {});
+
     return () => {
-      if (notifListener.current)   Notifications.removeNotificationSubscription(notifListener.current);
+      if (notifListener.current)    Notifications.removeNotificationSubscription(notifListener.current);
       if (responseListener.current) Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, [userToken]);
