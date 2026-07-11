@@ -33,8 +33,8 @@ router.get("/settings", async (req, res) => {
   }
 });
 
-// PATCH /api/automations/settings/:type — toggle an automation on or off
-router.patch("/settings/:type", async (req, res) => {
+// POST /api/automations/settings/:type — toggle an automation on or off
+router.post("/settings/:type", async (req, res) => {
   try {
     const { type } = req.params;
     const { enabled } = req.body;

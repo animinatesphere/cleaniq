@@ -99,7 +99,7 @@ export default function Automations() {
     setSettings(prev => prev.map(s => s.key === type ? { ...s, enabled: newVal } : s));
     setSavingKey(type);
     try {
-      await axios.patch(`${API}/automations/settings/${type}`, { enabled: newVal });
+      await axios.post(`${API}/automations/settings/${type}`, { enabled: newVal });
     } catch {
       // Revert on failure
       setSettings(prev => prev.map(s => s.key === type ? { ...s, enabled: !newVal } : s));
