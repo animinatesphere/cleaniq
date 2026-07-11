@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback } from "react";
+import { useState, useContext, useCallback } from "react";
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
   TouchableOpacity, ActivityIndicator, RefreshControl,
@@ -7,16 +7,11 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import {
   Search, SlidersHorizontal, Bell, Star,
-  CalendarDays, CheckCircle, Clock, ChevronRight, Eye,
+  CalendarDays, CheckCircle, Clock, Eye,
 } from "lucide-react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
-
-const requireAuth = (navigation, action) => {
-  if (!action) return navigation.navigate("Login");
-  action();
-};
 import { C } from "../theme/flat";
 
 // ── Static photos mapped by service name keywords ─────────────────────────────
@@ -125,8 +120,9 @@ const HomeScreen = ({ navigation }) => {
 
       const ranges = buildRanges(bRes.data || []);
       setNextSlot(nextAvailableSlot(ranges));
-    } catch {}
-    finally { setLoading(false); setRefreshing(false); }
+    } catch {
+      // ignore network errors — UI shows empty state
+    } finally { setLoading(false); setRefreshing(false); }
   };
 
   useFocusEffect(useCallback(() => { fetchAll(); }, []));

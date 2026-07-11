@@ -497,7 +497,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBook
                 <button
                   key={v}
                   onClick={() => setCalendarView(v)}
-                  className={`px-3.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all capitalize ${calendarView === v ? "bg-primary text-white shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+                  className={`px-3.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${calendarView === v ? "bg-primary text-white shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
                 >
                   {v}
                 </button>
@@ -4823,7 +4823,7 @@ ${extrasRows}
                       {/* Address and Postcode */}
                       <div className="space-y-3">
                         <div>
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1">
                             📍 Full Address{" "}
                             <span className="text-rose-500">*</span>
                           </label>
@@ -4874,7 +4874,7 @@ ${extrasRows}
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1">
                               🔄 Frequency{" "}
                               <span className="text-rose-500">*</span>
                             </label>
@@ -5271,7 +5271,7 @@ ${extrasRows}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Calendar and Time */}
                         <div className="p-4 bg-white rounded-2xl border-2 border-slate-200">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 block flex items-center gap-1">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1">
                             📅 Select Date{" "}
                             <span className="text-rose-500">*</span>
                           </label>
@@ -5292,7 +5292,7 @@ ${extrasRows}
 
                           <div className="mt-4 space-y-3">
                             <div className="space-y-3">
-                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block flex items-center gap-1">
+                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
                                 🕐 Time Slot Selection
                               </label>
 
