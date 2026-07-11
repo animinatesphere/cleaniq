@@ -32,6 +32,7 @@ import {
   AlertTriangle,
   Sparkles,
   ChevronDown,
+  FileText,
 } from "lucide-react";
 import AdminCRM from "./AdminCRM";
 import { buildBookedRanges, overlapsExistingRange } from "../utils/timeOverlap";
@@ -2651,6 +2652,46 @@ const Bookings = () => {
     }
   };
 
+  const generateBookingInvoice = (b) => {
+    const extras = (b.details?.extras || []).map(e => typeof e === "string" ? e : (e.name || "")).filter(Boolean);
+    const extrasRows = extras.map(ex => `<tr><td style="padding:8px 24px;font-size:13px;color:#334155;">${ex}</td><td style="padding:8px 24px;text-align:right;font-size:13px;color:#334155;">—</td></tr>`).join("");
+    const total = Number(b.payment?.amount || 0);
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Invoice ${b.bookingId}</title>
+<style>@media print{body{margin:0}}.page{max-width:680px;margin:40px auto;font-family:Arial,sans-serif;color:#1e293b}</style></head>
+<body><div class="page">
+<div style="background:#0f172a;padding:28px 32px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;">
+<div><p style="margin:0;color:#6ee7b7;font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">Cleaniq Services</p><p style="margin:4px 0 0;color:#94a3b8;font-size:12px;">info@cleaniqservices.com · +44 7752 476368</p></div>
+<div style="text-align:right"><p style="margin:0;color:#fff;font-size:18px;font-weight:900;">INVOICE</p><p style="margin:4px 0 0;color:#64748b;font-size:12px;">${b.bookingId}</p></div>
+</div>
+<div style="border:1px solid #e2e8f0;border-top:none;padding:24px 32px;background:#fff;">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
+<div><p style="margin:0 0 4px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Bill To</p>
+<p style="margin:0;font-weight:700;font-size:14px;">${b.customer?.firstName || ""} ${b.customer?.lastName || ""}</p>
+<p style="margin:2px 0 0;font-size:12px;color:#64748b;">${b.customer?.email || ""}</p>
+<p style="margin:2px 0 0;font-size:12px;color:#64748b;">${b.customer?.phone || ""}</p></div>
+<div style="text-align:right"><p style="margin:0 0 4px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Job Date</p>
+<p style="margin:0;font-weight:700;font-size:14px;">${b.schedule?.date ? new Date(b.schedule.date).toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"}) : "—"}</p>
+<p style="margin:2px 0 0;font-size:12px;color:#64748b;">${b.schedule?.timeSlot || ""}</p>
+<p style="margin:2px 0 0;font-size:12px;color:#64748b;">${b.details?.address || ""}</p></div>
+</div>
+<table style="width:100%;border-collapse:collapse;">
+<thead><tr style="background:#f8fafc;"><th style="padding:10px 24px;text-align:left;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Description</th><th style="padding:10px 24px;text-align:right;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Amount</th></tr></thead>
+<tbody>
+<tr><td style="padding:12px 24px;font-size:13px;font-weight:600;">${b.service || "Cleaning Service"} — ${b.details?.duration || 1}h${b.details?.frequency && b.details.frequency !== "Once" ? ` (${b.details.frequency})` : ""}</td><td style="padding:12px 24px;text-align:right;font-size:13px;font-weight:600;">£${total.toFixed(2)}</td></tr>
+${extrasRows}
+</tbody>
+<tfoot><tr style="border-top:2px solid #0f172a;"><td style="padding:14px 24px;font-size:15px;font-weight:900;">Total</td><td style="padding:14px 24px;text-align:right;font-size:15px;font-weight:900;">£${total.toFixed(2)}</td></tr></tfoot>
+</table>
+<div style="margin-top:24px;padding:16px 24px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;">
+<p style="margin:0;font-size:12px;color:#15803d;font-weight:700;">Payment Status: ${b.payment?.status || "Pending"}</p>
+<p style="margin:4px 0 0;font-size:11px;color:#64748b;">Thank you for choosing Cleaniq Services. All prices include VAT.</p>
+</div>
+</div></div>
+<script>window.onload=function(){window.print();}</script></body></html>`;
+    const w = window.open("", "_blank");
+    if (w) { w.document.write(html); w.document.close(); }
+  };
+
   const LEAD_EXPORT_HEADERS = [
     "Booking ID",
     "Customer",
@@ -3730,10 +3771,44 @@ const Bookings = () => {
                     </div>
                     <div className="space-y-1 pt-2">
                       <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
-                        Extra Services & Add-ons (one per line)
+                        Extra Services & Add-ons
                       </label>
+                      {/* Quick-add chips from catalogue */}
+                      {extraServicesList.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 px-1 pb-2">
+                          {extraServicesList.slice(0, 12).map((svc) => {
+                            const currentExtras = editData.details?.extras || [];
+                            const label = svc.name + (svc.rate ? ` (£${Number(svc.rate).toFixed(0)})` : "");
+                            const alreadyAdded = currentExtras.some(e => (typeof e === "string" ? e : (e.name || "")).toLowerCase().includes(svc.name.toLowerCase()));
+                            return (
+                              <button
+                                key={svc._id || svc.name}
+                                type="button"
+                                onClick={() => {
+                                  const extras = [...(editData.details?.extras || [])];
+                                  if (alreadyAdded) {
+                                    const idx = extras.findIndex(e => (typeof e === "string" ? e : (e.name || "")).toLowerCase().includes(svc.name.toLowerCase()));
+                                    extras.splice(idx, 1);
+                                  } else {
+                                    extras.push(svc.name + (svc.rate ? ` — £${Number(svc.rate).toFixed(2)}` : ""));
+                                  }
+                                  setEditData({ ...editData, details: { ...editData.details, extras } });
+                                }}
+                                className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${
+                                  alreadyAdded
+                                    ? "bg-primary text-white border-primary"
+                                    : "bg-white text-slate-600 border-slate-300 hover:border-primary hover:text-primary"
+                                }`}
+                              >
+                                {alreadyAdded ? "✓ " : "+ "}{svc.name}
+                                {svc.rate && <span className="opacity-70 ml-1">£{Number(svc.rate).toFixed(0)}</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                       <textarea
-                        value={(editData.details?.extras || []).join("\n")}
+                        value={(editData.details?.extras || []).map(e => typeof e === "string" ? e : (e.name || "")).join("\n")}
                         onChange={(e) =>
                           setEditData({
                             ...editData,
@@ -3747,12 +3822,10 @@ const Bookings = () => {
                           })
                         }
                         placeholder="e.g. Oven Clean (x1)&#10;Parking: Available on-site&#10;Entry: I will be home"
-                        className="w-full p-4 rounded-xl bg-white border border-slate-200 font-bold text-xs h-28 resize-none"
+                        className="w-full p-4 rounded-xl bg-white border border-slate-200 font-bold text-xs h-24 resize-none"
                       />
                       <p className="text-[10px] text-slate-400 ml-4">
-                        Each line becomes one item — rooms, add-ons, parking,
-                        access, and pet info are all stored here as plain
-                        text lines.
+                        Click an add-on above or type below — one item per line.
                       </p>
                     </div>
                   </div>
@@ -4201,9 +4274,16 @@ const Bookings = () => {
                 <>
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="flex-1 py-5 rounded-3xl bg-white border border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-widest"
+                    className="py-5 px-5 rounded-3xl bg-white border border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-widest"
                   >
                     Discard
+                  </button>
+                  <button
+                    onClick={() => generateBookingInvoice(editData)}
+                    title="Generate invoice PDF"
+                    className="py-5 px-5 rounded-3xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-600 uppercase tracking-widest flex items-center gap-2 hover:bg-slate-200 transition-all"
+                  >
+                    <FileText size={15} /> Invoice
                   </button>
                   <button
                     onClick={() => handleUpdate()}

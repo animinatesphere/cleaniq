@@ -41,28 +41,37 @@ function fmtDate(d) {
   });
 }
 
-function Toggle({ checked, onChange, disabled }) {
+function Toggle({ checked, onChange, saving }) {
   return (
     <button
-      onClick={() => !disabled && onChange(!checked)}
-      className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${
+      type="button"
+      onClick={() => !saving && onChange(!checked)}
+      aria-checked={checked}
+      role="switch"
+      className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 ${
         checked ? "bg-zinc-900" : "bg-zinc-300"
-      } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+      } ${saving ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
     >
-      <span className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${checked ? "translate-x-4" : ""}`} />
+      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out mt-0.5 ml-0.5 ${checked ? "translate-x-5" : "translate-x-0"}`} />
     </button>
   );
 }
 
 export default function Automations() {
-  const [settings, setSettings]   = useState([]);
-  const [stats, setStats]         = useState({ pending: 0, sentToday: 0, failed: 0, totalSent: 0 });
-  const [queue, setQueue]         = useState([]);
-  const [history, setHistory]     = useState([]);
-  const [tab, setTab]             = useState("queue");
-  const [togglingKey, setTogglingKey] = useState(null);
-  const [loading, setLoading]     = useState(true);
+  const [settings, setSettings]       = useState([]);
+  const [stats, setStats]             = useState({ pending: 0, sentToday: 0, failed: 0, totalSent: 0 });
+  const [queue, setQueue]             = useState([]);
+  const [history, setHistory]         = useState([]);
+  const [tab, setTab]                 = useState("queue");
+  const [savingKey, setSavingKey]     = useState(null);
+  const [loading, setLoading]         = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
+  const [toast, setToast]             = useState(null);
+
+  const showToast = (msg, type = "error") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   const fetchAll = useCallback(async () => {
     try {
@@ -76,8 +85,8 @@ export default function Automations() {
       setStats(stRes.data || {});
       setQueue(qRes.data || []);
       setHistory(hRes.data?.tasks || []);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      showToast("Failed to load automation data");
     } finally {
       setLoading(false);
     }
@@ -86,14 +95,17 @@ export default function Automations() {
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
   const toggleAutomation = async (type, newVal) => {
-    setTogglingKey(type);
+    // Optimistic update — flip immediately so the toggle feels instant
+    setSettings(prev => prev.map(s => s.key === type ? { ...s, enabled: newVal } : s));
+    setSavingKey(type);
     try {
       await axios.patch(`${API}/automations/settings/${type}`, { enabled: newVal });
-      setSettings(prev => prev.map(s => s.key === type ? { ...s, enabled: newVal } : s));
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Revert on failure
+      setSettings(prev => prev.map(s => s.key === type ? { ...s, enabled: !newVal } : s));
+      showToast("Failed to save — please try again");
     } finally {
-      setTogglingKey(null);
+      setSavingKey(null);
     }
   };
 
@@ -103,14 +115,13 @@ export default function Automations() {
       await axios.delete(`${API}/automations/queue/${id}`);
       setQueue(prev => prev.filter(t => t._id !== id));
       setStats(prev => ({ ...prev, pending: Math.max(0, prev.pending - 1) }));
-    } catch (err) {
-      console.error(err);
+    } catch {
+      showToast("Failed to cancel task");
     } finally {
       setCancellingId(null);
     }
   };
 
-  // Group settings by category
   const grouped = settings.reduce((acc, s) => {
     acc[s.category] = acc[s.category] || [];
     acc[s.category].push(s);
@@ -126,24 +137,32 @@ export default function Automations() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-5">
+
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-80 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold text-white ${toast.type === "error" ? "bg-red-600" : "bg-green-600"}`}>
+          {toast.msg}
+        </div>
+      )}
+
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Automation Engine</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight">Automation Engine</h1>
         <p className="text-sm text-zinc-500 mt-1">
           Automated emails that fire at the right moment — reminders, follow-ups, reviews, win-backs.
         </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Pending",    val: stats.pending,   color: "text-blue-600",  bg: "bg-blue-50" },
           { label: "Sent Today", val: stats.sentToday, color: "text-green-600", bg: "bg-green-50" },
           { label: "Total Sent", val: stats.totalSent, color: "text-zinc-900",  bg: "bg-zinc-50" },
           { label: "Failed",     val: stats.failed,    color: "text-red-600",   bg: "bg-red-50" },
         ].map(s => (
-          <div key={s.label} className={`${s.bg} rounded-xl px-5 py-4 border border-zinc-100`}>
+          <div key={s.label} className={`${s.bg} rounded-xl px-4 py-3 border border-zinc-100`}>
             <p className={`text-2xl font-black ${s.color}`}>{s.val ?? 0}</p>
             <p className="text-xs text-zinc-500 font-medium mt-0.5">{s.label}</p>
           </div>
@@ -151,31 +170,31 @@ export default function Automations() {
       </div>
 
       {/* Automation Toggles */}
-      <div className="bg-white rounded-2xl border border-zinc-200 divide-y divide-zinc-100">
-        <div className="px-6 py-4">
+      <div className="bg-white rounded-2xl border border-zinc-200 divide-y divide-zinc-100 overflow-hidden">
+        <div className="px-4 sm:px-6 py-4">
           <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Automation Settings</h2>
           <p className="text-xs text-zinc-400 mt-0.5">Toggle individual automations on or off. Changes take effect immediately.</p>
         </div>
         {Object.entries(grouped).map(([cat, items]) => (
           <div key={cat}>
-            <div className="px-6 py-3 bg-zinc-50">
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${CATEGORY_COLORS[cat]?.badge}`}>
+            <div className="px-4 sm:px-6 py-2.5 bg-zinc-50">
+              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${CATEGORY_COLORS[cat]?.badge}`}>
                 {CATEGORY_LABELS[cat] || cat}
               </span>
             </div>
             {items.map(item => (
-              <div key={item.key} className="px-6 py-4 flex items-center justify-between hover:bg-zinc-50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.enabled ? CATEGORY_COLORS[cat]?.dot : "bg-zinc-300"}`} />
-                  <div>
-                    <p className="text-sm font-medium text-zinc-800">{item.label}</p>
-                    <p className="text-xs text-zinc-400">{item.enabled ? "Active — will fire automatically" : "Disabled"}</p>
-                  </div>
+              <div key={item.key} className="px-4 sm:px-6 py-4 flex items-center gap-3 hover:bg-zinc-50 transition-colors">
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.enabled ? CATEGORY_COLORS[cat]?.dot : "bg-zinc-300"}`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-zinc-800 leading-tight">{item.label}</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    {savingKey === item.key ? "Saving…" : item.enabled ? "Active" : "Disabled"}
+                  </p>
                 </div>
                 <Toggle
                   checked={item.enabled}
                   onChange={(v) => toggleAutomation(item.key, v)}
-                  disabled={togglingKey === item.key}
+                  saving={savingKey === item.key}
                 />
               </div>
             ))}
@@ -184,19 +203,17 @@ export default function Automations() {
       </div>
 
       {/* Queue / History Tabs */}
-      <div className="bg-white rounded-2xl border border-zinc-200">
-        <div className="border-b border-zinc-100 px-6 flex gap-1 pt-2">
+      <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
+        <div className="border-b border-zinc-100 px-4 sm:px-6 flex gap-1 pt-2">
           {[
-            { key: "queue",   label: `Queue`, count: queue.length },
+            { key: "queue",   label: "Queue",   count: queue.length },
             { key: "history", label: "History", count: history.length },
           ].map(t => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
-                tab === t.key
-                  ? "border-zinc-900 text-zinc-900"
-                  : "border-transparent text-zinc-400 hover:text-zinc-600"
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+                tab === t.key ? "border-zinc-900 text-zinc-900" : "border-transparent text-zinc-400 hover:text-zinc-600"
               }`}
             >
               {t.label}
@@ -214,88 +231,76 @@ export default function Automations() {
         </div>
 
         {tab === "queue" && (
-          <div>
-            {queue.length === 0 ? (
-              <div className="text-center py-16 text-zinc-400">
-                <div className="text-3xl mb-2">✅</div>
-                <p className="font-medium text-sm">No pending automations</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-zinc-50">
-                {queue.map(task => (
-                  <div key={task._id} className="px-6 py-4 flex items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-semibold text-zinc-800 truncate">
-                          {TYPE_LABELS[task.type] || task.type}
-                        </p>
-                        <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${STATUS_STYLES[task.status]}`}>
-                          {task.status}
-                        </span>
-                      </div>
-                      <p className="text-xs text-zinc-400 mt-0.5">
-                        To: <span className="font-medium text-zinc-600">{task.payload?.email}</span>
-                        {" · "}{task.payload?.firstName} {task.payload?.lastName}
-                        {task.payload?.bookingRef && <> · Ref: <span className="font-mono">{task.payload.bookingRef}</span></>}
-                        {task.payload?.quoteRef && <> · Quote: <span className="font-mono">{task.payload.quoteRef}</span></>}
+          queue.length === 0 ? (
+            <div className="text-center py-16 text-zinc-400">
+              <div className="text-3xl mb-2">✅</div>
+              <p className="font-medium text-sm">No pending automations</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-zinc-50">
+              {queue.map(task => (
+                <div key={task._id} className="px-4 sm:px-6 py-4 flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-zinc-800">
+                        {TYPE_LABELS[task.type] || task.type}
                       </p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${STATUS_STYLES[task.status]}`}>
+                        {task.status}
+                      </span>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-xs font-semibold text-zinc-700">{fmtDate(task.runAt)}</p>
-                      <p className="text-xs text-zinc-400">Scheduled for</p>
-                    </div>
-                    <button
-                      onClick={() => cancelTask(task._id)}
-                      disabled={cancellingId === task._id}
-                      className="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
-                    >
-                      {cancellingId === task._id ? "..." : "Cancel"}
-                    </button>
+                    <p className="text-xs text-zinc-400 mt-0.5 break-all">
+                      {task.payload?.email}
+                      {task.payload?.firstName && ` · ${task.payload.firstName}`}
+                      {task.payload?.bookingRef && ` · ${task.payload.bookingRef}`}
+                      {task.payload?.quoteRef && ` · Quote: ${task.payload.quoteRef}`}
+                    </p>
+                    <p className="text-xs text-zinc-500 font-medium mt-1">{fmtDate(task.runAt)}</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <button
+                    onClick={() => cancelTask(task._id)}
+                    disabled={cancellingId === task._id}
+                    className="flex-shrink-0 text-xs text-red-500 hover:text-red-700 font-semibold px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                  >
+                    {cancellingId === task._id ? "…" : "Cancel"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )
         )}
 
         {tab === "history" && (
-          <div>
-            {history.length === 0 ? (
-              <div className="text-center py-16 text-zinc-400">
-                <div className="text-3xl mb-2">📭</div>
-                <p className="font-medium text-sm">No automation history yet</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-zinc-50">
-                {history.map(task => (
-                  <div key={task._id} className="px-6 py-4 flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-semibold text-zinc-800 truncate">
-                          {TYPE_LABELS[task.type] || task.type}
-                        </p>
-                        <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${STATUS_STYLES[task.status]}`}>
-                          {task.status}
-                        </span>
-                      </div>
-                      <p className="text-xs text-zinc-400 mt-0.5">
-                        To: <span className="font-medium text-zinc-600">{task.payload?.email}</span>
-                        {task.payload?.bookingRef && <> · Ref: <span className="font-mono">{task.payload.bookingRef}</span></>}
-                        {task.payload?.quoteRef && <> · Quote: <span className="font-mono">{task.payload.quoteRef}</span></>}
+          history.length === 0 ? (
+            <div className="text-center py-16 text-zinc-400">
+              <div className="text-3xl mb-2">📭</div>
+              <p className="font-medium text-sm">No automation history yet</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-zinc-50">
+              {history.map(task => (
+                <div key={task._id} className="px-4 sm:px-6 py-4 flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-zinc-800">
+                        {TYPE_LABELS[task.type] || task.type}
                       </p>
-                      {task.error && (
-                        <p className="text-xs text-red-500 mt-0.5 truncate">{task.error}</p>
-                      )}
+                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${STATUS_STYLES[task.status]}`}>
+                        {task.status}
+                      </span>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-xs font-semibold text-zinc-700">{fmtDate(task.executedAt || task.createdAt)}</p>
-                      <p className="text-xs text-zinc-400">{task.executedAt ? "Executed" : "Created"}</p>
-                    </div>
+                    <p className="text-xs text-zinc-400 mt-0.5 break-all">
+                      {task.payload?.email}
+                      {task.payload?.bookingRef && ` · ${task.payload.bookingRef}`}
+                      {task.payload?.quoteRef && ` · Quote: ${task.payload.quoteRef}`}
+                    </p>
+                    {task.error && <p className="text-xs text-red-500 mt-0.5">{task.error}</p>}
+                    <p className="text-xs text-zinc-500 font-medium mt-1">{fmtDate(task.executedAt || task.createdAt)}</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                </div>
+              ))}
+            </div>
+          )
         )}
       </div>
     </div>

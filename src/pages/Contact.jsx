@@ -260,6 +260,7 @@ const Contact = () => {
                     {serviceNames.map((name) => (
                       <option key={name} value={name}>{name}</option>
                     ))}
+                    <option value="Other Cleaning Services">Other Cleaning Services</option>
                   </select>
                 </div>
               </div>

@@ -203,12 +203,75 @@ const PreviewModal = ({
     <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
       <div className="sticky top-0 bg-white border-b border-slate-100 px-8 py-5 flex justify-between items-center rounded-t-[32px] z-10">
         <h2 className="text-lg font-bold text-slate-800">Quote Preview</h2>
-        <button
-          onClick={onClose}
-          className="w-9 h-9 rounded-2xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all"
-        >
-          <X size={18} className="text-slate-600" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const rows = items.filter(i => i.service || i.customService).map(item => `
+                <tr>
+                  <td style="padding:10px 16px;border-bottom:1px solid #e2e8f0;">
+                    <strong>${item.service === "__custom__" ? item.customService : item.service}</strong>
+                    ${item.description ? `<br/><span style="font-size:11px;color:#64748b;">${item.description}</span>` : ""}
+                  </td>
+                  <td style="padding:10px 16px;border-bottom:1px solid #e2e8f0;text-align:center;">${item.qty}${item.billingType === "hourly" ? " hrs" : ""}</td>
+                  <td style="padding:10px 16px;border-bottom:1px solid #e2e8f0;text-align:right;">£${Number(item.unitPrice||0).toFixed(2)}${item.billingType==="hourly"?"/hr":""}</td>
+                  <td style="padding:10px 16px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">£${(Number(item.unitPrice||0)*Number(item.qty||1)).toFixed(2)}</td>
+                </tr>`).join("");
+              const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Quote — ${data.companyName||"Client"}</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;color:#1e293b;background:#fff;}
+@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact;}}
+.hdr{background:#0f172a;padding:32px 40px;display:flex;justify-content:space-between;}
+.title{color:#fff;font-size:24px;font-weight:900;}.ref{color:#6ee7b7;font-size:13px;margin-top:4px;}
+.co{color:#94a3b8;font-size:11px;margin-top:2px;}
+.body{padding:32px 40px;}.section{margin-bottom:24px;}
+.label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:6px;}
+.val{font-size:15px;font-weight:700;color:#0f172a;}.sub{font-size:13px;color:#64748b;margin-top:2px;}
+table{width:100%;border-collapse:collapse;margin-bottom:16px;}
+thead tr{background:#0f172a;}thead th{padding:10px 16px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#6ee7b7;text-align:left;}
+thead th:last-child,thead th:nth-child(2),thead th:nth-child(3){text-align:right;}
+.totals{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;}
+.trow{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#475569;}
+.grand{font-size:16px;font-weight:900;color:#0f172a;border-top:1px solid #e2e8f0;padding-top:10px;margin-top:6px;}
+.notes{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 16px;font-size:13px;color:#92400e;margin-top:16px;}
+.footer{margin-top:40px;padding-top:20px;border-top:1px solid #e2e8f0;text-align:center;font-size:11px;color:#64748b;}
+</style></head><body>
+<div class="hdr">
+  <div><div class="title">SERVICE QUOTE</div><div class="co">Cleaniq Services Ltd</div></div>
+  <div style="text-align:right"><div class="ref">CLQ-${Date.now().toString().slice(-6)}</div><div class="co">${new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"})}</div></div>
+</div>
+<div class="body">
+  <div style="display:flex;gap:32px;margin-bottom:24px;">
+    <div><div class="label">Prepared For</div><div class="val">${data.companyName||"—"}</div>${data.contactName?`<div class="sub">Attn: ${data.contactName}</div>`:""}${data.email?`<div class="sub">${data.email}</div>`:""}${data.phone?`<div class="sub">${data.phone}</div>`:""}</div>
+    <div style="text-align:right"><div class="label">Frequency</div><div class="val">${FREQUENCY_OPTIONS.find(f=>f.value===data.frequency)?.label||"One-time"}</div></div>
+  </div>
+  <table>
+    <thead><tr><th>Service &amp; Details</th><th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Total</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="totals">
+    <div class="trow"><span>Subtotal</span><span>£${subtotal.toFixed(2)}</span></div>
+    ${discountAmount>0?`<div class="trow" style="color:#16a34a;"><span>Discount (${data.discount}%)</span><span>-£${discountAmount.toFixed(2)}</span></div>`:""}
+    ${data.includeVat&&vat>0?`<div class="trow"><span>VAT (${data.vatRate}%)</span><span>£${vat.toFixed(2)}</span></div>`:""}
+    <div class="trow grand"><span>GRAND TOTAL</span><span>£${grandTotal.toFixed(2)}</span></div>
+    ${data.depositRequired&&depositAmount>0?`<div class="trow" style="color:#0369a1;margin-top:8px;"><span>Deposit Required (${data.depositPercent}%)</span><span>£${depositAmount.toFixed(2)}</span></div>`:""}
+  </div>
+  ${data.notes?`<div class="notes"><strong>Notes:</strong> ${data.notes}</div>`:""}
+  <div class="footer">Cleaniq Services Limited · info@cleaniqservices.com · cleaniqservices.com · +44 7752 476368</div>
+</div>
+<script>window.onload=function(){window.print();}</script>
+</body></html>`;
+              const w = window.open("","_blank"); w.document.write(html); w.document.close();
+            }}
+            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition-all flex items-center gap-2"
+          >
+            🖨 Print / PDF
+          </button>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-2xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all"
+          >
+            <X size={18} className="text-slate-600" />
+          </button>
+        </div>
       </div>
       <div className="p-8 space-y-6">
         <div className="flex justify-between items-start">

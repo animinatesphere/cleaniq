@@ -7,6 +7,7 @@ import {
   RefreshCw,
   Calendar,
   User,
+  Send,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -31,6 +32,64 @@ const Checklist = () => {
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [sendingId, setSendingId] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const sendChecklist = async (booking) => {
+    setSendingId(booking._id);
+    const tasks = tasksFor(booking);
+    const taskRows = tasks.map((t, i) =>
+      `<tr style="background:${i%2===0?"#f8fafc":"#fff"}">
+        <td style="padding:8px 16px;font-size:13px;color:${t.done?"#94a3b8":"#1e293b"};${t.done?"text-decoration:line-through;":""}">
+          ${t.done?"✅":"⬜"} ${t.task}
+        </td>
+      </tr>`).join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/></head>
+<body style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;color:#1e293b;">
+  <div style="background:#0f172a;padding:24px 32px;border-radius:12px 12px 0 0;">
+    <h2 style="color:#6ee7b7;margin:0;font-size:18px;">Cleaniq Services — Job Checklist</h2>
+    <p style="color:#94a3b8;margin:6px 0 0;font-size:13px;">Booking ${booking.bookingId} · ${booking.service}</p>
+  </div>
+  <div style="background:#fff;border:1px solid #e2e8f0;border-top:none;padding:24px 32px;border-radius:0 0 12px 12px;">
+    <p style="font-size:14px;color:#475569;margin-bottom:16px;">
+      Please complete all items on this checklist for: <strong>${booking.customer?.firstName} ${booking.customer?.lastName}</strong>
+      on <strong>${booking.schedule?.date ? new Date(booking.schedule.date).toLocaleDateString("en-GB") : "—"}</strong>.
+    </p>
+    <table style="width:100%;border-collapse:collapse;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
+      ${taskRows}
+    </table>
+    <p style="font-size:12px;color:#94a3b8;margin-top:20px;">Cleaniq Services · info@cleaniqservices.com · +44 7752 476368</p>
+  </div>
+</body></html>`;
+
+    try {
+      const recipients = [booking.customer?.email].filter(Boolean);
+      if (booking.assignedWorker?.email) recipients.push(booking.assignedWorker.email);
+
+      await Promise.all(recipients.map(to =>
+        fetch(`${API}/email-logs/send`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to,
+            subject: `Cleaning Checklist — ${booking.bookingId}`,
+            html,
+          }),
+        })
+      ));
+      showToast(`Checklist sent to ${recipients.length} recipient${recipients.length > 1 ? "s" : ""}`);
+    } catch {
+      showToast("Failed to send checklist", "error");
+    } finally {
+      setSendingId(null);
+    }
+  };
 
   const fetchBookings = () => {
     setLoading(true);
@@ -91,6 +150,11 @@ const Checklist = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
+      {toast && (
+        <div className={`fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-80 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold text-white ${toast.type === "error" ? "bg-red-600" : "bg-emerald-600"}`}>
+          {toast.msg}
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -165,15 +229,25 @@ const Checklist = () => {
                       </span>
                     </p>
                   </div>
-                  <span
-                    className={`text-[11px] font-bold px-3 py-1 rounded-full whitespace-nowrap ${
-                      doneCount === tasks.length
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {doneCount}/{tasks.length} done
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-[11px] font-bold px-3 py-1 rounded-full whitespace-nowrap ${
+                        doneCount === tasks.length
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      {doneCount}/{tasks.length} done
+                    </span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); sendChecklist(booking); }}
+                      disabled={sendingId === booking._id}
+                      title="Send checklist to customer & staff"
+                      className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
+                    >
+                      <Send size={13} className={sendingId === booking._id ? "animate-pulse" : ""} />
+                    </button>
+                  </div>
                 </button>
 
                 {isOpen && (

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft, MapPin, Home as HomeIcon, Zap,
   CheckCircle2, ChevronLeft, ChevronRight, Plus, Minus,
-  Briefcase, Star, Truck, User,
+  Briefcase, Star, Truck, User, Search,
   Calendar, AlertCircle, RefreshCw, Clock,
 } from "lucide-react";
 import { LEAD_SOURCES } from "./Bookings";
@@ -149,6 +149,12 @@ const NewBookingPage = () => {
   const [skipEmail, setSkipEmail]       = useState(false);
   const [success, setSuccess]           = useState(null);
 
+  // Customer search/autocomplete
+  const [customerQuery, setCustomerQuery] = useState("");
+  const [customerResults, setCustomerResults] = useState([]);
+  const [showCustomerDrop, setShowCustomerDrop] = useState(false);
+  const [customerSearching, setCustomerSearching] = useState(false);
+
   const [data, setData] = useState({
     customer: { firstName:"", lastName:"", email:"", phone:"" },
     service: "",
@@ -192,6 +198,37 @@ const NewBookingPage = () => {
         setBookedDates(fullyBooked);
       }).catch(()=>{});
   }, []);
+
+  /* ── Customer search ────────────────────────────────────────────────── */
+  useEffect(() => {
+    if (customerQuery.trim().length < 2) { setCustomerResults([]); return; }
+    const t = setTimeout(async () => {
+      setCustomerSearching(true);
+      try {
+        const r = await fetch(`${import.meta.env.VITE_API_URL}/customers?search=${encodeURIComponent(customerQuery)}&limit=8`);
+        const d = await r.json();
+        setCustomerResults(Array.isArray(d) ? d : (Array.isArray(d?.customers) ? d.customers : []));
+        setShowCustomerDrop(true);
+      } catch { setCustomerResults([]); }
+      finally { setCustomerSearching(false); }
+    }, 280);
+    return () => clearTimeout(t);
+  }, [customerQuery]);
+
+  const pickCustomer = (c) => {
+    setData(prev => ({
+      ...prev,
+      customer: {
+        firstName: c.firstName || "",
+        lastName:  c.lastName  || "",
+        email:     c.email     || "",
+        phone:     c.phone     || c.phoneNumber || "",
+      },
+    }));
+    setCustomerQuery(`${c.firstName || ""} ${c.lastName || ""}`.trim());
+    setShowCustomerDrop(false);
+    setCustomerResults([]);
+  };
 
   /* ── Helpers ────────────────────────────────────────────────────────── */
   const pad   = (n) => String(n).padStart(2,"0");
@@ -870,6 +907,50 @@ const NewBookingPage = () => {
                   <h2 className="text-sm font-semibold text-zinc-900 mb-4 flex items-center gap-2">
                     <User size={15} className="text-zinc-500"/> Customer information
                   </h2>
+
+                  {/* Search existing customers */}
+                  <div className="mb-4 relative">
+                    <Label>Search existing client</Label>
+                    <div className="relative">
+                      <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="Type a name or email to find existing client…"
+                        value={customerQuery}
+                        onChange={e => { setCustomerQuery(e.target.value); setShowCustomerDrop(true); }}
+                        onFocus={() => customerResults.length > 0 && setShowCustomerDrop(true)}
+                        onBlur={() => setTimeout(() => setShowCustomerDrop(false), 200)}
+                        className="w-full h-9 pl-9 pr-3 text-sm border border-zinc-200 rounded-lg bg-zinc-50 text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 transition"
+                      />
+                      {customerSearching && <RefreshCw size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 animate-spin" />}
+                    </div>
+                    {showCustomerDrop && customerResults.length > 0 && (
+                      <div className="absolute z-30 top-full left-0 right-0 mt-1 bg-white border border-zinc-200 rounded-xl shadow-lg overflow-hidden">
+                        {customerResults.map((c, i) => (
+                          <button
+                            key={c._id || i}
+                            type="button"
+                            onMouseDown={() => pickCustomer(c)}
+                            className="w-full text-left px-4 py-2.5 hover:bg-zinc-50 text-sm border-b border-zinc-100 last:border-0 flex items-center gap-3"
+                          >
+                            <div className="w-7 h-7 rounded-full bg-zinc-200 flex items-center justify-center text-xs font-bold text-zinc-600 flex-shrink-0">
+                              {(c.firstName?.[0] || "?").toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-semibold text-zinc-800 truncate">{c.firstName} {c.lastName}</p>
+                              <p className="text-xs text-zinc-400 truncate">{c.email}{c.phone ? ` · ${c.phone}` : ""}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {showCustomerDrop && customerQuery.length >= 2 && customerResults.length === 0 && !customerSearching && (
+                      <div className="absolute z-30 top-full left-0 right-0 mt-1 bg-white border border-zinc-200 rounded-xl shadow-lg px-4 py-3 text-xs text-zinc-400">
+                        No existing client found — fill in details below
+                      </div>
+                    )}
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Field label="First name" required error={formErrors["customer.firstName"]}>
                       <input placeholder="Jane" value={data.customer.firstName}

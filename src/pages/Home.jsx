@@ -239,6 +239,16 @@ const Home = () => {
                   className="group-hover:translate-x-2 transition-transform"
                 />
               </Link>
+              <Link
+                to="/pages/contact"
+                className="btn-outline py-5 px-10 text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16px] group font-black uppercase tracking-widest"
+              >
+                Get a Quote
+                <ArrowRight
+                  size={20}
+                  className="group-hover:translate-x-2 transition-transform"
+                />
+              </Link>
               <div className="flex items-center gap-3 px-6 py-4">
                 <div className="flex -space-x-3">
                   {[

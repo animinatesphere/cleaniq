@@ -13,8 +13,9 @@ const campaignSchema = new mongoose.Schema({
   },
   recipients: [{ type: String }],
   recipientCount: { type: Number, default: 0 },
-  sentCount: { type: Number, default: 0 },
-  status: { type: String, enum: ["sent", "draft", "failed"], default: "sent" },
+  sentCount:      { type: Number, default: 0 },
+  totalCount:     { type: Number, default: 0 },
+  status: { type: String, enum: ["queued", "sending", "sent", "draft", "failed"], default: "sent" },
   sentAt: { type: Date, default: Date.now },
 });
 

@@ -141,7 +141,8 @@ router.post('/send', async (req, res) => {
 
 /**
  * POST /api/marketing/campaign
- * Send a campaign by segment with a name field (used by Campaigns.jsx)
+ * Queue a named campaign and send 1 email per minute in the background.
+ * Returns immediately — poll GET /api/marketing/campaigns for progress.
  */
 router.post('/campaign', async (req, res) => {
   const { name, segment, subject, body, targetEmails = [] } = req.body;
@@ -149,26 +150,17 @@ router.post('/campaign', async (req, res) => {
   if (!subject || !body) {
     return res.status(400).json({ message: 'Subject and body are required.' });
   }
-  if (!targetEmails.length) {
-    return res.status(400).json({ message: 'No recipients provided.' });
-  }
 
   const validEmails = [...new Set(
-    targetEmails.filter(e => isValidEmail(e.trim())).map(e => e.trim().toLowerCase())
+    targetEmails.filter(e => e && isValidEmail(e.trim())).map(e => e.trim().toLowerCase())
   )];
   if (!validEmails.length) {
-    return res.status(400).json({ message: 'No valid recipients found.' });
+    return res.status(400).json({ message: 'No valid recipients provided.' });
   }
 
+  let campaign;
   try {
-    console.log(`📢 Sending campaign "${subject}" to ${validEmails.length} recipient(s)...`);
-    const html = campaignEmailHtml(subject, body);
-    const results = await Promise.allSettled(
-      validEmails.map((email) => sendEmail({ to: email, subject, html })),
-    );
-    const sentCount = results.filter(r => r.status === 'fulfilled' && r.value).length;
-
-    const campaign = await Campaign.create({
+    campaign = await Campaign.create({
       name: name || subject,
       subject,
       body,
@@ -177,18 +169,44 @@ router.post('/campaign', async (req, res) => {
       recipientType: ['all', 'leads'].includes(segment) ? segment : 'custom',
       recipients: validEmails,
       recipientCount: validEmails.length,
-      sentCount,
-      status: 'sent',
-    });
-
-    res.json({
-      message: `Campaign sent to ${sentCount} of ${validEmails.length} recipient(s).`,
-      campaign,
+      totalCount: validEmails.length,
+      sentCount: 0,
+      status: 'queued',
+      sentAt: new Date(),
     });
   } catch (error) {
-    console.error('Campaign send error:', error);
-    res.status(500).json({ message: 'Failed to send campaign.' });
+    console.error('Campaign create error:', error);
+    return res.status(500).json({ message: 'Failed to create campaign.' });
   }
+
+  // Respond immediately — don't make the client wait for all emails
+  res.json({
+    message: `Campaign queued — sending ${validEmails.length} email${validEmails.length !== 1 ? 's' : ''} at 1 per minute.`,
+    campaign,
+  });
+
+  // Background rate-limited send: 1 email per minute
+  const html = campaignEmailHtml(subject, body);
+  let i = 0;
+
+  const sendNext = async () => {
+    if (i >= validEmails.length) {
+      await Campaign.findByIdAndUpdate(campaign._id, { status: 'sent' });
+      console.log(`✅ Campaign "${subject}" complete — ${validEmails.length} emails sent.`);
+      return;
+    }
+    const to = validEmails[i++];
+    try {
+      await sendEmail({ to, subject, html });
+      await Campaign.findByIdAndUpdate(campaign._id, { $inc: { sentCount: 1 }, status: 'sending' });
+      console.log(`📧 Campaign [${i}/${validEmails.length}] → ${to}`);
+    } catch (err) {
+      console.error(`⚠️ Campaign email to ${to} failed:`, err.message);
+    }
+    setTimeout(sendNext, 60 * 1000);
+  };
+
+  sendNext();
 });
 
 /**

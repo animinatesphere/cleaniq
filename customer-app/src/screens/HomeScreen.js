@@ -164,6 +164,41 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
 
+        {/* ── Hero Banner ────────────────────────────────────────── */}
+        <View style={S.hero}>
+          <Image
+            source={{ uri: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80" }}
+            style={S.heroBg}
+            resizeMode="cover"
+          />
+          <View style={S.heroDark} />
+          <View style={S.heroContent}>
+            <View style={S.heroBadge}>
+              <CheckCircle size={11} color="#6EE7B7" strokeWidth={2.5} />
+              <Text style={S.heroBadgeTxt}>Professional &amp; Vetted Staff</Text>
+            </View>
+            <Text style={S.heroTitle}>Spotless Spaces,{"\n"}Every Time.</Text>
+            <Text style={S.heroSub}>Residential, commercial and specialist cleaning — booked in 60 seconds.</Text>
+            <TouchableOpacity style={S.heroCta} onPress={goBook} activeOpacity={0.85}>
+              <CalendarDays size={14} color="#fff" strokeWidth={2} />
+              <Text style={S.heroCtaTxt}>Book a Cleaning</Text>
+            </TouchableOpacity>
+          </View>
+          {/* Trust stats */}
+          <View style={S.heroStats}>
+            {[
+              { val: "2k+", lbl: "Homes\nCleaned" },
+              { val: "4.9★", lbl: "Average\nRating" },
+              { val: "100%", lbl: "Vetted\nStaff" },
+            ].map((s) => (
+              <View key={s.val} style={S.heroStat}>
+                <Text style={S.heroStatVal}>{s.val}</Text>
+                <Text style={S.heroStatLbl}>{s.lbl}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
         {/* ── Search ─────────────────────────────────────────────── */}
         <View style={S.searchRow}>
           <View style={S.searchBox}>
@@ -371,6 +406,43 @@ const S = StyleSheet.create({
     borderWidth: 2, borderColor: "#DCFCE7",
   },
   avatarTxt: { fontSize: 15, fontWeight: "900", color: "#fff" },
+
+  // Hero
+  hero: {
+    marginHorizontal: 20, marginTop: 14, borderRadius: 22,
+    overflow: "hidden", minHeight: 220,
+  },
+  heroBg: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
+  heroDark: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(5,40,24,0.82)" },
+  heroContent: { padding: 22, paddingBottom: 0, zIndex: 2, gap: 10 },
+  heroBadge: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(110,231,183,0.18)",
+    borderWidth: 1, borderColor: "rgba(110,231,183,0.5)",
+    borderRadius: 8, paddingHorizontal: 9, paddingVertical: 4,
+  },
+  heroBadgeTxt: { fontSize: 10, fontWeight: "700", color: "#6EE7B7" },
+  heroTitle: { fontSize: 26, fontWeight: "900", color: "#fff", lineHeight: 32 },
+  heroSub: { fontSize: 12, color: "rgba(255,255,255,0.75)", lineHeight: 18, maxWidth: 260 },
+  heroCta: {
+    flexDirection: "row", alignItems: "center", gap: 7,
+    alignSelf: "flex-start",
+    backgroundColor: C.primary,
+    borderRadius: 12, paddingHorizontal: 18, paddingVertical: 11, marginTop: 4,
+  },
+  heroCtaTxt: { fontSize: 13, fontWeight: "800", color: "#fff" },
+  heroStats: {
+    flexDirection: "row", marginTop: 20, zIndex: 2,
+    borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.12)",
+  },
+  heroStat: {
+    flex: 1, alignItems: "center", paddingVertical: 14,
+    borderRightWidth: 1, borderRightColor: "rgba(255,255,255,0.12)",
+    gap: 2,
+  },
+  heroStatVal: { fontSize: 16, fontWeight: "900", color: "#6EE7B7" },
+  heroStatLbl: { fontSize: 9, color: "rgba(255,255,255,0.65)", textAlign: "center", lineHeight: 13 },
 
   // Search
   searchRow: {
