@@ -1,392 +1,646 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Search,
-  Download,
-  Eye,
-  Pencil,
-  Send,
-  Trash2,
-  X,
-  RefreshCw,
-  Plus,
+  Search, Download, Eye, Pencil, Send, Trash2, X,
+  RefreshCw, Plus, MoreHorizontal, CheckCircle2, AlertCircle,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
-import { QuoteDetailModal, FREQUENCY_OPTIONS } from "./QuoteBuilder";
+import { FREQUENCY_OPTIONS } from "./QuoteBuilder";
 
 const API = import.meta.env.VITE_API_URL;
 export const QUOTE_EDIT_DRAFT_KEY = "cleaniq_quote_edit_draft";
+const PAGE_SIZE = 20;
 
 const QUOTE_EXPORT_HEADERS = [
-  "Quote Ref",
-  "Company",
-  "Contact",
-  "Email",
-  "Phone",
-  "Frequency",
-  "Subtotal",
-  "VAT",
-  "Total",
-  "Status",
-  "Date Sent",
-  "Accepted At",
-  "Declined At",
+  "Quote Ref", "Company", "Contact", "Email", "Phone",
+  "Frequency", "Subtotal", "VAT", "Total", "Status",
+  "Date Sent", "Accepted At", "Declined At",
 ];
 
-const Toast = ({ msg, type, onClose }) => (
-  <div
-    className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl text-white text-sm font-bold animate-in slide-in-from-bottom-4 duration-300 ${type === "success" ? "bg-emerald-600" : "bg-rose-600"}`}
-  >
-    {msg}
-    <button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100">
-      <X size={15} />
-    </button>
-  </div>
-);
-
+// ── Status badge ──────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
   if (status === "accepted")
-    return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700">
-        Accepted
-      </span>
-    );
+    return <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">Accepted</span>;
   if (status === "declined")
-    return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-rose-50 text-rose-700">
-        Declined
-      </span>
-    );
-  return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">
-      Sent
-    </span>
-  );
+    return <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-100">Declined</span>;
+  return <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">Sent</span>;
 };
 
+// ── Row ⋯ menu ────────────────────────────────────────────────────────────────
+function RowMenu({ quote, onView, onEdit, onResend, onDelete, resending }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative" onClick={e => e.stopPropagation()}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+      >
+        <MoreHorizontal size={16} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-9 z-20 w-44 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+          <button
+            onClick={() => { setOpen(false); onView(quote); }}
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <Eye size={13} /> View Details
+          </button>
+          <button
+            onClick={() => { setOpen(false); onEdit(quote); }}
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <Pencil size={13} /> Edit & Duplicate
+          </button>
+          <button
+            onClick={() => { setOpen(false); onResend(quote); }}
+            disabled={resending}
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+          >
+            {resending ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
+            Resend Email
+          </button>
+          <div className="border-t border-slate-100" />
+          <button
+            onClick={() => { setOpen(false); onDelete(quote); }}
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+          >
+            <Trash2 size={13} /> Delete
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Quote detail drawer ───────────────────────────────────────────────────────
+function QuoteDrawer({ quote, onClose, onEdit, onResend, onDelete, resending }) {
+  if (!quote) return null;
+  const freq = FREQUENCY_OPTIONS.find(f => f.value === quote.frequency)?.label || quote.frequency;
+  const fmtCcy = (n) => `£${Number(n || 0).toFixed(2)}`;
+
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
+      <div className="fixed right-0 top-0 h-full w-full sm:w-125 bg-white z-50 flex flex-col shadow-2xl">
+        {/* Header */}
+        <div className="flex items-start justify-between px-6 py-5 border-b border-slate-100 shrink-0">
+          <div className="min-w-0 pr-4">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Quote</p>
+            <h2 className="text-base font-bold text-slate-900">{quote.companyName}</h2>
+            <p className="text-xs text-slate-400 mt-0.5">{quote.quoteRef} · {quote.email}</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => { onResend(quote); }}
+              disabled={resending}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 transition-all font-semibold text-xs disabled:opacity-50"
+            >
+              {resending ? <RefreshCw size={12} className="animate-spin" /> : <Send size={12} />}
+              Resend
+            </button>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* Status + date strip */}
+        <div className="px-6 py-3 border-b border-slate-50 flex flex-wrap items-center gap-3 shrink-0">
+          <StatusBadge status={quote.status} />
+          {quote.createdAt && (
+            <span className="text-xs text-slate-400 font-medium">
+              Sent {new Date(quote.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+            </span>
+          )}
+          {quote.acceptedAt && (
+            <span className="text-xs text-emerald-500 font-semibold">
+              Accepted {new Date(quote.acceptedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+            </span>
+          )}
+          {quote.declinedAt && (
+            <span className="text-xs text-red-500 font-semibold">
+              Declined {new Date(quote.declinedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+            </span>
+          )}
+        </div>
+
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+          {/* Contact info */}
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Contact</p>
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-1.5 text-sm">
+              {[
+                { label: "Company",  value: quote.companyName },
+                { label: "Contact",  value: quote.contactName || "—" },
+                { label: "Email",    value: quote.email },
+                { label: "Phone",    value: quote.phone || "—" },
+                { label: "Address",  value: quote.address || "—" },
+                { label: "Frequency",value: freq },
+              ].map(r => (
+                <div key={r.label} className="flex justify-between gap-3">
+                  <span className="text-slate-400 text-xs shrink-0">{r.label}</span>
+                  <span className="font-semibold text-slate-800 text-xs text-right wrap-break-word">{r.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Line items */}
+          {quote.items?.length > 0 && (
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Line Items</p>
+              <div className="bg-slate-50 rounded-xl border border-slate-100 overflow-hidden">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                      <th className="px-4 py-2 text-left">Description</th>
+                      <th className="px-3 py-2 text-right">Qty</th>
+                      <th className="px-3 py-2 text-right">Rate</th>
+                      <th className="px-4 py-2 text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {quote.items.map((item, i) => (
+                      <tr key={i}>
+                        <td className="px-4 py-2 text-slate-700 font-medium">{item.description}</td>
+                        <td className="px-3 py-2 text-slate-500 text-right tabular-nums">{item.quantity}</td>
+                        <td className="px-3 py-2 text-slate-500 text-right tabular-nums">{fmtCcy(item.unitPrice)}</td>
+                        <td className="px-4 py-2 font-bold text-slate-800 text-right tabular-nums">{fmtCcy(item.total)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Totals */}
+          <div className="bg-slate-900 rounded-xl p-4 text-white space-y-2">
+            {[
+              { label: "Subtotal", value: fmtCcy(quote.subtotal) },
+              { label: `VAT (${quote.vatRate ?? 20}%)`, value: fmtCcy(quote.vat) },
+            ].map(r => (
+              <div key={r.label} className="flex justify-between text-xs">
+                <span className="text-slate-400">{r.label}</span>
+                <span className="font-semibold tabular-nums">{r.value}</span>
+              </div>
+            ))}
+            <div className="border-t border-slate-700 pt-2 flex justify-between">
+              <span className="text-sm font-bold">Total</span>
+              <span className="text-lg font-black tabular-nums">{fmtCcy(quote.grandTotal)}</span>
+            </div>
+          </div>
+
+          {/* Notes */}
+          {quote.notes && (
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Notes</p>
+              <p className="text-sm text-slate-600 bg-slate-50 rounded-xl p-4 border border-slate-100 leading-relaxed">{quote.notes}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer actions */}
+        <div className="px-6 py-4 border-t border-slate-100 shrink-0 flex gap-2">
+          <button
+            onClick={() => { onEdit(quote); onClose(); }}
+            className="flex-1 flex items-center justify-center gap-2 h-9 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <Pencil size={13} /> Edit & Duplicate
+          </button>
+          <button
+            onClick={() => { onDelete(quote); onClose(); }}
+            className="flex items-center justify-center gap-2 h-9 px-4 bg-red-50 border border-red-200 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors"
+          >
+            <Trash2 size={13} /> Delete
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Main component ──────────────────────────────────────────────────��─────────
 const QuoteHistory = () => {
   const navigate = useNavigate();
-  const [quotes, setQuotes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [selectedQuote, setSelectedQuote] = useState(null);
-  const [toast, setToast] = useState(null);
+  const [quotes, setQuotes]         = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [search, setSearch]         = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [viewingQuote, setViewingQuote] = useState(null);
+  const [selected, setSelected]     = useState(new Set());
+  const [toast, setToast]           = useState(null);
   const [resendingRef, setResendingRef] = useState(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   const fetchQuotes = () => {
     setLoading(true);
     fetch(`${API}/quotes?limit=500`)
-      .then((r) => r.json())
-      .then((res) => {
-        if (res.success) setQuotes(res.data);
-      })
-      .catch(() => setToast({ msg: "Failed to load quotes", type: "error" }))
+      .then(r => r.json())
+      .then(res => { if (res.success) setQuotes(res.data); })
+      .catch(() => showToast("Failed to load quotes", "error"))
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    fetchQuotes();
-  }, []);
+  useEffect(() => { fetchQuotes(); }, []);
+  useEffect(() => { setPage(1); setSelected(new Set()); }, [search, statusFilter]);
 
   const stats = useMemo(() => {
-    const total = quotes.length;
-    const accepted = quotes.filter((q) => q.status === "accepted");
-    const declined = quotes.filter((q) => q.status === "declined");
-    const totalValue = quotes.reduce((s, q) => s + (q.grandTotal || 0), 0);
-    const acceptedValue = accepted.reduce((s, q) => s + (q.grandTotal || 0), 0);
-    const responded = accepted.length + declined.length;
+    const accepted     = quotes.filter(q => q.status === "accepted");
+    const declined     = quotes.filter(q => q.status === "declined");
+    const totalValue   = quotes.reduce((s, q) => s + (q.grandTotal || 0), 0);
+    const acceptedVal  = accepted.reduce((s, q) => s + (q.grandTotal || 0), 0);
+    const responded    = accepted.length + declined.length;
     return {
-      total,
+      total: quotes.length,
       acceptedCount: accepted.length,
       declinedCount: declined.length,
-      pendingCount: total - responded,
+      pendingCount: quotes.length - responded,
       totalValue,
-      acceptedValue,
+      acceptedValue: acceptedVal,
       acceptanceRate: responded > 0 ? (accepted.length / responded) * 100 : 0,
     };
   }, [quotes]);
 
   const filtered = useMemo(() => {
-    if (!search) return quotes;
-    const s = search.toLowerCase();
-    return quotes.filter(
-      (q) =>
+    let list = quotes;
+    if (search) {
+      const s = search.toLowerCase();
+      list = list.filter(q =>
         q.companyName?.toLowerCase().includes(s) ||
         q.email?.toLowerCase().includes(s) ||
-        q.quoteRef?.toLowerCase().includes(s),
-    );
-  }, [quotes, search]);
+        q.quoteRef?.toLowerCase().includes(s)
+      );
+    }
+    if (statusFilter === "accepted") list = list.filter(q => q.status === "accepted");
+    if (statusFilter === "declined") list = list.filter(q => q.status === "declined");
+    if (statusFilter === "sent")     list = list.filter(q => q.status !== "accepted" && q.status !== "declined");
+    return list;
+  }, [quotes, search, statusFilter]);
 
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage   = Math.min(page, totalPages);
+  const pageItems  = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  // Selection (scoped to current page)
+  const allSelected  = pageItems.length > 0 && pageItems.every(q => selected.has(q.quoteRef));
+  const someSelected = selected.size > 0;
+
+  const toggleRow = (ref) => {
+    setSelected(prev => { const n = new Set(prev); n.has(ref) ? n.delete(ref) : n.add(ref); return n; });
+  };
+
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelected(prev => { const n = new Set(prev); pageItems.forEach(q => n.delete(q.quoteRef)); return n; });
+    } else {
+      setSelected(prev => { const n = new Set(prev); pageItems.forEach(q => n.add(q.quoteRef)); return n; });
+    }
+  };
+
+  // Actions
   const handleEdit = (quote) => {
     sessionStorage.setItem(QUOTE_EDIT_DRAFT_KEY, JSON.stringify(quote));
     navigate("/admin/quotes");
   };
 
   const handleResend = async (quote) => {
-    if (!window.confirm(`Resend quote ${quote.quoteRef} to ${quote.email}?`))
-      return;
+    if (!window.confirm(`Resend quote ${quote.quoteRef} to ${quote.email}?`)) return;
     setResendingRef(quote.quoteRef);
     try {
       const res = await fetch(`${API}/quotes/resend/${quote.quoteRef}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}),
       });
       if (!res.ok) throw new Error();
-      setToast({ msg: `Quote resent to ${quote.email}`, type: "success" });
+      showToast(`Quote resent to ${quote.email}`);
     } catch {
-      setToast({ msg: "Failed to resend quote", type: "error" });
+      showToast("Failed to resend quote", "error");
     } finally {
       setResendingRef(null);
     }
   };
 
   const handleDelete = async (quote) => {
-    if (
-      !window.confirm(
-        `Permanently delete quote ${quote.quoteRef} for ${quote.companyName}?`,
-      )
-    )
-      return;
+    if (!window.confirm(`Permanently delete quote ${quote.quoteRef} for ${quote.companyName}?`)) return;
     try {
-      const res = await fetch(`${API}/quotes/${quote.quoteRef}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`${API}/quotes/${quote.quoteRef}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
-      setQuotes((prev) => prev.filter((q) => q.quoteRef !== quote.quoteRef));
-      setToast({ msg: "Quote deleted", type: "success" });
+      setQuotes(prev => prev.filter(q => q.quoteRef !== quote.quoteRef));
+      setSelected(prev => { const n = new Set(prev); n.delete(quote.quoteRef); return n; });
+      showToast("Quote deleted");
     } catch {
-      setToast({ msg: "Failed to delete quote", type: "error" });
+      showToast("Failed to delete quote", "error");
     }
   };
 
-  const exportRows = () =>
-    filtered.map((q) => [
-      q.quoteRef,
-      q.companyName,
-      q.contactName || "",
-      q.email,
-      q.phone || "",
-      FREQUENCY_OPTIONS.find((f) => f.value === q.frequency)?.label ||
-        q.frequency,
-      q.subtotal,
-      q.vat,
-      q.grandTotal,
-      q.status,
-      q.createdAt ? new Date(q.createdAt).toLocaleDateString() : "",
-      q.acceptedAt ? new Date(q.acceptedAt).toLocaleDateString() : "",
-      q.declinedAt ? new Date(q.declinedAt).toLocaleDateString() : "",
-    ]);
+  const handleBulkDelete = async () => {
+    const refs = [...selected];
+    if (!window.confirm(`Permanently delete ${refs.length} quote${refs.length !== 1 ? "s" : ""}?`)) return;
+    setBulkDeleting(true);
+    try {
+      await fetch(`${API}/quotes/bulk-delete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refs }),
+      });
+      setQuotes(prev => prev.filter(q => !refs.includes(q.quoteRef)));
+      setSelected(new Set());
+      showToast(`${refs.length} quote${refs.length !== 1 ? "s" : ""} deleted`);
+    } catch {
+      showToast("Failed to delete", "error");
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  // Export helpers
+  const exportRows = () => filtered.map(q => [
+    q.quoteRef, q.companyName, q.contactName || "", q.email, q.phone || "",
+    FREQUENCY_OPTIONS.find(f => f.value === q.frequency)?.label || q.frequency,
+    q.subtotal, q.vat, q.grandTotal, q.status,
+    q.createdAt ? new Date(q.createdAt).toLocaleDateString() : "",
+    q.acceptedAt ? new Date(q.acceptedAt).toLocaleDateString() : "",
+    q.declinedAt ? new Date(q.declinedAt).toLocaleDateString() : "",
+  ]);
 
   const exportCSV = () => {
-    const rows = exportRows();
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [QUOTE_EXPORT_HEADERS.join(","), ...rows.map((r) => r.join(","))].join(
-        "\n",
-      );
+    const csvContent = "data:text/csv;charset=utf-8," +
+      [QUOTE_EXPORT_HEADERS.join(","), ...exportRows().map(r => r.join(","))].join("\n");
     const link = document.createElement("a");
     link.setAttribute("href", encodeURI(csvContent));
-    link.setAttribute(
-      "download",
-      `Cleaniq_Quotes_${new Date().toLocaleDateString().replace(/\//g, "-")}.csv`,
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    link.setAttribute("download", `Cleaniq_Quotes_${new Date().toLocaleDateString().replace(/\//g, "-")}.csv`);
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
 
   const exportExcel = async () => {
     const XLSX = await import("xlsx");
-    const rows = exportRows();
-    const worksheet = XLSX.utils.aoa_to_sheet([QUOTE_EXPORT_HEADERS, ...rows]);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Quote History");
-    XLSX.writeFile(
-      workbook,
-      `Cleaniq_Quotes_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`,
-    );
+    const ws = XLSX.utils.aoa_to_sheet([QUOTE_EXPORT_HEADERS, ...exportRows()]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Quote History");
+    XLSX.writeFile(wb, `Cleaniq_Quotes_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`);
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
+    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
+
+      {/* Toast */}
       {toast && (
-        <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />
+        <div className={`fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-72 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold text-white flex items-center gap-2 ${
+          toast.type === "error" ? "bg-red-600" : "bg-slate-900"
+        }`}>
+          {toast.type === "error" ? <AlertCircle size={14} /> : <CheckCircle2 size={14} />}
+          {toast.msg}
+          <button onClick={() => setToast(null)} className="ml-auto opacity-70 hover:opacity-100"><X size={13} /></button>
+        </div>
       )}
-      {selectedQuote && (
-        <QuoteDetailModal
-          quote={selectedQuote}
-          onClose={() => setSelectedQuote(null)}
-        />
-      )}
+
+      {/* Quote drawer */}
+      <QuoteDrawer
+        quote={viewingQuote}
+        onClose={() => setViewingQuote(null)}
+        onEdit={handleEdit}
+        onResend={handleResend}
+        onDelete={handleDelete}
+        resending={resendingRef === viewingQuote?.quoteRef}
+      />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Quote History
-          </h2>
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Quote History</h2>
           <p className="text-sm text-slate-400 font-medium mt-1">
             {loading ? "Loading…" : `${quotes.length} quotes sent in total`}
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={exportCSV}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
-          >
-            <Download size={15} /> CSV
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button onClick={exportCSV} className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">
+            <Download size={14} /> CSV
           </button>
-          <button
-            onClick={exportExcel}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
-          >
-            <Download size={15} /> Excel
+          <button onClick={exportExcel} className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">
+            <Download size={14} /> Excel
           </button>
-          <button
-            onClick={() => navigate("/admin/quotes")}
-            className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold shadow-sm hover:bg-primary-dark transition-all"
-          >
-            <Plus size={15} /> New Quote
+          <button onClick={() => navigate("/admin/quotes")} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-sm hover:bg-primary-dark transition-all">
+            <Plus size={14} /> New Quote
           </button>
         </div>
       </div>
 
-      {/* Quote Revenue Analytics */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm flex flex-wrap divide-y sm:divide-y-0 divide-x divide-slate-100">
+      {/* Stats */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm flex flex-wrap divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
         {[
-          { label: "Total Quoted", value: `£${stats.totalValue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}` },
-          { label: "Accepted Value", value: `£${stats.acceptedValue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}` },
-          { label: "Acceptance Rate", value: `${stats.acceptanceRate.toFixed(0)}%` },
-          { label: "Accepted", value: stats.acceptedCount },
-          { label: "Declined", value: stats.declinedCount },
-          { label: "Awaiting Response", value: stats.pendingCount },
-        ].map((m) => (
-          <div key={m.label} className="flex-1 min-w-[140px] px-6 py-5">
-            <p className="text-[11px] font-semibold text-slate-400 mb-1.5">
-              {m.label}
-            </p>
-            <p className="text-xl font-bold text-slate-900 tabular-nums">
-              {m.value}
-            </p>
+          { label: "Total Quoted",       value: `£${stats.totalValue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}` },
+          { label: "Accepted Value",     value: `£${stats.acceptedValue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}` },
+          { label: "Acceptance Rate",    value: `${stats.acceptanceRate.toFixed(0)}%` },
+          { label: "Accepted",           value: stats.acceptedCount },
+          { label: "Declined",           value: stats.declinedCount },
+          { label: "Awaiting Response",  value: stats.pendingCount },
+        ].map(m => (
+          <div key={m.label} className="flex-1 min-w-32.5 px-5 py-4">
+            <p className="text-[11px] font-semibold text-slate-400 mb-1">{m.label}</p>
+            <p className="text-xl font-bold text-slate-900 tabular-nums">{m.value}</p>
           </div>
         ))}
       </div>
 
-      {/* Table */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100">
-          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-200 w-full md:w-80 focus-within:border-primary/50 transition-all">
-            <Search size={16} className="text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search by company, email, or ref…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="bg-transparent outline-none text-sm font-medium w-full text-slate-700"
-            />
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search company, email, or ref…"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          {[
+            { key: "all",      label: "All" },
+            { key: "accepted", label: "Accepted" },
+            { key: "declined", label: "Declined" },
+            { key: "sent",     label: "Awaiting" },
+          ].map(f => (
+            <button
+              key={f.key}
+              onClick={() => setStatusFilter(f.key)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                statusFilter === f.key
+                  ? "bg-slate-900 text-white border-slate-900"
+                  : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Bulk action bar */}
+      {someSelected && (
+        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl">
+          <p className="text-sm font-semibold">{selected.size} quote{selected.size !== 1 ? "s" : ""} selected</p>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setSelected(new Set())} className="text-xs text-slate-400 hover:text-white transition-colors px-2 py-1">
+              Clear
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkDeleting}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+            >
+              <Trash2 size={12} /> Delete {selected.size} selected
+            </button>
           </div>
         </div>
+      )}
+
+      {/* Table */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.12em] bg-slate-50/60">
-                <th className="px-6 py-3.5">Company</th>
+                <th className="pl-5 pr-2 py-3.5 w-10">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={toggleAll}
+                    className="rounded border-slate-300 accent-slate-900 w-3.5 h-3.5 cursor-pointer"
+                  />
+                </th>
+                <th className="px-4 py-3.5">Company</th>
                 <th className="px-4 py-3.5">Reference</th>
-                <th className="px-4 py-3.5">Frequency</th>
+                <th className="px-4 py-3.5 hidden md:table-cell">Frequency</th>
                 <th className="px-4 py-3.5">Total</th>
                 <th className="px-4 py-3.5">Status</th>
-                <th className="px-4 py-3.5">Date</th>
-                <th className="px-6 py-3.5 text-right">Actions</th>
+                <th className="px-4 py-3.5 hidden sm:table-cell">Date</th>
+                <th className="px-5 py-3.5 w-12"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center text-slate-400 font-semibold">
-                    Loading…
+                  <td colSpan={8} className="py-16 text-center text-slate-400 font-semibold">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                      Loading…
+                    </div>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center text-slate-300 font-semibold">
+                  <td colSpan={8} className="py-16 text-center text-slate-300 font-semibold">
                     No quotes found
                   </td>
                 </tr>
               ) : (
-                filtered.map((q) => (
-                  <tr key={q.quoteRef} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-6 py-4">
-                      <p className="font-semibold text-slate-800 text-sm">
-                        {q.companyName}
-                      </p>
-                      <p className="text-[11px] text-slate-400 font-medium">
-                        {q.email}
-                      </p>
-                    </td>
-                    <td className="px-4 py-4 text-sm font-medium text-slate-600">
-                      {q.quoteRef}
-                    </td>
-                    <td className="px-4 py-4 text-sm font-medium text-slate-600">
-                      {FREQUENCY_OPTIONS.find((f) => f.value === q.frequency)
-                        ?.label.split(" ")[0] || q.frequency}
-                    </td>
-                    <td className="px-4 py-4 text-sm font-bold text-slate-900 tabular-nums">
-                      £{Number(q.grandTotal || 0).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-4">
-                      <StatusBadge status={q.status} />
-                    </td>
-                    <td className="px-4 py-4 text-[11px] font-semibold text-slate-400">
-                      {q.createdAt
-                        ? new Date(q.createdAt).toLocaleDateString("en-GB", {
-                            day: "numeric",
-                            month: "short",
-                          })
-                        : "—"}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-1.5">
-                        <button
-                          onClick={() => setSelectedQuote(q)}
-                          title="View"
-                          className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
-                        >
-                          <Eye size={15} />
-                        </button>
-                        <button
-                          onClick={() => handleEdit(q)}
-                          title="Edit & resend as new quote"
-                          className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all"
-                        >
-                          <Pencil size={15} />
-                        </button>
-                        <button
-                          onClick={() => handleResend(q)}
-                          disabled={resendingRef === q.quoteRef}
-                          title="Resend email"
-                          className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all disabled:opacity-50"
-                        >
-                          {resendingRef === q.quoteRef ? (
-                            <RefreshCw size={15} className="animate-spin" />
-                          ) : (
-                            <Send size={15} />
-                          )}
-                        </button>
-                        <button
-                          onClick={() => handleDelete(q)}
-                          title="Delete"
-                          className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                pageItems.map(q => {
+                  const isSelected = selected.has(q.quoteRef);
+                  return (
+                    <tr
+                      key={q.quoteRef}
+                      onClick={() => setViewingQuote(q)}
+                      className={`transition-colors cursor-pointer ${isSelected ? "bg-slate-50" : "hover:bg-slate-50/70"}`}
+                    >
+                      <td className="pl-5 pr-2 py-4 w-10" onClick={e => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleRow(q.quoteRef)}
+                          className="rounded border-slate-300 accent-slate-900 w-3.5 h-3.5 cursor-pointer"
+                        />
+                      </td>
+                      <td className="px-4 py-4">
+                        <p className="font-semibold text-slate-800 text-sm leading-tight">{q.companyName}</p>
+                        <p className="text-[11px] text-slate-400 font-medium mt-0.5">{q.email}</p>
+                      </td>
+                      <td className="px-4 py-4 text-sm font-medium text-slate-600">{q.quoteRef}</td>
+                      <td className="px-4 py-4 text-sm font-medium text-slate-600 hidden md:table-cell">
+                        {FREQUENCY_OPTIONS.find(f => f.value === q.frequency)?.label.split(" ")[0] || q.frequency}
+                      </td>
+                      <td className="px-4 py-4 text-sm font-bold text-slate-900 tabular-nums">
+                        £{Number(q.grandTotal || 0).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-4"><StatusBadge status={q.status} /></td>
+                      <td className="px-4 py-4 text-[11px] font-semibold text-slate-400 hidden sm:table-cell">
+                        {q.createdAt ? new Date(q.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—"}
+                      </td>
+                      <td className="px-5 py-4 w-12">
+                        <RowMenu
+                          quote={q}
+                          onView={setViewingQuote}
+                          onEdit={handleEdit}
+                          onResend={handleResend}
+                          onDelete={handleDelete}
+                          resending={resendingRef === q.quoteRef}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {!loading && filtered.length > 0 && (
+          <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/40">
+            <p className="text-xs text-slate-400 font-medium">
+              {filtered.length} quote{filtered.length !== 1 ? "s" : ""}
+              {someSelected ? ` · ${selected.size} selected` : ""}
+              {" "}· Page {safePage} of {totalPages}
+            </p>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={safePage === 1}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft size={14} />
+              </button>
+              {(() => {
+                const range = [];
+                for (let i = Math.max(1, safePage - 2); i <= Math.min(totalPages, safePage + 2); i++) range.push(i);
+                return range.map(p => (
+                  <button key={p} onClick={() => setPage(p)}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
+                      p === safePage ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-500 hover:bg-white"
+                    }`}
+                  >{p}</button>
+                ));
+              })()}
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={safePage === totalPages}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

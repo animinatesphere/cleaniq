@@ -96,6 +96,70 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBook
     notes: "",
   });
 
+  const [bookingLookupId, setBookingLookupId] = useState("");
+  const [lookupStatus, setLookupStatus] = useState(null); // null | "found" | "not_found" | "loading"
+
+  const handleBookingLookup = async () => {
+    const query = bookingLookupId.trim();
+    if (!query) return;
+    setLookupStatus("loading");
+
+    // First search the already-loaded bookings array
+    const match = bookings.find(
+      (b) =>
+        (b.bookingId || "").toLowerCase() === query.toLowerCase() ||
+        b._id === query,
+    );
+
+    if (match) {
+      setRecurringForm((f) => ({
+        ...f,
+        customerFirstName: match.customer?.firstName || "",
+        customerLastName: match.customer?.lastName || "",
+        customerEmail: match.customer?.email || "",
+        customerPhone: match.customer?.phone || "",
+        address: match.details?.address || match.customer?.address || "",
+        postcode: match.details?.postcode || match.customer?.postcode || "",
+        service: match.service || f.service,
+        notes: match.details?.notes || f.notes,
+      }));
+      setLookupStatus("found");
+      return;
+    }
+
+    // Fallback: fetch all bookings from API (booking may not be in loaded list)
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings`);
+      const data = await res.json();
+      const remote = Array.isArray(data)
+        ? data.find(
+            (b) =>
+              (b.bookingId || "").toLowerCase() === query.toLowerCase() ||
+              b._id === query,
+          )
+        : null;
+
+      if (remote) {
+        setRecurringForm((f) => ({
+          ...f,
+          customerFirstName: remote.customer?.firstName || "",
+          customerLastName: remote.customer?.lastName || "",
+          customerEmail: remote.customer?.email || "",
+          customerPhone: remote.customer?.phone || "",
+          address: remote.details?.address || remote.customer?.address || "",
+          postcode: remote.details?.postcode || remote.customer?.postcode || "",
+          service: remote.service || f.service,
+          notes: remote.details?.notes || f.notes,
+        }));
+        setLookupStatus("found");
+      } else {
+        setLookupStatus("not_found");
+      }
+    } catch {
+      setLookupStatus("not_found");
+    }
+  };
+
   const [servicesList, setServicesList] = useState([]);
   const [dynamicRates, setDynamicRates] = useState({});
 
@@ -1551,6 +1615,73 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBook
                   gap: "16px",
                 }}
               >
+                {/* BOOKING ID LOOKUP */}
+                <div
+                  style={{
+                    background: "linear-gradient(135deg,#f8fafc,#f1f5f9)",
+                    border: "1.5px solid #e2e8f0",
+                    borderRadius: "16px",
+                    padding: "16px 18px",
+                  }}
+                >
+                  <label style={{ ...labelStyle, marginBottom: "8px" }}>
+                    Load from Booking ID
+                  </label>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <input
+                      type="text"
+                      style={{
+                        ...inputStyle,
+                        flex: 1,
+                        fontFamily: "monospace",
+                        letterSpacing: "0.5px",
+                      }}
+                      value={bookingLookupId}
+                      onChange={(e) => {
+                        setBookingLookupId(e.target.value);
+                        setLookupStatus(null);
+                      }}
+                      onKeyDown={(e) => e.key === "Enter" && handleBookingLookup()}
+                      placeholder="e.g. BK-A1B2C3"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleBookingLookup}
+                      disabled={lookupStatus === "loading" || !bookingLookupId.trim()}
+                      style={{
+                        padding: "10px 18px",
+                        borderRadius: "12px",
+                        border: "none",
+                        background:
+                          !bookingLookupId.trim()
+                            ? "#e2e8f0"
+                            : "linear-gradient(135deg,#0F172A,#1e3a5f)",
+                        color: !bookingLookupId.trim() ? "#94a3b8" : "#6EE7B7",
+                        fontWeight: 800,
+                        fontSize: "12px",
+                        cursor: !bookingLookupId.trim() ? "not-allowed" : "pointer",
+                        whiteSpace: "nowrap",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      {lookupStatus === "loading" ? "..." : "Load"}
+                    </button>
+                  </div>
+                  {lookupStatus === "found" && (
+                    <p style={{ margin: "8px 0 0", fontSize: "11px", fontWeight: 700, color: "#059669" }}>
+                      ✓ Customer details loaded successfully
+                    </p>
+                  )}
+                  {lookupStatus === "not_found" && (
+                    <p style={{ margin: "8px 0 0", fontSize: "11px", fontWeight: 700, color: "#dc2626" }}>
+                      No booking found with that ID
+                    </p>
+                  )}
+                  <p style={{ margin: "6px 0 0", fontSize: "10px", color: "#94a3b8" }}>
+                    Enter an existing booking ID to auto-fill customer details below
+                  </p>
+                </div>
+
                 <div>
                   <label
                     style={{
@@ -1976,6 +2107,8 @@ const Bookings = () => {
   const [fieldTouched, setFieldTouched] = useState({});
   const [selectedBookings, setSelectedBookings] = useState(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [bookingsPage, setBookingsPage] = useState(1);
+  const BOOKINGS_PAGE_SIZE = 25;
   const [additionalHoursForm, setAdditionalHoursForm] = useState({
     hours: "",
     hourlyRate: "",
@@ -2774,6 +2907,10 @@ ${extrasRows}
     );
   }, [bookings, searchTerm]);
 
+  const bookingsTotalPages = Math.max(1, Math.ceil(filteredBookings.length / BOOKINGS_PAGE_SIZE));
+  const bookingsSafePage   = Math.min(bookingsPage, bookingsTotalPages);
+  const pageBookings       = filteredBookings.slice((bookingsSafePage - 1) * BOOKINGS_PAGE_SIZE, bookingsSafePage * BOOKINGS_PAGE_SIZE);
+
   const getStatusColor = (status) => {
     const colors = {
       Confirmed: "bg-emerald-50 text-emerald-600 border-emerald-100",
@@ -3019,7 +3156,7 @@ ${extrasRows}
                 type="text"
                 placeholder="Search bookings..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => { setSearchTerm(e.target.value); setBookingsPage(1); }}
                 className="bg-transparent outline-none text-sm font-medium w-full text-slate-700"
               />
             </div>
@@ -3042,8 +3179,8 @@ ${extrasRows}
                     <input
                       type="checkbox"
                       checked={
-                        selectedBookings.size === filteredBookings.length &&
-                        filteredBookings.length > 0
+                        pageBookings.length > 0 &&
+                        pageBookings.every(b => selectedBookings.has(b._id))
                       }
                       onChange={toggleSelectAll}
                       className="w-4 h-4 rounded border-2 border-slate-300 cursor-pointer accent-primary"
@@ -3077,7 +3214,7 @@ ${extrasRows}
                     </td>
                   </tr>
                 ) : (
-                  filteredBookings.map((b) => (
+                  pageBookings.map((b) => (
                     <tr
                       key={b._id}
                       onClick={() => { setSelectedBooking(b); setEditData(b); setIsEditing(false); setShowRaw(false); }}
@@ -3206,6 +3343,44 @@ ${extrasRows}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {!loading && filteredBookings.length > 0 && (
+            <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/40">
+              <p className="text-xs text-slate-400 font-medium">
+                {filteredBookings.length} booking{filteredBookings.length !== 1 ? "s" : ""}
+                {selectedBookings.size > 0 ? ` · ${selectedBookings.size} selected` : ""}
+                {" "}· Page {bookingsSafePage} of {bookingsTotalPages}
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setBookingsPage(p => Math.max(1, p - 1))}
+                  disabled={bookingsSafePage === 1}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                {(() => {
+                  const range = [];
+                  for (let i = Math.max(1, bookingsSafePage - 2); i <= Math.min(bookingsTotalPages, bookingsSafePage + 2); i++) range.push(i);
+                  return range.map(p => (
+                    <button key={p} onClick={() => setBookingsPage(p)}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
+                        p === bookingsSafePage ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-500 hover:bg-white"
+                      }`}
+                    >{p}</button>
+                  ));
+                })()}
+                <button
+                  onClick={() => setBookingsPage(p => Math.min(bookingsTotalPages, p + 1))}
+                  disabled={bookingsSafePage === bookingsTotalPages}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
       {selectedBooking && (

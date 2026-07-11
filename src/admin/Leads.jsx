@@ -3,9 +3,11 @@ import {
   Search, Mail, Phone, Trash2, X, Send, RefreshCw,
   Download, Users, UserPlus, MoreHorizontal,
   Calendar, MessageSquare, Globe, User,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
+const PAGE_SIZE = 25;
 
 function fmtDate(d) {
   if (!d) return "—";
@@ -179,6 +181,7 @@ const Leads = () => {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(new Set());
   const [selectedLead, setSelectedLead] = useState(null); // drawer
   const [emailTarget, setEmailTarget] = useState(null);
@@ -295,8 +298,14 @@ const Leads = () => {
     );
   }, [leads, search]);
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage   = Math.min(page, totalPages);
+  const pageItems  = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
   const toggleSelect = (id) => setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
-  const toggleAll = () => selected.size === filtered.length ? setSelected(new Set()) : setSelected(new Set(filtered.map(l => l._id)));
+  const toggleAll = () => pageItems.every(l => selected.has(l._id)) && pageItems.length > 0
+    ? setSelected(new Set())
+    : setSelected(new Set(pageItems.map(l => l._id)));
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
@@ -337,7 +346,7 @@ const Leads = () => {
               type="text"
               placeholder="Search by name, email, or phone…"
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={e => { setSearch(e.target.value); setPage(1); }}
               className="bg-transparent outline-none text-sm font-medium w-full text-slate-700"
             />
           </div>
@@ -349,7 +358,7 @@ const Leads = () => {
               <tr className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.12em] bg-slate-50/60">
                 <th className="px-4 py-3.5 w-12">
                   <input type="checkbox"
-                    checked={selected.size === filtered.length && filtered.length > 0}
+                    checked={pageItems.length > 0 && pageItems.every(l => selected.has(l._id))}
                     onChange={toggleAll}
                     className="w-4 h-4 rounded border-2 border-slate-300 cursor-pointer accent-primary" />
                 </th>
@@ -372,7 +381,7 @@ const Leads = () => {
                   No leads yet
                 </td></tr>
               ) : (
-                filtered.map(l => (
+                pageItems.map(l => (
                   <tr
                     key={l._id}
                     onClick={() => setSelectedLead(l)}
@@ -420,6 +429,55 @@ const Leads = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/40">
+            <p className="text-xs text-slate-400 font-medium">
+              {filtered.length} leads · Page {safePage} of {totalPages}
+            </p>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={safePage === 1}
+                className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft size={14} />
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(n => n === 1 || n === totalPages || Math.abs(n - safePage) <= 1)
+                .reduce((acc, n, i, arr) => {
+                  if (i > 0 && n - arr[i - 1] > 1) acc.push("…");
+                  acc.push(n);
+                  return acc;
+                }, [])
+                .map((n, i) =>
+                  n === "…" ? (
+                    <span key={`ellipsis-${i}`} className="px-1 text-xs text-slate-400">…</span>
+                  ) : (
+                    <button
+                      key={n}
+                      onClick={() => setPage(n)}
+                      className={`min-w-[28px] h-7 rounded-lg text-xs font-semibold transition-colors ${
+                        n === safePage
+                          ? "bg-primary text-white shadow-sm"
+                          : "border border-slate-200 text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  )
+                )}
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={safePage === totalPages}
+                className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Detail drawer */}

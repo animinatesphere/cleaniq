@@ -9,6 +9,7 @@ import {
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const STAGES = ["New", "Quoted", "Follow-up", "Booked", "Lost"];
+const COLUMN_PAGE_SIZE = 8;
 
 const STAGE_STYLES = {
   New:         { border: "border-l-blue-500",   badge: "bg-blue-50 text-blue-700 border-blue-200",     dot: "bg-blue-500" },
@@ -297,6 +298,7 @@ export default function Pipeline() {
   const [addForm, setAddForm] = useState(BLANK_LEAD);
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
+  const [colPages, setColPages] = useState({});
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
@@ -410,6 +412,10 @@ export default function Pipeline() {
       <div className="flex gap-4 overflow-x-auto pb-4">
         {STAGES.map(stage => {
           const cards = byStage(stage);
+          const visibleCount = (colPages[stage] || 1) * COLUMN_PAGE_SIZE;
+          const visibleCards = cards.slice(0, visibleCount);
+          const hasMore = cards.length > visibleCount;
+          const isExpanded = (colPages[stage] || 1) > 1;
           return (
             <div key={stage} className="flex-shrink-0 w-72">
               {/* Column header */}
@@ -462,7 +468,7 @@ export default function Pipeline() {
                     No leads
                   </div>
                 )}
-                {cards.map(lead => (
+                {visibleCards.map(lead => (
                   <div
                     key={lead._id}
                     onClick={() => setSelectedLead(lead)}
@@ -503,6 +509,28 @@ export default function Pipeline() {
                   </div>
                 ))}
               </div>
+
+              {/* Show more / Show less */}
+              {(hasMore || isExpanded) && (
+                <div className="mt-2 space-y-1.5">
+                  {hasMore && (
+                    <button
+                      onClick={() => setColPages(p => ({ ...p, [stage]: (p[stage] || 1) + 1 }))}
+                      className="w-full py-2 text-xs font-semibold text-zinc-500 hover:text-zinc-800 border border-dashed border-zinc-200 rounded-xl hover:border-zinc-300 hover:bg-zinc-50 transition-colors"
+                    >
+                      Show {Math.min(COLUMN_PAGE_SIZE, cards.length - visibleCount)} more
+                    </button>
+                  )}
+                  {isExpanded && (
+                    <button
+                      onClick={() => setColPages(p => ({ ...p, [stage]: 1 }))}
+                      className="w-full py-1.5 text-[11px] font-medium text-zinc-400 hover:text-zinc-600 transition-colors"
+                    >
+                      Show less
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}

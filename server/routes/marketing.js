@@ -222,4 +222,13 @@ router.get('/campaigns', async (req, res) => {
   }
 });
 
+router.delete('/campaigns/:id', async (req, res) => {
+  try {
+    await Campaign.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Campaign deleted.' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

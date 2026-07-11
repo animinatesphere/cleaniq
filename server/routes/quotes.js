@@ -481,6 +481,27 @@ router.delete("/:quoteRef", async (req, res) => {
 });
 
 /**
+ * POST /api/quotes/bulk-delete
+ * Permanently remove multiple quotes by quoteRef array
+ */
+router.post("/bulk-delete", async (req, res) => {
+  try {
+    const { refs } = req.body;
+    if (!Array.isArray(refs) || refs.length === 0) {
+      return res.status(400).json({ success: false, message: "refs array is required." });
+    }
+    const quotes = await Quote.find({ quoteRef: { $in: refs } });
+    for (const quote of quotes) {
+      await moveToTrash("Quote", quote, `${quote.quoteRef} — ${quote.companyName || quote.contactName || ""}`);
+      await quote.deleteOne();
+    }
+    res.json({ success: true, message: `${quotes.length} quote(s) deleted.` });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
  * POST /api/quotes/schedule
  * Schedule recurring quotes to be sent automatically
  */

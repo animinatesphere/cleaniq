@@ -172,6 +172,129 @@ const RevenueDetailModal = ({ segment, onClose, onViewBooking }) => {
   );
 };
 
+// ── Net Revenue Detail Modal ──────────────────────────────────────────────────
+const NetRevenueDetailModal = ({ completed, expenses, netRevenue, onClose, onViewBooking }) => {
+  const [tab, setTab] = useState("income");
+  const totalIncome = completed.reduce((s, b) => s + Number(b.payment?.amount || 0), 0);
+  const totalExpenses = expenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-slate-100 px-7 py-5 flex justify-between items-center rounded-t-[28px] z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Receipt size={18} className="text-primary" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">Net Revenue Breakdown</h2>
+              <p className={`text-[11px] font-semibold tabular-nums ${netRevenue >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                £{netRevenue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} net
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-9 h-9 rounded-2xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all">
+            <X size={18} className="text-slate-600" />
+          </button>
+        </div>
+
+        {/* Summary strip */}
+        <div className="grid grid-cols-3 divide-x divide-slate-100 border-b border-slate-100 text-center">
+          <div className="py-4 px-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Income</p>
+            <p className="text-base font-bold text-emerald-600 tabular-nums">£{totalIncome.toLocaleString("en-GB", { maximumFractionDigits: 0 })}</p>
+            <p className="text-[10px] text-slate-400">{completed.length} job{completed.length !== 1 ? "s" : ""}</p>
+          </div>
+          <div className="py-4 px-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Expenses</p>
+            <p className="text-base font-bold text-red-500 tabular-nums">−£{totalExpenses.toLocaleString("en-GB", { maximumFractionDigits: 0 })}</p>
+            <p className="text-[10px] text-slate-400">{expenses.length} item{expenses.length !== 1 ? "s" : ""}</p>
+          </div>
+          <div className="py-4 px-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Net</p>
+            <p className={`text-base font-bold tabular-nums ${netRevenue >= 0 ? "text-primary" : "text-red-600"}`}>
+              £{netRevenue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+            </p>
+            {totalIncome > 0 && (
+              <p className="text-[10px] text-slate-400">{((netRevenue / totalIncome) * 100).toFixed(0)}% margin</p>
+            )}
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 px-5 pt-4 pb-0">
+          {[{ id: "income", label: `Income (${completed.length})` }, { id: "expenses", label: `Expenses (${expenses.length})` }].map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${tab === t.id ? "bg-primary text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="overflow-y-auto flex-1 p-3">
+          {tab === "income" ? (
+            completed.length === 0 ? (
+              <p className="text-sm text-slate-400 font-medium text-center py-12">No completed bookings yet.</p>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {completed.map((b, i) => (
+                  <button
+                    key={i}
+                    onClick={() => onViewBooking(b)}
+                    className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 rounded-2xl transition-colors text-left"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[10px] font-bold text-emerald-600">{initials(b)}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{b.customer?.firstName} {b.customer?.lastName}</p>
+                      <p className="text-[11px] font-medium text-slate-400 truncate">
+                        {b.service} · {b.schedule?.date ? new Date(b.schedule.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-sm font-bold text-emerald-600 tabular-nums">+£{Number(b.payment?.amount || 0).toLocaleString("en-GB", { minimumFractionDigits: 2 })}</p>
+                      <p className="text-[10px] text-slate-400">{b.bookingId}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )
+          ) : (
+            expenses.length === 0 ? (
+              <p className="text-sm text-slate-400 font-medium text-center py-12">No expenses recorded.</p>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {expenses.map((e, i) => (
+                  <div key={i} className="flex items-center gap-3 p-4">
+                    <div className="w-9 h-9 rounded-full bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[10px] font-bold text-red-500">{(e.category || "?")[0].toUpperCase()}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{e.description || "Expense"}</p>
+                      <p className="text-[11px] font-medium text-slate-400 truncate">
+                        {e.category || "Uncategorised"} · {e.date ? new Date(e.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-sm font-bold text-red-500 tabular-nums">−£{Number(e.amount || 0).toLocaleString("en-GB", { minimumFractionDigits: 2 })}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TREND_RANGES = [
   { label: "7D", days: 7 },
   { label: "30D", days: 30 },
@@ -209,6 +332,8 @@ const Dashboard = () => {
   const [leads, setLeads] = useState([]);
   const [search, setSearch] = useState("");
   const [expenseStats, setExpenseStats] = useState(null);
+  const [expenses, setExpenses] = useState([]);
+  const [showNetDetail, setShowNetDetail] = useState(false);
 
   // Revenue & Leads calendar — pick a start date, then an end date, to see
   // totals for that range.
@@ -294,6 +419,10 @@ const Dashboard = () => {
     fetch(`${import.meta.env.VITE_API_URL}/expenses/stats`)
       .then((r) => r.json())
       .then((data) => setExpenseStats(data))
+      .catch(() => {});
+    fetch(`${import.meta.env.VITE_API_URL}/expenses`)
+      .then((r) => r.json())
+      .then((data) => setExpenses(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, [fetchData]);
 
@@ -734,8 +863,14 @@ const Dashboard = () => {
         </button>
 
         {/* Net Revenue */}
-        <div className={`rounded-2xl shadow-sm p-5 ${netRevenue >= 0 ? "bg-primary text-white" : "bg-red-600 text-white"}`}>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-2">Net Revenue</p>
+        <button
+          onClick={() => setShowNetDetail(true)}
+          className={`rounded-2xl shadow-sm p-5 text-left transition-all hover:opacity-90 active:scale-[0.98] ${netRevenue >= 0 ? "bg-primary text-white" : "bg-red-600 text-white"}`}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">Net Revenue</p>
+            <span className="text-[10px] font-bold bg-white/20 text-white px-2 py-0.5 rounded-full">View Details →</span>
+          </div>
           <p className="text-3xl font-bold tabular-nums">
             £{netRevenue.toLocaleString("en-GB",{maximumFractionDigits:0})}
           </p>
@@ -747,7 +882,7 @@ const Dashboard = () => {
               </span>
             )}
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Revenue & Lead Conversion Calendar — collapsed into a dropdown */}
@@ -1600,6 +1735,15 @@ const Dashboard = () => {
           segment={detailSegment}
           onClose={() => setDetailSegment(null)}
           onViewBooking={(b) => navigate(`/admin/bookings?id=${b._id}`)}
+        />
+      )}
+      {showNetDetail && (
+        <NetRevenueDetailModal
+          completed={completed}
+          expenses={expenses}
+          netRevenue={netRevenue}
+          onClose={() => setShowNetDetail(false)}
+          onViewBooking={(b) => { setShowNetDetail(false); navigate(`/admin/bookings?id=${b._id}`); }}
         />
       )}
     </div>

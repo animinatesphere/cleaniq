@@ -173,6 +173,68 @@ router.post("/", async (req, res) => {
       console.error("⚠️ Failed to capture booking lead:", leadErr.message);
     }
 
+    // ── Recurring series generation ──────────────────────────────────────────
+    // When frequency is not "Once", stamp a recurringGroup on the first booking
+    // and create all future instances silently (no emails, no payment links).
+    const recurFreq = newBooking.details?.frequency;
+    if (recurFreq && recurFreq !== "Once") {
+      const groupId = `RG-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+
+      // Tag the first booking with the group ID
+      await Booking.findByIdAndUpdate(newBooking._id, { $set: { meta: { recurringGroup: groupId } } });
+      newBooking.meta = { recurringGroup: groupId };
+
+      const RECUR_SCHEDULES = {
+        Weekly:      { type: "days",   step: 7,  total: 12 },
+        Fortnightly: { type: "days",   step: 14, total: 12 },
+        "Bi-weekly": { type: "days",   step: 14, total: 12 },
+        Monthly:     { type: "months", step: 1,  total: 12 },
+        Quarterly:   { type: "months", step: 3,  total: 4  },
+        Yearly:      { type: "months", step: 12, total: 2  },
+      };
+      const rule = RECUR_SCHEDULES[recurFreq];
+
+      if (rule) {
+        const baseDate = new Date(newBooking.schedule.date);
+        const baseData = newBooking.toObject();
+        for (let i = 1; i < rule.total; i++) {
+          const instanceDate = new Date(baseDate);
+          if (rule.type === "days") {
+            instanceDate.setDate(instanceDate.getDate() + rule.step * i);
+          } else {
+            instanceDate.setMonth(instanceDate.getMonth() + rule.step * i);
+          }
+          try {
+            await Booking.create({
+              ...baseData,
+              _id: undefined,
+              bookingId: `BK-R${Math.floor(100000 + Math.random() * 900000)}`,
+              schedule: { ...baseData.schedule, date: instanceDate },
+              status: "Confirmed",
+              skipConfirmationEmail: true,
+              noPaymentRequired: true,
+              payment: { ...baseData.payment, status: "Pending", stripePaymentIntentId: null },
+              meta: { recurringGroup: groupId },
+              assignedWorker: null,
+              assignedWorkerName: null,
+              rejectedBy: [],
+              checklist: [],
+              jobAcceptedTime: null,
+              jobArrivedTime: null,
+              jobStartTime: null,
+              jobEndTime: null,
+              jobDurationActual: 0,
+              createdAt: new Date(),
+            });
+          } catch (recurErr) {
+            console.error(`⚠️ Recurring instance ${i} failed:`, recurErr.message);
+          }
+        }
+        console.log(`📅 Created ${rule.total}-booking ${recurFreq} series → group ${groupId}`);
+      }
+    }
+    // ── End recurring ────────────────────────────────────────────────────────
+
     // ✅ Skip all emails for DEV MODE bookings (testing only)
     const isDevMode =
       newBooking.payment && newBooking.payment.method === "Dev Mode";

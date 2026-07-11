@@ -17,6 +17,7 @@ import {
   Pencil,
   Clock,
   History,
+  Download,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -30,16 +31,55 @@ export const FREQUENCY_OPTIONS = [
   { value: "yearly", label: "Yearly" },
 ];
 
-const DEFAULT_SERVICES = [
-  "Airbnb & Holiday Let Cleaning",
-  "Office Cleaning",
-  "End of Tenancy Cleaning",
-  "Deep Cleaning",
-  "Regular Domestic Cleaning",
-  "Commercial Kitchen Cleaning",
-  "Post-Construction Cleaning",
-  "Carpet & Upholstery Cleaning",
-];
+// Full service catalogue organised by category — used in the quote builder dropdown
+export const SERVICE_CATALOGUE = {
+  "Residential & Domestic": [
+    "Regular Domestic Cleaning",
+    "One-Off House Clean",
+    "Spring / Seasonal Deep Clean",
+    "Deep Cleaning",
+    "Declutter & Organising Clean",
+  ],
+  "Airbnb & Holiday Let": [
+    "Airbnb & Holiday Let Cleaning",
+    "Guest Changeover Clean",
+    "Short-Let Property Clean",
+    "Linen & Laundry Service",
+  ],
+  "Commercial & Office": [
+    "Office Cleaning",
+    "Retail & Shop Cleaning",
+    "Restaurant & Hospitality Cleaning",
+    "Medical / Healthcare Facility Clean",
+    "School & Education Cleaning",
+    "Gym & Fitness Facility Clean",
+    "Warehouse & Industrial Cleaning",
+    "Co-working Space Cleaning",
+  ],
+  "Specialist Cleans": [
+    "End of Tenancy Cleaning",
+    "Move-In Cleaning",
+    "Carpet & Upholstery Cleaning",
+    "Sofa & Mattress Deep Clean",
+    "Oven & Appliance Deep Clean",
+    "Window Cleaning (Interior)",
+    "Window Cleaning (Exterior & Interior)",
+    "Conservatory Cleaning",
+    "Pressure Washing (Driveways & Patios)",
+  ],
+  "Post-Event & Restoration": [
+    "After Builders / Post-Construction Clean",
+    "Post-Party & Event Clean",
+    "Commercial Kitchen Deep Clean",
+    "Hoarder / Extreme Clean",
+    "Flood Damage & Restoration Clean",
+    "Disinfection & Sanitisation",
+    "Bio-Hazard Specialist Clean",
+    "Fire & Smoke Damage Clean",
+  ],
+};
+
+const DEFAULT_SERVICES = Object.values(SERVICE_CATALOGUE).flat();
 
 const emptyItem = () => ({
   service: "",
@@ -68,123 +108,138 @@ const Toast = ({ msg, type, onClose }) => (
 );
 
 // ── Line Item ──────────────────────────────────────────────────────────────────
-const LineItem = ({ item, index, onChange, onRemove, services }) => (
-  <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200 space-y-3">
-    <div className="flex justify-between items-center">
-      <span className="text-[11px] font-semibold text-slate-400">
-        Line Item #{index + 1}
-      </span>
-      <button
-        onClick={() => onRemove(index)}
-        className="w-7 h-7 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition-all"
-      >
-        <Trash2 size={13} />
-      </button>
-    </div>
-    <div className="grid sm:grid-cols-2 gap-3">
-      <div className="sm:col-span-2">
-        <label className="text-[11px] font-semibold text-slate-400 mb-1 block">
-          Service
-        </label>
-        <select
-          value={item.service}
-          onChange={(e) => onChange(index, "service", e.target.value)}
-          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-        >
-          <option value="">Select a service…</option>
-          {services.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-          <option value="__custom__">— Enter custom service —</option>
-        </select>
-        {item.service === "__custom__" && (
-          <input
-            type="text"
-            placeholder="Custom service name"
-            value={item.customService}
-            onChange={(e) => onChange(index, "customService", e.target.value)}
-            className="mt-2 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-          />
-        )}
+const LineItem = ({ item, index, onChange, onRemove, catalogue }) => {
+  const lineTotal = Number(item.unitPrice || 0) * Number(item.qty || 1);
+  return (
+    <div className="border border-slate-200 rounded-2xl bg-white overflow-hidden hover:border-primary/25 hover:shadow-sm transition-all">
+      {/* Row header */}
+      <div className="flex items-center justify-between px-5 py-3 bg-slate-50 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center">
+            {index + 1}
+          </span>
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Line Item</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-black text-slate-800 tabular-nums">
+            £{lineTotal.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
+          </span>
+          <button
+            onClick={() => onRemove(index)}
+            className="w-6 h-6 rounded-lg bg-rose-50 text-rose-400 hover:bg-rose-100 hover:text-rose-600 flex items-center justify-center transition-all"
+          >
+            <Trash2 size={11} />
+          </button>
+        </div>
       </div>
-      <div className="sm:col-span-2">
-        <label className="text-[11px] font-semibold text-slate-400 mb-1 block">
-          Cleaning Details — what will be cleaned (optional)
-        </label>
-        <textarea
-          rows={2}
-          placeholder="e.g. 3-bed property: all bedrooms, 2 bathrooms, kitchen deep clean, hoovering & dusting throughout..."
-          value={item.description}
-          onChange={(e) => onChange(index, "description", e.target.value)}
-          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-medium text-slate-700 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-        />
-        <p className="text-[10px] text-slate-400 font-semibold mt-1">
-          This shows up in the quote preview and the email sent to the
-          customer, so they know exactly how the clean will be done.
-        </p>
-      </div>
-      <div className="sm:col-span-2 flex items-center gap-2 p-1 bg-white rounded-2xl border border-slate-200 w-fit">
-        <button
-          type="button"
-          onClick={() => onChange(index, "billingType", "flat")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${item.billingType !== "hourly" ? "bg-primary text-white shadow" : "text-slate-500 hover:bg-slate-50"}`}
-        >
-          Flat Rate
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange(index, "billingType", "hourly")}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${item.billingType === "hourly" ? "bg-primary text-white shadow" : "text-slate-500 hover:bg-slate-50"}`}
-        >
-          <Clock size={12} /> Hourly Rate
-        </button>
-      </div>
-      <div>
-        <label className="text-[11px] font-semibold text-slate-400 mb-1 block">
-          {item.billingType === "hourly" ? "Estimated Hours" : "Quantity / Visits"}
-        </label>
-        <input
-          type="number"
-          min="1"
-          step={item.billingType === "hourly" ? "0.5" : "1"}
-          value={item.qty}
-          onChange={(e) => onChange(index, "qty", Number(e.target.value))}
-          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-        />
-      </div>
-      <div>
-        <label className="text-[11px] font-semibold text-slate-400 mb-1 block">
-          {item.billingType === "hourly" ? "Hourly Rate (£/hr)" : "Unit Price (£)"}
-        </label>
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          placeholder="0.00"
-          value={item.unitPrice}
-          onChange={(e) => onChange(index, "unitPrice", e.target.value)}
-          className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-        />
-      </div>
-    </div>
-    <div className="flex justify-end">
-      <div className="px-4 py-2 bg-white rounded-2xl border border-slate-200 flex items-center gap-2">
-        <span className="text-[11px] font-semibold text-slate-400">
-          Subtotal:
-        </span>
-        <span className="font-bold text-slate-800 text-sm">
-          £
-          {(Number(item.unitPrice || 0) * Number(item.qty || 1)).toLocaleString(
-            "en-GB",
-            { minimumFractionDigits: 2 },
+
+      <div className="p-5 space-y-4">
+        {/* Service select — grouped by category */}
+        <div>
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Service *</label>
+          <select
+            value={item.service}
+            onChange={(e) => onChange(index, "service", e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+          >
+            <option value="">— Select a service —</option>
+            {Object.entries(catalogue).map(([cat, svcs]) => (
+              <optgroup key={cat} label={cat}>
+                {svcs.map(s => <option key={s} value={s}>{s}</option>)}
+              </optgroup>
+            ))}
+            <option value="__custom__">✏ Custom / Other service</option>
+          </select>
+          {item.service === "__custom__" && (
+            <input
+              type="text"
+              placeholder="Type the service name…"
+              value={item.customService}
+              onChange={(e) => onChange(index, "customService", e.target.value)}
+              className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            />
           )}
-        </span>
+        </div>
+
+        {/* Cleaning scope */}
+        <div>
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+            Scope of Work <span className="text-slate-300 font-medium normal-case tracking-normal">(optional)</span>
+          </label>
+          <textarea
+            rows={2}
+            placeholder="e.g. 3-bed house: all bedrooms, 2 bathrooms, kitchen deep clean, hoovering throughout…"
+            value={item.description}
+            onChange={(e) => onChange(index, "description", e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 resize-none focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+          />
+          <p className="text-[10px] text-slate-400 mt-1">Appears on the quote and customer email — helps them see exactly what's included.</p>
+        </div>
+
+        {/* Pricing row */}
+        <div className="flex flex-wrap items-end gap-3">
+          {/* Billing toggle */}
+          <div className="shrink-0">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Billing Type</label>
+            <div className="flex items-center gap-0.5 p-1 bg-slate-100 rounded-xl">
+              <button
+                type="button"
+                onClick={() => onChange(index, "billingType", "flat")}
+                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${item.billingType !== "hourly" ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+              >
+                Flat Rate
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange(index, "billingType", "hourly")}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${item.billingType === "hourly" ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+              >
+                <Clock size={11} /> Hourly
+              </button>
+            </div>
+          </div>
+
+          {/* Qty */}
+          <div className="flex-1 min-w-24">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+              {item.billingType === "hourly" ? "Hours" : "Qty"}
+            </label>
+            <input
+              type="number" min="1" step={item.billingType === "hourly" ? "0.5" : "1"}
+              value={item.qty}
+              onChange={(e) => onChange(index, "qty", Number(e.target.value))}
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-bold text-center text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            />
+          </div>
+
+          {/* Unit price */}
+          <div className="flex-1 min-w-28">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+              {item.billingType === "hourly" ? "£ / hr" : "Unit Price £"}
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">£</span>
+              <input
+                type="number" min="0" step="0.01" placeholder="0.00"
+                value={item.unitPrice}
+                onChange={(e) => onChange(index, "unitPrice", e.target.value)}
+                className="w-full pl-7 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
+            </div>
+          </div>
+
+          {/* Line total */}
+          <div className="flex-1 min-w-24">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Total</label>
+            <div className="px-3 py-2.5 rounded-xl bg-primary/5 border border-primary/20 text-sm font-black text-primary text-center tabular-nums">
+              £{lineTotal.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ── Preview Modal ──────────────────────────────────────────────────────────────
 const PreviewModal = ({
@@ -671,7 +726,7 @@ const Toggle = ({ value, onChange, label }) => (
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 const QuoteBuilder = () => {
-  const [services, setServices] = useState(DEFAULT_SERVICES);
+  const [catalogue, setCatalogue] = useState(SERVICE_CATALOGUE);
   const [items, setItems] = useState([emptyItem()]);
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState(null);
@@ -718,11 +773,12 @@ const QuoteBuilder = () => {
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          const apiNames = data.map((s) => s.name);
-          setServices([
-            ...apiNames,
-            ...DEFAULT_SERVICES.filter((d) => !apiNames.includes(d)),
-          ]);
+          // Merge API services into catalogue under "Custom Services" if not already present
+          const allExisting = Object.values(SERVICE_CATALOGUE).flat().map(s => s.toLowerCase());
+          const newApiServices = data.map(s => s.name).filter(n => !allExisting.includes(n.toLowerCase()));
+          if (newApiServices.length > 0) {
+            setCatalogue(prev => ({ ...prev, "Custom Services": [...(prev["Custom Services"] || []), ...newApiServices] }));
+          }
         }
       })
       .catch(() => {});
@@ -801,6 +857,122 @@ const QuoteBuilder = () => {
     ? grandTotal * (Number(form.depositPercent) / 100)
     : 0;
   const balanceDue = grandTotal - depositAmount;
+
+  const downloadPDF = () => {
+    const ref = `CLQ-${Date.now().toString().slice(-6)}`;
+    const rows = items
+      .filter(i => i.service || i.customService)
+      .map(item => `
+        <tr>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;">
+            <strong>${item.service === "__custom__" ? item.customService : item.service}</strong>
+            ${item.description ? `<br/><span style="font-size:11px;color:#64748b;">${item.description}</span>` : ""}
+            ${item.billingType === "hourly" ? `<br/><span style="font-size:10px;color:#7c3aed;font-weight:700;">Billed hourly</span>` : ""}
+          </td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;text-align:center;">${item.qty}${item.billingType === "hourly" ? " hrs" : ""}</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;text-align:right;">£${Number(item.unitPrice || 0).toFixed(2)}${item.billingType === "hourly" ? "/hr" : ""}</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">£${(Number(item.unitPrice || 0) * Number(item.qty || 1)).toFixed(2)}</td>
+        </tr>`).join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<title>Quote — ${form.companyName || "Client"} — ${ref}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:Arial,sans-serif;color:#1e293b;background:#fff;font-size:14px;}
+@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact;}@page{margin:20mm;}}
+.hdr{background:#0f172a;padding:36px 48px;display:flex;justify-content:space-between;align-items:flex-start;}
+.hdr-left .title{color:#fff;font-size:26px;font-weight:900;letter-spacing:-0.5px;}
+.hdr-left .company{color:#94a3b8;font-size:12px;margin-top:4px;}
+.hdr-right{text-align:right;}
+.hdr-right .ref{color:#6ee7b7;font-size:14px;font-weight:800;}
+.hdr-right .date{color:#64748b;font-size:11px;margin-top:4px;}
+.body{padding:40px 48px;}
+.section{margin-bottom:28px;}
+.label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;margin-bottom:8px;}
+.val{font-size:16px;font-weight:800;color:#0f172a;}
+.sub{font-size:13px;color:#64748b;margin-top:3px;}
+.info-block{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px 24px;display:flex;justify-content:space-between;margin-bottom:28px;}
+.freq-block{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 20px;margin-bottom:28px;display:flex;align-items:center;gap:10px;}
+.freq-block .freq-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#3b82f6;}
+.freq-block .freq-val{font-size:14px;font-weight:700;color:#1e293b;}
+table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+thead tr{background:#0f172a;}
+thead th{padding:12px 16px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#6ee7b7;text-align:left;}
+thead th:nth-child(2){text-align:center;}
+thead th:nth-child(3),thead th:nth-child(4){text-align:right;}
+tbody tr:nth-child(even){background:#f8fafc;}
+.totals{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px 24px;}
+.trow{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;color:#475569;}
+.trow.discount{color:#16a34a;}
+.trow.vat{}
+.grand{font-size:17px;font-weight:900;color:#0f172a;border-top:2px solid #e2e8f0;padding-top:12px;margin-top:8px;}
+.deposit{font-size:13px;font-weight:700;color:#0369a1;border-top:1px solid #e2e8f0;padding-top:10px;margin-top:6px;}
+.notes{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px 20px;margin-top:20px;}
+.notes-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#d97706;margin-bottom:6px;}
+.notes-body{font-size:13px;color:#92400e;line-height:1.6;}
+.footer{margin-top:48px;padding-top:20px;border-top:1px solid #e2e8f0;text-align:center;font-size:11px;color:#94a3b8;}
+</style></head><body>
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="title">SERVICE QUOTE</div>
+    <div class="company">Cleaniq Services Ltd</div>
+  </div>
+  <div class="hdr-right">
+    <div class="ref">${ref}</div>
+    <div class="date">${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</div>
+    ${form.validDays ? `<div class="date" style="margin-top:2px;">Valid for ${form.validDays} days</div>` : ""}
+  </div>
+</div>
+<div class="body">
+  <div class="info-block">
+    <div>
+      <div class="label">Prepared For</div>
+      <div class="val">${form.companyName || "—"}</div>
+      ${form.contactName ? `<div class="sub">Attn: ${form.contactName}</div>` : ""}
+      ${form.email ? `<div class="sub">${form.email}</div>` : ""}
+      ${form.phone ? `<div class="sub">${form.phone}</div>` : ""}
+      ${form.address ? `<div class="sub">${form.address}</div>` : ""}
+    </div>
+    <div style="text-align:right">
+      <div class="label">Payment Terms</div>
+      <div class="val" style="font-size:14px;">${form.paymentTerms || "Net 30"}</div>
+      ${form.serviceDate ? `<div class="sub" style="margin-top:8px;">Service Date: ${new Date(form.serviceDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>` : ""}
+    </div>
+  </div>
+  ${form.frequency !== "once" ? `
+  <div class="freq-block">
+    <div>
+      <div class="freq-label">Recurring Contract</div>
+      <div class="freq-val">${FREQUENCY_OPTIONS.find(f => f.value === form.frequency)?.label || "—"}</div>
+    </div>
+  </div>` : ""}
+  <table>
+    <thead>
+      <tr>
+        <th>Service &amp; Details</th>
+        <th style="text-align:center;">Qty</th>
+        <th style="text-align:right;">Unit Price</th>
+        <th style="text-align:right;">Total</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="totals">
+    <div class="trow"><span>Subtotal</span><span>£${subtotal.toFixed(2)}</span></div>
+    ${discountAmount > 0 ? `<div class="trow discount"><span>Discount (${form.discount}%)</span><span>−£${discountAmount.toFixed(2)}</span></div>` : ""}
+    ${form.includeVat && vat > 0 ? `<div class="trow"><span>VAT (${form.vatRate}%)</span><span>£${vat.toFixed(2)}</span></div>` : ""}
+    <div class="trow grand"><span>GRAND TOTAL</span><span>£${grandTotal.toFixed(2)}${form.frequency !== "once" ? ` / ${FREQUENCY_OPTIONS.find(f => f.value === form.frequency)?.label.split(" ")[0].toLowerCase()}` : ""}</span></div>
+    ${form.depositRequired && depositAmount > 0 ? `<div class="trow deposit"><span>Deposit Required (${form.depositPercent}%)</span><span>£${depositAmount.toFixed(2)}</span></div><div class="trow" style="color:#475569;"><span>Balance Due</span><span>£${balanceDue.toFixed(2)}</span></div>` : ""}
+  </div>
+  ${form.notes ? `<div class="notes"><div class="notes-label">Notes &amp; Terms</div><div class="notes-body">${form.notes}</div></div>` : ""}
+  <div class="footer">Cleaniq Services Limited &nbsp;·&nbsp; info@cleaniqservices.com &nbsp;·&nbsp; cleaniqservices.com &nbsp;·&nbsp; +44 7752 476368</div>
+</div>
+<script>window.onload = function(){ window.print(); }</script>
+</body></html>`;
+
+    const w = window.open("", "_blank");
+    if (w) { w.document.write(html); w.document.close(); }
+  };
 
   const handleSend = async () => {
     if (!form.email)
@@ -907,12 +1079,18 @@ const QuoteBuilder = () => {
             or individual customers
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <button
             onClick={() => setPreview(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm"
           >
             <Eye size={15} /> Preview
+          </button>
+          <button
+            onClick={downloadPDF}
+            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm"
+          >
+            <Download size={15} /> Download PDF
           </button>
           <button
             onClick={handleSend}
@@ -1228,7 +1406,7 @@ const QuoteBuilder = () => {
                   index={i}
                   onChange={updateItem}
                   onRemove={removeItem}
-                  services={services}
+                  catalogue={catalogue}
                 />
               ))}
             </div>
@@ -1367,6 +1545,12 @@ const QuoteBuilder = () => {
                 className="w-full py-3 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-2xl text-sm font-bold transition-all border border-slate-200 flex items-center justify-center gap-2"
               >
                 <Eye size={15} /> Preview Quote
+              </button>
+              <button
+                onClick={downloadPDF}
+                className="w-full py-3 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-2xl text-sm font-bold transition-all border border-slate-200 flex items-center justify-center gap-2"
+              >
+                <Download size={15} /> Download PDF
               </button>
             </div>
           </div>

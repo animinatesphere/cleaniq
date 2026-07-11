@@ -1,24 +1,28 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
-import { Send, X, RefreshCw, Eye, Mail, Upload, Clock } from "lucide-react";
+import {
+  Send, X, RefreshCw, Eye, Mail, Upload, Clock,
+  MoreHorizontal, Trash2, MessageSquare, Users, BarChart2,
+  ChevronRight, Plus, Zap,
+} from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const SEGMENTS = [
-  { value: "all", label: "All Customers" },
-  { value: "vip", label: "VIP" },
-  { value: "regular", label: "Regular" },
-  { value: "new", label: "New Customers" },
-  { value: "at-risk", label: "At Risk" },
+  { value: "all",    label: "All Customers" },
+  { value: "vip",    label: "VIP" },
+  { value: "regular",label: "Regular" },
+  { value: "new",    label: "New Customers" },
+  { value: "at-risk",label: "At Risk" },
   { value: "custom", label: "Custom (paste or upload)" },
 ];
 
-const STATUS_STYLES = {
-  sent:     "bg-green-50 text-green-700 border-green-200",
-  sending:  "bg-blue-50 text-blue-700 border-blue-200",
-  queued:   "bg-amber-50 text-amber-700 border-amber-200",
-  draft:    "bg-zinc-100 text-zinc-600 border-zinc-200",
-  failed:   "bg-red-50 text-red-700 border-red-200",
+const STATUS_META = {
+  sent:    { label: "Sent",    cls: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500" },
+  sending: { label: "Sending", cls: "bg-blue-50 text-blue-700 border-blue-200",     dot: "bg-blue-500 animate-pulse" },
+  queued:  { label: "Queued",  cls: "bg-amber-50 text-amber-700 border-amber-200",  dot: "bg-amber-500 animate-pulse" },
+  draft:   { label: "Draft",   cls: "bg-zinc-100 text-zinc-600 border-zinc-200",    dot: "bg-zinc-400" },
+  failed:  { label: "Failed",  cls: "bg-red-50 text-red-700 border-red-200",        dot: "bg-red-500" },
 };
 
 function fmtDate(d) {
@@ -26,17 +30,25 @@ function fmtDate(d) {
   return new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
+function fmtDatetime(d) {
+  if (!d) return "—";
+  return new Date(d).toLocaleString("en-GB", {
+    day: "2-digit", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
 function ProgressBar({ sent, total }) {
   const pct = total > 0 ? Math.round((sent / total) * 100) : 0;
   return (
-    <div className="mt-2">
+    <div className="mt-2.5">
       <div className="flex justify-between text-[10px] text-zinc-500 mb-1">
         <span>{sent} / {total} sent</span>
         <span>{pct}%</span>
       </div>
       <div className="w-full h-1.5 bg-zinc-100 rounded-full overflow-hidden">
         <div
-          className="h-full bg-blue-500 rounded-full transition-all duration-500"
+          className="h-full bg-blue-500 rounded-full transition-all duration-700"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -44,11 +56,20 @@ function ProgressBar({ sent, total }) {
   );
 }
 
+function StatusBadge({ status }) {
+  const meta = STATUS_META[status] || STATUS_META.draft;
+  return (
+    <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full border ${meta.cls}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
+      {meta.label}
+    </span>
+  );
+}
+
 function extractEmailsFromCsv(text) {
   const lines = text.split(/\r?\n/);
   const emails = [];
   for (const line of lines) {
-    // Try each comma/tab-separated cell, pick the one that looks like an email
     const cells = line.split(/[,\t]/);
     for (const cell of cells) {
       const val = cell.trim().replace(/^["']|["']$/g, "");
@@ -60,46 +81,158 @@ function extractEmailsFromCsv(text) {
   return [...new Set(emails)];
 }
 
+// ── Campaign card ⋯ menu ──────────────────────────────────────────────────────
+function CampaignMenu({ campaign, onView, onDelete }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative" onClick={e => e.stopPropagation()}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-7 h-7 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+      >
+        <MoreHorizontal size={15} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-8 z-20 w-40 bg-white border border-zinc-200 rounded-xl shadow-lg overflow-hidden">
+          <button
+            onClick={() => { setOpen(false); onView(campaign); }}
+            className="flex items-center gap-2 w-full px-3.5 py-2.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors"
+          >
+            <Eye size={13} /> View Message
+          </button>
+          <button
+            onClick={() => { setOpen(false); onDelete(campaign._id); }}
+            className="flex items-center gap-2 w-full px-3.5 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+          >
+            <Trash2 size={13} /> Delete
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Message detail drawer ─────────────────────────────────────────────────────
+function MessageDrawer({ campaign, onClose }) {
+  if (!campaign) return null;
+  const body = campaign.body || campaign.message || "";
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 bg-black/30 z-40 transition-opacity"
+        onClick={onClose}
+      />
+      <div className="fixed right-0 top-0 h-full w-full sm:w-120 bg-white z-50 flex flex-col shadow-2xl">
+        {/* Header */}
+        <div className="flex items-start justify-between px-6 py-5 border-b border-zinc-100 shrink-0">
+          <div className="min-w-0 pr-4">
+            <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Campaign</p>
+            <h2 className="text-base font-bold text-zinc-900 leading-tight">{campaign.name}</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Meta row */}
+        <div className="px-6 py-4 border-b border-zinc-50 flex flex-wrap gap-3 shrink-0">
+          <StatusBadge status={campaign.status} />
+          <span className="text-xs text-zinc-400 font-medium">{fmtDatetime(campaign.sentAt || campaign.createdAt)}</span>
+          {(campaign.totalCount || campaign.recipientCount) > 0 && (
+            <span className="text-xs font-semibold text-zinc-600">
+              {campaign.sentCount || campaign.recipientCount || campaign.totalCount} recipient{(campaign.totalCount ?? campaign.recipientCount) !== 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+
+        {/* Subject */}
+        <div className="px-6 py-4 border-b border-zinc-50 shrink-0">
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Subject</p>
+          <p className="text-sm font-semibold text-zinc-900">{campaign.subject}</p>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Message</p>
+          <div className="bg-zinc-50 rounded-xl px-5 py-4 text-sm text-zinc-700 whitespace-pre-wrap leading-relaxed font-mono border border-zinc-100">
+            {body || <span className="text-zinc-400 italic">No message body recorded.</span>}
+          </div>
+
+          {/* Recipients preview */}
+          {campaign.recipients?.length > 0 && (
+            <div className="mt-5">
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
+                Recipients ({campaign.recipients.length})
+              </p>
+              <div className="bg-zinc-50 rounded-xl p-3 max-h-40 overflow-y-auto border border-zinc-100 space-y-1">
+                {campaign.recipients.slice(0, 30).map((email, i) => (
+                  <p key={i} className="text-xs text-zinc-600 font-mono truncate">{email}</p>
+                ))}
+                {campaign.recipients.length > 30 && (
+                  <p className="text-xs text-zinc-400 italic">…and {campaign.recipients.length - 30} more</p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 export default function Campaigns() {
-  const [campaigns, setCampaigns] = useState([]);
-  const [customers, setCustomers] = useState([]);
-  const [loadingHistory, setLoadingHistory] = useState(true);
-  const [sending, setSending] = useState(false);
+  const [campaigns, setCampaigns]     = useState([]);
+  const [customers, setCustomers]     = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [sending, setSending]         = useState(false);
+  const [showComposer, setShowComposer] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [error, setError] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
-  const [selectedCampaign, setSelectedCampaign] = useState(null);
-  const [fileEmails, setFileEmails] = useState([]);
-  const [fileName, setFileName] = useState("");
+  const [viewCampaign, setViewCampaign] = useState(null);
+  const [deletingId, setDeletingId]   = useState(null);
+  const [toast, setToast]             = useState(null);
+  const [fileEmails, setFileEmails]   = useState([]);
+  const [fileName, setFileName]       = useState("");
   const fileRef = useRef(null);
   const pollRef = useRef(null);
 
   const [form, setForm] = useState({
-    name: "",
-    segment: "all",
-    subject: "",
-    body: "",
-    customEmails: "",
+    name: "", segment: "all", subject: "", body: "", customEmails: "",
   });
+
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   const fetchHistory = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/marketing/campaigns`).catch(() => ({ data: [] }));
       const data = Array.isArray(res.data) ? res.data : [];
       setCampaigns(data);
-      // Stop polling when no active campaigns
       const hasActive = data.some(c => c.status === "sending" || c.status === "queued");
       if (!hasActive && pollRef.current) {
         clearInterval(pollRef.current);
         pollRef.current = null;
       }
-    } catch {
-      // silently ignore
-    }
+    } catch { /* ignore */ }
   }, []);
 
   const fetchAll = useCallback(async () => {
-    setLoadingHistory(true);
+    setLoading(true);
     try {
       const [hRes, cRes] = await Promise.all([
         axios.get(`${API}/marketing/campaigns`).catch(() => ({ data: [] })),
@@ -107,10 +240,8 @@ export default function Campaigns() {
       ]);
       setCampaigns(Array.isArray(hRes.data) ? hRes.data : []);
       setCustomers(Array.isArray(cRes.data) ? cRes.data : []);
-    } catch {
-      // silently handle
     } finally {
-      setLoadingHistory(false);
+      setLoading(false);
     }
   }, []);
 
@@ -119,11 +250,10 @@ export default function Campaigns() {
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [fetchAll]);
 
-  // Start polling when campaigns have active sends
   useEffect(() => {
     const hasActive = campaigns.some(c => c.status === "sending" || c.status === "queued");
     if (hasActive && !pollRef.current) {
-      pollRef.current = setInterval(fetchHistory, 30000); // refresh every 30s
+      pollRef.current = setInterval(fetchHistory, 30000);
     } else if (!hasActive && pollRef.current) {
       clearInterval(pollRef.current);
       pollRef.current = null;
@@ -135,10 +265,7 @@ export default function Campaigns() {
     if (!file) return;
     setFileName(file.name);
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      const emails = extractEmailsFromCsv(ev.target.result);
-      setFileEmails(emails);
-    };
+    reader.onload = (ev) => setFileEmails(extractEmailsFromCsv(ev.target.result));
     reader.readAsText(file);
   };
 
@@ -151,24 +278,20 @@ export default function Campaigns() {
   const getTargetEmails = () => {
     if (form.segment === "custom") {
       const pasted = form.customEmails
-        .split(/[\n,;]+/)
-        .map(e => e.trim().toLowerCase())
-        .filter(e => e.includes("@"));
+        .split(/[\n,;]+/).map(e => e.trim().toLowerCase()).filter(e => e.includes("@"));
       return [...new Set([...pasted, ...fileEmails])];
     }
-    const seg = form.segment;
     return customers
       .filter(c => {
-        if (seg === "all") return true;
+        if (form.segment === "all") return true;
         const tag = (c.segment || c.tags || "").toString().toLowerCase();
-        if (seg === "vip")     return tag.includes("vip");
-        if (seg === "regular") return tag.includes("regular");
-        if (seg === "new")     return tag.includes("new");
-        if (seg === "at-risk") return tag.includes("at risk") || tag.includes("at-risk");
+        if (form.segment === "vip")     return tag.includes("vip");
+        if (form.segment === "regular") return tag.includes("regular");
+        if (form.segment === "new")     return tag.includes("new");
+        if (form.segment === "at-risk") return tag.includes("at risk") || tag.includes("at-risk");
         return true;
       })
-      .map(c => c.email)
-      .filter(Boolean);
+      .map(c => c.email).filter(Boolean);
   };
 
   const targetEmails = getTargetEmails();
@@ -176,165 +299,144 @@ export default function Campaigns() {
   const handleSend = async (e) => {
     e.preventDefault();
     if (!form.name.trim() || !form.subject.trim() || !form.body.trim()) {
-      setError("Campaign name, subject and body are all required");
+      showToast("Campaign name, subject and body are required", "error");
       return;
     }
     if (targetEmails.length === 0) {
-      setError("No recipients found — paste emails, upload a file, or pick a segment with customers");
+      showToast("No recipients — paste emails, upload a CSV, or pick a segment with customers", "error");
       return;
     }
-    const estimatedMins = targetEmails.length;
+    const mins = targetEmails.length;
     if (!window.confirm(
       `Queue campaign to ${targetEmails.length} recipient${targetEmails.length !== 1 ? "s" : ""}?\n\n` +
-      `Emails will be sent at 1 per minute (~${estimatedMins} min total).\n\n` +
-      `You can close this tab — sending continues in the background.`
+      `Emails send at 1 per minute (~${mins} min total).\nYou can close this tab — sending continues in the background.`
     )) return;
 
     setSending(true);
-    setError("");
     try {
       const res = await axios.post(`${API}/marketing/campaign`, {
-        name: form.name,
-        segment: form.segment,
-        subject: form.subject,
-        body: form.body,
-        targetEmails,
+        name: form.name, segment: form.segment, subject: form.subject,
+        body: form.body, targetEmails,
       });
-      setSuccessMsg(res.data?.message || `Campaign queued for ${targetEmails.length} recipients — sending 1/min.`);
+      showToast(res.data?.message || `Campaign queued for ${targetEmails.length} recipients.`);
       setForm({ name: "", segment: "all", subject: "", body: "", customEmails: "" });
       clearFile();
+      setShowComposer(false);
+      setShowPreview(false);
       fetchAll();
-      // Start polling immediately after queuing
-      if (!pollRef.current) {
-        pollRef.current = setInterval(fetchHistory, 30000);
-      }
+      if (!pollRef.current) pollRef.current = setInterval(fetchHistory, 30000);
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to queue campaign");
+      showToast(err?.response?.data?.message || "Failed to queue campaign", "error");
     } finally {
       setSending(false);
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this campaign? This cannot be undone.")) return;
+    setDeletingId(id);
+    try {
+      await axios.delete(`${API}/marketing/campaigns/${id}`);
+      setCampaigns(prev => prev.filter(c => c._id !== id));
+      showToast("Campaign deleted");
+    } catch {
+      showToast("Failed to delete campaign", "error");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // ── Stats ──────────────────────────────────────────────────────────────────
+  const totalSent = campaigns.reduce((s, c) => s + (c.sentCount || c.recipientCount || 0), 0);
+  const activeCampaigns = campaigns.filter(c => c.status === "sending" || c.status === "queued").length;
+
   return (
-    <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl flex items-center justify-between gap-2">
-          <span>{error}</span>
-          <button onClick={() => setError("")}><X size={14} /></button>
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-5">
+
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-80 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold text-white flex items-center gap-2 ${
+          toast.type === "error" ? "bg-red-600" : "bg-zinc-900"
+        }`}>
+          {toast.type === "error" ? <X size={14} /> : <Zap size={14} />}
+          {toast.msg}
         </div>
       )}
-      {successMsg && (
-        <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-xl flex items-center justify-between gap-2">
-          <span className="flex items-center gap-2"><Clock size={14} /> {successMsg}</span>
-          <button onClick={() => setSuccessMsg("")}><X size={14} /></button>
-        </div>
-      )}
+
+      {/* Message drawer */}
+      <MessageDrawer campaign={viewCampaign} onClose={() => setViewCampaign(null)} />
 
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Campaign Manager</h1>
-        <p className="text-sm text-zinc-500 mt-1">Bulk email campaigns — queued and sent at 1 email per minute.</p>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight">Campaign Manager</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">Bulk email — sent at 1 per minute, continues in the background.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={fetchAll}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-zinc-500 hover:text-zinc-800 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors"
+          >
+            <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+            Refresh
+          </button>
+          <button
+            onClick={() => setShowComposer(o => !o)}
+            className="flex items-center gap-1.5 px-4 py-2 bg-zinc-900 text-white text-xs font-bold rounded-lg hover:bg-zinc-700 transition-colors"
+          >
+            <Plus size={13} /> New Campaign
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Left — Campaign history */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between">
-              <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-widest">History</h2>
-              <button onClick={fetchAll} title="Refresh" className="text-zinc-400 hover:text-zinc-700 transition-colors">
-                <RefreshCw size={13} className={loadingHistory ? "animate-spin" : ""} />
-              </button>
+      {/* Stats row */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { icon: <Mail size={15} />,      label: "Total Campaigns", val: campaigns.length, color: "text-zinc-900",    bg: "bg-white" },
+          { icon: <Users size={15} />,     label: "Emails Sent",     val: totalSent,         color: "text-emerald-600", bg: "bg-emerald-50" },
+          { icon: <BarChart2 size={15} />, label: "Active",          val: activeCampaigns,   color: "text-blue-600",    bg: "bg-blue-50" },
+        ].map(s => (
+          <div key={s.label} className={`${s.bg} rounded-xl px-4 py-3.5 border border-zinc-100 flex items-center gap-3`}>
+            <span className={`${s.color} opacity-70 shrink-0`}>{s.icon}</span>
+            <div>
+              <p className={`text-2xl font-black ${s.color} leading-none`}>{s.val}</p>
+              <p className="text-[11px] text-zinc-500 font-medium mt-0.5">{s.label}</p>
             </div>
-            {loadingHistory ? (
-              <div className="flex items-center justify-center py-10">
-                <div className="w-5 h-5 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
-              </div>
-            ) : campaigns.length === 0 ? (
-              <div className="text-center py-12 text-zinc-400 px-6">
-                <Mail size={28} className="mx-auto mb-3 text-zinc-300" />
-                <p className="text-sm font-medium">No campaigns yet</p>
-                <p className="text-xs mt-1">Compose and send your first campaign using the form.</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-zinc-50">
-                {campaigns.map(c => (
-                  <button
-                    key={c._id}
-                    onClick={() => setSelectedCampaign(selectedCampaign?._id === c._id ? null : c)}
-                    className="w-full text-left px-5 py-4 hover:bg-zinc-50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-semibold text-zinc-900 truncate">{c.name}</p>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold flex-shrink-0 ${STATUS_STYLES[c.status] || STATUS_STYLES.draft}`}>
-                        {c.status || "sent"}
-                      </span>
-                    </div>
-                    <p className="text-xs text-zinc-500 truncate mt-0.5">{c.subject}</p>
-                    <div className="flex items-center gap-3 mt-1 text-[11px] text-zinc-400 flex-wrap">
-                      <span>{c.segment || "all"}</span>
-                      <span>{fmtDate(c.sentAt || c.createdAt)}</span>
-                    </div>
-                    {/* Progress bar for active campaigns */}
-                    {(c.status === "sending" || c.status === "queued") && (
-                      <ProgressBar sent={c.sentCount || 0} total={c.totalCount || c.recipientCount || 0} />
-                    )}
-                    {c.status === "sent" && c.totalCount > 0 && (
-                      <p className="text-[11px] text-green-600 font-semibold mt-1">
-                        {c.sentCount || c.recipientCount || c.totalCount} emails sent
-                      </p>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
+        ))}
+      </div>
 
-          {/* Expanded campaign detail */}
-          {selectedCampaign && (
-            <div className="bg-white border border-zinc-200 rounded-2xl p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-zinc-900">{selectedCampaign.name}</h3>
-                <button onClick={() => setSelectedCampaign(null)}>
-                  <X size={14} className="text-zinc-400" />
-                </button>
-              </div>
-              <p className="text-xs font-semibold text-zinc-500">Subject: {selectedCampaign.subject}</p>
-              <div className="text-xs text-zinc-600 bg-zinc-50 rounded-xl p-3 whitespace-pre-wrap max-h-48 overflow-y-auto">
-                {selectedCampaign.body || selectedCampaign.message}
-              </div>
-              {selectedCampaign.recipients?.length > 0 && (
-                <p className="text-xs text-zinc-400">{selectedCampaign.recipients.length} recipients</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Right — Composer */}
-        <div className="lg:col-span-3">
-          <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-zinc-100">
-              <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Compose Campaign</h2>
+      {/* Composer (collapsible) */}
+      {showComposer && (
+        <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-zinc-900">Compose Campaign</h2>
               <p className="text-xs text-zinc-400 mt-0.5">Emails are queued and sent at 1 per minute.</p>
             </div>
-            <form onSubmit={handleSend} className="p-6 space-y-4">
+            <button onClick={() => setShowComposer(false)} className="text-zinc-400 hover:text-zinc-700 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-zinc-100 transition-colors">
+              <X size={15} />
+            </button>
+          </div>
+
+          <form onSubmit={handleSend} className="p-6 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Campaign Name</label>
+                <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Campaign Name</label>
                 <input
                   required
                   placeholder="e.g. Summer Re-engagement"
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none focus:border-zinc-400"
+                  className="w-full px-3.5 py-2.5 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none focus:border-zinc-400 focus:bg-white transition-colors"
                 />
               </div>
-
               <div>
-                <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Target Segment</label>
+                <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Target Segment</label>
                 <select
                   value={form.segment}
                   onChange={e => setForm(f => ({ ...f, segment: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none"
+                  className="w-full px-3.5 py-2.5 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none"
                 >
                   {SEGMENTS.map(s => (
                     <option key={s.value} value={s.value}>{s.label}</option>
@@ -342,130 +444,198 @@ export default function Campaigns() {
                 </select>
                 {form.segment !== "custom" && (
                   <p className="text-xs text-zinc-400 mt-1">
-                    <span className="font-medium text-zinc-600">{targetEmails.length} recipient{targetEmails.length !== 1 ? "s" : ""}</span> matched
+                    <span className="font-semibold text-zinc-700">{targetEmails.length}</span> recipient{targetEmails.length !== 1 ? "s" : ""} matched
                   </p>
                 )}
               </div>
+            </div>
 
-              {form.segment === "custom" && (
-                <div className="space-y-3">
-                  {/* CSV file upload */}
-                  <div>
-                    <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Upload CSV / Text File</label>
-                    <div className="flex items-center gap-2">
-                      <label className="flex items-center gap-2 px-4 py-2 border border-dashed border-zinc-300 rounded-xl bg-zinc-50 hover:bg-zinc-100 cursor-pointer text-xs font-semibold text-zinc-600 transition-colors">
-                        <Upload size={13} />
-                        {fileName ? `${fileName} (${fileEmails.length} emails)` : "Choose file…"}
-                        <input
-                          ref={fileRef}
-                          type="file"
-                          accept=".csv,.txt,.tsv"
-                          className="hidden"
-                          onChange={handleFileUpload}
-                        />
-                      </label>
-                      {fileName && (
-                        <button type="button" onClick={clearFile} className="text-zinc-400 hover:text-red-500">
-                          <X size={14} />
-                        </button>
-                      )}
-                    </div>
-                    {fileEmails.length > 0 && (
-                      <p className="text-xs text-zinc-400 mt-1">{fileEmails.length} emails loaded from file</p>
-                    )}
-                  </div>
-
-                  {/* Manual paste */}
-                  <div>
-                    <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Or Paste Emails</label>
-                    <textarea
-                      placeholder="Paste emails separated by commas, semicolons, or newlines"
-                      rows={3}
-                      value={form.customEmails}
-                      onChange={e => setForm(f => ({ ...f, customEmails: e.target.value }))}
-                      className="w-full px-4 py-2.5 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none focus:border-zinc-400 resize-none"
-                    />
-                  </div>
-
-                  <p className="text-xs text-zinc-500 font-medium">
-                    Total: <span className="text-zinc-900">{targetEmails.length} unique valid email{targetEmails.length !== 1 ? "s" : ""}</span>
-                    {targetEmails.length > 0 && (
-                      <span className="text-zinc-400"> · ~{targetEmails.length} min to send all</span>
-                    )}
-                  </p>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Subject Line</label>
-                <input
-                  required
-                  placeholder="e.g. Special offer just for you"
-                  value={form.subject}
-                  onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none focus:border-zinc-400"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Message Body</label>
-                  <button
-                    type="button"
-                    onClick={() => setShowPreview(p => !p)}
-                    className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-900 transition-colors"
-                  >
-                    <Eye size={12} /> {showPreview ? "Hide" : "Preview"}
-                  </button>
+            {form.segment === "custom" && (
+              <div className="bg-zinc-50 rounded-xl p-4 border border-zinc-100 space-y-3">
+                <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 px-3.5 py-2 border border-dashed border-zinc-300 rounded-xl bg-white hover:bg-zinc-50 cursor-pointer text-xs font-semibold text-zinc-600 transition-colors">
+                    <Upload size={12} />
+                    {fileName ? `${fileName} (${fileEmails.length} emails)` : "Upload CSV…"}
+                    <input ref={fileRef} type="file" accept=".csv,.txt,.tsv" className="hidden" onChange={handleFileUpload} />
+                  </label>
+                  {fileName && (
+                    <button type="button" onClick={clearFile} className="text-zinc-400 hover:text-red-500 transition-colors">
+                      <X size={14} />
+                    </button>
+                  )}
                 </div>
                 <textarea
-                  required
-                  rows={8}
-                  placeholder={"Hi [name],\n\nWrite your message here...\n\nThanks,\nCleaniq Services"}
-                  value={form.body}
-                  onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
-                  className="w-full px-4 py-3 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none focus:border-zinc-400 resize-none font-mono"
+                  placeholder="Or paste emails — commas, semicolons, or newlines"
+                  rows={3}
+                  value={form.customEmails}
+                  onChange={e => setForm(f => ({ ...f, customEmails: e.target.value }))}
+                  className="w-full px-3.5 py-2.5 border border-zinc-200 rounded-xl bg-white text-sm outline-none focus:border-zinc-400 resize-none"
                 />
-                <p className="text-[11px] text-zinc-400 mt-1">
-                  Use [name] for the customer's first name. Plain text — line breaks are preserved.
+                <p className="text-xs text-zinc-500">
+                  <span className="font-semibold text-zinc-900">{targetEmails.length} unique email{targetEmails.length !== 1 ? "s" : ""}</span>
+                  {targetEmails.length > 0 && <span className="text-zinc-400"> · ~{targetEmails.length} min to send</span>}
                 </p>
               </div>
+            )}
 
-              {/* Preview panel */}
-              {showPreview && form.body && (
-                <div className="border border-zinc-200 rounded-xl bg-zinc-50 overflow-hidden">
-                  <div className="px-4 py-2.5 border-b border-zinc-100 bg-white">
-                    <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Email Preview</p>
-                    {form.subject && (
-                      <p className="text-sm font-semibold text-zinc-900 mt-1">{form.subject}</p>
+            <div>
+              <label className="block text-[10px] font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">Subject Line</label>
+              <input
+                required
+                placeholder="e.g. A special offer just for you"
+                value={form.subject}
+                onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
+                className="w-full px-3.5 py-2.5 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none focus:border-zinc-400 focus:bg-white transition-colors"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Message Body</label>
+                <button
+                  type="button"
+                  onClick={() => setShowPreview(p => !p)}
+                  className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-700 transition-colors"
+                >
+                  <Eye size={11} /> {showPreview ? "Hide preview" : "Preview"}
+                </button>
+              </div>
+              <textarea
+                required
+                rows={7}
+                placeholder={"Hi [name],\n\nWrite your message here...\n\nThanks,\nCleaniq Services"}
+                value={form.body}
+                onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
+                className="w-full px-3.5 py-3 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none focus:border-zinc-400 focus:bg-white transition-colors resize-none font-mono"
+              />
+              <p className="text-[11px] text-zinc-400 mt-1">Use [name] for the customer's first name.</p>
+            </div>
+
+            {showPreview && form.body && (
+              <div className="border border-zinc-200 rounded-xl overflow-hidden">
+                <div className="px-4 py-2.5 border-b border-zinc-100 bg-zinc-50">
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Email Preview</p>
+                  {form.subject && <p className="text-sm font-semibold text-zinc-900 mt-1">{form.subject}</p>}
+                </div>
+                <div className="px-5 py-4 text-sm text-zinc-700 whitespace-pre-wrap leading-relaxed max-h-56 overflow-y-auto">
+                  {form.body.replace(/\[name\]/gi, "Alex")}
+                </div>
+              </div>
+            )}
+
+            {targetEmails.length > 0 && (
+              <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800">
+                <Clock size={13} className="mt-0.5 shrink-0" />
+                <span><span className="font-semibold">Rate-limited:</span> {targetEmails.length} emails at 1/min (~{targetEmails.length} min). Sending continues after you close this page.</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={sending}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-zinc-700 disabled:opacity-50 transition-colors"
+            >
+              {sending ? (
+                <><RefreshCw size={14} className="animate-spin" /> Queuing…</>
+              ) : (
+                <><Send size={14} /> Queue Campaign{targetEmails.length > 0 ? ` (${targetEmails.length})` : ""}</>
+              )}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Campaign history */}
+      <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-zinc-900">Campaign History</h2>
+          <span className="text-xs text-zinc-400 font-medium">{campaigns.length} campaign{campaigns.length !== 1 ? "s" : ""}</span>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-5 h-5 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : campaigns.length === 0 ? (
+          <div className="text-center py-16 px-6">
+            <div className="w-12 h-12 bg-zinc-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+              <Mail size={20} className="text-zinc-400" />
+            </div>
+            <p className="text-sm font-semibold text-zinc-600">No campaigns yet</p>
+            <p className="text-xs text-zinc-400 mt-1">Click "New Campaign" to compose and send your first bulk email.</p>
+            <button
+              onClick={() => setShowComposer(true)}
+              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-zinc-900 text-white text-xs font-bold rounded-lg hover:bg-zinc-700 transition-colors"
+            >
+              <Plus size={12} /> New Campaign
+            </button>
+          </div>
+        ) : (
+          <div className="divide-y divide-zinc-50">
+            {campaigns.map(c => {
+              const isActive = c.status === "sending" || c.status === "queued";
+              const total = c.totalCount || c.recipientCount || 0;
+              const sent  = c.sentCount || 0;
+              const isDeleting = deletingId === c._id;
+
+              return (
+                <div
+                  key={c._id}
+                  className={`px-5 py-4 flex items-start gap-4 group transition-colors ${isDeleting ? "opacity-40" : "hover:bg-zinc-50/70"}`}
+                >
+                  {/* Icon */}
+                  <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center mt-0.5 ${
+                    isActive ? "bg-blue-50" : c.status === "sent" ? "bg-emerald-50" : c.status === "failed" ? "bg-red-50" : "bg-zinc-100"
+                  }`}>
+                    <MessageSquare size={15} className={
+                      isActive ? "text-blue-500" : c.status === "sent" ? "text-emerald-500" : c.status === "failed" ? "text-red-500" : "text-zinc-400"
+                    } />
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-bold text-zinc-900 truncate">{c.name || c.subject}</p>
+                      <StatusBadge status={c.status} />
+                    </div>
+                    <p className="text-xs text-zinc-500 truncate mt-0.5">{c.subject}</p>
+
+                    <div className="flex items-center gap-3 mt-1.5 text-[11px] text-zinc-400 flex-wrap">
+                      {total > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Users size={10} />
+                          {isActive ? `${sent}/${total}` : (c.status === "sent" ? total : total)} recipients
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1">
+                        <Clock size={10} />
+                        {fmtDate(c.sentAt || c.createdAt)}
+                      </span>
+                      {c.segment && c.segment !== "custom" && (
+                        <span className="px-1.5 py-0.5 bg-zinc-100 text-zinc-500 rounded font-medium">{c.segment}</span>
+                      )}
+                    </div>
+
+                    {isActive && total > 0 && <ProgressBar sent={sent} total={total} />}
+
+                    {c.status === "sent" && total > 0 && (
+                      <p className="text-[11px] text-emerald-600 font-semibold mt-1.5 flex items-center gap-1">
+                        <ChevronRight size={10} /> {sent || total} emails delivered
+                      </p>
                     )}
                   </div>
-                  <div className="px-5 py-4 text-sm text-zinc-700 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
-                    {form.body.replace(/\[name\]/gi, "John")}
-                  </div>
-                </div>
-              )}
 
-              {targetEmails.length > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800">
-                  <span className="font-semibold">Rate-limited:</span> {targetEmails.length} emails will be sent at 1 per minute (~{targetEmails.length} min). Sending continues in the background after you close this page.
+                  {/* Actions */}
+                  <CampaignMenu
+                    campaign={c}
+                    onView={setViewCampaign}
+                    onDelete={handleDelete}
+                  />
                 </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={sending}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-zinc-700 disabled:opacity-50 transition-colors"
-              >
-                {sending ? (
-                  <><RefreshCw size={15} className="animate-spin" /> Queuing…</>
-                ) : (
-                  <><Send size={15} /> Queue Campaign {targetEmails.length > 0 && `(${targetEmails.length})`}</>
-                )}
-              </button>
-            </form>
+              );
+            })}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

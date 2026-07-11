@@ -4,7 +4,9 @@ import {
   ArrowLeft, MapPin, Home as HomeIcon, Zap,
   CheckCircle2, ChevronLeft, ChevronRight, Plus, Minus,
   Briefcase, Star, Truck, User, Search,
-  Calendar, AlertCircle, RefreshCw, Clock,
+  Calendar, AlertCircle, RefreshCw, Clock, Repeat,
+  Sparkles, Layers, HardHat, Flame, PartyPopper, Shield,
+  Building2, Wrench,
 } from "lucide-react";
 import { LEAD_SOURCES } from "./Bookings";
 import { buildBookedRanges, overlapsExistingRange } from "../utils/timeOverlap";
@@ -237,19 +239,34 @@ const NewBookingPage = () => {
   /* ── Service options ────────────────────────────────────────────────── */
   const serviceOptions = useMemo(() => {
     const assets = {
-      residential: { tag:"Domestic cleaning",      icon:<HomeIcon size={18}/>,  defaultId:"Residential Cleaning" },
-      commercial:  { tag:"Office cleaning",         icon:<Briefcase size={18}/>, defaultId:"Office Cleaning" },
-      move:        { tag:"Deep clean",              icon:<Zap size={18}/>,       defaultId:"Deep Clean" },
-      airbnb:      { tag:"Short-let specialist",    icon:<Star size={18}/>,      defaultId:"Airbnb Cleaning" },
-      tenancy:     { tag:"Move-out clean",          icon:<Truck size={18}/>,     defaultId:"End of Tenancy" },
+      residential: { tag:"Regular domestic",          icon:<HomeIcon size={18}/>,     defaultId:"Regular Domestic Cleaning" },
+      oneoff:      { tag:"One-off / seasonal",         icon:<Sparkles size={18}/>,     defaultId:"One-Off House Clean" },
+      deep:        { tag:"Full deep clean",            icon:<Zap size={18}/>,          defaultId:"Deep Cleaning" },
+      airbnb:      { tag:"Holiday let specialist",     icon:<Star size={18}/>,         defaultId:"Airbnb & Holiday Let Cleaning" },
+      tenancy:     { tag:"Move-out clean",             icon:<Truck size={18}/>,        defaultId:"End of Tenancy Cleaning" },
+      movein:      { tag:"Move-in clean",              icon:<Building2 size={18}/>,    defaultId:"Move-In Cleaning" },
+      commercial:  { tag:"Office & workspace",         icon:<Briefcase size={18}/>,    defaultId:"Office Cleaning" },
+      carpet:      { tag:"Carpet & fabric care",       icon:<Layers size={18}/>,       defaultId:"Carpet & Upholstery Cleaning" },
+      builders:    { tag:"Post-construction",          icon:<HardHat size={18}/>,      defaultId:"After Builders / Post-Construction Clean" },
+      kitchen:     { tag:"Oven & kitchen specialist",  icon:<Flame size={18}/>,        defaultId:"Oven & Appliance Deep Clean" },
+      event:       { tag:"Post-party & events",        icon:<PartyPopper size={18}/>,  defaultId:"Post-Party & Event Clean" },
+      disinfect:   { tag:"Sanitisation & bio clean",   icon:<Shield size={18}/>,       defaultId:"Disinfection & Sanitisation" },
+      pressure:    { tag:"Outdoor & driveway",         icon:<Wrench size={18}/>,       defaultId:"Pressure Washing (Driveways & Patios)" },
     };
     const getKey = (name) => {
       const n = clean(name);
-      if (n.includes("residential")||n.includes("domestic")||n.includes("home")) return "residential";
-      if (n.includes("office")||n.includes("commercial")) return "commercial";
-      if (n.includes("deep")||n.includes("move")) return "move";
-      if (n.includes("airbnb")||n.includes("short")) return "airbnb";
-      if (n.includes("tenancy")||n.includes("moveout")) return "tenancy";
+      if (n.includes("carpet")||n.includes("upholstery")||n.includes("sofa")||n.includes("mattress")||n.includes("fabric")) return "carpet";
+      if (n.includes("builder")||n.includes("construction")||n.includes("postconstruction")) return "builders";
+      if (n.includes("kitchen")||n.includes("oven")||n.includes("appliance")) return "kitchen";
+      if (n.includes("party")||n.includes("event")||n.includes("postevent")||n.includes("postparty")) return "event";
+      if (n.includes("disinfect")||n.includes("sanitisat")||n.includes("biohazard")) return "disinfect";
+      if (n.includes("pressure")||n.includes("driveway")||n.includes("patio")||n.includes("outdoor")) return "pressure";
+      if (n.includes("airbnb")||n.includes("shortlet")||n.includes("holiday")||n.includes("guestchangeover")) return "airbnb";
+      if (n.includes("tenancy")||n.includes("moveout")||n.includes("endoftenancy")) return "tenancy";
+      if (n.includes("movein")) return "movein";
+      if (n.includes("office")||n.includes("commercial")||n.includes("retail")||n.includes("warehouse")||n.includes("gym")||n.includes("school")||n.includes("medical")||n.includes("restaurant")||n.includes("coworking")) return "commercial";
+      if (n.includes("deep")&&!n.includes("kitchen")) return "deep";
+      if (n.includes("oneoff")||n.includes("seasonal")||n.includes("spring")) return "oneoff";
       return "residential";
     };
     const bases = servicesList.filter(s => s.category==="Base");
@@ -305,7 +322,7 @@ const NewBookingPage = () => {
     if (f==="customer.phone")      return !v ? "Required" : v.replace(/\D/g,"").length<10 ? "Min 10 digits" : "";
     if (f==="service")             return !v ? "Select a service" : "";
     if (f==="details.address")     return (!v||v.trim().length<5) ? "At least 5 characters" : "";
-    if (f==="details.frequency")   return !["Once","Weekly","Bi-weekly","Monthly"].includes(v) ? "Select one" : "";
+    if (f==="details.frequency")   return !["Once","Weekly","Fortnightly","Monthly","Quarterly","Yearly"].includes(v) ? "Select one" : "";
     if (f==="details.duration")    return (!v||Number(v)<1) ? "Min 1 hour" : Number(v)>50 ? "Max 50 hours" : "";
     if (f==="schedule.date")       return !v ? "Required" : "";
     if (f==="schedule.timeSlot")   return !v ? "Required" : "";
@@ -415,9 +432,14 @@ const NewBookingPage = () => {
           <CheckCircle2 size={28} className="text-emerald-600"/>
         </div>
         <h2 className="text-xl font-bold text-zinc-900 mb-1">Booking Created</h2>
-        <p className="text-sm text-zinc-500 mb-6">
+        <p className="text-sm text-zinc-500 mb-2">
           {success.bookingId} — {noPaymentRequired && skipEmail ? "No email sent" : noPaymentRequired ? "Confirmation emailed (no payment link)" : "Payment link emailed to customer"}
         </p>
+        {success.meta?.recurringGroup && (
+          <p className="text-xs text-blue-600 font-semibold mb-4 flex items-center justify-center gap-1">
+            <Repeat size={12}/> Recurring series created — view all in Recurring Bookings
+          </p>
+        )}
 
         <div className="text-left space-y-2 mb-8">
           {[
@@ -595,9 +617,16 @@ const NewBookingPage = () => {
                           className={inputCls(formErrors["details.frequency"])}>
                           <option>Once</option>
                           <option>Weekly</option>
-                          <option>Bi-weekly</option>
+                          <option>Fortnightly</option>
                           <option>Monthly</option>
+                          <option>Quarterly</option>
+                          <option>Yearly</option>
                         </select>
+                        {data.details.frequency !== "Once" && (
+                          <p className="text-[11px] text-blue-600 mt-1 flex items-center gap-1">
+                            <Repeat size={10}/> {{Weekly:"12 weekly",Fortnightly:"12 fortnightly",Monthly:"12 monthly",Quarterly:"4 quarterly",Yearly:"2 yearly"}[data.details.frequency]} bookings will be auto-created as a series
+                          </p>
+                        )}
                       </Field>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
