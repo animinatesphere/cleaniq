@@ -40,7 +40,7 @@ router.patch("/settings/:type", async (req, res) => {
     const { enabled } = req.body;
     await SystemSetting.findOneAndUpdate(
       { key: `automation_${type}` },
-      { value: !!enabled, updatedAt: new Date() },
+      { $set: { value: !!enabled, updatedAt: new Date() } },
       { upsert: true, new: true }
     );
     res.json({ success: true, type, enabled: !!enabled });
