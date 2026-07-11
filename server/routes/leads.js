@@ -43,8 +43,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PATCH /api/leads/:id
-router.patch('/:id', async (req, res) => {
+// POST /api/leads/:id/update  (PATCH blocked by nginx — use POST)
+router.post('/:id/update', async (req, res) => {
   try {
     const allowed = ['name', 'email', 'phone', 'message', 'serviceInterest', 'source', 'stage', 'acknowledged'];
     const update = {};

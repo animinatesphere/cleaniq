@@ -315,7 +315,7 @@ export default function Pipeline() {
   const moveToStage = async (lead, newStage) => {
     setMovingId(lead._id);
     try {
-      await axios.patch(`${API}/leads/${lead._id}`, { stage: newStage });
+      await axios.post(`${API}/leads/${lead._id}/update`, { stage: newStage });
       setLeads(prev => prev.map(l => l._id === lead._id ? { ...l, stage: newStage } : l));
       if (selectedLead?._id === lead._id) setSelectedLead(l => ({ ...l, stage: newStage }));
     } catch {
@@ -337,7 +337,7 @@ export default function Pipeline() {
   };
 
   const saveLead = async (id, updates) => {
-    await axios.patch(`${API}/leads/${id}`, updates);
+    await axios.post(`${API}/leads/${id}/update`, updates);
     setLeads(prev => prev.map(l => l._id === id ? { ...l, ...updates } : l));
     setSelectedLead(l => l._id === id ? { ...l, ...updates } : l);
   };
