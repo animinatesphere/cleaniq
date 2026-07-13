@@ -250,6 +250,12 @@ const AdminLayout = () => {
           key: "invoice-builder",
           icon: <FileSignature size={20} />,
         },
+        {
+          name: "Commercial Hub",
+          path: "/admin/commercial",
+          key: "commercial",
+          icon: <Building2 size={20} />,
+        },
       ],
     },
     {

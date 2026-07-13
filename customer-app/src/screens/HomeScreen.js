@@ -9,7 +9,6 @@ import {
   Search, SlidersHorizontal, Bell, Star,
   CalendarDays, CheckCircle, Clock, Eye,
 } from "lucide-react-native";
-import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import { C } from "../theme/flat";
@@ -111,14 +110,14 @@ const HomeScreen = ({ navigation }) => {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const [sRes, bRes] = await Promise.all([
-        axios.get(`${API_URL}/services?region=UK`, { headers }),
-        axios.get(`${API_URL}/bookings?date=${todayISO()}`, { headers }).catch(() => ({ data: [] })),
+        fetch(`${API_URL}/services?region=UK`, { headers }).then((r) => r.json()),
+        fetch(`${API_URL}/bookings?date=${todayISO()}`, { headers }).then((r) => r.json()).catch(() => []),
       ]);
 
-      const base = (sRes.data || []).filter((s) => s.category === "Base");
+      const base = (sRes || []).filter((s) => s.category === "Base");
       setServices(base);
 
-      const ranges = buildRanges(bRes.data || []);
+      const ranges = buildRanges(bRes || []);
       setNextSlot(nextAvailableSlot(ranges));
     } catch {
       // ignore network errors — UI shows empty state

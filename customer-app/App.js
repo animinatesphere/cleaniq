@@ -6,7 +6,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
-import axios from "axios";
 import { Home, CalendarDays, User } from "lucide-react-native";
 import { AuthProvider, AuthContext, API_URL } from "./src/context/AuthContext";
 import OnboardingScreen from "./src/screens/OnboardingScreen";
@@ -114,6 +113,7 @@ const AppNavigation = () => {
   const { isLoading, userToken } = useContext(AuthContext);
   const [hasOnboarded,    setHasOnboarded]    = useState(false);
   const [checkingOnboard, setCheckingOnboard] = useState(true);
+  const [goToLogin,       setGoToLogin]       = useState(false);
   const notifListener    = useRef();
   const responseListener = useRef();
 
@@ -134,8 +134,13 @@ const AppNavigation = () => {
       const pushToken = await registerForPushNotificationsAsync();
       if (pushToken) {
         const token = await AsyncStorage.getItem("customerToken");
-        axios.post(`${API_URL}/customer-auth/push-token`, { token: pushToken }, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        fetch(`${API_URL}/customer-auth/push-token`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ token: pushToken }),
         }).catch(() => {});
       }
     })();
@@ -158,13 +163,21 @@ const AppNavigation = () => {
   }
 
   if (!hasOnboarded) {
-    return <OnboardingScreen onFinished={() => setHasOnboarded(true)} />;
+    return (
+      <OnboardingScreen
+        onFinished={() => setHasOnboarded(true)}
+        onLogin={() => { setGoToLogin(true); setHasOnboarded(true); }}
+      />
+    );
   }
 
   return (
     <NavigationContainer>
       <StatusBar style="light" />
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        initialRouteName={goToLogin ? "Login" : "Main"}
+        screenOptions={{ headerShown: false }}
+      >
         <Stack.Screen name="Main"          component={MainTabs} />
         <Stack.Screen name="Login"         component={LoginScreen} />
         <Stack.Screen name="Booking"       component={BookingScreen} />

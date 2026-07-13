@@ -45,7 +45,6 @@ import {
   CreditCard,
   Phone,
 } from "lucide-react-native";
-import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
@@ -240,9 +239,9 @@ const BookingScreen = ({ navigation }) => {
 
   // Fetch live service rates + load saved address from profile
   useEffect(() => {
-    axios.get(`${API_URL}/services`).then((res) => {
+    fetch(`${API_URL}/services`).then((r) => r.json()).then((data) => {
       const map = {};
-      (res.data || []).forEach((s) => { if (s.name && s.rate) map[s.name] = s.rate; });
+      (data || []).forEach((s) => { if (s.name && s.rate) map[s.name] = s.rate; });
       setRates(map);
     }).catch(() => {});
 
@@ -263,8 +262,9 @@ const BookingScreen = ({ navigation }) => {
     setBookedSlots([]);
     const d   = dateStr(form.date);
     const svc = encodeURIComponent(form.serviceType);
-    axios.get(`${API_URL}/bookings/availability/${d}/${svc}`)
-      .then((res) => setBookedSlots(res.data?.bookedSlots || []))
+    fetch(`${API_URL}/bookings/availability/${d}/${svc}`)
+      .then((r) => r.json())
+      .then((data) => setBookedSlots(data?.bookedSlots || []))
       .catch(() => setBookedSlots([]))
       .finally(() => setAvailLoading(false));
   }, [form.date, form.serviceType]);
@@ -337,14 +337,20 @@ const BookingScreen = ({ navigation }) => {
         meta:    { source: "Customer App" },
       };
 
-      const res = await axios.post(`${API_URL}/bookings`, payload, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      const res = await fetch(`${API_URL}/bookings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
       });
+      const resData = await res.json();
 
-      setBookingRef(res.data.bookingId || res.data._id || payload.bookingId);
+      setBookingRef(resData.bookingId || resData._id || payload.bookingId);
       setSubmitted(true);
     } catch (err) {
-      Alert.alert("Booking failed", err.response?.data?.message || "Something went wrong. Please try again.");
+      Alert.alert("Booking failed", "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }

@@ -8,7 +8,6 @@ import {
   CalendarDays, Clock, MapPin, ChevronRight,
   ClipboardList, Plus,
 } from "lucide-react-native";
-import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
@@ -113,10 +112,10 @@ const BookingsScreen = ({ navigation }) => {
   const fetchBookings = async () => {
     try {
       const token = await AsyncStorage.getItem("customerToken");
-      const res = await axios.get(`${API_URL}/customer-bookings`, {
+      const res = await fetch(`${API_URL}/customer-bookings`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      setBookings(res.data || []);
+      setBookings((await res.json()) || []);
     } catch {} finally { setLoading(false); setRefreshing(false); }
   };
 

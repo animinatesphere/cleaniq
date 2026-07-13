@@ -9,7 +9,6 @@ import {
   CheckCircle2, XCircle, Radio, Package, FileText,
   AlertTriangle, RefreshCw, Phone, MessageCircle,
 } from "lucide-react-native";
-import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
@@ -81,10 +80,11 @@ const BookingDetailScreen = ({ route, navigation }) => {
     setRefreshing(true);
     try {
       const token = await AsyncStorage.getItem("customerToken");
-      const res = await axios.get(`${API_URL}/customer-bookings`, {
+      const res = await fetch(`${API_URL}/customer-bookings`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      const found = (res.data || []).find((b) => b._id === bookingId);
+      const list = await res.json();
+      const found = (list || []).find((b) => b._id === bookingId);
       if (found) setBooking(found);
     } catch {} finally { setRefreshing(false); }
   };
@@ -97,8 +97,8 @@ const BookingDetailScreen = ({ route, navigation }) => {
     let iv;
     const poll = async () => {
       try {
-        const r = await axios.get(`${API_URL}/workers/jobs/${bookingId}/worker-location`);
-        setWorkerLoc(r.data);
+        const r = await fetch(`${API_URL}/workers/jobs/${bookingId}/worker-location`);
+        setWorkerLoc(await r.json());
       } catch { setWorkerLoc(null); }
     };
     poll();
@@ -119,15 +119,21 @@ const BookingDetailScreen = ({ route, navigation }) => {
             setCancelling(true);
             try {
               const token = await AsyncStorage.getItem("customerToken");
-              const res = await axios.put(
+              const res = await fetch(
                 `${API_URL}/customer-bookings/${bookingId}/cancel`,
-                {},
-                { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                  },
+                  body: JSON.stringify({}),
+                },
               );
               setBooking((b) => ({ ...b, status: "Cancelled" }));
               Alert.alert("Cancelled", "Your booking has been cancelled.");
             } catch (err) {
-              Alert.alert("Failed", err.response?.data?.message || "Could not cancel. Please call us.");
+              Alert.alert("Failed", "Could not cancel. Please call us.");
             } finally { setCancelling(false); }
           },
         },

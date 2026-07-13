@@ -76,7 +76,11 @@ const LoginScreen = ({ navigation }) => {
     const result = await login(loginEmail.trim().toLowerCase(), loginPassword);
     setLoading(false);
     if (result.success) {
-      navigation.canGoBack() ? navigation.goBack() : null;
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        navigation.replace("Main");
+      }
     } else {
       Alert.alert("Login failed", result.message);
     }
@@ -102,7 +106,11 @@ const LoginScreen = ({ navigation }) => {
     );
     setLoading(false);
     if (result.success) {
-      navigation.canGoBack() ? navigation.goBack() : null;
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        navigation.replace("Main");
+      }
     } else {
       Alert.alert("Sign up failed", result.message);
     }

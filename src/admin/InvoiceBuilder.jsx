@@ -41,6 +41,9 @@ const InvoiceBuilder = () => {
   const [showPaidBadge, setShowPaidBadge] = useState(false);
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState(null);
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
+  const [serviceDate, setServiceDate] = useState("");
   const [bookingRef, setBookingRef] = useState("");
   const [loadingBooking, setLoadingBooking] = useState(false);
   const [loadedBookingId, setLoadedBookingId] = useState(null);
@@ -87,14 +90,36 @@ const InvoiceBuilder = () => {
         `${data.customer?.firstName || ""} ${data.customer?.lastName || ""}`.trim(),
       );
       setCustomerEmail(data.customer?.email || "");
+      setCustomerPhone(data.customer?.phone || "");
+      setCustomerAddress(data.details?.address || "");
+
+      const rawDate = data.details?.date || data.scheduledDate || data.date || "";
+      if (rawDate) {
+        try {
+          setServiceDate(new Date(rawDate).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" }));
+        } catch { setServiceDate(rawDate); }
+      }
+
       const isFlatRate = data.payment?.billingType === "flat";
-      setItems([
-        {
-          description: `${data.service || "Cleaning Service"}${!isFlatRate && data.details?.duration ? ` (${data.details.duration} hrs)` : ""}`,
+      const duration = data.details?.duration;
+      const extras = Array.isArray(data.details?.extras) ? data.details.extras : [];
+      const bedrooms = data.details?.bedrooms;
+
+      const mainDesc = [
+        data.service || "Cleaning Service",
+        bedrooms ? `${bedrooms} bed` : "",
+        !isFlatRate && duration ? `${duration} hrs` : "",
+      ].filter(Boolean).join(" · ");
+
+      const lineItems = [
+        { description: mainDesc, qty: 1, rate: Number(data.payment?.amount || 0) },
+        ...extras.map((ex) => ({
+          description: typeof ex === "string" ? ex : ex.name || ex.label || String(ex),
           qty: 1,
-          rate: Number(data.payment?.amount || 0),
-        },
-      ]);
+          rate: Number(ex.price || ex.amount || 0),
+        })),
+      ];
+      setItems(lineItems);
       setLoadedBookingId(data._id);
       setToast({
         msg: `Loaded booking ${data.bookingId}`,
@@ -114,6 +139,9 @@ const InvoiceBuilder = () => {
     invoiceNumber,
     customerName,
     customerEmail,
+    customerPhone,
+    customerAddress,
+    serviceDate,
     invoiceDate,
     items,
     notes,
@@ -241,8 +269,17 @@ const InvoiceBuilder = () => {
 </div>
 <div class="body">
   <div class="meta">
-    <div><div class="ml">Billed To</div><div class="mn">${customerName || "—"}</div><div class="me">${customerEmail || ""}</div></div>
-    <div style="text-align:right"><div class="ml">Date</div><div class="mn">${invoiceDate}</div></div>
+    <div>
+      <div class="ml">Billed To</div>
+      <div class="mn">${customerName || "—"}</div>
+      <div class="me">${customerEmail || ""}</div>
+      ${customerPhone ? `<div class="me">${customerPhone}</div>` : ""}
+      ${customerAddress ? `<div class="me">${customerAddress}</div>` : ""}
+    </div>
+    <div style="text-align:right">
+      <div class="ml">Invoice Date</div><div class="mn">${invoiceDate}</div>
+      ${serviceDate ? `<div class="ml" style="margin-top:10px">Service Date</div><div class="mn">${serviceDate}</div>` : ""}
+    </div>
   </div>
   <table>
     <thead><tr><th>Description</th><th style="text-align:right">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead>
@@ -353,6 +390,40 @@ const InvoiceBuilder = () => {
                 className="w-full p-3 rounded-xl border-2 border-slate-200 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
               />
             </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                Customer Phone
+              </label>
+              <input
+                type="tel"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                placeholder="+44 7700 000000"
+                className="w-full p-3 rounded-xl border-2 border-slate-200 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                Service Date
+              </label>
+              <input
+                value={serviceDate}
+                onChange={(e) => setServiceDate(e.target.value)}
+                placeholder="e.g. 15 July 2026"
+                className="w-full p-3 rounded-xl border-2 border-slate-200 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+              Property / Service Address
+            </label>
+            <input
+              value={customerAddress}
+              onChange={(e) => setCustomerAddress(e.target.value)}
+              placeholder="Full property address"
+              className="w-full p-3 rounded-xl border-2 border-slate-200 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+            />
           </div>
 
           <div>
@@ -527,15 +598,23 @@ const InvoiceBuilder = () => {
                 <p className="font-bold mt-1">
                   {customerName || "Customer Name"}
                 </p>
-                <p className="text-slate-500">
-                  {customerEmail || "customer@email.com"}
-                </p>
+                <p className="text-slate-500">{customerEmail || "customer@email.com"}</p>
+                {customerPhone && <p className="text-slate-500">{customerPhone}</p>}
+                {customerAddress && <p className="text-slate-500">{customerAddress}</p>}
               </div>
               <div className="text-right">
                 <p className="text-[9px] font-black text-slate-400 uppercase">
-                  Date
+                  Invoice Date
                 </p>
                 <p className="font-bold mt-1">{invoiceDate}</p>
+                {serviceDate && (
+                  <>
+                    <p className="text-[9px] font-black text-slate-400 uppercase mt-2">
+                      Service Date
+                    </p>
+                    <p className="font-bold">{serviceDate}</p>
+                  </>
+                )}
               </div>
             </div>
 

@@ -3,11 +3,11 @@
     "name": "Cleaniq Service",
     "slug": "cleaniq-customer",
     "scheme": "cleaniqcustomer",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "platforms": [
-      "web",
       "ios",
-      "android"
+      "android",
+      "web"
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.jpg",
@@ -20,12 +20,14 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.cleaniq.customer",
+      "jsEngine": "hermes",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "com.cleaniq.customer",
+      "jsEngine": "hermes",
       "adaptiveIcon": {
         "backgroundColor": "#0A5C43",
         "foregroundImage": "./assets/icon.jpg"
@@ -34,25 +36,11 @@
         "android.permission.POST_NOTIFICATIONS"
       ]
     },
-    "plugins": [
-      [
-        "expo-updates",
-        {
-          "username": "hexcode"
-        }
-      ]
-    ],
     "extra": {
       "eas": {
-        "projectId": "15337943-4313-40d1-b40f-81988d4b3be3"
+        "projectId": "3b274192-4aec-474b-b5c1-4c5a05438455"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "enabled": false
-    },
-    "owner": "hexcode"
+    "owner": "hexcode-dan"
   }
 }

@@ -1,4 +1,4 @@
-// React import not required with new JSX transform
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Globe,
@@ -14,6 +14,25 @@ import logo2 from "../assets/lOGO.png";
 
 const Footer = () => {
   const { region } = useRegion();
+
+  useEffect(() => {
+    if (document.getElementById("mjq-widget-script")) return;
+    const script = document.createElement("script");
+    script.id = "mjq-widget-script";
+    script.src = "https://www.myjobquote.co.uk/js/widget.js";
+    script.async = true;
+    script.onload = () => {
+      try {
+        (new window.MyJobQuoteWidget()).init({
+          targetId: "mjq-widget",
+          userId: "usr_wzjss6dgfba6cphndxrohgshe33h",
+          badgeName: "standard-badge",
+        });
+      } catch {}
+    };
+    document.body.appendChild(script);
+  }, []);
+
   return (
     <footer className="bg-primary-dark text-white pt-20 pb-10 px-6 relative overflow-hidden">
       {/* Decorative Elements */}
@@ -155,9 +174,12 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest">
-            © 2026 Cleaniq Services. PROUDLY ECO-CONSCIOUS.
-          </p>
+          <div className="flex items-center gap-6">
+            <p className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest">
+              © 2026 Cleaniq Services. PROUDLY ECO-CONSCIOUS.
+            </p>
+            <div id="mjq-widget" />
+          </div>
           <div className="flex gap-6">
             <Link
               to="/privacy"

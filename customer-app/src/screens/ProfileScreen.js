@@ -32,7 +32,6 @@ import {
   Calendar,
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
 
@@ -257,18 +256,22 @@ const ProfileScreen = ({ navigation }) => {
     setChangingPwd(true);
     try {
       const token = await AsyncStorage.getItem("customerToken");
-      await axios.patch(
-        `${API_URL}/customer-auth/change-password`,
-        { currentPassword: currentPwd, newPassword: newPwd },
-        { headers: token ? { Authorization: `Bearer ${token}` } : {} },
-      );
+      const res = await fetch(`${API_URL}/customer-auth/change-password`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ currentPassword: currentPwd, newPassword: newPwd }),
+      });
+      const data = await res.json();
       setChangingPwd(false);
       setEditingPwd(false);
       setCurrentPwd(""); setNewPwd(""); setConfirmPwd("");
       Alert.alert("Password updated", "Your password has been changed successfully.");
     } catch (err) {
       setChangingPwd(false);
-      Alert.alert("Failed", err.response?.data?.message || "Could not change password.");
+      Alert.alert("Failed", "Could not change password.");
     }
   };
 

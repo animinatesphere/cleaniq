@@ -6,7 +6,6 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { ChevronLeft, Send, MessageCircle } from "lucide-react-native";
-import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
@@ -35,11 +34,11 @@ const ChatScreen = ({ route, navigation }) => {
 
   const fetchMessages = async () => {
     try {
-      const res = await axios.get(
+      const res = await fetch(
         `${API_URL}/customer-chat/worker-messages/${bookingId}`,
         { headers: headers() },
       );
-      setMessages(res.data || []);
+      setMessages((await res.json()) || []);
       setTimeout(() => listRef.current?.scrollToEnd({ animated: false }), 80);
     } catch {}
     finally { setLoading(false); }
@@ -57,12 +56,16 @@ const ChatScreen = ({ route, navigation }) => {
     setText("");
     setSending(true);
     try {
-      const res = await axios.post(
+      const res = await fetch(
         `${API_URL}/customer-chat/worker-messages/${bookingId}`,
-        { text: msg },
-        { headers: headers() },
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...headers() },
+          body: JSON.stringify({ text: msg }),
+        },
       );
-      setMessages((prev) => [...prev, res.data]);
+      const newMsg = await res.json();
+      setMessages((prev) => [...prev, newMsg]);
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 80);
     } catch {
       setText(msg);

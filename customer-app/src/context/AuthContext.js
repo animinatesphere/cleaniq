@@ -1,10 +1,19 @@
 import React, { createContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
 
 export const AuthContext = createContext();
 
 export const API_URL = "https://api.cleaniqservices.com/api";
+
+const apiFetch = async (url, options = {}) => {
+  const res = await fetch(url, {
+    ...options,
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+  });
+  const data = await res.json();
+  if (!res.ok) throw { response: { data } };
+  return { data };
+};
 
 export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -13,12 +22,9 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (firstName, lastName, email, phone, password) => {
     try {
-      const response = await axios.post(`${API_URL}/customer-auth/register`, {
-        firstName,
-        lastName,
-        email,
-        phone,
-        password,
+      const response = await apiFetch(`${API_URL}/customer-auth/register`, {
+        method: "POST",
+        body: JSON.stringify({ firstName, lastName, email, phone, password }),
       });
       const { token, customer } = response.data;
       await AsyncStorage.setItem("customerToken", token);
@@ -38,16 +44,13 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API_URL}/customer-auth/login`, {
-        email,
-        password,
+      const response = await apiFetch(`${API_URL}/customer-auth/login`, {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
       });
-
       const { token, customer } = response.data;
-
       await AsyncStorage.setItem("customerToken", token);
       await AsyncStorage.setItem("customerInfo", JSON.stringify(customer));
-
       setUserToken(token);
       setCustomerInfo(customer);
       return { success: true };
@@ -64,8 +67,10 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (fields) => {
     try {
       const token = await AsyncStorage.getItem("customerToken");
-      const res = await axios.patch(`${API_URL}/customer-auth/profile`, fields, {
+      const res = await apiFetch(`${API_URL}/customer-auth/profile`, {
+        method: "PATCH",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: JSON.stringify(fields),
       });
       const updated = res.data.customer;
       await AsyncStorage.setItem("customerInfo", JSON.stringify(updated));
@@ -92,13 +97,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = await AsyncStorage.getItem("customerToken");
       const info = await AsyncStorage.getItem("customerInfo");
-
       if (token && info) {
         setUserToken(token);
         setCustomerInfo(JSON.parse(info));
       }
     } catch (e) {
-      console.log("AsyncStorage error:", e);
+      // ignore storage errors on startup
     } finally {
       setIsLoading(false);
     }
@@ -110,15 +114,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{
-        login,
-        register,
-        logout,
-        updateProfile,
-        isLoading,
-        userToken,
-        customerInfo,
-      }}
+      value={{ login, register, logout, updateProfile, isLoading, userToken, customerInfo }}
     >
       {children}
     </AuthContext.Provider>

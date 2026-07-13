@@ -54,7 +54,7 @@ const SLIDES = [
   },
 ];
 
-const OnboardingScreen = ({ onFinished }) => {
+const OnboardingScreen = ({ onFinished, onLogin }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollViewRef = useRef(null);
 
@@ -146,6 +146,20 @@ const OnboardingScreen = ({ onFinished }) => {
             </Text>
             <ArrowRight size={18} color={C.primaryDark} strokeWidth={2.5} />
           </TouchableOpacity>
+
+          {/* Always-visible Log In link for returning users / Apple reviewers */}
+          <TouchableOpacity
+            style={styles.loginLink}
+            onPress={async () => {
+              try { await AsyncStorage.setItem("@has_onboarded", "true"); } catch {}
+              if (onLogin) onLogin();
+            }}
+          >
+            <Text style={styles.loginLinkText}>
+              Already have an account?{"  "}
+              <Text style={styles.loginLinkBold}>Log In</Text>
+            </Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </View>
@@ -225,6 +239,21 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "800",
     color: C.primaryDark,
+  },
+  loginLink: {
+    alignItems: "center",
+    marginTop: 16,
+    paddingVertical: 8,
+  },
+  loginLinkText: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.75)",
+    fontWeight: "500",
+  },
+  loginLinkBold: {
+    color: "#FFFFFF",
+    fontWeight: "800",
+    textDecorationLine: "underline",
   },
 });
 
