@@ -33,6 +33,7 @@ import {
   Sparkles,
   ChevronDown,
   FileText,
+  Camera,
 } from "lucide-react";
 import AdminCRM from "./AdminCRM";
 import { buildBookedRanges, overlapsExistingRange } from "../utils/timeOverlap";
@@ -2097,6 +2098,7 @@ const Bookings = () => {
   const [bookedDates, setBookedDates] = useState([]);
   const [bookedSlotsByDate, setBookedSlotsByDate] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [showCancelled, setShowCancelled] = useState(false);
   const [editData, setEditData] = useState({});
   const [statusMessage, setStatusMessage] = useState({ type: "", text: "" });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -2897,6 +2899,7 @@ ${extrasRows}
     return bookings.filter(
       (b) =>
         b.status !== "Blackout" &&
+        (showCancelled || b.status !== "Cancelled") &&
         (b.customer?.firstName
           ?.toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
@@ -2905,7 +2908,7 @@ ${extrasRows}
             .includes(searchTerm.toLowerCase()) ||
           b.bookingId?.toLowerCase().includes(searchTerm.toLowerCase())),
     );
-  }, [bookings, searchTerm]);
+  }, [bookings, searchTerm, showCancelled]);
 
   const bookingsTotalPages = Math.max(1, Math.ceil(filteredBookings.length / BOOKINGS_PAGE_SIZE));
   const bookingsSafePage   = Math.min(bookingsPage, bookingsTotalPages);
@@ -3160,6 +3163,13 @@ ${extrasRows}
                 className="bg-transparent outline-none text-sm font-medium w-full text-slate-700"
               />
             </div>
+            <button
+              onClick={() => setShowCancelled((v) => !v)}
+              className={`px-4 py-2 rounded-xl border text-sm font-semibold transition-all flex items-center gap-2 ${showCancelled ? "bg-rose-50 border-rose-200 text-rose-600" : "bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300"}`}
+            >
+              <span className={`w-2 h-2 rounded-full ${showCancelled ? "bg-rose-500" : "bg-slate-300"}`} />
+              {showCancelled ? "Hiding cancelled" : "Show cancelled"}
+            </button>
             {selectedBookings.size > 0 && (
               <button
                 onClick={() => setShowBulkDeleteModal(true)}
@@ -4441,6 +4451,39 @@ ${extrasRows}
                       )}
                     </div>
                   </div>
+
+                  {/* Worker Before & After Photos */}
+                  {(selectedBooking.photos?.before || selectedBooking.photos?.after) && (
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <Camera size={14} /> Worker Photos
+                      </h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        {selectedBooking.photos?.before && (
+                          <div>
+                            <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-2">Before</p>
+                            <img
+                              src={selectedBooking.photos.before}
+                              alt="Before clean"
+                              className="w-full rounded-2xl object-cover border border-slate-200"
+                              style={{ aspectRatio: "4/3" }}
+                            />
+                          </div>
+                        )}
+                        {selectedBooking.photos?.after && (
+                          <div>
+                            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-2">After</p>
+                            <img
+                              src={selectedBooking.photos.after}
+                              alt="After clean"
+                              className="w-full rounded-2xl object-cover border border-slate-200"
+                              style={{ aspectRatio: "4/3" }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>

@@ -65,6 +65,7 @@ import Referrals from "./admin/Referrals";
 import Campaigns from "./admin/Campaigns";
 import CustomerProfile from "./admin/CustomerProfile";
 import CommercialHub from "./admin/CommercialHub";
+import PriceList from "./admin/PriceList";
 
 function App() {
   const location = useLocation();
@@ -139,6 +140,7 @@ function App() {
               <Route path="worker-performance" element={<WorkerPerformance />} />
               <Route path="referrals" element={<Referrals />} />
               <Route path="commercial" element={<CommercialHub />} />
+              <Route path="pricelist" element={<PriceList />} />
               <Route path="campaigns" element={<Campaigns />} />
               <Route path="customers/:id" element={<CustomerProfile />} />
             </Route>

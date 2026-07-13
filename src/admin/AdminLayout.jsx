@@ -41,6 +41,7 @@ import {
   BarChart2,
   Share2,
   Megaphone,
+  Tag,
 } from "lucide-react";
 import Login from "./Login";
 import logo from "../assets/logo DP2.jpg";
@@ -255,6 +256,12 @@ const AdminLayout = () => {
           path: "/admin/commercial",
           key: "commercial",
           icon: <Building2 size={20} />,
+        },
+        {
+          name: "Price List",
+          path: "/admin/pricelist",
+          key: "pricelist",
+          icon: <Tag size={20} />,
         },
       ],
     },

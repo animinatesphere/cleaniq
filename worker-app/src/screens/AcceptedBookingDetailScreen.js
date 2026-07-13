@@ -72,6 +72,9 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   const [afterPhoto, setAfterPhoto] = useState(null);
   const [photoUploading, setPhotoUploading] = useState(null); // "before" | "after" | null
 
+  // Cleaning checklist
+  const [checkedTasks, setCheckedTasks] = useState({});
+
   const isJobTomorrowOrLater = useCallback(() => {
     if (!booking || !booking.schedule || !booking.schedule.date) return false;
     const jobDate = new Date(booking.schedule.date);
@@ -97,24 +100,98 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     }
   };
 
-  const takePhoto = async (type) => {
-    // Ask for camera permission
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        "Camera Permission Required",
-        "Please allow camera access to take before/after photos.",
-      );
-      return;
+  const getChecklistForService = (service) => {
+    const name = (service || "").toLowerCase();
+    if (name.includes("tenancy") || name.includes("deep")) {
+      return [
+        "Dust ceiling corners & light fixtures",
+        "Deep clean inside cupboards & oven",
+        "Scrub bath, tiles & shower cabin",
+        "Clean inside windows & window sills",
+        "Clean doors, skirting boards & door frames",
+        "Vacuum and mop all floor surfaces",
+        "Descale taps, showerhead & toilet",
+        "Empty and clean all bins",
+        "Check all rooms for any items left behind",
+      ];
     }
+    if (name.includes("airbnb") || name.includes("commercial")) {
+      return [
+        "Replace all bed linen and towels",
+        "Restock bathroom consumables (soap, toilet roll)",
+        "Dust all surfaces and furniture",
+        "Clean bathroom — scrub toilet, sink, bath/shower",
+        "Wipe kitchen worktops, hob & appliances",
+        "Vacuum all carpets and rugs",
+        "Mop hard floor surfaces",
+        "Empty all bins and replace bin liners",
+        "Check for lost property and damage",
+        "Take before and after photos",
+      ];
+    }
+    return [
+      "Dust and polish all hard surfaces",
+      "Empty bins and replace liners",
+      "Vacuum all rugs and carpets",
+      "Scrub toilet, sink and shower/bath",
+      "Wipe down kitchen exterior worktops",
+      "Clean kitchen appliance exteriors",
+      "Mop hard floors",
+    ];
+  };
 
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.75,
-      base64: true,
-    });
+  const toggleTask = (index) => {
+    const key = `${bookingId}_${index}`;
+    setCheckedTasks((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const takePhoto = async (type) => {
+    Alert.alert(
+      `${type === "before" ? "Before" : "After"} Photo`,
+      "How would you like to add the photo?",
+      [
+        {
+          text: "Take Photo",
+          onPress: () => capturePhoto(type, "camera"),
+        },
+        {
+          text: "Choose from Gallery",
+          onPress: () => capturePhoto(type, "gallery"),
+        },
+        { text: "Cancel", style: "cancel" },
+      ]
+    );
+  };
+
+  const capturePhoto = async (type, source) => {
+    let result;
+    if (source === "camera") {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Camera Permission Required", "Please allow camera access to take photos.");
+        return;
+      }
+      result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.75,
+        base64: true,
+      });
+    } else {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Gallery Permission Required", "Please allow gallery access to choose photos.");
+        return;
+      }
+      result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.75,
+        base64: true,
+      });
+    }
 
     if (result.canceled) return;
 
@@ -133,8 +210,11 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         photo: photoData,
       });
     } catch (err) {
-      console.warn("Photo upload failed, stored locally:", err?.message);
-      // Keep the local preview even if upload fails
+      Alert.alert(
+        "Upload Failed",
+        "Photo saved locally but could not be uploaded. Please check your connection and try again.",
+        [{ text: "OK" }]
+      );
     } finally {
       setPhotoUploading(null);
     }
@@ -574,6 +654,56 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
         )}
+
+        {/* ── Cleaning Checklist ──────────────────────────────── */}
+        {["Assigned", "Arrived", "In Progress", "Completed"].includes(booking.status) && (() => {
+          const tasks = getChecklistForService(booking.service);
+          const doneCount = tasks.filter((_, i) => checkedTasks[`${bookingId}_${i}`]).length;
+          return (
+            <View style={styles.section}>
+              <View style={styles.checklistHeader}>
+                <Text style={styles.sectionTitle}>✅ Cleaning Checklist</Text>
+                <View style={styles.checklistProgress}>
+                  <Text style={styles.checklistProgressText}>
+                    {doneCount}/{tasks.length}
+                  </Text>
+                </View>
+              </View>
+
+              {/* progress bar */}
+              <View style={styles.checklistBar}>
+                <View
+                  style={[
+                    styles.checklistBarFill,
+                    { width: tasks.length > 0 ? `${(doneCount / tasks.length) * 100}%` : "0%" },
+                  ]}
+                />
+              </View>
+
+              <View style={styles.checklistCard}>
+                {tasks.map((task, i) => {
+                  const key = `${bookingId}_${i}`;
+                  const done = !!checkedTasks[key];
+                  return (
+                    <TouchableOpacity
+                      key={i}
+                      style={[styles.checklistRow, done && styles.checklistRowDone]}
+                      onPress={() => toggleTask(i)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.checklistCircle, done && styles.checklistCircleDone]}>
+                        {done && <CheckCircle2 size={14} color="#fff" strokeWidth={2.5} />}
+                      </View>
+                      <Text style={[styles.checklistTaskText, done && styles.checklistTaskDone]}>
+                        {task}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          );
+        })()}
 
         {/* ── Before & After Photos ───────────────────────────── */}
         {["Arrived", "In Progress", "Completed"].includes(booking.status) && (
@@ -1141,6 +1271,73 @@ const styles = StyleSheet.create({
     borderColor: "#A7D9B8",
   },
   completedText: { fontSize: 14, fontWeight: "700", color: "#1A5C33" },
+
+  // Checklist
+  checklistHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  checklistProgress: {
+    backgroundColor: "#0F6B4C",
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  checklistProgressText: { fontSize: 12, fontWeight: "800", color: "#fff" },
+  checklistBar: {
+    height: 5,
+    borderRadius: 4,
+    backgroundColor: "#D1FAE5",
+    marginBottom: 12,
+    overflow: "hidden",
+  },
+  checklistBarFill: {
+    height: "100%",
+    borderRadius: 4,
+    backgroundColor: "#0F6B4C",
+  },
+  checklistCard: {
+    borderRadius: 16,
+    overflow: "hidden",
+    ...neuRaisedSm,
+  },
+  checklistRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+    borderBottomWidth: 1,
+    borderBottomColor: "#EAF5EE",
+  },
+  checklistRowDone: { backgroundColor: "#F0FDF4" },
+  checklistCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: "#A7D9B8",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  checklistCircleDone: {
+    backgroundColor: "#0F6B4C",
+    borderColor: "#0F6B4C",
+  },
+  checklistTaskText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#1A2E22",
+    lineHeight: 18,
+  },
+  checklistTaskDone: {
+    color: "#86A892",
+    textDecorationLine: "line-through",
+  },
 
   // Before & After Photos
   photoBlock: {

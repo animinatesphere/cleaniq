@@ -411,6 +411,7 @@ const NewBookingPage = () => {
     const m = {};
     bookings.forEach(b => {
       if (!b.schedule?.date) return;
+      if (b.status === "Cancelled") return;
       const d = new Date(b.schedule.date);
       const k = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
       m[k] = m[k]||[];
