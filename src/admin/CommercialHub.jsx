@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import QuoteBuilderComponent from "./QuoteBuilder";
 import InvoiceBuilderComponent from "./InvoiceBuilder";
+import logoSrc from "../assets/logo DP.jpg";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -140,34 +141,45 @@ const PropertyReport = () => {
   const condObj = CONDITIONS.find((c) => c.id === condition);
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "—";
 
-  const CSS = `*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:12px;color:#1e293b;padding:32px}
-.hdr{display:flex;justify-content:space-between;border-bottom:2px solid #0A5C43;padding-bottom:16px;margin-bottom:24px}
-.brand{font-size:20px;font-weight:900;color:#0A5C43}.brand small{display:block;font-size:10px;font-weight:400;color:#64748b}
-.meta{text-align:right;font-size:11px;color:#475569;line-height:1.7}
-h2{font-size:13px;font-weight:700;color:#0A5C43;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px}
-.badge{display:inline-block;padding:3px 12px;border-radius:999px;font-weight:700;font-size:11px;margin-top:8px}
+  const CSS = `*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:12px;color:#1e293b;background:#fff}
+@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+.hdr{background:#0A5C43;display:flex;justify-content:space-between;align-items:center;padding:28px 40px;margin-bottom:0}
+.hdr-logo{height:56px;border-radius:8px;display:block}
+.hdr-meta{text-align:right;font-size:11px;color:rgba(255,255,255,.75);line-height:1.8}
+.hdr-meta strong{color:#fff;font-size:13px}
+.sub-hdr{background:#f0fdf4;border-bottom:1px solid #d1fae5;padding:14px 40px;display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.sub-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#0A5C43}
+.badge{display:inline-block;padding:3px 12px;border-radius:999px;font-weight:700;font-size:11px}
 .slightly{background:#fef9c3;color:#854d0e}.moderately{background:#ffedd5;color:#9a3412}.very{background:#fee2e2;color:#991b1b}
-table{width:100%;border-collapse:collapse;font-size:11px}th{background:#f1f5f9;text-align:left;padding:6px 8px;font-size:10px;text-transform:uppercase;color:#64748b}td{padding:6px 8px;border-bottom:1px solid #f1f5f9}
-.cl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}.cli{display:flex;gap:5px;align-items:center;font-size:11px;padding:4px 6px;background:#f8fafc;border-radius:4px}
-.chk{color:#16a34a;font-weight:700}.unchk{color:#cbd5e1}
-.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.pgrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0}
-.foot{margin-top:32px;border-top:1px solid #e2e8f0;padding-top:12px;text-align:center;font-size:10px;color:#94a3b8}`;
+.body{padding:0 40px 40px}
+h2{font-size:12px;font-weight:800;color:#0A5C43;margin:24px 0 10px;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #d1fae5;padding-bottom:6px}
+table{width:100%;border-collapse:collapse;font-size:11px}th{background:#f8fafc;text-align:left;padding:7px 10px;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;border-bottom:2px solid #e2e8f0}td{padding:7px 10px;border-bottom:1px solid #f1f5f9}
+.cl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}.cli{display:flex;gap:6px;align-items:center;font-size:11px;padding:5px 8px;background:#f8fafc;border-radius:6px;border:1px solid #f1f5f9}
+.chk{color:#16a34a;font-weight:800}.unchk{color:#cbd5e1}
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.pgrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0}
+.foot{margin-top:40px;border-top:1px solid #e2e8f0;padding-top:14px;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#94a3b8}`;
 
   // withPhotos=true for print/download, false for email (keeps size manageable)
-  const buildHtml = (withPhotos = true) => `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  const buildHtml = (withPhotos = true) => {
+    const logoUrl = `${window.location.origin}${logoSrc}`;
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>Property Report — ${info.propertyName || "Cleaniq"}</title>
 <style>${CSS}</style></head><body>
 <div class="hdr">
-  <div><div class="brand">Cleaniq Services<small>Property Condition Report</small></div>
-  ${condObj ? `<div class="badge ${condition}">${condObj.label}</div>` : ""}</div>
-  <div class="meta">
-    <p><strong>${info.propertyName || "—"}</strong></p>
-    <p>${info.address || ""}</p>
+  <img src="${logoUrl}" alt="Cleaniq Services" class="hdr-logo" />
+  <div class="hdr-meta">
+    <p><strong>${info.propertyName || "Property Report"}</strong></p>
+    ${info.address ? `<p>${info.address}</p>` : ""}
     <p>Date: ${fmtDate(info.date)}</p>
-    <p>Booking Ref: ${info.bookingRef || "—"}</p>
-    <p>Cleaner: ${info.cleaner || "—"}</p>
+    ${info.bookingRef ? `<p>Ref: ${info.bookingRef}</p>` : ""}
+    ${info.cleaner ? `<p>Cleaner: ${info.cleaner}</p>` : ""}
   </div>
 </div>
+<div class="sub-hdr">
+  <span class="sub-title">Property Condition Report</span>
+  ${condObj ? `<div class="badge ${condition}">${condObj.label}</div>` : "<span></span>"}
+</div>
+<div class="body">
 ${withPhotos && before.length ? `<h2>Before Photos</h2><div class="pgrid">${before.map((s) => `<img src="${s}">`).join("")}</div>` : before.length ? `<p style="font-size:11px;color:#64748b;margin:8px 0">📷 ${before.length} before photo(s) — see downloaded report for full images.</p>` : ""}
 ${withPhotos && after.length ? `<h2>After Photos</h2><div class="pgrid">${after.map((s) => `<img src="${s}">`).join("")}</div>` : after.length ? `<p style="font-size:11px;color:#64748b;margin:8px 0">📷 ${after.length} after photo(s) — see downloaded report for full images.</p>` : ""}
 ${damages.length ? `<h2>Damage Report</h2><table><tr><th>Item</th><th>Location</th><th>Severity</th><th>Description</th></tr>${damages.map((d) => `<tr><td>${d.item}</td><td>${d.location}</td><td>${d.severity}</td><td>${d.description}</td></tr>`).join("")}</table>` : ""}
@@ -175,9 +187,14 @@ ${damages.length ? `<h2>Damage Report</h2><table><tr><th>Item</th><th>Location</
 <h2>Consumables Replenish</h2><div class="cl">${CONSUMABLES.map((s) => `<div class="cli"><span class="${consumables[s] ? "chk" : "unchk"}">${consumables[s] ? "✓" : "○"}</span>${s}${consumables[`qty_${s}`] ? ` ×${consumables[`qty_${s}`]}` : ""}</div>`).join("")}</div>
 ${withPhotos && vendingPhoto ? `<h2>Vending Machine</h2><img src="${vendingPhoto}" style="max-width:220px;border-radius:8px;border:1px solid #e2e8f0">` : ""}
 <h2>Inventory Report</h2><table><tr><th>Item</th><th>Expected</th><th>Actual</th><th>Discrepancy</th><th>Notes</th></tr>${inventory.map((r) => { const disc = r.expected !== "" && r.actual !== "" && String(r.expected) !== String(r.actual); return `<tr><td>${r.item}</td><td>${r.expected || "—"}</td><td style="${disc ? "color:#dc2626;font-weight:700" : ""}">${r.actual || "—"}</td><td>${disc ? "⚠ Mismatch" : ""}</td><td>${r.notes || ""}</td></tr>`; }).join("")}</table>
-${notes ? `<h2>Additional Notes</h2><p style="padding:12px;background:#f8fafc;border-radius:8px;line-height:1.6">${notes}</p>` : ""}
-<div class="foot">Generated by Cleaniq Services · cleaniqservices.com · ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>
+${notes ? `<h2>Additional Notes</h2><p style="padding:14px;background:#f8fafc;border-radius:8px;line-height:1.7;border:1px solid #e2e8f0">${notes}</p>` : ""}
+<div class="foot">
+  <span>© ${new Date().getFullYear()} Cleaniq Services Ltd</span>
+  <span>cleaniqservices.com · +44 7752 476368</span>
+</div>
+</div>
 </body></html>`;
+  };
 
   const printReport = () => {
     const w = window.open("", "_blank");
@@ -439,44 +456,54 @@ const CommercialHub = () => {
   const [tab, setTab] = useState("report");
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6 pb-24">
       {/* Page header */}
-      <div className="flex items-center gap-4">
-        <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center">
-          <Building2 size={22} className="text-primary" />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-primary p-8">
+        <div className="absolute inset-0 opacity-10">
+          <Building2 size={240} className="absolute -right-10 -bottom-10 text-white" />
         </div>
-        <div>
-          <h1 className="text-xl font-black text-slate-900">Commercial Hub</h1>
-          <p className="text-sm text-slate-500">Airbnb & commercial client tools — reports, quotes, and invoices</p>
+        <div className="relative flex items-center gap-5">
+          <img src={logoSrc} alt="Cleaniq Services" className="h-14 rounded-2xl shadow-lg shadow-black/30 flex-shrink-0" />
+          <div>
+            <h1 className="text-2xl font-black text-white tracking-tight">Commercial Hub</h1>
+            <p className="text-sm text-white/55 mt-1">Airbnb & commercial client tools — reports, quotes, and invoices</p>
+          </div>
         </div>
       </div>
 
       {/* Tab bar */}
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {TABS.map((t) => {
           const Icon = t.icon;
+          const active = tab === t.id;
           return (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl border font-bold text-sm transition-all ${tab === t.id ? "bg-primary text-white border-primary shadow-sm" : "bg-white border-slate-200 text-slate-600 hover:border-primary/30 hover:text-primary"}`}
+              className={`flex items-start gap-3 p-4 rounded-2xl border-2 text-left transition-all duration-200 ${
+                active
+                  ? "bg-primary/5 border-primary shadow-sm"
+                  : "bg-white border-slate-200 hover:border-primary/30 hover:shadow-sm"
+              }`}
             >
-              <Icon size={16} />
-              {t.label}
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${active ? "bg-primary shadow-lg shadow-primary/30" : "bg-slate-100"}`}>
+                <Icon size={18} className={active ? "text-white" : "text-slate-500"} />
+              </div>
+              <div className="pt-0.5">
+                <p className={`text-sm font-bold leading-tight ${active ? "text-primary" : "text-slate-700"}`}>{t.label}</p>
+                <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">{t.desc}</p>
+              </div>
             </button>
           );
         })}
       </div>
 
-      {/* Active tab description */}
-      <p className="text-xs text-slate-400 font-medium">
-        {TABS.find((t) => t.id === tab)?.desc}
-      </p>
-
       {/* Tab content */}
-      {tab === "report" && <PropertyReport />}
-      {tab === "quote" && <CommercialQuote />}
-      {tab === "invoice" && <CommercialInvoice />}
+      <div>
+        {tab === "report" && <PropertyReport />}
+        {tab === "quote" && <CommercialQuote />}
+        {tab === "invoice" && <CommercialInvoice />}
+      </div>
     </div>
   );
 };

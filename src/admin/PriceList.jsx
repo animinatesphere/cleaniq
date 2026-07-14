@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Tag, Send, Download, Printer, Plus, Trash2, RefreshCw,
-  X, Search, Building2, FileText, Sparkles, CheckCircle2,
+  X, Search, Building2, FileText, Sparkles, CheckCircle2, Eye,
 } from "lucide-react";
+import logo from "../assets/logo DP.jpg";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -118,37 +119,32 @@ export default function PriceList() {
   const buildHtml = () => {
     const today      = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
     const validUntil = new Date(Date.now() + 30 * 86400000).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    const logoUrl    = `${window.location.origin}${logo}`;
 
     const rowsHtml = priceRows.map((row) => {
       if (row.type === "heading") return `
-        <tr><td colspan="2" style="padding:14px 18px 6px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#0A5C43;border-bottom:2px solid #0A5C43;background:#f0fdf4">${row.label}</td></tr>`;
-      const priceStr = row.price ? `£${Number(row.price).toFixed(2)}${unitLabel(row.unit) ? ` <span style="font-size:10px;color:#94a3b8">${unitLabel(row.unit)}</span>` : ""}` : "POA";
+        <tr><td colspan="2" style="padding:14px 20px 7px;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#0A5C43;border-bottom:2px solid #d1fae5;background:#f0fdf4">${row.label}</td></tr>`;
+      const priceStr = row.price ? `£${Number(row.price).toFixed(2)}${unitLabel(row.unit) ? `<span style="font-size:10px;color:#94a3b8;margin-left:2px">${unitLabel(row.unit)}</span>` : ""}` : `<span style="font-size:11px;font-weight:600;color:#94a3b8">POA</span>`;
       return `
         <tr style="border-bottom:1px solid #f1f5f9">
-          <td style="padding:12px 18px">
+          <td style="padding:13px 20px">
             <div style="font-size:13px;font-weight:700;color:#1e293b">${row.name}</div>
-            ${row.description ? `<div style="font-size:11px;color:#64748b;margin-top:2px">${row.description}</div>` : ""}
+            ${row.description ? `<div style="font-size:11px;color:#64748b;margin-top:3px">${row.description}</div>` : ""}
           </td>
-          <td style="padding:12px 18px;text-align:right;font-size:14px;font-weight:900;color:#0A5C43;white-space:nowrap">${priceStr}</td>
+          <td style="padding:13px 20px;text-align:right;font-size:15px;font-weight:900;color:#0A5C43;white-space:nowrap">${priceStr}</td>
         </tr>`;
     }).join("");
 
     return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Cleaniq Services — Price List</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#1e293b}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style>
-</head><body><div style="max-width:700px;margin:0 auto;padding:0 0 48px">
-  <div style="background:#0A5C43;padding:40px 40px 32px;position:relative;overflow:hidden">
-    <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,.05);border-radius:50%"></div>
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative">
-      <div>
-        <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:-.5px">Cleaniq Services</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:3px;letter-spacing:.08em;text-transform:uppercase">Professional Cleaning Solutions</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.5)">Price List</div>
-        <div style="font-size:28px;font-weight:900;color:#fff;margin-top:2px">Services &amp; Rates</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:4px">Issued: ${today}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.55)">Valid until: ${validUntil}</div>
-      </div>
+</head><body><div style="max-width:720px;margin:0 auto;padding:0 0 56px">
+  <div style="background:#0A5C43;padding:32px 40px;display:flex;justify-content:space-between;align-items:center">
+    <img src="${logoUrl}" alt="Cleaniq Services" style="height:60px;border-radius:8px;display:block" />
+    <div style="text-align:right">
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.45);margin-bottom:4px">Services &amp; Rates</div>
+      <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-.3px">Price List</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:5px">Issued: ${today}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.45)">Valid until: ${validUntil}</div>
     </div>
   </div>
   <div style="padding:28px 40px 0;display:flex;justify-content:space-between;gap:32px">
@@ -198,13 +194,9 @@ export default function PriceList() {
   };
 
   const handleDownload = () => {
-    const blob = new Blob([buildHtml()], { type: "text/html" });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement("a");
-    a.href     = url;
-    a.download = `Cleaniq-PriceList-${recipient.companyName?.replace(/\s+/g, "-") || Date.now()}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const html = buildHtml();
+    const w = window.open("", "_blank");
+    if (w) { w.document.write(html); w.document.close(); setTimeout(() => w.print(), 600); }
   };
 
   const handleSend = async () => {
@@ -241,44 +233,67 @@ export default function PriceList() {
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
+  const CAT_COLORS = {
+    Base:   { dot: "bg-emerald-500", hdr: "bg-emerald-50 border-emerald-100", lbl: "text-emerald-700" },
+    Rooms:  { dot: "bg-blue-500",    hdr: "bg-blue-50 border-blue-100",       lbl: "text-blue-700" },
+    Extras: { dot: "bg-amber-500",   hdr: "bg-amber-50 border-amber-100",     lbl: "text-amber-700" },
+  };
+
   return (
     <div className="space-y-6 pb-24">
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
-      {/* Page header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2.5">
-            <Tag size={22} className="text-primary" /> Price List Generator
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Add services from the catalogue, set your prices, then send a branded price list to any company.
-          </p>
+      {/* ── Page header ─────────────────────────────────────────── */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-primary p-8">
+        <div className="absolute inset-0 opacity-[0.07]">
+          <Tag size={280} className="absolute -right-16 -bottom-12 text-white" />
         </div>
-        <button
-          onClick={() => setTab(tab === "edit" ? "preview" : "edit")}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-slate-200 text-sm font-bold text-slate-600 hover:border-primary/40 hover:text-primary transition-all"
-        >
-          <Sparkles size={15} />
-          {tab === "edit" ? "Preview" : "Back to Edit"}
-        </button>
+        <div className="relative flex items-center justify-between gap-4">
+          <div className="flex items-center gap-5">
+            <img src={logo} alt="Cleaniq Services" className="h-14 rounded-2xl shadow-lg shadow-black/30 flex-shrink-0" />
+            <div>
+              <h1 className="text-2xl font-black text-white tracking-tight">Price List Generator</h1>
+              <p className="text-sm text-white/50 mt-1">Build a branded price list and send it directly to any company</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setTab(tab === "edit" ? "preview" : "edit")}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-bold transition-all flex-shrink-0"
+          >
+            <Eye size={15} />
+            {tab === "edit" ? "Preview" : "Back to Edit"}
+          </button>
+        </div>
       </div>
 
       {tab === "preview" ? (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-5 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+          <div className="px-5 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Live Preview</span>
+            <div className="flex gap-2">
+              <button onClick={handleDownload} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-all">
+                <Download size={12} /> Save PDF
+              </button>
+              <button onClick={handleSend} disabled={sending} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-all disabled:opacity-60">
+                <Send size={12} /> {sending ? "Sending…" : "Send"}
+              </button>
+            </div>
           </div>
           <iframe srcDoc={buildHtml()} className="w-full" style={{ height: "82vh", border: "none" }} title="Price List Preview" />
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {/* ── Column 1: Catalogue ────────────────────────────────── */}
-          <div className="space-y-3">
+          {/* ── Column 1: Catalogue ─────────────────────────────── */}
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-black text-slate-700">Service Catalogue</h2>
-              <span className="text-xs text-slate-400 font-medium">{catalogue.length} services</span>
+              <h2 className="text-sm font-black text-slate-700 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-md bg-slate-200 flex items-center justify-center">
+                  <Search size={11} className="text-slate-500" />
+                </span>
+                Service Catalogue
+              </h2>
+              <span className="text-[11px] text-slate-400 font-semibold bg-slate-100 px-2 py-0.5 rounded-full">{catalogue.length} services</span>
             </div>
 
             <div className="relative">
@@ -286,45 +301,51 @@ export default function PriceList() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search…"
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="Search services…"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white"
               />
             </div>
 
             {loading ? (
               <div className="flex items-center justify-center py-16 text-slate-400 text-sm">
-                <RefreshCw size={16} className="animate-spin mr-2" /> Loading…
+                <RefreshCw size={16} className="animate-spin mr-2" /> Loading catalogue…
               </div>
             ) : (
               CATEGORY_ORDER.map((cat) => {
                 const items = filteredCatalogue[cat];
                 if (!items.length) return null;
                 const allAdded = items.every((s) => inList(s._id));
+                const cc = CAT_COLORS[cat] || CAT_COLORS.Extras;
                 return (
-                  <div key={cat} className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-                    <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
-                      <span className="text-xs font-black text-slate-600 uppercase tracking-wide">{CATEGORY_LABELS[cat]}</span>
+                  <div key={cat} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div className={`flex items-center justify-between px-4 py-3 border-b ${cc.hdr}`}>
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${cc.dot}`} />
+                        <span className={`text-xs font-black uppercase tracking-wide ${cc.lbl}`}>{CATEGORY_LABELS[cat]}</span>
+                      </div>
                       <button
                         onClick={() => addAllInCategory(cat)}
                         disabled={allAdded}
-                        className="text-xs font-bold text-primary hover:text-primary/70 disabled:text-slate-300 disabled:cursor-not-allowed transition-colors"
+                        className={`text-xs font-bold transition-colors ${allAdded ? "text-slate-300 cursor-not-allowed" : "text-primary hover:text-primary/70"}`}
                       >
-                        {allAdded ? "All added" : "+ Add all"}
+                        {allAdded ? "✓ All added" : "+ Add all"}
                       </button>
                     </div>
                     <div className="divide-y divide-slate-50">
                       {items.map((s) => {
                         const added = inList(s._id);
                         return (
-                          <div key={s._id} className="flex items-center gap-3 px-4 py-3">
+                          <div key={s._id} className={`flex items-center gap-3 px-4 py-3 transition-colors ${added ? "bg-emerald-50/50" : "hover:bg-slate-50"}`}>
                             <div className="flex-1 min-w-0">
                               <p className={`text-sm font-semibold truncate ${added ? "text-slate-400" : "text-slate-800"}`}>{s.name}</p>
                               {s.rate ? (
-                                <p className="text-xs text-slate-400 tabular-nums">£{Number(s.rate).toFixed(2)}{unitLabel(s.type)}</p>
+                                <p className={`text-xs tabular-nums mt-0.5 ${added ? "text-slate-300" : "text-primary font-bold"}`}>
+                                  £{Number(s.rate).toFixed(2)}{unitLabel(s.type)}
+                                </p>
                               ) : null}
                             </div>
                             {added ? (
-                              <CheckCircle2 size={18} className="text-emerald-400 flex-shrink-0" />
+                              <CheckCircle2 size={17} className="text-emerald-400 flex-shrink-0" />
                             ) : (
                               <button
                                 onClick={() => addFromCatalogue(s)}
@@ -343,72 +364,73 @@ export default function PriceList() {
             )}
           </div>
 
-          {/* ── Column 2: Price List (editable) ───────────────────── */}
-          <div className="space-y-3">
+          {/* ── Column 2: Price List (editable) ─────────────────── */}
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-black text-slate-700">Your Price List</h2>
+              <h2 className="text-sm font-black text-slate-700 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center">
+                  <Tag size={11} className="text-primary" />
+                </span>
+                Your Price List
+              </h2>
               <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
                 {listItems.filter((it) => it.name).length} items
               </span>
             </div>
 
             {listItems.length === 0 ? (
-              <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-10 text-center">
-                <Tag size={28} className="text-slate-200 mx-auto mb-3" />
-                <p className="text-sm font-semibold text-slate-400">No services added yet</p>
-                <p className="text-xs text-slate-300 mt-1">Click + in the catalogue to add services here</p>
+              <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                  <Tag size={24} className="text-slate-300" />
+                </div>
+                <p className="text-sm font-bold text-slate-400">No services added yet</p>
+                <p className="text-xs text-slate-300 mt-1.5">Click + in the catalogue to add services</p>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                 <div className="divide-y divide-slate-100">
                   {listItems.map((it) => (
-                    <div key={it.id} className="px-4 py-3 space-y-2">
+                    <div key={it.id} className="p-4 space-y-2.5">
                       <div className="flex items-center gap-2">
-                        {/* Name — editable */}
                         <input
                           value={it.name}
                           onChange={(e) => updateItem(it.id, "name", e.target.value)}
                           placeholder="Service name"
-                          className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg border-2 border-slate-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                          className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all"
                         />
                         <button
                           onClick={() => removeItem(it.id)}
-                          className="flex-shrink-0 w-7 h-7 rounded-lg text-slate-300 hover:bg-rose-50 hover:text-rose-500 transition-all flex items-center justify-center"
+                          className="flex-shrink-0 w-8 h-8 rounded-xl text-slate-300 hover:bg-rose-50 hover:text-rose-500 transition-all flex items-center justify-center border border-transparent hover:border-rose-200"
                         >
                           <X size={15} />
                         </button>
                       </div>
                       <div className="flex items-center gap-2">
-                        {/* Price */}
-                        <div className="flex items-center gap-1 flex-1">
+                        <div className="flex items-center gap-1 flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
                           <span className="text-sm font-bold text-slate-400">£</span>
                           <input
-                            type="number"
-                            min="0"
-                            step="0.01"
+                            type="number" min="0" step="0.01"
                             value={it.price}
                             onChange={(e) => updateItem(it.id, "price", e.target.value)}
                             placeholder="0.00"
-                            className="flex-1 px-2.5 py-1.5 rounded-lg border-2 border-slate-200 text-sm font-bold text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                            className="flex-1 py-2 bg-transparent text-sm font-bold text-right tabular-nums text-primary focus:outline-none"
                           />
                         </div>
-                        {/* Unit */}
                         <select
                           value={it.unit}
                           onChange={(e) => updateItem(it.id, "unit", e.target.value)}
-                          className="px-2 py-1.5 rounded-lg border-2 border-slate-200 text-xs font-bold text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                          className="px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                         >
                           <option value="flat">flat</option>
                           <option value="hourly">/hr</option>
                           <option value="per_room">/room</option>
                         </select>
                       </div>
-                      {/* Optional description */}
                       <input
                         value={it.description}
                         onChange={(e) => updateItem(it.id, "description", e.target.value)}
-                        placeholder="Description (optional)"
-                        className="w-full px-2.5 py-1.5 rounded-lg border-2 border-slate-100 text-xs text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        placeholder="Short description (optional)"
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-100 bg-slate-50/50 text-xs text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       />
                     </div>
                   ))}
@@ -416,15 +438,13 @@ export default function PriceList() {
               </div>
             )}
 
-            {/* Add custom service */}
             <button
               onClick={addCustom}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed border-slate-200 text-sm font-bold text-slate-500 hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-dashed border-slate-200 text-sm font-bold text-slate-500 hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all"
             >
               <Plus size={16} /> Add Custom Service
             </button>
 
-            {/* Clear all */}
             {listItems.length > 0 && (
               <button
                 onClick={() => setListItems([])}
@@ -435,82 +455,97 @@ export default function PriceList() {
             )}
           </div>
 
-          {/* ── Column 3: Recipient + Actions ─────────────────────── */}
+          {/* ── Column 3: Recipient + Actions ───────────────────── */}
           <div className="space-y-4">
-            {/* Recipient */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-3">
-              <div className="flex items-center gap-2">
-                <Building2 size={15} className="text-primary" />
-                <span className="text-xs font-black uppercase tracking-wider text-slate-500">Send To</span>
-              </div>
-              {[
-                { label: "Company Name",  key: "companyName",  type: "text",  ph: "Acme Facilities Ltd" },
-                { label: "Contact Name",  key: "contactName",  type: "text",  ph: "Jane Smith" },
-                { label: "Email Address", key: "email",        type: "email", ph: "contact@company.com" },
-                { label: "Phone",         key: "phone",        type: "tel",   ph: "+44 7700 000000" },
-                { label: "Address",       key: "address",      type: "text",  ph: "Business address" },
-              ].map(({ label, key, type, ph }) => (
-                <div key={key}>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">{label}</label>
-                  <input type={type} value={recipient[key]} onChange={setR(key)} placeholder={ph} className={inp} />
+            {/* Recipient card */}
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/80 flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Building2 size={14} className="text-primary" />
                 </div>
-              ))}
+                <div>
+                  <p className="text-sm font-black text-slate-700">Send To</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Recipient details</p>
+                </div>
+              </div>
+              <div className="p-5 space-y-3">
+                {[
+                  { label: "Company Name",  key: "companyName",  type: "text",  ph: "Acme Facilities Ltd" },
+                  { label: "Contact Name",  key: "contactName",  type: "text",  ph: "Jane Smith" },
+                  { label: "Email Address", key: "email",        type: "email", ph: "contact@company.com" },
+                  { label: "Phone",         key: "phone",        type: "tel",   ph: "+44 7700 000000" },
+                  { label: "Address",       key: "address",      type: "text",  ph: "Business address" },
+                ].map(({ label, key, type, ph }) => (
+                  <div key={key}>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">{label}</label>
+                    <input type={type} value={recipient[key]} onChange={setR(key)} placeholder={ph} className={inp} />
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Cover note */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-3">
-              <div className="flex items-center gap-2">
-                <FileText size={15} className="text-primary" />
-                <span className="text-xs font-black uppercase tracking-wider text-slate-500">Cover Note</span>
-              </div>
-              <textarea
-                value={intro}
-                onChange={(e) => setIntro(e.target.value)}
-                rows={3}
-                className="w-full px-3.5 py-3 rounded-xl border-2 border-slate-200 text-sm text-slate-700 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                placeholder="Opening message…"
-              />
-              <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                <div
-                  onClick={() => setIncludeVat((v) => !v)}
-                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${includeVat ? "bg-primary border-primary" : "border-slate-300"}`}
-                >
-                  {includeVat && <X size={11} className="text-white" />}
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/80 flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <FileText size={14} className="text-primary" />
                 </div>
-                <span className="text-sm font-semibold text-slate-600">Include VAT notice</span>
-              </label>
+                <p className="text-sm font-black text-slate-700">Cover Note</p>
+              </div>
+              <div className="p-5 space-y-3">
+                <textarea
+                  value={intro}
+                  onChange={(e) => setIntro(e.target.value)}
+                  rows={3}
+                  className="w-full px-3.5 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all"
+                  placeholder="Opening message…"
+                />
+                <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                  <div
+                    onClick={() => setIncludeVat((v) => !v)}
+                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${includeVat ? "bg-primary border-primary" : "border-slate-300"}`}
+                  >
+                    {includeVat && <X size={11} className="text-white" />}
+                  </div>
+                  <span className="text-sm font-semibold text-slate-600">Include VAT notice</span>
+                </label>
+              </div>
             </div>
 
-            {/* Actions */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-2.5 sticky top-4">
-              <p className="text-xs font-black uppercase tracking-wider text-slate-400 mb-3">Actions</p>
-              <button
-                onClick={handleSend}
-                disabled={sending}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-primary text-white font-bold text-sm hover:bg-primary/90 disabled:opacity-60 transition-colors"
-              >
-                {sending ? <RefreshCw size={15} className="animate-spin" /> : <Send size={15} />}
-                {sending ? "Sending…" : "Send to Email"}
-              </button>
-              <button
-                onClick={() => setTab("preview")}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:border-primary/40 hover:text-primary transition-colors"
-              >
-                <Sparkles size={15} /> Preview
-              </button>
-              <div className="grid grid-cols-2 gap-2">
+            {/* Actions sticky card */}
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm sticky top-4">
+              <div className="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-primary/5 to-transparent">
+                <p className="text-xs font-black uppercase tracking-wider text-primary">Actions</p>
+              </div>
+              <div className="p-5 space-y-2.5">
                 <button
-                  onClick={handleDownload}
-                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-2xl border-2 border-slate-200 text-slate-600 font-bold text-xs hover:border-primary/40 hover:text-primary transition-colors"
+                  onClick={handleSend}
+                  disabled={sending}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-primary text-white font-bold text-sm hover:bg-primary/90 disabled:opacity-60 transition-colors shadow-lg shadow-primary/20"
                 >
-                  <Download size={13} /> Download
+                  {sending ? <RefreshCw size={15} className="animate-spin" /> : <Send size={15} />}
+                  {sending ? "Sending…" : "Send to Email"}
                 </button>
                 <button
-                  onClick={handlePrint}
-                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-2xl border-2 border-slate-200 text-slate-600 font-bold text-xs hover:border-primary/40 hover:text-primary transition-colors"
+                  onClick={() => setTab("preview")}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:border-primary/40 hover:text-primary transition-colors"
                 >
-                  <Printer size={13} /> Print
+                  <Eye size={15} /> Preview Price List
                 </button>
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    onClick={handleDownload}
+                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-xs hover:border-primary/40 hover:text-primary transition-colors"
+                  >
+                    <Download size={13} /> Save PDF
+                  </button>
+                  <button
+                    onClick={handlePrint}
+                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-xs hover:border-primary/40 hover:text-primary transition-colors"
+                  >
+                    <Printer size={13} /> Print
+                  </button>
+                </div>
               </div>
             </div>
           </div>

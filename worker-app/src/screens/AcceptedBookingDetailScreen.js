@@ -28,6 +28,7 @@ import {
   Linking,
   StatusBar,
   Image,
+  TextInput,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { AuthContext, API_URL } from "../context/AuthContext";
@@ -53,6 +54,11 @@ import {
   Camera,
   ImageIcon,
   CheckCircle2,
+  Pencil,
+  Trash2,
+  Plus,
+  Check,
+  X,
 } from "lucide-react-native";
 import axios from "axios";
 
@@ -74,6 +80,11 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 
   // Cleaning checklist
   const [checkedTasks, setCheckedTasks] = useState({});
+  const [tasks, setTasks] = useState([]);
+  const [editingIndex, setEditingIndex] = useState(null); // index being edited
+  const [editingText, setEditingText] = useState("");
+  const [addingTask, setAddingTask] = useState(false);
+  const [newTaskText, setNewTaskText] = useState("");
 
   const isJobTomorrowOrLater = useCallback(() => {
     if (!booking || !booking.schedule || !booking.schedule.date) return false;
@@ -223,6 +234,13 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   useEffect(() => {
     fetchBookingDetails();
   }, [bookingId]);
+
+  // Seed checklist from service type once booking loads (only if not yet set)
+  useEffect(() => {
+    if (booking && tasks.length === 0) {
+      setTasks(getChecklistForService(booking.service));
+    }
+  }, [booking]);
 
   useFocusEffect(
     useCallback(() => {
@@ -657,7 +675,6 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 
         {/* ── Cleaning Checklist ──────────────────────────────── */}
         {["Assigned", "Arrived", "In Progress", "Completed"].includes(booking.status) && (() => {
-          const tasks = getChecklistForService(booking.service);
           const doneCount = tasks.filter((_, i) => checkedTasks[`${bookingId}_${i}`]).length;
           return (
             <View style={styles.section}>
@@ -684,22 +701,137 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 {tasks.map((task, i) => {
                   const key = `${bookingId}_${i}`;
                   const done = !!checkedTasks[key];
+                  const isEditing = editingIndex === i;
+
                   return (
-                    <TouchableOpacity
+                    <View
                       key={i}
-                      style={[styles.checklistRow, done && styles.checklistRowDone]}
-                      onPress={() => toggleTask(i)}
-                      activeOpacity={0.7}
+                      style={[styles.checklistRow, done && !isEditing && styles.checklistRowDone]}
                     >
-                      <View style={[styles.checklistCircle, done && styles.checklistCircleDone]}>
-                        {done && <CheckCircle2 size={14} color="#fff" strokeWidth={2.5} />}
-                      </View>
-                      <Text style={[styles.checklistTaskText, done && styles.checklistTaskDone]}>
-                        {task}
-                      </Text>
-                    </TouchableOpacity>
+                      {isEditing ? (
+                        /* ── Edit mode ── */
+                        <>
+                          <TextInput
+                            style={styles.checklistEditInput}
+                            value={editingText}
+                            onChangeText={setEditingText}
+                            autoFocus
+                            multiline
+                          />
+                          <TouchableOpacity
+                            style={styles.checklistIconBtn}
+                            onPress={() => {
+                              if (editingText.trim()) {
+                                setTasks((prev) =>
+                                  prev.map((t, idx) => idx === i ? editingText.trim() : t)
+                                );
+                              }
+                              setEditingIndex(null);
+                              setEditingText("");
+                            }}
+                          >
+                            <Check size={16} color="#0F6B4C" strokeWidth={2.5} />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.checklistIconBtn}
+                            onPress={() => { setEditingIndex(null); setEditingText(""); }}
+                          >
+                            <X size={16} color="#6B7280" strokeWidth={2.5} />
+                          </TouchableOpacity>
+                        </>
+                      ) : (
+                        /* ── Normal mode ── */
+                        <>
+                          <TouchableOpacity
+                            style={[styles.checklistCircle, done && styles.checklistCircleDone]}
+                            onPress={() => toggleTask(i)}
+                            activeOpacity={0.7}
+                          >
+                            {done && <CheckCircle2 size={14} color="#fff" strokeWidth={2.5} />}
+                          </TouchableOpacity>
+                          <Text
+                            style={[styles.checklistTaskText, done && styles.checklistTaskDone]}
+                            onPress={() => toggleTask(i)}
+                          >
+                            {task}
+                          </Text>
+                          <TouchableOpacity
+                            style={styles.checklistIconBtn}
+                            onPress={() => {
+                              setEditingIndex(i);
+                              setEditingText(task);
+                            }}
+                          >
+                            <Pencil size={14} color="#86A892" strokeWidth={2} />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.checklistIconBtn}
+                            onPress={() => {
+                              Alert.alert("Remove task?", task, [
+                                { text: "Cancel", style: "cancel" },
+                                {
+                                  text: "Remove",
+                                  style: "destructive",
+                                  onPress: () => {
+                                    setTasks((prev) => prev.filter((_, idx) => idx !== i));
+                                    setCheckedTasks((prev) => {
+                                      const next = { ...prev };
+                                      delete next[key];
+                                      return next;
+                                    });
+                                  },
+                                },
+                              ]);
+                            }}
+                          >
+                            <Trash2 size={14} color="#EF4444" strokeWidth={2} />
+                          </TouchableOpacity>
+                        </>
+                      )}
+                    </View>
                   );
                 })}
+
+                {/* Add task row */}
+                {addingTask ? (
+                  <View style={[styles.checklistRow, { borderBottomWidth: 0 }]}>
+                    <TextInput
+                      style={styles.checklistEditInput}
+                      value={newTaskText}
+                      onChangeText={setNewTaskText}
+                      placeholder="New task..."
+                      placeholderTextColor="#A7D9B8"
+                      autoFocus
+                      multiline
+                    />
+                    <TouchableOpacity
+                      style={styles.checklistIconBtn}
+                      onPress={() => {
+                        if (newTaskText.trim()) {
+                          setTasks((prev) => [...prev, newTaskText.trim()]);
+                        }
+                        setNewTaskText("");
+                        setAddingTask(false);
+                      }}
+                    >
+                      <Check size={16} color="#0F6B4C" strokeWidth={2.5} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.checklistIconBtn}
+                      onPress={() => { setNewTaskText(""); setAddingTask(false); }}
+                    >
+                      <X size={16} color="#6B7280" strokeWidth={2.5} />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.checklistAddBtn}
+                    onPress={() => setAddingTask(true)}
+                  >
+                    <Plus size={15} color="#0F6B4C" strokeWidth={2.5} />
+                    <Text style={styles.checklistAddText}>Add task</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           );
@@ -1337,6 +1469,38 @@ const styles = StyleSheet.create({
   checklistTaskDone: {
     color: "#86A892",
     textDecorationLine: "line-through",
+  },
+  checklistIconBtn: {
+    width: 28,
+    height: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
+  },
+  checklistEditInput: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#1A2E22",
+    borderWidth: 1.5,
+    borderColor: "#A7D9B8",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: "#F0FDF4",
+    minHeight: 36,
+  },
+  checklistAddBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+  },
+  checklistAddText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#0F6B4C",
   },
 
   // Before & After Photos

@@ -10,7 +10,7 @@ import {
   CreditCard,
   Copy,
 } from "lucide-react";
-import logo from "../assets/logo DP2.jpg";
+import logo from "../assets/logo DP.jpg";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -225,6 +225,7 @@ const InvoiceBuilder = () => {
 
   const handleDownload = () => {
     const total = items.reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.rate) || 0), 0);
+    const logoUrl = `${window.location.origin}${logo}`;
     const rows = items.map((item) => `
       <tr>
         <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;">${item.description || "—"}</td>
@@ -239,8 +240,8 @@ const InvoiceBuilder = () => {
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#1e293b;}
   @media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact;}}
-  .hdr{background:#0f172a;padding:36px 40px;display:flex;justify-content:space-between;align-items:flex-start;}
-  .co{color:#fff;font-size:20px;font-weight:900;} .co-tag{color:#94a3b8;font-size:11px;margin-top:4px;}
+  .hdr{background:#0f172a;padding:32px 40px;display:flex;justify-content:space-between;align-items:center;}
+  .logo{height:56px;border-radius:8px;}
   .inv-lbl{color:#fff;font-size:28px;font-weight:900;text-align:right;}
   .inv-num{color:#6ee7b7;font-size:13px;font-weight:700;text-align:right;margin-top:4px;}
   .paid{display:inline-block;margin-top:8px;padding:3px 12px;background:#6ee7b7;color:#052e16;border-radius:999px;font-size:10px;font-weight:900;text-transform:uppercase;}
@@ -264,7 +265,7 @@ const InvoiceBuilder = () => {
   .ft-co{font-size:13px;font-weight:700;color:#0f172a;} .ft-ct{font-size:11px;color:#64748b;margin-top:4px;}
 </style></head><body>
 <div class="hdr">
-  <div><div class="co">Cleaniq Services</div><div class="co-tag">Professional Cleaning Services</div></div>
+  <img src="${logoUrl}" alt="Cleaniq Services" class="logo" />
   <div><div class="inv-lbl">INVOICE</div><div class="inv-num">${invoiceNumber}</div>${showPaidBadge ? '<div class="paid">✓ PAID</div>' : ""}</div>
 </div>
 <div class="body">

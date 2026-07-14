@@ -19,6 +19,7 @@ import {
   History,
   Download,
 } from "lucide-react";
+import logo from "../assets/logo DP.jpg";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -261,6 +262,8 @@ const PreviewModal = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => {
+              const logoUrl = `${window.location.origin}${logo}`;
+              const quoteRef = `CLQ-${Date.now().toString().slice(-6)}`;
               const rows = items.filter(i => i.service || i.customService).map(item => `
                 <tr>
                   <td style="padding:10px 16px;border-bottom:1px solid #e2e8f0;">
@@ -274,9 +277,10 @@ const PreviewModal = ({
               const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Quote — ${data.companyName||"Client"}</title>
 <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;color:#1e293b;background:#fff;}
 @media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact;}}
-.hdr{background:#0f172a;padding:32px 40px;display:flex;justify-content:space-between;}
-.title{color:#fff;font-size:24px;font-weight:900;}.ref{color:#6ee7b7;font-size:13px;margin-top:4px;}
-.co{color:#94a3b8;font-size:11px;margin-top:2px;}
+.hdr{background:#0f172a;padding:28px 40px;display:flex;justify-content:space-between;align-items:center;}
+.hdr-logo{height:56px;border-radius:8px;}
+.ref{color:#6ee7b7;font-size:14px;font-weight:800;text-align:right;}
+.co{color:#94a3b8;font-size:11px;margin-top:3px;text-align:right;}
 .body{padding:32px 40px;}.section{margin-bottom:24px;}
 .label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:6px;}
 .val{font-size:15px;font-weight:700;color:#0f172a;}.sub{font-size:13px;color:#64748b;margin-top:2px;}
@@ -290,8 +294,8 @@ thead th:last-child,thead th:nth-child(2),thead th:nth-child(3){text-align:right
 .footer{margin-top:40px;padding-top:20px;border-top:1px solid #e2e8f0;text-align:center;font-size:11px;color:#64748b;}
 </style></head><body>
 <div class="hdr">
-  <div><div class="title">SERVICE QUOTE</div><div class="co">Cleaniq Services Ltd</div></div>
-  <div style="text-align:right"><div class="ref">CLQ-${Date.now().toString().slice(-6)}</div><div class="co">${new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"})}</div></div>
+  <img src="${logoUrl}" alt="Cleaniq Services" class="hdr-logo" />
+  <div><div class="ref">${quoteRef}</div><div class="co">${new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"})}</div></div>
 </div>
 <div class="body">
   <div style="display:flex;gap:32px;margin-bottom:24px;">
@@ -329,15 +333,8 @@ thead th:last-child,thead th:nth-child(2),thead th:nth-child(3){text-align:right
         </div>
       </div>
       <div className="p-8 space-y-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">
-              SERVICE QUOTE
-            </h1>
-            <p className="text-sm text-slate-400 font-semibold mt-1">
-              Cleaniq Services Ltd
-            </p>
-          </div>
+        <div className="flex justify-between items-center">
+          <img src={logo} alt="Cleaniq Services" className="h-10 rounded-lg" />
           <div className="text-right">
             <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
               Quote Ref
@@ -860,6 +857,7 @@ const QuoteBuilder = () => {
 
   const downloadPDF = () => {
     const ref = `CLQ-${Date.now().toString().slice(-6)}`;
+    const logoUrl = `${window.location.origin}${logo}`;
     const rows = items
       .filter(i => i.service || i.customService)
       .map(item => `
@@ -880,12 +878,12 @@ const QuoteBuilder = () => {
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:Arial,sans-serif;color:#1e293b;background:#fff;font-size:14px;}
 @media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact;}@page{margin:20mm;}}
-.hdr{background:#0f172a;padding:36px 48px;display:flex;justify-content:space-between;align-items:flex-start;}
-.hdr-left .title{color:#fff;font-size:26px;font-weight:900;letter-spacing:-0.5px;}
-.hdr-left .company{color:#94a3b8;font-size:12px;margin-top:4px;}
+.hdr{background:#0f172a;padding:28px 48px;display:flex;justify-content:space-between;align-items:center;}
+.hdr-logo{height:60px;border-radius:8px;}
 .hdr-right{text-align:right;}
-.hdr-right .ref{color:#6ee7b7;font-size:14px;font-weight:800;}
-.hdr-right .date{color:#64748b;font-size:11px;margin-top:4px;}
+.hdr-right .ref{color:#6ee7b7;font-size:15px;font-weight:900;}
+.hdr-right .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:4px;}
+.hdr-right .date{color:rgba(255,255,255,.55);font-size:11px;margin-top:4px;}
 .body{padding:40px 48px;}
 .section{margin-bottom:28px;}
 .label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#94a3b8;margin-bottom:8px;}
@@ -904,23 +902,20 @@ tbody tr:nth-child(even){background:#f8fafc;}
 .totals{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:20px 24px;}
 .trow{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;color:#475569;}
 .trow.discount{color:#16a34a;}
-.trow.vat{}
 .grand{font-size:17px;font-weight:900;color:#0f172a;border-top:2px solid #e2e8f0;padding-top:12px;margin-top:8px;}
 .deposit{font-size:13px;font-weight:700;color:#0369a1;border-top:1px solid #e2e8f0;padding-top:10px;margin-top:6px;}
 .notes{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:16px 20px;margin-top:20px;}
 .notes-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#d97706;margin-bottom:6px;}
 .notes-body{font-size:13px;color:#92400e;line-height:1.6;}
-.footer{margin-top:48px;padding-top:20px;border-top:1px solid #e2e8f0;text-align:center;font-size:11px;color:#94a3b8;}
+.footer{margin-top:48px;padding-top:20px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;}
 </style></head><body>
 <div class="hdr">
-  <div class="hdr-left">
-    <div class="title">SERVICE QUOTE</div>
-    <div class="company">Cleaniq Services Ltd</div>
-  </div>
+  <img src="${logoUrl}" alt="Cleaniq Services" class="hdr-logo" />
   <div class="hdr-right">
+    <div class="lbl">Service Quote</div>
     <div class="ref">${ref}</div>
     <div class="date">${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</div>
-    ${form.validDays ? `<div class="date" style="margin-top:2px;">Valid for ${form.validDays} days</div>` : ""}
+    ${form.validDays ? `<div class="date">Valid for ${form.validDays} days</div>` : ""}
   </div>
 </div>
 <div class="body">
@@ -965,9 +960,9 @@ tbody tr:nth-child(even){background:#f8fafc;}
     ${form.depositRequired && depositAmount > 0 ? `<div class="trow deposit"><span>Deposit Required (${form.depositPercent}%)</span><span>£${depositAmount.toFixed(2)}</span></div><div class="trow" style="color:#475569;"><span>Balance Due</span><span>£${balanceDue.toFixed(2)}</span></div>` : ""}
   </div>
   ${form.notes ? `<div class="notes"><div class="notes-label">Notes &amp; Terms</div><div class="notes-body">${form.notes}</div></div>` : ""}
-  <div class="footer">Cleaniq Services Limited &nbsp;·&nbsp; info@cleaniqservices.com &nbsp;·&nbsp; cleaniqservices.com &nbsp;·&nbsp; +44 7752 476368</div>
+  <div class="footer"><span>© ${new Date().getFullYear()} Cleaniq Services Limited</span><span>info@cleaniqservices.com · cleaniqservices.com · +44 7752 476368</span></div>
 </div>
-<script>window.onload = function(){ window.print(); }</script>
+<script>window.onload=function(){window.print();}</script>
 </body></html>`;
 
     const w = window.open("", "_blank");
