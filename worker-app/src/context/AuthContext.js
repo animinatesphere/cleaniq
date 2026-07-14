@@ -5,7 +5,6 @@ import { resetToLogin } from "../utils/navigationRef";
 
 export const AuthContext = createContext();
 
-// Switch to live server after VPS is updated: 'https://api.cleaniqservices.com/api'
 export const API_URL = "https://api.cleaniqservices.com/api";
 
 export const AuthProvider = ({ children }) => {
@@ -21,6 +20,8 @@ export const AuthProvider = ({ children }) => {
       });
 
       const { token, worker } = response.data;
+
+      if (!token || !worker) throw new Error("Invalid login response from server");
 
       await AsyncStorage.setItem("workerToken", token);
       await AsyncStorage.setItem("workerInfo", JSON.stringify(worker));
@@ -66,14 +67,23 @@ export const AuthProvider = ({ children }) => {
   const checkLoginState = async () => {
     try {
       const token = await AsyncStorage.getItem("workerToken");
-      const info = await AsyncStorage.getItem("workerInfo");
+      const info  = await AsyncStorage.getItem("workerInfo");
 
-      if (token && info) {
-        setUserToken(token);
-        setWorkerInfo(JSON.parse(info));
+      // AsyncStorage can return the literal string "undefined" when a value was
+      // stored as undefined — guard against that before JSON.parse.
+      const validToken = token && token !== "undefined" ? token : null;
+      const validInfo  = info  && info  !== "undefined" ? info  : null;
+
+      if (validToken && validInfo) {
+        setUserToken(validToken);
+        setWorkerInfo(JSON.parse(validInfo));
+      } else if (!validToken || !validInfo) {
+        // Clear any corrupt/partial data so next login starts clean
+        await AsyncStorage.multiRemove(["workerToken", "workerInfo"]).catch(() => {});
       }
     } catch (e) {
       console.log("AsyncStorage error:", e);
+      await AsyncStorage.multiRemove(["workerToken", "workerInfo"]).catch(() => {});
     } finally {
       setIsLoading(false);
     }

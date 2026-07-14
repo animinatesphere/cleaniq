@@ -8,13 +8,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(
   cors({
-    origin: [
-      "https://www.cleaniqservices.com",
-      "https://cleaniqservices.com",
-      "http://localhost:5173",
-      "http://localhost:8081",
-    ],
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // ✅ added OPTIONS
+    origin: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
