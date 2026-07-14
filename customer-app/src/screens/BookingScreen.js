@@ -334,6 +334,8 @@ const BookingScreen = ({ navigation }) => {
         suppliesProvidedBy: form.suppliesProvidedBy,
         hasPet:  form.hasPet,
         payment: { amount: total, method: "Invoice", status: "Pending", billingType: "hourly" },
+        status:  "Awaiting Payment",
+        region:  "UK",
         meta:    { source: "Customer App" },
       };
 
@@ -364,11 +366,12 @@ const BookingScreen = ({ navigation }) => {
           <View style={styles.successCircle}>
             <CheckCircle2 size={48} color="#fff" strokeWidth={1.6} />
           </View>
-          <Text style={styles.successTitle}>Booking Confirmed</Text>
+          <Text style={styles.successTitle}>Booking Received!</Text>
           <Text style={styles.successRef}>Reference: {bookingRef}</Text>
           <Text style={styles.successNote}>
             A payment link has been sent to{"\n"}
             <Text style={{ fontWeight: "800" }}>{email}</Text>
+            {"\n"}Your booking will be confirmed once payment is complete.
           </Text>
         </LinearGradient>
         <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.successBody}>

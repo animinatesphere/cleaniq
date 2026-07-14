@@ -125,17 +125,25 @@ const generateTempPassword = () => {
 
 // GET available jobs — pass ?region=UK or ?region=NG to only see jobs in
 // the worker's own area (defaults to all regions if omitted).
-// "Confirmed"  = admin confirmed the booking / customer-app default
-// "Authorized" = customer paid via Stripe authorize flow (web booking)
-// "Accepted"   = booked via customer app / legacy flow
-// "Pending"    = awaiting payment — NOT shown to workers
+// "Confirmed"        = paid via Stripe / admin-created / bank transfer confirmed
+// "Authorized"       = Stripe authorize-then-capture flow (payment held)
+// "Accepted"         = legacy flow
+// "Awaiting Payment" = customer submitted but hasn't paid yet — NOT shown to workers
 router.get("/jobs", async (req, res) => {
   try {
     const { region } = req.query;
     const filter = {
       status: { $in: ["Confirmed", "Authorized", "Accepted"] },
     };
-    if (region) filter.region = region;
+    // Include bookings with the matching region OR with no region set
+    // (older bookings and admin-created ones may not have a region field)
+    if (region) {
+      filter.$or = [
+        { region },
+        { region: null },
+        { region: { $exists: false } },
+      ];
+    }
 
     const jobs = await Booking.find(filter).sort({ createdAt: -1 });
 
