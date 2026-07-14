@@ -258,7 +258,41 @@ table{width:100%;border-collapse:collapse;font-size:11px}th{background:#f8fafc;t
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Property Report — ${info.propertyName || "Cleaniq"}</title>
 <style>${CSS}
-@media(max-width:600px){.hdr{padding:18px 20px;flex-direction:column;align-items:flex-start;gap:12px}.hdr-meta{text-align:left}.sub-hdr{padding:10px 20px;flex-direction:column;gap:6px}.body{padding:0 20px 28px}.pgrid{grid-template-columns:repeat(2,1fr)}.cl{grid-template-columns:1fr 1fr}}</style></head><body>
+@media(max-width:600px){.hdr{padding:18px 20px;flex-direction:column;align-items:flex-start;gap:12px}.hdr-meta{text-align:left}.sub-hdr{padding:10px 20px;flex-direction:column;gap:6px}.body{padding:0 20px 28px}.pgrid{grid-template-columns:repeat(2,1fr)}.cl{grid-template-columns:1fr 1fr}}
+.toolbar{position:fixed;top:0;left:0;right:0;z-index:999;background:#0A5C43;display:flex;align-items:center;gap:10px;padding:10px 20px;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.toolbar p{color:rgba(255,255,255,.7);font-size:11px;flex:1;margin:0}
+.tbtn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;border:none;cursor:pointer;white-space:nowrap}
+.tbtn-pdf{background:#fff;color:#0A5C43}.tbtn-pdf:hover{background:#f0fdf4}
+.tbtn-print{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)}.tbtn-print:hover{background:rgba(255,255,255,.25)}
+@media print{.toolbar{display:none}body{padding-top:0!important}}
+</style></head><body style="padding-top:56px">
+<div class="toolbar">
+  <p>Property Report — ${info.propertyName || info.bookingRef || "Cleaniq"}</p>
+  <button class="tbtn tbtn-pdf" onclick="downloadPdf(this)">⬇ Download PDF</button>
+  <button class="tbtn tbtn-print" onclick="window.print()">🖨 Print</button>
+</div>
+<script>
+function downloadPdf(btn){
+  btn.disabled=true;btn.textContent='Generating…';
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+  s.onload=function(){
+    var el=document.createElement('div');
+    el.innerHTML=document.body.innerHTML;
+    var tb=el.querySelector('.toolbar');if(tb)tb.remove();
+    el.style.paddingTop='0';
+    html2pdf().set({
+      margin:8,
+      filename:'property-report-${(info.bookingRef || info.propertyName || "cleaniq").replace(/[^a-z0-9]/gi,"-").toLowerCase()}.pdf',
+      image:{type:'jpeg',quality:0.95},
+      html2canvas:{scale:2,useCORS:true,logging:false},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+    }).from(el).save().then(function(){btn.disabled=false;btn.textContent='⬇ Download PDF'});
+  };
+  s.onerror=function(){btn.disabled=false;btn.textContent='⬇ Download PDF';alert('Could not load PDF library. Use the Print button instead.');};
+  document.head.appendChild(s);
+}
+</script>
 <div class="hdr">
   <img src="${logoUrl}" alt="Cleaniq Services" class="hdr-logo" />
   <div class="hdr-meta">
