@@ -37,7 +37,7 @@
       [
         "expo-updates",
         {
-          "username": "hexcode"
+          "username": "hexcode-dan"
         }
       ],
       [
@@ -52,6 +52,7 @@
         "projectId": "c1e50a75-2559-4534-a471-6e975bdeccbc"
       }
     },
+    "owner": "hexcode-dan",
     "runtimeVersion": {
       "policy": "appVersion"
     },
