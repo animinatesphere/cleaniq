@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Cleaniq Services Pro",
-    "slug": "cleaniq-worker",
+    "slug": "worker-app",
     "scheme": "cleaniqworker",
     "version": "1.2.0",
     "platforms": ["ios", "android", "web"],
