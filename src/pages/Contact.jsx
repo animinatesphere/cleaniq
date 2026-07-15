@@ -58,7 +58,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="pt-32 pb-24 bg-[#F8FAFC] min-h-screen">
+    <div className="pt-24 md:pt-32 pb-16 md:pb-24 bg-[#F8FAFC] min-h-screen">
       <Helmet>
         <title>Contact Us | Cleaniq Services Manchester</title>
         <meta
@@ -69,7 +69,7 @@ const Contact = () => {
         <meta property="og:title" content="Contact Us | Cleaniq Services Manchester" />
       </Helmet>
 
-      <div className="max-w-6xl mx-auto px-4 md:px-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
 
         {/* Header */}
         <motion.div
@@ -80,7 +80,7 @@ const Contact = () => {
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-6">
             <Mail size={14} /> Get in Touch
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-primary-dark tracking-tighter mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-primary-dark tracking-tighter mb-4">
             Contact Our Team
           </h1>
           <p className="text-slate-500 font-bold text-base md:text-lg max-w-xl mx-auto leading-relaxed">
@@ -88,7 +88,7 @@ const Contact = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-5 gap-8 items-start">
+        <div className="grid md:grid-cols-5 gap-6 md:gap-8 items-start">
 
           {/* Info Column */}
           <motion.div

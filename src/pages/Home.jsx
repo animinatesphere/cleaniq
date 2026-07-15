@@ -187,17 +187,17 @@ const Home = () => {
         })}
       </script>
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center pt-40 pb-20 overflow-hidden">
+      <section className="relative min-h-screen flex items-center pt-28 md:pt-40 pb-12 md:pb-20 overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 rounded-l-[150px] hidden lg:block" />
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-secondary/10 rounded-full blur-[100px]" />
 
-        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-8 lg:gap-16 items-center relative z-10">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white shadow-xl shadow-primary/5 text-primary font-black text-[10px] md:text-sm mb-8 border border-primary/5">
+            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white shadow-xl shadow-primary/5 text-primary font-black text-[10px] md:text-sm mb-4 md:mb-8 border border-primary/5">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
@@ -207,7 +207,7 @@ const Home = () => {
                 : "EXCEPTIONAL CLEANING IN MANCHESTER"}
             </div>
 
-            <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold text-primary-dark leading-[1.1] mb-8 tracking-tighter">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-primary-dark leading-[1.1] mb-4 md:mb-8 tracking-tighter">
               {region.id === "UK"
                 ? " Professional Cleaning Services in"
                 : "Top-Rated End of Tenancy Cleaning  in"}
@@ -218,7 +218,7 @@ const Home = () => {
               .
             </h1>
 
-            <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-lg leading-relaxed font-medium">
+            <p className="text-base md:text-xl text-slate-600 mb-6 md:mb-10 max-w-lg leading-relaxed font-medium">
               We provide the most reliable{" "}
               {region.id === "UK"
                 ? "End of Tenancy Cleaning "
@@ -228,7 +228,7 @@ const Home = () => {
               space.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-stretch sm:items-center">
               <Link
                 to="/booking"
                 className="btn-primary py-5 px-10 text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16px] group"
@@ -282,13 +282,13 @@ const Home = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1 }}
-            className="relative lg:block"
+            className="hidden md:relative md:block"
           >
-            <div className="relative z-10 rounded-[60px] overflow-hidden shadow-2xl border-8 border-white bg-slate-100">
+            <div className="relative z-10 rounded-[40px] lg:rounded-[60px] overflow-hidden shadow-2xl border-4 lg:border-8 border-white bg-slate-100">
               <img
                 src={air1}
                 alt="Professional cleaning service"
-                className="w-full h-[400px] lg:h-[600px] object-cover"
+                className="w-full h-[360px] lg:h-[600px] object-cover"
                 fetchpriority="high"
                 width="1200"
                 height="800"
