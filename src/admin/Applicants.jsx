@@ -217,7 +217,14 @@ const Applicants = () => {
                           {a.fullName?.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-bold text-primary-dark">{a.fullName}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-primary-dark">{a.fullName}</p>
+                            {a.source === 'Website' && (
+                              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wide bg-blue-50 text-blue-600 border border-blue-100">
+                                Website
+                              </span>
+                            )}
+                          </div>
                           <p className="text-[10px] text-slate-400 font-bold">{a.email}</p>
                           <p className="text-[10px] text-primary font-bold">{a.phone}</p>
                         </div>

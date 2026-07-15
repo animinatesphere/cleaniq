@@ -9,11 +9,7 @@ import {
   User,
   Mail,
   Phone,
-  MapPin,
-  Briefcase,
   FileText,
-  ChevronRight,
-  ChevronLeft,
   ShieldCheck,
   Building,
   Award,
@@ -23,7 +19,6 @@ import { Link } from "react-router-dom";
 
 const Recruitment = () => {
   const { region } = useRegion();
-  const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
@@ -31,12 +26,7 @@ const Recruitment = () => {
     fullName: "",
     email: "",
     phone: "",
-    city: "",
-    experience: "None",
-    hasTransport: false,
     cv: null,
-    dbsNumber: "",
-    idDocument: null,
   });
 
   const showNotification = (message, type = "error") => {
@@ -44,91 +34,52 @@ const Recruitment = () => {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  const nextStep = () => {
-    if (step === 1) {
-      if (!formData.fullName.trim()) {
-        showNotification("Please enter your full name.");
-        return;
-      }
-      if (!formData.email.trim()) {
-        showNotification("Please enter your email address.");
-        return;
-      }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email.trim())) {
-        showNotification("Please enter a valid email address.");
-        return;
-      }
-      if (!formData.phone.trim()) {
-        showNotification("Please enter your phone number.");
-        return;
-      }
-      if (!formData.city.trim()) {
-        showNotification("Please enter your current city.");
-        return;
-      }
-    }
-    if (step === 2) {
-      if (!formData.experience) {
-        showNotification("Please select your professional experience level.");
-        return;
-      }
-    }
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    setStep((s) => s + 1);
-  };
-  const prevStep = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    setStep((s) => s - 1);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.idDocument) {
-      showNotification("Please upload a valid ID document.");
+
+    if (!formData.fullName.trim()) {
+      showNotification("Please enter your full name.");
+      return;
+    }
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      showNotification("Please enter a valid email address.");
+      return;
+    }
+    if (!formData.phone.trim()) {
+      showNotification("Please enter your phone number.");
       return;
     }
     if (!formData.cv) {
       showNotification("Please upload your CV.");
       return;
     }
+
     setIsSubmitting(true);
 
     const data = new FormData();
-    // Files
-    if (formData.cv) data.append("cv", formData.cv);
-    if (formData.idDocument) data.append("idDocument", formData.idDocument);
-
-    // Other data
-    const applicantData = {
+    data.append("cv", formData.cv);
+    data.append("data", JSON.stringify({
       fullName: formData.fullName,
       email: formData.email,
       phone: formData.phone,
-      city: formData.city,
-      experience: formData.experience,
-      hasTransport: formData.hasTransport,
       region: region.id,
-    };
-
-    data.append("data", JSON.stringify(applicantData));
+      source: "Website",
+    }));
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/recruitment`,
-        {
-          method: "POST",
-          body: data, // Fetch handles multipart/form-data for FormData automatically
-        },
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/recruitment`, {
+        method: "POST",
+        body: data,
+      });
 
       if (response.ok) {
         setSubmitted(true);
       } else {
-        alert("Application failed. Please try again.");
+        showNotification("Application failed. Please try again.");
       }
     } catch (error) {
       console.error("Error submitting application:", error);
-      alert("Network error. Please check your connection.");
+      showNotification("Network error. Please check your connection.");
     } finally {
       setIsSubmitting(false);
     }
@@ -140,7 +91,7 @@ const Recruitment = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full p-6 md:p-12 text-center rounded-[32px] md:rounded-[48px] bg-slate-50 border border-slate-100 shadow-xl"
+          className="max-w-md w-full p-6 md:p-12 text-center rounded-4xl md:rounded-[48px] bg-slate-50 border border-slate-100 shadow-xl"
         >
           <motion.div
             initial={{ scale: 0 }}
@@ -154,14 +105,9 @@ const Recruitment = () => {
             Application Sent!
           </h2>
           <p className="text-slate-500 mb-10 leading-relaxed font-medium">
-            Thanks for your interest in joining Cleaniq Services. Our
-            recruitment team will review your{" "}
-            {region.id === "UK" ? "DBS" : "CV"} and get back to you shortly.
+            Thanks for your interest in joining Cleaniq Services. Our team will review your CV and be in touch shortly with next steps.
           </p>
-          <Link
-            to="/"
-            className="btn-primary w-full py-5 text-lg shadow-xl shadow-primary/20"
-          >
+          <Link to="/" className="btn-primary w-full py-5 text-lg shadow-xl shadow-primary/20">
             Return to Home
           </Link>
         </motion.div>
@@ -175,24 +121,20 @@ const Recruitment = () => {
         <title>Join Cleaniq — Careers & Recruitment</title>
         <meta
           name="description"
-          content="Apply to join Cleaniq Services. We're hiring vetted cleaning professionals in Manchester and Nigeria. Competitive pay and flexible schedules."
+          content="Apply to join Cleaniq Services. We're hiring vetted cleaning professionals in Manchester. Competitive pay and flexible schedules."
         />
-        <link
-          rel="canonical"
-          href="https://www.cleaniqservices.com/recruitment"
-        />
-        <meta
-          property="og:title"
-          content={"Join Cleaniq — Careers & Recruitment"}
-        />
+        <link rel="canonical" href="https://www.cleaniqservices.com/recruitment" />
+        <meta property="og:title" content="Join Cleaniq — Careers & Recruitment" />
       </Helmet>
+
       {isSubmitting && <LoadingOverlay message="Sending your application..." />}
-      <div className="max-w-4xl mx-auto">
-        {/* Header Section */}
+
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-6">
             Join our elite team.
@@ -203,433 +145,144 @@ const Recruitment = () => {
           </h1>
           <p className="text-lg text-slate-500 max-w-xl mx-auto font-medium leading-relaxed">
             {region.id === "UK"
-              ? "We're hiring dedicated pros in Manchester with valid DBS checks."
+              ? "We're hiring dedicated pros in Manchester. Send us your CV and we'll be in touch."
               : "Join Nigeria's premier cleaning network. High pay, flexible hours, and professional growth."}
           </p>
         </motion.div>
 
-        {/* Multi-step Form */}
-        <div className="bg-slate-50 rounded-[32px] md:rounded-[60px] p-6 md:p-16 border border-slate-100 shadow-sm relative overflow-hidden">
+        {/* Form */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-slate-50 rounded-[32px] md:rounded-[48px] p-6 md:p-12 border border-slate-100 shadow-sm relative overflow-hidden"
+        >
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]" />
 
-          {/* Stepper Progress */}
-          <div className="flex gap-4 mb-16 relative z-10">
-            {[1, 2, 3].map((s) => (
-              <div key={s} className="flex-1">
-                <div
-                  className={`h-2 rounded-full transition-all duration-700 ${step >= s ? "bg-primary" : "bg-slate-200"}`}
-                />
-                <p
-                  className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest mt-4 ${step >= s ? "text-primary" : "text-slate-400"}`}
-                >
-                  Step 0{s}
-                </p>
+          <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
+                <FileText size={24} />
               </div>
-            ))}
-          </div>
+              <h3 className="text-2xl font-black text-primary-dark tracking-tight">
+                Your Details.
+              </h3>
+            </div>
 
-          <form onSubmit={handleSubmit} className="relative z-10">
-            <AnimatePresence mode="wait">
-              {step === 1 && (
-                <motion.div
-                  key="step1"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-8"
+            <div className="grid sm:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                  <User size={10} /> Full Name
+                </label>
+                <input
+                  required
+                  type="text"
+                  placeholder="John Doe"
+                  className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                  <Mail size={10} /> Email Address
+                </label>
+                <input
+                  required
+                  type="email"
+                  placeholder="john@example.com"
+                  className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                <Phone size={10} /> Phone Number
+              </label>
+              <input
+                required
+                type="tel"
+                placeholder={region.id === "UK" ? "+44 7..." : "+234 8..."}
+                className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
+            </div>
+
+            {/* CV Upload */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                Upload CV
+              </label>
+              <div className="relative group">
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  onChange={(e) => setFormData({ ...formData, cv: e.target.files[0] })}
+                />
+                <div
+                  className={`p-8 md:p-10 border-2 border-dashed rounded-4xl flex flex-col items-center justify-center gap-4 transition-all ${
+                    formData.cv
+                      ? "border-primary bg-primary/5"
+                      : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"
+                  }`}
                 >
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
-                      <User size={24} />
-                    </div>
-                    <h3 className="text-2xl font-black text-primary-dark tracking-tight">
-                      Personal Details.
-                    </h3>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Full Name
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        placeholder="John Doe"
-                        className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
-                        value={formData.fullName}
-                        onChange={(e) =>
-                          setFormData({ ...formData, fullName: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Email Address
-                      </label>
-                      <input
-                        required
-                        type="email"
-                        placeholder="john@example.com"
-                        className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
-                        value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Phone Number
-                      </label>
-                      <input
-                        required
-                        type="tel"
-                        placeholder={
-                          region.id === "UK" ? "+44 7..." : "+234 8..."
-                        }
-                        className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Current City
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        placeholder={
-                          region.id === "UK" ? "Manchester" : "Lagos"
-                        }
-                        className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
-                        value={formData.city}
-                        onChange={(e) =>
-                          setFormData({ ...formData, city: e.target.value })
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    className="btn-primary w-full py-5 text-lg group"
+                  <div
+                    className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${
+                      formData.cv
+                        ? "bg-white text-primary"
+                        : "bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary"
+                    }`}
                   >
-                    Continue Application
-                    <ChevronRight
-                      size={20}
-                      className="group-hover:translate-x-2 transition-transform"
-                    />
-                  </button>
-                </motion.div>
-              )}
-
-              {step === 2 && (
-                <motion.div
-                  key="step2"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-10"
-                >
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
-                      <Briefcase size={24} />
-                    </div>
-                    <h3 className="text-2xl font-black text-primary-dark tracking-tight">
-                      Professional Experience.
-                    </h3>
+                    {formData.cv ? <CheckCircle2 size={32} /> : <Upload size={32} />}
                   </div>
-
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                      Years of experience
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      {["Entry Level", "2-4 Years", "5+ Years"].map((exp) => (
-                        <button
-                          key={exp}
-                          type="button"
-                          onClick={() =>
-                            setFormData({ ...formData, experience: exp })
-                          }
-                          className={`p-6 rounded-[32px] border-2 text-sm font-black transition-all ${
-                            formData.experience === exp
-                              ? "border-primary bg-primary text-white shadow-lg shadow-primary/20"
-                              : "border-white bg-white text-slate-400 hover:border-primary/20"
-                          }`}
-                        >
-                          {exp}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="p-8 rounded-[40px] bg-white border border-slate-100 flex items-center justify-between gap-6">
-                    <div>
-                      <h4 className="text-xl font-black text-primary-dark mb-1">
-                        Access to transport?
-                      </h4>
-                      <p className="text-sm text-slate-500 font-medium">
-                        Do you have a vehicle or reliable public transport?
-                      </p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={formData.hasTransport}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            hasTransport: e.target.checked,
-                          })
-                        }
-                      />
-                      <div className="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary transition-colors"></div>
-                    </label>
-                  </div>
-
-                  <div className="flex flex-col-reverse sm:flex-row gap-4">
-                    <button
-                      type="button"
-                      onClick={prevStep}
-                      className="px-8 py-5 rounded-[32px] bg-white border border-slate-200 font-black text-slate-500 hover:bg-slate-50 transition-all flex items-center gap-2"
-                    >
-                      <ChevronLeft size={20} /> Back
-                    </button>
-                    <button
-                      type="button"
-                      onClick={nextStep}
-                      className="btn-primary flex-1 py-5 text-lg flex items-center justify-center gap-2"
-                    >
-                      {region.id === "UK" ? "Continue" : "CV Upload"}{" "}
-                      <ChevronRight size={20} />
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {step === 3 && (
-                <motion.div
-                  key="step3"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-10"
-                >
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
-                      <FileText size={24} />
-                    </div>
-                    <h3 className="text-2xl font-black text-primary-dark tracking-tight">
-                      Identity & Verification.
-                    </h3>
-                  </div>
-
-                  <div className="space-y-6">
-                    {/* Common Passport Section */}
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                        Valid Id
-                      </label>
-                      <div className="relative group">
-                        <input
-                          type="file"
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              idDocument: e.target.files[0],
-                            })
-                          }
-                        />
-                        <div
-                          className={`p-6 md:p-10 border-2 border-dashed rounded-[32px] md:rounded-[40px] flex flex-col items-center justify-center gap-4 transition-all ${formData.idDocument ? "border-primary bg-primary/5" : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"}`}
-                        >
-                          <div
-                            className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${formData.idDocument ? "bg-white text-primary" : "bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary"}`}
-                          >
-                            {formData.idDocument ? (
-                              <CheckCircle2 size={32} />
-                            ) : (
-                              <Upload size={32} />
-                            )}
-                          </div>
-                          <div className="text-center">
-                            <p className="font-black text-primary-dark">
-                              {formData.idDocument
-                                ? formData.idDocument.name
-                                : "Upload Valid ID"}
-                            </p>
-                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
-                              Required for identity verification
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Regional Specific Section */}
-                    {region.id === "UK" ? (
-                      <div className="space-y-6 pt-6 border-t border-slate-100">
-                        {/* <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload CV</label>
-                          <input 
-                            required
-                            type="text" 
-                            placeholder="Enter 12-digit number"
-                            className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
-                            value={formData.dbsNumber}
-                            onChange={e => setFormData({...formData, dbsNumber: e.target.value})}
-                          />
-                        </div> */}
-                        <div className="relative group">
-                          <input
-                            type="file"
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                cv: e.target.files[0],
-                              })
-                            }
-                          />
-                          <div
-                            className={`p-6 md:p-10 border-2 border-dashed rounded-[32px] md:rounded-[40px] flex flex-col items-center justify-center gap-4 transition-all ${formData.cv ? "border-primary bg-primary/5" : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"}`}
-                          >
-                            <div
-                              className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${formData.cv ? "bg-white text-primary" : "bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary"}`}
-                            >
-                              {formData.cv ? (
-                                <CheckCircle2 size={32} />
-                              ) : (
-                                <Upload size={32} />
-                              )}
-                            </div>
-                            <div className="text-center">
-                              <p className="font-black text-primary-dark">
-                                {formData.cv ? formData.cv.name : "Upload CV"}
-                              </p>
-                              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
-                                PDF or JPEG (Max 5MB)
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-6 pt-6 border-t border-slate-100">
-                        <p className="text-slate-500 font-medium leading-relaxed">
-                          Please upload your latest Curriculum Vitae (CV)
-                          highlighting your professional history and references.
-                        </p>
-                        <div className="relative group">
-                          <input
-                            type="file"
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                cv: e.target.files[0],
-                              })
-                            }
-                          />
-                          <div
-                            className={`p-6 md:p-10 border-2 border-dashed rounded-[32px] md:rounded-[40px] flex flex-col items-center justify-center gap-4 transition-all ${formData.cv ? "border-primary bg-primary/5" : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"}`}
-                          >
-                            <div
-                              className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${formData.cv ? "bg-white text-primary" : "bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary"}`}
-                            >
-                              {formData.cv ? (
-                                <CheckCircle2 size={32} />
-                              ) : (
-                                <Upload size={32} />
-                              )}
-                            </div>
-                            <div className="text-center">
-                              <p className="font-black text-primary-dark">
-                                {formData.cv
-                                  ? formData.cv.name
-                                  : "Tap to upload CV"}
-                              </p>
-                              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
-                                PDF or Word Doc (Max 5MB)
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-8 rounded-[40px] bg-primary/5 border border-primary/10 flex gap-6">
-                    <ShieldCheck className="text-primary shrink-0" size={24} />
-                    <p className="text-sm text-slate-600 font-medium leading-relaxed">
-                      "I confirm that all information provided is accurate and
-                      authorize Cleaniq Services to conduct necessary background
-                      verification in accordance with{" "}
-                      {region.id === "UK" ? "GDPR" : "NDPR"} regulations."
+                  <div className="text-center">
+                    <p className="font-black text-primary-dark">
+                      {formData.cv ? formData.cv.name : "Tap to upload your CV"}
+                    </p>
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
+                      PDF or Word Doc (Max 5MB)
                     </p>
                   </div>
+                </div>
+              </div>
+            </div>
 
-                  <div className="flex flex-col-reverse sm:flex-row gap-4">
-                    <button
-                      type="button"
-                      onClick={prevStep}
-                      className="px-8 py-5 rounded-[32px] bg-white border border-slate-200 font-black text-slate-500 hover:bg-slate-50 transition-all"
-                    >
-                      Back
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn-primary flex-1 py-5 text-lg shadow-2xl shadow-primary/20"
-                    >
-                      Submit Application
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div className="p-6 rounded-3xl bg-primary/5 border border-primary/10 flex gap-4">
+              <ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
+              <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                We'll review your CV and contact you within <strong>24–72 hours</strong>. If successful, we'll send you login details and ask you to complete your profile before your first job.
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="btn-primary w-full py-5 text-base shadow-2xl shadow-primary/20 disabled:opacity-70"
+            >
+              Submit Application
+            </button>
           </form>
-        </div>
+        </motion.div>
 
-        {/* Benefits Section */}
-        <div className="mt-24 grid md:grid-cols-3 gap-8">
+        {/* Benefits */}
+        <div className="mt-20 grid md:grid-cols-3 gap-8">
           {[
-            {
-              icon: <Building size={24} />,
-              title: "Flexible Hours.",
-              desc: "Choose when and where you want to work.",
-            },
-            {
-              icon: <Award size={24} />,
-              title: "Premium Pay.",
-              desc: "Industry-leading rates for top-tier professionals.",
-            },
-            {
-              icon: <ShieldCheck size={24} />,
-              title: "Vetted Quality.",
-              desc: "Join a network of the highest rated pros.",
-            },
+            { icon: <Building size={24} />, title: "Flexible Hours.", desc: "Choose when and where you want to work." },
+            { icon: <Award size={24} />, title: "Premium Pay.", desc: "Industry-leading rates for top-tier professionals." },
+            { icon: <ShieldCheck size={24} />, title: "Vetted Quality.", desc: "Join a network of the highest rated pros." },
           ].map((benefit, i) => (
             <div key={i} className="text-center p-8">
               <div className="w-14 h-14 rounded-2xl bg-primary/5 text-primary flex items-center justify-center mx-auto mb-6">
                 {benefit.icon}
               </div>
-              <h4 className="text-xl font-black text-primary-dark mb-3 tracking-tight">
-                {benefit.title}
-              </h4>
-              <p className="text-slate-500 font-medium text-sm leading-relaxed">
-                {benefit.desc}
-              </p>
+              <h4 className="text-xl font-black text-primary-dark mb-3 tracking-tight">{benefit.title}</h4>
+              <p className="text-slate-500 font-medium text-sm leading-relaxed">{benefit.desc}</p>
             </div>
           ))}
         </div>
@@ -644,24 +297,22 @@ const Recruitment = () => {
             className="fixed top-10 left-1/2 -translate-x-1/2 z-100 w-[90%] max-w-md"
           >
             <div
-              className={`p-6 rounded-[32px] border-2 shadow-2xl flex items-center gap-4 bg-white ${notification.type === "error" ? "border-rose-100 text-rose-600" : "border-emerald-100 text-emerald-600"}`}
+              className={`p-6 rounded-[32px] border-2 shadow-2xl flex items-center gap-4 bg-white ${
+                notification.type === "error"
+                  ? "border-rose-100 text-rose-600"
+                  : "border-emerald-100 text-emerald-600"
+              }`}
             >
               <div
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${notification.type === "error" ? "bg-rose-50" : "bg-emerald-50"}`}
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                  notification.type === "error" ? "bg-rose-50" : "bg-emerald-50"
+                }`}
               >
-                {notification.type === "error" ? (
-                  <AlertCircle size={24} />
-                ) : (
-                  <CheckCircle2 size={24} />
-                )}
+                {notification.type === "error" ? <AlertCircle size={24} /> : <CheckCircle2 size={24} />}
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">
-                  {notification.type}
-                </p>
-                <p className="font-bold text-sm leading-tight">
-                  {notification.message}
-                </p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">{notification.type}</p>
+                <p className="font-bold text-sm leading-tight">{notification.message}</p>
               </div>
             </div>
           </motion.div>

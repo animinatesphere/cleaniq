@@ -14,6 +14,7 @@ const applicantSchema = new mongoose.Schema({
   dbsCheckPath: String,        // DBS certificate
   additionalNotes: String,
   region: { type: String, default: 'UK' },
+  source: { type: String, default: null }, // 'Website' | 'Manual' | null
   status: { type: String, default: 'Applied' },
   createdAt: { type: Date, default: Date.now },
 });

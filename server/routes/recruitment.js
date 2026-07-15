@@ -69,6 +69,7 @@ router.post('/', upload.fields([
       subject: `🚨 New Worker Application: ${saved.fullName}`,
       html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto">
         <h2>New Job Application</h2>
+        <p><strong>Source:</strong> ${saved.source || 'Unknown'}</p>
         <p><strong>Name:</strong> ${saved.fullName}</p>
         <p><strong>Email:</strong> ${saved.email}</p>
         <p><strong>Phone:</strong> ${saved.phone || '—'}</p>
