@@ -37,6 +37,20 @@ router.get("/by-ref/:bookingId", async (req, res) => {
   }
 });
 
+// GET single booking by MongoDB _id (used by Job Detail page)
+router.get("/:id", async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id).populate(
+      "assignedWorker",
+      "firstName lastName email phone region workerId hourlyRate",
+    );
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+    res.json(booking);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // DELETE ALL bookings (Admin) - IMPORTANT: Must be above /:id
 router.delete("/all/delete", async (req, res) => {
   try {

@@ -167,6 +167,12 @@ const AdminLayout = () => {
       label: "Operations",
       items: [
         {
+          name: "Job Tracker",
+          path: "/admin/jobs",
+          key: "jobs",
+          icon: <ClipboardList size={20} />,
+        },
+        {
           name: "Bookings",
           path: "/admin/bookings",
           key: "bookings",
