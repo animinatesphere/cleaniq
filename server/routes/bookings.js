@@ -429,8 +429,9 @@ router.put("/:id", async (req, res) => {
     if (!existingBooking)
       return res.status(404).json({ message: "Booking not found" });
 
-    const wasCompleted = existingBooking.status === "Completed";
+    const wasCompleted = existingBooking.status === "Completed" || existingBooking.status === "Completed - Unpaid";
     const isNowCompleted = req.body.status === "Completed";
+    const isNowCompletedUnpaid = req.body.status === "Completed - Unpaid";
 
     // If postcode is provided separately and not already in address, append it
     if (req.body.details?.postcode && req.body.details?.address) {
@@ -691,6 +692,34 @@ router.put("/:id", async (req, res) => {
         console.log(`⚙️ Post-service automations scheduled for booking ${updatedBooking.bookingId}`);
       } catch (schedErr) {
         console.error("⚠️ Failed to schedule post-service automations:", schedErr.message);
+      }
+    }
+
+    // Completed - Unpaid: update worker wallet only, no customer emails, no Stripe capture
+    // Used for corporate/B2B clients that pay on a fortnightly or monthly cycle
+    if (!wasCompleted && isNowCompletedUnpaid) {
+      console.log(`✅ Booking ${updatedBooking.bookingId} marked as Completed - Unpaid. Updating worker wallet (no email sent).`);
+      try {
+        if (updatedBooking.assignedWorker) {
+          const Worker = require("../models/Worker");
+          const workerEarnings =
+            (updatedBooking.workerRate || 0) *
+            (updatedBooking.details?.duration || updatedBooking.workerDuration || updatedBooking.duration || 0);
+
+          if (workerEarnings > 0) {
+            const worker = await Worker.findById(updatedBooking.assignedWorker);
+            if (worker) {
+              if (!worker.wallet) {
+                worker.wallet = { totalEarned: 0, balance: 0, onHold: 0, withdrawn: 0 };
+              }
+              worker.wallet.lastUpdated = new Date();
+              await worker.save();
+              console.log(`💰 Completed-Unpaid: worker wallet updated for ${updatedBooking.assignedWorkerName}`);
+            }
+          }
+        }
+      } catch (walletErr) {
+        console.error("⚠️ Worker wallet update failed for Completed-Unpaid:", walletErr.message);
       }
     }
 

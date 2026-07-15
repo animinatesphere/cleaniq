@@ -823,6 +823,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBook
             Confirmed: "#059669",
             Pending: "#D97706",
             Completed: "#6366F1",
+            "Completed - Unpaid": "#9333EA",
             Cancelled: "#EF4444",
             Accepted: "#0EA5E9",
           };
@@ -2919,6 +2920,7 @@ ${extrasRows}
       Confirmed: "bg-emerald-50 text-emerald-600 border-emerald-100",
       Pending: "bg-amber-50 text-amber-600 border-amber-100",
       Completed: "bg-blue-50 text-blue-600 border-blue-100",
+      "Completed - Unpaid": "bg-purple-50 text-purple-600 border-purple-100",
       Cancelled: "bg-rose-50 text-rose-600 border-rose-100",
     };
     return colors[status] || "bg-slate-50 text-slate-600 border-slate-100";
@@ -3298,7 +3300,7 @@ ${extrasRows}
                           onChange={(e) => handleQuickStatusChange(b._id, e.target.value)}
                           className={`px-2.5 py-1 rounded-full text-[10px] font-semibold border uppercase tracking-wide cursor-pointer appearance-none bg-transparent ${getStatusColor(b.status)}`}
                         >
-                          {["Pending","Confirmed","Assigned","Arrived","In Progress","Completed","Cancelled"].map(s => (
+                          {["Pending","Confirmed","Assigned","Arrived","In Progress","Completed","Completed - Unpaid","Cancelled"].map(s => (
                             <option key={s} value={s}>{s}</option>
                           ))}
                         </select>
@@ -3532,6 +3534,7 @@ ${extrasRows}
                         <option value="Confirmed">Confirmed</option>
                         <option value="Pending">Pending</option>
                         <option value="Completed">Completed</option>
+                        <option value="Completed - Unpaid">Completed - Unpaid</option>
                         <option value="Cancelled">Cancelled</option>
                       </select>
                     </div>
