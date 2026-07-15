@@ -309,6 +309,15 @@ const BookingScreen = ({ navigation }) => {
     setSubmitting(true);
     try {
       const token   = await AsyncStorage.getItem("customerToken");
+
+      // Convert extras object {name: qty} → array [{name, qty, price}] so admin/worker can read it
+      const extrasArray = Object.entries(form.extras)
+        .filter(([, qty]) => qty > 0)
+        .map(([name, qty]) => {
+          const ex = EXTRAS.find((e) => e.name === name);
+          return { name, qty, price: ex?.price || 0 };
+        });
+
       const payload = {
         bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
         service:   form.serviceType,
@@ -322,6 +331,9 @@ const BookingScreen = ({ navigation }) => {
           keyAccess:           form.keyAccess,
           suppliesProvidedBy:  form.suppliesProvidedBy,
           specialInstructions: form.specialInstructions,
+          notes:               form.specialInstructions,
+          hasPet:              form.hasPet === true ? "Yes" : form.hasPet === false ? "No" : null,
+          extras:              extrasArray,
         },
         property: {
           bedrooms:       form.bedrooms,
@@ -329,10 +341,8 @@ const BookingScreen = ({ navigation }) => {
           kitchens:       form.kitchens,
           receptionRooms: form.receptionRooms,
         },
-        extras:   form.extras,
-        schedule: { date: dateStr(form.date), time: form.timeSlot, timeSlot: form.timeSlot },
+        schedule: { date: dateStr(form.date), timeSlot: form.timeSlot, preferredTime: form.timeSlot },
         suppliesProvidedBy: form.suppliesProvidedBy,
-        hasPet:  form.hasPet,
         payment: { amount: total, method: "Invoice", status: "Pending", billingType: "hourly" },
         status:  "Awaiting Payment",
         region:  "UK",

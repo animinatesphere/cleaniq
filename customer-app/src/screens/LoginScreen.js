@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
   ScrollView,
   Image,
   Dimensions,
@@ -16,7 +15,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
-  Mail, Lock, Eye, EyeOff, User, Phone, ChevronRight, X,
+  Mail, Lock, Eye, EyeOff, User, Phone, ChevronRight, X, AlertCircle,
 } from "lucide-react-native";
 import { AuthContext } from "../context/AuthContext";
 import { C } from "../theme/flat";
@@ -54,6 +53,8 @@ const LoginScreen = ({ navigation }) => {
 
   const [tab, setTab] = useState("login");
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
+  const [signupError, setSignupError] = useState("");
 
   const [loginEmail, setLoginEmail]       = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -69,8 +70,10 @@ const LoginScreen = ({ navigation }) => {
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 
   const handleLogin = async () => {
+    setLoginError("");
     if (!loginEmail.trim() || !loginPassword.trim()) {
-      return Alert.alert("Missing details", "Please enter your email and password.");
+      setLoginError("Please enter your email and password.");
+      return;
     }
     setLoading(true);
     const result = await login(loginEmail.trim().toLowerCase(), loginPassword);
@@ -82,22 +85,27 @@ const LoginScreen = ({ navigation }) => {
         navigation.replace("Main");
       }
     } else {
-      Alert.alert("Login failed", result.message);
+      setLoginError(result.message || "Incorrect email or password. Please try again.");
     }
   };
 
   const handleSignup = async () => {
+    setSignupError("");
     if (!firstName.trim() || !lastName.trim()) {
-      return Alert.alert("Missing details", "Please enter your first and last name.");
+      setSignupError("Please enter your first and last name.");
+      return;
     }
     if (!signupEmail.trim()) {
-      return Alert.alert("Missing details", "Please enter your email address.");
+      setSignupError("Please enter your email address.");
+      return;
     }
     if (signupPassword.length < 6) {
-      return Alert.alert("Weak password", "Password must be at least 6 characters.");
+      setSignupError("Password must be at least 6 characters.");
+      return;
     }
     if (signupPassword !== confirmPwd) {
-      return Alert.alert("Passwords don't match", "Please make sure both passwords are the same.");
+      setSignupError("Passwords don't match. Please check and try again.");
+      return;
     }
     setLoading(true);
     const result = await register(
@@ -112,7 +120,7 @@ const LoginScreen = ({ navigation }) => {
         navigation.replace("Main");
       }
     } else {
-      Alert.alert("Sign up failed", result.message);
+      setSignupError(result.message || "Sign up failed. Please try again.");
     }
   };
 
@@ -171,14 +179,14 @@ const LoginScreen = ({ navigation }) => {
           <View style={styles.tabBar}>
             <TouchableOpacity
               style={[styles.tabBtn, isLogin && styles.tabBtnActive]}
-              onPress={() => setTab("login")}
+              onPress={() => { setTab("login"); setLoginError(""); setSignupError(""); }}
               activeOpacity={0.8}
             >
               <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>Log In</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tabBtn, !isLogin && styles.tabBtnActive]}
-              onPress={() => setTab("signup")}
+              onPress={() => { setTab("signup"); setLoginError(""); setSignupError(""); }}
               activeOpacity={0.8}
             >
               <Text style={[styles.tabText, !isLogin && styles.tabTextActive]}>Sign Up</Text>
@@ -193,18 +201,25 @@ const LoginScreen = ({ navigation }) => {
                 Log in to manage your bookings and track your cleaner.
               </Text>
 
+              {!!loginError && (
+                <View style={styles.errorBanner}>
+                  <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                  <Text style={styles.errorBannerTxt}>{loginError}</Text>
+                </View>
+              )}
+
               <Field
                 icon={<Mail size={18} color={C.textMuted} />}
                 placeholder="Email address"
                 value={loginEmail}
-                onChangeText={setLoginEmail}
+                onChangeText={(v) => { setLoginEmail(v); setLoginError(""); }}
                 keyboardType="email-address"
               />
               <Field
                 icon={<Lock size={18} color={C.textMuted} />}
                 placeholder="Password"
                 value={loginPassword}
-                onChangeText={setLoginPassword}
+                onChangeText={(v) => { setLoginPassword(v); setLoginError(""); }}
                 secureTextEntry={!showLoginPwd}
                 rightIcon={showLoginPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
                 onRightPress={() => setShowLoginPwd((v) => !v)}
@@ -254,6 +269,13 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.formSub}>
                 Join thousands getting spotless homes across Manchester.
               </Text>
+
+              {!!signupError && (
+                <View style={styles.errorBanner}>
+                  <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                  <Text style={styles.errorBannerTxt}>{signupError}</Text>
+                </View>
+              )}
 
               <View style={styles.nameRow}>
                 <View style={[styles.fieldRow, styles.halfField]}>
@@ -505,6 +527,13 @@ const styles = StyleSheet.create({
     textAlign: "center", lineHeight: 17, marginTop: 4,
   },
   termsLink: { color: C.primary },
+
+  errorBanner: {
+    flexDirection: "row", alignItems: "flex-start", gap: 8,
+    backgroundColor: "#FEF2F2", borderWidth: 1.5, borderColor: "#FECACA",
+    borderRadius: 12, padding: 12,
+  },
+  errorBannerTxt: { flex: 1, fontSize: 13, color: "#DC2626", fontWeight: "500", lineHeight: 18 },
 });
 
 export default LoginScreen;

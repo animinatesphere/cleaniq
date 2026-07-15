@@ -162,32 +162,37 @@ const HomeScreen = ({ navigation, route }) => {
     setRefreshing(false);
   };
 
-  const handleQuickAccept = (job) => {
+  const showAlert = (title, msg) => {
+    if (Platform.OS === "web") window.alert(`${title}\n${msg}`);
+    else Alert.alert(title, msg);
+  };
+  const showConfirm = (title, msg, onOk) => {
+    if (Platform.OS === "web") {
+      if (window.confirm(`${title}\n${msg}`)) onOk();
+    } else {
+      Alert.alert(title, msg, [
+        { text:"Cancel", style:"cancel" },
+        { text:"OK", onPress: onOk },
+      ]);
+    }
+  };
+
+  const handleQuickAccept = async (job) => {
     const id = job._id||job.bookingId;
-    Alert.alert("Accept Job","Are you sure you want to accept this job?",[
-      { text:"Cancel", style:"cancel" },
-      { text:"Accept", onPress: async ()=>{
-        setActionLoading(id);
-        try {
-          await axios.post(`${API_URL}/workers/jobs/${id}/accept`,{ workerId:workerInfo.id, workerName:`${workerInfo.firstName} ${workerInfo.lastName}` });
-          triggerNotificationUpdate(); await fetchData();
-          Alert.alert("Accepted!","Job moved to your Active tab.");
-        } catch(e){ Alert.alert("Error",e.response?.data?.error||"Failed"); }
-        finally { setActionLoading(null); }
-      }},
-    ]);
+    setActionLoading(id);
+    try {
+      await axios.post(`${API_URL}/workers/jobs/${id}/accept`,{ workerId:workerInfo.id, workerName:`${workerInfo.firstName} ${workerInfo.lastName}` });
+      triggerNotificationUpdate(); await fetchData();
+      showAlert("Accepted!","Job moved to your Active tab.");
+    } catch(e){ showAlert("Error",e.response?.data?.error||"Failed"); }
+    finally { setActionLoading(null); }
   };
 
   const handleCancel = async (id) => {
-    Alert.alert("Cancel Job","Are you sure?",[
-      { text:"No", style:"cancel" },
-      { text:"Yes, Cancel", style:"destructive", onPress: async ()=>{
-        setActionLoading(id);
-        try { await axios.post(`${API_URL}/workers/jobs/${id}/cancel`); setMyJobs(p=>p.filter(j=>j._id!==id)); fetchData(); }
-        catch(e){ Alert.alert("Error",e.response?.data?.error||"Failed"); }
-        finally { setActionLoading(null); }
-      }},
-    ]);
+    setActionLoading(id);
+    try { await axios.post(`${API_URL}/workers/jobs/${id}/cancel`); setMyJobs(p=>p.filter(j=>j._id!==id)); fetchData(); }
+    catch(e){ showAlert("Error",e.response?.data?.error||"Failed"); }
+    finally { setActionLoading(null); }
   };
 
   const handleArrive = async (id) => {
@@ -208,124 +213,8 @@ const HomeScreen = ({ navigation, route }) => {
       .filter(Boolean).join(" ").toLowerCase().includes(q);
   });
 
-  // ── Reusable Badge ─────────────────────────────────────────────────────────
-  const Badge = ({ label, color=C.mutedFg, bg=C.muted, border=C.border }) => (
-    <View style={[S.badge,{backgroundColor:bg,borderColor:border}]}>
-      <Text style={[S.badgeTxt,{color}]}>{label}</Text>
-    </View>
-  );
 
-  // ── Service icon chip ──────────────────────────────────────────────────────
-  const SvcIcon = ({ name, size=40 }) => {
-    const { Icon, color, bg } = svcConfig(name);
-    return (
-      <View style={[S.svcIcon,{width:size,height:size,borderRadius:size/4,backgroundColor:bg,borderColor:color+"33"}]}>
-        <Icon size={size*0.42} color={color} strokeWidth={1.8} />
-      </View>
-    );
-  };
 
-  // ── Customer avatar ────────────────────────────────────────────────────────
-  const Avatar = ({ first="?", last="" }) => {
-    const initials = `${first[0]||""}${last[0]||""}`.toUpperCase();
-    const bg = avatarColor(first);
-    return (
-      <View style={[S.avatar,{backgroundColor:bg}]}>
-        <Text style={S.avatarTxt}>{initials}</Text>
-      </View>
-    );
-  };
-
-  // ── Job Card ───────────────────────────────────────────────────────────────
-  const JobCard = ({ job, showActions=true }) => {
-    const sm  = statusMeta(job.status);
-    const pay = ((job.workerRate||0)*(job.details?.duration||job.workerDuration||job.duration||0)).toFixed(2);
-    const { Icon, color, bg, border } = svcConfig(job.service);
-    return (
-      <TouchableOpacity
-        style={S.jobCard}
-        onPress={()=>navigation.navigate("AcceptedBookingDetail",{ bookingId:job._id })}
-        activeOpacity={0.72}
-      >
-        {/* Color accent strip + service icon */}
-        <View style={[S.jobAccent,{ backgroundColor: bg, borderBottomColor: color+"22" }]}>
-          <View style={S.jobAccentInner}>
-            <View style={[S.jobSvcBadge,{backgroundColor:color+"18",borderColor:color+"33"}]}>
-              <Icon size={14} color={color} strokeWidth={2}/>
-              <Text style={[S.jobSvcTxt,{color}]}>{svcConfig(job.service).label}</Text>
-            </View>
-            <View style={[S.statusPill,{backgroundColor:sm.bg,borderColor:sm.border}]}>
-              <View style={[S.statusDot,{backgroundColor:sm.color}]}/>
-              <Text style={[S.statusTxt,{color:sm.color}]}>{job.status}</Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={S.jobBody}>
-          {/* Title row */}
-          <View style={S.jobTitleRow}>
-            <SvcIcon name={job.service} size={44} />
-            <View style={{flex:1,marginLeft:12}}>
-              <Text style={S.jobName} numberOfLines={1}>{job.service||"Cleaning Service"}</Text>
-              <View style={{flexDirection:"row",alignItems:"center",gap:6,marginTop:4}}>
-                <Avatar first={job.customer?.firstName} last={job.customer?.lastName}/>
-                <Text style={S.jobCustomer}>{job.customer?.firstName} {job.customer?.lastName}</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Meta */}
-          <View style={S.jobMeta}>
-            <View style={S.metaChip}>
-              <Calendar size={11} color={C.mutedFg} strokeWidth={2}/>
-              <Text style={S.metaChipTxt}>{fmtDate(job.schedule?.date)}</Text>
-            </View>
-            <View style={S.metaChip}>
-              <Clock size={11} color={C.mutedFg} strokeWidth={2}/>
-              <Text style={S.metaChipTxt}>{fmtTime(job.schedule)}</Text>
-            </View>
-          </View>
-          <View style={[S.metaChip,{alignSelf:"flex-start",marginTop:4}]}>
-            <MapPin size={11} color={C.mutedFg} strokeWidth={2}/>
-            <Text style={S.metaChipTxt} numberOfLines={1}>{fmtAddr(job)}</Text>
-          </View>
-
-          {/* Footer */}
-          <View style={S.jobFooter}>
-            <View>
-              <Text style={S.payLabel}>Payout</Text>
-              <Text style={S.payAmt}>£{pay}</Text>
-            </View>
-            {showActions && ["pending","assigned"].includes(job.status?.toLowerCase()) ? (
-              <View style={{flexDirection:"row",gap:8}}>
-                <TouchableOpacity style={S.btnGhost} onPress={()=>handleCancel(job._id)} disabled={actionLoading===job._id}>
-                  <Trash2 size={14} color="#EF4444"/>
-                </TouchableOpacity>
-                <TouchableOpacity style={S.btnPrimary} onPress={()=>handleArrive(job._id)} disabled={actionLoading===job._id}>
-                  {actionLoading===job._id ? <ActivityIndicator size="small" color="#fff"/>
-                    : <Text style={S.btnPrimaryTxt}>I've Arrived</Text>}
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <TouchableOpacity style={S.btnOutline} onPress={()=>navigation.navigate("AcceptedBookingDetail",{bookingId:job._id})}>
-                <Text style={S.btnOutlineTxt}>Details</Text>
-                <ChevronRight size={12} color={C.text} strokeWidth={2.5}/>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  // ── Empty state ────────────────────────────────────────────────────────────
-  const Empty = ({ icon:Icon, title, sub }) => (
-    <View style={S.empty}>
-      <View style={S.emptyBox}><Icon size={24} color={C.mutedFg} strokeWidth={1.5}/></View>
-      <Text style={S.emptyTitle}>{title}</Text>
-      <Text style={S.emptySub}>{sub}</Text>
-    </View>
-  );
 
   // ── ACTIVITY TAB ───────────────────────────────────────────────────────────
   const ActivityTab = () => (
@@ -393,7 +282,7 @@ const HomeScreen = ({ navigation, route }) => {
 
       {activeJobs.length===0
         ? <Empty icon={Briefcase} title="No active jobs" sub="Head to Offers to find work near you"/>
-        : <View style={S.list}>{activeJobs.map(j=><JobCard key={j._id} job={j} showActions/>)}</View>
+        : <View style={S.list}>{activeJobs.map(j=><JobCard key={j._id} job={j} showActions navigation={navigation} onCancel={handleCancel} onArrive={handleArrive} actionLoading={actionLoading}/>)}</View>
       }
       <View style={{height:100}}/>
     </ScrollView>
@@ -431,7 +320,7 @@ const HomeScreen = ({ navigation, route }) => {
 
       {completedJobs.length===0
         ? <Empty icon={CheckCircle} title="No completed jobs yet" sub="Your history will appear here"/>
-        : <View style={S.list}>{completedJobs.map(j=><JobCard key={j._id} job={j} showActions={false}/>)}</View>
+        : <View style={S.list}>{completedJobs.map(j=><JobCard key={j._id} job={j} showActions={false} navigation={navigation} onCancel={handleCancel} onArrive={handleArrive} actionLoading={actionLoading}/>)}</View>
       }
       <View style={{height:100}}/>
     </ScrollView>
@@ -513,12 +402,15 @@ const HomeScreen = ({ navigation, route }) => {
                       <Text style={S.btnOutlineTxt}>View Details</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[S.btnPrimary,{flex:1,justifyContent:"center",gap:4}]}
+                      style={[S.btnPrimary,{flex:1,justifyContent:"center"}]}
                       onPress={()=>handleQuickAccept(job)}
                       disabled={actionLoading===id}>
                       {actionLoading===id
                         ? <ActivityIndicator size="small" color="#fff"/>
-                        : <><Text style={S.btnPrimaryTxt}>Accept Job</Text><ArrowUpRight size={13} color="#fff" strokeWidth={2.5}/></>
+                        : <View style={{flexDirection:"row",alignItems:"center",gap:4}}>
+                            <Text style={S.btnPrimaryTxt}>Accept Job</Text>
+                            <ArrowUpRight size={13} color="#fff" strokeWidth={2.5}/>
+                          </View>
                       }
                     </TouchableOpacity>
                   </View>
@@ -652,7 +544,8 @@ const HomeScreen = ({ navigation, route }) => {
       {loading && (
         <View style={S.loading}><ActivityIndicator size="large" color={C.primary} /></View>
       )}
-      {!loading && <>
+      {!loading && (
+      <View style={{flex:1}}>
       {/* Header */}
       <View style={S.header}>
         <View style={{flexDirection:"row",alignItems:"center",gap:12}}>
@@ -706,7 +599,8 @@ const HomeScreen = ({ navigation, route }) => {
         {activeTab==="offers"    && OffersTab()}
         {activeTab==="payments"  && PaymentsTab()}
       </View>
-      </>}
+      </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -973,5 +867,121 @@ const S = StyleSheet.create({
   payRowAmt:   { fontSize:16, fontWeight:"800", color:C.text },
   wdIconBox:   { width:38, height:38, borderRadius:R, alignItems:"center", justifyContent:"center" },
 });
+
+// ── Stable module-level micro-components ─────────────────────────────────────
+// Defined outside HomeScreen so their references never change across re-renders,
+// preventing React's reconciler from unmounting/remounting them (which causes
+// the "removeChild: node is not a child" crash on React Native Web).
+
+const Badge = ({ label, color=C.mutedFg, bg=C.muted, border=C.border }) => (
+  <View style={[S.badge,{backgroundColor:bg,borderColor:border}]}>
+    <Text style={[S.badgeTxt,{color}]}>{label}</Text>
+  </View>
+);
+
+const SvcIcon = ({ name, size=40 }) => {
+  const { Icon, color, bg } = svcConfig(name);
+  return (
+    <View style={[S.svcIcon,{width:size,height:size,borderRadius:size/4,backgroundColor:bg,borderColor:color+"33"}]}>
+      <Icon size={size*0.42} color={color} strokeWidth={1.8} />
+    </View>
+  );
+};
+
+const Avatar = ({ first="?", last="" }) => {
+  const initials = `${first[0]||""}${last[0]||""}`.toUpperCase();
+  const bg = avatarColor(first);
+  return (
+    <View style={[S.avatar,{backgroundColor:bg}]}>
+      <Text style={S.avatarTxt}>{initials}</Text>
+    </View>
+  );
+};
+
+const Empty = ({ icon:Icon, title, sub }) => (
+  <View style={S.empty}>
+    <View style={S.emptyBox}><Icon size={24} color={C.mutedFg} strokeWidth={1.5}/></View>
+    <Text style={S.emptyTitle}>{title}</Text>
+    <Text style={S.emptySub}>{sub}</Text>
+  </View>
+);
+
+const JobCard = ({ job, showActions=true, navigation, onCancel, onArrive, actionLoading }) => {
+  const sm  = statusMeta(job.status);
+  const pay = ((job.workerRate||0)*(job.details?.duration||job.workerDuration||job.duration||0)).toFixed(2);
+  const { Icon, color, bg } = svcConfig(job.service);
+  return (
+    <TouchableOpacity
+      style={S.jobCard}
+      onPress={()=>navigation.navigate("AcceptedBookingDetail",{ bookingId:job._id })}
+      activeOpacity={0.72}
+    >
+      <View style={[S.jobAccent,{ backgroundColor: bg, borderBottomColor: color+"22" }]}>
+        <View style={S.jobAccentInner}>
+          <View style={[S.jobSvcBadge,{backgroundColor:color+"18",borderColor:color+"33"}]}>
+            <Icon size={14} color={color} strokeWidth={2}/>
+            <Text style={[S.jobSvcTxt,{color}]}>{svcConfig(job.service).label}</Text>
+          </View>
+          <View style={[S.statusPill,{backgroundColor:sm.bg,borderColor:sm.border}]}>
+            <View style={[S.statusDot,{backgroundColor:sm.color}]}/>
+            <Text style={[S.statusTxt,{color:sm.color}]}>{job.status}</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={S.jobBody}>
+        <View style={S.jobTitleRow}>
+          <SvcIcon name={job.service} size={44} />
+          <View style={{flex:1,marginLeft:12}}>
+            <Text style={S.jobName} numberOfLines={1}>{job.service||"Cleaning Service"}</Text>
+            <View style={{flexDirection:"row",alignItems:"center",gap:6,marginTop:4}}>
+              <Avatar first={job.customer?.firstName} last={job.customer?.lastName}/>
+              <Text style={S.jobCustomer}>{job.customer?.firstName} {job.customer?.lastName}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={S.jobMeta}>
+          <View style={S.metaChip}>
+            <Calendar size={11} color={C.mutedFg} strokeWidth={2}/>
+            <Text style={S.metaChipTxt}>{fmtDate(job.schedule?.date)}</Text>
+          </View>
+          <View style={S.metaChip}>
+            <Clock size={11} color={C.mutedFg} strokeWidth={2}/>
+            <Text style={S.metaChipTxt}>{fmtTime(job.schedule)}</Text>
+          </View>
+        </View>
+        <View style={[S.metaChip,{alignSelf:"flex-start",marginTop:4}]}>
+          <MapPin size={11} color={C.mutedFg} strokeWidth={2}/>
+          <Text style={S.metaChipTxt} numberOfLines={1}>{fmtAddr(job)}</Text>
+        </View>
+
+        <View style={S.jobFooter}>
+          <View>
+            <Text style={S.payLabel}>Payout</Text>
+            <Text style={S.payAmt}>£{pay}</Text>
+          </View>
+          {showActions && ["pending","assigned"].includes(job.status?.toLowerCase()) ? (
+            <View style={{flexDirection:"row",gap:8}}>
+              <TouchableOpacity style={S.btnGhost} onPress={()=>onCancel(job._id)} disabled={actionLoading===job._id}>
+                <Trash2 size={14} color="#EF4444"/>
+              </TouchableOpacity>
+              <TouchableOpacity style={S.btnPrimary} onPress={()=>onArrive(job._id)} disabled={actionLoading===job._id}>
+                {actionLoading===job._id
+                  ? <ActivityIndicator size="small" color="#fff"/>
+                  : <Text style={S.btnPrimaryTxt}>I've Arrived</Text>}
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={S.btnOutline} onPress={()=>navigation.navigate("AcceptedBookingDetail",{bookingId:job._id})}>
+              <Text style={S.btnOutlineTxt}>Details</Text>
+              <ChevronRight size={12} color={C.text} strokeWidth={2.5}/>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 export default HomeScreen;

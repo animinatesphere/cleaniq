@@ -153,7 +153,12 @@ const BookingDetailScreen = ({ route, navigation }) => {
   const isActive     = !["Completed", "Cancelled"].includes(booking.status);
   const StatusIcon   = statusMeta.icon;
 
-  const extras = Object.entries(booking.extras || {}).filter(([, v]) => v > 0);
+  // Support old root-level object format {name: qty} and new details.extras array [{name, qty}]
+  const extrasObj = booking.extras || {};
+  const extrasArr = Array.isArray(booking.details?.extras) ? booking.details.extras : [];
+  const extrasFromArr = extrasArr.filter(e => e?.qty > 0).map(e => [e.name, e.qty]);
+  const extrasFromObj = Object.entries(extrasObj).filter(([, v]) => v > 0);
+  const extras = extrasFromArr.length > 0 ? extrasFromArr : extrasFromObj;
 
   const timeline = [
     { label: "Booking Confirmed",   done: true },

@@ -7,10 +7,14 @@ const applicantSchema = new mongoose.Schema({
   city: String,
   experience: String,
   hasTransport: Boolean,
-  cvPath: String, // Path to stored CV on VPS
-  idPath: String, // Path to stored ID on VPS
-  region: String,
-  status: { type: String, default: 'Pending' }, // Pending, Reviewed, Interviewed, Hired, Rejected
+  cvPath: String,
+  idPath: String,
+  rightToWorkPath: String,     // Right to Work share code document
+  rightToWorkCode: String,     // The actual share code string (text)
+  dbsCheckPath: String,        // DBS certificate
+  additionalNotes: String,
+  region: { type: String, default: 'UK' },
+  status: { type: String, default: 'Applied' },
   createdAt: { type: Date, default: Date.now },
 });
 

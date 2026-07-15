@@ -53,9 +53,15 @@ const bookingSchema = new mongoose.Schema({
   jobDurationActual: { type: Number, default: 0 }, // in minutes
   workerRate: { type: Number, default: null }, // per hour rate set by admin
   workerDuration: { type: Number, default: null }, // expected duration set by admin
-  rejectedBy: [{ type: String }], // Array of worker IDs who turned down this job
+  rejectedBy: [{ type: String }],
+  photos: [{
+    photoType: { type: String, enum: ["before", "after", "damage", "other"] },
+    url: String,
+    uploadedAt: { type: Date, default: Date.now },
+  }],
+  workerReport: { type: String, default: null },
   createdAt: { type: Date, default: Date.now },
-  meta: mongoose.Schema.Types.Mixed, // Catch-all for future expansions
+  meta: mongoose.Schema.Types.Mixed,
 });
 
 module.exports = mongoose.model("Booking", bookingSchema);

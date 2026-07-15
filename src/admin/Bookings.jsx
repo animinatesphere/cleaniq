@@ -2938,12 +2938,20 @@ ${extrasRows}
       "Living Room",
     ];
 
-    // Check details object directly for room properties
+    // Check details object directly for room properties (admin-created format)
     roomNames.forEach((room) => {
       if (b.details?.[room] && b.details[room] > 0) {
         data[room] = b.details[room];
       }
     });
+
+    // Also check booking.property (customer app format)
+    if (b.property) {
+      if (!data["Bedroom"]        && b.property.bedrooms       > 0) data["Bedroom"]        = b.property.bedrooms;
+      if (!data["Bathroom"]       && b.property.bathrooms      > 0) data["Bathroom"]       = b.property.bathrooms;
+      if (!data["Kitchen"]        && b.property.kitchens       > 0) data["Kitchen"]        = b.property.kitchens;
+      if (!data["Reception Room"] && b.property.receptionRooms > 0) data["Reception Room"] = b.property.receptionRooms;
+    }
 
     return data;
   };
@@ -2991,6 +2999,9 @@ ${extrasRows}
 
   const getPetInfo = (b) => {
     if (!b) return null;
+    // Customer app format: details.hasPet = "Yes" | "No"
+    if (b.details?.hasPet) return b.details.hasPet;
+    // Admin format: stored as string in extras array
     if (Array.isArray(b.details?.extras)) {
       const petEntry = b.details.extras.find(
         (e) =>
@@ -3006,6 +3017,7 @@ ${extrasRows}
     if (!b) return "";
     const baseNotes =
       b.details?.notes ||
+      b.details?.specialInstructions ||
       b.notes ||
       b.meta?.notes ||
       b.specialInstructions ||
@@ -4270,6 +4282,53 @@ ${extrasRows}
                           </div>
                         </div>
                       </div>
+                    </div>
+                  )}
+
+                  {/* ── Worker Submission: Photos & Report ── */}
+                  {(selectedBooking.photos?.length > 0 || selectedBooking.workerReport) && (
+                    <div className="bg-slate-50 border border-slate-200 rounded-[32px] p-6">
+                      <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <Camera size={14} /> Worker Job Submission
+                      </h5>
+
+                      {/* Photos grouped by type */}
+                      {selectedBooking.photos?.length > 0 && (() => {
+                        const groups = { before: [], after: [], damage: [], other: [] };
+                        selectedBooking.photos.forEach(p => { (groups[p.photoType] || groups.other).push(p); });
+                        const labels = { before: "Before", after: "After", damage: "Damage", other: "Other" };
+                        const colors = { before: "bg-amber-50 text-amber-700 border-amber-200", after: "bg-emerald-50 text-emerald-700 border-emerald-200", damage: "bg-rose-50 text-rose-700 border-rose-200", other: "bg-slate-50 text-slate-600 border-slate-200" };
+                        return (
+                          <div className="space-y-4 mb-4">
+                            {Object.entries(groups).filter(([, arr]) => arr.length > 0).map(([type, photos]) => (
+                              <div key={type}>
+                                <p className={`inline-block text-[10px] font-bold px-3 py-1 rounded-full border mb-2 ${colors[type]}`}>{labels[type]} — {photos.length} photo{photos.length > 1 ? 's' : ''}</p>
+                                <div className="flex gap-2 flex-wrap">
+                                  {photos.map((p, i) => (
+                                    <a key={i} href={`https://api.cleaniqservices.com/${p.url}`} target="_blank" rel="noreferrer">
+                                      <img
+                                        src={`https://api.cleaniqservices.com/${p.url}`}
+                                        alt={`${type}-${i}`}
+                                        className="w-24 h-24 rounded-2xl object-cover border border-slate-200 hover:opacity-90 transition-opacity"
+                                      />
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+
+                      {/* Written report */}
+                      {selectedBooking.workerReport && (
+                        <div className="bg-white border border-slate-200 rounded-2xl p-4">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">
+                            <FileText size={12} /> Worker Report
+                          </p>
+                          <p className="text-sm text-slate-700 leading-relaxed">{selectedBooking.workerReport}</p>
+                        </div>
+                      )}
                     </div>
                   )}
 

@@ -78,6 +78,12 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   const [afterPhoto, setAfterPhoto] = useState(null);
   const [photoUploading, setPhotoUploading] = useState(null); // "before" | "after" | null
 
+  // Completion modal state
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [damagePhotos, setDamagePhotos] = useState([]); // [{uri, base64}]
+  const [workerReport, setWorkerReport] = useState("");
+  const [submittingCompletion, setSubmittingCompletion] = useState(false);
+
   // Cleaning checklist
   const [checkedTasks, setCheckedTasks] = useState({});
   const [tasks, setTasks] = useState([]);
@@ -217,8 +223,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     setPhotoUploading(type);
     try {
       await axios.post(`${API_URL}/workers/jobs/${bookingId}/photos`, {
-        type,
-        photo: photoData,
+        photos: [{ photoType: type, base64: photoData }],
       });
     } catch (err) {
       Alert.alert(
@@ -228,6 +233,57 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
       );
     } finally {
       setPhotoUploading(null);
+    }
+  };
+
+  const pickDamagePhoto = async () => {
+    Alert.alert("Add Damage Photo", "How would you like to add the photo?", [
+      { text: "Take Photo", onPress: () => captureDamagePhoto("camera") },
+      { text: "Choose from Gallery", onPress: () => captureDamagePhoto("gallery") },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
+  const captureDamagePhoto = async (source) => {
+    let result;
+    if (source === "camera") {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") { Alert.alert("Permission Required", "Camera access is needed."); return; }
+      result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.75, base64: true });
+    } else {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") { Alert.alert("Permission Required", "Gallery access is needed."); return; }
+      result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.75, base64: true });
+    }
+    if (result.canceled) return;
+    const asset = result.assets[0];
+    setDamagePhotos(prev => [...prev, { uri: asset.uri, base64: `data:image/jpeg;base64,${asset.base64}` }]);
+  };
+
+  const handleCompleteWithSubmission = async () => {
+    if (!afterPhoto) {
+      Alert.alert("After Photo Required", "Please take an after photo before completing the job.");
+      return;
+    }
+    setSubmittingCompletion(true);
+    try {
+      // Upload damage photos + report in one request
+      if (damagePhotos.length > 0 || workerReport.trim()) {
+        await axios.post(`${API_URL}/workers/jobs/${bookingId}/photos`, {
+          photos: damagePhotos.map(p => ({ photoType: "damage", base64: p.base64 })),
+          workerReport: workerReport.trim() || undefined,
+        });
+      }
+      // Mark job complete
+      await axios.post(`${API_URL}/workers/jobs/${bookingId}/complete`);
+      setBooking(prev => ({ ...prev, status: "Completed" }));
+      if (sharingLocation) stopSharingLocation();
+      setShowCompletionModal(false);
+      Alert.alert("✅ Job Complete", "Great work! The job has been marked as completed.");
+    } catch (error) {
+      Alert.alert("Error", error.response?.data?.error || "Failed to complete job. Please try again.");
+    } finally {
+      setSubmittingCompletion(false);
     }
   };
 
@@ -248,7 +304,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     }, [bookingId]),
   );
 
-  const extractDetails = (detailsObj) => {
+  const extractDetails = (detailsObj, propertyObj) => {
     if (!detailsObj) return { rooms: [], services: [], info: {} };
 
     const rooms = [];
@@ -263,11 +319,20 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
       "Utility Room",
     ];
 
+    // Admin-created format: rooms stored as details.Bedroom, details.Bathroom etc.
     roomKeys.forEach((key) => {
       if (detailsObj[key] && detailsObj[key] > 0) {
         rooms.push(`${key} (x${detailsObj[key]})`);
       }
     });
+
+    // Customer app format: rooms stored in booking.property.bedrooms etc.
+    if (rooms.length === 0 && propertyObj) {
+      if (propertyObj.bedrooms      > 0) rooms.push(`Bedroom (x${propertyObj.bedrooms})`);
+      if (propertyObj.bathrooms     > 0) rooms.push(`Bathroom (x${propertyObj.bathrooms})`);
+      if (propertyObj.kitchens      > 0) rooms.push(`Kitchen (x${propertyObj.kitchens})`);
+      if (propertyObj.receptionRooms > 0) rooms.push(`Reception Room (x${propertyObj.receptionRooms})`);
+    }
 
     const services = [];
     let extrasList = [];
@@ -400,30 +465,15 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   }, []);
 
   const doAction = async (endpoint, nextStatus, successMsg) => {
-    // Require before photo before starting
     if (endpoint === "start" && !beforePhoto) {
-      Alert.alert(
-        "Before Photo Required",
-        "Please take a before photo of the property before you start cleaning.",
-      );
+      Alert.alert("Before Photo Required", "Please take a before photo of the property before you start cleaning.");
       return;
     }
-    // Require after photo before completing
-    if (endpoint === "complete" && !afterPhoto) {
-      Alert.alert(
-        "After Photo Required",
-        "Please take an after photo to show the completed clean before marking as done.",
-      );
-      return;
-    }
-
     setActionLoading(endpoint);
     try {
       await axios.post(`${API_URL}/workers/jobs/${bookingId}/${endpoint}`);
       setBooking((prev) => ({ ...prev, status: nextStatus }));
-      if (nextStatus === "Completed" && sharingLocation) {
-        stopSharingLocation();
-      }
+      if (nextStatus === "Completed" && sharingLocation) stopSharingLocation();
       Alert.alert("✅ Done", successMsg);
     } catch (error) {
       Alert.alert("Error", error.response?.data?.error || "Action failed");
@@ -489,7 +539,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   if (!booking) return null;
 
   const cust = booking.customer || {};
-  const { rooms, services, info } = extractDetails(booking.details);
+  const { rooms, services, info } = extractDetails(booking.details, booking.property);
   const parking = info.parking;
   const entry = info.entry;
   const pet = info.pet;
@@ -631,41 +681,27 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 styles.mainActionBtn,
                 {
                   backgroundColor: statusCfg.nextColor,
-                  opacity:
-                    statusCfg.next === "start" && !isJobTomorrowOrLater()
-                      ? 0.5
-                      : 1,
+                  opacity: statusCfg.next === "start" && !isJobTomorrowOrLater() ? 0.5 : 1,
                 },
               ]}
-              onPress={() =>
-                doAction(
-                  statusCfg.next,
-                  nextStatusMap[statusCfg.next],
-                  `Status updated to ${nextStatusMap[statusCfg.next]}`,
-                )
-              }
-              disabled={
-                actionLoading !== null ||
-                (statusCfg.next === "start" && !isJobTomorrowOrLater())
-              }
+              onPress={() => {
+                if (statusCfg.next === "complete") {
+                  setShowCompletionModal(true);
+                } else {
+                  doAction(statusCfg.next, nextStatusMap[statusCfg.next], `Status updated to ${nextStatusMap[statusCfg.next]}`);
+                }
+              }}
+              disabled={actionLoading !== null || (statusCfg.next === "start" && !isJobTomorrowOrLater())}
             >
               {actionLoading === statusCfg.next ? (
                 <ActivityIndicator color="#fff" />
               ) : (
                 <>
-                  {statusCfg.next === "arrive" && (
-                    <Flag size={18} color="#fff" />
-                  )}
-                  {statusCfg.next === "start" && (
-                    <Play size={18} color="#fff" />
-                  )}
-                  {statusCfg.next === "complete" && (
-                    <CheckCircle size={18} color="#fff" />
-                  )}
+                  {statusCfg.next === "arrive" && <Flag size={18} color="#fff" />}
+                  {statusCfg.next === "start" && <Play size={18} color="#fff" />}
+                  {statusCfg.next === "complete" && <CheckCircle size={18} color="#fff" />}
                   <Text style={styles.mainActionText}>
-                    {statusCfg.next === "start" && !isJobTomorrowOrLater()
-                      ? "Available Tomorrow"
-                      : statusCfg.nextLabel}
+                    {statusCfg.next === "start" && !isJobTomorrowOrLater() ? "Available Tomorrow" : statusCfg.nextLabel}
                   </Text>
                 </>
               )}
@@ -1137,6 +1173,97 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 
         <View style={{ height: 32 }} />
       </ScrollView>
+
+      {/* ── Completion Modal ─────────────────────────────────────── */}
+      {showCompletionModal && (
+        <View style={styles.completionOverlay}>
+          <View style={styles.completionSheet}>
+            {/* Sheet Header */}
+            <View style={styles.completionHeader}>
+              <View>
+                <Text style={styles.completionTitle}>Complete Job</Text>
+                <Text style={styles.completionSub}>Submit photos & report before finishing</Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowCompletionModal(false)} style={styles.completionClose}>
+                <X size={20} color="#4B7A5A" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
+
+              {/* Before / After status */}
+              <Text style={styles.completionSectionLabel}>📸 Job Photos</Text>
+              <View style={styles.completionPhotoStatus}>
+                <View style={[styles.completionPhotoChip, beforePhoto ? styles.completionChipDone : styles.completionChipMissing]}>
+                  {beforePhoto ? <CheckCircle2 size={14} color="#0F6B4C" strokeWidth={2.5} /> : <AlertCircle size={14} color="#B45309" />}
+                  <Text style={beforePhoto ? styles.completionChipTxtDone : styles.completionChipTxtWarn}>
+                    Before photo {beforePhoto ? "✓" : "missing"}
+                  </Text>
+                </View>
+                <View style={[styles.completionPhotoChip, afterPhoto ? styles.completionChipDone : styles.completionChipMissing]}>
+                  {afterPhoto ? <CheckCircle2 size={14} color="#0F6B4C" strokeWidth={2.5} /> : <AlertCircle size={14} color="#B45309" />}
+                  <Text style={afterPhoto ? styles.completionChipTxtDone : styles.completionChipTxtWarn}>
+                    After photo {afterPhoto ? "✓" : "missing — required"}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Damage Photos */}
+              <Text style={styles.completionSectionLabel}>⚠️ Damage Photos (optional)</Text>
+              <Text style={styles.completionHint}>Add photos of any damage found at the property.</Text>
+              <View style={styles.damageGrid}>
+                {damagePhotos.map((p, i) => (
+                  <View key={i} style={styles.damageThumbWrap}>
+                    <Image source={{ uri: p.uri }} style={styles.damageThumb} resizeMode="cover" />
+                    <TouchableOpacity style={styles.damageRemoveBtn} onPress={() => setDamagePhotos(prev => prev.filter((_, idx) => idx !== i))}>
+                      <X size={12} color="#fff" strokeWidth={3} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                <TouchableOpacity style={styles.damageAddBtn} onPress={pickDamagePhoto}>
+                  <Camera size={22} color="#0F6B4C" />
+                  <Text style={styles.damageAddTxt}>Add</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Written Report */}
+              <Text style={styles.completionSectionLabel}>📝 Written Report (optional)</Text>
+              <Text style={styles.completionHint}>Note any issues, access problems, or extra work done.</Text>
+              <TextInput
+                style={styles.reportInput}
+                placeholder="e.g. Found mould behind washing machine. Notified customer. Extra 20 min spent on oven..."
+                placeholderTextColor="#A7D9B8"
+                value={workerReport}
+                onChangeText={setWorkerReport}
+                multiline
+                textAlignVertical="top"
+              />
+
+              {/* Submit */}
+              <TouchableOpacity
+                style={[styles.completionSubmitBtn, (!afterPhoto || submittingCompletion) && { opacity: 0.6 }]}
+                onPress={handleCompleteWithSubmission}
+                disabled={!afterPhoto || submittingCompletion}
+              >
+                {submittingCompletion ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <>
+                    <CheckCircle size={18} color="#fff" />
+                    <Text style={styles.completionSubmitTxt}>Submit & Complete Job</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              {!afterPhoto && (
+                <Text style={styles.completionWarning}>
+                  ⚠️ Go back and take an after photo before you can complete this job.
+                </Text>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -1583,6 +1710,86 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   photoUploadTxt: { fontSize: 12, fontWeight: "700", color: "#fff" },
+
+  // Completion Modal
+  completionOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(10,40,20,0.55)",
+    justifyContent: "flex-end",
+    zIndex: 100,
+  },
+  completionSheet: {
+    backgroundColor: NEU_BG,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    maxHeight: "92%",
+    flex: 1,
+    marginTop: "auto",
+    paddingTop: 8,
+  },
+  completionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#D1FAE5",
+  },
+  completionTitle: { fontSize: 18, fontWeight: "800", color: "#1A2E22" },
+  completionSub: { fontSize: 12, color: "#6B7280", marginTop: 2 },
+  completionClose: {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: "#EAF5EE", alignItems: "center", justifyContent: "center",
+  },
+  completionSectionLabel: {
+    fontSize: 12, fontWeight: "800", color: "#4B7A5A",
+    textTransform: "uppercase", letterSpacing: 0.5, marginTop: 18, marginBottom: 6,
+  },
+  completionHint: { fontSize: 12, color: "#86A892", marginBottom: 10 },
+  completionPhotoStatus: { flexDirection: "row", gap: 8, flexWrap: "wrap", marginBottom: 4 },
+  completionPhotoChip: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, borderWidth: 1,
+  },
+  completionChipDone: { backgroundColor: "#DCFCE7", borderColor: "#86EFAC" },
+  completionChipMissing: { backgroundColor: "#FFFBEB", borderColor: "#FDE68A" },
+  completionChipTxtDone: { fontSize: 12, fontWeight: "700", color: "#0F6B4C" },
+  completionChipTxtWarn: { fontSize: 12, fontWeight: "700", color: "#92400E" },
+
+  damageGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 4 },
+  damageThumbWrap: { width: 80, height: 80, borderRadius: 12, overflow: "hidden", position: "relative" },
+  damageThumb: { width: "100%", height: "100%" },
+  damageRemoveBtn: {
+    position: "absolute", top: 4, right: 4,
+    width: 20, height: 20, borderRadius: 10,
+    backgroundColor: "rgba(239,68,68,0.85)",
+    alignItems: "center", justifyContent: "center",
+  },
+  damageAddBtn: {
+    width: 80, height: 80, borderRadius: 12,
+    backgroundColor: "#EAF5EE", borderWidth: 1.5,
+    borderColor: "#A7D9B8", borderStyle: "dashed",
+    alignItems: "center", justifyContent: "center", gap: 4,
+  },
+  damageAddTxt: { fontSize: 11, fontWeight: "700", color: "#0F6B4C" },
+
+  reportInput: {
+    backgroundColor: "#F0FDF4", borderWidth: 1, borderColor: "#A7D9B8",
+    borderRadius: 14, padding: 14, fontSize: 13, color: "#1A2E22",
+    minHeight: 110, lineHeight: 20, marginBottom: 4,
+  },
+  completionSubmitBtn: {
+    backgroundColor: "#0F6B4C", borderRadius: 16,
+    paddingVertical: 17, flexDirection: "row",
+    alignItems: "center", justifyContent: "center",
+    gap: 8, marginTop: 18,
+  },
+  completionSubmitTxt: { fontSize: 16, fontWeight: "800", color: "#fff" },
+  completionWarning: {
+    fontSize: 12, color: "#92400E", textAlign: "center",
+    marginTop: 10, fontWeight: "600",
+  },
 });
 
 export default AcceptedBookingDetailScreen;

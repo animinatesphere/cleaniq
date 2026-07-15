@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
+  KeyboardAvoidingView, Platform, ActivityIndicator,
   Image, ScrollView, StatusBar,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as LocalAuthentication from "expo-local-authentication";
 import { AuthContext } from "../context/AuthContext";
-import { Mail, Lock, Fingerprint, Eye, EyeOff } from "lucide-react-native";
+import { Mail, Lock, Fingerprint, Eye, EyeOff, AlertCircle } from "lucide-react-native";
 
 // ── Shadcn/ui tokens (matches HomeScreen) ─────────────────────────────────────
 const C = {
@@ -26,13 +26,14 @@ const C = {
 
 const RADIUS = 8;
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail]                     = useState("");
   const [password, setPassword]               = useState("");
   const [showPassword, setShowPassword]       = useState(false);
   const [isLoggingIn, setIsLoggingIn]         = useState(false);
   const [isBiometricSupported, setIsBiometric] = useState(false);
   const [focusedField, setFocusedField]       = useState(null);
+  const [errorMsg, setErrorMsg]               = useState("");
 
   const { login } = useContext(AuthContext);
 
@@ -54,8 +55,9 @@ const LoginScreen = () => {
   }, []);
 
   const handleLogin = async () => {
+    setErrorMsg("");
     if (!email || !password) {
-      Alert.alert("Missing fields", "Please enter your email and password.");
+      setErrorMsg("Please enter your email and password.");
       return;
     }
     setIsLoggingIn(true);
@@ -65,7 +67,7 @@ const LoginScreen = () => {
       await AsyncStorage.setItem("@saved_email", email);
       await AsyncStorage.setItem("@saved_pass", password);
     } else {
-      Alert.alert("Sign in failed", result.message);
+      setErrorMsg(result.message || "Incorrect email or password. Please try again.");
     }
   };
 
@@ -130,6 +132,14 @@ const LoginScreen = () => {
 
             <View style={S.sep} />
 
+            {/* Error banner */}
+            {!!errorMsg && (
+              <View style={S.errorBanner}>
+                <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                <Text style={S.errorBannerTxt}>{errorMsg}</Text>
+              </View>
+            )}
+
             {/* Email */}
             <View style={S.field}>
               <Text style={S.label}>Email address</Text>
@@ -140,7 +150,7 @@ const LoginScreen = () => {
                   placeholder="you@cleaniq.com"
                   placeholderTextColor={C.mutedFg}
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(v) => { setEmail(v); setErrorMsg(""); }}
                   autoCapitalize="none"
                   keyboardType="email-address"
                   autoComplete="email"
@@ -160,7 +170,7 @@ const LoginScreen = () => {
                   placeholder="Enter your password"
                   placeholderTextColor={C.mutedFg}
                   value={password}
-                  onChangeText={setPassword}
+                  onChangeText={(v) => { setPassword(v); setErrorMsg(""); }}
                   secureTextEntry={!showPassword}
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField(null)}
@@ -204,6 +214,17 @@ const LoginScreen = () => {
             <Text style={S.helpText}>
               Having trouble? Contact your regional manager.
             </Text>
+
+            {/* Apply link */}
+            <View style={{ alignItems: "center", marginTop: 20 }}>
+              <Text style={[S.helpText, { marginBottom: 8 }]}>Want to join our team?</Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Apply")}
+                style={{ paddingVertical: 10, paddingHorizontal: 20, backgroundColor: "#064E3B", borderRadius: 8 }}
+              >
+                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>Apply for a Cleaning Role</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* ── Footer ───────────────────────────────────────────────────── */}
@@ -255,6 +276,12 @@ const S = StyleSheet.create({
   heading:    { fontSize: 22, fontWeight: "700", color: C.text, letterSpacing: -0.4, marginBottom: 4 },
   subheading: { fontSize: 13, color: C.mutedFg, lineHeight: 20 },
   sep:        { height: 1, backgroundColor: C.border, marginVertical: 20 },
+  errorBanner: {
+    flexDirection: "row", alignItems: "flex-start", gap: 8,
+    backgroundColor: "#FEF2F2", borderWidth: 1, borderColor: "#FECACA",
+    borderRadius: 8, padding: 12, marginBottom: 16,
+  },
+  errorBannerTxt: { flex: 1, fontSize: 13, color: "#DC2626", fontWeight: "500", lineHeight: 18 },
 
   // Form fields
   field: { marginBottom: 16 },

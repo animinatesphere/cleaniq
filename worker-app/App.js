@@ -40,6 +40,7 @@ import OfferDetailScreen from "./src/screens/OfferDetailScreen";
 import AcceptedBookingDetailScreen from "./src/screens/AcceptedBookingDetailScreen";
 import ChatWithCustomerScreen from "./src/screens/ChatWithCustomerScreen";
 import ChatScreen from "./src/screens/ChatScreen";
+import ApplyScreen from "./src/screens/ApplyScreen";
 import notificationService from "./src/utils/notificationService";
 import { navigationRef } from "./src/utils/navigationRef";
 
@@ -289,8 +290,10 @@ const AppNavigation = () => {
     <NavigationContainer ref={navigationRef} linking={linking}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {userToken == null ? (
-          // No token found, user isn't signed in
-          <Stack.Screen name="Login" component={LoginScreen} />
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Apply" component={ApplyScreen} />
+          </>
         ) : (
           // User is signed in
           <>

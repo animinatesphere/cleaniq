@@ -626,6 +626,43 @@ router.post("/jobs/:id/complete", async (req, res) => {
   }
 });
 
+// POST job photos (before / after / damage / other) — base64 payload
+router.post("/jobs/:id/photos", async (req, res) => {
+  try {
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+
+    const { photos, workerReport } = req.body; // photos: [{photoType, base64}], workerReport: string
+
+    if (Array.isArray(photos) && photos.length > 0) {
+      const fs = require("fs");
+      const path = require("path");
+      const uploadsDir = path.join(__dirname, "../uploads");
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+      for (const p of photos) {
+        if (!p.base64) continue;
+        const ext = p.base64.startsWith("data:image/png") ? "png" : "jpg";
+        const filename = `job-photo-${booking.bookingId}-${p.photoType}-${Date.now()}.${ext}`;
+        const filepath = path.join(uploadsDir, filename);
+        const base64Data = p.base64.replace(/^data:image\/\w+;base64,/, "");
+        fs.writeFileSync(filepath, Buffer.from(base64Data, "base64"));
+        booking.photos.push({ photoType: p.photoType, url: `uploads/${filename}` });
+      }
+    }
+
+    if (workerReport !== undefined) {
+      booking.workerReport = workerReport;
+    }
+
+    await booking.save();
+    res.json({ message: "Photos saved", booking });
+  } catch (error) {
+    console.error("Error saving job photos:", error);
+    res.status(500).json({ error: "Failed to save photos" });
+  }
+});
+
 // GET all workers
 router.get("/", async (req, res) => {
   try {
