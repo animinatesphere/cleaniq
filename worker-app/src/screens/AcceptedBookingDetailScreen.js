@@ -380,7 +380,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 
   const handleMessage = () => {
     navigation.navigate("ChatWithCustomer", {
-      bookingId,
+      bookingId: booking?.bookingId || bookingId,
       customerName: `${booking?.customer?.firstName || "Customer"} ${booking?.customer?.lastName || ""}`,
     });
   };

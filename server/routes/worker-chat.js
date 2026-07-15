@@ -6,9 +6,11 @@ const Worker = require("../models/Worker");
 const Customer = require("../models/Customer");
 const { sendCustomerPush } = require("../utils/pushNotifications");
 
-// Helper: verify worker owns the booking
+// Helper: verify worker owns the booking — accepts BK-xxxx ref or MongoDB _id
 const verifyWorkerOwnsBooking = async (bookingId, workerId) => {
-  const booking = await Booking.findOne({ bookingId });
+  const booking = await Booking.findOne({
+    $or: [{ bookingId }, { _id: bookingId.match(/^[0-9a-f]{24}$/i) ? bookingId : null }],
+  }).catch(() => Booking.findOne({ bookingId }));
   if (!booking) return null;
   if (booking.assignedWorker?.toString() !== workerId) return null;
   return booking;
