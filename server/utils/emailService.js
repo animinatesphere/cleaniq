@@ -216,6 +216,89 @@ const templates = {
     </div>
   `,
 
+  invoiceAwaitingPayment: (booking) => `
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0;">
+      <div style="background: #ffffff; padding: 40px 48px 24px; border-bottom: 3px solid #0F172A;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td>
+              <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq" style="width: 80px; height: auto; border-radius: 8px;" />
+              <p style="margin: 8px 0 0; font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Professional Cleaning Services</p>
+            </td>
+            <td align="right" style="vertical-align: top;">
+              <p style="margin: 0; font-size: 28px; font-weight: 900; color: #0F172A; letter-spacing: -1px;">INVOICE</p>
+              <p style="margin: 4px 0 0; font-size: 13px; color: #64748b; font-weight: 600;">INV-${booking.bookingId}</p>
+              <div style="margin-top: 12px; display: inline-block; background: #fffbeb; border: 2px solid #FCD34D; border-radius: 20px; padding: 4px 16px;">
+                <span style="font-size: 12px; font-weight: 900; color: #D97706; text-transform: uppercase; letter-spacing: 1px;">⏳ AWAITING PAYMENT</span>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div style="padding: 32px 48px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="vertical-align: top; width: 50%;">
+              <p style="margin: 0 0 6px; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px;">Billed To</p>
+              <p style="margin: 0; font-size: 15px; font-weight: 800; color: #0F172A;">${booking.customer.firstName} ${booking.customer.lastName}</p>
+              <p style="margin: 2px 0; font-size: 13px; color: #64748b;">${booking.customer.email}</p>
+              <p style="margin: 2px 0; font-size: 13px; color: #64748b;">${booking.customer.phone || ""}</p>
+              ${booking.details?.address ? `<p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">${booking.details.address}</p>` : ""}
+            </td>
+            <td style="vertical-align: top; text-align: right;">
+              <p style="margin: 0 0 6px; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px;">Invoice Details</p>
+              <p style="margin: 0; font-size: 13px; color: #334155;"><strong>Date:</strong> ${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</p>
+              <p style="margin: 2px 0; font-size: 13px; color: #334155;"><strong>Service Date:</strong> ${new Date(booking.schedule?.date || Date.now()).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</p>
+              <p style="margin: 2px 0; font-size: 13px; color: #334155;"><strong>Time Slot:</strong> ${booking.schedule?.timeSlot || "N/A"}</p>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div style="padding: 28px 48px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+          <thead>
+            <tr style="background: #0F172A;">
+              <th style="padding: 12px 16px; text-align: left; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Description</th>
+              <th style="padding: 12px 16px; text-align: center; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">${booking.payment?.billingType === "flat" ? "Billing" : "Duration"}</th>
+              <th style="padding: 12px 16px; text-align: right; font-size: 10px; font-weight: 800; color: #6EE7B7; text-transform: uppercase; letter-spacing: 1px;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+              <td style="padding: 16px; font-size: 14px; color: #0F172A; font-weight: 600;">${booking.service}${booking.details?.address ? `<br><span style="font-size: 12px; color: #64748b; font-weight: 400;">📍 ${booking.details.address}</span>` : ""}</td>
+              <td style="padding: 16px; text-align: center; font-size: 14px; color: #334155;">${booking.payment?.billingType === "flat" ? "Flat Rate" : `${booking.details?.duration || "N/A"} hrs`}</td>
+              <td style="padding: 16px; text-align: right; font-size: 14px; font-weight: 700; color: #0F172A;">£${booking.payment.amount}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="padding: 0 48px 32px; margin-top: 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+          <tr style="border-top: 1px solid #e2e8f0;">
+            <td colspan="2" style="padding: 12px 16px; text-align: right; font-size: 13px; color: #64748b;">Subtotal:</td>
+            <td style="padding: 12px 16px; text-align: right; font-size: 13px; font-weight: 700; color: #334155;">£${booking.payment.amount}</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="padding: 4px 16px; text-align: right; font-size: 13px; color: #64748b;">VAT (0%):</td>
+            <td style="padding: 4px 16px; text-align: right; font-size: 13px; font-weight: 700; color: #334155;">£0.00</td>
+          </tr>
+          <tr style="background: #fffbeb; border-top: 2px solid #D97706;">
+            <td colspan="2" style="padding: 16px; text-align: right; font-size: 15px; font-weight: 900; color: #D97706;">AMOUNT DUE:</td>
+            <td style="padding: 16px; text-align: right; font-size: 18px; font-weight: 900; color: #D97706;">£${booking.payment.amount}</td>
+          </tr>
+        </table>
+      </div>
+      <div style="margin: 0 48px 32px; padding: 20px 24px; background: #fffbeb; border-radius: 16px; border: 1px solid #FCD34D; text-align: center;">
+        <p style="margin: 0; font-size: 14px; font-weight: 700; color: #92400e;">Your cleaning has been completed. Payment is due per your agreed terms.</p>
+        <p style="margin: 6px 0 0; font-size: 13px; color: #D97706;">Please contact us at info@cleaniqservices.com with any queries.</p>
+      </div>
+      <div style="background: #f8fafc; padding: 24px 48px; border-top: 1px solid #e2e8f0; text-align: center;">
+        <p style="margin: 0; font-size: 12px; color: #94a3b8;">Cleaniq Services Limited · cleaniqservices.com · support@cleaniqservices.com</p>
+        <p style="margin: 6px 0 0; font-size: 11px; color: #cbd5e1;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
   applicantReceived: (applicantName, role) => `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
       <div style="background-color: #0F172A; padding: 40px; text-align: center;">

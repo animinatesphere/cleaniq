@@ -66,6 +66,7 @@ import Campaigns from "./admin/Campaigns";
 import CustomerProfile from "./admin/CustomerProfile";
 import CommercialHub from "./admin/CommercialHub";
 import PriceList from "./admin/PriceList";
+import JobDetail from "./admin/JobDetail";
 
 function App() {
   const location = useLocation();
@@ -143,6 +144,7 @@ function App() {
               <Route path="pricelist" element={<PriceList />} />
               <Route path="campaigns" element={<Campaigns />} />
               <Route path="customers/:id" element={<CustomerProfile />} />
+              <Route path="jobs/:id" element={<JobDetail />} />
             </Route>
           </Routes>
         </main>

@@ -695,10 +695,21 @@ router.put("/:id", async (req, res) => {
       }
     }
 
-    // Completed - Unpaid: update worker wallet only, no customer emails, no Stripe capture
+    // Completed - Unpaid: send invoice email (no PAID label) + update worker wallet, no Stripe capture
     // Used for corporate/B2B clients that pay on a fortnightly or monthly cycle
     if (!wasCompleted && isNowCompletedUnpaid) {
-      console.log(`✅ Booking ${updatedBooking.bookingId} marked as Completed - Unpaid. Updating worker wallet (no email sent).`);
+      console.log(`✅ Booking ${updatedBooking.bookingId} marked as Completed - Unpaid. Sending awaiting-payment invoice...`);
+
+      try {
+        await sendEmail({
+          to: updatedBooking.customer.email,
+          subject: `Invoice & Service Completion: ${updatedBooking.bookingId} — Payment Due`,
+          html: templates.invoiceAwaitingPayment(updatedBooking),
+        });
+        console.log(`📧 Awaiting-payment invoice sent to ${updatedBooking.customer.email}`);
+      } catch (invoiceErr) {
+        console.error(`❌ Failed to send awaiting-payment invoice for ${updatedBooking.bookingId}:`, invoiceErr.message);
+      }
       try {
         if (updatedBooking.assignedWorker) {
           const Worker = require("../models/Worker");
