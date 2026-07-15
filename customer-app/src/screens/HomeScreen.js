@@ -17,7 +17,7 @@ import { C } from "../theme/flat";
 const SVC_PHOTOS = {
   residential: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=75",
   tenancy:     "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400&q=75",
-  office:      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=75",
+  office:      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400&q=75",
   deep:        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=75",
   airbnb:      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=75",
   construct:   "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&q=75",
@@ -27,7 +27,7 @@ const SVC_PHOTOS = {
 const CAT_PHOTOS = {
   residential: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&q=70",
   tenancy:     "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&q=70",
-  office:      "https://images.unsplash.com/photo-1497366754035-f200581a82e9?w=200&q=70",
+  office:      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=200&q=70",
   deep:        "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200&q=70",
   airbnb:      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=200&q=70",
   construct:   "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=200&q=70",
@@ -172,7 +172,7 @@ const HomeScreen = ({ navigation }) => {
               <CheckCircle size={11} color="#6EE7B7" strokeWidth={2.5} />
               <Text style={S.heroBadgeTxt}>Professional &amp; Vetted Staff</Text>
             </View>
-            <Text style={S.heroTitle}>Spotless Spaces,{"\n"}Every Time.</Text>
+            <Text style={S.heroTitle}>Professional{"\n"}End of Tenancy Cleaning.</Text>
             <Text style={S.heroSub}>Residential, commercial and specialist cleaning — booked in 60 seconds.</Text>
             <TouchableOpacity style={S.heroCta} onPress={goBook} activeOpacity={0.85}>
               <CalendarDays size={14} color="#fff" strokeWidth={2} />
