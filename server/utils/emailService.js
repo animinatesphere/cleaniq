@@ -17,7 +17,7 @@ const logEmail = ({ to, subject, html, success }) => {
   }
 };
 
-const sendEmail = async ({ to, subject, html }) => {
+const sendEmail = async ({ to, subject, html, attachments }) => {
   try {
     if (!resend) {
       console.error("❌ EMAIL ERROR: RESEND_API_KEY is missing in .env");
@@ -26,12 +26,14 @@ const sendEmail = async ({ to, subject, html }) => {
     }
 
     console.log(`📧 Resend: Attempting to send email to: ${to}...`);
-    const { data, error } = await resend.emails.send({
+    const payload = {
       from: "Cleaniq Services <noreply@cleaniqservices.com>",
-      to: to,
-      subject: subject,
-      html: html,
-    });
+      to,
+      subject,
+      html,
+    };
+    if (attachments && attachments.length > 0) payload.attachments = attachments;
+    const { data, error } = await resend.emails.send(payload);
 
     if (error) {
       console.error("❌ RESEND ERROR DETAILS:", JSON.stringify(error, null, 2));

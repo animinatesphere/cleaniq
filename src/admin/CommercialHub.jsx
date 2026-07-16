@@ -333,17 +333,79 @@ ${notes ? `<h2>Additional Notes</h2><p style="padding:14px;background:#f8fafc;bo
     }
   };
 
+  // Clean notification email body — no base64 images, works in all email clients
+  const buildNotificationHtml = () => {
+    const rows = [
+      info.propertyName && ["Property", info.propertyName],
+      info.address && ["Address", info.address],
+      info.bookingRef && ["Booking Ref", info.bookingRef],
+      info.date && ["Date", fmtDate(info.date)],
+      info.cleaner && ["Cleaner", info.cleaner],
+      condObj && ["Condition", condObj.label],
+    ].filter(Boolean);
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f8fafc;font-family:Arial,Helvetica,sans-serif">
+<div style="max-width:600px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0">
+  <div style="background:#0A5C43;padding:32px 40px;text-align:center">
+    <p style="color:#fff;font-size:24px;font-weight:900;margin:0;letter-spacing:-0.5px">Cleaniq Services</p>
+    <p style="color:rgba(255,255,255,0.6);font-size:11px;margin:6px 0 0;text-transform:uppercase;letter-spacing:2px">Property Condition Report</p>
+  </div>
+  <div style="padding:32px 40px">
+    <p style="color:#1e293b;font-size:16px;font-weight:700;margin:0 0 6px">Your property report is attached.</p>
+    <p style="color:#64748b;font-size:14px;line-height:1.6;margin:0 0 28px">Please find the full property condition report enclosed as a PDF. Open or save it for your records.</p>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">
+      ${rows.map(([k, v], i) => `<tr style="background:${i % 2 === 0 ? "#f8fafc" : "#fff"}">
+        <td style="padding:10px 16px;color:#64748b;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;width:130px;white-space:nowrap">${k}</td>
+        <td style="padding:10px 16px;color:#1e293b;font-size:13px">${v}</td>
+      </tr>`).join("")}
+    </table>
+  </div>
+  <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 40px;text-align:center">
+    <p style="color:#94a3b8;font-size:11px;margin:0">© ${new Date().getFullYear()} Cleaniq Services Ltd · <a href="https://cleaniqservices.com" style="color:#0A5C43;text-decoration:none">cleaniqservices.com</a></p>
+  </div>
+</div>
+</body></html>`;
+  };
+
   const handleSendEmail = async () => {
     if (!info.recipientEmail) { setToast({ msg: "Enter a recipient email address first", type: "error" }); return; }
     setSending(true);
     try {
+      // Generate PDF with photos included
+      const filename = `Property-Report-${(info.bookingRef || info.propertyName || "Cleaniq").replace(/[^a-z0-9]/gi, "-")}.pdf`;
+      const container = document.createElement("div");
+      container.innerHTML = buildHtml(true);
+      container.style.cssText = "position:absolute;left:-9999px;top:0;width:794px";
+      document.body.appendChild(container);
+
+      let pdfBase64 = null;
+      try {
+        const pdfBlob = await html2pdf().set({
+          margin: [8, 8, 8, 8],
+          filename,
+          image: { type: "jpeg", quality: 0.85 },
+          html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+          pagebreak: { mode: ["avoid-all", "css"] },
+        }).from(container).outputPdf("blob");
+
+        pdfBase64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result.split(",")[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(pdfBlob);
+        });
+      } finally {
+        document.body.removeChild(container);
+      }
+
       const res = await fetch(`${API}/email-logs/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           to: info.recipientEmail,
           subject: `Property Report — ${info.propertyName || info.bookingRef || "Cleaniq"} · ${fmtDate(info.date)}`,
-          html: buildHtml(false),
+          html: buildNotificationHtml(),
+          ...(pdfBase64 ? { attachment: { filename, base64: pdfBase64 } } : {}),
         }),
       });
       const data = await res.json();

@@ -4,13 +4,17 @@ const EmailLog = require("../models/EmailLog");
 const { sendEmail } = require("../utils/emailService");
 
 // POST /api/email-logs/send — send a one-off transactional email
+// Optional: attachment = { filename: string, base64: string }
 router.post("/send", async (req, res) => {
-  const { to, subject, html } = req.body;
+  const { to, subject, html, attachment } = req.body;
   if (!to || !subject || !html) {
     return res.status(400).json({ message: "to, subject and html are required" });
   }
   try {
-    const ok = await sendEmail({ to, subject, html });
+    const attachments = attachment
+      ? [{ filename: attachment.filename, content: Buffer.from(attachment.base64, "base64") }]
+      : undefined;
+    const ok = await sendEmail({ to, subject, html, attachments });
     if (!ok) return res.status(500).json({ message: "Email delivery failed" });
     res.json({ message: "Email sent" });
   } catch (err) {
