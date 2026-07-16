@@ -1,5 +1,6 @@
 const ScheduledTask = require("../models/ScheduledTask");
 const SystemSetting = require("../models/SystemSetting");
+const Customer = require("../models/Customer");
 const { sendEmail, automationTemplates } = require("./emailService");
 
 const GOOGLE_REVIEW_URL = "https://g.page/r/cleaniqservices/review";
@@ -120,6 +121,21 @@ async function processDueTasks() {
       task.status = "cancelled";
       await task.save();
       continue;
+    }
+
+    // Check if this customer has opted out of CRM emails
+    if (task.payload?.email) {
+      const customer = await Customer.findOne(
+        { email: task.payload.email.toLowerCase() },
+        "crmEmailsEnabled"
+      ).catch(() => null);
+      if (customer && customer.crmEmailsEnabled === false) {
+        task.status = "cancelled";
+        task.error = "CRM emails disabled for this customer";
+        task.executedAt = new Date();
+        await task.save();
+        continue;
+      }
     }
 
     task.attempts += 1;

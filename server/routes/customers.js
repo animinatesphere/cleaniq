@@ -313,4 +313,21 @@ router.patch('/:id/tags', async (req, res) => {
   }
 });
 
+// Toggle CRM automation emails on/off for a customer
+router.patch('/:id/crm-emails', async (req, res) => {
+  try {
+    const { enabled } = req.body;
+    if (typeof enabled !== 'boolean') return res.status(400).json({ message: 'enabled must be a boolean' });
+    const customer = await Customer.findByIdAndUpdate(
+      req.params.id,
+      { crmEmailsEnabled: enabled },
+      { new: true, select: '-passwordHash' }
+    );
+    if (!customer) return res.status(404).json({ message: 'Customer not found' });
+    res.json(customer);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 module.exports = router;

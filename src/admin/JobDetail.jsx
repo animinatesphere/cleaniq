@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft, User, Clock, Camera, FileText, MapPin,
   CheckCircle2, AlertTriangle, Briefcase, Phone, Mail,
-  Calendar, Timer, Star, Image, ChevronRight
+  Calendar, Timer, Star, Image, ChevronRight, Radio, Navigation
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -69,6 +69,22 @@ const JobDetail = () => {
   const [booking, setBooking] = useState(null);
   const [worker, setWorker] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [liveLocation, setLiveLocation] = useState(null); // { lat, lng, lastUpdated, sharing }
+  const locationPollRef = useRef(null);
+
+  const pollLocation = async (bookingMongoId) => {
+    try {
+      const res = await fetch(`${API}/workers/jobs/${bookingMongoId}/worker-location`);
+      if (res.ok) {
+        const data = await res.json();
+        setLiveLocation(data.sharing ? data : null);
+      } else {
+        setLiveLocation(null);
+      }
+    } catch {
+      setLiveLocation(null);
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -82,6 +98,12 @@ const JobDetail = () => {
           const wr = await fetch(`${API}/workers/${data.assignedWorker}`);
           if (wr.ok) setWorker(await wr.json());
         }
+
+        // Start polling live location if job is active
+        if (["Assigned", "Arrived", "In Progress"].includes(data.status) && data._id) {
+          pollLocation(data._id);
+          locationPollRef.current = setInterval(() => pollLocation(data._id), 15000);
+        }
       } catch (e) {
         console.error(e);
       } finally {
@@ -89,6 +111,7 @@ const JobDetail = () => {
       }
     };
     load();
+    return () => { if (locationPollRef.current) clearInterval(locationPollRef.current); };
   }, [id]);
 
   if (loading) return (
@@ -216,6 +239,56 @@ const JobDetail = () => {
               </div>
             )}
           </div>
+
+          {/* Live Worker Location */}
+          {["Assigned", "Arrived", "In Progress"].includes(booking.status) && (
+            <div className={`rounded-3xl border p-6 shadow-sm ${liveLocation ? "bg-emerald-50 border-emerald-200" : "bg-white border-slate-100"}`}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-slate-400">
+                  <Radio size={14} className={liveLocation ? "text-emerald-500" : "text-slate-300"} />
+                  Live Worker Location
+                </h2>
+                {liveLocation && (
+                  <span className="flex items-center gap-1.5 text-[10px] font-black text-emerald-700 bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    LIVE
+                  </span>
+                )}
+              </div>
+              {liveLocation ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white rounded-2xl p-3 border border-emerald-100">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Latitude</p>
+                      <p className="text-sm font-black text-slate-800">{liveLocation.lat?.toFixed(6)}</p>
+                    </div>
+                    <div className="bg-white rounded-2xl p-3 border border-emerald-100">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Longitude</p>
+                      <p className="text-sm font-black text-slate-800">{liveLocation.lng?.toFixed(6)}</p>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-slate-500 font-bold">
+                    Last updated: {liveLocation.lastUpdated ? new Date(liveLocation.lastUpdated).toLocaleTimeString("en-GB") : "—"}
+                    <span className="text-[9px] text-slate-400 ml-1">(auto-refreshes every 15s)</span>
+                  </p>
+                  <a
+                    href={`https://www.google.com/maps?q=${liveLocation.lat},${liveLocation.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-black hover:bg-emerald-700 transition-colors w-fit"
+                  >
+                    <Navigation size={13} /> Open in Google Maps
+                  </a>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 gap-2">
+                  <MapPin size={28} className="text-slate-200" />
+                  <p className="text-sm font-bold text-slate-400">No live location yet</p>
+                  <p className="text-xs text-slate-300 font-medium text-center">Location sharing starts automatically when the worker presses "I've Arrived"</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Photos */}
           {photos.length > 0 ? (

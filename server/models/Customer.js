@@ -11,6 +11,7 @@ const customerSchema = new mongoose.Schema({
   lastLogoutAt:   { type: Date, default: null },
   loginCount:     { type: Number, default: 0 },
   tags: { type: [String], default: [] },
+  crmEmailsEnabled: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
 });
 

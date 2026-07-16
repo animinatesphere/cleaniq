@@ -464,6 +464,30 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     };
   }, []);
 
+  const startSharingLocation = async (bkgId) => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") return; // silently skip — permission denied
+      const sub = await Location.watchPositionAsync(
+        { accuracy: Location.Accuracy.Balanced, timeInterval: 15000, distanceInterval: 25 },
+        (position) => {
+          axios
+            .put(`${API_URL}/workers/${workerInfo.id}/location`, {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+              sharing: true,
+              bookingId: bkgId,
+            })
+            .catch(() => {});
+        },
+      );
+      locationSubscription.current = sub;
+      setSharingLocation(true);
+    } catch {
+      // Location sharing is best-effort; don't block the arrived flow
+    }
+  };
+
   const doAction = async (endpoint, nextStatus, successMsg) => {
     if (endpoint === "start" && !beforePhoto) {
       Alert.alert("Before Photo Required", "Please take a before photo of the property before you start cleaning.");
@@ -473,6 +497,13 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     try {
       await axios.post(`${API_URL}/workers/jobs/${bookingId}/${endpoint}`);
       setBooking((prev) => ({ ...prev, status: nextStatus }));
+
+      // Auto-start location sharing when worker arrives so admin + customer
+      // can see live position without the worker needing to toggle it manually.
+      if (endpoint === "arrive" && !sharingLocation) {
+        await startSharingLocation(booking?._id);
+      }
+
       if (nextStatus === "Completed" && sharingLocation) stopSharingLocation();
       Alert.alert("✅ Done", successMsg);
     } catch (error) {
@@ -604,7 +635,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
           )}
         </View>
 
-        {/* Share Location Toggle */}
+        {/* Location sharing status card */}
         {booking.status !== "Completed" && (
           <View style={styles.locationShareCard}>
             <View style={styles.locationShareLeft}>
@@ -621,33 +652,43 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.locationShareTitle}>
-                  {sharingLocation
-                    ? "Sharing your location"
-                    : "Share my location"}
+                  {sharingLocation ? "📍 Sharing live location" : "Location sharing"}
                 </Text>
                 <Text style={styles.locationShareSub}>
                   {sharingLocation
-                    ? "Customer can see you're on the way"
-                    : "Let the customer know when you're close"}
+                    ? "Admin & customer can see where you are"
+                    : booking.status === "Assigned"
+                      ? "Will auto-start when you press I've Arrived"
+                      : "Tap Start to share your location"}
                 </Text>
               </View>
             </View>
-            <TouchableOpacity
-              onPress={toggleLocationSharing}
-              disabled={locationLoading}
-              style={[
-                styles.locationShareToggle,
-                sharingLocation && styles.locationShareToggleActive,
-              ]}
-            >
-              {locationLoading ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <Text style={styles.locationShareToggleText}>
-                  {sharingLocation ? "Stop" : "Start"}
-                </Text>
-              )}
-            </TouchableOpacity>
+            {/* Only show Stop button — Start auto-fires on Arrived */}
+            {sharingLocation ? (
+              <TouchableOpacity
+                onPress={() => stopSharingLocation()}
+                disabled={locationLoading}
+                style={[styles.locationShareToggle, styles.locationShareToggleActive]}
+              >
+                {locationLoading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.locationShareToggleText}>Stop</Text>
+                )}
+              </TouchableOpacity>
+            ) : booking.status !== "Assigned" ? (
+              <TouchableOpacity
+                onPress={toggleLocationSharing}
+                disabled={locationLoading}
+                style={styles.locationShareToggle}
+              >
+                {locationLoading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.locationShareToggleText}>Start</Text>
+                )}
+              </TouchableOpacity>
+            ) : null}
           </View>
         )}
 
