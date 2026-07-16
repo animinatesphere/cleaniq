@@ -42,6 +42,7 @@ import {
   Share2,
   Megaphone,
   Tag,
+  ChevronDown,
 } from "lucide-react";
 import Login from "./Login";
 import logo from "../assets/logo DP2.jpg";
@@ -56,6 +57,23 @@ const AdminLayout = () => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const notifRef = useRef(null);
+  const [openGroups, setOpenGroups] = useState(() => {
+    try {
+      const saved = localStorage.getItem("adminSidebarOpenGroups");
+      if (saved) return new Set(JSON.parse(saved));
+    } catch {}
+    return new Set(["Overview"]);
+  });
+
+  const toggleGroup = (label) => {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
+      localStorage.setItem("adminSidebarOpenGroups", JSON.stringify([...next]));
+      return next;
+    });
+  };
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -142,6 +160,7 @@ const AdminLayout = () => {
   const fullMenuGroups = [
     {
       label: "Overview",
+      groupIcon: <LayoutDashboard size={14} />,
       items: [
         {
           name: "Dashboard",
@@ -165,6 +184,7 @@ const AdminLayout = () => {
     },
     {
       label: "Operations",
+      groupIcon: <ClipboardList size={14} />,
       items: [
         {
           name: "Job Tracker",
@@ -273,6 +293,7 @@ const AdminLayout = () => {
     },
     {
       label: "CRM",
+      groupIcon: <Users size={14} />,
       items: [
         {
           name: "Tasks",
@@ -308,6 +329,7 @@ const AdminLayout = () => {
     },
     {
       label: "Finance",
+      groupIcon: <DollarSign size={14} />,
       items: [
         {
           name: "Staff Pay",
@@ -331,6 +353,7 @@ const AdminLayout = () => {
     },
     {
       label: "People",
+      groupIcon: <Briefcase size={14} />,
       items: [
         {
           name: "Staff",
@@ -354,6 +377,7 @@ const AdminLayout = () => {
     },
     {
       label: "Content & Support",
+      groupIcon: <MessageSquare size={14} />,
       items: [
         {
           name: "Blog",
@@ -371,6 +395,7 @@ const AdminLayout = () => {
     },
     {
       label: "System",
+      groupIcon: <Settings size={14} />,
       items: [
         {
           name: "Organization Chart",
@@ -423,6 +448,28 @@ const AdminLayout = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, isBookingAgent, location.pathname]);
 
+  // Auto-open the group that contains the current active route
+  useEffect(() => {
+    const pathname = location.pathname;
+    fullMenuGroups.forEach((group) => {
+      const hasActive = group.items.some((item) =>
+        item.path === "/admin" || item.exact
+          ? pathname === item.path
+          : pathname.startsWith(item.path),
+      );
+      if (hasActive) {
+        setOpenGroups((prev) => {
+          if (prev.has(group.label)) return prev;
+          const next = new Set(prev);
+          next.add(group.label);
+          localStorage.setItem("adminSidebarOpenGroups", JSON.stringify([...next]));
+          return next;
+        });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
   return (
     <div className="flex min-h-screen bg-[#F8FAFC] print:bg-white">
       {/* Mobile Sidebar Overlay */}
@@ -461,42 +508,111 @@ const AdminLayout = () => {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-5 overflow-y-auto custom-scrollbar pr-1">
-          {menuGroups.map((group) => (
-            <div key={group.label} className="space-y-1">
-              <p
-                className={`px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 ${isCollapsed ? "lg:hidden" : ""}`}
-              >
-                {group.label}
-              </p>
-              {group.items.map((item) => {
-                const isActive =
-                  item.path === "/admin" || item.exact
-                    ? location.pathname === item.path
-                    : location.pathname.startsWith(item.path);
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setSidebarOpen(false)}
-                    title={isCollapsed ? item.name : undefined}
-                    className={`flex items-center p-3 rounded-xl transition-all duration-200 ${isCollapsed ? "lg:justify-center" : ""} ${isActive ? "bg-primary/10 text-primary font-bold" : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"}`}
+        <nav className="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-0.5">
+          {/* Desktop collapsed: icon-only flat list (hidden on mobile) */}
+          {isCollapsed &&
+            menuGroups.flatMap((g) => g.items).map((item) => {
+              const isActive =
+                item.path === "/admin" || item.exact
+                  ? location.pathname === item.path
+                  : location.pathname.startsWith(item.path);
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setSidebarOpen(false)}
+                  title={item.name}
+                  className={`hidden lg:flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                  }`}
+                >
+                  {item.icon}
+                </Link>
+              );
+            })}
+
+          {/* Expanded: collapsible groups (always on mobile, on desktop when not collapsed) */}
+          <div className={isCollapsed ? "lg:hidden" : ""}>
+            {menuGroups.map((group) => {
+              const isOpen = openGroups.has(group.label);
+              const hasActiveItem = group.items.some((item) =>
+                item.path === "/admin" || item.exact
+                  ? location.pathname === item.path
+                  : location.pathname.startsWith(item.path),
+              );
+              return (
+                <div key={group.label} className="mb-1">
+                  {/* Group header */}
+                  <button
+                    onClick={() => toggleGroup(group.label)}
+                    className={`flex items-center justify-between w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.18em] transition-all duration-200 group ${
+                      hasActiveItem
+                        ? "text-primary bg-primary/5"
+                        : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                    }`}
                   >
-                    <div
-                      className={`flex items-center gap-3 ${isCollapsed ? "lg:gap-0" : ""}`}
-                    >
-                      <span className="flex-shrink-0">{item.icon}</span>
+                    <div className="flex items-center gap-2">
                       <span
-                        className={`text-sm whitespace-nowrap ${isActive ? "font-bold" : "font-medium"} ${isCollapsed ? "lg:hidden" : ""}`}
+                        className={
+                          hasActiveItem
+                            ? "text-primary"
+                            : "text-slate-400 group-hover:text-slate-500"
+                        }
                       >
-                        {item.name}
+                        {group.groupIcon}
                       </span>
+                      <span>{group.label}</span>
                     </div>
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
+                    <ChevronDown
+                      size={13}
+                      className={`transition-transform duration-200 flex-shrink-0 ${
+                        isOpen ? "rotate-0" : "-rotate-90"
+                      } ${hasActiveItem ? "text-primary" : "text-slate-300"}`}
+                    />
+                  </button>
+
+                  {/* Group items */}
+                  {isOpen && (
+                    <div className="mt-0.5 mb-2 space-y-0.5 pl-3 border-l-2 border-slate-100 ml-3">
+                      {group.items.map((item) => {
+                        const isActive =
+                          item.path === "/admin" || item.exact
+                            ? location.pathname === item.path
+                            : location.pathname.startsWith(item.path);
+                        return (
+                          <Link
+                            key={item.path}
+                            to={item.path}
+                            onClick={() => setSidebarOpen(false)}
+                            className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition-all duration-150 ${
+                              isActive
+                                ? "bg-primary/10 text-primary"
+                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                            }`}
+                          >
+                            <span
+                              className={`flex-shrink-0 ${isActive ? "text-primary" : "text-slate-400"}`}
+                            >
+                              {item.icon}
+                            </span>
+                            <span
+                              className={`text-sm whitespace-nowrap leading-none ${
+                                isActive ? "font-bold" : "font-medium"
+                              }`}
+                            >
+                              {item.name}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </nav>
 
         <button
