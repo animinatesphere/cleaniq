@@ -367,26 +367,53 @@ ${notes ? `<h2>Additional Notes</h2><p style="padding:14px;background:#f8fafc;bo
     pagebreak: { mode: ["avoid-all", "css"] },
   };
 
-  // Mount the HTML off-screen and wait for all images to decode before rendering
-  const mountAndSettle = async (html) => {
-    const container = document.createElement("div");
-    container.innerHTML = html;
-    container.style.cssText = "position:absolute;left:-9999px;top:0;width:794px";
-    document.body.appendChild(container);
-    // Give the browser a tick to decode base64 images
-    await new Promise((r) => setTimeout(r, 400));
-    return container;
-  };
+  // Load the full HTML document in an off-screen iframe so its <style> block,
+  // layout, and base64 images all render correctly before html2canvas runs.
+  // Returns the iframe element; caller must remove it when done.
+  const mountInIframe = (html) =>
+    new Promise((resolve, reject) => {
+      const iframe = document.createElement("iframe");
+      Object.assign(iframe.style, {
+        position: "fixed",
+        left: "-9999px",
+        top: "0",
+        width: "794px",
+        height: "1123px",
+        border: "none",
+        visibility: "hidden",
+      });
+      iframe.addEventListener(
+        "load",
+        async () => {
+          try {
+            // Expand height to full content so html2canvas captures everything
+            const body = iframe.contentDocument.body;
+            iframe.style.height = Math.max(body.scrollHeight, 1123) + "px";
+            // Let base64 images decode inside the iframe
+            await new Promise((r) => setTimeout(r, 600));
+            resolve(iframe);
+          } catch (e) {
+            reject(e);
+          }
+        },
+        { once: true },
+      );
+      document.body.appendChild(iframe);
+      iframe.srcdoc = html;
+    });
 
   const [downloading, setDownloading] = useState(false);
   const handleDownload = async () => {
     setDownloading(true);
     const filename = `property-report-${(info.bookingRef || info.propertyName || "cleaniq").replace(/[^a-z0-9]/gi, "-").toLowerCase()}.pdf`;
-    const container = await mountAndSettle(buildHtml(true));
+    const iframe = await mountInIframe(buildHtml(true));
     try {
-      await html2pdf().set({ ...PDF_OPTS, filename }).from(container).save();
+      await html2pdf()
+        .set({ ...PDF_OPTS, filename })
+        .from(iframe.contentDocument.body)
+        .save();
     } finally {
-      document.body.removeChild(container);
+      document.body.removeChild(iframe);
       setDownloading(false);
     }
   };
@@ -432,26 +459,30 @@ ${notes ? `<h2>Additional Notes</h2><p style="padding:14px;background:#f8fafc;bo
     setSending(true);
 
     const filename = `Property-Report-${(info.bookingRef || info.propertyName || "Cleaniq").replace(/[^a-z0-9]/gi, "-")}.pdf`;
-    const container = await mountAndSettle(buildHtml(true));
+    let iframe;
+    try {
+      iframe = await mountInIframe(buildHtml(true));
+    } catch (e) {
+      setToast({ msg: "Failed to prepare PDF — " + e.message, type: "error" });
+      setSending(false);
+      return;
+    }
 
     let pdfBase64 = null;
     try {
-      // toPdf().get("pdf") gives us the raw jsPDF instance — the only reliable way
-      // to get base64 out of html2pdf without using the broken outputPdf("blob") path
       const jspdf = await html2pdf()
         .set(PDF_OPTS)
-        .from(container)
+        .from(iframe.contentDocument.body)
         .toPdf()
         .get("pdf");
       pdfBase64 = jspdf.output("datauristring").split(",")[1];
     } catch (pdfErr) {
       console.error("PDF generation failed:", pdfErr);
       setToast({ msg: "PDF generation failed — " + (pdfErr.message || "unknown error"), type: "error" });
-      document.body.removeChild(container);
       setSending(false);
       return;
     } finally {
-      if (document.body.contains(container)) document.body.removeChild(container);
+      if (document.body.contains(iframe)) document.body.removeChild(iframe);
     }
 
     try {
