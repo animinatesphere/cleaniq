@@ -264,27 +264,58 @@ const PropertyReport = () => {
   const condObj = CONDITIONS.find((c) => c.id === condition);
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "—";
 
-  const CSS = `*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:12px;color:#1e293b;background:#fff}
-@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
-.hdr{background:#0A5C43;display:flex;justify-content:space-between;align-items:center;padding:28px 40px;margin-bottom:0}
-.hdr-logo{height:56px;border-radius:8px;display:block}
-.hdr-meta{text-align:right;font-size:11px;color:rgba(255,255,255,.75);line-height:1.8}
-.hdr-meta strong{color:#fff;font-size:13px}
-.sub-hdr{background:#f0fdf4;border-bottom:1px solid #d1fae5;padding:14px 40px;display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
-.sub-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#0A5C43}
-.badge{display:inline-block;padding:3px 12px;border-radius:999px;font-weight:700;font-size:11px}
-.slightly{background:#fef9c3;color:#854d0e}.moderately{background:#ffedd5;color:#9a3412}.very{background:#fee2e2;color:#991b1b}
-.body{padding:0 40px 40px}
-h2{font-size:12px;font-weight:800;color:#0A5C43;margin:24px 0 10px;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #d1fae5;padding-bottom:6px}
-table{width:100%;border-collapse:collapse;font-size:11px}th{background:#f8fafc;text-align:left;padding:7px 10px;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;border-bottom:2px solid #e2e8f0}td{padding:7px 10px;border-bottom:1px solid #f1f5f9}
-.cl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}.cli{display:flex;gap:6px;align-items:center;font-size:11px;padding:5px 8px;background:#f8fafc;border-radius:6px;border:1px solid #f1f5f9}
-.chk{color:#16a34a;font-weight:800}.unchk{color:#cbd5e1}
-.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.pgrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0}
-.dmg-card{background:#fff8f8;border:1px solid #fee2e2;border-radius:10px;padding:12px 14px;margin-bottom:10px}
-.dmg-photos{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-.dmg-photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;border:1px solid #fecaca}
-.vid-pill{display:inline-flex;align-items:center;gap:6px;background:#1e293b;color:#94a3b8;font-size:10px;font-weight:700;padding:4px 10px;border-radius:999px;margin:3px}
-.foot{margin-top:40px;border-top:1px solid #e2e8f0;padding-top:14px;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#94a3b8}`;
+  const CSS = `*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#1e293b;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.hdr{background:#0A5C43;display:flex;align-items:stretch;min-height:88px}
+.hdr-brand{display:flex;flex-direction:column;justify-content:center;padding:20px 24px;border-right:1px solid rgba(255,255,255,.15);min-width:176px}
+.hdr-logo{height:34px;width:auto;border-radius:5px;display:block;margin-bottom:7px}
+.hdr-co{color:#fff;font-size:13px;font-weight:900;letter-spacing:-.2px}
+.hdr-co-tag{color:rgba(255,255,255,.45);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.6px;margin-top:2px}
+.hdr-main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 24px}
+.hdr-type{color:rgba(255,255,255,.45);font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:2px;margin-bottom:5px}
+.hdr-prop{color:#fff;font-size:16px;font-weight:900;line-height:1.2;margin-bottom:3px}
+.hdr-addr{color:rgba(255,255,255,.65);font-size:10px}
+.hdr-right{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;padding:20px 24px}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);background:#f0fdf4;border-bottom:2px solid #0A5C43}
+.sc{padding:10px 16px;border-right:1px solid #d1fae5}
+.sc:last-child{border-right:none}
+.sl{font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#0A5C43;opacity:.7;margin-bottom:3px}
+.sv{font-size:11px;font-weight:700;color:#1e293b}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;font-weight:800;font-size:10.5px}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+.slightly{background:#fef9c3;color:#713f12}.slightly .dot{background:#ca8a04}
+.moderately{background:#ffedd5;color:#9a3412}.moderately .dot{background:#ea580c}
+.very{background:#fee2e2;color:#991b1b}.very .dot{background:#dc2626}
+.body{padding:24px 28px 36px}
+.sh{display:flex;align-items:center;gap:9px;margin:26px 0 13px}
+.sh-bar{width:3px;height:15px;background:#0A5C43;border-radius:2px;flex-shrink:0}
+.sh-txt{font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#0A5C43}
+.sh-rule{flex:1;height:1px;background:#e2e8f0}
+.ba-tag{display:inline-block;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:2px 9px;border-radius:4px;margin-bottom:7px}
+.ba-before{background:#eff6ff;color:#1d4ed8}.ba-after{background:#f0fdf4;color:#15803d}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.pgrid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;display:block}
+.dc{background:#fffbfb;border:1px solid #fecaca;border-left:4px solid #ef4444;border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.dc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.dc-item{font-size:12px;font-weight:800;color:#1e293b}
+.dc-loc{font-size:9.5px;color:#64748b;margin-top:1px}
+.dc-desc{font-size:11px;color:#475569;line-height:1.55;padding-top:8px;margin-top:6px;border-top:1px solid #fee2e2}
+.sev{display:inline-block;padding:2px 9px;border-radius:999px;font-size:8.5px;font-weight:800}
+.sev-Minor{background:#fef9c3;color:#854d0e}.sev-Moderate{background:#ffedd5;color:#9a3412}.sev-Major{background:#fee2e2;color:#991b1b}
+.dp{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px}
+.dp img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px;border:1px solid #fecaca}
+.cl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.cli{display:flex;gap:7px;align-items:center;font-size:10.5px;padding:6px 9px;background:#f0fdf4;border-radius:5px;border:1px solid #bbf7d0;color:#1e293b}
+.chk{color:#16a34a;font-weight:900;font-size:13px;width:14px;flex-shrink:0}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:#0A5C43;color:rgba(255,255,255,.85);text-align:left;padding:8px 11px;font-size:8px;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+tr:nth-child(even) td{background:#f8fafc}
+td{padding:7px 11px;border-bottom:1px solid #f1f5f9;color:#334155}
+.vid-pill{display:inline-flex;align-items:center;gap:5px;background:#1e293b;color:#94a3b8;font-size:9px;font-weight:700;padding:3px 9px;border-radius:999px;margin:3px}
+.notes{padding:12px 16px;background:#f8fafc;border-radius:7px;border-left:3px solid #0A5C43;line-height:1.7;font-size:11px;color:#334155}
+.foot{background:#0A5C43;margin-top:40px;padding:13px 28px;display:flex;justify-content:space-between;align-items:center}
+.foot-l{color:rgba(255,255,255,.65);font-size:9px;line-height:1.7}
+.foot-l strong{color:#fff}
+.foot-r{color:rgba(255,255,255,.5);font-size:9px;text-align:right;line-height:1.7}`;
 
   // Render a MediaItem array into HTML — images inline, videos as labelled pills (can't print video)
   const mediaToHtml = (items, withMedia) => {
@@ -304,50 +335,70 @@ table{width:100%;border-collapse:collapse;font-size:11px}th{background:#f8fafc;t
 
   // withPhotos=true for print/download, false for email (keeps size manageable)
   const buildHtml = (withPhotos = true) => {
-    // Always embed logo as base64 — email clients block external image URLs
     const logoUrl = logoB64 || `${window.location.origin}${logoSrc}`;
+    const today = new Date().toISOString().slice(0, 10);
+    const checkedSupplies = SUPPLIES.filter((s) => supplies[s]);
+    const checkedConsumables = CONSUMABLES.filter((s) => consumables[s]);
+    const hasPhotos = photoSections.some((s) => s.before.length || s.after.length);
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Property Report — ${info.propertyName || "Cleaniq"}</title>
-<style>${CSS}
-@media(max-width:600px){.hdr{padding:18px 20px;flex-direction:column;align-items:flex-start;gap:12px}.hdr-meta{text-align:left}.sub-hdr{padding:10px 20px;flex-direction:column;gap:6px}.body{padding:0 20px 28px}.pgrid{grid-template-columns:repeat(2,1fr)}.cl{grid-template-columns:1fr 1fr}}
-@media print{body{padding-top:0!important}}
-</style></head><body>
+<style>${CSS}</style></head><body>
 <div class="hdr">
-  <img src="${logoUrl}" alt="Cleaniq Services" class="hdr-logo" />
-  <div class="hdr-meta">
-    <p><strong>${info.propertyName || "Property Report"}</strong></p>
-    ${info.address ? `<p>${info.address}</p>` : ""}
-    <p>Date: ${fmtDate(info.date)}</p>
-    ${info.bookingRef ? `<p>Ref: ${info.bookingRef}</p>` : ""}
-    ${info.cleaner ? `<p>Cleaner: ${info.cleaner}</p>` : ""}
+  <div class="hdr-brand">
+    <img src="${logoUrl}" alt="Cleaniq Services" class="hdr-logo" />
+    <p class="hdr-co">Cleaniq Services</p>
+    <p class="hdr-co-tag">Professional Cleaning</p>
   </div>
+  <div class="hdr-main">
+    <p class="hdr-type">Property Condition Report</p>
+    <p class="hdr-prop">${info.propertyName || "Property Report"}</p>
+    ${info.address ? `<p class="hdr-addr">${info.address}</p>` : ""}
+  </div>
+  ${condObj ? `<div class="hdr-right"><span class="badge ${condition}"><span class="dot"></span>${condObj.label}</span></div>` : ""}
 </div>
-<div class="sub-hdr">
-  <span class="sub-title">Property Condition Report</span>
-  ${condObj ? `<div class="badge ${condition}">${condObj.label}</div>` : "<span></span>"}
+<div class="strip">
+  <div class="sc"><p class="sl">Booking Ref</p><p class="sv">${info.bookingRef || "—"}</p></div>
+  <div class="sc"><p class="sl">Date</p><p class="sv">${fmtDate(info.date)}</p></div>
+  <div class="sc"><p class="sl">Cleaner</p><p class="sv">${info.cleaner || "—"}</p></div>
+  <div class="sc"><p class="sl">Prepared By</p><p class="sv">Cleaniq Services</p></div>
 </div>
 <div class="body">
-${photoSections.some((s) => s.before.length || s.after.length) ? photoSections.map((s, i) => {
+${hasPhotos ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Before &amp; After Photos</span><div class="sh-rule"></div></div>
+${photoSections.map((s, i) => {
   const title = s.label || (photoSections.length > 1 ? `Section ${i + 1}` : "");
   const prefix = title ? ` — ${title}` : "";
   return [
-    s.before.length ? `<h2>Before${prefix}</h2>${mediaToHtml(s.before, withPhotos)}` : "",
-    s.after.length ? `<h2>After${prefix}</h2>${mediaToHtml(s.after, withPhotos)}` : "",
+    s.before.length ? `<p class="ba-tag ba-before">Before${prefix}</p>${mediaToHtml(s.before, withPhotos)}` : "",
+    s.after.length ? `<p class="ba-tag ba-after">After${prefix}</p>${mediaToHtml(s.after, withPhotos)}` : "",
   ].join("");
-}).join("") : ""}
-${damages.length ? `<h2>Damage Report</h2>${damages.map((d) => {
-  const dmgMedia = d.photos || [];
-  return `<div class="dmg-card"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:3px 8px 3px 0;font-size:11px;font-weight:700;color:#1e293b;width:30%">${d.item || "—"}</td><td style="padding:3px 8px;font-size:11px;color:#475569;width:25%">${d.location || "—"}</td><td style="padding:3px 8px;font-size:11px;width:20%"><span style="background:${d.severity==="Major"?"#fee2e2":d.severity==="Moderate"?"#ffedd5":"#fef9c3"};color:${d.severity==="Major"?"#991b1b":d.severity==="Moderate"?"#9a3412":"#854d0e"};padding:2px 8px;border-radius:999px;font-weight:700">${d.severity}</span></td><td style="padding:3px 0 3px 8px;font-size:11px;color:#475569">${d.description || ""}</td></tr></table>${dmgMedia.length ? `<div class="dmg-photos">${mediaToHtml(dmgMedia, withPhotos)}</div>` : ""}</div>`;
 }).join("")}` : ""}
-<h2>Cleaning Supplies Restock</h2><div class="cl">${SUPPLIES.map((s) => `<div class="cli"><span class="${supplies[s] ? "chk" : "unchk"}">${supplies[s] ? "✓" : "○"}</span>${s}${supplies[`qty_${s}`] ? ` ×${supplies[`qty_${s}`]}` : ""}</div>`).join("")}</div>
-<h2>Consumables Replenish</h2><div class="cl">${CONSUMABLES.map((s) => `<div class="cli"><span class="${consumables[s] ? "chk" : "unchk"}">${consumables[s] ? "✓" : "○"}</span>${s}${consumables[`qty_${s}`] ? ` ×${consumables[`qty_${s}`]}` : ""}</div>`).join("")}</div>
-${vendingPhotos.length ? `<h2>Vending Machine</h2>${mediaToHtml(vendingPhotos, withPhotos)}` : ""}
-<h2>Inventory Report</h2><table><tr><th>Item</th><th>Expected</th><th>Actual</th><th>Discrepancy</th><th>Notes</th></tr>${inventory.map((r) => { const disc = r.expected !== "" && r.actual !== "" && String(r.expected) !== String(r.actual); return `<tr><td>${r.item}</td><td>${r.expected || "—"}</td><td style="${disc ? "color:#dc2626;font-weight:700" : ""}">${r.actual || "—"}</td><td>${disc ? "⚠ Mismatch" : ""}</td><td>${r.notes || ""}</td></tr>`; }).join("")}</table>
-${notes ? `<h2>Additional Notes</h2><p style="padding:14px;background:#f8fafc;border-radius:8px;line-height:1.7;border:1px solid #e2e8f0">${notes}</p>` : ""}
-<div class="foot">
-  <span>© ${new Date().getFullYear()} Cleaniq Services Ltd</span>
-  <span>cleaniqservices.com · +44 7752 476368</span>
+${damages.length ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Damage Report</span><div class="sh-rule"></div></div>
+${damages.map((d) => {
+  const imgs = withPhotos ? (d.photos || []).filter((m) => m.type === "image") : [];
+  return `<div class="dc">
+  <div class="dc-top">
+    <div><p class="dc-item">${d.item || "—"}</p><p class="dc-loc">${d.location || ""}</p></div>
+    <span class="sev sev-${d.severity}">${d.severity}</span>
+  </div>
+  ${d.description ? `<p class="dc-desc">${d.description}</p>` : ""}
+  ${imgs.length ? `<div class="dp">${imgs.map((m) => `<img src="${m.src}">`).join("")}</div>` : ""}
+</div>`;
+}).join("")}` : ""}
+${checkedSupplies.length ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Cleaning Supplies Restock</span><div class="sh-rule"></div></div>
+<div class="cl">${checkedSupplies.map((s) => `<div class="cli"><span class="chk">✓</span>${s}${supplies[`qty_${s}`] ? ` ×${supplies[`qty_${s}`]}` : ""}</div>`).join("")}</div>` : ""}
+${checkedConsumables.length ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Consumables Replenish</span><div class="sh-rule"></div></div>
+<div class="cl">${checkedConsumables.map((s) => `<div class="cli"><span class="chk">✓</span>${s}${consumables[`qty_${s}`] ? ` ×${consumables[`qty_${s}`]}` : ""}</div>`).join("")}</div>` : ""}
+${vendingPhotos.length ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Vending Machine</span><div class="sh-rule"></div></div>${mediaToHtml(vendingPhotos, withPhotos)}` : ""}
+<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Inventory Report</span><div class="sh-rule"></div></div>
+<table><tr><th>Item</th><th>Expected</th><th>Actual</th><th>Discrepancy</th><th>Notes</th></tr>${inventory.map((r) => {
+  const disc = r.expected !== "" && r.actual !== "" && String(r.expected) !== String(r.actual);
+  return `<tr><td>${r.item}</td><td>${r.expected || "—"}</td><td${disc ? ` style="color:#dc2626;font-weight:700"` : ""}>${r.actual || "—"}</td><td>${disc ? "⚠ Mismatch" : ""}</td><td>${r.notes || ""}</td></tr>`;
+}).join("")}</table>
+${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additional Notes</span><div class="sh-rule"></div></div><div class="notes">${notes}</div>` : ""}
 </div>
+<div class="foot">
+  <div class="foot-l"><strong>Cleaniq Services Ltd</strong><br>cleaniqservices.com · +44 7752 476368</div>
+  <div class="foot-r">Generated ${fmtDate(today)}<br>Confidential — For client use only</div>
 </div>
 </body></html>`;
   };
