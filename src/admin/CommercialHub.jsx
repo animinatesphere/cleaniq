@@ -1,9 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import html2pdf from "html2pdf.js";
 import {
   Building2, FileText, FileCheck, Camera, Plus, Trash2,
   Download, Send, X, ClipboardList, Printer,
   RefreshCw, Package, AlertTriangle, Play, Film,
+  Search, User, ChevronRight,
 } from "lucide-react";
 import QuoteBuilderComponent from "./QuoteBuilder";
 import InvoiceBuilderComponent from "./InvoiceBuilder";
@@ -187,6 +188,55 @@ const PropertyReport = () => {
   const [notes, setNotes] = useState("");
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState(null);
+
+  // Booking search
+  const [allBookings, setAllBookings] = useState([]);
+  const [search, setSearch] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+    fetch(`${API}/bookings`)
+      .then((r) => r.json())
+      .then((data) => setAllBookings(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
+
+  const q = search.trim().toLowerCase();
+  const searchResults = q.length < 2 ? [] : allBookings.filter((b) => {
+    const name = `${b.customer?.firstName || ""} ${b.customer?.lastName || ""}`.toLowerCase();
+    const email = (b.customer?.email || "").toLowerCase();
+    const ref = (b.bookingId || "").toLowerCase();
+    return name.includes(q) || email.includes(q) || ref.includes(q);
+  }).slice(0, 8);
+
+  const fillFromBooking = (b) => {
+    const addr = b.property?.address || b.property?.postcode
+      ? [b.property?.address, b.property?.postcode].filter(Boolean).join(", ")
+      : b.details?.address || "";
+    const custName = [b.customer?.firstName, b.customer?.lastName].filter(Boolean).join(" ");
+    setInfo((p) => ({
+      ...p,
+      propertyName: p.propertyName || (custName ? `${custName}'s Property` : b.service || ""),
+      address: p.address || addr,
+      bookingRef: b.bookingId || p.bookingRef,
+      date: b.schedule?.date ? new Date(b.schedule.date).toISOString().slice(0, 10) : p.date,
+      cleaner: b.assignedWorkerName || p.cleaner,
+      recipientEmail: b.customer?.email || p.recipientEmail,
+    }));
+    setSearch("");
+    setShowResults(false);
+  };
 
   const set = (k) => (e) => setInfo((p) => ({ ...p, [k]: e.target.value }));
   const toggleItem = (state, setState, key) => setState((p) => ({ ...p, [key]: !p[key] }));
@@ -423,6 +473,70 @@ ${notes ? `<h2>Additional Notes</h2><p style="padding:14px;background:#f8fafc;bo
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
       {/* Property Info */}
       <Section title="Property Details" icon={Building2}>
+        {/* Customer / Booking search */}
+        <div ref={searchRef} className="relative mb-5">
+          <div className="relative">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setShowResults(true); }}
+              onFocus={() => search.length >= 2 && setShowResults(true)}
+              placeholder="Search by customer name, email or booking ref to auto-fill…"
+              className="w-full pl-10 pr-4 py-3 rounded-2xl border-2 border-slate-200 bg-white text-sm font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+            />
+            {search && (
+              <button
+                onClick={() => { setSearch(""); setShowResults(false); }}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors"
+              >
+                <X size={15} />
+              </button>
+            )}
+          </div>
+
+          {/* Results dropdown */}
+          {showResults && searchResults.length > 0 && (
+            <div className="absolute z-30 top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+              {searchResults.map((b) => {
+                const name = [b.customer?.firstName, b.customer?.lastName].filter(Boolean).join(" ") || "Unknown";
+                const addr = b.property?.address || b.details?.address || "";
+                return (
+                  <button
+                    key={b._id}
+                    onMouseDown={(e) => { e.preventDefault(); fillFromBooking(b); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0 group"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                      <User size={16} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-slate-800 truncate">{name}</p>
+                      <p className="text-[11px] text-slate-400 font-medium truncate">
+                        {b.bookingId} · {b.customer?.email || "no email"}
+                        {addr ? ` · ${addr}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${b.status === "Completed" ? "bg-emerald-50 text-emerald-600" : b.status === "Cancelled" ? "bg-red-50 text-red-500" : "bg-blue-50 text-blue-600"}`}>
+                        {b.status}
+                      </span>
+                      <ChevronRight size={14} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {showResults && q.length >= 2 && searchResults.length === 0 && (
+            <div className="absolute z-30 top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 text-center text-sm text-slate-400 font-medium">
+              No bookings found for "{search}"
+            </div>
+          )}
+        </div>
+
+        {/* Manual fields — still editable after auto-fill */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Field label="Property Name"><Input value={info.propertyName} onChange={set("propertyName")} placeholder="e.g. The Grand Flat" /></Field>
           <Field label="Address"><Input value={info.address} onChange={set("address")} placeholder="Full address" /></Field>
