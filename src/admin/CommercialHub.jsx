@@ -359,24 +359,32 @@ ${notes ? `<h2>Additional Notes</h2><p style="padding:14px;background:#f8fafc;bo
     setTimeout(() => w.print(), 600);
   };
 
+  const PDF_OPTS = {
+    margin: [8, 8, 8, 8],
+    image: { type: "jpeg", quality: 0.92 },
+    html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, imageTimeout: 20000 },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    pagebreak: { mode: ["avoid-all", "css"] },
+  };
+
+  // Mount the HTML off-screen and wait for all images to decode before rendering
+  const mountAndSettle = async (html) => {
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    container.style.cssText = "position:absolute;left:-9999px;top:0;width:794px";
+    document.body.appendChild(container);
+    // Give the browser a tick to decode base64 images
+    await new Promise((r) => setTimeout(r, 400));
+    return container;
+  };
+
   const [downloading, setDownloading] = useState(false);
   const handleDownload = async () => {
     setDownloading(true);
     const filename = `property-report-${(info.bookingRef || info.propertyName || "cleaniq").replace(/[^a-z0-9]/gi, "-").toLowerCase()}.pdf`;
-    const container = document.createElement("div");
-    container.innerHTML = buildHtml(true);
-    // Remove the print-only media query wrapper so html2canvas renders at full size
-    container.style.cssText = "position:absolute;left:-9999px;top:0;width:794px";
-    document.body.appendChild(container);
+    const container = await mountAndSettle(buildHtml(true));
     try {
-      await html2pdf().set({
-        margin: [8, 8, 8, 8],
-        filename,
-        image: { type: "jpeg", quality: 0.95 },
-        html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["avoid-all", "css"] },
-      }).from(container).save();
+      await html2pdf().set({ ...PDF_OPTS, filename }).from(container).save();
     } finally {
       document.body.removeChild(container);
       setDownloading(false);
@@ -417,37 +425,36 @@ ${notes ? `<h2>Additional Notes</h2><p style="padding:14px;background:#f8fafc;bo
   };
 
   const handleSendEmail = async () => {
-    if (!info.recipientEmail) { setToast({ msg: "Enter a recipient email address first", type: "error" }); return; }
+    if (!info.recipientEmail) {
+      setToast({ msg: "Enter a recipient email address first", type: "error" });
+      return;
+    }
     setSending(true);
+
+    const filename = `Property-Report-${(info.bookingRef || info.propertyName || "Cleaniq").replace(/[^a-z0-9]/gi, "-")}.pdf`;
+    const container = await mountAndSettle(buildHtml(true));
+
+    let pdfBase64 = null;
     try {
-      // Generate PDF with photos included
-      const filename = `Property-Report-${(info.bookingRef || info.propertyName || "Cleaniq").replace(/[^a-z0-9]/gi, "-")}.pdf`;
-      const container = document.createElement("div");
-      container.innerHTML = buildHtml(true);
-      container.style.cssText = "position:absolute;left:-9999px;top:0;width:794px";
-      document.body.appendChild(container);
+      // toPdf().get("pdf") gives us the raw jsPDF instance — the only reliable way
+      // to get base64 out of html2pdf without using the broken outputPdf("blob") path
+      const jspdf = await html2pdf()
+        .set(PDF_OPTS)
+        .from(container)
+        .toPdf()
+        .get("pdf");
+      pdfBase64 = jspdf.output("datauristring").split(",")[1];
+    } catch (pdfErr) {
+      console.error("PDF generation failed:", pdfErr);
+      setToast({ msg: "PDF generation failed — " + (pdfErr.message || "unknown error"), type: "error" });
+      document.body.removeChild(container);
+      setSending(false);
+      return;
+    } finally {
+      if (document.body.contains(container)) document.body.removeChild(container);
+    }
 
-      let pdfBase64 = null;
-      try {
-        const pdfBlob = await html2pdf().set({
-          margin: [8, 8, 8, 8],
-          filename,
-          image: { type: "jpeg", quality: 0.85 },
-          html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: ["avoid-all", "css"] },
-        }).from(container).outputPdf("blob");
-
-        pdfBase64 = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (e) => resolve(e.target.result.split(",")[1]);
-          reader.onerror = reject;
-          reader.readAsDataURL(pdfBlob);
-        });
-      } finally {
-        document.body.removeChild(container);
-      }
-
+    try {
       const res = await fetch(`${API}/email-logs/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -455,12 +462,12 @@ ${notes ? `<h2>Additional Notes</h2><p style="padding:14px;background:#f8fafc;bo
           to: info.recipientEmail,
           subject: `Property Report — ${info.propertyName || info.bookingRef || "Cleaniq"} · ${fmtDate(info.date)}`,
           html: buildNotificationHtml(),
-          ...(pdfBase64 ? { attachment: { filename, base64: pdfBase64 } } : {}),
+          attachment: { filename, base64: pdfBase64 },
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || data.error);
-      setToast({ msg: `Report sent to ${info.recipientEmail}`, type: "success" });
+      setToast({ msg: `Report sent to ${info.recipientEmail} with PDF attached`, type: "success" });
     } catch (err) {
       setToast({ msg: err.message || "Failed to send report", type: "error" });
     } finally {
