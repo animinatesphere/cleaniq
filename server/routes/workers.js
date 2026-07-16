@@ -5,7 +5,7 @@ const Booking = require("../models/Booking");
 const Notification = require("../models/Notification");
 const { moveToTrash } = require("../utils/trash");
 const jwt = require("jsonwebtoken");
-const { sendEmail, templates } = require("../utils/emailService");
+const { sendEmail, templates, workerEventEmails } = require("../utils/emailService");
 const Customer = require("../models/Customer");
 const { sendCustomerPush } = require("../utils/pushNotifications");
 
@@ -240,6 +240,16 @@ router.post("/jobs/:id/accept", async (req, res) => {
       ),
     });
 
+    // Send customer email — tell them who accepted and all job details
+    if (booking.customer?.email) {
+      const workerDoc = await Worker.findById(workerId).catch(() => null);
+      sendEmail({
+        to: booking.customer.email,
+        subject: `Your cleaner is confirmed — ${workerName} · ${booking.bookingId}`,
+        html: workerEventEmails.workerAccepted(booking, workerDoc),
+      }).catch(() => {});
+    }
+
     res.json({ message: "Job accepted successfully", booking });
   } catch (error) {
     console.error("Error accepting job:", error);
@@ -419,6 +429,15 @@ router.post("/jobs/:id/arrive", async (req, res) => {
         `Staff member <strong>${booking.assignedWorkerName}</strong> has reached the customer's property.`,
       ),
     });
+
+    // Send arrival email to customer — includes location, worker name, tips
+    if (booking.customer?.email) {
+      sendEmail({
+        to: booking.customer.email,
+        subject: `🚪 Your cleaner has arrived — ${booking.assignedWorkerName} is at your door!`,
+        html: workerEventEmails.workerArrived(booking),
+      }).catch(() => {});
+    }
 
     res.json({ message: "Arrived at customer location", booking });
   } catch (error) {
@@ -605,8 +624,17 @@ router.post("/jobs/:id/complete", async (req, res) => {
     // Notify customer
     await notifyCustomer(booking, {
       title: "All Done — Spotless!",
-      body: `Your ${booking.service} is complete. Check your inbox for the invoice. Thank you for choosing Cleaniq!`,
+      body: `Your ${booking.service} is complete. Check your inbox for the full summary. Thank you for choosing Cleaniq!`,
     });
+
+    // Send job-complete email to customer with summary, duration, review CTA
+    if (booking.customer?.email) {
+      sendEmail({
+        to: booking.customer.email,
+        subject: `✨ Your clean is done! — ${booking.service} · ${booking.bookingId}`,
+        html: workerEventEmails.jobCompleted(booking),
+      }).catch(() => {});
+    }
 
     // Send email log to Admin
     await sendEmail({

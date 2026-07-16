@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Search, Users, Mail, MailX, CheckCircle2, XCircle } from "lucide-react";
+import {
+  Search, Users, Mail, MailX, CheckCircle2, XCircle,
+  ChevronDown, ChevronUp, Save, UserCheck, UserX, RefreshCw,
+} from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -49,7 +52,7 @@ function Toggle({ checked, onChange, saving }) {
       onClick={() => !saving && onChange(!checked)}
       aria-checked={checked}
       role="switch"
-      className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 ${
+      className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200 focus:outline-none ${
         checked ? "bg-zinc-900" : "bg-zinc-300"
       } ${saving ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
     >
@@ -58,22 +61,50 @@ function Toggle({ checked, onChange, saving }) {
   );
 }
 
+// Checkbox component
+function Checkbox({ checked, indeterminate, onChange }) {
+  return (
+    <button
+      type="button"
+      onClick={onChange}
+      className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
+        checked
+          ? "bg-zinc-900 border-zinc-900"
+          : indeterminate
+            ? "bg-zinc-200 border-zinc-400"
+            : "bg-white border-zinc-300 hover:border-zinc-500"
+      }`}
+    >
+      {checked && (
+        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+          <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+      {indeterminate && !checked && (
+        <span className="w-2.5 h-0.5 bg-zinc-600 rounded-full" />
+      )}
+    </button>
+  );
+}
+
 export default function Automations() {
-  const [settings, setSettings]       = useState([]);
-  const [stats, setStats]             = useState({ pending: 0, sentToday: 0, failed: 0, totalSent: 0 });
-  const [queue, setQueue]             = useState([]);
-  const [history, setHistory]         = useState([]);
-  const [tab, setTab]                 = useState("queue");
-  const [savingKey, setSavingKey]     = useState(null);
-  const [loading, setLoading]         = useState(true);
+  const [settings, setSettings]         = useState([]);
+  const [stats, setStats]               = useState({ pending: 0, sentToday: 0, failed: 0, totalSent: 0 });
+  const [queue, setQueue]               = useState([]);
+  const [history, setHistory]           = useState([]);
+  const [tab, setTab]                   = useState("queue");
+  const [savingKey, setSavingKey]       = useState(null);
+  const [loading, setLoading]           = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
-  const [toast, setToast]             = useState(null);
+  const [toast, setToast]               = useState(null);
 
   // Audience tab state
   const [customers, setCustomers]           = useState([]);
+  const [audienceLoading, setAudienceLoading] = useState(false);
   const [audienceSearch, setAudienceSearch] = useState("");
-  const [togglingId, setTogglingId]         = useState(null);
-  const [audienceFilter, setAudienceFilter] = useState("all"); // "all" | "enabled" | "disabled"
+  const [audienceFilter, setAudienceFilter] = useState("all"); // "all" | "on" | "off"
+  const [selected, setSelected]             = useState(new Set()); // Set of customer _ids
+  const [bulkSaving, setBulkSaving]         = useState(false);
 
   const showToast = (msg, type = "error") => {
     setToast({ msg, type });
@@ -101,21 +132,28 @@ export default function Automations() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // Fetch customers for audience tab (lazy — only when tab is opened)
-  useEffect(() => {
-    if (tab === "audience" && customers.length === 0) {
-      axios.get(`${API}/customers`).then(r => setCustomers(r.data || [])).catch(() => {});
+  const loadAudience = useCallback(async () => {
+    setAudienceLoading(true);
+    try {
+      const r = await axios.get(`${API}/customers`);
+      setCustomers(r.data || []);
+    } catch {
+      showToast("Failed to load customers");
+    } finally {
+      setAudienceLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    if (tab === "audience" && customers.length === 0) loadAudience();
   }, [tab]);
 
   const toggleAutomation = async (type, newVal) => {
-    // Optimistic update — flip immediately so the toggle feels instant
     setSettings(prev => prev.map(s => s.key === type ? { ...s, enabled: newVal } : s));
     setSavingKey(type);
     try {
       await axios.post(`${API}/automations/settings/${type}`, { enabled: newVal });
     } catch {
-      // Revert on failure
       setSettings(prev => prev.map(s => s.key === type ? { ...s, enabled: !newVal } : s));
       showToast("Failed to save — please try again");
     } finally {
@@ -136,19 +174,7 @@ export default function Automations() {
     }
   };
 
-  const toggleCrmEmails = async (customer) => {
-    const newVal = !customer.crmEmailsEnabled;
-    setCustomers(prev => prev.map(c => c._id === customer._id ? { ...c, crmEmailsEnabled: newVal } : c));
-    setTogglingId(customer._id);
-    try {
-      await axios.patch(`${API}/customers/${customer._id}/crm-emails`, { enabled: newVal });
-    } catch {
-      setCustomers(prev => prev.map(c => c._id === customer._id ? { ...c, crmEmailsEnabled: !newVal } : c));
-      showToast("Failed to update — please try again");
-    } finally {
-      setTogglingId(null);
-    }
-  };
+  // --- Audience logic ---
 
   const filteredCustomers = customers.filter(c => {
     const q = audienceSearch.toLowerCase();
@@ -156,12 +182,73 @@ export default function Automations() {
       c.firstName?.toLowerCase().includes(q) ||
       c.lastName?.toLowerCase().includes(q) ||
       c.email?.toLowerCase().includes(q);
+    const enabled = c.crmEmailsEnabled !== false;
     const matchFilter =
       audienceFilter === "all" ? true :
-      audienceFilter === "enabled" ? c.crmEmailsEnabled !== false :
-      c.crmEmailsEnabled === false;
+      audienceFilter === "on"  ? enabled :
+      !enabled;
     return matchSearch && matchFilter;
   });
+
+  const enabledCount  = customers.filter(c => c.crmEmailsEnabled !== false).length;
+  const disabledCount = customers.filter(c => c.crmEmailsEnabled === false).length;
+
+  const allFilteredSelected = filteredCustomers.length > 0 &&
+    filteredCustomers.every(c => selected.has(c._id));
+  const someFilteredSelected = filteredCustomers.some(c => selected.has(c._id));
+
+  const toggleSelectAll = () => {
+    if (allFilteredSelected) {
+      setSelected(prev => {
+        const next = new Set(prev);
+        filteredCustomers.forEach(c => next.delete(c._id));
+        return next;
+      });
+    } else {
+      setSelected(prev => {
+        const next = new Set(prev);
+        filteredCustomers.forEach(c => next.add(c._id));
+        return next;
+      });
+    }
+  };
+
+  const toggleCustomer = (id) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const applyBulk = async (enable) => {
+    if (selected.size === 0) return;
+    setBulkSaving(true);
+    const ids = [...selected];
+    // Optimistic update
+    setCustomers(prev => prev.map(c =>
+      ids.includes(c._id) ? { ...c, crmEmailsEnabled: enable } : c
+    ));
+    try {
+      await Promise.all(
+        ids.map(id => axios.patch(`${API}/customers/${id}/crm-emails`, { enabled: enable }))
+      );
+      showToast(
+        `${enable ? "Enabled" : "Disabled"} automation emails for ${ids.length} customer${ids.length > 1 ? "s" : ""}`,
+        "success"
+      );
+      setSelected(new Set());
+    } catch {
+      // Revert
+      setCustomers(prev => prev.map(c =>
+        ids.includes(c._id) ? { ...c, crmEmailsEnabled: !enable } : c
+      ));
+      showToast("Failed to apply changes — please try again");
+    } finally {
+      setBulkSaving(false);
+    }
+  };
 
   const grouped = settings.reduce((acc, s) => {
     acc[s.category] = acc[s.category] || [];
@@ -243,7 +330,7 @@ export default function Automations() {
         ))}
       </div>
 
-      {/* Queue / History / Audience Tabs */}
+      {/* Tabs */}
       <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
         <div className="border-b border-zinc-100 px-4 sm:px-6 flex gap-1 pt-2">
           {[
@@ -272,6 +359,7 @@ export default function Automations() {
           </button>
         </div>
 
+        {/* ── QUEUE ── */}
         {tab === "queue" && (
           queue.length === 0 ? (
             <div className="text-center py-16 text-zinc-400">
@@ -312,6 +400,7 @@ export default function Automations() {
           )
         )}
 
+        {/* ── HISTORY ── */}
         {tab === "history" && (
           history.length === 0 ? (
             <div className="text-center py-16 text-zinc-400">
@@ -345,13 +434,37 @@ export default function Automations() {
           )
         )}
 
+        {/* ── AUDIENCE ── */}
         {tab === "audience" && (
           <div>
-            {/* Audience header */}
-            <div className="px-4 sm:px-6 py-4 border-b border-zinc-100">
-              <p className="text-xs text-zinc-500 mb-3">
-                Control which customers receive CRM automation emails. Disable individuals to permanently stop all automated emails for them.
-              </p>
+            {/* Toolbar */}
+            <div className="px-4 sm:px-6 py-4 border-b border-zinc-100 space-y-3">
+
+              {/* Summary chips */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1.5 bg-green-50 border border-green-100 rounded-full px-3 py-1">
+                  <Mail size={12} className="text-green-600" />
+                  <span className="text-xs font-black text-green-700">{enabledCount} receiving</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-red-50 border border-red-100 rounded-full px-3 py-1">
+                  <MailX size={12} className="text-red-500" />
+                  <span className="text-xs font-black text-red-600">{disabledCount} excluded</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-zinc-100 border border-zinc-200 rounded-full px-3 py-1">
+                  <Users size={12} className="text-zinc-500" />
+                  <span className="text-xs font-black text-zinc-600">{customers.length} total</span>
+                </div>
+                <button
+                  onClick={loadAudience}
+                  disabled={audienceLoading}
+                  className="ml-auto flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-zinc-700 transition-colors"
+                >
+                  <RefreshCw size={12} className={audienceLoading ? "animate-spin" : ""} />
+                  Refresh
+                </button>
+              </div>
+
+              {/* Search + filter */}
               <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -359,14 +472,14 @@ export default function Automations() {
                     value={audienceSearch}
                     onChange={e => setAudienceSearch(e.target.value)}
                     placeholder="Search by name or email..."
-                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-zinc-200 bg-zinc-50 text-sm font-medium focus:outline-none focus:border-zinc-400 focus:bg-white transition-all"
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-zinc-200 bg-zinc-50 text-sm font-medium focus:outline-none focus:border-zinc-900 focus:bg-white transition-all"
                   />
                 </div>
-                <div className="flex gap-1.5">
+                <div className="flex gap-1.5 shrink-0">
                   {[
-                    { key: "all",      label: "All" },
-                    { key: "enabled",  label: "Receiving" },
-                    { key: "disabled", label: "Opted Out" },
+                    { key: "all", label: "All" },
+                    { key: "on",  label: "Receiving" },
+                    { key: "off", label: "Excluded" },
                   ].map(f => (
                     <button
                       key={f.key}
@@ -382,70 +495,127 @@ export default function Automations() {
                   ))}
                 </div>
               </div>
-              {/* Stats row */}
-              <div className="flex items-center gap-4 mt-3">
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 size={13} className="text-green-500" />
-                  <span className="text-xs font-bold text-zinc-600">
-                    {customers.filter(c => c.crmEmailsEnabled !== false).length} receiving
+
+              {/* Bulk action bar — shows when something is selected */}
+              {selected.size > 0 && (
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="text-sm font-black text-zinc-800">
+                    {selected.size} selected
                   </span>
+                  <button
+                    onClick={() => applyBulk(true)}
+                    disabled={bulkSaving}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-600 text-white text-xs font-black hover:bg-green-700 transition-colors disabled:opacity-50"
+                  >
+                    <UserCheck size={13} />
+                    Enable — receive emails
+                  </button>
+                  <button
+                    onClick={() => applyBulk(false)}
+                    disabled={bulkSaving}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-black hover:bg-red-600 transition-colors disabled:opacity-50"
+                  >
+                    <UserX size={13} />
+                    Exclude — stop emails
+                  </button>
+                  <button
+                    onClick={() => setSelected(new Set())}
+                    className="text-xs font-bold text-zinc-400 hover:text-zinc-700 transition-colors ml-1"
+                  >
+                    Clear selection
+                  </button>
+                  {bulkSaving && (
+                    <div className="w-4 h-4 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />
+                  )}
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <XCircle size={13} className="text-red-400" />
-                  <span className="text-xs font-bold text-zinc-600">
-                    {customers.filter(c => c.crmEmailsEnabled === false).length} opted out
-                  </span>
-                </div>
-              </div>
+              )}
             </div>
 
-            {/* Customer list */}
-            {filteredCustomers.length === 0 ? (
+            {/* Select-all header row */}
+            {filteredCustomers.length > 0 && (
+              <div className="px-4 sm:px-6 py-2.5 bg-zinc-50 border-b border-zinc-100 flex items-center gap-3">
+                <Checkbox
+                  checked={allFilteredSelected}
+                  indeterminate={someFilteredSelected && !allFilteredSelected}
+                  onChange={toggleSelectAll}
+                />
+                <span className="text-xs font-bold text-zinc-500">
+                  {allFilteredSelected
+                    ? `All ${filteredCustomers.length} selected`
+                    : someFilteredSelected
+                      ? `${[...selected].filter(id => filteredCustomers.find(c => c._id === id)).length} of ${filteredCustomers.length} selected`
+                      : `Select all ${filteredCustomers.length}`}
+                </span>
+              </div>
+            )}
+
+            {/* Customer rows */}
+            {audienceLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <div className="w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : filteredCustomers.length === 0 ? (
               <div className="text-center py-16 text-zinc-400">
                 <Users size={32} className="mx-auto mb-2 opacity-30" />
                 <p className="font-medium text-sm">No customers found</p>
               </div>
             ) : (
-              <div className="divide-y divide-zinc-50 max-h-[520px] overflow-y-auto">
+              <div className="divide-y divide-zinc-50 max-h-[480px] overflow-y-auto">
                 {filteredCustomers.map(c => {
-                  const enabled = c.crmEmailsEnabled !== false;
-                  const saving  = togglingId === c._id;
+                  const isSelected = selected.has(c._id);
+                  const enabled    = c.crmEmailsEnabled !== false;
                   return (
                     <div
                       key={c._id}
-                      className="px-4 sm:px-6 py-3.5 flex items-center gap-3 hover:bg-zinc-50 transition-colors"
+                      onClick={() => toggleCustomer(c._id)}
+                      className={`px-4 sm:px-6 py-3.5 flex items-center gap-3 cursor-pointer transition-colors ${
+                        isSelected ? "bg-zinc-50" : "hover:bg-zinc-50/60"
+                      }`}
                     >
+                      <Checkbox
+                        checked={isSelected}
+                        onChange={() => toggleCustomer(c._id)}
+                      />
+
                       {/* Avatar */}
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${enabled ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-400"}`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                        enabled ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-400"
+                      }`}>
                         {c.firstName?.[0]}{c.lastName?.[0]}
                       </div>
+
+                      {/* Name + email */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-zinc-800 leading-tight">
+                        <p className="text-sm font-bold text-zinc-800 leading-tight truncate">
                           {c.firstName} {c.lastName}
                         </p>
                         <p className="text-xs text-zinc-400 truncate">{c.email}</p>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {enabled ? (
-                          <span className="flex items-center gap-1 text-[10px] font-black text-green-600 bg-green-50 border border-green-100 px-2 py-0.5 rounded-full">
-                            <Mail size={10} /> Receiving
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-[10px] font-black text-red-500 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full">
-                            <MailX size={10} /> Opted Out
-                          </span>
-                        )}
-                        <Toggle
-                          checked={enabled}
-                          onChange={() => !saving && toggleCrmEmails(c)}
-                          saving={saving}
-                        />
-                      </div>
+
+                      {/* Status badge */}
+                      {enabled ? (
+                        <span className="flex items-center gap-1 text-[10px] font-black text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                          Receiving
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-[10px] font-black text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                          Excluded
+                        </span>
+                      )}
                     </div>
                   );
                 })}
               </div>
             )}
+
+            {/* Footer hint */}
+            <div className="px-4 sm:px-6 py-3 border-t border-zinc-100 bg-zinc-50">
+              <p className="text-xs text-zinc-400">
+                Select customers then use <strong>Enable</strong> or <strong>Exclude</strong> to control who receives automation emails. Changes apply immediately.
+              </p>
+            </div>
           </div>
         )}
       </div>

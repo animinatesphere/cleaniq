@@ -1885,4 +1885,322 @@ const automationTemplates = {
   `,
 };
 
-module.exports = { sendEmail, templates, automationTemplates };
+// ─── Transactional worker-event emails sent to the customer ──────────────────
+
+const workerEventEmails = {
+
+  // Sent when a worker accepts the job
+  workerAccepted: (booking, worker) => {
+    const firstName  = booking.customer?.firstName || "there";
+    const workerName = worker
+      ? `${worker.firstName} ${worker.lastName}`
+      : booking.assignedWorkerName || "Your cleaner";
+    const initials   = workerName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+    const service    = booking.service || "Cleaning Service";
+    const ref        = booking.bookingId || "";
+    const address    = [booking.details?.address, booking.details?.postcode].filter(Boolean).join(", ");
+    const dateStr    = booking.schedule?.date
+      ? new Date(booking.schedule.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+      : "Scheduled date";
+    const timeSlot   = booking.schedule?.timeSlot || "";
+    const phone      = worker?.phone || "";
+    const acceptedAt = new Date(booking.jobAcceptedTime || Date.now()).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#f1f5f9;">
+<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#0A5C43 0%,#0F6B4C 60%,#1a7a59 100%);padding:48px 40px 40px;text-align:center;position:relative;">
+    <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq" style="width:72px;height:72px;border-radius:16px;object-fit:cover;border:3px solid rgba(110,231,183,0.4);margin-bottom:20px;" />
+    <div style="display:inline-block;background:rgba(110,231,183,0.15);border:1px solid rgba(110,231,183,0.4);border-radius:100px;padding:6px 18px;margin-bottom:18px;">
+      <span style="color:#6EE7B7;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;">Cleaner Assigned</span>
+    </div>
+    <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:900;letter-spacing:-0.5px;line-height:1.2;">Your cleaner is confirmed!</h1>
+    <p style="color:#a7f3d0;margin:10px 0 0;font-size:15px;font-weight:500;">Someone great is on their way to you</p>
+  </div>
+
+  <!-- Greeting -->
+  <div style="padding:36px 40px 0;">
+    <p style="color:#0f172a;font-size:16px;font-weight:700;margin:0 0 6px;">Hi ${firstName} 👋</p>
+    <p style="color:#475569;font-size:14px;line-height:1.7;margin:0;">Great news — a cleaner has accepted your booking and is committed to your scheduled clean. Here's everything you need to know about who's coming.</p>
+  </div>
+
+  <!-- Worker Card -->
+  <div style="margin:28px 40px 0;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1.5px solid #a7f3d0;border-radius:20px;padding:24px;display:flex;align-items:center;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="vertical-align:middle;width:72px;">
+          <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#0A5C43,#059669);display:flex;align-items:center;justify-content:center;text-align:center;">
+            <span style="color:#ffffff;font-size:22px;font-weight:900;line-height:64px;display:block;">${initials}</span>
+          </div>
+        </td>
+        <td style="vertical-align:middle;padding-left:18px;">
+          <p style="margin:0;font-size:18px;font-weight:900;color:#064e3b;">${workerName}</p>
+          <p style="margin:4px 0 0;font-size:13px;color:#059669;font-weight:700;">✓ Verified Cleaniq Professional</p>
+          ${phone ? `<p style="margin:4px 0 0;font-size:13px;color:#475569;">📞 ${phone}</p>` : ""}
+          <p style="margin:6px 0 0;font-size:12px;color:#6b7280;">Accepted at ${acceptedAt}</p>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Job Details -->
+  <div style="margin:24px 40px 0;">
+    <p style="font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 12px;">Booking Details</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
+      <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+        <td style="padding:14px 16px;font-size:13px;color:#64748b;font-weight:600;width:40%;">📋 Reference</td>
+        <td style="padding:14px 16px;font-size:13px;color:#0f172a;font-weight:800;">${ref}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:14px 16px;font-size:13px;color:#64748b;font-weight:600;">🧹 Service</td>
+        <td style="padding:14px 16px;font-size:13px;color:#0f172a;font-weight:700;">${service}</td>
+      </tr>
+      <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+        <td style="padding:14px 16px;font-size:13px;color:#64748b;font-weight:600;">📅 Date</td>
+        <td style="padding:14px 16px;font-size:13px;color:#0f172a;font-weight:700;">${dateStr}</td>
+      </tr>
+      ${timeSlot ? `<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:14px 16px;font-size:13px;color:#64748b;font-weight:600;">🕐 Time Slot</td><td style="padding:14px 16px;font-size:13px;color:#0f172a;font-weight:700;">${timeSlot}</td></tr>` : ""}
+      ${address ? `<tr style="background:#f8fafc;"><td style="padding:14px 16px;font-size:13px;color:#64748b;font-weight:600;">📍 Address</td><td style="padding:14px 16px;font-size:13px;color:#0f172a;font-weight:700;">${address}</td></tr>` : ""}
+    </table>
+  </div>
+
+  <!-- What to expect -->
+  <div style="margin:24px 40px 0;background:#fffbeb;border:1px solid #fde68a;border-radius:16px;padding:20px;">
+    <p style="margin:0 0 10px;font-size:12px;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:1px;">What to expect</p>
+    <p style="margin:0 0 6px;font-size:13px;color:#78350f;line-height:1.6;">✅ Your cleaner will contact you if they need access instructions</p>
+    <p style="margin:0 0 6px;font-size:13px;color:#78350f;line-height:1.6;">✅ You'll receive another email when they arrive at your property</p>
+    <p style="margin:0;font-size:13px;color:#78350f;line-height:1.6;">✅ You'll be notified once the job is complete with a full summary</p>
+  </div>
+
+  <!-- CTA -->
+  <div style="text-align:center;padding:32px 40px 0;">
+    <a href="https://cleaniqservices.com/account/dashboard" style="display:inline-block;background:linear-gradient(135deg,#0A5C43,#059669);color:#ffffff;padding:16px 40px;border-radius:14px;text-decoration:none;font-weight:800;font-size:15px;letter-spacing:0.3px;">View My Booking →</a>
+  </div>
+
+  <!-- Footer -->
+  <div style="padding:28px 40px;margin-top:32px;border-top:1px solid #f1f5f9;text-align:center;">
+    <p style="margin:0 0 4px;font-size:11px;color:#94a3b8;">© 2026 Cleaniq Services · Professional Cleaning You Can Trust</p>
+    <p style="margin:0;font-size:11px;color:#cbd5e1;">Questions? Email us at <a href="mailto:info@cleaniqservices.com" style="color:#0A5C43;">info@cleaniqservices.com</a></p>
+  </div>
+</div></body></html>`;
+  },
+
+  // Sent when worker marks themselves as arrived
+  workerArrived: (booking) => {
+    const firstName  = booking.customer?.firstName || "there";
+    const workerName = booking.assignedWorkerName || "Your cleaner";
+    const initials   = workerName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+    const service    = booking.service || "Cleaning Service";
+    const ref        = booking.bookingId || "";
+    const address    = [booking.details?.address, booking.details?.postcode].filter(Boolean).join(", ");
+    const mapsLink   = address
+      ? `https://www.google.com/maps/search/${encodeURIComponent(address)}`
+      : "https://www.google.com/maps";
+    const arrivedAt  = new Date(booking.jobArrivedTime || Date.now()).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    const arrivedDate = new Date(booking.jobArrivedTime || Date.now()).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#f1f5f9;">
+<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+  <!-- Header — amber arrival theme -->
+  <div style="background:linear-gradient(135deg,#92400e 0%,#b45309 50%,#d97706 100%);padding:48px 40px 36px;text-align:center;">
+    <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq" style="width:72px;height:72px;border-radius:16px;object-fit:cover;border:3px solid rgba(253,230,138,0.5);margin-bottom:20px;" />
+    <div style="display:inline-block;background:rgba(253,230,138,0.2);border:1px solid rgba(253,230,138,0.5);border-radius:100px;padding:6px 18px;margin-bottom:18px;">
+      <span style="color:#fde68a;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;">📍 Arrived</span>
+    </div>
+    <h1 style="color:#ffffff;margin:0;font-size:30px;font-weight:900;letter-spacing:-0.5px;line-height:1.2;">Your cleaner is here!</h1>
+    <p style="color:#fde68a;margin:10px 0 0;font-size:15px;font-weight:600;">They've reached your property — let them in 🚪</p>
+  </div>
+
+  <!-- Time badge -->
+  <div style="text-align:center;padding:28px 40px 0;">
+    <div style="display:inline-block;background:#fffbeb;border:1.5px solid #fde68a;border-radius:16px;padding:14px 28px;">
+      <p style="margin:0;font-size:12px;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:1px;">Arrived at</p>
+      <p style="margin:4px 0 0;font-size:28px;font-weight:900;color:#b45309;">${arrivedAt}</p>
+      <p style="margin:2px 0 0;font-size:12px;color:#d97706;font-weight:600;">${arrivedDate}</p>
+    </div>
+  </div>
+
+  <!-- Greeting -->
+  <div style="padding:28px 40px 0;">
+    <p style="color:#0f172a;font-size:16px;font-weight:700;margin:0 0 6px;">Hi ${firstName} 👋</p>
+    <p style="color:#475569;font-size:14px;line-height:1.7;margin:0;"><strong style="color:#0f172a;">${workerName}</strong> has just arrived at your property and is ready to start your <strong>${service}</strong>. Please open the door to let them in.</p>
+  </div>
+
+  <!-- Worker + Location split card -->
+  <div style="margin:24px 40px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-spacing:0 0;">
+      <tr>
+        <!-- Worker mini card -->
+        <td style="vertical-align:top;width:50%;padding-right:8px;">
+          <div style="background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:16px;padding:18px;height:100%;box-sizing:border-box;">
+            <p style="margin:0 0 10px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Your Cleaner</p>
+            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#0A5C43,#059669);text-align:center;margin-bottom:10px;">
+              <span style="color:#fff;font-size:16px;font-weight:900;line-height:44px;display:block;">${initials}</span>
+            </div>
+            <p style="margin:0;font-size:15px;font-weight:800;color:#064e3b;">${workerName}</p>
+            <p style="margin:4px 0 0;font-size:12px;color:#059669;font-weight:700;">✓ Verified Professional</p>
+            <p style="margin:4px 0 0;font-size:11px;color:#64748b;">Ref: ${ref}</p>
+          </div>
+        </td>
+        <!-- Location card -->
+        <td style="vertical-align:top;width:50%;padding-left:8px;">
+          <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:16px;padding:18px;height:100%;box-sizing:border-box;">
+            <p style="margin:0 0 10px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;">📍 Property</p>
+            <p style="margin:0;font-size:13px;font-weight:700;color:#0f172a;line-height:1.5;">${address || "Your registered address"}</p>
+            ${address ? `<a href="${mapsLink}" style="display:inline-block;margin-top:12px;background:#f59e0b;color:#ffffff;padding:8px 14px;border-radius:10px;text-decoration:none;font-weight:800;font-size:11px;">View on Maps →</a>` : ""}
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Quick tips -->
+  <div style="margin:24px 40px 0;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:20px;">
+    <p style="margin:0 0 12px;font-size:12px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:1px;">Quick tips for a smooth clean</p>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr><td style="padding:4px 0;font-size:13px;color:#334155;">🔑&nbsp; Show your cleaner where supplies are stored</td></tr>
+      <tr><td style="padding:4px 0;font-size:13px;color:#334155;">🐾&nbsp; Secure any pets so the team can work safely</td></tr>
+      <tr><td style="padding:4px 0;font-size:13px;color:#334155;">💬&nbsp; Point out any areas needing extra attention</td></tr>
+      <tr><td style="padding:4px 0;font-size:13px;color:#334155;">☕&nbsp; Then sit back — you'll hear from us when it's done!</td></tr>
+    </table>
+  </div>
+
+  <!-- CTA -->
+  <div style="text-align:center;padding:28px 40px 0;">
+    <a href="https://cleaniqservices.com/account/dashboard" style="display:inline-block;background:linear-gradient(135deg,#b45309,#d97706);color:#ffffff;padding:16px 40px;border-radius:14px;text-decoration:none;font-weight:800;font-size:15px;">Track My Booking →</a>
+  </div>
+
+  <!-- Footer -->
+  <div style="padding:28px 40px;margin-top:32px;border-top:1px solid #f1f5f9;text-align:center;">
+    <p style="margin:0 0 4px;font-size:11px;color:#94a3b8;">© 2026 Cleaniq Services · Professional Cleaning You Can Trust</p>
+    <p style="margin:0;font-size:11px;color:#cbd5e1;">Questions? Email us at <a href="mailto:info@cleaniqservices.com" style="color:#0A5C43;">info@cleaniqservices.com</a></p>
+  </div>
+</div></body></html>`;
+  },
+
+  // Sent when worker marks the job as complete
+  jobCompleted: (booking) => {
+    const firstName  = booking.customer?.firstName || "there";
+    const workerName = booking.assignedWorkerName || "Your cleaner";
+    const initials   = workerName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+    const service    = booking.service || "Cleaning Service";
+    const ref        = booking.bookingId || "";
+    const address    = [booking.details?.address, booking.details?.postcode].filter(Boolean).join(", ");
+    const durationMins = booking.jobDurationActual || 0;
+    const durationHrs  = durationMins > 0
+      ? durationMins >= 60
+        ? `${Math.floor(durationMins / 60)}h ${durationMins % 60 > 0 ? `${durationMins % 60}m` : ""}`.trim()
+        : `${durationMins}m`
+      : null;
+    const startTime  = booking.jobStartTime
+      ? new Date(booking.jobStartTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+      : null;
+    const endTime    = booking.jobEndTime
+      ? new Date(booking.jobEndTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+      : null;
+    const completedDate = new Date(booking.jobEndTime || Date.now()).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#f1f5f9;">
+<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+  <!-- Header — celebration green -->
+  <div style="background:linear-gradient(135deg,#064e3b 0%,#0A5C43 50%,#059669 100%);padding:48px 40px 36px;text-align:center;position:relative;">
+    <!-- Sparkle dots -->
+    <div style="position:absolute;top:20px;left:30px;width:8px;height:8px;border-radius:50%;background:rgba(110,231,183,0.5);"></div>
+    <div style="position:absolute;top:40px;right:40px;width:6px;height:6px;border-radius:50%;background:rgba(253,230,138,0.6);"></div>
+    <div style="position:absolute;bottom:30px;left:60px;width:5px;height:5px;border-radius:50%;background:rgba(110,231,183,0.4);"></div>
+    <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq" style="width:72px;height:72px;border-radius:16px;object-fit:cover;border:3px solid rgba(110,231,183,0.4);margin-bottom:20px;" />
+    <!-- Big checkmark -->
+    <div style="width:64px;height:64px;border-radius:50%;background:rgba(110,231,183,0.2);border:2.5px solid #6EE7B7;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;text-align:center;">
+      <span style="color:#6EE7B7;font-size:28px;line-height:64px;display:block;">✓</span>
+    </div>
+    <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:900;letter-spacing:-0.5px;line-height:1.2;">All done — spotless! ✨</h1>
+    <p style="color:#a7f3d0;margin:10px 0 0;font-size:15px;font-weight:500;">Your ${service} is complete</p>
+    <p style="color:#6EE7B7;margin:6px 0 0;font-size:13px;font-weight:600;">${completedDate}</p>
+  </div>
+
+  <!-- Greeting -->
+  <div style="padding:32px 40px 0;">
+    <p style="color:#0f172a;font-size:16px;font-weight:700;margin:0 0 6px;">Hi ${firstName} 🎉</p>
+    <p style="color:#475569;font-size:14px;line-height:1.7;margin:0;">Your home has been professionally cleaned by <strong style="color:#0f172a;">${workerName}</strong>. We hope everything looks and smells amazing!</p>
+  </div>
+
+  <!-- Stats row -->
+  ${durationHrs || startTime ? `
+  <div style="margin:24px 40px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-spacing:8px 0;">
+      <tr>
+        ${durationHrs ? `<td style="text-align:center;background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:14px;padding:16px 8px;">
+          <p style="margin:0;font-size:22px;font-weight:900;color:#0A5C43;">${durationHrs}</p>
+          <p style="margin:4px 0 0;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Duration</p>
+        </td>` : ""}
+        ${startTime ? `<td style="text-align:center;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 8px;">
+          <p style="margin:0;font-size:22px;font-weight:900;color:#0f172a;">${startTime}</p>
+          <p style="margin:4px 0 0;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Started</p>
+        </td>` : ""}
+        ${endTime ? `<td style="text-align:center;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 8px;">
+          <p style="margin:0;font-size:22px;font-weight:900;color:#0f172a;">${endTime}</p>
+          <p style="margin:4px 0 0;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Finished</p>
+        </td>` : ""}
+      </tr>
+    </table>
+  </div>` : ""}
+
+  <!-- Job summary -->
+  <div style="margin:24px 40px 0;">
+    <p style="font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 12px;">Job Summary</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
+      <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+        <td style="padding:13px 16px;font-size:13px;color:#64748b;font-weight:600;width:40%;">📋 Booking Ref</td>
+        <td style="padding:13px 16px;font-size:13px;color:#0f172a;font-weight:800;">${ref}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:13px 16px;font-size:13px;color:#64748b;font-weight:600;">🧹 Service</td>
+        <td style="padding:13px 16px;font-size:13px;color:#0f172a;font-weight:700;">${service}</td>
+      </tr>
+      <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+        <td style="padding:13px 16px;font-size:13px;color:#64748b;font-weight:600;">👤 Completed by</td>
+        <td style="padding:13px 16px;font-size:13px;color:#0f172a;font-weight:700;">
+          <span style="display:inline-flex;align-items:center;gap:8px;">
+            <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0A5C43,#059669);color:#fff;font-size:11px;font-weight:900;text-align:center;line-height:28px;display:inline-block;">${initials}</span>
+            ${workerName}
+          </span>
+        </td>
+      </tr>
+      ${address ? `<tr><td style="padding:13px 16px;font-size:13px;color:#64748b;font-weight:600;">📍 Address</td><td style="padding:13px 16px;font-size:13px;color:#0f172a;font-weight:700;">${address}</td></tr>` : ""}
+    </table>
+  </div>
+
+  <!-- Review CTA -->
+  <div style="margin:24px 40px 0;background:linear-gradient(135deg,#fffbeb,#fef9c3);border:1.5px solid #fde68a;border-radius:20px;padding:24px;text-align:center;">
+    <p style="margin:0 0 6px;font-size:20px;">⭐⭐⭐⭐⭐</p>
+    <p style="margin:0 0 6px;font-size:15px;font-weight:800;color:#92400e;">How was your clean?</p>
+    <p style="margin:0 0 16px;font-size:13px;color:#78350f;line-height:1.6;">Your review helps us reward great cleaners and helps other customers discover Cleaniq. It takes just 30 seconds!</p>
+    <a href="https://g.page/r/cleaniqservices/review" style="display:inline-block;background:#f59e0b;color:#ffffff;padding:13px 32px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;">Leave a Review →</a>
+  </div>
+
+  <!-- Rebook nudge -->
+  <div style="margin:16px 40px 0;background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:16px;padding:18px;display:flex;align-items:center;">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="vertical-align:middle;">
+        <p style="margin:0;font-size:14px;font-weight:800;color:#064e3b;">Want a regular clean? 🏠</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#059669;">Book the same service again and save up to 10% on recurring cleans.</p>
+      </td>
+      <td style="vertical-align:middle;text-align:right;white-space:nowrap;padding-left:16px;">
+        <a href="https://cleaniqservices.com/booking" style="display:inline-block;background:#0A5C43;color:#fff;padding:10px 18px;border-radius:10px;text-decoration:none;font-weight:800;font-size:12px;">Book Again</a>
+      </td>
+    </tr></table>
+  </div>
+
+  <!-- Footer -->
+  <div style="padding:28px 40px;margin-top:24px;border-top:1px solid #f1f5f9;text-align:center;">
+    <p style="margin:0 0 4px;font-size:11px;color:#94a3b8;">© 2026 Cleaniq Services · Professional Cleaning You Can Trust</p>
+    <p style="margin:0;font-size:11px;color:#cbd5e1;">Questions? Email us at <a href="mailto:info@cleaniqservices.com" style="color:#0A5C43;">info@cleaniqservices.com</a></p>
+  </div>
+</div></body></html>`;
+  },
+};
+
+module.exports = { sendEmail, templates, automationTemplates, workerEventEmails };
