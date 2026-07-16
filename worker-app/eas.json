@@ -19,7 +19,6 @@
     "production": {
       "autoIncrement": true,
       "channel": "production",
-      "platforms": ["android"],
       "android": {
         "buildType": "app-bundle",
         "gradleCommand": ":app:bundleRelease"
