@@ -691,6 +691,91 @@ router.post("/jobs/:id/photos", async (req, res) => {
   }
 });
 
+// POST extra-time-request — worker submits photos + reasons when property needs more time
+router.post("/jobs/:id/extra-time-request", async (req, res) => {
+  try {
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+
+    const { photos, reasons, extraHours, notes, workerName } = req.body;
+
+    // Save evidence photos
+    if (Array.isArray(photos) && photos.length > 0) {
+      const fs = require("fs");
+      const path = require("path");
+      const uploadsDir = path.join(__dirname, "../uploads");
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+      for (const p of photos) {
+        if (!p.base64) continue;
+        const ext = p.base64.startsWith("data:image/png") ? "png" : "jpg";
+        const filename = `extra-time-${booking.bookingId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const filepath = path.join(uploadsDir, filename);
+        const base64Data = p.base64.replace(/^data:image\/\w+;base64,/, "");
+        fs.writeFileSync(filepath, Buffer.from(base64Data, "base64"));
+        booking.photos.push({ photoType: "other", url: `uploads/${filename}` });
+      }
+    }
+
+    // Store request details in meta
+    booking.meta = {
+      ...(booking.meta || {}),
+      extraTimeRequest: {
+        reasons: reasons || [],
+        extraHours: extraHours || 0,
+        notes: notes || "",
+        workerName: workerName || booking.assignedWorkerName || "Worker",
+        requestedAt: new Date(),
+        status: "pending",
+      },
+    };
+    await booking.save();
+
+    // Notify admin by email
+    const bookedHrs = parseFloat(booking.details?.duration || booking.workerDuration || 0);
+    const newHrs = bookedHrs + (extraHours || 0);
+    const reasonsList = (reasons || []).map(r => `<li style="margin-bottom:6px">${r}</li>`).join("");
+
+    await sendEmail({
+      to: "cleaniqservices@gmail.com",
+      subject: `⏱ Extra Time Request — ${booking.bookingId} (${booking.customer?.firstName || "Customer"} ${booking.customer?.lastName || ""})`,
+      html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif">
+<div style="max-width:600px;margin:28px auto;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0">
+  <div style="background:#0A5C43;padding:28px 36px">
+    <p style="color:#fff;font-size:20px;font-weight:900;margin:0">Extra Time Request</p>
+    <p style="color:rgba(255,255,255,.6);font-size:12px;margin:4px 0 0">Booking ${booking.bookingId} · ${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}</p>
+  </div>
+  <div style="background:#fff7ed;border-bottom:2px solid #fed7aa;padding:14px 36px;display:flex;align-items:center;gap:10px">
+    <span style="font-size:20px">⚠️</span>
+    <p style="font-size:14px;color:#9a3412;font-weight:700;margin:0">${workerName || booking.assignedWorkerName || "The worker"} has requested extra time on this job</p>
+  </div>
+  <div style="padding:28px 36px">
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+      <tr style="background:#f8fafc"><td style="padding:9px 14px;color:#64748b;font-size:11px;font-weight:700;text-transform:uppercase;width:140px">Customer</td><td style="padding:9px 14px;font-size:13px">${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}</td></tr>
+      <tr><td style="padding:9px 14px;color:#64748b;font-size:11px;font-weight:700;text-transform:uppercase">Address</td><td style="padding:9px 14px;font-size:13px">${booking.details?.address || "—"}</td></tr>
+      <tr style="background:#f8fafc"><td style="padding:9px 14px;color:#64748b;font-size:11px;font-weight:700;text-transform:uppercase">Booked Hours</td><td style="padding:9px 14px;font-size:13px">${bookedHrs} hrs</td></tr>
+      <tr><td style="padding:9px 14px;color:#64748b;font-size:11px;font-weight:700;text-transform:uppercase">Extra Hours Needed</td><td style="padding:9px 14px;font-size:16px;font-weight:900;color:#0A5C43">+${extraHours} hrs (total: ${newHrs} hrs)</td></tr>
+    </table>
+    ${reasonsList ? `<p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#64748b;margin:0 0 8px">Reasons</p><ul style="padding-left:18px;margin:0 0 20px;color:#334155;font-size:13px;line-height:1.7">${reasonsList}</ul>` : ""}
+    ${notes ? `<div style="padding:12px 16px;background:#f8fafc;border-left:3px solid #0A5C43;border-radius:6px;font-size:13px;color:#334155;line-height:1.7">${notes}</div>` : ""}
+    <div style="margin-top:24px;padding:14px 18px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px">
+      <p style="font-size:13px;font-weight:700;color:#15803d;margin:0">Action required: Go to Domestic Hub in the admin portal to review the photos, generate the report and send it to the customer.</p>
+    </div>
+  </div>
+  <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 36px;text-align:center">
+    <p style="color:#94a3b8;font-size:11px;margin:0">© ${new Date().getFullYear()} Cleaniq Services Ltd · cleaniqservices.com</p>
+  </div>
+</div>
+</body></html>`,
+    }).catch((e) => console.warn("Admin notification email failed:", e.message));
+
+    res.json({ success: true, message: "Extra time request submitted" });
+  } catch (error) {
+    console.error("Extra time request error:", error);
+    res.status(500).json({ error: "Failed to submit request" });
+  }
+});
+
 // GET all workers
 router.get("/", async (req, res) => {
   try {

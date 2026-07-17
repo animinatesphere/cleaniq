@@ -43,6 +43,7 @@ import {
   Megaphone,
   Tag,
   ChevronDown,
+  Home,
 } from "lucide-react";
 import Login from "./Login";
 import logo from "../assets/logo DP2.jpg";
@@ -282,6 +283,12 @@ const AdminLayout = () => {
           path: "/admin/commercial",
           key: "commercial",
           icon: <Building2 size={20} />,
+        },
+        {
+          name: "Domestic Hub",
+          path: "/admin/domestic",
+          key: "domestic",
+          icon: <Home size={20} />,
         },
         {
           name: "Price List",

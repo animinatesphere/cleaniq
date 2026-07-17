@@ -88,6 +88,11 @@ const JobCard = ({ booking, onClick }) => {
                   Invoice Sent
                 </span>
               )}
+              {booking.meta?.extraTimeRequest?.status === "pending" && (
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wide bg-orange-100 text-orange-700 border border-orange-300 animate-pulse">
+                  ⏱ Extra Time
+                </span>
+              )}
             </div>
             <p className="text-[11px] text-slate-500 font-semibold truncate leading-tight">{booking.service}</p>
           </div>

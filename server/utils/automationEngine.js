@@ -190,4 +190,11 @@ async function scheduleTask(type, runAt, payload) {
   }
 }
 
-module.exports = { startAutomationEngine, scheduleTask };
+// Run a task handler immediately (used by manual-send and resend routes)
+async function runTaskNow(type, payload) {
+  const handler = handlers[type];
+  if (!handler) throw new Error(`No handler for type: ${type}`);
+  await handler({ type, payload, attempts: 1 });
+}
+
+module.exports = { startAutomationEngine, scheduleTask, runTaskNow };

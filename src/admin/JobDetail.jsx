@@ -3,8 +3,10 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft, User, Clock, Camera, FileText, MapPin,
   CheckCircle2, AlertTriangle, Briefcase, Phone, Mail,
-  Calendar, Timer, Star, Image, ChevronRight, Radio, Navigation
+  Calendar, Timer, Star, Image, ChevronRight, Radio, Navigation,
+  PlusCircle, RefreshCw, X,
 } from "lucide-react";
+import DomesticPropertyReport from "./DomesticPropertyReport";
 
 const API = import.meta.env.VITE_API_URL;
 const SERVER = API?.replace("/api", "");
@@ -59,6 +61,275 @@ const PhotoCard = ({ photo, label }) => {
         <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{label}</p>
         {photo?.uploadedAt && <p className="text-[10px] text-slate-400 ml-auto">{fmtTime(photo.uploadedAt)}</p>}
       </div>
+    </div>
+  );
+};
+
+const ExtraTimeRequestCard = ({ booking, onUpdated }) => {
+  const req = booking.meta?.extraTimeRequest;
+  const [dismissing, setDismissing] = useState(false);
+  const [extending, setExtending]   = useState(false);
+  const SERVER = API?.replace("/api", "");
+
+  const bookedHrs  = parseFloat(booking?.details?.duration || booking?.workerDuration || 0);
+  const currentAmt = parseFloat(booking?.payment?.amount   || 0);
+  const hourlyRate = bookedHrs > 0 ? currentAmt / bookedHrs : null;
+  const newHrs     = bookedHrs + (req?.extraHours || 0);
+  const newTotal   = hourlyRate ? hourlyRate * newHrs : null;
+
+  const evidencePhotos = (booking.photos || []).filter(p => p.photoType === "other");
+
+  const handleExtend = async () => {
+    setExtending(true);
+    try {
+      const body = {
+        details: { ...booking.details, duration: newHrs },
+        ...(newTotal != null ? { payment: { ...booking.payment, amount: parseFloat(newTotal.toFixed(2)) } } : {}),
+        meta: { ...(booking.meta || {}), extraTimeRequest: { ...req, status: "approved" } },
+      };
+      const res = await fetch(`${API}/bookings/${booking._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("Update failed");
+      if (onUpdated) onUpdated();
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setExtending(false);
+    }
+  };
+
+  const handleDismiss = async () => {
+    setDismissing(true);
+    try {
+      const res = await fetch(`${API}/bookings/${booking._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ meta: { ...(booking.meta || {}), extraTimeRequest: { ...req, status: "dismissed" } } }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      if (onUpdated) onUpdated();
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setDismissing(false);
+    }
+  };
+
+  if (req?.status === "dismissed") return null;
+
+  return (
+    <div className={`rounded-3xl border-2 p-6 mb-2 ${req?.status === "approved" ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-300"}`}>
+      {/* Header */}
+      <div className="flex items-start gap-3 mb-4">
+        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${req?.status === "approved" ? "bg-emerald-100" : "bg-amber-100"}`}>
+          <Timer size={18} className={req?.status === "approved" ? "text-emerald-700" : "text-amber-700"} />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-black text-slate-800">Extra Time Request from Worker</p>
+            {req?.status === "approved"
+              ? <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-800 uppercase tracking-wide">Approved</span>
+              : <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-200 text-amber-800 uppercase tracking-wide animate-pulse">Needs Action</span>
+            }
+          </div>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            {req?.workerName || booking.assignedWorkerName} · {req?.requestedAt ? new Date(req.requestedAt).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : ""}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4 mb-4">
+        {/* Reasons */}
+        {req?.reasons?.length > 0 && (
+          <div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Reasons</p>
+            <ul className="space-y-1.5">
+              {req.reasons.map((r, i) => (
+                <li key={i} className="flex items-start gap-2 text-xs font-medium text-slate-700">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                  {r}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Time summary */}
+        <div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Time Needed</p>
+          <div className="flex items-center gap-3">
+            <div className="text-center">
+              <p className="text-xl font-black text-slate-600">{bookedHrs}h</p>
+              <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Booked</p>
+            </div>
+            <span className="text-slate-400 font-bold text-lg">+</span>
+            <div className="text-center">
+              <p className="text-xl font-black text-amber-600">{req?.extraHours}h</p>
+              <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Extra</p>
+            </div>
+            <span className="text-slate-400 font-bold text-lg">=</span>
+            <div className="text-center">
+              <p className="text-xl font-black text-emerald-700">{newHrs}h</p>
+              <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Total</p>
+            </div>
+          </div>
+          {newTotal != null && (
+            <p className="text-xs text-slate-500 font-medium mt-2">
+              New total: <span className="font-black text-slate-800">£{newTotal.toFixed(2)}</span>
+              <span className="text-slate-400 ml-1">(+£{((newTotal || 0) - currentAmt).toFixed(2)})</span>
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Notes */}
+      {req?.notes && (
+        <div className="mb-4 px-4 py-3 bg-white/70 rounded-xl border border-amber-200">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Worker Notes</p>
+          <p className="text-xs font-medium text-slate-700 leading-relaxed">{req.notes}</p>
+        </div>
+      )}
+
+      {/* Evidence photos */}
+      {evidencePhotos.length > 0 && (
+        <div className="mb-4">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Evidence Photos ({evidencePhotos.length})</p>
+          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+            {evidencePhotos.map((p, i) => {
+              const url = p.url?.startsWith("http") ? p.url : `${SERVER}/${p.url}`;
+              return (
+                <a key={i} href={url} target="_blank" rel="noreferrer">
+                  <img src={url} alt={`Evidence ${i + 1}`} className="w-full aspect-square object-cover rounded-xl border border-amber-200" />
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Actions */}
+      {req?.status !== "approved" && (
+        <div className="flex flex-wrap gap-2 pt-3 border-t border-amber-200">
+          <button
+            onClick={handleExtend}
+            disabled={extending}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-black hover:bg-emerald-700 transition-colors disabled:opacity-60"
+          >
+            {extending ? <RefreshCw size={13} className="animate-spin" /> : <PlusCircle size={13} />}
+            {extending ? "Updating…" : `Approve & extend to ${newHrs}h`}
+          </button>
+          <button
+            onClick={handleDismiss}
+            disabled={dismissing}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition-colors disabled:opacity-60"
+          >
+            {dismissing ? <RefreshCw size={13} className="animate-spin" /> : <X size={13} />}
+            Dismiss
+          </button>
+          <p className="w-full text-[10px] text-slate-400 font-medium mt-1">
+            "Approve" updates the booking duration & amount. Then use <span className="font-bold">Domestic Hub</span> to send the formal report with photos to the customer.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ExtendJobPanel = ({ booking, onUpdated }) => {
+  const [extraHrs, setExtraHrs]   = useState(1);
+  const [saving, setSaving]       = useState(false);
+  const [success, setSuccess]     = useState(false);
+  const [error, setError]         = useState(null);
+
+  const bookedHrs  = parseFloat(booking?.details?.duration || booking?.workerDuration || 0);
+  const currentAmt = parseFloat(booking?.payment?.amount   || 0);
+  const hourlyRate = bookedHrs > 0 ? currentAmt / bookedHrs : null;
+  const newHrs     = bookedHrs + extraHrs;
+  const newAmt     = hourlyRate ? hourlyRate * newHrs : null;
+
+  const handleSave = async () => {
+    setSaving(true); setError(null); setSuccess(false);
+    try {
+      const body = {
+        details: { ...booking.details, duration: newHrs },
+        ...(newAmt != null ? { payment: { ...booking.payment, amount: parseFloat(newAmt.toFixed(2)) } } : {}),
+      };
+      const res = await fetch(`${API}/bookings/${booking._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error((await res.json()).message || "Update failed");
+      setSuccess(true);
+      if (onUpdated) onUpdated();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!bookedHrs) return null;
+
+  return (
+    <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+      <h2 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+        <PlusCircle size={13} /> Extend Job
+      </h2>
+      <p className="text-xs text-slate-500 font-medium mb-4">
+        Arrived and the job needs more time? Update the duration and recalculate the total.
+      </p>
+
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="rounded-2xl bg-slate-50 p-3 text-center">
+          <p className="text-lg font-black text-slate-700">{bookedHrs}h</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Booked</p>
+        </div>
+        <div className="rounded-2xl bg-emerald-50 p-3 text-center">
+          <p className="text-lg font-black text-emerald-700">{newHrs}h</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">New Total</p>
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Extra Hours</label>
+        <div className="flex items-center gap-2">
+          {[0.5, 1, 1.5, 2, 3].map((h) => (
+            <button
+              key={h}
+              onClick={() => setExtraHrs(h)}
+              className={`flex-1 py-2 rounded-xl text-xs font-black transition-all ${extraHrs === h ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+            >
+              +{h}h
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {newAmt != null && (
+        <div className="flex justify-between items-center mb-4 px-4 py-3 bg-slate-50 rounded-xl">
+          <span className="text-sm font-bold text-slate-500">New Total</span>
+          <span className="text-base font-black text-emerald-700">
+            £{newAmt.toFixed(2)}
+            <span className="text-xs text-slate-400 font-medium ml-1">(+£{(newAmt - currentAmt).toFixed(2)})</span>
+          </span>
+        </div>
+      )}
+
+      {success && <p className="text-xs font-bold text-emerald-600 mb-3">✓ Booking updated successfully</p>}
+      {error   && <p className="text-xs font-bold text-rose-600 mb-3">{error}</p>}
+
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-black hover:bg-emerald-700 transition-colors disabled:opacity-60"
+      >
+        {saving ? <RefreshCw size={13} className="animate-spin" /> : <PlusCircle size={13} />}
+        {saving ? "Saving…" : `Save — extend to ${newHrs}h`}
+      </button>
     </div>
   );
 };
@@ -166,6 +437,11 @@ const JobDetail = () => {
           <p className="text-sm text-slate-500 font-medium mt-1">{booking.service} · Created {fmt(booking.createdAt)}</p>
         </div>
       </div>
+
+      {/* ── Extra Time Request Banner ─────────────────────────── */}
+      {booking.meta?.extraTimeRequest && (
+        <ExtraTimeRequestCard booking={booking} onUpdated={() => window.location.reload()} />
+      )}
 
       <div className="grid lg:grid-cols-3 gap-6">
 
@@ -348,6 +624,9 @@ const JobDetail = () => {
             </div>
           )}
 
+          {/* Domestic Property Report */}
+          <DomesticPropertyReport booking={booking} />
+
           {/* Job Details */}
           <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
             <h2 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-5">Job Details</h2>
@@ -502,6 +781,11 @@ const JobDetail = () => {
               )}
             </div>
           </div>
+
+          {/* Extend Job — show when job is booked by the hour and not yet fully completed */}
+          {booking.payment?.billingType !== "flat" && booking.details?.duration && !["Completed", "Cancelled"].includes(booking.status) && (
+            <ExtendJobPanel booking={booking} onUpdated={() => window.location.reload()} />
+          )}
 
           {/* Quick actions */}
           <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">

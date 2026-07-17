@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const ScheduledTask = require("../models/ScheduledTask");
 const SystemSetting = require("../models/SystemSetting");
+const Customer = require("../models/Customer");
+const { runTaskNow } = require("../utils/automationEngine");
 
 const AUTOMATION_TYPES = [
   { key: "booking_reminder_24h",  label: "Booking Reminder — 24 hours before", category: "booking" },
@@ -102,6 +104,66 @@ router.delete("/queue/:id", async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/automations/resend/:id — immediately resend a failed/cancelled task
+router.post("/resend/:id", async (req, res) => {
+  try {
+    const task = await ScheduledTask.findById(req.params.id);
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    await runTaskNow(task.type, task.payload);
+
+    // Log the manual resend as a new sent record
+    await ScheduledTask.create({
+      type: task.type,
+      payload: task.payload,
+      runAt: new Date(),
+      status: "sent",
+      executedAt: new Date(),
+      attempts: 1,
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Resend error:", err.message);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/automations/send-manual — send any automation email to a specific customer right now
+router.post("/send-manual", async (req, res) => {
+  try {
+    const { type, customerId, service } = req.body;
+    if (!type || !customerId) {
+      return res.status(400).json({ message: "type and customerId are required" });
+    }
+
+    const customer = await Customer.findById(customerId);
+    if (!customer) return res.status(404).json({ message: "Customer not found" });
+
+    const payload = {
+      email: customer.email,
+      firstName: customer.firstName,
+      service: service || "your recent clean",
+    };
+
+    await runTaskNow(type, payload);
+
+    await ScheduledTask.create({
+      type,
+      payload,
+      runAt: new Date(),
+      status: "sent",
+      executedAt: new Date(),
+      attempts: 1,
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Manual send error:", err.message);
+    res.status(500).json({ message: err.message });
   }
 });
 

@@ -3,6 +3,7 @@ import axios from "axios";
 import {
   Search, Users, Mail, MailX, CheckCircle2, XCircle,
   ChevronDown, ChevronUp, Save, UserCheck, UserX, RefreshCw,
+  Send, RotateCcw, ChevronRight,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -96,7 +97,13 @@ export default function Automations() {
   const [savingKey, setSavingKey]       = useState(null);
   const [loading, setLoading]           = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
+  const [resendingId, setResendingId]   = useState(null);
   const [toast, setToast]               = useState(null);
+
+  // Manual send state (Audience tab)
+  const [manualType, setManualType]       = useState("referral_offer_48h");
+  const [manualService, setManualService] = useState("");
+  const [manualSending, setManualSending] = useState(false);
 
   // Audience tab state
   const [customers, setCustomers]           = useState([]);
@@ -171,6 +178,44 @@ export default function Automations() {
       showToast("Failed to cancel task");
     } finally {
       setCancellingId(null);
+    }
+  };
+
+  const resendTask = async (task) => {
+    setResendingId(task._id);
+    try {
+      await axios.post(`${API}/automations/resend/${task._id}`);
+      showToast(`Resent ${TYPE_LABELS[task.type] || task.type} to ${task.payload?.email}`, "success");
+      fetchAll();
+    } catch (err) {
+      showToast(err.response?.data?.message || "Failed to resend");
+    } finally {
+      setResendingId(null);
+    }
+  };
+
+  const sendManual = async () => {
+    if (selected.size === 0) return;
+    setManualSending(true);
+    const ids = [...selected];
+    let successCount = 0;
+    for (const customerId of ids) {
+      try {
+        await axios.post(`${API}/automations/send-manual`, {
+          type: manualType,
+          customerId,
+          service: manualService || undefined,
+        });
+        successCount++;
+      } catch {}
+    }
+    setManualSending(false);
+    if (successCount > 0) {
+      showToast(`Email sent to ${successCount} customer${successCount > 1 ? "s" : ""}`, "success");
+      setSelected(new Set());
+      fetchAll();
+    } else {
+      showToast("Failed to send — please try again");
     }
   };
 
@@ -422,12 +467,26 @@ export default function Automations() {
                     </div>
                     <p className="text-xs text-zinc-400 mt-0.5 break-all">
                       {task.payload?.email}
+                      {task.payload?.firstName && ` · ${task.payload.firstName}`}
                       {task.payload?.bookingRef && ` · ${task.payload.bookingRef}`}
                       {task.payload?.quoteRef && ` · Quote: ${task.payload.quoteRef}`}
                     </p>
                     {task.error && <p className="text-xs text-red-500 mt-0.5">{task.error}</p>}
                     <p className="text-xs text-zinc-500 font-medium mt-1">{fmtDate(task.executedAt || task.createdAt)}</p>
                   </div>
+                  {(task.status === "failed" || task.status === "cancelled") && (
+                    <button
+                      onClick={() => resendTask(task)}
+                      disabled={resendingId === task._id}
+                      title="Resend this email now"
+                      className="flex-shrink-0 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors disabled:opacity-50"
+                    >
+                      {resendingId === task._id
+                        ? <RefreshCw size={12} className="animate-spin" />
+                        : <RotateCcw size={12} />}
+                      {resendingId === task._id ? "Sending…" : "Resend"}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -498,35 +557,76 @@ export default function Automations() {
 
               {/* Bulk action bar — shows when something is selected */}
               {selected.size > 0 && (
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <span className="text-sm font-black text-zinc-800">
-                    {selected.size} selected
-                  </span>
-                  <button
-                    onClick={() => applyBulk(true)}
-                    disabled={bulkSaving}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-600 text-white text-xs font-black hover:bg-green-700 transition-colors disabled:opacity-50"
-                  >
-                    <UserCheck size={13} />
-                    Enable — receive emails
-                  </button>
-                  <button
-                    onClick={() => applyBulk(false)}
-                    disabled={bulkSaving}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-black hover:bg-red-600 transition-colors disabled:opacity-50"
-                  >
-                    <UserX size={13} />
-                    Exclude — stop emails
-                  </button>
-                  <button
-                    onClick={() => setSelected(new Set())}
-                    className="text-xs font-bold text-zinc-400 hover:text-zinc-700 transition-colors ml-1"
-                  >
-                    Clear selection
-                  </button>
-                  {bulkSaving && (
-                    <div className="w-4 h-4 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />
-                  )}
+                <div className="space-y-3 pt-1">
+                  {/* Selection count + enable/disable */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-black text-zinc-800">
+                      {selected.size} customer{selected.size > 1 ? "s" : ""} selected
+                    </span>
+                    <button
+                      onClick={() => applyBulk(true)}
+                      disabled={bulkSaving}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-600 text-white text-xs font-black hover:bg-green-700 transition-colors disabled:opacity-50"
+                    >
+                      <UserCheck size={13} />
+                      Enable emails
+                    </button>
+                    <button
+                      onClick={() => applyBulk(false)}
+                      disabled={bulkSaving}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-black hover:bg-red-600 transition-colors disabled:opacity-50"
+                    >
+                      <UserX size={13} />
+                      Exclude
+                    </button>
+                    <button
+                      onClick={() => setSelected(new Set())}
+                      className="text-xs font-bold text-zinc-400 hover:text-zinc-700 transition-colors"
+                    >
+                      Clear
+                    </button>
+                    {bulkSaving && <div className="w-4 h-4 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />}
+                  </div>
+
+                  {/* Manual send panel */}
+                  <div className="bg-zinc-900 rounded-2xl p-4 space-y-3">
+                    <p className="text-xs font-black text-white flex items-center gap-2">
+                      <Send size={13} className="text-emerald-400" />
+                      Send Automation Email Now
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <select
+                        value={manualType}
+                        onChange={e => setManualType(e.target.value)}
+                        className="flex-1 px-3 py-2 rounded-xl bg-zinc-800 text-white text-xs font-semibold border border-zinc-700 focus:outline-none focus:border-emerald-500"
+                      >
+                        <option value="review_request_2h">⭐ Review Request</option>
+                        <option value="referral_offer_48h">🎁 Referral Offer</option>
+                        <option value="rebooking_discount_3d">💰 Re-booking Discount (10% off)</option>
+                        <option value="booking_reminder_24h">📅 Booking Reminder — 24h</option>
+                        <option value="booking_reminder_3h">⏰ Booking Reminder — 3h</option>
+                      </select>
+                      <input
+                        value={manualService}
+                        onChange={e => setManualService(e.target.value)}
+                        placeholder="Service name (optional)"
+                        className="sm:w-44 px-3 py-2 rounded-xl bg-zinc-800 text-white text-xs font-medium border border-zinc-700 focus:outline-none focus:border-emerald-500 placeholder-zinc-500"
+                      />
+                      <button
+                        onClick={sendManual}
+                        disabled={manualSending}
+                        className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-black hover:bg-emerald-600 transition-colors disabled:opacity-60 whitespace-nowrap"
+                      >
+                        {manualSending
+                          ? <RefreshCw size={13} className="animate-spin" />
+                          : <Send size={13} />}
+                        {manualSending ? "Sending…" : `Send to ${selected.size}`}
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-zinc-500">
+                      This sends the selected email immediately, outside the normal automation schedule.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

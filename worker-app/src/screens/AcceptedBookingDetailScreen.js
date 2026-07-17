@@ -59,7 +59,19 @@ import {
   Plus,
   Check,
   X,
+  Timer,
 } from "lucide-react-native";
+
+const EXTRA_TIME_REASONS = [
+  "Property significantly dirtier than described",
+  "Heavy build-up of grease in kitchen",
+  "Bathroom/toilet requires deep clean",
+  "Additional rooms need cleaning",
+  "Carpets and floors need extra attention",
+  "Clutter needs clearing before cleaning can begin",
+  "Property not cleaned for a long time",
+  "More rooms than specified at booking",
+];
 import axios from "axios";
 
 const AcceptedBookingDetailScreen = ({ route, navigation }) => {
@@ -83,6 +95,14 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   const [damagePhotos, setDamagePhotos] = useState([]); // [{uri, base64}]
   const [workerReport, setWorkerReport] = useState("");
   const [submittingCompletion, setSubmittingCompletion] = useState(false);
+
+  // Extra time request modal
+  const [showExtraTimeModal, setShowExtraTimeModal] = useState(false);
+  const [extraTimePhotos, setExtraTimePhotos]       = useState([]); // [{uri, base64}]
+  const [extraTimeReasons, setExtraTimeReasons]     = useState([]);
+  const [extraHours, setExtraHours]                 = useState(1);
+  const [extraNotes, setExtraNotes]                 = useState("");
+  const [submittingExtraTime, setSubmittingExtraTime] = useState(false);
 
   // Cleaning checklist
   const [checkedTasks, setCheckedTasks] = useState({});
@@ -258,6 +278,59 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     if (result.canceled) return;
     const asset = result.assets[0];
     setDamagePhotos(prev => [...prev, { uri: asset.uri, base64: `data:image/jpeg;base64,${asset.base64}` }]);
+  };
+
+  const pickExtraTimePhoto = async () => {
+    Alert.alert("Add Photo", "Show what's making the job take longer", [
+      { text: "Take Photo",           onPress: () => captureExtraTimePhoto("camera")  },
+      { text: "Choose from Gallery",  onPress: () => captureExtraTimePhoto("gallery") },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
+  const captureExtraTimePhoto = async (source) => {
+    let result;
+    if (source === "camera") {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") { Alert.alert("Permission Required", "Camera access is needed."); return; }
+      result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.72, base64: true });
+    } else {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") { Alert.alert("Permission Required", "Gallery access is needed."); return; }
+      result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.72, base64: true });
+    }
+    if (result.canceled) return;
+    const asset = result.assets[0];
+    setExtraTimePhotos(prev => [...prev, { uri: asset.uri, base64: `data:image/jpeg;base64,${asset.base64}` }]);
+  };
+
+  const handleSubmitExtraTimeRequest = async () => {
+    if (extraTimeReasons.length === 0) {
+      Alert.alert("Select a Reason", "Please tick at least one reason why more time is needed.");
+      return;
+    }
+    setSubmittingExtraTime(true);
+    try {
+      await axios.post(`${API_URL}/workers/jobs/${bookingId}/extra-time-request`, {
+        photos:      extraTimePhotos.map(p => ({ base64: p.base64 })),
+        reasons:     extraTimeReasons,
+        extraHours,
+        notes:       extraNotes.trim(),
+        workerName:  workerInfo?.firstName ? `${workerInfo.firstName} ${workerInfo.lastName || ""}`.trim() : undefined,
+      });
+      setShowExtraTimeModal(false);
+      setExtraTimePhotos([]);
+      setExtraTimeReasons([]);
+      setExtraNotes("");
+      Alert.alert(
+        "✅ Request Sent",
+        "Your extra time request has been sent to the admin. They will contact the customer and confirm.",
+      );
+    } catch (error) {
+      Alert.alert("Error", error.response?.data?.error || "Could not send request. Please try again.");
+    } finally {
+      setSubmittingExtraTime(false);
+    }
   };
 
   const handleCompleteWithSubmission = async () => {
@@ -750,6 +823,25 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
           </View>
         )}
 
+        {/* ── Request Extra Time — shown when worker has arrived ── */}
+        {booking.status === "Arrived" && (
+          <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
+            <TouchableOpacity
+              style={styles.extraTimeBtn}
+              onPress={() => setShowExtraTimeModal(true)}
+            >
+              <Timer size={17} color="#B45309" />
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <Text style={styles.extraTimeBtnTitle}>Property needs more time?</Text>
+                <Text style={styles.extraTimeBtnSub}>Tap to submit an extra time request to admin</Text>
+              </View>
+              <View style={styles.extraTimeBtnArrow}>
+                <Text style={{ color: "#B45309", fontSize: 18, fontWeight: "700" }}>›</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* ── Cleaning Checklist ──────────────────────────────── */}
         {["Assigned", "Arrived", "In Progress", "Completed"].includes(booking.status) && (() => {
           const doneCount = tasks.filter((_, i) => checkedTasks[`${bookingId}_${i}`]).length;
@@ -1214,6 +1306,140 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 
         <View style={{ height: 32 }} />
       </ScrollView>
+
+      {/* ── Extra Time Request Modal ─────────────────────────────── */}
+      {showExtraTimeModal && (
+        <View style={styles.completionOverlay}>
+          <View style={styles.completionSheet}>
+            {/* Header */}
+            <View style={styles.completionHeader}>
+              <View>
+                <Text style={styles.completionTitle}>Request Extra Time</Text>
+                <Text style={styles.completionSub}>Photos + reasons → sent to admin</Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowExtraTimeModal(false)} style={styles.completionClose}>
+                <X size={20} color="#4B7A5A" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+
+              {/* Step 1 — Photos */}
+              <Text style={styles.completionSectionLabel}>📸 Step 1 — Take Photos</Text>
+              <Text style={styles.completionHint}>Show the areas that need more work — kitchen grease, dirty bathrooms, cluttered rooms, etc.</Text>
+              <View style={styles.damageGrid}>
+                {extraTimePhotos.map((p, i) => (
+                  <View key={i} style={styles.damageThumbWrap}>
+                    <Image source={{ uri: p.uri }} style={styles.damageThumb} resizeMode="cover" />
+                    <TouchableOpacity
+                      style={styles.damageRemoveBtn}
+                      onPress={() => setExtraTimePhotos(prev => prev.filter((_, idx) => idx !== i))}
+                    >
+                      <X size={12} color="#fff" strokeWidth={3} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                <TouchableOpacity style={styles.damageAddBtn} onPress={pickExtraTimePhoto}>
+                  <Camera size={22} color="#0F6B4C" />
+                  <Text style={styles.damageAddTxt}>Add</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Step 2 — Reasons */}
+              <Text style={[styles.completionSectionLabel, { marginTop: 20 }]}>✅ Step 2 — Select Reasons</Text>
+              <Text style={styles.completionHint}>Tick everything that applies.</Text>
+              <View style={{ marginTop: 8 }}>
+                {EXTRA_TIME_REASONS.map((reason) => {
+                  const selected = extraTimeReasons.includes(reason);
+                  return (
+                    <TouchableOpacity
+                      key={reason}
+                      onPress={() => setExtraTimeReasons(prev =>
+                        selected ? prev.filter(r => r !== reason) : [...prev, reason]
+                      )}
+                      style={[styles.reasonRow, selected && styles.reasonRowSelected]}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.reasonCheck, selected && styles.reasonCheckSelected]}>
+                        {selected && <Check size={12} color="#fff" strokeWidth={3} />}
+                      </View>
+                      <Text style={[styles.reasonText, selected && styles.reasonTextSelected]}>{reason}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Step 3 — Extra hours */}
+              <Text style={[styles.completionSectionLabel, { marginTop: 20 }]}>⏱ Step 3 — How Many Extra Hours?</Text>
+              <View style={styles.extraHoursRow}>
+                {[0.5, 1, 1.5, 2, 2.5, 3, 4].map(h => (
+                  <TouchableOpacity
+                    key={h}
+                    onPress={() => setExtraHours(h)}
+                    style={[styles.extraHoursBtn, extraHours === h && styles.extraHoursBtnSelected]}
+                  >
+                    <Text style={[styles.extraHoursBtnTxt, extraHours === h && styles.extraHoursBtnTxtSelected]}>
+                      +{h}h
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Duration summary */}
+              {booking.details?.duration ? (
+                <View style={styles.extraTimeSummary}>
+                  <View style={styles.extraTimeSumItem}>
+                    <Text style={styles.extraTimeSumVal}>{booking.details.duration}h</Text>
+                    <Text style={styles.extraTimeSumLbl}>Booked</Text>
+                  </View>
+                  <Text style={styles.extraTimeSumOp}>+</Text>
+                  <View style={styles.extraTimeSumItem}>
+                    <Text style={[styles.extraTimeSumVal, { color: "#B45309" }]}>{extraHours}h</Text>
+                    <Text style={styles.extraTimeSumLbl}>Extra</Text>
+                  </View>
+                  <Text style={styles.extraTimeSumOp}>=</Text>
+                  <View style={styles.extraTimeSumItem}>
+                    <Text style={[styles.extraTimeSumVal, { color: "#0F6B4C" }]}>{parseFloat(booking.details.duration) + extraHours}h</Text>
+                    <Text style={styles.extraTimeSumLbl}>New Total</Text>
+                  </View>
+                </View>
+              ) : null}
+
+              {/* Step 4 — Notes */}
+              <Text style={[styles.completionSectionLabel, { marginTop: 20 }]}>📝 Step 4 — Any Extra Notes?</Text>
+              <TextInput
+                style={styles.reportInput}
+                placeholder="e.g. Kitchen oven has heavy grease build-up, bathroom tiles need scrubbing..."
+                placeholderTextColor="#A7D9B8"
+                value={extraNotes}
+                onChangeText={setExtraNotes}
+                multiline
+                textAlignVertical="top"
+              />
+
+              {/* Submit */}
+              <TouchableOpacity
+                style={[styles.completionSubmitBtn, { backgroundColor: "#B45309", marginTop: 20 }, (submittingExtraTime || extraTimeReasons.length === 0) && { opacity: 0.55 }]}
+                onPress={handleSubmitExtraTimeRequest}
+                disabled={submittingExtraTime || extraTimeReasons.length === 0}
+              >
+                {submittingExtraTime ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <>
+                    <Timer size={18} color="#fff" />
+                    <Text style={styles.completionSubmitTxt}>Send Request to Admin</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              {extraTimeReasons.length === 0 && (
+                <Text style={styles.completionWarning}>⚠️ Select at least one reason above to continue.</Text>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      )}
 
       {/* ── Completion Modal ─────────────────────────────────────── */}
       {showCompletionModal && (
@@ -1831,6 +2057,73 @@ const styles = StyleSheet.create({
     fontSize: 12, color: "#92400E", textAlign: "center",
     marginTop: 10, fontWeight: "600",
   },
+
+  // ── Extra Time Request ────────────────────────────────────────
+  extraTimeBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: "#FFF7ED",
+    borderWidth: 1.5,
+    borderColor: "#FED7AA",
+  },
+  extraTimeBtnTitle: { fontSize: 14, fontWeight: "800", color: "#92400E" },
+  extraTimeBtnSub:   { fontSize: 11, color: "#B45309", marginTop: 2 },
+  extraTimeBtnArrow: {
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: "#FED7AA", alignItems: "center", justifyContent: "center",
+  },
+  reasonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 11,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+    marginBottom: 7,
+    backgroundColor: "#fff",
+  },
+  reasonRowSelected: {
+    borderColor: "#F59E0B",
+    backgroundColor: "#FFFBEB",
+  },
+  reasonCheck: {
+    width: 20, height: 20, borderRadius: 6,
+    borderWidth: 2, borderColor: "#D1D5DB",
+    alignItems: "center", justifyContent: "center",
+  },
+  reasonCheckSelected: { backgroundColor: "#F59E0B", borderColor: "#F59E0B" },
+  reasonText:         { flex: 1, fontSize: 13, color: "#374151", fontWeight: "500" },
+  reasonTextSelected: { color: "#92400E", fontWeight: "700" },
+  extraHoursRow: {
+    flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10,
+  },
+  extraHoursBtn: {
+    paddingHorizontal: 14, paddingVertical: 10,
+    borderRadius: 10, backgroundColor: "#F3F4F6",
+    borderWidth: 1.5, borderColor: "#E5E7EB",
+  },
+  extraHoursBtnSelected: { backgroundColor: "#FFF7ED", borderColor: "#F59E0B" },
+  extraHoursBtnTxt:         { fontSize: 14, fontWeight: "700", color: "#6B7280" },
+  extraHoursBtnTxtSelected: { color: "#92400E", fontWeight: "800" },
+  extraTimeSummary: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    marginTop: 14,
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: "#F0FDF4",
+    borderWidth: 1,
+    borderColor: "#BBF7D0",
+  },
+  extraTimeSumItem: { alignItems: "center" },
+  extraTimeSumVal:  { fontSize: 22, fontWeight: "900", color: "#1A2E22" },
+  extraTimeSumLbl:  { fontSize: 10, color: "#4B7A5A", fontWeight: "700", marginTop: 3, textTransform: "uppercase" },
+  extraTimeSumOp:   { fontSize: 22, fontWeight: "700", color: "#86A892" },
 });
 
 export default AcceptedBookingDetailScreen;
