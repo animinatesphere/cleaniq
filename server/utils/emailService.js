@@ -1595,17 +1595,20 @@ const templates = {
 
     <!-- HEADER -->
     <tr>
-      <td style="background:#0A5C43;padding:36px 48px">
+      <td style="background:#0A5C43;padding:40px 48px">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
             <td style="vertical-align:middle">
-              <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Services" style="width:110px;height:auto;border-radius:14px;display:block" />
-              <p style="margin:10px 0 0;font-size:10px;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:2px">Professional Cleaning Services</p>
+              <!-- Logo in white card so it shows on any background -->
+              <div style="display:inline-block;background:#ffffff;border-radius:16px;padding:12px 18px;box-shadow:0 4px 20px rgba(0,0,0,0.25)">
+                <img src="https://cleaniqservices.com/logo%20DP2.jpg" alt="Cleaniq Services" style="width:160px;height:auto;display:block;border-radius:8px" />
+              </div>
+              <p style="margin:14px 0 0;font-size:10px;font-weight:800;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:2px">Professional Cleaning Services</p>
             </td>
             <td align="right" style="vertical-align:top">
-              <p style="margin:0;font-size:32px;font-weight:900;color:#ffffff;letter-spacing:-1.5px;line-height:1">INVOICE</p>
-              ${invoiceNumber ? `<p style="margin:6px 0 0;font-size:14px;color:#6EE7B7;font-weight:700;letter-spacing:0.5px">${invoiceNumber}</p>` : ""}
-              ${showPaidBadge ? `<div style="margin-top:14px;display:inline-block;background:#6EE7B7;border-radius:999px;padding:5px 18px"><span style="font-size:11px;font-weight:900;color:#064e3b;text-transform:uppercase;letter-spacing:1.5px">✓ PAID</span></div>` : ""}
+              <p style="margin:0;font-size:36px;font-weight:900;color:#ffffff;letter-spacing:-1.5px;line-height:1">INVOICE</p>
+              ${invoiceNumber ? `<p style="margin:8px 0 0;font-size:14px;color:#6EE7B7;font-weight:700;letter-spacing:0.5px">${invoiceNumber}</p>` : ""}
+              ${showPaidBadge ? `<div style="margin-top:14px;display:inline-block;background:#6EE7B7;border-radius:999px;padding:6px 20px"><span style="font-size:11px;font-weight:900;color:#064e3b;text-transform:uppercase;letter-spacing:1.5px">✓ PAID</span></div>` : ""}
             </td>
           </tr>
         </table>
