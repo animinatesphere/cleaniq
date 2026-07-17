@@ -50,7 +50,6 @@ import {
   Play,
   Flag,
   AlertCircle,
-  Radio,
   Camera,
   ImageIcon,
   CheckCircle2,
@@ -708,62 +707,6 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
           )}
         </View>
 
-        {/* Location sharing status card */}
-        {booking.status !== "Completed" && (
-          <View style={styles.locationShareCard}>
-            <View style={styles.locationShareLeft}>
-              <View
-                style={[
-                  styles.locationShareIcon,
-                  sharingLocation && styles.locationShareIconActive,
-                ]}
-              >
-                <Radio
-                  size={18}
-                  color={sharingLocation ? "#FFFFFF" : "#0F6B4C"}
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.locationShareTitle}>
-                  {sharingLocation ? "📍 Sharing live location" : "Location sharing"}
-                </Text>
-                <Text style={styles.locationShareSub}>
-                  {sharingLocation
-                    ? "Admin & customer can see where you are"
-                    : booking.status === "Assigned"
-                      ? "Will auto-start when you press I've Arrived"
-                      : "Tap Start to share your location"}
-                </Text>
-              </View>
-            </View>
-            {/* Only show Stop button — Start auto-fires on Arrived */}
-            {sharingLocation ? (
-              <TouchableOpacity
-                onPress={() => stopSharingLocation()}
-                disabled={locationLoading}
-                style={[styles.locationShareToggle, styles.locationShareToggleActive]}
-              >
-                {locationLoading ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.locationShareToggleText}>Stop</Text>
-                )}
-              </TouchableOpacity>
-            ) : booking.status !== "Assigned" ? (
-              <TouchableOpacity
-                onPress={toggleLocationSharing}
-                disabled={locationLoading}
-                style={styles.locationShareToggle}
-              >
-                {locationLoading ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.locationShareToggleText}>Start</Text>
-                )}
-              </TouchableOpacity>
-            ) : null}
-          </View>
-        )}
 
         {/* Quick Action Buttons */}
         <View style={styles.quickActions}>
