@@ -1588,122 +1588,121 @@ const templates = {
 <!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f1f5f9;font-family:'Segoe UI',Arial,Helvetica,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:32px 0">
+<body style="margin:0;padding:0;background:#eef2f7;font-family:'Segoe UI',Arial,Helvetica,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f7;padding:36px 16px">
   <tr><td align="center">
-  <table width="620" cellpadding="0" cellspacing="0" style="max-width:620px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px -10px rgba(15,23,42,0.18)">
+  <table width="620" cellpadding="0" cellspacing="0" style="max-width:620px;width:100%;border-radius:20px;overflow:hidden;box-shadow:0 24px 64px -12px rgba(15,23,42,0.22)">
 
-    <!-- HEADER -->
+    <!-- ░░ HEADER BAND ░░ -->
     <tr>
-      <td style="background:#0A5C43;padding:40px 48px">
-        <table width="100%" cellpadding="0" cellspacing="0">
+      <td style="background:#0A5C43;padding:44px 48px 36px;text-align:center">
+        <!-- Logo — white pill, big and clear -->
+        <div style="display:inline-block;background:#ffffff;border-radius:20px;padding:16px 28px;box-shadow:0 8px 32px rgba(0,0,0,0.28);margin-bottom:20px">
+          <img src="https://cleaniqservices.com/logo%20DP2.jpg"
+               alt="Cleaniq Services"
+               width="200"
+               style="width:200px;max-width:200px;height:auto;display:block;border-radius:10px" />
+        </div>
+        <p style="margin:0 0 20px;font-size:11px;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:2.5px">Professional Cleaning Services</p>
+        <!-- Invoice label -->
+        <table cellpadding="0" cellspacing="0" style="margin:0 auto">
           <tr>
-            <td style="vertical-align:middle">
-              <!-- Logo in white card so it shows on any background -->
-              <div style="display:inline-block;background:#ffffff;border-radius:16px;padding:12px 18px;box-shadow:0 4px 20px rgba(0,0,0,0.25)">
-                <img src="https://cleaniqservices.com/logo%20DP2.jpg" alt="Cleaniq Services" style="width:160px;height:auto;display:block;border-radius:8px" />
-              </div>
-              <p style="margin:14px 0 0;font-size:10px;font-weight:800;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:2px">Professional Cleaning Services</p>
-            </td>
-            <td align="right" style="vertical-align:top">
-              <p style="margin:0;font-size:36px;font-weight:900;color:#ffffff;letter-spacing:-1.5px;line-height:1">INVOICE</p>
-              ${invoiceNumber ? `<p style="margin:8px 0 0;font-size:14px;color:#6EE7B7;font-weight:700;letter-spacing:0.5px">${invoiceNumber}</p>` : ""}
-              ${showPaidBadge ? `<div style="margin-top:14px;display:inline-block;background:#6EE7B7;border-radius:999px;padding:6px 20px"><span style="font-size:11px;font-weight:900;color:#064e3b;text-transform:uppercase;letter-spacing:1.5px">✓ PAID</span></div>` : ""}
+            <td style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:14px 32px;text-align:center">
+              <p style="margin:0;font-size:11px;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Invoice</p>
+              <p style="margin:0;font-size:28px;font-weight:900;color:#ffffff;letter-spacing:-0.5px;line-height:1">${invoiceNumber || "—"}</p>
+              ${showPaidBadge ? `<div style="margin-top:12px"><span style="background:#6EE7B7;color:#064e3b;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;padding:5px 18px;border-radius:999px">✓ PAID IN FULL</span></div>` : ""}
             </td>
           </tr>
         </table>
       </td>
     </tr>
 
-    <!-- INFO STRIP -->
+    <!-- ░░ META STRIP ░░ -->
     <tr>
       <td style="background:#f0fdf4;border-top:3px solid #0A5C43;padding:0">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
-            <td style="padding:14px 24px;border-right:1px solid #d1fae5;width:25%">
-              <p style="margin:0 0 3px;font-size:9px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;opacity:.7">Invoice #</p>
-              <p style="margin:0;font-size:12px;font-weight:700;color:#1e293b">${invoiceNumber || "—"}</p>
+            <td style="padding:13px 20px;border-right:1px solid #bbf7d0;width:25%">
+              <p style="margin:0 0 3px;font-size:8px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;opacity:.75">Invoice #</p>
+              <p style="margin:0;font-size:11px;font-weight:700;color:#0f172a">${invoiceNumber || "—"}</p>
             </td>
-            <td style="padding:14px 24px;border-right:1px solid #d1fae5;width:25%">
-              <p style="margin:0 0 3px;font-size:9px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;opacity:.7">Invoice Date</p>
-              <p style="margin:0;font-size:12px;font-weight:700;color:#1e293b">${invoiceDate}</p>
+            <td style="padding:13px 20px;border-right:1px solid #bbf7d0;width:25%">
+              <p style="margin:0 0 3px;font-size:8px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;opacity:.75">Invoice Date</p>
+              <p style="margin:0;font-size:11px;font-weight:700;color:#0f172a">${invoiceDate}</p>
             </td>
-            <td style="padding:14px 24px;border-right:1px solid #d1fae5;width:25%">
-              <p style="margin:0 0 3px;font-size:9px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;opacity:.7">Service Date</p>
-              <p style="margin:0;font-size:12px;font-weight:700;color:#1e293b">${serviceDate || "—"}</p>
+            <td style="padding:13px 20px;border-right:1px solid #bbf7d0;width:25%">
+              <p style="margin:0 0 3px;font-size:8px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;opacity:.75">Service Date</p>
+              <p style="margin:0;font-size:11px;font-weight:700;color:#0f172a">${serviceDate || "—"}</p>
             </td>
-            <td style="padding:14px 24px;width:25%">
-              <p style="margin:0 0 3px;font-size:9px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;opacity:.7">Status</p>
-              <p style="margin:0;font-size:12px;font-weight:700;color:${showPaidBadge ? "#16a34a" : "#d97706"}">${showPaidBadge ? "✓ Paid" : "Due"}</p>
+            <td style="padding:13px 20px;width:25%">
+              <p style="margin:0 0 3px;font-size:8px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;opacity:.75">Status</p>
+              <p style="margin:0;font-size:11px;font-weight:800;color:${showPaidBadge ? "#16a34a" : "#d97706"}">${showPaidBadge ? "✓ Paid" : "Payment Due"}</p>
             </td>
           </tr>
         </table>
       </td>
     </tr>
 
-    <!-- BILLED TO -->
+    <!-- ░░ BILLED TO / FROM ░░ -->
     <tr>
-      <td style="padding:32px 48px 0">
+      <td style="background:#ffffff;padding:32px 40px">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
-            <td style="vertical-align:top;width:50%">
-              <p style="margin:0 0 8px;font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px">Billed To</p>
-              <p style="margin:0;font-size:17px;font-weight:800;color:#0f172a">${customerName || "—"}</p>
-              ${customerEmail ? `<p style="margin:3px 0 0;font-size:13px;color:#64748b">${customerEmail}</p>` : ""}
-              ${customerPhone ? `<p style="margin:2px 0 0;font-size:13px;color:#64748b">${customerPhone}</p>` : ""}
-              ${customerAddress ? `<p style="margin:4px 0 0;font-size:13px;color:#64748b">${customerAddress}</p>` : ""}
+            <td style="vertical-align:top;width:50%;padding-right:20px">
+              <p style="margin:0 0 10px;font-size:9px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.5px;border-bottom:2px solid #d1fae5;padding-bottom:6px">Billed To</p>
+              <p style="margin:0 0 4px;font-size:16px;font-weight:800;color:#0f172a">${customerName || "—"}</p>
+              ${customerEmail ? `<p style="margin:0 0 2px;font-size:13px;color:#64748b">${customerEmail}</p>` : ""}
+              ${customerPhone ? `<p style="margin:0 0 2px;font-size:13px;color:#64748b">${customerPhone}</p>` : ""}
+              ${customerAddress ? `<p style="margin:4px 0 0;font-size:13px;color:#64748b;line-height:1.5">${customerAddress}</p>` : ""}
             </td>
-            <td style="vertical-align:top;text-align:right;width:50%">
-              <p style="margin:0 0 8px;font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px">From</p>
-              <p style="margin:0;font-size:17px;font-weight:800;color:#0f172a">Cleaniq Services Ltd</p>
-              <p style="margin:3px 0 0;font-size:13px;color:#64748b">info@cleaniqservices.com</p>
-              <p style="margin:2px 0 0;font-size:13px;color:#64748b">+44 7752 476368</p>
-              <p style="margin:2px 0 0;font-size:13px;color:#64748b">cleaniqservices.com</p>
+            <td style="vertical-align:top;width:50%;text-align:right;padding-left:20px">
+              <p style="margin:0 0 10px;font-size:9px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.5px;border-bottom:2px solid #d1fae5;padding-bottom:6px">From</p>
+              <p style="margin:0 0 4px;font-size:16px;font-weight:800;color:#0f172a">Cleaniq Services Ltd</p>
+              <p style="margin:0 0 2px;font-size:13px;color:#64748b">info@cleaniqservices.com</p>
+              <p style="margin:0 0 2px;font-size:13px;color:#64748b">+44 7752 476368</p>
+              <p style="margin:0;font-size:13px;color:#64748b">cleaniqservices.com</p>
             </td>
           </tr>
         </table>
       </td>
     </tr>
 
-    <!-- DIVIDER -->
-    <tr><td style="padding:24px 48px 0"><div style="height:1px;background:#e2e8f0"></div></td></tr>
-
-    <!-- LINE ITEMS TABLE -->
+    <!-- ░░ LINE ITEMS ░░ -->
     <tr>
-      <td style="padding:24px 48px 0">
-        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:12px;overflow:hidden">
+      <td style="background:#ffffff;padding:0 40px">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0">
           <thead>
             <tr style="background:#0f172a">
-              <th style="padding:13px 16px;text-align:left;font-size:9px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1.2px">Description</th>
-              <th style="padding:13px 16px;text-align:center;font-size:9px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1.2px">Qty</th>
-              <th style="padding:13px 16px;text-align:right;font-size:9px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1.2px">Rate</th>
-              <th style="padding:13px 16px;text-align:right;font-size:9px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1.2px">Amount</th>
+              <th style="padding:13px 18px;text-align:left;font-size:9px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1.2px">Description</th>
+              <th style="padding:13px 18px;text-align:center;font-size:9px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1.2px;width:48px">Qty</th>
+              <th style="padding:13px 18px;text-align:right;font-size:9px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1.2px;width:80px">Rate</th>
+              <th style="padding:13px 18px;text-align:right;font-size:9px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1.2px;width:90px">Amount</th>
             </tr>
           </thead>
           <tbody>
             ${items.map((item, idx) => `
-            <tr style="background:${idx % 2 === 0 ? "#ffffff" : "#f8fafc"}">
-              <td style="padding:15px 16px;font-size:14px;color:#0f172a;font-weight:600;border-bottom:1px solid #f1f5f9">${item.description || "—"}</td>
-              <td style="padding:15px 16px;text-align:center;font-size:14px;color:#475569;border-bottom:1px solid #f1f5f9">${item.qty || 1}</td>
-              <td style="padding:15px 16px;text-align:right;font-size:14px;color:#475569;border-bottom:1px solid #f1f5f9">${currencySymbol}${Number(item.rate || 0).toFixed(2)}</td>
-              <td style="padding:15px 16px;text-align:right;font-size:14px;font-weight:700;color:#0f172a;border-bottom:1px solid #f1f5f9">${currencySymbol}${((Number(item.qty) || 0) * (Number(item.rate) || 0)).toFixed(2)}</td>
+            <tr style="background:${idx % 2 === 0 ? "#ffffff" : "#f9fafb"}">
+              <td style="padding:14px 18px;font-size:14px;color:#0f172a;font-weight:600;border-bottom:1px solid #f1f5f9">${item.description || "—"}</td>
+              <td style="padding:14px 18px;text-align:center;font-size:14px;color:#64748b;border-bottom:1px solid #f1f5f9">${item.qty || 1}</td>
+              <td style="padding:14px 18px;text-align:right;font-size:14px;color:#64748b;border-bottom:1px solid #f1f5f9">${currencySymbol}${Number(item.rate || 0).toFixed(2)}</td>
+              <td style="padding:14px 18px;text-align:right;font-size:14px;font-weight:700;color:#0f172a;border-bottom:1px solid #f1f5f9">${currencySymbol}${((Number(item.qty) || 0) * (Number(item.rate) || 0)).toFixed(2)}</td>
             </tr>`).join("")}
           </tbody>
         </table>
       </td>
     </tr>
 
-    <!-- TOTAL -->
+    <!-- ░░ TOTAL ░░ -->
     <tr>
-      <td style="padding:16px 48px 32px">
+      <td style="background:#ffffff;padding:16px 40px 36px">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
             <td></td>
-            <td align="right" style="width:220px">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:14px;overflow:hidden;border:1px solid #86efac">
+            <td align="right" style="width:260px">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#0A5C43;border-radius:14px;overflow:hidden">
                 <tr>
-                  <td style="padding:16px 20px;font-size:13px;font-weight:800;color:#065f46;text-transform:uppercase;letter-spacing:1px">Total ${showPaidBadge ? "Paid" : "Due"}</td>
-                  <td align="right" style="padding:16px 20px;font-size:22px;font-weight:900;color:#065f46">${currencySymbol}${subtotal.toFixed(2)}</td>
+                  <td style="padding:18px 22px;font-size:12px;font-weight:800;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1.2px">Total ${showPaidBadge ? "Paid" : "Due"}</td>
+                  <td align="right" style="padding:18px 22px;font-size:26px;font-weight:900;color:#ffffff">${currencySymbol}${subtotal.toFixed(2)}</td>
                 </tr>
               </table>
             </td>
@@ -1713,60 +1712,51 @@ const templates = {
     </tr>
 
     ${paymentLink ? `
-    <!-- PAY NOW BUTTON -->
+    <!-- ░░ PAY NOW ░░ -->
     <tr>
-      <td style="padding:0 48px 32px;text-align:center">
-        <a href="${paymentLink}" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#ffffff;padding:18px 44px;border-radius:14px;text-decoration:none;font-weight:800;font-size:15px;letter-spacing:0.3px;box-shadow:0 8px 24px -4px rgba(79,70,229,0.45)">💳 Pay Now Securely</a>
-        <p style="margin:10px 0 0;font-size:11px;color:#94a3b8">Secure card payment · Click the button above to pay online</p>
+      <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:28px 40px;text-align:center">
+        <p style="margin:0 0 16px;font-size:14px;font-weight:700;color:#0f172a">Ready to pay online?</p>
+        <a href="${paymentLink}" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#ffffff;padding:16px 48px;border-radius:14px;text-decoration:none;font-weight:800;font-size:15px;box-shadow:0 8px 24px -4px rgba(79,70,229,0.4)">💳 Pay Now Securely</a>
+        <p style="margin:12px 0 0;font-size:11px;color:#94a3b8">Encrypted · Powered by Stripe</p>
       </td>
     </tr>` : ""}
 
     ${paymentInstructions ? `
-    <!-- PAYMENT INSTRUCTIONS -->
+    <!-- ░░ BANK DETAILS ░░ -->
     <tr>
-      <td style="padding:0 48px 28px">
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:14px;border:1px solid #e2e8f0;overflow:hidden">
-          <tr>
-            <td style="background:#0f172a;padding:10px 20px">
-              <p style="margin:0;font-size:10px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1.5px">Bank Transfer Details</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:18px 20px">
-              <p style="margin:0;font-size:13px;color:#334155;white-space:pre-line;line-height:1.8;font-weight:500">${paymentInstructions}</p>
-            </td>
-          </tr>
+      <td style="background:#f8fafc;padding:${paymentLink ? "0" : "28px"} 40px 28px">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-radius:14px;overflow:hidden;border:1px solid #e2e8f0">
+          <tr><td style="background:#0f172a;padding:11px 20px"><p style="margin:0;font-size:9px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1.5px">Bank Transfer Details</p></td></tr>
+          <tr><td style="background:#ffffff;padding:20px"><p style="margin:0;font-size:13px;color:#334155;white-space:pre-line;line-height:2;font-weight:500">${paymentInstructions}</p></td></tr>
         </table>
       </td>
     </tr>` : ""}
 
     ${notes ? `
-    <!-- NOTES -->
+    <!-- ░░ NOTES ░░ -->
     <tr>
-      <td style="padding:0 48px 28px">
-        <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:14px;padding:18px 20px;border:1px solid #86efac">
-          <p style="margin:0 0 6px;font-size:10px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1px">Note</p>
+      <td style="padding:0 40px 28px;background:#f8fafc">
+        <div style="background:#f0fdf4;border-radius:14px;padding:18px 22px;border-left:4px solid #0A5C43">
+          <p style="margin:0 0 6px;font-size:9px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1px">Note</p>
           <p style="margin:0;font-size:13px;color:#065f46;white-space:pre-line;line-height:1.7">${notes}</p>
         </div>
       </td>
     </tr>` : ""}
 
-    <!-- THANK YOU BANNER -->
+    <!-- ░░ THANK YOU ░░ -->
     <tr>
-      <td style="padding:0 48px 32px">
-        <div style="background:#0A5C43;border-radius:16px;padding:22px 28px;text-align:center">
-          <p style="margin:0;font-size:15px;font-weight:800;color:#ffffff">Thank you for choosing Cleaniq Services</p>
-          <p style="margin:6px 0 0;font-size:12px;color:rgba(255,255,255,0.65)">We're committed to delivering a spotless clean every time.</p>
-        </div>
+      <td style="background:#0A5C43;padding:28px 40px;text-align:center">
+        <p style="margin:0 0 4px;font-size:16px;font-weight:800;color:#ffffff">Thank you for choosing Cleaniq Services</p>
+        <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.6)">We're committed to delivering a spotless clean every time.</p>
       </td>
     </tr>
 
-    <!-- FOOTER -->
+    <!-- ░░ FOOTER ░░ -->
     <tr>
-      <td style="background:#0f172a;padding:24px 48px;text-align:center">
-        <p style="margin:0 0 4px;font-size:12px;color:#94a3b8;font-weight:600">Cleaniq Services Limited</p>
-        <p style="margin:0;font-size:11px;color:#475569">info@cleaniqservices.com &nbsp;·&nbsp; cleaniqservices.com &nbsp;·&nbsp; +44 7752 476368</p>
-        <p style="margin:8px 0 0;font-size:10px;color:#334155">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      <td style="background:#0f172a;padding:22px 40px;text-align:center">
+        <p style="margin:0 0 5px;font-size:12px;color:#64748b;font-weight:600">Cleaniq Services Limited</p>
+        <p style="margin:0 0 8px;font-size:11px;color:#475569">info@cleaniqservices.com &nbsp;·&nbsp; cleaniqservices.com &nbsp;·&nbsp; +44 7752 476368</p>
+        <p style="margin:0;font-size:10px;color:#334155">&copy; 2026 Cleaniq Services. All rights reserved.</p>
       </td>
     </tr>
 

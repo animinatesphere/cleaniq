@@ -264,58 +264,67 @@ const PropertyReport = () => {
   const condObj = CONDITIONS.find((c) => c.id === condition);
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "—";
 
-  const CSS = `*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#1e293b;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.hdr{background:#0A5C43;display:flex;align-items:stretch;min-height:88px}
-.hdr-brand{display:flex;flex-direction:column;justify-content:center;padding:20px 24px;border-right:1px solid rgba(255,255,255,.15);min-width:176px}
-.hdr-logo{height:34px;width:auto;border-radius:5px;display:block;margin-bottom:7px}
-.hdr-co{color:#fff;font-size:13px;font-weight:900;letter-spacing:-.2px}
-.hdr-co-tag{color:rgba(255,255,255,.45);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.6px;margin-top:2px}
-.hdr-main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 24px}
-.hdr-type{color:rgba(255,255,255,.45);font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:2px;margin-bottom:5px}
-.hdr-prop{color:#fff;font-size:16px;font-weight:900;line-height:1.2;margin-bottom:3px}
-.hdr-addr{color:rgba(255,255,255,.65);font-size:10px}
-.hdr-right{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;padding:20px 24px}
-.strip{display:grid;grid-template-columns:repeat(4,1fr);background:#f0fdf4;border-bottom:2px solid #0A5C43}
-.sc{padding:10px 16px;border-right:1px solid #d1fae5}
-.sc:last-child{border-right:none}
-.sl{font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#0A5C43;opacity:.7;margin-bottom:3px}
-.sv{font-size:11px;font-weight:700;color:#1e293b}
-.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;font-weight:800;font-size:10.5px}
-.dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
-.slightly{background:#fef9c3;color:#713f12}.slightly .dot{background:#ca8a04}
-.moderately{background:#ffedd5;color:#9a3412}.moderately .dot{background:#ea580c}
-.very{background:#fee2e2;color:#991b1b}.very .dot{background:#dc2626}
-.body{padding:24px 28px 36px}
-.sh{display:flex;align-items:center;gap:9px;margin:26px 0 13px}
-.sh-bar{width:3px;height:15px;background:#0A5C43;border-radius:2px;flex-shrink:0}
-.sh-txt{font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#0A5C43}
-.sh-rule{flex:1;height:1px;background:#e2e8f0}
-.ba-tag{display:inline-block;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:2px 9px;border-radius:4px;margin-bottom:7px}
-.ba-before{background:#eff6ff;color:#1d4ed8}.ba-after{background:#f0fdf4;color:#15803d}
-.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-.pgrid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;display:block}
-.dc{background:#fffbfb;border:1px solid #fecaca;border-left:4px solid #ef4444;border-radius:8px;padding:12px 14px;margin-bottom:10px}
-.dc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
-.dc-item{font-size:12px;font-weight:800;color:#1e293b}
-.dc-loc{font-size:9.5px;color:#64748b;margin-top:1px}
-.dc-desc{font-size:11px;color:#475569;line-height:1.55;padding-top:8px;margin-top:6px;border-top:1px solid #fee2e2}
-.sev{display:inline-block;padding:2px 9px;border-radius:999px;font-size:8.5px;font-weight:800}
-.sev-Minor{background:#fef9c3;color:#854d0e}.sev-Moderate{background:#ffedd5;color:#9a3412}.sev-Major{background:#fee2e2;color:#991b1b}
-.dp{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px}
-.dp img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px;border:1px solid #fecaca}
-.cl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
-.cli{display:flex;gap:7px;align-items:center;font-size:10.5px;padding:6px 9px;background:#f0fdf4;border-radius:5px;border:1px solid #bbf7d0;color:#1e293b}
-.chk{color:#16a34a;font-weight:900;font-size:13px;width:14px;flex-shrink:0}
-table{width:100%;border-collapse:collapse;font-size:11px}
-th{background:#0A5C43;color:rgba(255,255,255,.85);text-align:left;padding:8px 11px;font-size:8px;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
-tr:nth-child(even) td{background:#f8fafc}
-td{padding:7px 11px;border-bottom:1px solid #f1f5f9;color:#334155}
-.vid-pill{display:inline-flex;align-items:center;gap:5px;background:#1e293b;color:#94a3b8;font-size:9px;font-weight:700;padding:3px 9px;border-radius:999px;margin:3px}
-.notes{padding:12px 16px;background:#f8fafc;border-radius:7px;border-left:3px solid #0A5C43;line-height:1.7;font-size:11px;color:#334155}
-.foot{background:#0A5C43;margin-top:40px;padding:13px 28px;display:flex;justify-content:space-between;align-items:center}
-.foot-l{color:rgba(255,255,255,.65);font-size:9px;line-height:1.7}
-.foot-l strong{color:#fff}
-.foot-r{color:rgba(255,255,255,.5);font-size:9px;text-align:right;line-height:1.7}`;
+  // All selectors scoped to #pdf-root so they don't bleed into the main page
+  // when the div is temporarily mounted for html2canvas rendering.
+  const CSS = `#pdf-root *{margin:0;padding:0;box-sizing:border-box}
+#pdf-root{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#1e293b;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;width:794px}
+#pdf-root .hdr{background:#0A5C43;display:flex;align-items:stretch;min-height:88px}
+#pdf-root .hdr-brand{display:flex;flex-direction:column;justify-content:center;padding:20px 24px;border-right:1px solid rgba(255,255,255,.15);min-width:176px}
+#pdf-root .hdr-logo{height:34px;width:auto;border-radius:5px;display:block;margin-bottom:7px}
+#pdf-root .hdr-co{color:#fff;font-size:13px;font-weight:900;letter-spacing:-.2px}
+#pdf-root .hdr-co-tag{color:rgba(255,255,255,.45);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.6px;margin-top:2px}
+#pdf-root .hdr-main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 24px}
+#pdf-root .hdr-type{color:rgba(255,255,255,.45);font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:2px;margin-bottom:5px}
+#pdf-root .hdr-prop{color:#fff;font-size:16px;font-weight:900;line-height:1.2;margin-bottom:3px}
+#pdf-root .hdr-addr{color:rgba(255,255,255,.65);font-size:10px}
+#pdf-root .hdr-right{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;padding:20px 24px}
+#pdf-root .strip{display:grid;grid-template-columns:repeat(4,1fr);background:#f0fdf4;border-bottom:2px solid #0A5C43}
+#pdf-root .sc{padding:10px 16px;border-right:1px solid #d1fae5}
+#pdf-root .sc:last-child{border-right:none}
+#pdf-root .sl{font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#0A5C43;opacity:.7;margin-bottom:3px}
+#pdf-root .sv{font-size:11px;font-weight:700;color:#1e293b}
+#pdf-root .badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;font-weight:800;font-size:10.5px}
+#pdf-root .dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+#pdf-root .slightly{background:#fef9c3;color:#713f12}
+#pdf-root .slightly .dot{background:#ca8a04}
+#pdf-root .moderately{background:#ffedd5;color:#9a3412}
+#pdf-root .moderately .dot{background:#ea580c}
+#pdf-root .very{background:#fee2e2;color:#991b1b}
+#pdf-root .very .dot{background:#dc2626}
+#pdf-root .body{padding:24px 28px 36px}
+#pdf-root .sh{display:flex;align-items:center;gap:9px;margin:26px 0 13px}
+#pdf-root .sh-bar{width:3px;height:15px;background:#0A5C43;border-radius:2px;flex-shrink:0}
+#pdf-root .sh-txt{font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#0A5C43}
+#pdf-root .sh-rule{flex:1;height:1px;background:#e2e8f0}
+#pdf-root .ba-tag{display:inline-block;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:2px 9px;border-radius:4px;margin-bottom:7px}
+#pdf-root .ba-before{background:#eff6ff;color:#1d4ed8}
+#pdf-root .ba-after{background:#f0fdf4;color:#15803d}
+#pdf-root .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+#pdf-root .pgrid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;display:block}
+#pdf-root .dc{background:#fffbfb;border:1px solid #fecaca;border-left:4px solid #ef4444;border-radius:8px;padding:12px 14px;margin-bottom:10px}
+#pdf-root .dc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+#pdf-root .dc-item{font-size:12px;font-weight:800;color:#1e293b}
+#pdf-root .dc-loc{font-size:9.5px;color:#64748b;margin-top:1px}
+#pdf-root .dc-desc{font-size:11px;color:#475569;line-height:1.55;padding-top:8px;margin-top:6px;border-top:1px solid #fee2e2}
+#pdf-root .sev{display:inline-block;padding:2px 9px;border-radius:999px;font-size:8.5px;font-weight:800}
+#pdf-root .sev-Minor{background:#fef9c3;color:#854d0e}
+#pdf-root .sev-Moderate{background:#ffedd5;color:#9a3412}
+#pdf-root .sev-Major{background:#fee2e2;color:#991b1b}
+#pdf-root .dp{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px}
+#pdf-root .dp img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px;border:1px solid #fecaca}
+#pdf-root .cl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+#pdf-root .cli{display:flex;gap:7px;align-items:center;font-size:10.5px;padding:6px 9px;background:#f0fdf4;border-radius:5px;border:1px solid #bbf7d0;color:#1e293b}
+#pdf-root .chk{color:#16a34a;font-weight:900;font-size:13px;width:14px;flex-shrink:0}
+#pdf-root table{width:100%;border-collapse:collapse;font-size:11px}
+#pdf-root th{background:#0A5C43;color:rgba(255,255,255,.85);text-align:left;padding:8px 11px;font-size:8px;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+#pdf-root tr:nth-child(even) td{background:#f8fafc}
+#pdf-root td{padding:7px 11px;border-bottom:1px solid #f1f5f9;color:#334155}
+#pdf-root .vid-pill{display:inline-flex;align-items:center;gap:5px;background:#1e293b;color:#94a3b8;font-size:9px;font-weight:700;padding:3px 9px;border-radius:999px;margin:3px}
+#pdf-root .notes{padding:12px 16px;background:#f8fafc;border-radius:7px;border-left:3px solid #0A5C43;line-height:1.7;font-size:11px;color:#334155}
+#pdf-root .foot{background:#0A5C43;margin-top:40px;padding:13px 28px;display:flex;justify-content:space-between;align-items:center}
+#pdf-root .foot-l{color:rgba(255,255,255,.65);font-size:9px;line-height:1.7}
+#pdf-root .foot-l strong{color:#fff}
+#pdf-root .foot-r{color:rgba(255,255,255,.5);font-size:9px;text-align:right;line-height:1.7}`;
 
   // Render a MediaItem array into HTML — images inline, videos as labelled pills (can't print video)
   const mediaToHtml = (items, withMedia) => {
@@ -342,7 +351,9 @@ td{padding:7px 11px;border-bottom:1px solid #f1f5f9;color:#334155}
     const hasPhotos = photoSections.some((s) => s.before.length || s.after.length);
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Property Report — ${info.propertyName || "Cleaniq"}</title>
-<style>${CSS}</style></head><body>
+</head><body style="margin:0;padding:0;background:#fff">
+<div id="pdf-root">
+<style>${CSS}</style>
 <div class="hdr">
   <div class="hdr-brand">
     <img src="${logoUrl}" alt="Cleaniq Services" class="hdr-logo" />
@@ -400,6 +411,7 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
   <div class="foot-l"><strong>Cleaniq Services Ltd</strong><br>cleaniqservices.com · +44 7752 476368</div>
   <div class="foot-r">Generated ${fmtDate(today)}<br>Confidential — For client use only</div>
 </div>
+</div>
 </body></html>`;
   };
 
@@ -418,53 +430,45 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
     pagebreak: { mode: ["avoid-all", "css"] },
   };
 
-  // Load the full HTML document in an off-screen iframe so its <style> block,
-  // layout, and base64 images all render correctly before html2canvas runs.
-  // Returns the iframe element; caller must remove it when done.
-  const mountInIframe = (html) =>
-    new Promise((resolve, reject) => {
-      const iframe = document.createElement("iframe");
-      Object.assign(iframe.style, {
-        position: "fixed",
-        left: "-9999px",
-        top: "0",
+  // Parse the generated HTML, extract #pdf-root, and mount it in the MAIN
+  // document so html2canvas can render it without cross-document style loss.
+  // The scoped #pdf-root CSS means it won't affect the rest of the page.
+  const mountForPdf = (html) =>
+    new Promise((resolve) => {
+      const parsed = new DOMParser().parseFromString(html, "text/html");
+      const root = parsed.getElementById("pdf-root");
+      if (!root) { resolve(null); return; }
+
+      const host = document.createElement("div");
+      Object.assign(host.style, {
+        position: "absolute",
+        top: "-99999px",
+        left: "0",
         width: "794px",
-        height: "1123px",
-        border: "none",
-        visibility: "hidden",
+        background: "#fff",
       });
-      iframe.addEventListener(
-        "load",
-        async () => {
-          try {
-            // Expand height to full content so html2canvas captures everything
-            const body = iframe.contentDocument.body;
-            iframe.style.height = Math.max(body.scrollHeight, 1123) + "px";
-            // Let base64 images decode inside the iframe
-            await new Promise((r) => setTimeout(r, 600));
-            resolve(iframe);
-          } catch (e) {
-            reject(e);
-          }
-        },
-        { once: true },
-      );
-      document.body.appendChild(iframe);
-      iframe.srcdoc = html;
+      host.appendChild(root);          // moves the node (with its <style> child) into host
+      document.body.appendChild(host);
+
+      // Wait for images to decode and layout to stabilise
+      setTimeout(() => {
+        host.style.height = host.scrollHeight + "px";
+        resolve(host);
+      }, 800);
     });
 
   const [downloading, setDownloading] = useState(false);
   const handleDownload = async () => {
     setDownloading(true);
     const filename = `property-report-${(info.bookingRef || info.propertyName || "cleaniq").replace(/[^a-z0-9]/gi, "-").toLowerCase()}.pdf`;
-    const iframe = await mountInIframe(buildHtml(true));
+    const host = await mountForPdf(buildHtml(true));
     try {
       await html2pdf()
         .set({ ...PDF_OPTS, filename })
-        .from(iframe.contentDocument.body)
+        .from(host.firstElementChild)   // the #pdf-root div
         .save();
     } finally {
-      document.body.removeChild(iframe);
+      if (host && host.parentNode) document.body.removeChild(host);
       setDownloading(false);
     }
   };
@@ -510,11 +514,9 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
     setSending(true);
 
     const filename = `Property-Report-${(info.bookingRef || info.propertyName || "Cleaniq").replace(/[^a-z0-9]/gi, "-")}.pdf`;
-    let iframe;
-    try {
-      iframe = await mountInIframe(buildHtml(true));
-    } catch (e) {
-      setToast({ msg: "Failed to prepare PDF — " + e.message, type: "error" });
+    const host = await mountForPdf(buildHtml(true));
+    if (!host) {
+      setToast({ msg: "Failed to prepare PDF — could not build content", type: "error" });
       setSending(false);
       return;
     }
@@ -523,7 +525,7 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
     try {
       const jspdf = await html2pdf()
         .set(PDF_OPTS)
-        .from(iframe.contentDocument.body)
+        .from(host.firstElementChild)
         .toPdf()
         .get("pdf");
       pdfBase64 = jspdf.output("datauristring").split(",")[1];
@@ -533,7 +535,7 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
       setSending(false);
       return;
     } finally {
-      if (document.body.contains(iframe)) document.body.removeChild(iframe);
+      if (host && host.parentNode) document.body.removeChild(host);
     }
 
     try {
