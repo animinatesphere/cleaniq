@@ -62,7 +62,7 @@ router.post("/payment-link", async (req, res) => {
   }
 });
 
-// POST /api/custom-invoice/send — build and email a free-form invoice
+// POST /api/custom-invoice/send — build and email a free-form invoice with PDF attachment
 router.post("/send", async (req, res) => {
   try {
     const data = req.body;
@@ -73,12 +73,22 @@ router.post("/send", async (req, res) => {
     }
 
     const html = templates.customInvoice(data);
-    const ok = await sendEmail({
-      to: data.customerEmail,
-      subject: `Invoice${data.invoiceNumber ? ` ${data.invoiceNumber}` : ""} from Cleaniq Services`,
-      html,
-    });
+    const invoiceLabel = data.invoiceNumber ? ` ${data.invoiceNumber}` : "";
+    const subject = `Invoice${invoiceLabel} from Cleaniq Services`;
 
+    // Generate PDF attachment so customers can download it directly from the email
+    let attachments = [];
+    try {
+      const pdfBuffer = await htmlToPdfBuffer(html, `Cleaniq Services - Invoice${invoiceLabel}`);
+      attachments = [{
+        filename: `Cleaniq-Invoice${invoiceLabel.replace(/\s+/g, "-")}.pdf`,
+        content: pdfBuffer,
+      }];
+    } catch (pdfErr) {
+      console.warn("PDF attachment generation failed, sending email without attachment:", pdfErr.message);
+    }
+
+    const ok = await sendEmail({ to: data.customerEmail, subject, html, attachments });
     if (!ok) return res.status(500).json({ message: "Failed to send invoice email" });
     res.json({ message: "Invoice sent successfully" });
   } catch (err) {

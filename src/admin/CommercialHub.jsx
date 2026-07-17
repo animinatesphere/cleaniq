@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import QuoteBuilderComponent from "./QuoteBuilder";
 import InvoiceBuilderComponent from "./InvoiceBuilder";
-import logoSrc from "../assets/logo DP.jpg";
+import logoSrc from "../assets/lOGO.png";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -270,8 +270,8 @@ const PropertyReport = () => {
 #pdf-root{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#1e293b;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;width:794px}
 #pdf-root .hdr{background:#0A5C43;display:flex;align-items:stretch;min-height:88px}
 #pdf-root .hdr-brand{display:flex;flex-direction:column;justify-content:center;padding:20px 24px;border-right:1px solid rgba(255,255,255,.15);min-width:176px}
-#pdf-root .hdr-logo{height:34px;width:auto;border-radius:5px;display:block;margin-bottom:7px}
-#pdf-root .hdr-co{color:#fff;font-size:13px;font-weight:900;letter-spacing:-.2px}
+#pdf-root .hdr-logo{height:46px;width:auto;display:block;margin-bottom:4px}
+#pdf-root .hdr-co{display:none}
 #pdf-root .hdr-co-tag{color:rgba(255,255,255,.45);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.6px;margin-top:2px}
 #pdf-root .hdr-main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 24px}
 #pdf-root .hdr-type{color:rgba(255,255,255,.45);font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:2px;margin-bottom:5px}
