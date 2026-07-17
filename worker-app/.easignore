@@ -4,12 +4,34 @@ node_modules/
 **/node_modules/
 .expo
 .expo/
+
+# Built output — never needed for EAS cloud build
 dist
+dist/
+dist/**
 web-build
+web-build/
+
+# Git
 .git
 .git/
+
+# Native build dirs (EAS generates these itself)
 android
+android/
 ios
+ios/
+
+# Large media / store assets — not required for build
+app-review
+app-review/
+app-store-screenshots
+app-store-screenshots/
+
+# Onboarding images are large — EAS will bundle via app.json, local files still needed
+# (leave assets/ in so Expo can bundle them)
+
+# Logs / secrets / cruft
 *.log
 *.map
 *.tgz
@@ -19,14 +41,15 @@ ios
 *.pem
 *.key
 *.mobileprovision
-**/CHANGELOG.md
-**/README.md
+.DS_Store
 npm-debug.*
 yarn-debug.*
 yarn-error.*
-.DS_Store
+**/CHANGELOG.md
+**/README.md
+*.md
 
-# Other apps in the monorepo — not needed for this build
+# Other apps in the monorepo
 ../server
 ../server/
 ../customer-app
