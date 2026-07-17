@@ -1596,12 +1596,12 @@ const templates = {
     <!-- ░░ HEADER BAND ░░ -->
     <tr>
       <td style="background:#0A5C43;padding:44px 48px 36px;text-align:center">
-        <!-- Logo — white pill, big and clear -->
-        <div style="display:inline-block;background:#ffffff;border-radius:20px;padding:16px 28px;box-shadow:0 8px 32px rgba(0,0,0,0.28);margin-bottom:20px">
-          <img src="https://cleaniqservices.com/logo%20DP2.jpg"
+        <!-- Logo — white text on green, no card needed -->
+        <div style="margin-bottom:20px">
+          <img src="https://cleaniqservices.com/lOGO.png"
                alt="Cleaniq Services"
-               width="200"
-               style="width:200px;max-width:200px;height:auto;display:block;border-radius:10px" />
+               width="260"
+               style="width:260px;max-width:260px;height:auto;display:block;margin:0 auto" />
         </div>
         <p style="margin:0 0 20px;font-size:11px;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:2.5px">Professional Cleaning Services</p>
         <!-- Invoice label -->
