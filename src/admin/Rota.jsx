@@ -2,20 +2,20 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   CalendarRange, ChevronLeft, ChevronRight, RefreshCw, X,
   UserPlus, Clock, MapPin, Users, CheckCircle2, AlertTriangle,
-  Hourglass, Plus, ChevronDown, ChevronUp,
+  Hourglass, Plus, ChevronDown, ChevronUp, GripVertical,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
 
 const WORKER_COLORS = [
-  { bg: "bg-blue-50",    stripe: "bg-blue-400",    text: "text-blue-900",    sub: "text-blue-500",    avatar: "bg-blue-500",    header: "bg-blue-50 border-blue-200"    },
-  { bg: "bg-violet-50",  stripe: "bg-violet-400",  text: "text-violet-900",  sub: "text-violet-500",  avatar: "bg-violet-500",  header: "bg-violet-50 border-violet-200"  },
-  { bg: "bg-emerald-50", stripe: "bg-emerald-500", text: "text-emerald-900", sub: "text-emerald-600", avatar: "bg-emerald-600", header: "bg-emerald-50 border-emerald-200" },
-  { bg: "bg-amber-50",   stripe: "bg-amber-400",   text: "text-amber-900",   sub: "text-amber-600",   avatar: "bg-amber-500",   header: "bg-amber-50 border-amber-200"    },
-  { bg: "bg-rose-50",    stripe: "bg-rose-400",    text: "text-rose-900",    sub: "text-rose-500",    avatar: "bg-rose-500",    header: "bg-rose-50 border-rose-200"      },
-  { bg: "bg-cyan-50",    stripe: "bg-cyan-500",    text: "text-cyan-900",    sub: "text-cyan-600",    avatar: "bg-cyan-600",    header: "bg-cyan-50 border-cyan-200"      },
-  { bg: "bg-pink-50",    stripe: "bg-pink-400",    text: "text-pink-900",    sub: "text-pink-500",    avatar: "bg-pink-500",    header: "bg-pink-50 border-pink-200"      },
-  { bg: "bg-indigo-50",  stripe: "bg-indigo-500",  text: "text-indigo-900",  sub: "text-indigo-500",  avatar: "bg-indigo-600",  header: "bg-indigo-50 border-indigo-200"  },
+  { bg: "bg-blue-50",    stripe: "bg-blue-400",    text: "text-blue-900",    sub: "text-blue-600",    avatar: "bg-blue-500",   ring: "ring-blue-200"    },
+  { bg: "bg-violet-50",  stripe: "bg-violet-400",  text: "text-violet-900",  sub: "text-violet-600",  avatar: "bg-violet-500", ring: "ring-violet-200"  },
+  { bg: "bg-emerald-50", stripe: "bg-emerald-500", text: "text-emerald-900", sub: "text-emerald-600", avatar: "bg-emerald-600",ring: "ring-emerald-200" },
+  { bg: "bg-amber-50",   stripe: "bg-amber-400",   text: "text-amber-900",   sub: "text-amber-600",   avatar: "bg-amber-500",  ring: "ring-amber-200"   },
+  { bg: "bg-rose-50",    stripe: "bg-rose-400",    text: "text-rose-900",    sub: "text-rose-600",    avatar: "bg-rose-500",   ring: "ring-rose-200"    },
+  { bg: "bg-cyan-50",    stripe: "bg-cyan-500",    text: "text-cyan-900",    sub: "text-cyan-600",    avatar: "bg-cyan-600",   ring: "ring-cyan-200"    },
+  { bg: "bg-pink-50",    stripe: "bg-pink-400",    text: "text-pink-900",    sub: "text-pink-600",    avatar: "bg-pink-500",   ring: "ring-pink-200"    },
+  { bg: "bg-indigo-50",  stripe: "bg-indigo-500",  text: "text-indigo-900",  sub: "text-indigo-600",  avatar: "bg-indigo-600", ring: "ring-indigo-200"  },
 ];
 
 const Toast = ({ msg, type, onClose }) => (
@@ -42,10 +42,10 @@ const urgencyTag = (date) => {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const t = new Date(date); t.setHours(0, 0, 0, 0);
   const d = Math.round((t - today) / 86400000);
-  if (d < 0)   return { label: "Overdue",   cls: "bg-rose-100 text-rose-700 border-rose-200" };
-  if (d === 0) return { label: "Today",     cls: "bg-rose-50 text-rose-600 border-rose-100" };
-  if (d === 1) return { label: "Tomorrow",  cls: "bg-amber-50 text-amber-600 border-amber-100" };
-  return         { label: "This week",      cls: "bg-slate-100 text-slate-500 border-slate-200" };
+  if (d < 0)   return { label: "Overdue",  cls: "bg-rose-100 text-rose-700 border-rose-200"   };
+  if (d === 0) return { label: "Today",    cls: "bg-rose-50 text-rose-600 border-rose-100"     };
+  if (d === 1) return { label: "Tomorrow", cls: "bg-amber-50 text-amber-600 border-amber-100"  };
+  return         { label: "This week",     cls: "bg-slate-100 text-slate-500 border-slate-200" };
 };
 
 export default function Rota() {
@@ -55,18 +55,22 @@ export default function Rota() {
   const [loading,   setLoading]       = useState(true);
   const [showUnassigned, setShowUnassigned] = useState(true);
 
-  // sidebar-style assign (from unassigned list)
+  // Assign modal (from unassigned card button)
   const [assignTarget, setAssignTarget] = useState(null);
   const [pickedWorker, setPickedWorker] = useState("");
   const [pickedHours,  setPickedHours]  = useState("");
 
-  // quick cell-assign (from + button in grid)
-  const [cellAssign,   setCellAssign]   = useState(null);
-  const [pickedBooking,setPickedBooking]= useState("");
-  const [cellHours,    setCellHours]    = useState("");
+  // Cell-assign modal (from + button in grid)
+  const [cellAssign,    setCellAssign]    = useState(null);
+  const [pickedBooking, setPickedBooking] = useState("");
+  const [cellHours,     setCellHours]     = useState("");
 
   const [assigning, setAssigning] = useState(false);
   const [toast,     setToast]     = useState(null);
+
+  // Drag and drop state
+  const [draggedId,   setDraggedId]   = useState(null);
+  const [dragOverCell, setDragOverCell] = useState(null); // "${workerId}_${dateKey}"
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -194,6 +198,50 @@ export default function Rota() {
     }
   };
 
+  // ── Drag-and-drop assign ──────────────────────────────────────────────────
+  const handleDragAssign = async (bookingId, workerId) => {
+    const workerName = workers.find(w => w._id === workerId)?.firstName || "worker";
+    try {
+      const res = await fetch(`${API}/workers/jobs/${bookingId}/assign`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workerId }),
+      });
+      if (!res.ok) throw new Error("Assignment failed");
+      showToast(`Assigned to ${workerName} — worker notified`);
+      fetchData();
+    } catch {
+      showToast("Failed to assign shift", "error");
+    }
+  };
+
+  const onDragStart = (e, bookingId) => {
+    e.dataTransfer.setData("bookingId", bookingId);
+    e.dataTransfer.effectAllowed = "move";
+    setDraggedId(bookingId);
+  };
+
+  const onDragEnd = () => {
+    setDraggedId(null);
+    setDragOverCell(null);
+  };
+
+  const onCellDragOver = (e, cellKey) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverCell(cellKey);
+  };
+
+  const onCellDragLeave = () => setDragOverCell(null);
+
+  const onCellDrop = (e, workerId) => {
+    e.preventDefault();
+    const bookingId = e.dataTransfer.getData("bookingId");
+    setDraggedId(null);
+    setDragOverCell(null);
+    if (bookingId) handleDragAssign(bookingId, workerId);
+  };
+
   const workerColorMap = useMemo(() => {
     const map = {};
     workers.forEach((w, i) => { map[w._id] = WORKER_COLORS[i % WORKER_COLORS.length]; });
@@ -209,13 +257,13 @@ export default function Rota() {
     <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
-      {/* ── Toolbar ────────────────────────────────────────── */}
+      {/* ── Toolbar ──────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
+          <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2.5 tracking-tight">
             <CalendarRange size={22} className="text-primary" /> Rota
           </h1>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-sm text-slate-400 mt-0.5 font-medium">
             Assign workers to bookings and manage the weekly schedule
           </p>
         </div>
@@ -246,59 +294,57 @@ export default function Rota() {
         </div>
       </div>
 
-      {/* ── KPI strip ───────────────────────────────────────── */}
+      {/* ── KPI strip ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { icon: Users,         label: "Active Staff",    value: workers.length,          accent: "bg-blue-50 text-blue-600" },
-          { icon: CheckCircle2,  label: "Shifts Assigned", value: assignedThisWeek.length, accent: "bg-emerald-50 text-emerald-600" },
-          { icon: AlertTriangle, label: "Unassigned",      value: unassigned.length,       accent: unassigned.length > 0 ? "bg-rose-50 text-rose-600" : "bg-slate-100 text-slate-400" },
-          { icon: Hourglass,     label: "Hours Scheduled", value: `${totalHoursThisWeek}h`,accent: "bg-violet-50 text-violet-600" },
+          { icon: Users,         label: "Active Staff",    value: workers.length,           accent: "bg-blue-50 text-blue-600"     },
+          { icon: CheckCircle2,  label: "Shifts Assigned", value: assignedThisWeek.length,  accent: "bg-emerald-50 text-emerald-600" },
+          { icon: AlertTriangle, label: "Unassigned",      value: unassigned.length,        accent: unassigned.length > 0 ? "bg-rose-50 text-rose-600" : "bg-slate-100 text-slate-400" },
+          { icon: Hourglass,     label: "Hours Scheduled", value: `${totalHoursThisWeek}h`, accent: "bg-violet-50 text-violet-600" },
         ].map(({ icon: Icon, label, value, accent }) => (
           <div key={label} className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${accent}`}>
               <Icon size={17} />
             </div>
             <div>
-              <p className="text-xl font-bold text-slate-900 tabular-nums leading-none">{value}</p>
+              <p className="text-xl font-black text-slate-900 tabular-nums leading-none">{value}</p>
               <p className="text-[10px] font-semibold text-slate-400 mt-1">{label}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ── Full-width spreadsheet grid ─────────────────────── */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      {/* ── Grid ──────────────────────────────────────────────────── */}
+      <div className={`bg-white border rounded-2xl shadow-sm overflow-hidden transition-all ${draggedId ? "border-primary/40 shadow-primary/10 shadow-lg" : "border-slate-200"}`}>
+        {/* Drag hint banner — shown while dragging */}
+        {draggedId && (
+          <div className="bg-primary/8 border-b border-primary/20 px-5 py-2.5 flex items-center gap-2">
+            <GripVertical size={14} className="text-primary animate-pulse" />
+            <p className="text-xs font-bold text-primary">Drop onto a worker row to assign this shift instantly</p>
+          </div>
+        )}
+
         <div className="overflow-x-auto">
           <table className="w-full border-collapse" style={{ minWidth: 980 }}>
 
             {/* Header row */}
             <thead>
               <tr>
-                {/* Staff column header */}
-                <th
-                  className="sticky left-0 z-20 bg-slate-50 border border-slate-200 px-5 py-4 text-left"
-                  style={{ minWidth: 200 }}
-                >
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Staff Member</span>
+                <th className="sticky left-0 z-20 bg-slate-50 border border-slate-200 px-5 py-4 text-left" style={{ minWidth: 210 }}>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Staff Member</span>
                 </th>
-
-                {/* Day headers */}
                 {days.map(d => {
                   const isToday   = dateKey(d) === todayKey;
                   const isWeekend = d.getDay() === 0 || d.getDay() === 6;
                   return (
                     <th
                       key={dateKey(d)}
-                      className={`border border-slate-200 px-4 py-4 text-center ${
-                        isToday ? "bg-primary/8" : isWeekend ? "bg-slate-50" : "bg-white"
-                      }`}
+                      className={`border border-slate-200 px-4 py-4 text-center ${isToday ? "bg-primary/8" : isWeekend ? "bg-slate-50" : "bg-white"}`}
                     >
-                      <p className={`text-[11px] font-bold uppercase tracking-widest leading-none ${isToday ? "text-primary" : "text-slate-400"}`}>
+                      <p className={`text-[10px] font-black uppercase tracking-widest leading-none ${isToday ? "text-primary" : "text-slate-400"}`}>
                         {d.toLocaleDateString("en-GB", { weekday: "short" })}
                       </p>
-                      <p className={`text-2xl font-black tabular-nums leading-tight mt-0.5 ${
-                        isToday ? "text-primary" : isWeekend ? "text-slate-400" : "text-slate-800"
-                      }`}>
+                      <p className={`text-2xl font-black tabular-nums leading-tight mt-0.5 ${isToday ? "text-primary" : isWeekend ? "text-slate-400" : "text-slate-800"}`}>
                         {d.getDate()}
                       </p>
                       <p className={`text-[10px] font-semibold mt-0.5 ${isToday ? "text-primary/60" : "text-slate-300"}`}>
@@ -308,10 +354,8 @@ export default function Rota() {
                     </th>
                   );
                 })}
-
-                {/* Hrs column header */}
-                <th className="sticky right-0 z-10 bg-slate-50 border border-slate-200 px-4 py-4 text-center" style={{ minWidth: 80 }}>
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Hrs</span>
+                <th className="sticky right-0 z-10 bg-slate-50 border border-slate-200 px-4 py-4 text-center" style={{ minWidth: 72 }}>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hrs</span>
                 </th>
               </tr>
             </thead>
@@ -340,65 +384,71 @@ export default function Rota() {
                   return (
                     <tr key={w._id} className="group/row">
 
-                      {/* Worker name cell (sticky) */}
-                      <td
-                        className="sticky left-0 z-10 bg-white border border-slate-200 px-5 py-4 align-middle"
-                        style={{ minWidth: 200 }}
-                      >
+                      {/* Worker name cell */}
+                      <td className="sticky left-0 z-10 bg-white border border-slate-200 px-5 py-4 align-middle" style={{ minWidth: 210 }}>
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-black text-white shrink-0 ${color.avatar}`}>
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-black text-white shrink-0 ${color.avatar} ring-2 ring-white`}>
                             {initials(w.firstName, w.lastName)}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-800 leading-tight">
-                              {w.firstName} {w.lastName}
-                            </p>
-                            {w.role && (
-                              <p className="text-[10px] text-slate-400 font-medium mt-0.5">{w.role}</p>
-                            )}
-                            <p className={`text-[10px] font-bold mt-1 ${weeklyHours > 0 ? color.sub : "text-slate-300"}`}>
+                            <p className="text-sm font-bold text-slate-800 leading-tight">{w.firstName} {w.lastName}</p>
+                            {w.role && <p className="text-[10px] text-slate-400 font-medium mt-0.5">{w.role}</p>}
+                            <p className={`text-[10px] font-bold mt-1 tabular-nums ${weeklyHours > 0 ? color.sub : "text-slate-300"}`}>
                               {weeklyHours > 0 ? `${weeklyHours}h this week` : "No shifts yet"}
                             </p>
                           </div>
                         </div>
                       </td>
 
-                      {/* Day shift cells */}
+                      {/* Day cells */}
                       {days.map(d => {
-                        const shifts = shiftsFor(w._id, d);
-                        const isToday   = dateKey(d) === todayKey;
-                        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                        const shifts      = shiftsFor(w._id, d);
+                        const isToday     = dateKey(d) === todayKey;
+                        const isWeekend   = d.getDay() === 0 || d.getDay() === 6;
+                        const cellKey     = `${w._id}_${dateKey(d)}`;
+                        const isOver      = dragOverCell === cellKey;
                         const dayUnassigned = unassigned.filter(b => dateKey(new Date(b.schedule.date)) === dateKey(d));
-                        const canAdd = dayUnassigned.length > 0;
+                        const canAdd      = dayUnassigned.length > 0;
 
                         return (
                           <td
                             key={dateKey(d)}
-                            className={`border border-slate-200 px-3 py-3 align-top ${
-                              isToday ? "bg-primary/5" : isWeekend ? "bg-slate-50/70" : "bg-white"
+                            onDragOver={e => onCellDragOver(e, cellKey)}
+                            onDragLeave={onCellDragLeave}
+                            onDrop={e => onCellDrop(e, w._id)}
+                            className={`border border-slate-200 px-3 py-3 align-top transition-colors ${
+                              isOver
+                                ? "bg-primary/10 border-primary/30"
+                                : isToday   ? "bg-primary/5"
+                                : isWeekend ? "bg-slate-50/70"
+                                : "bg-white"
                             }`}
-                            style={{ minWidth: 148, minHeight: 88 }}
+                            style={{ minWidth: 148 }}
                           >
                             <div className="flex flex-col gap-1.5 min-h-16">
+
+                              {/* Drop zone overlay label */}
+                              {isOver && (
+                                <div className="flex items-center justify-center h-10 rounded-xl border-2 border-dashed border-primary/50 bg-primary/5 text-[10px] font-black text-primary">
+                                  Drop to assign
+                                </div>
+                              )}
+
                               {/* Shift cards */}
-                              {shifts.map(s => (
+                              {!isOver && shifts.map(s => (
                                 <div
                                   key={s._id}
-                                  className={`${color.bg} rounded-xl px-3 py-2.5 border border-opacity-60 relative overflow-hidden`}
+                                  className={`${color.bg} rounded-xl px-3 py-2 relative overflow-hidden border border-transparent hover:border-opacity-60 transition-all`}
                                   title={s.details?.address}
                                 >
-                                  {/* Coloured left stripe */}
                                   <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-xl ${color.stripe}`} />
-                                  <div className="pl-1">
-                                    <p className={`text-[11px] font-bold leading-snug truncate ${color.text}`}>
-                                      {s.service}
-                                    </p>
+                                  <div className="pl-1.5">
+                                    <p className={`text-[11px] font-bold leading-snug truncate ${color.text}`}>{s.service}</p>
                                     <p className={`text-[10px] font-semibold flex items-center gap-1 mt-0.5 ${color.sub}`}>
-                                      <Clock size={9} />
-                                      {s.schedule?.timeSlot || "—"}
+                                      <Clock size={9} />{s.schedule?.timeSlot || "—"}
                                     </p>
                                     {s.workerDuration && (
-                                      <span className={`inline-block mt-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${color.bg} border ${color.sub}`}>
+                                      <span className={`inline-block mt-1 text-[9px] font-black px-1.5 py-px rounded-full ${color.bg} border ${color.ring}`}>
                                         {s.workerDuration}h
                                       </span>
                                     )}
@@ -406,8 +456,8 @@ export default function Rota() {
                                 </div>
                               ))}
 
-                              {/* Add-shift button (shows on row hover when unassigned bookings exist) */}
-                              {canAdd && (
+                              {/* Add-shift button */}
+                              {!isOver && canAdd && (
                                 <button
                                   onClick={() => openCellAssign(w, d)}
                                   className="flex items-center justify-center gap-1.5 py-2 rounded-xl border-2 border-dashed border-slate-200 text-slate-300 hover:border-primary/50 hover:text-primary hover:bg-primary/5 opacity-0 group-hover/row:opacity-100 transition-all text-[10px] font-bold"
@@ -417,8 +467,7 @@ export default function Rota() {
                                 </button>
                               )}
 
-                              {/* Empty cell placeholder */}
-                              {shifts.length === 0 && !canAdd && (
+                              {shifts.length === 0 && !canAdd && !isOver && (
                                 <div className="flex-1 min-h-12" />
                               )}
                             </div>
@@ -426,12 +475,10 @@ export default function Rota() {
                         );
                       })}
 
-                      {/* Weekly hours total (sticky right) */}
-                      <td
-                        className="sticky right-0 z-10 bg-white border border-slate-200 px-4 py-4 text-center align-middle"
-                      >
+                      {/* Weekly hours total */}
+                      <td className="sticky right-0 z-10 bg-white border border-slate-200 px-3 py-4 text-center align-middle">
                         <span className={`text-sm font-black tabular-nums px-2.5 py-1.5 rounded-xl block text-center ${
-                          weeklyHours > 0 ? `${color.bg} ${color.text}` : "bg-slate-100 text-slate-400"
+                          weeklyHours > 0 ? `${color.bg} ${color.text}` : "bg-slate-50 text-slate-300"
                         }`}>
                           {weeklyHours}h
                         </span>
@@ -446,8 +493,8 @@ export default function Rota() {
 
         {/* Summary footer */}
         {!loading && workers.length > 0 && (
-          <div className="px-6 py-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-4">
-            <p className="text-xs text-slate-500 font-semibold">
+          <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-4">
+            <p className="text-xs text-slate-500 font-semibold tabular-nums">
               {workers.length} staff &nbsp;·&nbsp; {assignedThisWeek.length} shifts assigned &nbsp;·&nbsp; {totalHoursThisWeek}h total
             </p>
             {unassigned.length > 0 && (
@@ -464,17 +511,20 @@ export default function Rota() {
         )}
       </div>
 
-      {/* ── Unassigned panel (below grid) ───────────────────── */}
+      {/* ── Unassigned panel ──────────────────────────────────────── */}
       {!loading && unassigned.length > 0 && showUnassigned && (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden animate-in slide-in-from-top-2 duration-200">
-          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center">
                 <AlertTriangle size={15} className="text-rose-500" />
               </div>
               <div>
                 <p className="text-sm font-bold text-slate-800">Unassigned Shifts</p>
-                <p className="text-[11px] text-slate-400">{unassigned.length} booking{unassigned.length !== 1 ? "s" : ""} still need a worker</p>
+                <p className="text-[11px] text-slate-400">
+                  {unassigned.length} booking{unassigned.length !== 1 ? "s" : ""} need a worker &nbsp;·&nbsp;
+                  <span className="text-primary font-semibold">Drag cards onto the grid to assign</span>
+                </p>
               </div>
             </div>
             <button onClick={() => setShowUnassigned(false)} className="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
@@ -482,17 +532,28 @@ export default function Rota() {
             </button>
           </div>
 
-          {/* Horizontal scrolling cards */}
           <div className="flex gap-4 overflow-x-auto px-6 py-5" style={{ scrollbarWidth: "thin" }}>
             {unassigned.map(b => {
-              const tag = urgencyTag(b.schedule.date);
+              const tag     = urgencyTag(b.schedule.date);
+              const isDragging = draggedId === b._id;
+
               return (
                 <div
                   key={b._id}
-                  className="shrink-0 w-64 border border-slate-200 rounded-2xl p-4 bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all"
+                  draggable
+                  onDragStart={e => onDragStart(e, b._id)}
+                  onDragEnd={onDragEnd}
+                  className={`shrink-0 w-64 border rounded-2xl p-4 transition-all select-none ${
+                    isDragging
+                      ? "opacity-40 border-primary/40 bg-primary/5 scale-95 shadow-lg"
+                      : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:shadow-md cursor-grab active:cursor-grabbing"
+                  }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-3">
-                    <p className="text-sm font-bold text-slate-800 leading-snug">{b.service}</p>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <GripVertical size={13} className="text-slate-300 shrink-0 -ml-1" />
+                      <p className="text-sm font-bold text-slate-800 leading-snug truncate">{b.service}</p>
+                    </div>
                     <span className={`text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border shrink-0 ${tag.cls}`}>
                       {tag.label}
                     </span>
@@ -529,7 +590,7 @@ export default function Rota() {
         </div>
       )}
 
-      {/* ── Assign Worker modal ─────────────────────────────── */}
+      {/* ── Assign Worker modal ───────────────────────────────────── */}
       {assignTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
@@ -554,7 +615,7 @@ export default function Rota() {
                 )}
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Select Worker</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-2">Select Worker</label>
                 <select
                   value={pickedWorker}
                   onChange={e => setPickedWorker(e.target.value)}
@@ -567,7 +628,7 @@ export default function Rota() {
                 </select>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Hours They'll Work</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-2">Hours They'll Work</label>
                 <div className="relative">
                   <input
                     type="number" min="0.5" step="0.5"
@@ -593,7 +654,7 @@ export default function Rota() {
         </div>
       )}
 
-      {/* ── Quick cell-assign modal ─────────────────────────── */}
+      {/* ── Quick cell-assign modal ───────────────────────────────── */}
       {cellAssign && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
@@ -611,7 +672,7 @@ export default function Rota() {
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-2">
                   Unassigned Booking ({cellAssign.options.length})
                 </label>
                 <select
@@ -631,7 +692,7 @@ export default function Rota() {
                 </select>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Hours They'll Work</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-2">Hours They'll Work</label>
                 <div className="relative">
                   <input
                     type="number" min="0.5" step="0.5"

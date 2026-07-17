@@ -16,10 +16,10 @@ const Footer = () => {
   const { region } = useRegion();
 
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://www.myjobquote.co.uk/js/widget.js";
-    script.async = true;
-    script.onload = () => {
+    const mjqScript = document.createElement("script");
+    mjqScript.src = "https://www.myjobquote.co.uk/js/widget.js";
+    mjqScript.async = true;
+    mjqScript.onload = () => {
       try {
         new window.MyJobQuoteWidget().init({
           targetId: "mjq-widget",
@@ -28,9 +28,16 @@ const Footer = () => {
         });
       } catch {}
     };
-    document.body.appendChild(script);
+    document.body.appendChild(mjqScript);
+
+    const barkScript = document.createElement("script");
+    barkScript.src = "https://www.bark.com/assets/js/frontend-v2/widgets-v2.7f94dbb7d9ce0d27fb12f0374e491545.v2.js";
+    barkScript.defer = true;
+    document.body.appendChild(barkScript);
+
     return () => {
-      if (document.body.contains(script)) document.body.removeChild(script);
+      if (document.body.contains(mjqScript)) document.body.removeChild(mjqScript);
+      if (document.body.contains(barkScript)) document.body.removeChild(barkScript);
     };
   }, []);
 
@@ -181,10 +188,26 @@ const Footer = () => {
           <div className="flex flex-wrap items-center gap-4">
             {/* MyJobQuote badge */}
             <div
-              style={{ transform: "scale(0.78)", transformOrigin: "left center" }}
+              style={{ transform: "scale(0.62)", transformOrigin: "left center" }}
               className="flex-shrink-0"
             >
               <div id="mjq-widget" />
+            </div>
+
+            {/* Bark verified badge */}
+            <div className="flex-shrink-0">
+              <a
+                href="https://www.bark.com/en/gb/company/cleaniq-services/0mRwz4/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bark-widget"
+                data-type="verified"
+                data-id="0mRwz4"
+                data-image="medium-navy"
+                data-version="3.0"
+              >
+                Cleaniq Services
+              </a>
             </div>
 
             {/* Google Reviews badge */}

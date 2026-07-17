@@ -11,6 +11,16 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 const STAGES = ["New", "Quoted", "Follow-up", "Booked", "Lost"];
 const COLUMN_PAGE_SIZE = 8;
 
+// Maps a booking status → pipeline stage. Returns null if no clear mapping.
+function bookingStatusToStage(status) {
+  if (!status) return null;
+  const s = status.toLowerCase();
+  if (["confirmed", "upcoming", "in progress", "completed", "completed - unpaid"].some(v => s.includes(v))) return "Booked";
+  if (["cancelled", "no show", "blackout", "lost"].some(v => s.includes(v))) return "Lost";
+  if (["quoted", "pending"].some(v => s.includes(v))) return "Quoted";
+  return null;
+}
+
 const STAGE_STYLES = {
   New:         { border: "border-l-blue-500",   badge: "bg-blue-50 text-blue-700 border-blue-200",     dot: "bg-blue-500" },
   Quoted:      { border: "border-l-amber-500",  badge: "bg-amber-50 text-amber-700 border-amber-200",   dot: "bg-amber-500" },
@@ -292,6 +302,9 @@ function LeadDrawer({ lead, onClose, onMove, onDelete, onSave, movingId }) {
 export default function Pipeline() {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState(null);
+  const [syncCount, setSyncCount] = useState(0);
   const [movingId, setMovingId] = useState(null);
   const [selectedLead, setSelectedLead] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -300,26 +313,76 @@ export default function Pipeline() {
   const [error, setError] = useState("");
   const [colPages, setColPages] = useState({});
 
-  const fetchLeads = useCallback(async () => {
-    setLoading(true);
+  const fetchLeads = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
+    else setSyncing(true);
     try {
-      const res = await axios.get(`${API}/leads`);
-      setLeads(Array.isArray(res.data) ? res.data : []);
+      // Fetch leads and bookings in parallel
+      const [leadsRes, bookingsRes] = await Promise.allSettled([
+        axios.get(`${API}/leads`),
+        axios.get(`${API}/bookings`),
+      ]);
+
+      const rawLeads = leadsRes.status === "fulfilled" && Array.isArray(leadsRes.value.data)
+        ? leadsRes.value.data : [];
+      const bookings = bookingsRes.status === "fulfilled" && Array.isArray(bookingsRes.value.data)
+        ? bookingsRes.value.data : [];
+
+      // Build email → most-recent booking map
+      const emailToBooking = {};
+      bookings.forEach(b => {
+        const email = b.customer?.email?.toLowerCase();
+        if (!email) return;
+        const existing = emailToBooking[email];
+        if (!existing || new Date(b.createdAt) > new Date(existing.createdAt)) {
+          emailToBooking[email] = b;
+        }
+      });
+
+      // Auto-sync each lead's stage from its linked booking
+      let autoMoved = 0;
+      const syncPromises = [];
+      const syncedLeads = rawLeads.map(lead => {
+        const booking = emailToBooking[lead.email?.toLowerCase()];
+        if (!booking) return lead;
+        const autoStage = bookingStatusToStage(booking.status);
+        if (autoStage && autoStage !== (lead.stage || "New")) {
+          autoMoved++;
+          syncPromises.push(
+            axios.post(`${API}/leads/${lead._id}/update`, { stage: autoStage }).catch(() => {})
+          );
+          return { ...lead, stage: autoStage, _autoSynced: true, _bookingRef: booking.bookingId || booking._id };
+        }
+        return { ...lead, _bookingRef: booking?.bookingId || null };
+      });
+
+      await Promise.allSettled(syncPromises);
+      setLeads(syncedLeads);
+      setSyncCount(autoMoved);
+      setLastSync(new Date());
     } catch {
-      setError("Failed to load leads");
+      setError("Failed to load pipeline");
     } finally {
       setLoading(false);
+      setSyncing(false);
     }
   }, []);
 
+  // Initial load
   useEffect(() => { fetchLeads(); }, [fetchLeads]);
+
+  // Auto-refresh every 2 minutes
+  useEffect(() => {
+    const timer = setInterval(() => fetchLeads(true), 2 * 60 * 1000);
+    return () => clearInterval(timer);
+  }, [fetchLeads]);
 
   const moveToStage = async (lead, newStage) => {
     setMovingId(lead._id);
     try {
       await axios.post(`${API}/leads/${lead._id}/update`, { stage: newStage });
-      setLeads(prev => prev.map(l => l._id === lead._id ? { ...l, stage: newStage } : l));
-      if (selectedLead?._id === lead._id) setSelectedLead(l => ({ ...l, stage: newStage }));
+      setLeads(prev => prev.map(l => l._id === lead._id ? { ...l, stage: newStage, _autoSynced: false } : l));
+      if (selectedLead?._id === lead._id) setSelectedLead(l => ({ ...l, stage: newStage, _autoSynced: false }));
     } catch {
       setError("Failed to update stage");
     } finally {
@@ -384,13 +447,26 @@ export default function Pipeline() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Lead Pipeline</h1>
-          <p className="text-sm text-zinc-500 mt-1">Track leads through your sales stages.</p>
+          <p className="text-sm text-zinc-500 mt-1">
+            Stages update automatically from booking status.
+            {lastSync && (
+              <span className="ml-2 text-zinc-400">
+                Last synced {lastSync.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                {syncCount > 0 && <span className="ml-1 text-emerald-600 font-semibold">· {syncCount} moved automatically</span>}
+              </span>
+            )}
+          </p>
         </div>
-        <button onClick={fetchLeads} className="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-900 px-3 py-2 rounded-xl hover:bg-zinc-100 transition-colors">
-          <RefreshCw size={14} /> Refresh
+        <button
+          onClick={() => fetchLeads(true)}
+          disabled={syncing}
+          className="flex items-center gap-2 text-xs font-semibold text-zinc-500 hover:text-zinc-900 px-3 py-2 rounded-xl hover:bg-zinc-100 transition-colors shrink-0"
+        >
+          <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
+          {syncing ? "Syncing…" : "Sync Now"}
         </button>
       </div>
 
@@ -502,9 +578,21 @@ export default function Pipeline() {
                       </p>
                     )}
 
-                    <div className="flex items-center justify-between mt-2.5">
-                      <p className="text-[10px] text-zinc-400">{fmtDate(lead.createdAt)}</p>
-                      <ChevronRight size={12} className="text-zinc-300 group-hover:text-zinc-400 transition-colors" />
+                    <div className="flex items-center justify-between mt-2.5 gap-2">
+                      <p className="text-[10px] text-zinc-400 shrink-0">{fmtDate(lead.createdAt)}</p>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {lead._bookingRef && (
+                          <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full truncate">
+                            {lead._bookingRef}
+                          </span>
+                        )}
+                        {lead._autoSynced && (
+                          <span className="text-[9px] font-bold text-blue-600 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-full shrink-0">
+                            Auto
+                          </span>
+                        )}
+                      </div>
+                      <ChevronRight size={12} className="text-zinc-300 group-hover:text-zinc-400 transition-colors shrink-0" />
                     </div>
                   </div>
                 ))}

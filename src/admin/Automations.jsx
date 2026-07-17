@@ -3,7 +3,7 @@ import axios from "axios";
 import {
   Search, Users, Mail, MailX, CheckCircle2, XCircle,
   ChevronDown, ChevronUp, Save, UserCheck, UserX, RefreshCw,
-  Send, RotateCcw, ChevronRight,
+  Send, RotateCcw, ChevronRight, X,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -67,7 +67,7 @@ function Checkbox({ checked, indeterminate, onChange }) {
   return (
     <button
       type="button"
-      onClick={onChange}
+      onClick={(e) => { e.stopPropagation(); onChange(); }}
       className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
         checked
           ? "bg-zinc-900 border-zinc-900"
@@ -100,10 +100,15 @@ export default function Automations() {
   const [resendingId, setResendingId]   = useState(null);
   const [toast, setToast]               = useState(null);
 
-  // Manual send state (Audience tab)
+  // Manual send state (Audience tab — bulk)
   const [manualType, setManualType]       = useState("referral_offer_48h");
   const [manualService, setManualService] = useState("");
   const [manualSending, setManualSending] = useState(false);
+
+  // Quick send — single customer
+  const [quickSend, setQuickSend]       = useState(null); // { id, name, email } | null
+  const [quickSendType, setQuickSendType] = useState("referral_offer_48h");
+  const [quickSending, setQuickSending] = useState(false);
 
   // Audience tab state
   const [customers, setCustomers]           = useState([]);
@@ -219,6 +224,25 @@ export default function Automations() {
     }
   };
 
+  const doQuickSend = async () => {
+    if (!quickSend) return;
+    setQuickSending(true);
+    try {
+      await axios.post(`${API}/automations/send-manual`, {
+        type: quickSendType,
+        customerId: quickSend.id,
+        service: manualService || undefined,
+      });
+      showToast(`Email sent to ${quickSend.name}`, "success");
+      setQuickSend(null);
+      fetchAll();
+    } catch {
+      showToast("Failed to send — please try again");
+    } finally {
+      setQuickSending(false);
+    }
+  };
+
   // --- Audience logic ---
 
   const filteredCustomers = customers.filter(c => {
@@ -316,6 +340,46 @@ export default function Automations() {
       {toast && (
         <div className={`fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-80 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold text-white ${toast.type === "error" ? "bg-red-600" : "bg-green-600"}`}>
           {toast.msg}
+        </div>
+      )}
+
+      {/* Quick send tray — single customer */}
+      {quickSend && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900 border-t-2 border-emerald-500 shadow-2xl px-4 py-4">
+          <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-black text-white leading-tight">
+                Send to: <span className="text-emerald-400">{quickSend.name}</span>
+              </p>
+              <p className="text-[11px] text-zinc-500 truncate">{quickSend.email}</p>
+            </div>
+            <select
+              value={quickSendType}
+              onChange={e => setQuickSendType(e.target.value)}
+              className="w-full sm:w-auto flex-1 px-3 py-2 rounded-xl bg-zinc-800 text-white text-xs font-semibold border border-zinc-700 focus:outline-none focus:border-emerald-500"
+            >
+              <option value="review_request_2h">⭐ Review Request</option>
+              <option value="referral_offer_48h">🎁 Referral Offer</option>
+              <option value="rebooking_discount_3d">💰 Re-booking Discount (10% off)</option>
+              <option value="booking_reminder_24h">📅 Booking Reminder — 24h</option>
+              <option value="booking_reminder_3h">⏰ Booking Reminder — 3h</option>
+            </select>
+            <button
+              onClick={doQuickSend}
+              disabled={quickSending}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-black hover:bg-emerald-600 transition-colors disabled:opacity-60 shrink-0"
+            >
+              {quickSending ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
+              {quickSending ? "Sending…" : "Send Now"}
+            </button>
+            <button
+              onClick={() => setQuickSend(null)}
+              className="p-1.5 text-zinc-500 hover:text-white transition-colors shrink-0"
+              title="Cancel"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
       )}
 
@@ -704,6 +768,19 @@ export default function Automations() {
                           Excluded
                         </span>
                       )}
+
+                      {/* Quick send button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setQuickSend({ id: c._id, name: `${c.firstName} ${c.lastName}`.trim(), email: c.email });
+                        }}
+                        title="Send email to this customer now"
+                        className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-zinc-100 text-zinc-500 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-transparent text-[11px] font-bold transition-all"
+                      >
+                        <Send size={11} />
+                        Send
+                      </button>
                     </div>
                   );
                 })}
@@ -713,7 +790,7 @@ export default function Automations() {
             {/* Footer hint */}
             <div className="px-4 sm:px-6 py-3 border-t border-zinc-100 bg-zinc-50">
               <p className="text-xs text-zinc-400">
-                Select customers then use <strong>Enable</strong> or <strong>Exclude</strong> to control who receives automation emails. Changes apply immediately.
+                Click <strong>Send</strong> on any row to manually trigger an email for that customer. Select multiple customers to bulk enable/exclude or send to all at once.
               </p>
             </div>
           </div>
