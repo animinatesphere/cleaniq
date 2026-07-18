@@ -285,6 +285,12 @@ const AdminLayout = () => {
           icon: <Building2 size={20} />,
         },
         {
+          name: "Property Report",
+          path: "/admin/property-report",
+          key: "property-report",
+          icon: <ClipboardList size={20} />,
+        },
+        {
           name: "Domestic Hub",
           path: "/admin/domestic",
           key: "domestic",

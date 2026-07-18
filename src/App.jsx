@@ -64,7 +64,7 @@ import WorkerPerformance from "./admin/WorkerPerformance";
 import Referrals from "./admin/Referrals";
 import Campaigns from "./admin/Campaigns";
 import CustomerProfile from "./admin/CustomerProfile";
-import CommercialHub from "./admin/CommercialHub";
+import CommercialHub, { PropertyReport } from "./admin/CommercialHub";
 import DomesticHub from "./admin/DomesticHub";
 import PriceList from "./admin/PriceList";
 import JobDetail from "./admin/JobDetail";
@@ -143,6 +143,7 @@ function App() {
               <Route path="worker-performance" element={<WorkerPerformance />} />
               <Route path="referrals" element={<Referrals />} />
               <Route path="commercial" element={<CommercialHub />} />
+              <Route path="property-report" element={<PropertyReport />} />
               <Route path="domestic" element={<DomesticHub />} />
               <Route path="pricelist" element={<PriceList />} />
               <Route path="campaigns" element={<Campaigns />} />

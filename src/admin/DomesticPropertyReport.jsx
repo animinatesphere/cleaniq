@@ -155,6 +155,11 @@ const CSS = `
 #dom-rpt .cta{background:#1e293b;border-radius:10px;padding:16px 22px;margin-top:20px;text-align:center}
 #dom-rpt .cta-txt{color:rgba(255,255,255,.7);font-size:11px;line-height:1.6}
 #dom-rpt .cta-contact{color:#6ee7b7;font-weight:700}
+#dom-rpt .lf-item{margin-bottom:14px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
+#dom-rpt .lf-hdr{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#854d0e;padding:7px 12px;background:#fef9c3;border-bottom:1px solid #fde68a;display:flex;align-items:center;gap:6px}
+#dom-rpt .lf-desc{font-size:11px;color:#334155;padding:10px 12px;line-height:1.6;border-bottom:1px solid #f1f5f9}
+#dom-rpt .lf-pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 12px}
+#dom-rpt .lf-pgrid img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:5px;border:1px solid #e2e8f0;display:block}
 #dom-rpt .foot{background:#0A5C43;margin-top:36px;padding:13px 28px;display:flex;justify-content:space-between;align-items:center}
 #dom-rpt .foot-l{color:rgba(255,255,255,.65);font-size:9px;line-height:1.7}
 #dom-rpt .foot-l strong{color:#fff}
@@ -183,7 +188,9 @@ const DomesticPropertyReport = ({ booking, defaultOpen = false }) => {
   const [areas, setAreas]           = useState(() => defaultAreas(booking));
   const [reasons, setReasons]       = useState([]);
   const [extraNotes, setExtraNotes] = useState("");
-  const [extraHrs, setExtraHrs]     = useState(1);
+  const [extraHrs, setExtraHrs]       = useState(1);
+  const [manualRate, setManualRate]   = useState(""); // admin override for hourly rate
+  const [lostFound, setLostFound]     = useState([]);
   const [downloading, setDownloading] = useState(false);
   const [sending, setSending]         = useState(false);
   const [updating, setUpdating]       = useState(false);
@@ -209,16 +216,27 @@ const DomesticPropertyReport = ({ booking, defaultOpen = false }) => {
   const addPhotos = (id, items) => setAreas((p) => p.map((a) => a.id === id ? { ...a, photos: [...a.photos, ...items] } : a));
   const removePhoto = (id, idx) => setAreas((p) => p.map((a) => a.id === id ? { ...a, photos: a.photos.filter((_, i) => i !== idx) } : a));
 
+  // Lost & found helpers
+  const addLostFoundItem      = () => setLostFound((p) => [...p, { id: Date.now(), description: "", photos: [] }]);
+  const removeLostFoundItem   = (id) => setLostFound((p) => p.filter((x) => x.id !== id));
+  const updateLostFoundDesc   = (id, v) => setLostFound((p) => p.map((x) => x.id === id ? { ...x, description: v } : x));
+  const addLostFoundPhotos    = (id, items) => setLostFound((p) => p.map((x) => x.id === id ? { ...x, photos: [...x.photos, ...items] } : x));
+  const removeLostFoundPhoto  = (id, idx) => setLostFound((p) => p.map((x) => x.id === id ? { ...x, photos: x.photos.filter((_, i) => i !== idx) } : x));
+
   const toggleReason = (r) =>
     setReasons((p) => p.includes(r) ? p.filter((x) => x !== r) : [...p, r]);
 
   // Payment calculations
-  const bookedHrs  = parseFloat(booking?.details?.duration || booking?.workerDuration || 0);
-  const currentAmt = parseFloat(booking?.payment?.amount   || 0);
-  const hourlyRate = bookedHrs > 0 ? currentAmt / bookedHrs : null;
+  const bookedHrs    = parseFloat(booking?.details?.duration || booking?.workerDuration || 0);
+  const currentAmt   = parseFloat(booking?.payment?.amount   || 0);
+  const autoRate     = bookedHrs > 0 ? currentAmt / bookedHrs : null;
+  const effectiveRate = manualRate !== "" && !isNaN(parseFloat(manualRate))
+    ? parseFloat(manualRate)
+    : autoRate;
+  const hourlyRate = effectiveRate;
   const newHrs     = bookedHrs + extraHrs;
-  const extraCost  = hourlyRate ? hourlyRate * extraHrs : null;
-  const newTotal   = hourlyRate ? hourlyRate * newHrs   : null;
+  const extraCost  = effectiveRate ? effectiveRate * extraHrs : null;
+  const newTotal   = effectiveRate ? effectiveRate * newHrs   : null;
 
   const customerName = [booking?.customer?.firstName, booking?.customer?.lastName].filter(Boolean).join(" ") || "Customer";
   const address = booking?.details?.address || "";
@@ -263,6 +281,16 @@ ${areas.filter((a) => a.photos.some((p) => p.type === "image")).map((a) => {
 <div class="sh"><div class="sh-bar"></div><span class="sh-txt">Reasons for Additional Time</span><div class="sh-rule"></div></div>
 ${reasons.length ? `<div class="reasons">${reasons.map((r) => `<div class="reason"><span class="reason-dot"></span>${r}</div>`).join("")}</div>` : ""}
 ${extraNotes ? `<p style="font-size:11px;color:#334155;margin-top:10px;line-height:1.6">${extraNotes.replace(/\n/g, "<br>")}</p>` : ""}
+
+${lostFound.length ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Lost &amp; Found Items</span><div class="sh-rule"></div></div>
+${lostFound.map((item, i) => {
+  const imgs = item.photos.filter((p) => p.type === "image");
+  return `<div class="lf-item">
+  <div class="lf-hdr">🔍 Item ${i + 1}</div>
+  ${item.description ? `<div class="lf-desc">${item.description.replace(/\n/g, "<br>")}</div>` : ""}
+  ${withPhotos && imgs.length ? `<div class="lf-pgrid">${imgs.map((m) => `<img src="${m.src}">`).join("")}</div>` : imgs.length ? `<p style="font-size:11px;color:#64748b;padding:8px 12px">📷 ${imgs.length} photo(s)</p>` : ""}
+</div>`;
+}).join("")}` : ""}
 
 <div class="sh"><div class="sh-bar"></div><span class="sh-txt">Time &amp; Cost Summary</span><div class="sh-rule"></div></div>
 <div class="timebox">
@@ -539,9 +567,44 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
           {/* ── Step 3: Extra hours ───────────────────────────────────────── */}
           <div>
             <p className="text-sm font-black text-slate-800 mb-1">Step 3 — How Much Extra Time?</p>
-            <p className="text-xs text-slate-400 font-medium mb-4">
-              {bookedHrs > 0 ? `Booked: ${bookedHrs} hrs` : "No duration on booking"}{hourlyRate ? ` · £${hourlyRate.toFixed(2)}/hr` : ""}
+            <p className="text-xs text-slate-400 font-medium mb-3">
+              {bookedHrs > 0 ? `Booked: ${bookedHrs} hrs` : "No duration on booking"}
+              {autoRate ? ` · Auto rate: £${autoRate.toFixed(2)}/hr` : ""}
             </p>
+
+            {/* Admin rate override */}
+            <div className="flex items-center gap-2 mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+              <div className="flex-1">
+                <p className="text-[10px] font-black text-amber-800 uppercase tracking-wider mb-1">Hourly Rate for Extra Time</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-amber-700">£</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.50"
+                    value={manualRate}
+                    onChange={(e) => setManualRate(e.target.value)}
+                    placeholder={autoRate ? autoRate.toFixed(2) : "e.g. 25.00"}
+                    className="w-28 px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-sm font-bold text-slate-800 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                  />
+                  <span className="text-xs text-amber-700 font-medium">/hr</span>
+                  {manualRate !== "" && (
+                    <button
+                      onClick={() => setManualRate("")}
+                      className="text-[10px] text-amber-600 hover:text-amber-900 font-bold underline"
+                    >
+                      Reset to auto
+                    </button>
+                  )}
+                </div>
+              </div>
+              {effectiveRate && (
+                <div className="text-right shrink-0">
+                  <p className="text-[10px] font-black text-amber-700 uppercase tracking-wider">Extra Cost</p>
+                  <p className="text-xl font-black text-amber-800">£{(effectiveRate * extraHrs).toFixed(2)}</p>
+                </div>
+              )}
+            </div>
             <div className="flex flex-wrap gap-2 mb-4">
               {EXTRA_HOURS.map((h) => (
                 <button
@@ -578,6 +641,69 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
                   +£{extraCost.toFixed(2)}
                   {newTotal != null && <span className="text-xs text-slate-400 font-medium ml-1">(new total: £{newTotal.toFixed(2)})</span>}
                 </span>
+              </div>
+            )}
+          </div>
+
+          {/* ── Step 4: Lost & Found ─────────────────────────────────────── */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <p className="text-sm font-black text-slate-800">Step 4 — Lost &amp; Found Items</p>
+                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                  Record any items found that don't belong. Add a description and photos for each item.
+                </p>
+              </div>
+              <button
+                onClick={addLostFoundItem}
+                className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+              >
+                <Plus size={12} /> Add Item
+              </button>
+            </div>
+
+            {lostFound.length === 0 ? (
+              <button
+                onClick={addLostFoundItem}
+                className="mt-3 w-full flex items-center justify-center gap-2 py-6 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 hover:border-amber-400 hover:text-amber-600 transition-colors text-sm font-bold"
+              >
+                <Plus size={14} /> Log a Found Item
+              </button>
+            ) : (
+              <div className="space-y-4 mt-4">
+                {lostFound.map((item, i) => (
+                  <div key={item.id} className="border border-amber-200 rounded-2xl overflow-hidden bg-amber-50/30">
+                    <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border-b border-amber-100">
+                      <span className="text-xs font-black text-amber-700 uppercase tracking-wider">Item {i + 1}</span>
+                      <div className="flex-1" />
+                      <button onClick={() => removeLostFoundItem(item.id)} className="text-slate-300 hover:text-rose-500 transition-colors">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                    <div className="p-4 space-y-4">
+                      <textarea
+                        value={item.description}
+                        onChange={(e) => updateLostFoundDesc(item.id, e.target.value)}
+                        placeholder="Describe the item (e.g. black iPhone found under sofa cushion in living room)…"
+                        rows={2}
+                        className="w-full px-3.5 py-3 rounded-xl border border-amber-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-300/40 resize-none"
+                      />
+                      <MediaGrid
+                        items={item.photos}
+                        onAdd={(items) => addLostFoundPhotos(item.id, items)}
+                        onRemove={(idx) => removeLostFoundPhoto(item.id, idx)}
+                        label="Photos of item"
+                        hint="Add as many photos as needed"
+                      />
+                    </div>
+                  </div>
+                ))}
+                <button
+                  onClick={addLostFoundItem}
+                  className="flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:underline"
+                >
+                  <Plus size={12} /> Add another item
+                </button>
               </div>
             )}
           </div>

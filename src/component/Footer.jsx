@@ -181,21 +181,25 @@ const Footer = () => {
         </div>
 
         {/* Trust Badges Strip */}
-        <div className="mb-10 py-8 border-t border-b border-white/10">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary mb-5 text-center md:text-left">
+        <div className="mb-10 py-5 border-t border-b border-white/10">
+          <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 mb-3 text-center md:text-left">
             Trusted &amp; Verified On
           </p>
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+
             {/* MyJobQuote badge */}
             <div
-              style={{ transform: "scale(0.62)", transformOrigin: "left center" }}
+              style={{ transform: "scale(0.52)", transformOrigin: "left center", height: 32, overflow: "hidden" }}
               className="flex-shrink-0"
             >
               <div id="mjq-widget" />
             </div>
 
             {/* Bark verified badge */}
-            <div className="flex-shrink-0">
+            <div
+              style={{ transform: "scale(0.7)", transformOrigin: "left center", height: 32, overflow: "hidden" }}
+              className="flex-shrink-0"
+            >
               <a
                 href="https://www.bark.com/en/gb/company/cleaniq-services/0mRwz4/"
                 target="_blank"
@@ -212,50 +216,39 @@ const Footer = () => {
 
             {/* Google Reviews badge */}
             <a
-              href={
-                import.meta.env.VITE_GMB_REVIEW_URL ||
-                "https://g.page/r/CTGJLR1Z7dySEBM/review"
-              }
+              href={import.meta.env.VITE_GMB_REVIEW_URL || "https://g.page/r/CTGJLR1Z7dySEBM/review"}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 hover:bg-white/10 hover:border-white/20 transition-all duration-200 group flex-shrink-0"
+              className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 hover:bg-white/10 transition-colors flex-shrink-0"
               aria-label="See our Google Reviews"
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/60 leading-none mb-1">Google Reviews</p>
-                <div className="flex items-center gap-0.5">
+                <p className="text-[9px] font-black text-white/50 leading-none">Google</p>
+                <div className="flex items-center gap-px mt-0.5">
                   {[1,2,3,4,5].map((s) => (
-                    <svg key={s} width="11" height="11" viewBox="0 0 24 24" fill="#FBBC05">
+                    <svg key={s} width="7" height="7" viewBox="0 0 24 24" fill="#FBBC05">
                       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                     </svg>
                   ))}
-                  <span className="text-[10px] font-bold text-slate-400 ml-1">5.0</span>
+                  <span className="text-[8px] font-bold text-slate-400 ml-0.5">5.0</span>
                 </div>
               </div>
             </a>
 
             {/* Stripe badge */}
-            <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 flex-shrink-0">
-              <svg width="40" height="18" viewBox="0 0 60 26" fill="none">
+            <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 flex-shrink-0">
+              <svg width="28" height="12" viewBox="0 0 60 26" fill="none">
                 <path d="M5.452 10.172c0-.613.504-.849 1.34-.849 1.195 0 2.709.362 3.904 1.01V6.67c-1.307-.52-2.6-.724-3.904-.724C3.29 5.946 1 7.447 1 10.316c0 4.46 6.14 3.748 6.14 5.67 0 .724-.63.96-1.508.96-1.307 0-2.976-.543-4.294-1.274v3.704c1.463.63 2.94.897 4.294.897 3.276 0 5.53-1.618 5.53-4.52-.016-4.813-6.71-3.955-6.71-5.581zm14.543-3.85l-2.45.52-.016 12.02h3.386V6.994l-.92-.672zm5.403.672V6.67l-3.386.016v12.687l3.386-.016V10.9c.8-1.046 2.16-.854 2.578-.712V6.91c-.433-.16-2.02-.4-2.578.084zm5.64-1.843l-3.386.724v2.725l3.386-.016V18.7h3.387V6.81l-3.387.341zm4.36 12.352h3.387V6.655h-3.387V18.5zm1.697-13.48c1.083 0 1.955-.872 1.955-1.956C38.05.98 37.178 0 36.095 0c-1.083 0-1.955.98-1.955 2.064 0 1.084.872 1.956 1.955 1.956zm9.048 12.736c-1.084 0-1.83-.48-1.83-1.956V9.896h2.24V6.994h-2.24V3.75l-3.42.718v2.526H38.5v2.903h1.393v6.22c0 2.528 1.272 3.883 3.812 3.883.928 0 1.97-.236 2.67-.63v-2.77c-.522.27-1.24.557-1.78.557z" fill="#635BFF"/>
               </svg>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/60 leading-none mb-0.5">Secure Payments</p>
-                <p className="text-[10px] text-slate-500 font-semibold">Powered by Stripe</p>
-              </div>
-              <div className="flex items-center gap-1 ml-1">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2.5">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-                <span className="text-[10px] font-bold text-emerald-400">SSL</span>
-              </div>
+              <p className="text-[9px] font-bold text-white/40">Secure Pay</p>
             </div>
+
           </div>
         </div>
 

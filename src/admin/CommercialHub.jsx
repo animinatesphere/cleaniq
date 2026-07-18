@@ -160,7 +160,7 @@ const MediaGrid = ({ items, onAdd, onRemove, label, compact = false }) => {
   );
 };
 
-const PropertyReport = () => {
+export const PropertyReport = () => {
   const [info, setInfo] = useState({ propertyName: "", address: "", bookingRef: "", date: new Date().toISOString().slice(0, 10), cleaner: "", recipientEmail: "" });
   const [condition, setCondition] = useState("");
   // Embed logo as base64 so it shows in print/PDF regardless of how the window is opened
