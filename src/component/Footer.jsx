@@ -188,15 +188,15 @@ const Footer = () => {
           <div className="flex flex-wrap items-center gap-2">
 
             {/* MyJobQuote badge */}
-            <div
+            {/* <div
               style={{ transform: "scale(0.52)", transformOrigin: "left center", height: 32, overflow: "hidden" }}
               className="flex-shrink-0"
             >
               <div id="mjq-widget" />
-            </div>
+            </div> */}
 
             {/* Bark verified badge */}
-            <div
+            {/* <div
               style={{ transform: "scale(0.7)", transformOrigin: "left center", height: 32, overflow: "hidden" }}
               className="flex-shrink-0"
             >
@@ -212,7 +212,7 @@ const Footer = () => {
               >
                 Cleaniq Services
               </a>
-            </div>
+            </div> */}
 
             {/* Google Reviews badge */}
             <a
