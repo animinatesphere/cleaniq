@@ -207,16 +207,34 @@ const Workers = () => {
       w.email.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
+  const openDetail = (w) => {
+    setWorkerDetailModal(w);
+    setNewPassword("");
+    setShowNewPwd(false);
+    setShowStoredPwd(false);
+    setPwdSuccess(false);
+  };
+
+  const statusStyle = (s) =>
+    s === "Active"
+      ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+      : s === "Pending"
+      ? "bg-amber-50 text-amber-600 border-amber-200"
+      : "bg-rose-50 text-rose-600 border-rose-200";
+
+  const avatarColor = (s) =>
+    s === "Active" ? "bg-emerald-600" : s === "Pending" ? "bg-amber-500" : "bg-rose-500";
+
   return (
     <div className="space-y-8">
-      {/* Header section */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-primary-dark tracking-tight">
             Staff Management
           </h1>
           <p className="text-slate-500 font-medium text-sm mt-1">
-            Manage your cleaning staff and app access
+            Click any worker card to view account details &amp; credentials
           </p>
         </div>
         <button
@@ -227,230 +245,160 @@ const Workers = () => {
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
-            <Briefcase size={24} />
+      {/* Stats strip */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: "Total Staff", value: workers.length, icon: <Briefcase size={18} />, color: "bg-primary/10 text-primary" },
+          { label: "Active", value: workers.filter((w) => w.status === "Active" || w.appAccessGranted).length, icon: <ShieldCheck size={18} />, color: "bg-emerald-100 text-emerald-600" },
+          { label: "Pending Setup", value: workers.filter((w) => w.status === "Pending").length, icon: <AlertCircle size={18} />, color: "bg-amber-100 text-amber-600" },
+        ].map(({ label, value, icon, color }) => (
+          <div key={label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color}`}>{icon}</div>
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+              <p className="text-2xl font-black text-primary-dark leading-none mt-0.5">{value}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              Total Staff
-            </p>
-            <p className="text-2xl font-black text-primary-dark">
-              {workers.length}
-            </p>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center">
-            <ShieldCheck size={24} />
-          </div>
-          <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              Active (App Access)
-            </p>
-            <p className="text-2xl font-black text-primary-dark">
-              {
-                workers.filter(
-                  (w) => w.status === "Active" || w.appAccessGranted,
-                ).length
-              }
-            </p>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center">
-            <AlertCircle size={24} />
-          </div>
-          <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              Pending Setup
-            </p>
-            <p className="text-2xl font-black text-primary-dark">
-              {workers.filter((w) => w.status === "Pending").length}
-            </p>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Workers Table */}
-      <div className="bg-white rounded-[32px] md:rounded-[40px] shadow-sm border border-slate-100 overflow-hidden">
-        <div className="p-5 md:p-8 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-50/50">
-          <h2 className="text-lg font-black text-primary-dark">
-            Staff Directory
-          </h2>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border border-slate-200 focus-within:border-primary/50 transition-all w-full md:w-80 shadow-sm">
-              <Search size={18} className="text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search staff..."
-                className="bg-transparent border-none outline-none text-sm font-medium w-full text-slate-700"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            {selectedWorkers.size > 0 && (
-              <button
-                onClick={() => setShowBulkDeleteModal(true)}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:shadow-lg text-white font-black transition-all flex items-center gap-2 text-sm whitespace-nowrap"
-              >
-                <Trash2 size={18} />
-                Delete ({selectedWorkers.size})
-              </button>
-            )}
-          </div>
+      {/* Search + bulk delete */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border border-slate-200 focus-within:border-primary/40 shadow-sm flex-1">
+          <Search size={16} className="text-slate-400 shrink-0" />
+          <input
+            type="text"
+            placeholder="Search by name or email…"
+            className="bg-transparent border-none outline-none text-sm font-medium w-full text-slate-700 placeholder-slate-400"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
+        {selectedWorkers.size > 0 && (
+          <button
+            onClick={() => setShowBulkDeleteModal(true)}
+            className="px-5 py-3 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-colors"
+          >
+            <Trash2 size={14} /> Delete {selectedWorkers.size} selected
+          </button>
+        )}
+      </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="p-6 w-12">
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedWorkers.size === filteredWorkers.length &&
-                      filteredWorkers.length > 0
-                    }
-                    onChange={toggleSelectAllWorkers}
-                    className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
-                  />
-                </th>
-                <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  Worker ID & Name
-                </th>
-                <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  Contact
-                </th>
-                <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  Status & Region
-                </th>
-                <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  Performance
-                </th>
-                <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {loading ? (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="p-8 text-center text-slate-400 font-bold"
-                  >
-                    Loading staff...
-                  </td>
-                </tr>
-              ) : filteredWorkers.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="p-8 text-center text-slate-400 font-bold"
-                  >
-                    No staff found.
-                  </td>
-                </tr>
-              ) : (
-                filteredWorkers.map((w) => (
-                  <tr
-                    key={w._id}
-                    className={`transition-colors ${
-                      selectedWorkers.has(w._id)
-                        ? "bg-blue-50"
-                        : "hover:bg-slate-50/50"
-                    } group`}
-                  >
-                    <td className="p-6 w-12">
-                      <input
-                        type="checkbox"
-                        checked={selectedWorkers.has(w._id)}
-                        onChange={() => toggleWorkerSelection(w._id)}
-                        className="w-5 h-5 rounded border-2 border-slate-300 cursor-pointer accent-primary"
-                      />
-                    </td>
-                    <td className="p-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black uppercase text-sm shrink-0">
-                          {w.firstName[0]}
-                          {w.lastName[0]}
-                        </div>
-                        <div>
-                          <p className="font-bold text-sm text-primary-dark">
-                            {w.firstName} {w.lastName}
-                          </p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <p className="text-[10px] font-black text-slate-400 uppercase">
-                              {w.workerId}
-                            </p>
-                            <span className="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
-                              {w.role || "Cleaner"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-6">
-                      <p className="font-bold text-sm text-slate-600">
-                        {w.email}
-                      </p>
-                      <p className="text-xs text-slate-500 font-medium mt-0.5">
-                        {w.phone}
-                      </p>
-                    </td>
-                    <td className="p-6">
-                      <span
-                        className={`inline-flex px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest mb-1
-                        ${
-                          w.status === "Active"
-                            ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                            : w.status === "Pending"
-                              ? "bg-amber-50 text-amber-600 border border-amber-100"
-                              : "bg-rose-50 text-rose-600 border border-rose-100"
-                        }
-                      `}
-                      >
+      {/* Worker cards grid */}
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white rounded-3xl border border-slate-100 p-6 animate-pulse space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-2xl bg-slate-100" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-4 bg-slate-100 rounded-lg w-3/4" />
+                  <div className="h-3 bg-slate-100 rounded-lg w-1/2" />
+                </div>
+              </div>
+              <div className="h-3 bg-slate-100 rounded-lg w-full" />
+              <div className="h-3 bg-slate-100 rounded-lg w-2/3" />
+            </div>
+          ))}
+        </div>
+      ) : filteredWorkers.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-slate-100 p-16 text-center">
+          <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <User size={28} className="text-slate-300" />
+          </div>
+          <p className="font-black text-slate-400 text-lg">No staff found</p>
+          <p className="text-slate-300 text-sm font-medium mt-1">Try a different search or add a new worker</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredWorkers.map((w) => (
+            <div
+              key={w._id}
+              onClick={() => openDetail(w)}
+              className={`bg-white rounded-3xl border-2 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 overflow-hidden
+                ${selectedWorkers.has(w._id) ? "border-primary/40 bg-primary/5" : "border-slate-100 hover:border-primary/30"}`}
+            >
+              {/* Status accent strip */}
+              <div className={`h-1.5 w-full ${w.status === "Active" ? "bg-emerald-400" : w.status === "Pending" ? "bg-amber-400" : "bg-rose-400"}`} />
+
+              <div className="p-5">
+                {/* Avatar + name */}
+                <div className="flex items-start gap-4 mb-4">
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-lg text-white uppercase shrink-0 shadow-md ${avatarColor(w.status)}`}>
+                    {w.firstName?.[0]}{w.lastName?.[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-black text-slate-800 text-base leading-tight truncate">
+                      {w.firstName} {w.lastName}
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                      <span className="text-[9px] font-black text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {w.role || "Cleaner"}
+                      </span>
+                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${statusStyle(w.status)}`}>
                         {w.status}
                       </span>
-                      <p className="text-xs font-black text-slate-400 mt-1">
-                        Region: {w.region}
-                      </p>
-                    </td>
-                    <td className="p-6">
-                      <div className="flex items-center gap-1 text-sm font-black text-secondary">
-                        <span className="text-primary-dark">⭐ {w.rating}</span>
-                      </div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase mt-1">
-                        {w.jobsCompleted} Jobs
-                      </p>
-                    </td>
-                    <td className="p-6 text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => { setWorkerDetailModal(w); setNewPassword(""); setShowNewPwd(false); setShowStoredPwd(false); setPwdSuccess(false); }}
-                          className="p-2.5 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
-                          title="View account & credentials"
-                        >
-                          <Eye size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(w._id)}
-                          className="p-2.5 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-100 hover:text-rose-500 transition-all"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={selectedWorkers.has(w._id)}
+                    onChange={(e) => { e.stopPropagation(); toggleWorkerSelection(w._id); }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-4 h-4 rounded border-2 border-slate-300 cursor-pointer accent-primary shrink-0 mt-1"
+                  />
+                </div>
+
+                <div className="border-t border-slate-100 my-3" />
+
+                {/* Contact */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <div className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </div>
+                    <span className="font-semibold truncate">{w.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <div className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.61 5.61l.9-.9a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </div>
+                    <span className="font-semibold">{w.phone || "—"}</span>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-slate-50 rounded-xl p-2.5 text-center">
+                    <p className="text-sm font-black text-slate-700">{w.jobsCompleted ?? 0}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Jobs</p>
+                  </div>
+                  <div className="bg-slate-50 rounded-xl p-2.5 text-center">
+                    <p className="text-sm font-black text-slate-700">⭐ {w.rating ?? "—"}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Rating</p>
+                  </div>
+                  <div className="bg-slate-50 rounded-xl p-2.5 text-center overflow-hidden">
+                    <p className="text-[10px] font-black text-slate-600 truncate">{w.region || "—"}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Region</p>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{w.workerId}</span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDelete(w._id); }}
+                    className="p-1.5 rounded-lg text-slate-300 hover:bg-rose-50 hover:text-rose-500 transition-colors"
+                    title="Remove worker"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
+      )}
 
       {/* Add Worker Modal */}
       {showAddModal && (

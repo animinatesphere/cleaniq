@@ -75,214 +75,7 @@ const fmtTimeRange = (b) => {
 export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBookingsCreated }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarView, setCalendarView] = useState("month"); // "month" | "year"
-  const [showRecurring, setShowRecurring] = useState(false);
   const [selectedDateForDetails, setSelectedDateForDetails] = useState(null);
-  const [recurringLoading, setRecurringLoading] = useState(false);
-  const [recurringSuccess, setRecurringSuccess] = useState(null);
-  const [recurringForm, setRecurringForm] = useState({
-    frequency: "weekly",
-    startDate: "",
-    endDate: "",
-    timeSlot: "Morning (8am-12pm)",
-    customerFirstName: "",
-    customerLastName: "",
-    customerEmail: "",
-    customerPhone: "",
-    address: "",
-    postcode: "",
-    service: "Residential Cleaning",
-    duration: 3,
-    amount: "",
-    region: "UK",
-    notes: "",
-  });
-
-  const [bookingLookupId, setBookingLookupId] = useState("");
-  const [lookupStatus, setLookupStatus] = useState(null); // null | "found" | "not_found" | "loading"
-
-  const handleBookingLookup = async () => {
-    const query = bookingLookupId.trim();
-    if (!query) return;
-    setLookupStatus("loading");
-
-    // First search the already-loaded bookings array
-    const match = bookings.find(
-      (b) =>
-        (b.bookingId || "").toLowerCase() === query.toLowerCase() ||
-        b._id === query,
-    );
-
-    if (match) {
-      setRecurringForm((f) => ({
-        ...f,
-        customerFirstName: match.customer?.firstName || "",
-        customerLastName: match.customer?.lastName || "",
-        customerEmail: match.customer?.email || "",
-        customerPhone: match.customer?.phone || "",
-        address: match.details?.address || match.customer?.address || "",
-        postcode: match.details?.postcode || match.customer?.postcode || "",
-        service: match.service || f.service,
-        notes: match.details?.notes || f.notes,
-      }));
-      setLookupStatus("found");
-      return;
-    }
-
-    // Fallback: fetch all bookings from API (booking may not be in loaded list)
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings`);
-      const data = await res.json();
-      const remote = Array.isArray(data)
-        ? data.find(
-            (b) =>
-              (b.bookingId || "").toLowerCase() === query.toLowerCase() ||
-              b._id === query,
-          )
-        : null;
-
-      if (remote) {
-        setRecurringForm((f) => ({
-          ...f,
-          customerFirstName: remote.customer?.firstName || "",
-          customerLastName: remote.customer?.lastName || "",
-          customerEmail: remote.customer?.email || "",
-          customerPhone: remote.customer?.phone || "",
-          address: remote.details?.address || remote.customer?.address || "",
-          postcode: remote.details?.postcode || remote.customer?.postcode || "",
-          service: remote.service || f.service,
-          notes: remote.details?.notes || f.notes,
-        }));
-        setLookupStatus("found");
-      } else {
-        setLookupStatus("not_found");
-      }
-    } catch {
-      setLookupStatus("not_found");
-    }
-  };
-
-  const [servicesList, setServicesList] = useState([]);
-  const [dynamicRates, setDynamicRates] = useState({});
-
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/services`);
-        const data = await res.json();
-        setServicesList(data || []);
-        const ratesObj = {};
-        data.forEach((s) => {
-          ratesObj[(s.name || "").toLowerCase().replace(/[^a-z0-9]/g, "")] =
-            s.rate;
-        });
-        setDynamicRates(ratesObj);
-      } catch (err) {
-        console.error("Failed to load services for recurring calendar:", err);
-      }
-    };
-    fetchServices();
-  }, []);
-
-  const createServiceOptions = useMemo(() => {
-    const bases = servicesList.filter((s) => s.category === "Base");
-    const keys = ["residential", "commercial", "move", "airbnb", "tenancy"];
-    const optionAssets = {
-      residential: {
-        tag: "Reliable domestic cleaners",
-        bullets: [
-          "Dusting",
-          "Vacuuming",
-          "Kitchen degreasing",
-          "Bathroom sanitization",
-        ],
-        icon: <HomeIcon />,
-        defaultId: "Residential Cleaning",
-        defaultTitle: "Residential Cleaning",
-      },
-      commercial: {
-        tag: "Expert office cleaning",
-        bullets: ["Workstation sanitization", "Communal area cleaning"],
-        icon: <Briefcase />,
-        defaultId: "Office Cleaning",
-        defaultTitle: "Office Cleaning",
-      },
-      move: {
-        tag: "Deep cleaning",
-        bullets: ["Inside cabinets", "Baseboard scrubbing"],
-        icon: <Zap />,
-        defaultId: "Deep Clean",
-        defaultTitle: "Deep Clean",
-      },
-      airbnb: {
-        tag: "Short-let specialist",
-        bullets: ["Linen & towel change", "Guest amenity restock"],
-        icon: <Star />,
-        defaultId: "Airbnb Cleaning",
-        defaultTitle: "Airbnb Cleaning",
-      },
-      tenancy: {
-        tag: "Moving out/in clean",
-        bullets: ["Full property deep clean", "Appliance deep clean"],
-        icon: <Truck />,
-        defaultId: "End of Tenancy",
-        defaultTitle: "End of Tenancy",
-      },
-    };
-
-    const getLayoutKey = (name) => {
-      const clean = (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-      if (
-        clean.includes("residential") ||
-        clean.includes("domestic") ||
-        clean.includes("home")
-      )
-        return "residential";
-      if (clean.includes("office") || clean.includes("commercial"))
-        return "commercial";
-      if (clean.includes("deep") || clean.includes("move")) return "move";
-      if (clean.includes("airbnb") || clean.includes("short")) return "airbnb";
-      if (clean.includes("tenancy") || clean.includes("moveout"))
-        return "tenancy";
-      return "residential";
-    };
-
-    const mapped = bases.map((s) => {
-      const key = getLayoutKey(s.name);
-      const assets = optionAssets[key];
-      return {
-        id: s.name,
-        title: s.name,
-        tag: assets.tag,
-        bullets: assets.bullets,
-        icon: assets.icon,
-        layoutId: key,
-      };
-    });
-    keys.forEach((k) => {
-      if (!mapped.some((m) => m.layoutId === k))
-        mapped.push({
-          id: optionAssets[k].defaultId,
-          title: optionAssets[k].defaultTitle,
-          tag: optionAssets[k].tag,
-          bullets: optionAssets[k].bullets,
-          icon: optionAssets[k].icon,
-          layoutId: k,
-        });
-    });
-    return mapped;
-  }, [servicesList]);
-
-  // Set initial default calculated price when dynamicRates or service/duration are loaded/change
-  useEffect(() => {
-    if (Object.keys(dynamicRates).length > 0 && !recurringForm.amount) {
-      const key = (recurringForm.service || "")
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, "")
-        .trim();
-      const rate = parseFloat(dynamicRates[key]) || 20;
-      setRecurringForm((f) => ({ ...f, amount: String(rate * f.duration) }));
-    }
-  }, [dynamicRates]);
 
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
   const startDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
@@ -373,156 +166,6 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBook
     count: bookingCountForMonth(currentMonth.getFullYear(), m),
   }));
   const yearTotalRevenue = yearMonths.reduce((s, m) => s + m.revenue, 0);
-
-  // Calculate preview of dates that will be generated
-  const getPreviewDates = () => {
-    if (!recurringForm.startDate || !recurringForm.endDate) return [];
-    const dates = [];
-    const start = new Date(recurringForm.startDate);
-    const end = new Date(recurringForm.endDate);
-    if (start > end) return [];
-    let current = new Date(start);
-    const maxDates = 365;
-    while (current <= end && dates.length < maxDates) {
-      dates.push(new Date(current));
-      if (recurringForm.frequency === "daily") {
-        current.setDate(current.getDate() + 1);
-      } else if (recurringForm.frequency === "weekly") {
-        current.setDate(current.getDate() + 7);
-      } else if (recurringForm.frequency === "fortnightly") {
-        current.setDate(current.getDate() + 14);
-      } else if (recurringForm.frequency === "monthly") {
-        current.setMonth(current.getMonth() + 1);
-      }
-    }
-    return dates;
-  };
-
-  const previewDates = getPreviewDates();
-
-  const handleCreateRecurring = async () => {
-    if (!recurringForm.startDate || !recurringForm.endDate) {
-      alert("Please select both start and end dates.");
-      return;
-    }
-    if (!recurringForm.customerEmail || !recurringForm.customerFirstName) {
-      alert("Customer name and email are required.");
-      return;
-    }
-    if (!recurringForm.address) {
-      alert("Service address is required.");
-      return;
-    }
-    if (previewDates.length === 0) {
-      alert("No dates would be generated with these settings.");
-      return;
-    }
-    if (previewDates.length > 200) {
-      alert(
-        `This would create ${previewDates.length} bookings — please shorten the date range.`,
-      );
-      return;
-    }
-
-    setRecurringLoading(true);
-    try {
-      const bookingsToCreate = previewDates.map((date) => {
-        const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-        const rand = Math.random().toString(36).substr(2, 6).toUpperCase();
-        return {
-          bookingId: `BK-${rand}`,
-          customer: {
-            firstName: recurringForm.customerFirstName,
-            lastName: recurringForm.customerLastName,
-            email: recurringForm.customerEmail,
-            phone: recurringForm.customerPhone,
-          },
-          service: recurringForm.service,
-          details: {
-            address: recurringForm.address,
-            postcode: recurringForm.postcode,
-            frequency:
-              recurringForm.frequency.charAt(0).toUpperCase() +
-              recurringForm.frequency.slice(1),
-            duration: recurringForm.duration,
-            extras: [],
-            notes: recurringForm.notes,
-          },
-          schedule: {
-            date: dateStr,
-            timeSlot: recurringForm.timeSlot,
-            preferredTime: "",
-          },
-          payment: {
-            amount: parseFloat(recurringForm.amount) || 0,
-            currency: "GBP",
-            status: "Pending",
-            method: "Bank Transfer",
-          },
-          region: recurringForm.region,
-          status: "Confirmed",
-          meta: { recurringGroup: `REC-${Date.now()}` },
-        };
-      });
-
-      // Create all bookings sequentially
-      let created = 0;
-      for (const bk of bookingsToCreate) {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(bk),
-        });
-        if (res.ok) created++;
-      }
-
-      setRecurringSuccess(created);
-      if (onBookingsCreated) onBookingsCreated();
-      setRecurringForm({
-        frequency: "weekly",
-        startDate: "",
-        endDate: "",
-        timeSlot: "Morning (8am-12pm)",
-        customerFirstName: "",
-        customerLastName: "",
-        customerEmail: "",
-        customerPhone: "",
-        address: "",
-        postcode: "",
-        service: "Residential Cleaning",
-        duration: 3,
-        amount: "",
-        region: "UK",
-        notes: "",
-      });
-    } catch (err) {
-      alert("Error creating recurring bookings: " + err.message);
-    } finally {
-      setRecurringLoading(false);
-    }
-  };
-
-  const inputStyle = {
-    width: "100%",
-    padding: "10px 14px",
-    borderRadius: "12px",
-    border: "1.5px solid #e2e8f0",
-    fontSize: "13px",
-    outline: "none",
-    boxSizing: "border-box",
-    fontFamily: "inherit",
-    color: "#0F172A",
-    background: "white",
-  };
-  const labelStyle = {
-    display: "block",
-    marginBottom: "6px",
-    fontSize: "11px",
-    fontWeight: 800,
-    color: "#64748b",
-    textTransform: "uppercase",
-    letterSpacing: "1px",
-  };
 
   return (
     <div className="space-y-6">
@@ -4096,6 +3739,25 @@ ${extrasRows}
                       .filter(b => b.meta?.recurringGroup === selectedBooking.meta.recurringGroup)
                       .sort((a, b) => new Date(a.schedule?.date) - new Date(b.schedule?.date));
                     if (siblings.length <= 1) return null;
+
+                    const deleteFromSeries = async (sib, e) => {
+                      e.stopPropagation();
+                      if (!window.confirm(`Delete this booking (${new Date(sib.schedule?.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })})?`)) return;
+                      try {
+                        const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings/${sib._id}`, { method: "DELETE" });
+                        if (!res.ok) throw new Error("Delete failed");
+                        // If we just deleted the one being viewed, switch to the next sibling
+                        if (sib._id === selectedBooking._id) {
+                          const remaining = siblings.filter(s => s._id !== sib._id);
+                          if (remaining.length > 0) { setSelectedBooking(remaining[0]); setEditData(remaining[0]); }
+                          else setSelectedBooking(null);
+                        }
+                        fetchBookings();
+                      } catch {
+                        setStatusMessage({ type: "error", text: "Failed to delete booking" });
+                      }
+                    };
+
                     return (
                       <div className="rounded-2xl border border-violet-200 bg-violet-50/40 overflow-hidden">
                         <div className="px-5 py-3 bg-violet-100/70 flex items-center gap-2">
@@ -4104,7 +3766,8 @@ ${extrasRows}
                         </div>
                         <div className="divide-y divide-violet-100 max-h-60 overflow-y-auto">
                           {siblings.map(sib => (
-                            <div key={sib._id} className={`flex items-center gap-3 px-5 py-3 ${sib._id === selectedBooking._id ? "bg-violet-100/60" : "hover:bg-violet-50 cursor-pointer"}`}
+                            <div key={sib._id}
+                              className={`flex items-center gap-3 px-5 py-3 ${sib._id === selectedBooking._id ? "bg-violet-100/60" : "hover:bg-violet-50 cursor-pointer"}`}
                               onClick={() => { if (sib._id !== selectedBooking._id) { setSelectedBooking(sib); setEditData(sib); setIsEditing(false); } }}
                             >
                               <div className="flex-1 min-w-0">
@@ -4125,6 +3788,13 @@ ${extrasRows}
                                 ? <span className="text-[9px] font-black text-violet-400 uppercase tracking-wide shrink-0">Viewing</span>
                                 : <span className="text-[9px] font-black text-violet-600 uppercase tracking-wide shrink-0">Open →</span>
                               }
+                              <button
+                                onClick={(e) => deleteFromSeries(sib, e)}
+                                className="p-1 rounded-lg text-slate-300 hover:bg-rose-50 hover:text-rose-500 transition-colors shrink-0 ml-1"
+                                title="Delete this booking from series"
+                              >
+                                <Trash2 size={12} />
+                              </button>
                             </div>
                           ))}
                         </div>
