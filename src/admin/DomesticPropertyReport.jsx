@@ -252,7 +252,7 @@ const DomesticPropertyReport = ({ booking, defaultOpen = false }) => {
   <div class="hdr-brand"><img src="${logoUrl}" alt="Cleaniq Services" class="hdr-logo" /></div>
   <div class="hdr-main">
     <p class="hdr-type">Additional Time Required</p>
-    <p class="hdr-title">Property Assessment Report</p>
+    <p class="hdr-title">Assessment Report</p>
     <p class="hdr-sub">${customerName}${address ? ` · ${address}` : ""}</p>
   </div>
 </div>
@@ -328,7 +328,7 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
   <!-- Header -->
   <div style="background:#0A5C43;padding:36px 40px;text-align:center">
     <p style="color:#fff;font-size:26px;font-weight:900;margin:0;letter-spacing:-.5px">Cleaniq Services</p>
-    <p style="color:rgba(255,255,255,.55);font-size:11px;margin:6px 0 0;text-transform:uppercase;letter-spacing:2px">Property Assessment</p>
+    <p style="color:rgba(255,255,255,.55);font-size:11px;margin:6px 0 0;text-transform:uppercase;letter-spacing:2px">Assessment Report</p>
   </div>
 
   <!-- Alert banner -->

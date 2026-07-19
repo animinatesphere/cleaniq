@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+﻿import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Search,
@@ -7,7 +7,6 @@ import {
   User,
   MapPin,
   Clock,
-  Car,
   Truck,
   Info,
   Home as HomeIcon,
@@ -25,11 +24,9 @@ import {
   Minus,
   Download,
   Calendar,
-  ShieldAlert,
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
-  AlertTriangle,
   Sparkles,
   ChevronDown,
   FileText,
@@ -72,7 +69,7 @@ const fmtTimeRange = (b) => {
   return `${fmt(s)} — ${fmt(s + Number(dur) * 60)}`;
 };
 
-export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBookingsCreated }) => {
+export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarView, setCalendarView] = useState("month"); // "month" | "year"
   const [selectedDateForDetails, setSelectedDateForDetails] = useState(null);
@@ -169,7 +166,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBook
 
   return (
     <div className="space-y-6">
-      {/* ── MAIN CALENDAR ───────────────────────────────────── */}
+      {/* â”€â”€ MAIN CALENDAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="bg-white rounded-[28px] sm:rounded-[40px] p-4 sm:p-10 border border-slate-200 shadow-sm animate-in fade-in">
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6 sm:mb-10">
           <div>
@@ -211,39 +208,6 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBook
                 </button>
               ))}
             </div>
-            {calendarView === "month" && (
-              <button
-                onClick={() => {
-                  setShowRecurring(!showRecurring);
-                  setRecurringSuccess(null);
-                }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all border-2"
-                style={{
-                  background: showRecurring
-                    ? "linear-gradient(135deg,#0F172A,#1e3a5f)"
-                    : "white",
-                  color: showRecurring ? "#6EE7B7" : "#0F172A",
-                  borderColor: showRecurring ? "#0F172A" : "#e2e8f0",
-                }}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M17 1l4 4-4 4" />
-                  <path d="M3 11V9a4 4 0 014-4h14" />
-                  <path d="M7 23l-4-4 4-4" />
-                  <path d="M21 13v2a4 4 0 01-4 4H3" />
-                </svg>
-                {showRecurring ? "Hide Recurring" : "Create Recurring Booking"}
-              </button>
-            )}
             <button
               onClick={handlePrevMonth}
               className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
@@ -339,7 +303,6 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBook
                 );
                 const realDayBookings = dayBookings.filter(isRealBooking);
                 const hasBookings = realDayBookings.length > 0;
-                const hasAnyBlock = isDayBlocked || hasAdminSlotBlocks || hasBookings;
                 const dayRevenue = realDayBookings.reduce(
                   (s, b) => s + Number(b.payment?.amount || 0),
                   0,
@@ -739,7 +702,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBook
                                 }}
                               >
                                 {fmtTimeRange(b) || b.schedule?.timeSlot || ""}{" "}
-                                · {b.bookingId}
+                                Â· {b.bookingId}
                               </p>
                             </div>
                           </div>
@@ -872,688 +835,6 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot, onBook
           );
         })()}
 
-      {/* ── RECURRING BOOKING PANEL ─────────────────────────── */}
-      {showRecurring && (
-        <div
-          className="bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden"
-          style={{ animation: "fadeIn 0.3s ease" }}
-        >
-          {/* Panel Header */}
-          <div
-            style={{
-              background: "linear-gradient(135deg, #0F172A 0%, #1e3a5f 100%)",
-              padding: "28px 40px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <div
-                style={{
-                  background: "rgba(110,231,183,0.15)",
-                  border: "1px solid rgba(110,231,183,0.3)",
-                  borderRadius: "14px",
-                  padding: "12px",
-                  display: "flex",
-                }}
-              >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#6EE7B7"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M17 1l4 4-4 4" />
-                  <path d="M3 11V9a4 4 0 014-4h14" />
-                  <path d="M7 23l-4-4 4-4" />
-                  <path d="M21 13v2a4 4 0 01-4 4H3" />
-                </svg>
-              </div>
-              <div>
-                <h3
-                  style={{
-                    margin: "0 0 4px",
-                    fontSize: "20px",
-                    fontWeight: 900,
-                    color: "white",
-                    letterSpacing: "-0.3px",
-                  }}
-                >
-                  Create Recurring Booking
-                </h3>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "13px",
-                    color: "#94a3b8",
-                    fontWeight: 600,
-                  }}
-                >
-                  Schedule Daily, Weekly, Fortnightly or Monthly cleaning
-                  appointments
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ padding: "36px 40px" }}>
-            {/* Success banner */}
-            {recurringSuccess !== null && (
-              <div
-                style={{
-                  background: "linear-gradient(135deg,#ecfdf5,#d1fae5)",
-                  border: "2px solid #86efac",
-                  borderRadius: "20px",
-                  padding: "20px 24px",
-                  marginBottom: "28px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "14px",
-                }}
-              >
-                <CheckCircle2
-                  size={24}
-                  style={{ color: "#059669", flexShrink: 0 }}
-                />
-                <div>
-                  <p
-                    style={{
-                      margin: "0 0 4px",
-                      fontSize: "16px",
-                      fontWeight: 900,
-                      color: "#065f46",
-                    }}
-                  >
-                    ✓ {recurringSuccess} recurring bookings created!
-                  </p>
-                  <p style={{ margin: 0, fontSize: "13px", color: "#059669" }}>
-                    All appointments are now visible in the bookings list and
-                    calendar.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: "32px",
-              }}
-            >
-              {/* LEFT COLUMN */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "20px",
-                }}
-              >
-                {/* FREQUENCY */}
-                <div>
-                  <label style={labelStyle}>Cleaning Frequency</label>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "10px",
-                    }}
-                  >
-                    {[
-                      { val: "daily", label: "Daily", sub: "Every day" },
-                      { val: "weekly", label: "Weekly", sub: "Every 7 days" },
-                      {
-                        val: "fortnightly",
-                        label: "Fortnightly",
-                        sub: "Every 2 weeks",
-                      },
-                      {
-                        val: "monthly",
-                        label: "Monthly",
-                        sub: "Same day each month",
-                      },
-                    ].map(({ val, label, sub }) => (
-                      <button
-                        key={val}
-                        type="button"
-                        onClick={() =>
-                          setRecurringForm((f) => ({ ...f, frequency: val }))
-                        }
-                        style={{
-                          padding: "14px",
-                          borderRadius: "14px",
-                          border: `2px solid ${recurringForm.frequency === val ? "#6EE7B7" : "#e2e8f0"}`,
-                          background:
-                            recurringForm.frequency === val
-                              ? "linear-gradient(135deg,#ecfdf5,#d1fae5)"
-                              : "white",
-                          cursor: "pointer",
-                          textAlign: "left",
-                          transition: "all 0.2s",
-                        }}
-                      >
-                        <p
-                          style={{
-                            margin: "0 0 2px",
-                            fontSize: "13px",
-                            fontWeight: 800,
-                            color:
-                              recurringForm.frequency === val
-                                ? "#065f46"
-                                : "#0F172A",
-                          }}
-                        >
-                          {label}
-                        </p>
-                        <p
-                          style={{
-                            margin: 0,
-                            fontSize: "11px",
-                            color: "#94a3b8",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {sub}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* DATE RANGE */}
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "12px",
-                  }}
-                >
-                  <div>
-                    <label style={labelStyle}>Start Date</label>
-                    <input
-                      type="date"
-                      style={inputStyle}
-                      value={recurringForm.startDate}
-                      onChange={(e) =>
-                        setRecurringForm((f) => ({
-                          ...f,
-                          startDate: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>End Date</label>
-                    <input
-                      type="date"
-                      style={inputStyle}
-                      value={recurringForm.endDate}
-                      onChange={(e) =>
-                        setRecurringForm((f) => ({
-                          ...f,
-                          endDate: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                </div>
-
-                {/* PREVIEW */}
-                {previewDates.length > 0 && (
-                  <div
-                    style={{
-                      background: "linear-gradient(135deg,#0F172A,#1e3a5f)",
-                      borderRadius: "16px",
-                      padding: "16px 20px",
-                    }}
-                  >
-                    <p
-                      style={{
-                        margin: "0 0 6px",
-                        fontSize: "12px",
-                        fontWeight: 800,
-                        color: "#94a3b8",
-                        textTransform: "uppercase",
-                        letterSpacing: "1px",
-                      }}
-                    >
-                      Schedule Preview
-                    </p>
-                    <p
-                      style={{
-                        margin: "0 0 10px",
-                        fontSize: "22px",
-                        fontWeight: 900,
-                        color: "#6EE7B7",
-                      }}
-                    >
-                      {previewDates.length} appointments
-                    </p>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: "6px",
-                        maxHeight: "100px",
-                        overflowY: "auto",
-                      }}
-                    >
-                      {previewDates.slice(0, 12).map((d, i) => (
-                        <span
-                          key={i}
-                          style={{
-                            background: "rgba(110,231,183,0.15)",
-                            border: "1px solid rgba(110,231,183,0.25)",
-                            color: "#6EE7B7",
-                            padding: "3px 10px",
-                            borderRadius: "20px",
-                            fontSize: "11px",
-                            fontWeight: 700,
-                          }}
-                        >
-                          {d.toLocaleDateString("en-GB", {
-                            day: "2-digit",
-                            month: "short",
-                          })}
-                        </span>
-                      ))}
-                      {previewDates.length > 12 && (
-                        <span
-                          style={{
-                            color: "#94a3b8",
-                            fontSize: "11px",
-                            fontWeight: 700,
-                            padding: "3px 6px",
-                          }}
-                        >
-                          +{previewDates.length - 12} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* TIME & SERVICE */}
-                <div>
-                  <label style={labelStyle}>Time Slot</label>
-                  <select
-                    style={inputStyle}
-                    value={recurringForm.timeSlot}
-                    onChange={(e) =>
-                      setRecurringForm((f) => ({
-                        ...f,
-                        timeSlot: e.target.value,
-                      }))
-                    }
-                  >
-                    <option>Morning (8am-12pm)</option>
-                    <option>Afternoon (12pm-4pm)</option>
-                    <option>Evening (4pm-8pm)</option>
-                    <option>Flexible</option>
-                  </select>
-                </div>
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "2fr 1fr 1fr",
-                    gap: "10px",
-                  }}
-                >
-                  <div>
-                    <label style={labelStyle}>Service</label>
-                    <input
-                      type="text"
-                      style={inputStyle}
-                      value={recurringForm.service}
-                      onChange={(e) =>
-                        setRecurringForm((f) => ({
-                          ...f,
-                          service: e.target.value,
-                        }))
-                      }
-                      placeholder="e.g. Residential Cleaning"
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Hours</label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={12}
-                      style={inputStyle}
-                      value={recurringForm.duration}
-                      onChange={(e) =>
-                        setRecurringForm((f) => ({
-                          ...f,
-                          duration: parseInt(e.target.value) || 2,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>£ / Visit</label>
-                    <input
-                      type="number"
-                      min={0}
-                      style={inputStyle}
-                      value={recurringForm.amount}
-                      onChange={(e) =>
-                        setRecurringForm((f) => ({
-                          ...f,
-                          amount: e.target.value,
-                        }))
-                      }
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* RIGHT COLUMN — CUSTOMER */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "16px",
-                }}
-              >
-                {/* BOOKING ID LOOKUP */}
-                <div
-                  style={{
-                    background: "linear-gradient(135deg,#f8fafc,#f1f5f9)",
-                    border: "1.5px solid #e2e8f0",
-                    borderRadius: "16px",
-                    padding: "16px 18px",
-                  }}
-                >
-                  <label style={{ ...labelStyle, marginBottom: "8px" }}>
-                    Load from Booking ID
-                  </label>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <input
-                      type="text"
-                      style={{
-                        ...inputStyle,
-                        flex: 1,
-                        fontFamily: "monospace",
-                        letterSpacing: "0.5px",
-                      }}
-                      value={bookingLookupId}
-                      onChange={(e) => {
-                        setBookingLookupId(e.target.value);
-                        setLookupStatus(null);
-                      }}
-                      onKeyDown={(e) => e.key === "Enter" && handleBookingLookup()}
-                      placeholder="e.g. BK-A1B2C3"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleBookingLookup}
-                      disabled={lookupStatus === "loading" || !bookingLookupId.trim()}
-                      style={{
-                        padding: "10px 18px",
-                        borderRadius: "12px",
-                        border: "none",
-                        background:
-                          !bookingLookupId.trim()
-                            ? "#e2e8f0"
-                            : "linear-gradient(135deg,#0F172A,#1e3a5f)",
-                        color: !bookingLookupId.trim() ? "#94a3b8" : "#6EE7B7",
-                        fontWeight: 800,
-                        fontSize: "12px",
-                        cursor: !bookingLookupId.trim() ? "not-allowed" : "pointer",
-                        whiteSpace: "nowrap",
-                        transition: "all 0.15s",
-                      }}
-                    >
-                      {lookupStatus === "loading" ? "..." : "Load"}
-                    </button>
-                  </div>
-                  {lookupStatus === "found" && (
-                    <p style={{ margin: "8px 0 0", fontSize: "11px", fontWeight: 700, color: "#059669" }}>
-                      ✓ Customer details loaded successfully
-                    </p>
-                  )}
-                  {lookupStatus === "not_found" && (
-                    <p style={{ margin: "8px 0 0", fontSize: "11px", fontWeight: 700, color: "#dc2626" }}>
-                      No booking found with that ID
-                    </p>
-                  )}
-                  <p style={{ margin: "6px 0 0", fontSize: "10px", color: "#94a3b8" }}>
-                    Enter an existing booking ID to auto-fill customer details below
-                  </p>
-                </div>
-
-                <div>
-                  <label
-                    style={{
-                      ...labelStyle,
-                      color: "#0F172A",
-                      fontSize: "12px",
-                    }}
-                  >
-                    Customer Details
-                  </label>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "10px",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    <div>
-                      <label style={labelStyle}>First Name *</label>
-                      <input
-                        type="text"
-                        style={inputStyle}
-                        value={recurringForm.customerFirstName}
-                        onChange={(e) =>
-                          setRecurringForm((f) => ({
-                            ...f,
-                            customerFirstName: e.target.value,
-                          }))
-                        }
-                        placeholder="Jane"
-                      />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Last Name</label>
-                      <input
-                        type="text"
-                        style={inputStyle}
-                        value={recurringForm.customerLastName}
-                        onChange={(e) =>
-                          setRecurringForm((f) => ({
-                            ...f,
-                            customerLastName: e.target.value,
-                          }))
-                        }
-                        placeholder="Smith"
-                      />
-                    </div>
-                  </div>
-                  <div style={{ marginBottom: "10px" }}>
-                    <label style={labelStyle}>Email *</label>
-                    <input
-                      type="email"
-                      style={inputStyle}
-                      value={recurringForm.customerEmail}
-                      onChange={(e) =>
-                        setRecurringForm((f) => ({
-                          ...f,
-                          customerEmail: e.target.value,
-                        }))
-                      }
-                      placeholder="jane@example.com"
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Phone</label>
-                    <input
-                      type="tel"
-                      style={inputStyle}
-                      value={recurringForm.customerPhone}
-                      onChange={(e) =>
-                        setRecurringForm((f) => ({
-                          ...f,
-                          customerPhone: e.target.value,
-                        }))
-                      }
-                      placeholder="+44 7700 000000"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label style={labelStyle}>Service Address *</label>
-                  <input
-                    type="text"
-                    style={{ ...inputStyle, marginBottom: "10px" }}
-                    value={recurringForm.address}
-                    onChange={(e) =>
-                      setRecurringForm((f) => ({
-                        ...f,
-                        address: e.target.value,
-                      }))
-                    }
-                    placeholder="123 High Street, London"
-                  />
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "10px",
-                    }}
-                  >
-                    <div>
-                      <label style={labelStyle}>Postcode</label>
-                      <input
-                        type="text"
-                        style={inputStyle}
-                        value={recurringForm.postcode}
-                        onChange={(e) =>
-                          setRecurringForm((f) => ({
-                            ...f,
-                            postcode: e.target.value,
-                          }))
-                        }
-                        placeholder="SW1A 1AA"
-                      />
-                    </div>
-                    <div>
-                      <label style={labelStyle}>Region</label>
-                      <select
-                        style={inputStyle}
-                        value={recurringForm.region}
-                        onChange={(e) =>
-                          setRecurringForm((f) => ({
-                            ...f,
-                            region: e.target.value,
-                          }))
-                        }
-                      >
-                        <option value="UK">UK</option>
-                        <option value="NG">NG</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label style={labelStyle}>Internal Notes (optional)</label>
-                  <textarea
-                    rows={3}
-                    style={{ ...inputStyle, resize: "none", lineHeight: 1.6 }}
-                    value={recurringForm.notes}
-                    onChange={(e) =>
-                      setRecurringForm((f) => ({ ...f, notes: e.target.value }))
-                    }
-                    placeholder="e.g. Customer prefers the cleaner to arrive 15 min early..."
-                  />
-                </div>
-
-                {/* CREATE BUTTON */}
-                <button
-                  onClick={handleCreateRecurring}
-                  disabled={recurringLoading || previewDates.length === 0}
-                  style={{
-                    width: "100%",
-                    padding: "18px",
-                    borderRadius: "18px",
-                    border: "none",
-                    background:
-                      recurringLoading || previewDates.length === 0
-                        ? "#94a3b8"
-                        : "linear-gradient(135deg, #0F172A 0%, #1e3a5f 100%)",
-                    color:
-                      recurringLoading || previewDates.length === 0
-                        ? "white"
-                        : "#6EE7B7",
-                    fontWeight: 900,
-                    fontSize: "15px",
-                    cursor:
-                      recurringLoading || previewDates.length === 0
-                        ? "not-allowed"
-                        : "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "10px",
-                    boxShadow:
-                      recurringLoading || previewDates.length === 0
-                        ? "none"
-                        : "0 10px 25px rgba(15,23,42,0.3)",
-                    transition: "all 0.2s",
-                    marginTop: "auto",
-                  }}
-                >
-                  {recurringLoading ? (
-                    <>
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        style={{ animation: "spin 1s linear infinite" }}
-                      >
-                        <path d="M21 12a9 9 0 11-6.219-8.56" />
-                      </svg>
-                      Creating {previewDates.length} Bookings...
-                    </>
-                  ) : (
-                    <>
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M17 1l4 4-4 4" />
-                        <path d="M3 11V9a4 4 0 014-4h14" />
-                        <path d="M7 23l-4-4 4-4" />
-                        <path d="M21 13v2a4 4 0 01-4 4H3" />
-                      </svg>
-                      Create{" "}
-                      {previewDates.length > 0 ? previewDates.length : ""}{" "}
-                      Recurring Booking{previewDates.length !== 1 ? "s" : ""}
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -1702,7 +983,6 @@ const Bookings = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [crmBooking, setCrmBooking] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [showRaw, setShowRaw] = useState(false);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -2300,7 +1580,7 @@ const Bookings = () => {
         text: `${bookingIds.length} booking(s) deleted successfully`,
       });
       fetchBookings();
-    } catch (error) {
+    } catch {
       setStatusMessage({
         type: "error",
         text: "Failed to delete bookings",
@@ -2357,7 +1637,7 @@ const Bookings = () => {
           text: "Failed to mark booking as completed",
         });
       }
-    } catch (error) {
+    } catch {
       setStatusMessage({
         type: "error",
         text: "Failed to mark booking as completed",
@@ -2400,7 +1680,7 @@ const Bookings = () => {
             text: "Booking deleted successfully",
           });
         }
-      } catch (error) {
+      } catch {
         setStatusMessage({ type: "error", text: "Failed to delete booking" });
       }
     }
@@ -2439,7 +1719,7 @@ const Bookings = () => {
 <style>@media print{body{margin:0}}.page{max-width:680px;margin:40px auto;font-family:Arial,sans-serif;color:#1e293b}</style></head>
 <body><div class="page">
 <div style="background:#0f172a;padding:28px 32px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;">
-<div><p style="margin:0;color:#6ee7b7;font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">Cleaniq Services</p><p style="margin:4px 0 0;color:#94a3b8;font-size:12px;">info@cleaniqservices.com · +44 7752 476368</p></div>
+<div><p style="margin:0;color:#6ee7b7;font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">Cleaniq Services</p><p style="margin:4px 0 0;color:#94a3b8;font-size:12px;">info@cleaniqservices.com Â· +44 7752 476368</p></div>
 <div style="text-align:right"><p style="margin:0;color:#fff;font-size:18px;font-weight:900;">INVOICE</p><p style="margin:4px 0 0;color:#64748b;font-size:12px;">${b.bookingId}</p></div>
 </div>
 <div style="border:1px solid #e2e8f0;border-top:none;padding:24px 32px;background:#fff;">
@@ -2720,30 +2000,9 @@ ${extrasRows}
     );
   };
 
-  const getLogistics = (b) => {
-    if (!b) return { parking: "Not specified", access: "Not specified" };
-    let parking = b.details?.parking || b.parking || "Not specified";
-    let access = b.details?.keyAccess || b.keyAccess || "Not specified";
-    if (Array.isArray(b.details?.extras)) {
-      const pTag = b.details.extras.find(
-        (e) =>
-          typeof e === "string" &&
-          (e.includes("DATA_PARKING:") || e.includes("🚗 PARKING:")),
-      );
-      const aTag = b.details.extras.find(
-        (e) =>
-          typeof e === "string" &&
-          (e.includes("DATA_ACCESS:") || e.includes("🔑 ACCESS:")),
-      );
-      if (pTag) parking = pTag.split(":")[1].trim();
-      if (aTag) access = aTag.split(":")[1].trim();
-    }
-    return { parking, access };
-  };
-
   return (
     <div className="space-y-6 pb-20 relative">
-      {/* ── CRM MODAL ─────────────────────────────────────────── */}
+      {/* â”€â”€ CRM MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {crmBooking && (
         <AdminCRM booking={crmBooking} onClose={() => setCrmBooking(null)} />
       )}
@@ -2910,7 +2169,7 @@ ${extrasRows}
                   pageBookings.map((b) => (
                     <tr
                       key={b._id}
-                      onClick={() => { setSelectedBooking(b); setEditData(b); setIsEditing(false); setShowRaw(false); }}
+                      onClick={() => { setSelectedBooking(b); setEditData(b); setIsEditing(false); }}
                       className={`group hover:bg-slate-50/80 transition-colors cursor-pointer ${
                         selectedBookings.has(b._id) ? "bg-blue-50" : ""
                       }`}
@@ -2920,6 +2179,7 @@ ${extrasRows}
                           type="checkbox"
                           checked={selectedBookings.has(b._id)}
                           onChange={() => toggleBookingSelection(b._id)}
+                          onClick={(e) => e.stopPropagation()}
                           className="w-4 h-4 rounded border-2 border-slate-300 cursor-pointer accent-primary"
                         />
                       </td>
@@ -2931,7 +2191,7 @@ ${extrasRows}
                           <p className="text-[10px] text-slate-400 font-semibold">{b.bookingId}</p>
                           {b._recurringCount > 1 && (
                             <span className="text-[9px] font-black bg-violet-100 text-violet-600 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
-                              Recurring · {b._recurringCount}
+                              Recurring Â· {b._recurringCount}
                             </span>
                           )}
                         </div>
@@ -3000,7 +2260,6 @@ ${extrasRows}
                                       setSelectedBooking(b);
                                       setEditData(b);
                                       setIsEditing(false);
-                                      setShowRaw(false);
                                       setOpenActionMenu(null);
                                     }}
                                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-semibold text-slate-700 hover:bg-slate-50 transition-colors text-left"
@@ -3055,8 +2314,8 @@ ${extrasRows}
             <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/40">
               <p className="text-xs text-slate-400 font-medium">
                 {displayBookings.length} booking{displayBookings.length !== 1 ? "s" : ""}
-                {selectedBookings.size > 0 ? ` · ${selectedBookings.size} selected` : ""}
-                {" "}· Page {bookingsSafePage} of {bookingsTotalPages}
+                {selectedBookings.size > 0 ? ` Â· ${selectedBookings.size} selected` : ""}
+                {" "}Â· Page {bookingsSafePage} of {bookingsTotalPages}
               </p>
               <div className="flex items-center gap-1">
                 <button
@@ -3660,7 +2919,6 @@ ${extrasRows}
                         <div className="flex flex-wrap gap-1.5 px-1 pb-2">
                           {extraServicesList.slice(0, 12).map((svc) => {
                             const currentExtras = editData.details?.extras || [];
-                            const label = svc.name + (svc.rate ? ` (£${Number(svc.rate).toFixed(0)})` : "");
                             const alreadyAdded = currentExtras.some(e => (typeof e === "string" ? e : (e.name || "")).toLowerCase().includes(svc.name.toLowerCase()));
                             return (
                               <button
@@ -3682,7 +2940,7 @@ ${extrasRows}
                                     : "bg-white text-slate-600 border-slate-300 hover:border-primary hover:text-primary"
                                 }`}
                               >
-                                {alreadyAdded ? "✓ " : "+ "}{svc.name}
+                                {alreadyAdded ? "âœ“ " : "+ "}{svc.name}
                                 {svc.rate && <span className="opacity-70 ml-1">£{Number(svc.rate).toFixed(0)}</span>}
                               </button>
                             );
@@ -3733,7 +2991,7 @@ ${extrasRows}
                 </div>
               ) : (
                 <>
-                  {/* ── Recurring series overview ─────────────────────────── */}
+                  {/* â”€â”€ Recurring series overview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
                   {selectedBooking.meta?.recurringGroup && (() => {
                     const siblings = bookings
                       .filter(b => b.meta?.recurringGroup === selectedBooking.meta.recurringGroup)
@@ -3786,7 +3044,7 @@ ${extrasRows}
                               )}
                               {sib._id === selectedBooking._id
                                 ? <span className="text-[9px] font-black text-violet-400 uppercase tracking-wide shrink-0">Viewing</span>
-                                : <span className="text-[9px] font-black text-violet-600 uppercase tracking-wide shrink-0">Open →</span>
+                                : <span className="text-[9px] font-black text-violet-600 uppercase tracking-wide shrink-0">Open â†’</span>
                               }
                               <button
                                 onClick={(e) => deleteFromSeries(sib, e)}
@@ -3832,7 +3090,7 @@ ${extrasRows}
                       <p className="text-xs font-bold text-primary-dark">
                         {selectedBooking.payment?.currency === "GBP"
                           ? "£"
-                          : "₦"}
+                          : "â‚¦"}
                         {selectedBooking.payment?.amount}
                       </p>
                       <div className="flex gap-1 mt-2 flex-col sm:flex-row">
@@ -3864,12 +3122,12 @@ ${extrasRows}
                                     confirmedAt: new Date().toISOString(),
                                   },
                                 }));
-                                alert("✅ Payment confirmed!");
+                                alert("âœ… Payment confirmed!");
                                 fetchBookings();
                               }
                             } catch (err) {
                               console.error("Failed to confirm payment:", err);
-                              alert("❌ Failed to confirm payment");
+                              alert("âŒ Failed to confirm payment");
                             }
                           }}
                           className="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[8px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-all"
@@ -4039,7 +3297,7 @@ ${extrasRows}
                     </div>
                   )}
 
-                  {/* ── Worker Submission: Photos & Report ── */}
+                  {/* â”€â”€ Worker Submission: Photos & Report â”€â”€ */}
                   {(selectedBooking.photos?.length > 0 || selectedBooking.workerReport) && (
                     <div className="bg-slate-50 border border-slate-200 rounded-[32px] p-6">
                       <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -4146,7 +3404,7 @@ ${extrasRows}
                               "Not set"}
                           </p>
                           <p className="text-[11px] font-bold text-primary uppercase mt-1">
-                            Arrival → Finish:{" "}
+                            Arrival â†’ Finish:{" "}
                             {fmtTimeRange(selectedBooking) ||
                               getPreferredTime(selectedBooking) ||
                               "Not specified"}
@@ -4225,7 +3483,7 @@ ${extrasRows}
                                     </p>
                                   </div>
                                   <span className="inline-flex items-center justify-center w-6 h-6 bg-rose-600 text-white rounded-full text-xs font-bold">
-                                    ✓
+                                    âœ“
                                   </span>
                                 </div>
                               ),
@@ -4526,17 +3784,17 @@ ${extrasRows}
 
                     if (emailResponse.ok) {
                       alert(
-                        `✅ Payment link sent to ${selectedBooking.customer.email}!\n\nAmount: £${data.additionalAmount.toFixed(2)}`,
+                        `âœ… Payment link sent to ${selectedBooking.customer.email}!\n\nAmount: £${data.additionalAmount.toFixed(2)}`,
                       );
                       setShowAdditionalHoursModal(false);
                     } else {
                       alert(
-                        "✅ Payment link created, but email failed to send",
+                        "âœ… Payment link created, but email failed to send",
                       );
                     }
                   } catch (error) {
                     console.error("Error:", error);
-                    alert(`❌ ${error.message}`);
+                    alert(`âŒ ${error.message}`);
                   } finally {
                     setAdditionalHoursForm((prev) => ({
                       ...prev,
@@ -4778,7 +4036,7 @@ ${extrasRows}
                               <p className="text-[11px] font-bold text-amber-700">
                                 No confirmation email is sent automatically for
                                 flat-rate bookings. Send the invoice yourself
-                                from the booking's CRM actions (✨) whenever
+                                from the booking's CRM actions (âœ¨) whenever
                                 you're ready.
                               </p>
                             </div>
@@ -4786,7 +4044,7 @@ ${extrasRows}
                         ) : (
                           <div>
                             <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                              ⏱️ Hours{" "}
+                              â±ï¸ Hours{" "}
                               <span className="text-rose-500">*</span>
                             </label>
                             <div className="grid grid-cols-8 sm:grid-cols-10 gap-1.5 max-h-36 overflow-y-auto p-1 mb-2 bg-white rounded-xl border border-slate-100">
@@ -5006,7 +4264,7 @@ ${extrasRows}
                               </div>
                               {createData.service === s.id && (
                                 <div className="text-primary text-sm font-bold mt-2">
-                                  ✓ Selected
+                                  âœ“ Selected
                                 </div>
                               )}
                             </button>
@@ -5087,7 +4345,7 @@ ${extrasRows}
                         }`}
                       >
                         <h5 className="font-bold text-base text-primary-dark mb-4 flex items-center gap-2">
-                          🛏️ Property Rooms
+                          🛏ï¸ Property Rooms
                           <span className="text-rose-500">*</span>
                         </h5>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -5142,12 +4400,12 @@ ${extrasRows}
                           <div className="mt-4 p-3 bg-rose-100 border-l-4 border-rose-500 rounded">
                             {formErrors["details.Bedroom"] && (
                               <p className="text-rose-700 text-[10px] font-bold mb-1">
-                                ⚠️ {formErrors["details.Bedroom"]}
+                                ⚠️ {formErrors["details.Bedroom"]}
                               </p>
                             )}
                             {formErrors["details.Bathroom"] && (
                               <p className="text-rose-700 text-[10px] font-bold">
-                                ⚠️ {formErrors["details.Bathroom"]}
+                                ⚠️ {formErrors["details.Bathroom"]}
                               </p>
                             )}
                           </div>
@@ -5240,7 +4498,7 @@ ${extrasRows}
                                       }}
                                       className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 flex items-center justify-center transition-colors font-bold"
                                     >
-                                      −
+                                      âˆ’
                                     </button>
                                     <span className="text-lg font-bold text-primary w-8 text-center">
                                       {currentQty}
@@ -5552,7 +4810,7 @@ ${extrasRows}
                                 <div className="border-t-2 border-slate-100 pt-4 space-y-3">
                                   <div className="flex items-center justify-between">
                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                      ⏰ Custom Time
+                                      â° Custom Time
                                     </p>
                                     {/* <button
                                       type="button"
@@ -5650,7 +4908,7 @@ ${extrasRows}
                                       {createData.schedule.preferredTime &&
                                       createData.schedule.timeSlot ===
                                         "Flexible"
-                                        ? "✓ Selected"
+                                        ? "âœ“ Selected"
                                         : "Click to set"}
                                     </span>
                                   </div>
@@ -5671,7 +4929,7 @@ ${extrasRows}
                               createData.schedule.timeSlot !== "Flexible" && (
                                 <div>
                                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
-                                    ⏰ Preferred Arrival Time (Optional)
+                                    â° Preferred Arrival Time (Optional)
                                   </label>
                                   <input
                                     placeholder="e.g. 10:00 AM"
@@ -5910,7 +5168,7 @@ ${extrasRows}
                       createData.details.duration && (
                         <div>
                           <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
-                            ⏱️ Duration
+                            â±ï¸ Duration
                           </p>
                           <div className="text-sm font-bold mt-2">
                             {createData.details.duration} hours
@@ -5952,7 +5210,7 @@ ${extrasRows}
                     onClick={() => setCreateStep((s) => Math.max(1, s - 1))}
                     className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors border-2 border-slate-200"
                   >
-                    ← Back
+                    â† Back
                   </button>
                 )}
               </div>
@@ -5968,7 +5226,7 @@ ${extrasRows}
                         : "bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg text-white hover:scale-105 border-primary"
                     }`}
                   >
-                    Next →
+                    Next â†’
                   </button>
                 )}
                 {createStep === 4 && (
@@ -6010,7 +5268,7 @@ ${extrasRows}
                             currency: createData.payment?.currency || "GBP",
                             // Non-pay bookings haven't actually been paid yet —
                             // they stay Pending until an invoice is sent
-                            // (→ Confirmed) and the job is done (→ Completed,
+                            // (â†’ Confirmed) and the job is done (â†’ Completed,
                             // which is also when money is actually captured).
                             status: "Pending",
                             billingType: createData.payment?.billingType || "hourly",
@@ -6202,7 +5460,7 @@ ${extrasRows}
                 successBooking.details.extras.length > 0 && (
                   <div className="bg-gradient-to-br from-rose-50 to-rose-100 rounded-2xl p-6 border border-rose-200">
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-                      ⭐ Extra Services
+                      ⭐ Extra Services
                     </p>
                     <div className="grid sm:grid-cols-2 gap-3">
                       {successBooking.details.extras.map((extra, idx) => {
@@ -6228,7 +5486,7 @@ ${extrasRows}
                               )}
                             </div>
                             <span className="inline-flex items-center justify-center w-5 h-5 bg-rose-600 text-white rounded-full text-[10px] font-bold">
-                              ✓
+                              âœ“
                             </span>
                           </div>
                         );
@@ -6253,7 +5511,7 @@ ${extrasRows}
                   </div>
                   <div className="text-right">
                     <p className="text-4xl font-bold text-green-600">
-                      {successBooking.payment.currency === "GBP" ? "£" : "₦"}
+                      {successBooking.payment.currency === "GBP" ? "£" : "â‚¦"}
                       {successBooking.payment.amount}
                     </p>
                   </div>
@@ -6264,7 +5522,7 @@ ${extrasRows}
             {/* Info Box */}
             <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-6">
               <p className="text-sm font-bold text-blue-900 mb-2">
-                ✓ Payment Link Sent
+                âœ“ Payment Link Sent
               </p>
               <p className="text-xs text-blue-800">
                 A secure payment link has been sent to{" "}

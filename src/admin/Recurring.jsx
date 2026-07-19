@@ -3,7 +3,8 @@ import {
   Search, Repeat, RefreshCw, Calendar, User, Ban,
   ChevronDown, ChevronUp, Plus, X, Check, AlertCircle,
   Clock, Hash, CreditCard, Building2, ArrowLeft, ArrowRight,
-  Zap, MapPin, Phone, Mail, Layers, ChevronRight, CheckCircle2, BellOff, Bell,
+  Zap, MapPin, Phone, Mail, Layers, ChevronRight, CheckCircle2,
+  BellOff, Bell, ChevronLeft, Sparkles,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -11,28 +12,34 @@ const API = import.meta.env.VITE_API_URL;
 const isRealBooking = (b) =>
   b.status !== "Blackout" && b.customer?.firstName !== "ADMIN_BLOCK";
 
+// ── Timezone-safe local date string ───────────────────────────────────────
+const toDateStr = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
 // ── Frequency options ──────────────────────────────────────────────────────
 const FREQ_OPTIONS = [
-  { value: "specific_days", label: "Specific Days", sub: "Choose which days each week", icon: "🗓", color: "violet" },
-  { value: "daily",         label: "Every Day",     sub: "7 sessions per week",          icon: "☀", color: "amber" },
-  { value: "every2days",    label: "Every 2 Days",  sub: "~3–4 sessions per week",       icon: "📅", color: "sky" },
-  { value: "every3days",    label: "Every 3 Days",  sub: "~2 sessions per week",         icon: "📆", color: "teal" },
-  { value: "weekly",        label: "Weekly",        sub: "Once per week",                icon: "🔄", color: "primary" },
-  { value: "fortnightly",   label: "Fortnightly",   sub: "Every 2 weeks",               icon: "📌", color: "indigo" },
-  { value: "monthly",       label: "Monthly",       sub: "Once per month",               icon: "🗃", color: "rose" },
-  { value: "quarterly",     label: "Quarterly",     sub: "Every 3 months",               icon: "📊", color: "orange" },
-  { value: "yearly",        label: "Yearly",        sub: "Once per year",                icon: "🏆", color: "emerald" },
+  { value: "specific_days", label: "Specific Days", sub: "Choose days each week",  icon: "🗓️", accent: "#7c3aed" },
+  { value: "daily",         label: "Every Day",     sub: "7 sessions per week",    icon: "☀️",  accent: "#d97706" },
+  { value: "every2days",    label: "Every 2 Days",  sub: "~3–4 sessions per week", icon: "📅",  accent: "#0284c7" },
+  { value: "every3days",    label: "Every 3 Days",  sub: "~2 sessions per week",   icon: "📆",  accent: "#0d9488" },
+  { value: "weekly",        label: "Weekly",        sub: "Once per week",          icon: "🔄",  accent: "#4f46e5" },
+  { value: "fortnightly",   label: "Fortnightly",   sub: "Every 2 weeks",          icon: "📌",  accent: "#2563eb" },
+  { value: "monthly",       label: "Monthly",       sub: "Once per month",         icon: "🗃️",  accent: "#e11d48" },
+  { value: "quarterly",     label: "Quarterly",     sub: "Every 3 months",         icon: "📊",  accent: "#ea580c" },
+  { value: "yearly",        label: "Yearly",        sub: "Once per year",          icon: "🏆",  accent: "#059669" },
 ];
 
 const DAYS_OF_WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const DAY_NUM = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MONTH_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 const freqLabel = (type, specificDays = []) => {
   if (type === "specific_days") return specificDays.join(", ") || "Specific days";
   return FREQ_OPTIONS.find((o) => o.value === type)?.label || type;
 };
 
-// ── Date generation ────────────────────────────────────────────────────────
+// ── Fixed timezone-safe date generation ───────────────────────────────────
 const generateDates = (form) => {
   if (!form.startDate) return [];
   const start = new Date(form.startDate + "T00:00:00");
@@ -48,25 +55,108 @@ const generateDates = (form) => {
         const d = new Date(cur);
         d.setDate(d.getDate() + dayNum);
         if (d >= start && dates.length < form.occurrences)
-          dates.push(d.toISOString().slice(0, 10));
+          dates.push(toDateStr(d));
       }
       cur.setDate(cur.getDate() + 7);
     }
   } else {
     let cur = new Date(start);
     for (let i = 0; i < form.occurrences; i++) {
-      dates.push(cur.toISOString().slice(0, 10));
-      if (form.frequencyType === "daily")        cur.setDate(cur.getDate() + 1);
-      else if (form.frequencyType === "every2days")  cur.setDate(cur.getDate() + 2);
-      else if (form.frequencyType === "every3days")  cur.setDate(cur.getDate() + 3);
-      else if (form.frequencyType === "weekly")      cur.setDate(cur.getDate() + 7);
-      else if (form.frequencyType === "fortnightly") cur.setDate(cur.getDate() + 14);
-      else if (form.frequencyType === "monthly")     cur.setMonth(cur.getMonth() + 1);
-      else if (form.frequencyType === "quarterly")   cur.setMonth(cur.getMonth() + 3);
-      else if (form.frequencyType === "yearly")      cur.setFullYear(cur.getFullYear() + 1);
+      dates.push(toDateStr(cur));
+      if (form.frequencyType === "daily")           cur.setDate(cur.getDate() + 1);
+      else if (form.frequencyType === "every2days") cur.setDate(cur.getDate() + 2);
+      else if (form.frequencyType === "every3days") cur.setDate(cur.getDate() + 3);
+      else if (form.frequencyType === "weekly")     cur.setDate(cur.getDate() + 7);
+      else if (form.frequencyType === "fortnightly")cur.setDate(cur.getDate() + 14);
+      else if (form.frequencyType === "monthly")    cur.setMonth(cur.getMonth() + 1);
+      else if (form.frequencyType === "quarterly")  cur.setMonth(cur.getMonth() + 3);
+      else if (form.frequencyType === "yearly")     cur.setFullYear(cur.getFullYear() + 1);
     }
   }
   return dates;
+};
+
+// ── Mini Calendar ──────────────────────────────────────────────────────────
+const MiniCalendar = ({ value, onChange }) => {
+  const today = new Date();
+  const todayStr = toDateStr(today);
+  const init = value ? new Date(value + "T00:00:00") : today;
+  const [vm, setVm] = useState(new Date(init.getFullYear(), init.getMonth(), 1));
+
+  const y = vm.getFullYear();
+  const m = vm.getMonth();
+  const firstDay = (new Date(y, m, 1).getDay() + 6) % 7; // Mon=0
+  const dim = new Date(y, m + 1, 0).getDate();
+
+  const cells = [];
+  for (let i = 0; i < firstDay; i++) cells.push(null);
+  for (let d = 1; d <= dim; d++) cells.push(d);
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const prevMonth = () => setVm(new Date(y, m - 1, 1));
+  const nextMonth = () => setVm(new Date(y, m + 1, 1));
+
+  return (
+    <div className="select-none">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <button
+          onClick={prevMonth}
+          className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-all"
+        >
+          <ChevronLeft size={15} />
+        </button>
+        <p className="text-sm font-black text-slate-800 tracking-tight">
+          {MONTH_NAMES[m]} {y}
+        </p>
+        <button
+          onClick={nextMonth}
+          className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-all"
+        >
+          <ChevronRight size={15} />
+        </button>
+      </div>
+
+      {/* Day labels */}
+      <div className="grid grid-cols-7 mb-1">
+        {["Mo","Tu","We","Th","Fr","Sa","Su"].map((d) => (
+          <div key={d} className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest py-1.5">
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Date grid */}
+      <div className="grid grid-cols-7 gap-y-1">
+        {cells.map((day, i) => {
+          if (!day) return <div key={`x${i}`} />;
+          const ds = `${y}-${String(m + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+          const isToday = ds === todayStr;
+          const isSel = ds === value;
+          const isPast = new Date(ds + "T00:00:00") < new Date(todayStr + "T00:00:00");
+          return (
+            <button
+              key={day}
+              disabled={isPast}
+              onClick={() => onChange(ds)}
+              className={`
+                mx-auto flex items-center justify-center w-9 h-9 rounded-xl text-sm font-bold transition-all
+                ${isSel
+                  ? "bg-primary text-white shadow-lg shadow-primary/30 scale-105"
+                  : isToday
+                  ? "bg-primary/10 text-primary ring-2 ring-primary/20"
+                  : isPast
+                  ? "text-slate-200 cursor-not-allowed"
+                  : "text-slate-700 hover:bg-primary/8 hover:text-primary"}
+              `}
+            >
+              {day}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 };
 
 // ── Shared primitives ──────────────────────────────────────────────────────
@@ -108,7 +198,7 @@ const STEPS = [
 ];
 
 // ══════════════════════════════════════════════════════════════════════════
-//  CREATE PAGE  (shown instead of list when creating)
+//  CREATE PAGE
 // ══════════════════════════════════════════════════════════════════════════
 const CreatePage = ({ onClose, onCreated }) => {
   const [step, setStep] = useState(1);
@@ -124,10 +214,8 @@ const CreatePage = ({ onClose, onCreated }) => {
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
   const setC = (k, v) => setForm((p) => ({ ...p, customer: { ...p.customer, [k]: v } }));
 
-  // ── Scroll to top on step change
   useEffect(() => { bodyRef.current?.scrollTo({ top: 0, behavior: "smooth" }); }, [step]);
 
-  // ── Customer autocomplete
   useEffect(() => {
     if (form.customerQuery.trim().length < 2) { setCustomerResults([]); return; }
     const t = setTimeout(async () => {
@@ -151,24 +239,17 @@ const CreatePage = ({ onClose, onCreated }) => {
     setShowCustDrop(false);
   };
 
-  // ── Load from booking ID
   const loadFromBookingId = async () => {
     const q = form.bookingIdQuery.trim();
     if (!q) return;
     setLoadingBooking(true);
     setLoadError("");
     try {
-      // Try fetching by bookingId field
       const r = await fetch(`${API}/bookings?bookingId=${encodeURIComponent(q)}&limit=1`);
       const data = await r.json();
       const list = Array.isArray(data) ? data : (data?.bookings || []);
-      const b = list.find(
-        (x) => x.bookingId?.toLowerCase() === q.toLowerCase() ||
-               x._id?.toLowerCase() === q.toLowerCase()
-      ) || list[0];
-
+      const b = list.find((x) => x.bookingId?.toLowerCase() === q.toLowerCase() || x._id?.toLowerCase() === q.toLowerCase()) || list[0];
       if (!b) { setLoadError(`No booking found for "${q}"`); return; }
-
       setForm((p) => ({
         ...p,
         loadedFrom: b.bookingId || q,
@@ -196,16 +277,13 @@ const CreatePage = ({ onClose, onCreated }) => {
     }
   };
 
-  // ── Day toggle
   const toggleDay = (d) =>
     set("specificDays", form.specificDays.includes(d)
       ? form.specificDays.filter((x) => x !== d)
       : [...form.specificDays, d]);
 
-  // ── Preview dates
-  const preview = useMemo(() => generateDates(form), [form]);
+  const preview = useMemo(() => generateDates(form), [form.startDate, form.frequencyType, form.specificDays, form.occurrences]);
 
-  // ── Validation per step
   const validateStep = (s) => {
     const e = {};
     if (s === 1) {
@@ -218,7 +296,7 @@ const CreatePage = ({ onClose, onCreated }) => {
       if (!form.address) e.address = "Required";
     }
     if (s === 3) {
-      if (!form.startDate) e.startDate = "Required";
+      if (!form.startDate) e.startDate = "Please select a start date";
       if (form.frequencyType === "specific_days" && form.specificDays.length === 0)
         e.specificDays = "Select at least one day";
     }
@@ -232,7 +310,6 @@ const CreatePage = ({ onClose, onCreated }) => {
   const next = () => { if (validateStep(step)) setStep((p) => p + 1); };
   const back = () => { setErrors({}); setStep((p) => p - 1); };
 
-  // ── Submit
   const handleCreate = async () => {
     if (!validateStep(4)) return;
     setSubmitting(true);
@@ -280,66 +357,112 @@ const CreatePage = ({ onClose, onCreated }) => {
   };
 
   const fmtDate = (d) =>
-    new Date(d + "T12:00:00").toLocaleDateString("en-GB", {
-      weekday: "short", day: "numeric", month: "short",
+    new Date(d + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+
+  const fmtDateLong = (d) =>
+    new Date(d + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  // Group preview dates by month for display
+  const previewByMonth = useMemo(() => {
+    const groups = {};
+    preview.forEach((d) => {
+      const key = d.slice(0, 7); // "YYYY-MM"
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(d);
     });
+    return Object.entries(groups).map(([key, dates]) => ({
+      key,
+      label: new Date(key + "-01T12:00:00").toLocaleDateString("en-GB", { month: "long", year: "numeric" }),
+      dates,
+    }));
+  }, [preview]);
+
+  const selectedFreq = FREQ_OPTIONS.find((o) => o.value === form.frequencyType);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
 
       {/* ── Top bar ── */}
       <div className="bg-white border-b border-slate-200 px-4 sm:px-8 py-4 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
-        <button onClick={onClose} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors font-semibold text-sm">
-          <ArrowLeft size={16} /> Back
+        <button
+          onClick={onClose}
+          className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors font-semibold text-sm"
+        >
+          <ArrowLeft size={15} /> Back
         </button>
-        <span className="text-slate-300 text-sm">/</span>
+        <span className="text-slate-200">|</span>
         <span className="text-slate-400 text-sm">Recurring Bookings</span>
-        <span className="text-slate-300 text-sm">/</span>
-        <span className="text-sm font-bold text-slate-700">Create New Series</span>
+        <ChevronRight size={13} className="text-slate-300" />
+        <span className="text-sm font-bold text-slate-700">New Series</span>
+        <div className="ml-auto flex items-center gap-2 text-xs font-bold text-slate-400">
+          <span className="hidden sm:block">Step {step} of 4</span>
+          <div className="flex gap-1">
+            {STEPS.map((s) => (
+              <div
+                key={s.id}
+                className={`h-1.5 rounded-full transition-all ${
+                  step === s.id ? "w-6 bg-primary" : step > s.id ? "w-3 bg-emerald-400" : "w-3 bg-slate-200"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1 max-w-3xl mx-auto w-full px-4 sm:px-6 py-8 space-y-6" ref={bodyRef}>
-
-        {/* ── Page title ── */}
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-              <Repeat size={18} className="text-white" />
-            </div>
-            Create Recurring Series
-          </h1>
-          <p className="text-sm text-slate-400 mt-1.5 ml-11.5">
-            Set up automatic repeat bookings for a customer on any schedule
-          </p>
-        </div>
+      <div className="flex-1 max-w-2xl mx-auto w-full px-4 sm:px-6 py-8 space-y-5" ref={bodyRef}>
 
         {/* ── Step indicator ── */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-          <div className="flex items-center">
-            {STEPS.map((s, idx) => {
-              const Icon = s.icon;
-              const done = step > s.id;
-              const active = step === s.id;
-              return (
-                <React.Fragment key={s.id}>
-                  <div className="flex flex-col items-center min-w-0 flex-1">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
+        <div className="flex items-center gap-0">
+          {STEPS.map((s, idx) => {
+            const Icon = s.icon;
+            const done = step > s.id;
+            const active = step === s.id;
+            return (
+              <React.Fragment key={s.id}>
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm transition-all duration-300 ${
                       done   ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
-                      : active ? "bg-primary text-white shadow-md shadow-primary/30"
-                               : "bg-slate-100 text-slate-400"
-                    }`}>
-                      {done ? <Check size={15} strokeWidth={3} /> : <Icon size={15} />}
-                    </div>
-                    <p className={`text-[10px] font-bold mt-1.5 hidden sm:block ${active ? "text-primary" : done ? "text-emerald-600" : "text-slate-400"}`}>
-                      {s.label}
-                    </p>
+                      : active ? "bg-primary text-white shadow-lg shadow-primary/30"
+                               : "bg-white border-2 border-slate-200 text-slate-300"
+                    }`}
+                  >
+                    {done ? <Check size={16} strokeWidth={3} /> : <Icon size={15} />}
                   </div>
-                  {idx < STEPS.length - 1 && (
-                    <div className={`h-0.5 flex-1 mx-1 transition-all ${step > s.id ? "bg-emerald-400" : "bg-slate-200"}`} />
-                  )}
-                </React.Fragment>
-              );
-            })}
+                  <p className={`text-[10px] font-black mt-1.5 tracking-wide hidden sm:block ${
+                    active ? "text-primary" : done ? "text-emerald-500" : "text-slate-300"
+                  }`}>
+                    {s.label.toUpperCase()}
+                  </p>
+                </div>
+                {idx < STEPS.length - 1 && (
+                  <div className={`flex-1 h-0.5 mx-2 mt-[-14px] sm:mt-[-20px] transition-all duration-300 ${
+                    step > s.id ? "bg-emerald-400" : "bg-slate-200"
+                  }`} />
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+
+        {/* ── Step heading ── */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-md shadow-primary/20 flex-shrink-0">
+            {React.createElement(STEPS[step - 1].icon, { size: 18, className: "text-white" })}
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-slate-900 leading-tight">
+              {step === 1 && "Who is this booking for?"}
+              {step === 2 && "What service & where?"}
+              {step === 3 && "When & how often?"}
+              {step === 4 && "Review & confirm"}
+            </h1>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {step === 1 && "Find an existing customer or enter their details manually"}
+              {step === 2 && "Service type, address and session duration"}
+              {step === 3 && "Choose the frequency, start date and total sessions"}
+              {step === 4 && "Check everything looks right before creating the series"}
+            </p>
           </div>
         </div>
 
@@ -347,15 +470,13 @@ const CreatePage = ({ onClose, onCreated }) => {
         {step === 1 && (
           <div className="space-y-4">
 
-            {/* Load from booking ID */}
-            <div className="bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary/20 rounded-2xl p-5">
+            {/* Quick fill */}
+            <div className="bg-gradient-to-br from-indigo-50 to-primary/8 border-2 border-primary/20 rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-1">
-                <Zap size={15} className="text-primary" />
+                <Zap size={14} className="text-primary" />
                 <p className="text-sm font-black text-primary">Quick Fill — Load from Booking ID</p>
               </div>
-              <p className="text-xs text-slate-500 mb-4">
-                Already have a booking? Enter its ID to auto-fill all customer and service details.
-              </p>
+              <p className="text-xs text-slate-500 mb-3">Auto-fill all details from an existing booking.</p>
               <div className="flex gap-2">
                 <input
                   value={form.bookingIdQuery}
@@ -367,7 +488,7 @@ const CreatePage = ({ onClose, onCreated }) => {
                 <button
                   onClick={loadFromBookingId}
                   disabled={loadingBooking || !form.bookingIdQuery.trim()}
-                  className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 disabled:opacity-60 transition-all shadow-sm flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 disabled:opacity-60 transition-all shadow-sm flex items-center gap-2 flex-shrink-0"
                 >
                   {loadingBooking ? <RefreshCw size={13} className="animate-spin" /> : <Search size={13} />}
                   Load
@@ -376,9 +497,9 @@ const CreatePage = ({ onClose, onCreated }) => {
               {loadError && <p className="text-xs text-rose-500 mt-2 flex items-center gap-1"><AlertCircle size={11} />{loadError}</p>}
               {form.loadedFrom && (
                 <div className="mt-3 flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-                  <CheckCircle2 size={14} className="text-emerald-500 flex-shrink-0" />
+                  <CheckCircle2 size={13} className="text-emerald-500 flex-shrink-0" />
                   <p className="text-xs font-bold text-emerald-700">
-                    Details loaded from booking <span className="font-mono">{form.loadedFrom}</span> — review and edit below
+                    Loaded from <span className="font-mono">{form.loadedFrom}</span> — review and edit below
                   </p>
                 </div>
               )}
@@ -386,12 +507,11 @@ const CreatePage = ({ onClose, onCreated }) => {
 
             {/* Customer details */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
                 <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <User size={14} className="text-slate-500" />
+                  <User size={13} className="text-slate-500" />
                 </div>
                 <p className="font-black text-slate-700 text-sm">Customer Details</p>
-                <span className="text-[10px] text-slate-400 font-medium ml-auto">Or search below</span>
               </div>
 
               {/* Name search */}
@@ -402,7 +522,7 @@ const CreatePage = ({ onClose, onCreated }) => {
                     <input
                       value={form.customerQuery}
                       onChange={(e) => set("customerQuery", e.target.value)}
-                      placeholder="Type name to search customers…"
+                      placeholder="Type name to search…"
                       className={`${inp} pl-10`}
                     />
                   </div>
@@ -419,7 +539,7 @@ const CreatePage = ({ onClose, onCreated }) => {
                           <p className="font-bold text-slate-800 text-sm">{c.firstName} {c.lastName}</p>
                           <p className="text-xs text-slate-400 truncate">{c.email}</p>
                         </div>
-                        <ChevronRight size={14} className="text-slate-300 ml-auto flex-shrink-0" />
+                        <ChevronRight size={13} className="text-slate-300 ml-auto flex-shrink-0" />
                       </button>
                     ))}
                   </div>
@@ -453,9 +573,9 @@ const CreatePage = ({ onClose, onCreated }) => {
         {/* ══════════════════ STEP 2 — SERVICE ══════════════════ */}
         {step === 2 && (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
               <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                <Building2 size={14} className="text-slate-500" />
+                <Building2 size={13} className="text-slate-500" />
               </div>
               <p className="font-black text-slate-700 text-sm">Service & Location</p>
             </div>
@@ -478,7 +598,7 @@ const CreatePage = ({ onClose, onCreated }) => {
                 <input value={form.postcode} onChange={(e) => set("postcode", e.target.value)}
                   placeholder="SW1A 1AA" className={inp} />
               </Field>
-              <Field label="Duration (hours)" hint="How long each session takes">
+              <Field label="Duration (hours)" hint="Per session">
                 <input type="number" min="1" max="24" value={form.duration}
                   onChange={(e) => set("duration", e.target.value)} className={inp} />
               </Field>
@@ -486,7 +606,7 @@ const CreatePage = ({ onClose, onCreated }) => {
 
             <Field label="Special Instructions / Notes">
               <textarea value={form.notes} onChange={(e) => set("notes", e.target.value)}
-                rows={3} placeholder="Access codes, parking info, pet notes…"
+                rows={3} placeholder="Access codes, parking, pet notes…"
                 className={`${inp} resize-none`} />
             </Field>
           </div>
@@ -498,12 +618,13 @@ const CreatePage = ({ onClose, onCreated }) => {
 
             {/* Frequency picker */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-100 mb-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
                 <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <Repeat size={14} className="text-slate-500" />
+                  <Repeat size={13} className="text-slate-500" />
                 </div>
-                <p className="font-black text-slate-700 text-sm">How often should this repeat?</p>
+                <p className="font-black text-slate-700 text-sm">How often does this repeat?</p>
               </div>
+
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {FREQ_OPTIONS.map((opt) => {
                   const isActive = form.frequencyType === opt.value;
@@ -512,19 +633,25 @@ const CreatePage = ({ onClose, onCreated }) => {
                       key={opt.value}
                       onClick={() => set("frequencyType", opt.value)}
                       className={`relative flex flex-col items-start p-3.5 rounded-xl border-2 text-left transition-all ${
-                        isActive
-                          ? "border-primary bg-primary/5 shadow-sm"
-                          : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                        isActive ? "shadow-md" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/80"
                       }`}
+                      style={isActive ? {
+                        borderColor: opt.accent,
+                        background: `${opt.accent}0d`,
+                      } : {}}
                     >
-                      <span className="text-lg mb-1.5 leading-none">{opt.icon}</span>
-                      <p className={`text-sm font-black leading-tight ${isActive ? "text-primary" : "text-slate-700"}`}>
+                      <span className="text-xl mb-2 leading-none">{opt.icon}</span>
+                      <p className={`text-sm font-black leading-tight`}
+                        style={{ color: isActive ? opt.accent : "#334155" }}>
                         {opt.label}
                       </p>
                       <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">{opt.sub}</p>
                       {isActive && (
-                        <div className="absolute top-2.5 right-2.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
-                          <Check size={10} className="text-white" strokeWidth={3} />
+                        <div
+                          className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full flex items-center justify-center"
+                          style={{ background: opt.accent }}
+                        >
+                          <Check size={11} className="text-white" strokeWidth={3} />
                         </div>
                       )}
                     </button>
@@ -543,8 +670,8 @@ const CreatePage = ({ onClose, onCreated }) => {
                         onClick={() => toggleDay(d)}
                         className={`w-12 h-12 rounded-xl font-black text-sm border-2 transition-all ${
                           form.specificDays.includes(d)
-                            ? "bg-primary border-primary text-white shadow-md shadow-primary/25"
-                            : "border-slate-200 text-slate-500 hover:border-primary/30 hover:text-primary"
+                            ? "bg-violet-600 border-violet-600 text-white shadow-md shadow-violet-200"
+                            : "border-slate-200 text-slate-500 hover:border-violet-300 hover:text-violet-600"
                         }`}
                       >
                         {d}
@@ -557,54 +684,103 @@ const CreatePage = ({ onClose, onCreated }) => {
                     </p>
                   )}
                   {form.specificDays.length > 0 && (
-                    <p className="text-xs text-emerald-600 font-bold mt-2">
-                      {form.specificDays.join(", ")} — {form.specificDays.length}× per week
+                    <p className="text-xs font-bold text-violet-600 mt-2">
+                      ✓ {form.specificDays.join(", ")} — {form.specificDays.length}× per week
                     </p>
                   )}
                 </div>
               )}
             </div>
 
-            {/* Start date, time, sessions */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+            {/* Start date — mini calendar */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
                 <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <Calendar size={14} className="text-slate-500" />
+                  <Calendar size={13} className="text-slate-500" />
                 </div>
-                <p className="font-black text-slate-700 text-sm">Start Date & Time</p>
+                <p className="font-black text-slate-700 text-sm">Start Date</p>
+                {form.startDate && (
+                  <span className="ml-auto text-xs font-bold text-primary bg-primary/8 px-2.5 py-1 rounded-full">
+                    {fmtDateLong(form.startDate)}
+                  </span>
+                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="First Session Date *" error={errors.startDate}>
-                  <input type="date" value={form.startDate}
-                    onChange={(e) => set("startDate", e.target.value)}
-                    min={new Date().toISOString().slice(0, 10)}
-                    className={inp} />
-                </Field>
-                <Field label="Time" hint="Same time each session">
+              {errors.startDate && (
+                <p className="text-xs text-rose-500 mb-3 flex items-center gap-1">
+                  <AlertCircle size={11} />{errors.startDate}
+                </p>
+              )}
+
+              <MiniCalendar
+                value={form.startDate}
+                onChange={(v) => { set("startDate", v); setErrors((e) => ({ ...e, startDate: undefined })); }}
+              />
+            </div>
+
+            {/* Time + sessions */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-5">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
+                  <Clock size={13} className="text-slate-500" />
+                </div>
+                <p className="font-black text-slate-700 text-sm">Time & Sessions</p>
+              </div>
+
+              <Field label="Session Time" hint="Same time every session">
+                <div className="relative">
+                  <Clock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input type="time" value={form.timeSlot}
                     onChange={(e) => set("timeSlot", e.target.value)}
-                    className={inp} />
-                </Field>
-              </div>
+                    className={`${inp} pl-10`} />
+                </div>
+              </Field>
 
-              <Field label="Total Number of Sessions" hint="How many bookings to create in total">
-                <div className="flex items-center gap-3">
-                  <button onClick={() => set("occurrences", Math.max(1, form.occurrences - 1))}
-                    className="w-11 h-11 rounded-xl border-2 border-slate-200 flex items-center justify-center text-slate-600 hover:border-primary/40 hover:text-primary font-black text-xl transition-all flex-shrink-0">
+              <Field label="Total Sessions" hint="Number of bookings to create">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => set("occurrences", Math.max(1, form.occurrences - 1))}
+                    className="w-12 h-12 rounded-2xl border-2 border-slate-200 flex items-center justify-center text-slate-500 hover:border-primary/40 hover:text-primary font-black text-2xl transition-all flex-shrink-0"
+                  >
                     −
                   </button>
-                  <div className="flex-1 text-center">
-                    <span className="text-3xl font-black text-slate-900 tabular-nums">{form.occurrences}</span>
-                    <p className="text-xs text-slate-400 mt-0.5">sessions</p>
+                  <div className="flex-1 text-center py-2 bg-slate-50 rounded-2xl border border-slate-200">
+                    <span className="text-4xl font-black text-slate-900 tabular-nums">{form.occurrences}</span>
+                    <p className="text-xs text-slate-400 mt-0.5 font-medium">sessions</p>
                   </div>
-                  <button onClick={() => set("occurrences", Math.min(104, form.occurrences + 1))}
-                    className="w-11 h-11 rounded-xl border-2 border-slate-200 flex items-center justify-center text-slate-600 hover:border-primary/40 hover:text-primary font-black text-xl transition-all flex-shrink-0">
+                  <button
+                    onClick={() => set("occurrences", Math.min(104, form.occurrences + 1))}
+                    className="w-12 h-12 rounded-2xl border-2 border-slate-200 flex items-center justify-center text-slate-500 hover:border-primary/40 hover:text-primary font-black text-2xl transition-all flex-shrink-0"
+                  >
                     +
                   </button>
                 </div>
               </Field>
             </div>
+
+            {/* Live preview of dates */}
+            {preview.length > 0 && (
+              <div className="bg-gradient-to-br from-primary/5 to-primary/8 border-2 border-primary/15 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles size={13} className="text-primary" />
+                  <p className="text-xs font-black text-primary uppercase tracking-wider">
+                    Preview — {preview.length} sessions will be created
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {preview.slice(0, 8).map((d, i) => (
+                    <span key={d} className="text-xs font-bold bg-white/80 text-slate-700 border border-primary/20 px-2.5 py-1 rounded-lg">
+                      {fmtDate(d)}
+                    </span>
+                  ))}
+                  {preview.length > 8 && (
+                    <span className="text-xs font-bold bg-primary/10 text-primary px-2.5 py-1 rounded-lg">
+                      +{preview.length - 8} more
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -616,61 +792,51 @@ const CreatePage = ({ onClose, onCreated }) => {
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
               <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
                 <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <Mail size={14} className="text-slate-500" />
+                  <Mail size={13} className="text-slate-500" />
                 </div>
                 <p className="font-black text-slate-700 text-sm">Email Notifications</p>
               </div>
-              <div className="flex flex-col gap-2.5">
-                <button
-                  onClick={() => set("suppressEmail", true)}
-                  className={`flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
-                    form.suppressEmail ? "border-amber-400 bg-amber-50" : "border-slate-200 hover:border-slate-300"
-                  }`}
-                >
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                    form.suppressEmail ? "border-amber-500 bg-amber-500" : "border-slate-300"
-                  }`}>
-                    {form.suppressEmail && <div className="w-2 h-2 rounded-full bg-white" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <BellOff size={14} className={form.suppressEmail ? "text-amber-600" : "text-slate-400"} />
-                      <p className={`font-bold text-sm ${form.suppressEmail ? "text-amber-700" : "text-slate-700"}`}>
-                        Don't send confirmation email
-                      </p>
-                    </div>
-                    <p className="text-xs text-slate-400 mt-0.5">Customer will NOT receive any email about this booking</p>
-                  </div>
-                </button>
-                <button
-                  onClick={() => set("suppressEmail", false)}
-                  className={`flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
-                    !form.suppressEmail ? "border-emerald-400 bg-emerald-50" : "border-slate-200 hover:border-slate-300"
-                  }`}
-                >
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                    !form.suppressEmail ? "border-emerald-500 bg-emerald-500" : "border-slate-300"
-                  }`}>
-                    {!form.suppressEmail && <div className="w-2 h-2 rounded-full bg-white" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Bell size={14} className={!form.suppressEmail ? "text-emerald-600" : "text-slate-400"} />
-                      <p className={`font-bold text-sm ${!form.suppressEmail ? "text-emerald-700" : "text-slate-700"}`}>
-                        Send confirmation email
-                      </p>
-                    </div>
-                    <p className="text-xs text-slate-400 mt-0.5">Customer will receive a booking confirmation for each session</p>
-                  </div>
-                </button>
+              <div className="grid grid-cols-2 gap-2.5">
+                {[
+                  { suppress: true,  Icon: BellOff, color: "amber",   title: "No email",           sub: "Customer won't receive any notification" },
+                  { suppress: false, Icon: Bell,    color: "emerald",  title: "Send confirmation",  sub: "Confirmation email sent for each session" },
+                ].map(({ suppress, Icon, color, title, sub }) => {
+                  const active = form.suppressEmail === suppress;
+                  return (
+                    <button
+                      key={String(suppress)}
+                      onClick={() => set("suppressEmail", suppress)}
+                      className={`flex flex-col items-start gap-2 p-4 rounded-xl border-2 text-left transition-all ${
+                        active
+                          ? color === "amber"
+                            ? "border-amber-400 bg-amber-50"
+                            : "border-emerald-400 bg-emerald-50"
+                          : "border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <Icon size={18} className={active
+                        ? color === "amber" ? "text-amber-500" : "text-emerald-500"
+                        : "text-slate-300"
+                      } />
+                      <div>
+                        <p className={`font-black text-sm leading-tight ${active
+                          ? color === "amber" ? "text-amber-700" : "text-emerald-700"
+                          : "text-slate-500"}`}>
+                          {title}
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">{sub}</p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Payment */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
                 <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <CreditCard size={14} className="text-slate-500" />
+                  <CreditCard size={13} className="text-slate-500" />
                 </div>
                 <p className="font-black text-slate-700 text-sm">Payment</p>
               </div>
@@ -690,15 +856,20 @@ const CreatePage = ({ onClose, onCreated }) => {
                   <p className={`font-bold text-sm ${form.noPayment ? "text-primary" : "text-slate-700"}`}>
                     No Payment Required
                   </p>
-                  <p className="text-xs text-slate-400">Staff visits, complimentary cleans, or internal bookings</p>
+                  <p className="text-xs text-slate-400">Staff visits, complimentary cleans, internal bookings</p>
                 </div>
               </button>
 
               {!form.noPayment && (
-                <Field label="Amount per Session (£) *" error={errors.amount}
-                  hint={`Total series value: £${(parseFloat(form.amount || 0) * preview.length).toLocaleString("en-GB", { maximumFractionDigits: 2 })}`}>
+                <Field
+                  label="Amount per Session (£) *"
+                  error={errors.amount}
+                  hint={preview.length > 0
+                    ? `Series total: £${(parseFloat(form.amount || 0) * preview.length).toLocaleString("en-GB", { maximumFractionDigits: 2 })}`
+                    : undefined}
+                >
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400">£</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-sm">£</span>
                     <input type="number" min="0" step="0.01" value={form.amount}
                       onChange={(e) => set("amount", e.target.value)}
                       placeholder="0.00" className={`${inp} pl-8`} />
@@ -707,56 +878,74 @@ const CreatePage = ({ onClose, onCreated }) => {
               )}
             </div>
 
-            {/* Summary card */}
+            {/* Booking summary */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-100 mb-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
                 <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <Layers size={14} className="text-slate-500" />
+                  <Layers size={13} className="text-slate-500" />
                 </div>
                 <p className="font-black text-slate-700 text-sm">Booking Summary</p>
               </div>
-              <div className="space-y-2.5">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
                 {[
-                  { label: "Customer", value: `${form.customer.firstName} ${form.customer.lastName}` },
-                  { label: "Email",    value: form.customer.email },
-                  { label: "Service",  value: form.service },
-                  { label: "Address",  value: `${form.address}${form.postcode ? `, ${form.postcode}` : ""}` },
-                  { label: "Duration", value: `${form.duration} hour${form.duration !== 1 ? "s" : ""} per session` },
-                  { label: "Frequency", value: freqLabel(form.frequencyType, form.specificDays) },
-                  { label: "Time",     value: form.timeSlot },
-                  { label: "Sessions", value: `${preview.length} bookings` },
-                  { label: "Payment",  value: form.noPayment ? "No charge" : `£${parseFloat(form.amount || 0).toFixed(2)} per session` },
-                  { label: "Email",    value: form.suppressEmail ? "No email sent to customer" : "Confirmation email will be sent" },
+                  { label: "Customer",   value: `${form.customer.firstName} ${form.customer.lastName}` },
+                  { label: "Email",      value: form.customer.email },
+                  { label: "Phone",      value: form.customer.phone || "—" },
+                  { label: "Service",    value: form.service },
+                  { label: "Address",    value: `${form.address}${form.postcode ? `, ${form.postcode}` : ""}` },
+                  { label: "Duration",   value: `${form.duration}h per session` },
+                  { label: "Frequency",  value: freqLabel(form.frequencyType, form.specificDays) },
+                  { label: "Start Date", value: form.startDate ? fmtDateLong(form.startDate) : "—" },
+                  { label: "Time",       value: form.timeSlot },
+                  { label: "Sessions",   value: `${preview.length} bookings` },
+                  { label: "Payment",    value: form.noPayment ? "No charge" : `£${parseFloat(form.amount || 0).toFixed(2)} / session` },
                 ].map(({ label, value }) => (
-                  <div key={label} className="flex items-start justify-between gap-3 text-sm">
-                    <span className="text-slate-400 font-medium flex-shrink-0 w-24">{label}</span>
-                    <span className="font-bold text-slate-800 text-right">{value || "—"}</span>
+                  <div key={label} className="flex flex-col gap-0.5">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{label}</span>
+                    <span className="font-bold text-slate-800 text-sm leading-tight">{value || "—"}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Sessions preview */}
-            {preview.length > 0 && (
+            {/* Sessions grid by month */}
+            {previewByMonth.length > 0 && (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-                <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-100 mb-4">
+                <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 mb-4">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
-                      <Hash size={14} className="text-emerald-600" />
+                      <Hash size={13} className="text-emerald-600" />
                     </div>
                     <p className="font-black text-slate-700 text-sm">All {preview.length} Sessions</p>
                   </div>
-                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                  <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
                     Ready to create
                   </span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {preview.map((d, i) => (
-                    <div key={d} className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
-                      <span className="text-[10px] font-black text-slate-300 tabular-nums w-5 flex-shrink-0">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span className="text-xs font-bold text-slate-700">{fmtDate(d)}</span>
+
+                <div className="space-y-4">
+                  {previewByMonth.map(({ key, label, dates: monthDates }) => (
+                    <div key={key}>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{label}</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                        {monthDates.map((d, i) => {
+                          const dt = new Date(d + "T12:00:00");
+                          return (
+                            <div key={d} className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5">
+                              <div className="w-8 h-8 rounded-lg bg-primary/8 flex flex-col items-center justify-center flex-shrink-0">
+                                <span className="text-[9px] font-black text-primary/60 uppercase leading-none">
+                                  {dt.toLocaleDateString("en-GB", { weekday: "short" })}
+                                </span>
+                                <span className="text-sm font-black text-primary leading-none mt-0.5">{dt.getDate()}</span>
+                              </div>
+                              <span className="text-xs font-bold text-slate-600">
+                                {dt.toLocaleDateString("en-GB", { month: "short", day: "numeric" })}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -773,37 +962,29 @@ const CreatePage = ({ onClose, onCreated }) => {
         )}
 
         {/* ── Step navigation ── */}
-        <div className="flex items-center justify-between gap-3 pt-2 pb-4">
+        <div className="flex items-center justify-between gap-3 pt-2 pb-6">
           <button
             onClick={step === 1 ? onClose : back}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-sm hover:border-slate-300 hover:bg-slate-50 transition-all"
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl border-2 border-slate-200 text-slate-600 font-bold text-sm hover:border-slate-300 hover:bg-slate-50 transition-all"
           >
             <ArrowLeft size={14} />
             {step === 1 ? "Cancel" : "Back"}
           </button>
 
-          <div className="flex items-center gap-1">
-            {STEPS.map((s) => (
-              <div key={s.id} className={`h-2 rounded-full transition-all ${
-                step === s.id ? "w-6 bg-primary" : step > s.id ? "w-2 bg-emerald-400" : "w-2 bg-slate-200"
-              }`} />
-            ))}
-          </div>
-
           {step < 4 ? (
             <button
               onClick={next}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-all shadow-md shadow-primary/20"
+              className="flex items-center gap-2 px-7 py-3 rounded-2xl bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-all shadow-lg shadow-primary/25"
             >
-              Next <ArrowRight size={14} />
+              Continue <ArrowRight size={14} />
             </button>
           ) : (
             <button
               onClick={handleCreate}
               disabled={submitting || preview.length === 0}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 disabled:opacity-60 transition-all shadow-md shadow-emerald-200"
+              className="flex items-center gap-2 px-7 py-3 rounded-2xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 disabled:opacity-60 transition-all shadow-lg shadow-emerald-200"
             >
-              {submitting ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} />}
+              {submitting ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} strokeWidth={3} />}
               {submitting ? "Creating…" : `Create ${preview.length} Booking${preview.length !== 1 ? "s" : ""}`}
             </button>
           )}
@@ -817,7 +998,7 @@ const CreatePage = ({ onClose, onCreated }) => {
 //  LIST PAGE
 // ══════════════════════════════════════════════════════════════════════════
 const Recurring = () => {
-  const [view, setView] = useState("list"); // "list" | "create"
+  const [view, setView] = useState("list");
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -851,10 +1032,14 @@ const Recurring = () => {
       const now = new Date();
       const upcoming = sorted.filter((b) => new Date(b.schedule?.date) >= now && b.status !== "Cancelled");
       const totalRevenue = sorted.reduce((s, b) => s + Number(b.payment?.amount || 0), 0);
-      return { groupId, first: sorted[0], frequency: sorted[0]?.details?.frequency || "Recurring",
+      return {
+        groupId, first: sorted[0],
+        frequency: sorted[0]?.details?.frequency || "Recurring",
         count: sorted.length, upcomingCount: upcoming.length,
-        nextDate: upcoming[0]?.schedule?.date || null, totalRevenue, bookings: sorted,
-        noPayment: sorted[0]?.noPaymentRequired };
+        nextDate: upcoming[0]?.schedule?.date || null,
+        totalRevenue, bookings: sorted,
+        noPayment: sorted[0]?.noPaymentRequired,
+      };
     });
 
     if (search) {
@@ -908,16 +1093,37 @@ const Recurring = () => {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <button onClick={fetchBookings}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:border-slate-300 transition-all font-semibold text-sm">
+          <button
+            onClick={fetchBookings}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:border-slate-300 transition-all font-semibold text-sm"
+          >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           </button>
-          <button onClick={() => setView("create")}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 transition-all font-bold text-sm shadow-md shadow-primary/20">
+          <button
+            onClick={() => setView("create")}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 transition-all font-bold text-sm shadow-md shadow-primary/20"
+          >
             <Plus size={16} /> Create Series
           </button>
         </div>
       </div>
+
+      {/* Stats */}
+      {!loading && series.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: "Active Series",     value: series.length,                                               color: "text-primary" },
+            { label: "Upcoming Sessions", value: series.reduce((s, g) => s + g.upcomingCount, 0),             color: "text-indigo-600" },
+            { label: "Total Revenue",     value: `£${series.reduce((s, g) => s + g.totalRevenue, 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}`, color: "text-emerald-600" },
+            { label: "No-Pay Series",     value: series.filter((g) => g.noPayment).length,                    color: "text-amber-600" },
+          ].map((stat) => (
+            <div key={stat.label} className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stat.label}</p>
+              <p className={`text-2xl font-black mt-1 tabular-nums ${stat.color}`}>{stat.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative max-w-md">
@@ -926,23 +1132,6 @@ const Recurring = () => {
           placeholder="Search by customer or service…"
           className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all" />
       </div>
-
-      {/* Stats */}
-      {!loading && series.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: "Active Series",    value: series.length },
-            { label: "Upcoming Sessions", value: series.reduce((s, g) => s + g.upcomingCount, 0) },
-            { label: "Total Revenue",    value: `£${series.reduce((s, g) => s + g.totalRevenue, 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}` },
-            { label: "No-Pay Series",    value: series.filter((g) => g.noPayment).length },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stat.label}</p>
-              <p className="text-2xl font-black text-slate-900 mt-1 tabular-nums">{stat.value}</p>
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* Series list */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm divide-y divide-slate-100 overflow-hidden">
@@ -958,14 +1147,17 @@ const Recurring = () => {
             </div>
             <p className="font-bold text-slate-600 mb-1">No recurring series yet</p>
             <p className="text-sm text-slate-400 mb-5">Create a repeating schedule for a customer</p>
-            <button onClick={() => setView("create")}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-colors shadow-md shadow-primary/20">
+            <button
+              onClick={() => setView("create")}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-colors shadow-md shadow-primary/20"
+            >
               <Plus size={15} /> Create First Series
             </button>
           </div>
         ) : (
           series.map((group) => {
             const isOpen = openGroup === group.groupId;
+            const initials = `${group.first?.customer?.firstName?.[0] || ""}${group.first?.customer?.lastName?.[0] || ""}`;
             return (
               <div key={group.groupId}>
                 <button
@@ -973,10 +1165,8 @@ const Recurring = () => {
                   className="w-full flex items-center justify-between gap-3 px-5 py-4 hover:bg-slate-50/80 transition-colors text-left"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm font-black text-primary">
-                        {group.first?.customer?.firstName?.[0]}{group.first?.customer?.lastName?.[0]}
-                      </span>
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm font-black text-primary">{initials}</span>
                     </div>
                     <div className="min-w-0">
                       <p className="font-bold text-slate-800 text-sm">
@@ -986,11 +1176,11 @@ const Recurring = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-primary/8 text-primary">
                       {group.frequency}
                     </span>
                     {group.noPayment && (
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-200">
                         No pay
                       </span>
                     )}
@@ -1021,9 +1211,7 @@ const Recurring = () => {
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-all font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Ban size={11} />
-                        {group.upcomingCount === 0
-                          ? "None upcoming"
-                          : `Cancel ${group.upcomingCount} upcoming`}
+                        {group.upcomingCount === 0 ? "None upcoming" : `Cancel ${group.upcomingCount} upcoming`}
                       </button>
                     </div>
                     <div className="bg-slate-50 rounded-xl border border-slate-200 divide-y divide-slate-100 overflow-hidden">
@@ -1046,9 +1234,9 @@ const Recurring = () => {
                             <span className="font-bold text-slate-600 flex-shrink-0 tabular-nums">£{b.payment?.amount || 0}</span>
                           )}
                           <span className={`font-bold px-2 py-0.5 rounded-full flex-shrink-0 text-[10px] ${
-                            b.status === "Cancelled"   ? "bg-rose-100 text-rose-600"
-                            : b.status === "Completed" ? "bg-emerald-100 text-emerald-700"
-                            : b.status === "In Progress" ? "bg-purple-100 text-purple-700"
+                            b.status === "Cancelled"    ? "bg-rose-100 text-rose-600"
+                            : b.status === "Completed"  ? "bg-emerald-100 text-emerald-700"
+                            : b.status === "In Progress"? "bg-purple-100 text-purple-700"
                             : "bg-slate-200 text-slate-600"
                           }`}>
                             {b.status}
