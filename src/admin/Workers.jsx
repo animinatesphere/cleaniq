@@ -12,7 +12,11 @@ import {
   CheckCircle2,
   AlertCircle,
   Eye,
+  EyeOff,
   Smartphone,
+  KeyRound,
+  RefreshCw,
+  User,
 } from "lucide-react";
 import { useRegion } from "../context/RegionContext";
 
@@ -27,6 +31,12 @@ const Workers = () => {
   const [copied, setCopied] = useState(false);
   const [selectedWorkers, setSelectedWorkers] = useState(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [workerDetailModal, setWorkerDetailModal] = useState(null);
+  const [newPassword, setNewPassword]               = useState("");
+  const [showNewPwd, setShowNewPwd]                 = useState(false);
+  const [showStoredPwd, setShowStoredPwd]           = useState(false);
+  const [updatingPwd, setUpdatingPwd]               = useState(false);
+  const [pwdSuccess, setPwdSuccess]                 = useState(false);
 
   const ROLE_OPTIONS = [
     "Cleaner",
@@ -138,6 +148,31 @@ const Workers = () => {
       setWorkers(workers.filter((w) => !selectedWorkers.has(w._id)));
     } catch (error) {
       console.error("Error deleting workers:", error);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!newPassword.trim() || !workerDetailModal?._id) return;
+    setUpdatingPwd(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/workers/${workerDetailModal._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Update failed");
+      const updated = { ...workerDetailModal, tempPassword: newPassword };
+      setWorkers((prev) => prev.map((w) => w._id === workerDetailModal._id ? updated : w));
+      setWorkerDetailModal(updated);
+      setNewPassword("");
+      setShowNewPwd(false);
+      setPwdSuccess(true);
+      setTimeout(() => setPwdSuccess(false), 3000);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setUpdatingPwd(false);
     }
   };
 
@@ -394,8 +429,12 @@ const Workers = () => {
                     </td>
                     <td className="p-6 text-right">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2.5 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all">
-                          <Edit3 size={16} />
+                        <button
+                          onClick={() => { setWorkerDetailModal(w); setNewPassword(""); setShowNewPwd(false); setShowStoredPwd(false); setPwdSuccess(false); }}
+                          className="p-2.5 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
+                          title="View account & credentials"
+                        >
+                          <Eye size={16} />
                         </button>
                         <button
                           onClick={() => handleDelete(w._id)}
@@ -586,6 +625,128 @@ const Workers = () => {
             >
               Done
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Worker Account Detail Modal */}
+      {workerDetailModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-primary-dark/60 backdrop-blur-sm" onClick={() => setWorkerDetailModal(null)} />
+          <div className="relative bg-white rounded-[32px] md:rounded-[40px] p-6 md:p-8 w-full max-w-lg shadow-2xl border-4 border-white animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setWorkerDetailModal(null)}
+              className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-500 transition-all"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-7">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-lg uppercase shrink-0">
+                {workerDetailModal.firstName?.[0]}{workerDetailModal.lastName?.[0]}
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-primary-dark tracking-tight">
+                  {workerDetailModal.firstName} {workerDetailModal.lastName}
+                </h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[9px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{workerDetailModal.role || "Cleaner"}</span>
+                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${workerDetailModal.status === "Active" ? "bg-emerald-50 text-emerald-600" : workerDetailModal.status === "Pending" ? "bg-amber-50 text-amber-600" : "bg-rose-50 text-rose-600"}`}>
+                    {workerDetailModal.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Profile Details */}
+            <div className="bg-slate-50 rounded-2xl p-5 space-y-3 mb-6">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Profile Details</p>
+              {[
+                { label: "Worker ID", value: workerDetailModal.workerId },
+                { label: "Email", value: workerDetailModal.email },
+                { label: "Phone", value: workerDetailModal.phone },
+                { label: "Region", value: workerDetailModal.region },
+                { label: "Jobs Completed", value: workerDetailModal.jobsCompleted ?? 0 },
+                { label: "Rating", value: workerDetailModal.rating ? `⭐ ${workerDetailModal.rating}` : "—" },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between items-center text-sm">
+                  <span className="text-slate-400 font-semibold">{label}</span>
+                  <span className="font-bold text-slate-700">{value || "—"}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* App Credentials */}
+            <div className="border border-slate-200 rounded-2xl p-5 mb-6 space-y-4">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">App Login Credentials</p>
+
+              {/* Email (login ID) */}
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Login Email</p>
+                <div className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-xl border border-slate-100">
+                  <span className="font-bold text-sm text-primary-dark">{workerDetailModal.email}</span>
+                  <button onClick={() => copyToClipboard(workerDetailModal.email)} className="p-1.5 rounded-lg hover:bg-primary/10 text-slate-400 hover:text-primary transition-colors">
+                    {copied ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Stored password */}
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Current Password</p>
+                <div className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-xl border border-slate-100">
+                  <span className="font-mono font-bold text-sm text-primary tracking-wider">
+                    {workerDetailModal.tempPassword
+                      ? (showStoredPwd ? workerDetailModal.tempPassword : "•".repeat(workerDetailModal.tempPassword.length))
+                      : <span className="text-slate-400 font-medium not-italic text-xs">Not stored — set a new password below</span>}
+                  </span>
+                  {workerDetailModal.tempPassword && (
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => setShowStoredPwd((p) => !p)} className="p-1.5 rounded-lg hover:bg-primary/10 text-slate-400 hover:text-primary transition-colors">
+                        {showStoredPwd ? <EyeOff size={14} /> : <Eye size={14} />}
+                      </button>
+                      <button onClick={() => copyToClipboard(workerDetailModal.tempPassword)} className="p-1.5 rounded-lg hover:bg-primary/10 text-slate-400 hover:text-primary transition-colors">
+                        {copied ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Update Password */}
+            <div className="border border-amber-200 bg-amber-50/40 rounded-2xl p-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <KeyRound size={14} className="text-amber-600" />
+                <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest">Update Password</p>
+              </div>
+              <div className="flex items-center gap-2 bg-white rounded-xl border border-amber-200 px-4 py-3">
+                <input
+                  type={showNewPwd ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password…"
+                  className="flex-1 bg-transparent border-none outline-none text-sm font-bold text-slate-700 placeholder-slate-300"
+                />
+                <button onClick={() => setShowNewPwd((p) => !p)} className="text-slate-400 hover:text-primary transition-colors">
+                  {showNewPwd ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+              {pwdSuccess && (
+                <p className="text-xs font-bold text-emerald-600 flex items-center gap-1.5">
+                  <CheckCircle2 size={13} /> Password updated successfully
+                </p>
+              )}
+              <button
+                onClick={handleUpdatePassword}
+                disabled={!newPassword.trim() || updatingPwd}
+                className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {updatingPwd ? <RefreshCw size={13} className="animate-spin" /> : <KeyRound size={13} />}
+                {updatingPwd ? "Updating…" : "Save New Password"}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -291,9 +291,9 @@ const AdminLayout = () => {
           icon: <ClipboardList size={20} />,
         },
         {
-          name: "Domestic Hub",
+          name: "Property Condition",
           path: "/admin/domestic",
-          key: "domestic",
+          key: "Property-condition",
           icon: <Home size={20} />,
         },
         {

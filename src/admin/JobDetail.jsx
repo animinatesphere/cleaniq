@@ -441,7 +441,7 @@ const JobDetail = () => {
   const statusStyle = STATUS_STYLE[booking.status] || { pill: "bg-slate-100 text-slate-600 border-slate-200", dot: "bg-slate-400" };
   const isLive      = ["Assigned", "Arrived", "In Progress"].includes(booking.status);
 
-  const currency = booking.payment?.currency === "GBP" ? "£" : "₦";
+  const currency = "£";
 
   const initials = (f, l) => `${f?.[0] || ""}${l?.[0] || ""}`.toUpperCase() || "?";
 

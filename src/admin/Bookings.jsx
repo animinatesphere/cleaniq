@@ -2676,10 +2676,10 @@ const Bookings = () => {
   };
 
   const toggleSelectAll = () => {
-    if (selectedBookings.size === filteredBookings.length) {
+    if (selectedBookings.size === displayBookings.length) {
       setSelectedBookings(new Set());
     } else {
-      setSelectedBookings(new Set(filteredBookings.map((b) => b._id)));
+      setSelectedBookings(new Set(displayBookings.map((b) => b._id)));
     }
   };
 
@@ -2911,9 +2911,35 @@ ${extrasRows}
     );
   }, [bookings, searchTerm, showCancelled]);
 
-  const bookingsTotalPages = Math.max(1, Math.ceil(filteredBookings.length / BOOKINGS_PAGE_SIZE));
+  // Collapse recurring groups: show one representative row per recurringGroup
+  const displayBookings = useMemo(() => {
+    const today = new Date();
+    const groups = {};
+    for (const b of filteredBookings) {
+      const grp = b.meta?.recurringGroup;
+      if (!grp) continue;
+      if (!groups[grp]) { groups[grp] = { best: b, count: 1 }; continue; }
+      groups[grp].count++;
+      const bDate = new Date(b.schedule?.date);
+      const bestDate = new Date(groups[grp].best.schedule?.date);
+      if (bDate >= today && (bestDate < today || bDate < bestDate)) groups[grp].best = b;
+    }
+    const seen = new Set();
+    return filteredBookings.reduce((acc, b) => {
+      const grp = b.meta?.recurringGroup;
+      if (!grp) { acc.push(b); return acc; }
+      if (!seen.has(grp)) {
+        seen.add(grp);
+        const { best, count } = groups[grp];
+        acc.push(count > 1 ? { ...best, _recurringCount: count } : best);
+      }
+      return acc;
+    }, []);
+  }, [filteredBookings]);
+
+  const bookingsTotalPages = Math.max(1, Math.ceil(displayBookings.length / BOOKINGS_PAGE_SIZE));
   const bookingsSafePage   = Math.min(bookingsPage, bookingsTotalPages);
-  const pageBookings       = filteredBookings.slice((bookingsSafePage - 1) * BOOKINGS_PAGE_SIZE, bookingsSafePage * BOOKINGS_PAGE_SIZE);
+  const pageBookings       = displayBookings.slice((bookingsSafePage - 1) * BOOKINGS_PAGE_SIZE, bookingsSafePage * BOOKINGS_PAGE_SIZE);
 
   const getStatusColor = (status) => {
     const colors = {
@@ -3228,7 +3254,7 @@ ${extrasRows}
                       Loading...
                     </td>
                   </tr>
-                ) : filteredBookings.length === 0 ? (
+                ) : displayBookings.length === 0 ? (
                   <tr>
                     <td
                       colSpan="7"
@@ -3258,9 +3284,14 @@ ${extrasRows}
                         <p className="font-semibold text-slate-800 text-sm">
                           {b.customer?.firstName} {b.customer?.lastName}
                         </p>
-                        <p className="text-[10px] text-slate-400 font-semibold">
-                          {b.bookingId}
-                        </p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <p className="text-[10px] text-slate-400 font-semibold">{b.bookingId}</p>
+                          {b._recurringCount > 1 && (
+                            <span className="text-[9px] font-black bg-violet-100 text-violet-600 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                              Recurring · {b._recurringCount}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-4">
                         <p className="text-sm font-medium text-slate-700">
@@ -3377,10 +3408,10 @@ ${extrasRows}
           </div>
 
           {/* Pagination */}
-          {!loading && filteredBookings.length > 0 && (
+          {!loading && displayBookings.length > 0 && (
             <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/40">
               <p className="text-xs text-slate-400 font-medium">
-                {filteredBookings.length} booking{filteredBookings.length !== 1 ? "s" : ""}
+                {displayBookings.length} booking{displayBookings.length !== 1 ? "s" : ""}
                 {selectedBookings.size > 0 ? ` · ${selectedBookings.size} selected` : ""}
                 {" "}· Page {bookingsSafePage} of {bookingsTotalPages}
               </p>
@@ -4059,6 +4090,48 @@ ${extrasRows}
                 </div>
               ) : (
                 <>
+                  {/* ── Recurring series overview ─────────────────────────── */}
+                  {selectedBooking.meta?.recurringGroup && (() => {
+                    const siblings = bookings
+                      .filter(b => b.meta?.recurringGroup === selectedBooking.meta.recurringGroup)
+                      .sort((a, b) => new Date(a.schedule?.date) - new Date(b.schedule?.date));
+                    if (siblings.length <= 1) return null;
+                    return (
+                      <div className="rounded-2xl border border-violet-200 bg-violet-50/40 overflow-hidden">
+                        <div className="px-5 py-3 bg-violet-100/70 flex items-center gap-2">
+                          <span className="text-[10px] font-black text-violet-700 uppercase tracking-wider">Recurring Series</span>
+                          <span className="text-[9px] bg-violet-200 text-violet-700 px-2 py-0.5 rounded-full font-bold">{siblings.length} bookings</span>
+                        </div>
+                        <div className="divide-y divide-violet-100 max-h-60 overflow-y-auto">
+                          {siblings.map(sib => (
+                            <div key={sib._id} className={`flex items-center gap-3 px-5 py-3 ${sib._id === selectedBooking._id ? "bg-violet-100/60" : "hover:bg-violet-50 cursor-pointer"}`}
+                              onClick={() => { if (sib._id !== selectedBooking._id) { setSelectedBooking(sib); setEditData(sib); setIsEditing(false); } }}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold text-slate-700">
+                                  {new Date(sib.schedule?.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                                </p>
+                                <p className="text-[10px] text-slate-400 font-medium">{sib.schedule?.timeSlot}</p>
+                              </div>
+                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wide ${getStatusColor(sib.status)}`}>
+                                {sib.status}
+                              </span>
+                              {sib.assignedWorkerName && (
+                                <span className="text-[9px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold hidden sm:inline">
+                                  {sib.assignedWorkerName}
+                                </span>
+                              )}
+                              {sib._id === selectedBooking._id
+                                ? <span className="text-[9px] font-black text-violet-400 uppercase tracking-wide shrink-0">Viewing</span>
+                                : <span className="text-[9px] font-black text-violet-600 uppercase tracking-wide shrink-0">Open →</span>
+                              }
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   <div className="grid md:grid-cols-3 gap-6">
                     <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 text-center">
                       <Mail size={20} className="text-primary mx-auto mb-2" />
