@@ -186,6 +186,10 @@ const Booking = () => {
   const [searchParams] = useSearchParams();
   const preSelectedService = searchParams.get("service");
   const returnedStep = parseInt(searchParams.get("step") || "1");
+  const crmMode =
+    searchParams.get("crm") === "1" ||
+    searchParams.get("crm") === "true" ||
+    searchParams.get("crm") === "yes";
 
   const [step, setStep] = useState(returnedStep);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -675,7 +679,7 @@ const Booking = () => {
         showNotification("Please select parking and access options.");
         return;
       }
-      if (!formData.suppliesProvidedBy) {
+      if (!formData.suppliesProvidedBy && !crmMode) {
         showNotification(
           "Please tell us who's providing the cleaning supplies & equipment.",
         );

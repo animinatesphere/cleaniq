@@ -11,8 +11,8 @@
 }
 
 @theme {
-  --color-primary: #10b981;
-  --color-primary-dark: #0f172a;
+  --color-primary: #036847;
+  --color-primary-dark: #025a3d;
   --color-secondary: #3b82f6;
 
   --font-sans: "Inter", "Outfit", system-ui, -apple-system, sans-serif;
@@ -20,7 +20,7 @@
 
 @layer base {
   :root {
-    --primary: #10b981;
+    --primary: #036847;
     --secondary: #3b82f6;
     --background: #061a13;
     --foreground: #f8fafc;
@@ -53,7 +53,7 @@
   }
 
   .btn-primary {
-    @apply px-5 py-2.5 md:px-6 md:py-3 rounded-full bg-[#10B981] text-white font-bold transition-all hover:bg-[#059669] hover:scale-105 active:scale-95 shadow-xl shadow-[#10B981]/20 flex items-center justify-center gap-2;
+    @apply px-5 py-2.5 md:px-6 md:py-3 rounded-full bg-[#036847] text-white font-bold transition-all hover:bg-[#025a3d] hover:scale-105 active:scale-95 shadow-xl shadow-[#036847]/20 flex items-center justify-center gap-2;
   }
 
   .btn-secondary {
@@ -61,7 +61,7 @@
   }
 
   .btn-outline {
-    @apply px-5 py-2.5 md:px-6 md:py-3 rounded-full border-2 border-[#10B981] text-[#10B981] font-bold transition-all hover:bg-[#10B981] hover:text-white hover:scale-105 active:scale-95 flex items-center justify-center gap-2;
+    @apply px-5 py-2.5 md:px-6 md:py-3 rounded-full border-2 border-[#036847] text-[#036847] font-bold transition-all hover:bg-[#036847] hover:text-white hover:scale-105 active:scale-95 flex items-center justify-center gap-2;
   }
 
   .booking-shell {
@@ -73,11 +73,11 @@
   }
 
   .booking-card-hover {
-    @apply transition-all duration-300 hover:bg-[#0D3527] hover:border-[#10B981]/30;
+    @apply transition-all duration-300 hover:bg-[#0D3527] hover:border-[#036847]/30;
   }
 
   .booking-input {
-    @apply w-full rounded-2xl border border-white/[0.08] bg-[#05201A] px-5 py-4 text-sm font-semibold text-white placeholder:text-white/35 focus:border-[#10B981] focus:outline-none focus:ring-0;
+    @apply w-full rounded-2xl border border-white/[0.08] bg-[#05201A] px-5 py-4 text-sm font-semibold text-white placeholder:text-white/35 focus:border-[#036847] focus:outline-none focus:ring-0;
   }
 
   .booking-muted {
@@ -86,38 +86,6 @@
 
   .booking-subtle {
     @apply text-white/55;
-  }
-
-  .section-padding {
-    @apply py-12 md:py-20 px-5 md:px-12 lg:px-24;
-  }
-
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
-  }
-
-  .card-hover {
-    @apply transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10;
-  }
-
-  .sticky-bottom {
-    @apply fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-lg border-t border-slate-100 z-50 md:relative md:bg-transparent md:border-0 md:p-0 md:z-auto;
-  }
-
-  .basket-item {
-    @apply flex justify-between items-center py-3 border-b border-slate-50 last:border-0;
-  }
-
-  .selection-card {
-    @apply p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col gap-2 bg-white;
-  }
-
-  .selection-card-active {
-    @apply border-primary bg-primary/5 text-primary shadow-lg shadow-primary/5;
-  }
-
-  .selection-card-inactive {
-    @apply border-slate-100 bg-white hover:border-slate-200 text-slate-500;
   }
 
   .booking-input {
@@ -139,24 +107,6 @@
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: #005b41;
-    border-radius: 10px;
-  }
-
-  .sidebar-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
-  }
-
-  .sidebar-scrollbar::-webkit-scrollbar {
-    width: 3px;
-  }
-
-  .sidebar-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .sidebar-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
     border-radius: 10px;
   }
 }

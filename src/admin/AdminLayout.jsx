@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import "./admin.css";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -481,7 +482,10 @@ const AdminLayout = () => {
           if (prev.has(group.label)) return prev;
           const next = new Set(prev);
           next.add(group.label);
-          localStorage.setItem("adminSidebarOpenGroups", JSON.stringify([...next]));
+          localStorage.setItem(
+            "adminSidebarOpenGroups",
+            JSON.stringify([...next]),
+          );
           return next;
         });
       }
@@ -530,27 +534,29 @@ const AdminLayout = () => {
         <nav className="flex-1 overflow-y-auto sidebar-scrollbar pr-1 space-y-0.5">
           {/* Desktop collapsed: icon-only flat list (hidden on mobile) */}
           {isCollapsed &&
-            menuGroups.flatMap((g) => g.items).map((item) => {
-              const isActive =
-                item.path === "/admin" || item.exact
-                  ? location.pathname === item.path
-                  : location.pathname.startsWith(item.path);
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setSidebarOpen(false)}
-                  title={item.name}
-                  className={`hidden lg:flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
-                    isActive
-                      ? "bg-white/10 text-white"
-                      : "text-white/40 hover:bg-white/[0.07] hover:text-white/70"
-                  }`}
-                >
-                  {item.icon}
-                </Link>
-              );
-            })}
+            menuGroups
+              .flatMap((g) => g.items)
+              .map((item) => {
+                const isActive =
+                  item.path === "/admin" || item.exact
+                    ? location.pathname === item.path
+                    : location.pathname.startsWith(item.path);
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setSidebarOpen(false)}
+                    title={item.name}
+                    className={`hidden lg:flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
+                      isActive
+                        ? "bg-white/10 text-white"
+                        : "text-white/40 hover:bg-white/[0.07] hover:text-white/70"
+                    }`}
+                  >
+                    {item.icon}
+                  </Link>
+                );
+              })}
 
           {/* Expanded: collapsible groups (always on mobile, on desktop when not collapsed) */}
           <div className={isCollapsed ? "lg:hidden" : ""}>
@@ -653,7 +659,9 @@ const AdminLayout = () => {
           <div className={`${isCollapsed ? "lg:hidden" : ""}`}>
             <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/[0.05] transition-colors group">
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-black text-[11px] flex-shrink-0 ring-2 ring-white/10">
-                {(localStorage.getItem("adminUser") || "A").charAt(0).toUpperCase()}
+                {(localStorage.getItem("adminUser") || "A")
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white/80 font-bold text-[13px] leading-tight truncate">

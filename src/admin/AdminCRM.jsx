@@ -434,13 +434,23 @@ const AdminCRM = ({ booking, onClose }) => {
   };
 
   const handleGenerateLink = async () => {
-    if (selectedItems.length === 0) {
-      showToast("Add at least one item to generate a payment link", "error");
-      return;
-    }
     try {
+      // If no explicit items selected, fall back to the booking's total
+      // so admins can generate a link without adding extras.
+      let itemsToSend = selectedItems;
+      if (!itemsToSend || itemsToSend.length === 0) {
+        const fallbackAmount = parseFloat(booking.payment?.amount) || 0;
+        itemsToSend = [
+          {
+            name: booking.service || "Booking",
+            amount: fallbackAmount,
+            qty: 1,
+          },
+        ];
+      }
+
       const data = await doAction("create-payment-link", {
-        items: selectedItems,
+        items: itemsToSend,
       });
       setGeneratedLink(data.url);
       showToast("✓ Payment link generated successfully!");
@@ -455,10 +465,25 @@ const AdminCRM = ({ booking, onClose }) => {
       return;
     }
     try {
+      const itemsToSend =
+        selectedItems && selectedItems.length > 0
+          ? selectedItems
+          : [
+              {
+                name: booking.service || "Booking",
+                amount: parseFloat(booking.payment?.amount) || 0,
+                qty: 1,
+              },
+            ];
+      const computedTotal = itemsToSend.reduce(
+        (s, it) => s + (parseFloat(it.amount) || 0) * (it.qty || 1),
+        0,
+      );
+
       await doAction("send-payment-link", {
         url: generatedLink,
-        items: selectedItems,
-        totalAmount,
+        items: itemsToSend,
+        totalAmount: computedTotal,
         note: paymentNote,
       });
       const now = new Date().toISOString();
@@ -1844,7 +1869,10 @@ const AdminCRM = ({ booking, onClose }) => {
             loading={loadingAction === "create-payment-link"}
             icon={CreditCard}
             variant="outline"
-            disabled={selectedItems.length === 0}
+            disabled={
+              selectedItems.length === 0 &&
+              !(booking.payment?.amount || booking.service)
+            }
           >
             Generate Link
           </ActionBtn>

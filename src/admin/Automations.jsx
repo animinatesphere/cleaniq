@@ -567,22 +567,30 @@ export default function Automations() {
   };
 
   // ── Audience helpers ──────────────────────────────────────────────────────
-  const filteredCustomers = customers.filter((c) => {
-    const q = audienceSearch.toLowerCase();
-    const matchSearch =
-      !q ||
-      c.firstName?.toLowerCase().includes(q) ||
-      c.lastName?.toLowerCase().includes(q) ||
-      c.email?.toLowerCase().includes(q);
-    const enabled = c.crmEmailsEnabled !== false;
-    const matchFilter =
-      audienceFilter === "all"
-        ? true
-        : audienceFilter === "on"
-          ? enabled
-          : !enabled;
-    return matchSearch && matchFilter;
-  });
+  const filteredCustomers = customers
+    .filter((c) => {
+      const q = audienceSearch.toLowerCase();
+      const matchSearch =
+        !q ||
+        c.firstName?.toLowerCase().includes(q) ||
+        c.lastName?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q);
+      const enabled = c.crmEmailsEnabled !== false;
+      const matchFilter =
+        audienceFilter === "all"
+          ? true
+          : audienceFilter === "on"
+            ? enabled
+            : !enabled;
+      return matchSearch && matchFilter;
+    })
+    .sort((a, b) => {
+      const aReg = !!getCId(a), bReg = !!getCId(b);
+      if (aReg !== bReg) return aReg ? -1 : 1;
+      const aOn = a.crmEmailsEnabled !== false, bOn = b.crmEmailsEnabled !== false;
+      if (aOn !== bOn) return aOn ? -1 : 1;
+      return 0;
+    });
 
   const enabledCount = customers.filter(
     (c) => c.crmEmailsEnabled !== false,
@@ -591,10 +599,11 @@ export default function Automations() {
     (c) => c.crmEmailsEnabled === false,
   ).length;
 
+  const registeredInView = filteredCustomers.filter((c) => !!getCId(c));
   const allSelected =
-    filteredCustomers.length > 0 &&
-    filteredCustomers.every((c) => selected.has(getCId(c)));
-  const someSelected = filteredCustomers.some((c) => selected.has(getCId(c)));
+    registeredInView.length > 0 &&
+    registeredInView.every((c) => selected.has(getCId(c)));
+  const someSelected = registeredInView.some((c) => selected.has(getCId(c)));
 
   const toggleRow = (c) => {
     const cId = getCId(c);
@@ -637,7 +646,7 @@ export default function Automations() {
     try {
       await Promise.all(
         ids.map((id) =>
-          axios.post(`${API}/customers/${id}/crm-emails`, { enabled: enable }),
+          axios.patch(`${API}/customers/${id}/crm-emails`, { enabled: enable }),
         ),
       );
       showToast(
@@ -654,6 +663,23 @@ export default function Automations() {
       showToast(e?.response?.data?.message || "Failed to apply changes");
     } finally {
       setBulkSaving(false);
+    }
+  };
+
+  const toggleSingle = async (c, enable) => {
+    const cId = getCId(c);
+    if (!cId) return;
+    setCustomers((prev) =>
+      prev.map((cu) => getCId(cu) === cId ? { ...cu, crmEmailsEnabled: enable } : cu),
+    );
+    try {
+      await axios.patch(`${API}/customers/${cId}/crm-emails`, { enabled: enable });
+      showToast(`${enable ? "Enabled" : "Excluded"} for ${c.firstName || c.email}`, "success");
+    } catch (e) {
+      setCustomers((prev) =>
+        prev.map((cu) => getCId(cu) === cId ? { ...cu, crmEmailsEnabled: !enable } : cu),
+      );
+      showToast(e?.response?.data?.message || "Failed to update");
     }
   };
 
@@ -1153,12 +1179,11 @@ export default function Automations() {
               )}
             </div>
 
-            {/* Select-all row — full-width button for better click feedback */}
-            {filteredCustomers.length > 0 && (
-              <button
-                type="button"
+            {/* Select-all row */}
+            {registeredInView.length > 0 && (
+              <div
                 onClick={toggleAll}
-                className="group w-full px-5 py-3 bg-[#071D16] border-b border-white/10 flex items-center gap-3 cursor-pointer hover:bg-[#0F2F24] transition-colors text-left select-none"
+                className="group w-full px-5 py-3 bg-[#071D16] border-b border-white/10 flex items-center gap-3 cursor-pointer hover:bg-[#0F2F24] transition-colors select-none"
               >
                 <Tick
                   checked={allSelected}
@@ -1166,12 +1191,12 @@ export default function Automations() {
                 />
                 <span className="text-[10px] font-bold text-white/45">
                   {allSelected
-                    ? `All ${filteredCustomers.length} selected — click to deselect`
+                    ? `All ${registeredInView.length} selected — click to deselect`
                     : someSelected
-                      ? `${selectedInView} of ${filteredCustomers.length} selected — click to select all`
-                      : `Select all ${filteredCustomers.length}`}
+                      ? `${selectedInView} of ${registeredInView.length} selected — click to select all`
+                      : `Select all ${registeredInView.length} registered`}
                 </span>
-              </button>
+              </div>
             )}
 
             {/* Rows */}
@@ -1187,18 +1212,25 @@ export default function Automations() {
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-white/10 max-h-130 overflow-y-auto">
+              <div className="divide-y divide-white/[0.06] max-h-[560px] overflow-y-auto">
                 {filteredCustomers.map((c) => {
                   const cId = getCId(c);
                   const isSel = cId ? selected.has(cId) : false;
                   const enabled = c.crmEmailsEnabled !== false;
+                  const isGuest = !cId;
 
                   return (
                     <div
                       key={cId || c.email}
-                      onClick={() => toggleRow(c)}
-                      className={`group px-5 py-3.5 flex items-center gap-3 cursor-pointer transition-colors select-none ${
-                        isSel ? "bg-emerald-500/8" : "hover:bg-[#0A2A1F]"
+                      onClick={() => !isGuest && toggleRow(c)}
+                      className={`group px-5 py-3.5 flex items-center gap-3 transition-colors select-none ${
+                        isGuest
+                          ? "cursor-default opacity-50"
+                          : isSel
+                            ? "bg-emerald-500/[0.07] cursor-pointer"
+                            : !enabled
+                              ? "bg-rose-500/[0.04] hover:bg-rose-500/[0.07] cursor-pointer"
+                              : "hover:bg-[#0A2A1F] cursor-pointer"
                       }`}
                     >
                       {/* Checkbox */}
@@ -1209,7 +1241,7 @@ export default function Automations() {
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
                           enabled
                             ? "bg-emerald-500/20 text-emerald-400"
-                            : "bg-[#071D16] text-white/30"
+                            : "bg-rose-500/10 text-rose-400"
                         }`}
                       >
                         {c.firstName?.[0]}
@@ -1218,42 +1250,47 @@ export default function Automations() {
 
                       {/* Name / email */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-white leading-tight truncate">
-                          {c.firstName} {c.lastName}
-                        </p>
-                        <p className="text-xs text-white/35 truncate">
+                        <div className="flex items-center gap-2">
+                          <p className={`text-sm font-bold leading-tight truncate ${!enabled ? "text-white/40" : "text-white"}`}>
+                            {c.firstName} {c.lastName}
+                          </p>
+                          {isGuest && (
+                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-white/[0.08] text-white/30 shrink-0">
+                              Guest
+                            </span>
+                          )}
+                        </div>
+                        <p className={`text-xs truncate ${!enabled ? "text-white/20" : "text-white/35"}`}>
                           {c.email}
                         </p>
                       </div>
 
-                      {/* Status */}
-                      {enabled ? (
-                        <span className="flex items-center gap-1 text-[9px] font-black text-emerald-400 bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 rounded-full shrink-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                          Receiving
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 text-[9px] font-black text-rose-400 bg-rose-500/15 border border-rose-500/25 px-2 py-0.5 rounded-full shrink-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                          Excluded
-                        </span>
-                      )}
+                      {/* Per-row CRM email toggle */}
+                      <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+                        <Toggle
+                          checked={enabled}
+                          onChange={(v) => toggleSingle(c, v)}
+                          saving={isGuest}
+                        />
+                      </div>
 
-                      {/* Quick send */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setQuickSend({
-                            id: cId,
-                            name: `${c.firstName} ${c.lastName}`.trim(),
-                            email: c.email,
-                          });
-                        }}
-                        className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#071E16] border border-white/10 text-white/40 hover:bg-emerald-500/15 hover:text-emerald-400 hover:border-emerald-500/25 text-[10px] font-bold transition-all"
-                      >
-                        <Send size={10} />
-                        Send
-                      </button>
+                      {/* Quick send — registered only */}
+                      {!isGuest && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuickSend({
+                              id: cId,
+                              name: `${c.firstName} ${c.lastName}`.trim(),
+                              email: c.email,
+                            });
+                          }}
+                          className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#071E16] border border-white/10 text-white/40 hover:bg-emerald-500/15 hover:text-emerald-400 hover:border-emerald-500/25 text-[10px] font-bold transition-all"
+                        >
+                          <Send size={10} />
+                          Send
+                        </button>
+                      )}
                     </div>
                   );
                 })}
