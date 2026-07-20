@@ -97,22 +97,22 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   };
 
   return (
-    <div className="bg-white rounded-[24px] md:rounded-[32px] p-4 md:p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
+    <div className="booking-card p-4 md:p-6">
       <div className="flex justify-between items-center mb-6 md:mb-8">
-        <h3 className="font-black text-primary-dark tracking-tighter text-base md:text-lg">
+        <h3 className="font-black text-white tracking-tighter text-base md:text-lg">
           {currentMonth.toLocaleString("default", { month: "long" })}{" "}
-          <span className="text-primary">{currentMonth.getFullYear()}</span>
+          <span className="text-[#10B981]">{currentMonth.getFullYear()}</span>
         </h3>
         <div className="flex gap-1 md:gap-2">
           <button
             onClick={handlePrevMonth}
-            className="p-1.5 md:p-2 rounded-lg md:xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
+            className="p-1.5 md:p-2 rounded-lg bg-[#05201A] text-white/60 hover:bg-[#0D3527] hover:text-[#10B981] transition-all"
           >
             <ChevronLeft size={18} />
           </button>
           <button
             onClick={handleNextMonth}
-            className="p-1.5 md:p-2 rounded-lg md:xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
+            className="p-1.5 md:p-2 rounded-lg bg-[#05201A] text-white/60 hover:bg-[#0D3527] hover:text-[#10B981] transition-all"
           >
             <ChevronRight size={18} />
           </button>
@@ -122,7 +122,7 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
           <div
             key={d}
-            className="text-[8px] md:text-[10px] font-black text-slate-300 uppercase text-center py-2"
+            className="text-[8px] md:text-[10px] font-black text-white/25 uppercase text-center py-2"
           >
             {d}
           </div>
@@ -143,18 +143,18 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
                       `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
                     )
                   }
-                  className={`w-full h-full rounded-xl text-center flex items-center justify-center relative font-black text-sm transition-all ${isSelected(date) ? "bg-primary text-white shadow-lg" : booked ? "bg-rose-50 text-rose-300 cursor-not-allowed" : past ? "bg-slate-50 text-slate-200 cursor-not-allowed" : "bg-slate-50 text-slate-600 hover:bg-primary/10 hover:text-primary"}`}
+                  className={`w-full h-full rounded-xl text-center flex items-center justify-center relative font-black text-sm transition-all ${isSelected(date) ? "bg-[#10B981] text-white shadow-lg" : booked ? "bg-rose-500/10 text-rose-300 cursor-not-allowed" : past ? "bg-white/[0.05] text-white/20 cursor-not-allowed" : "bg-[#05201A] text-white/80 hover:bg-[#0D3527] hover:text-[#10B981]"}`}
                 >
                   <span className="text-xs md:text-sm font-black">
                     {date.getDate()}
                   </span>
                   {booked && (
-                    <span className="text-[6px] md:text-[7px] font-black uppercase text-rose-500 absolute top-0.5 md:top-1">
+                    <span className="text-[6px] md:text-[7px] font-black uppercase text-rose-300 absolute top-0.5 md:top-1">
                       Taken
                     </span>
                   )}
                   {isToday(date) && !isSelected(date) && (
-                    <div className="w-0.5 h-0.5 md:w-1 md:h-1 rounded-full absolute bottom-1.5 md:bottom-2 bg-primary" />
+                    <div className="w-0.5 h-0.5 md:w-1 md:h-1 rounded-full absolute bottom-1.5 md:bottom-2 bg-[#10B981]" />
                   )}
                 </button>
               ) : (
@@ -868,18 +868,18 @@ const Booking = () => {
 
   if (isSubmitted) {
     return (
-      <div className="pt-40 pb-20 min-h-screen bg-white flex items-center justify-center px-6 text-center">
+      <div className="pt-40 pb-20 min-h-screen bg-[#061A13] flex items-center justify-center px-6 text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <div className="w-20 h-20 bg-primary rounded-[24px] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-primary/20 rotate-12">
+          <div className="w-20 h-20 bg-[#10B981] rounded-[24px] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-[#10B981]/20 rotate-12">
             <CheckCircle2 size={40} className="text-white" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-primary-dark mb-4 tracking-tighter">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tighter">
             Confirmed!
           </h1>
-          <p className="text-slate-500 font-bold mb-10">
+          <p className="text-white/55 font-bold mb-10">
             Check your email for confirmation.
           </p>
           <Link
@@ -894,7 +894,7 @@ const Booking = () => {
   }
 
   return (
-    <div className="pt-32 min-h-screen bg-[#F8FAFC] pb-32">
+    <div className="pt-32 min-h-screen bg-[#061A13] pb-32">
       <Helmet>
         <title>Book Cleaning — Cleaniq Services</title>
         <meta
@@ -911,14 +911,14 @@ const Booking = () => {
       {isSubmitting && <LoadingOverlay message="Confirming..." />}
       <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12">
         {/* Progress Bar */}
-        <div className="flex justify-between items-center mb-6 md:mb-10 bg-white p-2 md:p-5 rounded-[20px] md:rounded-3xl shadow-sm border border-slate-100 overflow-x-auto no-scrollbar sticky top-32 z-40">
+        <div className="flex justify-between items-center mb-6 md:mb-10 bg-[#0B2D22] p-2 md:p-5 rounded-[20px] md:rounded-3xl shadow-sm border border-white/[0.07] overflow-x-auto no-scrollbar sticky top-32 z-40">
           {steps.map((s, idx) => (
             <div key={s.id} className="flex items-center shrink-0">
               <div
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-300 ${step === s.id ? "bg-primary text-white shadow-md" : s.id < step ? "text-primary" : "text-slate-300"}`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-300 ${step === s.id ? "bg-[#10B981] text-white shadow-md" : s.id < step ? "text-[#10B981]" : "text-white/25"}`}
               >
                 <div
-                  className={`w-5 h-5 md:w-6 md:h-6 rounded-lg flex items-center justify-center font-black text-[8px] md:text-[9px] ${step === s.id ? "bg-white/20" : s.id < step ? "bg-primary/20" : "bg-slate-200"}`}
+                  className={`w-5 h-5 md:w-6 md:h-6 rounded-lg flex items-center justify-center font-black text-[8px] md:text-[9px] ${step === s.id ? "bg-white/20" : s.id < step ? "bg-[#10B981]/20" : "bg-white/[0.08]"}`}
                 >
                   {s.id < step ? <CheckCircle2 size={10} /> : s.id}
                 </div>
@@ -929,7 +929,7 @@ const Booking = () => {
               {idx < steps.length - 1 && (
                 <ChevronRight
                   size={10}
-                  className="mx-1 md:mx-2 text-slate-200"
+                  className="mx-1 md:mx-2 text-white/15"
                 />
               )}
             </div>
@@ -944,28 +944,28 @@ const Booking = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="bg-white rounded-3xl md:rounded-[40px] p-5 md:p-10 border border-slate-100 relative min-h-150"
+                className="bg-[#0B2D22] rounded-3xl md:rounded-[40px] p-5 md:p-10 border border-white/[0.07] relative min-h-150"
               >
                 <div className="flex-1 pb-20 md:pb-24">
                   {step === 1 && (
                     <div className="space-y-10 animate-in fade-in">
                       <div className="space-y-6">
                         <div>
-                          <h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">
+                          <h1 className="text-xl md:text-3xl font-extrabold text-white tracking-tight">
                             Where are we cleaning?
                           </h1>
-                          <p className="text-slate-400 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">
+                          <p className="text-white/35 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">
                             Enter your address to get started
                           </p>
                         </div>
                         <div className="space-y-4">
                           <div className="relative group">
                             <MapPin
-                              className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors"
+                              className="absolute left-5 top-1/2 -translate-y-1/2 text-white/35 group-focus-within:text-[#10B981] transition-colors"
                               size={20}
                             />
                             <input
-                              className="w-full p-6 pl-14 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all"
+                              className="w-full p-6 pl-14 rounded-2xl bg-[#05201A] border border-white/[0.08] focus:border-[#10B981] shadow-sm outline-none font-bold text-sm transition-all text-white"
                               placeholder="Enter full address"
                               value={formData.address}
                               onChange={(e) => {
@@ -978,7 +978,7 @@ const Booking = () => {
                           </div>
                           <div className="grid md:grid-cols-2 gap-4">
                             <input
-                              className="w-full p-6 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all"
+                              className="w-full p-6 rounded-2xl bg-[#05201A] border border-white/[0.08] focus:border-[#10B981] shadow-sm outline-none font-bold text-sm transition-all text-white"
                               placeholder="Address Line 2 (optional)"
                               value={formData.addressLine2}
                               onChange={(e) =>
@@ -989,7 +989,7 @@ const Booking = () => {
                               }
                             />
                             <input
-                              className="w-full p-6 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-sm transition-all"
+                              className="w-full p-6 rounded-2xl bg-[#05201A] border border-white/[0.08] focus:border-[#10B981] shadow-sm outline-none font-bold text-sm transition-all text-white"
                               placeholder="Postcode"
                               value={formData.postcode}
                               onChange={(e) =>
@@ -1003,8 +1003,8 @@ const Booking = () => {
                         </div>
                       </div>
 
-                      <div className="pt-10 border-t border-slate-100">
-                        <h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight mb-8">
+                      <div className="pt-10 border-t border-white/[0.07]">
+                        <h1 className="text-xl md:text-3xl font-extrabold text-white tracking-tight mb-8">
                           What type of cleaning?
                         </h1>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1014,20 +1014,20 @@ const Booking = () => {
                               onClick={() => {
                                 setFormData({ ...formData, serviceType: s.id });
                               }}
-                              className={`flex flex-col items-center p-6 rounded-[32px] border-4 transition-all duration-300 ${formData.serviceType === s.id ? "border-primary bg-primary/5 shadow-lg" : "border-slate-100 hover:border-primary/30"}`}
+                              className={`flex flex-col items-center p-6 rounded-[32px] border transition-all duration-300 ${formData.serviceType === s.id ? "border-[#10B981] bg-[#10B981]/10 shadow-lg" : "border-white/[0.07] bg-[#05201A] hover:border-[#10B981]/30"}`}
                             >
                               <div
-                                className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${formData.serviceType === s.id ? "bg-primary text-white shadow-lg" : "bg-primary/5 text-primary"}`}
+                                className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${formData.serviceType === s.id ? "bg-[#10B981] text-white shadow-lg" : "bg-[#10B981]/10 text-[#10B981]"}`}
                               >
                                 {s.icon}
                               </div>
                               <p
-                                className={`font-black text-lg tracking-tighter ${formData.serviceType === s.id ? "text-primary" : "text-primary-dark"}`}
+                                className={`font-black text-lg tracking-tighter ${formData.serviceType === s.id ? "text-[#10B981]" : "text-white"}`}
                               >
                                 {s.title}
                               </p>
                               <div className="mt-1 mb-4">
-                                <span className="text-base font-black text-primary-dark">
+                                <span className="text-base font-black text-white">
                                   {region.symbol}
                                   {String(
                                     dynamicRates[cleanKey(s.id)] ||
@@ -1050,12 +1050,12 @@ const Booking = () => {
                                     .replace("/hr", "")
                                     .replace("/hour", "")}
                                 </span>
-                                <span className="text-[10px] font-bold text-slate-400 ml-1">
+                                <span className="text-[10px] font-bold text-white/35 ml-1">
                                   / hr
                                 </span>
                               </div>
 
-                              <div className="space-y-2 w-full text-left pt-4 border-t border-slate-100">
+                              <div className="space-y-2 w-full text-left pt-4 border-t border-white/[0.07]">
                                 {s.bullets.map((bullet, idx) => (
                                   <div
                                     key={idx}
@@ -1065,11 +1065,11 @@ const Booking = () => {
                                       size={12}
                                       className={
                                         formData.serviceType === s.id
-                                          ? "text-primary"
-                                          : "text-slate-300"
+                                          ? "text-[#10B981]"
+                                          : "text-white/25"
                                       }
                                     />
-                                    <p className="text-[10px] font-bold text-slate-500">
+                                    <p className="text-[10px] font-bold text-white/45">
                                       {bullet}
                                     </p>
                                   </div>
@@ -1087,10 +1087,10 @@ const Booking = () => {
                       <div className="grid md:grid-cols-2 gap-10">
                         <div>
                           <div>
-                            <h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">
+                            <h1 className="text-xl md:text-3xl font-extrabold text-white tracking-tight">
                               Tell us about your home
                             </h1>
-                            <p className="text-slate-400 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">
+                            <p className="text-white/35 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">
                               Select rooms for a personalized quote
                             </p>
                           </div>
@@ -1112,7 +1112,7 @@ const Booking = () => {
                                   <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
                                     {room.icon}
                                   </div>
-                                  <span className="font-bold text-xs text-primary-dark">
+                                  <span className="font-bold text-xs text-white">
                                     {room.name}
                                   </span>
                                 </div>
@@ -1138,8 +1138,8 @@ const Booking = () => {
                           </div>
 
                           {/* Pet Question */}
-                          <div className="mt-4 p-5 rounded-2xl bg-white border-2 border-slate-100">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                          <div className="mt-4 p-5 rounded-2xl bg-[#05201A] border border-white/[0.07]">
+                            <p className="text-[10px] font-black text-white/35 uppercase tracking-widest mb-3">
                               🐾 Do you have a pet at home?
                             </p>
                             <div className="grid grid-cols-2 gap-3">
@@ -1151,8 +1151,8 @@ const Booking = () => {
                                   }
                                   className={`py-4 rounded-2xl border-2 font-black text-sm transition-all ${
                                     formData.hasPet === opt
-                                      ? "border-primary bg-primary text-white shadow-lg shadow-primary/20"
-                                      : "border-slate-100 bg-slate-50 text-slate-500 hover:border-primary/30"
+                                      ? "border-[#10B981] bg-[#10B981] text-white shadow-lg shadow-[#10B981]/20"
+                                      : "border-white/[0.07] bg-[#0B2D22] text-white/60 hover:border-[#10B981]/30"
                                   }`}
                                 >
                                   {opt === "Yes"
@@ -1164,12 +1164,12 @@ const Booking = () => {
                           </div>
                         </div>
 
-                        <div className="bg-slate-50 p-8 rounded-[40px] border border-slate-100 flex flex-col justify-center">
+                        <div className="bg-[#05201A] p-8 rounded-[40px] border border-white/[0.07] flex flex-col justify-center">
                           <div className="text-center mb-8">
-                            <h2 className="text-xl font-extrabold text-primary-dark tracking-tight">
+                            <h2 className="text-xl font-extrabold text-white tracking-tight">
                               How long?
                             </h2>
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                            <p className="text-[9px] font-black text-white/35 uppercase tracking-widest mt-1">
                               Select duration for the cleaning
                             </p>
                           </div>
@@ -1186,10 +1186,10 @@ const Booking = () => {
                                         duration: hours,
                                       })
                                     }
-                                    className={`py-2.5 rounded-xl border-2 font-black text-xs transition-all ${
+                                    className={`py-2.5 rounded-xl border font-black text-xs transition-all ${
                                       formData.duration === hours
-                                        ? "border-primary bg-primary text-white shadow-md"
-                                        : "border-slate-200 bg-white text-primary hover:border-primary/50"
+                                        ? "border-[#10B981] bg-[#10B981] text-white shadow-md"
+                                        : "border-white/[0.08] bg-[#0B2D22] text-[#10B981] hover:border-[#10B981]/50"
                                     }`}
                                   >
                                     {hours}
@@ -1214,13 +1214,13 @@ const Booking = () => {
                                       : Math.min(50, Math.max(2, val)),
                                   });
                                 }}
-                                className="w-full py-5 px-6 rounded-2xl border-2 border-slate-200 bg-white font-black text-2xl text-primary text-center focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                                className="w-full py-5 px-6 rounded-2xl border border-white/[0.08] bg-[#0B2D22] font-black text-2xl text-[#10B981] text-center focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981] transition-all"
                               />
-                              <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                              <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xs font-bold text-white/35 uppercase tracking-widest">
                                 hours
                               </span>
                             </div>
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-3 text-center">
+                            <p className="text-[9px] font-black text-white/35 uppercase tracking-widest mt-3 text-center">
                               Choose any duration from 2 to 50 hours
                             </p>
                           </div>
@@ -1231,7 +1231,7 @@ const Booking = () => {
                                 onClick={() =>
                                   setFormData({ ...formData, frequency: f })
                                 }
-                                className={`py-4 rounded-2xl border-2 font-black text-xs transition-all ${formData.frequency === f ? "border-primary bg-primary text-white shadow-md" : "border-slate-100 bg-white text-slate-400 hover:border-primary/30"}`}
+                                className={`py-4 rounded-2xl border font-black text-xs transition-all ${formData.frequency === f ? "border-[#10B981] bg-[#10B981] text-white shadow-md" : "border-white/[0.07] bg-[#0B2D22] text-white/60 hover:border-[#10B981]/30"}`}
                               >
                                 {f}
                               </button>
@@ -1247,10 +1247,10 @@ const Booking = () => {
                       <div className="grid md:grid-cols-2 gap-10">
                         <div>
                           <div>
-                            <h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">
+                            <h1 className="text-xl md:text-3xl font-extrabold text-white tracking-tight">
                               Extras Services
                             </h1>
-                            <p className="text-slate-400 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">
+                            <p className="text-white/35 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">
                               Add optional extras to your booking
                             </p>
                           </div>
@@ -1302,19 +1302,19 @@ const Booking = () => {
                                 return (
                                   <div
                                     key={extra._id}
-                                    className="flex items-center justify-between p-3 px-5 rounded-2xl bg-slate-50 border border-slate-100"
+                                    className="flex items-center justify-between p-3 px-5 rounded-2xl bg-[#05201A] border border-white/[0.07]"
                                   >
                                     <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+                                      <div className="w-8 h-8 rounded-xl bg-[#0B2D22] flex items-center justify-center text-[#10B981] shadow-sm">
                                         {iconMap[cleanName] || (
                                           <Star size={18} />
                                         )}
                                       </div>
                                       <div>
-                                        <p className="text-xs font-bold text-primary-dark">
+                                        <p className="text-xs font-bold text-white">
                                           {extra.name}
                                         </p>
-                                        <p className="text-[9px] font-bold text-slate-400">
+                                        <p className="text-[9px] font-bold text-white/35">
                                           {region.symbol}
                                           {extra.rate}
                                         </p>
@@ -1329,7 +1329,7 @@ const Booking = () => {
                                       >
                                         <Minus size={14} />
                                       </button>
-                                      <span className="text-base font-black text-primary-dark w-4 text-center">
+                                      <span className="text-base font-black text-white w-4 text-center">
                                         {formData.extras[extra.name] || 0}
                                       </span>
                                       <button
@@ -1349,17 +1349,17 @@ const Booking = () => {
 
                         <div className="space-y-8">
                           <div>
-                            <h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">
+                            <h1 className="text-xl md:text-3xl font-extrabold text-white tracking-tight">
                               Logistics
                             </h1>
-                            <p className="text-slate-400 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">
+                            <p className="text-white/35 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">
                               Help us prepare for your visit
                             </p>
                           </div>
                           <div className="space-y-6">
                             <div className="space-y-3">
-                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <Car size={14} className="text-primary" />{" "}
+                              <p className="text-[10px] font-black text-white/35 uppercase tracking-widest flex items-center gap-2">
+                                <Car size={14} className="text-[#10B981]" />{" "}
                                 Parking Availability
                               </p>
                               <div className="grid grid-cols-2 gap-2">
@@ -1374,7 +1374,7 @@ const Booking = () => {
                                     onClick={() =>
                                       setFormData({ ...formData, parking: p })
                                     }
-                                    className={`p-4 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${formData.parking === p ? "border-primary bg-primary text-white shadow-md" : "border-slate-100 bg-white text-slate-400 hover:border-primary/30"}`}
+                                    className={`p-4 rounded-2xl border text-[10px] font-black uppercase transition-all ${formData.parking === p ? "border-[#10B981] bg-[#10B981] text-white shadow-md" : "border-white/[0.07] bg-[#0B2D22] text-white/60 hover:border-[#10B981]/30"}`}
                                   >
                                     {p}
                                   </button>
@@ -1382,9 +1382,9 @@ const Booking = () => {
                               </div>
                             </div>
                             <div className="space-y-3">
-                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <Key size={14} className="text-primary" /> Entry
-                                Instructions
+                              <p className="text-[10px] font-black text-white/35 uppercase tracking-widest flex items-center gap-2">
+                                <Key size={14} className="text-[#10B981]" />{" "}
+                                Entry Instructions
                               </p>
                               <div className="grid grid-cols-2 gap-2">
                                 {[
@@ -1398,7 +1398,7 @@ const Booking = () => {
                                     onClick={() =>
                                       setFormData({ ...formData, keyAccess: k })
                                     }
-                                    className={`p-4 rounded-2xl border-2 text-[10px] font-black uppercase transition-all ${formData.keyAccess === k ? "border-primary bg-primary text-white shadow-md" : "border-slate-100 bg-white text-slate-400 hover:border-primary/30"}`}
+                                    className={`p-4 rounded-2xl border text-[10px] font-black uppercase transition-all ${formData.keyAccess === k ? "border-[#10B981] bg-[#10B981] text-white shadow-md" : "border-white/[0.07] bg-[#0B2D22] text-white/60 hover:border-[#10B981]/30"}`}
                                   >
                                     {k}
                                   </button>
@@ -1406,12 +1406,12 @@ const Booking = () => {
                               </div>
                             </div>
                             <div className="space-y-3">
-                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <Info size={14} className="text-primary" />{" "}
+                              <p className="text-[10px] font-black text-white/35 uppercase tracking-widest flex items-center gap-2">
+                                <Info size={14} className="text-[#10B981]" />{" "}
                                 Special Instructions
                               </p>
                               <textarea
-                                className="w-full p-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 shadow-sm outline-none font-bold text-xs resize-none"
+                                className="w-full p-5 rounded-2xl bg-[#05201A] border border-white/[0.08] focus:border-[#10B981] shadow-sm outline-none font-bold text-xs resize-none text-white"
                                 rows={3}
                                 placeholder="Example: Gate code is 1234, focus on kitchen..."
                                 value={formData.specialInstructions}
@@ -1424,16 +1424,19 @@ const Booking = () => {
                               />
                             </div>
                             <div className="space-y-3">
-                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <Sparkles size={14} className="text-primary" />{" "}
+                              <p className="text-[10px] font-black text-white/35 uppercase tracking-widest flex items-center gap-2">
+                                <Sparkles
+                                  size={14}
+                                  className="text-[#10B981]"
+                                />{" "}
                                 Who provides the cleaning supplies & equipment?{" "}
                                 <span className="text-rose-500">*</span>
                               </p>
                               <select
-                                className={`w-full p-5 rounded-2xl border-2 shadow-sm outline-none font-bold text-xs transition-all ${
+                                className={`w-full p-5 rounded-2xl border shadow-sm outline-none font-bold text-xs transition-all ${
                                   formData.suppliesProvidedBy
-                                    ? "bg-slate-50 border-transparent focus:border-primary/30"
-                                    : "bg-rose-50 border-rose-200 text-rose-500"
+                                    ? "bg-[#05201A] border-white/[0.08] focus:border-[#10B981] text-white"
+                                    : "bg-rose-500/10 border-rose-400/30 text-rose-300"
                                 }`}
                                 value={formData.suppliesProvidedBy || ""}
                                 onChange={(e) =>
@@ -1459,7 +1462,7 @@ const Booking = () => {
                                 </option>
                               </select>
                               {!formData.suppliesProvidedBy && (
-                                <p className="text-[10px] font-bold text-rose-500">
+                                <p className="text-[10px] font-bold text-rose-300">
                                   This selection is required before you can
                                   continue.
                                 </p>
@@ -1477,10 +1480,10 @@ const Booking = () => {
                         {/* Date & Time */}
                         <div className="space-y-6">
                           <div>
-                            <h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">
+                            <h1 className="text-xl md:text-3xl font-extrabold text-white tracking-tight">
                               Select Date & Time
                             </h1>
-                            <p className="text-slate-400 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">
+                            <p className="text-white/35 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">
                               Choose your preferred booking date
                             </p>
                           </div>
@@ -1498,13 +1501,16 @@ const Booking = () => {
                           />
                           {formData.date && (
                             <div className="space-y-4">
-                              <div className="bg-white p-6 rounded-2xl border-2 border-slate-200 space-y-4">
+                              <div className="bg-[#05201A] p-6 rounded-2xl border border-white/[0.07] space-y-4">
                                 <div>
-                                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                    <Clock size={16} className="text-primary" />
+                                  <p className="text-[10px] font-black text-white/35 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <Clock
+                                      size={16}
+                                      className="text-[#10B981]"
+                                    />
                                     Choose Your Flexible Time
                                   </p>
-                                  <p className="text-[9px] text-slate-400 mb-4">
+                                  <p className="text-[9px] text-white/35 mb-4">
                                     Available: 8:00 AM - 8:00 PM
                                   </p>
                                 </div>
@@ -1592,10 +1598,10 @@ const Booking = () => {
                                           className={`py-3 px-2 rounded-xl border-2 text-[10px] font-bold transition-all transform hover:scale-105 ${
                                             formData.preferredTime === time &&
                                             formData.timeSlot === "Flexible"
-                                              ? "border-primary bg-primary text-white shadow-lg scale-110"
+                                              ? "border-[#10B981] bg-[#10B981] text-white shadow-lg scale-110"
                                               : isBooked
-                                                ? "border-rose-200 bg-rose-50 text-rose-300 cursor-not-allowed opacity-50"
-                                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                                ? "border-rose-400/30 bg-rose-500/10 text-rose-300 cursor-not-allowed opacity-50"
+                                                : "border-white/[0.08] bg-[#0B2D22] text-white/70 hover:border-[#10B981]/50"
                                           }`}
                                         >
                                           {time}
@@ -1606,9 +1612,9 @@ const Booking = () => {
                                 </div>
 
                                 {/* Custom Time Input */}
-                                <div className="border-t-2 border-slate-100 pt-4 space-y-3">
+                                <div className="border-t border-white/[0.07] pt-4 space-y-3">
                                   <div className="flex items-center justify-between">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    <p className="text-[10px] font-black text-white/35 uppercase tracking-widest">
                                       ⏰ Custom Time
                                     </p>
                                     {/* <button
@@ -1690,18 +1696,18 @@ const Booking = () => {
                                           });
                                         }
                                       }}
-                                      className="flex-1 p-4 rounded-xl bg-slate-50 border-2 border-slate-200 focus:border-primary focus:bg-white shadow-sm outline-none font-bold text-sm text-slate-700"
+                                      className="flex-1 p-4 rounded-xl bg-[#0B2D22] border border-white/[0.08] focus:border-[#10B981] focus:bg-[#05201A] shadow-sm outline-none font-bold text-sm text-white"
                                       min="08:00"
                                       max="20:00"
                                     />
-                                    <span className="text-[9px] font-bold text-slate-500 text-center">
+                                    <span className="text-[9px] font-bold text-white/35 text-center">
                                       {formData.preferredTime &&
                                       formData.timeSlot === "Flexible"
                                         ? "✓ Selected"
                                         : "Click to set"}
                                     </span>
                                   </div>
-                                  <p className="text-[8px] text-slate-400">
+                                  <p className="text-[8px] text-white/35">
                                     💡 If left empty, we'll default to 12:30 PM
                                   </p>
                                 </div>
@@ -1710,15 +1716,15 @@ const Booking = () => {
                           )}
                           {formData.timeSlot &&
                             formData.timeSlot !== "Flexible" && (
-                              <div className="animate-in slide-in-from-bottom-2 space-y-2 bg-white p-4 rounded-2xl border-2 border-slate-200">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                  <Clock size={14} className="text-primary" />{" "}
+                              <div className="animate-in slide-in-from-bottom-2 space-y-2 bg-[#05201A] p-4 rounded-2xl border border-white/[0.07]">
+                                <p className="text-[10px] font-black text-white/35 uppercase tracking-widest flex items-center gap-2">
+                                  <Clock size={14} className="text-[#10B981]" />{" "}
                                   Alternative: Specify exact time?
                                 </p>
                                 <input
                                   type="text"
                                   placeholder="e.g. 9:30 AM (optional)"
-                                  className="w-full p-4 rounded-xl bg-slate-50 border-2 border-transparent focus:border-primary/50 shadow-sm outline-none font-bold text-sm"
+                                  className="w-full p-4 rounded-xl bg-[#0B2D22] border border-white/[0.08] focus:border-[#10B981] shadow-sm outline-none font-bold text-sm text-white"
                                   value={formData.preferredTime}
                                   onChange={(e) =>
                                     setFormData({
@@ -1734,10 +1740,10 @@ const Booking = () => {
                         {/* Customer Details */}
                         <div className="space-y-6">
                           <div>
-                            <h1 className="text-xl md:text-3xl font-extrabold text-primary-dark tracking-tight">
+                            <h1 className="text-xl md:text-3xl font-extrabold text-white tracking-tight">
                               Your Details
                             </h1>
-                            <p className="text-slate-400 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">
+                            <p className="text-white/35 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">
                               We'll use this to confirm your booking
                             </p>
                           </div>
@@ -1796,33 +1802,33 @@ const Booking = () => {
                         !formData.lastName ||
                         !formData.email ||
                         !formData.phone ? (
-                          <div className="bg-slate-50 p-8 rounded-[32px] border-2 border-slate-100 text-center animate-in fade-in">
-                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                          <div className="bg-[#05201A] p-8 rounded-[32px] border border-white/[0.07] text-center animate-in fade-in">
+                            <div className="w-16 h-16 bg-[#0B2D22] rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                               <ShieldCheck
-                                className="text-slate-300"
+                                className="text-white/35"
                                 size={32}
                               />
                             </div>
-                            <h3 className="font-extrabold text-primary-dark tracking-tight mb-2 text-lg">
+                            <h3 className="font-extrabold text-white tracking-tight mb-2 text-lg">
                               Complete Your Details
                             </h3>
-                            <p className="text-xs font-bold text-slate-400">
+                            <p className="text-xs font-bold text-white/35">
                               Please fill out your Date, Time, and Personal
                               Details above to unlock secure payment.
                             </p>
                           </div>
                         ) : (
-                          <div className="bg-primary/5 p-6 rounded-[32px] border border-primary/10">
-                            <div className="flex items-center gap-3 text-[10px] font-black text-primary uppercase tracking-widest mb-4">
+                          <div className="bg-[#10B981]/10 p-6 rounded-[32px] border border-[#10B981]/20">
+                            <div className="flex items-center gap-3 text-[10px] font-black text-[#10B981] uppercase tracking-widest mb-4">
                               <ShieldCheck size={18} />
                               Securely processed by Stripe
                             </div>
                             {!customer && !guestCheckoutInModal ? (
-                              <div className="p-6 bg-white rounded-2xl border border-slate-100 text-center">
-                                <p className="font-extrabold text-primary-dark mb-2">
+                              <div className="p-6 bg-[#05201A] rounded-2xl border border-white/[0.07] text-center">
+                                <p className="font-extrabold text-white mb-2">
                                   Account required to pay
                                 </p>
-                                <p className="text-sm text-slate-500 mb-4">
+                                <p className="text-sm text-white/55 mb-4">
                                   Please log in or create a free account to
                                   complete payment and secure your booking.
                                 </p>
@@ -1836,7 +1842,7 @@ const Booking = () => {
                                     </Link>
                                     <Link
                                       to="/account/signup?returnTo=/booking"
-                                      className="py-3 px-6 bg-slate-50 rounded-2xl font-black text-primary border border-slate-200"
+                                      className="py-3 px-6 bg-[#0B2D22] rounded-2xl font-black text-[#10B981] border border-white/[0.08]"
                                     >
                                       Sign up
                                     </Link>
@@ -1845,7 +1851,7 @@ const Booking = () => {
                                     onClick={() =>
                                       setGuestCheckoutInModal(true)
                                     }
-                                    className="mt-2 text-xs font-bold text-slate-400 hover:text-slate-600 underline"
+                                    className="mt-2 text-xs font-bold text-white/35 hover:text-white/60 underline"
                                   >
                                     Continue as Guest
                                   </button>
@@ -1895,11 +1901,11 @@ const Booking = () => {
                   )}
                 </div>
 
-                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 bg-white/80 backdrop-blur-sm border-t border-slate-50 flex justify-between items-center pointer-events-none rounded-b-[24px] md:rounded-b-[40px]">
+                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 bg-[#0B2D22]/90 backdrop-blur-sm border-t border-white/[0.07] flex justify-between items-center pointer-events-none rounded-b-[24px] md:rounded-b-[40px]">
                   {step > 1 ? (
                     <button
                       onClick={prevStep}
-                      className="pointer-events-auto group flex items-center gap-2 text-slate-400 hover:text-primary transition-all font-black text-[9px] uppercase tracking-widest"
+                      className="pointer-events-auto group flex items-center gap-2 text-white/35 hover:text-[#10B981] transition-all font-black text-[9px] uppercase tracking-widest"
                     >
                       <ChevronLeft
                         size={18}
@@ -1913,7 +1919,7 @@ const Booking = () => {
                   {step < 4 && (
                     <button
                       onClick={nextStep}
-                      className="pointer-events-auto group flex items-center gap-3 md:gap-4 bg-primary text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-primary/30 transition-all"
+                      className="pointer-events-auto group flex items-center gap-3 md:gap-4 bg-[#10B981] text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-black text-[10px] uppercase tracking-widest hover:shadow-lg hover:shadow-[#10B981]/30 transition-all"
                     >
                       Next Step{" "}
                       <ArrowRight
@@ -1928,17 +1934,17 @@ const Booking = () => {
           </div>
 
           <div className="lg:col-span-4 lg:sticky lg:top-32 space-y-6">
-            <div className="bg-white rounded-[40px] p-8 shadow-xl border-4 border-white relative overflow-hidden">
+            <div className="bg-[#0B2D22] rounded-[40px] p-8 shadow-xl border border-white/[0.07] relative overflow-hidden">
               <div className="space-y-6 mb-8 text-xs max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
                     <MapPin size={14} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase">
+                    <p className="text-[10px] font-black text-white/35 uppercase">
                       Location
                     </p>
-                    <p className="font-bold text-primary-dark">
+                    <p className="font-bold text-white">
                       {formData.address || "Select address"}
                     </p>
                   </div>
@@ -1948,7 +1954,7 @@ const Booking = () => {
                     <Zap size={14} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-[10px] font-black text-slate-400 uppercase mb-1">
+                    <p className="text-[10px] font-black text-white/35 uppercase mb-1">
                       Service Details
                     </p>
                     <div className="space-y-2">
@@ -1996,12 +2002,12 @@ const Booking = () => {
                         qty > 0 ? (
                           <div
                             key={name}
-                            className="flex justify-between items-center text-[10px] bg-slate-50 p-2 rounded-lg border border-slate-100"
+                            className="flex justify-between items-center text-[10px] bg-[#05201A] p-2 rounded-lg border border-white/[0.07]"
                           >
-                            <span className="font-bold text-slate-600">
+                            <span className="font-bold text-white/70">
                               {name} x{qty}
                             </span>
-                            <span className="font-black text-slate-600">
+                            <span className="font-black text-white/80">
                               {region.symbol}
                               {(dynamicRates[cleanKey(name)] || 0) * qty}
                             </span>
@@ -2012,12 +2018,12 @@ const Booking = () => {
                         qty > 0 ? (
                           <div
                             key={name}
-                            className="flex justify-between items-center text-[10px] bg-primary/5 p-2 rounded-lg border border-primary/20"
+                            className="flex justify-between items-center text-[10px] bg-[#10B981]/10 p-2 rounded-lg border border-[#10B981]/20"
                           >
-                            <span className="font-bold text-primary-dark">
+                            <span className="font-bold text-white">
                               {name} x{qty}
                             </span>
-                            <span className="font-black text-primary">
+                            <span className="font-black text-[#10B981]">
                               {region.symbol}
                               {(dynamicRates[cleanKey(name)] || 0) * qty}
                             </span>
@@ -2028,12 +2034,12 @@ const Booking = () => {
                   </div>
                 </div>
               </div>
-              <div className="pt-6 border-t border-slate-100 flex justify-between items-center">
+              <div className="pt-6 border-t border-white/[0.07] flex justify-between items-center">
                 <div>
-                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">
+                  <p className="text-[8px] font-bold text-white/35 uppercase tracking-widest">
                     Estimated Total
                   </p>
-                  <p className="text-2xl font-black text-primary-dark">
+                  <p className="text-2xl font-black text-white">
                     {region.symbol}
                     {totalPrice}
                   </p>
@@ -2041,22 +2047,22 @@ const Booking = () => {
               </div>
             </div>
             <div className="space-y-3">
-              <div className="bg-white rounded-3xl p-5 border border-slate-100 flex items-center justify-between shadow-sm">
+              <div className="bg-[#05201A] rounded-3xl p-5 border border-white/[0.07] flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-[#4F46E5] rounded-xl flex items-center justify-center">
                     <Shield size={16} className="text-white" />
                   </div>
                   <div>
-                    <p className="text-[8px] font-black text-slate-400 uppercase">
+                    <p className="text-[8px] font-black text-white/35 uppercase">
                       Trusted Provider
                     </p>
-                    <p className="font-bold text-primary-dark text-xs">
+                    <p className="font-bold text-white text-xs">
                       Verified & Insured
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="bg-primary-dark rounded-[32px] p-6 text-white space-y-4 shadow-lg">
+              <div className="bg-[#05201A] rounded-[32px] p-6 text-white space-y-4 shadow-lg border border-white/[0.07]">
                 <div className="flex items-center gap-3">
                   <Shield size={16} />
                   <p className="text-[10px] font-bold uppercase tracking-widest">
@@ -2088,16 +2094,16 @@ const Booking = () => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-60 w-[95%] max-w-md bg-white rounded-3xl shadow-2xl p-8"
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-60 w-[95%] max-w-md bg-[#0B2D22] rounded-3xl shadow-2xl p-8 border border-white/[0.07]"
             >
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Lock size={32} className="text-primary" />
+                <div className="w-16 h-16 bg-[#10B981]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Lock size={32} className="text-[#10B981]" />
                 </div>
-                <h2 className="text-3xl font-black text-primary-dark mb-2">
+                <h2 className="text-3xl font-black text-white mb-2">
                   Secure Checkout
                 </h2>
-                <p className="text-slate-500 text-sm">
+                <p className="text-white/55 text-sm">
                   Please log in, sign up, or continue as a guest
                 </p>
               </div>
@@ -2105,17 +2111,17 @@ const Booking = () => {
               <div className="space-y-3">
                 <button
                   onClick={() => setGuestCheckoutInModal(true)}
-                  className="w-full py-4 px-6 bg-primary text-white rounded-2xl font-black text-lg hover:bg-primary-dark transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="w-full py-4 px-6 bg-[#10B981] text-white rounded-2xl font-black text-lg hover:bg-[#059669] transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   Continue as Guest
                 </button>
 
                 <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-200"></div>
+                    <div className="w-full border-t border-white/[0.08]"></div>
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="px-3 bg-white text-slate-400 font-semibold">
+                    <span className="px-3 bg-[#0B2D22] text-white/35 font-semibold">
                       OR
                     </span>
                   </div>
@@ -2123,14 +2129,14 @@ const Booking = () => {
 
                 <Link
                   to="/account/login?returnTo=/booking&step=4"
-                  className="block w-full py-4 px-6 bg-slate-100 text-primary rounded-2xl font-black text-lg hover:bg-slate-200 transition-all duration-200 text-center border border-slate-200"
+                  className="block w-full py-4 px-6 bg-[#05201A] text-[#10B981] rounded-2xl font-black text-lg hover:bg-[#0D3527] transition-all duration-200 text-center border border-white/[0.08]"
                 >
                   Log In
                 </Link>
 
                 <Link
                   to="/account/signup?returnTo=/booking&step=4"
-                  className="block w-full py-4 px-6 bg-white text-primary rounded-2xl font-black text-lg hover:bg-slate-50 transition-all duration-200 border-2 border-primary text-center"
+                  className="block w-full py-4 px-6 bg-[#0B2D22] text-[#10B981] rounded-2xl font-black text-lg hover:bg-[#05201A] transition-all duration-200 border border-[#10B981]/30 text-center"
                 >
                   Sign Up
                 </Link>
@@ -2138,7 +2144,7 @@ const Booking = () => {
 
               <button
                 onClick={() => setStep(3)}
-                className="mt-6 text-sm text-slate-400 hover:text-slate-600 transition-colors w-full text-center"
+                className="mt-6 text-sm text-white/35 hover:text-white/60 transition-colors w-full text-center"
               >
                 ← Back
               </button>
@@ -2154,10 +2160,10 @@ const Booking = () => {
             className="fixed top-10 left-1/2 -translate-x-1/2 z-100 w-[90%] max-w-md"
           >
             <div
-              className={`p-6 rounded-[32px] border-2 shadow-2xl flex items-center gap-4 bg-white ${notification.type === "error" ? "border-rose-100 text-rose-600" : "border-emerald-100 text-emerald-600"}`}
+              className={`p-6 rounded-[32px] border shadow-2xl flex items-center gap-4 bg-[#0B2D22] ${notification.type === "error" ? "border-rose-400/25 text-rose-300" : "border-[#10B981]/25 text-[#10B981]"}`}
             >
               <div
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${notification.type === "error" ? "bg-rose-50" : "bg-emerald-50"}`}
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${notification.type === "error" ? "bg-rose-500/10" : "bg-[#10B981]/10"}`}
               >
                 {notification.type === "error" ? (
                   <AlertCircle size={24} />

@@ -167,22 +167,26 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
 
   return (
     <div className="space-y-6">
-      {/* â”€â”€ MAIN CALENDAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      <div className="bg-white rounded-[28px] sm:rounded-[40px] p-4 sm:p-10 border border-slate-200 shadow-sm animate-in fade-in">
+      {/* â"€â"€ MAIN CALENDAR â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
+      <div className="bg-[#0B2D22] rounded-[28px] sm:rounded-[40px] p-4 sm:p-10 border border-white/10 shadow-sm animate-in fade-in">
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6 sm:mb-10">
           <div>
-            <h3 className="text-2xl font-bold text-primary-dark tracking-tighter">
+            <h3 className="text-2xl font-bold text-white/85 tracking-tighter">
               {calendarView === "year" ? (
-                <span className="text-primary">{currentMonth.getFullYear()}</span>
+                <span className="text-primary">
+                  {currentMonth.getFullYear()}
+                </span>
               ) : (
                 <>
                   {currentMonth.toLocaleString("default", { month: "long" })}{" "}
-                  <span className="text-primary">{currentMonth.getFullYear()}</span>
+                  <span className="text-primary">
+                    {currentMonth.getFullYear()}
+                  </span>
                 </>
               )}
             </h3>
             <div className="flex items-center gap-3 mt-1.5">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 text-[11px] font-bold">
                 £
                 {(calendarView === "year"
                   ? yearTotalRevenue
@@ -190,7 +194,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                 ).toLocaleString("en-GB", { maximumFractionDigits: 0 })}{" "}
                 {calendarView === "year" ? "this year" : "this month"}
               </span>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
                 {calendarView === "year"
                   ? "Click a month to view its calendar"
                   : "Click any date to Block/Unblock"}
@@ -198,12 +202,12 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
             </div>
           </div>
           <div className="flex gap-3 items-center flex-wrap">
-            <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
+            <div className="flex items-center gap-1 bg-white/10 rounded-xl p-1">
               {["month", "year"].map((v) => (
                 <button
                   key={v}
                   onClick={() => setCalendarView(v)}
-                  className={`px-3.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${calendarView === v ? "bg-primary text-white shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+                  className={`px-3.5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${calendarView === v ? "bg-primary text-white shadow-sm" : "text-white/40 hover:text-white/70"}`}
                 >
                   {v}
                 </button>
@@ -211,13 +215,13 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
             </div>
             <button
               onClick={handlePrevMonth}
-              className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
+              className="p-3 rounded-2xl bg-white/5 text-white/40 hover:bg-[#10B981]/10 hover:text-[#10B981] transition-all border border-white/10"
             >
               <ChevronLeft size={20} />
             </button>
             <button
               onClick={handleNextMonth}
-              className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
+              className="p-3 rounded-2xl bg-white/5 text-white/40 hover:bg-[#10B981]/10 hover:text-[#10B981] transition-all border border-white/10"
             >
               <ChevronRight size={20} />
             </button>
@@ -231,8 +235,14 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                 currentMonth.getFullYear(),
                 m.month,
               );
-              const totalDays = daysInMonth(currentMonth.getFullYear(), m.month);
-              const startDay = startDayOfMonth(currentMonth.getFullYear(), m.month);
+              const totalDays = daysInMonth(
+                currentMonth.getFullYear(),
+                m.month,
+              );
+              const startDay = startDayOfMonth(
+                currentMonth.getFullYear(),
+                m.month,
+              );
               const cells = [];
               for (let i = 0; i < startDay; i++) cells.push(null);
               for (let d = 1; d <= totalDays; d++) cells.push(d);
@@ -240,7 +250,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
               return (
                 <div
                   key={m.month}
-                  className={`text-left p-4 rounded-[20px] border-2 transition-all ${m.count > 0 ? "bg-emerald-50/60 border-emerald-200" : "bg-slate-50 border-transparent"}`}
+                  className={`text-left p-4 rounded-[20px] border-2 transition-all ${m.count > 0 ? "bg-[#10B981]/10 border-[#10B981]/30" : "bg-white/5 border-transparent"}`}
                 >
                   <button
                     onClick={() => {
@@ -251,14 +261,17 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                     }}
                     className="w-full flex items-center justify-between mb-3 hover:opacity-70 transition-opacity"
                   >
-                    <span className="font-bold text-primary-dark text-sm">
+                    <span className="font-bold text-white/85 text-sm">
                       {m.label}
                     </span>
                     <span className="text-right">
-                      <span className="block text-sm font-bold text-slate-900 tabular-nums">
-                        £{m.revenue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}
+                      <span className="block text-sm font-bold text-white tabular-nums">
+                        £
+                        {m.revenue.toLocaleString("en-GB", {
+                          maximumFractionDigits: 0,
+                        })}
                       </span>
-                      <span className="block text-[10px] font-semibold text-slate-400">
+                      <span className="block text-[10px] font-semibold text-white/40">
                         {m.count} booking{m.count !== 1 ? "s" : ""}
                       </span>
                     </span>
@@ -267,9 +280,13 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                     {cells.map((d, i) => (
                       <div
                         key={i}
-                        title={d && bookedDays.has(d) ? `${bookedDays.size ? "" : ""}Booking on ${m.label} ${d}` : undefined}
+                        title={
+                          d && bookedDays.has(d)
+                            ? `${bookedDays.size ? "" : ""}Booking on ${m.label} ${d}`
+                            : undefined
+                        }
                         className={`aspect-square rounded-[5px] flex items-center justify-center text-[8px] font-bold
-                          ${!d ? "" : bookedDays.has(d) ? "bg-emerald-400 text-white" : "bg-white text-slate-300 border border-slate-100"}
+                          ${!d ? "" : bookedDays.has(d) ? "bg-[#10B981] text-white" : "bg-white/5 text-white/30 border border-white/10"}
                         `}
                       >
                         {d || ""}
@@ -286,7 +303,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
                 <div
                   key={d}
-                  className="text-[10px] font-bold text-slate-300 uppercase text-center py-2"
+                  className="text-[10px] font-bold text-white/30 uppercase text-center py-2"
                 >
                   {d}
                 </div>
@@ -297,7 +314,9 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
               {days.map((date, i) => {
                 const dayBookings = getBookingsForDate(date);
                 const isDayBlocked = dayBookings.some(
-                  (b) => b.status === "Blackout" && b.schedule?.timeSlot === "All Day",
+                  (b) =>
+                    b.status === "Blackout" &&
+                    b.schedule?.timeSlot === "All Day",
                 );
                 const hasAdminSlotBlocks = dayBookings.some(
                   (b) => b.status === "Blackout" && b.schedule?.preferredTime,
@@ -308,11 +327,15 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                   (s, b) => s + Number(b.payment?.amount || 0),
                   0,
                 );
-                const hasRecurring = dayBookings.some((b) => b.meta?.recurringGroup);
+                const hasRecurring = dayBookings.some(
+                  (b) => b.meta?.recurringGroup,
+                );
 
                 // Mini slot indicator — count booked + blocked time slots
-                const bookedSlotCount = realDayBookings.filter((b) =>
-                  b.schedule?.preferredTime || b.schedule?.time?.includes(":")
+                const bookedSlotCount = realDayBookings.filter(
+                  (b) =>
+                    b.schedule?.preferredTime ||
+                    b.schedule?.time?.includes(":"),
                 ).length;
                 const adminSlotCount = dayBookings.filter(
                   (b) => b.status === "Blackout" && b.schedule?.preferredTime,
@@ -320,12 +343,12 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                 const totalOccupied = bookedSlotCount + adminSlotCount;
 
                 const cellClass = isDayBlocked
-                  ? "bg-rose-50 border-rose-300 text-rose-500"
+                  ? "bg-rose-500/20 border-rose-500/40 text-rose-400"
                   : hasBookings
-                  ? "bg-amber-50 border-amber-300 text-amber-700"
-                  : hasAdminSlotBlocks
-                  ? "bg-rose-50 border-rose-200 text-rose-400"
-                  : "bg-slate-50 border-transparent text-slate-400 hover:border-primary/30";
+                    ? "bg-amber-500/15 border-amber-500/30 text-amber-400"
+                    : hasAdminSlotBlocks
+                      ? "bg-rose-500/15 border-rose-500/25 text-rose-400/70"
+                      : "bg-white/4 border-transparent text-white/30 hover:border-emerald-500/30 hover:text-white/60";
 
                 return (
                   <div key={i} className="aspect-square">
@@ -334,7 +357,9 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                         onClick={() => setSelectedDateForDetails({ date })}
                         className={`w-full h-full rounded-[24px] flex flex-col items-center justify-center transition-all relative border-2 group ${cellClass}`}
                       >
-                        <span className="text-sm font-bold">{date.getDate()}</span>
+                        <span className="text-sm font-bold">
+                          {date.getDate()}
+                        </span>
                         {isDayBlocked && (
                           <span className="text-[7px] font-bold uppercase absolute bottom-2">
                             Blocked
@@ -343,7 +368,14 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                         {hasBookings && !isDayBlocked && (
                           <span className="text-[7px] font-bold uppercase absolute bottom-1 text-center leading-tight px-1">
                             {realDayBookings.length} booked
-                            {dayRevenue > 0 && <><br />£{dayRevenue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}</>}
+                            {dayRevenue > 0 && (
+                              <>
+                                <br />£
+                                {dayRevenue.toLocaleString("en-GB", {
+                                  maximumFractionDigits: 0,
+                                })}
+                              </>
+                            )}
                           </span>
                         )}
                         {!hasBookings && hasAdminSlotBlocks && (
@@ -359,7 +391,9 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                         )}
                         {totalOccupied > 0 && !isDayBlocked && (
                           <span className="absolute top-1.5 left-1.5 flex gap-0.5">
-                            {Array.from({ length: Math.min(totalOccupied, 4) }).map((_, k) => (
+                            {Array.from({
+                              length: Math.min(totalOccupied, 4),
+                            }).map((_, k) => (
                               <span
                                 key={k}
                                 className={`w-1 h-1 rounded-full ${k < bookedSlotCount ? "bg-amber-400" : "bg-rose-400"}`}
@@ -380,26 +414,34 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
 
         {/* Legend */}
         {calendarView === "month" && (
-        <div className="flex gap-6 mt-8 pt-6 border-t border-slate-100 flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-amber-400" />
-            <span className="text-[11px] font-bold text-slate-400">Has Bookings</span>
+          <div className="flex gap-6 mt-8 pt-6 border-t border-white/10 flex-wrap">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-amber-400" />
+              <span className="text-[11px] font-bold text-white/40">
+                Has Bookings
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-rose-400" />
+              <span className="text-[11px] font-bold text-white/40">
+                Blocked
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-purple-400" />
+              <span className="text-[11px] font-bold text-white/40">
+                Recurring
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-white/15" />
+              <span className="text-[11px] font-bold text-white/40">
+                Available
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-rose-400" />
-            <span className="text-[11px] font-bold text-slate-400">Blocked</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-purple-400" />
-            <span className="text-[11px] font-bold text-slate-400">Recurring</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-slate-200" />
-            <span className="text-[11px] font-bold text-slate-400">Available</span>
-          </div>
-        </div>
         )}
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">
+        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-4">
           {calendarView === "year"
             ? "💡 Click any month to jump straight to its calendar"
             : "💡 Click any date to view bookings and manage availability"}
@@ -413,7 +455,8 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
           // Re-derive live from the current bookings prop so slot toggles reflect immediately.
           const bookingsOnDate = getBookingsForDate(date);
           const isBlocked = bookingsOnDate.some(
-            (b) => b.status === "Blackout" && b.schedule?.timeSlot === "All Day",
+            (b) =>
+              b.status === "Blackout" && b.schedule?.timeSlot === "All Day",
           );
           const dStr = date.toLocaleDateString("en-GB", {
             weekday: "long",
@@ -461,8 +504,11 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
             const t =
               b.schedule?.preferredTime ||
               (b.schedule?.time?.includes(":") ? b.schedule.time : null) ||
-              (b.schedule?.timeSlot?.includes(":") ? b.schedule.timeSlot : null);
-            if (t) realBookingsBySlot[t] = (realBookingsBySlot[t] || []).concat(b);
+              (b.schedule?.timeSlot?.includes(":")
+                ? b.schedule.timeSlot
+                : null);
+            if (t)
+              realBookingsBySlot[t] = (realBookingsBySlot[t] || []).concat(b);
           });
 
           const fmtSlot = (t) => {
@@ -714,53 +760,113 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
 
                   {/* Time Slot Grid */}
                   {onToggleTimeSlot && (
-                    <div style={{ marginTop: "20px", paddingTop: "20px", borderTop: "1px solid #f1f5f9" }}>
-                      <p style={{ margin: "0 0 12px", fontSize: "11px", fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: "1px" }}>
+                    <div
+                      style={{
+                        marginTop: "20px",
+                        paddingTop: "20px",
+                        borderTop: "1px solid #f1f5f9",
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: "0 0 12px",
+                          fontSize: "11px",
+                          fontWeight: 800,
+                          color: "#64748b",
+                          textTransform: "uppercase",
+                          letterSpacing: "1px",
+                        }}
+                      >
                         Time Slot Availability
                       </p>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "6px",
+                          marginBottom: "10px",
+                        }}
+                      >
                         {[
                           { dot: "#10b981", label: "Available" },
                           { dot: "#f59e0b", label: "Booked" },
                           { dot: "#ef4444", label: "Blocked" },
                         ].map(({ dot, label }) => (
-                          <span key={label} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "10px", fontWeight: 700, color: "#94a3b8" }}>
-                            <span style={{ width: 8, height: 8, borderRadius: "50%", background: dot, display: "inline-block" }} />
+                          <span
+                            key={label}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              fontSize: "10px",
+                              fontWeight: 700,
+                              color: "#94a3b8",
+                            }}
+                          >
+                            <span
+                              style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: "50%",
+                                background: dot,
+                                display: "inline-block",
+                              }}
+                            />
                             {label}
                           </span>
                         ))}
-                        <span style={{ fontSize: "10px", color: "#cbd5e1", marginLeft: "auto" }}>Click to block / unblock</span>
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            color: "#cbd5e1",
+                            marginLeft: "auto",
+                          }}
+                        >
+                          Click to block / unblock
+                        </span>
                       </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "5px" }}>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(5, 1fr)",
+                          gap: "5px",
+                        }}
+                      >
                         {TIME_SLOTS.map((slot) => {
                           const isAdminBlocked = !!adminBlockedBySlot[slot];
                           const hasRealBooking = !!realBookingsBySlot[slot];
                           const bg = isAdminBlocked
                             ? "#fee2e2"
                             : hasRealBooking
-                            ? "#fef3c7"
-                            : "#f0fdf4";
+                              ? "#fef3c7"
+                              : "#f0fdf4";
                           const color = isAdminBlocked
                             ? "#dc2626"
                             : hasRealBooking
-                            ? "#d97706"
-                            : "#059669";
+                              ? "#d97706"
+                              : "#059669";
                           const border = isAdminBlocked
                             ? "1px solid #fca5a5"
                             : hasRealBooking
-                            ? "1px solid #fcd34d"
-                            : "1px solid #bbf7d0";
+                              ? "1px solid #fcd34d"
+                              : "1px solid #bbf7d0";
                           return (
                             <button
                               key={slot}
                               disabled={hasRealBooking}
-                              onClick={() => onToggleTimeSlot(date, slot, adminBlockedBySlot[slot] || null)}
+                              onClick={() =>
+                                onToggleTimeSlot(
+                                  date,
+                                  slot,
+                                  adminBlockedBySlot[slot] || null,
+                                )
+                              }
                               title={
                                 hasRealBooking
                                   ? `${realBookingsBySlot[slot].length} booking(s)`
                                   : isAdminBlocked
-                                  ? "Click to unblock"
-                                  : "Click to block"
+                                    ? "Click to unblock"
+                                    : "Click to block"
                               }
                               style={{
                                 padding: "5px 2px",
@@ -835,7 +941,6 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
             </div>
           );
         })()}
-
     </div>
   );
 };
@@ -900,9 +1005,9 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   };
 
   return (
-    <div className="bg-white rounded-[24px] md:rounded-[32px] p-4 md:p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
+    <div className="bg-[#0B2D22] rounded-[24px] md:rounded-[32px] p-4 md:p-6 border border-white/10 shadow-xl shadow-black/50">
       <div className="flex justify-between items-center mb-6 md:mb-8">
-        <h3 className="font-bold text-primary-dark tracking-tighter text-base md:text-lg">
+        <h3 className="font-bold text-white/85 tracking-tighter text-base md:text-lg">
           {currentMonth.toLocaleString("default", { month: "long" })}{" "}
           <span className="text-primary">{currentMonth.getFullYear()}</span>
         </h3>
@@ -910,14 +1015,14 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="p-1.5 md:p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
+            className="p-1.5 md:p-2 rounded-lg bg-white/5 text-white/40 hover:bg-[#10B981]/10 hover:text-[#10B981] transition-all"
           >
             <ChevronLeft size={18} />
           </button>
           <button
             type="button"
             onClick={handleNextMonth}
-            className="p-1.5 md:p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
+            className="p-1.5 md:p-2 rounded-lg bg-white/5 text-white/40 hover:bg-[#10B981]/10 hover:text-[#10B981] transition-all"
           >
             <ChevronRight size={18} />
           </button>
@@ -927,7 +1032,7 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
           <div
             key={d}
-            className="text-[8px] md:text-[10px] font-bold text-slate-300 uppercase text-center py-2"
+            className="text-[8px] md:text-[10px] font-bold text-white/30 uppercase text-center py-2"
           >
             {d}
           </div>
@@ -949,7 +1054,7 @@ const CreateCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
                       `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
                     )
                   }
-                  className={`w-full h-full rounded-xl text-center flex items-center justify-center relative font-bold text-sm transition-all ${isSelected(date) ? "bg-primary text-white shadow-lg" : booked ? "bg-rose-50 text-rose-300 cursor-not-allowed" : past ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-slate-50 text-slate-600 hover:bg-primary/10 hover:text-primary"}`}
+                  className={`w-full h-full rounded-xl text-center flex items-center justify-center relative font-bold text-sm transition-all ${isSelected(date) ? "bg-primary text-white shadow-lg" : booked ? "bg-rose-500/20 text-rose-400 cursor-not-allowed" : past ? "bg-amber-500/15 text-amber-400 hover:bg-amber-500/20" : "bg-white/5 text-white/70 hover:bg-[#10B981]/10 hover:text-[#10B981]"}`}
                 >
                   <span className="text-xs md:text-sm font-bold">
                     {date.getDate()}
@@ -999,7 +1104,12 @@ const Bookings = () => {
       Bathroom: 0,
     },
     schedule: { date: "", timeSlot: "", preferredTime: "" },
-    payment: { amount: 0, currency: "GBP", status: "Pending", billingType: "hourly" },
+    payment: {
+      amount: 0,
+      currency: "GBP",
+      status: "Pending",
+      billingType: "hourly",
+    },
     status: "Pending",
     leadSource: "Organic",
     suppliesProvidedBy: "Cleaniq",
@@ -1273,7 +1383,9 @@ const Bookings = () => {
   // Pricing for admin create form
   useEffect(() => {
     if (createData.payment?.billingType === "flat") {
-      setCreateTotal(Math.round((parseFloat(createFlatAmount) || 0) * 100) / 100);
+      setCreateTotal(
+        Math.round((parseFloat(createFlatAmount) || 0) * 100) / 100,
+      );
       return;
     }
     const fd = createData.details || {};
@@ -1650,13 +1762,19 @@ const Bookings = () => {
 
   const handleQuickStatusChange = async (bookingId, newStatus) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings/${bookingId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/bookings/${bookingId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        },
+      );
       if (res.ok) {
-        setStatusMessage({ type: "success", text: `Status updated to ${newStatus}` });
+        setStatusMessage({
+          type: "success",
+          text: `Status updated to ${newStatus}`,
+        });
         fetchBookings();
       }
     } catch {
@@ -1713,8 +1831,15 @@ const Bookings = () => {
   };
 
   const generateBookingInvoice = (b) => {
-    const extras = (b.details?.extras || []).map(e => typeof e === "string" ? e : (e.name || "")).filter(Boolean);
-    const extrasRows = extras.map(ex => `<tr><td style="padding:8px 24px;font-size:13px;color:#334155;">${ex}</td><td style="padding:8px 24px;text-align:right;font-size:13px;color:#334155;">—</td></tr>`).join("");
+    const extras = (b.details?.extras || [])
+      .map((e) => (typeof e === "string" ? e : e.name || ""))
+      .filter(Boolean);
+    const extrasRows = extras
+      .map(
+        (ex) =>
+          `<tr><td style="padding:8px 24px;font-size:13px;color:#334155;">${ex}</td><td style="padding:8px 24px;text-align:right;font-size:13px;color:#334155;">—</td></tr>`,
+      )
+      .join("");
     const total = Number(b.payment?.amount || 0);
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Invoice ${b.bookingId}</title>
 <style>@media print{body{margin:0}}.page{max-width:680px;margin:40px auto;font-family:Arial,sans-serif;color:#1e293b}</style></head>
@@ -1730,7 +1855,7 @@ const Bookings = () => {
 <p style="margin:2px 0 0;font-size:12px;color:#64748b;">${b.customer?.email || ""}</p>
 <p style="margin:2px 0 0;font-size:12px;color:#64748b;">${b.customer?.phone || ""}</p></div>
 <div style="text-align:right"><p style="margin:0 0 4px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Job Date</p>
-<p style="margin:0;font-weight:700;font-size:14px;">${b.schedule?.date ? new Date(b.schedule.date).toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"}) : "—"}</p>
+<p style="margin:0;font-weight:700;font-size:14px;">${b.schedule?.date ? new Date(b.schedule.date).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" }) : "—"}</p>
 <p style="margin:2px 0 0;font-size:12px;color:#64748b;">${b.schedule?.timeSlot || ""}</p>
 <p style="margin:2px 0 0;font-size:12px;color:#64748b;">${b.details?.address || ""}</p></div>
 </div>
@@ -1749,7 +1874,10 @@ ${extrasRows}
 </div></div>
 <script>window.onload=function(){window.print();}</script></body></html>`;
     const w = window.open("", "_blank");
-    if (w) { w.document.write(html); w.document.close(); }
+    if (w) {
+      w.document.write(html);
+      w.document.close();
+    }
   };
 
   const LEAD_EXPORT_HEADERS = [
@@ -1842,16 +1970,23 @@ ${extrasRows}
     for (const b of filteredBookings) {
       const grp = b.meta?.recurringGroup;
       if (!grp) continue;
-      if (!groups[grp]) { groups[grp] = { best: b, count: 1 }; continue; }
+      if (!groups[grp]) {
+        groups[grp] = { best: b, count: 1 };
+        continue;
+      }
       groups[grp].count++;
       const bDate = new Date(b.schedule?.date);
       const bestDate = new Date(groups[grp].best.schedule?.date);
-      if (bDate >= today && (bestDate < today || bDate < bestDate)) groups[grp].best = b;
+      if (bDate >= today && (bestDate < today || bDate < bestDate))
+        groups[grp].best = b;
     }
     const seen = new Set();
     return filteredBookings.reduce((acc, b) => {
       const grp = b.meta?.recurringGroup;
-      if (!grp) { acc.push(b); return acc; }
+      if (!grp) {
+        acc.push(b);
+        return acc;
+      }
       if (!seen.has(grp)) {
         seen.add(grp);
         const { best, count } = groups[grp];
@@ -1861,19 +1996,30 @@ ${extrasRows}
     }, []);
   }, [filteredBookings]);
 
-  const bookingsTotalPages = Math.max(1, Math.ceil(displayBookings.length / BOOKINGS_PAGE_SIZE));
-  const bookingsSafePage   = Math.min(bookingsPage, bookingsTotalPages);
-  const pageBookings       = displayBookings.slice((bookingsSafePage - 1) * BOOKINGS_PAGE_SIZE, bookingsSafePage * BOOKINGS_PAGE_SIZE);
+  const bookingsTotalPages = Math.max(
+    1,
+    Math.ceil(displayBookings.length / BOOKINGS_PAGE_SIZE),
+  );
+  const bookingsSafePage = Math.min(bookingsPage, bookingsTotalPages);
+  const pageBookings = displayBookings.slice(
+    (bookingsSafePage - 1) * BOOKINGS_PAGE_SIZE,
+    bookingsSafePage * BOOKINGS_PAGE_SIZE,
+  );
 
   const getStatusColor = (status) => {
     const colors = {
-      Confirmed: "bg-emerald-50 text-emerald-600 border-emerald-100",
-      Pending: "bg-amber-50 text-amber-600 border-amber-100",
-      Completed: "bg-blue-50 text-blue-600 border-blue-100",
-      "Completed - Unpaid": "bg-purple-50 text-purple-600 border-purple-100",
-      Cancelled: "bg-rose-50 text-rose-600 border-rose-100",
+      Confirmed: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+      Pending: "bg-amber-500/15  text-amber-400  border-amber-500/25",
+      Completed: "bg-blue-500/15   text-blue-400   border-blue-500/25",
+      "Completed - Unpaid":
+        "bg-purple-500/15 text-purple-400 border-purple-500/25",
+      Cancelled: "bg-rose-500/15   text-rose-400   border-rose-500/25",
+      "In Progress": "bg-violet-500/15 text-violet-400 border-violet-500/25",
+      Accepted: "bg-indigo-500/15 text-indigo-400 border-indigo-500/25",
+      Assigned: "bg-cyan-500/15   text-cyan-400   border-cyan-500/25",
+      Arrived: "bg-teal-500/15   text-teal-400   border-teal-500/25",
     };
-    return colors[status] || "bg-slate-50 text-slate-600 border-slate-100";
+    return colors[status] || "bg-white/[0.06] text-white/50 border-white/10";
   };
 
   const getPropertyData = (b) => {
@@ -1899,10 +2045,14 @@ ${extrasRows}
 
     // Also check booking.property (customer app format)
     if (b.property) {
-      if (!data["Bedroom"]        && b.property.bedrooms       > 0) data["Bedroom"]        = b.property.bedrooms;
-      if (!data["Bathroom"]       && b.property.bathrooms      > 0) data["Bathroom"]       = b.property.bathrooms;
-      if (!data["Kitchen"]        && b.property.kitchens       > 0) data["Kitchen"]        = b.property.kitchens;
-      if (!data["Reception Room"] && b.property.receptionRooms > 0) data["Reception Room"] = b.property.receptionRooms;
+      if (!data["Bedroom"] && b.property.bedrooms > 0)
+        data["Bedroom"] = b.property.bedrooms;
+      if (!data["Bathroom"] && b.property.bathrooms > 0)
+        data["Bathroom"] = b.property.bathrooms;
+      if (!data["Kitchen"] && b.property.kitchens > 0)
+        data["Kitchen"] = b.property.kitchens;
+      if (!data["Reception Room"] && b.property.receptionRooms > 0)
+        data["Reception Room"] = b.property.receptionRooms;
     }
 
     return data;
@@ -2003,41 +2153,97 @@ ${extrasRows}
 
   return (
     <div className="space-y-6 pb-20 relative">
-      {/* â”€â”€ CRM MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* â"€â"€ CRM MODAL â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
       {crmBooking && (
         <AdminCRM booking={crmBooking} onClose={() => setCrmBooking(null)} />
       )}
 
       {statusMessage.text && (
-        <div className="fixed top-6 right-6 z-100 px-6 py-4 rounded-2xl shadow-2xl bg-slate-900 text-white font-semibold text-sm animate-in slide-in-from-right">
+        <div className="fixed top-6 right-6 z-100 px-6 py-4 rounded-2xl shadow-2xl bg-[#0B2D22] text-white font-semibold text-sm animate-in slide-in-from-right">
           {statusMessage.text}
         </div>
       )}
 
       {/* ── Stats Summary ───────────────────────────────────────────────────── */}
       {(() => {
-        const allReal = bookings.filter(b => b.status !== "Blackout" && b.customer?.firstName !== "ADMIN_BLOCK");
+        const allReal = bookings.filter(
+          (b) =>
+            b.status !== "Blackout" && b.customer?.firstName !== "ADMIN_BLOCK",
+        );
         const todayStr = new Date().toISOString().split("T")[0];
-        const todayCount = allReal.filter(b => b.schedule?.date && new Date(b.schedule.date).toISOString().split("T")[0] === todayStr).length;
-        const pendingCount = allReal.filter(b => b.status === "Pending").length;
-        const activeCount  = allReal.filter(b => ["Confirmed","In Progress","Accepted"].includes(b.status)).length;
-        const completedCount = allReal.filter(b => b.status === "Completed").length;
-        const totalRevenue = allReal.filter(b => b.status === "Completed").reduce((s,b) => s+Number(b.payment?.amount||0),0);
+        const todayCount = allReal.filter(
+          (b) =>
+            b.schedule?.date &&
+            new Date(b.schedule.date).toISOString().split("T")[0] === todayStr,
+        ).length;
+        const pendingCount = allReal.filter(
+          (b) => b.status === "Pending",
+        ).length;
+        const activeCount = allReal.filter((b) =>
+          ["Confirmed", "In Progress", "Accepted"].includes(b.status),
+        ).length;
+        const completedCount = allReal.filter(
+          (b) => b.status === "Completed",
+        ).length;
+        const totalRevenue = allReal
+          .filter((b) => b.status === "Completed")
+          .reduce((s, b) => s + Number(b.payment?.amount || 0), 0);
         return (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[
-              { label:"Today", val:todayCount,     sub:"scheduled",       color:"text-cyan-400",    dot:"bg-cyan-400" },
-              { label:"Pending", val:pendingCount,  sub:"need action",    color:"text-amber-400",   dot:"bg-amber-400" },
-              { label:"Active",  val:activeCount,   sub:"in progress",    color:"text-emerald-400", dot:"bg-emerald-400" },
-              { label:"Completed", val:completedCount, sub:"all time",    color:"text-blue-400",    dot:"bg-blue-400" },
-              { label:"Revenue",  val:`£${(totalRevenue/1000).toFixed(1)}k`, sub:"earned",          color:"text-emerald-300", dot:"bg-emerald-300" },
-            ].map(s => (
-              <div key={s.label} className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl px-5 py-4 flex items-center gap-3 shadow-sm shadow-black/20">
-                <div className={`w-2 h-2 rounded-full shrink-0 ${s.dot}`}/>
+              {
+                label: "Today",
+                val: todayCount,
+                sub: "scheduled",
+                color: "text-cyan-400",
+                dot: "bg-cyan-400",
+              },
+              {
+                label: "Pending",
+                val: pendingCount,
+                sub: "need action",
+                color: "text-amber-400",
+                dot: "bg-amber-400",
+              },
+              {
+                label: "Active",
+                val: activeCount,
+                sub: "in progress",
+                color: "text-emerald-400",
+                dot: "bg-[#10B981]",
+              },
+              {
+                label: "Completed",
+                val: completedCount,
+                sub: "all time",
+                color: "text-blue-400",
+                dot: "bg-blue-400",
+              },
+              {
+                label: "Revenue",
+                val: `£${(totalRevenue / 1000).toFixed(1)}k`,
+                sub: "earned",
+                color: "text-emerald-300",
+                dot: "bg-emerald-300",
+              },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl px-5 py-4 flex items-center gap-3 shadow-sm shadow-black/20"
+              >
+                <div className={`w-2 h-2 rounded-full shrink-0 ${s.dot}`} />
                 <div>
-                  <p className={`text-xl font-black tabular-nums leading-none ${s.color}`}>{s.val}</p>
-                  <p className="text-[10px] font-black text-white/30 uppercase tracking-wider mt-0.5">{s.label}</p>
-                  <p className="text-[9px] font-medium text-white/20">{s.sub}</p>
+                  <p
+                    className={`text-xl font-black tabular-nums leading-none ${s.color}`}
+                  >
+                    {s.val}
+                  </p>
+                  <p className="text-[10px] font-black text-white/30 uppercase tracking-wider mt-0.5">
+                    {s.label}
+                  </p>
+                  <p className="text-[9px] font-medium text-white/20">
+                    {s.sub}
+                  </p>
                 </div>
               </div>
             ))}
@@ -2047,8 +2253,13 @@ ${extrasRows}
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">Bookings</h1>
-          <p className="text-sm text-white/35 font-medium mt-0.5">{bookings.filter(b=>b.status!=="Blackout").length} total bookings · manage and track all jobs</p>
+          <h1 className="text-2xl font-black text-white tracking-tight">
+            Bookings
+          </h1>
+          <p className="text-sm text-white/35 font-medium mt-0.5">
+            {bookings.filter((b) => b.status !== "Blackout").length} total
+            bookings · manage and track all jobs
+          </p>
         </div>
         <div className="flex flex-wrap gap-2.5 w-full md:w-auto">
           <button
@@ -2067,9 +2278,9 @@ ${extrasRows}
           <div className="relative">
             <button
               onClick={() => setShowCreateMenu((v) => !v)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 text-white border border-emerald-500 hover:bg-emerald-400 transition-all font-black text-sm shadow-sm shadow-emerald-500/25"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#10B981] text-white border border-[#10B981] hover:bg-[#059669] transition-all font-black text-sm shadow-md shadow-[#10B981]/20"
             >
-              New Booking
+              + New Booking
               <ChevronDown
                 size={15}
                 className={`transition-transform ${showCreateMenu ? "rotate-180" : ""}`}
@@ -2081,7 +2292,10 @@ ${extrasRows}
                   className="fixed inset-0 z-40"
                   onClick={() => setShowCreateMenu(false)}
                 />
-                <div className="absolute right-0 z-50 mt-2 w-72 bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/40 overflow-hidden" style={{minWidth:"17rem"}}>
+                <div
+                  className="absolute right-0 z-50 mt-2 w-72 bg-[#0B2D22] border border-white/10 rounded-xl shadow-xl shadow-black/50 overflow-hidden"
+                  style={{ minWidth: "17rem" }}
+                >
                   <button
                     onClick={() => {
                       setShowCreateMenu(false);
@@ -2089,19 +2303,29 @@ ${extrasRows}
                     }}
                     className="w-full text-left px-5 py-4 hover:bg-white/[0.05] transition-all"
                   >
-                    <p className="text-sm font-black text-white/85">Create Booking</p>
-                    <p className="text-[11px] text-white/35 mt-0.5 font-medium">Standard flow — payment link / bank details emailed</p>
+                    <p className="text-sm font-black text-white/85">
+                      Create Booking
+                    </p>
+                    <p className="text-[11px] text-white/35 mt-0.5 font-medium">
+                      Standard flow — payment link / bank details emailed
+                    </p>
                   </button>
                   <div className="h-px bg-white/[0.06]" />
                   <button
                     onClick={() => {
                       setShowCreateMenu(false);
-                      navigate("/admin/bookings/new", { state: { noPaymentRequired: true } });
+                      navigate("/admin/bookings/new", {
+                        state: { noPaymentRequired: true },
+                      });
                     }}
                     className="w-full text-left px-5 py-4 hover:bg-emerald-500/10 transition-all"
                   >
-                    <p className="text-sm font-black text-emerald-400">Create Booking (non pay)</p>
-                    <p className="text-[11px] text-white/35 mt-0.5 font-medium">Already paid — no Stripe link or email sent</p>
+                    <p className="text-sm font-black text-emerald-400">
+                      Create Booking (non pay)
+                    </p>
+                    <p className="text-[11px] text-white/35 mt-0.5 font-medium">
+                      Already paid — no Stripe link or email sent
+                    </p>
                   </button>
                 </div>
               </>
@@ -2117,262 +2341,361 @@ ${extrasRows}
       </div>
 
       <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm shadow-black/20 overflow-hidden animate-in fade-in">
-          <div className="p-5 border-b border-white/[0.07] flex items-center gap-3 justify-between flex-wrap">
-            <div className="flex items-center gap-2.5 px-4 py-2.5 bg-white/[0.05] rounded-xl border border-white/10 flex-1 min-w-60 focus-within:border-emerald-500/40 transition-all">
-              <Search size={16} className="text-white/25" />
-              <input
-                type="text"
-                placeholder="Search by name or booking ID…"
-                value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setBookingsPage(1); }}
-                className="bg-transparent outline-none text-sm font-medium w-full text-white/70 placeholder:text-white/20"
-              />
-            </div>
-            <button
-              onClick={() => setShowCancelled((v) => !v)}
-              className={`px-4 py-2 rounded-xl border text-sm font-black transition-all flex items-center gap-2 ${showCancelled ? "bg-rose-500/15 border-rose-500/25 text-rose-400" : "bg-white/[0.05] border-white/10 text-white/40 hover:border-white/20"}`}
-            >
-              <span className={`w-2 h-2 rounded-full ${showCancelled ? "bg-rose-500" : "bg-white/20"}`} />
-              {showCancelled ? "Hide Cancelled" : "Show Cancelled"}
-            </button>
-            {selectedBookings.size > 0 && (
-              <button
-                onClick={() => setShowBulkDeleteModal(true)}
-                className="px-4 py-2 rounded-xl bg-rose-500/20 border border-rose-500/30 hover:bg-rose-500/30 text-rose-400 font-black transition-all flex items-center gap-2 text-sm"
-              >
-                <Trash2 size={16} />
-                Delete ({selectedBookings.size})
-              </button>
-            )}
+        <div className="p-5 border-b border-white/[0.07] flex items-center gap-3 justify-between flex-wrap">
+          <div className="flex items-center gap-2.5 px-4 py-2.5 bg-white/[0.05] rounded-xl border border-white/10 flex-1 min-w-60 focus-within:border-emerald-500/40 transition-all">
+            <Search size={16} className="text-white/25" />
+            <input
+              type="text"
+              placeholder="Search by name or booking ID…"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setBookingsPage(1);
+              }}
+              className="bg-transparent outline-none text-sm font-medium w-full text-white/70 placeholder:text-white/20"
+            />
           </div>
+          <button
+            onClick={() => setShowCancelled((v) => !v)}
+            className={`px-4 py-2 rounded-xl border text-sm font-black transition-all flex items-center gap-2 ${showCancelled ? "bg-rose-500/15 border-rose-500/25 text-rose-400" : "bg-white/[0.05] border-white/10 text-white/40 hover:border-white/20"}`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${showCancelled ? "bg-rose-500" : "bg-white/20"}`}
+            />
+            {showCancelled ? "Hide Cancelled" : "Show Cancelled"}
+          </button>
+          {selectedBookings.size > 0 && (
+            <button
+              onClick={() => setShowBulkDeleteModal(true)}
+              className="px-4 py-2 rounded-xl bg-rose-500/20 border border-rose-500/30 hover:bg-rose-500/30 text-rose-400 font-black transition-all flex items-center gap-2 text-sm"
+            >
+              <Trash2 size={16} />
+              Delete ({selectedBookings.size})
+            </button>
+          )}
+        </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="text-[10px] font-black text-white/25 uppercase tracking-[0.15em] bg-white/[0.03] border-b border-white/[0.06]">
-                  <th className="px-4 py-3.5 w-12">
-                    <input
-                      type="checkbox"
-                      checked={
-                        pageBookings.length > 0 &&
-                        pageBookings.every(b => selectedBookings.has(b._id))
-                      }
-                      onChange={toggleSelectAll}
-                      className="w-4 h-4 rounded border-2 border-white/20 cursor-pointer accent-emerald-500"
-                    />
-                  </th>
-                  <th className="px-6 py-3.5">Customer</th>
-                  <th className="px-4 py-3.5">Service</th>
-                  <th className="px-4 py-3.5">Date & Time</th>
-                  <th className="px-4 py-3.5">Worker</th>
-                  <th className="px-4 py-3.5">Status</th>
-                  <th className="px-6 py-3.5 text-right">Actions</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="text-[10px] font-black text-white/25 uppercase tracking-[0.15em] bg-white/[0.03] border-b border-white/[0.06]">
+                <th className="px-4 py-3.5 w-12">
+                  <input
+                    type="checkbox"
+                    checked={
+                      pageBookings.length > 0 &&
+                      pageBookings.every((b) => selectedBookings.has(b._id))
+                    }
+                    onChange={toggleSelectAll}
+                    className="w-4 h-4 rounded border-2 border-white/20 cursor-pointer accent-emerald-500"
+                  />
+                </th>
+                <th className="px-6 py-3.5">Customer</th>
+                <th className="px-4 py-3.5">Service</th>
+                <th className="px-4 py-3.5">Date & Time</th>
+                <th className="px-4 py-3.5">Worker</th>
+                <th className="px-4 py-3.5">Status</th>
+                <th className="px-6 py-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.04]">
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="py-16 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <RefreshCw
+                        size={20}
+                        className="text-white/20 animate-spin"
+                      />
+                      <span className="text-sm font-bold text-white/25">
+                        Loading bookings…
+                      </span>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.04]">
-                {loading ? (
-                  <tr>
-                    <td colSpan="7" className="py-16 text-center">
-                      <div className="flex flex-col items-center gap-3">
-                        <RefreshCw size={20} className="text-white/20 animate-spin" />
-                        <span className="text-sm font-bold text-white/25">Loading bookings…</span>
-                      </div>
+              ) : displayBookings.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="py-16 text-center">
+                    <p className="text-sm font-bold text-white/20">
+                      No bookings match your search
+                    </p>
+                    <p className="text-[11px] text-white/15 mt-1">
+                      Try a different name or booking ID
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                pageBookings.map((b) => (
+                  <tr
+                    key={b._id}
+                    onClick={() => {
+                      setSelectedBooking(b);
+                      setEditData(b);
+                      setIsEditing(false);
+                    }}
+                    className={`group hover:bg-white/[0.04] transition-colors cursor-pointer ${
+                      selectedBookings.has(b._id) ? "bg-emerald-500/[0.08]" : ""
+                    }`}
+                  >
+                    <td className="px-4 py-4 w-12">
+                      <input
+                        type="checkbox"
+                        checked={selectedBookings.has(b._id)}
+                        onChange={() => toggleBookingSelection(b._id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-4 h-4 rounded border-2 border-white/20 cursor-pointer accent-emerald-500"
+                      />
                     </td>
-                  </tr>
-                ) : displayBookings.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="py-16 text-center">
-                      <p className="text-sm font-bold text-white/20">No bookings match your search</p>
-                      <p className="text-[11px] text-white/15 mt-1">Try a different name or booking ID</p>
-                    </td>
-                  </tr>
-                ) : (
-                  pageBookings.map((b) => (
-                    <tr
-                      key={b._id}
-                      onClick={() => { setSelectedBooking(b); setEditData(b); setIsEditing(false); }}
-                      className={`group hover:bg-white/[0.04] transition-colors cursor-pointer ${
-                        selectedBookings.has(b._id) ? "bg-emerald-500/[0.08]" : ""
-                      }`}
-                    >
-                      <td className="px-4 py-4 w-12">
-                        <input
-                          type="checkbox"
-                          checked={selectedBookings.has(b._id)}
-                          onChange={() => toggleBookingSelection(b._id)}
-                          onClick={(e) => e.stopPropagation()}
-                          className="w-4 h-4 rounded border-2 border-white/20 cursor-pointer accent-emerald-500"
-                        />
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0">
-                            <span className="text-[10px] font-black text-emerald-400">
-                              {((b.customer?.firstName?.[0]||"")+(b.customer?.lastName?.[0]||"")).toUpperCase()||"?"}
-                            </span>
-                          </div>
-                          <div>
-                        <p className="font-black text-white/85 text-sm">{b.customer?.firstName} {b.customer?.lastName}</p>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <p className="text-[10px] text-white/30 font-bold tabular-nums">{b.bookingId}</p>
-                          {b._recurringCount > 1 && (
-                            <span className="text-[9px] font-black bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded-full uppercase tracking-wide border border-violet-500/25">
-                              Recurring Â· {b._recurringCount}
-                            </span>
-                          )}
-                        </div>
-                        </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <p className="text-sm font-medium text-slate-700">
-                          {b.service}
-                        </p>
-                        <p className="text-[10px] text-emerald-400/70 font-bold mt-0.5">
-                          {getPropertyData(b)["Bedroom"] || 0} Bed · {b.details?.duration || 0}h
-                        </p>
-                        <span className="inline-block mt-1 text-[9px] font-black uppercase text-white/30 bg-white/[0.05] border border-white/10 px-1.5 py-0.5 rounded-full">
-                          {b.leadSource || "Organic"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <p className="text-sm font-bold text-white/70 tabular-nums">
-                          {new Date(b.schedule?.date).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}
-                        </p>
-                        <p className="text-[10px] text-white/35 font-bold mt-0.5">
-                          {b.schedule?.timeSlot === "Flexible"
-                            ? fmtTimeRange(b) || b.schedule?.timeSlot
-                            : b.schedule?.timeSlot}
-                        </p>
-                      </td>
-                      <td className="px-4 py-4">
-                        {b.assignedWorkerName ? (
-                          <span className="text-xs font-black text-emerald-400 bg-emerald-500/15 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                            {b.assignedWorkerName}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0">
+                          <span className="text-[10px] font-black text-emerald-400">
+                            {(
+                              (b.customer?.firstName?.[0] || "") +
+                              (b.customer?.lastName?.[0] || "")
+                            ).toUpperCase() || "?"}
                           </span>
-                        ) : (
-                          <span className="text-xs font-bold text-white/20 italic">Unassigned</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
-                        <select
-                          value={b.status}
-                          onChange={(e) => handleQuickStatusChange(b._id, e.target.value)}
-                          className={`px-2.5 py-1.5 rounded-full text-[10px] font-black border uppercase tracking-wide cursor-pointer appearance-none bg-transparent ${getStatusColor(b.status)}`}
-                        >
-                          {["Pending","Confirmed","Assigned","Arrived","In Progress","Completed","Completed - Unpaid","Cancelled"].map(s => (
-                            <option key={s} value={s}>{s}</option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-1.5">
-                          <div className="relative" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => setOpenActionMenu(openActionMenu === b._id ? null : b._id)}
-                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.06] text-white/45 hover:bg-white/10 hover:text-white/80 transition-all text-[11px] font-black border border-white/10"
-                            >
-                              Actions <ChevronDown size={13} />
-                            </button>
-                            {openActionMenu === b._id && (
-                              <>
-                                <div
-                                  className="fixed inset-0 z-40"
-                                  onClick={() => setOpenActionMenu(null)}
-                                />
-                                <div className="absolute right-0 top-full mt-1 z-50 bg-[#0B2D22] rounded-2xl shadow-2xl shadow-black/40 border border-white/[0.08] py-1.5 min-w-[185px] overflow-hidden">
-                                  <button
-                                    onClick={() => {
-                                      setSelectedBooking(b);
-                                      setEditData(b);
-                                      setIsEditing(false);
-                                      setOpenActionMenu(null);
-                                    }}
-                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-white/65 hover:bg-white/[0.05] hover:text-white transition-colors text-left"
-                                  >
-                                    <Eye size={14} className="text-white/30" /> View Details
-                                  </button>
-                                  <Link
-                                    to={`/admin/jobs/${b._id}`}
-                                    onClick={() => setOpenActionMenu(null)}
-                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-white/65 hover:bg-white/[0.05] hover:text-white transition-colors text-left"
-                                  >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-emerald-400"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    Job Sheet
-                                  </Link>
-                                  <button
-                                    onClick={() => { setCrmBooking(b); setOpenActionMenu(null); }}
-                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-white/65 hover:bg-white/[0.05] hover:text-white transition-colors text-left"
-                                  >
-                                    <Sparkles size={14} className="text-emerald-400" /> CRM Actions
-                                  </button>
-                                  {b.status !== "Completed" && b.status !== "Cancelled" && (
-                                    <button
-                                      disabled={markingCompleteId === b._id}
-                                      onClick={() => { handleMarkCompleted(b); setOpenActionMenu(null); }}
-                                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-emerald-400 hover:bg-emerald-500/10 transition-colors text-left disabled:opacity-40"
-                                    >
-                                      <CheckCircle2 size={14} className="text-emerald-400" /> Mark Complete
-                                    </button>
-                                  )}
-                                  <div className="border-t border-white/[0.06] my-1" />
-                                  <button
-                                    onClick={() => { handleDelete(b._id, b.bookingId); setOpenActionMenu(null); }}
-                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-rose-400 hover:bg-rose-500/10 transition-colors text-left"
-                                  >
-                                    <Trash2 size={14} /> Delete
-                                  </button>
-                                </div>
-                              </>
+                        </div>
+                        <div>
+                          <p className="font-black text-white/85 text-sm">
+                            {b.customer?.firstName} {b.customer?.lastName}
+                          </p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <p className="text-[10px] text-white/30 font-bold tabular-nums">
+                              {b.bookingId}
+                            </p>
+                            {b._recurringCount > 1 && (
+                              <span className="text-[9px] font-black bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded-full uppercase tracking-wide border border-violet-500/25">
+                                Recurring Â· {b._recurringCount}
+                              </span>
                             )}
                           </div>
                         </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {!loading && displayBookings.length > 0 && (
-            <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/40">
-              <p className="text-xs text-slate-400 font-medium">
-                {displayBookings.length} booking{displayBookings.length !== 1 ? "s" : ""}
-                {selectedBookings.size > 0 ? ` Â· ${selectedBookings.size} selected` : ""}
-                {" "}Â· Page {bookingsSafePage} of {bookingsTotalPages}
-              </p>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setBookingsPage(p => Math.max(1, p - 1))}
-                  disabled={bookingsSafePage === 1}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronLeft size={14} />
-                </button>
-                {(() => {
-                  const range = [];
-                  for (let i = Math.max(1, bookingsSafePage - 2); i <= Math.min(bookingsTotalPages, bookingsSafePage + 2); i++) range.push(i);
-                  return range.map(p => (
-                    <button key={p} onClick={() => setBookingsPage(p)}
-                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
-                        p === bookingsSafePage ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-500 hover:bg-white"
-                      }`}
-                    >{p}</button>
-                  ));
-                })()}
-                <button
-                  onClick={() => setBookingsPage(p => Math.min(bookingsTotalPages, p + 1))}
-                  disabled={bookingsSafePage === bookingsTotalPages}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronRight size={14} />
-                </button>
-              </div>
-            </div>
-          )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <p className="text-sm font-medium text-white/70">
+                        {b.service}
+                      </p>
+                      <p className="text-[10px] text-emerald-400/70 font-bold mt-0.5">
+                        {getPropertyData(b)["Bedroom"] || 0} Bed ·{" "}
+                        {b.details?.duration || 0}h
+                      </p>
+                      <span className="inline-block mt-1 text-[9px] font-black uppercase text-white/30 bg-white/[0.05] border border-white/10 px-1.5 py-0.5 rounded-full">
+                        {b.leadSource || "Organic"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <p className="text-sm font-bold text-white/70 tabular-nums">
+                        {new Date(b.schedule?.date).toLocaleDateString(
+                          "en-GB",
+                          { day: "numeric", month: "short", year: "numeric" },
+                        )}
+                      </p>
+                      <p className="text-[10px] text-white/35 font-bold mt-0.5">
+                        {b.schedule?.timeSlot === "Flexible"
+                          ? fmtTimeRange(b) || b.schedule?.timeSlot
+                          : b.schedule?.timeSlot}
+                      </p>
+                    </td>
+                    <td className="px-4 py-4">
+                      {b.assignedWorkerName ? (
+                        <span className="text-xs font-black text-emerald-400 bg-emerald-500/15 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                          {b.assignedWorkerName}
+                        </span>
+                      ) : (
+                        <span className="text-xs font-bold text-white/20 italic">
+                          Unassigned
+                        </span>
+                      )}
+                    </td>
+                    <td
+                      className="px-4 py-4"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <select
+                        value={b.status}
+                        onChange={(e) =>
+                          handleQuickStatusChange(b._id, e.target.value)
+                        }
+                        className={`px-2.5 py-1.5 rounded-full text-[10px] font-black border uppercase tracking-wide cursor-pointer appearance-none bg-transparent ${getStatusColor(b.status)}`}
+                      >
+                        {[
+                          "Pending",
+                          "Confirmed",
+                          "Assigned",
+                          "Arrived",
+                          "In Progress",
+                          "Completed",
+                          "Completed - Unpaid",
+                          "Cancelled",
+                        ].map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-1.5">
+                        <div
+                          className="relative"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            onClick={() =>
+                              setOpenActionMenu(
+                                openActionMenu === b._id ? null : b._id,
+                              )
+                            }
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.06] text-white/45 hover:bg-white/10 hover:text-white/80 transition-all text-[11px] font-black border border-white/10"
+                          >
+                            Actions <ChevronDown size={13} />
+                          </button>
+                          {openActionMenu === b._id && (
+                            <>
+                              <div
+                                className="fixed inset-0 z-40"
+                                onClick={() => setOpenActionMenu(null)}
+                              />
+                              <div className="absolute right-0 top-full mt-1 z-50 bg-[#0B2D22] rounded-2xl shadow-2xl shadow-black/40 border border-white/[0.08] py-1.5 min-w-[185px] overflow-hidden">
+                                <button
+                                  onClick={() => {
+                                    setSelectedBooking(b);
+                                    setEditData(b);
+                                    setIsEditing(false);
+                                    setOpenActionMenu(null);
+                                  }}
+                                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-white/65 hover:bg-white/[0.05] hover:text-white transition-colors text-left"
+                                >
+                                  <Eye size={14} className="text-white/30" />{" "}
+                                  View Details
+                                </button>
+                                <Link
+                                  to={`/admin/jobs/${b._id}`}
+                                  onClick={() => setOpenActionMenu(null)}
+                                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-white/65 hover:bg-white/[0.05] hover:text-white transition-colors text-left"
+                                >
+                                  <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    className="text-emerald-400"
+                                  >
+                                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                  Job Sheet
+                                </Link>
+                                <button
+                                  onClick={() => {
+                                    setCrmBooking(b);
+                                    setOpenActionMenu(null);
+                                  }}
+                                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-white/65 hover:bg-white/[0.05] hover:text-white transition-colors text-left"
+                                >
+                                  <Sparkles
+                                    size={14}
+                                    className="text-emerald-400"
+                                  />{" "}
+                                  CRM Actions
+                                </button>
+                                {b.status !== "Completed" &&
+                                  b.status !== "Cancelled" && (
+                                    <button
+                                      disabled={markingCompleteId === b._id}
+                                      onClick={() => {
+                                        handleMarkCompleted(b);
+                                        setOpenActionMenu(null);
+                                      }}
+                                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-emerald-400 hover:bg-emerald-500/10 transition-colors text-left disabled:opacity-40"
+                                    >
+                                      <CheckCircle2
+                                        size={14}
+                                        className="text-emerald-400"
+                                      />{" "}
+                                      Mark Complete
+                                    </button>
+                                  )}
+                                <div className="border-t border-white/[0.06] my-1" />
+                                <button
+                                  onClick={() => {
+                                    handleDelete(b._id, b.bookingId);
+                                    setOpenActionMenu(null);
+                                  }}
+                                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-rose-400 hover:bg-rose-500/10 transition-colors text-left"
+                                >
+                                  <Trash2 size={14} /> Delete
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
+
+        {/* Pagination */}
+        {!loading && displayBookings.length > 0 && (
+          <div className="px-5 py-3.5 border-t border-white/[0.07] flex items-center justify-between gap-3 bg-white/[0.02]">
+            <p className="text-xs text-white/40 font-medium">
+              {displayBookings.length} booking
+              {displayBookings.length !== 1 ? "s" : ""}
+              {selectedBookings.size > 0
+                ? ` Â· ${selectedBookings.size} selected`
+                : ""}{" "}
+              Â· Page {bookingsSafePage} of {bookingsTotalPages}
+            </p>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setBookingsPage((p) => Math.max(1, p - 1))}
+                disabled={bookingsSafePage === 1}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 text-white/60 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft size={14} />
+              </button>
+              {(() => {
+                const range = [];
+                for (
+                  let i = Math.max(1, bookingsSafePage - 2);
+                  i <= Math.min(bookingsTotalPages, bookingsSafePage + 2);
+                  i++
+                )
+                  range.push(i);
+                return range.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setBookingsPage(p)}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
+                      p === bookingsSafePage
+                        ? "bg-emerald-500 text-white"
+                        : "border border-white/10 text-white/60 hover:bg-white/10"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ));
+              })()}
+              <button
+                onClick={() =>
+                  setBookingsPage((p) => Math.min(bookingsTotalPages, p + 1))
+                }
+                disabled={bookingsSafePage === bookingsTotalPages}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 text-white/60 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {selectedBooking && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
@@ -2380,22 +2703,22 @@ ${extrasRows}
             className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md"
             onClick={() => setSelectedBooking(null)}
           />
-          <div className="relative w-full max-w-4xl bg-white rounded-[32px] md:rounded-[48px] shadow-2xl overflow-hidden border-4 border-white flex flex-col max-h-[90vh]">
-            <div className="p-4 sm:p-6 md:p-8 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3 bg-slate-50/50 shrink-0">
+          <div className="relative w-full max-w-4xl bg-[#071E16] rounded-[28px] shadow-2xl shadow-black/60 overflow-hidden border border-white/[0.08] flex flex-col max-h-[90vh]">
+            <div className="px-6 py-5 border-b border-white/[0.07] flex flex-wrap justify-between items-center gap-3 bg-[#0B2D22] shrink-0">
               <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-lg shrink-0">
-                  <Hash size={22} />
+                <div className="w-11 h-11 bg-emerald-500/20 border border-emerald-500/25 rounded-2xl flex items-center justify-center shrink-0">
+                  <Hash size={18} className="text-emerald-400" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-lg sm:text-2xl font-bold text-primary-dark tracking-tighter truncate">
-                    {isEditing ? "Edit Parameters" : "Entry Intelligence"}
+                  <h3 className="text-base font-black text-white tracking-tight truncate">
+                    {isEditing ? "Edit Booking" : "Booking Details"}
                   </h3>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    <p className="text-[10px] font-black text-emerald-400/70 uppercase tracking-widest tabular-nums">
                       {selectedBooking.bookingId}
                     </p>
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wide ${getStatusColor(selectedBooking.status)}`}
+                      className={`px-2 py-0.5 rounded-full text-[9px] font-black border uppercase tracking-wide ${getStatusColor(selectedBooking.status)}`}
                     >
                       {selectedBooking.status}
                     </span>
@@ -2410,28 +2733,28 @@ ${extrasRows}
                       disabled={markingCompleteId === selectedBooking._id}
                       onClick={() => handleMarkCompleted(selectedBooking)}
                       title="Mark the job as done — captures any authorized payment and emails the customer their receipt"
-                      className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-all disabled:opacity-60"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-black transition-all disabled:opacity-60 shadow-sm shadow-emerald-500/25"
                     >
                       <CheckCircle2 size={15} />
                       {markingCompleteId === selectedBooking._id
-                        ? "Completing..."
-                        : "Mark as Completed"}
+                        ? "Completing…"
+                        : "Mark Completed"}
                     </button>
                   )}
                 <button
                   onClick={() => setSelectedBooking(null)}
-                  className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors shrink-0"
+                  className="w-9 h-9 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center text-white/40 hover:bg-rose-500/15 hover:text-rose-400 transition-all shrink-0"
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
             </div>
-            <div className="p-6 md:p-8 space-y-10 overflow-y-auto custom-scrollbar flex-1 bg-white">
+            <div className="p-6 md:p-8 space-y-8 overflow-y-auto custom-scrollbar flex-1 bg-[#071E16]">
               {isEditing ? (
                 <div className="space-y-8">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                      <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                         First Name
                       </label>
                       <input
@@ -2446,11 +2769,11 @@ ${extrasRows}
                             },
                           })
                         }
-                        className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold"
+                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                      <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                         Last Name
                       </label>
                       <input
@@ -2465,11 +2788,11 @@ ${extrasRows}
                             },
                           })
                         }
-                        className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold"
+                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                      <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                         Phone
                       </label>
                       <input
@@ -2484,11 +2807,11 @@ ${extrasRows}
                             },
                           })
                         }
-                        className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold"
+                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                      <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                         Status
                       </label>
                       <select
@@ -2496,23 +2819,25 @@ ${extrasRows}
                         onChange={(e) =>
                           setEditData({ ...editData, status: e.target.value })
                         }
-                        className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold"
+                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
                       >
                         <option value="Confirmed">Confirmed</option>
                         <option value="Pending">Pending</option>
                         <option value="Completed">Completed</option>
-                        <option value="Completed - Unpaid">Completed - Unpaid</option>
+                        <option value="Completed - Unpaid">
+                          Completed - Unpaid
+                        </option>
                         <option value="Cancelled">Cancelled</option>
                       </select>
                     </div>
                   </div>
-                  <div className="p-8 rounded-[32px] bg-slate-50 border border-slate-100 space-y-4">
-                    <h4 className="text-xs font-bold text-primary-dark uppercase tracking-widest">
+                  <div className="p-8 rounded-[32px] bg-white/5 border border-white/10 space-y-4">
+                    <h4 className="text-xs font-black text-white/50 uppercase tracking-widest">
                       Pricing & Logistics
                     </h4>
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-1">
-                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                        <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                           Total Price ({editData.payment?.currency})
                         </label>
                         <div className="relative">
@@ -2532,12 +2857,12 @@ ${extrasRows}
                                 },
                               })
                             }
-                            className="w-full p-4 pl-10 rounded-2xl bg-white border border-slate-200 font-bold text-lg"
+                            className="w-full p-4 pl-10 rounded-2xl bg-white/5 border border-white/10 font-bold text-lg"
                           />
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                        <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                           Worker Rate (£/hr)
                         </label>
                         <input
@@ -2549,12 +2874,12 @@ ${extrasRows}
                               workerRate: Number(e.target.value) || 0,
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold text-lg"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold text-lg"
                           placeholder="0.00"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                        <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                           Worker Expected Hours
                         </label>
                         <input
@@ -2566,7 +2891,7 @@ ${extrasRows}
                               workerDuration: Number(e.target.value) || 0,
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold text-lg"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold text-lg"
                           placeholder="e.g. 2"
                         />
                       </div>
@@ -2579,13 +2904,13 @@ ${extrasRows}
                           : null;
 
                         return (
-                          <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 space-y-4 md:col-span-2">
-                            <h4 className="text-xs font-bold text-primary-dark uppercase tracking-widest">
+                          <div className="p-6 rounded-[32px] bg-white/5 border border-white/10 space-y-4 md:col-span-2">
+                            <h4 className="text-xs font-black text-white/50 uppercase tracking-widest">
                               Schedule
                             </h4>
                             <div className="grid md:grid-cols-2 gap-6">
                               <div>
-                                <label className="text-[9px] font-bold text-slate-400 ml-1 uppercase block mb-2">
+                                <label className="text-[9px] font-bold text-white/40 ml-1 uppercase block mb-2">
                                   Booking Date
                                 </label>
                                 <CreateCalendar
@@ -2606,7 +2931,7 @@ ${extrasRows}
                               </div>
 
                               <div className="space-y-3">
-                                <label className="text-[9px] font-bold text-slate-400 ml-1 uppercase block">
+                                <label className="text-[9px] font-bold text-white/40 ml-1 uppercase block">
                                   Time Slot
                                 </label>
                                 <div className="grid grid-cols-3 gap-2">
@@ -2640,8 +2965,8 @@ ${extrasRows}
                                           slot.value
                                             ? "border-primary bg-primary text-white shadow-md"
                                             : isTaken
-                                              ? "border-rose-200 bg-rose-50 text-rose-300 cursor-not-allowed opacity-50"
-                                              : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                              ? "border-rose-500/30 bg-rose-500/15 text-rose-400 cursor-not-allowed opacity-50"
+                                              : "border-white/10 bg-white/5 text-white/70 hover:border-primary/50"
                                         }`}
                                       >
                                         {slot.label}
@@ -2656,7 +2981,7 @@ ${extrasRows}
                                 </div>
 
                                 <div>
-                                  <label className="text-[9px] font-bold text-slate-400 ml-1 uppercase block mb-2">
+                                  <label className="text-[9px] font-bold text-white/40 ml-1 uppercase block mb-2">
                                     Or pick a flexible time
                                   </label>
                                   <div className="grid grid-cols-4 gap-2 mb-3">
@@ -2763,8 +3088,8 @@ ${extrasRows}
                                                 ?.preferredTime === time
                                                 ? "border-primary bg-primary text-white shadow-lg scale-105"
                                                 : isBooked
-                                                  ? "border-rose-200 bg-rose-50 text-rose-300 cursor-not-allowed opacity-50"
-                                                  : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                                  ? "border-rose-500/30 bg-rose-500/15 text-rose-400 cursor-not-allowed opacity-50"
+                                                  : "border-white/10 bg-white/5 text-white/70 hover:border-primary/50"
                                             }`}
                                           >
                                             {time}
@@ -2793,7 +3118,7 @@ ${extrasRows}
                                         },
                                       })
                                     }
-                                    className="w-full p-3 rounded-xl bg-white border-2 border-slate-200 font-bold text-sm"
+                                    className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 font-bold text-sm"
                                   />
                                 </div>
                               </div>
@@ -2804,13 +3129,13 @@ ${extrasRows}
                     </div>
                   </div>
 
-                  <div className="p-8 rounded-[32px] bg-slate-50 border border-slate-100 space-y-4">
-                    <h4 className="text-xs font-bold text-primary-dark uppercase tracking-widest">
+                  <div className="p-8 rounded-[32px] bg-white/5 border border-white/10 space-y-4">
+                    <h4 className="text-xs font-black text-white/50 uppercase tracking-widest">
                       Address & Contact
                     </h4>
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-1 md:col-span-2">
-                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                        <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                           Address
                         </label>
                         <input
@@ -2825,11 +3150,11 @@ ${extrasRows}
                               },
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                        <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                           Postcode
                         </label>
                         <input
@@ -2844,11 +3169,11 @@ ${extrasRows}
                               },
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                        <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                           Email
                         </label>
                         <input
@@ -2863,19 +3188,19 @@ ${extrasRows}
                               },
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-8 rounded-[32px] bg-slate-50 border border-slate-100 space-y-4">
-                    <h4 className="text-xs font-bold text-primary-dark uppercase tracking-widest">
+                  <div className="p-8 rounded-[32px] bg-white/5 border border-white/10 space-y-4">
+                    <h4 className="text-xs font-black text-white/50 uppercase tracking-widest">
                       Job Details
                     </h4>
                     <div className="grid md:grid-cols-3 gap-6">
                       <div className="space-y-1">
-                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                        <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                           Frequency
                         </label>
                         <select
@@ -2889,7 +3214,7 @@ ${extrasRows}
                               },
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
                         >
                           <option value="Once">Once</option>
                           <option value="Weekly">Weekly</option>
@@ -2898,7 +3223,7 @@ ${extrasRows}
                         </select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                        <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                           Duration (hours)
                         </label>
                         <input
@@ -2913,11 +3238,11 @@ ${extrasRows}
                               },
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                        <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                           Supplies Provided By
                         </label>
                         <select
@@ -2928,7 +3253,7 @@ ${extrasRows}
                               suppliesProvidedBy: e.target.value,
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white border border-slate-200 font-bold"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
                         >
                           <option value="">Not specified</option>
                           <option value="Cleaniq">Cleaniq</option>
@@ -2937,44 +3262,71 @@ ${extrasRows}
                       </div>
                     </div>
                     <div className="space-y-1 pt-2">
-                      <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                      <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                         Extra Services & Add-ons
                       </label>
                       {/* Quick-add chips from catalogue */}
                       {extraServicesList.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 px-1 pb-2">
                           {extraServicesList.slice(0, 12).map((svc) => {
-                            const currentExtras = editData.details?.extras || [];
-                            const alreadyAdded = currentExtras.some(e => (typeof e === "string" ? e : (e.name || "")).toLowerCase().includes(svc.name.toLowerCase()));
+                            const currentExtras =
+                              editData.details?.extras || [];
+                            const alreadyAdded = currentExtras.some((e) =>
+                              (typeof e === "string" ? e : e.name || "")
+                                .toLowerCase()
+                                .includes(svc.name.toLowerCase()),
+                            );
                             return (
                               <button
                                 key={svc._id || svc.name}
                                 type="button"
                                 onClick={() => {
-                                  const extras = [...(editData.details?.extras || [])];
+                                  const extras = [
+                                    ...(editData.details?.extras || []),
+                                  ];
                                   if (alreadyAdded) {
-                                    const idx = extras.findIndex(e => (typeof e === "string" ? e : (e.name || "")).toLowerCase().includes(svc.name.toLowerCase()));
+                                    const idx = extras.findIndex((e) =>
+                                      (typeof e === "string" ? e : e.name || "")
+                                        .toLowerCase()
+                                        .includes(svc.name.toLowerCase()),
+                                    );
                                     extras.splice(idx, 1);
                                   } else {
-                                    extras.push(svc.name + (svc.rate ? ` — £${Number(svc.rate).toFixed(2)}` : ""));
+                                    extras.push(
+                                      svc.name +
+                                        (svc.rate
+                                          ? ` — £${Number(svc.rate).toFixed(2)}`
+                                          : ""),
+                                    );
                                   }
-                                  setEditData({ ...editData, details: { ...editData.details, extras } });
+                                  setEditData({
+                                    ...editData,
+                                    details: { ...editData.details, extras },
+                                  });
                                 }}
                                 className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${
                                   alreadyAdded
                                     ? "bg-primary text-white border-primary"
-                                    : "bg-white text-slate-600 border-slate-300 hover:border-primary hover:text-primary"
+                                    : "bg-white/5 text-white/70 border-white/20 hover:border-primary hover:text-primary"
                                 }`}
                               >
-                                {alreadyAdded ? "âœ“ " : "+ "}{svc.name}
-                                {svc.rate && <span className="opacity-70 ml-1">£{Number(svc.rate).toFixed(0)}</span>}
+                                {alreadyAdded ? "✓" : "+"} {svc.name}
+                                {svc.rate && (
+                                  <span className="opacity-70 ml-1">
+                                    £{Number(svc.rate).toFixed(0)}
+                                  </span>
+                                )}
                               </button>
                             );
                           })}
                         </div>
                       )}
                       <textarea
-                        value={(editData.details?.extras || []).map(e => typeof e === "string" ? e : (e.name || "")).join("\n")}
+                        value={(editData.details?.extras || [])
+                          .map((e) =>
+                            typeof e === "string" ? e : e.name || "",
+                          )
+                          .join("\n")}
                         onChange={(e) =>
                           setEditData({
                             ...editData,
@@ -2988,16 +3340,16 @@ ${extrasRows}
                           })
                         }
                         placeholder="e.g. Oven Clean (x1)&#10;Parking: Available on-site&#10;Entry: I will be home"
-                        className="w-full p-4 rounded-xl bg-white border border-slate-200 font-bold text-xs h-24 resize-none"
+                        className="w-full p-4 rounded-xl bg-white/5 border border-white/10 font-bold text-xs h-24 resize-none"
                       />
-                      <p className="text-[10px] text-slate-400 ml-4">
+                      <p className="text-[10px] text-white/40 ml-4">
                         Click an add-on above or type below — one item per line.
                       </p>
                     </div>
                   </div>
 
                   <div className="space-y-1 pt-4">
-                    <label className="text-[9px] font-bold text-slate-400 ml-4 uppercase">
+                    <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                       Special Instructions
                     </label>
                     <textarea
@@ -3011,109 +3363,165 @@ ${extrasRows}
                           },
                         })
                       }
-                      className="w-full p-4 rounded-xl bg-white border border-slate-200 font-bold text-xs h-24 resize-none"
+                      className="w-full p-4 rounded-xl bg-white/5 border border-white/10 font-bold text-xs h-24 resize-none"
                     />
                   </div>
                 </div>
               ) : (
                 <>
-                  {/* â”€â”€ Recurring series overview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-                  {selectedBooking.meta?.recurringGroup && (() => {
-                    const siblings = bookings
-                      .filter(b => b.meta?.recurringGroup === selectedBooking.meta.recurringGroup)
-                      .sort((a, b) => new Date(a.schedule?.date) - new Date(b.schedule?.date));
-                    if (siblings.length <= 1) return null;
+                  {/* â"€â"€ Recurring series overview â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
+                  {selectedBooking.meta?.recurringGroup &&
+                    (() => {
+                      const siblings = bookings
+                        .filter(
+                          (b) =>
+                            b.meta?.recurringGroup ===
+                            selectedBooking.meta.recurringGroup,
+                        )
+                        .sort(
+                          (a, b) =>
+                            new Date(a.schedule?.date) -
+                            new Date(b.schedule?.date),
+                        );
+                      if (siblings.length <= 1) return null;
 
-                    const deleteFromSeries = async (sib, e) => {
-                      e.stopPropagation();
-                      if (!window.confirm(`Delete this booking (${new Date(sib.schedule?.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })})?`)) return;
-                      try {
-                        const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings/${sib._id}`, { method: "DELETE" });
-                        if (!res.ok) throw new Error("Delete failed");
-                        // If we just deleted the one being viewed, switch to the next sibling
-                        if (sib._id === selectedBooking._id) {
-                          const remaining = siblings.filter(s => s._id !== sib._id);
-                          if (remaining.length > 0) { setSelectedBooking(remaining[0]); setEditData(remaining[0]); }
-                          else setSelectedBooking(null);
+                      const deleteFromSeries = async (sib, e) => {
+                        e.stopPropagation();
+                        if (
+                          !window.confirm(
+                            `Delete this booking (${new Date(sib.schedule?.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })})?`,
+                          )
+                        )
+                          return;
+                        try {
+                          const res = await fetch(
+                            `${import.meta.env.VITE_API_URL}/bookings/${sib._id}`,
+                            { method: "DELETE" },
+                          );
+                          if (!res.ok) throw new Error("Delete failed");
+                          // If we just deleted the one being viewed, switch to the next sibling
+                          if (sib._id === selectedBooking._id) {
+                            const remaining = siblings.filter(
+                              (s) => s._id !== sib._id,
+                            );
+                            if (remaining.length > 0) {
+                              setSelectedBooking(remaining[0]);
+                              setEditData(remaining[0]);
+                            } else setSelectedBooking(null);
+                          }
+                          fetchBookings();
+                        } catch {
+                          setStatusMessage({
+                            type: "error",
+                            text: "Failed to delete booking",
+                          });
                         }
-                        fetchBookings();
-                      } catch {
-                        setStatusMessage({ type: "error", text: "Failed to delete booking" });
-                      }
-                    };
+                      };
 
-                    return (
-                      <div className="rounded-2xl border border-violet-200 bg-violet-50/40 overflow-hidden">
-                        <div className="px-5 py-3 bg-violet-100/70 flex items-center gap-2">
-                          <span className="text-[10px] font-black text-violet-700 uppercase tracking-wider">Recurring Series</span>
-                          <span className="text-[9px] bg-violet-200 text-violet-700 px-2 py-0.5 rounded-full font-bold">{siblings.length} bookings</span>
-                        </div>
-                        <div className="divide-y divide-violet-100 max-h-60 overflow-y-auto">
-                          {siblings.map(sib => (
-                            <div key={sib._id}
-                              className={`flex items-center gap-3 px-5 py-3 ${sib._id === selectedBooking._id ? "bg-violet-100/60" : "hover:bg-violet-50 cursor-pointer"}`}
-                              onClick={() => { if (sib._id !== selectedBooking._id) { setSelectedBooking(sib); setEditData(sib); setIsEditing(false); } }}
-                            >
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-bold text-slate-700">
-                                  {new Date(sib.schedule?.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                                </p>
-                                <p className="text-[10px] text-slate-400 font-medium">{sib.schedule?.timeSlot}</p>
-                              </div>
-                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wide ${getStatusColor(sib.status)}`}>
-                                {sib.status}
-                              </span>
-                              {sib.assignedWorkerName && (
-                                <span className="text-[9px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold hidden sm:inline">
-                                  {sib.assignedWorkerName}
-                                </span>
-                              )}
-                              {sib._id === selectedBooking._id
-                                ? <span className="text-[9px] font-black text-violet-400 uppercase tracking-wide shrink-0">Viewing</span>
-                                : <span className="text-[9px] font-black text-violet-600 uppercase tracking-wide shrink-0">Open â†’</span>
-                              }
-                              <button
-                                onClick={(e) => deleteFromSeries(sib, e)}
-                                className="p-1 rounded-lg text-slate-300 hover:bg-rose-50 hover:text-rose-500 transition-colors shrink-0 ml-1"
-                                title="Delete this booking from series"
+                      return (
+                        <div className="rounded-2xl border border-violet-500/25 bg-violet-500/10 overflow-hidden">
+                          <div className="px-5 py-3 bg-violet-500/15 flex items-center gap-2">
+                            <span className="text-[10px] font-black text-violet-400 uppercase tracking-wider">
+                              Recurring Series
+                            </span>
+                            <span className="text-[9px] bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded-full font-bold border border-violet-500/25">
+                              {siblings.length} bookings
+                            </span>
+                          </div>
+                          <div className="divide-y divide-violet-500/15 max-h-60 overflow-y-auto">
+                            {siblings.map((sib) => (
+                              <div
+                                key={sib._id}
+                                className={`flex items-center gap-3 px-5 py-3 ${sib._id === selectedBooking._id ? "bg-violet-500/15" : "hover:bg-white/[0.04] cursor-pointer"}`}
+                                onClick={() => {
+                                  if (sib._id !== selectedBooking._id) {
+                                    setSelectedBooking(sib);
+                                    setEditData(sib);
+                                    setIsEditing(false);
+                                  }
+                                }}
                               >
-                                <Trash2 size={12} />
-                              </button>
-                            </div>
-                          ))}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-bold text-white/70">
+                                    {new Date(
+                                      sib.schedule?.date,
+                                    ).toLocaleDateString("en-GB", {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                    })}
+                                  </p>
+                                  <p className="text-[10px] text-white/40 font-medium">
+                                    {sib.schedule?.timeSlot}
+                                  </p>
+                                </div>
+                                <span
+                                  className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wide ${getStatusColor(sib.status)}`}
+                                >
+                                  {sib.status}
+                                </span>
+                                {sib.assignedWorkerName && (
+                                  <span className="text-[9px] text-emerald-400 bg-emerald-500/15 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold hidden sm:inline">
+                                    {sib.assignedWorkerName}
+                                  </span>
+                                )}
+                                {sib._id === selectedBooking._id ? (
+                                  <span className="text-[9px] font-black text-violet-400 uppercase tracking-wide shrink-0">
+                                    Viewing
+                                  </span>
+                                ) : (
+                                  <span className="text-[9px] font-black text-violet-400 uppercase tracking-wide shrink-0">
+                                    Open â†’
+                                  </span>
+                                )}
+                                <button
+                                  onClick={(e) => deleteFromSeries(sib, e)}
+                                  className="p-1 rounded-lg text-white/30 hover:bg-rose-500/15 hover:text-rose-400 transition-colors shrink-0 ml-1"
+                                  title="Delete this booking from series"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })()}
+                      );
+                    })()}
 
                   <div className="grid md:grid-cols-3 gap-6">
-                    <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 text-center">
-                      <Mail size={20} className="text-primary mx-auto mb-2" />
-                      <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">
+                    <div className="p-5 rounded-2xl bg-white/4 border border-white/[0.07] text-center">
+                      <Mail
+                        size={20}
+                        className="text-emerald-400 mx-auto mb-2"
+                      />
+                      <p className="text-[9px] font-bold text-white/40 uppercase mb-1">
                         Email
                       </p>
-                      <p className="text-xs font-bold text-primary-dark truncate">
+                      <p className="text-xs font-bold text-white/85 truncate">
                         {selectedBooking.customer?.email}
                       </p>
                     </div>
-                    <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 text-center">
-                      <Phone size={20} className="text-primary mx-auto mb-2" />
-                      <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">
+                    <div className="p-5 rounded-2xl bg-white/4 border border-white/[0.07] text-center">
+                      <Phone
+                        size={20}
+                        className="text-emerald-400 mx-auto mb-2"
+                      />
+                      <p className="text-[9px] font-bold text-white/40 uppercase mb-1">
                         Contact
                       </p>
-                      <p className="text-xs font-bold text-primary-dark">
+                      <p className="text-xs font-bold text-white/85">
                         {selectedBooking.customer?.phone}
                       </p>
                     </div>
-                    <div className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 text-center relative group">
+                    <div className="p-6 rounded-[32px] bg-white/5 border border-white/10 text-center relative group">
                       <DollarSign
                         size={20}
-                        className="text-primary mx-auto mb-2"
+                        className="text-emerald-400 mx-auto mb-2"
                       />
-                      <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">
+                      <p className="text-[9px] font-bold text-white/40 uppercase mb-1">
                         Payment
                       </p>
-                      <p className="text-xs font-bold text-primary-dark">
+                      <p className="text-xs font-bold text-white/85">
                         {selectedBooking.payment?.currency === "GBP"
                           ? "£"
                           : "â‚¦"}
@@ -3179,17 +3587,17 @@ ${extrasRows}
 
                   {(selectedBooking.assignedWorker ||
                     selectedBooking.assignedWorkerName) && (
-                    <div className="bg-emerald-50 rounded-[32px] p-6 border border-emerald-100 flex flex-col md:flex-row gap-8">
+                    <div className="bg-emerald-500/10 rounded-2xl p-6 border border-emerald-500/20 flex flex-col md:flex-row gap-8">
                       <div className="flex-1">
-                        <div className="flex items-center gap-4 mb-4 pb-4 border-b border-emerald-100">
-                          <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center shrink-0">
-                            <User size={24} className="text-emerald-700" />
+                        <div className="flex items-center gap-4 mb-4 pb-4 border-b border-emerald-500/15">
+                          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+                            <User size={24} className="text-emerald-400" />
                           </div>
                           <div>
-                            <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">
+                            <p className="text-[9px] font-bold text-emerald-400/70 uppercase tracking-widest">
                               Assigned Worker
                             </p>
-                            <p className="text-sm font-bold text-emerald-900">
+                            <p className="text-sm font-bold text-white/85">
                               {selectedBooking.assignedWorker?.firstName
                                 ? `${selectedBooking.assignedWorker.firstName} ${selectedBooking.assignedWorker.lastName}`
                                 : selectedBooking.assignedWorkerName}
@@ -3200,53 +3608,53 @@ ${extrasRows}
                         {selectedBooking.assignedWorker && (
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
+                              <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wide">
                                 Phone
                               </p>
-                              <p className="text-xs font-bold text-emerald-800">
+                              <p className="text-xs font-bold text-white/75">
                                 {selectedBooking.assignedWorker.phone}
                               </p>
                             </div>
                             <div>
-                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
+                              <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wide">
                                 Email
                               </p>
                               <p
-                                className="text-xs font-bold text-emerald-800 truncate"
+                                className="text-xs font-bold text-white/75 truncate"
                                 title={selectedBooking.assignedWorker.email}
                               >
                                 {selectedBooking.assignedWorker.email}
                               </p>
                             </div>
                             <div>
-                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
+                              <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wide">
                                 Worker ID
                               </p>
-                              <p className="text-xs font-bold text-emerald-800">
+                              <p className="text-xs font-bold text-white/75">
                                 {selectedBooking.assignedWorker.workerId}
                               </p>
                             </div>
                             <div>
-                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
+                              <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wide">
                                 Region
                               </p>
-                              <p className="text-xs font-bold text-emerald-800">
+                              <p className="text-xs font-bold text-white/75">
                                 {selectedBooking.assignedWorker.region}
                               </p>
                             </div>
                             <div>
-                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
+                              <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wide">
                                 Assigned Rate
                               </p>
-                              <p className="text-xs font-bold text-emerald-800">
+                              <p className="text-xs font-bold text-white/75">
                                 £{selectedBooking.workerRate || 0}/hr
                               </p>
                             </div>
                             <div>
-                              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
+                              <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wide">
                                 Expected Hours
                               </p>
-                              <p className="text-xs font-bold text-emerald-800">
+                              <p className="text-xs font-bold text-white/75">
                                 {selectedBooking.workerDuration || 0} hrs
                               </p>
                             </div>
@@ -3255,26 +3663,26 @@ ${extrasRows}
                       </div>
 
                       {/* Live Cleaner Progress Timeline */}
-                      <div className="w-full md:w-80 bg-white/70 backdrop-blur-sm p-5 rounded-2xl border border-emerald-100/50 flex flex-col justify-between">
-                        <h5 className="text-[10px] font-bold text-emerald-800 uppercase tracking-widest mb-3 flex items-center gap-1">
+                      <div className="w-full md:w-80 bg-white/[0.05] backdrop-blur-sm p-5 rounded-2xl border border-white/[0.08] flex flex-col justify-between">
+                        <h5 className="text-[10px] font-bold text-white/75 uppercase tracking-widest mb-3 flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                           Live Cleaner Progress
                         </h5>
 
-                        <div className="space-y-4 relative pl-3 border-l-2 border-slate-100">
+                        <div className="space-y-4 relative pl-3 border-l-2 border-white/10">
                           {/* Step 1: Arrived */}
                           <div className="relative">
                             <span
                               className={`absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 ${
                                 selectedBooking.jobArrivedTime
-                                  ? "bg-emerald-500 border-emerald-200"
-                                  : "bg-white border-slate-300"
+                                  ? "bg-emerald-500 border-[#10B981]/30"
+                                  : "bg-white/5 border-white/20"
                               }`}
                             />
-                            <p className="text-xs font-bold text-primary-dark">
+                            <p className="text-xs font-bold text-white/85">
                               Arrived at Customer
                             </p>
-                            <p className="text-[10px] text-slate-400 font-medium">
+                            <p className="text-[10px] text-white/40 font-medium">
                               {selectedBooking.jobArrivedTime
                                 ? `Completed at ${new Date(selectedBooking.jobArrivedTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
                                 : "Pending arrival..."}
@@ -3286,14 +3694,14 @@ ${extrasRows}
                             <span
                               className={`absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 ${
                                 selectedBooking.jobStartTime
-                                  ? "bg-emerald-500 border-emerald-200"
-                                  : "bg-white border-slate-300"
+                                  ? "bg-emerald-500 border-[#10B981]/30"
+                                  : "bg-white/5 border-white/20"
                               }`}
                             />
-                            <p className="text-xs font-bold text-primary-dark">
+                            <p className="text-xs font-bold text-white/85">
                               Cleaning Commenced
                             </p>
-                            <p className="text-[10px] text-slate-400 font-medium">
+                            <p className="text-[10px] text-white/40 font-medium">
                               {selectedBooking.jobStartTime
                                 ? `Started at ${new Date(selectedBooking.jobStartTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
                                 : "Awaiting start..."}
@@ -3305,14 +3713,14 @@ ${extrasRows}
                             <span
                               className={`absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2 ${
                                 selectedBooking.jobEndTime
-                                  ? "bg-emerald-500 border-emerald-200"
-                                  : "bg-white border-slate-300"
+                                  ? "bg-emerald-500 border-[#10B981]/30"
+                                  : "bg-white/5 border-white/20"
                               }`}
                             />
-                            <p className="text-xs font-bold text-primary-dark">
+                            <p className="text-xs font-bold text-white/85">
                               Cleaning Finished
                             </p>
-                            <p className="text-[10px] text-slate-400 font-bold">
+                            <p className="text-[10px] text-white/40 font-bold">
                               {selectedBooking.jobEndTime
                                 ? `Done: ${selectedBooking.jobDurationActual || 0} mins actual clean`
                                 : "Awaiting completion..."}
@@ -3323,48 +3731,84 @@ ${extrasRows}
                     </div>
                   )}
 
-                  {/* â”€â”€ Worker Submission: Photos & Report â”€â”€ */}
-                  {(selectedBooking.photos?.length > 0 || selectedBooking.workerReport) && (
-                    <div className="bg-slate-50 border border-slate-200 rounded-[32px] p-6">
-                      <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  {/* â"€â"€ Worker Submission: Photos & Report â"€â"€ */}
+                  {(selectedBooking.photos?.length > 0 ||
+                    selectedBooking.workerReport) && (
+                    <div className="bg-white/5 border border-white/10 rounded-[32px] p-6">
+                      <h5 className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <Camera size={14} /> Worker Job Submission
                       </h5>
 
                       {/* Photos grouped by type */}
-                      {selectedBooking.photos?.length > 0 && (() => {
-                        const groups = { before: [], after: [], damage: [], other: [] };
-                        selectedBooking.photos.forEach(p => { (groups[p.photoType] || groups.other).push(p); });
-                        const labels = { before: "Before", after: "After", damage: "Damage", other: "Other" };
-                        const colors = { before: "bg-amber-50 text-amber-700 border-amber-200", after: "bg-emerald-50 text-emerald-700 border-emerald-200", damage: "bg-rose-50 text-rose-700 border-rose-200", other: "bg-slate-50 text-slate-600 border-slate-200" };
-                        return (
-                          <div className="space-y-4 mb-4">
-                            {Object.entries(groups).filter(([, arr]) => arr.length > 0).map(([type, photos]) => (
-                              <div key={type}>
-                                <p className={`inline-block text-[10px] font-bold px-3 py-1 rounded-full border mb-2 ${colors[type]}`}>{labels[type]} — {photos.length} photo{photos.length > 1 ? 's' : ''}</p>
-                                <div className="flex gap-2 flex-wrap">
-                                  {photos.map((p, i) => (
-                                    <a key={i} href={`https://api.cleaniqservices.com/${p.url}`} target="_blank" rel="noreferrer">
-                                      <img
-                                        src={`https://api.cleaniqservices.com/${p.url}`}
-                                        alt={`${type}-${i}`}
-                                        className="w-24 h-24 rounded-2xl object-cover border border-slate-200 hover:opacity-90 transition-opacity"
-                                      />
-                                    </a>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })()}
+                      {selectedBooking.photos?.length > 0 &&
+                        (() => {
+                          const groups = {
+                            before: [],
+                            after: [],
+                            damage: [],
+                            other: [],
+                          };
+                          selectedBooking.photos.forEach((p) => {
+                            (groups[p.photoType] || groups.other).push(p);
+                          });
+                          const labels = {
+                            before: "Before",
+                            after: "After",
+                            damage: "Damage",
+                            other: "Other",
+                          };
+                          const colors = {
+                            before:
+                              "bg-amber-500/15 text-amber-400 border-amber-500/25",
+                            after:
+                              "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+                            damage:
+                              "bg-rose-500/15 text-rose-400 border-rose-500/25",
+                            other: "bg-white/5 text-white/70 border-white/10",
+                          };
+                          return (
+                            <div className="space-y-4 mb-4">
+                              {Object.entries(groups)
+                                .filter(([, arr]) => arr.length > 0)
+                                .map(([type, photos]) => (
+                                  <div key={type}>
+                                    <p
+                                      className={`inline-block text-[10px] font-bold px-3 py-1 rounded-full border mb-2 ${colors[type]}`}
+                                    >
+                                      {labels[type]} — {photos.length} photo
+                                      {photos.length > 1 ? "s" : ""}
+                                    </p>
+                                    <div className="flex gap-2 flex-wrap">
+                                      {photos.map((p, i) => (
+                                        <a
+                                          key={i}
+                                          href={`https://api.cleaniqservices.com/${p.url}`}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                        >
+                                          <img
+                                            src={`https://api.cleaniqservices.com/${p.url}`}
+                                            alt={`${type}-${i}`}
+                                            className="w-24 h-24 rounded-2xl object-cover border border-white/10 hover:opacity-90 transition-opacity"
+                                          />
+                                        </a>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          );
+                        })()}
 
                       {/* Written report */}
                       {selectedBooking.workerReport && (
-                        <div className="bg-white border border-slate-200 rounded-2xl p-4">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                          <p className="text-[10px] font-bold text-white/40 uppercase mb-2 flex items-center gap-1">
                             <FileText size={12} /> Worker Report
                           </p>
-                          <p className="text-sm text-slate-700 leading-relaxed">{selectedBooking.workerReport}</p>
+                          <p className="text-sm text-white/70 leading-relaxed">
+                            {selectedBooking.workerReport}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -3373,27 +3817,27 @@ ${extrasRows}
                   <div className="grid md:grid-cols-2 gap-12">
                     <div className="space-y-6">
                       <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary mt-1 shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 mt-1 shrink-0">
                           <MapPin size={20} />
                         </div>
                         <div>
-                          <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                          <h4 className="text-[9px] font-bold text-white/40 uppercase tracking-widest">
                             Full Address
                           </h4>
-                          <p className="font-bold text-primary-dark leading-tight">
+                          <p className="font-bold text-white/85 leading-tight">
                             {selectedBooking.details?.address}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0">
                           <Calendar size={20} />
                         </div>
                         <div>
-                          <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                          <h4 className="text-[9px] font-bold text-white/40 uppercase tracking-widest">
                             Booking Date
                           </h4>
-                          <p className="font-bold text-primary-dark">
+                          <p className="font-bold text-white/85">
                             {selectedBooking.schedule?.date
                               ? new Date(
                                   selectedBooking.schedule.date,
@@ -3408,18 +3852,18 @@ ${extrasRows}
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0">
                           <Clock size={20} />
                         </div>
                         <div>
-                          <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                          <h4 className="text-[9px] font-bold text-white/40 uppercase tracking-widest">
                             Duration & Arrival Timing
                           </h4>
-                          <p className="font-bold text-primary-dark">
+                          <p className="font-bold text-white/85">
                             {selectedBooking.details?.duration || 0}h Clean (
                             {selectedBooking.service})
                           </p>
-                          <p className="text-[11px] font-bold text-slate-500 uppercase mt-1">
+                          <p className="text-[11px] font-bold text-white/60 uppercase mt-1">
                             Slot:{" "}
                             {{
                               Morning: "Morning (8am – 12pm)",
@@ -3438,14 +3882,14 @@ ${extrasRows}
                         </div>
                       </div>
                       <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center text-primary shrink-0 mt-1">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0 mt-1">
                           <Info size={20} />
                         </div>
                         <div>
-                          <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                          <h4 className="text-[9px] font-bold text-white/40 uppercase tracking-widest">
                             Customer Notes / Instructions
                           </h4>
-                          <p className="text-xs font-bold text-slate-500 leading-relaxed italic">
+                          <p className="text-xs font-bold text-white/60 leading-relaxed italic">
                             "
                             {getNotes(selectedBooking) ||
                               "No instructions provided"}
@@ -3458,9 +3902,9 @@ ${extrasRows}
                       {/* Property Rooms Section */}
                       {Object.keys(getPropertyData(selectedBooking)).length >
                         0 && (
-                        <div className="p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-[24px] border-2 border-indigo-200 space-y-4">
-                          <h4 className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest flex items-center gap-2">
-                            <HomeIcon size={16} className="text-indigo-600" />
+                        <div className="p-6 bg-indigo-500/10 rounded-[24px] border-2 border-indigo-500/25 space-y-4">
+                          <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2">
+                            <HomeIcon size={16} className="text-indigo-400" />
                             Property Rooms
                           </h4>
                           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -3470,12 +3914,12 @@ ${extrasRows}
                               qty > 0 ? (
                                 <div
                                   key={key}
-                                  className="bg-white rounded-lg border-2 border-indigo-200 p-3 text-center hover:shadow-md transition-shadow"
+                                  className="bg-white/5 rounded-lg border-2 border-indigo-500/25 p-3 text-center hover:shadow-md transition-shadow"
                                 >
-                                  <p className="text-[10px] font-bold text-indigo-600">
+                                  <p className="text-[10px] font-bold text-indigo-400">
                                     {qty}x
                                   </p>
-                                  <p className="text-[9px] font-bold text-slate-700 mt-1 line-clamp-2">
+                                  <p className="text-[9px] font-bold text-white/70 mt-1 line-clamp-2">
                                     {key}
                                   </p>
                                 </div>
@@ -3488,9 +3932,9 @@ ${extrasRows}
                       {/* Extra Services Section */}
                       {Object.keys(getExtrasData(selectedBooking)).length >
                         0 && (
-                        <div className="p-6 bg-gradient-to-br from-rose-50 to-rose-100 rounded-[24px] border-2 border-rose-200 space-y-4">
-                          <h4 className="text-[10px] font-bold text-rose-600 uppercase tracking-widest flex items-center gap-2">
-                            <Zap size={16} className="text-rose-600" /> Extra
+                        <div className="p-6 bg-rose-500/10 rounded-[24px] border-2 border-rose-500/25 space-y-4">
+                          <h4 className="text-[10px] font-bold text-rose-400 uppercase tracking-widest flex items-center gap-2">
+                            <Zap size={16} className="text-rose-400" /> Extra
                             Services
                           </h4>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -3498,18 +3942,18 @@ ${extrasRows}
                               ([name, qty]) => (
                                 <div
                                   key={name}
-                                  className="bg-white rounded-lg border-2 border-rose-200 p-4 flex items-center justify-between hover:shadow-md transition-shadow"
+                                  className="bg-white/5 rounded-lg border-2 border-rose-500/25 p-4 flex items-center justify-between hover:shadow-md transition-shadow"
                                 >
                                   <div className="flex-1">
-                                    <p className="text-sm font-bold text-slate-900">
+                                    <p className="text-sm font-bold text-white">
                                       {name}
                                     </p>
-                                    <p className="text-xs text-slate-600 font-semibold">
+                                    <p className="text-xs text-white/70 font-semibold">
                                       Qty: {qty}
                                     </p>
                                   </div>
-                                  <span className="inline-flex items-center justify-center w-6 h-6 bg-rose-600 text-white rounded-full text-xs font-bold">
-                                    âœ“
+                                  <span className="inline-flex items-center justify-center w-6 h-6 bg-rose-500 text-white rounded-full text-xs font-bold">
+                                    ✓
                                   </span>
                                 </div>
                               ),
@@ -3523,8 +3967,8 @@ ${extrasRows}
                         <div
                           className={`p-5 rounded-[24px] border-2 flex items-center gap-4 ${
                             getPetInfo(selectedBooking) === "Yes"
-                              ? "bg-amber-50 border-amber-200"
-                              : "bg-slate-50 border-slate-200"
+                              ? "bg-amber-500/15 border-amber-500/30"
+                              : "bg-white/5 border-white/10"
                           }`}
                         >
                           <span className="text-2xl">
@@ -3533,11 +3977,11 @@ ${extrasRows}
                               : "🚫"}
                           </span>
                           <div>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                            <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">
                               Pet on Premises
                             </p>
                             <p
-                              className={`font-bold text-sm ${getPetInfo(selectedBooking) === "Yes" ? "text-amber-600" : "text-slate-500"}`}
+                              className={`font-bold text-sm ${getPetInfo(selectedBooking) === "Yes" ? "text-amber-400" : "text-white/60"}`}
                             >
                               {getPetInfo(selectedBooking) === "Yes"
                                 ? "Yes — pet-friendly cleaning required"
@@ -3550,30 +3994,35 @@ ${extrasRows}
                   </div>
 
                   {/* Worker Before & After Photos */}
-                  {(selectedBooking.photos?.before || selectedBooking.photos?.after) && (
+                  {(selectedBooking.photos?.before ||
+                    selectedBooking.photos?.after) && (
                     <div>
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                      <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <Camera size={14} /> Worker Photos
                       </h4>
                       <div className="grid grid-cols-2 gap-4">
                         {selectedBooking.photos?.before && (
                           <div>
-                            <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-2">Before</p>
+                            <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-2">
+                              Before
+                            </p>
                             <img
                               src={selectedBooking.photos.before}
                               alt="Before clean"
-                              className="w-full rounded-2xl object-cover border border-slate-200"
+                              className="w-full rounded-2xl object-cover border border-white/10"
                               style={{ aspectRatio: "4/3" }}
                             />
                           </div>
                         )}
                         {selectedBooking.photos?.after && (
                           <div>
-                            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-2">After</p>
+                            <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wider mb-2">
+                              After
+                            </p>
                             <img
                               src={selectedBooking.photos.after}
                               alt="After clean"
-                              className="w-full rounded-2xl object-cover border border-slate-200"
+                              className="w-full rounded-2xl object-cover border border-white/10"
                               style={{ aspectRatio: "4/3" }}
                             />
                           </div>
@@ -3584,27 +4033,27 @@ ${extrasRows}
                 </>
               )}
             </div>
-            <div className="p-6 md:p-8 border-t border-slate-100 bg-slate-50/50 flex gap-4 shrink-0">
+            <div className="px-6 py-4 border-t border-white/[0.07] bg-[#0B2D22] flex gap-3 shrink-0">
               {isEditing ? (
                 <>
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="py-5 px-5 rounded-3xl bg-white border border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-widest"
+                    className="py-3 px-5 rounded-xl bg-white/[0.06] border border-white/10 text-xs font-black text-white/50 uppercase tracking-widest hover:bg-white/10 transition-all"
                   >
                     Discard
                   </button>
                   <button
                     onClick={() => generateBookingInvoice(editData)}
                     title="Generate invoice PDF"
-                    className="py-5 px-5 rounded-3xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-600 uppercase tracking-widest flex items-center gap-2 hover:bg-slate-200 transition-all"
+                    className="py-3 px-5 rounded-xl bg-white/[0.06] border border-white/10 text-xs font-black text-white/60 uppercase tracking-widest flex items-center gap-2 hover:bg-white/10 transition-all"
                   >
-                    <FileText size={15} /> Invoice
+                    <FileText size={14} /> Invoice
                   </button>
                   <button
                     onClick={() => handleUpdate()}
-                    className="flex-1 py-5 rounded-3xl bg-primary text-white text-xs font-bold uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                    className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-black uppercase tracking-widest shadow-sm shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all"
                   >
-                    <Save size={18} /> Sync Changes
+                    <Save size={15} /> Save Changes
                   </button>
                 </>
               ) : (
@@ -3617,15 +4066,15 @@ ${extrasRows}
                           status: "Cancelled",
                         });
                     }}
-                    className="flex-1 py-5 rounded-3xl bg-rose-50 text-rose-600 border border-rose-100 text-xs font-bold uppercase tracking-widest hover:bg-rose-100 transition-all"
+                    className="flex-1 py-3 rounded-xl bg-rose-500/15 border border-rose-500/25 text-rose-400 text-xs font-black uppercase tracking-widest hover:bg-rose-500/25 transition-all"
                   >
                     Cancel Booking
                   </button>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="flex-1 py-5 rounded-3xl bg-primary text-white text-xs font-bold uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-3 hover:scale-[1.02] transition-all"
+                    className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-black uppercase tracking-widest shadow-sm shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all"
                   >
-                    <Edit3 size={18} /> Modify Entry
+                    <Edit3 size={15} /> Edit Booking
                   </button>
                 </>
               )}
@@ -3641,9 +4090,9 @@ ${extrasRows}
             className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md"
             onClick={() => setShowAdditionalHoursModal(false)}
           />
-          <div className="relative w-full max-w-md bg-white rounded-[28px] overflow-hidden shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95">
+          <div className="relative w-full max-w-md bg-[#0B2D22] rounded-[28px] overflow-hidden shadow-2xl border border-white/10 animate-in fade-in zoom-in-95">
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-6 flex items-center justify-between">
+            <div className="bg-[#0D3527] border-b border-white/[0.07] px-6 py-5 flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
                   <Zap size={20} className="text-white" />
@@ -3664,20 +4113,20 @@ ${extrasRows}
             {/* Content */}
             <div className="p-6 space-y-5">
               {/* Current Hours Info */}
-              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
-                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mb-2">
+              <div className="bg-white/[0.04] border border-white/[0.07] rounded-xl p-4">
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-wider mb-3">
                   Current Booking Details
                 </p>
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <p className="text-slate-600 font-bold">Original Hours:</p>
-                    <p className="text-blue-700 font-bold text-lg">
+                    <p className="text-white/40 font-bold">Original Hours:</p>
+                    <p className="text-cyan-400 font-black text-lg tabular-nums">
                       {selectedBooking.details?.duration || 0}h
                     </p>
                   </div>
                   <div>
-                    <p className="text-slate-600 font-bold">Current Total:</p>
-                    <p className="text-blue-700 font-bold text-lg">
+                    <p className="text-white/40 font-bold">Current Total:</p>
+                    <p className="text-cyan-400 font-black text-lg tabular-nums">
                       {(selectedBooking.details?.additionalHoursPurchased ||
                         0) + (selectedBooking.details?.duration || 0)}
                       h
@@ -3688,7 +4137,7 @@ ${extrasRows}
 
               {/* Additional Hours Input */}
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
+                <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-2 block">
                   📝 Additional Hours Needed
                 </label>
                 <input
@@ -3703,13 +4152,13 @@ ${extrasRows}
                       hours: e.target.value,
                     }))
                   }
-                  className="w-full p-3 rounded-xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all text-sm font-bold placeholder:text-slate-400"
+                  className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-blue-500 transition-all text-sm font-bold placeholder:text-white/40"
                 />
               </div>
 
               {/* Hourly Rate Input */}
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
+                <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-2 block">
                   💷 Hourly Rate (£)
                 </label>
                 <input
@@ -3724,24 +4173,24 @@ ${extrasRows}
                       hourlyRate: e.target.value,
                     }))
                   }
-                  className="w-full p-3 rounded-xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all text-sm font-bold placeholder:text-slate-400"
+                  className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-blue-500 transition-all text-sm font-bold placeholder:text-white/40"
                 />
               </div>
 
               {/* Calculate Total */}
               {additionalHoursForm.hours && additionalHoursForm.hourlyRate && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
-                  <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-2">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
+                  <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wider mb-2">
                     💰 Payment Amount
                   </p>
-                  <p className="text-3xl font-bold text-emerald-700">
+                  <p className="text-3xl font-bold text-emerald-400">
                     £
                     {(
                       parseFloat(additionalHoursForm.hours || 0) *
                       parseFloat(additionalHoursForm.hourlyRate || 0)
                     ).toFixed(2)}
                   </p>
-                  <p className="text-[11px] text-emerald-600 font-bold mt-1">
+                  <p className="text-[11px] text-emerald-400/70 font-bold mt-1">
                     {additionalHoursForm.hours}h × £
                     {additionalHoursForm.hourlyRate}/hr
                   </p>
@@ -3833,7 +4282,7 @@ ${extrasRows}
                   !additionalHoursForm.hours ||
                   !additionalHoursForm.hourlyRate
                 }
-                className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-bold uppercase tracking-widest shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-2xl bg-blue-500 hover:bg-blue-400 disabled:opacity-30 text-white text-xs font-black uppercase tracking-widest shadow-sm shadow-blue-500/25 transition-all flex items-center justify-center gap-2"
               >
                 {additionalHoursForm.isGenerating ? (
                   <>
@@ -3864,7 +4313,7 @@ ${extrasRows}
               setSkipConfirmationEmail(false);
             }}
           />
-          <div className="relative w-full max-w-7xl bg-white rounded-[32px] overflow-hidden shadow-[0_25px_70px_-15px_rgba(0,0,0,0.35)] overflow-y-auto max-h-[92vh] border border-slate-100 animate-in fade-in zoom-in-95">
+          <div className="relative w-full max-w-7xl bg-[#0B2D22] rounded-[32px] overflow-hidden shadow-[0_25px_70px_-15px_rgba(0,0,0,0.35)] overflow-y-auto max-h-[92vh] border border-white/10 animate-in fade-in zoom-in-95">
             {/* Header with Gradient */}
             <div className="relative bg-gradient-to-r from-primary via-blue-600 to-indigo-600 px-4 sm:px-6 lg:px-10 py-6 sm:py-8 flex items-center justify-between overflow-hidden">
               <div className="absolute -top-16 -right-10 w-48 h-48 bg-white/10 rounded-full pointer-events-none" />
@@ -3876,7 +4325,7 @@ ${extrasRows}
                   </div>
                   New Booking
                   {noPaymentRequired && (
-                    <span className="bg-emerald-400 text-emerald-950 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-md">
+                    <span className="bg-[#10B981] text-[#10B981]-950 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-md">
                       Non Pay
                     </span>
                   )}
@@ -3917,7 +4366,7 @@ ${extrasRows}
             </div>
 
             {/* Progress Bar */}
-            <div className="px-4 sm:px-6 lg:px-10 pt-6 bg-slate-50/60">
+            <div className="px-4 sm:px-6 lg:px-10 pt-6 bg-white/5/60">
               <div className="flex items-center gap-3">
                 {[
                   { step: 1, icon: <MapPin size={18} /> },
@@ -3932,7 +4381,7 @@ ${extrasRows}
                           ? "bg-primary text-white shadow-lg"
                           : step === createStep
                             ? "bg-primary text-white shadow-lg scale-110 ring-4 ring-primary/20"
-                            : "bg-white text-slate-300 border-2 border-slate-200"
+                            : "bg-white/5 text-white/30 border-2 border-white/10"
                       }`}
                     >
                       {step < createStep ? <CheckCircle2 size={20} /> : icon}
@@ -3940,7 +4389,7 @@ ${extrasRows}
                     {step < 4 && (
                       <div
                         className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                          step < createStep ? "bg-primary" : "bg-slate-200"
+                          step < createStep ? "bg-primary" : "bg-white/15"
                         }`}
                       />
                     )}
@@ -3956,8 +4405,8 @@ ${extrasRows}
                         createStep === idx + 1
                           ? "text-primary"
                           : idx + 1 < createStep
-                            ? "text-slate-500"
-                            : "text-slate-300"
+                            ? "text-white/60"
+                            : "text-white/30"
                       }`}
                     >
                       {t}
@@ -3969,23 +4418,23 @@ ${extrasRows}
 
             <div className="grid lg:grid-cols-12 gap-6 px-4 sm:px-6 lg:px-10 py-6">
               <div className="lg:col-span-8">
-                <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 sm:p-8 rounded-[28px] border border-slate-200/50">
+                <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 sm:p-8 rounded-[28px] border border-white/10/50">
                   {/* Step content */}
                   {createStep === 1 && (
                     <div className="space-y-6">
-                      <div className="pb-4 border-b border-slate-200">
-                        <h4 className="text-2xl font-bold text-primary-dark flex items-center gap-3">
+                      <div className="pb-4 border-b border-white/10">
+                        <h4 className="text-2xl font-bold text-white/85 flex items-center gap-3">
                           <MapPin size={24} className="text-primary" />
                           Cleaning Location
                         </h4>
-                        <p className="text-[11px] text-slate-500 uppercase tracking-widest mt-2 font-bold">
+                        <p className="text-[11px] text-white/60 uppercase tracking-widest mt-2 font-bold">
                           Where and what type of cleaning?
                         </p>
                       </div>
 
                       {/* Billing Type */}
-                      <div className="p-5 bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-200 space-y-4">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                      <div className="p-5 bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-white/10 space-y-4">
+                        <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider block">
                           💷 Billing Type
                         </label>
                         <div className="grid grid-cols-2 gap-3">
@@ -3995,9 +4444,10 @@ ${extrasRows}
                               handleFieldChange("payment.billingType", "hourly")
                             }
                             className={`flex flex-col items-center gap-1 py-4 px-3 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${
-                              (createData.payment?.billingType || "hourly") === "hourly"
+                              (createData.payment?.billingType || "hourly") ===
+                              "hourly"
                                 ? "border-primary bg-primary text-white shadow-lg scale-[1.02]"
-                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                : "border-white/10 bg-white/5 text-white/70 hover:border-primary/50"
                             }`}
                           >
                             <Clock size={18} />
@@ -4005,7 +4455,7 @@ ${extrasRows}
                               Hourly Rate
                             </span>
                             <span
-                              className={`text-[10px] ${(createData.payment?.billingType || "hourly") === "hourly" ? "text-white/70" : "text-slate-400"}`}
+                              className={`text-[10px] ${(createData.payment?.billingType || "hourly") === "hourly" ? "text-white/70" : "text-white/40"}`}
                             >
                               Priced by duration
                             </span>
@@ -4018,7 +4468,7 @@ ${extrasRows}
                             className={`flex flex-col items-center gap-1 py-4 px-3 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${
                               createData.payment?.billingType === "flat"
                                 ? "border-primary bg-primary text-white shadow-lg scale-[1.02]"
-                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                : "border-white/10 bg-white/5 text-white/70 hover:border-primary/50"
                             }`}
                           >
                             <DollarSign size={18} />
@@ -4026,7 +4476,7 @@ ${extrasRows}
                               Flat Rate
                             </span>
                             <span
-                              className={`text-[10px] ${createData.payment?.billingType === "flat" ? "text-white/70" : "text-slate-400"}`}
+                              className={`text-[10px] ${createData.payment?.billingType === "flat" ? "text-white/70" : "text-white/40"}`}
                             >
                               One fixed price
                             </span>
@@ -4036,11 +4486,11 @@ ${extrasRows}
                         {createData.payment?.billingType === "flat" ? (
                           <>
                             <div>
-                              <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                              <label className="text-[9px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">
                                 Fixed Price for This Job
                               </label>
                               <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 font-bold text-sm">
                                   £
                                 </span>
                                 <input
@@ -4049,17 +4499,21 @@ ${extrasRows}
                                   step="0.01"
                                   placeholder="0.00"
                                   value={createFlatAmount}
-                                  onChange={(e) => setCreateFlatAmount(e.target.value)}
-                                  className="w-full pl-7 p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                  onChange={(e) =>
+                                    setCreateFlatAmount(e.target.value)
+                                  }
+                                  className="w-full pl-7 p-3 rounded-xl border-2 border-white/10 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                                 />
                               </div>
-                              <p className="text-[10px] text-slate-400 mt-1.5">
-                                Overrides the hourly calculation — customer pays this once. No hourly duration is needed for flat-rate jobs.
+                              <p className="text-[10px] text-white/40 mt-1.5">
+                                Overrides the hourly calculation — customer pays
+                                this once. No hourly duration is needed for
+                                flat-rate jobs.
                               </p>
                             </div>
-                            <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-50 border border-amber-200">
+                            <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/25">
                               <span className="text-amber-500">🔇</span>
-                              <p className="text-[11px] font-bold text-amber-700">
+                              <p className="text-[11px] font-bold text-amber-400">
                                 No confirmation email is sent automatically for
                                 flat-rate bookings. Send the invoice yourself
                                 from the booking's CRM actions (âœ¨) whenever
@@ -4069,11 +4523,11 @@ ${extrasRows}
                           </>
                         ) : (
                           <div>
-                            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                            <label className="text-[9px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">
                               â±ï¸ Hours{" "}
                               <span className="text-rose-500">*</span>
                             </label>
-                            <div className="grid grid-cols-8 sm:grid-cols-10 gap-1.5 max-h-36 overflow-y-auto p-1 mb-2 bg-white rounded-xl border border-slate-100">
+                            <div className="grid grid-cols-8 sm:grid-cols-10 gap-1.5 max-h-36 overflow-y-auto p-1 mb-2 bg-white/5 rounded-xl border border-white/10">
                               {Array.from({ length: 50 }, (_, i) => i + 1).map(
                                 (hours) => (
                                   <button
@@ -4088,7 +4542,7 @@ ${extrasRows}
                                     className={`py-1.5 rounded-lg border text-[11px] font-bold transition-all ${
                                       createData.details.duration === hours
                                         ? "border-primary bg-primary text-white shadow-sm"
-                                        : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                        : "border-white/10 bg-white/5 text-white/70 hover:border-primary/50"
                                     }`}
                                   >
                                     {hours}
@@ -4116,15 +4570,16 @@ ${extrasRows}
                                 className={`w-full p-3 rounded-xl border-2 transition-all text-sm font-bold focus:outline-none focus:ring-2 ${
                                   formErrors["details.duration"]
                                     ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500"
-                                    : "border-slate-200 focus:ring-primary/30 focus:border-primary"
+                                    : "border-white/10 focus:ring-primary/30 focus:border-primary"
                                 }`}
                               />
-                              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-white/40 uppercase tracking-wider">
                                 hours
                               </span>
                             </div>
-                            <p className="text-[10px] text-slate-400 mt-1.5">
-                              Any custom duration from 1 to 50 hours — drives the price automatically.
+                            <p className="text-[10px] text-white/40 mt-1.5">
+                              Any custom duration from 1 to 50 hours — drives
+                              the price automatically.
                             </p>
                             {formErrors["details.duration"] && (
                               <p className="text-rose-500 text-[10px] font-bold mt-1.5">
@@ -4138,16 +4593,16 @@ ${extrasRows}
                       {/* Address and Postcode */}
                       <div className="space-y-3">
                         <div>
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                          <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-2 flex items-center gap-1">
                             📍 Full Address{" "}
                             <span className="text-rose-500">*</span>
                           </label>
                           <input
                             placeholder="Enter complete address"
-                            className={`w-full p-4 rounded-2xl bg-white border-2 transition-all text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 ${
+                            className={`w-full p-4 rounded-2xl bg-white/5 border-2 transition-all text-sm font-medium placeholder:text-white/40 focus:outline-none focus:ring-2 ${
                               formErrors["details.address"]
                                 ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500"
-                                : "border-slate-200 focus:ring-primary/30 focus:border-primary"
+                                : "border-white/10 focus:ring-primary/30 focus:border-primary"
                             }`}
                             value={createData.details.address || ""}
                             onChange={(e) =>
@@ -4173,12 +4628,12 @@ ${extrasRows}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div>
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
+                            <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-2 block">
                               📬 Postcode
                             </label>
                             <input
                               placeholder="e.g., M1 1AA"
-                              className="w-full p-4 rounded-2xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium placeholder:text-slate-400"
+                              className="w-full p-4 rounded-2xl bg-white/5 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium placeholder:text-white/40"
                               value={createData.details.postcode || ""}
                               onChange={(e) =>
                                 handleFieldChange(
@@ -4189,7 +4644,7 @@ ${extrasRows}
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                            <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-2 flex items-center gap-1">
                               🔄 Frequency{" "}
                               <span className="text-rose-500">*</span>
                             </label>
@@ -4201,10 +4656,10 @@ ${extrasRows}
                                   e.target.value,
                                 )
                               }
-                              className={`w-full p-4 rounded-2xl bg-white border-2 transition-all text-sm font-medium focus:outline-none focus:ring-2 ${
+                              className={`w-full p-4 rounded-2xl bg-white/5 border-2 transition-all text-sm font-medium focus:outline-none focus:ring-2 ${
                                 formErrors["details.frequency"]
                                   ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500"
-                                  : "border-slate-200 focus:ring-primary/30 focus:border-primary"
+                                  : "border-white/10 focus:ring-primary/30 focus:border-primary"
                               }`}
                             >
                               <option>Once</option>
@@ -4226,7 +4681,7 @@ ${extrasRows}
                       {/* Lead Source & Supplies */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
+                          <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-2 block">
                             📣 Where did this booking come from?
                           </label>
                           <select
@@ -4234,7 +4689,7 @@ ${extrasRows}
                             onChange={(e) =>
                               handleFieldChange("leadSource", e.target.value)
                             }
-                            className="w-full p-4 rounded-2xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium"
+                            className="w-full p-4 rounded-2xl bg-white/5 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium"
                           >
                             {LEAD_SOURCES.map((src) => (
                               <option key={src} value={src}>
@@ -4244,7 +4699,7 @@ ${extrasRows}
                           </select>
                         </div>
                         <div>
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
+                          <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-2 block">
                             🧴 Who provides cleaning supplies & equipment?
                           </label>
                           <select
@@ -4255,7 +4710,7 @@ ${extrasRows}
                                 e.target.value,
                               )
                             }
-                            className="w-full p-4 rounded-2xl bg-white border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium"
+                            className="w-full p-4 rounded-2xl bg-white/5 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium"
                           >
                             <option value="Cleaniq">Cleaniq provides</option>
                             <option value="Customer">Customer provides</option>
@@ -4265,7 +4720,7 @@ ${extrasRows}
 
                       {/* Service Selection */}
                       <div className="pt-2">
-                        <h5 className="font-bold text-lg text-primary-dark mb-4 flex items-center gap-2">
+                        <h5 className="font-bold text-lg text-white/85 mb-4 flex items-center gap-2">
                           🧹 Select Service Type{" "}
                           <span className="text-rose-500">*</span>
                         </h5>
@@ -4278,19 +4733,19 @@ ${extrasRows}
                                 createData.service === s.id
                                   ? "border-primary bg-gradient-to-br from-primary/10 to-blue-50 shadow-lg scale-105"
                                   : formErrors.service
-                                    ? "border-rose-200 bg-white hover:shadow-md"
-                                    : "border-slate-200 bg-white hover:shadow-md hover:border-primary/30"
+                                    ? "border-rose-200 bg-white/5 hover:shadow-md"
+                                    : "border-white/10 bg-white/5 hover:shadow-md hover:border-primary/30"
                               }`}
                             >
-                              <div className="font-extrabold text-base text-primary-dark">
+                              <div className="font-extrabold text-base text-white/85">
                                 {s.title}
                               </div>
-                              <div className="text-[11px] text-slate-500 mt-2 font-bold">
+                              <div className="text-[11px] text-white/60 mt-2 font-bold">
                                 {s.tag}
                               </div>
                               {createData.service === s.id && (
                                 <div className="text-primary text-sm font-bold mt-2">
-                                  âœ“ Selected
+                                  âœ" Selected
                                 </div>
                               )}
                             </button>
@@ -4308,41 +4763,47 @@ ${extrasRows}
 
                   {createStep === 2 && (
                     <div className="space-y-6">
-                      <div className="pb-4 border-b border-slate-200">
-                        <h4 className="text-2xl font-bold text-primary-dark flex items-center gap-3">
+                      <div className="pb-4 border-b border-white/10">
+                        <h4 className="text-2xl font-bold text-white/85 flex items-center gap-3">
                           <HomeIcon size={24} className="text-primary" />
                           Home Details
                         </h4>
-                        <p className="text-[11px] text-slate-500 uppercase tracking-widest mt-2 font-bold">
+                        <p className="text-[11px] text-white/60 uppercase tracking-widest mt-2 font-bold">
                           Specify property rooms
                         </p>
                       </div>
 
                       {/* Duration summary and Pet */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-white rounded-2xl border-2 border-slate-200">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-white/5 rounded-2xl border-2 border-white/10">
                         {createData.payment?.billingType === "flat" ? (
-                          <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200">
-                            <DollarSign size={20} className="text-emerald-600 shrink-0" />
-                            <p className="text-xs font-bold text-emerald-700">
+                          <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                            <DollarSign
+                              size={20}
+                              className="text-emerald-400/70 shrink-0"
+                            />
+                            <p className="text-xs font-bold text-emerald-400">
                               Flat-rate job — no hourly duration needed. The
                               fixed price you set in Step 1 covers the whole
                               job.
                             </p>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200">
-                            <Clock size={20} className="text-primary shrink-0" />
-                            <p className="text-xs font-bold text-slate-700">
+                          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                            <Clock
+                              size={20}
+                              className="text-primary shrink-0"
+                            />
+                            <p className="text-xs font-bold text-white/70">
                               Duration: {createData.details.duration || "—"}{" "}
                               hour{createData.details.duration === 1 ? "" : "s"}{" "}
-                              <span className="text-slate-400 font-medium">
+                              <span className="text-white/40 font-medium">
                                 (set in Step 1)
                               </span>
                             </p>
                           </div>
                         )}
                         <div>
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 block">
+                          <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-3 block">
                             🐾 Has Pet
                           </label>
                           <select
@@ -4353,7 +4814,7 @@ ${extrasRows}
                                 e.target.value,
                               )
                             }
-                            className="w-full p-3 rounded-xl bg-slate-50 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-bold"
+                            className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-bold"
                           >
                             <option value="No">No</option>
                             <option value="Yes">Yes</option>
@@ -4363,14 +4824,14 @@ ${extrasRows}
 
                       {/* Property Rooms */}
                       <div
-                        className={`p-4 bg-white rounded-2xl border-2 ${
+                        className={`p-4 bg-white/5 rounded-2xl border-2 ${
                           formErrors["details.Bedroom"] ||
                           formErrors["details.Bathroom"]
-                            ? "border-rose-400 bg-rose-50"
-                            : "border-slate-200"
+                            ? "border-rose-500/50 bg-rose-500/10"
+                            : "border-white/10"
                         }`}
                       >
-                        <h5 className="font-bold text-base text-primary-dark mb-4 flex items-center gap-2">
+                        <h5 className="font-bold text-base text-white/85 mb-4 flex items-center gap-2">
                           🛏ï¸ Property Rooms
                           <span className="text-rose-500">*</span>
                         </h5>
@@ -4387,12 +4848,12 @@ ${extrasRows}
                           ].map((r) => (
                             <div
                               key={r}
-                              className="p-3 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-slate-200 flex flex-col items-center gap-2 hover:shadow-md transition-all"
+                              className="p-3 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-white/10 flex flex-col items-center gap-2 hover:shadow-md transition-all"
                             >
-                              <div className="font-bold text-sm text-primary-dark text-center line-clamp-2">
+                              <div className="font-bold text-sm text-white/85 text-center line-clamp-2">
                                 {r}
                               </div>
-                              <div className="flex items-center gap-2 bg-white rounded-lg px-2 py-1 border border-slate-200">
+                              <div className="flex items-center gap-2 bg-white/5 rounded-lg px-2 py-1 border border-white/10">
                                 <button
                                   onClick={() => {
                                     const cur = createData.details[r] || 0;
@@ -4401,7 +4862,7 @@ ${extrasRows}
                                       Math.max(0, cur - 1),
                                     );
                                   }}
-                                  className="p-1 rounded-md hover:bg-slate-100 text-slate-500 hover:text-primary transition-colors"
+                                  className="p-1 rounded-md hover:bg-white/10 text-white/60 hover:text-primary transition-colors"
                                 >
                                   <Minus size={16} />
                                 </button>
@@ -4413,7 +4874,7 @@ ${extrasRows}
                                     const cur = createData.details[r] || 0;
                                     handleFieldChange(`details.${r}`, cur + 1);
                                   }}
-                                  className="p-1 rounded-md hover:bg-slate-100 text-slate-500 hover:text-primary transition-colors"
+                                  className="p-1 rounded-md hover:bg-white/10 text-white/60 hover:text-primary transition-colors"
                                 >
                                   <Plus size={16} />
                                 </button>
@@ -4423,14 +4884,14 @@ ${extrasRows}
                         </div>
                         {(formErrors["details.Bedroom"] ||
                           formErrors["details.Bathroom"]) && (
-                          <div className="mt-4 p-3 bg-rose-100 border-l-4 border-rose-500 rounded">
+                          <div className="mt-4 p-3 bg-rose-500/10 border-l-4 border-rose-500/50 rounded">
                             {formErrors["details.Bedroom"] && (
-                              <p className="text-rose-700 text-[10px] font-bold mb-1">
+                              <p className="text-rose-400 text-[10px] font-bold mb-1">
                                 ⚠️ {formErrors["details.Bedroom"]}
                               </p>
                             )}
                             {formErrors["details.Bathroom"] && (
-                              <p className="text-rose-700 text-[10px] font-bold">
+                              <p className="text-rose-400 text-[10px] font-bold">
                                 ⚠️ {formErrors["details.Bathroom"]}
                               </p>
                             )}
@@ -4442,22 +4903,22 @@ ${extrasRows}
 
                   {createStep === 3 && (
                     <div className="space-y-6">
-                      <div className="pb-4 border-b border-slate-200">
-                        <h4 className="text-2xl font-bold text-primary-dark flex items-center gap-3">
+                      <div className="pb-4 border-b border-white/10">
+                        <h4 className="text-2xl font-bold text-white/85 flex items-center gap-3">
                           <Zap size={24} className="text-primary" />
                           Extra Services
                         </h4>
-                        <p className="text-[11px] text-slate-500 uppercase tracking-widest mt-2 font-bold">
+                        <p className="text-[11px] text-white/60 uppercase tracking-widest mt-2 font-bold">
                           Add optional services to boost the booking value
                         </p>
                       </div>
                       {extraServicesList.length === 0 ? (
-                        <div className="text-center py-12 px-6 bg-white rounded-2xl border-2 border-dashed border-slate-200">
+                        <div className="text-center py-12 px-6 bg-white/5 rounded-2xl border-2 border-dashed border-white/10">
                           <Zap
                             size={40}
-                            className="mx-auto text-slate-300 mb-3"
+                            className="mx-auto text-white/30 mb-3"
                           />
-                          <p className="text-sm font-bold text-slate-500">
+                          <p className="text-sm font-bold text-white/60">
                             No extra services available
                           </p>
                         </div>
@@ -4474,27 +4935,27 @@ ${extrasRows}
                                 className={`p-4 rounded-2xl border-2 transition-all transform hover:scale-105 ${
                                   currentQty > 0
                                     ? "bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-300 shadow-md"
-                                    : "bg-white border-slate-200 hover:border-primary/30"
+                                    : "bg-white/5 border-white/10 hover:border-primary/30"
                                 }`}
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-4 flex-1">
-                                    <div className="p-3 bg-white rounded-xl border-2 border-slate-200">
+                                    <div className="p-3 bg-white/5 rounded-xl border-2 border-white/10">
                                       <Zap
                                         size={20}
                                         className="text-amber-500"
                                       />
                                     </div>
                                     <div>
-                                      <p className="text-sm font-bold text-primary-dark">
+                                      <p className="text-sm font-bold text-white/85">
                                         {extra.name}
                                       </p>
-                                      <p className="text-xs font-bold text-slate-500 mt-1">
+                                      <p className="text-xs font-bold text-white/60 mt-1">
                                         £{extra.rate} per unit
                                       </p>
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-3 bg-white rounded-xl p-2 border-2 border-slate-200">
+                                  <div className="flex items-center gap-3 bg-white/5 rounded-xl p-2 border-2 border-white/10">
                                     <button
                                       onClick={() => {
                                         setCreateData((prev) => {
@@ -4522,7 +4983,7 @@ ${extrasRows}
                                           };
                                         });
                                       }}
-                                      className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 flex items-center justify-center transition-colors font-bold"
+                                      className="w-8 h-8 rounded-lg bg-white/10 hover:bg-red-100 text-white/70 hover:text-red-600 flex items-center justify-center transition-colors font-bold"
                                     >
                                       âˆ’
                                     </button>
@@ -4557,7 +5018,7 @@ ${extrasRows}
                                           };
                                         });
                                       }}
-                                      className="w-8 h-8 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-600 flex items-center justify-center transition-colors font-bold"
+                                      className="w-8 h-8 rounded-lg bg-[#10B981]/20 hover:bg-emerald-200 text-emerald-400/70 flex items-center justify-center transition-colors font-bold"
                                     >
                                       +
                                     </button>
@@ -4573,20 +5034,20 @@ ${extrasRows}
 
                   {createStep === 4 && (
                     <div className="space-y-6">
-                      <div className="pb-4 border-b border-slate-200">
-                        <h4 className="text-2xl font-bold text-primary-dark flex items-center gap-3">
+                      <div className="pb-4 border-b border-white/10">
+                        <h4 className="text-2xl font-bold text-white/85 flex items-center gap-3">
                           <DollarSign size={24} className="text-primary" />
                           Payment & Schedule
                         </h4>
-                        <p className="text-[11px] text-slate-500 uppercase tracking-widest mt-2 font-bold">
+                        <p className="text-[11px] text-white/60 uppercase tracking-widest mt-2 font-bold">
                           Set date, time, and customer details
                         </p>
                       </div>
 
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Calendar and Time */}
-                        <div className="p-4 bg-white rounded-2xl border-2 border-slate-200">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1">
+                        <div className="p-4 bg-white/5 rounded-2xl border-2 border-white/10">
+                          <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-3 flex items-center gap-1">
                             📅 Select Date{" "}
                             <span className="text-rose-500">*</span>
                           </label>
@@ -4607,12 +5068,12 @@ ${extrasRows}
 
                           <div className="mt-4 space-y-3">
                             <div className="space-y-3">
-                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                              <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider flex items-center gap-1">
                                 🕐 Time Slot Selection
                               </label>
 
-                              <div className="p-3 bg-white rounded-xl border-2 border-slate-200">
-                                <p className="text-[9px] font-bold text-slate-500 mb-2">
+                              <div className="p-3 bg-white/5 rounded-xl border-2 border-white/10">
+                                <p className="text-[9px] font-bold text-white/60 mb-2">
                                   Traditional Slots
                                 </p>
                                 <div className="grid grid-cols-3 gap-2">
@@ -4690,8 +5151,8 @@ ${extrasRows}
                                             slot.value
                                               ? "border-primary bg-primary text-white shadow-md"
                                               : isSlotBooked
-                                                ? "border-rose-200 bg-rose-50 text-rose-300 cursor-not-allowed opacity-50 font-bold text-xs"
-                                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                                ? "border-rose-500/30 bg-rose-500/15 text-rose-400 cursor-not-allowed opacity-50 font-bold text-xs"
+                                                : "border-white/10 bg-white/5 text-white/70 hover:border-primary/50"
                                           }`}
                                         >
                                           {slot.label.split("(")[0].trim()}
@@ -4707,13 +5168,13 @@ ${extrasRows}
                                 </div>
                               </div>
 
-                              <div className="p-6 bg-white rounded-xl border-2 border-slate-200 space-y-4">
+                              <div className="p-6 bg-white/5 rounded-xl border-2 border-white/10 space-y-4">
                                 <div>
-                                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                  <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-2 flex items-center gap-2">
                                     <Clock size={16} className="text-primary" />
                                     Choose Your Flexible Time
                                   </p>
-                                  <p className="text-[9px] text-slate-400 mb-4">
+                                  <p className="text-[9px] text-white/40 mb-4">
                                     Available: 8:00 AM - 8:00 PM
                                   </p>
                                 </div>
@@ -4821,8 +5282,8 @@ ${extrasRows}
                                               .preferredTime === time
                                               ? "border-primary bg-primary text-white shadow-lg scale-110"
                                               : isBooked
-                                                ? "border-rose-200 bg-rose-50 text-rose-300 cursor-not-allowed opacity-50"
-                                                : "border-slate-200 bg-white text-slate-600 hover:border-primary/50"
+                                                ? "border-rose-500/30 bg-rose-500/15 text-rose-400 cursor-not-allowed opacity-50"
+                                                : "border-white/10 bg-white/5 text-white/70 hover:border-primary/50"
                                           }`}
                                         >
                                           {time}
@@ -4833,9 +5294,9 @@ ${extrasRows}
                                 </div>
 
                                 {/* Custom Time Input */}
-                                <div className="border-t-2 border-slate-100 pt-4 space-y-3">
+                                <div className="border-t-2 border-white/10 pt-4 space-y-3">
                                   <div className="flex items-center justify-between">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
                                       â° Custom Time
                                     </p>
                                     {/* <button
@@ -4862,7 +5323,7 @@ ${extrasRows}
                                           "[DEV TEST] Admin form populated with test data - NO PAYMENT REQUIRED",
                                         );
                                       }}
-                                      className="text-[8px] font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wider px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 transition"
+                                      className="text-[8px] font-bold text-blue-400 hover:text-blue-300 uppercase tracking-wider px-2 py-1 rounded bg-blue-500/15 hover:bg-blue-500/25 transition"
                                     >
                                       🧪 Dev Test Fill
                                     </button> */}
@@ -4926,19 +5387,19 @@ ${extrasRows}
                                           );
                                         }
                                       }}
-                                      className="flex-1 p-4 rounded-xl bg-slate-50 border-2 border-slate-200 focus:border-primary focus:bg-white shadow-sm outline-none font-bold text-sm text-slate-700"
+                                      className="flex-1 p-4 rounded-xl bg-white/5 border-2 border-white/10 focus:border-primary focus:bg-white/10 shadow-sm outline-none font-bold text-sm text-white/70"
                                       min="08:00"
                                       max="20:00"
                                     />
-                                    <span className="text-[9px] font-bold text-slate-500 text-center whitespace-nowrap">
+                                    <span className="text-[9px] font-bold text-white/60 text-center whitespace-nowrap">
                                       {createData.schedule.preferredTime &&
                                       createData.schedule.timeSlot ===
                                         "Flexible"
-                                        ? "âœ“ Selected"
+                                        ? "✓ Selected"
                                         : "Click to set"}
                                     </span>
                                   </div>
-                                  <p className="text-[8px] text-slate-400">
+                                  <p className="text-[8px] text-white/40">
                                     💡 If left empty, we'll default to 12:30 PM
                                   </p>
                                 </div>
@@ -4954,7 +5415,7 @@ ${extrasRows}
                             {createData.schedule.timeSlot &&
                               createData.schedule.timeSlot !== "Flexible" && (
                                 <div>
-                                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block">
+                                  <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-2 block">
                                     â° Preferred Arrival Time (Optional)
                                   </label>
                                   <input
@@ -4968,7 +5429,7 @@ ${extrasRows}
                                         e.target.value,
                                       )
                                     }
-                                    className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-slate-400"
+                                    className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-white/40"
                                   />
                                 </div>
                               )}
@@ -4976,8 +5437,8 @@ ${extrasRows}
                         </div>
 
                         {/* Customer Info */}
-                        <div className="p-4 bg-white rounded-2xl border-2 border-slate-200 space-y-3">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                        <div className="p-4 bg-white/5 rounded-2xl border-2 border-white/10 space-y-3">
+                          <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider block">
                             👤 Customer Information
                           </label>
 
@@ -5000,8 +5461,8 @@ ${extrasRows}
                                 }
                                 className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm focus:outline-none focus:ring-2 ${
                                   formErrors["customer.firstName"]
-                                    ? "bg-white border-rose-400 focus:ring-rose-200 focus:border-rose-500 placeholder:text-rose-300"
-                                    : "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 focus:ring-primary/30 focus:border-primary placeholder:text-slate-400"
+                                    ? "bg-white border-rose-400/50 focus:ring-rose-400/30 focus:border-rose-400 placeholder:text-rose-300"
+                                    : "bg-gradient-to-br from-slate-50 to-slate-100 border-white/10 focus:ring-primary/30 focus:border-primary placeholder:text-white/40"
                                 }`}
                               />
                               {formErrors["customer.firstName"] && (
@@ -5028,8 +5489,8 @@ ${extrasRows}
                                 }
                                 className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm focus:outline-none focus:ring-2 ${
                                   formErrors["customer.lastName"]
-                                    ? "bg-white border-rose-400 focus:ring-rose-200 focus:border-rose-500 placeholder:text-rose-300"
-                                    : "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 focus:ring-primary/30 focus:border-primary placeholder:text-slate-400"
+                                    ? "bg-white border-rose-400/50 focus:ring-rose-400/30 focus:border-rose-400 placeholder:text-rose-300"
+                                    : "bg-gradient-to-br from-slate-50 to-slate-100 border-white/10 focus:ring-primary/30 focus:border-primary placeholder:text-white/40"
                                 }`}
                               />
                               {formErrors["customer.lastName"] && (
@@ -5058,8 +5519,8 @@ ${extrasRows}
                               }
                               className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm focus:outline-none focus:ring-2 ${
                                 formErrors["customer.email"]
-                                  ? "bg-white border-rose-400 focus:ring-rose-200 focus:border-rose-500 placeholder:text-rose-300"
-                                  : "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 focus:ring-primary/30 focus:border-primary placeholder:text-slate-400"
+                                  ? "bg-white border-rose-400/50 focus:ring-rose-400/30 focus:border-rose-400 placeholder:text-rose-300"
+                                  : "bg-gradient-to-br from-slate-50 to-slate-100 border-white/10 focus:ring-primary/30 focus:border-primary placeholder:text-white/40"
                               }`}
                             />
                             {formErrors["customer.email"] && (
@@ -5086,8 +5547,8 @@ ${extrasRows}
                               }
                               className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm focus:outline-none focus:ring-2 ${
                                 formErrors["customer.phone"]
-                                  ? "bg-white border-rose-400 focus:ring-rose-200 focus:border-rose-500 placeholder:text-rose-300"
-                                  : "bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 focus:ring-primary/30 focus:border-primary placeholder:text-slate-400"
+                                  ? "bg-white border-rose-400/50 focus:ring-rose-400/30 focus:border-rose-400 placeholder:text-rose-300"
+                                  : "bg-gradient-to-br from-slate-50 to-slate-100 border-white/10 focus:ring-primary/30 focus:border-primary placeholder:text-white/40"
                               }`}
                             />
                             {formErrors["customer.phone"] && (
@@ -5100,22 +5561,24 @@ ${extrasRows}
                       </div>
 
                       {/* Final Summary */}
-                      <div className="p-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200">
+                      <div className="p-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-[#10B981]/30">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-[10px] text-emerald-600 uppercase font-bold tracking-wider">
+                            <p className="text-[10px] text-emerald-400/70 uppercase font-bold tracking-wider">
                               💰 Estimated Total
                             </p>
-                            <p className="text-3xl font-bold text-emerald-700 mt-1">
+                            <p className="text-3xl font-bold text-emerald-400 mt-1">
                               £{createTotal}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-[10px] text-emerald-600 uppercase font-bold tracking-wider">
+                            <p className="text-[10px] text-emerald-400/70 uppercase font-bold tracking-wider">
                               📊 Status
                             </p>
-                            <p className="font-bold text-emerald-700 text-lg mt-1">
-                              {noPaymentRequired ? "Completed" : createData.status}
+                            <p className="font-bold text-emerald-400 text-lg mt-1">
+                              {noPaymentRequired
+                                ? "Completed"
+                                : createData.status}
                             </p>
                           </div>
                         </div>
@@ -5186,9 +5649,7 @@ ${extrasRows}
                         <p className="text-[10px] font-bold text-white/70 uppercase tracking-wider">
                           💷 Billing
                         </p>
-                        <div className="text-sm font-bold mt-2">
-                          Flat Rate
-                        </div>
+                        <div className="text-sm font-bold mt-2">Flat Rate</div>
                       </div>
                     ) : (
                       createData.details.duration && (
@@ -5213,14 +5674,14 @@ ${extrasRows}
                   <div className="h-px bg-white/20"></div>
 
                   {/* Total Price Card */}
-                  <div className="bg-white rounded-xl p-5 text-primary shadow-lg">
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  <div className="bg-white/5 rounded-xl p-5 text-primary shadow-lg">
+                    <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
                       💰 Estimated Total
                     </p>
                     <p className="text-3xl font-bold text-primary mt-2">
                       £{createTotal}
                     </p>
-                    <p className="text-xs text-slate-600 mt-2 font-bold">
+                    <p className="text-xs text-white/70 mt-2 font-bold">
                       Ready to create this booking?
                     </p>
                   </div>
@@ -5229,12 +5690,12 @@ ${extrasRows}
             </div>
 
             {/* Footer Buttons */}
-            <div className="px-4 sm:px-6 lg:px-10 py-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3 justify-between">
+            <div className="px-4 sm:px-6 lg:px-10 py-6 border-t border-white/10 flex flex-col sm:flex-row gap-3 justify-between">
               <div className="flex gap-3 flex-1 sm:flex-initial">
                 {createStep > 1 && (
                   <button
                     onClick={() => setCreateStep((s) => Math.max(1, s - 1))}
-                    className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors border-2 border-slate-200"
+                    className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white/70 font-bold transition-colors border-2 border-white/10"
                   >
                     â† Back
                   </button>
@@ -5248,7 +5709,7 @@ ${extrasRows}
                     disabled={Object.keys(formErrors).length > 0}
                     className={`px-8 py-3 rounded-xl transition-all transform font-bold border-2 flex items-center gap-2 ${
                       Object.keys(formErrors).length > 0
-                        ? "bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed"
+                        ? "bg-white/15 text-white/40 border-white/20 cursor-not-allowed"
                         : "bg-gradient-to-r from-primary to-blue-600 hover:shadow-lg text-white hover:scale-105 border-primary"
                     }`}
                   >
@@ -5297,13 +5758,17 @@ ${extrasRows}
                             // (â†’ Confirmed) and the job is done (â†’ Completed,
                             // which is also when money is actually captured).
                             status: "Pending",
-                            billingType: createData.payment?.billingType || "hourly",
+                            billingType:
+                              createData.payment?.billingType || "hourly",
                           },
-                          status: noPaymentRequired ? "Confirmed" : createData.status,
+                          status: noPaymentRequired
+                            ? "Confirmed"
+                            : createData.status,
                           noPaymentRequired,
                           skipConfirmationEmail:
                             noPaymentRequired && skipConfirmationEmail,
-                          createdByAdmin: localStorage.getItem("adminUser") || null,
+                          createdByAdmin:
+                            localStorage.getItem("adminUser") || null,
                         };
                         const res = await fetch(
                           `${import.meta.env.VITE_API_URL}/bookings`,
@@ -5348,16 +5813,16 @@ ${extrasRows}
       {/* Success Modal */}
       {showSuccessModal && successBooking && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[32px] p-8 max-w-2xl w-full shadow-2xl animate-in fade-in zoom-in overflow-y-auto max-h-[90vh]">
+          <div className="bg-[#0B2D22] rounded-[32px] p-8 max-w-2xl w-full shadow-2xl animate-in fade-in zoom-in overflow-y-auto max-h-[90vh]">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 size={32} className="text-emerald-600" />
+              <div className="w-16 h-16 bg-[#10B981]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 size={32} className="text-emerald-400/70" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-2">
+              <h2 className="text-2xl font-bold text-white mb-2">
                 Booking Created Successfully!
               </h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-white/60">
                 Payment link has been sent to customer email
               </p>
             </div>
@@ -5367,28 +5832,28 @@ ${extrasRows}
               {/* Row 1: Reference & Customer */}
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Booking Reference */}
-                <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 border border-slate-200">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+                <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 border border-white/10">
+                  <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">
                     📋 Booking Reference
                   </p>
-                  <p className="text-2xl font-bold text-slate-900 font-mono">
+                  <p className="text-2xl font-bold text-white font-mono">
                     {successBooking.bookingId}
                   </p>
                 </div>
 
                 {/* Customer Info */}
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+                  <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">
                     👤 Customer
                   </p>
-                  <p className="text-lg font-bold text-slate-900 mb-1">
+                  <p className="text-lg font-bold text-white mb-1">
                     {successBooking.customer.firstName}{" "}
                     {successBooking.customer.lastName}
                   </p>
-                  <p className="text-xs text-slate-600">
+                  <p className="text-xs text-white/70">
                     {successBooking.customer.email}
                   </p>
-                  <p className="text-xs text-slate-600 mt-2">
+                  <p className="text-xs text-white/70 mt-2">
                     📱 {successBooking.customer.phone}
                   </p>
                 </div>
@@ -5398,43 +5863,43 @@ ${extrasRows}
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Service Type */}
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+                  <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">
                     🧹 Service Type
                   </p>
-                  <p className="text-lg font-bold text-slate-900 mb-1">
+                  <p className="text-lg font-bold text-white mb-1">
                     {successBooking.service}
                   </p>
-                  <p className="text-xs text-slate-600">
+                  <p className="text-xs text-white/70">
                     Duration: {successBooking.details.duration} hours
                   </p>
-                  <p className="text-xs text-slate-600 mt-1">
+                  <p className="text-xs text-white/70 mt-1">
                     Frequency: {successBooking.details.frequency || "Once"}
                   </p>
                 </div>
 
                 {/* Schedule */}
                 <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-6 border border-amber-200">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+                  <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">
                     📅 Schedule
                   </p>
-                  <p className="text-lg font-bold text-slate-900 mb-2">
+                  <p className="text-lg font-bold text-white mb-2">
                     {new Date(successBooking.schedule.date).toDateString()}
                   </p>
-                  <p className="text-sm font-bold text-slate-700">
+                  <p className="text-sm font-bold text-white/70">
                     🕐 {successBooking.schedule.timeSlot}
                   </p>
                 </div>
               </div>
 
               {/* Row 3: Location */}
-              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-emerald-200">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-[#10B981]/30">
+                <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">
                   📍 Location
                 </p>
-                <p className="text-lg font-bold text-slate-900 mb-2">
+                <p className="text-lg font-bold text-white mb-2">
                   {successBooking.details.address}
                 </p>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-white/70">
                   Postcode:{" "}
                   <span className="font-bold">
                     {successBooking.details.postcode}
@@ -5459,19 +5924,19 @@ ${extrasRows}
                 );
                 return rooms.length > 0 ? (
                   <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-6 border border-indigo-200">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+                    <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">
                       🏠 Property Rooms
                     </p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                       {rooms.map((room) => (
                         <div
                           key={room}
-                          className="bg-white rounded-xl p-3 border border-indigo-200 flex flex-col items-center justify-center"
+                          className="bg-white/5 rounded-xl p-3 border border-indigo-200 flex flex-col items-center justify-center"
                         >
                           <p className="text-xs font-bold text-indigo-600">
                             {successBooking.details[room]}x
                           </p>
-                          <p className="text-xs font-bold text-slate-700 text-center mt-1">
+                          <p className="text-xs font-bold text-white/70 text-center mt-1">
                             {room}
                           </p>
                         </div>
@@ -5485,7 +5950,7 @@ ${extrasRows}
               {successBooking.details.extras &&
                 successBooking.details.extras.length > 0 && (
                   <div className="bg-gradient-to-br from-rose-50 to-rose-100 rounded-2xl p-6 border border-rose-200">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+                    <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">
                       ⭐ Extra Services
                     </p>
                     <div className="grid sm:grid-cols-2 gap-3">
@@ -5499,20 +5964,20 @@ ${extrasRows}
                         return (
                           <div
                             key={idx}
-                            className="bg-white rounded-xl p-4 border border-rose-200 flex items-start justify-between"
+                            className="bg-white/5 rounded-xl p-4 border border-rose-200 flex items-start justify-between"
                           >
                             <div>
-                              <p className="text-sm font-bold text-slate-900">
+                              <p className="text-sm font-bold text-white">
                                 {displayText}
                               </p>
                               {extraPrice && (
-                                <p className="text-xs text-slate-600 mt-1">
+                                <p className="text-xs text-white/70 mt-1">
                                   £{extraPrice} each
                                 </p>
                               )}
                             </div>
                             <span className="inline-flex items-center justify-center w-5 h-5 bg-rose-600 text-white rounded-full text-[10px] font-bold">
-                              âœ“
+                              âœ"
                             </span>
                           </div>
                         );
@@ -5525,10 +5990,10 @@ ${extrasRows}
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+                    <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-2">
                       💰 Total Amount
                     </p>
-                    <p className="text-xs text-slate-600 mb-1">
+                    <p className="text-xs text-white/70 mb-1">
                       Status:{" "}
                       <span className="font-bold text-amber-600">
                         Pending Payment
@@ -5546,11 +6011,11 @@ ${extrasRows}
             </div>
 
             {/* Info Box */}
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-6">
-              <p className="text-sm font-bold text-blue-900 mb-2">
-                âœ“ Payment Link Sent
+            <div className="bg-blue-500/10 border-2 border-blue-500/25 rounded-xl p-4 mb-6">
+              <p className="text-sm font-bold text-blue-300 mb-2">
+                ✓ Payment Link Sent
               </p>
-              <p className="text-xs text-blue-800">
+              <p className="text-xs text-blue-400/80">
                 A secure payment link has been sent to{" "}
                 <span className="font-bold">
                   {successBooking.customer.email}
@@ -5592,7 +6057,7 @@ ${extrasRows}
               </button> */}
               <button
                 onClick={() => setShowSuccessModal(false)}
-                className="w-full py-3 px-6 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-all"
+                className="w-full py-3 px-6 rounded-2xl bg-white/10 text-white/70 font-bold hover:bg-white/15 transition-all"
               >
                 Close
               </button>
@@ -5607,35 +6072,35 @@ ${extrasRows}
             className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md"
             onClick={() => setShowBulkDeleteModal(false)}
           />
-          <div className="relative w-full max-w-md bg-white rounded-[32px] shadow-2xl overflow-hidden border-4 border-white p-8">
+          <div className="relative w-full max-w-md bg-[#0B2D22] rounded-2xl shadow-2xl shadow-black/60 overflow-hidden border border-white/[0.08] p-8">
             <div className="text-center space-y-6">
-              <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto">
-                <Trash2 size={32} className="text-rose-500" />
+              <div className="w-16 h-16 bg-rose-500/15 border border-rose-500/25 rounded-2xl flex items-center justify-center mx-auto">
+                <Trash2 size={28} className="text-rose-400" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-primary-dark tracking-tighter">
+                <h3 className="text-xl font-black text-white tracking-tight">
                   Delete {selectedBookings.size} Bookings?
                 </h3>
-                <p className="text-sm text-slate-500 mt-2">
+                <p className="text-sm text-white/40 mt-2">
                   This action cannot be undone. All selected bookings will be
                   permanently deleted.
                 </p>
               </div>
-              <div className="bg-rose-50 border-2 border-rose-200 rounded-2xl p-4">
-                <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">
+              <div className="bg-rose-500/10 border border-rose-500/25 rounded-xl p-4">
+                <p className="text-[10px] font-black text-rose-400 uppercase tracking-wider">
                   Warning: {selectedBookings.size} bookings will be deleted
                 </p>
               </div>
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={() => setShowBulkDeleteModal(false)}
-                  className="flex-1 py-3 px-6 rounded-2xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-all border-2 border-slate-200"
+                  className="flex-1 py-3 px-6 rounded-xl bg-white/[0.06] text-white/60 font-black hover:bg-white/10 transition-all border border-white/10"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleBulkDelete}
-                  className="flex-1 py-3 px-6 rounded-2xl bg-gradient-to-r from-rose-500 to-red-600 text-white font-bold hover:shadow-lg transition-all border-2 border-rose-600"
+                  className="flex-1 py-3 px-6 rounded-xl bg-rose-500 text-white font-black hover:bg-rose-400 transition-all shadow-sm shadow-rose-500/25"
                 >
                   Delete All
                 </button>

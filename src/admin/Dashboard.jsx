@@ -63,7 +63,8 @@ const gbp = (n, dp = 0) =>
   `£${Number(n || 0).toLocaleString("en-GB", { minimumFractionDigits: dp, maximumFractionDigits: dp })}`;
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
-const card = "bg-[#0B2D22] border border-white/[0.06] rounded-2xl";
+const card =
+  "relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-[linear-gradient(135deg,rgba(11,45,34,0.96),rgba(5,32,26,0.96))] shadow-[0_18px_55px_rgba(0,0,0,0.24)]";
 const eyebrow =
   "text-[10px] font-semibold uppercase tracking-[0.16em] text-white/30";
 const cardTitle = "text-[15px] font-semibold text-white tracking-tight";
@@ -881,1357 +882,1397 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-24">
-      {/* ── Header ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <p className={`${eyebrow} mb-1.5`}>
-            {new Date().toLocaleDateString("en-GB", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
-          <h1 className="text-[22px] font-semibold text-white tracking-tight">
-            {greeting}, {localStorage.getItem("adminUser") || "Admin"}
-          </h1>
-          <p className={`text-[13px] ${muted} mt-1`}>
-            {loading
-              ? "Fetching data…"
-              : `${bookings.filter((b) => b.status !== "Blackout").length} bookings on record · updated ${lastRefresh?.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) ?? "—"}`}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => navigate("/admin/new-booking")}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 text-white rounded-xl text-[13px] font-semibold hover:bg-emerald-400 transition-colors"
-          >
-            <Plus size={15} /> New booking
-          </button>
-          <div className="flex items-center gap-2 px-3 py-2 bg-white/[0.05] border border-white/[0.08] rounded-xl focus-within:border-emerald-500/40 transition-colors">
-            <Search size={14} className="text-white/25 shrink-0" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search customers"
-              className="bg-transparent border-none outline-none text-[13px] w-36 text-white/75 placeholder:text-white/25"
-            />
-          </div>
-          <div className="flex items-center gap-0.5 bg-white/[0.05] border border-white/[0.08] rounded-xl p-0.5">
-            {TREND_RANGES.map((opt) => (
-              <button
-                key={opt.days}
-                onClick={() => setTrendRange(opt.days)}
-                className={`px-3 py-1.5 rounded-[10px] text-[11px] font-semibold transition-colors ${trendRange === opt.days ? "bg-emerald-500 text-white" : "text-white/35 hover:text-white/65"}`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={exportCSV}
-            disabled={loading || bookings.length === 0}
-            className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/[0.05] border border-white/[0.08] rounded-xl text-[13px] font-medium text-white/45 hover:bg-white/10 hover:text-white/75 transition-colors disabled:opacity-30"
-          >
-            <Download size={13} /> CSV
-          </button>
-          <button
-            onClick={exportExcel}
-            disabled={loading || bookings.length === 0}
-            className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/[0.05] border border-white/[0.08] rounded-xl text-[13px] font-medium text-white/45 hover:bg-white/10 hover:text-white/75 transition-colors disabled:opacity-30"
-          >
-            <Download size={13} /> Excel
-          </button>
-          <button
-            onClick={fetchData}
-            disabled={loading}
-            aria-label="Refresh"
-            className="flex items-center justify-center w-9 h-9 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white/40 hover:bg-white/10 hover:text-white/75 transition-colors disabled:opacity-30"
-          >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-          </button>
-        </div>
-      </div>
-
-      {/* ── KPI strip ────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
-        {kpis.map((k) => (
-          <button
-            key={k.label}
-            onClick={k.onClick}
-            disabled={!k.onClick}
-            className={`${card} text-left px-5 py-4 transition-colors ${k.onClick ? "hover:bg-[#0D3527] cursor-pointer" : "cursor-default"}`}
-          >
-            <div className="flex items-center justify-between mb-2.5">
-              <p className={eyebrow}>{k.label}</p>
-              <k.icon size={14} className="text-emerald-400/60" />
-            </div>
-            <div className="flex items-baseline gap-2">
-              <p className="text-[26px] font-semibold text-white tracking-tight tabular-nums leading-none">
-                {loading ? "—" : k.value}
-              </p>
-              {k.delta != null && !loading && (
-                <span
-                  className={`inline-flex items-center gap-0.5 text-[11px] font-semibold tabular-nums ${k.delta >= 0 ? "text-emerald-400" : "text-rose-400"}`}
-                >
-                  {k.delta >= 0 ? (
-                    <ArrowUpRight size={11} />
-                  ) : (
-                    <ArrowDownRight size={11} />
-                  )}
-                  {Math.abs(k.delta).toFixed(1)}%
-                </span>
-              )}
-            </div>
-            <p className={`text-[11px] ${muted} mt-1.5`}>{k.sub}</p>
-          </button>
-        ))}
-      </div>
-
-      {/* ── Workflow cards ───────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-        {/* BOOKINGS */}
-        <div className={`${card} flex flex-col overflow-hidden`}>
-          <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]">
-            <p className={eyebrow}>Bookings</p>
-            <button
-              onClick={() => navigate("/admin/bookings")}
-              className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
-            >
-              Schedule
-            </button>
-          </div>
-          <div className="px-5 py-4 flex-1">
-            <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
-              {newPending.length}
-            </p>
-            <p className={`text-[11px] ${muted} mt-1 mb-4`}>
-              new requests waiting
-            </p>
-            <div className="space-y-2.5">
-              {[
-                {
-                  label: "Confirmed",
-                  val: confirmed.length,
-                  note: gbp(rev(confirmed)),
-                  seg: {
-                    title: "Confirmed Bookings",
-                    bookings: confirmed,
-                    total: rev(confirmed),
-                  },
-                },
-                {
-                  label: "In progress",
-                  val: inProgress.length,
-                  note: gbp(rev(inProgress)),
-                  seg: {
-                    title: "In Progress Bookings",
-                    bookings: inProgress,
-                    total: rev(inProgress),
-                  },
-                },
-                {
-                  label: "Completed",
-                  val: completed.length,
-                  note: gbp(completedRevenue),
-                  seg: {
-                    title: "Completed Bookings",
-                    bookings: completed,
-                    total: completedRevenue,
-                  },
-                },
-              ].map((row) => (
-                <button
-                  key={row.label}
-                  onClick={() => setDetailSegment(row.seg)}
-                  className="w-full flex items-center justify-between group"
-                >
-                  <span className="text-xs font-medium text-white/45 group-hover:text-white/70 transition-colors">
-                    {row.label}
-                  </span>
-                  <span className="text-xs font-semibold text-white/80 tabular-nums">
-                    {row.val}{" "}
-                    <span className={`font-medium ${dimmed}`}>
-                      · {row.note}
-                    </span>
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
-            <svg
-              viewBox="0 0 100 30"
-              className="w-full h-7"
-              preserveAspectRatio="none"
-            >
-              <defs>
-                <linearGradient id="sg1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10B981" stopOpacity="0.2" />
-                  <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <polygon points={sparkBooking.area} fill="url(#sg1)" />
-              <polyline
-                points={sparkBooking.pts}
-                fill="none"
-                stroke="#10B981"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-              />
-              <polyline
-                points={sparkCompleted.pts}
-                fill="none"
-                stroke="#3CC7FF"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-              />
-            </svg>
-            <div className="flex items-center gap-3 mt-1.5">
-              <span
-                className={`flex items-center gap-1.5 text-[10px] font-medium ${muted}`}
-              >
-                <span className="w-2.5 h-[2px] bg-emerald-400 rounded inline-block" />
-                Received
-              </span>
-              <span
-                className={`flex items-center gap-1.5 text-[10px] font-medium ${muted}`}
-              >
-                <span className="w-2.5 h-[2px] bg-cyan-400 rounded inline-block" />
-                Completed
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* QUOTES */}
-        <div className={`${card} flex flex-col overflow-hidden`}>
-          <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]">
-            <p className={eyebrow}>Quotes</p>
-            <button
-              onClick={() => navigate("/admin/quotes")}
-              className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
-            >
-              Convert
-            </button>
-          </div>
-          <div className="px-5 py-4 flex-1">
-            <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
-              {quoteStats?.accepted ?? "—"}
-            </p>
-            <p className={`text-[11px] ${muted} mt-1 mb-4`}>
-              approved
-              {quoteStats?.acceptedValue > 0
-                ? ` · ${gbp(quoteStats.acceptedValue)}`
-                : ""}
-            </p>
-            <div className="space-y-2.5">
-              {[
-                { label: "Awaiting response", val: quoteStats?.pending ?? "—" },
-                { label: "Declined", val: quoteStats?.declined ?? "—" },
-                { label: "Total sent", val: quoteStats?.total ?? "—" },
-              ].map((row) => (
-                <button
-                  key={row.label}
-                  onClick={() => navigate("/admin/quotes/history")}
-                  className="w-full flex items-center justify-between group"
-                >
-                  <span className="text-xs font-medium text-white/45 group-hover:text-white/70 transition-colors">
-                    {row.label}
-                  </span>
-                  <span className="text-xs font-semibold text-white/80 tabular-nums">
-                    {row.val}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
-            <p className={`text-[10px] font-medium ${muted} mb-1.5`}>
-              Acceptance rate · {(quoteStats?.acceptanceRate || 0).toFixed(0)}%
-            </p>
-            <div className="w-full h-1.5 bg-white/[0.05] rounded-full overflow-hidden flex">
-              <div
-                className="h-full bg-emerald-500 transition-all duration-700"
-                style={{ width: `${quoteStats?.acceptanceRate ?? 0}%` }}
-              />
-              <div
-                className="h-full bg-rose-500/80 transition-all duration-700"
-                style={{
-                  width: `${quoteStats ? (quoteStats.declined / quoteStats.total) * 100 || 0 : 0}%`,
-                }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* JOBS */}
-        <div className={`${card} flex flex-col overflow-hidden`}>
-          <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]">
-            <p className={eyebrow}>Jobs</p>
-            <button
-              onClick={() => navigate("/admin/jobs")}
-              className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
-            >
-              View jobs
-            </button>
-          </div>
-          <div className="px-5 py-4 flex-1">
-            <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
-              {inProgress.length + accepted.length}
-            </p>
-            <p className={`text-[11px] ${muted} mt-1 mb-4`}>active right now</p>
-            <div className="space-y-2.5">
-              {[
-                {
-                  label: "Requires action",
-                  val: newPending.length,
-                  seg: {
-                    title: "New Bookings",
-                    bookings: newPending,
-                    total: rev(newPending),
-                  },
-                },
-                {
-                  label: "In progress",
-                  val: inProgress.length,
-                  seg: {
-                    title: "In Progress",
-                    bookings: inProgress,
-                    total: rev(inProgress),
-                  },
-                },
-                {
-                  label: "Completed",
-                  val: completed.length,
-                  seg: {
-                    title: "Completed",
-                    bookings: completed,
-                    total: completedRevenue,
-                  },
-                },
-              ].map((row) => (
-                <button
-                  key={row.label}
-                  onClick={() => setDetailSegment(row.seg)}
-                  className="w-full flex items-center justify-between group"
-                >
-                  <span className="text-xs font-medium text-white/45 group-hover:text-white/70 transition-colors">
-                    {row.label}
-                  </span>
-                  <span className="text-xs font-semibold text-white/80 tabular-nums">
-                    {row.val}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
-            <svg
-              viewBox="0 0 100 30"
-              className="w-full h-7"
-              preserveAspectRatio="none"
-            >
-              <polyline
-                points={sparkBooking.pts}
-                fill="none"
-                stroke="#475569"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-              />
-              <polyline
-                points={sparkCompleted.pts}
-                fill="none"
-                stroke="#10B981"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-              />
-            </svg>
-            <div className="flex items-center gap-3 mt-1.5">
-              <span
-                className={`flex items-center gap-1.5 text-[10px] font-medium ${muted}`}
-              >
-                <span className="w-2.5 h-[2px] bg-slate-500 rounded inline-block" />
-                Created
-              </span>
-              <span
-                className={`flex items-center gap-1.5 text-[10px] font-medium ${muted}`}
-              >
-                <span className="w-2.5 h-[2px] bg-emerald-400 rounded inline-block" />
-                Completed
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* REVENUE */}
-        <div className={`${card} flex flex-col overflow-hidden`}>
-          <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]">
-            <p className={eyebrow}>Revenue</p>
-            <button
-              onClick={() => setShowNetDetail(true)}
-              className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
-            >
-              Breakdown
-            </button>
-          </div>
-          <div className="px-5 py-4 flex-1">
-            <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
-              {gbp(completedRevenue)}
-            </p>
-            <p className={`text-[11px] ${muted} mt-1 mb-4`}>
-              gross · {completed.length} completed jobs
-            </p>
-            <div className="space-y-2.5">
-              {[
-                {
-                  label: "Pending pipeline",
-                  val: gbp(pendingRevenue),
-                  action: () =>
-                    setDetailSegment({
-                      title: "Open Pipeline",
-                      bookings: pending,
-                      total: pendingRevenue,
-                    }),
-                },
-                {
-                  label: "Total expenses",
-                  val: `−${gbp(totalExpenses)}`,
-                  action: () => navigate("/admin/expenses"),
-                },
-                {
-                  label: "Net revenue",
-                  val: gbp(netRevenue),
-                  action: () => setShowNetDetail(true),
-                },
-              ].map((row) => (
-                <button
-                  key={row.label}
-                  onClick={row.action}
-                  className="w-full flex items-center justify-between group"
-                >
-                  <span className="text-xs font-medium text-white/45 group-hover:text-white/70 transition-colors">
-                    {row.label}
-                  </span>
-                  <span className="text-xs font-semibold text-white/80 tabular-nums">
-                    {row.val}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
-            <svg
-              viewBox="0 0 100 30"
-              className="w-full h-7"
-              preserveAspectRatio="none"
-            >
-              <defs>
-                <linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10B981" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              {(() => {
-                const vals = Array.from({ length: 12 }, (_, i) => {
-                  const d = new Date();
-                  d.setDate(d.getDate() - (11 - i) * 2.5);
-                  const s = new Date(d.toDateString()),
-                    e = new Date(s.getTime() + 86399999 * 2.5);
-                  return bookings
-                    .filter((b) => {
-                      const t = new Date(b.createdAt || b.schedule?.date);
-                      return t >= s && t <= e && b.status === "Completed";
-                    })
-                    .reduce((a, b) => a + Number(b.payment?.amount || 0), 0);
-                });
-                const mx = Math.max(...vals, 1);
-                const pts = vals
-                  .map((v, i) => `${(i / 11) * 96 + 2},${28 - (v / mx) * 24}`)
-                  .join(" ");
-                return (
-                  <>
-                    <polygon points={`2,28 ${pts} 98,28`} fill="url(#sg2)" />
-                    <polyline
-                      points={pts}
-                      fill="none"
-                      stroke="#10B981"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  </>
-                );
-              })()}
-            </svg>
-            <span
-              className={`flex items-center gap-1.5 mt-1.5 text-[10px] font-medium ${muted}`}
-            >
-              <span className="w-2.5 h-[2px] bg-emerald-400 rounded inline-block" />
-              Revenue · last 30 days
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Today's schedule ─────────────────────────────────────────────────── */}
-      {todaysBookings.length > 0 && (
-        <div className={`${card} overflow-hidden`}>
-          <div className="px-5 py-4 border-b border-white/[0.05] flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-emerald-400/10 flex items-center justify-center">
-                <CalendarCheck size={14} className="text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-white">
-                  Today's schedule
-                </p>
-                <p className={`text-xs ${muted}`}>
-                  {todaysBookings.length} job
-                  {todaysBookings.length !== 1 ? "s" : ""} on the board
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => navigate("/admin/bookings")}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
-            >
-              View all <ChevronRight size={12} />
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <div className="flex gap-2.5 p-4 min-w-max">
-              {todaysBookings.slice(0, 8).map((b, i) => (
-                <button
-                  key={i}
-                  onClick={() => navigate(`/admin/bookings?id=${b._id}`)}
-                  className="flex items-center gap-3 bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] rounded-xl px-4 py-3 text-left transition-colors min-w-52"
-                >
-                  <div className="w-8 h-8 rounded-full bg-emerald-400/10 flex items-center justify-center shrink-0">
-                    <span className="text-[10px] font-semibold text-emerald-400">
-                      {initials(b)}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-white/85 truncate">
-                      {b.customer?.firstName} {b.customer?.lastName}
-                    </p>
-                    <p className={`text-[11px] ${muted} truncate`}>
-                      {b.service}
-                    </p>
-                    <p className="text-[11px] font-semibold text-white/55 mt-0.5">
-                      {b.schedule?.preferredTime || "Time TBC"}
-                    </p>
-                  </div>
-                  <StatusBadge status={b.status} />
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Revenue trend + split ────────────────────────────────────────────── */}
-      <div className="grid lg:grid-cols-3 gap-4">
-        <div className={`lg:col-span-2 ${card} p-5 sm:p-6`}>
-          <div className="flex flex-wrap justify-between items-start gap-4 mb-2">
+    <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.16),_transparent_32%),linear-gradient(135deg,_rgba(3,20,15,0.98),_rgba(4,28,22,0.95))] p-3 sm:p-4 lg:p-6 shadow-[0_30px_120px_rgba(0,0,0,0.35)]">
+      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.05),rgba(255,255,255,0))] pointer-events-none" />
+      <div className="relative space-y-5 pb-24">
+        {/* ── Header ───────────────────────────────────────────────────────────── */}
+        <div className="rounded-[28px] border border-white/10 bg-[#071b14]/80 p-4 sm:p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <CardHead kicker="Analytics" title="Revenue trend" />
-              <div className="flex items-baseline gap-2.5 mt-2">
-                <span className="text-2xl font-semibold text-white tabular-nums tracking-tight">
-                  {gbp(rangeRevenue, 2)}
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 mb-3">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
+                  Operations overview
                 </span>
-                {changePct !== null ? (
-                  <span
-                    className={`inline-flex items-center gap-1 text-[11px] font-semibold tabular-nums ${changePct >= 0 ? "text-emerald-400" : "text-rose-400"}`}
+              </div>
+              <p className={`${eyebrow} mb-1.5`}>
+                {new Date().toLocaleDateString("en-GB", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+              <h1 className="text-[22px] font-semibold text-white tracking-tight">
+                {greeting}, {localStorage.getItem("adminUser") || "Admin"}
+              </h1>
+              <p className={`text-[13px] ${muted} mt-1`}>
+                {loading
+                  ? "Fetching data…"
+                  : `${bookings.filter((b) => b.status !== "Blackout").length} bookings on record · updated ${lastRefresh?.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) ?? "—"}`}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => navigate("/admin/new-booking")}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 text-white rounded-xl text-[13px] font-semibold hover:bg-emerald-400 transition-colors"
+              >
+                <Plus size={15} /> New booking
+              </button>
+              <div className="flex items-center gap-2 px-3 py-2 bg-white/[0.05] border border-white/[0.08] rounded-xl focus-within:border-emerald-500/40 transition-colors">
+                <Search size={14} className="text-white/25 shrink-0" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search customers"
+                  className="bg-transparent border-none outline-none text-[13px] w-36 text-white/75 placeholder:text-white/25"
+                />
+              </div>
+              <div className="flex items-center gap-0.5 bg-white/[0.05] border border-white/[0.08] rounded-xl p-0.5">
+                {TREND_RANGES.map((opt) => (
+                  <button
+                    key={opt.days}
+                    onClick={() => setTrendRange(opt.days)}
+                    className={`px-3 py-1.5 rounded-[10px] text-[11px] font-semibold transition-colors ${trendRange === opt.days ? "bg-emerald-500 text-white" : "text-white/35 hover:text-white/65"}`}
                   >
-                    {changePct >= 0 ? (
-                      <ArrowUpRight size={12} />
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={exportCSV}
+                disabled={loading || bookings.length === 0}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/[0.05] border border-white/[0.08] rounded-xl text-[13px] font-medium text-white/45 hover:bg-white/10 hover:text-white/75 transition-colors disabled:opacity-30"
+              >
+                <Download size={13} /> CSV
+              </button>
+              <button
+                onClick={exportExcel}
+                disabled={loading || bookings.length === 0}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/[0.05] border border-white/[0.08] rounded-xl text-[13px] font-medium text-white/45 hover:bg-white/10 hover:text-white/75 transition-colors disabled:opacity-30"
+              >
+                <Download size={13} /> Excel
+              </button>
+              <button
+                onClick={fetchData}
+                disabled={loading}
+                aria-label="Refresh"
+                className="flex items-center justify-center w-9 h-9 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white/40 hover:bg-white/10 hover:text-white/75 transition-colors disabled:opacity-30"
+              >
+                <RefreshCw
+                  size={14}
+                  className={loading ? "animate-spin" : ""}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── KPI strip ────────────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+          {kpis.map((k) => (
+            <button
+              key={k.label}
+              onClick={k.onClick}
+              disabled={!k.onClick}
+              className={`${card} text-left px-5 py-4 transition-colors ${k.onClick ? "hover:bg-[#0D3527] cursor-pointer" : "cursor-default"}`}
+            >
+              <div className="flex items-center justify-between mb-2.5">
+                <p className={eyebrow}>{k.label}</p>
+                <k.icon size={14} className="text-emerald-400/60" />
+              </div>
+              <div className="flex items-baseline gap-2">
+                <p className="text-[26px] font-semibold text-white tracking-tight tabular-nums leading-none">
+                  {loading ? "—" : k.value}
+                </p>
+                {k.delta != null && !loading && (
+                  <span
+                    className={`inline-flex items-center gap-0.5 text-[11px] font-semibold tabular-nums ${k.delta >= 0 ? "text-emerald-400" : "text-rose-400"}`}
+                  >
+                    {k.delta >= 0 ? (
+                      <ArrowUpRight size={11} />
                     ) : (
-                      <ArrowDownRight size={12} />
+                      <ArrowDownRight size={11} />
                     )}
-                    {changePct >= 0 ? "+" : ""}
-                    {changePct.toFixed(1)}% vs prior period
-                  </span>
-                ) : (
-                  <span className={`text-[11px] ${muted}`}>
-                    No prior period data yet
+                    {Math.abs(k.delta).toFixed(1)}%
                   </span>
                 )}
               </div>
+              <p className={`text-[11px] ${muted} mt-1.5`}>{k.sub}</p>
+            </button>
+          ))}
+        </div>
+
+        {/* ── Workflow cards ───────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          {/* BOOKINGS */}
+          <div className={`${card} flex flex-col overflow-hidden`}>
+            <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]">
+              <p className={eyebrow}>Bookings</p>
+              <button
+                onClick={() => navigate("/admin/bookings")}
+                className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+              >
+                Schedule
+              </button>
+            </div>
+            <div className="px-5 py-4 flex-1">
+              <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
+                {newPending.length}
+              </p>
+              <p className={`text-[11px] ${muted} mt-1 mb-4`}>
+                new requests waiting
+              </p>
+              <div className="space-y-2.5">
+                {[
+                  {
+                    label: "Confirmed",
+                    val: confirmed.length,
+                    note: gbp(rev(confirmed)),
+                    seg: {
+                      title: "Confirmed Bookings",
+                      bookings: confirmed,
+                      total: rev(confirmed),
+                    },
+                  },
+                  {
+                    label: "In progress",
+                    val: inProgress.length,
+                    note: gbp(rev(inProgress)),
+                    seg: {
+                      title: "In Progress Bookings",
+                      bookings: inProgress,
+                      total: rev(inProgress),
+                    },
+                  },
+                  {
+                    label: "Completed",
+                    val: completed.length,
+                    note: gbp(completedRevenue),
+                    seg: {
+                      title: "Completed Bookings",
+                      bookings: completed,
+                      total: completedRevenue,
+                    },
+                  },
+                ].map((row) => (
+                  <button
+                    key={row.label}
+                    onClick={() => setDetailSegment(row.seg)}
+                    className="w-full flex items-center justify-between group"
+                  >
+                    <span className="text-xs font-medium text-white/45 group-hover:text-white/70 transition-colors">
+                      {row.label}
+                    </span>
+                    <span className="text-xs font-semibold text-white/80 tabular-nums">
+                      {row.val}{" "}
+                      <span className={`font-medium ${dimmed}`}>
+                        · {row.note}
+                      </span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
+              <svg
+                viewBox="0 0 100 30"
+                className="w-full h-7"
+                preserveAspectRatio="none"
+              >
+                <defs>
+                  <linearGradient id="sg1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10B981" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <polygon points={sparkBooking.area} fill="url(#sg1)" />
+                <polyline
+                  points={sparkBooking.pts}
+                  fill="none"
+                  stroke="#10B981"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                />
+                <polyline
+                  points={sparkCompleted.pts}
+                  fill="none"
+                  stroke="#3CC7FF"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </svg>
+              <div className="flex items-center gap-3 mt-1.5">
+                <span
+                  className={`flex items-center gap-1.5 text-[10px] font-medium ${muted}`}
+                >
+                  <span className="w-2.5 h-[2px] bg-emerald-400 rounded inline-block" />
+                  Received
+                </span>
+                <span
+                  className={`flex items-center gap-1.5 text-[10px] font-medium ${muted}`}
+                >
+                  <span className="w-2.5 h-[2px] bg-cyan-400 rounded inline-block" />
+                  Completed
+                </span>
+              </div>
             </div>
           </div>
-          {loading ? (
-            <div className="h-52 bg-white/[0.03] rounded-xl animate-pulse" />
-          ) : (
-            <div className="space-y-2 pt-2">
-              <div className="relative" style={{ height: "200px" }}>
-                {[0, 25, 50, 75].map((g) => (
-                  <div
-                    key={g}
-                    className="absolute left-0 right-0 border-t border-dashed border-white/[0.04]"
-                    style={{ bottom: `${g}%` }}
-                  />
+
+          {/* QUOTES */}
+          <div className={`${card} flex flex-col overflow-hidden`}>
+            <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]">
+              <p className={eyebrow}>Quotes</p>
+              <button
+                onClick={() => navigate("/admin/quotes")}
+                className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+              >
+                Convert
+              </button>
+            </div>
+            <div className="px-5 py-4 flex-1">
+              <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
+                {quoteStats?.accepted ?? "—"}
+              </p>
+              <p className={`text-[11px] ${muted} mt-1 mb-4`}>
+                approved
+                {quoteStats?.acceptedValue > 0
+                  ? ` · ${gbp(quoteStats.acceptedValue)}`
+                  : ""}
+              </p>
+              <div className="space-y-2.5">
+                {[
+                  {
+                    label: "Awaiting response",
+                    val: quoteStats?.pending ?? "—",
+                  },
+                  { label: "Declined", val: quoteStats?.declined ?? "—" },
+                  { label: "Total sent", val: quoteStats?.total ?? "—" },
+                ].map((row) => (
+                  <button
+                    key={row.label}
+                    onClick={() => navigate("/admin/quotes/history")}
+                    className="w-full flex items-center justify-between group"
+                  >
+                    <span className="text-xs font-medium text-white/45 group-hover:text-white/70 transition-colors">
+                      {row.label}
+                    </span>
+                    <span className="text-xs font-semibold text-white/80 tabular-nums">
+                      {row.val}
+                    </span>
+                  </button>
                 ))}
-                <svg
-                  className="absolute inset-0 w-full h-full"
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
+              </div>
+            </div>
+            <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
+              <p className={`text-[10px] font-medium ${muted} mb-1.5`}>
+                Acceptance rate · {(quoteStats?.acceptanceRate || 0).toFixed(0)}
+                %
+              </p>
+              <div className="w-full h-1.5 bg-white/[0.05] rounded-full overflow-hidden flex">
+                <div
+                  className="h-full bg-emerald-500 transition-all duration-700"
+                  style={{ width: `${quoteStats?.acceptanceRate ?? 0}%` }}
+                />
+                <div
+                  className="h-full bg-rose-500/80 transition-all duration-700"
+                  style={{
+                    width: `${quoteStats ? (quoteStats.declined / quoteStats.total) * 100 || 0 : 0}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* JOBS */}
+          <div className={`${card} flex flex-col overflow-hidden`}>
+            <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]">
+              <p className={eyebrow}>Jobs</p>
+              <button
+                onClick={() => navigate("/admin/jobs")}
+                className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+              >
+                View jobs
+              </button>
+            </div>
+            <div className="px-5 py-4 flex-1">
+              <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
+                {inProgress.length + accepted.length}
+              </p>
+              <p className={`text-[11px] ${muted} mt-1 mb-4`}>
+                active right now
+              </p>
+              <div className="space-y-2.5">
+                {[
+                  {
+                    label: "Requires action",
+                    val: newPending.length,
+                    seg: {
+                      title: "New Bookings",
+                      bookings: newPending,
+                      total: rev(newPending),
+                    },
+                  },
+                  {
+                    label: "In progress",
+                    val: inProgress.length,
+                    seg: {
+                      title: "In Progress",
+                      bookings: inProgress,
+                      total: rev(inProgress),
+                    },
+                  },
+                  {
+                    label: "Completed",
+                    val: completed.length,
+                    seg: {
+                      title: "Completed",
+                      bookings: completed,
+                      total: completedRevenue,
+                    },
+                  },
+                ].map((row) => (
+                  <button
+                    key={row.label}
+                    onClick={() => setDetailSegment(row.seg)}
+                    className="w-full flex items-center justify-between group"
+                  >
+                    <span className="text-xs font-medium text-white/45 group-hover:text-white/70 transition-colors">
+                      {row.label}
+                    </span>
+                    <span className="text-xs font-semibold text-white/80 tabular-nums">
+                      {row.val}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
+              <svg
+                viewBox="0 0 100 30"
+                className="w-full h-7"
+                preserveAspectRatio="none"
+              >
+                <polyline
+                  points={sparkBooking.pts}
+                  fill="none"
+                  stroke="#475569"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                />
+                <polyline
+                  points={sparkCompleted.pts}
+                  fill="none"
+                  stroke="#10B981"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </svg>
+              <div className="flex items-center gap-3 mt-1.5">
+                <span
+                  className={`flex items-center gap-1.5 text-[10px] font-medium ${muted}`}
                 >
-                  <defs>
-                    <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop
-                        offset="0%"
-                        stopColor="#10B981"
-                        stopOpacity="0.18"
+                  <span className="w-2.5 h-[2px] bg-slate-500 rounded inline-block" />
+                  Created
+                </span>
+                <span
+                  className={`flex items-center gap-1.5 text-[10px] font-medium ${muted}`}
+                >
+                  <span className="w-2.5 h-[2px] bg-emerald-400 rounded inline-block" />
+                  Completed
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* REVENUE */}
+          <div className={`${card} flex flex-col overflow-hidden`}>
+            <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]">
+              <p className={eyebrow}>Revenue</p>
+              <button
+                onClick={() => setShowNetDetail(true)}
+                className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+              >
+                Breakdown
+              </button>
+            </div>
+            <div className="px-5 py-4 flex-1">
+              <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
+                {gbp(completedRevenue)}
+              </p>
+              <p className={`text-[11px] ${muted} mt-1 mb-4`}>
+                gross · {completed.length} completed jobs
+              </p>
+              <div className="space-y-2.5">
+                {[
+                  {
+                    label: "Pending pipeline",
+                    val: gbp(pendingRevenue),
+                    action: () =>
+                      setDetailSegment({
+                        title: "Open Pipeline",
+                        bookings: pending,
+                        total: pendingRevenue,
+                      }),
+                  },
+                  {
+                    label: "Total expenses",
+                    val: `−${gbp(totalExpenses)}`,
+                    action: () => navigate("/admin/expenses"),
+                  },
+                  {
+                    label: "Net revenue",
+                    val: gbp(netRevenue),
+                    action: () => setShowNetDetail(true),
+                  },
+                ].map((row) => (
+                  <button
+                    key={row.label}
+                    onClick={row.action}
+                    className="w-full flex items-center justify-between group"
+                  >
+                    <span className="text-xs font-medium text-white/45 group-hover:text-white/70 transition-colors">
+                      {row.label}
+                    </span>
+                    <span className="text-xs font-semibold text-white/80 tabular-nums">
+                      {row.val}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
+              <svg
+                viewBox="0 0 100 30"
+                className="w-full h-7"
+                preserveAspectRatio="none"
+              >
+                <defs>
+                  <linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10B981" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                {(() => {
+                  const vals = Array.from({ length: 12 }, (_, i) => {
+                    const d = new Date();
+                    d.setDate(d.getDate() - (11 - i) * 2.5);
+                    const s = new Date(d.toDateString()),
+                      e = new Date(s.getTime() + 86399999 * 2.5);
+                    return bookings
+                      .filter((b) => {
+                        const t = new Date(b.createdAt || b.schedule?.date);
+                        return t >= s && t <= e && b.status === "Completed";
+                      })
+                      .reduce((a, b) => a + Number(b.payment?.amount || 0), 0);
+                  });
+                  const mx = Math.max(...vals, 1);
+                  const pts = vals
+                    .map((v, i) => `${(i / 11) * 96 + 2},${28 - (v / mx) * 24}`)
+                    .join(" ");
+                  return (
+                    <>
+                      <polygon points={`2,28 ${pts} 98,28`} fill="url(#sg2)" />
+                      <polyline
+                        points={pts}
+                        fill="none"
+                        stroke="#10B981"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
                       />
-                      <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <polygon
-                    points={`0,100 ${trendLine} 100,100`}
-                    fill="url(#trendFill)"
-                  />
-                  <polyline
-                    points={trendLine}
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="1.5"
-                    vectorEffect="non-scaling-stroke"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex">
-                  {trendPoints.map((p, i) => (
-                    <div
-                      key={i}
-                      className="flex-1 h-full relative cursor-pointer"
-                      onMouseEnter={() => setHoveredPoint(i)}
-                      onMouseLeave={() => setHoveredPoint(null)}
+                    </>
+                  );
+                })()}
+              </svg>
+              <span
+                className={`flex items-center gap-1.5 mt-1.5 text-[10px] font-medium ${muted}`}
+              >
+                <span className="w-2.5 h-[2px] bg-emerald-400 rounded inline-block" />
+                Revenue · last 30 days
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Today's schedule ─────────────────────────────────────────────────── */}
+        {todaysBookings.length > 0 && (
+          <div className={`${card} overflow-hidden`}>
+            <div className="px-5 py-4 border-b border-white/[0.05] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-emerald-400/10 flex items-center justify-center">
+                  <CalendarCheck size={14} className="text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">
+                    Today's schedule
+                  </p>
+                  <p className={`text-xs ${muted}`}>
+                    {todaysBookings.length} job
+                    {todaysBookings.length !== 1 ? "s" : ""} on the board
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate("/admin/bookings")}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+              >
+                View all <ChevronRight size={12} />
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <div className="flex gap-2.5 p-4 min-w-max">
+                {todaysBookings.slice(0, 8).map((b, i) => (
+                  <button
+                    key={i}
+                    onClick={() => navigate(`/admin/bookings?id=${b._id}`)}
+                    className="flex items-center gap-3 bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] rounded-xl px-4 py-3 text-left transition-colors min-w-52"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-emerald-400/10 flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-semibold text-emerald-400">
+                        {initials(b)}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium text-white/85 truncate">
+                        {b.customer?.firstName} {b.customer?.lastName}
+                      </p>
+                      <p className={`text-[11px] ${muted} truncate`}>
+                        {b.service}
+                      </p>
+                      <p className="text-[11px] font-semibold text-white/55 mt-0.5">
+                        {b.schedule?.preferredTime || "Time TBC"}
+                      </p>
+                    </div>
+                    <StatusBadge status={b.status} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Revenue trend + split ────────────────────────────────────────────── */}
+        <div className="grid lg:grid-cols-3 gap-4">
+          <div className={`lg:col-span-2 ${card} p-5 sm:p-6`}>
+            <div className="flex flex-wrap justify-between items-start gap-4 mb-2">
+              <div>
+                <CardHead kicker="Analytics" title="Revenue trend" />
+                <div className="flex items-baseline gap-2.5 mt-2">
+                  <span className="text-2xl font-semibold text-white tabular-nums tracking-tight">
+                    {gbp(rangeRevenue, 2)}
+                  </span>
+                  {changePct !== null ? (
+                    <span
+                      className={`inline-flex items-center gap-1 text-[11px] font-semibold tabular-nums ${changePct >= 0 ? "text-emerald-400" : "text-rose-400"}`}
                     >
-                      {hoveredPoint === i && (
+                      {changePct >= 0 ? (
+                        <ArrowUpRight size={12} />
+                      ) : (
+                        <ArrowDownRight size={12} />
+                      )}
+                      {changePct >= 0 ? "+" : ""}
+                      {changePct.toFixed(1)}% vs prior period
+                    </span>
+                  ) : (
+                    <span className={`text-[11px] ${muted}`}>
+                      No prior period data yet
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            {loading ? (
+              <div className="h-52 bg-white/[0.03] rounded-xl animate-pulse" />
+            ) : (
+              <div className="space-y-2 pt-2">
+                <div className="relative" style={{ height: "200px" }}>
+                  {[0, 25, 50, 75].map((g) => (
+                    <div
+                      key={g}
+                      className="absolute left-0 right-0 border-t border-dashed border-white/[0.04]"
+                      style={{ bottom: `${g}%` }}
+                    />
+                  ))}
+                  <svg
+                    className="absolute inset-0 w-full h-full"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                  >
+                    <defs>
+                      <linearGradient
+                        id="trendFill"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor="#10B981"
+                          stopOpacity="0.18"
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor="#10B981"
+                          stopOpacity="0"
+                        />
+                      </linearGradient>
+                    </defs>
+                    <polygon
+                      points={`0,100 ${trendLine} 100,100`}
+                      fill="url(#trendFill)"
+                    />
+                    <polyline
+                      points={trendLine}
+                      fill="none"
+                      stroke="#10B981"
+                      strokeWidth="1.5"
+                      vectorEffect="non-scaling-stroke"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex">
+                    {trendPoints.map((p, i) => (
+                      <div
+                        key={i}
+                        className="flex-1 h-full relative cursor-pointer"
+                        onMouseEnter={() => setHoveredPoint(i)}
+                        onMouseLeave={() => setHoveredPoint(null)}
+                      >
+                        {hoveredPoint === i && (
+                          <div
+                            className="absolute -translate-x-1/2 mb-2 bg-[#0F3D2C] border border-white/10 text-white text-[10px] font-medium rounded-lg px-2.5 py-1.5 whitespace-nowrap z-20 pointer-events-none shadow-xl tabular-nums"
+                            style={{
+                              left: "50%",
+                              bottom: `${Math.min(p.heightPct + 10, 88)}%`,
+                            }}
+                          >
+                            <span className="font-semibold">
+                              {gbp(p.revenue, 2)}
+                            </span>
+                            <br />
+                            <span className={muted}>
+                              {p.count} booking{p.count !== 1 ? "s" : ""} ·{" "}
+                              {p.label}
+                            </span>
+                          </div>
+                        )}
                         <div
-                          className="absolute -translate-x-1/2 mb-2 bg-[#0F3D2C] border border-white/10 text-white text-[10px] font-medium rounded-lg px-2.5 py-1.5 whitespace-nowrap z-20 pointer-events-none shadow-xl tabular-nums"
+                          className={`absolute rounded-full border-2 border-[#0B2D22] transition-all ${hoveredPoint === i ? "bg-emerald-400 w-3 h-3" : "bg-emerald-500/40 w-1.5 h-1.5"}`}
                           style={{
                             left: "50%",
-                            bottom: `${Math.min(p.heightPct + 10, 88)}%`,
+                            bottom: `${p.heightPct}%`,
+                            transform: "translate(-50%, 50%)",
                           }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  {trendPoints.map((p, i) => (
+                    <div key={i} className="flex-1 text-center">
+                      {i % trendLabelStep === 0 && (
+                        <span
+                          className={`text-[9px] font-medium ${dimmed} uppercase tracking-wide`}
                         >
-                          <span className="font-semibold">
-                            {gbp(p.revenue, 2)}
-                          </span>
-                          <br />
-                          <span className={muted}>
-                            {p.count} booking{p.count !== 1 ? "s" : ""} ·{" "}
-                            {p.label}
-                          </span>
-                        </div>
+                          {p.label}
+                        </span>
                       )}
-                      <div
-                        className={`absolute rounded-full border-2 border-[#0B2D22] transition-all ${hoveredPoint === i ? "bg-emerald-400 w-3 h-3" : "bg-emerald-500/40 w-1.5 h-1.5"}`}
-                        style={{
-                          left: "50%",
-                          bottom: `${p.heightPct}%`,
-                          transform: "translate(-50%, 50%)",
-                        }}
-                      />
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="flex gap-1">
-                {trendPoints.map((p, i) => (
-                  <div key={i} className="flex-1 text-center">
-                    {i % trendLabelStep === 0 && (
-                      <span
-                        className={`text-[9px] font-medium ${dimmed} uppercase tracking-wide`}
-                      >
-                        {p.label}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* Revenue split donut */}
-        <div className={`${card} p-5 sm:p-6`}>
-          <CardHead
-            kicker="Breakdown"
-            title="Revenue split"
-            sub={`Net ${gbp(Math.max(netRevenue, 0))} after expenses`}
-          />
-          <div className="relative w-36 h-36 mx-auto my-6">
-            <svg viewBox="0 0 42 42" className="w-full h-full">
-              <circle
-                cx="21"
-                cy="21"
-                r="15.91549"
-                fill="transparent"
-                stroke="#0F3D2C"
-                strokeWidth="4"
-              />
-              {donutArcs.map((seg, i) => (
+          {/* Revenue split donut */}
+          <div className={`${card} p-5 sm:p-6`}>
+            <CardHead
+              kicker="Breakdown"
+              title="Revenue split"
+              sub={`Net ${gbp(Math.max(netRevenue, 0))} after expenses`}
+            />
+            <div className="relative w-36 h-36 mx-auto my-6">
+              <svg viewBox="0 0 42 42" className="w-full h-full">
                 <circle
-                  key={i}
                   cx="21"
                   cy="21"
                   r="15.91549"
                   fill="transparent"
-                  stroke={seg.color}
+                  stroke="#0F3D2C"
                   strokeWidth="4"
-                  strokeDasharray={`${seg.pct} ${100 - seg.pct}`}
-                  strokeDashoffset={seg.dashoffset}
-                  transform="rotate(-90 21 21)"
-                  strokeLinecap={seg.pct < 100 ? "butt" : "round"}
                 />
-              ))}
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <p className="text-lg font-semibold text-white tabular-nums tracking-tight">
-                {gbp(Math.max(netRevenue, 0))}
-              </p>
-              <p className={eyebrow}>Net</p>
-            </div>
-          </div>
-          <div className="space-y-2.5">
-            {donutArcs.map((seg, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: seg.color }}
+                {donutArcs.map((seg, i) => (
+                  <circle
+                    key={i}
+                    cx="21"
+                    cy="21"
+                    r="15.91549"
+                    fill="transparent"
+                    stroke={seg.color}
+                    strokeWidth="4"
+                    strokeDasharray={`${seg.pct} ${100 - seg.pct}`}
+                    strokeDashoffset={seg.dashoffset}
+                    transform="rotate(-90 21 21)"
+                    strokeLinecap={seg.pct < 100 ? "butt" : "round"}
                   />
-                  <span className="text-xs font-medium text-white/55">
-                    {seg.label}
-                  </span>
-                </div>
-                <span className="text-xs font-semibold text-white/80 tabular-nums">
-                  {seg.pct.toFixed(0)}%
-                </span>
+                ))}
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <p className="text-lg font-semibold text-white tabular-nums tracking-tight">
+                  {gbp(Math.max(netRevenue, 0))}
+                </p>
+                <p className={eyebrow}>Net</p>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── 6-month overview + top services ──────────────────────────────────── */}
-      <div className="grid lg:grid-cols-3 gap-4">
-        <div className={`lg:col-span-2 ${card} p-5 sm:p-6`}>
-          <div className="flex flex-wrap justify-between items-start gap-3 mb-5">
-            <CardHead kicker="Six months" title="Bookings overview" />
-            <div className="flex items-center gap-4 text-[11px] font-medium text-white/40">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />{" "}
-                Completed
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-cyan-400/70" />{" "}
-                Cancelled
-              </span>
             </div>
-          </div>
-          <div
-            className="flex items-end gap-2 sm:gap-4"
-            style={{ height: "170px" }}
-          >
-            {monthly.map((m, i) => (
-              <div
-                key={i}
-                className="flex-1 h-full flex items-end justify-center gap-1 group"
-              >
-                <div
-                  className="w-4 rounded-t bg-emerald-500 group-hover:bg-emerald-400 transition-colors"
-                  style={{
-                    height: `${Math.max((m.completed / maxMonthRev) * 100, 2)}%`,
-                  }}
-                  title={`Completed: ${gbp(m.completed, 2)}`}
-                />
-                <div
-                  className="w-4 rounded-t bg-cyan-400/50 group-hover:bg-cyan-400/70 transition-colors"
-                  style={{
-                    height: `${Math.max((m.cancelled / maxMonthRev) * 100, 2)}%`,
-                  }}
-                  title={`Cancelled: ${gbp(m.cancelled, 2)}`}
-                />
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-4 mt-2">
-            {monthly.map((m, i) => (
-              <div key={i} className="flex-1 text-center">
-                <span
-                  className={`text-[10px] font-medium ${dimmed} uppercase tracking-wide`}
-                >
-                  {m.label}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className={`${card} p-5 sm:p-6`}>
-          <CardHead
-            kicker="Performance"
-            title="Top services"
-            sub="By revenue earned"
-          />
-          <div className="space-y-4 mt-5">
-            {loading ? (
-              [...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-5 bg-white/[0.04] rounded-lg animate-pulse"
-                />
-              ))
-            ) : topServices.length === 0 ? (
-              <p className={`${muted} text-sm text-center py-6`}>
-                No bookings yet — revenue by service will appear here.
-              </p>
-            ) : (
-              topServices.map(([name, stats], i) => (
-                <div key={i}>
-                  <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-xs font-medium text-white/55 truncate mr-2 flex-1 min-w-0">
-                      {name}
-                    </span>
-                    <span className="text-xs font-semibold text-white/80 tabular-nums shrink-0">
-                      {gbp(stats.revenue)}
+            <div className="space-y-2.5">
+              {donutArcs.map((seg, i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: seg.color }}
+                    />
+                    <span className="text-xs font-medium text-white/55">
+                      {seg.label}
                     </span>
                   </div>
-                  <div className="w-full h-1 bg-white/[0.05] rounded-full overflow-hidden">
+                  <span className="text-xs font-semibold text-white/80 tabular-nums">
+                    {seg.pct.toFixed(0)}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── 6-month overview + top services ──────────────────────────────────── */}
+        <div className="grid lg:grid-cols-3 gap-4">
+          <div className={`lg:col-span-2 ${card} p-5 sm:p-6`}>
+            <div className="flex flex-wrap justify-between items-start gap-3 mb-5">
+              <CardHead kicker="Six months" title="Bookings overview" />
+              <div className="flex items-center gap-4 text-[11px] font-medium text-white/40">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />{" "}
+                  Completed
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400/70" />{" "}
+                  Cancelled
+                </span>
+              </div>
+            </div>
+            <div
+              className="flex items-end gap-2 sm:gap-4"
+              style={{ height: "170px" }}
+            >
+              {monthly.map((m, i) => (
+                <div
+                  key={i}
+                  className="flex-1 h-full flex items-end justify-center gap-1 group"
+                >
+                  <div
+                    className="w-4 rounded-t bg-emerald-500 group-hover:bg-emerald-400 transition-colors"
+                    style={{
+                      height: `${Math.max((m.completed / maxMonthRev) * 100, 2)}%`,
+                    }}
+                    title={`Completed: ${gbp(m.completed, 2)}`}
+                  />
+                  <div
+                    className="w-4 rounded-t bg-cyan-400/50 group-hover:bg-cyan-400/70 transition-colors"
+                    style={{
+                      height: `${Math.max((m.cancelled / maxMonthRev) * 100, 2)}%`,
+                    }}
+                    title={`Cancelled: ${gbp(m.cancelled, 2)}`}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-4 mt-2">
+              {monthly.map((m, i) => (
+                <div key={i} className="flex-1 text-center">
+                  <span
+                    className={`text-[10px] font-medium ${dimmed} uppercase tracking-wide`}
+                  >
+                    {m.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={`${card} p-5 sm:p-6`}>
+            <CardHead
+              kicker="Performance"
+              title="Top services"
+              sub="By revenue earned"
+            />
+            <div className="space-y-4 mt-5">
+              {loading ? (
+                [...Array(4)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-5 bg-white/[0.04] rounded-lg animate-pulse"
+                  />
+                ))
+              ) : topServices.length === 0 ? (
+                <p className={`${muted} text-sm text-center py-6`}>
+                  No bookings yet — revenue by service will appear here.
+                </p>
+              ) : (
+                topServices.map(([name, stats], i) => (
+                  <div key={i}>
+                    <div className="flex justify-between items-center mb-1.5">
+                      <span className="text-xs font-medium text-white/55 truncate mr-2 flex-1 min-w-0">
+                        {name}
+                      </span>
+                      <span className="text-xs font-semibold text-white/80 tabular-nums shrink-0">
+                        {gbp(stats.revenue)}
+                      </span>
+                    </div>
+                    <div className="w-full h-1 bg-white/[0.05] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-emerald-500 rounded-full transition-all duration-700"
+                        style={{
+                          width: `${(stats.revenue / maxServiceRev) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Status distribution + booking sources ────────────────────────────── */}
+        <div className="grid lg:grid-cols-2 gap-4">
+          <div className={`${card} p-5 sm:p-6`}>
+            <CardHead
+              kicker="Last 30 days"
+              title="Booking status distribution"
+            />
+            <div className="space-y-3 mt-5">
+              {statusDist.map((s) => (
+                <div key={s.label} className="flex items-center gap-3">
+                  <div className="w-24 shrink-0">
+                    <p className="text-[11px] font-medium text-white/50">
+                      {s.label}
+                    </p>
+                  </div>
+                  <div className="flex-1 h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-emerald-500 rounded-full transition-all duration-700"
+                      className="h-full rounded-full transition-all duration-700"
                       style={{
-                        width: `${(stats.revenue / maxServiceRev) * 100}%`,
+                        width: `${s.pct}%`,
+                        backgroundColor: statusColors[s.label] || "#475569",
                       }}
                     />
                   </div>
+                  <div className="w-16 text-right shrink-0 flex items-center gap-1.5 justify-end">
+                    <span className="text-[13px] font-semibold text-white/80 tabular-nums">
+                      {s.count}
+                    </span>
+                    <span className={`text-[10px] ${muted} tabular-nums`}>
+                      {s.pct.toFixed(0)}%
+                    </span>
+                  </div>
                 </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Status distribution + booking sources ────────────────────────────── */}
-      <div className="grid lg:grid-cols-2 gap-4">
-        <div className={`${card} p-5 sm:p-6`}>
-          <CardHead kicker="Last 30 days" title="Booking status distribution" />
-          <div className="space-y-3 mt-5">
-            {statusDist.map((s) => (
-              <div key={s.label} className="flex items-center gap-3">
-                <div className="w-24 shrink-0">
-                  <p className="text-[11px] font-medium text-white/50">
-                    {s.label}
-                  </p>
-                </div>
-                <div className="flex-1 h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+              ))}
+            </div>
+            <div className="mt-5 h-2 rounded-full overflow-hidden flex bg-white/[0.04]">
+              {statusDist
+                .filter((s) => s.pct > 0)
+                .map((s) => (
                   <div
-                    className="h-full rounded-full transition-all duration-700"
+                    key={s.label}
+                    className="h-full transition-all duration-700"
                     style={{
                       width: `${s.pct}%`,
                       backgroundColor: statusColors[s.label] || "#475569",
                     }}
+                    title={`${s.label}: ${s.count}`}
                   />
-                </div>
-                <div className="w-16 text-right shrink-0 flex items-center gap-1.5 justify-end">
-                  <span className="text-[13px] font-semibold text-white/80 tabular-nums">
-                    {s.count}
-                  </span>
-                  <span className={`text-[10px] ${muted} tabular-nums`}>
-                    {s.pct.toFixed(0)}%
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-5 h-2 rounded-full overflow-hidden flex bg-white/[0.04]">
-            {statusDist
-              .filter((s) => s.pct > 0)
-              .map((s) => (
-                <div
-                  key={s.label}
-                  className="h-full transition-all duration-700"
-                  style={{
-                    width: `${s.pct}%`,
-                    backgroundColor: statusColors[s.label] || "#475569",
-                  }}
-                  title={`${s.label}: ${s.count}`}
-                />
-              ))}
-          </div>
-        </div>
-
-        <div className={`${card} p-5 sm:p-6`}>
-          <CardHead
-            kicker="Acquisition"
-            title="Booking sources"
-            action="View leads"
-            onAction={() => navigate("/admin/leads")}
-          />
-          <div className="grid grid-cols-3 gap-2 mt-4 mb-5">
-            {[
-              { label: "Total", val: leadStats?.total ?? "—" },
-              { label: "This week", val: leadStats?.thisWeek ?? "—" },
-              { label: "This month", val: leadStats?.thisMonth ?? "—" },
-            ].map((s) => (
-              <div
-                key={s.label}
-                className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-3 text-center"
-              >
-                <p className="text-lg font-semibold text-white tabular-nums">
-                  {s.val}
-                </p>
-                <p className={`${eyebrow} mt-0.5`}>{s.label}</p>
-              </div>
-            ))}
-          </div>
-          <div className="space-y-2.5">
-            {leadSourceBreakdown.length === 0 ? (
-              <p className={`${muted} text-sm text-center py-6`}>
-                No leads yet — sources will appear as enquiries arrive.
-              </p>
-            ) : (
-              leadSourceBreakdown.map(([source, stats]) => (
-                <div
-                  key={source}
-                  className="flex items-center justify-between gap-3"
-                >
-                  <span className="text-xs font-medium text-white/55 w-24 shrink-0 truncate">
-                    {source}
-                  </span>
-                  <div className="flex-1 h-1 bg-white/[0.05] rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-emerald-500 rounded-full"
-                      style={{
-                        width: `${(stats.count / maxLeadCount) * 100}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-[11px] font-semibold text-white/80 tabular-nums w-6 text-right">
-                    {stats.count}
-                  </span>
-                  <span
-                    className={`hidden sm:inline text-[10px] ${muted} tabular-nums w-16 text-right shrink-0`}
-                  >
-                    {gbp(stats.revenue)}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Customers + requested + ratings ──────────────────────────────────── */}
-      <div className="grid lg:grid-cols-3 gap-4">
-        <div className={`${card} overflow-hidden`}>
-          <div className="p-5 sm:p-6 pb-3">
-            <CardHead
-              kicker="Clients"
-              title="Top customers"
-              action="View all"
-              onAction={() => navigate("/admin/customers")}
-            />
-          </div>
-          <div className="px-3 pb-3">
-            {topCustomers.length === 0 ? (
-              <p className={`${muted} text-sm text-center py-8`}>
-                No customers yet — completed bookings build this list.
-              </p>
-            ) : (
-              topCustomers.map((c, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors"
-                >
-                  <div className="w-8 h-8 rounded-full bg-emerald-400/10 flex items-center justify-center shrink-0">
-                    <span className="text-[10px] font-semibold text-emerald-400">
-                      {(
-                        (c.firstName?.[0] || "") + (c.lastName?.[0] || "")
-                      ).toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-white/85 truncate">
-                      {c.firstName} {c.lastName}
-                    </p>
-                    <p className={`text-[11px] ${muted}`}>
-                      {c.count} booking{c.count !== 1 ? "s" : ""}
-                    </p>
-                  </div>
-                  <p className="text-[13px] font-semibold text-white/80 tabular-nums shrink-0">
-                    {gbp(c.total)}
-                  </p>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className={`${card} p-5 sm:p-6`}>
-          <CardHead kicker="Popularity" title="Top requested services" />
-          <div className="space-y-3.5 mt-5">
-            {topRequested.length === 0 ? (
-              <p className={`${muted} text-sm text-center py-8`}>
-                No data yet.
-              </p>
-            ) : (
-              topRequested.map(([name, stats], i) => {
-                const share =
-                  bookings.length > 0
-                    ? (stats.count / bookings.length) * 100
-                    : 0;
-                return (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between gap-3"
-                  >
-                    <span className="text-xs font-medium text-white/55 truncate flex-1 min-w-0">
-                      {name}
-                    </span>
-                    <div className="flex items-center gap-2 shrink-0 w-28">
-                      <div className="flex-1 h-1 bg-white/[0.05] rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-cyan-400/80 rounded-full"
-                          style={{ width: `${share}%` }}
-                        />
-                      </div>
-                      <span className="text-[11px] font-semibold text-white/75 tabular-nums w-9 text-right">
-                        {share.toFixed(0)}%
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        <div className={`${card} p-5 sm:p-6`}>
-          <div className="flex justify-between items-start">
-            <CardHead kicker="Reviews" title="Ratings" />
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-400/10">
-              <Star size={12} className="text-amber-400 fill-amber-400" />
-              <span className="text-[13px] font-semibold text-amber-300 tabular-nums">
-                {avgRating.toFixed(1)}
-              </span>
+                ))}
             </div>
           </div>
-          {reviews.length === 0 ? (
-            <p className={`${muted} text-sm text-center py-8`}>
-              No reviews yet — ratings will appear as customers leave feedback.
-            </p>
-          ) : (
-            <>
-              <p className={`text-[11px] ${muted} mt-1 mb-4`}>
-                {reviews.length.toLocaleString("en-GB")} total reviews
-              </p>
-              <div className="space-y-2.5">
-                {ratingBreakdown.map((r) => (
-                  <div key={r.star} className="flex items-center gap-2">
-                    <span className="text-[11px] font-medium text-white/45 w-11 shrink-0">
-                      {r.star} star
+
+          <div className={`${card} p-5 sm:p-6`}>
+            <CardHead
+              kicker="Acquisition"
+              title="Booking sources"
+              action="View leads"
+              onAction={() => navigate("/admin/leads")}
+            />
+            <div className="grid grid-cols-3 gap-2 mt-4 mb-5">
+              {[
+                { label: "Total", val: leadStats?.total ?? "—" },
+                { label: "This week", val: leadStats?.thisWeek ?? "—" },
+                { label: "This month", val: leadStats?.thisMonth ?? "—" },
+              ].map((s) => (
+                <div
+                  key={s.label}
+                  className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-3 text-center"
+                >
+                  <p className="text-lg font-semibold text-white tabular-nums">
+                    {s.val}
+                  </p>
+                  <p className={`${eyebrow} mt-0.5`}>{s.label}</p>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2.5">
+              {leadSourceBreakdown.length === 0 ? (
+                <p className={`${muted} text-sm text-center py-6`}>
+                  No leads yet — sources will appear as enquiries arrive.
+                </p>
+              ) : (
+                leadSourceBreakdown.map(([source, stats]) => (
+                  <div
+                    key={source}
+                    className="flex items-center justify-between gap-3"
+                  >
+                    <span className="text-xs font-medium text-white/55 w-24 shrink-0 truncate">
+                      {source}
                     </span>
                     <div className="flex-1 h-1 bg-white/[0.05] rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-amber-400 rounded-full"
-                        style={{ width: `${r.pct}%` }}
+                        className="h-full bg-emerald-500 rounded-full"
+                        style={{
+                          width: `${(stats.count / maxLeadCount) * 100}%`,
+                        }}
                       />
                     </div>
+                    <span className="text-[11px] font-semibold text-white/80 tabular-nums w-6 text-right">
+                      {stats.count}
+                    </span>
                     <span
-                      className={`text-[10px] font-medium ${muted} tabular-nums w-8 text-right`}
+                      className={`hidden sm:inline text-[10px] ${muted} tabular-nums w-16 text-right shrink-0`}
                     >
-                      {r.pct.toFixed(0)}%
+                      {gbp(stats.revenue)}
                     </span>
                   </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* ── Quote conversion + recent quotes + calendar ──────────────────────── */}
-      <div className="grid lg:grid-cols-3 gap-4">
-        <div className={`${card} p-5 sm:p-6`}>
-          <CardHead
-            kicker="Quotes"
-            title="Quote conversion"
-            sub="Accept vs decline, all time"
-          />
-          {!quoteStats?.total ? (
-            <p className={`${muted} text-sm text-center py-8`}>
-              No quotes sent yet — send one to start tracking conversion.
-            </p>
-          ) : (
-            <>
-              <div className="flex items-end gap-2 mt-4 mb-4">
-                <span className="text-3xl font-semibold text-white tabular-nums tracking-tight">
-                  {(quoteStats.acceptanceRate || 0).toFixed(0)}%
-                </span>
-                <span className={`text-[11px] ${muted} mb-1.5`}>
-                  acceptance rate
-                </span>
-              </div>
-              <div className="w-full h-1.5 bg-white/[0.05] rounded-full overflow-hidden flex mb-4">
-                <div
-                  className="h-full bg-emerald-500"
-                  style={{
-                    width: `${((quoteStats.accepted || 0) / quoteStats.total) * 100}%`,
-                  }}
-                />
-                <div
-                  className="h-full bg-rose-500/80"
-                  style={{
-                    width: `${((quoteStats.declined || 0) / quoteStats.total) * 100}%`,
-                  }}
-                />
-              </div>
-              <div className="space-y-2.5">
-                {[
-                  {
-                    color: "bg-emerald-500",
-                    label: "Accepted",
-                    val: `${quoteStats.accepted || 0} · ${gbp(quoteStats.acceptedValue || 0)}`,
-                  },
-                  {
-                    color: "bg-rose-500",
-                    label: "Declined",
-                    val: `${quoteStats.declined || 0}`,
-                  },
-                  {
-                    color: "bg-white/20",
-                    label: "Awaiting response",
-                    val: `${quoteStats.pending ?? quoteStats.total}`,
-                  },
-                ].map((r) => (
-                  <div
-                    key={r.label}
-                    className="flex items-center justify-between text-xs"
-                  >
-                    <span className="flex items-center gap-2 font-medium text-white/55">
-                      <span className={`w-2 h-2 rounded-full ${r.color}`} />
-                      {r.label}
-                    </span>
-                    <span className="font-semibold text-white/80 tabular-nums">
-                      {r.val}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        <div className={`${card} overflow-hidden`}>
-          <div className="p-5 sm:p-6 pb-3">
-            <CardHead
-              kicker="Latest"
-              title="Recent quotes"
-              action="History"
-              onAction={() => navigate("/admin/quotes/history")}
-            />
+                ))
+              )}
+            </div>
           </div>
-          <div className="px-3 pb-3">
-            {recentQuotes.length === 0 ? (
-              <p className={`${muted} text-sm text-center py-8`}>
-                No quotes sent yet.
-              </p>
-            ) : (
-              recentQuotes.map((q) => {
-                const isAccepted = q.status === "accepted";
-                const isDeclined = q.status === "declined";
-                return (
-                  <button
-                    key={q.quoteRef}
-                    onClick={() => navigate("/admin/quotes")}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors text-left"
+        </div>
+
+        {/* ── Customers + requested + ratings ──────────────────────────────────── */}
+        <div className="grid lg:grid-cols-3 gap-4">
+          <div className={`${card} overflow-hidden`}>
+            <div className="p-5 sm:p-6 pb-3">
+              <CardHead
+                kicker="Clients"
+                title="Top customers"
+                action="View all"
+                onAction={() => navigate("/admin/customers")}
+              />
+            </div>
+            <div className="px-3 pb-3">
+              {topCustomers.length === 0 ? (
+                <p className={`${muted} text-sm text-center py-8`}>
+                  No customers yet — completed bookings build this list.
+                </p>
+              ) : (
+                topCustomers.map((c, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors"
                   >
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isAccepted ? "bg-emerald-400/10" : isDeclined ? "bg-rose-400/10" : "bg-white/[0.05]"}`}
-                    >
-                      {isDeclined ? (
-                        <X size={15} className="text-rose-400" />
-                      ) : (
-                        <CheckCircle2
-                          size={15}
-                          className={
-                            isAccepted ? "text-emerald-400" : "text-white/25"
-                          }
-                        />
-                      )}
+                    <div className="w-8 h-8 rounded-full bg-emerald-400/10 flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-semibold text-emerald-400">
+                        {(
+                          (c.firstName?.[0] || "") + (c.lastName?.[0] || "")
+                        ).toUpperCase()}
+                      </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-medium text-white/85 truncate">
-                        {q.companyName}
+                        {c.firstName} {c.lastName}
                       </p>
                       <p className={`text-[11px] ${muted}`}>
-                        {q.quoteRef} · {gbp(q.grandTotal, 2)}
+                        {c.count} booking{c.count !== 1 ? "s" : ""}
                       </p>
                     </div>
-                    <span
-                      className={`text-[10px] font-semibold px-2 py-[3px] rounded-md shrink-0 ${isAccepted ? "text-emerald-300 bg-emerald-400/10" : isDeclined ? "text-rose-300 bg-rose-400/10" : "text-white/40 bg-white/[0.05]"}`}
+                    <p className="text-[13px] font-semibold text-white/80 tabular-nums shrink-0">
+                      {gbp(c.total)}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className={`${card} p-5 sm:p-6`}>
+            <CardHead kicker="Popularity" title="Top requested services" />
+            <div className="space-y-3.5 mt-5">
+              {topRequested.length === 0 ? (
+                <p className={`${muted} text-sm text-center py-8`}>
+                  No data yet.
+                </p>
+              ) : (
+                topRequested.map(([name, stats], i) => {
+                  const share =
+                    bookings.length > 0
+                      ? (stats.count / bookings.length) * 100
+                      : 0;
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between gap-3"
                     >
-                      {isAccepted
-                        ? "Accepted"
-                        : isDeclined
-                          ? "Declined"
-                          : "Sent"}
-                    </span>
-                  </button>
-                );
-              })
+                      <span className="text-xs font-medium text-white/55 truncate flex-1 min-w-0">
+                        {name}
+                      </span>
+                      <div className="flex items-center gap-2 shrink-0 w-28">
+                        <div className="flex-1 h-1 bg-white/[0.05] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-cyan-400/80 rounded-full"
+                            style={{ width: `${share}%` }}
+                          />
+                        </div>
+                        <span className="text-[11px] font-semibold text-white/75 tabular-nums w-9 text-right">
+                          {share.toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          <div className={`${card} p-5 sm:p-6`}>
+            <div className="flex justify-between items-start">
+              <CardHead kicker="Reviews" title="Ratings" />
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-400/10">
+                <Star size={12} className="text-amber-400 fill-amber-400" />
+                <span className="text-[13px] font-semibold text-amber-300 tabular-nums">
+                  {avgRating.toFixed(1)}
+                </span>
+              </div>
+            </div>
+            {reviews.length === 0 ? (
+              <p className={`${muted} text-sm text-center py-8`}>
+                No reviews yet — ratings will appear as customers leave
+                feedback.
+              </p>
+            ) : (
+              <>
+                <p className={`text-[11px] ${muted} mt-1 mb-4`}>
+                  {reviews.length.toLocaleString("en-GB")} total reviews
+                </p>
+                <div className="space-y-2.5">
+                  {ratingBreakdown.map((r) => (
+                    <div key={r.star} className="flex items-center gap-2">
+                      <span className="text-[11px] font-medium text-white/45 w-11 shrink-0">
+                        {r.star} star
+                      </span>
+                      <div className="flex-1 h-1 bg-white/[0.05] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-amber-400 rounded-full"
+                          style={{ width: `${r.pct}%` }}
+                        />
+                      </div>
+                      <span
+                        className={`text-[10px] font-medium ${muted} tabular-nums w-8 text-right`}
+                      >
+                        {r.pct.toFixed(0)}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
 
-        {/* Revenue by date */}
-        <div className={`${card} p-5 sm:p-6`}>
-          <CardHead
-            kicker="Range"
-            title="Revenue by date"
-            sub="Pick a start and end date to see totals"
-          />
-
-          <div className="flex items-center justify-between mt-4 mb-3">
-            <button
-              onClick={() => setCalMonth(new Date(calYear, calMonthIdx - 1, 1))}
-              aria-label="Previous month"
-              className="p-1.5 rounded-lg bg-white/[0.04] text-white/40 hover:bg-white/10 hover:text-white/75 transition-colors"
-            >
-              <ChevronLeft size={14} />
-            </button>
-            <p className="text-[13px] font-semibold text-white/80">
-              {calMonth.toLocaleDateString("en-GB", {
-                month: "long",
-                year: "numeric",
-              })}
-            </p>
-            <button
-              onClick={() => setCalMonth(new Date(calYear, calMonthIdx + 1, 1))}
-              aria-label="Next month"
-              className="p-1.5 rounded-lg bg-white/[0.04] text-white/40 hover:bg-white/10 hover:text-white/75 transition-colors"
-            >
-              <ChevronRight size={14} />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-7 gap-1 mb-1">
-            {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-              <div
-                key={i}
-                className={`text-[9px] font-semibold ${dimmed} uppercase text-center py-1`}
-              >
-                {d}
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-1 mb-3">
-            {calCells.map((day, i) => {
-              if (!day) return <div key={i} className="aspect-square" />;
-              const isStart = selStart && dateKey(day) === dateKey(selStart);
-              const isEnd = selEnd && dateKey(day) === dateKey(selEnd);
-              const inR = inRange(day);
-              const isToday = dateKey(day) === dateKey(new Date());
-              return (
-                <button
-                  key={i}
-                  onClick={() => handleCalClick(day)}
-                  className={`aspect-square rounded-lg flex items-center justify-center text-[11px] font-semibold transition-colors border ${
-                    isStart || isEnd
-                      ? "bg-emerald-500 text-white border-emerald-500"
-                      : inR
-                        ? "bg-emerald-400/10 text-emerald-300 border-emerald-500/20"
-                        : isToday
-                          ? "border-emerald-500/40 text-emerald-400/80"
-                          : "border-transparent text-white/40 hover:bg-white/[0.05] hover:text-white/65"
-                  }`}
-                >
-                  {day.getDate()}
-                </button>
-              );
-            })}
-          </div>
-
-          {selStart ? (
-            <div className="bg-emerald-400/[0.07] border border-emerald-500/15 rounded-xl p-3.5">
-              <p className={`${eyebrow} mb-1`}>
-                {selStart.toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "short",
-                })}
-                {selEnd
-                  ? ` – ${selEnd.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`
-                  : ""}
+        {/* ── Quote conversion + recent quotes + calendar ──────────────────────── */}
+        <div className="grid lg:grid-cols-3 gap-4">
+          <div className={`${card} p-5 sm:p-6`}>
+            <CardHead
+              kicker="Quotes"
+              title="Quote conversion"
+              sub="Accept vs decline, all time"
+            />
+            {!quoteStats?.total ? (
+              <p className={`${muted} text-sm text-center py-8`}>
+                No quotes sent yet — send one to start tracking conversion.
               </p>
-              <p className="text-xl font-semibold text-emerald-400 tabular-nums tracking-tight">
-                {gbp(selectedRangeRevenue)}
-              </p>
-              <div className="flex gap-4 mt-2 text-[11px]">
-                <span className={muted}>{bookingsInRange.length} bookings</span>
-                <span className={muted}>{leadsInRange.length} leads</span>
-                <span className={muted}>
-                  {conversionPct.toFixed(0)}% conversion
-                </span>
-              </div>
+            ) : (
+              <>
+                <div className="flex items-end gap-2 mt-4 mb-4">
+                  <span className="text-3xl font-semibold text-white tabular-nums tracking-tight">
+                    {(quoteStats.acceptanceRate || 0).toFixed(0)}%
+                  </span>
+                  <span className={`text-[11px] ${muted} mb-1.5`}>
+                    acceptance rate
+                  </span>
+                </div>
+                <div className="w-full h-1.5 bg-white/[0.05] rounded-full overflow-hidden flex mb-4">
+                  <div
+                    className="h-full bg-emerald-500"
+                    style={{
+                      width: `${((quoteStats.accepted || 0) / quoteStats.total) * 100}%`,
+                    }}
+                  />
+                  <div
+                    className="h-full bg-rose-500/80"
+                    style={{
+                      width: `${((quoteStats.declined || 0) / quoteStats.total) * 100}%`,
+                    }}
+                  />
+                </div>
+                <div className="space-y-2.5">
+                  {[
+                    {
+                      color: "bg-emerald-500",
+                      label: "Accepted",
+                      val: `${quoteStats.accepted || 0} · ${gbp(quoteStats.acceptedValue || 0)}`,
+                    },
+                    {
+                      color: "bg-rose-500",
+                      label: "Declined",
+                      val: `${quoteStats.declined || 0}`,
+                    },
+                    {
+                      color: "bg-white/20",
+                      label: "Awaiting response",
+                      val: `${quoteStats.pending ?? quoteStats.total}`,
+                    },
+                  ].map((r) => (
+                    <div
+                      key={r.label}
+                      className="flex items-center justify-between text-xs"
+                    >
+                      <span className="flex items-center gap-2 font-medium text-white/55">
+                        <span className={`w-2 h-2 rounded-full ${r.color}`} />
+                        {r.label}
+                      </span>
+                      <span className="font-semibold text-white/80 tabular-nums">
+                        {r.val}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className={`${card} overflow-hidden`}>
+            <div className="p-5 sm:p-6 pb-3">
+              <CardHead
+                kicker="Latest"
+                title="Recent quotes"
+                action="History"
+                onAction={() => navigate("/admin/quotes/history")}
+              />
+            </div>
+            <div className="px-3 pb-3">
+              {recentQuotes.length === 0 ? (
+                <p className={`${muted} text-sm text-center py-8`}>
+                  No quotes sent yet.
+                </p>
+              ) : (
+                recentQuotes.map((q) => {
+                  const isAccepted = q.status === "accepted";
+                  const isDeclined = q.status === "declined";
+                  return (
+                    <button
+                      key={q.quoteRef}
+                      onClick={() => navigate("/admin/quotes")}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors text-left"
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isAccepted ? "bg-emerald-400/10" : isDeclined ? "bg-rose-400/10" : "bg-white/[0.05]"}`}
+                      >
+                        {isDeclined ? (
+                          <X size={15} className="text-rose-400" />
+                        ) : (
+                          <CheckCircle2
+                            size={15}
+                            className={
+                              isAccepted ? "text-emerald-400" : "text-white/25"
+                            }
+                          />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-medium text-white/85 truncate">
+                          {q.companyName}
+                        </p>
+                        <p className={`text-[11px] ${muted}`}>
+                          {q.quoteRef} · {gbp(q.grandTotal, 2)}
+                        </p>
+                      </div>
+                      <span
+                        className={`text-[10px] font-semibold px-2 py-[3px] rounded-md shrink-0 ${isAccepted ? "text-emerald-300 bg-emerald-400/10" : isDeclined ? "text-rose-300 bg-rose-400/10" : "text-white/40 bg-white/[0.05]"}`}
+                      >
+                        {isAccepted
+                          ? "Accepted"
+                          : isDeclined
+                            ? "Declined"
+                            : "Sent"}
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Revenue by date */}
+          <div className={`${card} p-5 sm:p-6`}>
+            <CardHead
+              kicker="Range"
+              title="Revenue by date"
+              sub="Pick a start and end date to see totals"
+            />
+
+            <div className="flex items-center justify-between mt-4 mb-3">
               <button
-                onClick={() => {
-                  setSelStart(null);
-                  setSelEnd(null);
-                }}
-                className={`text-[11px] font-semibold ${muted} hover:text-white/65 mt-2 inline-flex items-center gap-1 transition-colors`}
+                onClick={() =>
+                  setCalMonth(new Date(calYear, calMonthIdx - 1, 1))
+                }
+                aria-label="Previous month"
+                className="p-1.5 rounded-lg bg-white/[0.04] text-white/40 hover:bg-white/10 hover:text-white/75 transition-colors"
               >
-                <X size={10} /> Clear selection
+                <ChevronLeft size={14} />
+              </button>
+              <p className="text-[13px] font-semibold text-white/80">
+                {calMonth.toLocaleDateString("en-GB", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+              <button
+                onClick={() =>
+                  setCalMonth(new Date(calYear, calMonthIdx + 1, 1))
+                }
+                aria-label="Next month"
+                className="p-1.5 rounded-lg bg-white/[0.04] text-white/40 hover:bg-white/10 hover:text-white/75 transition-colors"
+              >
+                <ChevronRight size={14} />
               </button>
             </div>
-          ) : (
-            <p className={`text-[11px] ${dimmed} text-center py-1`}>
-              Select a date range to see revenue
-            </p>
-          )}
-        </div>
-      </div>
 
-      {/* ── Modals ───────────────────────────────────────────────────────────── */}
-      {detailSegment && (
-        <DetailModal
-          segment={detailSegment}
-          onClose={() => setDetailSegment(null)}
-          onViewBooking={(b) => {
-            setDetailSegment(null);
-            navigate(`/admin/bookings?id=${b._id}`);
-          }}
-        />
-      )}
-      {showNetDetail && (
-        <NetRevenueModal
-          completed={completed}
-          expenses={expenses}
-          netRevenue={netRevenue}
-          onClose={() => setShowNetDetail(false)}
-          onViewBooking={(b) => {
-            setShowNetDetail(false);
-            navigate(`/admin/bookings?id=${b._id}`);
-          }}
-        />
-      )}
+            <div className="grid grid-cols-7 gap-1 mb-1">
+              {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+                <div
+                  key={i}
+                  className={`text-[9px] font-semibold ${dimmed} uppercase text-center py-1`}
+                >
+                  {d}
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1 mb-3">
+              {calCells.map((day, i) => {
+                if (!day) return <div key={i} className="aspect-square" />;
+                const isStart = selStart && dateKey(day) === dateKey(selStart);
+                const isEnd = selEnd && dateKey(day) === dateKey(selEnd);
+                const inR = inRange(day);
+                const isToday = dateKey(day) === dateKey(new Date());
+                return (
+                  <button
+                    key={i}
+                    onClick={() => handleCalClick(day)}
+                    className={`aspect-square rounded-lg flex items-center justify-center text-[11px] font-semibold transition-colors border ${
+                      isStart || isEnd
+                        ? "bg-emerald-500 text-white border-emerald-500"
+                        : inR
+                          ? "bg-emerald-400/10 text-emerald-300 border-emerald-500/20"
+                          : isToday
+                            ? "border-emerald-500/40 text-emerald-400/80"
+                            : "border-transparent text-white/40 hover:bg-white/[0.05] hover:text-white/65"
+                    }`}
+                  >
+                    {day.getDate()}
+                  </button>
+                );
+              })}
+            </div>
+
+            {selStart ? (
+              <div className="bg-emerald-400/[0.07] border border-emerald-500/15 rounded-xl p-3.5">
+                <p className={`${eyebrow} mb-1`}>
+                  {selStart.toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                  })}
+                  {selEnd
+                    ? ` – ${selEnd.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`
+                    : ""}
+                </p>
+                <p className="text-xl font-semibold text-emerald-400 tabular-nums tracking-tight">
+                  {gbp(selectedRangeRevenue)}
+                </p>
+                <div className="flex gap-4 mt-2 text-[11px]">
+                  <span className={muted}>
+                    {bookingsInRange.length} bookings
+                  </span>
+                  <span className={muted}>{leadsInRange.length} leads</span>
+                  <span className={muted}>
+                    {conversionPct.toFixed(0)}% conversion
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    setSelStart(null);
+                    setSelEnd(null);
+                  }}
+                  className={`text-[11px] font-semibold ${muted} hover:text-white/65 mt-2 inline-flex items-center gap-1 transition-colors`}
+                >
+                  <X size={10} /> Clear selection
+                </button>
+              </div>
+            ) : (
+              <p className={`text-[11px] ${dimmed} text-center py-1`}>
+                Select a date range to see revenue
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* ── Modals ───────────────────────────────────────────────────────────── */}
+        {detailSegment && (
+          <DetailModal
+            segment={detailSegment}
+            onClose={() => setDetailSegment(null)}
+            onViewBooking={(b) => {
+              setDetailSegment(null);
+              navigate(`/admin/bookings?id=${b._id}`);
+            }}
+          />
+        )}
+        {showNetDetail && (
+          <NetRevenueModal
+            completed={completed}
+            expenses={expenses}
+            netRevenue={netRevenue}
+            onClose={() => setShowNetDetail(false)}
+            onViewBooking={(b) => {
+              setShowNetDetail(false);
+              navigate(`/admin/bookings?id=${b._id}`);
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };

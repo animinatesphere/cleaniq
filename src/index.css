@@ -11,20 +11,20 @@
 }
 
 @theme {
-  --color-primary: #005B41;
-  --color-primary-dark: #003B2A;
-  --color-secondary: #3CC7FF;
-  --color-accent: #FFFFFF;
-  
-  --font-sans: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
+  --color-primary: #10b981;
+  --color-primary-dark: #ffffff;
+  --color-secondary: #3b82f6;
+  --color-accent: #ffffff;
+
+  --font-sans: "Inter", "Outfit", system-ui, -apple-system, sans-serif;
 }
 
 @layer base {
   :root {
-    --primary: #005B41;
-    --secondary: #3CC7FF;
-    --background: #f8fafc;
-    --foreground: #0f172a;
+    --primary: #10b981;
+    --secondary: #3b82f6;
+    --background: #061a13;
+    --foreground: #f8fafc;
   }
 
   html {
@@ -54,15 +54,39 @@
   }
 
   .btn-primary {
-    @apply px-5 py-2.5 md:px-6 md:py-3 rounded-full bg-primary text-white font-bold transition-all hover:bg-primary-dark hover:scale-105 active:scale-95 shadow-xl shadow-primary/20 flex items-center justify-center gap-2;
+    @apply px-5 py-2.5 md:px-6 md:py-3 rounded-full bg-[#10B981] text-white font-bold transition-all hover:bg-[#059669] hover:scale-105 active:scale-95 shadow-xl shadow-[#10B981]/20 flex items-center justify-center gap-2;
   }
 
   .btn-secondary {
-    @apply px-5 py-2.5 md:px-6 md:py-3 rounded-full bg-secondary text-primary font-bold transition-all hover:bg-secondary/80 hover:scale-105 active:scale-95 shadow-xl shadow-secondary/20 flex items-center justify-center gap-2;
+    @apply px-5 py-2.5 md:px-6 md:py-3 rounded-full bg-[#3B82F6] text-white font-bold transition-all hover:bg-[#2563EB] hover:scale-105 active:scale-95 shadow-xl shadow-[#3B82F6]/20 flex items-center justify-center gap-2;
   }
 
   .btn-outline {
-    @apply px-5 py-2.5 md:px-6 md:py-3 rounded-full border-2 border-primary text-primary font-bold transition-all hover:bg-primary hover:text-white hover:scale-105 active:scale-95 flex items-center justify-center gap-2;
+    @apply px-5 py-2.5 md:px-6 md:py-3 rounded-full border-2 border-[#10B981] text-[#10B981] font-bold transition-all hover:bg-[#10B981] hover:text-white hover:scale-105 active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .booking-shell {
+    @apply min-h-screen bg-[#061A13] text-white;
+  }
+
+  .booking-card {
+    @apply rounded-[32px] border border-white/[0.07] bg-[#0B2D22] shadow-[0_24px_80px_rgba(0,0,0,0.25)];
+  }
+
+  .booking-card-hover {
+    @apply transition-all duration-300 hover:bg-[#0D3527] hover:border-[#10B981]/30;
+  }
+
+  .booking-input {
+    @apply w-full rounded-2xl border border-white/[0.08] bg-[#05201A] px-5 py-4 text-sm font-semibold text-white placeholder:text-white/35 focus:border-[#10B981] focus:outline-none focus:ring-0;
+  }
+
+  .booking-muted {
+    @apply text-white/35;
+  }
+
+  .booking-subtle {
+    @apply text-white/55;
   }
 
   .section-padding {
@@ -98,12 +122,12 @@
   }
 
   .booking-input {
-    @apply w-full p-6 rounded-2xl border-2 border-slate-100 focus:border-primary focus:outline-none transition-all font-bold text-slate-700 bg-slate-50/30 focus:bg-white;
+    @apply w-full p-6 rounded-2xl border border-white/[0.08] focus:border-[#10B981] focus:outline-none transition-all font-bold text-white bg-[#05201A] focus:bg-[#0B2D22];
   }
 
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: #005B41 #f1f1f1;
+    scrollbar-color: #005b41 #f1f1f1;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
@@ -115,13 +139,13 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #005B41;
+    background: #005b41;
     border-radius: 10px;
   }
 
   .sidebar-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.12) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
   }
 
   .sidebar-scrollbar::-webkit-scrollbar {
@@ -133,7 +157,7 @@
   }
 
   .sidebar-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.12);
+    background: rgba(255, 255, 255, 0.12);
     border-radius: 10px;
   }
 }
@@ -148,18 +172,24 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #005B41;
+  background: #005b41;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #003B2A;
+  background: #003b2a;
 }
 
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 .animate-float {

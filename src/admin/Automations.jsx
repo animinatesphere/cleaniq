@@ -1,51 +1,186 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
-  Search, Users, Mail, MailX, CheckCircle2, XCircle,
-  ChevronDown, ChevronUp, Save, UserCheck, UserX, RefreshCw,
-  Send, RotateCcw, ChevronRight, X,
+  Search,
+  Users,
+  Mail,
+  MailX,
+  CheckCircle2,
+  XCircle,
+  Save,
+  UserCheck,
+  UserX,
+  RefreshCw,
+  Send,
+  RotateCcw,
+  X,
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  Settings2,
+  Clock,
+  Zap,
+  Bell,
+  Star,
+  Gift,
+  Calendar,
+  AlertCircle,
+  Filter,
+  Trash2,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-const TYPE_LABELS = {
-  booking_reminder_24h:  "Booking Reminder — 24h before",
-  booking_reminder_3h:   "Booking Reminder — 3h before",
-  review_request_2h:     "Review Request — 2h after job",
-  referral_offer_48h:    "Referral Offer — 48h after job",
-  rebooking_discount_3d: "Re-booking Discount — 3 days after",
-  quote_followup_24h:    "Quote Follow-up — 24 hours",
-  quote_followup_3d:     "Quote Follow-up — 3 days",
-  lost_lead_7d:          "Lost Lead Win-back — 7 days",
+const TYPE_META = {
+  booking_reminder_24h: {
+    label: "Booking Reminder — 24h before",
+    icon: "📅",
+    category: "booking",
+    delay: "24h before booking",
+    trigger: "booking_created",
+  },
+  booking_reminder_3h: {
+    label: "Booking Reminder — 3h before",
+    icon: "⏰",
+    category: "booking",
+    delay: "3h before booking",
+    trigger: "booking_created",
+  },
+  review_request_2h: {
+    label: "Review Request — 2h after job",
+    icon: "⭐",
+    category: "after_service",
+    delay: "2h after job done",
+    trigger: "booking_completed",
+  },
+  referral_offer_48h: {
+    label: "Referral Offer — 48h after job",
+    icon: "🎁",
+    category: "after_service",
+    delay: "48h after job done",
+    trigger: "booking_completed",
+  },
+  rebooking_discount_3d: {
+    label: "Re-booking Discount — 3 days after",
+    icon: "💰",
+    category: "after_service",
+    delay: "3 days after job done",
+    trigger: "booking_completed",
+  },
+  quote_followup_24h: {
+    label: "Quote Follow-up — 24 hours",
+    icon: "📋",
+    category: "quote",
+    delay: "24h after quote sent",
+    trigger: "quote_sent",
+  },
+  quote_followup_3d: {
+    label: "Quote Follow-up — 3 days",
+    icon: "📋",
+    category: "quote",
+    delay: "3 days after quote",
+    trigger: "quote_sent",
+  },
+  lost_lead_7d: {
+    label: "Lost Lead Win-back — 7 days",
+    icon: "🔄",
+    category: "quote",
+    delay: "7 days after lost",
+    trigger: "lead_lost",
+  },
 };
 
-const CATEGORY_LABELS = {
-  booking:       "Booking Reminders",
-  after_service: "After Service",
-  quote:         "Quote & Lead",
+const CATEGORY_META = {
+  booking: {
+    label: "Booking Reminders",
+    color: "text-blue-400",
+    bg: "bg-blue-500/15",
+    border: "border-blue-500/25",
+  },
+  after_service: {
+    label: "After Service",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/15",
+    border: "border-emerald-500/25",
+  },
+  quote: {
+    label: "Quote & Lead",
+    color: "text-amber-400",
+    bg: "bg-amber-500/15",
+    border: "border-amber-500/25",
+  },
 };
 
-const CATEGORY_COLORS = {
-  booking:       { dot: "bg-blue-500",  badge: "bg-blue-50 text-blue-700 border-blue-200" },
-  after_service: { dot: "bg-green-500", badge: "bg-green-50 text-green-700 border-green-200" },
-  quote:         { dot: "bg-amber-500", badge: "bg-amber-50 text-amber-700 border-amber-200" },
-};
+const RECIPIENT_OPTIONS = [
+  {
+    value: "all",
+    label: "All customers",
+    desc: "Send to every customer who triggers this event",
+  },
+  {
+    value: "opted_in",
+    label: "Opted-in only",
+    desc: "Only customers with email automation enabled",
+  },
+  {
+    value: "new_only",
+    label: "New customers only",
+    desc: "Customers who booked for the first time",
+  },
+  {
+    value: "repeat",
+    label: "Repeat customers only",
+    desc: "Customers with more than one booking",
+  },
+];
 
-const STATUS_STYLES = {
-  pending:   "bg-blue-50 text-blue-700 border-blue-200",
-  sent:      "bg-green-50 text-green-700 border-green-200",
-  failed:    "bg-red-50 text-red-700 border-red-200",
-  cancelled: "bg-zinc-100 text-zinc-500 border-zinc-200",
-};
+const AVAILABLE_TYPES = Object.entries(TYPE_META).map(([key, v]) => ({
+  key,
+  ...v,
+}));
 
 function fmtDate(d) {
   if (!d) return "—";
   return new Date(d).toLocaleString("en-GB", {
-    day: "2-digit", month: "short", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
+// ─── Visual-only checkbox (plain div, never a button) ──────────────────────
+function Tick({ checked, indeterminate }) {
+  return (
+    <div
+      className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-150 ${
+        checked
+          ? "bg-emerald-500 border-emerald-500"
+          : indeterminate
+            ? "border-white/30 bg-white/8"
+            : "border-white/20 bg-white/4 group-hover:border-white/35"
+      }`}
+    >
+      {checked && (
+        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+          <path
+            d="M1 4L3.5 6.5L9 1"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
+      {indeterminate && !checked && (
+        <span className="w-2.5 h-0.5 bg-white/50 rounded-full" />
+      )}
+    </div>
+  );
+}
+
+// ─── Toggle ───────────────────────────────────────────────────────────────────
 function Toggle({ checked, onChange, saving }) {
   return (
     <button
@@ -53,75 +188,225 @@ function Toggle({ checked, onChange, saving }) {
       onClick={() => !saving && onChange(!checked)}
       aria-checked={checked}
       role="switch"
-      className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200 focus:outline-none ${
-        checked ? "bg-zinc-900" : "bg-zinc-300"
+      className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+        checked
+          ? "bg-emerald-500 shadow-sm shadow-emerald-500/30"
+          : "bg-white/12"
       } ${saving ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
     >
-      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out mt-0.5 ml-0.5 ${checked ? "translate-x-5" : "translate-x-0"}`} />
+      <span
+        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out mt-0.5 ml-0.5 ${checked ? "translate-x-5" : "translate-x-0"}`}
+      />
     </button>
   );
 }
 
-// Checkbox component
-function Checkbox({ checked, indeterminate, onChange }) {
+// ─── Status badge ─────────────────────────────────────────────────────────────
+function StatusBadge({ status }) {
+  const map = {
+    pending: "bg-blue-500/15 text-blue-400 border-blue-500/25",
+    sent: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+    failed: "bg-rose-500/15 text-rose-400 border-rose-500/25",
+    cancelled: "bg-white/8 text-white/40 border-white/10",
+  };
   return (
-    <button
-      type="button"
-      onClick={(e) => { e.stopPropagation(); onChange(); }}
-      className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
-        checked
-          ? "bg-zinc-900 border-zinc-900"
-          : indeterminate
-            ? "bg-zinc-200 border-zinc-400"
-            : "bg-white border-zinc-300 hover:border-zinc-500"
-      }`}
+    <span
+      className={`text-[10px] px-2 py-0.5 rounded-full border font-bold capitalize ${map[status] || map.cancelled}`}
     >
-      {checked && (
-        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-          <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )}
-      {indeterminate && !checked && (
-        <span className="w-2.5 h-0.5 bg-zinc-600 rounded-full" />
-      )}
-    </button>
+      {status}
+    </span>
   );
 }
 
-export default function Automations() {
-  const [settings, setSettings]         = useState([]);
-  const [stats, setStats]               = useState({ pending: 0, sentToday: 0, failed: 0, totalSent: 0 });
-  const [queue, setQueue]               = useState([]);
-  const [history, setHistory]           = useState([]);
-  const [tab, setTab]                   = useState("queue");
-  const [savingKey, setSavingKey]       = useState(null);
-  const [loading, setLoading]           = useState(true);
-  const [cancellingId, setCancellingId] = useState(null);
-  const [resendingId, setResendingId]   = useState(null);
-  const [toast, setToast]               = useState(null);
+// ─── Automation row ───────────────────────────────────────────────────────────
+function AutomationRow({ item, onToggle, onSaveRecipients, onDelete, saving }) {
+  const [open, setOpen] = useState(false);
+  const [recipients, setRecipients] = useState(item.recipients || "opted_in");
+  const [savingRec, setSavingRec] = useState(false);
 
-  // Manual send state (Audience tab — bulk)
-  const [manualType, setManualType]       = useState("referral_offer_48h");
-  const [manualService, setManualService] = useState("");
+  const meta = TYPE_META[item.key] || {};
+  const cat = CATEGORY_META[item.category || meta.category];
+
+  const handleSave = async () => {
+    setSavingRec(true);
+    try {
+      await onSaveRecipients(item.key, recipients);
+    } finally {
+      setSavingRec(false);
+    }
+  };
+
+  const recipientLabel =
+    RECIPIENT_OPTIONS.find((r) => r.value === recipients)?.label ||
+    "All customers";
+
+  return (
+    <div className="border-b border-white/5 last:border-0">
+      {/* Main row */}
+      <div className="px-5 py-4 flex items-center gap-3 hover:bg-white/2 transition-colors">
+        <span className="text-lg shrink-0 leading-none">
+          {meta.icon || "⚡"}
+        </span>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-bold text-white leading-tight">
+              {item.label}
+            </p>
+            {cat && (
+              <span
+                className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${cat.bg} ${cat.color} ${cat.border}`}
+              >
+                {cat.label}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 mt-0.5">
+            <p className="text-[11px] text-white/35">{meta.delay || "—"}</p>
+            {item.enabled && (
+              <span className="text-[10px] text-white/25">
+                · {recipientLabel}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={() => setOpen((o) => !o)}
+            className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-white/35 hover:bg-white/9 hover:text-white/60 transition-all"
+          >
+            {open ? <ChevronUp size={14} /> : <Settings2 size={14} />}
+          </button>
+          <Toggle
+            checked={item.enabled}
+            onChange={(v) => onToggle(item.key, v)}
+            saving={saving === item.key}
+          />
+        </div>
+      </div>
+
+      {/* Expanded panel */}
+      {open && (
+        <div className="mx-4 mb-4 rounded-2xl bg-white/3 border border-white/7 overflow-hidden">
+          <div className="p-4 border-b border-white/6">
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+              <Users size={11} /> Who Receives This
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {RECIPIENT_OPTIONS.map((r) => (
+                <button
+                  key={r.value}
+                  type="button"
+                  onClick={() => setRecipients(r.value)}
+                  className={`flex items-start gap-2.5 p-3 rounded-xl border text-left transition-all ${
+                    recipients === r.value
+                      ? "bg-emerald-500/15 border-emerald-500/35"
+                      : "bg-white/3 border-white/7 hover:bg-white/6"
+                  }`}
+                >
+                  <div
+                    className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${
+                      recipients === r.value
+                        ? "border-emerald-500 bg-emerald-500"
+                        : "border-white/20"
+                    }`}
+                  >
+                    {recipients === r.value && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">{r.label}</p>
+                    <p className="text-[10px] text-white/35 leading-tight mt-0.5">
+                      {r.desc}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="px-4 py-3 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 text-[10px] text-white/35">
+              <Clock size={11} />
+              <span>{meta.delay || "Custom timing"}</span>
+            </div>
+            {meta.trigger && (
+              <div className="flex items-center gap-1.5 text-[10px] text-white/35">
+                <Zap size={11} />
+                <span>Trigger: {meta.trigger.replace(/_/g, " ")}</span>
+              </div>
+            )}
+            <div className="flex-1" />
+            <button
+              onClick={() => onDelete(item.key)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-400 text-[10px] font-black hover:bg-rose-500/20 transition-all border border-rose-500/20"
+            >
+              <Trash2 size={11} /> Remove
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={
+                savingRec || recipients === (item.recipients || "opted_in")
+              }
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 text-[10px] font-black hover:bg-emerald-500/25 transition-all border border-emerald-500/25 disabled:opacity-40"
+            >
+              {savingRec ? (
+                <RefreshCw size={10} className="animate-spin" />
+              ) : (
+                <Save size={10} />
+              )}
+              {savingRec ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+export default function Automations() {
+  const [settings, setSettings] = useState([]);
+  const [stats, setStats] = useState({
+    pending: 0,
+    sentToday: 0,
+    failed: 0,
+    totalSent: 0,
+  });
+  const [queue, setQueue] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [tab, setTab] = useState("settings");
+  const [savingKey, setSavingKey] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState(null);
+  const [resendingId, setResendingId] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  // Manual send
+  const [manualType, setManualType] = useState("referral_offer_48h");
   const [manualSending, setManualSending] = useState(false);
 
-  // Quick send — single customer
-  const [quickSend, setQuickSend]       = useState(null); // { id, name, email } | null
+  // Quick-send tray (single customer)
+  const [quickSend, setQuickSend] = useState(null);
   const [quickSendType, setQuickSendType] = useState("referral_offer_48h");
   const [quickSending, setQuickSending] = useState(false);
 
-  // Audience tab state
-  const [customers, setCustomers]           = useState([]);
+  // Audience tab
+  const [customers, setCustomers] = useState([]);
   const [audienceLoading, setAudienceLoading] = useState(false);
   const [audienceSearch, setAudienceSearch] = useState("");
-  const [audienceFilter, setAudienceFilter] = useState("all"); // "all" | "on" | "off"
-  const [selected, setSelected]             = useState(new Set()); // Set of customer _ids
-  const [bulkSaving, setBulkSaving]         = useState(false);
+  const [audienceFilter, setAudienceFilter] = useState("all");
+  const [selected, setSelected] = useState(new Set());
+  const [bulkSaving, setBulkSaving] = useState(false);
 
   const showToast = (msg, type = "error") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
   };
+
+  const getCId = (c) => String(c._id || c.id || "");
 
   const fetchAll = useCallback(async () => {
     try {
@@ -135,22 +420,24 @@ export default function Automations() {
       setStats(stRes.data || {});
       setQueue(qRes.data || []);
       setHistory(hRes.data?.tasks || []);
-    } catch {
-      showToast("Failed to load automation data");
+    } catch (e) {
+      showToast(e?.response?.data?.message || "Failed to load automation data");
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   const loadAudience = useCallback(async () => {
     setAudienceLoading(true);
     try {
       const r = await axios.get(`${API}/customers`);
       setCustomers(r.data || []);
-    } catch {
-      showToast("Failed to load customers");
+    } catch (e) {
+      showToast(e?.response?.data?.message || "Failed to load customers");
     } finally {
       setAudienceLoading(false);
     }
@@ -160,16 +447,53 @@ export default function Automations() {
     if (tab === "audience" && customers.length === 0) loadAudience();
   }, [tab]);
 
+  // ── Automation actions ────────────────────────────────────────────────────
   const toggleAutomation = async (type, newVal) => {
-    setSettings(prev => prev.map(s => s.key === type ? { ...s, enabled: newVal } : s));
+    setSettings((prev) =>
+      prev.map((s) => (s.key === type ? { ...s, enabled: newVal } : s)),
+    );
     setSavingKey(type);
     try {
-      await axios.post(`${API}/automations/settings/${type}`, { enabled: newVal });
-    } catch {
-      setSettings(prev => prev.map(s => s.key === type ? { ...s, enabled: !newVal } : s));
-      showToast("Failed to save — please try again");
+      await axios.post(`${API}/automations/settings/${type}`, {
+        enabled: newVal,
+      });
+      showToast(
+        `${newVal ? "Enabled" : "Disabled"} — ${TYPE_META[type]?.label || type}`,
+        "success",
+      );
+    } catch (e) {
+      setSettings((prev) =>
+        prev.map((s) => (s.key === type ? { ...s, enabled: !newVal } : s)),
+      );
+      showToast(e?.response?.data?.message || "Failed to save");
     } finally {
       setSavingKey(null);
+    }
+  };
+
+  const saveRecipients = async (type, recipients) => {
+    try {
+      await axios.post(`${API}/automations/settings/${type}`, { recipients });
+      setSettings((prev) =>
+        prev.map((s) => (s.key === type ? { ...s, recipients } : s)),
+      );
+      showToast("Recipient settings saved", "success");
+    } catch (e) {
+      showToast(
+        e?.response?.data?.message || "Failed to save recipient settings",
+      );
+      throw e;
+    }
+  };
+
+  const deleteAutomation = async (type) => {
+    if (!window.confirm("Remove this automation?")) return;
+    try {
+      await axios.delete(`${API}/automations/settings/${type}`);
+      setSettings((prev) => prev.filter((s) => s.key !== type));
+      showToast("Automation removed", "success");
+    } catch (e) {
+      showToast(e?.response?.data?.message || "Failed to remove");
     }
   };
 
@@ -177,10 +501,11 @@ export default function Automations() {
     setCancellingId(id);
     try {
       await axios.delete(`${API}/automations/queue/${id}`);
-      setQueue(prev => prev.filter(t => t._id !== id));
-      setStats(prev => ({ ...prev, pending: Math.max(0, prev.pending - 1) }));
-    } catch {
-      showToast("Failed to cancel task");
+      setQueue((prev) => prev.filter((t) => t._id !== id));
+      setStats((prev) => ({ ...prev, pending: Math.max(0, prev.pending - 1) }));
+      showToast("Task cancelled", "success");
+    } catch (e) {
+      showToast(e?.response?.data?.message || "Failed to cancel");
     } finally {
       setCancellingId(null);
     }
@@ -190,10 +515,10 @@ export default function Automations() {
     setResendingId(task._id);
     try {
       await axios.post(`${API}/automations/resend/${task._id}`);
-      showToast(`Resent ${TYPE_LABELS[task.type] || task.type} to ${task.payload?.email}`, "success");
+      showToast(`Resent to ${task.payload?.email}`, "success");
       fetchAll();
-    } catch (err) {
-      showToast(err.response?.data?.message || "Failed to resend");
+    } catch (e) {
+      showToast(e?.response?.data?.message || "Failed to resend");
     } finally {
       setResendingId(null);
     }
@@ -203,20 +528,19 @@ export default function Automations() {
     if (selected.size === 0) return;
     setManualSending(true);
     const ids = [...selected];
-    let successCount = 0;
+    let ok = 0;
     for (const customerId of ids) {
       try {
         await axios.post(`${API}/automations/send-manual`, {
           type: manualType,
           customerId,
-          service: manualService || undefined,
         });
-        successCount++;
+        ok++;
       } catch {}
     }
     setManualSending(false);
-    if (successCount > 0) {
-      showToast(`Email sent to ${successCount} customer${successCount > 1 ? "s" : ""}`, "success");
+    if (ok > 0) {
+      showToast(`Sent to ${ok} customer${ok > 1 ? "s" : ""}`, "success");
       setSelected(new Set());
       fetchAll();
     } else {
@@ -231,151 +555,201 @@ export default function Automations() {
       await axios.post(`${API}/automations/send-manual`, {
         type: quickSendType,
         customerId: quickSend.id,
-        service: manualService || undefined,
       });
       showToast(`Email sent to ${quickSend.name}`, "success");
       setQuickSend(null);
       fetchAll();
-    } catch {
-      showToast("Failed to send — please try again");
+    } catch (e) {
+      showToast(e?.response?.data?.message || "Failed to send");
     } finally {
       setQuickSending(false);
     }
   };
 
-  // --- Audience logic ---
-
-  const filteredCustomers = customers.filter(c => {
+  // ── Audience helpers ──────────────────────────────────────────────────────
+  const filteredCustomers = customers.filter((c) => {
     const q = audienceSearch.toLowerCase();
-    const matchSearch = !q ||
+    const matchSearch =
+      !q ||
       c.firstName?.toLowerCase().includes(q) ||
       c.lastName?.toLowerCase().includes(q) ||
       c.email?.toLowerCase().includes(q);
     const enabled = c.crmEmailsEnabled !== false;
     const matchFilter =
-      audienceFilter === "all" ? true :
-      audienceFilter === "on"  ? enabled :
-      !enabled;
+      audienceFilter === "all"
+        ? true
+        : audienceFilter === "on"
+          ? enabled
+          : !enabled;
     return matchSearch && matchFilter;
   });
 
-  const enabledCount  = customers.filter(c => c.crmEmailsEnabled !== false).length;
-  const disabledCount = customers.filter(c => c.crmEmailsEnabled === false).length;
+  const enabledCount = customers.filter(
+    (c) => c.crmEmailsEnabled !== false,
+  ).length;
+  const disabledCount = customers.filter(
+    (c) => c.crmEmailsEnabled === false,
+  ).length;
 
-  const allFilteredSelected = filteredCustomers.length > 0 &&
-    filteredCustomers.every(c => selected.has(c._id));
-  const someFilteredSelected = filteredCustomers.some(c => selected.has(c._id));
+  const allSelected =
+    filteredCustomers.length > 0 &&
+    filteredCustomers.every((c) => selected.has(getCId(c)));
+  const someSelected = filteredCustomers.some((c) => selected.has(getCId(c)));
 
-  const toggleSelectAll = () => {
-    if (allFilteredSelected) {
-      setSelected(prev => {
-        const next = new Set(prev);
-        filteredCustomers.forEach(c => next.delete(c._id));
-        return next;
-      });
-    } else {
-      setSelected(prev => {
-        const next = new Set(prev);
-        filteredCustomers.forEach(c => next.add(c._id));
-        return next;
-      });
-    }
+  const toggleRow = (c) => {
+    const cId = getCId(c);
+    if (!cId) return;
+    setSelected((prev) => {
+      const n = new Set(prev);
+      n.has(cId) ? n.delete(cId) : n.add(cId);
+      return n;
+    });
   };
 
-  const toggleCustomer = (id) => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelected((prev) => {
+        const n = new Set(prev);
+        filteredCustomers.forEach((c) => n.delete(getCId(c)));
+        return n;
+      });
+    } else {
+      setSelected((prev) => {
+        const n = new Set(prev);
+        filteredCustomers.forEach((c) => {
+          const id = getCId(c);
+          if (id) n.add(id);
+        });
+        return n;
+      });
+    }
   };
 
   const applyBulk = async (enable) => {
     if (selected.size === 0) return;
     setBulkSaving(true);
     const ids = [...selected];
-    // Optimistic update
-    setCustomers(prev => prev.map(c =>
-      ids.includes(c._id) ? { ...c, crmEmailsEnabled: enable } : c
-    ));
+    setCustomers((prev) =>
+      prev.map((c) =>
+        ids.includes(getCId(c)) ? { ...c, crmEmailsEnabled: enable } : c,
+      ),
+    );
     try {
       await Promise.all(
-        ids.map(id => axios.patch(`${API}/customers/${id}/crm-emails`, { enabled: enable }))
+        ids.map((id) =>
+          axios.post(`${API}/customers/${id}/crm-emails`, { enabled: enable }),
+        ),
       );
       showToast(
-        `${enable ? "Enabled" : "Disabled"} automation emails for ${ids.length} customer${ids.length > 1 ? "s" : ""}`,
-        "success"
+        `${enable ? "Enabled" : "Disabled"} for ${ids.length} customer${ids.length > 1 ? "s" : ""}`,
+        "success",
       );
       setSelected(new Set());
-    } catch {
-      // Revert
-      setCustomers(prev => prev.map(c =>
-        ids.includes(c._id) ? { ...c, crmEmailsEnabled: !enable } : c
-      ));
-      showToast("Failed to apply changes — please try again");
+    } catch (e) {
+      setCustomers((prev) =>
+        prev.map((c) =>
+          ids.includes(getCId(c)) ? { ...c, crmEmailsEnabled: !enable } : c,
+        ),
+      );
+      showToast(e?.response?.data?.message || "Failed to apply changes");
     } finally {
       setBulkSaving(false);
     }
   };
 
-  const grouped = settings.reduce((acc, s) => {
-    acc[s.category] = acc[s.category] || [];
-    acc[s.category].push(s);
-    return acc;
-  }, {});
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  return (
-    <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-5">
+  const TABS = [
+    { key: "settings", label: "Automations", count: settings.length },
+    { key: "queue", label: "Queue", count: queue.length },
+    { key: "history", label: "History", count: history.length },
+    { key: "audience", label: "Audience", count: customers.length || null },
+  ];
 
+  // Merge API data with full predefined list so all 8 are always visible
+  const settingsMap = Object.fromEntries(settings.map((s) => [s.key, s]));
+  const allItems = AVAILABLE_TYPES.map((t) => ({
+    key: t.key,
+    label: TYPE_META[t.key]?.label || t.label,
+    category: t.category,
+    enabled: settingsMap[t.key]?.enabled ?? false,
+    recipients: settingsMap[t.key]?.recipients ?? "opted_in",
+  }));
+  const groupedItems = allItems.reduce((acc, item) => {
+    acc[item.category] = acc[item.category] || [];
+    acc[item.category].push(item);
+    return acc;
+  }, {});
+
+  const selectedInView = filteredCustomers.filter((c) =>
+    selected.has(getCId(c)),
+  ).length;
+
+  return (
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-5">
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-80 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold text-white ${toast.type === "error" ? "bg-red-600" : "bg-green-600"}`}>
+        <div
+          className={`fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-80 z-50 px-4 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-2.5 ${
+            toast.type === "error"
+              ? "bg-rose-500/90 text-white border border-rose-400/30"
+              : "bg-emerald-500/90 text-white border border-emerald-400/30"
+          }`}
+        >
+          {toast.type === "error" ? (
+            <AlertCircle size={15} />
+          ) : (
+            <CheckCircle2 size={15} />
+          )}
           {toast.msg}
         </div>
       )}
 
-      {/* Quick send tray — single customer */}
+      {/* Quick-send tray */}
       {quickSend && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900 border-t-2 border-emerald-500 shadow-2xl px-4 py-4">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#071E16] border-t border-emerald-500/30 shadow-2xl px-4 py-4">
           <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-black text-white leading-tight">
-                Send to: <span className="text-emerald-400">{quickSend.name}</span>
+              <p className="text-xs font-black text-white">
+                Send to:{" "}
+                <span className="text-emerald-400">{quickSend.name}</span>
               </p>
-              <p className="text-[11px] text-zinc-500 truncate">{quickSend.email}</p>
+              <p className="text-[11px] text-white/35 truncate">
+                {quickSend.email}
+              </p>
             </div>
             <select
               value={quickSendType}
-              onChange={e => setQuickSendType(e.target.value)}
-              className="w-full sm:w-auto flex-1 px-3 py-2 rounded-xl bg-zinc-800 text-white text-xs font-semibold border border-zinc-700 focus:outline-none focus:border-emerald-500"
+              onChange={(e) => setQuickSendType(e.target.value)}
+              className="w-full sm:w-auto flex-1 px-3 py-2 rounded-xl bg-white/6 text-white text-xs font-semibold border border-white/10 focus:outline-none focus:border-emerald-500"
             >
-              <option value="review_request_2h">⭐ Review Request</option>
-              <option value="referral_offer_48h">🎁 Referral Offer</option>
-              <option value="rebooking_discount_3d">💰 Re-booking Discount (10% off)</option>
-              <option value="booking_reminder_24h">📅 Booking Reminder — 24h</option>
-              <option value="booking_reminder_3h">⏰ Booking Reminder — 3h</option>
+              {Object.entries(TYPE_META).map(([k, v]) => (
+                <option key={k} value={k}>
+                  {v.icon} {v.label}
+                </option>
+              ))}
             </select>
             <button
               onClick={doQuickSend}
               disabled={quickSending}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-black hover:bg-emerald-600 transition-colors disabled:opacity-60 shrink-0"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-black hover:bg-emerald-400 transition-colors disabled:opacity-60 shrink-0 shadow-sm shadow-emerald-500/25"
             >
-              {quickSending ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
+              {quickSending ? (
+                <RefreshCw size={13} className="animate-spin" />
+              ) : (
+                <Send size={13} />
+              )}
               {quickSending ? "Sending…" : "Send Now"}
             </button>
             <button
               onClick={() => setQuickSend(null)}
-              className="p-1.5 text-zinc-500 hover:text-white transition-colors shrink-0"
-              title="Cancel"
+              className="p-1.5 text-white/30 hover:text-white transition-colors shrink-0"
             >
               <X size={18} />
             </button>
@@ -384,205 +758,280 @@ export default function Automations() {
       )}
 
       {/* Header */}
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight">Automation Engine</h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          Automated emails that fire at the right moment — reminders, follow-ups, reviews, win-backs.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            Automation Engine
+          </h1>
+          <p className="text-xs text-white/40 mt-1">
+            Automated emails that fire at the right moment — reminders,
+            follow-ups, reviews, win-backs.
+          </p>
+        </div>
+        <button
+          onClick={fetchAll}
+          className="w-9 h-9 rounded-xl bg-white/6 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/9 transition-all shrink-0"
+          title="Refresh"
+        >
+          <RefreshCw size={15} />
+        </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Pending",    val: stats.pending,   color: "text-blue-600",  bg: "bg-blue-50" },
-          { label: "Sent Today", val: stats.sentToday, color: "text-green-600", bg: "bg-green-50" },
-          { label: "Total Sent", val: stats.totalSent, color: "text-zinc-900",  bg: "bg-zinc-50" },
-          { label: "Failed",     val: stats.failed,    color: "text-red-600",   bg: "bg-red-50" },
-        ].map(s => (
-          <div key={s.label} className={`${s.bg} rounded-xl px-4 py-3 border border-zinc-100`}>
-            <p className={`text-2xl font-black ${s.color}`}>{s.val ?? 0}</p>
-            <p className="text-xs text-zinc-500 font-medium mt-0.5">{s.label}</p>
+          {
+            label: "Pending",
+            val: stats.pending,
+            color: "text-blue-400",
+            icon: "⏳",
+          },
+          {
+            label: "Sent Today",
+            val: stats.sentToday,
+            color: "text-emerald-400",
+            icon: "✅",
+          },
+          {
+            label: "Total Sent",
+            val: stats.totalSent,
+            color: "text-white",
+            icon: "📨",
+          },
+          {
+            label: "Failed",
+            val: stats.failed,
+            color: "text-rose-400",
+            icon: "❌",
+          },
+        ].map((s) => (
+          <div
+            key={s.label}
+            className="bg-[#0B2D22] border border-white/7 rounded-2xl px-4 py-3"
+          >
+            <p className={`text-2xl font-black tabular-nums ${s.color}`}>
+              {s.val ?? 0}
+            </p>
+            <p className="text-[10px] text-white/35 font-bold mt-0.5 uppercase tracking-widest">
+              {s.label}
+            </p>
           </div>
         ))}
       </div>
 
-      {/* Automation Toggles */}
-      <div className="bg-white rounded-2xl border border-zinc-200 divide-y divide-zinc-100 overflow-hidden">
-        <div className="px-4 sm:px-6 py-4">
-          <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-widest">Automation Settings</h2>
-          <p className="text-xs text-zinc-400 mt-0.5">Toggle individual automations on or off. Changes take effect immediately.</p>
-        </div>
-        {Object.entries(grouped).map(([cat, items]) => (
-          <div key={cat}>
-            <div className="px-4 sm:px-6 py-2.5 bg-zinc-50">
-              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${CATEGORY_COLORS[cat]?.badge}`}>
-                {CATEGORY_LABELS[cat] || cat}
-              </span>
-            </div>
-            {items.map(item => (
-              <div key={item.key} className="px-4 sm:px-6 py-4 flex items-center gap-3 hover:bg-zinc-50 transition-colors">
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.enabled ? CATEGORY_COLORS[cat]?.dot : "bg-zinc-300"}`} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-zinc-800 leading-tight">{item.label}</p>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    {savingKey === item.key ? "Saving…" : item.enabled ? "Active" : "Disabled"}
-                  </p>
-                </div>
-                <Toggle
-                  checked={item.enabled}
-                  onChange={(v) => toggleAutomation(item.key, v)}
-                  saving={savingKey === item.key}
-                />
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-
-      {/* Tabs */}
-      <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden">
-        <div className="border-b border-zinc-100 px-4 sm:px-6 flex gap-1 pt-2">
-          {[
-            { key: "queue",    label: "Queue",    count: queue.length },
-            { key: "history",  label: "History",  count: history.length },
-            { key: "audience", label: "Audience", count: customers.length || null },
-          ].map(t => (
+      {/* Main card */}
+      <div className="bg-[#0B2D22] border border-white/7 rounded-2xl overflow-hidden">
+        {/* Tab bar */}
+        <div className="border-b border-white/6 px-4 sm:px-6 flex gap-0.5 pt-2 overflow-x-auto">
+          {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
-                tab === t.key ? "border-zinc-900 text-zinc-900" : "border-transparent text-zinc-400 hover:text-zinc-600"
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 text-xs font-black border-b-2 transition-all whitespace-nowrap ${
+                tab === t.key
+                  ? "border-emerald-500 text-white"
+                  : "border-transparent text-white/30 hover:text-white/60"
               }`}
             >
               {t.label}
               {t.count > 0 && (
-                <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
-                  tab === t.key ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500"
-                }`}>{t.count}</span>
+                <span
+                  className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ${
+                    tab === t.key
+                      ? "bg-emerald-500 text-white"
+                      : "bg-white/10 text-white/40"
+                  }`}
+                >
+                  {t.count}
+                </span>
               )}
             </button>
           ))}
-          <div className="flex-1" />
-          <button onClick={fetchAll} className="text-xs text-zinc-400 hover:text-zinc-700 px-3 py-2 transition-colors">
-            Refresh
-          </button>
         </div>
 
+        {/* ── AUTOMATIONS ── */}
+        {tab === "settings" && (
+          <div>
+            {Object.entries(groupedItems).map(([cat, items]) => {
+              const catMeta = CATEGORY_META[cat];
+              return (
+                <div key={cat}>
+                  <div className="px-5 py-2.5 bg-white/2 border-b border-white/4 flex items-center gap-2.5">
+                    <span
+                      className={`text-[9px] font-black uppercase tracking-widest ${catMeta?.color || "text-white/40"}`}
+                    >
+                      {catMeta?.label || cat}
+                    </span>
+                    <span className="text-[9px] text-white/20">
+                      {items.filter((i) => i.enabled).length}/{items.length}{" "}
+                      active
+                    </span>
+                  </div>
+                  {items.map((item) => (
+                    <AutomationRow
+                      key={item.key}
+                      item={item}
+                      onToggle={toggleAutomation}
+                      onSaveRecipients={saveRecipients}
+                      onDelete={deleteAutomation}
+                      saving={savingKey}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* ── QUEUE ── */}
-        {tab === "queue" && (
-          queue.length === 0 ? (
-            <div className="text-center py-16 text-zinc-400">
-              <div className="text-3xl mb-2">✅</div>
-              <p className="font-medium text-sm">No pending automations</p>
+        {tab === "queue" &&
+          (queue.length === 0 ? (
+            <div className="text-center py-16">
+              <CheckCircle2 size={32} className="mx-auto mb-3 text-white/15" />
+              <p className="text-white/40 font-bold text-sm">
+                No pending automations
+              </p>
             </div>
           ) : (
-            <div className="divide-y divide-zinc-50">
-              {queue.map(task => (
-                <div key={task._id} className="px-4 sm:px-6 py-4 flex items-start gap-3">
+            <div className="divide-y divide-white/[0.04]">
+              {queue.map((task) => (
+                <div
+                  key={task._id}
+                  className="px-5 py-4 flex items-start gap-3 hover:bg-white/2 transition-colors"
+                >
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-zinc-800">
-                        {TYPE_LABELS[task.type] || task.type}
+                      <p className="text-sm font-bold text-white">
+                        {TYPE_META[task.type]?.label || task.type}
                       </p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${STATUS_STYLES[task.status]}`}>
-                        {task.status}
-                      </span>
+                      <StatusBadge status={task.status} />
                     </div>
-                    <p className="text-xs text-zinc-400 mt-0.5 break-all">
+                    <p className="text-[11px] text-white/35 mt-0.5 break-all">
                       {task.payload?.email}
-                      {task.payload?.firstName && ` · ${task.payload.firstName}`}
-                      {task.payload?.bookingRef && ` · ${task.payload.bookingRef}`}
-                      {task.payload?.quoteRef && ` · Quote: ${task.payload.quoteRef}`}
+                      {task.payload?.firstName &&
+                        ` · ${task.payload.firstName}`}
+                      {task.payload?.bookingRef &&
+                        ` · ${task.payload.bookingRef}`}
                     </p>
-                    <p className="text-xs text-zinc-500 font-medium mt-1">{fmtDate(task.runAt)}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Clock size={10} className="text-white/25" />
+                      <p className="text-[10px] text-white/35">
+                        {fmtDate(task.runAt)}
+                      </p>
+                    </div>
                   </div>
                   <button
                     onClick={() => cancelTask(task._id)}
                     disabled={cancellingId === task._id}
-                    className="flex-shrink-0 text-xs text-red-500 hover:text-red-700 font-semibold px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                    className="shrink-0 text-[10px] font-black px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-all disabled:opacity-40"
                   >
                     {cancellingId === task._id ? "…" : "Cancel"}
                   </button>
                 </div>
               ))}
             </div>
-          )
-        )}
+          ))}
 
         {/* ── HISTORY ── */}
-        {tab === "history" && (
-          history.length === 0 ? (
-            <div className="text-center py-16 text-zinc-400">
-              <div className="text-3xl mb-2">📭</div>
-              <p className="font-medium text-sm">No automation history yet</p>
+        {tab === "history" &&
+          (history.length === 0 ? (
+            <div className="text-center py-16">
+              <Mail size={32} className="mx-auto mb-3 text-white/15" />
+              <p className="text-white/40 font-bold text-sm">
+                No automation history yet
+              </p>
             </div>
           ) : (
-            <div className="divide-y divide-zinc-50">
-              {history.map(task => (
-                <div key={task._id} className="px-4 sm:px-6 py-4 flex items-start gap-3">
+            <div className="divide-y divide-white/[0.04]">
+              {history.map((task) => (
+                <div
+                  key={task._id}
+                  className="px-5 py-4 flex items-start gap-3 hover:bg-white/2 transition-colors"
+                >
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-zinc-800">
-                        {TYPE_LABELS[task.type] || task.type}
+                      <p className="text-sm font-bold text-white">
+                        {TYPE_META[task.type]?.label || task.type}
                       </p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${STATUS_STYLES[task.status]}`}>
-                        {task.status}
-                      </span>
+                      <StatusBadge status={task.status} />
                     </div>
-                    <p className="text-xs text-zinc-400 mt-0.5 break-all">
+                    <p className="text-[11px] text-white/35 mt-0.5 break-all">
                       {task.payload?.email}
-                      {task.payload?.firstName && ` · ${task.payload.firstName}`}
-                      {task.payload?.bookingRef && ` · ${task.payload.bookingRef}`}
-                      {task.payload?.quoteRef && ` · Quote: ${task.payload.quoteRef}`}
+                      {task.payload?.firstName &&
+                        ` · ${task.payload.firstName}`}
                     </p>
-                    {task.error && <p className="text-xs text-red-500 mt-0.5">{task.error}</p>}
-                    <p className="text-xs text-zinc-500 font-medium mt-1">{fmtDate(task.executedAt || task.createdAt)}</p>
+                    {task.error && (
+                      <div className="flex items-start gap-1.5 mt-1.5 p-2 rounded-lg bg-rose-500/10 border border-rose-500/20">
+                        <AlertCircle
+                          size={11}
+                          className="text-rose-400 shrink-0 mt-0.5"
+                        />
+                        <p className="text-[10px] text-rose-400">
+                          {task.error}
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1 mt-1">
+                      <Clock size={10} className="text-white/25" />
+                      <p className="text-[10px] text-white/35">
+                        {fmtDate(task.executedAt || task.createdAt)}
+                      </p>
+                    </div>
                   </div>
-                  {(task.status === "failed" || task.status === "cancelled") && (
+                  {(task.status === "failed" ||
+                    task.status === "cancelled") && (
                     <button
                       onClick={() => resendTask(task)}
                       disabled={resendingId === task._id}
-                      title="Resend this email now"
-                      className="flex-shrink-0 flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors disabled:opacity-50"
+                      className="shrink-0 flex items-center gap-1.5 text-[10px] font-black px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/25 hover:bg-amber-500/25 transition-all disabled:opacity-40"
                     >
-                      {resendingId === task._id
-                        ? <RefreshCw size={12} className="animate-spin" />
-                        : <RotateCcw size={12} />}
-                      {resendingId === task._id ? "Sending…" : "Resend"}
+                      {resendingId === task._id ? (
+                        <RefreshCw size={11} className="animate-spin" />
+                      ) : (
+                        <RotateCcw size={11} />
+                      )}
+                      {resendingId === task._id ? "…" : "Retry"}
                     </button>
                   )}
                 </div>
               ))}
             </div>
-          )
-        )}
+          ))}
 
         {/* ── AUDIENCE ── */}
         {tab === "audience" && (
           <div>
             {/* Toolbar */}
-            <div className="px-4 sm:px-6 py-4 border-b border-zinc-100 space-y-3">
-
+            <div className="px-5 py-4 border-b border-white/6 space-y-3">
               {/* Summary chips */}
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center gap-1.5 bg-green-50 border border-green-100 rounded-full px-3 py-1">
-                  <Mail size={12} className="text-green-600" />
-                  <span className="text-xs font-black text-green-700">{enabledCount} receiving</span>
+                <div className="flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/25 rounded-full px-3 py-1">
+                  <Mail size={11} className="text-emerald-400" />
+                  <span className="text-[10px] font-black text-emerald-400">
+                    {enabledCount} receiving
+                  </span>
                 </div>
-                <div className="flex items-center gap-1.5 bg-red-50 border border-red-100 rounded-full px-3 py-1">
-                  <MailX size={12} className="text-red-500" />
-                  <span className="text-xs font-black text-red-600">{disabledCount} excluded</span>
+                <div className="flex items-center gap-1.5 bg-rose-500/15 border border-rose-500/25 rounded-full px-3 py-1">
+                  <MailX size={11} className="text-rose-400" />
+                  <span className="text-[10px] font-black text-rose-400">
+                    {disabledCount} excluded
+                  </span>
                 </div>
-                <div className="flex items-center gap-1.5 bg-zinc-100 border border-zinc-200 rounded-full px-3 py-1">
-                  <Users size={12} className="text-zinc-500" />
-                  <span className="text-xs font-black text-zinc-600">{customers.length} total</span>
+                <div className="flex items-center gap-1.5 bg-white/6 border border-white/10 rounded-full px-3 py-1">
+                  <Users size={11} className="text-white/40" />
+                  <span className="text-[10px] font-black text-white/40">
+                    {customers.length} total
+                  </span>
                 </div>
                 <button
                   onClick={loadAudience}
                   disabled={audienceLoading}
-                  className="ml-auto flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-zinc-700 transition-colors"
+                  className="ml-auto flex items-center gap-1 text-[10px] font-bold text-white/30 hover:text-white/60 transition-colors"
                 >
-                  <RefreshCw size={12} className={audienceLoading ? "animate-spin" : ""} />
+                  <RefreshCw
+                    size={11}
+                    className={audienceLoading ? "animate-spin" : ""}
+                  />
                   Refresh
                 </button>
               </div>
@@ -590,27 +1039,30 @@ export default function Automations() {
               {/* Search + filter */}
               <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <Search
+                    size={13}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25"
+                  />
                   <input
                     value={audienceSearch}
-                    onChange={e => setAudienceSearch(e.target.value)}
-                    placeholder="Search by name or email..."
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-zinc-200 bg-zinc-50 text-sm font-medium focus:outline-none focus:border-zinc-900 focus:bg-white transition-all"
+                    onChange={(e) => setAudienceSearch(e.target.value)}
+                    placeholder="Search by name or email…"
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/50 transition-all"
                   />
                 </div>
                 <div className="flex gap-1.5 shrink-0">
                   {[
                     { key: "all", label: "All" },
-                    { key: "on",  label: "Receiving" },
+                    { key: "on", label: "Receiving" },
                     { key: "off", label: "Excluded" },
-                  ].map(f => (
+                  ].map((f) => (
                     <button
                       key={f.key}
                       onClick={() => setAudienceFilter(f.key)}
-                      className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                      className={`px-3 py-2 rounded-xl text-xs font-black transition-all ${
                         audienceFilter === f.key
-                          ? "bg-zinc-900 text-white"
-                          : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                          ? "bg-emerald-500 text-white"
+                          : "bg-white/6 text-white/40 hover:bg-white/9"
                       }`}
                     >
                       {f.label}
@@ -619,166 +1071,186 @@ export default function Automations() {
                 </div>
               </div>
 
-              {/* Bulk action bar — shows when something is selected */}
+              {/* Bulk action bar — shown when any selected */}
               {selected.size > 0 && (
-                <div className="space-y-3 pt-1">
-                  {/* Selection count + enable/disable */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-black text-zinc-800">
-                      {selected.size} customer{selected.size > 1 ? "s" : ""} selected
-                    </span>
-                    <button
-                      onClick={() => applyBulk(true)}
-                      disabled={bulkSaving}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-green-600 text-white text-xs font-black hover:bg-green-700 transition-colors disabled:opacity-50"
-                    >
-                      <UserCheck size={13} />
-                      Enable emails
-                    </button>
-                    <button
-                      onClick={() => applyBulk(false)}
-                      disabled={bulkSaving}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500 text-white text-xs font-black hover:bg-red-600 transition-colors disabled:opacity-50"
-                    >
-                      <UserX size={13} />
-                      Exclude
-                    </button>
-                    <button
-                      onClick={() => setSelected(new Set())}
-                      className="text-xs font-bold text-zinc-400 hover:text-zinc-700 transition-colors"
-                    >
-                      Clear
-                    </button>
-                    {bulkSaving && <div className="w-4 h-4 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />}
+                <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/25 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-emerald-500/15">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[10px] font-black shrink-0">
+                        {selected.size}
+                      </div>
+                      <span className="text-sm font-black text-white">
+                        {selected.size} customer{selected.size > 1 ? "s" : ""}{" "}
+                        selected
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => applyBulk(true)}
+                        disabled={bulkSaving}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-black hover:bg-emerald-400 transition-colors disabled:opacity-50"
+                      >
+                        <UserCheck size={12} /> Enable
+                      </button>
+                      <button
+                        onClick={() => applyBulk(false)}
+                        disabled={bulkSaving}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 border border-rose-500/25 text-rose-400 text-xs font-black hover:bg-rose-500/25 transition-colors disabled:opacity-50"
+                      >
+                        <UserX size={12} /> Exclude
+                      </button>
+                      <button
+                        onClick={() => setSelected(new Set())}
+                        className="text-xs font-bold text-white/30 hover:text-white/60 transition-colors px-2"
+                      >
+                        ✕
+                      </button>
+                      {bulkSaving && (
+                        <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                      )}
+                    </div>
                   </div>
 
-                  {/* Manual send panel */}
-                  <div className="bg-zinc-900 rounded-2xl p-4 space-y-3">
-                    <p className="text-xs font-black text-white flex items-center gap-2">
-                      <Send size={13} className="text-emerald-400" />
-                      Send Automation Email Now
+                  {/* Manual send */}
+                  <div className="px-4 py-3 space-y-2.5">
+                    <p className="text-xs font-black text-emerald-400 flex items-center gap-2">
+                      <Send size={12} />
+                      Send Email to {selected.size} Customer
+                      {selected.size > 1 ? "s" : ""} Now
                     </p>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <select
                         value={manualType}
-                        onChange={e => setManualType(e.target.value)}
-                        className="flex-1 px-3 py-2 rounded-xl bg-zinc-800 text-white text-xs font-semibold border border-zinc-700 focus:outline-none focus:border-emerald-500"
+                        onChange={(e) => setManualType(e.target.value)}
+                        className="flex-1 px-3 py-2 rounded-xl bg-[#061A13] text-white text-xs font-semibold border border-white/10 focus:outline-none focus:border-emerald-500"
                       >
-                        <option value="review_request_2h">⭐ Review Request</option>
-                        <option value="referral_offer_48h">🎁 Referral Offer</option>
-                        <option value="rebooking_discount_3d">💰 Re-booking Discount (10% off)</option>
-                        <option value="booking_reminder_24h">📅 Booking Reminder — 24h</option>
-                        <option value="booking_reminder_3h">⏰ Booking Reminder — 3h</option>
+                        {Object.entries(TYPE_META).map(([k, v]) => (
+                          <option key={k} value={k}>
+                            {v.icon} {v.label}
+                          </option>
+                        ))}
                       </select>
-                      <input
-                        value={manualService}
-                        onChange={e => setManualService(e.target.value)}
-                        placeholder="Service name (optional)"
-                        className="sm:w-44 px-3 py-2 rounded-xl bg-zinc-800 text-white text-xs font-medium border border-zinc-700 focus:outline-none focus:border-emerald-500 placeholder-zinc-500"
-                      />
                       <button
                         onClick={sendManual}
                         disabled={manualSending}
-                        className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-black hover:bg-emerald-600 transition-colors disabled:opacity-60 whitespace-nowrap"
+                        className="flex items-center justify-center gap-2 px-5 py-2 rounded-xl bg-emerald-500 text-white text-xs font-black hover:bg-emerald-400 transition-colors disabled:opacity-60 whitespace-nowrap shadow-sm shadow-emerald-500/25"
                       >
+                        {manualSending ? (
+                          <RefreshCw size={12} className="animate-spin" />
+                        ) : (
+                          <Send size={12} />
+                        )}
                         {manualSending
-                          ? <RefreshCw size={13} className="animate-spin" />
-                          : <Send size={13} />}
-                        {manualSending ? "Sending…" : `Send to ${selected.size}`}
+                          ? "Sending…"
+                          : `Send to ${selected.size}`}
                       </button>
                     </div>
-                    <p className="text-[10px] text-zinc-500">
-                      This sends the selected email immediately, outside the normal automation schedule.
+                    <p className="text-[10px] text-white/25">
+                      Sends immediately, outside the normal schedule.
                     </p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Select-all header row */}
+            {/* Select-all row — plain div, not a button, to avoid nested-button bugs */}
             {filteredCustomers.length > 0 && (
-              <div className="px-4 sm:px-6 py-2.5 bg-zinc-50 border-b border-zinc-100 flex items-center gap-3">
-                <Checkbox
-                  checked={allFilteredSelected}
-                  indeterminate={someFilteredSelected && !allFilteredSelected}
-                  onChange={toggleSelectAll}
+              <div
+                onClick={toggleAll}
+                className="group px-5 py-3 bg-white/2 border-b border-white/6 flex items-center gap-3 cursor-pointer hover:bg-white/4 transition-colors select-none"
+              >
+                <Tick
+                  checked={allSelected}
+                  indeterminate={someSelected && !allSelected}
                 />
-                <span className="text-xs font-bold text-zinc-500">
-                  {allFilteredSelected
-                    ? `All ${filteredCustomers.length} selected`
-                    : someFilteredSelected
-                      ? `${[...selected].filter(id => filteredCustomers.find(c => c._id === id)).length} of ${filteredCustomers.length} selected`
+                <span className="text-[10px] font-bold text-white/45">
+                  {allSelected
+                    ? `All ${filteredCustomers.length} deselect`
+                    : someSelected
+                      ? `${selectedInView} of ${filteredCustomers.length} selected — click to select all`
                       : `Select all ${filteredCustomers.length}`}
                 </span>
               </div>
             )}
 
-            {/* Customer rows */}
+            {/* Rows */}
             {audienceLoading ? (
               <div className="flex items-center justify-center py-16">
-                <div className="w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
               </div>
             ) : filteredCustomers.length === 0 ? (
-              <div className="text-center py-16 text-zinc-400">
-                <Users size={32} className="mx-auto mb-2 opacity-30" />
-                <p className="font-medium text-sm">No customers found</p>
+              <div className="text-center py-16">
+                <Users size={32} className="mx-auto mb-3 text-white/15" />
+                <p className="text-white/40 font-bold text-sm">
+                  No customers found
+                </p>
               </div>
             ) : (
-              <div className="divide-y divide-zinc-50 max-h-[480px] overflow-y-auto">
-                {filteredCustomers.map(c => {
-                  const isSelected = selected.has(c._id);
-                  const enabled    = c.crmEmailsEnabled !== false;
+              <div className="divide-y divide-white/[0.04] max-h-[520px] overflow-y-auto">
+                {filteredCustomers.map((c) => {
+                  const cId = getCId(c);
+                  const isSel = cId ? selected.has(cId) : false;
+                  const enabled = c.crmEmailsEnabled !== false;
+
                   return (
                     <div
-                      key={c._id}
-                      onClick={() => toggleCustomer(c._id)}
-                      className={`px-4 sm:px-6 py-3.5 flex items-center gap-3 cursor-pointer transition-colors ${
-                        isSelected ? "bg-zinc-50" : "hover:bg-zinc-50/60"
+                      key={cId || c.email}
+                      onClick={() => toggleRow(c)}
+                      className={`group px-5 py-3.5 flex items-center gap-3 cursor-pointer transition-colors select-none ${
+                        isSel ? "bg-emerald-500/8" : "hover:bg-white/2"
                       }`}
                     >
-                      <Checkbox
-                        checked={isSelected}
-                        onChange={() => toggleCustomer(c._id)}
-                      />
+                      {/* Checkbox */}
+                      <Tick checked={isSel} />
 
                       {/* Avatar */}
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
-                        enabled ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-400"
-                      }`}>
-                        {c.firstName?.[0]}{c.lastName?.[0]}
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                          enabled
+                            ? "bg-emerald-500/20 text-emerald-400"
+                            : "bg-white/8 text-white/25"
+                        }`}
+                      >
+                        {c.firstName?.[0]}
+                        {c.lastName?.[0]}
                       </div>
 
-                      {/* Name + email */}
+                      {/* Name / email */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-zinc-800 leading-tight truncate">
+                        <p className="text-sm font-bold text-white leading-tight truncate">
                           {c.firstName} {c.lastName}
                         </p>
-                        <p className="text-xs text-zinc-400 truncate">{c.email}</p>
+                        <p className="text-xs text-white/35 truncate">
+                          {c.email}
+                        </p>
                       </div>
 
-                      {/* Status badge */}
+                      {/* Status */}
                       {enabled ? (
-                        <span className="flex items-center gap-1 text-[10px] font-black text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full shrink-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                        <span className="flex items-center gap-1 text-[9px] font-black text-emerald-400 bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 rounded-full shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                           Receiving
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1 text-[10px] font-black text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full shrink-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                        <span className="flex items-center gap-1 text-[9px] font-black text-rose-400 bg-rose-500/15 border border-rose-500/25 px-2 py-0.5 rounded-full shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                           Excluded
                         </span>
                       )}
 
-                      {/* Quick send button */}
+                      {/* Quick send */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setQuickSend({ id: c._id, name: `${c.firstName} ${c.lastName}`.trim(), email: c.email });
+                          setQuickSend({
+                            id: cId,
+                            name: `${c.firstName} ${c.lastName}`.trim(),
+                            email: c.email,
+                          });
                         }}
-                        title="Send email to this customer now"
-                        className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-zinc-100 text-zinc-500 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-transparent text-[11px] font-bold transition-all"
+                        className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white/6 border border-white/10 text-white/40 hover:bg-emerald-500/15 hover:text-emerald-400 hover:border-emerald-500/25 text-[10px] font-bold transition-all"
                       >
-                        <Send size={11} />
+                        <Send size={10} />
                         Send
                       </button>
                     </div>
@@ -786,13 +1258,6 @@ export default function Automations() {
                 })}
               </div>
             )}
-
-            {/* Footer hint */}
-            <div className="px-4 sm:px-6 py-3 border-t border-zinc-100 bg-zinc-50">
-              <p className="text-xs text-zinc-400">
-                Click <strong>Send</strong> on any row to manually trigger an email for that customer. Select multiple customers to bulk enable/exclude or send to all at once.
-              </p>
-            </div>
           </div>
         )}
       </div>

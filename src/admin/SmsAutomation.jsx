@@ -59,9 +59,17 @@ export default function SmsAutomation() {
   const [testPhone, setTestPhone]   = useState("");
   const [testSending, setTestSending] = useState(false);
   const [clearingLogs, setClearingLogs] = useState(false);
-  const [creds, setCreds] = useState({ accountSid: "", authToken: "", phoneNumber: "" });
+  const [creds, setCreds] = useState({ accountSid: "", authToken: "", phoneNumber: "", verifySid: "" });
   const [savingCreds, setSavingCreds] = useState(false);
-  const [activeTab, setActiveTab]   = useState("triggers"); // "triggers" | "logs" | "credentials"
+  const [activeTab, setActiveTab]   = useState("triggers"); // "triggers" | "logs" | "credentials" | "verify"
+
+  // Twilio Verify state
+  const [verifyPhone, setVerifyPhone]   = useState("");
+  const [verifyCode, setVerifyCode]     = useState("");
+  const [verifySent, setVerifySent]     = useState(false);
+  const [verifySending, setVerifySending] = useState(false);
+  const [verifyChecking, setVerifyChecking] = useState(false);
+  const [verifyResult, setVerifyResult] = useState(null); // "approved" | "failed" | null
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -129,16 +137,66 @@ export default function SmsAutomation() {
           accountSid:  creds.accountSid  || undefined,
           authToken:   creds.authToken   || undefined,
           phoneNumber: creds.phoneNumber || undefined,
+          verifySid:   creds.verifySid   || undefined,
         }),
       });
       if (!res.ok) throw new Error();
       showToast("Credentials saved");
-      setCreds({ accountSid: "", authToken: "", phoneNumber: "" });
+      setCreds({ accountSid: "", authToken: "", phoneNumber: "", verifySid: "" });
       fetchConfig();
     } catch {
       showToast("Failed to save credentials", "error");
     } finally {
       setSavingCreds(false);
+    }
+  };
+
+  const sendVerification = async () => {
+    if (!verifyPhone.trim()) return showToast("Enter a phone number", "error");
+    setVerifySending(true);
+    setVerifyResult(null);
+    setVerifyCode("");
+    try {
+      const res = await fetch(`${API}/sms/verify/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to: verifyPhone.trim(), channel: "sms" }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setVerifySent(true);
+        showToast(`Verification code sent to ${verifyPhone}`);
+      } else {
+        showToast(data.error || "Failed to send code", "error");
+      }
+    } catch {
+      showToast("Failed to send verification code", "error");
+    } finally {
+      setVerifySending(false);
+    }
+  };
+
+  const checkVerification = async () => {
+    if (!verifyCode.trim()) return showToast("Enter the 6-digit code", "error");
+    setVerifyChecking(true);
+    try {
+      const res = await fetch(`${API}/sms/verify/check`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to: verifyPhone.trim(), code: verifyCode.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setVerifyResult("approved");
+        showToast("Phone number verified successfully!", "success");
+      } else {
+        setVerifyResult("failed");
+        showToast(data.error || "Incorrect code", "error");
+      }
+    } catch {
+      showToast("Failed to check code", "error");
+    } finally {
+      setVerifyChecking(false);
     }
   };
 
@@ -237,8 +295,13 @@ export default function SmsAutomation() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
-        {[["triggers", "Triggers"], ["logs", "SMS Logs"], ["credentials", "Credentials"]].map(([id, label]) => (
+      <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit flex-wrap">
+        {[
+          ["triggers",    "Triggers"],
+          ["verify",      "Phone Verify"],
+          ["logs",        "SMS Logs"],
+          ["credentials", "Credentials"],
+        ].map(([id, label]) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
@@ -249,6 +312,9 @@ export default function SmsAutomation() {
             }`}
           >
             {label}
+            {id === "verify" && config?.verifyConfigured && (
+              <span className="ml-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+            )}
           </button>
         ))}
       </div>
@@ -459,6 +525,129 @@ export default function SmsAutomation() {
         </div>
       )}
 
+      {/* ── PHONE VERIFY TAB ─────────────────────────────────────────── */}
+      {activeTab === "verify" && (
+        <div className="space-y-5 max-w-xl">
+
+          {/* Info banner */}
+          <div className="bg-violet-50 border border-violet-200 rounded-2xl p-4 flex items-start gap-3">
+            <span className="text-lg leading-none mt-0.5">🔐</span>
+            <div>
+              <p className="text-sm font-black text-violet-800">Twilio Verify — Phone Number Testing</p>
+              <p className="text-xs text-violet-600 font-medium mt-0.5">
+                Enter any phone number, send a one-time code, then verify it arrived. Use this to confirm your Verify service is working before relying on it in production.
+              </p>
+            </div>
+          </div>
+
+          {!config?.verifyConfigured && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+              <AlertCircle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-black text-amber-800">Verify Service not configured</p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  Go to the{" "}
+                  <button onClick={() => setActiveTab("credentials")} className="underline font-bold">
+                    Credentials tab
+                  </button>{" "}
+                  and enter your Verify Service SID (starts with VA...) to use this feature.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-5">
+
+            {/* Step 1 — Phone number */}
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Step 1 — Enter phone number</p>
+              <div className="flex gap-3">
+                <input
+                  type="tel"
+                  value={verifyPhone}
+                  onChange={e => { setVerifyPhone(e.target.value); setVerifySent(false); setVerifyResult(null); setVerifyCode(""); }}
+                  placeholder="+447911123456"
+                  disabled={!config?.verifyConfigured}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 disabled:opacity-50"
+                />
+                <button
+                  onClick={sendVerification}
+                  disabled={verifySending || !config?.verifyConfigured || !verifyPhone.trim()}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-black hover:bg-violet-700 transition-colors disabled:opacity-50 whitespace-nowrap"
+                >
+                  {verifySending ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
+                  {verifySending ? "Sending…" : verifySent ? "Resend Code" : "Send Code"}
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1.5">Use international format e.g. +447911123456 · The code expires in 10 minutes</p>
+            </div>
+
+            {/* Step 2 — Enter code (shown once sent) */}
+            {verifySent && (
+              <div className="pt-4 border-t border-slate-100">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Step 2 — Enter the code you received</p>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={verifyCode}
+                    onChange={e => { setVerifyCode(e.target.value.replace(/\D/g, "")); setVerifyResult(null); }}
+                    placeholder="123456"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-black font-mono tracking-[0.25em] text-center focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400"
+                  />
+                  <button
+                    onClick={checkVerification}
+                    disabled={verifyChecking || verifyCode.length < 6}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-black hover:bg-emerald-700 transition-colors disabled:opacity-50 whitespace-nowrap"
+                  >
+                    {verifyChecking ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                    {verifyChecking ? "Checking…" : "Verify Code"}
+                  </button>
+                </div>
+
+                {/* Result */}
+                {verifyResult === "approved" && (
+                  <div className="mt-4 flex items-center gap-3 px-4 py-3.5 bg-emerald-50 border border-emerald-200 rounded-xl">
+                    <CheckCircle2 size={18} className="text-emerald-600 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-black text-emerald-800">Verified!</p>
+                      <p className="text-xs text-emerald-600 font-medium mt-0.5">The code matched. Your Twilio Verify service is working correctly.</p>
+                    </div>
+                  </div>
+                )}
+                {verifyResult === "failed" && (
+                  <div className="mt-4 flex items-center gap-3 px-4 py-3.5 bg-rose-50 border border-rose-200 rounded-xl">
+                    <XCircle size={18} className="text-rose-600 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-black text-rose-800">Incorrect code</p>
+                      <p className="text-xs text-rose-600 font-medium mt-0.5">The code didn't match — double-check the SMS and try again.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* How it works */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+            <p className="text-xs font-black text-slate-700 mb-3">How Twilio Verify works</p>
+            <div className="space-y-2.5">
+              {[
+                ["Send", "Twilio sends a 6-digit OTP to the phone via SMS (or voice/WhatsApp)."],
+                ["Check", "You submit the code back to Twilio — it tells you approved or failed."],
+                ["Use case", "Confirm a customer or worker's number is real before sending automations."],
+              ].map(([title, desc]) => (
+                <div key={title} className="flex gap-3 text-xs">
+                  <span className="font-black text-slate-600 w-16 shrink-0">{title}</span>
+                  <span className="text-slate-500 font-medium">{desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── CREDENTIALS TAB ───────────────────────────────────────────── */}
       {activeTab === "credentials" && (
         <div className="space-y-5 max-w-xl">
@@ -517,11 +706,34 @@ export default function SmsAutomation() {
                 />
                 <p className="text-[11px] text-slate-400 mt-1.5">Must be a Twilio number in international format e.g. +441234567890</p>
               </div>
+
+              {/* Verify Service SID */}
+              <div className="pt-2 border-t border-slate-100">
+                <label className="text-xs font-black text-slate-600 uppercase tracking-wider block mb-1.5">
+                  Verify Service SID
+                  <span className="ml-2 text-[9px] font-bold bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full normal-case tracking-normal">Phone Verification</span>
+                </label>
+                <input
+                  type="text"
+                  value={creds.verifySid}
+                  onChange={e => setCreds(c => ({ ...c, verifySid: e.target.value }))}
+                  placeholder="VAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 font-mono"
+                />
+                <div className="flex items-center justify-between mt-1.5">
+                  <p className="text-[11px] text-slate-400">Found in Twilio Console → Verify → Services</p>
+                  {config?.verifyConfigured && (
+                    <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                      <CheckCircle2 size={11} /> {config.verifySidMasked}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
 
             <button
               onClick={saveCreds}
-              disabled={savingCreds || (!creds.accountSid && !creds.authToken && !creds.phoneNumber)}
+              disabled={savingCreds || (!creds.accountSid && !creds.authToken && !creds.phoneNumber && !creds.verifySid)}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-white font-black text-sm hover:bg-primary-dark transition-colors disabled:opacity-50"
             >
               {savingCreds ? <RefreshCw size={15} className="animate-spin" /> : <Settings size={15} />}

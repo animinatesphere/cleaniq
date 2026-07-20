@@ -21,6 +21,7 @@ router.get("/config", async (req, res) => {
       "twilio_account_sid",
       "twilio_auth_token",
       "twilio_phone_number",
+      "twilio_verify_sid",
     ];
     const settings = await SystemSetting.find({ key: { $in: keys } });
     const map = {};
@@ -31,13 +32,18 @@ router.get("/config", async (req, res) => {
       enabled: map[`sms_${t.key}`] === true,
     }));
 
-    const configured = !!(map.twilio_account_sid && map.twilio_auth_token && map.twilio_phone_number);
+    const configured       = !!(map.twilio_account_sid && map.twilio_auth_token && map.twilio_phone_number);
+    const verifyConfigured = !!(map.twilio_account_sid && map.twilio_auth_token && map.twilio_verify_sid);
 
     res.json({
       triggers,
       configured,
+      verifyConfigured,
       phoneNumber: map.twilio_phone_number
         ? `...${String(map.twilio_phone_number).slice(-4)}`
+        : null,
+      verifySidMasked: map.twilio_verify_sid
+        ? `VA...${String(map.twilio_verify_sid).slice(-6)}`
         : null,
     });
   } catch (err) {
@@ -66,7 +72,7 @@ router.post("/config/trigger", async (req, res) => {
 // POST /api/sms/config/credentials — save Twilio credentials
 router.post("/config/credentials", async (req, res) => {
   try {
-    const { accountSid, authToken, phoneNumber } = req.body;
+    const { accountSid, authToken, phoneNumber, verifySid } = req.body;
     const updates = [];
     if (accountSid !== undefined)
       updates.push(SystemSetting.findOneAndUpdate({ key: "twilio_account_sid" },  { key: "twilio_account_sid",  value: accountSid  }, { upsert: true }));
@@ -74,10 +80,69 @@ router.post("/config/credentials", async (req, res) => {
       updates.push(SystemSetting.findOneAndUpdate({ key: "twilio_auth_token" },   { key: "twilio_auth_token",   value: authToken   }, { upsert: true }));
     if (phoneNumber !== undefined)
       updates.push(SystemSetting.findOneAndUpdate({ key: "twilio_phone_number" }, { key: "twilio_phone_number", value: phoneNumber  }, { upsert: true }));
+    if (verifySid !== undefined)
+      updates.push(SystemSetting.findOneAndUpdate({ key: "twilio_verify_sid" },   { key: "twilio_verify_sid",   value: verifySid   }, { upsert: true }));
     await Promise.all(updates);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Verify helpers ──────────────────────────────────────────────────────────
+async function getVerifyClient() {
+  const [sidSetting, tokenSetting, vSidSetting] = await Promise.all([
+    SystemSetting.findOne({ key: "twilio_account_sid" }),
+    SystemSetting.findOne({ key: "twilio_auth_token" }),
+    SystemSetting.findOne({ key: "twilio_verify_sid" }),
+  ]);
+  const sid      = sidSetting?.value   || process.env.TWILIO_ACCOUNT_SID;
+  const token    = tokenSetting?.value || process.env.TWILIO_AUTH_TOKEN;
+  const verifySid = vSidSetting?.value || process.env.TWILIO_VERIFY_SID;
+  if (!sid || !token || !verifySid) return null;
+  const twilio = require("twilio");
+  return { client: twilio(sid, token), verifySid };
+}
+
+// POST /api/sms/verify/send — send a Twilio Verify code to a phone number
+router.post("/verify/send", async (req, res) => {
+  try {
+    const { to, channel = "sms" } = req.body;
+    if (!to) return res.status(400).json({ error: "Phone number required" });
+
+    const ctx = await getVerifyClient();
+    if (!ctx) return res.status(400).json({ error: "Twilio Verify not configured. Add your Verify Service SID in Credentials." });
+
+    const verification = await ctx.client.verify.v2
+      .services(ctx.verifySid)
+      .verifications.create({ to, channel });
+
+    res.json({ success: true, status: verification.status, to: verification.to });
+  } catch (err) {
+    res.status(400).json({ error: err.message || "Failed to send verification code" });
+  }
+});
+
+// POST /api/sms/verify/check — check the code the user entered
+router.post("/verify/check", async (req, res) => {
+  try {
+    const { to, code } = req.body;
+    if (!to || !code) return res.status(400).json({ error: "Phone number and code required" });
+
+    const ctx = await getVerifyClient();
+    if (!ctx) return res.status(400).json({ error: "Twilio Verify not configured" });
+
+    const check = await ctx.client.verify.v2
+      .services(ctx.verifySid)
+      .verificationChecks.create({ to, code });
+
+    if (check.status === "approved") {
+      res.json({ success: true, status: "approved" });
+    } else {
+      res.status(400).json({ success: false, status: check.status, error: "Incorrect code — please try again" });
+    }
+  } catch (err) {
+    res.status(400).json({ error: err.message || "Failed to verify code" });
   }
 });
 
