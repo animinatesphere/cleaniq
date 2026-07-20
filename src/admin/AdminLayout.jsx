@@ -273,6 +273,12 @@ const AdminLayout = () => {
           icon: <Zap size={20} />,
         },
         {
+          name: "SMS Automation",
+          path: "/admin/sms-automation",
+          key: "sms-automation",
+          icon: <MessageSquare size={20} />,
+        },
+        {
           name: "Invoice ",
           path: "/admin/invoice-builder",
           key: "invoice-builder",
@@ -484,7 +490,7 @@ const AdminLayout = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC] print:bg-white">
+    <div className="flex min-h-screen bg-[#F1F5F3] print:bg-white">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
@@ -495,33 +501,33 @@ const AdminLayout = () => {
 
       {/* Sidebar */}
       <aside
-        className={`print:hidden fixed inset-y-0 left-0 z-50 w-72 ${isCollapsed ? "lg:w-22 lg:px-3" : ""} bg-white border-r border-slate-200 text-slate-600 p-6 flex flex-col transition-all duration-300 lg:translate-x-0 lg:static ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`print:hidden fixed inset-y-0 left-0 z-50 w-72 ${isCollapsed ? "lg:w-22 lg:px-3" : ""} bg-[#05201A] border-r border-white/[0.08] text-white/50 p-6 flex flex-col transition-all duration-300 lg:translate-x-0 lg:static ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div
-          className={`flex items-center mb-10 ${isCollapsed ? "lg:justify-center" : "justify-between"}`}
+          className={`flex items-center pb-5 mb-5 border-b border-white/[0.08] ${isCollapsed ? "lg:justify-center" : "justify-between"}`}
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
-              <img src={logo} alt="" />
+            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 ring-1 ring-white/10 flex-shrink-0 overflow-hidden">
+              <img src={logo} alt="" className="w-full h-full object-cover" />
             </div>
             <div className={isCollapsed ? "lg:hidden" : ""}>
-              <h1 className="font-black text-base leading-none  tracking-tighter text-slate-900 whitespace-nowrap">
+              <h1 className="font-black text-base leading-none tracking-tighter text-white whitespace-nowrap">
                 Cleaniq Services
               </h1>
-              <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest whitespace-nowrap">
+              <span className="text-[10px] text-white/35 font-semibold uppercase tracking-widest whitespace-nowrap">
                 Business Portal
               </span>
             </div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className={`lg:hidden text-slate-400 hover:text-slate-600 ${isCollapsed ? "lg:hidden" : ""}`}
+            className={`lg:hidden text-white/40 hover:text-white/70 ${isCollapsed ? "lg:hidden" : ""}`}
           >
             <X size={22} />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-0.5">
+        <nav className="flex-1 overflow-y-auto sidebar-scrollbar pr-1 space-y-0.5">
           {/* Desktop collapsed: icon-only flat list (hidden on mobile) */}
           {isCollapsed &&
             menuGroups.flatMap((g) => g.items).map((item) => {
@@ -537,8 +543,8 @@ const AdminLayout = () => {
                   title={item.name}
                   className={`hidden lg:flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
                     isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                      ? "bg-white/10 text-white"
+                      : "text-white/40 hover:bg-white/[0.07] hover:text-white/70"
                   }`}
                 >
                   {item.icon}
@@ -562,16 +568,16 @@ const AdminLayout = () => {
                     onClick={() => toggleGroup(group.label)}
                     className={`flex items-center justify-between w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.18em] transition-all duration-200 group ${
                       hasActiveItem
-                        ? "text-primary bg-primary/5"
-                        : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                        ? "text-emerald-400 bg-white/[0.07]"
+                        : "text-white/30 hover:text-white/55 hover:bg-white/5"
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <span
                         className={
                           hasActiveItem
-                            ? "text-primary"
-                            : "text-slate-400 group-hover:text-slate-500"
+                            ? "text-emerald-400"
+                            : "text-white/30 group-hover:text-white/50"
                         }
                       >
                         {group.groupIcon}
@@ -582,13 +588,13 @@ const AdminLayout = () => {
                       size={13}
                       className={`transition-transform duration-200 flex-shrink-0 ${
                         isOpen ? "rotate-0" : "-rotate-90"
-                      } ${hasActiveItem ? "text-primary" : "text-slate-300"}`}
+                      } ${hasActiveItem ? "text-emerald-400/60" : "text-white/15"}`}
                     />
                   </button>
 
                   {/* Group items */}
                   {isOpen && (
-                    <div className="mt-0.5 mb-2 space-y-0.5 pl-3 border-l-2 border-slate-100 ml-3">
+                    <div className="mt-0.5 mb-2 space-y-0.5 pl-3 border-l-2 border-white/10 ml-3">
                       {group.items.map((item) => {
                         const isActive =
                           item.path === "/admin" || item.exact
@@ -599,14 +605,14 @@ const AdminLayout = () => {
                             key={item.path}
                             to={item.path}
                             onClick={() => setSidebarOpen(false)}
-                            className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition-all duration-150 ${
+                            className={`flex items-center gap-2.5 pl-2 pr-2.5 py-2 rounded-lg transition-all duration-150 border-l-2 ${
                               isActive
-                                ? "bg-primary/10 text-primary"
-                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                                ? "bg-white/10 text-white border-emerald-400"
+                                : "text-white/45 hover:bg-white/[0.07] hover:text-white/80 border-transparent"
                             }`}
                           >
                             <span
-                              className={`flex-shrink-0 ${isActive ? "text-primary" : "text-slate-400"}`}
+                              className={`flex-shrink-0 ${isActive ? "text-emerald-400" : "text-white/35"}`}
                             >
                               {item.icon}
                             </span>
@@ -630,7 +636,7 @@ const AdminLayout = () => {
 
         <button
           onClick={toggleCollapsed}
-          className={`hidden lg:flex items-center gap-3 p-3 mt-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-all ${isCollapsed ? "justify-center" : ""}`}
+          className={`hidden lg:flex items-center gap-3 p-3 mt-2 rounded-xl text-white/30 hover:text-white/65 hover:bg-white/[0.07] transition-all ${isCollapsed ? "justify-center" : ""}`}
         >
           {isCollapsed ? (
             <ChevronsRight size={18} />
@@ -642,25 +648,44 @@ const AdminLayout = () => {
           )}
         </button>
 
-        <div className="mt-auto border-t border-slate-100 pt-4 space-y-2">
+        <div className="mt-auto border-t border-white/[0.08] pt-4">
+          {/* Expanded: full profile card */}
+          <div className={`${isCollapsed ? "lg:hidden" : ""}`}>
+            <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/[0.05] transition-colors group">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-black text-[11px] flex-shrink-0 ring-2 ring-white/10">
+                {(localStorage.getItem("adminUser") || "A").charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white/80 font-bold text-[13px] leading-tight truncate">
+                  {localStorage.getItem("adminUser") || "Admin"}
+                </p>
+                <p className="text-white/35 text-[10px] font-medium uppercase tracking-wider mt-0.5">
+                  {isBookingAgent ? "Booking Agent" : "Manager"}
+                </p>
+              </div>
+              <button
+                onClick={handleLogout}
+                title="Logout"
+                className="p-1.5 rounded-lg text-white/25 hover:text-rose-400 hover:bg-rose-500/10 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
+              >
+                <LogOut size={14} />
+              </button>
+            </div>
+          </div>
+          {/* Collapsed: icon-only logout */}
           <button
             onClick={handleLogout}
-            title={isCollapsed ? "Logout" : undefined}
-            className={`flex items-center gap-3 w-full p-3 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors ${isCollapsed ? "lg:justify-center" : ""}`}
+            title="Logout"
+            className={`hidden ${isCollapsed ? "lg:flex" : ""} items-center justify-center w-full p-3 rounded-xl text-white/30 hover:text-rose-400 hover:bg-rose-500/10 transition-colors`}
           >
-            <LogOut size={19} className="flex-shrink-0" />
-            <span
-              className={`font-semibold text-sm ${isCollapsed ? "lg:hidden" : ""}`}
-            >
-              Logout
-            </span>
+            <LogOut size={18} />
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 relative">
-        <header className="print:hidden sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 lg:px-10 py-4 flex items-center justify-between">
+        <header className="print:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-6 lg:px-10 py-3.5 flex items-center justify-between shadow-sm shadow-slate-200/50">
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden p-2 rounded-xl bg-slate-100 text-slate-600"
@@ -669,10 +694,10 @@ const AdminLayout = () => {
           </button>
 
           <div>
-            <p className="text-base font-bold text-slate-900">
+            <p className="text-[15px] font-black text-slate-900 tracking-tight">
               Welcome back, {localStorage.getItem("adminUser") || "Admin"}
             </p>
-            <p className="text-xs text-slate-400 font-medium hidden sm:block">
+            <p className="text-[11px] text-slate-400 font-medium hidden sm:block mt-0.5">
               Here's what's happening with your business today
             </p>
           </div>
@@ -683,7 +708,7 @@ const AdminLayout = () => {
           >
             <button
               onClick={() => setIsNotifOpen(!isNotifOpen)}
-              className={`relative p-2.5 rounded-xl border transition-all ${isNotifOpen ? "bg-primary/10 border-primary text-primary" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+              className={`relative p-2 rounded-xl border transition-all ${isNotifOpen ? "bg-primary/10 border-primary/30 text-primary" : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300"}`}
             >
               <Bell size={20} />
               {notifications.length > 0 && (
@@ -693,7 +718,7 @@ const AdminLayout = () => {
 
             {/* Notification Dropdown */}
             {isNotifOpen && (
-              <div className="absolute top-full right-0 mt-4 w-[85vw] sm:w-80 bg-white border border-slate-200 rounded-4xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="absolute top-full right-0 mt-3 w-[85vw] sm:w-80 bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/80 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                   <h3 className="font-black text-primary-dark text-sm">
                     Notifications
@@ -765,7 +790,7 @@ const AdminLayout = () => {
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-10 max-w-400 mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-400 mx-auto w-full">
           <Outlet />
         </main>
       </div>

@@ -56,6 +56,7 @@ import Rota from "./admin/Rota";
 import Calendar from "./admin/Calendar";
 import NewBookingPage from "./admin/NewBookingPage";
 import Automations from "./admin/Automations";
+import SmsAutomation from "./admin/SmsAutomation";
 import Pipeline from "./admin/Pipeline";
 import Tasks from "./admin/Tasks";
 import Complaints from "./admin/Complaints";
@@ -136,6 +137,7 @@ function App() {
               <Route path="withdrawals" element={<AdminWithdrawals />} />
               <Route path="payments" element={<AdminPayments />} />
               <Route path="automations" element={<Automations />} />
+              <Route path="sms-automation" element={<SmsAutomation />} />
               <Route path="pipeline" element={<Pipeline />} />
               <Route path="tasks" element={<Tasks />} />
               <Route path="complaints" element={<Complaints />} />

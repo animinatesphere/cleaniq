@@ -92,6 +92,7 @@ const complaintsRoutes = require("./routes/complaints");
 const contractsRoutes = require("./routes/contracts");
 const referralsRoutes = require("./routes/referrals");
 const leadsRoutes = require("./routes/leads");
+const smsRoutes = require("./routes/sms");
 
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
@@ -106,6 +107,7 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/quotes", quotesRoutes);
 app.use("/api/automations", automationsRoutes);
+app.use("/api/sms", smsRoutes);
 
 // Stripe webhook endpoint (raw body required)
 const { scheduleTask } = require("./utils/automationEngine");

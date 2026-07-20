@@ -7,6 +7,7 @@ const Lead = require("../models/Lead");
 const { sendEmail, templates } = require("../utils/emailService");
 const { moveToTrash } = require("../utils/trash");
 const { scheduleTask } = require("../utils/automationEngine");
+const sms = require("../utils/smsService");
 
 // GET all bookings (Admin)
 router.get("/", async (req, res) => {
@@ -430,6 +431,17 @@ router.post("/", async (req, res) => {
       console.error("⚠️ Failed to schedule booking reminders:", schedErr.message);
     }
 
+    // SMS: confirm new booking (fire-and-forget)
+    setImmediate(async () => {
+      try {
+        if (newBooking.status === "Confirmed") {
+          await sms.triggerBookingConfirmed(newBooking);
+        }
+      } catch (smsErr) {
+        console.error("SMS create trigger error:", smsErr.message);
+      }
+    });
+
     res.status(201).json(newBooking);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -446,6 +458,10 @@ router.put("/:id", async (req, res) => {
     const wasCompleted = existingBooking.status === "Completed" || existingBooking.status === "Completed - Unpaid";
     const isNowCompleted = req.body.status === "Completed";
     const isNowCompletedUnpaid = req.body.status === "Completed - Unpaid";
+    const prevStatus = existingBooking.status;
+    const newStatus  = req.body.status;
+    const prevWorker = existingBooking.assignedWorker?.toString();
+    const newWorker  = req.body.assignedWorker?.toString();
 
     // If postcode is provided separately and not already in address, append it
     if (req.body.details?.postcode && req.body.details?.address) {
@@ -747,6 +763,33 @@ router.put("/:id", async (req, res) => {
         console.error("⚠️ Worker wallet update failed for Completed-Unpaid:", walletErr.message);
       }
     }
+
+    // ── SMS triggers (fire-and-forget — never block the response) ──────────
+    setImmediate(async () => {
+      try {
+        // Booking confirmed
+        if (prevStatus !== "Confirmed" && newStatus === "Confirmed") {
+          await sms.triggerBookingConfirmed(updatedBooking);
+        }
+        // Booking cancelled
+        if (prevStatus !== "Cancelled" && newStatus === "Cancelled") {
+          await sms.triggerBookingCancelled(updatedBooking);
+        }
+        // Booking completed
+        if (!wasCompleted && isNowCompleted) {
+          await sms.triggerBookingCompleted(updatedBooking);
+        }
+        // Worker assigned (new assignment or change)
+        if (newWorker && newWorker !== prevWorker) {
+          const worker = await Worker.findById(newWorker).select("firstName lastName phone");
+          const workerName = worker ? `${worker.firstName} ${worker.lastName}`.trim() : "your cleaner";
+          await sms.triggerWorkerAssigned(updatedBooking, workerName);
+          if (worker) await sms.triggerWorkerJobAssigned(updatedBooking, worker);
+        }
+      } catch (smsErr) {
+        console.error("SMS trigger error:", smsErr.message);
+      }
+    });
 
     res.json(updatedBooking);
   } catch (err) {
