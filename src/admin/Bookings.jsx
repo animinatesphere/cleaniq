@@ -31,6 +31,7 @@ import {
   ChevronDown,
   FileText,
   Camera,
+  RefreshCw,
 } from "lucide-react";
 import AdminCRM from "./AdminCRM";
 import { buildBookedRanges, overlapsExistingRange } from "../utils/timeOverlap";
@@ -2013,22 +2014,52 @@ ${extrasRows}
         </div>
       )}
 
+      {/* ── Stats Summary ───────────────────────────────────────────────────── */}
+      {(() => {
+        const allReal = bookings.filter(b => b.status !== "Blackout" && b.customer?.firstName !== "ADMIN_BLOCK");
+        const todayStr = new Date().toISOString().split("T")[0];
+        const todayCount = allReal.filter(b => b.schedule?.date && new Date(b.schedule.date).toISOString().split("T")[0] === todayStr).length;
+        const pendingCount = allReal.filter(b => b.status === "Pending").length;
+        const activeCount  = allReal.filter(b => ["Confirmed","In Progress","Accepted"].includes(b.status)).length;
+        const completedCount = allReal.filter(b => b.status === "Completed").length;
+        const totalRevenue = allReal.filter(b => b.status === "Completed").reduce((s,b) => s+Number(b.payment?.amount||0),0);
+        return (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {[
+              { label:"Today", val:todayCount,     sub:"scheduled",       color:"text-cyan-400",    dot:"bg-cyan-400" },
+              { label:"Pending", val:pendingCount,  sub:"need action",    color:"text-amber-400",   dot:"bg-amber-400" },
+              { label:"Active",  val:activeCount,   sub:"in progress",    color:"text-emerald-400", dot:"bg-emerald-400" },
+              { label:"Completed", val:completedCount, sub:"all time",    color:"text-blue-400",    dot:"bg-blue-400" },
+              { label:"Revenue",  val:`£${(totalRevenue/1000).toFixed(1)}k`, sub:"earned",          color:"text-emerald-300", dot:"bg-emerald-300" },
+            ].map(s => (
+              <div key={s.label} className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl px-5 py-4 flex items-center gap-3 shadow-sm shadow-black/20">
+                <div className={`w-2 h-2 rounded-full shrink-0 ${s.dot}`}/>
+                <div>
+                  <p className={`text-xl font-black tabular-nums leading-none ${s.color}`}>{s.val}</p>
+                  <p className="text-[10px] font-black text-white/30 uppercase tracking-wider mt-0.5">{s.label}</p>
+                  <p className="text-[9px] font-medium text-white/20">{s.sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Bookings
-          </h1>
+          <h1 className="text-2xl font-black text-white tracking-tight">Bookings</h1>
+          <p className="text-sm text-white/35 font-medium mt-0.5">{bookings.filter(b=>b.status!=="Blackout").length} total bookings · manage and track all jobs</p>
         </div>
         <div className="flex flex-wrap gap-2.5 w-full md:w-auto">
           <button
             onClick={exportToCSV}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.06] border border-white/10 rounded-xl text-sm font-bold text-white/50 hover:bg-white/10 hover:text-white/80 transition-all"
           >
             <Download size={15} /> CSV
           </button>
           <button
             onClick={exportToExcel}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.06] border border-white/10 rounded-xl text-sm font-bold text-white/50 hover:bg-white/10 hover:text-white/80 transition-all"
             title="Export bookings & leads to Excel"
           >
             <Download size={15} /> Excel
@@ -2036,7 +2067,7 @@ ${extrasRows}
           <div className="relative">
             <button
               onClick={() => setShowCreateMenu((v) => !v)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900 text-white border border-zinc-900 hover:bg-zinc-700 transition-all font-semibold text-sm"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 text-white border border-emerald-500 hover:bg-emerald-400 transition-all font-black text-sm shadow-sm shadow-emerald-500/25"
             >
               New Booking
               <ChevronDown
@@ -2050,35 +2081,27 @@ ${extrasRows}
                   className="fixed inset-0 z-40"
                   onClick={() => setShowCreateMenu(false)}
                 />
-                <div className="absolute right-0 z-50 mt-2 w-68 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden" style={{minWidth:"17rem"}}>
+                <div className="absolute right-0 z-50 mt-2 w-72 bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/40 overflow-hidden" style={{minWidth:"17rem"}}>
                   <button
                     onClick={() => {
                       setShowCreateMenu(false);
                       navigate("/admin/bookings/new");
                     }}
-                    className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-all"
+                    className="w-full text-left px-5 py-4 hover:bg-white/[0.05] transition-all"
                   >
-                    <p className="text-sm font-semibold text-slate-800">
-                      Create Booking
-                    </p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
-                      Standard flow — payment link / bank details emailed
-                    </p>
+                    <p className="text-sm font-black text-white/85">Create Booking</p>
+                    <p className="text-[11px] text-white/35 mt-0.5 font-medium">Standard flow — payment link / bank details emailed</p>
                   </button>
-                  <div className="h-px bg-slate-100" />
+                  <div className="h-px bg-white/[0.06]" />
                   <button
                     onClick={() => {
                       setShowCreateMenu(false);
                       navigate("/admin/bookings/new", { state: { noPaymentRequired: true } });
                     }}
-                    className="w-full text-left px-4 py-3 hover:bg-emerald-50 transition-all"
+                    className="w-full text-left px-5 py-4 hover:bg-emerald-500/10 transition-all"
                   >
-                    <p className="text-sm font-semibold text-emerald-700">
-                      Create Booking (non pay)
-                    </p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
-                      Already paid — no Stripe link or email sent
-                    </p>
+                    <p className="text-sm font-black text-emerald-400">Create Booking (non pay)</p>
+                    <p className="text-[11px] text-white/35 mt-0.5 font-medium">Already paid — no Stripe link or email sent</p>
                   </button>
                 </div>
               </>
@@ -2086,36 +2109,36 @@ ${extrasRows}
           </div>
           <button
             onClick={fetchBookings}
-            className="px-4 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-dark transition-all font-semibold text-sm shadow-sm"
+            className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/[0.06] border border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70 transition-all"
           >
-            Refresh
+            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden animate-in fade-in">
-          <div className="p-5 border-b border-slate-100 flex items-center gap-4 justify-between flex-wrap">
-            <div className="flex items-center gap-2.5 px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-200 flex-1 min-w-60 focus-within:border-primary/50 transition-all">
-              <Search size={16} className="text-slate-400" />
+      <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm shadow-black/20 overflow-hidden animate-in fade-in">
+          <div className="p-5 border-b border-white/[0.07] flex items-center gap-3 justify-between flex-wrap">
+            <div className="flex items-center gap-2.5 px-4 py-2.5 bg-white/[0.05] rounded-xl border border-white/10 flex-1 min-w-60 focus-within:border-emerald-500/40 transition-all">
+              <Search size={16} className="text-white/25" />
               <input
                 type="text"
-                placeholder="Search bookings..."
+                placeholder="Search by name or booking ID…"
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setBookingsPage(1); }}
-                className="bg-transparent outline-none text-sm font-medium w-full text-slate-700"
+                className="bg-transparent outline-none text-sm font-medium w-full text-white/70 placeholder:text-white/20"
               />
             </div>
             <button
               onClick={() => setShowCancelled((v) => !v)}
-              className={`px-4 py-2 rounded-xl border text-sm font-semibold transition-all flex items-center gap-2 ${showCancelled ? "bg-rose-50 border-rose-200 text-rose-600" : "bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300"}`}
+              className={`px-4 py-2 rounded-xl border text-sm font-black transition-all flex items-center gap-2 ${showCancelled ? "bg-rose-500/15 border-rose-500/25 text-rose-400" : "bg-white/[0.05] border-white/10 text-white/40 hover:border-white/20"}`}
             >
-              <span className={`w-2 h-2 rounded-full ${showCancelled ? "bg-rose-500" : "bg-slate-300"}`} />
-              {showCancelled ? "Hiding cancelled" : "Show cancelled"}
+              <span className={`w-2 h-2 rounded-full ${showCancelled ? "bg-rose-500" : "bg-white/20"}`} />
+              {showCancelled ? "Hide Cancelled" : "Show Cancelled"}
             </button>
             {selectedBookings.size > 0 && (
               <button
                 onClick={() => setShowBulkDeleteModal(true)}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold transition-all flex items-center gap-2 text-sm"
+                className="px-4 py-2 rounded-xl bg-rose-500/20 border border-rose-500/30 hover:bg-rose-500/30 text-rose-400 font-black transition-all flex items-center gap-2 text-sm"
               >
                 <Trash2 size={16} />
                 Delete ({selectedBookings.size})
@@ -2126,7 +2149,7 @@ ${extrasRows}
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.12em] bg-slate-50/60">
+                <tr className="text-[10px] font-black text-white/25 uppercase tracking-[0.15em] bg-white/[0.03] border-b border-white/[0.06]">
                   <th className="px-4 py-3.5 w-12">
                     <input
                       type="checkbox"
@@ -2135,34 +2158,32 @@ ${extrasRows}
                         pageBookings.every(b => selectedBookings.has(b._id))
                       }
                       onChange={toggleSelectAll}
-                      className="w-4 h-4 rounded border-2 border-slate-300 cursor-pointer accent-primary"
+                      className="w-4 h-4 rounded border-2 border-white/20 cursor-pointer accent-emerald-500"
                     />
                   </th>
                   <th className="px-6 py-3.5">Customer</th>
                   <th className="px-4 py-3.5">Service</th>
-                  <th className="px-4 py-3.5">Date</th>
+                  <th className="px-4 py-3.5">Date & Time</th>
                   <th className="px-4 py-3.5">Worker</th>
                   <th className="px-4 py-3.5">Status</th>
                   <th className="px-6 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-white/[0.04]">
                 {loading ? (
                   <tr>
-                    <td
-                      colSpan="7"
-                      className="py-16 text-center font-semibold text-slate-400"
-                    >
-                      Loading...
+                    <td colSpan="7" className="py-16 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <RefreshCw size={20} className="text-white/20 animate-spin" />
+                        <span className="text-sm font-bold text-white/25">Loading bookings…</span>
+                      </div>
                     </td>
                   </tr>
                 ) : displayBookings.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan="7"
-                      className="py-16 text-center font-semibold text-slate-300"
-                    >
-                      No matching entries
+                    <td colSpan="7" className="py-16 text-center">
+                      <p className="text-sm font-bold text-white/20">No bookings match your search</p>
+                      <p className="text-[11px] text-white/15 mt-1">Try a different name or booking ID</p>
                     </td>
                   </tr>
                 ) : (
@@ -2170,8 +2191,8 @@ ${extrasRows}
                     <tr
                       key={b._id}
                       onClick={() => { setSelectedBooking(b); setEditData(b); setIsEditing(false); }}
-                      className={`group hover:bg-slate-50/80 transition-colors cursor-pointer ${
-                        selectedBookings.has(b._id) ? "bg-blue-50" : ""
+                      className={`group hover:bg-white/[0.04] transition-colors cursor-pointer ${
+                        selectedBookings.has(b._id) ? "bg-emerald-500/[0.08]" : ""
                       }`}
                     >
                       <td className="px-4 py-4 w-12">
@@ -2180,59 +2201,64 @@ ${extrasRows}
                           checked={selectedBookings.has(b._id)}
                           onChange={() => toggleBookingSelection(b._id)}
                           onClick={(e) => e.stopPropagation()}
-                          className="w-4 h-4 rounded border-2 border-slate-300 cursor-pointer accent-primary"
+                          className="w-4 h-4 rounded border-2 border-white/20 cursor-pointer accent-emerald-500"
                         />
                       </td>
                       <td className="px-6 py-4">
-                        <p className="font-semibold text-slate-800 text-sm">
-                          {b.customer?.firstName} {b.customer?.lastName}
-                        </p>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0">
+                            <span className="text-[10px] font-black text-emerald-400">
+                              {((b.customer?.firstName?.[0]||"")+(b.customer?.lastName?.[0]||"")).toUpperCase()||"?"}
+                            </span>
+                          </div>
+                          <div>
+                        <p className="font-black text-white/85 text-sm">{b.customer?.firstName} {b.customer?.lastName}</p>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <p className="text-[10px] text-slate-400 font-semibold">{b.bookingId}</p>
+                          <p className="text-[10px] text-white/30 font-bold tabular-nums">{b.bookingId}</p>
                           {b._recurringCount > 1 && (
-                            <span className="text-[9px] font-black bg-violet-100 text-violet-600 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                            <span className="text-[9px] font-black bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded-full uppercase tracking-wide border border-violet-500/25">
                               Recurring Â· {b._recurringCount}
                             </span>
                           )}
+                        </div>
+                        </div>
                         </div>
                       </td>
                       <td className="px-4 py-4">
                         <p className="text-sm font-medium text-slate-700">
                           {b.service}
                         </p>
-                        <p className="text-[10px] text-primary font-semibold">
-                          {getPropertyData(b)["Bedroom"] || 0} Bed •{" "}
-                          {b.details?.duration || 0}h Clean
+                        <p className="text-[10px] text-emerald-400/70 font-bold mt-0.5">
+                          {getPropertyData(b)["Bedroom"] || 0} Bed · {b.details?.duration || 0}h
                         </p>
-                        <span className="inline-block mt-1 text-[9px] font-semibold uppercase text-slate-400 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded-full">
+                        <span className="inline-block mt-1 text-[9px] font-black uppercase text-white/30 bg-white/[0.05] border border-white/10 px-1.5 py-0.5 rounded-full">
                           {b.leadSource || "Organic"}
                         </span>
                       </td>
-                      <td className="px-4 py-4 text-sm font-medium text-slate-700">
-                        {new Date(b.schedule?.date).toLocaleDateString()}
-                        <br />
-                        <span className="text-[10px] text-slate-400 font-semibold">
+                      <td className="px-4 py-4">
+                        <p className="text-sm font-bold text-white/70 tabular-nums">
+                          {new Date(b.schedule?.date).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}
+                        </p>
+                        <p className="text-[10px] text-white/35 font-bold mt-0.5">
                           {b.schedule?.timeSlot === "Flexible"
                             ? fmtTimeRange(b) || b.schedule?.timeSlot
                             : b.schedule?.timeSlot}
-                        </span>
+                        </p>
                       </td>
                       <td className="px-4 py-4">
                         {b.assignedWorkerName ? (
-                          <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">
+                          <span className="text-xs font-black text-emerald-400 bg-emerald-500/15 px-2.5 py-1 rounded-full border border-emerald-500/20">
                             {b.assignedWorkerName}
                           </span>
                         ) : (
-                          <span className="text-xs font-medium text-slate-300 italic">
-                            Unassigned
-                          </span>
+                          <span className="text-xs font-bold text-white/20 italic">Unassigned</span>
                         )}
                       </td>
                       <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
                         <select
                           value={b.status}
                           onChange={(e) => handleQuickStatusChange(b._id, e.target.value)}
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-semibold border uppercase tracking-wide cursor-pointer appearance-none bg-transparent ${getStatusColor(b.status)}`}
+                          className={`px-2.5 py-1.5 rounded-full text-[10px] font-black border uppercase tracking-wide cursor-pointer appearance-none bg-transparent ${getStatusColor(b.status)}`}
                         >
                           {["Pending","Confirmed","Assigned","Arrived","In Progress","Completed","Completed - Unpaid","Cancelled"].map(s => (
                             <option key={s} value={s}>{s}</option>
@@ -2244,7 +2270,7 @@ ${extrasRows}
                           <div className="relative" onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => setOpenActionMenu(openActionMenu === b._id ? null : b._id)}
-                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 text-slate-500 hover:bg-primary/10 hover:text-primary transition-all text-[11px] font-bold border border-slate-200"
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.06] text-white/45 hover:bg-white/10 hover:text-white/80 transition-all text-[11px] font-black border border-white/10"
                             >
                               Actions <ChevronDown size={13} />
                             </button>
@@ -2254,7 +2280,7 @@ ${extrasRows}
                                   className="fixed inset-0 z-40"
                                   onClick={() => setOpenActionMenu(null)}
                                 />
-                                <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 min-w-[170px] overflow-hidden">
+                                <div className="absolute right-0 top-full mt-1 z-50 bg-[#0B2D22] rounded-2xl shadow-2xl shadow-black/40 border border-white/[0.08] py-1.5 min-w-[185px] overflow-hidden">
                                   <button
                                     onClick={() => {
                                       setSelectedBooking(b);
@@ -2262,37 +2288,37 @@ ${extrasRows}
                                       setIsEditing(false);
                                       setOpenActionMenu(null);
                                     }}
-                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-semibold text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-white/65 hover:bg-white/[0.05] hover:text-white transition-colors text-left"
                                   >
-                                    <Eye size={14} className="text-slate-400" /> View Details
+                                    <Eye size={14} className="text-white/30" /> View Details
                                   </button>
                                   <Link
                                     to={`/admin/jobs/${b._id}`}
                                     onClick={() => setOpenActionMenu(null)}
-                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-semibold text-slate-700 hover:bg-primary/5 transition-colors text-left"
+                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-white/65 hover:bg-white/[0.05] hover:text-white transition-colors text-left"
                                   >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-primary"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    View Job Detail
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-emerald-400"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    Job Sheet
                                   </Link>
                                   <button
                                     onClick={() => { setCrmBooking(b); setOpenActionMenu(null); }}
-                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-semibold text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-white/65 hover:bg-white/[0.05] hover:text-white transition-colors text-left"
                                   >
-                                    <Sparkles size={14} className="text-emerald-500" /> CRM Actions
+                                    <Sparkles size={14} className="text-emerald-400" /> CRM Actions
                                   </button>
                                   {b.status !== "Completed" && b.status !== "Cancelled" && (
                                     <button
                                       disabled={markingCompleteId === b._id}
                                       onClick={() => { handleMarkCompleted(b); setOpenActionMenu(null); }}
-                                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-semibold text-slate-700 hover:bg-emerald-50 transition-colors text-left disabled:opacity-40"
+                                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-emerald-400 hover:bg-emerald-500/10 transition-colors text-left disabled:opacity-40"
                                     >
-                                      <CheckCircle2 size={14} className="text-emerald-500" /> Mark Completed
+                                      <CheckCircle2 size={14} className="text-emerald-400" /> Mark Complete
                                     </button>
                                   )}
-                                  <div className="border-t border-slate-100 my-1" />
+                                  <div className="border-t border-white/[0.06] my-1" />
                                   <button
                                     onClick={() => { handleDelete(b._id, b.bookingId); setOpenActionMenu(null); }}
-                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-semibold text-rose-500 hover:bg-rose-50 transition-colors text-left"
+                                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black text-rose-400 hover:bg-rose-500/10 transition-colors text-left"
                                   >
                                     <Trash2 size={14} /> Delete
                                   </button>

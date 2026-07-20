@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ChevronRight,
@@ -11,11 +11,16 @@ import {
   Receipt,
   X,
   Download,
-  FileText,
   CheckCircle2,
-  Megaphone,
-  CalendarRange,
+  TrendingUp,
+  Plus,
+  CalendarCheck,
+  Wallet,
+  Briefcase,
+  Percent,
 } from "lucide-react";
+
+const API = import.meta.env.VITE_API_URL;
 
 const DASHBOARD_EXPORT_HEADERS = [
   "Booking ID",
@@ -48,123 +53,157 @@ const dashboardExportRows = (bookings) =>
       b.suppliesProvidedBy || "",
     ]);
 
-// Customer initials, used for avatar chips.
 const initials = (b) => {
   const f = b?.customer?.firstName?.[0] || "";
   const l = b?.customer?.lastName?.[0] || "";
   return (f + l).toUpperCase() || "?";
 };
 
+const gbp = (n, dp = 0) =>
+  `£${Number(n || 0).toLocaleString("en-GB", { minimumFractionDigits: dp, maximumFractionDigits: dp })}`;
+
+// ── Design tokens ──────────────────────────────────────────────────────────────
+const card = "bg-[#0B2D22] border border-white/[0.06] rounded-2xl";
+const eyebrow =
+  "text-[10px] font-semibold uppercase tracking-[0.16em] text-white/30";
+const cardTitle = "text-[15px] font-semibold text-white tracking-tight";
+const muted = "text-white/40";
+const dimmed = "text-white/25";
+
+// ── Card header ────────────────────────────────────────────────────────────────
+const CardHead = ({ kicker, title, sub, action, onAction }) => (
+  <div className="flex items-start justify-between gap-3">
+    <div className="min-w-0">
+      {kicker && <p className={`${eyebrow} mb-1`}>{kicker}</p>}
+      <h3 className={cardTitle}>{title}</h3>
+      {sub && <p className={`text-xs ${muted} mt-0.5`}>{sub}</p>}
+    </div>
+    {action && (
+      <button
+        onClick={onAction}
+        className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+      >
+        {action} <ChevronRight size={13} />
+      </button>
+    )}
+  </div>
+);
+
+// ── Status badge ───────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
   const map = {
     Completed: {
-      dot: "bg-emerald-600",
-      text: "text-emerald-700",
-      bg: "bg-emerald-50",
+      dot: "bg-emerald-400",
+      text: "text-emerald-300",
+      bg: "bg-emerald-400/10",
     },
-    Confirmed: { dot: "bg-blue-600", text: "text-blue-700", bg: "bg-blue-50" },
-    Pending: { dot: "bg-amber-600", text: "text-amber-700", bg: "bg-amber-50" },
-    Cancelled: { dot: "bg-red-600", text: "text-red-700", bg: "bg-red-50" },
+    Confirmed: {
+      dot: "bg-blue-400",
+      text: "text-blue-300",
+      bg: "bg-blue-400/10",
+    },
+    Pending: {
+      dot: "bg-amber-400",
+      text: "text-amber-300",
+      bg: "bg-amber-400/10",
+    },
+    Cancelled: {
+      dot: "bg-rose-400",
+      text: "text-rose-300",
+      bg: "bg-rose-400/10",
+    },
     "In Progress": {
-      dot: "bg-purple-600",
-      text: "text-purple-700",
-      bg: "bg-purple-50",
+      dot: "bg-violet-400",
+      text: "text-violet-300",
+      bg: "bg-violet-400/10",
     },
     Accepted: {
-      dot: "bg-indigo-600",
-      text: "text-indigo-700",
-      bg: "bg-indigo-50",
+      dot: "bg-indigo-400",
+      text: "text-indigo-300",
+      bg: "bg-indigo-400/10",
     },
   };
   const s = map[status] || {
-    dot: "bg-slate-400",
-    text: "text-slate-600",
-    bg: "bg-slate-50",
+    dot: "bg-white/30",
+    text: "text-white/45",
+    bg: "bg-white/[0.05]",
   };
   return (
     <span
-      className={`inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${s.bg} ${s.text}`}
+      className={`inline-flex items-center gap-1.5 text-[10px] font-semibold px-2 py-[3px] rounded-md ${s.bg} ${s.text}`}
     >
-      <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+      <span className={`w-1 h-1 rounded-full ${s.dot}`} />
       {status}
     </span>
   );
 };
 
-// ── Revenue Detail Modal ─────────────────────────────────────────────────────
-const RevenueDetailModal = ({ segment, onClose, onViewBooking }) => {
+// ── Detail modal ───────────────────────────────────────────────────────────────
+const DetailModal = ({ segment, onClose, onViewBooking }) => {
   const { title, bookings, total } = segment;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-xl max-h-[85vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-slate-100 px-7 py-5 flex justify-between items-center rounded-t-[28px] z-10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-2xl w-full max-w-xl max-h-[85vh] overflow-y-auto">
+        <div className="sticky top-0 bg-[#0B2D22] border-b border-white/[0.06] px-6 py-4 flex justify-between items-center z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Receipt size={18} className="text-primary" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-400/10 flex items-center justify-center">
+              <Receipt size={16} className="text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900">{title}</h2>
-              <p className="text-[11px] font-semibold text-slate-400 tabular-nums">
-                £
-                {total.toLocaleString("en-GB", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}{" "}
-                · {bookings.length} booking{bookings.length !== 1 ? "s" : ""}
+              <h2 className="text-sm font-semibold text-white">{title}</h2>
+              <p className={`text-xs ${muted} tabular-nums`}>
+                {gbp(total, 2)} · {bookings.length} booking
+                {bookings.length !== 1 ? "s" : ""}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-2xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all"
+            aria-label="Close"
+            className="w-8 h-8 rounded-lg bg-white/[0.05] flex items-center justify-center hover:bg-white/10 transition-colors"
           >
-            <X size={18} className="text-slate-600" />
+            <X size={16} className="text-white/50" />
           </button>
         </div>
-        <div className="p-3">
+        <div className="p-2">
           {bookings.length === 0 ? (
-            <p className="text-sm text-slate-400 font-medium text-center py-12">
+            <p className={`text-sm ${muted} text-center py-12`}>
               No bookings in this segment.
             </p>
           ) : (
-            <div className="divide-y divide-slate-100">
-              {bookings.map((b, i) => (
-                <button
-                  key={i}
-                  onClick={() => onViewBooking(b)}
-                  className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 rounded-2xl transition-colors text-left"
-                >
-                  <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center flex-shrink-0">
-                    <span className="text-[10px] font-bold text-slate-500">
-                      {initials(b)}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 truncate">
-                      {b.customer?.firstName} {b.customer?.lastName}
-                    </p>
-                    <p className="text-[11px] font-medium text-slate-400 truncate">
-                      {b.service} ·{" "}
-                      {b.schedule?.date
-                        ? new Date(b.schedule.date).toLocaleDateString(
-                            "en-GB",
-                            { day: "numeric", month: "short" },
-                          )
-                        : "—"}
-                    </p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-bold text-slate-900 tabular-nums">
-                      £
-                      {Number(b.payment?.amount || 0).toLocaleString("en-GB", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </p>
-                    <StatusBadge status={b.status} />
-                  </div>
-                </button>
-              ))}
-            </div>
+            bookings.map((b, i) => (
+              <button
+                key={i}
+                onClick={() => onViewBooking(b)}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04] rounded-xl transition-colors text-left"
+              >
+                <div className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center shrink-0">
+                  <span className="text-[10px] font-semibold text-white/50">
+                    {initials(b)}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white/85 truncate">
+                    {b.customer?.firstName} {b.customer?.lastName}
+                  </p>
+                  <p className={`text-xs ${muted} truncate`}>
+                    {b.service} ·{" "}
+                    {b.schedule?.date
+                      ? new Date(b.schedule.date).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                        })
+                      : "—"}
+                  </p>
+                </div>
+                <div className="text-right shrink-0 space-y-1">
+                  <p className="text-sm font-semibold text-white/85 tabular-nums">
+                    {gbp(b.payment?.amount, 2)}
+                  </p>
+                  <StatusBadge status={b.status} />
+                </div>
+              </button>
+            ))
           )}
         </div>
       </div>
@@ -172,122 +211,167 @@ const RevenueDetailModal = ({ segment, onClose, onViewBooking }) => {
   );
 };
 
-// ── Net Revenue Detail Modal ──────────────────────────────────────────────────
-const NetRevenueDetailModal = ({ completed, expenses, netRevenue, onClose, onViewBooking }) => {
+// ── Net revenue modal ──────────────────────────────────────────────────────────
+const NetRevenueModal = ({
+  completed,
+  expenses,
+  netRevenue,
+  onClose,
+  onViewBooking,
+}) => {
   const [tab, setTab] = useState("income");
-  const totalIncome = completed.reduce((s, b) => s + Number(b.payment?.amount || 0), 0);
+  const totalIncome = completed.reduce(
+    (s, b) => s + Number(b.payment?.amount || 0),
+    0,
+  );
   const totalExpenses = expenses.reduce((s, e) => s + Number(e.amount || 0), 0);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-slate-100 px-7 py-5 flex justify-between items-center rounded-t-[28px] z-10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-2xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden">
+        <div className="border-b border-white/[0.06] px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Receipt size={18} className="text-primary" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-400/10 flex items-center justify-center">
+              <TrendingUp size={16} className="text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900">Net Revenue Breakdown</h2>
-              <p className={`text-[11px] font-semibold tabular-nums ${netRevenue >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-                £{netRevenue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} net
+              <h2 className="text-sm font-semibold text-white">
+                Net revenue breakdown
+              </h2>
+              <p
+                className={`text-xs tabular-nums ${netRevenue >= 0 ? "text-emerald-400" : "text-rose-400"}`}
+              >
+                {gbp(netRevenue, 2)} net
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="w-9 h-9 rounded-2xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all">
-            <X size={18} className="text-slate-600" />
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="w-8 h-8 rounded-lg bg-white/[0.05] flex items-center justify-center hover:bg-white/10 transition-colors"
+          >
+            <X size={16} className="text-white/50" />
           </button>
         </div>
-
-        {/* Summary strip */}
-        <div className="grid grid-cols-3 divide-x divide-slate-100 border-b border-slate-100 text-center">
-          <div className="py-4 px-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Income</p>
-            <p className="text-base font-bold text-emerald-600 tabular-nums">£{totalIncome.toLocaleString("en-GB", { maximumFractionDigits: 0 })}</p>
-            <p className="text-[10px] text-slate-400">{completed.length} job{completed.length !== 1 ? "s" : ""}</p>
-          </div>
-          <div className="py-4 px-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Expenses</p>
-            <p className="text-base font-bold text-red-500 tabular-nums">−£{totalExpenses.toLocaleString("en-GB", { maximumFractionDigits: 0 })}</p>
-            <p className="text-[10px] text-slate-400">{expenses.length} item{expenses.length !== 1 ? "s" : ""}</p>
-          </div>
-          <div className="py-4 px-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Net</p>
-            <p className={`text-base font-bold tabular-nums ${netRevenue >= 0 ? "text-primary" : "text-red-600"}`}>
-              £{netRevenue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}
-            </p>
-            {totalIncome > 0 && (
-              <p className="text-[10px] text-slate-400">{((netRevenue / totalIncome) * 100).toFixed(0)}% margin</p>
-            )}
-          </div>
+        <div className="grid grid-cols-3 divide-x divide-white/[0.05] border-b border-white/[0.06] text-center">
+          {[
+            {
+              label: "Income",
+              val: gbp(totalIncome),
+              sub: `${completed.length} jobs`,
+              color: "text-emerald-400",
+            },
+            {
+              label: "Expenses",
+              val: `−${gbp(totalExpenses)}`,
+              sub: `${expenses.length} items`,
+              color: "text-rose-400",
+            },
+            {
+              label: "Net",
+              val: gbp(netRevenue),
+              sub:
+                totalIncome > 0
+                  ? `${((netRevenue / totalIncome) * 100).toFixed(0)}% margin`
+                  : "",
+              color: netRevenue >= 0 ? "text-white" : "text-rose-400",
+            },
+          ].map((c) => (
+            <div key={c.label} className="py-4 px-3">
+              <p className={`${eyebrow} mb-1`}>{c.label}</p>
+              <p className={`text-base font-semibold tabular-nums ${c.color}`}>
+                {c.val}
+              </p>
+              <p className={`text-[10px] ${dimmed}`}>{c.sub}</p>
+            </div>
+          ))}
         </div>
-
-        {/* Tabs */}
-        <div className="flex gap-1 px-5 pt-4 pb-0">
-          {[{ id: "income", label: `Income (${completed.length})` }, { id: "expenses", label: `Expenses (${expenses.length})` }].map((t) => (
+        <div className="flex gap-1.5 px-5 pt-4">
+          {[
+            { id: "income", label: `Income · ${completed.length}` },
+            { id: "expenses", label: `Expenses · ${expenses.length}` },
+          ].map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${tab === t.id ? "bg-primary text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${tab === t.id ? "bg-emerald-500 text-white" : "bg-white/[0.05] text-white/45 hover:bg-white/10"}`}
             >
               {t.label}
             </button>
           ))}
         </div>
-
-        {/* Content */}
-        <div className="overflow-y-auto flex-1 p-3">
+        <div className="overflow-y-auto flex-1 p-2">
           {tab === "income" ? (
             completed.length === 0 ? (
-              <p className="text-sm text-slate-400 font-medium text-center py-12">No completed bookings yet.</p>
+              <p className={`text-sm ${muted} text-center py-12`}>
+                No completed bookings yet.
+              </p>
             ) : (
-              <div className="divide-y divide-slate-100">
-                {completed.map((b, i) => (
-                  <button
-                    key={i}
-                    onClick={() => onViewBooking(b)}
-                    className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 rounded-2xl transition-colors text-left"
-                  >
-                    <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center flex-shrink-0">
-                      <span className="text-[10px] font-bold text-emerald-600">{initials(b)}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 truncate">{b.customer?.firstName} {b.customer?.lastName}</p>
-                      <p className="text-[11px] font-medium text-slate-400 truncate">
-                        {b.service} · {b.schedule?.date ? new Date(b.schedule.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}
-                      </p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-sm font-bold text-emerald-600 tabular-nums">+£{Number(b.payment?.amount || 0).toLocaleString("en-GB", { minimumFractionDigits: 2 })}</p>
-                      <p className="text-[10px] text-slate-400">{b.bookingId}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )
-          ) : (
-            expenses.length === 0 ? (
-              <p className="text-sm text-slate-400 font-medium text-center py-12">No expenses recorded.</p>
-            ) : (
-              <div className="divide-y divide-slate-100">
-                {expenses.map((e, i) => (
-                  <div key={i} className="flex items-center gap-3 p-4">
-                    <div className="w-9 h-9 rounded-full bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
-                      <span className="text-[10px] font-bold text-red-500">{(e.category || "?")[0].toUpperCase()}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 truncate">{e.description || "Expense"}</p>
-                      <p className="text-[11px] font-medium text-slate-400 truncate">
-                        {e.category || "Uncategorised"} · {e.date ? new Date(e.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}
-                      </p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-sm font-bold text-red-500 tabular-nums">−£{Number(e.amount || 0).toLocaleString("en-GB", { minimumFractionDigits: 2 })}</p>
-                    </div>
+              completed.map((b, i) => (
+                <button
+                  key={i}
+                  onClick={() => onViewBooking(b)}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04] rounded-xl transition-colors text-left"
+                >
+                  <div className="w-8 h-8 rounded-full bg-emerald-400/10 flex items-center justify-center shrink-0">
+                    <span className="text-[10px] font-semibold text-emerald-400">
+                      {initials(b)}
+                    </span>
                   </div>
-                ))}
-              </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white/85 truncate">
+                      {b.customer?.firstName} {b.customer?.lastName}
+                    </p>
+                    <p className={`text-xs ${muted} truncate`}>
+                      {b.service} ·{" "}
+                      {b.schedule?.date
+                        ? new Date(b.schedule.date).toLocaleDateString(
+                            "en-GB",
+                            { day: "numeric", month: "short", year: "numeric" },
+                          )
+                        : "—"}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-semibold text-emerald-400 tabular-nums">
+                      +{gbp(b.payment?.amount, 2)}
+                    </p>
+                    <p className={`text-[10px] ${dimmed}`}>{b.bookingId}</p>
+                  </div>
+                </button>
+              ))
             )
+          ) : expenses.length === 0 ? (
+            <p className={`text-sm ${muted} text-center py-12`}>
+              No expenses recorded.
+            </p>
+          ) : (
+            expenses.map((e, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-3">
+                <div className="w-8 h-8 rounded-full bg-rose-400/10 flex items-center justify-center shrink-0">
+                  <span className="text-[10px] font-semibold text-rose-400">
+                    {(e.category || "?")[0].toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white/85 truncate">
+                    {e.description || "Expense"}
+                  </p>
+                  <p className={`text-xs ${muted} truncate`}>
+                    {e.category || "Uncategorised"} ·{" "}
+                    {e.date
+                      ? new Date(e.date).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "—"}
+                  </p>
+                </div>
+                <p className="text-sm font-semibold text-rose-400 tabular-nums shrink-0">
+                  −{gbp(e.amount, 2)}
+                </p>
+              </div>
+            ))
           )}
         </div>
       </div>
@@ -302,21 +386,7 @@ const TREND_RANGES = [
   { label: "1Y", days: 365 },
 ];
 
-// ── Metric strip item ────────────────────────────────────────────────────────
-const Metric = ({ label, value, onClick }) => (
-  <button
-    onClick={onClick}
-    className="text-left px-4 sm:px-6 py-4 sm:py-5 hover:bg-slate-50 transition-colors border-b border-r border-slate-100"
-  >
-    <p className="text-[10px] sm:text-[11px] font-semibold text-slate-400 mb-1 sm:mb-1.5 truncate">
-      {label}
-    </p>
-    <p className="text-base sm:text-xl font-bold text-slate-900 tabular-nums truncate">
-      {value}
-    </p>
-  </button>
-);
-
+// ─────────────────────────────────────────────────────────────────────────────
 const Dashboard = () => {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
@@ -334,18 +404,14 @@ const Dashboard = () => {
   const [expenseStats, setExpenseStats] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [showNetDetail, setShowNetDetail] = useState(false);
-
-  // Revenue & Leads calendar — pick a start date, then an end date, to see
-  // totals for that range.
   const [calMonth, setCalMonth] = useState(new Date());
-  const [calOpen, setCalOpen] = useState(false);
   const [selStart, setSelStart] = useState(null);
   const [selEnd, setSelEnd] = useState(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings`);
+      const res = await fetch(`${API}/bookings`);
       const data = await res.json();
       setBookings(Array.isArray(data) ? data : []);
       setLastRefresh(new Date());
@@ -356,94 +422,90 @@ const Dashboard = () => {
     }
   }, []);
 
-  const exportDashboardCSV = () => {
+  const exportCSV = () => {
     const rows = dashboardExportRows(bookings);
-    const csvContent =
+    const csv =
       "data:text/csv;charset=utf-8," +
       [
         DASHBOARD_EXPORT_HEADERS.join(","),
         ...rows.map((r) => r.join(",")),
       ].join("\n");
-    const link = document.createElement("a");
-    link.setAttribute("href", encodeURI(csvContent));
-    link.setAttribute(
-      "download",
-      `Cleaniq_Dashboard_${new Date().toLocaleDateString().replace(/\//g, "-")}.csv`,
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const a = document.createElement("a");
+    a.href = encodeURI(csv);
+    a.download = `CleanIQ_Dashboard_${new Date().toLocaleDateString().replace(/\//g, "-")}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
-  const exportDashboardExcel = async () => {
+  const exportExcel = async () => {
     const XLSX = await import("xlsx");
     const rows = dashboardExportRows(bookings);
-    const worksheet = XLSX.utils.aoa_to_sheet([
-      DASHBOARD_EXPORT_HEADERS,
-      ...rows,
-    ]);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings & Leads");
+    const ws = XLSX.utils.aoa_to_sheet([DASHBOARD_EXPORT_HEADERS, ...rows]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Bookings");
     XLSX.writeFile(
-      workbook,
-      `Cleaniq_Dashboard_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`,
+      wb,
+      `CleanIQ_Dashboard_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`,
     );
   };
 
   useEffect(() => {
     fetchData();
-    fetch(`${import.meta.env.VITE_API_URL}/quotes/stats`)
+    fetch(`${API}/quotes/stats`)
       .then((r) => r.json())
       .then((res) => {
         if (res.success) setQuoteStats(res.data);
       })
       .catch(() => {});
-    fetch(`${import.meta.env.VITE_API_URL}/quotes?limit=5`)
+    fetch(`${API}/quotes?limit=5`)
       .then((r) => r.json())
       .then((res) => {
         if (res.success) setRecentQuotes(res.data);
       })
       .catch(() => {});
-    fetch(`${import.meta.env.VITE_API_URL}/reviews`)
+    fetch(`${API}/reviews`)
       .then((r) => r.json())
       .then((data) => setReviews(Array.isArray(data) ? data : []))
       .catch(() => {});
-    fetch(`${import.meta.env.VITE_API_URL}/contact/leads/stats`)
+    fetch(`${API}/contact/leads/stats`)
       .then((r) => r.json())
       .then((data) => setLeadStats(data))
       .catch(() => {});
-    fetch(`${import.meta.env.VITE_API_URL}/contact/leads`)
+    fetch(`${API}/contact/leads`)
       .then((r) => r.json())
       .then((data) => setLeads(Array.isArray(data) ? data : []))
       .catch(() => {});
-    fetch(`${import.meta.env.VITE_API_URL}/expenses/stats`)
+    fetch(`${API}/expenses/stats`)
       .then((r) => r.json())
       .then((data) => setExpenseStats(data))
       .catch(() => {});
-    fetch(`${import.meta.env.VITE_API_URL}/expenses`)
+    fetch(`${API}/expenses`)
       .then((r) => r.json())
       .then((data) => setExpenses(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, [fetchData]);
 
-  // Revenue by status
+  // ── Computed values ──────────────────────────────────────────────────────────
   const completed = bookings.filter((b) => b.status === "Completed");
   const pending = bookings.filter((b) =>
     ["Pending", "Confirmed", "Accepted", "In Progress"].includes(b.status),
   );
   const cancelled = bookings.filter((b) => b.status === "Cancelled");
+  const newPending = bookings.filter((b) => b.status === "Pending");
+  const confirmed = bookings.filter((b) => b.status === "Confirmed");
+  const inProgress = bookings.filter((b) => b.status === "In Progress");
+  const accepted = bookings.filter((b) => b.status === "Accepted");
 
   const rev = (arr) =>
     arr.reduce((s, b) => s + Number(b.payment?.amount || 0), 0);
   const completedRevenue = rev(completed);
-  const totalRevenue = completedRevenue; // only completed jobs count as revenue
   const pendingRevenue = rev(pending);
   const cancelledRevenue = rev(cancelled);
   const totalExpenses = expenseStats?.allTime || 0;
   const netRevenue = completedRevenue - totalExpenses;
 
-  // Revenue trend chart: buckets by day/week/month depending on the
-  // selected range, plus a comparison vs. the prior period.
+  // ── Trend chart ──────────────────────────────────────────────────────────────
   const buildTrendSeries = (days) => {
     const now = new Date();
     now.setHours(23, 59, 59, 999);
@@ -458,7 +520,6 @@ const Dashboard = () => {
       bucketUnit = "month";
       bucketCount = 12;
     }
-
     const ranges = Array.from({ length: bucketCount }, (_, idx) => {
       const i = bucketCount - 1 - idx;
       let start, end, label;
@@ -484,22 +545,13 @@ const Dashboard = () => {
           month: "short",
         });
       } else {
-        const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        start = monthDate;
-        end = new Date(
-          monthDate.getFullYear(),
-          monthDate.getMonth() + 1,
-          0,
-          23,
-          59,
-          59,
-          999,
-        );
+        const md = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        start = md;
+        end = new Date(md.getFullYear(), md.getMonth() + 1, 0, 23, 59, 59, 999);
         label = start.toLocaleDateString("en-GB", { month: "short" });
       }
       return { start, end, label };
     });
-
     const series = ranges.map(({ start, end, label }) => {
       const inBucket = bookings.filter((b) => {
         const d = new Date(b.createdAt || b.schedule?.date);
@@ -507,14 +559,12 @@ const Dashboard = () => {
       });
       return { label, revenue: rev(inBucket), count: inBucket.length };
     });
-
     return {
       series,
       rangeStart: ranges[0].start,
       rangeEnd: ranges[ranges.length - 1].end,
     };
   };
-
   const {
     series: trendSeries,
     rangeStart,
@@ -522,19 +572,16 @@ const Dashboard = () => {
   } = buildTrendSeries(trendRange);
   const rangeRevenue = trendSeries.reduce((s, m) => s + m.revenue, 0);
   const periodMs = rangeEnd.getTime() - rangeStart.getTime();
-  const prevPeriodStart = new Date(rangeStart.getTime() - periodMs - 1);
-  const prevPeriodEnd = new Date(rangeStart.getTime() - 1);
-  const prevRangeRevenue = rev(
+  const prevStart = new Date(rangeStart.getTime() - periodMs - 1);
+  const prevEnd = new Date(rangeStart.getTime() - 1);
+  const prevRevenue = rev(
     bookings.filter((b) => {
       const d = new Date(b.createdAt || b.schedule?.date);
-      return d >= prevPeriodStart && d <= prevPeriodEnd && b.status === "Completed";
+      return d >= prevStart && d <= prevEnd && b.status === "Completed";
     }),
   );
-  const rangeChangePct =
-    prevRangeRevenue > 0
-      ? ((rangeRevenue - prevRangeRevenue) / prevRangeRevenue) * 100
-      : null;
-
+  const changePct =
+    prevRevenue > 0 ? ((rangeRevenue - prevRevenue) / prevRevenue) * 100 : null;
   const maxTrendRev = Math.max(...trendSeries.map((m) => m.revenue), 1);
   const trendPoints = trendSeries.map((m, i) => {
     const heightPct = maxTrendRev > 0 ? (m.revenue / maxTrendRev) * 78 : 0;
@@ -542,27 +589,11 @@ const Dashboard = () => {
       trendSeries.length > 1 ? (i / (trendSeries.length - 1)) * 100 : 50;
     return { ...m, x, heightPct, y: 92 - heightPct };
   });
-  const trendLinePoints = trendPoints.map((p) => `${p.x},${p.y}`).join(" ");
+  const trendLine = trendPoints.map((p) => `${p.x},${p.y}`).join(" ");
   const trendLabelStep = Math.max(1, Math.ceil(trendSeries.length / 7));
 
-  // Revenue split donut (Completed / Expenses / Pending / Cancelled)
-  const donutSegments = [
-    { label: "Completed", value: completedRevenue, color: "#005B41" },
-    { label: "Expenses",  value: totalExpenses,    color: "#EF4444" },
-    { label: "Pending",   value: pendingRevenue,   color: "#3CC7FF" },
-    { label: "Cancelled", value: cancelledRevenue, color: "#E2E8F0" },
-  ];
-  const donutTotal = donutSegments.reduce((s, d) => s + d.value, 0) || 1;
-  let donutCumulative = 0;
-  const donutArcs = donutSegments.map((seg) => {
-    const pct = (seg.value / donutTotal) * 100;
-    const dashoffset = 100 - donutCumulative;
-    donutCumulative += pct;
-    return { ...seg, pct, dashoffset };
-  });
-
-  // Bookings overview: completed vs cancelled revenue, last 6 months
-  const months = Array.from({ length: 6 }, (_, i) => {
+  // ── 6-month bars ─────────────────────────────────────────────────────────────
+  const months6 = Array.from({ length: 6 }, (_, i) => {
     const d = new Date();
     d.setMonth(d.getMonth() - (5 - i));
     return {
@@ -571,7 +602,7 @@ const Dashboard = () => {
       month: d.getMonth(),
     };
   });
-  const monthlyPaired = months.map(({ label, year, month }) => {
+  const monthly = months6.map(({ label, year, month }) => {
     const inMonth = bookings.filter((b) => {
       const d = new Date(b.createdAt || b.schedule?.date);
       return d.getFullYear() === year && d.getMonth() === month;
@@ -580,14 +611,52 @@ const Dashboard = () => {
       label,
       completed: rev(inMonth.filter((b) => b.status === "Completed")),
       cancelled: rev(inMonth.filter((b) => b.status === "Cancelled")),
+      count: inMonth.length,
     };
   });
-  const maxPairedRev = Math.max(
-    ...monthlyPaired.flatMap((m) => [m.completed, m.cancelled]),
+  const maxMonthRev = Math.max(
+    ...monthly.flatMap((m) => [m.completed, m.cancelled]),
     1,
   );
 
-  // Top services — by revenue (sidebar bar list)
+  // ── Mini sparkline helper ────────────────────────────────────────────────────
+  const mini7 = (filterFn) => {
+    const vals = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      const s = new Date(d.toDateString()),
+        e = new Date(s.getTime() + 86399999);
+      return bookings.filter((b) => {
+        const t = new Date(b.createdAt || b.schedule?.date);
+        return t >= s && t <= e && filterFn(b);
+      }).length;
+    });
+    const mx = Math.max(...vals, 1);
+    const pts = vals
+      .map((v, i) => `${(i / 6) * 96 + 2},${28 - (v / mx) * 24}`)
+      .join(" ");
+    return { pts, area: `2,28 ${pts} 98,28` };
+  };
+  const sparkBooking = mini7((b) => b.status !== "Blackout");
+  const sparkCompleted = mini7((b) => b.status === "Completed");
+
+  // ── Revenue donut ────────────────────────────────────────────────────────────
+  const donutSegs = [
+    { label: "Completed", value: completedRevenue, color: "#10B981" },
+    { label: "Expenses", value: totalExpenses, color: "#F43F5E" },
+    { label: "Pending", value: pendingRevenue, color: "#3CC7FF" },
+    { label: "Cancelled", value: cancelledRevenue, color: "#334155" },
+  ];
+  const donutTotal = donutSegs.reduce((s, d) => s + d.value, 0) || 1;
+  let cumulative = 0;
+  const donutArcs = donutSegs.map((seg) => {
+    const pct = (seg.value / donutTotal) * 100;
+    const dashoffset = 100 - cumulative;
+    cumulative += pct;
+    return { ...seg, pct, dashoffset };
+  });
+
+  // ── Top services ─────────────────────────────────────────────────────────────
   const serviceMap = {};
   bookings.forEach((b) => {
     if (!serviceMap[b.service])
@@ -598,14 +667,12 @@ const Dashboard = () => {
   const topServices = Object.entries(serviceMap)
     .sort((a, b) => b[1].revenue - a[1].revenue)
     .slice(0, 5);
-  const maxServiceRev = topServices[0]?.[1].revenue || 1;
-
-  // Top requested services — by booking count share
   const topRequested = Object.entries(serviceMap)
     .sort((a, b) => b[1].count - a[1].count)
     .slice(0, 5);
+  const maxServiceRev = topServices[0]?.[1].revenue || 1;
 
-  // Top customers by total spend
+  // ── Top customers ────────────────────────────────────────────────────────────
   const customerMap = {};
   bookings.forEach((b) => {
     const key =
@@ -632,7 +699,7 @@ const Dashboard = () => {
     .sort((a, b) => b.total - a.total)
     .slice(0, 5);
 
-  // Leads by source
+  // ── Leads by source ──────────────────────────────────────────────────────────
   const leadSourceMap = {};
   bookings
     .filter((b) => b.status !== "Blackout")
@@ -647,7 +714,7 @@ const Dashboard = () => {
     .slice(0, 8);
   const maxLeadCount = leadSourceBreakdown[0]?.[1].count || 1;
 
-  // Ratings summary
+  // ── Ratings ──────────────────────────────────────────────────────────────────
   const avgRating =
     reviews.length > 0
       ? reviews.reduce((s, r) => s + Number(r.rating || 0), 0) / reviews.length
@@ -661,21 +728,17 @@ const Dashboard = () => {
     };
   });
 
-  // Revenue & Lead Conversion calendar — click a start date then an end
-  // date to see totals for that range.
-  const calDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
-  const calStartDow = (y, m) => new Date(y, m, 1).getDay();
+  // ── Calendar ─────────────────────────────────────────────────────────────────
   const calYear = calMonth.getFullYear();
   const calMonthIdx = calMonth.getMonth();
   const calCells = [];
-  for (let i = 0; i < calStartDow(calYear, calMonthIdx); i++) calCells.push(null);
-  for (let d = 1; d <= calDaysInMonth(calYear, calMonthIdx); d++)
+  for (let i = 0; i < new Date(calYear, calMonthIdx, 1).getDay(); i++)
+    calCells.push(null);
+  for (let d = 1; d <= new Date(calYear, calMonthIdx + 1, 0).getDate(); d++)
     calCells.push(new Date(calYear, calMonthIdx, d));
-
   const dateKey = (d) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-
-  const handleCalDayClick = (day) => {
+  const handleCalClick = (day) => {
     if (!selStart || (selStart && selEnd)) {
       setSelStart(day);
       setSelEnd(null);
@@ -683,39 +746,42 @@ const Dashboard = () => {
       if (day < selStart) {
         setSelEnd(selStart);
         setSelStart(day);
-      } else {
-        setSelEnd(day);
-      }
+      } else setSelEnd(day);
     }
   };
-
-  const inSelectedRange = (day) => {
+  const inRange = (day) => {
     if (!selStart) return false;
     const end = selEnd || selStart;
-    return day >= new Date(selStart.toDateString()) && day <= new Date(end.toDateString());
+    return (
+      day >= new Date(selStart.toDateString()) &&
+      day <= new Date(end.toDateString())
+    );
   };
-
-  const rangeStartTime = selStart ? new Date(selStart.toDateString()).getTime() : null;
+  const rangeStartTime = selStart
+    ? new Date(selStart.toDateString()).getTime()
+    : null;
   const rangeEndTime = selEnd
     ? new Date(new Date(selEnd.toDateString()).getTime() + 86399999)
     : selStart
       ? new Date(new Date(selStart.toDateString()).getTime() + 86399999)
       : null;
-
-  const bookingsInSelectedRange =
+  const bookingsInRange =
     rangeStartTime != null
       ? bookings.filter((b) => {
-          if (!b.schedule?.date || b.status === "Blackout" || b.customer?.firstName === "ADMIN_BLOCK")
+          if (
+            !b.schedule?.date ||
+            b.status === "Blackout" ||
+            b.customer?.firstName === "ADMIN_BLOCK"
+          )
             return false;
           const t = new Date(b.schedule.date).getTime();
           return t >= rangeStartTime && t <= rangeEndTime.getTime();
         })
       : [];
-  // Only completed bookings count as earned revenue
-  const selectedRangeRevenue = bookingsInSelectedRange
+  const selectedRangeRevenue = bookingsInRange
     .filter((b) => b.status === "Completed")
     .reduce((s, b) => s + Number(b.payment?.amount || 0), 0);
-  const leadsInSelectedRange =
+  const leadsInRange =
     rangeStartTime != null
       ? leads.filter((l) => {
           if (!l.createdAt) return false;
@@ -723,500 +789,802 @@ const Dashboard = () => {
           return t >= rangeStartTime && t <= rangeEndTime.getTime();
         })
       : [];
-  const selectedRangeConversionPct =
-    leadsInSelectedRange.length > 0
-      ? (bookingsInSelectedRange.length / leadsInSelectedRange.length) * 100
+  const conversionPct =
+    leadsInRange.length > 0
+      ? (bookingsInRange.length / leadsInRange.length) * 100
       : 0;
 
+  // ── Greeting ─────────────────────────────────────────────────────────────────
+  const nowHour = new Date().getHours();
+  const greeting =
+    nowHour < 12
+      ? "Good morning"
+      : nowHour < 17
+        ? "Good afternoon"
+        : "Good evening";
+  const todayStr = new Date().toISOString().split("T")[0];
+  const todaysBookings = bookings.filter((b) => {
+    if (
+      !b.schedule?.date ||
+      b.status === "Blackout" ||
+      b.customer?.firstName === "ADMIN_BLOCK"
+    )
+      return false;
+    return new Date(b.schedule.date).toISOString().split("T")[0] === todayStr;
+  });
+
+  // ── Status distribution (last 30 days) ───────────────────────────────────────
+  const last30 = new Date();
+  last30.setDate(last30.getDate() - 30);
+  const recent = bookings.filter(
+    (b) =>
+      new Date(b.createdAt || b.schedule?.date) >= last30 &&
+      b.status !== "Blackout",
+  );
+  const statusDist = [
+    "Completed",
+    "Confirmed",
+    "Pending",
+    "In Progress",
+    "Cancelled",
+  ].map((s) => ({
+    label: s,
+    count: recent.filter((b) => b.status === s).length,
+    pct:
+      recent.length > 0
+        ? (recent.filter((b) => b.status === s).length / recent.length) * 100
+        : 0,
+  }));
+  const statusColors = {
+    Completed: "#10B981",
+    Confirmed: "#3B82F6",
+    Pending: "#F59E0B",
+    "In Progress": "#8B5CF6",
+    Cancelled: "#F43F5E",
+  };
+
+  // ── KPI strip data ───────────────────────────────────────────────────────────
+  const kpis = [
+    {
+      label: "Net revenue",
+      icon: Wallet,
+      value: gbp(netRevenue),
+      sub: `${completedRevenue > 0 ? ((netRevenue / completedRevenue) * 100).toFixed(0) : 0}% margin`,
+      onClick: () => setShowNetDetail(true),
+      delta: changePct,
+    },
+    {
+      label: "Pipeline value",
+      icon: Briefcase,
+      value: gbp(pendingRevenue),
+      sub: `${pending.length} open job${pending.length !== 1 ? "s" : ""}`,
+      onClick: () =>
+        setDetailSegment({
+          title: "Open Pipeline",
+          bookings: pending,
+          total: pendingRevenue,
+        }),
+    },
+    {
+      label: "Quote acceptance",
+      icon: Percent,
+      value: `${(quoteStats?.acceptanceRate || 0).toFixed(0)}%`,
+      sub: `${quoteStats?.accepted ?? 0} of ${quoteStats?.total ?? 0} accepted`,
+      onClick: () => navigate("/admin/quotes/history"),
+    },
+    {
+      label: "Average rating",
+      icon: Star,
+      value: avgRating.toFixed(1),
+      sub: `${reviews.length} review${reviews.length !== 1 ? "s" : ""}`,
+    },
+  ];
+
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-24">
+      {/* ── Header ───────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Overview
-          </h2>
-          <p className="text-sm text-slate-400 font-medium mt-1">
+          <p className={`${eyebrow} mb-1.5`}>
+            {new Date().toLocaleDateString("en-GB", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </p>
+          <h1 className="text-[22px] font-semibold text-white tracking-tight">
+            {greeting}, {localStorage.getItem("adminUser") || "Admin"}
+          </h1>
+          <p className={`text-[13px] ${muted} mt-1`}>
             {loading
               ? "Fetching data…"
-              : `${bookings.length} total bookings · Last updated ${lastRefresh ? lastRefresh.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "—"}`}
+              : `${bookings.filter((b) => b.status !== "Blackout").length} bookings on record · updated ${lastRefresh?.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) ?? "—"}`}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl w-full sm:w-auto">
-            <Search size={16} className="text-slate-400 flex-shrink-0" />
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => navigate("/admin/new-booking")}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 text-white rounded-xl text-[13px] font-semibold hover:bg-emerald-400 transition-colors"
+          >
+            <Plus size={15} /> New booking
+          </button>
+          <div className="flex items-center gap-2 px-3 py-2 bg-white/[0.05] border border-white/[0.08] rounded-xl focus-within:border-emerald-500/40 transition-colors">
+            <Search size={14} className="text-white/25 shrink-0" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search customers…"
-              className="bg-transparent border-none outline-none text-sm font-medium w-full sm:w-40 text-slate-700"
+              placeholder="Search customers"
+              className="bg-transparent border-none outline-none text-[13px] w-36 text-white/75 placeholder:text-white/25"
             />
           </div>
-          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 overflow-x-auto">
+          <div className="flex items-center gap-0.5 bg-white/[0.05] border border-white/[0.08] rounded-xl p-0.5">
             {TREND_RANGES.map((opt) => (
               <button
                 key={opt.days}
                 onClick={() => setTrendRange(opt.days)}
-                className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all flex-shrink-0 ${trendRange === opt.days ? "bg-primary text-white shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+                className={`px-3 py-1.5 rounded-[10px] text-[11px] font-semibold transition-colors ${trendRange === opt.days ? "bg-emerald-500 text-white" : "text-white/35 hover:text-white/65"}`}
               >
                 {opt.label}
               </button>
             ))}
           </div>
           <button
-            onClick={exportDashboardCSV}
+            onClick={exportCSV}
             disabled={loading || bookings.length === 0}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-50 flex-shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/[0.05] border border-white/[0.08] rounded-xl text-[13px] font-medium text-white/45 hover:bg-white/10 hover:text-white/75 transition-colors disabled:opacity-30"
           >
-            <Download size={15} /> <span className="hidden sm:inline">CSV</span>
+            <Download size={13} /> CSV
           </button>
           <button
-            onClick={exportDashboardExcel}
+            onClick={exportExcel}
             disabled={loading || bookings.length === 0}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-50 flex-shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/[0.05] border border-white/[0.08] rounded-xl text-[13px] font-medium text-white/45 hover:bg-white/10 hover:text-white/75 transition-colors disabled:opacity-30"
           >
-            <Download size={15} />{" "}
-            <span className="hidden sm:inline">Excel</span>
+            <Download size={13} /> Excel
           </button>
           <button
             onClick={fetchData}
             disabled={loading}
-            className="flex items-center justify-center w-10 h-10 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all disabled:opacity-50 flex-shrink-0"
+            aria-label="Refresh"
+            className="flex items-center justify-center w-9 h-9 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white/40 hover:bg-white/10 hover:text-white/75 transition-colors disabled:opacity-30"
           >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
       </div>
 
-      {/* Booking count strip */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-        <Metric
-          label="Total Bookings"
-          value={bookings.length.toLocaleString("en-GB")}
-          onClick={() => setDetailSegment({ title:"Total Bookings", bookings, total:totalRevenue })}
-        />
-        <Metric
-          label="Completed"
-          value={completed.length.toLocaleString("en-GB")}
-          onClick={() => setDetailSegment({ title:"Completed Bookings", bookings:completed, total:completedRevenue })}
-        />
-        <Metric
-          label="Pending"
-          value={pending.length.toLocaleString("en-GB")}
-          onClick={() => setDetailSegment({ title:"Pending Bookings", bookings:pending, total:pendingRevenue })}
-        />
-        <Metric
-          label="Cancelled"
-          value={cancelled.length.toLocaleString("en-GB")}
-          onClick={() => setDetailSegment({ title:"Cancelled Bookings", bookings:cancelled, total:cancelledRevenue })}
-        />
-        <Metric
-          label="Quotes Sent"
-          value={quoteStats ? quoteStats.total : loading ? "—" : 0}
-          onClick={() => navigate("/admin/quotes")}
-        />
+      {/* ── KPI strip ────────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+        {kpis.map((k) => (
+          <button
+            key={k.label}
+            onClick={k.onClick}
+            disabled={!k.onClick}
+            className={`${card} text-left px-5 py-4 transition-colors ${k.onClick ? "hover:bg-[#0D3527] cursor-pointer" : "cursor-default"}`}
+          >
+            <div className="flex items-center justify-between mb-2.5">
+              <p className={eyebrow}>{k.label}</p>
+              <k.icon size={14} className="text-emerald-400/60" />
+            </div>
+            <div className="flex items-baseline gap-2">
+              <p className="text-[26px] font-semibold text-white tracking-tight tabular-nums leading-none">
+                {loading ? "—" : k.value}
+              </p>
+              {k.delta != null && !loading && (
+                <span
+                  className={`inline-flex items-center gap-0.5 text-[11px] font-semibold tabular-nums ${k.delta >= 0 ? "text-emerald-400" : "text-rose-400"}`}
+                >
+                  {k.delta >= 0 ? (
+                    <ArrowUpRight size={11} />
+                  ) : (
+                    <ArrowDownRight size={11} />
+                  )}
+                  {Math.abs(k.delta).toFixed(1)}%
+                </span>
+              )}
+            </div>
+            <p className={`text-[11px] ${muted} mt-1.5`}>{k.sub}</p>
+          </button>
+        ))}
       </div>
 
-      {/* Financial summary row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Gross Revenue */}
-        <button
-          onClick={() => setDetailSegment({ title:"Completed Revenue", bookings:completed, total:completedRevenue })}
-          className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5 text-left hover:border-primary/40 transition-all group"
-        >
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Gross Revenue</p>
-          <p className="text-3xl font-bold text-slate-900 tabular-nums">
-            £{completedRevenue.toLocaleString("en-GB",{maximumFractionDigits:0})}
-          </p>
-          <p className="text-[11px] text-slate-400 mt-1">{completed.length} completed bookings</p>
-        </button>
-
-        {/* Pending Revenue */}
-        <button
-          onClick={() => setDetailSegment({ title:"Pending Revenue", bookings:pending, total:pendingRevenue })}
-          className="bg-white border border-amber-100 rounded-2xl shadow-sm p-5 text-left hover:border-amber-300 transition-all group"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pending Revenue</p>
-            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Awaiting</span>
-          </div>
-          <p className="text-3xl font-bold text-amber-500 tabular-nums">
-            £{pendingRevenue.toLocaleString("en-GB",{maximumFractionDigits:0})}
-          </p>
-          <p className="text-[11px] text-slate-400 mt-1">{pending.length} job{pending.length !== 1 ? "s" : ""} not yet completed</p>
-        </button>
-
-        {/* Expenses (negative) */}
-        <button
-          onClick={() => navigate("/admin/expenses")}
-          className="bg-white border border-red-100 rounded-2xl shadow-sm p-5 text-left hover:border-red-300 transition-all group"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Total Expenses</p>
-            <span className="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Deducted</span>
-          </div>
-          <p className="text-3xl font-bold text-red-500 tabular-nums">
-            −£{totalExpenses.toLocaleString("en-GB",{maximumFractionDigits:0})}
-          </p>
-          <p className="text-[11px] text-slate-400 mt-1">View Expense Tracker →</p>
-        </button>
-
-        {/* Net Revenue */}
-        <button
-          onClick={() => setShowNetDetail(true)}
-          className={`rounded-2xl shadow-sm p-5 text-left transition-all hover:opacity-90 active:scale-[0.98] ${netRevenue >= 0 ? "bg-primary text-white" : "bg-red-600 text-white"}`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">Net Revenue</p>
-            <span className="text-[10px] font-bold bg-white/20 text-white px-2 py-0.5 rounded-full">View Details →</span>
-          </div>
-          <p className="text-3xl font-bold tabular-nums">
-            £{netRevenue.toLocaleString("en-GB",{maximumFractionDigits:0})}
-          </p>
-          <div className="mt-3 pt-3 border-t border-white/20 flex items-center justify-between text-[11px] font-medium text-white/70">
-            <span>Gross −£{Math.round(totalExpenses).toLocaleString("en-GB")} expenses</span>
-            {totalExpenses > 0 && completedRevenue > 0 && (
-              <span className="font-bold text-white">
-                {((netRevenue / completedRevenue) * 100).toFixed(0)}% margin
-              </span>
-            )}
-          </div>
-        </button>
-      </div>
-
-      {/* Revenue & Lead Conversion Calendar — collapsed into a dropdown */}
-      <div className="relative inline-block">
-        <button
-          onClick={() => setCalOpen((v) => !v)}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-bold transition-all ${
-            calOpen
-              ? "bg-primary text-white border-primary"
-              : "bg-white text-slate-700 border-slate-200 hover:border-primary/40 hover:text-primary"
-          }`}
-        >
-          <CalendarRange size={16} />
-          Revenue & Lead Conversion
-          {selStart && (
-            <span
-              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${calOpen ? "bg-white/20" : "bg-primary/10 text-primary"}`}
+      {/* ── Workflow cards ───────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        {/* BOOKINGS */}
+        <div className={`${card} flex flex-col overflow-hidden`}>
+          <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]">
+            <p className={eyebrow}>Bookings</p>
+            <button
+              onClick={() => navigate("/admin/bookings")}
+              className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
             >
-              £
-              {selectedRangeRevenue.toLocaleString("en-GB", {
-                maximumFractionDigits: 0,
-              })}
-            </span>
-          )}
-          <ChevronRight
-            size={14}
-            className={`transition-transform ${calOpen ? "rotate-90" : ""}`}
-          />
-        </button>
-
-        {calOpen && (
-          <div className="absolute z-30 mt-2 w-[92vw] sm:w-[640px] max-w-[640px] bg-white border border-slate-200/80 rounded-2xl shadow-xl p-4 sm:p-6">
-            <div className="flex flex-wrap justify-between items-start gap-4 mb-5">
-              <p className="text-[11px] font-medium text-slate-400">
-                Click a start date, then an end date, to see totals for that
-                range
-              </p>
-              <div className="flex items-center gap-3">
-                {(selStart || selEnd) && (
-                  <button
-                    onClick={() => {
-                      setSelStart(null);
-                      setSelEnd(null);
-                    }}
-                    className="text-[11px] font-bold text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1"
-                  >
-                    <X size={12} /> Clear selection
-                  </button>
-                )}
+              Schedule
+            </button>
+          </div>
+          <div className="px-5 py-4 flex-1">
+            <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
+              {newPending.length}
+            </p>
+            <p className={`text-[11px] ${muted} mt-1 mb-4`}>
+              new requests waiting
+            </p>
+            <div className="space-y-2.5">
+              {[
+                {
+                  label: "Confirmed",
+                  val: confirmed.length,
+                  note: gbp(rev(confirmed)),
+                  seg: {
+                    title: "Confirmed Bookings",
+                    bookings: confirmed,
+                    total: rev(confirmed),
+                  },
+                },
+                {
+                  label: "In progress",
+                  val: inProgress.length,
+                  note: gbp(rev(inProgress)),
+                  seg: {
+                    title: "In Progress Bookings",
+                    bookings: inProgress,
+                    total: rev(inProgress),
+                  },
+                },
+                {
+                  label: "Completed",
+                  val: completed.length,
+                  note: gbp(completedRevenue),
+                  seg: {
+                    title: "Completed Bookings",
+                    bookings: completed,
+                    total: completedRevenue,
+                  },
+                },
+              ].map((row) => (
                 <button
-                  onClick={() => setCalOpen(false)}
-                  className="text-slate-400 hover:text-slate-600"
+                  key={row.label}
+                  onClick={() => setDetailSegment(row.seg)}
+                  className="w-full flex items-center justify-between group"
                 >
-                  <X size={16} />
+                  <span className="text-xs font-medium text-white/45 group-hover:text-white/70 transition-colors">
+                    {row.label}
+                  </span>
+                  <span className="text-xs font-semibold text-white/80 tabular-nums">
+                    {row.val}{" "}
+                    <span className={`font-medium ${dimmed}`}>
+                      · {row.note}
+                    </span>
+                  </span>
                 </button>
-              </div>
-            </div>
-
-            <div className="grid sm:grid-cols-3 gap-6">
-          {/* Calendar grid */}
-          <div className="sm:col-span-2">
-            <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={() =>
-                  setCalMonth(new Date(calYear, calMonthIdx - 1, 1))
-                }
-                className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <p className="text-sm font-bold text-slate-800">
-                {calMonth.toLocaleDateString("en-GB", {
-                  month: "long",
-                  year: "numeric",
-                })}
-              </p>
-              <button
-                onClick={() =>
-                  setCalMonth(new Date(calYear, calMonthIdx + 1, 1))
-                }
-                className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-7 gap-1.5 mb-2">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                <div
-                  key={d}
-                  className="text-[9px] font-bold text-slate-300 uppercase text-center py-1"
-                >
-                  {d}
-                </div>
               ))}
             </div>
-            <div className="grid grid-cols-7 gap-1.5">
-              {calCells.map((day, i) => {
-                if (!day) return <div key={i} className="aspect-square" />;
-                const isStart =
-                  selStart && dateKey(day) === dateKey(selStart);
-                const isEnd = selEnd && dateKey(day) === dateKey(selEnd);
-                const inRange = inSelectedRange(day);
-                const isToday = dateKey(day) === dateKey(new Date());
-                return (
-                  <button
-                    key={i}
-                    onClick={() => handleCalDayClick(day)}
-                    className={`aspect-square rounded-lg flex items-center justify-center text-[11px] font-bold transition-all border
-                      ${
-                        isStart || isEnd
-                          ? "bg-primary text-white border-primary shadow-sm"
-                          : inRange
-                            ? "bg-primary/15 text-primary-dark border-primary/20"
-                            : isToday
-                              ? "border-primary/40 text-primary"
-                              : "border-transparent text-slate-500 hover:bg-slate-50 hover:border-slate-200"
-                      }`}
-                  >
-                    {day.getDate()}
-                  </button>
-                );
-              })}
+          </div>
+          <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
+            <svg
+              viewBox="0 0 100 30"
+              className="w-full h-7"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="sg1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10B981" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <polygon points={sparkBooking.area} fill="url(#sg1)" />
+              <polyline
+                points={sparkBooking.pts}
+                fill="none"
+                stroke="#10B981"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
+              <polyline
+                points={sparkCompleted.pts}
+                fill="none"
+                stroke="#3CC7FF"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+            <div className="flex items-center gap-3 mt-1.5">
+              <span
+                className={`flex items-center gap-1.5 text-[10px] font-medium ${muted}`}
+              >
+                <span className="w-2.5 h-[2px] bg-emerald-400 rounded inline-block" />
+                Received
+              </span>
+              <span
+                className={`flex items-center gap-1.5 text-[10px] font-medium ${muted}`}
+              >
+                <span className="w-2.5 h-[2px] bg-cyan-400 rounded inline-block" />
+                Completed
+              </span>
             </div>
           </div>
+        </div>
 
-          {/* Selected range summary */}
-          <div className="bg-gradient-to-br from-primary to-primary-dark rounded-2xl p-5 text-white flex flex-col justify-between">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-white/70 mb-1">
-                {selStart
-                  ? `${selStart.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} ${selEnd ? `– ${selEnd.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}`
-                  : "Select a date range"}
-              </p>
-              <p className="text-3xl font-bold tabular-nums">
-                £
-                {selectedRangeRevenue.toLocaleString("en-GB", {
-                  maximumFractionDigits: 0,
-                })}
-              </p>
-              <p className="text-[11px] font-medium text-white/70 mt-1">
-                Revenue earned
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-3 mt-6">
-              <div className="bg-white/10 rounded-xl p-3">
-                <p className="text-xl font-bold tabular-nums">
-                  {bookingsInSelectedRange.length}
-                </p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-white/70">
-                  Bookings
-                </p>
-              </div>
-              <div className="bg-white/10 rounded-xl p-3">
-                <p className="text-xl font-bold tabular-nums">
-                  {leadsInSelectedRange.length}
-                </p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-white/70">
-                  Leads
-                </p>
-              </div>
-            </div>
-            <div className="mt-3 bg-white/10 rounded-xl p-3">
-              <p className="text-xl font-bold tabular-nums">
-                {selectedRangeConversionPct.toFixed(0)}%
-              </p>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-white/70">
-                Lead → Booking Conversion
-              </p>
+        {/* QUOTES */}
+        <div className={`${card} flex flex-col overflow-hidden`}>
+          <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]">
+            <p className={eyebrow}>Quotes</p>
+            <button
+              onClick={() => navigate("/admin/quotes")}
+              className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              Convert
+            </button>
+          </div>
+          <div className="px-5 py-4 flex-1">
+            <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
+              {quoteStats?.accepted ?? "—"}
+            </p>
+            <p className={`text-[11px] ${muted} mt-1 mb-4`}>
+              approved
+              {quoteStats?.acceptedValue > 0
+                ? ` · ${gbp(quoteStats.acceptedValue)}`
+                : ""}
+            </p>
+            <div className="space-y-2.5">
+              {[
+                { label: "Awaiting response", val: quoteStats?.pending ?? "—" },
+                { label: "Declined", val: quoteStats?.declined ?? "—" },
+                { label: "Total sent", val: quoteStats?.total ?? "—" },
+              ].map((row) => (
+                <button
+                  key={row.label}
+                  onClick={() => navigate("/admin/quotes/history")}
+                  className="w-full flex items-center justify-between group"
+                >
+                  <span className="text-xs font-medium text-white/45 group-hover:text-white/70 transition-colors">
+                    {row.label}
+                  </span>
+                  <span className="text-xs font-semibold text-white/80 tabular-nums">
+                    {row.val}
+                  </span>
+                </button>
+              ))}
             </div>
           </div>
+          <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
+            <p className={`text-[10px] font-medium ${muted} mb-1.5`}>
+              Acceptance rate · {(quoteStats?.acceptanceRate || 0).toFixed(0)}%
+            </p>
+            <div className="w-full h-1.5 bg-white/[0.05] rounded-full overflow-hidden flex">
+              <div
+                className="h-full bg-emerald-500 transition-all duration-700"
+                style={{ width: `${quoteStats?.acceptanceRate ?? 0}%` }}
+              />
+              <div
+                className="h-full bg-rose-500/80 transition-all duration-700"
+                style={{
+                  width: `${quoteStats ? (quoteStats.declined / quoteStats.total) * 100 || 0 : 0}%`,
+                }}
+              />
             </div>
           </div>
-        )}
+        </div>
+
+        {/* JOBS */}
+        <div className={`${card} flex flex-col overflow-hidden`}>
+          <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]">
+            <p className={eyebrow}>Jobs</p>
+            <button
+              onClick={() => navigate("/admin/jobs")}
+              className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              View jobs
+            </button>
+          </div>
+          <div className="px-5 py-4 flex-1">
+            <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
+              {inProgress.length + accepted.length}
+            </p>
+            <p className={`text-[11px] ${muted} mt-1 mb-4`}>active right now</p>
+            <div className="space-y-2.5">
+              {[
+                {
+                  label: "Requires action",
+                  val: newPending.length,
+                  seg: {
+                    title: "New Bookings",
+                    bookings: newPending,
+                    total: rev(newPending),
+                  },
+                },
+                {
+                  label: "In progress",
+                  val: inProgress.length,
+                  seg: {
+                    title: "In Progress",
+                    bookings: inProgress,
+                    total: rev(inProgress),
+                  },
+                },
+                {
+                  label: "Completed",
+                  val: completed.length,
+                  seg: {
+                    title: "Completed",
+                    bookings: completed,
+                    total: completedRevenue,
+                  },
+                },
+              ].map((row) => (
+                <button
+                  key={row.label}
+                  onClick={() => setDetailSegment(row.seg)}
+                  className="w-full flex items-center justify-between group"
+                >
+                  <span className="text-xs font-medium text-white/45 group-hover:text-white/70 transition-colors">
+                    {row.label}
+                  </span>
+                  <span className="text-xs font-semibold text-white/80 tabular-nums">
+                    {row.val}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
+            <svg
+              viewBox="0 0 100 30"
+              className="w-full h-7"
+              preserveAspectRatio="none"
+            >
+              <polyline
+                points={sparkBooking.pts}
+                fill="none"
+                stroke="#475569"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
+              <polyline
+                points={sparkCompleted.pts}
+                fill="none"
+                stroke="#10B981"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+            <div className="flex items-center gap-3 mt-1.5">
+              <span
+                className={`flex items-center gap-1.5 text-[10px] font-medium ${muted}`}
+              >
+                <span className="w-2.5 h-[2px] bg-slate-500 rounded inline-block" />
+                Created
+              </span>
+              <span
+                className={`flex items-center gap-1.5 text-[10px] font-medium ${muted}`}
+              >
+                <span className="w-2.5 h-[2px] bg-emerald-400 rounded inline-block" />
+                Completed
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* REVENUE */}
+        <div className={`${card} flex flex-col overflow-hidden`}>
+          <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-white/[0.05]">
+            <p className={eyebrow}>Revenue</p>
+            <button
+              onClick={() => setShowNetDetail(true)}
+              className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              Breakdown
+            </button>
+          </div>
+          <div className="px-5 py-4 flex-1">
+            <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
+              {gbp(completedRevenue)}
+            </p>
+            <p className={`text-[11px] ${muted} mt-1 mb-4`}>
+              gross · {completed.length} completed jobs
+            </p>
+            <div className="space-y-2.5">
+              {[
+                {
+                  label: "Pending pipeline",
+                  val: gbp(pendingRevenue),
+                  action: () =>
+                    setDetailSegment({
+                      title: "Open Pipeline",
+                      bookings: pending,
+                      total: pendingRevenue,
+                    }),
+                },
+                {
+                  label: "Total expenses",
+                  val: `−${gbp(totalExpenses)}`,
+                  action: () => navigate("/admin/expenses"),
+                },
+                {
+                  label: "Net revenue",
+                  val: gbp(netRevenue),
+                  action: () => setShowNetDetail(true),
+                },
+              ].map((row) => (
+                <button
+                  key={row.label}
+                  onClick={row.action}
+                  className="w-full flex items-center justify-between group"
+                >
+                  <span className="text-xs font-medium text-white/45 group-hover:text-white/70 transition-colors">
+                    {row.label}
+                  </span>
+                  <span className="text-xs font-semibold text-white/80 tabular-nums">
+                    {row.val}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
+            <svg
+              viewBox="0 0 100 30"
+              className="w-full h-7"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10B981" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              {(() => {
+                const vals = Array.from({ length: 12 }, (_, i) => {
+                  const d = new Date();
+                  d.setDate(d.getDate() - (11 - i) * 2.5);
+                  const s = new Date(d.toDateString()),
+                    e = new Date(s.getTime() + 86399999 * 2.5);
+                  return bookings
+                    .filter((b) => {
+                      const t = new Date(b.createdAt || b.schedule?.date);
+                      return t >= s && t <= e && b.status === "Completed";
+                    })
+                    .reduce((a, b) => a + Number(b.payment?.amount || 0), 0);
+                });
+                const mx = Math.max(...vals, 1);
+                const pts = vals
+                  .map((v, i) => `${(i / 11) * 96 + 2},${28 - (v / mx) * 24}`)
+                  .join(" ");
+                return (
+                  <>
+                    <polygon points={`2,28 ${pts} 98,28`} fill="url(#sg2)" />
+                    <polyline
+                      points={pts}
+                      fill="none"
+                      stroke="#10B981"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </>
+                );
+              })()}
+            </svg>
+            <span
+              className={`flex items-center gap-1.5 mt-1.5 text-[10px] font-medium ${muted}`}
+            >
+              <span className="w-2.5 h-[2px] bg-emerald-400 rounded inline-block" />
+              Revenue · last 30 days
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Row 1: Trend chart + Donut */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-4 sm:p-6 flex flex-wrap justify-between items-start gap-4">
+      {/* ── Today's schedule ─────────────────────────────────────────────────── */}
+      {todaysBookings.length > 0 && (
+        <div className={`${card} overflow-hidden`}>
+          <div className="px-5 py-4 border-b border-white/[0.05] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-400/10 flex items-center justify-center">
+                <CalendarCheck size={14} className="text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  Today's schedule
+                </p>
+                <p className={`text-xs ${muted}`}>
+                  {todaysBookings.length} job
+                  {todaysBookings.length !== 1 ? "s" : ""} on the board
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate("/admin/bookings")}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              View all <ChevronRight size={12} />
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <div className="flex gap-2.5 p-4 min-w-max">
+              {todaysBookings.slice(0, 8).map((b, i) => (
+                <button
+                  key={i}
+                  onClick={() => navigate(`/admin/bookings?id=${b._id}`)}
+                  className="flex items-center gap-3 bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] rounded-xl px-4 py-3 text-left transition-colors min-w-52"
+                >
+                  <div className="w-8 h-8 rounded-full bg-emerald-400/10 flex items-center justify-center shrink-0">
+                    <span className="text-[10px] font-semibold text-emerald-400">
+                      {initials(b)}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-medium text-white/85 truncate">
+                      {b.customer?.firstName} {b.customer?.lastName}
+                    </p>
+                    <p className={`text-[11px] ${muted} truncate`}>
+                      {b.service}
+                    </p>
+                    <p className="text-[11px] font-semibold text-white/55 mt-0.5">
+                      {b.schedule?.preferredTime || "Time TBC"}
+                    </p>
+                  </div>
+                  <StatusBadge status={b.status} />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Revenue trend + split ────────────────────────────────────────────── */}
+      <div className="grid lg:grid-cols-3 gap-4">
+        <div className={`lg:col-span-2 ${card} p-5 sm:p-6`}>
+          <div className="flex flex-wrap justify-between items-start gap-4 mb-2">
             <div>
-              <h3 className="text-base font-bold text-slate-800">
-                Revenue Trend
-              </h3>
-              <div className="flex items-baseline gap-2.5 mt-1.5">
-                <span className="text-2xl font-bold text-slate-900 tabular-nums tracking-tight">
-                  £
-                  {rangeRevenue.toLocaleString("en-GB", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+              <CardHead kicker="Analytics" title="Revenue trend" />
+              <div className="flex items-baseline gap-2.5 mt-2">
+                <span className="text-2xl font-semibold text-white tabular-nums tracking-tight">
+                  {gbp(rangeRevenue, 2)}
                 </span>
-                {rangeChangePct !== null ? (
+                {changePct !== null ? (
                   <span
-                    className={`inline-flex items-center gap-1 text-[11px] font-semibold tabular-nums ${rangeChangePct >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                    className={`inline-flex items-center gap-1 text-[11px] font-semibold tabular-nums ${changePct >= 0 ? "text-emerald-400" : "text-rose-400"}`}
                   >
-                    {rangeChangePct >= 0 ? (
+                    {changePct >= 0 ? (
                       <ArrowUpRight size={12} />
                     ) : (
                       <ArrowDownRight size={12} />
                     )}
-                    {rangeChangePct >= 0 ? "+" : ""}
-                    {rangeChangePct.toFixed(1)}% vs prior period
+                    {changePct >= 0 ? "+" : ""}
+                    {changePct.toFixed(1)}% vs prior period
                   </span>
                 ) : (
-                  <span className="text-[11px] font-medium text-slate-400">
+                  <span className={`text-[11px] ${muted}`}>
                     No prior period data yet
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <div className="px-4 sm:px-6 pb-4 sm:pb-6">
-            {loading ? (
-              <div className="h-52 bg-slate-50 rounded-2xl animate-pulse" />
-            ) : (
-              <div className="space-y-2">
-                <div className="relative" style={{ height: "200px" }}>
-                  {[0, 25, 50, 75].map((g) => (
+          {loading ? (
+            <div className="h-52 bg-white/[0.03] rounded-xl animate-pulse" />
+          ) : (
+            <div className="space-y-2 pt-2">
+              <div className="relative" style={{ height: "200px" }}>
+                {[0, 25, 50, 75].map((g) => (
+                  <div
+                    key={g}
+                    className="absolute left-0 right-0 border-t border-dashed border-white/[0.04]"
+                    style={{ bottom: `${g}%` }}
+                  />
+                ))}
+                <svg
+                  className="absolute inset-0 w-full h-full"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                >
+                  <defs>
+                    <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset="0%"
+                        stopColor="#10B981"
+                        stopOpacity="0.18"
+                      />
+                      <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <polygon
+                    points={`0,100 ${trendLine} 100,100`}
+                    fill="url(#trendFill)"
+                  />
+                  <polyline
+                    points={trendLine}
+                    fill="none"
+                    stroke="#10B981"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex">
+                  {trendPoints.map((p, i) => (
                     <div
-                      key={g}
-                      className="absolute left-0 right-0 border-t border-dashed border-slate-100"
-                      style={{ bottom: `${g}%` }}
-                    />
-                  ))}
-                  <svg
-                    className="absolute inset-0 w-full h-full"
-                    viewBox="0 0 100 100"
-                    preserveAspectRatio="none"
-                  >
-                    <defs>
-                      <linearGradient
-                        id="trendFill"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="0%"
-                          stopColor="#005B41"
-                          stopOpacity="0.16"
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor="#005B41"
-                          stopOpacity="0"
-                        />
-                      </linearGradient>
-                    </defs>
-                    <polygon
-                      points={`0,100 ${trendLinePoints} 100,100`}
-                      fill="url(#trendFill)"
-                    />
-                    <polyline
-                      points={trendLinePoints}
-                      fill="none"
-                      stroke="#005B41"
-                      strokeWidth="1.5"
-                      vectorEffect="non-scaling-stroke"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex">
-                    {trendPoints.map((p, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 h-full relative cursor-pointer"
-                        onMouseEnter={() => setHoveredPoint(i)}
-                        onMouseLeave={() => setHoveredPoint(null)}
-                      >
-                        {hoveredPoint === i && (
-                          <div
-                            className="absolute -translate-x-1/2 mb-2 bg-slate-900 text-white text-[10px] font-semibold rounded-xl px-2.5 py-1.5 whitespace-nowrap z-20 pointer-events-none shadow-xl tabular-nums"
-                            style={{
-                              left: "50%",
-                              bottom: `${Math.min(p.heightPct + 10, 88)}%`,
-                            }}
-                          >
-                            £
-                            {p.revenue.toLocaleString("en-GB", {
-                              minimumFractionDigits: 2,
-                            })}
-                            <br />
-                            <span className="text-slate-400">
-                              {p.count} booking{p.count !== 1 ? "s" : ""} ·{" "}
-                              {p.label}
-                            </span>
-                          </div>
-                        )}
+                      key={i}
+                      className="flex-1 h-full relative cursor-pointer"
+                      onMouseEnter={() => setHoveredPoint(i)}
+                      onMouseLeave={() => setHoveredPoint(null)}
+                    >
+                      {hoveredPoint === i && (
                         <div
-                          className={`absolute rounded-full border-2 border-white shadow transition-all ${hoveredPoint === i ? "bg-primary w-3 h-3" : "bg-primary/50 w-1.5 h-1.5"}`}
+                          className="absolute -translate-x-1/2 mb-2 bg-[#0F3D2C] border border-white/10 text-white text-[10px] font-medium rounded-lg px-2.5 py-1.5 whitespace-nowrap z-20 pointer-events-none shadow-xl tabular-nums"
                           style={{
                             left: "50%",
-                            bottom: `${p.heightPct}%`,
-                            transform: "translate(-50%, 50%)",
+                            bottom: `${Math.min(p.heightPct + 10, 88)}%`,
                           }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  {trendPoints.map((p, i) => (
-                    <div key={i} className="flex-1 text-center">
-                      {i % trendLabelStep === 0 && (
-                        <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">
-                          {p.label}
-                        </span>
+                        >
+                          <span className="font-semibold">
+                            {gbp(p.revenue, 2)}
+                          </span>
+                          <br />
+                          <span className={muted}>
+                            {p.count} booking{p.count !== 1 ? "s" : ""} ·{" "}
+                            {p.label}
+                          </span>
+                        </div>
                       )}
+                      <div
+                        className={`absolute rounded-full border-2 border-[#0B2D22] transition-all ${hoveredPoint === i ? "bg-emerald-400 w-3 h-3" : "bg-emerald-500/40 w-1.5 h-1.5"}`}
+                        style={{
+                          left: "50%",
+                          bottom: `${p.heightPct}%`,
+                          transform: "translate(-50%, 50%)",
+                        }}
+                      />
                     </div>
                   ))}
                 </div>
               </div>
-            )}
-          </div>
+              <div className="flex gap-1">
+                {trendPoints.map((p, i) => (
+                  <div key={i} className="flex-1 text-center">
+                    {i % trendLabelStep === 0 && (
+                      <span
+                        className={`text-[9px] font-medium ${dimmed} uppercase tracking-wide`}
+                      >
+                        {p.label}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Revenue Split donut */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6">
-          <h3 className="text-base font-bold text-slate-800">Revenue Split</h3>
-          <p className="text-[11px] font-medium text-slate-400 mt-0.5 mb-6">
-            Net: £{Math.max(netRevenue,0).toLocaleString("en-GB",{maximumFractionDigits:0})} after £{totalExpenses.toLocaleString("en-GB",{maximumFractionDigits:0})} expenses
-          </p>
-          <div className="relative w-40 h-40 mx-auto mb-6">
-            <svg viewBox="0 0 42 42" className="w-full h-full -rotate-0">
+        {/* Revenue split donut */}
+        <div className={`${card} p-5 sm:p-6`}>
+          <CardHead
+            kicker="Breakdown"
+            title="Revenue split"
+            sub={`Net ${gbp(Math.max(netRevenue, 0))} after expenses`}
+          />
+          <div className="relative w-36 h-36 mx-auto my-6">
+            <svg viewBox="0 0 42 42" className="w-full h-full">
               <circle
                 cx="21"
                 cy="21"
                 r="15.91549"
                 fill="transparent"
-                stroke="#F1F5F9"
-                strokeWidth="5"
+                stroke="#0F3D2C"
+                strokeWidth="4"
               />
               {donutArcs.map((seg, i) => (
                 <circle
@@ -1226,7 +1594,7 @@ const Dashboard = () => {
                   r="15.91549"
                   fill="transparent"
                   stroke={seg.color}
-                  strokeWidth="5"
+                  strokeWidth="4"
                   strokeDasharray={`${seg.pct} ${100 - seg.pct}`}
                   strokeDashoffset={seg.dashoffset}
                   transform="rotate(-90 21 21)"
@@ -1235,27 +1603,25 @@ const Dashboard = () => {
               ))}
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <p className="text-xl font-bold text-slate-900 tabular-nums">
-                £{(Math.max(netRevenue,0) / 1000).toFixed(1)}k
+              <p className="text-lg font-semibold text-white tabular-nums tracking-tight">
+                {gbp(Math.max(netRevenue, 0))}
               </p>
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                Net
-              </p>
+              <p className={eyebrow}>Net</p>
             </div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {donutArcs.map((seg, i) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span
-                    className="w-2.5 h-2.5 rounded-full"
+                    className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: seg.color }}
                   />
-                  <span className="text-[12px] font-semibold text-slate-600">
+                  <span className="text-xs font-medium text-white/55">
                     {seg.label}
                   </span>
                 </div>
-                <span className="text-[12px] font-bold text-slate-900 tabular-nums">
+                <span className="text-xs font-semibold text-white/80 tabular-nums">
                   {seg.pct.toFixed(0)}%
                 </span>
               </div>
@@ -1264,57 +1630,54 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Row 2: Paired bar chart + Top Services */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6">
-          <div className="flex flex-wrap justify-between items-start gap-3 mb-6">
-            <div>
-              <h3 className="text-base font-bold text-slate-800">
-                Bookings Overview
-              </h3>
-              <p className="text-[11px] font-medium text-slate-400 mt-0.5">
-                Completed vs. cancelled revenue, last 6 months
-              </p>
-            </div>
-            <div className="flex items-center gap-4 text-[11px] font-semibold text-slate-500">
+      {/* ── 6-month overview + top services ──────────────────────────────────── */}
+      <div className="grid lg:grid-cols-3 gap-4">
+        <div className={`lg:col-span-2 ${card} p-5 sm:p-6`}>
+          <div className="flex flex-wrap justify-between items-start gap-3 mb-5">
+            <CardHead kicker="Six months" title="Bookings overview" />
+            <div className="flex items-center gap-4 text-[11px] font-medium text-white/40">
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-primary" /> Completed
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />{" "}
+                Completed
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-secondary" /> Cancelled
+                <span className="w-2 h-2 rounded-full bg-cyan-400/70" />{" "}
+                Cancelled
               </span>
             </div>
           </div>
           <div
-            className="flex items-end gap-1.5 sm:gap-4"
-            style={{ height: "180px" }}
+            className="flex items-end gap-2 sm:gap-4"
+            style={{ height: "170px" }}
           >
-            {monthlyPaired.map((m, i) => (
+            {monthly.map((m, i) => (
               <div
                 key={i}
-                className="flex-1 h-full flex items-end justify-center gap-1 sm:gap-1.5 group"
+                className="flex-1 h-full flex items-end justify-center gap-1 group"
               >
                 <div
-                  className="w-3 sm:w-4 rounded-t-md bg-primary group-hover:bg-primary/80 transition-colors"
+                  className="w-4 rounded-t bg-emerald-500 group-hover:bg-emerald-400 transition-colors"
                   style={{
-                    height: `${Math.max((m.completed / maxPairedRev) * 100, 2)}%`,
+                    height: `${Math.max((m.completed / maxMonthRev) * 100, 2)}%`,
                   }}
-                  title={`Completed: £${m.completed.toFixed(2)}`}
+                  title={`Completed: ${gbp(m.completed, 2)}`}
                 />
                 <div
-                  className="w-3 sm:w-4 rounded-t-md bg-secondary group-hover:bg-secondary/80 transition-colors"
+                  className="w-4 rounded-t bg-cyan-400/50 group-hover:bg-cyan-400/70 transition-colors"
                   style={{
-                    height: `${Math.max((m.cancelled / maxPairedRev) * 100, 2)}%`,
+                    height: `${Math.max((m.cancelled / maxMonthRev) * 100, 2)}%`,
                   }}
-                  title={`Cancelled: £${m.cancelled.toFixed(2)}`}
+                  title={`Cancelled: ${gbp(m.cancelled, 2)}`}
                 />
               </div>
             ))}
           </div>
           <div className="flex gap-4 mt-2">
-            {monthlyPaired.map((m, i) => (
+            {monthly.map((m, i) => (
               <div key={i} className="flex-1 text-center">
-                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                <span
+                  className={`text-[10px] font-medium ${dimmed} uppercase tracking-wide`}
+                >
                   {m.label}
                 </span>
               </div>
@@ -1322,41 +1685,38 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Top Services horizontal bars */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6">
-          <h3 className="text-base font-bold text-slate-800">Top Services</h3>
-          <p className="text-[11px] font-medium text-slate-400 mt-0.5 mb-5">
-            By revenue earned
-          </p>
-          <div className="space-y-4">
+        <div className={`${card} p-5 sm:p-6`}>
+          <CardHead
+            kicker="Performance"
+            title="Top services"
+            sub="By revenue earned"
+          />
+          <div className="space-y-4 mt-5">
             {loading ? (
               [...Array(4)].map((_, i) => (
                 <div
                   key={i}
-                  className="h-6 bg-slate-100 rounded-xl animate-pulse"
+                  className="h-5 bg-white/[0.04] rounded-lg animate-pulse"
                 />
               ))
             ) : topServices.length === 0 ? (
-              <p className="text-slate-400 text-sm font-semibold text-center py-4">
-                No data yet
+              <p className={`${muted} text-sm text-center py-6`}>
+                No bookings yet — revenue by service will appear here.
               </p>
             ) : (
               topServices.map(([name, stats], i) => (
                 <div key={i}>
                   <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-[12px] font-semibold text-slate-600 truncate mr-2 flex-1 min-w-0">
+                    <span className="text-xs font-medium text-white/55 truncate mr-2 flex-1 min-w-0">
                       {name}
                     </span>
-                    <span className="text-[12px] font-bold text-slate-900 tabular-nums flex-shrink-0">
-                      £
-                      {stats.revenue.toLocaleString("en-GB", {
-                        maximumFractionDigits: 0,
-                      })}
+                    <span className="text-xs font-semibold text-white/80 tabular-nums shrink-0">
+                      {gbp(stats.revenue)}
                     </span>
                   </div>
-                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="w-full h-1 bg-white/[0.05] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-primary rounded-full transition-all duration-700"
+                      className="h-full bg-emerald-500 rounded-full transition-all duration-700"
                       style={{
                         width: `${(stats.revenue / maxServiceRev) * 100}%`,
                       }}
@@ -1369,76 +1729,172 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Row 3: Top Customers / Top Requested / Ratings */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-4 sm:p-6 pb-3 flex justify-between items-center">
-            <h3 className="text-base font-bold text-slate-800">
-              Top Customers
-            </h3>
-            <button
-              onClick={() => navigate("/admin/customers")}
-              className="text-[11px] font-bold text-primary hover:text-primary-dark transition-colors"
-            >
-              View All
-            </button>
+      {/* ── Status distribution + booking sources ────────────────────────────── */}
+      <div className="grid lg:grid-cols-2 gap-4">
+        <div className={`${card} p-5 sm:p-6`}>
+          <CardHead kicker="Last 30 days" title="Booking status distribution" />
+          <div className="space-y-3 mt-5">
+            {statusDist.map((s) => (
+              <div key={s.label} className="flex items-center gap-3">
+                <div className="w-24 shrink-0">
+                  <p className="text-[11px] font-medium text-white/50">
+                    {s.label}
+                  </p>
+                </div>
+                <div className="flex-1 h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${s.pct}%`,
+                      backgroundColor: statusColors[s.label] || "#475569",
+                    }}
+                  />
+                </div>
+                <div className="w-16 text-right shrink-0 flex items-center gap-1.5 justify-end">
+                  <span className="text-[13px] font-semibold text-white/80 tabular-nums">
+                    {s.count}
+                  </span>
+                  <span className={`text-[10px] ${muted} tabular-nums`}>
+                    {s.pct.toFixed(0)}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 h-2 rounded-full overflow-hidden flex bg-white/[0.04]">
+            {statusDist
+              .filter((s) => s.pct > 0)
+              .map((s) => (
+                <div
+                  key={s.label}
+                  className="h-full transition-all duration-700"
+                  style={{
+                    width: `${s.pct}%`,
+                    backgroundColor: statusColors[s.label] || "#475569",
+                  }}
+                  title={`${s.label}: ${s.count}`}
+                />
+              ))}
+          </div>
+        </div>
+
+        <div className={`${card} p-5 sm:p-6`}>
+          <CardHead
+            kicker="Acquisition"
+            title="Booking sources"
+            action="View leads"
+            onAction={() => navigate("/admin/leads")}
+          />
+          <div className="grid grid-cols-3 gap-2 mt-4 mb-5">
+            {[
+              { label: "Total", val: leadStats?.total ?? "—" },
+              { label: "This week", val: leadStats?.thisWeek ?? "—" },
+              { label: "This month", val: leadStats?.thisMonth ?? "—" },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-3 text-center"
+              >
+                <p className="text-lg font-semibold text-white tabular-nums">
+                  {s.val}
+                </p>
+                <p className={`${eyebrow} mt-0.5`}>{s.label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="space-y-2.5">
+            {leadSourceBreakdown.length === 0 ? (
+              <p className={`${muted} text-sm text-center py-6`}>
+                No leads yet — sources will appear as enquiries arrive.
+              </p>
+            ) : (
+              leadSourceBreakdown.map(([source, stats]) => (
+                <div
+                  key={source}
+                  className="flex items-center justify-between gap-3"
+                >
+                  <span className="text-xs font-medium text-white/55 w-24 shrink-0 truncate">
+                    {source}
+                  </span>
+                  <div className="flex-1 h-1 bg-white/[0.05] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 rounded-full"
+                      style={{
+                        width: `${(stats.count / maxLeadCount) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <span className="text-[11px] font-semibold text-white/80 tabular-nums w-6 text-right">
+                    {stats.count}
+                  </span>
+                  <span
+                    className={`hidden sm:inline text-[10px] ${muted} tabular-nums w-16 text-right shrink-0`}
+                  >
+                    {gbp(stats.revenue)}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Customers + requested + ratings ──────────────────────────────────── */}
+      <div className="grid lg:grid-cols-3 gap-4">
+        <div className={`${card} overflow-hidden`}>
+          <div className="p-5 sm:p-6 pb-3">
+            <CardHead
+              kicker="Clients"
+              title="Top customers"
+              action="View all"
+              onAction={() => navigate("/admin/customers")}
+            />
           </div>
           <div className="px-3 pb-3">
             {topCustomers.length === 0 ? (
-              <p className="text-slate-400 text-sm font-semibold text-center py-8">
-                No customers yet
+              <p className={`${muted} text-sm text-center py-8`}>
+                No customers yet — completed bookings build this list.
               </p>
             ) : (
               topCustomers.map((c, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors"
                 >
-                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-[10px] font-bold text-primary">
+                  <div className="w-8 h-8 rounded-full bg-emerald-400/10 flex items-center justify-center shrink-0">
+                    <span className="text-[10px] font-semibold text-emerald-400">
                       {(
                         (c.firstName?.[0] || "") + (c.lastName?.[0] || "")
                       ).toUpperCase()}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 truncate">
+                    <p className="text-[13px] font-medium text-white/85 truncate">
                       {c.firstName} {c.lastName}
                     </p>
-                    <p className="text-[11px] font-medium text-slate-400">
+                    <p className={`text-[11px] ${muted}`}>
                       {c.count} booking{c.count !== 1 ? "s" : ""}
                     </p>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-bold text-slate-900 tabular-nums">
-                      £
-                      {c.total.toLocaleString("en-GB", {
-                        maximumFractionDigits: 0,
-                      })}
-                    </p>
-                  </div>
-                  <ChevronRight
-                    size={15}
-                    className="text-slate-300 flex-shrink-0"
-                  />
+                  <p className="text-[13px] font-semibold text-white/80 tabular-nums shrink-0">
+                    {gbp(c.total)}
+                  </p>
                 </div>
               ))
             )}
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6">
-          <h3 className="text-base font-bold text-slate-800 mb-5">
-            Top Requested Services
-          </h3>
-          <div className="space-y-4">
+        <div className={`${card} p-5 sm:p-6`}>
+          <CardHead kicker="Popularity" title="Top requested services" />
+          <div className="space-y-3.5 mt-5">
             {topRequested.length === 0 ? (
-              <p className="text-slate-400 text-sm font-semibold text-center py-8">
-                No data yet
+              <p className={`${muted} text-sm text-center py-8`}>
+                No data yet.
               </p>
             ) : (
               topRequested.map(([name, stats], i) => {
-                const sharePct =
+                const share =
                   bookings.length > 0
                     ? (stats.count / bookings.length) * 100
                     : 0;
@@ -1447,18 +1903,18 @@ const Dashboard = () => {
                     key={i}
                     className="flex items-center justify-between gap-3"
                   >
-                    <span className="text-[12px] font-semibold text-slate-600 truncate flex-1 min-w-0">
+                    <span className="text-xs font-medium text-white/55 truncate flex-1 min-w-0">
                       {name}
                     </span>
-                    <div className="flex items-center gap-2 flex-shrink-0 w-24 sm:w-28">
-                      <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="flex items-center gap-2 shrink-0 w-28">
+                      <div className="flex-1 h-1 bg-white/[0.05] rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-secondary rounded-full"
-                          style={{ width: `${sharePct}%` }}
+                          className="h-full bg-cyan-400/80 rounded-full"
+                          style={{ width: `${share}%` }}
                         />
                       </div>
-                      <span className="text-[11px] font-bold text-slate-900 tabular-nums w-9 text-right">
-                        {sharePct.toFixed(0)}%
+                      <span className="text-[11px] font-semibold text-white/75 tabular-nums w-9 text-right">
+                        {share.toFixed(0)}%
                       </span>
                     </div>
                   </div>
@@ -1468,38 +1924,40 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6">
-          <div className="flex justify-between items-center mb-5">
-            <h3 className="text-base font-bold text-slate-800">Ratings</h3>
-            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50">
-              <Star size={13} className="text-amber-500 fill-amber-500" />
-              <span className="text-[12px] font-bold text-amber-700 tabular-nums">
+        <div className={`${card} p-5 sm:p-6`}>
+          <div className="flex justify-between items-start">
+            <CardHead kicker="Reviews" title="Ratings" />
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-400/10">
+              <Star size={12} className="text-amber-400 fill-amber-400" />
+              <span className="text-[13px] font-semibold text-amber-300 tabular-nums">
                 {avgRating.toFixed(1)}
               </span>
             </div>
           </div>
           {reviews.length === 0 ? (
-            <p className="text-slate-400 text-sm font-semibold text-center py-8">
-              No reviews yet
+            <p className={`${muted} text-sm text-center py-8`}>
+              No reviews yet — ratings will appear as customers leave feedback.
             </p>
           ) : (
             <>
-              <p className="text-[11px] font-medium text-slate-400 mb-4">
+              <p className={`text-[11px] ${muted} mt-1 mb-4`}>
                 {reviews.length.toLocaleString("en-GB")} total reviews
               </p>
               <div className="space-y-2.5">
                 {ratingBreakdown.map((r) => (
                   <div key={r.star} className="flex items-center gap-2">
-                    <span className="text-[11px] font-semibold text-slate-500 w-10 flex-shrink-0">
-                      {r.star}-star
+                    <span className="text-[11px] font-medium text-white/45 w-11 shrink-0">
+                      {r.star} star
                     </span>
-                    <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="flex-1 h-1 bg-white/[0.05] rounded-full overflow-hidden">
                       <div
                         className="h-full bg-amber-400 rounded-full"
                         style={{ width: `${r.pct}%` }}
                       />
                     </div>
-                    <span className="text-[10px] font-bold text-slate-400 tabular-nums w-8 text-right">
+                    <span
+                      className={`text-[10px] font-medium ${muted} tabular-nums w-8 text-right`}
+                    >
                       {r.pct.toFixed(0)}%
                     </span>
                   </div>
@@ -1510,30 +1968,29 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Row 4: Quote Conversion / Recent Quotes / Leads by Source */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6">
-          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2 mb-1">
-            <FileText size={16} className="text-primary" /> Quote Conversion
-          </h3>
-          <p className="text-[11px] font-medium text-slate-400 mb-5">
-            Accept vs. decline rate, all-time
-          </p>
-          {!quoteStats || !quoteStats.total ? (
-            <p className="text-slate-400 text-sm font-semibold text-center py-8">
-              No quotes sent yet
+      {/* ── Quote conversion + recent quotes + calendar ──────────────────────── */}
+      <div className="grid lg:grid-cols-3 gap-4">
+        <div className={`${card} p-5 sm:p-6`}>
+          <CardHead
+            kicker="Quotes"
+            title="Quote conversion"
+            sub="Accept vs decline, all time"
+          />
+          {!quoteStats?.total ? (
+            <p className={`${muted} text-sm text-center py-8`}>
+              No quotes sent yet — send one to start tracking conversion.
             </p>
           ) : (
             <>
-              <div className="flex items-end gap-2 mb-5">
-                <span className="text-3xl font-bold text-slate-900 tabular-nums">
+              <div className="flex items-end gap-2 mt-4 mb-4">
+                <span className="text-3xl font-semibold text-white tabular-nums tracking-tight">
                   {(quoteStats.acceptanceRate || 0).toFixed(0)}%
                 </span>
-                <span className="text-[11px] font-medium text-slate-400 mb-1.5">
+                <span className={`text-[11px] ${muted} mb-1.5`}>
                   acceptance rate
                 </span>
               </div>
-              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex mb-5">
+              <div className="w-full h-1.5 bg-white/[0.05] rounded-full overflow-hidden flex mb-4">
                 <div
                   className="h-full bg-emerald-500"
                   style={{
@@ -1541,64 +1998,61 @@ const Dashboard = () => {
                   }}
                 />
                 <div
-                  className="h-full bg-rose-400"
+                  className="h-full bg-rose-500/80"
                   style={{
                     width: `${((quoteStats.declined || 0) / quoteStats.total) * 100}%`,
                   }}
                 />
               </div>
               <div className="space-y-2.5">
-                <div className="flex items-center justify-between text-[12px]">
-                  <span className="flex items-center gap-2 font-semibold text-slate-600">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />{" "}
-                    Accepted
-                  </span>
-                  <span className="font-bold text-slate-900 tabular-nums">
-                    {quoteStats.accepted || 0} · £
-                    {(quoteStats.acceptedValue || 0).toLocaleString("en-GB", {
-                      maximumFractionDigits: 0,
-                    })}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-[12px]">
-                  <span className="flex items-center gap-2 font-semibold text-slate-600">
-                    <span className="w-2 h-2 rounded-full bg-rose-400" />{" "}
-                    Declined
-                  </span>
-                  <span className="font-bold text-slate-900 tabular-nums">
-                    {quoteStats.declined || 0}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-[12px]">
-                  <span className="flex items-center gap-2 font-semibold text-slate-600">
-                    <span className="w-2 h-2 rounded-full bg-slate-300" />{" "}
-                    Awaiting response
-                  </span>
-                  <span className="font-bold text-slate-900 tabular-nums">
-                    {quoteStats.pending ?? quoteStats.total}
-                  </span>
-                </div>
+                {[
+                  {
+                    color: "bg-emerald-500",
+                    label: "Accepted",
+                    val: `${quoteStats.accepted || 0} · ${gbp(quoteStats.acceptedValue || 0)}`,
+                  },
+                  {
+                    color: "bg-rose-500",
+                    label: "Declined",
+                    val: `${quoteStats.declined || 0}`,
+                  },
+                  {
+                    color: "bg-white/20",
+                    label: "Awaiting response",
+                    val: `${quoteStats.pending ?? quoteStats.total}`,
+                  },
+                ].map((r) => (
+                  <div
+                    key={r.label}
+                    className="flex items-center justify-between text-xs"
+                  >
+                    <span className="flex items-center gap-2 font-medium text-white/55">
+                      <span className={`w-2 h-2 rounded-full ${r.color}`} />
+                      {r.label}
+                    </span>
+                    <span className="font-semibold text-white/80 tabular-nums">
+                      {r.val}
+                    </span>
+                  </div>
+                ))}
               </div>
             </>
           )}
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-4 sm:p-6 pb-3 flex justify-between items-center">
-            <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <FileText size={16} className="text-primary" /> Recent Quotes
-            </h3>
-            <button
-              onClick={() => navigate("/admin/quotes/history")}
-              className="text-[11px] font-bold text-primary hover:text-primary-dark transition-colors flex items-center gap-1"
-            >
-              History <ChevronRight size={12} />
-            </button>
+        <div className={`${card} overflow-hidden`}>
+          <div className="p-5 sm:p-6 pb-3">
+            <CardHead
+              kicker="Latest"
+              title="Recent quotes"
+              action="History"
+              onAction={() => navigate("/admin/quotes/history")}
+            />
           </div>
           <div className="px-3 pb-3">
             {recentQuotes.length === 0 ? (
-              <p className="text-slate-400 text-sm font-semibold text-center py-8">
-                No quotes sent yet
+              <p className={`${muted} text-sm text-center py-8`}>
+                No quotes sent yet.
               </p>
             ) : (
               recentQuotes.map((q) => {
@@ -1608,32 +2062,32 @@ const Dashboard = () => {
                   <button
                     key={q.quoteRef}
                     onClick={() => navigate("/admin/quotes")}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors text-left"
                   >
                     <div
-                      className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isAccepted ? "bg-emerald-100" : isDeclined ? "bg-rose-100" : "bg-slate-100"}`}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isAccepted ? "bg-emerald-400/10" : isDeclined ? "bg-rose-400/10" : "bg-white/[0.05]"}`}
                     >
                       {isDeclined ? (
-                        <X size={16} className="text-rose-600" />
+                        <X size={15} className="text-rose-400" />
                       ) : (
                         <CheckCircle2
-                          size={16}
+                          size={15}
                           className={
-                            isAccepted ? "text-emerald-600" : "text-slate-400"
+                            isAccepted ? "text-emerald-400" : "text-white/25"
                           }
                         />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 truncate">
+                      <p className="text-[13px] font-medium text-white/85 truncate">
                         {q.companyName}
                       </p>
-                      <p className="text-[11px] font-medium text-slate-400">
-                        {q.quoteRef} · £{Number(q.grandTotal || 0).toFixed(2)}
+                      <p className={`text-[11px] ${muted}`}>
+                        {q.quoteRef} · {gbp(q.grandTotal, 2)}
                       </p>
                     </div>
                     <span
-                      className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full flex-shrink-0 ${isAccepted ? "text-emerald-700 bg-emerald-50" : isDeclined ? "text-rose-700 bg-rose-50" : "text-slate-500 bg-slate-100"}`}
+                      className={`text-[10px] font-semibold px-2 py-[3px] rounded-md shrink-0 ${isAccepted ? "text-emerald-300 bg-emerald-400/10" : isDeclined ? "text-rose-300 bg-rose-400/10" : "text-white/40 bg-white/[0.05]"}`}
                     >
                       {isAccepted
                         ? "Accepted"
@@ -1648,102 +2102,134 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden p-4 sm:p-6">
-          <div className="flex justify-between items-center mb-1">
-            <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <Megaphone size={16} className="text-primary" /> Leads
-            </h3>
+        {/* Revenue by date */}
+        <div className={`${card} p-5 sm:p-6`}>
+          <CardHead
+            kicker="Range"
+            title="Revenue by date"
+            sub="Pick a start and end date to see totals"
+          />
+
+          <div className="flex items-center justify-between mt-4 mb-3">
             <button
-              onClick={() => navigate("/admin/leads")}
-              className="text-[11px] font-bold text-primary hover:text-primary-dark transition-colors"
+              onClick={() => setCalMonth(new Date(calYear, calMonthIdx - 1, 1))}
+              aria-label="Previous month"
+              className="p-1.5 rounded-lg bg-white/[0.04] text-white/40 hover:bg-white/10 hover:text-white/75 transition-colors"
             >
-              View All
+              <ChevronLeft size={14} />
+            </button>
+            <p className="text-[13px] font-semibold text-white/80">
+              {calMonth.toLocaleDateString("en-GB", {
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+            <button
+              onClick={() => setCalMonth(new Date(calYear, calMonthIdx + 1, 1))}
+              aria-label="Next month"
+              className="p-1.5 rounded-lg bg-white/[0.04] text-white/40 hover:bg-white/10 hover:text-white/75 transition-colors"
+            >
+              <ChevronRight size={14} />
             </button>
           </div>
-          <p className="text-[11px] font-medium text-slate-400 mb-4">
-            Contact Us enquiries captured as leads
-          </p>
-          <div className="grid grid-cols-3 gap-2 mb-5">
-            <div className="bg-slate-50 rounded-xl p-3 text-center">
-              <p className="text-lg font-bold text-slate-900 tabular-nums">
-                {leadStats?.total ?? "—"}
-              </p>
-              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wide">
-                Total
-              </p>
-            </div>
-            <div className="bg-slate-50 rounded-xl p-3 text-center">
-              <p className="text-lg font-bold text-slate-900 tabular-nums">
-                {leadStats?.thisWeek ?? "—"}
-              </p>
-              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wide">
-                This Week
-              </p>
-            </div>
-            <div className="bg-slate-50 rounded-xl p-3 text-center">
-              <p className="text-lg font-bold text-slate-900 tabular-nums">
-                {leadStats?.thisMonth ?? "—"}
-              </p>
-              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wide">
-                This Month
-              </p>
-            </div>
+
+          <div className="grid grid-cols-7 gap-1 mb-1">
+            {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+              <div
+                key={i}
+                className={`text-[9px] font-semibold ${dimmed} uppercase text-center py-1`}
+              >
+                {d}
+              </div>
+            ))}
           </div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 pt-3 border-t border-slate-100">
-            Booking Sources
-          </p>
-          {leadSourceBreakdown.length === 0 ? (
-            <p className="text-slate-400 text-sm font-semibold text-center py-8">
-              No leads yet
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {leadSourceBreakdown.map(([source, stats]) => (
-                <div
-                  key={source}
-                  className="flex items-center justify-between gap-3"
+          <div className="grid grid-cols-7 gap-1 mb-3">
+            {calCells.map((day, i) => {
+              if (!day) return <div key={i} className="aspect-square" />;
+              const isStart = selStart && dateKey(day) === dateKey(selStart);
+              const isEnd = selEnd && dateKey(day) === dateKey(selEnd);
+              const inR = inRange(day);
+              const isToday = dateKey(day) === dateKey(new Date());
+              return (
+                <button
+                  key={i}
+                  onClick={() => handleCalClick(day)}
+                  className={`aspect-square rounded-lg flex items-center justify-center text-[11px] font-semibold transition-colors border ${
+                    isStart || isEnd
+                      ? "bg-emerald-500 text-white border-emerald-500"
+                      : inR
+                        ? "bg-emerald-400/10 text-emerald-300 border-emerald-500/20"
+                        : isToday
+                          ? "border-emerald-500/40 text-emerald-400/80"
+                          : "border-transparent text-white/40 hover:bg-white/[0.05] hover:text-white/65"
+                  }`}
                 >
-                  <span className="text-[12px] font-semibold text-slate-600 w-24 flex-shrink-0 truncate">
-                    {source}
-                  </span>
-                  <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full"
-                      style={{
-                        width: `${(stats.count / maxLeadCount) * 100}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-[11px] font-bold text-slate-900 tabular-nums w-8 text-right">
-                    {stats.count}
-                  </span>
-                  <span className="hidden sm:inline text-[10px] font-semibold text-slate-400 tabular-nums w-16 text-right flex-shrink-0">
-                    £
-                    {stats.revenue.toLocaleString("en-GB", {
-                      maximumFractionDigits: 0,
-                    })}
-                  </span>
-                </div>
-              ))}
+                  {day.getDate()}
+                </button>
+              );
+            })}
+          </div>
+
+          {selStart ? (
+            <div className="bg-emerald-400/[0.07] border border-emerald-500/15 rounded-xl p-3.5">
+              <p className={`${eyebrow} mb-1`}>
+                {selStart.toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                })}
+                {selEnd
+                  ? ` – ${selEnd.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`
+                  : ""}
+              </p>
+              <p className="text-xl font-semibold text-emerald-400 tabular-nums tracking-tight">
+                {gbp(selectedRangeRevenue)}
+              </p>
+              <div className="flex gap-4 mt-2 text-[11px]">
+                <span className={muted}>{bookingsInRange.length} bookings</span>
+                <span className={muted}>{leadsInRange.length} leads</span>
+                <span className={muted}>
+                  {conversionPct.toFixed(0)}% conversion
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  setSelStart(null);
+                  setSelEnd(null);
+                }}
+                className={`text-[11px] font-semibold ${muted} hover:text-white/65 mt-2 inline-flex items-center gap-1 transition-colors`}
+              >
+                <X size={10} /> Clear selection
+              </button>
             </div>
+          ) : (
+            <p className={`text-[11px] ${dimmed} text-center py-1`}>
+              Select a date range to see revenue
+            </p>
           )}
         </div>
       </div>
 
+      {/* ── Modals ───────────────────────────────────────────────────────────── */}
       {detailSegment && (
-        <RevenueDetailModal
+        <DetailModal
           segment={detailSegment}
           onClose={() => setDetailSegment(null)}
-          onViewBooking={(b) => navigate(`/admin/bookings?id=${b._id}`)}
+          onViewBooking={(b) => {
+            setDetailSegment(null);
+            navigate(`/admin/bookings?id=${b._id}`);
+          }}
         />
       )}
       {showNetDetail && (
-        <NetRevenueDetailModal
+        <NetRevenueModal
           completed={completed}
           expenses={expenses}
           netRevenue={netRevenue}
           onClose={() => setShowNetDetail(false)}
-          onViewBooking={(b) => { setShowNetDetail(false); navigate(`/admin/bookings?id=${b._id}`); }}
+          onViewBooking={(b) => {
+            setShowNetDetail(false);
+            navigate(`/admin/bookings?id=${b._id}`);
+          }}
         />
       )}
     </div>
