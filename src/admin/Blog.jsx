@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   Trash2,
   Edit2,
@@ -269,7 +269,7 @@ const AdminBlog = () => {
   const draftCount = posts.length - publishedCount;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       {submitting && <LoadingOverlay message="Saving blog post..." />}
 
       {/* Success Message */}
@@ -278,7 +278,7 @@ const AdminBlog = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-linear-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-full font-bold shadow-lg"
+          className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-full font-bold shadow-lg"
         >
           <CheckCircle size={20} />
           {successMessage}
@@ -343,7 +343,7 @@ const AdminBlog = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                className={`bg-linear-to-br from-${stat.color}-50 to-${stat.color}-100 rounded-2xl p-6 border-2 border-${stat.color}-200`}
+                className={`bg-gradient-to-br from-${stat.color}-50 to-${stat.color}-100 rounded-2xl p-6 border-2 border-${stat.color}-200`}
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -375,7 +375,7 @@ const AdminBlog = () => {
           >
             <div className="bg-white rounded-3xl shadow-xl border-2 border-slate-200 overflow-hidden">
               {/* Form Header */}
-              <div className="bg-linear-to-r from-primary to-secondary px-6 sm:px-8 py-6 flex items-center justify-between">
+              <div className="bg-gradient-to-r from-primary to-secondary px-6 sm:px-8 py-6 flex items-center justify-between">
                 <h2 className="text-2xl sm:text-3xl font-black text-white">
                   {editingId ? "✎ Edit Blog Post" : "✍ Create New Blog Post"}
                 </h2>
@@ -518,7 +518,7 @@ const AdminBlog = () => {
                 </div>
 
                 {/* Publish Status */}
-                <div className="flex items-center gap-4 p-5 bg-linear-to-r from-slate-100 to-slate-50 rounded-xl border-2 border-slate-200">
+                <div className="flex items-center gap-4 p-5 bg-gradient-to-r from-slate-100 to-slate-50 rounded-xl border-2 border-slate-200">
                   <input
                     type="checkbox"
                     name="published"
@@ -618,12 +618,12 @@ const AdminBlog = () => {
                           </p>
                         </div>
                         {post.published ? (
-                          <span className="inline-flex items-center gap-2 px-4 py-2 bg-linear-to-r from-emerald-100 to-green-100 text-emerald-700 rounded-full text-xs font-black whitespace-nowrap">
+                          <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 rounded-full text-xs font-black whitespace-nowrap">
                             <Eye size={16} />
                             Published
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-2 px-4 py-2 bg-linear-to-r from-amber-100 to-yellow-100 text-amber-700 rounded-full text-xs font-black whitespace-nowrap">
+                          <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 rounded-full text-xs font-black whitespace-nowrap">
                             <EyeOff size={16} />
                             Draft
                           </span>
@@ -691,7 +691,7 @@ const AdminBlog = () => {
             className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
           >
             {/* Modal Header */}
-            <div className="bg-linear-to-r from-primary to-secondary px-6 sm:px-8 py-6 flex items-center justify-between sticky top-0">
+            <div className="bg-gradient-to-r from-primary to-secondary px-6 sm:px-8 py-6 flex items-center justify-between sticky top-0">
               <h3 className="text-2xl font-black text-white flex items-center gap-2">
                 <MessageCircle size={28} />
                 Comments
@@ -797,3 +797,4 @@ const AdminBlog = () => {
 };
 
 export default AdminBlog;
+

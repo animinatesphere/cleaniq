@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
@@ -150,7 +150,7 @@ const BlogDetail = () => {
 
   if (!post) {
     return (
-      <div className="pt-40 min-h-screen bg-linear-to-br mt-12 from-slate-900 via-slate-800 to-slate-900 pb-20">
+      <div className="pt-40 min-h-screen bg-gradient-to-br mt-12 from-slate-900 via-slate-800 to-slate-900 pb-20">
         <div className="max-w-3xl mx-auto px-4 md:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -228,7 +228,7 @@ const BlogDetail = () => {
 
       <div className="min-h-screen bg-white">
         {/* Header Section */}
-        <div className="bg-linear-to-br from-primary/5 mt-12 to-secondary/5 pt-32 pb-12">
+        <div className="bg-gradient-to-br from-primary/5 mt-12 to-secondary/5 pt-32 pb-12">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8">
             {/* Back Button */}
             <motion.div
@@ -325,7 +325,7 @@ const BlogDetail = () => {
                           e.target.alt = "Image unavailable - " + post.title;
                         }}
                       />
-                      <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-secondary/10"></div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10"></div>
                     </div>
                   </div>
                 </motion.div>
@@ -349,13 +349,13 @@ const BlogDetail = () => {
             )}
 
             {/* Author Bio Card */}
-            <div className="bg-linear-to-r from-primary/5 to-secondary/5 border-2 border-primary/10 rounded-2xl p-8 md:p-10 mb-16 hover:border-primary/20 transition-all">
+            <div className="bg-gradient-to-r from-primary/5 to-secondary/5 border-2 border-primary/10 rounded-2xl p-8 md:p-10 mb-16 hover:border-primary/20 transition-all">
               <h3 className="text-xl font-black text-primary-dark mb-6 flex items-center gap-3">
-                <div className="w-1 h-8 bg-linear-to-b from-primary to-secondary rounded-full" />
+                <div className="w-1 h-8 bg-gradient-to-b from-primary to-secondary rounded-full" />
                 About the Author
               </h3>
               <div className="flex gap-6 items-start">
-                <div className="w-16 h-16 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-md">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-md">
                   <User size={28} className="text-white" />
                 </div>
                 <div>
@@ -375,7 +375,7 @@ const BlogDetail = () => {
             {/* CTA Section */}
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="bg-linear-to-r from-primary via-secondary to-primary rounded-2xl p-8 md:p-12 text-white mb-16 shadow-2xl shadow-primary/20"
+              className="bg-gradient-to-r from-primary via-secondary to-primary rounded-2xl p-8 md:p-12 text-white mb-16 shadow-2xl shadow-primary/20"
             >
               <h3 className="text-2xl md:text-3xl font-black mb-4">
                 Ready for a Professional Clean?
@@ -460,7 +460,7 @@ const BlogDetail = () => {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={submittingComment}
-                  className="bg-linear-to-r from-primary to-secondary px-6 py-3 rounded-lg font-bold text-white flex items-center gap-2 hover:shadow-lg shadow-primary/30 transition-all disabled:opacity-50"
+                  className="bg-gradient-to-r from-primary to-secondary px-6 py-3 rounded-lg font-bold text-white flex items-center gap-2 hover:shadow-lg shadow-primary/30 transition-all disabled:opacity-50"
                 >
                   <Send size={18} />
                   {submittingComment ? "Submitting..." : "Post Comment"}
@@ -498,7 +498,7 @@ const BlogDetail = () => {
                     className="bg-white border-2 border-slate-200 rounded-lg p-6 hover:shadow-md hover:border-primary/20 transition-all"
                   >
                     <div className="flex gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-md">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-md">
                         <User size={20} className="text-white" />
                       </div>
                       <div className="flex-1">
@@ -550,3 +550,4 @@ const BlogDetail = () => {
 };
 
 export default BlogDetail;
+

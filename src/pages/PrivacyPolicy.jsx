@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+﻿/* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
@@ -235,7 +235,7 @@ const PrivacyPolicy = () => {
       </Helmet>
 
       {/* Header Section */}
-      <section className="relative pt-40 pb-20 bg-linear-to-br from-primary/5 to-secondary/5">
+      <section className="relative pt-40 pb-20 bg-gradient-to-br from-primary/5 to-secondary/5">
         <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
 
         <div className="max-w-4xl mx-auto px-6 relative z-10">
@@ -346,7 +346,7 @@ const PrivacyPolicy = () => {
             viewport={{ once: true }}
             className="mt-20 pt-20 border-t border-slate-200"
           >
-            <div className="bg-linear-to-br from-primary/5 to-secondary/5 rounded-3xl p-10 md:p-16">
+            <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-3xl p-10 md:p-16">
               <h2 className="text-3xl md:text-4xl font-black text-primary-dark mb-6">
                 Questions About Your Privacy?
               </h2>
@@ -410,3 +410,4 @@ const PrivacyPolicy = () => {
 };
 
 export default PrivacyPolicy;
+

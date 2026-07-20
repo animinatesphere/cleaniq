@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../assets/lOGO.png";
 
@@ -71,7 +71,7 @@ const Preloader = () => {
                   ease: "easeInOut",
                   delay: 0.5
                 }}
-                className="absolute inset-0 z-20 bg-linear-to-r from-transparent via-white/30 to-transparent w-full h-full skew-x-[-20deg]"
+                className="absolute inset-0 z-20 bg-gradient-to-r from-transparent via-white/30 to-transparent w-full h-full skew-x-[-20deg]"
               />
             </motion.div>
 
@@ -101,3 +101,4 @@ const Preloader = () => {
 };
 
 export default Preloader;
+

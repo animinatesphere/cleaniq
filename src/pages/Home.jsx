@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useRegion } from "../context/RegionContext";
@@ -673,7 +673,7 @@ const Home = () => {
                   loading="lazy"
                 />
                 {/* Dark overlay */}
-                <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 {/* Label */}
                 <div className="absolute bottom-8 left-8">
                   <p className="text-xs font-black text-white/60 uppercase tracking-widest mb-1">
@@ -1005,3 +1005,4 @@ const Home = () => {
 };
 
 export default Home;
+
