@@ -889,6 +889,9 @@ router.get("/:id/confirm-payment-sent", async (req, res) => {
       booking.meta.paymentSentReportedAt = new Date();
       await booking.save();
 
+      // SMS: booking confirmed (fire-and-forget)
+      setImmediate(() => sms.triggerBookingConfirmed(booking).catch(e => console.error("SMS payment-sent trigger error:", e.message)));
+
       try {
         await sendEmail({
           to: process.env.EMAIL_USER || "admin@cleaniqservices.com",

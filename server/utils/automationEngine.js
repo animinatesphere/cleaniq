@@ -1,7 +1,9 @@
 const ScheduledTask = require("../models/ScheduledTask");
 const SystemSetting = require("../models/SystemSetting");
 const Customer = require("../models/Customer");
+const Booking = require("../models/Booking");
 const { sendEmail, automationTemplates } = require("./emailService");
+const sms = require("./smsService");
 
 const GOOGLE_REVIEW_URL = "https://g.page/r/cleaniqservices/review";
 
@@ -25,6 +27,15 @@ const handlers = {
       subject: `Reminder: Your ${service} clean is tomorrow`,
       html: automationTemplates.bookingReminder24h({ firstName, service, date, bookingRef, amount }),
     });
+    // Also send SMS reminder
+    if (task.payload.bookingId) {
+      try {
+        const booking = await Booking.findById(task.payload.bookingId);
+        if (booking) await sms.triggerBookingReminder24h(booking);
+      } catch (err) {
+        console.error("SMS 24h reminder error:", err.message);
+      }
+    }
   },
 
   booking_reminder_3h: async (task) => {

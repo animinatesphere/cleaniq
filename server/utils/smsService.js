@@ -76,10 +76,23 @@ const templates = {
     `New job: ${b.customerName} at ${b.address} on ${b.date} at ${b.time}. Ref: ${b.bookingRef}. Log in for details. — CleanIQ`,
 };
 
+// ── Phone resolver — uses booking phone or falls back to Customer record ───
+async function resolvePhone(booking) {
+  const phone = booking.customer?.phone;
+  if (phone) return phone;
+  const email = booking.customer?.email;
+  if (!email) return "";
+  try {
+    const Customer = require("../models/Customer");
+    const cust = await Customer.findOne({ email: email.toLowerCase() }, "phone");
+    return cust?.phone || "";
+  } catch { return ""; }
+}
+
 // ── Trigger functions (called from booking route) ──────────────────────────
 async function triggerBookingConfirmed(booking) {
   if (!await isTriggerEnabled("booking_confirmed")) return;
-  const phone = booking.customer?.phone;
+  const phone = await resolvePhone(booking);
   if (!phone) return;
   await sendSms({
     to: phone,
@@ -98,7 +111,7 @@ async function triggerBookingConfirmed(booking) {
 
 async function triggerWorkerAssigned(booking, workerName) {
   if (!await isTriggerEnabled("worker_assigned")) return;
-  const phone = booking.customer?.phone;
+  const phone = await resolvePhone(booking);
   if (!phone) return;
   await sendSms({
     to: phone,
@@ -117,7 +130,7 @@ async function triggerWorkerAssigned(booking, workerName) {
 
 async function triggerBookingReminder24h(booking) {
   if (!await isTriggerEnabled("booking_reminder_24h")) return;
-  const phone = booking.customer?.phone;
+  const phone = await resolvePhone(booking);
   if (!phone) return;
   await sendSms({
     to: phone,
@@ -135,7 +148,7 @@ async function triggerBookingReminder24h(booking) {
 
 async function triggerBookingCompleted(booking) {
   if (!await isTriggerEnabled("booking_completed")) return;
-  const phone = booking.customer?.phone;
+  const phone = await resolvePhone(booking);
   if (!phone) return;
   await sendSms({
     to: phone,
@@ -150,7 +163,7 @@ async function triggerBookingCompleted(booking) {
 
 async function triggerBookingCancelled(booking) {
   if (!await isTriggerEnabled("booking_cancelled")) return;
-  const phone = booking.customer?.phone;
+  const phone = await resolvePhone(booking);
   if (!phone) return;
   await sendSms({
     to: phone,

@@ -3,6 +3,7 @@ const router = express.Router();
 const Booking = require('../models/Booking');
 const { verifyCustomer } = require('./customer-auth');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const sms = require('../utils/smsService');
 
 // GET /api/customer-bookings  — fetch all bookings for the logged-in customer (by email)
 router.get('/', verifyCustomer, async (req, res) => {
@@ -47,6 +48,10 @@ router.put('/:id/cancel', verifyCustomer, async (req, res) => {
 
     booking.status = 'Cancelled';
     await booking.save();
+
+    // SMS: booking cancelled (fire-and-forget)
+    setImmediate(() => sms.triggerBookingCancelled(booking).catch(e => console.error("SMS cancel trigger error:", e.message)));
+
     res.json({ message: 'Booking cancelled successfully and payment refunded.', booking });
   } catch (err) {
     res.status(500).json({ message: err.message });

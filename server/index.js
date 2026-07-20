@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
+const sms = require("./utils/smsService");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -156,6 +157,9 @@ app.post(
             booking.payment.authorizedAt = new Date();
             booking.status = "Confirmed"; // Booking is confirmed but cleaning not done yet
             await booking.save();
+
+            // SMS: booking confirmed (fire-and-forget)
+            setImmediate(() => sms.triggerBookingConfirmed(booking).catch(e => console.error("SMS Stripe trigger error:", e.message)));
 
             // Send Authorization Email to Customer (payment held)
             await sendEmail({
