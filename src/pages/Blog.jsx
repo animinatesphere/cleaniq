@@ -128,7 +128,7 @@ const Blog = () => {
               {/* Main Title */}
               <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white mb-6 tracking-tight leading-tight">
                 Cleaning Tips & <br />
-                <span className="bg-linear-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
                   Industry Insights
                 </span>
               </h1>
@@ -282,7 +282,7 @@ const Blog = () => {
                       <div className="h-full bg-white/5 backdrop-blur border border-white/10 rounded-2xl overflow-hidden hover:border-primary/50 hover:bg-white/10 transition-all duration-300 flex flex-col group-hover:-translate-y-2">
                         {/* Image */}
                         {post.image && (
-                          <div className="relative h-48 overflow-hidden bg-linear-to-br from-primary/20 to-secondary/20">
+                          <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20">
                             <img
                               src={getImageUrl(post.image)}
                               alt={post.title}

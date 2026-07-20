@@ -12,7 +12,7 @@
 
 @theme {
   --color-primary: #10b981;
-    --color-primary-dark: #0f172a;
+  --color-primary-dark: #0f172a;
 
   --font-sans: "Inter", "Outfit", system-ui, -apple-system, sans-serif;
 }
@@ -92,7 +92,7 @@
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-linear-to-r from-primary to-secondary;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
   }
 
   .card-hover {
