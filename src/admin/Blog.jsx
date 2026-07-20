@@ -323,19 +323,28 @@ const AdminBlog = () => {
                 label: "Total Posts",
                 value: posts.length,
                 icon: FileText,
-                color: "primary",
+                gradient:
+                  "bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200",
+                valueClass: "text-3xl font-black text-primary-600",
+                badgeClass: "p-3 bg-primary-200 rounded-full text-primary-600",
               },
               {
                 label: "Published",
                 value: publishedCount,
                 icon: Eye,
-                color: "emerald",
+                gradient:
+                  "bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200",
+                valueClass: "text-3xl font-black text-emerald-600",
+                badgeClass: "p-3 bg-emerald-200 rounded-full text-emerald-600",
               },
               {
                 label: "Drafts",
                 value: draftCount,
                 icon: EyeOff,
-                color: "amber",
+                gradient:
+                  "bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200",
+                valueClass: "text-3xl font-black text-amber-700",
+                badgeClass: "p-3 bg-amber-200 rounded-full text-amber-700",
               },
             ].map((stat, idx) => (
               <motion.div
@@ -343,20 +352,16 @@ const AdminBlog = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                className={`bg-gradient-to-br from-${stat.color}-50 to-${stat.color}-100 rounded-2xl p-6 border-2 border-${stat.color}-200`}
+                className={`${stat.gradient} rounded-2xl p-6 border-2`}
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-slate-600 text-sm font-bold uppercase tracking-wide mb-1">
                       {stat.label}
                     </p>
-                    <p className={`text-3xl font-black text-${stat.color}-600`}>
-                      {stat.value}
-                    </p>
+                    <p className={stat.valueClass}>{stat.value}</p>
                   </div>
-                  <div
-                    className={`p-3 bg-${stat.color}-200 rounded-full text-${stat.color}-600`}
-                  >
+                  <div className={stat.badgeClass}>
                     <stat.icon size={24} />
                   </div>
                 </div>
@@ -797,4 +802,3 @@ const AdminBlog = () => {
 };
 
 export default AdminBlog;
-

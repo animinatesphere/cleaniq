@@ -13,6 +13,7 @@
 @theme {
   --color-primary: #10b981;
   --color-primary-dark: #0f172a;
+  --color-secondary: #3b82f6;
 
   --font-sans: "Inter", "Outfit", system-ui, -apple-system, sans-serif;
 }
