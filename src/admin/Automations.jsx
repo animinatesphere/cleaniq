@@ -158,8 +158,8 @@ function Tick({ checked, indeterminate }) {
         checked
           ? "bg-emerald-500 border-emerald-500"
           : indeterminate
-            ? "border-white/30 bg-white/8"
-            : "border-white/20 bg-white/4 group-hover:border-white/35"
+            ? "border-white/30 bg-[#071D16]"
+            : "border-white/20 bg-[#071D16] group-hover:border-white/35"
       }`}
     >
       {checked && (
@@ -191,7 +191,7 @@ function Toggle({ checked, onChange, saving }) {
       className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
         checked
           ? "bg-emerald-500 shadow-sm shadow-emerald-500/30"
-          : "bg-white/12"
+          : "bg-[#071D16]"
       } ${saving ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
     >
       <span
@@ -207,7 +207,7 @@ function StatusBadge({ status }) {
     pending: "bg-blue-500/15 text-blue-400 border-blue-500/25",
     sent: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
     failed: "bg-rose-500/15 text-rose-400 border-rose-500/25",
-    cancelled: "bg-white/8 text-white/40 border-white/10",
+    cancelled: "bg-[#071D16] text-white/40 border-white/10",
   };
   return (
     <span
@@ -243,7 +243,7 @@ function AutomationRow({ item, onToggle, onSaveRecipients, onDelete, saving }) {
   return (
     <div className="border-b border-white/5 last:border-0">
       {/* Main row */}
-      <div className="px-5 py-4 flex items-center gap-3 hover:bg-white/2 transition-colors">
+      <div className="px-5 py-4 flex items-center gap-3 hover:bg-[#0A2A1F] transition-colors">
         <span className="text-lg shrink-0 leading-none">
           {meta.icon || "⚡"}
         </span>
@@ -274,7 +274,7 @@ function AutomationRow({ item, onToggle, onSaveRecipients, onDelete, saving }) {
         <div className="flex items-center gap-2.5 shrink-0">
           <button
             onClick={() => setOpen((o) => !o)}
-            className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-white/35 hover:bg-white/9 hover:text-white/60 transition-all"
+            className="w-8 h-8 rounded-xl bg-[#071D16] flex items-center justify-center text-white/35 hover:bg-[#0F2F24] hover:text-white/60 transition-all"
           >
             {open ? <ChevronUp size={14} /> : <Settings2 size={14} />}
           </button>
@@ -288,8 +288,8 @@ function AutomationRow({ item, onToggle, onSaveRecipients, onDelete, saving }) {
 
       {/* Expanded panel */}
       {open && (
-        <div className="mx-4 mb-4 rounded-2xl bg-white/3 border border-white/7 overflow-hidden">
-          <div className="p-4 border-b border-white/6">
+        <div className="mx-4 mb-4 rounded-2xl bg-[#071E16] border border-white/10 overflow-hidden">
+          <div className="p-4 border-b border-white/10">
             <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 flex items-center gap-1.5">
               <Users size={11} /> Who Receives This
             </p>
@@ -302,7 +302,7 @@ function AutomationRow({ item, onToggle, onSaveRecipients, onDelete, saving }) {
                   className={`flex items-start gap-2.5 p-3 rounded-xl border text-left transition-all ${
                     recipients === r.value
                       ? "bg-emerald-500/15 border-emerald-500/35"
-                      : "bg-white/3 border-white/7 hover:bg-white/6"
+                      : "bg-[#071E16] border-white/10 hover:bg-[#0F2F24]"
                   }`}
                 >
                   <div
@@ -727,7 +727,7 @@ export default function Automations() {
             <select
               value={quickSendType}
               onChange={(e) => setQuickSendType(e.target.value)}
-              className="w-full sm:w-auto flex-1 px-3 py-2 rounded-xl bg-white/6 text-white text-xs font-semibold border border-white/10 focus:outline-none focus:border-emerald-500"
+              className="w-full sm:w-auto flex-1 px-3 py-2 rounded-xl bg-[#071D16] text-white text-xs font-semibold border border-white/10 focus:outline-none focus:border-emerald-500"
             >
               {Object.entries(TYPE_META).map(([k, v]) => (
                 <option key={k} value={k}>
@@ -770,7 +770,7 @@ export default function Automations() {
         </div>
         <button
           onClick={fetchAll}
-          className="w-9 h-9 rounded-xl bg-white/6 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/9 transition-all shrink-0"
+          className="w-9 h-9 rounded-xl bg-[#071D16] border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-[#0F2F24] transition-all shrink-0"
           title="Refresh"
         >
           <RefreshCw size={15} />
@@ -839,7 +839,7 @@ export default function Automations() {
                   className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ${
                     tab === t.key
                       ? "bg-emerald-500 text-white"
-                      : "bg-white/10 text-white/40"
+                      : "bg-[#0F2F24] text-white/40"
                   }`}
                 >
                   {t.count}
@@ -856,7 +856,7 @@ export default function Automations() {
               const catMeta = CATEGORY_META[cat];
               return (
                 <div key={cat}>
-                  <div className="px-5 py-2.5 bg-white/2 border-b border-white/4 flex items-center gap-2.5">
+                  <div className="px-5 py-2.5 bg-[#071D16] border-b border-white/10 flex items-center gap-2.5">
                     <span
                       className={`text-[9px] font-black uppercase tracking-widest ${catMeta?.color || "text-white/40"}`}
                     >
@@ -893,11 +893,11 @@ export default function Automations() {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-white/[0.04]">
+            <div className="divide-y divide-white/10">
               {queue.map((task) => (
                 <div
                   key={task._id}
-                  className="px-5 py-4 flex items-start gap-3 hover:bg-white/2 transition-colors"
+                  className="px-5 py-4 flex items-start gap-3 hover:bg-[#0A2A1F] transition-colors"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -942,11 +942,11 @@ export default function Automations() {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-white/[0.04]">
+            <div className="divide-y divide-white/10">
               {history.map((task) => (
                 <div
                   key={task._id}
-                  className="px-5 py-4 flex items-start gap-3 hover:bg-white/2 transition-colors"
+                  className="px-5 py-4 flex items-start gap-3 hover:bg-[#0A2A1F] transition-colors"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -1017,7 +1017,7 @@ export default function Automations() {
                     {disabledCount} excluded
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 bg-white/6 border border-white/10 rounded-full px-3 py-1">
+                <div className="flex items-center gap-1.5 bg-[#071D16] border border-white/10 rounded-full px-3 py-1">
                   <Users size={11} className="text-white/40" />
                   <span className="text-[10px] font-black text-white/40">
                     {customers.length} total
@@ -1047,7 +1047,7 @@ export default function Automations() {
                     value={audienceSearch}
                     onChange={(e) => setAudienceSearch(e.target.value)}
                     placeholder="Search by name or email…"
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/50 transition-all"
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-white/10 bg-[#071D16] text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/50 transition-all"
                   />
                 </div>
                 <div className="flex gap-1.5 shrink-0">
@@ -1062,7 +1062,7 @@ export default function Automations() {
                       className={`px-3 py-2 rounded-xl text-xs font-black transition-all ${
                         audienceFilter === f.key
                           ? "bg-emerald-500 text-white"
-                          : "bg-white/6 text-white/40 hover:bg-white/9"
+                          : "bg-[#071D16] text-white/40 hover:bg-[#0F2F24]"
                       }`}
                     >
                       {f.label}
@@ -1153,11 +1153,12 @@ export default function Automations() {
               )}
             </div>
 
-            {/* Select-all row — plain div, not a button, to avoid nested-button bugs */}
+            {/* Select-all row — full-width button for better click feedback */}
             {filteredCustomers.length > 0 && (
-              <div
+              <button
+                type="button"
                 onClick={toggleAll}
-                className="group px-5 py-3 bg-white/2 border-b border-white/6 flex items-center gap-3 cursor-pointer hover:bg-white/4 transition-colors select-none"
+                className="group w-full px-5 py-3 bg-[#071D16] border-b border-white/10 flex items-center gap-3 cursor-pointer hover:bg-[#0F2F24] transition-colors text-left select-none"
               >
                 <Tick
                   checked={allSelected}
@@ -1165,12 +1166,12 @@ export default function Automations() {
                 />
                 <span className="text-[10px] font-bold text-white/45">
                   {allSelected
-                    ? `All ${filteredCustomers.length} deselect`
+                    ? `All ${filteredCustomers.length} selected — click to deselect`
                     : someSelected
                       ? `${selectedInView} of ${filteredCustomers.length} selected — click to select all`
                       : `Select all ${filteredCustomers.length}`}
                 </span>
-              </div>
+              </button>
             )}
 
             {/* Rows */}
@@ -1186,7 +1187,7 @@ export default function Automations() {
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-white/[0.04] max-h-[520px] overflow-y-auto">
+              <div className="divide-y divide-white/10 max-h-130 overflow-y-auto">
                 {filteredCustomers.map((c) => {
                   const cId = getCId(c);
                   const isSel = cId ? selected.has(cId) : false;
@@ -1197,7 +1198,7 @@ export default function Automations() {
                       key={cId || c.email}
                       onClick={() => toggleRow(c)}
                       className={`group px-5 py-3.5 flex items-center gap-3 cursor-pointer transition-colors select-none ${
-                        isSel ? "bg-emerald-500/8" : "hover:bg-white/2"
+                        isSel ? "bg-emerald-500/8" : "hover:bg-[#0A2A1F]"
                       }`}
                     >
                       {/* Checkbox */}
@@ -1208,7 +1209,7 @@ export default function Automations() {
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
                           enabled
                             ? "bg-emerald-500/20 text-emerald-400"
-                            : "bg-white/8 text-white/25"
+                            : "bg-[#071D16] text-white/30"
                         }`}
                       >
                         {c.firstName?.[0]}
@@ -1248,7 +1249,7 @@ export default function Automations() {
                             email: c.email,
                           });
                         }}
-                        className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white/6 border border-white/10 text-white/40 hover:bg-emerald-500/15 hover:text-emerald-400 hover:border-emerald-500/25 text-[10px] font-bold transition-all"
+                        className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#071E16] border border-white/10 text-white/40 hover:bg-emerald-500/15 hover:text-emerald-400 hover:border-emerald-500/25 text-[10px] font-bold transition-all"
                       >
                         <Send size={10} />
                         Send
