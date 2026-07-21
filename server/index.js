@@ -374,43 +374,6 @@ app.post(
           }
         }
       }
-
-            // Schedule booking reminders now that payment is confirmed
-            try {
-              const bookingDate = booking.schedule?.date ? new Date(booking.schedule.date) : null;
-              if (bookingDate && bookingDate > new Date()) {
-                const payload = {
-                  bookingId: booking._id.toString(),
-                  bookingRef: booking.bookingId,
-                  email: booking.customer?.email,
-                  firstName: booking.customer?.firstName,
-                  service: booking.service,
-                  date: bookingDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
-                  amount: booking.payment?.amount,
-                };
-                const ms24h = 24 * 60 * 60 * 1000;
-                const ms3h  = 3  * 60 * 60 * 1000;
-                if (bookingDate - ms24h > Date.now()) {
-                  await scheduleTask("booking_reminder_24h", new Date(bookingDate - ms24h), payload);
-                }
-                if (bookingDate - ms3h > Date.now()) {
-                  await scheduleTask("booking_reminder_3h", new Date(bookingDate - ms3h), payload);
-                }
-              }
-            } catch (schedErr) {
-              console.error("⚠️ Failed to schedule Stripe booking reminders:", schedErr.message);
-            }
-
-            console.log(
-              `✅ Payment authorized for booking ${bookingId}, awaiting completion to capture`,
-            );
-          } else {
-            console.warn(
-              "⚠️ Booking not found for checkout session:",
-              bookingId,
-            );
-          }
-        }
       } else if (event.type === "payment_intent.succeeded") {
         const pi = event.data.object;
         const bookingId = pi.metadata && pi.metadata.bookingId;
