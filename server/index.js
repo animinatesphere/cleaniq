@@ -30,9 +30,10 @@ app.use(
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   }),
 );
-app.options("*", cors());
 // Enforce canonical host (www) in production to avoid www vs non-www split
 app.use((req, res, next) => {
   try {
