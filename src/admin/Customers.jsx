@@ -6,15 +6,14 @@ import {
   CreditCard, Globe, AlertTriangle, UserPlus, Eye, EyeOff,
 } from "lucide-react";
 
-/* ── Tiny shadcn-style primitives (Tailwind only, no extra deps) ─────────── */
 const Badge = ({ children, variant = "default" }) => {
   const cls = {
-    default:     "bg-zinc-100 text-zinc-700 border-zinc-200",
-    success:     "bg-emerald-50 text-emerald-700 border-emerald-200",
-    warning:     "bg-amber-50  text-amber-700  border-amber-200",
-    destructive: "bg-red-50    text-red-700    border-red-200",
-    blue:        "bg-blue-50   text-blue-700   border-blue-200",
-  }[variant] || "bg-zinc-100 text-zinc-700 border-zinc-200";
+    default:     "bg-white/5 text-white/40 border-white/10",
+    success:     "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+    warning:     "bg-amber-500/15  text-amber-400  border-amber-500/25",
+    destructive: "bg-rose-500/15    text-rose-400    border-rose-500/25",
+    blue:        "bg-blue-500/15   text-blue-400   border-blue-500/25",
+  }[variant] || "bg-white/5 text-white/40 border-white/10";
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border ${cls}`}>
       {children}
@@ -24,13 +23,13 @@ const Badge = ({ children, variant = "default" }) => {
 
 const Btn = ({ children, variant = "default", size = "md", className = "", ...props }) => {
   const base = "inline-flex items-center gap-1.5 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed";
-  const sizes = { sm: "px-3 py-1.5 text-xs rounded-md", md: "px-4 py-2 text-sm rounded-lg", lg: "px-5 py-2.5 text-sm rounded-lg" };
+  const sizes = { sm: "px-3 py-1.5 text-xs rounded-xl", md: "px-4 py-2 text-sm rounded-xl", lg: "px-5 py-2.5 text-sm rounded-xl" };
   const variants = {
-    default:     "bg-zinc-900 text-white hover:bg-zinc-700",
-    outline:     "border border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50",
-    ghost:       "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
-    destructive: "bg-red-600 text-white hover:bg-red-700",
-    success:     "bg-emerald-600 text-white hover:bg-emerald-700",
+    default:     "bg-emerald-500 text-white hover:bg-emerald-400",
+    outline:     "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10",
+    ghost:       "text-white/60 hover:bg-white/10 hover:text-white",
+    destructive: "bg-rose-500/15 border border-rose-500/25 text-rose-400 hover:bg-rose-500/25",
+    success:     "bg-emerald-500 text-white hover:bg-emerald-400",
   };
   return (
     <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...props}>
@@ -41,9 +40,9 @@ const Btn = ({ children, variant = "default", size = "md", className = "", ...pr
 
 const Input = ({ label, ...props }) => (
   <div className="space-y-1.5">
-    {label && <label className="text-xs font-medium text-zinc-600">{label}</label>}
+    {label && <label className="text-xs font-medium text-white/60">{label}</label>}
     <input
-      className="w-full h-9 px-3 text-sm border border-zinc-200 rounded-lg bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 transition"
+      className="w-full h-9 px-3 text-sm bg-[#071D16] border border-white/10 text-white placeholder:text-white/20 rounded-xl focus:outline-none focus:border-emerald-500/50 transition"
       {...props}
     />
   </div>
@@ -64,7 +63,6 @@ const timeSince = (d) => {
   return fmtDate(d);
 };
 
-/* ─────────────────────────────────────────────────────────────────────────── */
 const Customers = () => {
   const [customers,       setCustomers]       = useState([]);
   const [loading,         setLoading]         = useState(true);
@@ -107,7 +105,6 @@ const Customers = () => {
 
   useEffect(() => { fetchCustomers(); }, [fetchCustomers]);
 
-  // Fetch booking history when a customer is selected
   useEffect(() => {
     if (!selected) { setCustomerBookings([]); return; }
     const go = async () => {
@@ -238,26 +235,24 @@ const Customers = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-[#061A13]">
 
-      {/* ── Toast ──────────────────────────────────────────────────────── */}
       {toast && (
         <div className={`fixed top-4 right-4 z-[9999] flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg text-sm font-medium border
-          ${toast.type === "success" ? "bg-white border-emerald-200 text-emerald-800" : "bg-white border-red-200 text-red-800"}`}>
-          {toast.type === "success" ? <CheckCircle2 size={16} className="text-emerald-600"/> : <XCircle size={16} className="text-red-600"/>}
+          ${toast.type === "success" ? "bg-[#0B2D22] border-emerald-500/25 text-emerald-400" : "bg-[#0B2D22] border-rose-500/25 text-rose-400"}`}>
+          {toast.type === "success" ? <CheckCircle2 size={16} className="text-emerald-400"/> : <XCircle size={16} className="text-rose-400"/>}
           {toast.msg}
         </div>
       )}
 
-      {/* ── Delete confirm dialog ──────────────────────────────────────── */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4 bg-black/40">
-          <div className="bg-white rounded-xl border border-zinc-200 shadow-xl p-6 w-full max-w-sm">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
-              <AlertTriangle size={22} className="text-red-600"/>
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#0B2D22] rounded-2xl border border-white/10 shadow-2xl p-6 w-full max-w-sm">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-rose-500/15 mx-auto mb-4">
+              <AlertTriangle size={22} className="text-rose-400"/>
             </div>
-            <h3 className="text-base font-semibold text-zinc-900 text-center mb-1">Delete customer?</h3>
-            <p className="text-sm text-zinc-500 text-center mb-6">This action cannot be undone. All their data will be permanently removed.</p>
+            <h3 className="text-base font-semibold text-white text-center mb-1">Delete customer?</h3>
+            <p className="text-sm text-white/70 text-center mb-6">This action cannot be undone. All their data will be permanently removed.</p>
             <div className="flex gap-3">
               <Btn variant="outline" className="flex-1 justify-center" onClick={() => setShowDeleteConfirm(null)}>Cancel</Btn>
               <Btn variant="destructive" className="flex-1 justify-center" onClick={() => handleDelete(showDeleteConfirm)}>Delete</Btn>
@@ -266,23 +261,22 @@ const Customers = () => {
         </div>
       )}
 
-      {/* ── Create Account Modal ───────────────────────────────────────── */}
       {showCreate && (
-        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4 bg-black/40">
-          <div className="bg-white rounded-xl border border-zinc-200 shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#0B2D22] rounded-2xl border border-white/10 shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
                   <UserPlus size={15} className="text-white"/>
                 </div>
-                <h3 className="text-base font-semibold text-zinc-900">Create Customer Account</h3>
+                <h3 className="text-base font-semibold text-white">Create Customer Account</h3>
               </div>
-              <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-md text-zinc-400 hover:bg-zinc-100">
+              <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-md text-white/40 hover:bg-white/10">
                 <X size={16}/>
               </button>
             </div>
             <div className="px-6 py-5 space-y-4">
-              <p className="text-sm text-zinc-500">The customer will receive an email with their login credentials.</p>
+              <p className="text-sm text-white/70">The customer will receive an email with their login credentials.</p>
               <div className="grid grid-cols-2 gap-3">
                 <Input label="First Name *" placeholder="Jane" value={createData.firstName} onChange={e => setCreateData({...createData, firstName:e.target.value})}/>
                 <Input label="Last Name *"  placeholder="Smith" value={createData.lastName}  onChange={e => setCreateData({...createData, lastName:e.target.value})}/>
@@ -290,23 +284,23 @@ const Customers = () => {
               <Input label="Email Address *" type="email" placeholder="jane@example.com" value={createData.email} onChange={e => setCreateData({...createData, email:e.target.value})}/>
               <Input label="Phone (optional)" type="tel" placeholder="+44 7700 000000" value={createData.phone} onChange={e => setCreateData({...createData, phone:e.target.value})}/>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-zinc-600">Password *</label>
+                <label className="text-xs font-medium text-white/60">Password *</label>
                 <div className="relative">
                   <input
                     type={showCreatePw ? "text" : "password"}
                     placeholder="Set a temporary password"
                     value={createData.password}
                     onChange={e => setCreateData({...createData, password:e.target.value})}
-                    className="w-full h-9 px-3 pr-10 text-sm border border-zinc-200 rounded-lg bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 transition"
+                    className="w-full h-9 px-3 pr-10 text-sm bg-[#071D16] border border-white/10 text-white placeholder:text-white/20 rounded-xl focus:outline-none focus:border-emerald-500/50 transition"
                   />
                   <button type="button" onClick={() => setShowCreatePw(p => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70">
                     {showCreatePw ? <EyeOff size={14}/> : <Eye size={14}/>}
                   </button>
                 </div>
               </div>
             </div>
-            <div className="px-6 py-4 border-t border-zinc-200 flex gap-3 justify-end">
+            <div className="px-6 py-4 border-t border-white/10 flex gap-3 justify-end">
               <Btn variant="outline" onClick={() => setShowCreate(false)}>Cancel</Btn>
               <Btn onClick={handleCreate} disabled={creating}>
                 {creating ? <RefreshCw size={12} className="animate-spin"/> : <Mail size={12}/>}
@@ -319,15 +313,13 @@ const Customers = () => {
 
       <div className={`flex h-screen overflow-hidden transition-all`}>
 
-        {/* ── Main list panel ──────────────────────────────────────────── */}
         <div className={`flex flex-col overflow-hidden transition-all ${selected ? "w-0 md:w-1/2 lg:w-[55%]" : "w-full"}`}>
 
-          {/* Header */}
-          <div className="bg-white border-b border-zinc-200 px-6 py-5 flex-shrink-0">
+          <div className="bg-[#0B2D22] border-b border-white/10 px-6 py-5 flex-shrink-0">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h1 className="text-xl font-semibold text-zinc-900">Customers</h1>
-                <p className="text-sm text-zinc-500 mt-0.5">{customers.length.toLocaleString()} total accounts</p>
+                <h1 className="text-xl font-semibold text-white">Customers</h1>
+                <p className="text-sm text-white/40 mt-0.5">{customers.length.toLocaleString()} total accounts</p>
               </div>
               <div className="flex items-center gap-2">
                 <Btn variant="outline" size="sm" onClick={() => fetchCustomers(true)} disabled={refreshing}>
@@ -343,37 +335,35 @@ const Customers = () => {
               </div>
             </div>
 
-            {/* Stats strip */}
             <div className="grid grid-cols-4 gap-3 mb-5">
               {[
-                { label:"Total",      value: stats.total,                   color:"text-zinc-900" },
-                { label:"Active",     value: stats.active,                  color:"text-emerald-700" },
-                { label:"New today",  value: stats.newToday,                color:"text-blue-700" },
-                { label:"Revenue",    value: `£${stats.totalSpent.toLocaleString()}`, color:"text-zinc-900" },
+                { label:"Total",      value: stats.total,                   color:"text-white" },
+                { label:"Active",     value: stats.active,                  color:"text-emerald-400" },
+                { label:"New today",  value: stats.newToday,                color:"text-blue-400" },
+                { label:"Revenue",    value: `£${stats.totalSpent.toLocaleString()}`, color:"text-white" },
               ].map(s => (
-                <div key={s.label} className="bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-3">
-                  <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide mb-1">{s.label}</p>
+                <div key={s.label} className="bg-[#071D16] border border-white/10 rounded-xl px-3 py-3">
+                  <p className="text-[10px] font-medium text-white/40 uppercase tracking-wide mb-1">{s.label}</p>
                   <p className={`text-lg font-bold tabular-nums ${s.color}`}>{s.value}</p>
                 </div>
               ))}
             </div>
 
-            {/* Search + filter */}
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"/>
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"/>
                 <input
                   type="text"
                   placeholder="Search by name, email or phone..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full h-9 pl-9 pr-4 text-sm border border-zinc-200 rounded-lg bg-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 transition"
+                  className="w-full h-9 pl-9 pr-4 text-sm bg-[#071D16] border border-white/10 text-white placeholder:text-white/20 rounded-xl focus:outline-none focus:border-emerald-500/50 transition"
                 />
               </div>
               <select
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value)}
-                className="h-9 px-3 text-sm border border-zinc-200 rounded-lg bg-white text-zinc-800 focus:outline-none cursor-pointer"
+                className="h-9 px-3 text-sm bg-[#071D16] border border-white/10 text-white rounded-xl focus:outline-none cursor-pointer"
               >
                 <option value="all">All</option>
                 <option value="active">Active</option>
@@ -382,20 +372,19 @@ const Customers = () => {
             </div>
           </div>
 
-          {/* Table */}
           <div className="flex-1 overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center h-64">
-                <RefreshCw size={20} className="animate-spin text-zinc-400"/>
+                <RefreshCw size={20} className="animate-spin text-white/40"/>
               </div>
             ) : filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-64 text-zinc-400">
+              <div className="flex flex-col items-center justify-center h-64 text-white/40">
                 <User size={32} strokeWidth={1.5} className="mb-3"/>
                 <p className="text-sm font-medium">No customers found</p>
               </div>
             ) : (
               <table className="w-full text-left text-sm border-collapse">
-                <thead className="sticky top-0 bg-zinc-50 border-b border-zinc-200 z-10">
+                <thead className="sticky top-0 bg-[#071D16] border-b border-white/10 z-10">
                   <tr>
                     <th className="px-4 py-3 w-10">
                       <input type="checkbox"
@@ -404,23 +393,23 @@ const Customers = () => {
                           ? setSelectedIds(new Set())
                           : setSelectedIds(new Set(filtered.map(c => c.email)))
                         }
-                        className="rounded border-zinc-300 accent-zinc-900"
+                        className="rounded border-white/20 accent-emerald-500"
                       />
                     </th>
-                    <th className="px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wide">Customer</th>
-                    <th className="px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wide hidden md:table-cell">Contact</th>
-                    <th className="px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wide hidden lg:table-cell">Last Login</th>
-                    <th className="px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wide">Bookings</th>
-                    <th className="px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wide text-right">Spent</th>
+                    <th className="px-4 py-3 font-bold text-white/40 text-[10px] uppercase tracking-widest">Customer</th>
+                    <th className="px-4 py-3 font-bold text-white/40 text-[10px] uppercase tracking-widest hidden md:table-cell">Contact</th>
+                    <th className="px-4 py-3 font-bold text-white/40 text-[10px] uppercase tracking-widest hidden lg:table-cell">Last Login</th>
+                    <th className="px-4 py-3 font-bold text-white/40 text-[10px] uppercase tracking-widest">Bookings</th>
+                    <th className="px-4 py-3 font-bold text-white/40 text-[10px] uppercase tracking-widest text-right">Spent</th>
                     <th className="px-4 py-3 w-10"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100 bg-white">
+                <tbody className="divide-y divide-white/[0.06]">
                   {filtered.map(c => (
                     <tr
                       key={c.email}
                       onClick={() => openCustomer(c)}
-                      className={`cursor-pointer hover:bg-zinc-50 transition-colors ${selected?.email === c.email ? "bg-zinc-50" : ""}`}
+                      className={`cursor-pointer hover:bg-[#0A2A1F] transition-colors ${selected?.email === c.email ? "bg-emerald-500/[0.08]" : ""}`}
                     >
                       <td className="px-4 py-3.5" onClick={e => e.stopPropagation()}>
                         <input type="checkbox"
@@ -430,44 +419,44 @@ const Customers = () => {
                             s.has(c.email) ? s.delete(c.email) : s.add(c.email);
                             setSelectedIds(s);
                           }}
-                          className="rounded border-zinc-300 accent-zinc-900"
+                          className="rounded border-white/20 accent-emerald-500"
                         />
                       </td>
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
                             {(c.firstName?.[0] || "?").toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-medium text-zinc-900">{c.firstName} {c.lastName}</p>
-                            <p className="text-xs text-zinc-500 mt-0.5">{c.email}</p>
+                            <p className="font-medium text-white">{c.firstName} {c.lastName}</p>
+                            <p className="text-xs text-white/40 mt-0.5">{c.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3.5 hidden md:table-cell">
-                        <p className="text-zinc-700">{c.phone || "—"}</p>
+                        <p className="text-white/70">{c.phone || "—"}</p>
                         {c.region && <Badge variant="blue">{c.region}</Badge>}
                       </td>
                       <td className="px-4 py-3.5 hidden lg:table-cell">
                         {c.lastLoginAt ? (
                           <div>
-                            <p className="text-zinc-700 text-xs">{timeSince(c.lastLoginAt)}</p>
-                            <p className="text-zinc-400 text-[11px]">{fmtDate(c.lastLoginAt)}</p>
+                            <p className="text-white/70 text-xs">{timeSince(c.lastLoginAt)}</p>
+                            <p className="text-white/30 text-[11px]">{fmtDate(c.lastLoginAt)}</p>
                           </div>
                         ) : (
                           <Badge variant="warning">Never logged in</Badge>
                         )}
                       </td>
                       <td className="px-4 py-3.5">
-                        <span className="font-medium text-zinc-900">{c.totalBookings || 0}</span>
+                        <span className="font-medium text-white">{c.totalBookings || 0}</span>
                       </td>
-                      <td className="px-4 py-3.5 text-right font-semibold text-zinc-900 tabular-nums">
+                      <td className="px-4 py-3.5 text-right font-semibold text-white tabular-nums">
                         £{(c.totalSpent || 0).toLocaleString()}
                       </td>
                       <td className="px-4 py-3.5" onClick={e => e.stopPropagation()}>
                         <button
                           onClick={() => setShowDeleteConfirm(c.email)}
-                          className="p-1.5 rounded-md text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                          className="p-1.5 rounded-md text-white/25 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
                         >
                           <Trash2 size={14}/>
                         </button>
@@ -480,19 +469,17 @@ const Customers = () => {
           </div>
         </div>
 
-        {/* ── Detail panel ─────────────────────────────────────────────── */}
         {selected && (
-          <div className="w-full md:w-1/2 lg:w-[45%] flex flex-col border-l border-zinc-200 bg-white overflow-hidden">
+          <div className="w-full md:w-1/2 lg:w-[45%] flex flex-col border-l border-white/10 bg-[#0B2D22] overflow-hidden">
 
-            {/* Panel header */}
-            <div className="px-6 py-4 border-b border-zinc-200 flex items-center justify-between flex-shrink-0">
+            <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-zinc-900 text-white flex items-center justify-center text-sm font-bold">
+                <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold">
                   {(selected.firstName?.[0] || "?").toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-semibold text-zinc-900">{selected.firstName} {selected.lastName}</p>
-                  <p className="text-xs text-zinc-500">Joined {fmtDate(selected.createdAt)}</p>
+                  <p className="font-semibold text-white">{selected.firstName} {selected.lastName}</p>
+                  <p className="text-xs text-white/40">Joined {fmtDate(selected.createdAt)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -511,15 +498,14 @@ const Customers = () => {
                 )}
                 <button
                   onClick={() => { setSelected(null); setIsEditing(false); }}
-                  className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all"
+                  className="p-1.5 rounded-md text-white/40 hover:text-white/70 hover:bg-white/10 transition-all"
                 >
                   <X size={16}/>
                 </button>
               </div>
             </div>
 
-            {/* Tabs */}
-            <div className="flex border-b border-zinc-200 px-6 flex-shrink-0">
+            <div className="flex border-b border-white/10 px-6 flex-shrink-0">
               {[
                 { key:"overview", label:"Overview" },
                 { key:"activity", label:"Login Activity" },
@@ -530,8 +516,8 @@ const Customers = () => {
                   onClick={() => setActiveDetailTab(t.key)}
                   className={`py-3 px-1 mr-6 text-sm font-medium border-b-2 transition-all ${
                     activeDetailTab === t.key
-                      ? "border-zinc-900 text-zinc-900"
-                      : "border-transparent text-zinc-500 hover:text-zinc-700"
+                      ? "border-emerald-500 text-white"
+                      : "border-transparent text-white/40 hover:text-white/70"
                   }`}
                 >
                   {t.label}
@@ -539,33 +525,29 @@ const Customers = () => {
               ))}
             </div>
 
-            {/* Panel body */}
             <div className="flex-1 overflow-y-auto px-6 py-5">
 
-              {/* ── OVERVIEW TAB ─────────────────────────────────────── */}
               {activeDetailTab === "overview" && (
                 <div className="space-y-6">
 
-                  {/* Quick stats */}
                   <div className="grid grid-cols-3 gap-3">
                     {[
                       { label:"Bookings",    value: selected.totalBookings || 0 },
                       { label:"Total Spent", value: `£${(selected.totalSpent||0).toLocaleString()}` },
                       { label:"Region",      value: selected.region || "—" },
                     ].map(s => (
-                      <div key={s.label} className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
-                        <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide mb-1">{s.label}</p>
-                        <p className="text-base font-bold text-zinc-900">{s.value}</p>
+                      <div key={s.label} className="bg-[#071D16] border border-white/10 rounded-xl p-3">
+                        <p className="text-[10px] font-medium text-white/40 uppercase tracking-wide mb-1">{s.label}</p>
+                        <p className="text-base font-bold text-white">{s.value}</p>
                       </div>
                     ))}
                   </div>
 
-                  {/* Personal info */}
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Personal Information</h3>
+                      <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Personal Information</h3>
                     </div>
-                    <div className="border border-zinc-200 rounded-lg divide-y divide-zinc-100">
+                    <div className="border border-white/10 rounded-xl divide-y divide-white/[0.06]">
                       {isEditing ? (
                         <div className="p-4 space-y-3">
                           <div className="grid grid-cols-2 gap-3">
@@ -588,9 +570,9 @@ const Customers = () => {
                             { Icon:Calendar, label:"Registered",   value:fmtDate(selected.createdAt) },
                           ].map(({Icon,label,value}) => (
                             <div key={label} className="flex items-center gap-3 px-4 py-3">
-                              <Icon size={14} className="text-zinc-400 flex-shrink-0"/>
-                              <span className="text-xs text-zinc-500 w-24 flex-shrink-0">{label}</span>
-                              <span className="text-sm text-zinc-800 font-medium truncate">{value}</span>
+                              <Icon size={14} className="text-white/40 flex-shrink-0"/>
+                              <span className="text-xs text-white/40 w-24 flex-shrink-0">{label}</span>
+                              <span className="text-sm text-white/70 font-medium truncate">{value}</span>
                             </div>
                           ))}
                         </>
@@ -598,84 +580,80 @@ const Customers = () => {
                     </div>
                   </div>
 
-                  {/* Account status */}
                   <div>
-                    <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Account Status</h3>
-                    <div className="border border-zinc-200 rounded-lg divide-y divide-zinc-100">
+                    <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-3">Account Status</h3>
+                    <div className="border border-white/10 rounded-xl divide-y divide-white/[0.06]">
                       <div className="flex items-center gap-3 px-4 py-3">
-                        <LogIn size={14} className="text-zinc-400"/>
-                        <span className="text-xs text-zinc-500 w-24">Last login</span>
-                        <span className="text-sm font-medium text-zinc-800">{fmtDateTime(selected.lastLoginAt)}</span>
+                        <LogIn size={14} className="text-white/40"/>
+                        <span className="text-xs text-white/40 w-24">Last login</span>
+                        <span className="text-sm font-medium text-white/70">{fmtDateTime(selected.lastLoginAt)}</span>
                         {selected.lastLoginAt && (
                           <Badge variant="success">{timeSince(selected.lastLoginAt)}</Badge>
                         )}
                       </div>
                       <div className="flex items-center gap-3 px-4 py-3">
-                        <LogOut size={14} className="text-zinc-400"/>
-                        <span className="text-xs text-zinc-500 w-24">Last logout</span>
-                        <span className="text-sm font-medium text-zinc-800">{fmtDateTime(selected.lastLogoutAt)}</span>
+                        <LogOut size={14} className="text-white/40"/>
+                        <span className="text-xs text-white/40 w-24">Last logout</span>
+                        <span className="text-sm font-medium text-white/70">{fmtDateTime(selected.lastLogoutAt)}</span>
                       </div>
                       <div className="flex items-center gap-3 px-4 py-3">
-                        <Activity size={14} className="text-zinc-400"/>
-                        <span className="text-xs text-zinc-500 w-24">Total logins</span>
-                        <span className="text-sm font-medium text-zinc-800">{selected.loginCount || 0}</span>
+                        <Activity size={14} className="text-white/40"/>
+                        <span className="text-xs text-white/40 w-24">Total logins</span>
+                        <span className="text-sm font-medium text-white/70">{selected.loginCount || 0}</span>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* ── ACTIVITY TAB ─────────────────────────────────────── */}
               {activeDetailTab === "activity" && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2 p-3 bg-zinc-50 border border-zinc-200 rounded-lg">
-                    <Activity size={14} className="text-zinc-500"/>
-                    <p className="text-xs text-zinc-600 font-medium">
+                  <div className="flex items-center gap-2 p-3 bg-[#071D16] border border-white/10 rounded-xl">
+                    <Activity size={14} className="text-white/40"/>
+                    <p className="text-xs text-white/60 font-medium">
                       Login history shows the last 50 sessions for this customer.
                     </p>
                   </div>
 
-                  {/* Summary row */}
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
-                      <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide mb-1">Last Login</p>
-                      <p className="text-sm font-semibold text-zinc-900">{timeSince(selected.lastLoginAt) || "Never"}</p>
-                      <p className="text-[11px] text-zinc-400">{fmtDateTime(selected.lastLoginAt)}</p>
+                    <div className="bg-[#071D16] border border-white/10 rounded-xl p-3">
+                      <p className="text-[10px] font-medium text-white/40 uppercase tracking-wide mb-1">Last Login</p>
+                      <p className="text-sm font-semibold text-white">{timeSince(selected.lastLoginAt) || "Never"}</p>
+                      <p className="text-[11px] text-white/30">{fmtDateTime(selected.lastLoginAt)}</p>
                     </div>
-                    <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
-                      <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide mb-1">Last Logout</p>
-                      <p className="text-sm font-semibold text-zinc-900">{timeSince(selected.lastLogoutAt) || "Never"}</p>
-                      <p className="text-[11px] text-zinc-400">{fmtDateTime(selected.lastLogoutAt)}</p>
+                    <div className="bg-[#071D16] border border-white/10 rounded-xl p-3">
+                      <p className="text-[10px] font-medium text-white/40 uppercase tracking-wide mb-1">Last Logout</p>
+                      <p className="text-sm font-semibold text-white">{timeSince(selected.lastLogoutAt) || "Never"}</p>
+                      <p className="text-[11px] text-white/30">{fmtDateTime(selected.lastLogoutAt)}</p>
                     </div>
                   </div>
 
-                  {/* Login history timeline */}
                   {selected.loginHistory?.length > 0 ? (
                     <div className="space-y-1">
-                      <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Session History</h3>
+                      <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-3">Session History</h3>
                       {selected.loginHistory.slice().reverse().map((session, i) => (
-                        <div key={i} className="flex items-start gap-3 p-3 rounded-lg border border-zinc-100 bg-white hover:border-zinc-200 transition-all">
+                        <div key={i} className="flex items-start gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#071D16] hover:border-white/10 transition-all">
                           <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            session.action === "logout" ? "bg-zinc-100" : "bg-emerald-50"
+                            session.action === "logout" ? "bg-white/10" : "bg-emerald-500/15"
                           }`}>
                             {session.action === "logout"
-                              ? <LogOut size={13} className="text-zinc-500"/>
-                              : <LogIn  size={13} className="text-emerald-600"/>
+                              ? <LogOut size={13} className="text-white/40"/>
+                              : <LogIn  size={13} className="text-emerald-400"/>
                             }
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <p className="text-sm font-medium text-zinc-800 capitalize">{session.action || "Login"}</p>
-                              <p className="text-[11px] text-zinc-400">{timeSince(session.timestamp)}</p>
+                              <p className="text-sm font-medium text-white capitalize">{session.action || "Login"}</p>
+                              <p className="text-[11px] text-white/30">{timeSince(session.timestamp)}</p>
                             </div>
-                            <p className="text-xs text-zinc-500 mt-0.5">{fmtDateTime(session.timestamp)}</p>
-                            {session.device && <p className="text-[11px] text-zinc-400 mt-0.5">{session.device}</p>}
+                            <p className="text-xs text-white/40 mt-0.5">{fmtDateTime(session.timestamp)}</p>
+                            {session.device && <p className="text-[11px] text-white/30 mt-0.5">{session.device}</p>}
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-12 text-zinc-400">
+                    <div className="flex flex-col items-center justify-center py-12 text-white/40">
                       <Clock size={28} strokeWidth={1.5} className="mb-3"/>
                       <p className="text-sm font-medium">No login history available</p>
                       <p className="text-xs mt-1">Sessions are recorded when the customer logs in or out</p>
@@ -684,40 +662,39 @@ const Customers = () => {
                 </div>
               )}
 
-              {/* ── BOOKINGS TAB ─────────────────────────────────────── */}
               {activeDetailTab === "bookings" && (
                 <div>
                   {loadingBookings ? (
                     <div className="flex items-center justify-center h-40">
-                      <RefreshCw size={18} className="animate-spin text-zinc-400"/>
+                      <RefreshCw size={18} className="animate-spin text-white/40"/>
                     </div>
                   ) : customerBookings.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-zinc-400">
+                    <div className="flex flex-col items-center justify-center py-12 text-white/40">
                       <ShoppingBag size={28} strokeWidth={1.5} className="mb-3"/>
                       <p className="text-sm font-medium">No bookings yet</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <p className="text-xs text-zinc-500 mb-3">{customerBookings.length} booking{customerBookings.length !== 1 ? "s" : ""} found</p>
+                      <p className="text-xs text-white/40 mb-3">{customerBookings.length} booking{customerBookings.length !== 1 ? "s" : ""} found</p>
                       {customerBookings.map(b => {
                         const statusColor = {
                           completed: "success", "in progress": "blue",
                           pending: "warning", cancelled: "destructive",
                         }[b.status?.toLowerCase()] || "default";
                         return (
-                          <div key={b._id} className="border border-zinc-200 rounded-lg p-4 bg-white hover:border-zinc-300 transition-all">
+                          <div key={b._id} className="border border-white/10 rounded-xl p-4 bg-[#071D16] hover:border-white/20 transition-all">
                             <div className="flex items-start justify-between gap-3 mb-2">
-                              <p className="font-medium text-zinc-900 text-sm">{b.service || "Cleaning Service"}</p>
+                              <p className="font-medium text-white text-sm">{b.service || "Cleaning Service"}</p>
                               <Badge variant={statusColor}>{b.status}</Badge>
                             </div>
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-zinc-500">
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-white/40">
                               <div className="flex items-center gap-1.5">
                                 <Calendar size={11}/>
                                 <span>{fmtDate(b.schedule?.date || b.preferredDate)}</span>
                               </div>
                               <div className="flex items-center gap-1.5">
                                 <CreditCard size={11}/>
-                                <span className="font-semibold text-zinc-800">£{b.payment?.amount?.toFixed(2) || "0.00"}</span>
+                                <span className="font-semibold text-white/70">£{b.payment?.amount?.toFixed(2) || "0.00"}</span>
                               </div>
                               {b.details?.address && (
                                 <div className="flex items-center gap-1.5 col-span-2">
@@ -735,10 +712,9 @@ const Customers = () => {
               )}
             </div>
 
-            {/* Panel footer — danger zone */}
             {!isEditing && (
-              <div className="px-6 py-4 border-t border-zinc-200 flex-shrink-0">
-                <Btn variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+              <div className="px-6 py-4 border-t border-white/10 flex-shrink-0">
+                <Btn variant="outline" size="sm" className="text-rose-400 border-rose-500/25 hover:bg-rose-500/15 hover:border-rose-500/40"
                   onClick={() => setShowDeleteConfirm(selected.email)}>
                   <Trash2 size={12}/> Delete account
                 </Btn>

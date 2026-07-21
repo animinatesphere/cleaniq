@@ -494,7 +494,7 @@ const AdminLayout = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen bg-[#061A13] print:bg-white">
+    <div className="flex min-h-screen bg-[#061A13] text-white print:bg-white">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
@@ -574,7 +574,7 @@ const AdminLayout = () => {
                     onClick={() => toggleGroup(group.label)}
                     className={`flex items-center justify-between w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.18em] transition-all duration-200 group ${
                       hasActiveItem
-                        ? "text-emerald-400 bg-white/[0.07]"
+                        ? "text-primary bg-white/[0.07]"
                         : "text-white/30 hover:text-white/55 hover:bg-white/5"
                     }`}
                   >
@@ -582,7 +582,7 @@ const AdminLayout = () => {
                       <span
                         className={
                           hasActiveItem
-                            ? "text-emerald-400"
+                            ? "text-primary"
                             : "text-white/30 group-hover:text-white/50"
                         }
                       >
@@ -594,7 +594,7 @@ const AdminLayout = () => {
                       size={13}
                       className={`transition-transform duration-200 flex-shrink-0 ${
                         isOpen ? "rotate-0" : "-rotate-90"
-                      } ${hasActiveItem ? "text-emerald-400/60" : "text-white/15"}`}
+                      } ${hasActiveItem ? "text-primary/60" : "text-white/15"}`}
                     />
                   </button>
 
@@ -613,12 +613,12 @@ const AdminLayout = () => {
                             onClick={() => setSidebarOpen(false)}
                             className={`flex items-center gap-2.5 pl-2 pr-2.5 py-2 rounded-lg transition-all duration-150 border-l-2 ${
                               isActive
-                                ? "bg-white/10 text-white border-emerald-400"
+                                ? "bg-white/10 text-white border-primary"
                                 : "text-white/45 hover:bg-white/[0.07] hover:text-white/80 border-transparent"
                             }`}
                           >
                             <span
-                              className={`flex-shrink-0 ${isActive ? "text-emerald-400" : "text-white/35"}`}
+                              className={`flex-shrink-0 ${isActive ? "text-primary" : "text-white/35"}`}
                             >
                               {item.icon}
                             </span>
@@ -799,7 +799,9 @@ const AdminLayout = () => {
         </header>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-400 mx-auto w-full">
-          <Outlet />
+          <div className="min-h-full rounded-[32px] bg-[#05201A] border border-white/[0.06] shadow-[0_24px_80px_rgba(0,0,0,0.25)] p-6">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

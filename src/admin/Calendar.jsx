@@ -34,7 +34,7 @@ const Calendar = () => {
     if (existingBlock) {
       try {
         await fetch(`${import.meta.env.VITE_API_URL}/bookings/${existingBlock._id}`, { method: "DELETE" });
-        setStatusMessage({ type: "success", text: `✅ Unblocked ${time} on ${dStr}` });
+        setStatusMessage({ type: "success", text: `Unblocked ${time} on ${dStr}` });
         fetchBookings();
       } catch (e) {
         console.error(e);
@@ -55,7 +55,7 @@ const Calendar = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        setStatusMessage({ type: "success", text: `⛔ Blocked ${time} on ${dStr}` });
+        setStatusMessage({ type: "success", text: `Blocked ${time} on ${dStr}` });
         fetchBookings();
       } catch (e) {
         console.error(e);
@@ -118,16 +118,16 @@ const Calendar = () => {
   return (
     <div className="space-y-6 pb-20 relative">
       {statusMessage.text && (
-        <div className="fixed top-6 right-6 z-100 px-6 py-4 rounded-2xl shadow-2xl bg-slate-900 text-white font-semibold text-sm animate-in slide-in-from-right">
+        <div className="fixed top-6 right-6 z-100 px-6 py-4 rounded-2xl shadow-2xl bg-[#0B2D22] border border-white/10 text-white font-semibold text-sm animate-in slide-in-from-right">
           {statusMessage.text}
         </div>
       )}
 
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-          <CalendarDays size={22} className="text-primary" /> Calendar
+        <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+          <CalendarDays size={22} className="text-emerald-400" /> Calendar
         </h1>
-        <p className="text-sm text-slate-400 mt-1">
+        <p className="text-sm text-white/40 mt-1">
           View bookings by date, manage availability, and schedule recurring
           jobs
         </p>

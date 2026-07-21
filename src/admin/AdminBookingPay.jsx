@@ -30,7 +30,6 @@ const AdminBookingPay = () => {
 
   const handlePaymentSuccess = async (paymentIntent) => {
     try {
-      // Update booking to completed and store transactionId
       const payload = {
         status: "Completed",
         payment: {
@@ -57,11 +56,11 @@ const AdminBookingPay = () => {
 
   if (loading)
     return (
-      <div className="p-8 text-sm font-medium text-slate-400">Loading…</div>
+      <div className="p-8 text-sm font-medium text-white/40">Loading…</div>
     );
   if (!booking)
     return (
-      <div className="p-8 text-sm font-medium text-slate-400">
+      <div className="p-8 text-sm font-medium text-white/40">
         Booking not found.
       </div>
     );
@@ -69,22 +68,22 @@ const AdminBookingPay = () => {
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-700">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+        <h2 className="text-2xl font-bold text-white tracking-tight">
           Collect Payment
         </h2>
-        <p className="text-sm text-slate-400 font-medium mt-1">
+        <p className="text-sm text-white/40 font-medium mt-1">
           Booking ref {booking.bookingId}
         </p>
       </div>
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-6">
-        <p className="text-sm font-semibold text-slate-700">
+      <div className="bg-[#0B2D22] border border-white/7 rounded-2xl p-6">
+        <p className="text-sm font-semibold text-white">
           {booking.customer.firstName} {booking.customer.lastName}
         </p>
-        <p className="text-sm text-slate-400 font-medium">
+        <p className="text-sm text-white/40 font-medium">
           {booking.customer.email}
         </p>
       </div>
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-6">
+      <div className="bg-[#0B2D22] border border-white/7 rounded-2xl p-6">
         <Elements stripe={stripePromise}>
           <StripePayment
             amount={booking.payment?.amount || 0}

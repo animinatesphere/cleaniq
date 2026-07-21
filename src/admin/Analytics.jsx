@@ -44,7 +44,7 @@ const deviceIcon = (category) => {
 };
 
 const KpiCard = ({ icon: Icon, label, value, accent }) => (
-  <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5">
+  <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-sm p-5">
     <div className="flex items-center justify-between mb-3">
       <div
         className={`w-9 h-9 rounded-xl flex items-center justify-center ${accent}`}
@@ -52,16 +52,16 @@ const KpiCard = ({ icon: Icon, label, value, accent }) => (
         <Icon size={16} />
       </div>
     </div>
-    <p className="text-2xl font-bold text-slate-900 tabular-nums">{value}</p>
-    <p className="text-[11px] font-semibold text-slate-400 mt-1">{label}</p>
+    <p className="text-2xl font-bold text-white tabular-nums">{value}</p>
+    <p className="text-[11px] font-semibold text-slate-300 mt-1">{label}</p>
   </div>
 );
 
 const BreakdownList = ({ title, items, renderLabel, valueKey, total }) => (
-  <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5 sm:p-6">
-    <h3 className="text-sm font-bold text-slate-800 mb-4">{title}</h3>
+  <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-sm p-5 sm:p-6">
+    <h3 className="text-sm font-bold text-white mb-4">{title}</h3>
     {items.length === 0 ? (
-      <p className="text-xs text-slate-300 py-6 text-center">No data yet</p>
+      <p className="text-xs text-slate-400 py-6 text-center">No data yet</p>
     ) : (
       <div className="space-y-3">
         {items.map((item, i) => {
@@ -69,14 +69,14 @@ const BreakdownList = ({ title, items, renderLabel, valueKey, total }) => (
           return (
             <div key={i}>
               <div className="flex items-center justify-between gap-3 mb-1.5">
-                <span className="text-xs font-semibold text-slate-600 truncate flex-1 min-w-0">
+                <span className="text-xs font-semibold text-slate-300 truncate flex-1 min-w-0">
                   {renderLabel(item)}
                 </span>
-                <span className="text-xs font-bold text-slate-900 tabular-nums shrink-0">
+                <span className="text-xs font-bold text-white tabular-nums shrink-0">
                   {item[valueKey].toLocaleString("en-GB")}
                 </span>
               </div>
-              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-[#05201A] rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary rounded-full"
                   style={{ width: `${pct}%` }}
@@ -145,8 +145,7 @@ const Analytics = () => {
   const trendLinePoints = trendPoints.map((p) => `${p.x},${p.y}`).join(" ");
   const trendLabelStep = Math.max(1, Math.ceil(trendPoints.length / 8));
 
-  const totalPageViews =
-    data?.topPages?.reduce((s, p) => s + p.views, 0) || 0;
+  const totalPageViews = data?.topPages?.reduce((s, p) => s + p.views, 0) || 0;
   const totalSourceSessions =
     data?.topSources?.reduce((s, src) => s + src.sessions, 0) || 0;
   const totalDeviceSessions =
@@ -164,7 +163,7 @@ const Analytics = () => {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Globe size={22} className="text-primary" /> Website Analytics
           </h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -173,12 +172,12 @@ const Analytics = () => {
         </div>
         <div className="flex items-center gap-2.5">
           {liveUsers !== null && (
-            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 shadow-sm">
+            <div className="flex items-center gap-2 bg-[#05201A] border border-white/[0.08] rounded-xl px-3.5 py-2.5 shadow-sm">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/30 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
-              <span className="text-[11px] font-bold text-slate-700 tabular-nums">
+              <span className="text-[11px] font-bold text-white tabular-nums">
                 {liveUsers}
               </span>
               <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
@@ -186,7 +185,7 @@ const Analytics = () => {
               </span>
             </div>
           )}
-          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+          <div className="flex items-center gap-1 bg-[#05201A] border border-white/[0.08] rounded-xl p-1 shadow-sm">
             {PERIODS.map((p) => (
               <button
                 key={p.value}
@@ -194,7 +193,7 @@ const Analytics = () => {
                 className={`px-3.5 py-2 rounded-lg text-[11px] font-bold transition-all ${
                   days === p.value
                     ? "bg-primary text-white shadow-sm"
-                    : "text-slate-400 hover:text-slate-600"
+                    : "text-slate-400 hover:text-slate-100"
                 }`}
               >
                 {p.label}
@@ -211,15 +210,18 @@ const Analytics = () => {
       </div>
 
       {error ? (
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-16 text-center">
+        <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-sm p-16 text-center">
           <Globe size={32} className="text-slate-200 mx-auto mb-4" />
-          <p className="text-sm font-bold text-slate-500">
+          <p className="text-sm font-bold text-white">
             Google Analytics isn't connected yet
           </p>
           <p className="text-xs text-slate-400 mt-2 max-w-md mx-auto">
-            Add <code className="bg-slate-100 px-1.5 py-0.5 rounded">GA4_PROPERTY_ID</code>{" "}
+            Add{" "}
+            <code className="bg-slate-800 text-slate-100 px-1.5 py-0.5 rounded">
+              GA4_PROPERTY_ID
+            </code>{" "}
             and{" "}
-            <code className="bg-slate-100 px-1.5 py-0.5 rounded">
+            <code className="bg-slate-800 text-slate-100 px-1.5 py-0.5 rounded">
               GA4_SERVICE_ACCOUNT_JSON
             </code>{" "}
             to the server's environment variables, then restart the server.
@@ -277,10 +279,8 @@ const Analytics = () => {
           </div>
 
           {/* Trend chart */}
-          <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5 sm:p-6">
-            <h3 className="text-sm font-bold text-slate-800 mb-1">
-              Visitor Trend
-            </h3>
+          <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-sm p-5 sm:p-6">
+            <h3 className="text-sm font-bold text-white mb-1">Visitor Trend</h3>
             <p className="text-[11px] text-slate-400 mb-5">
               Daily active users over the last {days} days
             </p>
@@ -311,8 +311,16 @@ const Analytics = () => {
                         x2="0"
                         y2="1"
                       >
-                        <stop offset="0%" stopColor="#005B41" stopOpacity="0.16" />
-                        <stop offset="100%" stopColor="#005B41" stopOpacity="0" />
+                        <stop
+                          offset="0%"
+                          stopColor="#036847"
+                          stopOpacity="0.16"
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor="#036847"
+                          stopOpacity="0"
+                        />
                       </linearGradient>
                     </defs>
                     <polygon
@@ -322,7 +330,7 @@ const Analytics = () => {
                     <polyline
                       points={trendLinePoints}
                       fill="none"
-                      stroke="#005B41"
+                      stroke="#036847"
                       strokeWidth="1.5"
                       vectorEffect="non-scaling-stroke"
                       strokeLinecap="round"
@@ -439,11 +447,11 @@ const Analytics = () => {
 
           {/* New vs Returning */}
           {data.newVsReturning.length > 0 && (
-            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5 sm:p-6">
-              <h3 className="text-sm font-bold text-slate-800 mb-4">
+            <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-sm p-5 sm:p-6">
+              <h3 className="text-sm font-bold text-white mb-4">
                 New vs Returning Visitors
               </h3>
-              <div className="flex h-3 rounded-full overflow-hidden bg-slate-100 mb-3">
+              <div className="flex h-3 rounded-full overflow-hidden bg-[#05201A] mb-3">
                 {data.newVsReturning.map((r, i) => (
                   <div
                     key={i}
@@ -460,10 +468,10 @@ const Analytics = () => {
                     <span
                       className={`w-2.5 h-2.5 rounded-full ${i === 0 ? "bg-primary" : "bg-secondary"}`}
                     />
-                    <span className="text-xs font-semibold text-slate-600 capitalize">
+                    <span className="text-xs font-semibold text-slate-300 capitalize">
                       {r.type === "new" ? "New" : "Returning"}
                     </span>
-                    <span className="text-xs font-bold text-slate-900 tabular-nums">
+                    <span className="text-xs font-bold text-white tabular-nums">
                       {((r.sessions / totalNewVsReturning) * 100).toFixed(0)}%
                     </span>
                   </div>

@@ -7,16 +7,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-/**
- * Professional Calendar Component for Admin Booking System
- * Features:
- * - Month/year navigation
- * - Visual status indicators (available, booked, fully booked)
- * - Responsive design
- * - Keyboard navigation
- * - Touch-friendly
- */
-
 export const ProfessionalCalendar = ({
   bookings = [],
   onDateSelect,
@@ -27,10 +17,8 @@ export const ProfessionalCalendar = ({
 }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
-  // Get days in month
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
 
-  // Get first day of month (0-6, Sunday-Saturday)
   const startDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
 
   const handlePrevMonth = () => {
@@ -45,7 +33,6 @@ export const ProfessionalCalendar = ({
     );
   };
 
-  // Build calendar days array
   const calendarDays = useMemo(() => {
     const days = [];
     const totalDays = daysInMonth(
@@ -57,12 +44,10 @@ export const ProfessionalCalendar = ({
       currentMonth.getMonth(),
     );
 
-    // Add empty slots for days before month starts
     for (let i = 0; i < startDay; i++) {
       days.push(null);
     }
 
-    // Add days of month
     for (let i = 1; i <= totalDays; i++) {
       days.push(
         new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i),
@@ -72,7 +57,6 @@ export const ProfessionalCalendar = ({
     return days;
   }, [currentMonth]);
 
-  // Calculate booking status for a date
   const getDateStatus = (date) => {
     if (!date) return null;
 
@@ -85,7 +69,6 @@ export const ProfessionalCalendar = ({
       return bStr === dateStr;
     });
 
-    // Count bookings by time slot
     const timeSlots = new Set(
       bookingsForDate.map((b) => b.schedule?.timeSlot).filter((s) => s),
     );
@@ -99,7 +82,6 @@ export const ProfessionalCalendar = ({
     return { status: "available", count: 0 };
   };
 
-  // Check if date is in past
   const isPastDate = (date) => {
     if (allowPastDates) return false;
     const today = new Date();
@@ -108,7 +90,6 @@ export const ProfessionalCalendar = ({
     return date < today;
   };
 
-  // Check if date is selected
   const isSelected = (date) => {
     if (!date || !selectedDate) return false;
     return (
@@ -118,7 +99,6 @@ export const ProfessionalCalendar = ({
     );
   };
 
-  // Handle date click
   const handleDateClick = (date) => {
     if (!date || isPastDate(date)) return;
     const status = getDateStatus(date);
@@ -126,7 +106,6 @@ export const ProfessionalCalendar = ({
     onDateSelect(date);
   };
 
-  // Time slots for selection
   const timeSlots = [
     { id: "Morning", label: "Morning (8am-12pm)", icon: "🌅" },
     { id: "Afternoon", label: "Afternoon (12pm-4pm)", icon: "☀️" },
@@ -135,30 +114,28 @@ export const ProfessionalCalendar = ({
 
   return (
     <div className="w-full space-y-6">
-      {/* Calendar Header */}
-      <div className="bg-white rounded-[24px] p-6 border border-slate-200 shadow-sm">
-        {/* Month Navigation */}
+      <div className="bg-[#0B2D22] border border-white/7 rounded-2xl p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h3 className="text-2xl font-black text-primary-dark tracking-tighter">
+            <h3 className="text-2xl font-black text-white tracking-tighter">
               {currentMonth.toLocaleString("default", { month: "long" })}{" "}
-              <span className="text-primary">{currentMonth.getFullYear()}</span>
+              <span className="text-emerald-400">{currentMonth.getFullYear()}</span>
             </h3>
-            <p className="text-[11px] text-slate-500 uppercase tracking-widest mt-2 font-bold">
+            <p className="text-[11px] text-white/40 uppercase tracking-widest mt-2 font-bold">
               Select a date for the booking
             </p>
           </div>
           <div className="flex gap-2">
             <button
               onClick={handlePrevMonth}
-              className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
+              className="p-3 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:bg-emerald-500/15 hover:text-emerald-400 transition-all"
               aria-label="Previous month"
             >
               <ChevronLeft size={20} />
             </button>
             <button
               onClick={handleNextMonth}
-              className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all border border-slate-200"
+              className="p-3 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:bg-emerald-500/15 hover:text-emerald-400 transition-all"
               aria-label="Next month"
             >
               <ChevronRight size={20} />
@@ -166,30 +143,28 @@ export const ProfessionalCalendar = ({
           </div>
         </div>
 
-        {/* Calendar Legend */}
-        <div className="grid grid-cols-3 gap-3 mb-6 p-4 bg-slate-50 rounded-lg border border-slate-100">
+        <div className="grid grid-cols-3 gap-3 mb-6 p-4 bg-[#071D16] rounded-lg border border-white/[0.06]">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-            <span className="text-[10px] font-bold text-slate-600">
+            <span className="text-[10px] font-bold text-white/60">
               Available
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-            <span className="text-[10px] font-bold text-slate-600">
+            <span className="text-[10px] font-bold text-white/60">
               Some Booked
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-rose-500"></div>
-            <span className="text-[10px] font-bold text-slate-600">
+            <span className="text-[10px] font-bold text-white/60">
               Fully Booked
             </span>
           </div>
         </div>
 
-        {/* Weekday Headers */}
-        <div className="grid grid-cols-7 gap-1 mb-2 text-[10px] text-slate-300 font-black uppercase">
+        <div className="grid grid-cols-7 gap-1 mb-2 text-[10px] text-white/25 font-black uppercase">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
             <div key={day} className="text-center py-2">
               {day}
@@ -197,8 +172,7 @@ export const ProfessionalCalendar = ({
           ))}
         </div>
 
-        {/* Calendar Days Grid */}
-        <div className="grid grid-cols-7 gap-1 bg-slate-50 p-3 rounded-lg">
+        <div className="grid grid-cols-7 gap-1 bg-[#071D16] p-3 rounded-lg">
           {calendarDays.map((date, index) => {
             const status = date ? getDateStatus(date) : null;
             const isPast = date ? isPastDate(date) : false;
@@ -222,14 +196,14 @@ export const ProfessionalCalendar = ({
                       relative overflow-hidden group
                       ${
                         selected
-                          ? "bg-primary text-white shadow-lg ring-2 ring-primary/50"
+                          ? "bg-emerald-500 text-white shadow-lg ring-2 ring-emerald-500/50"
                           : isPast
-                            ? "bg-slate-100 text-slate-300 cursor-not-allowed opacity-50"
+                            ? "bg-[#071D16] text-white/20 cursor-not-allowed opacity-50"
                             : status?.status === "fully-booked"
-                              ? "bg-rose-50 text-rose-300 cursor-not-allowed border border-rose-200"
+                              ? "bg-rose-500/10 text-rose-400 cursor-not-allowed border border-rose-500/20"
                               : status?.status === "partially-booked"
-                                ? "bg-amber-50 text-amber-600 border border-amber-200 hover:shadow-md"
-                                : "bg-white text-slate-600 border border-slate-200 hover:border-primary hover:shadow-md hover:text-primary"
+                                ? "bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:shadow-md"
+                                : "bg-[#071D16] text-white/60 border border-white/[0.06] hover:border-emerald-500/30 hover:bg-[#0A2A1F] hover:text-white"
                       }
                     `}
                   >
@@ -252,14 +226,13 @@ export const ProfessionalCalendar = ({
         </div>
       </div>
 
-      {/* Time Slot Selection (if date selected and time slots enabled) */}
       {selectedDate && showTimeSlots && (
-        <div className="bg-white rounded-[24px] p-6 border border-slate-200 shadow-sm animate-in fade-in slide-in-from-bottom-2">
+        <div className="bg-[#0B2D22] border border-white/7 rounded-2xl p-6 animate-in fade-in slide-in-from-bottom-2">
           <div className="mb-4">
-            <h4 className="text-lg font-black text-primary-dark tracking-tighter">
+            <h4 className="text-lg font-black text-white tracking-tighter">
               Select Time Slot
             </h4>
-            <p className="text-[11px] text-slate-500 uppercase tracking-widest mt-1 font-bold">
+            <p className="text-[11px] text-white/40 uppercase tracking-widest mt-1 font-bold">
               {selectedDate.toLocaleDateString("en-GB", {
                 weekday: "long",
                 year: "numeric",
@@ -271,7 +244,6 @@ export const ProfessionalCalendar = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {timeSlots.map((slot) => {
-              // Check if this time slot is available on selected date
               const slotBookings = bookings.filter((b) => {
                 if (!b.schedule?.date || !b.schedule?.timeSlot) return false;
                 const bDate = new Date(b.schedule.date);
@@ -292,8 +264,8 @@ export const ProfessionalCalendar = ({
                     border-2
                     ${
                       isBooked
-                        ? "bg-rose-50 border-rose-200 text-rose-300 cursor-not-allowed opacity-50"
-                        : "bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 text-blue-600 hover:shadow-lg hover:scale-105"
+                        ? "bg-rose-500/10 border-rose-500/20 text-rose-400 cursor-not-allowed opacity-50"
+                        : "bg-blue-500/15 border-blue-500/25 text-blue-400 hover:shadow-lg hover:scale-105"
                     }
                   `}
                 >
@@ -311,11 +283,10 @@ export const ProfessionalCalendar = ({
         </div>
       )}
 
-      {/* Quick Date Selection Buttons */}
       <div className="flex gap-2 flex-wrap">
         <button
           onClick={() => handleDateClick(new Date())}
-          className="px-4 py-2 rounded-xl bg-slate-50 text-slate-600 text-xs font-black hover:bg-primary hover:text-white transition-all border border-slate-200"
+          className="px-4 py-2 rounded-xl bg-[#071D16] border border-white/10 text-white/60 text-xs font-black hover:bg-emerald-500 hover:text-white hover:border-transparent transition-all"
         >
           Today
         </button>
@@ -325,7 +296,7 @@ export const ProfessionalCalendar = ({
             tomorrow.setDate(tomorrow.getDate() + 1);
             handleDateClick(tomorrow);
           }}
-          className="px-4 py-2 rounded-xl bg-slate-50 text-slate-600 text-xs font-black hover:bg-primary hover:text-white transition-all border border-slate-200"
+          className="px-4 py-2 rounded-xl bg-[#071D16] border border-white/10 text-white/60 text-xs font-black hover:bg-emerald-500 hover:text-white hover:border-transparent transition-all"
         >
           Tomorrow
         </button>
@@ -335,20 +306,19 @@ export const ProfessionalCalendar = ({
             nextWeek.setDate(nextWeek.getDate() + 7);
             setCurrentMonth(nextWeek);
           }}
-          className="px-4 py-2 rounded-xl bg-slate-50 text-slate-600 text-xs font-black hover:bg-primary hover:text-white transition-all border border-slate-200"
+          className="px-4 py-2 rounded-xl bg-[#071D16] border border-white/10 text-white/60 text-xs font-black hover:bg-emerald-500 hover:text-white hover:border-transparent transition-all"
         >
           Next Week
         </button>
       </div>
 
-      {/* Info Message */}
-      <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex gap-3">
-        <AlertCircle size={20} className="text-blue-600 shrink-0 mt-0.5" />
+      <div className="bg-blue-500/15 border border-blue-500/25 rounded-2xl p-4 flex gap-3">
+        <AlertCircle size={20} className="text-blue-400 shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-bold text-blue-900">
-            📅 Professional Booking Calendar
+          <p className="text-sm font-bold text-blue-300">
+            Professional Booking Calendar
           </p>
-          <p className="text-xs text-blue-700 mt-1">
+          <p className="text-xs text-blue-400/70 mt-1">
             Select an available date and time slot. Red dates are fully booked
             and cannot be selected. Grayed out dates are in the past.
           </p>

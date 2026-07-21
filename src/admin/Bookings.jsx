@@ -535,21 +535,23 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
             >
               <div
                 style={{
-                  background: "white",
+                  background: "#0B2D22",
+                  border: "1px solid rgba(255,255,255,0.1)",
                   borderRadius: "32px",
                   width: "100%",
                   maxWidth: "560px",
                   maxHeight: "80vh",
                   overflow: "auto",
-                  boxShadow: "0 25px 50px rgba(0,0,0,0.25)",
+                  boxShadow: "0 25px 50px rgba(0,0,0,0.6)",
                 }}
               >
                 {/* Modal Header */}
                 <div
                   style={{
-                    background: "linear-gradient(135deg, #0F172A, #1e3a5f)",
+                    background: "linear-gradient(135deg, #061A13, #0B2D22)",
                     padding: "28px 32px",
                     borderRadius: "32px 32px 0 0",
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
                   }}
                 >
                   <div
@@ -565,7 +567,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                           margin: "0 0 4px",
                           fontSize: "11px",
                           fontWeight: 800,
-                          color: "#94a3b8",
+                          color: "rgba(255,255,255,0.4)",
                           textTransform: "uppercase",
                           letterSpacing: "1px",
                         }}
@@ -635,7 +637,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                           margin: "0 0 4px",
                           fontSize: "14px",
                           fontWeight: 700,
-                          color: "#94a3b8",
+                          color: "rgba(255,255,255,0.4)",
                         }}
                       >
                         No bookings on this date
@@ -644,7 +646,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                         style={{
                           margin: 0,
                           fontSize: "12px",
-                          color: "#cbd5e1",
+                          color: "rgba(255,255,255,0.25)",
                         }}
                       >
                         {isBlocked
@@ -659,7 +661,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                           margin: "0 0 12px",
                           fontSize: "11px",
                           fontWeight: 800,
-                          color: "#64748b",
+                          color: "rgba(255,255,255,0.4)",
                           textTransform: "uppercase",
                           letterSpacing: "1px",
                         }}
@@ -678,10 +680,10 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                           <div
                             key={i}
                             style={{
-                              background: "#f8fafc",
+                              background: "#071D16",
                               borderRadius: "16px",
                               padding: "14px 16px",
-                              border: "1px solid #e2e8f0",
+                              border: "1px solid rgba(255,255,255,0.1)",
                               display: "flex",
                               alignItems: "flex-start",
                               gap: "12px",
@@ -710,7 +712,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                                     margin: 0,
                                     fontSize: "13px",
                                     fontWeight: 800,
-                                    color: "#0F172A",
+                                    color: "white",
                                   }}
                                 >
                                   {b.customer?.firstName} {b.customer?.lastName}
@@ -735,7 +737,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                                 style={{
                                   margin: "2px 0 0",
                                   fontSize: "12px",
-                                  color: "#64748b",
+                                  color: "rgba(255,255,255,0.5)",
                                   fontWeight: 600,
                                 }}
                               >
@@ -745,7 +747,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                                 style={{
                                   margin: "2px 0 0",
                                   fontSize: "11px",
-                                  color: "#94a3b8",
+                                  color: "rgba(255,255,255,0.3)",
                                 }}
                               >
                                 {fmtTimeRange(b) || b.schedule?.timeSlot || ""}{" "}
@@ -764,7 +766,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                       style={{
                         marginTop: "20px",
                         paddingTop: "20px",
-                        borderTop: "1px solid #f1f5f9",
+                        borderTop: "1px solid rgba(255,255,255,0.06)",
                       }}
                     >
                       <p
@@ -772,7 +774,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                           margin: "0 0 12px",
                           fontSize: "11px",
                           fontWeight: 800,
-                          color: "#64748b",
+                          color: "rgba(255,255,255,0.4)",
                           textTransform: "uppercase",
                           letterSpacing: "1px",
                         }}
@@ -800,7 +802,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                               gap: "4px",
                               fontSize: "10px",
                               fontWeight: 700,
-                              color: "#94a3b8",
+                              color: "rgba(255,255,255,0.4)",
                             }}
                           >
                             <span
@@ -818,7 +820,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                         <span
                           style={{
                             fontSize: "10px",
-                            color: "#cbd5e1",
+                            color: "rgba(255,255,255,0.25)",
                             marginLeft: "auto",
                           }}
                         >
@@ -836,20 +838,20 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                           const isAdminBlocked = !!adminBlockedBySlot[slot];
                           const hasRealBooking = !!realBookingsBySlot[slot];
                           const bg = isAdminBlocked
-                            ? "#fee2e2"
+                            ? "rgba(239,68,68,0.15)"
                             : hasRealBooking
-                              ? "#fef3c7"
-                              : "#f0fdf4";
+                              ? "rgba(245,158,11,0.15)"
+                              : "rgba(16,185,129,0.10)";
                           const color = isAdminBlocked
-                            ? "#dc2626"
+                            ? "#f87171"
                             : hasRealBooking
-                              ? "#d97706"
-                              : "#059669";
+                              ? "#fbbf24"
+                              : "#34d399";
                           const border = isAdminBlocked
-                            ? "1px solid #fca5a5"
+                            ? "1px solid rgba(239,68,68,0.3)"
                             : hasRealBooking
-                              ? "1px solid #fcd34d"
-                              : "1px solid #bbf7d0";
+                              ? "1px solid rgba(245,158,11,0.3)"
+                              : "1px solid rgba(16,185,129,0.3)";
                           return (
                             <button
                               key={slot}
@@ -895,7 +897,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                       display: "flex",
                       gap: "10px",
                       paddingTop: "20px",
-                      borderTop: "1px solid #f1f5f9",
+                      borderTop: "1px solid rgba(255,255,255,0.06)",
                     }}
                   >
                     <button
@@ -907,15 +909,17 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                         flex: 1,
                         padding: "14px",
                         borderRadius: "16px",
-                        border: "none",
+                        border: isBlocked
+                          ? "1px solid rgba(16,185,129,0.25)"
+                          : "1px solid rgba(239,68,68,0.25)",
                         cursor: "pointer",
                         fontWeight: 800,
                         fontSize: "13px",
                         transition: "all 0.2s",
                         background: isBlocked
-                          ? "linear-gradient(135deg, #ecfdf5, #d1fae5)"
-                          : "linear-gradient(135deg, #fff1f2, #ffe4e6)",
-                        color: isBlocked ? "#059669" : "#e11d48",
+                          ? "rgba(16,185,129,0.15)"
+                          : "rgba(239,68,68,0.15)",
+                        color: isBlocked ? "#34d399" : "#f87171",
                       }}
                     >
                       {isBlocked ? "🔓 Unlock This Date" : "⛔ Block This Date"}
@@ -925,9 +929,9 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                       style={{
                         padding: "14px 20px",
                         borderRadius: "16px",
-                        border: "1px solid #e2e8f0",
-                        background: "white",
-                        color: "#64748b",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        background: "rgba(255,255,255,0.05)",
+                        color: "rgba(255,255,255,0.5)",
                         fontWeight: 700,
                         fontSize: "13px",
                         cursor: "pointer",
@@ -4418,7 +4422,7 @@ ${extrasRows}
 
             <div className="grid lg:grid-cols-12 gap-6 px-4 sm:px-6 lg:px-10 py-6">
               <div className="lg:col-span-8">
-                <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-6 sm:p-8 rounded-[28px] border border-white/10/50">
+                <div className="bg-[#071D16] p-6 sm:p-8 rounded-[28px] border border-white/10">
                   {/* Step content */}
                   {createStep === 1 && (
                     <div className="space-y-6">
@@ -4433,7 +4437,7 @@ ${extrasRows}
                       </div>
 
                       {/* Billing Type */}
-                      <div className="p-5 bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-white/10 space-y-4">
+                      <div className="p-5 bg-[#071D16] rounded-2xl border-2 border-white/10 space-y-4">
                         <label className="text-[10px] font-bold text-white/60 uppercase tracking-wider block">
                           💷 Billing Type
                         </label>
@@ -4848,7 +4852,7 @@ ${extrasRows}
                           ].map((r) => (
                             <div
                               key={r}
-                              className="p-3 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-2 border-white/10 flex flex-col items-center gap-2 hover:shadow-md transition-all"
+                              className="p-3 bg-[#071D16] rounded-xl border-2 border-white/10 flex flex-col items-center gap-2 hover:shadow-md transition-all"
                             >
                               <div className="font-bold text-sm text-white/85 text-center line-clamp-2">
                                 {r}

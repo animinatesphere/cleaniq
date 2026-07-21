@@ -23,66 +23,61 @@ const fmtTime = (date) =>
 const diffMins = (a, b) => a && b ? Math.round((new Date(b) - new Date(a)) / 60000) : null;
 
 const STATUS_STYLE = {
-  Confirmed:            { pill: "bg-emerald-100 text-emerald-800 border-emerald-200", dot: "bg-emerald-500" },
-  Pending:              { pill: "bg-amber-100 text-amber-800 border-amber-200",       dot: "bg-amber-400"   },
-  Completed:            { pill: "bg-sky-100 text-sky-800 border-sky-200",             dot: "bg-sky-500"     },
-  "Completed - Unpaid": { pill: "bg-purple-100 text-purple-800 border-purple-200",    dot: "bg-purple-500"  },
-  Cancelled:            { pill: "bg-rose-100 text-rose-800 border-rose-200",          dot: "bg-rose-500"    },
-  "In Progress":        { pill: "bg-blue-100 text-blue-800 border-blue-200",          dot: "bg-blue-500",   live: true },
-  Assigned:             { pill: "bg-violet-100 text-violet-800 border-violet-200",    dot: "bg-violet-500"  },
-  Arrived:              { pill: "bg-teal-100 text-teal-800 border-teal-200",          dot: "bg-teal-500"    },
+  Confirmed:            { pill: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25", dot: "bg-emerald-500" },
+  Pending:              { pill: "bg-amber-500/15 text-amber-400 border-amber-500/25",       dot: "bg-amber-400"   },
+  Completed:            { pill: "bg-sky-500/15 text-sky-400 border-sky-500/25",             dot: "bg-sky-500"     },
+  "Completed - Unpaid": { pill: "bg-violet-500/15 text-violet-400 border-violet-500/25",    dot: "bg-violet-500"  },
+  Cancelled:            { pill: "bg-rose-500/15 text-rose-400 border-rose-500/25",          dot: "bg-rose-500"    },
+  "In Progress":        { pill: "bg-blue-500/15 text-blue-400 border-blue-500/25",          dot: "bg-blue-500",   live: true },
+  Assigned:             { pill: "bg-violet-500/15 text-violet-400 border-violet-500/25",    dot: "bg-violet-500"  },
+  Arrived:              { pill: "bg-teal-500/15 text-teal-400 border-teal-500/25",          dot: "bg-teal-500"    },
 };
 
-// ── Section heading ───────────────────────────────────────────────────────────
 const SectionHead = ({ label, icon: Icon, right }) => (
   <div className="flex items-center justify-between mb-5">
     <div className="flex items-center gap-2">
-      {Icon && <Icon size={13} className="text-slate-400" />}
-      <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{label}</span>
+      {Icon && <Icon size={13} className="text-white/30" />}
+      <span className="text-[11px] font-black text-white/40 uppercase tracking-widest">{label}</span>
     </div>
     {right}
   </div>
 );
 
-// ── Timeline ──────────────────────────────────────────────────────────────────
 const Timeline = ({ booking }) => {
   const steps = [
-    { icon: Calendar,     label: "Booking Created",      time: fmt(booking.createdAt),       done: !!booking.createdAt,       dotColor: "bg-slate-400",   iconColor: "text-slate-500"   },
-    { icon: CheckCircle2, label: "Accepted by Worker",   time: fmt(booking.jobAcceptedTime), done: !!booking.jobAcceptedTime, dotColor: "bg-emerald-500", iconColor: "text-emerald-600" },
-    { icon: MapPin,       label: "Worker Arrived",        time: fmt(booking.jobArrivedTime),  done: !!booking.jobArrivedTime,  dotColor: "bg-sky-500",     iconColor: "text-sky-600"     },
-    { icon: Timer,        label: "Job Started",           time: fmt(booking.jobStartTime),    done: !!booking.jobStartTime,    dotColor: "bg-amber-500",   iconColor: "text-amber-600"   },
+    { icon: Calendar,     label: "Booking Created",      time: fmt(booking.createdAt),       done: !!booking.createdAt,       dotColor: "bg-white/30",    iconColor: "text-white/40"    },
+    { icon: CheckCircle2, label: "Accepted by Worker",   time: fmt(booking.jobAcceptedTime), done: !!booking.jobAcceptedTime, dotColor: "bg-emerald-500", iconColor: "text-emerald-400" },
+    { icon: MapPin,       label: "Worker Arrived",        time: fmt(booking.jobArrivedTime),  done: !!booking.jobArrivedTime,  dotColor: "bg-sky-500",     iconColor: "text-sky-400"     },
+    { icon: Timer,        label: "Job Started",           time: fmt(booking.jobStartTime),    done: !!booking.jobStartTime,    dotColor: "bg-amber-500",   iconColor: "text-amber-400"   },
     { icon: Star,         label: "Job Completed",         time: fmt(booking.jobEndTime),      done: !!booking.jobEndTime,      dotColor: "bg-primary",     iconColor: "text-primary"     },
   ];
 
   return (
     <div className="relative">
-      {/* Vertical connector */}
-      <div className="absolute left-[19px] top-10 bottom-6 w-px bg-slate-100" />
+      <div className="absolute left-[19px] top-10 bottom-6 w-px bg-white/10" />
 
       <div className="space-y-0">
         {steps.map(({ icon: Icon, label, time, done, dotColor, iconColor }, i) => {
           const isNext = !done && steps.slice(0, i).every(s => s.done);
           return (
             <div key={label} className={`relative flex items-start gap-4 pb-7 last:pb-0 ${!done && !isNext ? "opacity-35" : ""}`}>
-              {/* Step dot */}
               <div className={`relative z-10 w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 border-2 transition-all ${
-                done ? `${dotColor.replace("bg-", "bg-").replace("500", "100").replace("400", "100")} border-transparent` : isNext ? "bg-white border-slate-200" : "bg-white border-slate-100"
+                done ? `bg-white/5 border-transparent` : isNext ? "bg-[#071D16] border-white/10" : "bg-[#071D16] border-white/7"
               }`}>
-                <Icon size={16} className={done ? iconColor : isNext ? "text-slate-300" : "text-slate-200"} />
-                {done && <div className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full ${dotColor} border-2 border-white`} />}
+                <Icon size={16} className={done ? iconColor : isNext ? "text-white/25" : "text-white/20"} />
+                {done && <div className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full ${dotColor} border-2 border-[#0B2D22]`} />}
               </div>
 
-              {/* Step content */}
               <div className="flex-1 pt-1.5 min-w-0">
-                <p className={`text-xs font-black uppercase tracking-widest leading-none ${done ? "text-slate-700" : isNext ? "text-slate-500" : "text-slate-300"}`}>
+                <p className={`text-xs font-black uppercase tracking-widest leading-none ${done ? "text-white" : isNext ? "text-white/40" : "text-white/25"}`}>
                   {label}
                 </p>
                 {time ? (
-                  <p className={`text-sm font-bold mt-1 ${done ? iconColor : "text-slate-400"}`}>{time}</p>
+                  <p className={`text-sm font-bold mt-1 ${done ? iconColor : "text-white/30"}`}>{time}</p>
                 ) : isNext ? (
-                  <p className="text-xs text-slate-400 font-medium mt-1 animate-pulse">In progress…</p>
+                  <p className="text-xs text-white/30 font-medium mt-1 animate-pulse">In progress…</p>
                 ) : (
-                  <p className="text-xs text-slate-300 font-medium mt-1">Pending</p>
+                  <p className="text-xs text-white/25 font-medium mt-1">Pending</p>
                 )}
               </div>
             </div>
@@ -93,11 +88,10 @@ const Timeline = ({ booking }) => {
   );
 };
 
-// ── Photo card ────────────────────────────────────────────────────────────────
 const PhotoCard = ({ photo, label, badge }) => {
   const url = photo?.url?.startsWith("http") ? photo.url : `${SERVER}/${photo?.url}`;
   return (
-    <a href={url} target="_blank" rel="noreferrer" className="group relative block rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 hover:border-slate-300 hover:shadow-md transition-all">
+    <a href={url} target="_blank" rel="noreferrer" className="group relative block rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/20 hover:shadow-md transition-all">
       <img src={url} alt={label} className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" onError={e => { e.target.style.display = "none"; }} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       <div className="absolute bottom-0 left-0 right-0 p-2 flex items-center justify-between">
@@ -112,7 +106,6 @@ const PhotoCard = ({ photo, label, badge }) => {
   );
 };
 
-// ── Extra time request card ───────────────────────────────────────────────────
 const ExtraTimeRequestCard = ({ booking, onUpdated }) => {
   const req = booking.meta?.extraTimeRequest;
   const [dismissing, setDismissing] = useState(false);
@@ -163,8 +156,7 @@ const ExtraTimeRequestCard = ({ booking, onUpdated }) => {
   const approved = req?.status === "approved";
 
   return (
-    <div className={`rounded-3xl border-2 overflow-hidden mb-4 ${approved ? "border-emerald-200" : "border-amber-300"}`}>
-      {/* Header strip */}
+    <div className={`rounded-3xl border-2 overflow-hidden mb-4 ${approved ? "border-emerald-500/30" : "border-amber-500/30"}`}>
       <div className={`px-6 py-4 flex items-center justify-between ${approved ? "bg-emerald-600" : "bg-amber-500"}`}>
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
@@ -185,16 +177,14 @@ const ExtraTimeRequestCard = ({ booking, onUpdated }) => {
         </span>
       </div>
 
-      {/* Body */}
-      <div className={`p-6 ${approved ? "bg-emerald-50" : "bg-amber-50"}`}>
+      <div className={`p-6 ${approved ? "bg-emerald-500/10" : "bg-amber-500/10"}`}>
         <div className="grid sm:grid-cols-2 gap-6 mb-5">
-          {/* Reasons */}
           {req?.reasons?.length > 0 && (
             <div>
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2.5">Reasons Given</p>
+              <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2.5">Reasons Given</p>
               <ul className="space-y-2">
                 {req.reasons.map((r, i) => (
-                  <li key={i} className="flex items-start gap-2 text-xs font-semibold text-slate-700">
+                  <li key={i} className="flex items-start gap-2 text-xs font-semibold text-white/70">
                     <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${approved ? "bg-emerald-500" : "bg-amber-500"}`} />
                     {r}
                   </li>
@@ -203,49 +193,48 @@ const ExtraTimeRequestCard = ({ booking, onUpdated }) => {
             </div>
           )}
 
-          {/* Time summary */}
           <div>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2.5">Time Breakdown</p>
-            <div className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3 border border-slate-100">
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2.5">Time Breakdown</p>
+            <div className="flex items-center gap-3 bg-[#071D16] rounded-2xl px-4 py-3 border border-white/10">
               <div className="text-center flex-1">
-                <p className="text-2xl font-black text-slate-600 tabular-nums">{bookedHrs}h</p>
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-wide mt-0.5">Booked</p>
+                <p className="text-2xl font-black text-white/60 tabular-nums">{bookedHrs}h</p>
+                <p className="text-[9px] font-black text-white/40 uppercase tracking-wide mt-0.5">Booked</p>
               </div>
-              <div className="text-slate-300 text-lg font-bold">+</div>
+              <div className="text-white/25 text-lg font-bold">+</div>
               <div className="text-center flex-1">
-                <p className="text-2xl font-black text-amber-500 tabular-nums">{req?.extraHours}h</p>
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-wide mt-0.5">Extra</p>
+                <p className="text-2xl font-black text-amber-400 tabular-nums">{req?.extraHours}h</p>
+                <p className="text-[9px] font-black text-white/40 uppercase tracking-wide mt-0.5">Extra</p>
               </div>
-              <div className="text-slate-300 text-lg font-bold">=</div>
+              <div className="text-white/25 text-lg font-bold">=</div>
               <div className="text-center flex-1">
-                <p className="text-2xl font-black text-emerald-600 tabular-nums">{newHrs}h</p>
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-wide mt-0.5">Total</p>
+                <p className="text-2xl font-black text-emerald-400 tabular-nums">{newHrs}h</p>
+                <p className="text-[9px] font-black text-white/40 uppercase tracking-wide mt-0.5">Total</p>
               </div>
             </div>
             {newTotal != null && (
-              <p className="text-xs text-slate-500 font-semibold mt-2 text-center">
-                New total: <span className="font-black text-slate-800">£{newTotal.toFixed(2)}</span>
-                <span className="text-slate-400 ml-1">(+£{(newTotal - currentAmt).toFixed(2)})</span>
+              <p className="text-xs text-white/40 font-semibold mt-2 text-center">
+                New total: <span className="font-black text-white">£{newTotal.toFixed(2)}</span>
+                <span className="text-white/30 ml-1">(+£{(newTotal - currentAmt).toFixed(2)})</span>
               </p>
             )}
           </div>
         </div>
 
         {req?.notes && (
-          <div className="mb-5 px-4 py-3 bg-white rounded-xl border border-slate-100">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Worker Notes</p>
-            <p className="text-xs font-medium text-slate-700 leading-relaxed">{req.notes}</p>
+          <div className="mb-5 px-4 py-3 bg-[#071D16] rounded-xl border border-white/10">
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Worker Notes</p>
+            <p className="text-xs font-medium text-white/70 leading-relaxed">{req.notes}</p>
           </div>
         )}
 
         {evidencePhotos.length > 0 && (
           <div className="mb-5">
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Evidence ({evidencePhotos.length})</p>
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Evidence ({evidencePhotos.length})</p>
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
               {evidencePhotos.map((p, i) => {
                 const url = p.url?.startsWith("http") ? p.url : `${SERVER}/${p.url}`;
                 return (
-                  <a key={i} href={url} target="_blank" rel="noreferrer" className="group relative aspect-square rounded-xl overflow-hidden border border-amber-200">
+                  <a key={i} href={url} target="_blank" rel="noreferrer" className="group relative aspect-square rounded-xl overflow-hidden border border-amber-500/25">
                     <img src={url} alt={`Evidence ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
                   </a>
                 );
@@ -255,7 +244,7 @@ const ExtraTimeRequestCard = ({ booking, onUpdated }) => {
         )}
 
         {!approved && (
-          <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-amber-200">
+          <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-amber-500/25">
             <button
               onClick={handleExtend}
               disabled={extending}
@@ -267,13 +256,13 @@ const ExtraTimeRequestCard = ({ booking, onUpdated }) => {
             <button
               onClick={handleDismiss}
               disabled={dismissing}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition-colors disabled:opacity-60"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/60 text-xs font-bold hover:bg-white/10 transition-colors disabled:opacity-60"
             >
               {dismissing ? <RefreshCw size={13} className="animate-spin" /> : <X size={13} />}
               Dismiss
             </button>
-            <p className="w-full text-[10px] text-slate-400 font-medium">
-              "Approve" updates the booking duration and amount, then use the <span className="font-bold text-slate-600">Domestic Hub</span> below to send the formal report to the customer.
+            <p className="w-full text-[10px] text-white/30 font-medium">
+              "Approve" updates the booking duration and amount, then use the <span className="font-bold text-white/60">Domestic Hub</span> below to send the formal report to the customer.
             </p>
           </div>
         )}
@@ -282,7 +271,6 @@ const ExtraTimeRequestCard = ({ booking, onUpdated }) => {
   );
 };
 
-// ── Extend job panel ──────────────────────────────────────────────────────────
 const ExtendJobPanel = ({ booking, onUpdated }) => {
   const [extraHrs, setExtraHrs] = useState(1);
   const [saving,   setSaving]   = useState(false);
@@ -317,29 +305,28 @@ const ExtendJobPanel = ({ booking, onUpdated }) => {
   if (!bookedHrs) return null;
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+    <div className="bg-[#0B2D22] rounded-3xl border border-white/7 p-6">
       <SectionHead label="Extend Job" icon={PlusCircle} />
-      <p className="text-xs text-slate-500 font-medium mb-5">Update duration if the job needs more time than originally booked.</p>
+      <p className="text-xs text-white/40 font-medium mb-5">Update duration if the job needs more time than originally booked.</p>
 
-      {/* Before / after */}
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="rounded-2xl bg-slate-50 p-4 text-center border border-slate-100">
-          <p className="text-2xl font-black text-slate-600 tabular-nums">{bookedHrs}h</p>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Booked</p>
+        <div className="rounded-2xl bg-[#071D16] p-4 text-center border border-white/7">
+          <p className="text-2xl font-black text-white/60 tabular-nums">{bookedHrs}h</p>
+          <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">Booked</p>
         </div>
-        <div className="rounded-2xl bg-emerald-50 p-4 text-center border border-emerald-100">
-          <p className="text-2xl font-black text-emerald-700 tabular-nums">{newHrs}h</p>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">New Total</p>
+        <div className="rounded-2xl bg-emerald-500/10 p-4 text-center border border-emerald-500/15">
+          <p className="text-2xl font-black text-emerald-400 tabular-nums">{newHrs}h</p>
+          <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">New Total</p>
         </div>
       </div>
 
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Extra Hours</p>
+      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Extra Hours</p>
       <div className="flex items-center gap-1.5 mb-5">
         {[0.5, 1, 1.5, 2, 3].map(h => (
           <button
             key={h}
             onClick={() => setExtraHrs(h)}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all ${extraHrs === h ? "bg-primary text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+            className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all ${extraHrs === h ? "bg-primary text-white shadow-sm" : "bg-white/5 text-white/60 hover:bg-white/10"}`}
           >
             +{h}h
           </button>
@@ -347,17 +334,17 @@ const ExtendJobPanel = ({ booking, onUpdated }) => {
       </div>
 
       {newAmt != null && (
-        <div className="flex justify-between items-center mb-5 px-4 py-3 bg-emerald-50 rounded-xl border border-emerald-100">
-          <span className="text-xs font-bold text-slate-500">New Total Cost</span>
-          <span className="font-black text-emerald-700">
+        <div className="flex justify-between items-center mb-5 px-4 py-3 bg-emerald-500/10 rounded-xl border border-emerald-500/15">
+          <span className="text-xs font-bold text-white/40">New Total Cost</span>
+          <span className="font-black text-emerald-400">
             £{newAmt.toFixed(2)}
-            <span className="text-xs text-slate-400 font-medium ml-1.5">(+£{(newAmt - currentAmt).toFixed(2)})</span>
+            <span className="text-xs text-white/30 font-medium ml-1.5">(+£{(newAmt - currentAmt).toFixed(2)})</span>
           </span>
         </div>
       )}
 
-      {success && <p className="text-xs font-bold text-emerald-600 mb-3 flex items-center gap-1.5"><CheckCircle2 size={13} /> Booking updated successfully</p>}
-      {error   && <p className="text-xs font-bold text-rose-600 mb-3">{error}</p>}
+      {success && <p className="text-xs font-bold text-emerald-400 mb-3 flex items-center gap-1.5"><CheckCircle2 size={13} /> Booking updated successfully</p>}
+      {error   && <p className="text-xs font-bold text-rose-400 mb-3">{error}</p>}
 
       <button
         onClick={handleSave}
@@ -371,7 +358,6 @@ const ExtendJobPanel = ({ booking, onUpdated }) => {
   );
 };
 
-// ── Main page ─────────────────────────────────────────────────────────────────
 const JobDetail = () => {
   const { id }    = useParams();
   const navigate  = useNavigate();
@@ -420,7 +406,7 @@ const JobDetail = () => {
   if (!booking) return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-4">
       <AlertTriangle size={40} className="text-rose-400" />
-      <p className="text-xl font-black text-slate-700">Booking not found</p>
+      <p className="text-xl font-black text-white/70">Booking not found</p>
       <button onClick={() => navigate(-1)} className="btn-primary py-3 px-6">Go Back</button>
     </div>
   );
@@ -438,7 +424,7 @@ const JobDetail = () => {
     ? booking.details.extras.filter(e => e?.qty > 0)
     : Object.entries(booking.extras || {}).filter(([, v]) => v > 0).map(([name, qty]) => ({ name, qty }));
 
-  const statusStyle = STATUS_STYLE[booking.status] || { pill: "bg-slate-100 text-slate-600 border-slate-200", dot: "bg-slate-400" };
+  const statusStyle = STATUS_STYLE[booking.status] || { pill: "bg-white/5 text-white/40 border-white/10", dot: "bg-white/30" };
   const isLive      = ["Assigned", "Arrived", "In Progress"].includes(booking.status);
 
   const currency = "£";
@@ -464,18 +450,15 @@ const JobDetail = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
 
-      {/* ── Back nav ─────────────────────────────────────────────── */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors mb-6 group"
+        className="flex items-center gap-2 text-sm font-bold text-white/40 hover:text-white transition-colors mb-6 group"
       >
         <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
         Back to Jobs
       </button>
 
-      {/* ── Hero header ──────────────────────────────────────────── */}
-      <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 mb-6 text-white relative overflow-hidden">
-        {/* Subtle grid texture */}
+      <div className="bg-[#061A13] rounded-3xl p-6 sm:p-8 mb-6 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
 
         {isLive && (
@@ -483,12 +466,11 @@ const JobDetail = () => {
         )}
 
         <div className="relative">
-          {/* Top row */}
           <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
             <div>
-              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Booking ID</p>
+              <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Booking ID</p>
               <h1 className="text-3xl sm:text-4xl font-black tracking-tight tabular-nums">{booking.bookingId}</h1>
-              <p className="text-slate-300 font-semibold mt-1 text-sm">{booking.service}</p>
+              <p className="text-white/70 font-semibold mt-1 text-sm">{booking.service}</p>
             </div>
             <div className="flex flex-col items-end gap-2 shrink-0">
               <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wide border ${statusStyle.pill}`}>
@@ -496,17 +478,16 @@ const JobDetail = () => {
                 {booking.status}
               </span>
               {booking.assignedWorkerName && (
-                <span className="text-[11px] font-bold text-slate-400">
-                  <span className="text-slate-500">Worker:</span> <span className="text-slate-200">{booking.assignedWorkerName}</span>
+                <span className="text-[11px] font-bold text-white/30">
+                  <span className="text-white/40">Worker:</span> <span className="text-white/80">{booking.assignedWorkerName}</span>
                 </span>
               )}
             </div>
           </div>
 
-          {/* Stats strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-5 border-t border-slate-800">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-5 border-t border-white/10">
             <div>
-              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Date</p>
+              <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Date</p>
               <p className="text-white font-black text-sm">
                 {booking.schedule?.date
                   ? new Date(booking.schedule.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
@@ -514,19 +495,19 @@ const JobDetail = () => {
               </p>
             </div>
             <div>
-              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Time</p>
+              <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Time</p>
               <p className="text-white font-black text-sm">{booking.schedule?.timeSlot || "—"}</p>
             </div>
             <div>
-              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Duration</p>
+              <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Duration</p>
               <p className="text-white font-black text-sm tabular-nums">
                 {booking.details?.duration ? `${booking.details.duration}h booked` : "—"}
                 {totalActualMins > 0 && <span className="text-sky-400 ml-1">({actualHrs}h actual)</span>}
               </p>
             </div>
             <div>
-              <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Amount</p>
-              <p className={`font-black text-sm tabular-nums ${booking.payment?.amount ? "text-emerald-400" : "text-slate-500"}`}>
+              <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-1">Amount</p>
+              <p className={`font-black text-sm tabular-nums ${booking.payment?.amount ? "text-emerald-400" : "text-white/40"}`}>
                 {booking.payment?.amount ? `${currency}${booking.payment.amount}` : "—"}
               </p>
             </div>
@@ -534,39 +515,35 @@ const JobDetail = () => {
         </div>
       </div>
 
-      {/* ── Extra time request banner ─────────────────────────────── */}
       {booking.meta?.extraTimeRequest && (
         <ExtraTimeRequestCard booking={booking} onUpdated={() => window.location.reload()} />
       )}
 
       <div className="grid lg:grid-cols-3 gap-6">
 
-        {/* ── LEFT COLUMN ──────────────────────────────────────────── */}
         <div className="lg:col-span-2 space-y-5">
 
-          {/* Timeline */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+          <div className="bg-[#0B2D22] rounded-3xl border border-white/7 p-6">
             <SectionHead label="Job Timeline" icon={Clock} />
             <Timeline booking={booking} />
 
-            {/* Duration stats */}
             {totalActualMins > 0 && (
-              <div className="mt-6 pt-5 border-t border-slate-100">
+              <div className="mt-6 pt-5 border-t border-white/7">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <div className="rounded-2xl bg-primary/5 border border-primary/10 p-4 text-center">
                     <p className="text-2xl font-black text-primary tabular-nums">{actualHrs}h</p>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Actual Duration</p>
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">Actual Duration</p>
                   </div>
                   {booking.workerDuration && (
-                    <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 text-center">
-                      <p className="text-2xl font-black text-slate-700 tabular-nums">{booking.workerDuration}h</p>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Expected</p>
+                    <div className="rounded-2xl bg-[#071D16] border border-white/7 p-4 text-center">
+                      <p className="text-2xl font-black text-white tabular-nums">{booking.workerDuration}h</p>
+                      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">Expected</p>
                     </div>
                   )}
                   {arrivedToStart != null && (
-                    <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4 text-center">
-                      <p className="text-2xl font-black text-slate-700 tabular-nums">{arrivedToStart}m</p>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Arrival → Start</p>
+                    <div className="rounded-2xl bg-[#071D16] border border-white/7 p-4 text-center">
+                      <p className="text-2xl font-black text-white tabular-nums">{arrivedToStart}m</p>
+                      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">Arrival → Start</p>
                     </div>
                   )}
                 </div>
@@ -574,14 +551,13 @@ const JobDetail = () => {
             )}
           </div>
 
-          {/* Live location */}
           {isLive && (
-            <div className={`rounded-3xl border p-6 shadow-sm ${liveLocation ? "bg-emerald-50 border-emerald-200" : "bg-white border-slate-100"}`}>
+            <div className={`rounded-3xl border p-6 ${liveLocation ? "bg-emerald-500/10 border-emerald-500/25" : "bg-[#0B2D22] border-white/7"}`}>
               <SectionHead
                 label="Live Worker Location"
                 icon={Radio}
                 right={liveLocation && (
-                  <span className="flex items-center gap-1.5 text-[10px] font-black text-emerald-700 bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-full">
+                  <span className="flex items-center gap-1.5 text-[10px] font-black text-emerald-400 bg-emerald-500/15 border border-emerald-500/25 px-2.5 py-1 rounded-full">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     LIVE · auto-refresh 15s
                   </span>
@@ -590,16 +566,16 @@ const JobDetail = () => {
               {liveLocation ? (
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white rounded-2xl p-3 border border-emerald-100">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Latitude</p>
-                      <p className="text-sm font-black text-slate-800 tabular-nums">{liveLocation.lat?.toFixed(6)}</p>
+                    <div className="bg-[#071D16] rounded-2xl p-3 border border-emerald-500/15">
+                      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Latitude</p>
+                      <p className="text-sm font-black text-white tabular-nums">{liveLocation.lat?.toFixed(6)}</p>
                     </div>
-                    <div className="bg-white rounded-2xl p-3 border border-emerald-100">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Longitude</p>
-                      <p className="text-sm font-black text-slate-800 tabular-nums">{liveLocation.lng?.toFixed(6)}</p>
+                    <div className="bg-[#071D16] rounded-2xl p-3 border border-emerald-500/15">
+                      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Longitude</p>
+                      <p className="text-sm font-black text-white tabular-nums">{liveLocation.lng?.toFixed(6)}</p>
                     </div>
                   </div>
-                  <p className="text-[10px] text-slate-500 font-bold">Last updated: {liveLocation.lastUpdated ? new Date(liveLocation.lastUpdated).toLocaleTimeString("en-GB") : "—"}</p>
+                  <p className="text-[10px] text-white/40 font-bold">Last updated: {liveLocation.lastUpdated ? new Date(liveLocation.lastUpdated).toLocaleTimeString("en-GB") : "—"}</p>
                   <a
                     href={`https://www.google.com/maps?q=${liveLocation.lat},${liveLocation.lng}`}
                     target="_blank"
@@ -611,23 +587,22 @@ const JobDetail = () => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-1">
-                    <MapPin size={22} className="text-slate-300" />
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-1">
+                    <MapPin size={22} className="text-white/25" />
                   </div>
-                  <p className="text-sm font-bold text-slate-400">No live location yet</p>
-                  <p className="text-xs text-slate-300 font-medium">Sharing starts when the worker presses "I've Arrived"</p>
+                  <p className="text-sm font-bold text-white/30">No live location yet</p>
+                  <p className="text-xs text-white/25 font-medium">Sharing starts when the worker presses "I've Arrived"</p>
                 </div>
               )}
             </div>
           )}
 
-          {/* Photos */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+          <div className="bg-[#0B2D22] rounded-3xl border border-white/7 p-6">
             <SectionHead
               label="Job Photos"
               icon={Camera}
               right={photos.length > 0 && (
-                <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full tabular-nums">
+                <span className="text-[10px] font-black text-white/40 bg-white/5 px-2.5 py-1 rounded-full tabular-nums">
                   {photos.length} total
                 </span>
               )}
@@ -635,23 +610,23 @@ const JobDetail = () => {
 
             {photos.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
-                  <Camera size={24} className="text-slate-300" />
+                <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center">
+                  <Camera size={24} className="text-white/25" />
                 </div>
-                <p className="text-sm font-bold text-slate-400">No photos uploaded yet</p>
-                <p className="text-xs text-slate-300 font-medium">Photos appear here once the worker starts uploading</p>
+                <p className="text-sm font-bold text-white/30">No photos uploaded yet</p>
+                <p className="text-xs text-white/25 font-medium">Photos appear here once the worker starts uploading</p>
               </div>
             ) : (
               <div className="space-y-6">
                 {beforePhotos.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="w-2 h-2 rounded-full bg-slate-400" />
-                      <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Before ({beforePhotos.length})</p>
+                      <div className="w-2 h-2 rounded-full bg-white/30" />
+                      <p className="text-xs font-black text-white/40 uppercase tracking-widest">Before ({beforePhotos.length})</p>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {beforePhotos.map((p, i) => (
-                        <PhotoCard key={i} photo={p} label={`Before ${i + 1}`} badge="bg-slate-800/70 text-white" />
+                        <PhotoCard key={i} photo={p} label={`Before ${i + 1}`} badge="bg-black/70 text-white" />
                       ))}
                     </div>
                   </div>
@@ -660,7 +635,7 @@ const JobDetail = () => {
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <p className="text-xs font-black text-emerald-700 uppercase tracking-widest">After ({afterPhotos.length})</p>
+                      <p className="text-xs font-black text-emerald-400 uppercase tracking-widest">After ({afterPhotos.length})</p>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {afterPhotos.map((p, i) => (
@@ -673,7 +648,7 @@ const JobDetail = () => {
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-2 h-2 rounded-full bg-rose-500" />
-                      <p className="text-xs font-black text-rose-600 uppercase tracking-widest">Damage Report ({damagePhotos.length})</p>
+                      <p className="text-xs font-black text-rose-400 uppercase tracking-widest">Damage Report ({damagePhotos.length})</p>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {damagePhotos.map((p, i) => (
@@ -686,39 +661,36 @@ const JobDetail = () => {
             )}
           </div>
 
-          {/* Worker report */}
           {booking.workerReport && (
-            <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+            <div className="bg-[#0B2D22] rounded-3xl border border-white/7 p-6">
               <SectionHead label="Worker Report" icon={FileText} />
-              <p className="text-sm text-slate-700 font-medium leading-relaxed whitespace-pre-wrap">{booking.workerReport}</p>
+              <p className="text-sm text-white/70 font-medium leading-relaxed whitespace-pre-wrap">{booking.workerReport}</p>
             </div>
           )}
 
-          {/* Domestic property report */}
           <DomesticPropertyReport booking={booking} />
 
-          {/* Job details */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+          <div className="bg-[#0B2D22] rounded-3xl border border-white/7 p-6">
             <SectionHead label="Job Details" icon={Layers} />
 
             <div className="grid sm:grid-cols-2 gap-3">
               {detailFields.map(({ label, value, icon: Icon }) => (
-                <div key={label} className="rounded-2xl bg-slate-50 border border-slate-100 px-4 py-3.5">
+                <div key={label} className="rounded-2xl bg-[#071D16] border border-white/7 px-4 py-3.5">
                   <div className="flex items-center gap-1.5 mb-1">
-                    {Icon && <Icon size={11} className="text-slate-400" />}
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+                    {Icon && <Icon size={11} className="text-white/30" />}
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">{label}</p>
                   </div>
-                  <p className="text-sm font-bold text-slate-700 leading-snug">{String(value)}</p>
+                  <p className="text-sm font-bold text-white/70 leading-snug">{String(value)}</p>
                 </div>
               ))}
             </div>
 
             {extras.length > 0 && (
-              <div className="mt-4 rounded-2xl bg-slate-50 border border-slate-100 px-4 py-3.5">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Extras</p>
+              <div className="mt-4 rounded-2xl bg-[#071D16] border border-white/7 px-4 py-3.5">
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-3">Extras</p>
                 <div className="flex flex-wrap gap-2">
                   {extras.map((e, i) => (
-                    <span key={i} className="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-xs font-bold text-slate-700 shadow-sm">
+                    <span key={i} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-white/70">
                       {e.name} × {e.qty}
                     </span>
                   ))}
@@ -728,39 +700,36 @@ const JobDetail = () => {
           </div>
         </div>
 
-        {/* ── RIGHT COLUMN ─────────────────────────────────────────── */}
         <div className="space-y-5">
 
-          {/* Customer */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+          <div className="bg-[#0B2D22] rounded-3xl border border-white/7 p-6">
             <SectionHead label="Customer" icon={User} />
             <div className="flex items-center gap-3.5 mb-5">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-white flex items-center justify-center font-black text-xl shrink-0 shadow-sm">
                 {initials(booking.customer?.firstName, booking.customer?.lastName)}
               </div>
               <div className="min-w-0">
-                <p className="font-black text-slate-900 text-sm leading-tight">{booking.customer?.firstName} {booking.customer?.lastName}</p>
-                <p className="text-[11px] text-slate-400 font-medium mt-0.5 truncate">{booking.customer?.email}</p>
+                <p className="font-black text-white text-sm leading-tight">{booking.customer?.firstName} {booking.customer?.lastName}</p>
+                <p className="text-[11px] text-white/30 font-medium mt-0.5 truncate">{booking.customer?.email}</p>
               </div>
             </div>
             <div className="space-y-2">
               {booking.customer?.phone && (
-                <a href={`tel:${booking.customer.phone}`} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 hover:bg-primary/5 hover:text-primary transition-colors group w-full border border-slate-100">
-                  <Phone size={14} className="text-slate-400 group-hover:text-primary shrink-0" />
-                  <span className="text-sm font-bold text-slate-700 group-hover:text-primary">{booking.customer.phone}</span>
+                <a href={`tel:${booking.customer.phone}`} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#071D16] hover:bg-emerald-500/5 hover:text-primary transition-colors group w-full border border-white/7">
+                  <Phone size={14} className="text-white/30 group-hover:text-primary shrink-0" />
+                  <span className="text-sm font-bold text-white/70 group-hover:text-primary">{booking.customer.phone}</span>
                 </a>
               )}
               {booking.customer?.email && (
-                <a href={`mailto:${booking.customer.email}`} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 hover:bg-primary/5 hover:text-primary transition-colors group w-full border border-slate-100 min-w-0">
-                  <Mail size={14} className="text-slate-400 group-hover:text-primary shrink-0" />
-                  <span className="text-sm font-bold text-slate-700 group-hover:text-primary truncate">{booking.customer.email}</span>
+                <a href={`mailto:${booking.customer.email}`} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#071D16] hover:bg-emerald-500/5 hover:text-primary transition-colors group w-full border border-white/7 min-w-0">
+                  <Mail size={14} className="text-white/30 group-hover:text-primary shrink-0" />
+                  <span className="text-sm font-bold text-white/70 group-hover:text-primary truncate">{booking.customer.email}</span>
                 </a>
               )}
             </div>
           </div>
 
-          {/* Worker */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+          <div className="bg-[#0B2D22] rounded-3xl border border-white/7 p-6">
             <SectionHead label="Assigned Worker" icon={Briefcase} />
             {booking.assignedWorkerName ? (
               <>
@@ -769,25 +738,25 @@ const JobDetail = () => {
                     {initials(...(booking.assignedWorkerName?.split(" ") || []))}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-black text-slate-900 text-sm leading-tight">{booking.assignedWorkerName}</p>
-                    {worker && <p className="text-[11px] text-slate-400 font-medium mt-0.5 truncate">{worker.email}</p>}
+                    <p className="font-black text-white text-sm leading-tight">{booking.assignedWorkerName}</p>
+                    {worker && <p className="text-[11px] text-white/30 font-medium mt-0.5 truncate">{worker.email}</p>}
                   </div>
                 </div>
                 <div className="space-y-2">
                   {worker?.phone && (
-                    <a href={`tel:${worker.phone}`} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 hover:bg-primary/5 hover:text-primary transition-colors group w-full border border-slate-100">
-                      <Phone size={14} className="text-slate-400 group-hover:text-primary shrink-0" />
-                      <span className="text-sm font-bold text-slate-700 group-hover:text-primary">{worker.phone}</span>
+                    <a href={`tel:${worker.phone}`} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#071D16] hover:bg-emerald-500/5 hover:text-primary transition-colors group w-full border border-white/7">
+                      <Phone size={14} className="text-white/30 group-hover:text-primary shrink-0" />
+                      <span className="text-sm font-bold text-white/70 group-hover:text-primary">{worker.phone}</span>
                     </a>
                   )}
                   {booking.workerRate && (
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 border border-slate-100">
-                      <Banknote size={14} className="text-slate-400 shrink-0" />
-                      <span className="text-sm font-bold text-slate-700">£{booking.workerRate}/hr</span>
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#071D16] border border-white/7">
+                      <Banknote size={14} className="text-white/30 shrink-0" />
+                      <span className="text-sm font-bold text-white/70">£{booking.workerRate}/hr</span>
                     </div>
                   )}
                   {booking.jobAcceptedTime && (
-                    <p className="text-[11px] text-slate-400 font-semibold px-1 flex items-center gap-1.5">
+                    <p className="text-[11px] text-white/30 font-semibold px-1 flex items-center gap-1.5">
                       <CheckCircle2 size={11} className="text-emerald-500" />
                       Accepted {fmt(booking.jobAcceptedTime)}
                     </p>
@@ -801,28 +770,26 @@ const JobDetail = () => {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-8 gap-2">
-                <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
-                  <User size={22} className="text-slate-300" />
+                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
+                  <User size={22} className="text-white/25" />
                 </div>
-                <p className="text-sm font-bold text-slate-400">Not yet assigned</p>
+                <p className="text-sm font-bold text-white/30">Not yet assigned</p>
               </div>
             )}
           </div>
 
-          {/* Payment */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+          <div className="bg-[#0B2D22] rounded-3xl border border-white/7 p-6">
             <SectionHead label="Payment" icon={Banknote} />
 
-            {/* Big amount */}
-            <div className="text-center py-4 mb-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <p className="text-4xl font-black text-slate-900 tabular-nums">
+            <div className="text-center py-4 mb-4 bg-[#071D16] rounded-2xl border border-white/7">
+              <p className="text-4xl font-black text-white tabular-nums">
                 {booking.payment?.amount ? `${currency}${booking.payment.amount}` : "—"}
               </p>
               <div className="mt-2">
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide border ${
-                  booking.payment?.status === "Completed" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
-                  booking.payment?.status === "Authorized" ? "bg-sky-50 text-sky-700 border-sky-200" :
-                  "bg-amber-50 text-amber-700 border-amber-200"
+                  booking.payment?.status === "Completed" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25" :
+                  booking.payment?.status === "Authorized" ? "bg-sky-500/15 text-sky-400 border-sky-500/25" :
+                  "bg-amber-500/15 text-amber-400 border-amber-500/25"
                 }`}>
                   {booking.payment?.status || "Pending"}
                 </span>
@@ -834,26 +801,24 @@ const JobDetail = () => {
                 { label: "Method",  value: booking.payment?.method || "—" },
                 { label: "Billing", value: booking.payment?.billingType ? (booking.payment.billingType.charAt(0).toUpperCase() + booking.payment.billingType.slice(1)) : "Hourly" },
               ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
-                  <span className="text-xs font-bold text-slate-400">{label}</span>
-                  <span className="text-sm font-bold text-slate-700">{value}</span>
+                <div key={label} className="flex justify-between items-center py-2 border-b border-white/[0.06] last:border-0">
+                  <span className="text-xs font-bold text-white/30">{label}</span>
+                  <span className="text-sm font-bold text-white/70">{value}</span>
                 </div>
               ))}
               {booking.noPaymentRequired && (
-                <p className="text-xs text-slate-500 font-medium bg-slate-50 rounded-xl px-3 py-2 mt-2">
+                <p className="text-xs text-white/40 font-medium bg-white/5 rounded-xl px-3 py-2 mt-2">
                   No payment required — paid outside system
                 </p>
               )}
             </div>
           </div>
 
-          {/* Extend job */}
           {booking.payment?.billingType !== "flat" && booking.details?.duration && !["Completed", "Cancelled"].includes(booking.status) && (
             <ExtendJobPanel booking={booking} onUpdated={() => window.location.reload()} />
           )}
 
-          {/* Quick actions */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+          <div className="bg-[#0B2D22] rounded-3xl border border-white/7 p-6">
             <SectionHead label="Quick Actions" />
             <div className="space-y-1.5">
               {[
@@ -863,10 +828,10 @@ const JobDetail = () => {
                 <Link
                   key={to}
                   to={to}
-                  className="flex items-center justify-between px-4 py-3 rounded-xl bg-slate-50 hover:bg-primary/5 transition-colors group border border-slate-100"
+                  className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#071D16] hover:bg-emerald-500/5 transition-colors group border border-white/7"
                 >
-                  <span className="text-sm font-bold text-slate-700 group-hover:text-primary">{label}</span>
-                  <ChevronRight size={14} className="text-slate-300 group-hover:text-primary transition-colors" />
+                  <span className="text-sm font-bold text-white/70 group-hover:text-primary">{label}</span>
+                  <ChevronRight size={14} className="text-white/25 group-hover:text-primary transition-colors" />
                 </Link>
               ))}
             </div>
