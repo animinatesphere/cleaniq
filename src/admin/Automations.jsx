@@ -646,7 +646,7 @@ export default function Automations() {
     try {
       await Promise.all(
         ids.map((id) =>
-          axios.patch(`${API}/customers/${id}/crm-emails`, { enabled: enable }),
+          axios.post(`${API}/customers/${id}/crm-emails`, { enabled: enable }),
         ),
       );
       showToast(
@@ -673,7 +673,7 @@ export default function Automations() {
       prev.map((cu) => getCId(cu) === cId ? { ...cu, crmEmailsEnabled: enable } : cu),
     );
     try {
-      await axios.patch(`${API}/customers/${cId}/crm-emails`, { enabled: enable });
+      await axios.post(`${API}/customers/${cId}/crm-emails`, { enabled: enable });
       showToast(`${enable ? "Enabled" : "Excluded"} for ${c.firstName || c.email}`, "success");
     } catch (e) {
       setCustomers((prev) =>
