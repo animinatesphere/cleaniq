@@ -817,7 +817,7 @@ const Dashboard = () => {
   const topServiceRevenue = Object.entries(serviceRevMap)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 6);
-  const maxServiceRev = topServiceRevenue[0]?.[1] || 1;
+  const maxSvcRev = topServiceRevenue[0]?.[1] || 1;
 
   // ── New vs returning customers ────────────────────────────────────────────────
   const customerBookingCounts = {};
@@ -2328,7 +2328,7 @@ const Dashboard = () => {
                       <div className="flex-1 h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
                         <div
                           className="h-full bg-emerald-500 rounded-full"
-                          style={{ width: `${(rev / maxServiceRev) * 100}%` }}
+                          style={{ width: `${(rev / maxSvcRev) * 100}%` }}
                         />
                       </div>
                       <span className="text-[11px] font-semibold text-white/80 tabular-nums w-14 text-right shrink-0">

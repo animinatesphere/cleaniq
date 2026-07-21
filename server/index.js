@@ -7,11 +7,28 @@ const sms = require("./utils/smsService");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const allowedOrigins = [
+  "https://www.cleaniqservices.com",
+  "https://cleaniqservices.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: true,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith("cleaniqservices.com")
+      ) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     credentials: true,
   }),
 );
@@ -23,7 +40,8 @@ app.use((req, res, next) => {
     if (
       process.env.NODE_ENV === "production" &&
       host.includes("cleaniqservices.com") &&
-      !host.startsWith("www.")
+      !host.startsWith("www.") &&
+      !host.startsWith("api.")
     ) {
       return res.redirect(
         301,
