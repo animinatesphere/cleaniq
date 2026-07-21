@@ -117,6 +117,47 @@ const Booking = require("./models/Booking");
 const { sendEmail, templates } = require("./utils/emailService");
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
 
+const applyAdditionalHoursPayment = async (
+  booking,
+  { additionalHoursAmount, additionalAmount, paymentIntentId },
+) => {
+  if (!booking || !additionalHoursAmount || additionalHoursAmount <= 0) {
+    return { applied: false };
+  }
+
+  if (
+    paymentIntentId &&
+    booking.payment?.lastAdditionalHoursPaymentIntentId === paymentIntentId
+  ) {
+    return { applied: false, skipped: true };
+  }
+
+  const originalHours = booking.details?.duration || 0;
+  const newTotalHours = originalHours + additionalHoursAmount;
+
+  booking.details = booking.details || {};
+  booking.details.duration = newTotalHours;
+  booking.details.additionalHoursPurchased =
+    (booking.details.additionalHoursPurchased || 0) + additionalHoursAmount;
+
+  booking.payment = booking.payment || {};
+  booking.payment.amount = (booking.payment.amount || 0) + (additionalAmount || 0);
+  booking.payment.status = "Completed";
+  booking.payment.capturedAt = new Date();
+  booking.payment.additionalHoursApplied =
+    (booking.payment.additionalHoursApplied || 0) + additionalHoursAmount;
+  booking.payment.lastAdditionalHoursPaymentIntentId = paymentIntentId;
+
+  await booking.save();
+
+  return {
+    applied: true,
+    originalHours,
+    newTotalHours,
+    additionalAmount: additionalAmount || 0,
+  };
+};
+
 app.post(
   "/webhooks/stripe",
   express.raw({ type: "application/json" }),
@@ -142,6 +183,11 @@ app.post(
       if (event.type === "checkout.session.completed") {
         const session = event.data.object;
         const bookingId = session.metadata && session.metadata.bookingId;
+        const isAdditionalHours =
+          session.metadata && session.metadata.type === "additional_hours";
+        const additionalHoursAmount = isAdditionalHours
+          ? parseInt(session.metadata.additionalHours || 0)
+          : 0;
         console.log(
           "💳 Stripe checkout session completed - payment authorized for bookingId:",
           bookingId,
@@ -150,23 +196,165 @@ app.post(
         if (bookingId && session.payment_intent) {
           const booking = await Booking.findById(bookingId);
           if (booking) {
-            // Store payment intent for later capture
-            booking.payment = booking.payment || {};
-            booking.payment.stripePaymentIntentId = session.payment_intent;
-            booking.payment.status = "Authorized"; // Money is held, not yet captured
-            booking.payment.authorizedAt = new Date();
-            booking.status = "Confirmed"; // Booking is confirmed but cleaning not done yet
-            await booking.save();
+            if (isAdditionalHours && additionalHoursAmount > 0) {
+              const additionalAmount = session.amount_total
+                ? session.amount_total / 100
+                : 0;
+              const result = await applyAdditionalHoursPayment(booking, {
+                additionalHoursAmount,
+                additionalAmount,
+                paymentIntentId: session.payment_intent,
+              });
 
-            // SMS: booking confirmed (fire-and-forget)
-            setImmediate(() => sms.triggerBookingConfirmed(booking).catch(e => console.error("SMS Stripe trigger error:", e.message)));
+              if (result.applied) {
+                await sendEmail({
+                  to: booking.customer.email,
+                  subject: `✓ Additional Hours Added: Cleaniq Booking ${booking.bookingId}`,
+                  html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+                      <h2 style="color: #0A5C43;">✓ Additional Hours Successfully Added!</h2>
+                      <p>Your booking has been updated with additional cleaning hours.</p>
+                      <div style="background-color: #f0f0f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <p><strong>Booking Reference:</strong> ${booking.bookingId}</p>
+                        <p><strong>Additional Hours Purchased:</strong> ${additionalHoursAmount} hours</p>
+                        <p><strong>Original Duration:</strong> ${result.originalHours} hours</p>
+                        <p><strong>New Total Duration:</strong> ${result.newTotalHours} hours</p>
+                        <p><strong>Amount Paid:</strong> £${result.additionalAmount.toFixed(2)}</p>
+                      </div>
+                      <p>Your cleaner will spend the additional time to provide thorough cleaning. Thank you for choosing Cleaniq!</p>
+                    </div>
+                  `,
+                });
+                console.log(
+                  `✅ Additional hours added immediately for booking ${bookingId}: ${additionalHoursAmount}hrs`,
+                );
+              } else if (!result.skipped) {
+                console.log(
+                  `⚠️ Additional hours payment was not applied for booking ${bookingId}`,
+                );
+              }
+            } else {
+              // Store payment intent for later capture
+              booking.payment = booking.payment || {};
+              booking.payment.stripePaymentIntentId = session.payment_intent;
+              booking.payment.status = "Authorized"; // Money is held, not yet captured
+              booking.payment.authorizedAt = new Date();
+              booking.status = "Confirmed"; // Booking is confirmed but cleaning not done yet
+              await booking.save();
 
-            // Send Authorization Email to Customer (payment held)
-            await sendEmail({
-              to: booking.customer.email,
-              subject: `✓ Payment Authorized: Cleaniq Booking ${booking.bookingId}`,
-              html: templates.adminBookingCreatedEmail1(booking), // Use success template
-            });
+              // SMS: booking confirmed (fire-and-forget)
+              setImmediate(() => sms.triggerBookingConfirmed(booking).catch(e => console.error("SMS Stripe trigger error:", e.message)));
+
+              // Send Authorization Email to Customer (payment held)
+              await sendEmail({
+                to: booking.customer.email,
+                subject: `✓ Payment Authorized: Cleaniq Booking ${booking.bookingId}`,
+                html: templates.adminBookingCreatedEmail1(booking), // Use success template
+              });
+
+              // Schedule booking reminders now that payment is confirmed
+              try {
+                const bookingDate = booking.schedule?.date ? new Date(booking.schedule.date) : null;
+                if (bookingDate && bookingDate > new Date()) {
+                  const payload = {
+                    bookingId: booking._id.toString(),
+                    bookingRef: booking.bookingId,
+                    email: booking.customer?.email,
+                    firstName: booking.customer?.firstName,
+                    service: booking.service,
+                    date: bookingDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
+                    amount: booking.payment?.amount,
+                  };
+                  const ms24h = 24 * 60 * 60 * 1000;
+                  const ms3h  = 3  * 60 * 60 * 1000;
+                  if (bookingDate - ms24h > Date.now()) {
+                    await scheduleTask("booking_reminder_24h", new Date(bookingDate - ms24h), payload);
+                  }
+                  if (bookingDate - ms3h > Date.now()) {
+                    await scheduleTask("booking_reminder_3h", new Date(bookingDate - ms3h), payload);
+                  }
+                }
+              } catch (schedErr) {
+                console.error("⚠️ Failed to schedule Stripe booking reminders:", schedErr.message);
+              }
+
+              console.log(
+                `✅ Payment authorized for booking ${bookingId}, awaiting completion to capture`,
+              );
+            }
+          } else {
+            console.warn(
+              "⚠️ Booking not found for checkout session:",
+              bookingId,
+            );
+          }
+        }
+      } else if (event.type === "payment_intent.succeeded") {
+        const pi = event.data.object;
+        const bookingId = pi.metadata && pi.metadata.bookingId;
+        const isAdditionalHours =
+          pi.metadata && pi.metadata.type === "additional_hours";
+        const additionalHoursAmount = isAdditionalHours
+          ? parseInt(pi.metadata.additionalHours || 0)
+          : 0;
+
+        console.log(
+          "🔔 Stripe payment intent succeeded for bookingId:",
+          bookingId,
+          isAdditionalHours
+            ? `(Additional Hours: ${additionalHoursAmount})`
+            : "",
+        );
+
+        if (bookingId) {
+          const booking = await Booking.findById(bookingId);
+          if (booking) {
+            if (isAdditionalHours && additionalHoursAmount > 0) {
+              const result = await applyAdditionalHoursPayment(booking, {
+                additionalHoursAmount,
+                additionalAmount: pi.amount_received / 100,
+                paymentIntentId: pi.id,
+              });
+
+              if (result.applied) {
+                await sendEmail({
+                  to: booking.customer.email,
+                  subject: `✓ Additional Hours Added: Cleaniq Booking ${booking.bookingId}`,
+                  html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+                      <h2 style="color: #0A5C43;">✓ Additional Hours Successfully Added!</h2>
+                      <p>Your booking has been updated with additional cleaning hours.</p>
+                      <div style="background-color: #f0f0f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <p><strong>Booking Reference:</strong> ${booking.bookingId}</p>
+                        <p><strong>Additional Hours Purchased:</strong> ${additionalHoursAmount} hours</p>
+                        <p><strong>Original Duration:</strong> ${result.originalHours} hours</p>
+                        <p><strong>New Total Duration:</strong> ${result.newTotalHours} hours</p>
+                        <p><strong>Amount Paid:</strong> £${result.additionalAmount.toFixed(2)}</p>
+                      </div>
+                      <p>Your cleaner will spend the additional time to provide thorough cleaning. Thank you for choosing Cleaniq!</p>
+                    </div>
+                  `,
+                });
+              }
+            } else {
+              // Regular payment completed
+              booking.payment = booking.payment || {};
+              booking.payment.status = "Completed"; // Payment has been captured
+              booking.payment.capturedAt = new Date();
+              await booking.save();
+
+              // Send Payment Capture Confirmation Email
+              await sendEmail({
+                to: booking.customer.email,
+                subject: `✓ Payment Captured: Cleaniq Booking ${booking.bookingId}`,
+                html: templates.paymentSuccessCustomer(booking),
+              });
+
+              console.log(`✅ Payment captured for booking ${bookingId}`);
+            }
+          }
+        }
+      }
 
             // Schedule booking reminders now that payment is confirmed
             try {

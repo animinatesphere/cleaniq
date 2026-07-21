@@ -42,6 +42,7 @@ import {
   BarChart2,
   Share2,
   Megaphone,
+  CreditCard,
   Tag,
   ChevronDown,
   Home,
@@ -175,6 +176,12 @@ const AdminLayout = () => {
           path: "/admin/analytics",
           key: "analytics",
           icon: <Globe size={20} />,
+        },
+        {
+          name: "Generate Links",
+          path: "/admin/generate-links",
+          key: "generate-links",
+          icon: <CreditCard size={20} />,
         },
         {
           name: "Expense Tracker",

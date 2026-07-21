@@ -51,6 +51,7 @@ import Bin from "./admin/Bin";
 import EmailHistory from "./admin/EmailHistory";
 import InvoiceBuilder from "./admin/InvoiceBuilder";
 import Analytics from "./admin/Analytics";
+import GenerateLinksPage from "./admin/GenerateLinksPage";
 import Expenses from "./admin/Expenses";
 import Rota from "./admin/Rota";
 import Calendar from "./admin/Calendar";
@@ -129,6 +130,7 @@ function App() {
               <Route path="email-history" element={<EmailHistory />} />
               <Route path="invoice-builder" element={<InvoiceBuilder />} />
               <Route path="analytics" element={<Analytics />} />
+              <Route path="generate-links" element={<GenerateLinksPage />} />
               <Route path="expenses" element={<Expenses />} />
               <Route path="rota" element={<Rota />} />
               <Route path="settings" element={<Settings />} />
@@ -142,7 +144,10 @@ function App() {
               <Route path="tasks" element={<Tasks />} />
               <Route path="complaints" element={<Complaints />} />
               <Route path="contracts" element={<Contracts />} />
-              <Route path="worker-performance" element={<WorkerPerformance />} />
+              <Route
+                path="worker-performance"
+                element={<WorkerPerformance />}
+              />
               <Route path="referrals" element={<Referrals />} />
               <Route path="commercial" element={<CommercialHub />} />
               <Route path="property-report" element={<PropertyReport />} />
