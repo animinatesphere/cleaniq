@@ -313,6 +313,33 @@ router.patch('/:id/tags', async (req, res) => {
   }
 });
 
+// Upsert CRM email preference for a guest (no Customer record yet) — creates minimal record
+router.post('/guest-crm-preference', async (req, res) => {
+  try {
+    const { email, firstName, lastName, phone, enabled } = req.body;
+    if (!email || typeof enabled !== 'boolean') {
+      return res.status(400).json({ message: 'email and enabled (boolean) are required' });
+    }
+    const customer = await Customer.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      {
+        $set: { crmEmailsEnabled: enabled },
+        $setOnInsert: {
+          email: email.toLowerCase(),
+          firstName: firstName || '',
+          lastName: lastName || '',
+          phone: phone || '',
+          isGuest: true,
+        },
+      },
+      { upsert: true, new: true, select: '-passwordHash' }
+    );
+    res.json(customer);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // GET CRM email preference for a customer
 router.get('/:id/crm-emails', async (req, res) => {
   try {

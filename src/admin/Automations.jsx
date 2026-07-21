@@ -668,16 +668,43 @@ export default function Automations() {
 
   const toggleSingle = async (c, enable) => {
     const cId = getCId(c);
-    if (!cId) return;
+    const isGuest = !cId;
+
+    // Optimistic update
     setCustomers((prev) =>
-      prev.map((cu) => getCId(cu) === cId ? { ...cu, crmEmailsEnabled: enable } : cu),
+      prev.map((cu) =>
+        (cId ? getCId(cu) === cId : cu.email === c.email)
+          ? { ...cu, crmEmailsEnabled: enable }
+          : cu
+      ),
     );
+
     try {
-      await axios.post(`${API}/customers/${cId}/crm-emails`, { enabled: enable });
+      if (isGuest) {
+        // Create a minimal Customer record for this guest so the preference persists
+        const res = await axios.post(`${API}/customers/guest-crm-preference`, {
+          email: c.email,
+          firstName: c.firstName,
+          lastName: c.lastName,
+          phone: c.phone,
+          enabled,
+        });
+        // Replace the guest entry with the new registered record (now has _id)
+        setCustomers((prev) =>
+          prev.map((cu) => cu.email === c.email ? { ...cu, ...res.data, crmEmailsEnabled: enable } : cu),
+        );
+      } else {
+        await axios.post(`${API}/customers/${cId}/crm-emails`, { enabled: enable });
+      }
       showToast(`${enable ? "Enabled" : "Excluded"} for ${c.firstName || c.email}`, "success");
     } catch (e) {
+      // Rollback
       setCustomers((prev) =>
-        prev.map((cu) => getCId(cu) === cId ? { ...cu, crmEmailsEnabled: !enable } : cu),
+        prev.map((cu) =>
+          (cId ? getCId(cu) === cId : cu.email === c.email)
+            ? { ...cu, crmEmailsEnabled: !enable }
+            : cu
+        ),
       );
       showToast(e?.response?.data?.message || "Failed to update");
     }
@@ -1224,12 +1251,12 @@ export default function Automations() {
                       key={cId || c.email}
                       onClick={() => !isGuest && toggleRow(c)}
                       className={`group px-5 py-3.5 flex items-center gap-3 transition-colors select-none ${
-                        isGuest
-                          ? "cursor-default opacity-50"
-                          : isSel
-                            ? "bg-emerald-500/[0.07] cursor-pointer"
-                            : !enabled
-                              ? "bg-rose-500/[0.04] hover:bg-rose-500/[0.07] cursor-pointer"
+                        isSel
+                          ? "bg-emerald-500/[0.07] cursor-pointer"
+                          : !enabled
+                            ? "bg-rose-500/[0.04] hover:bg-rose-500/[0.07] cursor-pointer"
+                            : isGuest
+                              ? "hover:bg-[#0A2A1F] cursor-default"
                               : "hover:bg-[#0A2A1F] cursor-pointer"
                       }`}
                     >
@@ -1270,7 +1297,6 @@ export default function Automations() {
                         <Toggle
                           checked={enabled}
                           onChange={(v) => toggleSingle(c, v)}
-                          saving={isGuest}
                         />
                       </div>
 
