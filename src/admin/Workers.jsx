@@ -19,6 +19,7 @@ import {
   User,
 } from "lucide-react";
 import { useRegion } from "../context/RegionContext";
+import StatDetailDrawer from "./StatDetailDrawer";
 
 const Workers = () => {
   const { region } = useRegion();
@@ -37,6 +38,7 @@ const Workers = () => {
   const [showStoredPwd, setShowStoredPwd]           = useState(false);
   const [updatingPwd, setUpdatingPwd]               = useState(false);
   const [pwdSuccess, setPwdSuccess]                 = useState(false);
+  const [drawer, setDrawer]                         = useState(null);
 
   const ROLE_OPTIONS = [
     "Cleaner",
@@ -225,6 +227,21 @@ const Workers = () => {
   const avatarColor = (s) =>
     s === "Active" ? "bg-emerald-600" : s === "Pending" ? "bg-amber-500" : "bg-rose-500";
 
+  const workerDrawerItem = (w) => (
+    <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+      <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0">
+        <span className="text-[10px] font-semibold text-emerald-400">
+          {((w.firstName?.[0]||"")+(w.lastName?.[0]||"")).toUpperCase()||"?"}
+        </span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-white/85 truncate">{w.firstName} {w.lastName}</p>
+        <p className="text-xs text-white/40 truncate">{w.role || w.email}</p>
+      </div>
+      <span className="text-[11px] font-semibold text-emerald-400/70 shrink-0">{w.status || "Active"}</span>
+    </div>
+  );
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -248,11 +265,15 @@ const Workers = () => {
       {/* Stats strip */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Total Staff", value: workers.length, icon: <Briefcase size={18} />, color: "bg-emerald-500/15 text-emerald-400" },
-          { label: "Active", value: workers.filter((w) => w.status === "Active" || w.appAccessGranted).length, icon: <ShieldCheck size={18} />, color: "bg-emerald-500/15 text-emerald-400" },
-          { label: "Pending Setup", value: workers.filter((w) => w.status === "Pending").length, icon: <AlertCircle size={18} />, color: "bg-amber-500/15 text-amber-400" },
-        ].map(({ label, value, icon, color }) => (
-          <div key={label} className="bg-[#0B2D22] border border-white/7 rounded-2xl p-5 flex items-center gap-4">
+          { label: "Total Staff",   value: workers.length,                                                             icon: <Briefcase size={18} />,  color: "bg-emerald-500/15 text-emerald-400", drawerTitle: "All Staff",      drawerSub: `${workers.length} workers total`,                                                        drawerItems: workers,                                                         accent: "emerald" },
+          { label: "Active",        value: workers.filter((w) => w.status === "Active" || w.appAccessGranted).length, icon: <ShieldCheck size={18} />, color: "bg-emerald-500/15 text-emerald-400", drawerTitle: "Active Workers",  drawerSub: `${workers.filter(w => w.status === "Active" || w.appAccessGranted).length} active`,  drawerItems: workers.filter(w => w.status === "Active" || w.appAccessGranted), accent: "emerald" },
+          { label: "Pending Setup", value: workers.filter((w) => w.status === "Pending").length,                      icon: <AlertCircle size={18} />, color: "bg-amber-500/15 text-amber-400",     drawerTitle: "Pending Setup",  drawerSub: `${workers.filter(w => w.status === "Pending").length} awaiting setup`,              drawerItems: workers.filter(w => w.status === "Pending"),                     accent: "amber"   },
+        ].map(({ label, value, icon, color, drawerTitle, drawerSub, drawerItems, accent }) => (
+          <div
+            key={label}
+            onClick={() => setDrawer({ title: drawerTitle, subtitle: drawerSub, items: drawerItems, accentColor: accent, renderItem: workerDrawerItem })}
+            className="bg-[#0B2D22] border border-white/7 rounded-2xl p-5 flex items-center gap-4 cursor-pointer"
+          >
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color}`}>{icon}</div>
             <div>
               <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">{label}</p>
@@ -735,6 +756,16 @@ const Workers = () => {
           </div>
         </div>
       )}
+      <StatDetailDrawer
+        isOpen={!!drawer}
+        onClose={() => setDrawer(null)}
+        title={drawer?.title || ""}
+        subtitle={drawer?.subtitle || ""}
+        items={drawer?.items || []}
+        renderItem={drawer?.renderItem}
+        onViewAll={drawer?.onViewAll}
+        accentColor={drawer?.accentColor || "emerald"}
+      />
     </div>
   );
 };

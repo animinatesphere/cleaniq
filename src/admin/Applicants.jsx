@@ -5,6 +5,7 @@ import {
   Trash2, ShieldCheck, X, Edit3, Save, UserPlus,
   FileCheck, AlertTriangle,
 } from 'lucide-react';
+import StatDetailDrawer from "./StatDetailDrawer";
 
 const STATUS_OPTIONS = ['Applied', 'Interviewing', 'Background Check', 'Hired', 'Rejected'];
 
@@ -34,6 +35,7 @@ const Applicants = () => {
   const [editData, setEditData] = useState({});
   const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
   const [hiring, setHiring] = useState(false);
+  const [drawer, setDrawer] = useState(null);
 
   useEffect(() => {
     if (statusMessage.text) {
@@ -172,15 +174,50 @@ const Applicants = () => {
           { label: 'Hired', value: applicants.filter(a => a.status === 'Hired').length, color: 'text-emerald-400', icon: <CheckCircle2 size={20}/> },
           { label: 'Pending Review', value: applicants.filter(a => ['Applied','Pending','Interviewing','Background Check'].includes(a.status)).length, color: 'text-amber-400', icon: <Clock size={20}/> },
           { label: 'Rejected', value: applicants.filter(a => a.status === 'Rejected').length, color: 'text-rose-400', icon: <XCircle size={20}/> },
-        ].map((s, i) => (
-          <div key={i} className="bg-[#0B2D22] p-6 rounded-2xl border border-white/7 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-bold text-white/40">{s.label}</p>
-              <h3 className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</h3>
+        ].map((s, i) => {
+          const drawerItems =
+            s.label === 'Total' ? applicants
+            : s.label === 'Hired' ? applicants.filter(a => a.status === 'Hired')
+            : s.label === 'Pending Review' ? applicants.filter(a => ['Applied','Pending','Interviewing','Background Check'].includes(a.status))
+            : applicants.filter(a => a.status === 'Rejected');
+          const drawerColor =
+            s.label === 'Hired' ? 'emerald'
+            : s.label === 'Rejected' ? 'rose'
+            : s.label === 'Pending Review' ? 'amber'
+            : 'blue';
+          return (
+            <div
+              key={i}
+              className="bg-[#0B2D22] p-6 rounded-2xl border border-white/7 flex items-center justify-between cursor-pointer"
+              onClick={() => setDrawer({
+                title: s.label === 'Total' ? 'All Applicants' : `${s.label} Applicants`,
+                subtitle: `${s.value} applicant${s.value !== 1 ? 's' : ''}`,
+                items: drawerItems,
+                renderItem: (a) => (
+                  <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-white/[0.07] flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-semibold text-white/50">
+                        {(a.fullName||"?")[0].toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white/85 truncate">{a.fullName}</p>
+                      <p className="text-xs text-white/40 truncate">{a.email} · {a.appliedFor || "Cleaner"}</p>
+                    </div>
+                    <span className="text-[10px] font-semibold text-amber-400 shrink-0">{a.status}</span>
+                  </div>
+                ),
+                accentColor: drawerColor,
+              })}
+            >
+              <div>
+                <p className="text-[10px] font-bold text-white/40">{s.label}</p>
+                <h3 className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</h3>
+              </div>
+              <div className="p-3 bg-white/[0.03] rounded-2xl">{s.icon}</div>
             </div>
-            <div className="p-3 bg-white/[0.03] rounded-2xl">{s.icon}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Table */}
@@ -426,6 +463,17 @@ const Applicants = () => {
           </div>
         </div>
       )}
+
+      <StatDetailDrawer
+        isOpen={!!drawer}
+        onClose={() => setDrawer(null)}
+        title={drawer?.title || ""}
+        subtitle={drawer?.subtitle || ""}
+        items={drawer?.items || []}
+        renderItem={drawer?.renderItem}
+        onViewAll={drawer?.onViewAll}
+        accentColor={drawer?.accentColor || "emerald"}
+      />
     </div>
   );
 };

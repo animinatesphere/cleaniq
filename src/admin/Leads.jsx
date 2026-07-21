@@ -5,6 +5,7 @@ import {
   Calendar, MessageSquare, Globe, User,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
+import StatDetailDrawer from "./StatDetailDrawer";
 
 const API = import.meta.env.VITE_API_URL;
 const PAGE_SIZE = 25;
@@ -183,6 +184,7 @@ const Leads = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addForm, setAddForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [adding, setAdding] = useState(false);
+  const [drawer, setDrawer] = useState(null);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -306,7 +308,26 @@ const Leads = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white tracking-tight">Leads</h2>
-          <p className="text-sm text-white/40 font-medium mt-1">
+          <p
+            className="text-sm text-white/40 font-medium mt-1 cursor-pointer"
+            onClick={() => !loading && setDrawer({
+              title: "Total Leads",
+              subtitle: `${leads.length} lead${leads.length !== 1 ? "s" : ""}`,
+              items: leads,
+              renderItem: (l) => (
+                <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white/85 truncate">{l.name || l.firstName + " " + l.lastName}</p>
+                    <p className="text-xs text-white/40 truncate">{l.email} · {l.source || "Organic"}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 shrink-0">
+                    {l.status || "New"}
+                  </span>
+                </div>
+              ),
+              accentColor: "emerald",
+            })}
+          >
             {loading ? "Loading…" : `${leads.length} lead${leads.length !== 1 ? "s" : ""} total`}
           </p>
         </div>
@@ -539,6 +560,17 @@ const Leads = () => {
           </div>
         </div>
       )}
+
+      <StatDetailDrawer
+        isOpen={!!drawer}
+        onClose={() => setDrawer(null)}
+        title={drawer?.title || ""}
+        subtitle={drawer?.subtitle || ""}
+        items={drawer?.items || []}
+        renderItem={drawer?.renderItem}
+        onViewAll={drawer?.onViewAll}
+        accentColor={drawer?.accentColor || "emerald"}
+      />
     </div>
   );
 };

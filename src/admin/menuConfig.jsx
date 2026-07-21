@@ -1,0 +1,93 @@
+import {
+  LayoutDashboard, Globe, Receipt, CalendarRange, Calendar, Settings,
+  CreditCard, ClipboardList, CalendarDays, FileText, History, ShieldCheck,
+  UserPlus, KanbanSquare, Megaphone, ListChecks, Repeat, Mail, Zap,
+  MessageSquare, FileSignature, Building2, Home, Tag, Users, AlertTriangle,
+  FileCheck, BarChart2, Share2, DollarSign, CheckCircle2, Wallet,
+  Briefcase, User, BookOpen, Trash2,
+} from "lucide-react";
+
+export const fullMenuGroups = [
+  {
+    label: "Overview",
+    groupIcon: <LayoutDashboard size={14} />,
+    items: [
+      { name: "Dashboard",     path: "/admin",                  key: "dashboard",     icon: <LayoutDashboard size={20} /> },
+      { name: "Analytics",     path: "/admin/analytics",        key: "analytics",     icon: <Globe size={20} /> },
+      { name: "Generate Links",path: "/admin/generate-links",   key: "generate-links",icon: <CreditCard size={20} /> },
+      { name: "Expense Tracker",path: "/admin/expenses",        key: "expenses",      icon: <Receipt size={20} /> },
+    ],
+  },
+  {
+    label: "Operations",
+    groupIcon: <ClipboardList size={14} />,
+    items: [
+      { name: "Job Tracker",       path: "/admin/jobs",           key: "jobs",             icon: <ClipboardList size={20} /> },
+      { name: "Bookings",          path: "/admin/bookings",       key: "bookings",          icon: <Calendar size={20} /> },
+      { name: "Calendar",          path: "/admin/calendar",       key: "calendar",          icon: <CalendarDays size={20} /> },
+      { name: "Rota",              path: "/admin/rota",           key: "rota",              icon: <CalendarRange size={20} /> },
+      { name: "Quotes",            path: "/admin/quotes",         key: "quotes",  exact: true, icon: <FileText size={20} /> },
+      { name: "Quote History",     path: "/admin/quotes/history", key: "quotes",            icon: <History size={20} /> },
+      { name: "Services",          path: "/admin/services",       key: "services",          icon: <ShieldCheck size={20} /> },
+      { name: "Leads",             path: "/admin/leads",          key: "leads",             icon: <UserPlus size={20} /> },
+      { name: "Pipeline",          path: "/admin/pipeline",       key: "pipeline",          icon: <KanbanSquare size={20} /> },
+      { name: "Campaigns",         path: "/admin/campaigns",      key: "campaigns",         icon: <Megaphone size={20} /> },
+      { name: "Checklist",         path: "/admin/checklist",      key: "checklist",         icon: <ListChecks size={20} /> },
+      { name: "Recurring",         path: "/admin/recurring",      key: "recurring",         icon: <Repeat size={20} /> },
+      { name: "Email History",     path: "/admin/email-history",  key: "email-history",     icon: <Mail size={20} /> },
+      { name: "Automations",       path: "/admin/automations",    key: "automations",       icon: <Zap size={20} /> },
+      { name: "SMS Automation",    path: "/admin/sms-automation", key: "sms-automation",    icon: <MessageSquare size={20} /> },
+      { name: "Invoice",           path: "/admin/invoice-builder",key: "invoice-builder",   icon: <FileSignature size={20} /> },
+      { name: "Commercial Hub",    path: "/admin/commercial",     key: "commercial",        icon: <Building2 size={20} /> },
+      { name: "Property Report",   path: "/admin/property-report",key: "property-report",   icon: <ClipboardList size={20} /> },
+      { name: "Property Condition",path: "/admin/domestic",       key: "Property-condition",icon: <Home size={20} /> },
+      { name: "Price List",        path: "/admin/pricelist",      key: "pricelist",         icon: <Tag size={20} /> },
+    ],
+  },
+  {
+    label: "CRM",
+    groupIcon: <Users size={14} />,
+    items: [
+      { name: "Tasks",              path: "/admin/tasks",              key: "tasks",              icon: <ClipboardList size={20} /> },
+      { name: "Complaints",         path: "/admin/complaints",         key: "complaints",         icon: <AlertTriangle size={20} /> },
+      { name: "Contracts",          path: "/admin/contracts",          key: "contracts",          icon: <FileCheck size={20} /> },
+      { name: "Worker Performance", path: "/admin/worker-performance", key: "worker-performance", icon: <BarChart2 size={20} /> },
+      { name: "Referrals",          path: "/admin/referrals",          key: "referrals",          icon: <Share2 size={20} /> },
+    ],
+  },
+  {
+    label: "Finance",
+    groupIcon: <DollarSign size={14} />,
+    items: [
+      { name: "Staff Pay",          path: "/admin/staff-pay",   key: "staff-pay",   icon: <DollarSign size={20} /> },
+      { name: "Payment Approvals",  path: "/admin/payments",    key: "payments",    icon: <CheckCircle2 size={20} /> },
+      { name: "Disbursement",       path: "/admin/withdrawals", key: "withdrawals", icon: <Wallet size={20} /> },
+    ],
+  },
+  {
+    label: "People",
+    groupIcon: <Briefcase size={14} />,
+    items: [
+      { name: "Staff",      path: "/admin/workers",    key: "workers",    icon: <Briefcase size={20} /> },
+      { name: "Applicants", path: "/admin/applicants", key: "applicants", icon: <Users size={20} /> },
+      { name: "Customers",  path: "/admin/customers",  key: "customers",  icon: <User size={20} /> },
+    ],
+  },
+  {
+    label: "Content & Support",
+    groupIcon: <MessageSquare size={14} />,
+    items: [
+      { name: "Blog",         path: "/admin/blog", key: "blog", icon: <BookOpen size={20} /> },
+      { name: "Chat Support", path: "/admin/chat", key: "chat", icon: <MessageSquare size={20} /> },
+    ],
+  },
+  {
+    label: "System",
+    groupIcon: <Settings size={14} />,
+    items: [
+      { name: "Organization Chart", path: "/admin/org-chart", key: "org-chart", icon: <Building2 size={20} /> },
+      { name: "Bin",                path: "/admin/bin",       key: "bin",       icon: <Trash2 size={20} /> },
+      { name: "Settings",           path: "/admin/settings",  key: "settings",  icon: <Settings size={20} /> },
+    ],
+  },
+];

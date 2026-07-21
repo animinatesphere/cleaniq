@@ -7,6 +7,8 @@ import {
   List, SortAsc,
 } from "lucide-react";
 
+import StatDetailDrawer from "./StatDetailDrawer";
+
 const API = import.meta.env.VITE_API_URL;
 
 const STATUS_META = {
@@ -205,8 +207,8 @@ const JobRow = ({ booking, onClick }) => {
   );
 };
 
-const StatCard = ({ label, value, sub, icon: Icon, color, bg }) => (
-  <div className="relative overflow-hidden rounded-2xl border border-white/7 bg-[#0B2D22] p-5">
+const StatCard = ({ label, value, sub, icon: Icon, color, bg, onClick }) => (
+  <div className={`relative overflow-hidden rounded-2xl border border-white/7 bg-[#0B2D22] p-5${onClick ? " cursor-pointer" : ""}`} onClick={onClick}>
     <div className={`absolute -right-4 -top-4 w-20 h-20 rounded-full ${bg} opacity-40`} />
     <div className="relative">
       <div className={`inline-flex items-center justify-center w-9 h-9 rounded-xl ${bg} mb-3`}>
@@ -227,6 +229,7 @@ const Jobs = () => {
   const [filter,   setFilter]   = useState("All");
   const [view,     setView]     = useState("grid");
   const [sort,     setSort]     = useState("date_desc");
+  const [drawer,   setDrawer]   = useState(null);
 
   useEffect(() => {
     fetch(`${API}/bookings`)
@@ -274,11 +277,15 @@ const Jobs = () => {
       }),
   [bookings, search, filter, sort]);
 
+  const liveJobs      = bookings.filter(b => LIVE_STATUSES.includes(b.status));
+  const completedJobs = bookings.filter(b => b.status === "Completed" || b.status === "Completed - Unpaid");
+  const photoJobs     = bookings.filter(b => (b.photos || []).length > 0);
+
   const stats = {
     total:      bookings.length,
-    live:       bookings.filter(b => LIVE_STATUSES.includes(b.status)).length,
-    completed:  bookings.filter(b => b.status === "Completed" || b.status === "Completed - Unpaid").length,
-    withPhotos: bookings.filter(b => (b.photos || []).length > 0).length,
+    live:       liveJobs.length,
+    completed:  completedJobs.length,
+    withPhotos: photoJobs.length,
   };
 
   return (
@@ -317,10 +324,10 @@ const Jobs = () => {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard label="Total Jobs"   value={stats.total}      icon={CalendarCheck}  color="text-primary"     bg="bg-primary/10" />
-          <StatCard label="Live Now"     value={stats.live}       sub={stats.live > 0 ? "Active in the field" : "None active"} icon={Activity} color="text-sky-400" bg="bg-sky-500/10" />
-          <StatCard label="Completed"    value={stats.completed}  icon={CheckCircle2}   color="text-emerald-400" bg="bg-emerald-500/10" />
-          <StatCard label="With Photos"  value={stats.withPhotos} icon={Camera}         color="text-violet-400"  bg="bg-violet-500/10" />
+          <StatCard label="Total Jobs"   value={stats.total}      icon={CalendarCheck}  color="text-primary"     bg="bg-primary/10"     onClick={() => setDrawer({ title: "All Jobs", subtitle: `${bookings.length} jobs`, items: bookings, accentColor: "emerald", renderItem: (b) => ( <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors"><div className="flex-1 min-w-0"><p className="text-sm font-medium text-white/85 truncate">{b.service}</p><p className="text-xs text-white/40 truncate">{b.customer?.firstName} {b.customer?.lastName}{b.assignedWorkerName ? ` · ${b.assignedWorkerName}` : ""}{b.schedule?.date ? ` · ${new Date(b.schedule.date).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}` : ""}</p></div><span className="text-[11px] font-semibold text-white/60 shrink-0">£{Number(b.payment?.amount||0).toFixed(0)}</span></div> ) })} />
+          <StatCard label="Live Now"     value={stats.live}       sub={stats.live > 0 ? "Active in the field" : "None active"} icon={Activity} color="text-sky-400" bg="bg-sky-500/10"    onClick={() => setDrawer({ title: "Live Jobs", subtitle: `${liveJobs.length} active in field`, items: liveJobs, accentColor: "blue", renderItem: (b) => ( <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors"><div className="flex-1 min-w-0"><p className="text-sm font-medium text-white/85 truncate">{b.service}</p><p className="text-xs text-white/40 truncate">{b.customer?.firstName} {b.customer?.lastName}{b.assignedWorkerName ? ` · ${b.assignedWorkerName}` : ""}{b.schedule?.date ? ` · ${new Date(b.schedule.date).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}` : ""}</p></div><span className="text-[11px] font-semibold text-white/60 shrink-0">£{Number(b.payment?.amount||0).toFixed(0)}</span></div> ) })} />
+          <StatCard label="Completed"    value={stats.completed}  icon={CheckCircle2}   color="text-emerald-400" bg="bg-emerald-500/10" onClick={() => setDrawer({ title: "Completed Jobs", subtitle: `${completedJobs.length} jobs`, items: completedJobs, accentColor: "emerald", renderItem: (b) => ( <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors"><div className="flex-1 min-w-0"><p className="text-sm font-medium text-white/85 truncate">{b.service}</p><p className="text-xs text-white/40 truncate">{b.customer?.firstName} {b.customer?.lastName}{b.assignedWorkerName ? ` · ${b.assignedWorkerName}` : ""}{b.schedule?.date ? ` · ${new Date(b.schedule.date).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}` : ""}</p></div><span className="text-[11px] font-semibold text-white/60 shrink-0">£{Number(b.payment?.amount||0).toFixed(0)}</span></div> ) })} />
+          <StatCard label="With Photos"  value={stats.withPhotos} icon={Camera}         color="text-violet-400"  bg="bg-violet-500/10"  onClick={() => setDrawer({ title: "Jobs With Photos", subtitle: `${photoJobs.length} jobs`, items: photoJobs, accentColor: "violet", renderItem: (b) => ( <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors"><div className="flex-1 min-w-0"><p className="text-sm font-medium text-white/85 truncate">{b.service}</p><p className="text-xs text-white/40 truncate">{b.customer?.firstName} {b.customer?.lastName}{b.assignedWorkerName ? ` · ${b.assignedWorkerName}` : ""}{b.schedule?.date ? ` · ${new Date(b.schedule.date).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}` : ""}</p></div><span className="text-[11px] font-semibold text-white/60 shrink-0">£{Number(b.payment?.amount||0).toFixed(0)}</span></div> ) })} />
         </div>
 
         <div className="bg-[#0B2D22] rounded-2xl border border-white/7 p-4 mb-6">
@@ -432,6 +439,17 @@ const Jobs = () => {
           </div>
         )}
       </div>
+
+      <StatDetailDrawer
+        isOpen={!!drawer}
+        onClose={() => setDrawer(null)}
+        title={drawer?.title || ""}
+        subtitle={drawer?.subtitle || ""}
+        items={drawer?.items || []}
+        renderItem={drawer?.renderItem}
+        onViewAll={drawer?.onViewAll}
+        accentColor={drawer?.accentColor || "emerald"}
+      />
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import StatDetailDrawer from "./StatDetailDrawer";
 import axios from "axios";
 import { Plus, X, Pencil, Check, Trash2, AlertTriangle, RefreshCw } from "lucide-react";
 
@@ -47,6 +48,7 @@ export default function Contracts() {
   const [editForm, setEditForm] = useState({});
   const [expandedId, setExpandedId] = useState(null);
   const [error, setError] = useState("");
+  const [drawer, setDrawer] = useState(null);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -125,6 +127,16 @@ export default function Contracts() {
 
   const expiringContracts = contracts.filter(c => isExpiringSoon(c.endDate) && c.status === "active");
 
+  const contractsRenderItem = (c) => (
+    <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-white/85 truncate">{c.companyName || c.clientName || c.name}</p>
+        <p className="text-xs text-white/40 truncate">{c.service || c.type} · Expires: {c.endDate ? new Date(c.endDate).toLocaleDateString("en-GB") : "—"}</p>
+      </div>
+      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-400 border border-blue-500/25 shrink-0">{c.status}</span>
+    </div>
+  );
+
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       {error && (
@@ -151,12 +163,12 @@ export default function Contracts() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Active Contracts",   val: stats.active,                    color: "text-emerald-400" },
-          { label: "Expiring Soon",      val: stats.expiringSoon,              color: "text-amber-400"   },
-          { label: "Monthly Value",      val: fmtCurrency(stats.monthlyValue), color: "text-white"       },
-          { label: "Annual Value",       val: fmtCurrency(stats.annualValue),  color: "text-blue-400"    },
+          { label: "Active Contracts",   val: stats.active,                    color: "text-emerald-400", items: contracts.filter(c => c.status === "active")   },
+          { label: "Expiring Soon",      val: stats.expiringSoon,              color: "text-amber-400",   items: expiringContracts                              },
+          { label: "Monthly Value",      val: fmtCurrency(stats.monthlyValue), color: "text-white",       items: contracts.filter(c => c.status === "active")   },
+          { label: "Annual Value",       val: fmtCurrency(stats.annualValue),  color: "text-blue-400",    items: contracts.filter(c => c.status === "active")   },
         ].map(s => (
-          <div key={s.label} className="bg-[#0B2D22] border border-white/7 rounded-xl px-5 py-4">
+          <div key={s.label} className="bg-[#0B2D22] border border-white/7 rounded-xl px-5 py-4" onClick={() => setDrawer({ title: s.label, subtitle: `${s.items.length} contract${s.items.length !== 1 ? "s" : ""}`, items: s.items, accentColor: "blue", renderItem: contractsRenderItem })}>
             <p className={`text-2xl font-black ${s.color}`}>{s.val}</p>
             <p className="text-xs text-white/40 font-medium mt-0.5">{s.label}</p>
           </div>
@@ -357,6 +369,16 @@ export default function Contracts() {
           })
         )}
       </div>
+      <StatDetailDrawer
+        isOpen={!!drawer}
+        onClose={() => setDrawer(null)}
+        title={drawer?.title || ""}
+        subtitle={drawer?.subtitle || ""}
+        items={drawer?.items || []}
+        renderItem={drawer?.renderItem}
+        onViewAll={drawer?.onViewAll}
+        accentColor={drawer?.accentColor || "emerald"}
+      />
     </div>
   );
 }

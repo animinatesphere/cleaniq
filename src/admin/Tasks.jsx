@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import StatDetailDrawer from "./StatDetailDrawer";
 import axios from "axios";
 import { Plus, X, Trash2, CheckSquare, Square, Pencil, Check, RefreshCw } from "lucide-react";
 
@@ -52,6 +53,7 @@ export default function Tasks() {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [error, setError] = useState("");
+  const [drawer, setDrawer] = useState(null);
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);
@@ -146,6 +148,16 @@ export default function Tasks() {
   const overdueCount = tasks.filter(isOverdue).length;
   const doneCount = tasks.filter(t => t.status === "Done").length;
 
+  const taskRenderItem = (t) => (
+    <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-white/85 truncate">{t.title}</p>
+        <p className="text-xs text-white/40 truncate">{t.assignedTo || "Unassigned"} · {t.dueDate ? new Date(t.dueDate).toLocaleDateString("en-GB") : "No due date"}</p>
+      </div>
+      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-white/10 text-white/60 shrink-0">{t.status}</span>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#061A13] p-6">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -173,11 +185,11 @@ export default function Tasks() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: "Open",    val: openCount,    bg: "bg-sky-500/15",     color: "text-sky-400"     },
-            { label: "Overdue", val: overdueCount, bg: "bg-rose-500/15",    color: "text-rose-400"    },
-            { label: "Done",    val: doneCount,    bg: "bg-emerald-500/15", color: "text-emerald-400" },
+            { label: "Open",    val: openCount,    bg: "bg-sky-500/15",     color: "text-sky-400",     items: tasks.filter(t => (t.status || "Open") === "Open"), accentColor: "blue"    },
+            { label: "Overdue", val: overdueCount, bg: "bg-rose-500/15",    color: "text-rose-400",    items: tasks.filter(isOverdue),                             accentColor: "rose"    },
+            { label: "Done",    val: doneCount,    bg: "bg-emerald-500/15", color: "text-emerald-400", items: tasks.filter(t => t.status === "Done"),              accentColor: "emerald" },
           ].map(s => (
-            <div key={s.label} className={`${s.bg} rounded-xl px-5 py-4 border border-white/10`}>
+            <div key={s.label} className={`${s.bg} rounded-xl px-5 py-4 border border-white/10`} onClick={() => setDrawer({ title: s.label + " Tasks", subtitle: `${s.items.length} task${s.items.length !== 1 ? "s" : ""}`, items: s.items, accentColor: s.accentColor, renderItem: taskRenderItem })}>
               <p className={`text-2xl font-black ${s.color}`}>{s.val}</p>
               <p className="text-xs text-white/40 font-medium mt-0.5">{s.label}</p>
             </div>
@@ -441,6 +453,16 @@ export default function Tasks() {
           </div>
         </div>
       </div>
+      <StatDetailDrawer
+        isOpen={!!drawer}
+        onClose={() => setDrawer(null)}
+        title={drawer?.title || ""}
+        subtitle={drawer?.subtitle || ""}
+        items={drawer?.items || []}
+        renderItem={drawer?.renderItem}
+        onViewAll={drawer?.onViewAll}
+        accentColor={drawer?.accentColor || "emerald"}
+      />
     </div>
   );
 }

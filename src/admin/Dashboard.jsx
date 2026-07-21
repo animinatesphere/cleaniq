@@ -795,6 +795,41 @@ const Dashboard = () => {
       ? (bookingsInRange.length / leadsInRange.length) * 100
       : 0;
 
+  // ── Day of week distribution ─────────────────────────────────────────────────
+  const DOW_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const dowCounts = [1, 2, 3, 4, 5, 6, 0].map((d) =>
+    bookings.filter(
+      (b) =>
+        b.schedule?.date &&
+        new Date(b.schedule.date).getDay() === d &&
+        b.status !== "Blackout" &&
+        b.customer?.firstName !== "ADMIN_BLOCK",
+    ).length,
+  );
+  const dowMax = Math.max(...dowCounts, 1);
+
+  // ── Service revenue breakdown ─────────────────────────────────────────────────
+  const serviceRevMap = {};
+  completed.forEach((b) => {
+    const svc = b.service || "Other";
+    serviceRevMap[svc] = (serviceRevMap[svc] || 0) + Number(b.payment?.amount || 0);
+  });
+  const topServiceRevenue = Object.entries(serviceRevMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
+  const maxServiceRev = topServiceRevenue[0]?.[1] || 1;
+
+  // ── New vs returning customers ────────────────────────────────────────────────
+  const customerBookingCounts = {};
+  bookings
+    .filter((b) => b.status !== "Blackout" && b.customer?.email)
+    .forEach((b) => {
+      const e = b.customer.email.toLowerCase();
+      customerBookingCounts[e] = (customerBookingCounts[e] || 0) + 1;
+    });
+  const returningCount = Object.values(customerBookingCounts).filter((c) => c > 1).length;
+  const newCustCount = Object.values(customerBookingCounts).filter((c) => c === 1).length;
+
   // ── Greeting ─────────────────────────────────────────────────────────────────
   const nowHour = new Date().getHours();
   const greeting =
@@ -2246,6 +2281,123 @@ const Dashboard = () => {
                 Select a date range to see revenue
               </p>
             )}
+          </div>
+        </div>
+
+        {/* ── Busy days · Service revenue · New vs Returning ──────────────────── */}
+        <div className="grid lg:grid-cols-3 gap-4">
+          {/* Busiest booking days */}
+          <div className={`${card} p-5 sm:p-6`}>
+            <CardHead kicker="Schedule" title="Busiest booking days" sub="All-time by day of week" />
+            <div className="mt-5 flex items-end gap-2" style={{ height: "120px" }}>
+              {DOW_LABELS.map((day, i) => {
+                const count = dowCounts[i];
+                const pct = (count / dowMax) * 100;
+                const isWeekend = i >= 5;
+                return (
+                  <div key={day} className="flex-1 flex flex-col items-center gap-1.5 h-full">
+                    <span className="text-[10px] font-semibold text-white/50 tabular-nums h-4">
+                      {count > 0 ? count : ""}
+                    </span>
+                    <div className="w-full flex-1 flex flex-col justify-end">
+                      <div
+                        className={`w-full rounded-t-md transition-all duration-700 ${isWeekend ? "bg-emerald-400/50" : "bg-emerald-500/75"}`}
+                        style={{ height: `${Math.max(pct, 5)}%` }}
+                      />
+                    </div>
+                    <span className={`text-[9px] font-semibold uppercase tracking-wide ${isWeekend ? "text-emerald-400/60" : dimmed}`}>
+                      {day}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Revenue by service */}
+          <div className={`${card} p-5 sm:p-6`}>
+            <CardHead kicker="Revenue" title="Revenue by service" sub="Completed bookings only" />
+            <div className="space-y-3 mt-5">
+              {topServiceRevenue.length === 0 ? (
+                <p className={`${muted} text-sm text-center py-6`}>No completed bookings yet.</p>
+              ) : (
+                topServiceRevenue.map(([svc, rev]) => (
+                  <div key={svc} className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-white/55 truncate flex-1 min-w-0">{svc}</span>
+                    <div className="flex items-center gap-2 shrink-0 w-36">
+                      <div className="flex-1 h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-emerald-500 rounded-full"
+                          style={{ width: `${(rev / maxServiceRev) * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-[11px] font-semibold text-white/80 tabular-nums w-14 text-right shrink-0">
+                        {gbp(rev)}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* New vs returning */}
+          <div className={`${card} p-5 sm:p-6`}>
+            <CardHead kicker="Retention" title="New vs returning" sub="Unique customers by booking count" />
+            <div className="mt-5 flex items-center gap-6">
+              <div className="relative w-28 h-28 shrink-0">
+                <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
+                  {returningCount + newCustCount > 0 && (
+                    <>
+                      <circle
+                        cx="18" cy="18" r="14" fill="none"
+                        stroke="#10B981" strokeWidth="4"
+                        strokeDasharray={`${(returningCount / (returningCount + newCustCount)) * 87.96} 87.96`}
+                        strokeLinecap="round"
+                      />
+                      <circle
+                        cx="18" cy="18" r="14" fill="none"
+                        stroke="rgba(16,185,129,0.2)" strokeWidth="4"
+                        strokeDasharray={`${(newCustCount / (returningCount + newCustCount)) * 87.96} 87.96`}
+                        strokeDashoffset={`-${(returningCount / (returningCount + newCustCount)) * 87.96}`}
+                        strokeLinecap="round"
+                      />
+                    </>
+                  )}
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-lg font-semibold text-white tabular-nums">
+                    {returningCount + newCustCount}
+                  </span>
+                  <span className={`text-[9px] ${muted} uppercase tracking-wide`}>clients</span>
+                </div>
+              </div>
+              <div className="space-y-3 flex-1">
+                {[
+                  { label: "Returning", count: returningCount, color: "bg-emerald-500" },
+                  { label: "New", count: newCustCount, color: "bg-emerald-500/20" },
+                ].map((r) => (
+                  <div key={r.label} className="flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-2 text-xs text-white/55 font-medium">
+                      <span className={`w-2 h-2 rounded-full ${r.color}`} />
+                      {r.label}
+                    </span>
+                    <span className="text-[13px] font-semibold text-white/80 tabular-nums">{r.count}</span>
+                  </div>
+                ))}
+                {returningCount + newCustCount > 0 && (
+                  <div className="pt-2 border-t border-white/[0.06]">
+                    <p className={`text-[11px] ${muted}`}>
+                      <span className="text-emerald-400 font-semibold">
+                        {((returningCount / (returningCount + newCustCount)) * 100).toFixed(0)}%
+                      </span>{" "}
+                      retention rate
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

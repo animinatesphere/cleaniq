@@ -5,6 +5,7 @@ import {
   Calendar, Clock, RefreshCw, User, Activity,
   CreditCard, Globe, AlertTriangle, UserPlus, Eye, EyeOff,
 } from "lucide-react";
+import StatDetailDrawer from "./StatDetailDrawer";
 
 const Badge = ({ children, variant = "default" }) => {
   const cls = {
@@ -83,6 +84,7 @@ const Customers = () => {
   const [showCreatePw,    setShowCreatePw]    = useState(false);
   const [creating,        setCreating]        = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState("overview");
+  const [drawer, setDrawer] = useState(null);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -234,6 +236,21 @@ const Customers = () => {
     setActiveDetailTab("overview");
   };
 
+  const customerDrawerItem = (c) => (
+    <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+      <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0">
+        <span className="text-[10px] font-semibold text-emerald-400">
+          {((c.firstName?.[0]||"")+(c.lastName?.[0]||"")).toUpperCase()||"?"}
+        </span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-white/85 truncate">{c.firstName} {c.lastName}</p>
+        <p className="text-xs text-white/40 truncate">{c.email}</p>
+      </div>
+      <span className="text-[11px] font-semibold text-white/50 shrink-0">{c.totalBookings || 0} bookings</span>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#061A13]">
 
@@ -337,12 +354,16 @@ const Customers = () => {
 
             <div className="grid grid-cols-4 gap-3 mb-5">
               {[
-                { label:"Total",      value: stats.total,                   color:"text-white" },
-                { label:"Active",     value: stats.active,                  color:"text-emerald-400" },
-                { label:"New today",  value: stats.newToday,                color:"text-blue-400" },
-                { label:"Revenue",    value: `£${stats.totalSpent.toLocaleString()}`, color:"text-white" },
+                { label:"Total",     value: stats.total,                            color:"text-white",       drawerTitle:"All Customers",     drawerSub:`${stats.total} total`,                               drawerItems:customers,                                                                                                      accent:"emerald" },
+                { label:"Active",    value: stats.active,                           color:"text-emerald-400", drawerTitle:"Active Customers",  drawerSub:`${stats.active} with login activity`,                drawerItems:customers.filter(c => c.lastLoginAt),                                                                          accent:"emerald" },
+                { label:"New today", value: stats.newToday,                         color:"text-blue-400",    drawerTitle:"New Today",         drawerSub:`${stats.newToday} registered in the last 24h`,      drawerItems:customers.filter(c => c.createdAt && new Date(c.createdAt) > new Date(Date.now() - 86400000)),                  accent:"blue"    },
+                { label:"Revenue",   value:`£${stats.totalSpent.toLocaleString()}`, color:"text-white",       drawerTitle:"Revenue Breakdown", drawerSub:`£${stats.totalSpent.toLocaleString()} total spent`,  drawerItems:[...customers].sort((a,b) => (b.totalSpent||0) - (a.totalSpent||0)),                                           accent:"emerald" },
               ].map(s => (
-                <div key={s.label} className="bg-[#071D16] border border-white/10 rounded-xl px-3 py-3">
+                <div
+                  key={s.label}
+                  onClick={() => setDrawer({ title: s.drawerTitle, subtitle: s.drawerSub, items: s.drawerItems, accentColor: s.accent, renderItem: customerDrawerItem })}
+                  className="bg-[#071D16] border border-white/10 rounded-xl px-3 py-3 cursor-pointer"
+                >
                   <p className="text-[10px] font-medium text-white/40 uppercase tracking-wide mb-1">{s.label}</p>
                   <p className={`text-lg font-bold tabular-nums ${s.color}`}>{s.value}</p>
                 </div>
@@ -723,6 +744,16 @@ const Customers = () => {
           </div>
         )}
       </div>
+      <StatDetailDrawer
+        isOpen={!!drawer}
+        onClose={() => setDrawer(null)}
+        title={drawer?.title || ""}
+        subtitle={drawer?.subtitle || ""}
+        items={drawer?.items || []}
+        renderItem={drawer?.renderItem}
+        onViewAll={drawer?.onViewAll}
+        accentColor={drawer?.accentColor || "emerald"}
+      />
     </div>
   );
 };

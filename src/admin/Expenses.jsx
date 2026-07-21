@@ -11,6 +11,7 @@ import {
   Calendar,
   TrendingDown,
 } from "lucide-react";
+import StatDetailDrawer from "./StatDetailDrawer";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -69,6 +70,7 @@ const Expenses = () => {
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [drawer, setDrawer] = useState(null);
 
   const fetchExpenses = () => {
     setLoading(true);
@@ -192,7 +194,28 @@ const Expenses = () => {
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm p-5">
+        <div
+          className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm p-5 cursor-pointer"
+          onClick={() => setDrawer({
+            title: "This Month's Expenses",
+            subtitle: `£${(stats?.thisMonth || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}`,
+            items: expenses.filter(e => {
+              const d = new Date(e.date);
+              const n = new Date();
+              return d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
+            }),
+            renderItem: (e) => (
+              <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white/85 truncate">{e.description || e.name}</p>
+                  <p className="text-xs text-white/40 truncate">{e.category} · {e.date ? new Date(e.date).toLocaleDateString("en-GB") : "—"}</p>
+                </div>
+                <span className="text-[13px] font-semibold text-rose-400 shrink-0">£{Number(e.amount||0).toFixed(2)}</span>
+              </div>
+            ),
+            accentColor: "rose",
+          })}
+        >
           <div className="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center mb-3">
             <Calendar size={16} />
           </div>
@@ -203,7 +226,24 @@ const Expenses = () => {
             This Month
           </p>
         </div>
-        <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm p-5">
+        <div
+          className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm p-5 cursor-pointer"
+          onClick={() => setDrawer({
+            title: "This Year's Expenses",
+            subtitle: `£${(stats?.thisYear || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}`,
+            items: expenses.filter(e => new Date(e.date).getFullYear() === new Date().getFullYear()),
+            renderItem: (e) => (
+              <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white/85 truncate">{e.description || e.name}</p>
+                  <p className="text-xs text-white/40 truncate">{e.category} · {e.date ? new Date(e.date).toLocaleDateString("en-GB") : "—"}</p>
+                </div>
+                <span className="text-[13px] font-semibold text-rose-400 shrink-0">£{Number(e.amount||0).toFixed(2)}</span>
+              </div>
+            ),
+            accentColor: "rose",
+          })}
+        >
           <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center mb-3">
             <TrendingDown size={16} />
           </div>
@@ -214,7 +254,24 @@ const Expenses = () => {
             This Year
           </p>
         </div>
-        <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm p-5">
+        <div
+          className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm p-5 cursor-pointer"
+          onClick={() => setDrawer({
+            title: "All Expenses",
+            subtitle: `£${(stats?.allTime || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}`,
+            items: expenses,
+            renderItem: (e) => (
+              <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white/85 truncate">{e.description || e.name}</p>
+                  <p className="text-xs text-white/40 truncate">{e.category} · {e.date ? new Date(e.date).toLocaleDateString("en-GB") : "—"}</p>
+                </div>
+                <span className="text-[13px] font-semibold text-rose-400 shrink-0">£{Number(e.amount||0).toFixed(2)}</span>
+              </div>
+            ),
+            accentColor: "rose",
+          })}
+        >
           <div className="w-9 h-9 rounded-xl bg-white/[0.07] text-white/60 flex items-center justify-center mb-3">
             <Wallet size={16} />
           </div>
@@ -225,7 +282,24 @@ const Expenses = () => {
             All Time
           </p>
         </div>
-        <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm p-5">
+        <div
+          className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm p-5 cursor-pointer"
+          onClick={() => topCategory && setDrawer({
+            title: `${topCategory[0]} Expenses`,
+            subtitle: `£${Number(topCategory[1]).toFixed(2)}`,
+            items: expenses.filter(e => e.category === topCategory[0]),
+            renderItem: (e) => (
+              <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white/85 truncate">{e.description || e.name}</p>
+                  <p className="text-xs text-white/40 truncate">{e.category} · {e.date ? new Date(e.date).toLocaleDateString("en-GB") : "—"}</p>
+                </div>
+                <span className="text-[13px] font-semibold text-rose-400 shrink-0">£{Number(e.amount||0).toFixed(2)}</span>
+              </div>
+            ),
+            accentColor: "rose",
+          })}
+        >
           <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center mb-3">
             <Receipt size={16} />
           </div>
@@ -472,6 +546,17 @@ const Expenses = () => {
           onClose={() => setToast(null)}
         />
       )}
+
+      <StatDetailDrawer
+        isOpen={!!drawer}
+        onClose={() => setDrawer(null)}
+        title={drawer?.title || ""}
+        subtitle={drawer?.subtitle || ""}
+        items={drawer?.items || []}
+        renderItem={drawer?.renderItem}
+        onViewAll={drawer?.onViewAll}
+        accentColor={drawer?.accentColor || "rose"}
+      />
     </div>
   );
 };

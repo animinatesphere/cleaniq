@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import AdminCRM from "./AdminCRM";
 import { buildBookedRanges, overlapsExistingRange } from "../utils/timeOverlap";
+import StatDetailDrawer from "./StatDetailDrawer";
 
 export const LEAD_SOURCES = [
   "Bark",
@@ -1157,6 +1158,7 @@ const Bookings = () => {
   });
   const [showAdditionalHoursModal, setShowAdditionalHoursModal] =
     useState(false);
+  const [drawer, setDrawer] = useState(null);
 
   useEffect(() => {
     if (statusMessage.text) {
@@ -2175,23 +2177,33 @@ ${extrasRows}
             b.status !== "Blackout" && b.customer?.firstName !== "ADMIN_BLOCK",
         );
         const todayStr = new Date().toISOString().split("T")[0];
-        const todayCount = allReal.filter(
+        const todayBookings = allReal.filter(
           (b) =>
             b.schedule?.date &&
             new Date(b.schedule.date).toISOString().split("T")[0] === todayStr,
-        ).length;
-        const pendingCount = allReal.filter(
-          (b) => b.status === "Pending",
-        ).length;
-        const activeCount = allReal.filter((b) =>
+        );
+        const todayCount = todayBookings.length;
+        const pendingBookings = allReal.filter((b) => b.status === "Pending");
+        const pendingCount = pendingBookings.length;
+        const activeBookings = allReal.filter((b) =>
           ["Confirmed", "In Progress", "Accepted"].includes(b.status),
-        ).length;
-        const completedCount = allReal.filter(
+        );
+        const activeCount = activeBookings.length;
+        const completedBookings = allReal.filter(
           (b) => b.status === "Completed",
-        ).length;
-        const totalRevenue = allReal
-          .filter((b) => b.status === "Completed")
+        );
+        const completedCount = completedBookings.length;
+        const totalRevenue = completedBookings
           .reduce((s, b) => s + Number(b.payment?.amount || 0), 0);
+        const bookingRenderItem = (b) => (
+          <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white/85 truncate">{b.customer?.firstName} {b.customer?.lastName}</p>
+              <p className="text-xs text-white/40 truncate">{b.service} · {b.schedule?.date ? new Date(b.schedule.date).toLocaleDateString("en-GB", {day:"numeric",month:"short"}) : "—"}</p>
+            </div>
+            <span className="text-[11px] font-semibold text-white/60 shrink-0">£{Number(b.payment?.amount||0).toFixed(0)}</span>
+          </div>
+        );
         return (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[
@@ -2201,6 +2213,7 @@ ${extrasRows}
                 sub: "scheduled",
                 color: "text-cyan-400",
                 dot: "bg-cyan-400",
+                onClick: () => setDrawer({ title: "Today's Bookings", subtitle: `${todayCount} scheduled today`, items: todayBookings, accentColor: "blue", renderItem: bookingRenderItem }),
               },
               {
                 label: "Pending",
@@ -2208,6 +2221,7 @@ ${extrasRows}
                 sub: "need action",
                 color: "text-amber-400",
                 dot: "bg-amber-400",
+                onClick: () => setDrawer({ title: "Pending Bookings", subtitle: `${pendingCount} need action`, items: pendingBookings, accentColor: "amber", renderItem: bookingRenderItem }),
               },
               {
                 label: "Active",
@@ -2215,6 +2229,7 @@ ${extrasRows}
                 sub: "in progress",
                 color: "text-emerald-400",
                 dot: "bg-[#10B981]",
+                onClick: () => setDrawer({ title: "Active Bookings", subtitle: `${activeCount} in progress`, items: activeBookings, accentColor: "emerald", renderItem: bookingRenderItem }),
               },
               {
                 label: "Completed",
@@ -2222,6 +2237,7 @@ ${extrasRows}
                 sub: "all time",
                 color: "text-blue-400",
                 dot: "bg-blue-400",
+                onClick: () => setDrawer({ title: "Completed Bookings", subtitle: `${completedCount} all time`, items: completedBookings, accentColor: "emerald", renderItem: bookingRenderItem }),
               },
               {
                 label: "Revenue",
@@ -2229,11 +2245,13 @@ ${extrasRows}
                 sub: "earned",
                 color: "text-emerald-300",
                 dot: "bg-emerald-300",
+                onClick: () => setDrawer({ title: "Revenue Breakdown", subtitle: `£${totalRevenue.toFixed(0)} from ${completedCount} completed`, items: [...completedBookings].sort((a,b) => Number(b.payment?.amount||0) - Number(a.payment?.amount||0)), accentColor: "emerald", renderItem: bookingRenderItem }),
               },
             ].map((s) => (
               <div
                 key={s.label}
-                className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl px-5 py-4 flex items-center gap-3 shadow-sm shadow-black/20"
+                onClick={s.onClick}
+                className={`bg-[#0B2D22] border border-white/[0.07] rounded-2xl px-5 py-4 flex items-center gap-3 shadow-sm shadow-black/20${s.onClick ? " cursor-pointer" : ""}`}
               >
                 <div className={`w-2 h-2 rounded-full shrink-0 ${s.dot}`} />
                 <div>
@@ -6113,6 +6131,17 @@ ${extrasRows}
           </div>
         </div>
       )}
+
+      <StatDetailDrawer
+        isOpen={!!drawer}
+        onClose={() => setDrawer(null)}
+        title={drawer?.title || ""}
+        subtitle={drawer?.subtitle || ""}
+        items={drawer?.items || []}
+        renderItem={drawer?.renderItem}
+        onViewAll={drawer?.onViewAll}
+        accentColor={drawer?.accentColor || "emerald"}
+      />
     </div>
   );
 };

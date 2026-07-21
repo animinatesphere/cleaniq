@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import StatDetailDrawer from "./StatDetailDrawer";
 import axios from "axios";
 import { Plus, X, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 
@@ -37,6 +38,7 @@ export default function Complaints() {
   const [saving, setSaving] = useState(false);
   const [editData, setEditData] = useState({});
   const [error, setError] = useState("");
+  const [drawer, setDrawer] = useState(null);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -87,6 +89,16 @@ export default function Complaints() {
     }
   };
 
+  const complaintsRenderItem = (c) => (
+    <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-white/85 truncate">{c.subject || c.title}</p>
+        <p className="text-xs text-white/40 truncate">{c.customerName || c.customer} · {c.createdAt ? new Date(c.createdAt).toLocaleDateString("en-GB") : "—"}</p>
+      </div>
+      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-400 border border-rose-500/25 shrink-0">{c.status || c.severity}</span>
+    </div>
+  );
+
   const toggleExpand = (id) => {
     if (expandedId === id) {
       setExpandedId(null);
@@ -127,12 +139,12 @@ export default function Complaints() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Open",          val: stats.open,          color: "text-rose-400"    },
-          { label: "Investigating", val: stats.investigating, color: "text-amber-400"   },
-          { label: "Resolved",      val: stats.resolved,      color: "text-emerald-400" },
-          { label: "Critical",      val: stats.critical,      color: "text-rose-400"    },
+          { label: "Open",          val: stats.open,          color: "text-rose-400",    items: complaints.filter(c => c.status === "Open")          },
+          { label: "Investigating", val: stats.investigating, color: "text-amber-400",   items: complaints.filter(c => c.status === "Investigating") },
+          { label: "Resolved",      val: stats.resolved,      color: "text-emerald-400", items: complaints.filter(c => c.status === "Resolved")      },
+          { label: "Critical",      val: stats.critical,      color: "text-rose-400",    items: complaints.filter(c => c.severity === "critical")    },
         ].map(s => (
-          <div key={s.label} className="bg-[#0B2D22] border border-white/7 rounded-xl px-5 py-4">
+          <div key={s.label} className="bg-[#0B2D22] border border-white/7 rounded-xl px-5 py-4" onClick={() => setDrawer({ title: s.label + " Complaints", subtitle: `${s.items.length} complaint${s.items.length !== 1 ? "s" : ""}`, items: s.items, accentColor: "rose", renderItem: complaintsRenderItem })}>
             <p className={`text-2xl font-black ${s.color}`}>{s.val}</p>
             <p className="text-xs font-medium mt-0.5 text-white/40">{s.label}</p>
           </div>
@@ -315,6 +327,16 @@ export default function Complaints() {
           ))
         )}
       </div>
+      <StatDetailDrawer
+        isOpen={!!drawer}
+        onClose={() => setDrawer(null)}
+        title={drawer?.title || ""}
+        subtitle={drawer?.subtitle || ""}
+        items={drawer?.items || []}
+        renderItem={drawer?.renderItem}
+        onViewAll={drawer?.onViewAll}
+        accentColor={drawer?.accentColor || "emerald"}
+      />
     </div>
   );
 }
