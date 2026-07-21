@@ -34,6 +34,20 @@ app.use(
     optionsSuccessStatus: 204,
   }),
 );
+
+// Explicit OPTIONS handler so preflight always responds with full CORS headers
+app.options("*", (req, res) => {
+  const origin = req.headers.origin;
+  if (origin && (allowedOrigins.includes(origin) || origin.endsWith("cleaniqservices.com"))) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With");
+  res.setHeader("Access-Control-Max-Age", "86400");
+  res.sendStatus(204);
+});
+
 // Enforce canonical host (www) in production to avoid www vs non-www split
 app.use((req, res, next) => {
   try {
