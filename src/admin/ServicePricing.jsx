@@ -110,79 +110,81 @@ const ServicePricing = () => {
   }, {});
 
   return (
-    <div className="service-pricing-container">
+    <div className="space-y-6 pb-24">
       {/* Header */}
-      <div className="pricing-header">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0B2D22] border border-white/7 rounded-2xl p-6">
         <div>
-          <h1>💰 Service Pricing</h1>
-          <p>Set worker payment rates for each service</p>
+          <h1 className="text-2xl font-black text-white">💰 Service Pricing</h1>
+          <p className="text-white/40 text-sm mt-1">Set worker payment rates for each service</p>
         </div>
         <button
-          className="btn-refresh"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 rounded-xl font-bold text-sm transition-all disabled:opacity-50"
           onClick={fetchServices}
           disabled={loading}
         >
-          <RefreshCw size={18} />
+          <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
           Refresh
         </button>
       </div>
 
       {/* Status Message */}
       {statusMsg.text && (
-        <div className={`status-message status-${statusMsg.type}`}>
-          {statusMsg.type === "success" && "✅ "}
-          {statusMsg.type === "error" && "❌ "}
+        <div className={`p-4 rounded-2xl border flex items-center gap-3 text-sm font-semibold ${
+          statusMsg.type === "success"
+            ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400"
+            : "bg-rose-500/15 border-rose-500/25 text-rose-400"
+        }`}>
           {statusMsg.text}
         </div>
       )}
 
       {/* Loading */}
       {loading && (
-        <div className="loading-state">
-          <RefreshCw size={32} className="spinner" />
-          <p>Loading services...</p>
+        <div className="py-20 flex flex-col items-center justify-center text-white/40">
+          <RefreshCw size={32} className="animate-spin mb-3 text-emerald-400" />
+          <p className="font-semibold text-sm">Loading services...</p>
         </div>
       )}
 
       {/* Services by Category */}
       {!loading && Object.keys(grouped).length > 0 && (
-        <div className="categories-list">
+        <div className="space-y-6">
           {Object.keys(grouped).map((category) => (
-            <div key={category} className="category-section">
-              <h2 className="category-title">
-                <Briefcase size={20} />
+            <div key={category} className="bg-[#0B2D22] border border-white/7 rounded-2xl overflow-hidden">
+              <h2 className="flex items-center gap-3 text-white font-black text-lg px-6 py-4 border-b border-white/[0.04] bg-[#071D16]">
+                <Briefcase size={20} className="text-emerald-400" />
                 {category}
               </h2>
 
-              <div className="services-grid">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
                 {grouped[category].map((service) => (
-                  <div key={service._id} className="service-card">
-                    <div className="card-header">
+                  <div key={service._id} className="bg-white/[0.03] border border-white/[0.04] rounded-2xl p-5 hover:bg-white/[0.06] transition-all">
+                    <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="service-name">{service.name}</h3>
-                        <p className="service-meta">
+                        <h3 className="font-black text-white text-base">{service.name}</h3>
+                        <p className="text-white/40 text-xs mt-1">
                           {service.type === "flat" ? "Flat rate" : "Hourly"} • £
                           {service.rate}/
                           {service.type === "flat" ? "service" : "hr"}
                         </p>
                       </div>
-                      <div className="card-actions">
+                      <div className="flex gap-2">
                         {editingId === service._id ? (
                           <>
                             <button
-                              className="btn-icon btn-save"
+                              className="w-8 h-8 flex items-center justify-center rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white transition-colors disabled:opacity-50"
                               onClick={() => handleSaveRate(service._id)}
                               disabled={savingId === service._id}
                               title="Save"
                             >
                               {savingId === service._id ? (
-                                <RefreshCw size={16} className="spinner" />
+                                <RefreshCw size={16} className="animate-spin" />
                               ) : (
                                 <Check size={16} />
                               )}
                             </button>
                             <button
-                              className="btn-icon btn-cancel"
+                              className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 transition-colors"
                               onClick={cancelEdit}
                               title="Cancel"
                             >
@@ -191,7 +193,7 @@ const ServicePricing = () => {
                           </>
                         ) : (
                           <button
-                            className="btn-icon btn-edit"
+                            className="w-8 h-8 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 transition-colors"
                             onClick={() => startEdit(service)}
                             title="Edit"
                           >
@@ -202,11 +204,11 @@ const ServicePricing = () => {
                     </div>
 
                     {/* Rate Display/Edit */}
-                    <div className="rate-section">
-                      <label>Worker Payment</label>
+                    <div className="mt-4 pt-4 border-t border-white/[0.04]">
+                      <label className="text-white/40 text-xs font-semibold uppercase tracking-wide block mb-2">Worker Payment</label>
                       {editingId === service._id ? (
-                        <div className="rate-input-group">
-                          <span className="currency">£</span>
+                        <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5">
+                          <span className="text-white/40 font-black">£</span>
                           <input
                             type="number"
                             step="0.01"
@@ -215,29 +217,29 @@ const ServicePricing = () => {
                               handleRateChange(service._id, e.target.value)
                             }
                             placeholder="0.00"
-                            className="rate-input"
+                            className="flex-1 bg-transparent text-white font-bold text-sm focus:outline-none placeholder:text-white/20"
                           />
-                          <span className="unit">/service</span>
+                          <span className="text-white/40 text-xs font-bold">/service</span>
                         </div>
                       ) : (
-                        <div className="rate-display">
-                          <span className="rate-value">
+                        <div className="flex items-center gap-2">
+                          <span className="text-white font-black text-xl">
                             £{(service.workerPaymentRate || 0).toFixed(2)}
                           </span>
-                          <span className="rate-unit">/service</span>
+                          <span className="text-white/40 text-sm">/service</span>
                         </div>
                       )}
                     </div>
 
                     {/* Description */}
                     {service.description && (
-                      <p className="service-description">
+                      <p className="text-white/40 text-xs mt-3 leading-relaxed">
                         {service.description}
                       </p>
                     )}
 
                     {/* Info Box */}
-                    <div className="info-box">
+                    <div className="flex items-center gap-2 mt-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2 text-emerald-400 text-xs font-medium">
                       <AlertCircle size={14} />
                       <span>
                         Worker earns £
@@ -255,10 +257,10 @@ const ServicePricing = () => {
 
       {/* Empty State */}
       {!loading && services.length === 0 && (
-        <div className="empty-state">
-          <DollarSign size={48} />
-          <p>No services found</p>
-          <p className="subtext">
+        <div className="py-20 flex flex-col items-center justify-center text-center text-white/40">
+          <DollarSign size={48} className="mb-4 text-white/25" />
+          <p className="font-semibold">No services found</p>
+          <p className="text-white/25 text-sm mt-2">
             Services will appear here once they're created
           </p>
         </div>

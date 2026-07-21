@@ -37,14 +37,14 @@ const emptyForm = () => ({
 });
 
 const CATEGORY_COLORS = {
-  "Supplies & Equipment": "bg-emerald-50 text-emerald-600",
-  "Fuel & Transport": "bg-blue-50 text-blue-600",
-  Marketing: "bg-violet-50 text-violet-600",
-  "Rent & Utilities": "bg-amber-50 text-amber-600",
-  Insurance: "bg-cyan-50 text-cyan-600",
-  "Software & Subscriptions": "bg-indigo-50 text-indigo-600",
-  "Wages & Bonuses": "bg-pink-50 text-pink-600",
-  Other: "bg-slate-100 text-slate-600",
+  "Supplies & Equipment": "bg-emerald-500/15 text-emerald-400",
+  "Fuel & Transport": "bg-blue-500/15 text-blue-400",
+  Marketing: "bg-violet-500/15 text-violet-400",
+  "Rent & Utilities": "bg-amber-500/15 text-amber-400",
+  Insurance: "bg-cyan-500/15 text-cyan-400",
+  "Software & Subscriptions": "bg-indigo-500/15 text-indigo-400",
+  "Wages & Bonuses": "bg-pink-500/15 text-pink-400",
+  Other: "bg-white/10 text-white/60",
 };
 
 const Toast = ({ msg, type, onClose }) => (
@@ -166,10 +166,10 @@ const Expenses = () => {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Receipt size={22} className="text-primary" /> Expense Tracker
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-white/40 mt-1">
             Log and track business expenses — supplies, fuel, marketing, and
             more
           </p>
@@ -177,13 +177,13 @@ const Expenses = () => {
         <div className="flex gap-2.5 self-start">
           <button
             onClick={fetchExpenses}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 font-semibold text-sm transition-all"
           >
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
           </button>
           <button
             onClick={openAdd}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-dark transition-all font-semibold text-sm shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white transition-all font-semibold text-sm shadow-sm"
           >
             <Plus size={15} /> Add Expense
           </button>
@@ -192,47 +192,47 @@ const Expenses = () => {
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5">
-          <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-3">
+        <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm p-5">
+          <div className="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center mb-3">
             <Calendar size={16} />
           </div>
-          <p className="text-2xl font-bold text-slate-900 tabular-nums">
+          <p className="text-2xl font-bold text-white tabular-nums">
             £{(stats?.thisMonth || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-[11px] font-semibold text-slate-400 mt-1">
+          <p className="text-[11px] font-semibold text-white/40 mt-1">
             This Month
           </p>
         </div>
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5">
-          <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
+        <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm p-5">
+          <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center mb-3">
             <TrendingDown size={16} />
           </div>
-          <p className="text-2xl font-bold text-slate-900 tabular-nums">
+          <p className="text-2xl font-bold text-white tabular-nums">
             £{(stats?.thisYear || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-[11px] font-semibold text-slate-400 mt-1">
+          <p className="text-[11px] font-semibold text-white/40 mt-1">
             This Year
           </p>
         </div>
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5">
-          <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mb-3">
+        <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm p-5">
+          <div className="w-9 h-9 rounded-xl bg-white/[0.07] text-white/60 flex items-center justify-center mb-3">
             <Wallet size={16} />
           </div>
-          <p className="text-2xl font-bold text-slate-900 tabular-nums">
+          <p className="text-2xl font-bold text-white tabular-nums">
             £{(stats?.allTime || 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}
           </p>
-          <p className="text-[11px] font-semibold text-slate-400 mt-1">
+          <p className="text-[11px] font-semibold text-white/40 mt-1">
             All Time
           </p>
         </div>
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5">
-          <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+        <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm p-5">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center mb-3">
             <Receipt size={16} />
           </div>
-          <p className="text-sm font-bold text-slate-900 truncate">
+          <p className="text-sm font-bold text-white truncate">
             {topCategory ? topCategory[0] : "—"}
           </p>
-          <p className="text-[11px] font-semibold text-slate-400 mt-1">
+          <p className="text-[11px] font-semibold text-white/40 mt-1">
             Top Category
           </p>
         </div>
@@ -242,19 +242,19 @@ const Expenses = () => {
         <div className="relative max-w-md flex-1 min-w-[200px]">
           <Search
             size={16}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40"
           />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search expenses..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none text-sm"
           />
         </div>
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 focus:border-emerald-500/50 focus:outline-none text-sm font-semibold"
         >
           <option value="all">All categories</option>
           {CATEGORIES.map((c) => (
@@ -265,11 +265,11 @@ const Expenses = () => {
         </select>
       </div>
 
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.12em] bg-slate-50/60">
+              <tr className="text-white/40 text-xs font-semibold uppercase tracking-wide bg-[#071D16]">
                 <th className="px-6 py-3.5">Description</th>
                 <th className="px-4 py-3.5">Category</th>
                 <th className="px-4 py-3.5">Date</th>
@@ -278,61 +278,61 @@ const Expenses = () => {
                 <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-white/[0.04]">
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="py-16 text-center font-semibold text-slate-400">
+                  <td colSpan="6" className="py-16 text-center font-semibold text-white/40">
                     Loading...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="py-16 text-center font-semibold text-slate-300">
+                  <td colSpan="6" className="py-16 text-center font-semibold text-white/25">
                     No expenses found
                   </td>
                 </tr>
               ) : (
                 filtered.map((e) => (
-                  <tr key={e._id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-slate-800">
+                  <tr key={e._id} className="hover:bg-white/[0.04] transition-colors border-b border-white/[0.04]">
+                    <td className="px-6 py-4 text-sm font-semibold text-white/80">
                       {e.description}
                       {e.notes && (
-                        <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                        <p className="text-[11px] text-white/40 font-medium mt-0.5">
                           {e.notes}
                         </p>
                       )}
                     </td>
                     <td className="px-4 py-4">
                       <span
-                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap ${CATEGORY_COLORS[e.category] || "bg-slate-100 text-slate-500"}`}
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap ${CATEGORY_COLORS[e.category] || "bg-white/10 text-white/60"}`}
                       >
                         {e.category}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-xs font-semibold text-slate-500 whitespace-nowrap">
+                    <td className="px-4 py-4 text-xs font-semibold text-white/40 whitespace-nowrap">
                       {new Date(e.date).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
                       })}
                     </td>
-                    <td className="px-4 py-4 text-xs font-medium text-slate-500">
+                    <td className="px-4 py-4 text-xs font-medium text-white/40">
                       {e.paymentMethod}
                     </td>
-                    <td className="px-4 py-4 text-right text-sm font-bold text-slate-900 tabular-nums">
+                    <td className="px-4 py-4 text-right text-sm font-bold text-white tabular-nums">
                       £{e.amount.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-1.5">
                         <button
                           onClick={() => openEdit(e)}
-                          className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-primary/10 hover:text-primary transition-all"
+                          className="p-2 rounded-xl bg-white/5 text-white/40 hover:bg-emerald-500/10 hover:text-emerald-400 transition-all"
                         >
                           <Edit3 size={15} />
                         </button>
                         <button
                           onClick={() => handleDelete(e)}
-                          className="p-2 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-100 hover:text-rose-500 transition-all"
+                          className="p-2 rounded-xl bg-white/5 text-white/40 hover:bg-rose-500/15 hover:text-rose-400 transition-all"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -347,26 +347,26 @@ const Expenses = () => {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md"
+            className="absolute inset-0"
             onClick={() => setShowModal(false)}
           />
-          <div className="relative w-full max-w-lg bg-white rounded-[28px] shadow-2xl overflow-hidden border-4 border-white">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-              <h3 className="text-lg font-bold text-primary-dark">
+          <div className="relative w-full max-w-lg bg-[#0B2D22] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+            <div className="p-6 border-b border-white/[0.07] flex justify-between items-center bg-[#071D16]">
+              <h3 className="text-lg font-bold text-white">
                 {editingId ? "Edit Expense" : "Add Expense"}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-rose-400 transition-colors"
               >
                 <X size={18} />
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">
                   Description
                 </label>
                 <input
@@ -375,12 +375,12 @@ const Expenses = () => {
                     setForm({ ...form, description: e.target.value })
                   }
                   placeholder="e.g. Cleaning supplies restock"
-                  className="w-full p-3 rounded-xl border-2 border-slate-200 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none font-medium text-sm"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">
                     Amount (£)
                   </label>
                   <input
@@ -390,24 +390,24 @@ const Expenses = () => {
                     value={form.amount}
                     onChange={(e) => setForm({ ...form, amount: e.target.value })}
                     placeholder="0.00"
-                    className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none font-bold text-sm"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">
                     Date
                   </label>
                   <input
                     type="date"
                     value={form.date}
                     onChange={(e) => setForm({ ...form, date: e.target.value })}
-                    className="w-full p-3 rounded-xl border-2 border-slate-200 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-emerald-500/50 focus:outline-none font-medium text-sm"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">
                     Category
                   </label>
                   <select
@@ -415,7 +415,7 @@ const Expenses = () => {
                     onChange={(e) =>
                       setForm({ ...form, category: e.target.value })
                     }
-                    className="w-full p-3 rounded-xl border-2 border-slate-200 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-emerald-500/50 focus:outline-none font-medium text-sm"
                   >
                     {CATEGORIES.map((c) => (
                       <option key={c} value={c}>
@@ -425,7 +425,7 @@ const Expenses = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">
                     Payment Method
                   </label>
                   <select
@@ -433,7 +433,7 @@ const Expenses = () => {
                     onChange={(e) =>
                       setForm({ ...form, paymentMethod: e.target.value })
                     }
-                    className="w-full p-3 rounded-xl border-2 border-slate-200 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-emerald-500/50 focus:outline-none font-medium text-sm"
                   >
                     {PAYMENT_METHODS.map((m) => (
                       <option key={m} value={m}>
@@ -444,19 +444,19 @@ const Expenses = () => {
                 </div>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">
                   Notes (optional)
                 </label>
                 <textarea
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  className="w-full p-3 rounded-xl border-2 border-slate-200 font-medium text-sm h-20 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none font-medium text-sm h-20 resize-none"
                 />
               </div>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full py-3 rounded-xl bg-primary text-white hover:bg-primary-dark font-bold text-sm transition-all disabled:opacity-60"
+                className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-sm transition-all disabled:opacity-60"
               >
                 {saving ? "Saving..." : editingId ? "Save Changes" : "Add Expense"}
               </button>

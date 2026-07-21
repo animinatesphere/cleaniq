@@ -248,7 +248,7 @@ const ExtraTimeRequestCard = ({ booking, onUpdated }) => {
             <button
               onClick={handleExtend}
               disabled={extending}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-black hover:bg-emerald-700 transition-colors disabled:opacity-60 shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-black transition-colors disabled:opacity-60 shadow-sm"
             >
               {extending ? <RefreshCw size={13} className="animate-spin" /> : <CheckCircle2 size={13} />}
               {extending ? "Updating…" : `Approve & extend to ${newHrs}h`}
@@ -256,7 +256,7 @@ const ExtraTimeRequestCard = ({ booking, onUpdated }) => {
             <button
               onClick={handleDismiss}
               disabled={dismissing}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/60 text-xs font-bold hover:bg-white/10 transition-colors disabled:opacity-60"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-xs font-bold hover:bg-white/10 transition-colors disabled:opacity-60"
             >
               {dismissing ? <RefreshCw size={13} className="animate-spin" /> : <X size={13} />}
               Dismiss
@@ -349,7 +349,7 @@ const ExtendJobPanel = ({ booking, onUpdated }) => {
       <button
         onClick={handleSave}
         disabled={saving}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 text-white text-xs font-black hover:bg-emerald-700 transition-colors disabled:opacity-60 shadow-sm"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-black transition-colors disabled:opacity-60 shadow-sm"
       >
         {saving ? <RefreshCw size={13} className="animate-spin" /> : <PlusCircle size={13} />}
         {saving ? "Saving…" : `Save — extend to ${newHrs}h`}
@@ -458,7 +458,7 @@ const JobDetail = () => {
         Back to Jobs
       </button>
 
-      <div className="bg-[#061A13] rounded-3xl p-6 sm:p-8 mb-6 text-white relative overflow-hidden">
+      <div className="bg-[#0B2D22] rounded-3xl p-6 sm:p-8 mb-6 text-white relative overflow-hidden border border-white/7">
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
 
         {isLive && (
@@ -580,7 +580,7 @@ const JobDetail = () => {
                     href={`https://www.google.com/maps?q=${liveLocation.lat},${liveLocation.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-black hover:bg-emerald-700 transition-colors shadow-sm"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-black transition-colors shadow-sm"
                   >
                     <Navigation size={13} /> Open in Google Maps
                   </a>

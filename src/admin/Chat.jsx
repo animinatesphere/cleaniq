@@ -149,9 +149,9 @@ const Chat = () => {
   });
 
   return (
-    <div className="bg-[#0B2D22] border border-white/7 rounded-[32px] overflow-hidden shadow-2xl h-[calc(100vh-140px)] flex flex-col md:flex-row">
+    <div className="bg-[#0B2D22] border border-white/7 rounded-4xl overflow-hidden shadow-2xl h-[calc(100vh-140px)] flex flex-col md:flex-row">
 
-      <div className="w-full md:w-[350px] border-r border-white/7 flex flex-col h-full bg-[#071D16]">
+      <div className="w-full md:w-87.5 border-r border-white/7 flex flex-col h-full bg-[#071D16]">
 
         <div className="p-6 border-b border-white/10 bg-[#0B2D22]">
           <div className="flex justify-between items-center mb-4">
@@ -318,8 +318,8 @@ const Chat = () => {
               </div>
               <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
                 activeTab === 'cleaners'
-                  ? (selectedThread.worker?.status === 'Active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400')
-                  : (selectedThread.booking?.status === 'Cancelled' ? 'bg-rose-500/15 text-rose-400' : selectedThread.booking?.status === 'Completed' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-blue-500/15 text-blue-400')
+                  ? (selectedThread.worker?.status === 'Active' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25' : 'bg-amber-500/15 text-amber-400 border border-amber-500/25')
+                  : (selectedThread.booking?.status === 'Cancelled' ? 'bg-rose-500/15 text-rose-400 border border-rose-500/25' : selectedThread.booking?.status === 'Completed' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25' : 'bg-blue-500/15 text-blue-400 border border-blue-500/25')
               }`}>
                 {activeTab === 'cleaners'
                   ? selectedThread.worker?.status
@@ -343,10 +343,10 @@ const Chat = () => {
                       key={m._id}
                       className={`flex ${isAdmin ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}
                     >
-                      <div className={`max-w-[70%] p-4 rounded-2xl shadow-sm border ${
+                      <div className={`max-w-[70%] p-4 rounded-2xl shadow-sm ${
                         isAdmin
-                          ? 'bg-emerald-500 text-white border-emerald-500/50 rounded-tr-sm'
-                          : 'bg-[#071D16] text-white/80 border-white/10 rounded-tl-sm'
+                          ? 'bg-emerald-500/20 text-white rounded-2xl'
+                          : 'bg-white/[0.07] text-white/80 rounded-2xl'
                       }`}>
                         <p className="text-sm font-bold leading-relaxed">{m.text}</p>
                         <div className={`flex justify-end items-center gap-1 mt-1 text-[9px] font-bold uppercase tracking-wider ${
@@ -363,7 +363,7 @@ const Chat = () => {
               <div ref={messageEndRef} />
             </div>
 
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-white/10 bg-[#0B2D22] shrink-0 flex items-center gap-3">
+            <form onSubmit={handleSendMessage} className="p-4 bg-[#071D16] border-t border-white/7 shrink-0 flex items-center gap-3">
               <input
                 type="text"
                 placeholder={activeTab === 'cleaners'
@@ -372,12 +372,12 @@ const Chat = () => {
                 }
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                className="flex-1 py-4 px-6 bg-[#071D16] rounded-2xl border border-white/10 outline-none font-bold text-sm text-white placeholder:text-white/20 focus:border-emerald-500/50 transition-all"
+                className="flex-1 py-4 px-6 bg-white/5 rounded-2xl border border-white/10 outline-none font-bold text-sm text-white placeholder:text-white/20 focus:border-emerald-500/50 transition-all"
               />
               <button
                 type="submit"
                 disabled={!inputText.trim() || sending}
-                className="w-14 h-14 bg-emerald-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition-all disabled:bg-white/10 disabled:shadow-none"
+                className="w-14 h-14 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 transition-all disabled:bg-white/10 disabled:shadow-none"
               >
                 <Send size={20} />
               </button>
@@ -385,7 +385,7 @@ const Chat = () => {
           </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-            <div className="w-20 h-20 bg-emerald-500/10 rounded-[32px] flex items-center justify-center text-emerald-400 mb-6 shadow-xl shadow-emerald-500/10">
+            <div className="w-20 h-20 bg-emerald-500/10 rounded-4xl flex items-center justify-center text-emerald-400 mb-6 shadow-xl shadow-emerald-500/10">
               <MessageSquare size={36} />
             </div>
             <h3 className="font-black text-2xl text-white">Select a Conversation</h3>

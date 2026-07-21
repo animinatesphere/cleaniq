@@ -152,15 +152,14 @@ const AdminWithdrawals = () => {
 
   // Get status badge
   const getStatusBadge = (status) => {
-    const statusStyles = {
-      pending: "status-badge status-pending",
-      approved: "status-badge status-approved",
-      processing: "status-badge status-processing",
-      completed: "status-badge status-completed",
-      failed: "status-badge status-failed",
+    const map = {
+      pending:    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border bg-amber-500/15 text-amber-400 border-amber-500/25",
+      approved:   "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+      processing: "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+      completed:  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border bg-white/10 text-white/60 border-white/10",
+      failed:     "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border bg-rose-500/15 text-rose-400 border-rose-500/25",
     };
-
-    return statusStyles[status] || "status-badge";
+    return map[status] || "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border bg-white/10 text-white/60 border-white/10";
   };
 
   // Get status icon
@@ -181,30 +180,50 @@ const AdminWithdrawals = () => {
   };
 
   return (
-    <div className="admin-withdrawals">
-      <div className="withdrawals-header">
-        <div className="header-top">
-          <h1>💰 Withdrawal Requests Management</h1>
-          <button onClick={fetchWithdrawals} className="btn-refresh">
+    <div className="min-h-screen bg-[#071D16] p-6 space-y-6">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white">💰 Withdrawal Requests Management</h1>
+          </div>
+          <button
+            onClick={fetchWithdrawals}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 rounded-xl text-sm font-semibold transition-colors"
+          >
             <RefreshCw size={20} /> Refresh
           </button>
         </div>
 
-        {successMsg && <div className="success-message">{successMsg}</div>}
-        {error && <div className="error-message">{error}</div>}
+        {successMsg && (
+          <div className="px-4 py-3 bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 rounded-xl text-sm font-semibold">
+            {successMsg}
+          </div>
+        )}
+        {error && (
+          <div className="px-4 py-3 bg-rose-500/15 border border-rose-500/25 text-rose-400 rounded-xl text-sm font-semibold">
+            {error}
+          </div>
+        )}
 
-        <div className="filter-bar">
-          <Search size={18} />
-          <input
-            type="text"
-            placeholder="Search by worker name or ID..."
-            // Add search functionality if needed
-          />
-          <div className="filter-buttons">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search by worker name or ID..."
+              className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none rounded-xl text-sm"
+              // Add search functionality if needed
+            />
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
             {["pending", "approved", "failed", "all"].map((status) => (
               <button
                 key={status}
-                className={`filter-btn ${filter === status ? "active" : ""}`}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors ${
+                  filter === status
+                    ? "bg-emerald-500 text-white border-emerald-500"
+                    : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10"
+                }`}
                 onClick={() => setFilter(status)}
               >
                 <Filter size={16} />
@@ -222,154 +241,155 @@ const AdminWithdrawals = () => {
       </div>
 
       {loading ? (
-        <div className="loading">Loading withdrawal requests...</div>
+        <div className="flex items-center justify-center py-16 text-white/40 font-medium">
+          Loading withdrawal requests...
+        </div>
       ) : filteredWithdrawals.length === 0 ? (
-        <div className="empty-state">
+        <div className="flex flex-col items-center justify-center py-16 text-white/25 gap-3">
           <Wallet size={48} />
-          <p>No {filter !== "all" ? filter : ""} withdrawal requests found</p>
+          <p className="font-medium">No {filter !== "all" ? filter : ""} withdrawal requests found</p>
         </div>
       ) : (
-        <div className="withdrawals-list">
+        <div className="space-y-3">
           {filteredWithdrawals.map((withdrawal) => (
             <div
               key={withdrawal._id}
-              className={`withdrawal-card ${withdrawal.status}`}
+              className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl overflow-hidden"
             >
               <div
-                className="card-header"
+                className="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer hover:bg-white/[0.04] transition-colors"
                 onClick={() =>
                   setExpandedId(
                     expandedId === withdrawal._id ? null : withdrawal._id,
                   )
                 }
               >
-                <div className="header-left">
+                <div className="flex items-center gap-3 min-w-0">
                   <div className={getStatusBadge(withdrawal.status)}>
                     {getStatusIcon(withdrawal.status)}
                     <span>{withdrawal.status.toUpperCase()}</span>
                   </div>
 
-                  <div className="worker-summary">
-                    <h3>{withdrawal.workerName}</h3>
-                    <p className="amount">£{withdrawal.amount.toFixed(2)}</p>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-white text-sm">{withdrawal.workerName}</h3>
+                    <p className="text-sm font-bold text-white/80 tabular-nums mt-0.5">£{withdrawal.amount.toFixed(2)}</p>
                   </div>
                 </div>
 
-                <div className="header-right">
-                  <span className="date">
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-xs text-white/40 font-medium">
                     {new Date(withdrawal.createdAt).toLocaleDateString()}
                   </span>
                   {expandedId === withdrawal._id ? (
-                    <ChevronUp size={20} />
+                    <ChevronUp size={20} className="text-white/40" />
                   ) : (
-                    <ChevronDown size={20} />
+                    <ChevronDown size={20} className="text-white/40" />
                   )}
                 </div>
               </div>
 
               {expandedId === withdrawal._id && (
-                <div className="card-content">
-                  <div className="section">
-                    <h4>
+                <div className="border-t border-white/[0.07] px-5 py-5 space-y-5 bg-white/[0.03]">
+                  <div>
+                    <h4 className="flex items-center gap-2 text-xs font-bold text-white/40 uppercase tracking-wide mb-3">
                       <User size={16} /> Worker Details
                     </h4>
-                    <div className="details-grid">
-                      <div className="detail-item">
-                        <span className="label">Name:</span>
-                        <span className="value">{withdrawal.workerName}</span>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide block">Name:</span>
+                        <span className="text-sm text-white/80 font-medium">{withdrawal.workerName}</span>
                       </div>
-                      <div className="detail-item">
-                        <span className="label">Worker ID:</span>
-                        <span className="value">{withdrawal.workerId}</span>
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide block">Worker ID:</span>
+                        <span className="text-sm text-white/80 font-medium">{withdrawal.workerId}</span>
                       </div>
-                      <div className="detail-item">
-                        <span className="label">Email:</span>
-                        <span className="value">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide block">Email:</span>
+                        <span className="text-sm text-white/80 font-medium flex items-center gap-1">
                           <Mail size={14} /> {withdrawal.workerEmail || "N/A"}
                         </span>
                       </div>
-                      <div className="detail-item">
-                        <span className="label">Phone:</span>
-                        <span className="value">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide block">Phone:</span>
+                        <span className="text-sm text-white/80 font-medium flex items-center gap-1">
                           <Phone size={14} />
                           {withdrawal.workerPhone || "N/A"}
                         </span>
                       </div>
-                      <div className="detail-item">
-                        <span className="label">Address:</span>
-                        <span className="value">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide block">Address:</span>
+                        <span className="text-sm text-white/80 font-medium flex items-center gap-1">
                           <MapPin size={14} />{" "}
                           {withdrawal.workerAddress || "N/A"}
                         </span>
                       </div>
-                      <div className="detail-item">
-                        <span className="label">Postcode:</span>
-                        <span className="value">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide block">Postcode:</span>
+                        <span className="text-sm text-white/80 font-medium">
                           {withdrawal.workerPostcode || "N/A"}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="section">
-                    <h4>
+                  <div>
+                    <h4 className="flex items-center gap-2 text-xs font-bold text-white/40 uppercase tracking-wide mb-3">
                       <DollarSign size={16} /> Withdrawal Information
                     </h4>
-                    <div className="details-grid">
-                      <div className="detail-item">
-                        <span className="label">Amount:</span>
-                        <span className="value highlight">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide block">Amount:</span>
+                        <span className="text-lg font-bold text-emerald-400 tabular-nums">
                           £{withdrawal.amount.toFixed(2)}
                         </span>
                       </div>
-                      <div className="detail-item">
-                        <span className="label">Status:</span>
-                        <span className={`value ${withdrawal.status}`}>
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide block">Status:</span>
+                        <span className={getStatusBadge(withdrawal.status)}>
+                          {getStatusIcon(withdrawal.status)}
                           {withdrawal.status.toUpperCase()}
                         </span>
                       </div>
-                      <div className="detail-item">
-                        <span className="label">Requested:</span>
-                        <span className="value">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide block">Requested:</span>
+                        <span className="text-sm text-white/80 font-medium flex items-center gap-1">
                           <Calendar size={14} />
                           {new Date(withdrawal.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       {withdrawal.approvedAt && (
-                        <div className="detail-item">
-                          <span className="label">Approved:</span>
-                          <span className="value">
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide block">Approved:</span>
+                          <span className="text-sm text-white/80 font-medium flex items-center gap-1">
                             <Calendar size={14} />
-                            {new Date(
-                              withdrawal.approvedAt,
-                            ).toLocaleDateString()}
+                            {new Date(withdrawal.approvedAt).toLocaleDateString()}
                           </span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="section">
-                    <h4>
+                  <div>
+                    <h4 className="flex items-center gap-2 text-xs font-bold text-white/40 uppercase tracking-wide mb-3">
                       <CreditCard size={16} /> Bank Account Details
                     </h4>
-                    <div className="bank-details-box">
-                      <div className="detail-item">
-                        <span className="label">Account Holder:</span>
-                        <span className="value">
+                    <div className="space-y-3 bg-[#071D16] rounded-xl p-4 border border-white/[0.05]">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide">Account Holder:</span>
+                        <span className="text-sm text-white/80 font-medium">
                           {withdrawal.bankDetails?.accountName || "N/A"}
                         </span>
                       </div>
-                      <div className="detail-item">
-                        <span className="label">Account Number:</span>
-                        <div className="copy-field">
-                          <span className="value">
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide shrink-0">Account Number:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-mono text-white/80">
                             ****
                             {withdrawal.bankDetails?.accountNumber?.slice(-4) ||
                               "XXXX"}
                           </span>
                           <button
-                            className="copy-btn"
+                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
                             onClick={() =>
                               copyToClipboard(
                                 withdrawal.bankDetails?.accountNumber,
@@ -385,14 +405,14 @@ const AdminWithdrawals = () => {
                           </button>
                         </div>
                       </div>
-                      <div className="detail-item">
-                        <span className="label">Sort Code:</span>
-                        <div className="copy-field">
-                          <span className="value">
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide shrink-0">Sort Code:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-mono text-white/80">
                             {withdrawal.bankDetails?.sortCode || "N/A"}
                           </span>
                           <button
-                            className="copy-btn"
+                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
                             onClick={() =>
                               copyToClipboard(
                                 withdrawal.bankDetails?.sortCode,
@@ -408,9 +428,9 @@ const AdminWithdrawals = () => {
                           </button>
                         </div>
                       </div>
-                      <div className="detail-item">
-                        <span className="label">Bank Name:</span>
-                        <span className="value">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wide">Bank Name:</span>
+                        <span className="text-sm text-white/80 font-medium">
                           {withdrawal.bankDetails?.bankName || "N/A"}
                         </span>
                       </div>
@@ -418,11 +438,11 @@ const AdminWithdrawals = () => {
                   </div>
 
                   {withdrawal.status === "pending" && (
-                    <div className="action-section">
-                      <h4>Approval Actions</h4>
-                      <div className="actions">
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-bold text-white/40 uppercase tracking-wide">Approval Actions</h4>
+                      <div className="space-y-3">
                         <button
-                          className="btn btn-approve"
+                          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors disabled:opacity-50"
                           onClick={() =>
                             handleApprove(withdrawal._id, withdrawal.workerId)
                           }
@@ -434,7 +454,7 @@ const AdminWithdrawals = () => {
                             : "Approve & Send Money"}
                         </button>
 
-                        <div className="reject-section">
+                        <div>
                           {rejectingId === withdrawal._id ? (
                             <>
                               <textarea
@@ -443,11 +463,12 @@ const AdminWithdrawals = () => {
                                 onChange={(e) =>
                                   setRejectReason(e.target.value)
                                 }
-                                className="reject-textarea"
+                                className="w-full px-4 py-3 bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none rounded-xl text-sm resize-none mb-2"
+                                rows={3}
                               />
-                              <div className="reject-buttons">
+                              <div className="flex gap-2">
                                 <button
-                                  className="btn btn-reject-confirm"
+                                  className="bg-rose-500/15 border border-rose-500/25 text-rose-400 hover:bg-rose-500/25 rounded-xl px-5 py-2 text-sm font-semibold transition-colors disabled:opacity-50"
                                   onClick={() => handleReject(withdrawal._id)}
                                   disabled={actionLoading[withdrawal._id]}
                                 >
@@ -456,7 +477,7 @@ const AdminWithdrawals = () => {
                                     : "Confirm Rejection"}
                                 </button>
                                 <button
-                                  className="btn btn-cancel"
+                                  className="bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 rounded-xl px-5 py-2 text-sm font-semibold transition-colors disabled:opacity-50"
                                   onClick={() => {
                                     setRejectingId(null);
                                     setRejectReason("");
@@ -469,7 +490,7 @@ const AdminWithdrawals = () => {
                             </>
                           ) : (
                             <button
-                              className="btn btn-reject"
+                              className="flex items-center gap-2 bg-rose-500/15 border border-rose-500/25 text-rose-400 hover:bg-rose-500/25 rounded-xl px-5 py-2.5 text-sm font-semibold transition-colors"
                               onClick={() => setRejectingId(withdrawal._id)}
                             >
                               <XCircle size={18} />
@@ -482,9 +503,9 @@ const AdminWithdrawals = () => {
                   )}
 
                   {withdrawal.reason && (
-                    <div className="section rejection-reason">
-                      <h4>Rejection Reason</h4>
-                      <p>{withdrawal.reason}</p>
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-bold text-white/40 uppercase tracking-wide">Rejection Reason</h4>
+                      <p className="text-sm text-white/80 bg-[#071D16] rounded-xl p-4 border border-white/[0.05]">{withdrawal.reason}</p>
                     </div>
                   )}
                 </div>

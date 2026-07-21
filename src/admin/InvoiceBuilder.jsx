@@ -28,12 +28,12 @@ const Toast = ({ msg, type, onClose }) => (
 
 const Field = ({ label, span = 1, children }) => (
   <div className={span === 2 ? "col-span-2" : ""}>
-    <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">{label}</label>
+    <label className="text-[9px] font-bold text-white/40 uppercase tracking-wider block mb-1">{label}</label>
     {children}
   </div>
 );
 
-const inp = "w-full p-2.5 rounded-lg border-2 border-slate-200 text-xs font-medium focus:outline-none focus:border-primary transition-colors bg-white";
+const inp = "w-full p-2.5 rounded-xl border border-white/10 text-xs font-medium focus:outline-none focus:border-emerald-500/50 transition-colors bg-white/5 text-white placeholder:text-white/20";
 
 const PDF_OPTS = {
   margin: [8, 8, 8, 8],
@@ -435,9 +435,9 @@ const InvoiceBuilder = () => {
         return (
           <div className="space-y-2">
             <div className={`grid gap-1.5 pb-1 ${flatRate ? "grid-cols-[1fr_80px_30px]" : "grid-cols-[1fr_50px_66px_30px]"}`}>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Description</p>
-              {!flatRate && <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider text-center">Qty</p>}
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider text-center">{flatRate ? "Amount £" : "Rate £"}</p>
+              <p className="text-[9px] font-bold text-white/40 uppercase tracking-wider">Description</p>
+              {!flatRate && <p className="text-[9px] font-bold text-white/40 uppercase tracking-wider text-center">Qty</p>}
+              <p className="text-[9px] font-bold text-white/40 uppercase tracking-wider text-center">{flatRate ? "Amount £" : "Rate £"}</p>
               <p />
             </div>
             {items.map((item) => (
@@ -445,14 +445,14 @@ const InvoiceBuilder = () => {
                 <input value={item.description} onChange={(e) => updateItem(item.id, "description", e.target.value)} placeholder="Service description" className={inp} />
                 {!flatRate && <input type="number" min="1" value={item.qty} onChange={(e) => updateItem(item.id, "qty", e.target.value)} className={`${inp} text-center`} />}
                 <input type="number" min="0" step="0.01" value={item.rate} onChange={(e) => updateItem(item.id, "rate", e.target.value)} className={`${inp} text-center`} />
-                <button onClick={() => removeItem(item.id)} disabled={items.length === 1} className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-rose-100 hover:text-rose-500 transition-all disabled:opacity-30"><Trash2 size={13} /></button>
+                <button onClick={() => removeItem(item.id)} disabled={items.length === 1} className="p-2 rounded-lg bg-white/5 text-white/40 hover:bg-rose-500/15 hover:text-rose-400 transition-all disabled:opacity-30"><Trash2 size={13} /></button>
               </div>
             ))}
             <div className="flex items-center justify-between pt-1">
-              <button onClick={addItem} className="flex items-center gap-1 text-[11px] font-bold text-primary hover:text-primary/80">
+              <button onClick={addItem} className="flex items-center gap-1 text-[11px] font-bold text-emerald-400 hover:text-emerald-300">
                 <Plus size={13} /> Add Line Item
               </button>
-              <span className="text-xs font-black text-slate-700">Total: £{subtotal.toFixed(2)}</span>
+              <span className="text-xs font-black text-white/80">Total: £{subtotal.toFixed(2)}</span>
             </div>
           </div>
         );
@@ -471,16 +471,16 @@ const InvoiceBuilder = () => {
       case "stripe":
         return paymentLink ? (
           <div className="flex gap-2 items-center">
-            <input readOnly value={paymentLink} className="flex-1 p-2.5 rounded-lg border border-indigo-200 bg-indigo-50 text-xs font-medium text-indigo-700 truncate" />
-            <button onClick={() => { navigator.clipboard.writeText(paymentLink); showToast("Link copied"); }} className="p-2.5 rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-100 transition-all"><Copy size={14} /></button>
-            <button onClick={() => setPaymentLink("")} className="p-2.5 rounded-lg border border-rose-200 text-rose-500 hover:bg-rose-50 transition-all"><X size={14} /></button>
+            <input readOnly value={paymentLink} className="flex-1 p-2.5 rounded-xl border border-white/10 bg-white/5 text-xs font-medium text-white/70 truncate" />
+            <button onClick={() => { navigator.clipboard.writeText(paymentLink); showToast("Link copied"); }} className="p-2.5 rounded-xl border border-white/10 text-white/60 hover:bg-white/10 transition-all"><Copy size={14} /></button>
+            <button onClick={() => setPaymentLink("")} className="p-2.5 rounded-xl border border-rose-500/25 text-rose-400 hover:bg-rose-500/15 transition-all"><X size={14} /></button>
           </div>
         ) : (
           <div>
             <button onClick={handleGeneratePaymentLink} disabled={generatingLink} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700 transition-all disabled:opacity-60">
               <CreditCard size={14} />{generatingLink ? "Generating..." : "Generate Stripe Payment Link"}
             </button>
-            <p className="text-[10px] text-slate-400 mt-1.5">Adds a secure "Pay Now" button to the invoice for the full total.</p>
+            <p className="text-[10px] text-white/40 mt-1.5">Adds a secure "Pay Now" button to the invoice for the full total.</p>
           </div>
         );
 
@@ -576,39 +576,39 @@ const InvoiceBuilder = () => {
   return (
     <div className="space-y-5 pb-24">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-          <FileText size={22} className="text-primary" /> Invoice Builder
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <FileText size={22} className="text-emerald-500" /> Invoice Builder
         </h1>
-        <p className="text-sm text-slate-400 mt-1">Drag sections to reorder · eye icon to show/hide · send or download PDF</p>
+        <p className="text-sm text-white/40 mt-1">Drag sections to reorder · eye icon to show/hide · send or download PDF</p>
       </div>
 
       {/* ── Top controls ─────────────────────────────────────────────────── */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-5 space-y-4">
+      <div className="bg-[#0B2D22] border border-white/7 rounded-2xl p-5 space-y-4">
 
         {/* Invoice number + global toggles */}
         <div className="flex gap-3 items-end flex-wrap">
           <div className="flex-1 min-w-36">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Invoice Number</label>
-            <input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} className="w-full p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:border-primary" />
+            <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">Invoice Number</label>
+            <input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} className="w-full p-3 rounded-xl border border-white/10 bg-white/5 font-bold text-sm text-white focus:outline-none focus:border-emerald-500/50" />
           </div>
-          <label className="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-xl border-2 border-slate-200 whitespace-nowrap hover:border-slate-300 transition-colors select-none">
-            <input type="checkbox" checked={showPaidBadge} onChange={(e) => setShowPaidBadge(e.target.checked)} className="w-4 h-4 accent-primary" />
-            <span className="text-xs font-bold text-slate-600">Mark as PAID</span>
+          <label className="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-xl border border-white/10 bg-white/5 whitespace-nowrap hover:border-white/20 transition-colors select-none">
+            <input type="checkbox" checked={showPaidBadge} onChange={(e) => setShowPaidBadge(e.target.checked)} className="w-4 h-4 accent-emerald-500" />
+            <span className="text-xs font-bold text-white/80">Mark as PAID</span>
           </label>
-          <label className="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-xl border-2 border-slate-200 whitespace-nowrap hover:border-slate-300 transition-colors select-none">
-            <input type="checkbox" checked={flatRate} onChange={(e) => setFlatRate(e.target.checked)} className="w-4 h-4 accent-primary" />
-            <span className="text-xs font-bold text-slate-600">Flat rate</span>
-            <span className="text-[10px] text-slate-400 font-medium">(hide hours &amp; qty)</span>
+          <label className="flex items-center gap-2 cursor-pointer px-4 py-3 rounded-xl border border-white/10 bg-white/5 whitespace-nowrap hover:border-white/20 transition-colors select-none">
+            <input type="checkbox" checked={flatRate} onChange={(e) => setFlatRate(e.target.checked)} className="w-4 h-4 accent-emerald-500" />
+            <span className="text-xs font-bold text-white/80">Flat rate</span>
+            <span className="text-[10px] text-white/40 font-medium">(hide hours &amp; qty)</span>
           </label>
         </div>
 
         {/* Load mode tabs */}
-        <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit">
+        <div className="flex gap-1 p-1 bg-white/5 rounded-xl w-fit">
           {[{ key: "single", label: "Single Booking" }, { key: "multi", label: "Combine Bookings" }].map((t) => (
             <button
               key={t.key}
               onClick={() => { setLoadMode(t.key); setFoundBookings([]); setSelectedBookingIds(new Set()); }}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${loadMode === t.key ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"}`}
+              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${loadMode === t.key ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white/60"}`}
             >
               {t.label}
             </button>
@@ -618,10 +618,10 @@ const InvoiceBuilder = () => {
         {loadMode === "single" ? (
           /* ── Single booking ── */
           <div>
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Load From Booking (optional)</label>
+            <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">Load From Booking (optional)</label>
             <div className="flex gap-2">
-              <input value={bookingRef} onChange={(e) => setBookingRef(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleLoadBooking()} placeholder="e.g. BK-7437" className="flex-1 p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:border-primary" />
-              <button onClick={handleLoadBooking} disabled={loadingBooking} className="flex items-center gap-2 px-4 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-all disabled:opacity-60 shrink-0">
+              <input value={bookingRef} onChange={(e) => setBookingRef(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleLoadBooking()} placeholder="e.g. BK-7437" className="flex-1 p-3 rounded-xl border border-white/10 bg-white/5 font-bold text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50" />
+              <button onClick={handleLoadBooking} disabled={loadingBooking} className="flex items-center gap-2 px-4 rounded-xl bg-white/5 border border-white/10 text-white/80 font-semibold text-sm hover:bg-white/10 transition-all disabled:opacity-60 shrink-0">
                 <Search size={15} />{loadingBooking ? "Loading..." : "Load"}
               </button>
             </div>
@@ -629,54 +629,54 @@ const InvoiceBuilder = () => {
         ) : (
           /* ── Combine bookings ── */
           <div className="space-y-3">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Search Customer to Combine Transactions</label>
+            <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">Search Customer to Combine Transactions</label>
             <div className="flex gap-2">
               <input
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearchCustomer()}
                 placeholder="Customer name or email address..."
-                className="flex-1 p-3 rounded-xl border-2 border-slate-200 font-bold text-sm focus:outline-none focus:border-primary"
+                className="flex-1 p-3 rounded-xl border border-white/10 bg-white/5 font-bold text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50"
               />
-              <button onClick={handleSearchCustomer} disabled={searchingCustomer} className="flex items-center gap-2 px-4 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-all disabled:opacity-60 shrink-0">
+              <button onClick={handleSearchCustomer} disabled={searchingCustomer} className="flex items-center gap-2 px-4 rounded-xl bg-white/5 border border-white/10 text-white/80 font-semibold text-sm hover:bg-white/10 transition-all disabled:opacity-60 shrink-0">
                 <Search size={15} />{searchingCustomer ? "Searching..." : "Search"}
               </button>
             </div>
 
             {foundBookings.length > 0 && (
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
+              <div className="border border-white/10 rounded-xl overflow-hidden">
                 {/* List header */}
-                <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-100">
-                  <p className="text-xs font-black text-slate-700">{foundBookings.length} booking{foundBookings.length !== 1 ? "s" : ""} found</p>
+                <div className="flex items-center justify-between px-4 py-2.5 bg-white/[0.03] border-b border-white/7">
+                  <p className="text-xs font-black text-white/80">{foundBookings.length} booking{foundBookings.length !== 1 ? "s" : ""} found</p>
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setSelectedBookingIds(new Set(foundBookings.map((b) => b._id)))} className="text-[11px] font-bold text-primary hover:underline">Select all</button>
-                    <button onClick={() => setSelectedBookingIds(new Set())} className="text-[11px] font-bold text-slate-400 hover:text-slate-600 hover:underline">Clear</button>
+                    <button onClick={() => setSelectedBookingIds(new Set(foundBookings.map((b) => b._id)))} className="text-[11px] font-bold text-emerald-400 hover:underline">Select all</button>
+                    <button onClick={() => setSelectedBookingIds(new Set())} className="text-[11px] font-bold text-white/40 hover:text-white/60 hover:underline">Clear</button>
                   </div>
                 </div>
 
                 {/* Booking rows */}
-                <div className="max-h-64 overflow-y-auto divide-y divide-slate-50">
+                <div className="max-h-64 overflow-y-auto divide-y divide-white/[0.04]">
                   {foundBookings.map((b) => {
                     const isSelected = selectedBookingIds.has(b._id);
                     const dateStr    = b.schedule?.date ? new Date(b.schedule.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : null;
                     return (
-                      <label key={b._id} className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${isSelected ? "bg-primary/5" : "hover:bg-slate-50"}`}>
-                        <input type="checkbox" checked={isSelected} onChange={() => toggleBookingSelection(b._id)} className="w-4 h-4 accent-primary shrink-0" />
+                      <label key={b._id} className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${isSelected ? "bg-emerald-500/10" : "hover:bg-white/5"}`}>
+                        <input type="checkbox" checked={isSelected} onChange={() => toggleBookingSelection(b._id)} className="w-4 h-4 accent-emerald-500 shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-slate-800 truncate">{b.service}</p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
+                          <p className="text-xs font-bold text-white truncate">{b.service}</p>
+                          <p className="text-[11px] text-white/40 mt-0.5">
                             {b.bookingId && <span className="mr-1.5">{b.bookingId}</span>}
                             {dateStr && <span>{dateStr}</span>}
                             {!flatRate && b.details?.duration && <span className="ml-1">· {b.details.duration}h</span>}
                           </p>
                         </div>
                         <div className="text-right shrink-0 ml-2">
-                          <p className="text-xs font-black text-slate-800 tabular-nums">{b.payment?.amount ? `£${Number(b.payment.amount).toFixed(2)}` : "—"}</p>
+                          <p className="text-xs font-black text-white tabular-nums">{b.payment?.amount ? `£${Number(b.payment.amount).toFixed(2)}` : "—"}</p>
                           <span className={`text-[9px] font-black uppercase px-1.5 py-px rounded-full ${
-                            b.status === "Completed"            ? "bg-emerald-100 text-emerald-700" :
-                            b.status === "Completed - Unpaid"   ? "bg-purple-100 text-purple-700"  :
-                            b.status === "Cancelled"            ? "bg-rose-100 text-rose-700"       :
-                            "bg-slate-100 text-slate-500"
+                            b.status === "Completed"            ? "bg-emerald-500/15 text-emerald-400" :
+                            b.status === "Completed - Unpaid"   ? "bg-purple-500/15 text-purple-400"  :
+                            b.status === "Cancelled"            ? "bg-rose-500/15 text-rose-400"       :
+                            "bg-white/10 text-white/60"
                           }`}>{b.status}</span>
                         </div>
                       </label>
@@ -686,12 +686,12 @@ const InvoiceBuilder = () => {
 
                 {/* Selection footer */}
                 {selectedBookingIds.size > 0 && (
-                  <div className="flex items-center justify-between px-4 py-3 bg-primary/5 border-t border-primary/20">
+                  <div className="flex items-center justify-between px-4 py-3 bg-emerald-500/10 border-t border-emerald-500/20">
                     <div>
-                      <p className="text-xs font-black text-primary">{selectedBookingIds.size} selected</p>
-                      <p className="text-[11px] text-primary/70 font-bold tabular-nums">Total: £{selectedTotal.toFixed(2)}</p>
+                      <p className="text-xs font-black text-emerald-400">{selectedBookingIds.size} selected</p>
+                      <p className="text-[11px] text-emerald-400/70 font-bold tabular-nums">Total: £{selectedTotal.toFixed(2)}</p>
                     </div>
-                    <button onClick={handleAddSelectedToInvoice} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-black hover:bg-primary/90 transition-colors shadow-sm">
+                    <button onClick={handleAddSelectedToInvoice} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-black hover:bg-emerald-400 transition-colors shadow-sm">
                       <Layers size={13} /> Build Invoice
                     </button>
                   </div>
@@ -707,7 +707,7 @@ const InvoiceBuilder = () => {
 
         {/* Section builder */}
         <div className="space-y-2">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 mb-0.5">Invoice Sections</p>
+          <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest px-1 mb-0.5">Invoice Sections</p>
           {sections.map((sec, idx) => {
             const SecIcon      = sec.icon;
             const isOpen       = openSections.has(sec.id);
@@ -720,30 +720,30 @@ const InvoiceBuilder = () => {
                 onDragOver={(e) => onDragOver(e, idx)}
                 onDrop={() => onDrop(idx)}
                 onDragEnd={() => { setDragIdx(null); setDragOverIdx(null); }}
-                className={`bg-white rounded-2xl shadow-sm overflow-hidden transition-all border ${isDragTarget ? "border-primary ring-2 ring-primary/20 scale-[1.01]" : "border-slate-200/80"} ${!sec.enabled ? "opacity-50" : ""}`}
+                className={`bg-[#0B2D22] rounded-2xl overflow-hidden transition-all border ${isDragTarget ? "border-emerald-500 ring-2 ring-emerald-500/20 scale-[1.01]" : "border-white/7"} ${!sec.enabled ? "opacity-50" : ""}`}
               >
                 <div className="flex items-center gap-2.5 px-3.5 py-3 cursor-pointer select-none" onClick={() => sec.enabled && toggleOpen(sec.id)}>
-                  <GripVertical size={16} className="text-slate-300 hover:text-slate-500 cursor-grab flex-shrink-0 transition-colors" />
-                  <SecIcon size={13} className={`flex-shrink-0 transition-colors ${sec.enabled ? "text-primary" : "text-slate-300"}`} />
-                  <span className={`flex-1 text-xs font-bold transition-colors ${sec.enabled ? "text-slate-700" : "text-slate-400"}`}>{sec.label}</span>
-                  <button onClick={(e) => { e.stopPropagation(); toggleSection(sec.id); }} className={`p-1.5 rounded-lg transition-all ${sec.enabled ? "text-primary hover:bg-primary/10" : "text-slate-300 hover:bg-slate-100"}`}>
+                  <GripVertical size={16} className="text-white/20 hover:text-white/40 cursor-grab flex-shrink-0 transition-colors" />
+                  <SecIcon size={13} className={`flex-shrink-0 transition-colors ${sec.enabled ? "text-emerald-400" : "text-white/20"}`} />
+                  <span className={`flex-1 text-xs font-bold transition-colors ${sec.enabled ? "text-white" : "text-white/40"}`}>{sec.label}</span>
+                  <button onClick={(e) => { e.stopPropagation(); toggleSection(sec.id); }} className={`p-1.5 rounded-lg transition-all ${sec.enabled ? "text-emerald-400 hover:bg-emerald-500/10" : "text-white/20 hover:bg-white/5"}`}>
                     {sec.enabled ? <Eye size={14} /> : <EyeOff size={14} />}
                   </button>
-                  {sec.enabled && <ChevronDown size={13} className={`text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />}
+                  {sec.enabled && <ChevronDown size={13} className={`text-white/40 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />}
                 </div>
                 {sec.enabled && isOpen && (
-                  <div className="border-t border-slate-100 px-4 pb-4 pt-3">{renderSectionForm(sec.id)}</div>
+                  <div className="border-t border-white/7 px-4 pb-4 pt-3">{renderSectionForm(sec.id)}</div>
                 )}
               </div>
             );
           })}
 
           <div className="flex gap-3 pt-3">
-            <button onClick={handleDownload} disabled={downloading} className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm transition-all disabled:opacity-60">
+            <button onClick={handleDownload} disabled={downloading} className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white/80 font-semibold text-sm transition-all disabled:opacity-60">
               {downloading ? <RefreshCw size={15} className="animate-spin" /> : <Download size={15} />}
               {downloading ? "Generating…" : "Download PDF"}
             </button>
-            <button onClick={handleSend} disabled={sending} className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white hover:bg-primary/90 font-semibold text-sm shadow-sm transition-all disabled:opacity-60">
+            <button onClick={handleSend} disabled={sending} className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 text-white hover:bg-emerald-400 font-semibold text-sm shadow-sm transition-all disabled:opacity-60">
               {sending ? <RefreshCw size={15} className="animate-spin" /> : <Send size={15} />}
               {sending ? "Sending…" : "Send Invoice"}
             </button>
@@ -751,8 +751,8 @@ const InvoiceBuilder = () => {
         </div>
 
         {/* Live preview */}
-        <div className="bg-slate-100 border border-slate-200/80 rounded-2xl shadow-sm p-4">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Live Preview</p>
+        <div className="bg-[#071D16] border border-white/7 rounded-2xl p-4">
+          <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-3">Live Preview</p>
           <div className="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden">
             <div style={{ background: "#0A5C43" }} className="px-5 py-4">
               <div className="flex items-start justify-between">

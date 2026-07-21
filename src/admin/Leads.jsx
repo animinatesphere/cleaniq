@@ -44,7 +44,7 @@ function RowMenu({ lead, onEmail, onDelete }) {
         <div className="absolute right-0 top-full mt-1 w-44 bg-[#0B2D22] border border-white/10 rounded-2xl shadow-xl z-30 overflow-hidden">
           <button
             onClick={() => { onEmail(); setOpen(false); }}
-            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-white/70 hover:bg-[#0A2A1F] font-medium transition-colors"
+            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-white/70 hover:bg-white/[0.04] font-medium transition-colors"
           >
             <Mail size={13} className="text-white/40" /> Send Email
           </button>
@@ -52,12 +52,12 @@ function RowMenu({ lead, onEmail, onDelete }) {
             <a
               href={`tel:${lead.phone}`}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-white/70 hover:bg-[#0A2A1F] font-medium transition-colors"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-white/70 hover:bg-white/[0.04] font-medium transition-colors"
             >
               <Phone size={13} className="text-white/40" /> Call
             </a>
           )}
-          <div className="border-t border-white/10" />
+          <div className="border-t border-white/7" />
           <button
             onClick={() => { onDelete(); setOpen(false); }}
             className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-rose-400 hover:bg-rose-500/10 font-medium transition-colors"
@@ -76,14 +76,14 @@ function LeadDrawer({ lead, onClose, onEmail, onDelete }) {
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={onClose} />
       <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-[#0B2D22] shadow-2xl z-50 flex flex-col border-l border-white/10 animate-in slide-in-from-right duration-200">
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/7">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#061A13] flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-[#071D16] flex items-center justify-center text-white font-black text-sm flex-shrink-0">
               {(lead.name?.[0] || "?").toUpperCase()}
             </div>
             <div>
               <p className="text-sm font-bold text-white leading-tight">{lead.name}</p>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400">
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
                 {lead.source || "Contact Form"}
               </span>
             </div>
@@ -113,7 +113,7 @@ function LeadDrawer({ lead, onClose, onEmail, onDelete }) {
             {lead.phone && (
               <div className="flex items-center gap-3">
                 <Phone size={14} className="text-white/40 flex-shrink-0" />
-                <a href={`tel:${lead.phone}`} className="text-sm text-white/70 hover:text-emerald-400 transition-colors">
+                <a href={`tel:${lead.phone}`} className="text-sm text-white/80 hover:text-emerald-400 transition-colors">
                   {lead.phone}
                 </a>
               </div>
@@ -122,7 +122,7 @@ function LeadDrawer({ lead, onClose, onEmail, onDelete }) {
             {lead.source && (
               <div className="flex items-center gap-3">
                 <Globe size={14} className="text-white/40 flex-shrink-0" />
-                <span className="text-sm text-white/60">{lead.source}</span>
+                <span className="text-sm text-white/40">{lead.source}</span>
               </div>
             )}
 
@@ -137,22 +137,22 @@ function LeadDrawer({ lead, onClose, onEmail, onDelete }) {
               <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider flex items-center gap-1.5">
                 <MessageSquare size={11} /> Message
               </p>
-              <p className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap">{lead.message}</p>
+              <p className="text-sm text-white/80 leading-relaxed whitespace-pre-wrap">{lead.message}</p>
             </div>
           )}
         </div>
 
-        <div className="px-5 py-4 border-t border-white/10 space-y-2.5">
+        <div className="px-5 py-4 border-t border-white/7 space-y-2.5">
           <button
             onClick={onEmail}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-400 transition-colors shadow-sm"
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold transition-colors shadow-sm"
           >
             <Mail size={14} /> Send Email
           </button>
           {lead.phone && (
             <a
               href={`tel:${lead.phone}`}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm font-semibold text-white/60 hover:bg-white/10 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 rounded-xl text-sm font-semibold transition-colors"
             >
               <Phone size={14} /> Call {lead.phone}
             </a>
@@ -312,16 +312,16 @@ const Leads = () => {
         </div>
         <div className="flex items-center gap-2.5 flex-wrap">
           <button onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-sm hover:bg-emerald-400 transition-all">
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold shadow-sm transition-all">
             <UserPlus size={15} /> Add Lead
           </button>
           <button onClick={exportCSV}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm font-semibold text-white/60 hover:bg-white/10 transition-all">
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 rounded-xl text-sm font-semibold transition-all">
             <Download size={15} /> Export
           </button>
           {selected.size > 0 && (
             <button onClick={() => openEmail("bulk")}
-              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-sm hover:bg-emerald-400 transition-all">
+              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold shadow-sm transition-all">
               <Send size={15} /> Email {selected.size} Selected
             </button>
           )}
@@ -329,7 +329,7 @@ const Leads = () => {
       </div>
 
       <div className="bg-[#0B2D22] border border-white/7 rounded-2xl overflow-hidden">
-        <div className="p-5 border-b border-white/10">
+        <div className="p-5 border-b border-white/7">
           <div className="flex items-center gap-2.5 px-4 py-2.5 bg-[#071D16] rounded-xl border border-white/10 w-full md:w-80 focus-within:border-emerald-500/50 transition-all">
             <Search size={16} className="text-white/40" />
             <input
@@ -345,22 +345,22 @@ const Leads = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="text-[10px] font-bold text-white/40 uppercase tracking-widest bg-[#071D16]">
-                <th className="px-4 py-3.5 w-12">
+              <tr className="bg-[#071D16]">
+                <th className="px-4 py-3.5 w-12 text-white/40 text-xs font-semibold uppercase tracking-wide">
                   <input type="checkbox"
                     checked={pageItems.length > 0 && pageItems.every(l => selected.has(l._id))}
                     onChange={toggleAll}
                     className="w-4 h-4 rounded border-2 border-white/20 cursor-pointer accent-emerald-500" />
                 </th>
-                <th className="px-6 py-3.5">Name</th>
-                <th className="px-4 py-3.5">Contact</th>
-                <th className="px-4 py-3.5">Source</th>
-                <th className="px-4 py-3.5">Message</th>
-                <th className="px-4 py-3.5">Date</th>
-                <th className="px-6 py-3.5 text-right">Actions</th>
+                <th className="px-6 py-3.5 text-white/40 text-xs font-semibold uppercase tracking-wide">Name</th>
+                <th className="px-4 py-3.5 text-white/40 text-xs font-semibold uppercase tracking-wide">Contact</th>
+                <th className="px-4 py-3.5 text-white/40 text-xs font-semibold uppercase tracking-wide">Source</th>
+                <th className="px-4 py-3.5 text-white/40 text-xs font-semibold uppercase tracking-wide">Message</th>
+                <th className="px-4 py-3.5 text-white/40 text-xs font-semibold uppercase tracking-wide">Date</th>
+                <th className="px-6 py-3.5 text-white/40 text-xs font-semibold uppercase tracking-wide text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.06]">
+            <tbody>
               {loading ? (
                 <tr><td colSpan={7} className="py-16 text-center">
                   <RefreshCw size={18} className="animate-spin inline text-white/40" />
@@ -375,7 +375,7 @@ const Leads = () => {
                   <tr
                     key={l._id}
                     onClick={() => setSelectedLead(l)}
-                    className="hover:bg-[#0A2A1F] transition-colors cursor-pointer group border-b border-white/[0.06]"
+                    className="hover:bg-white/[0.04] transition-colors cursor-pointer group border-b border-white/[0.04]"
                   >
                     <td className="px-4 py-4 w-12" onClick={e => e.stopPropagation()}>
                       <input type="checkbox"
@@ -392,7 +392,7 @@ const Leads = () => {
                       </div>
                     </td>
                     <td className="px-4 py-4">
-                      <p className="text-sm font-medium text-white/60">{l.email}</p>
+                      <p className="text-sm font-medium text-white/80">{l.email}</p>
                       {l.phone && <p className="text-[11px] text-white/40 font-medium mt-0.5">{l.phone}</p>}
                     </td>
                     <td className="px-4 py-4">
@@ -421,7 +421,7 @@ const Leads = () => {
         </div>
 
         {totalPages > 1 && (
-          <div className="px-5 py-3.5 border-t border-white/10 flex items-center justify-between gap-3 bg-[#071D16]/40">
+          <div className="px-5 py-3.5 border-t border-white/7 flex items-center justify-between gap-3 bg-white/[0.03]">
             <p className="text-xs text-white/40 font-medium">
               {filtered.length} leads · Page {safePage} of {totalPages}
             </p>
@@ -450,7 +450,7 @@ const Leads = () => {
                       className={`min-w-[28px] h-7 rounded-lg text-xs font-semibold transition-colors ${
                         n === safePage
                           ? "bg-emerald-500 text-white shadow-sm"
-                          : "border border-white/10 text-white/60 hover:bg-white/10"
+                          : "border border-white/10 text-white/40 hover:bg-white/10"
                       }`}
                     >
                       {n}
@@ -481,7 +481,7 @@ const Leads = () => {
       {emailTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-[#0B2D22] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+            <div className="p-6 border-b border-white/7 flex justify-between items-center">
               <h3 className="text-base font-bold text-white">
                 {emailTarget === "bulk" ? `Email ${selected.size} Leads` : `Email ${emailTarget.name}`}
               </h3>
@@ -493,13 +493,13 @@ const Leads = () => {
               <input type="text" required placeholder="Subject"
                 value={emailForm.subject}
                 onChange={e => setEmailForm({ ...emailForm, subject: e.target.value })}
-                className="w-full p-3.5 rounded-xl bg-[#071D16] border border-white/10 text-white placeholder:text-white/20 font-medium text-sm focus:outline-none focus:border-emerald-500/50 transition-all" />
+                className="w-full p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-white/20 font-medium text-sm focus:outline-none focus:border-emerald-500/50 transition-all" />
               <textarea required placeholder="Message" rows={6}
                 value={emailForm.message}
                 onChange={e => setEmailForm({ ...emailForm, message: e.target.value })}
-                className="w-full p-3.5 rounded-xl bg-[#071D16] border border-white/10 text-white placeholder:text-white/20 font-medium text-sm resize-none focus:outline-none focus:border-emerald-500/50 transition-all" />
+                className="w-full p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-white/20 font-medium text-sm resize-none focus:outline-none focus:border-emerald-500/50 transition-all" />
               <button type="submit" disabled={sending}
-                className="w-full py-3.5 rounded-xl bg-emerald-500 text-white font-bold text-sm shadow-sm hover:bg-emerald-400 transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+                className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-sm shadow-sm transition-all disabled:opacity-60 flex items-center justify-center gap-2">
                 {sending ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
                 {sending ? "Sending…" : "Send Email"}
               </button>
@@ -511,7 +511,7 @@ const Leads = () => {
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-[#0B2D22] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+            <div className="p-6 border-b border-white/7 flex justify-between items-center">
               <h3 className="text-base font-bold text-white">Add Lead</h3>
               <button onClick={() => setShowAddModal(false)} className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:bg-white/10">
                 <X size={18} />
@@ -520,18 +520,18 @@ const Leads = () => {
             <form onSubmit={handleAddLead} className="p-6 space-y-4">
               <input type="text" required placeholder="Name"
                 value={addForm.name} onChange={e => setAddForm({ ...addForm, name: e.target.value })}
-                className="w-full p-3.5 rounded-xl bg-[#071D16] border border-white/10 text-white placeholder:text-white/20 font-medium text-sm focus:outline-none focus:border-emerald-500/50 transition-all" />
+                className="w-full p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-white/20 font-medium text-sm focus:outline-none focus:border-emerald-500/50 transition-all" />
               <input type="email" required placeholder="Email"
                 value={addForm.email} onChange={e => setAddForm({ ...addForm, email: e.target.value })}
-                className="w-full p-3.5 rounded-xl bg-[#071D16] border border-white/10 text-white placeholder:text-white/20 font-medium text-sm focus:outline-none focus:border-emerald-500/50 transition-all" />
+                className="w-full p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-white/20 font-medium text-sm focus:outline-none focus:border-emerald-500/50 transition-all" />
               <input type="text" placeholder="Phone (optional)"
                 value={addForm.phone} onChange={e => setAddForm({ ...addForm, phone: e.target.value })}
-                className="w-full p-3.5 rounded-xl bg-[#071D16] border border-white/10 text-white placeholder:text-white/20 font-medium text-sm focus:outline-none focus:border-emerald-500/50 transition-all" />
+                className="w-full p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-white/20 font-medium text-sm focus:outline-none focus:border-emerald-500/50 transition-all" />
               <textarea placeholder="Notes (optional)" rows={4}
                 value={addForm.message} onChange={e => setAddForm({ ...addForm, message: e.target.value })}
-                className="w-full p-3.5 rounded-xl bg-[#071D16] border border-white/10 text-white placeholder:text-white/20 font-medium text-sm resize-none focus:outline-none focus:border-emerald-500/50 transition-all" />
+                className="w-full p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-white/20 font-medium text-sm resize-none focus:outline-none focus:border-emerald-500/50 transition-all" />
               <button type="submit" disabled={adding}
-                className="w-full py-3.5 rounded-xl bg-emerald-500 text-white font-bold text-sm shadow-sm hover:bg-emerald-400 transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+                className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-sm shadow-sm transition-all disabled:opacity-60 flex items-center justify-center gap-2">
                 {adding ? <RefreshCw size={16} className="animate-spin" /> : <UserPlus size={16} />}
                 {adding ? "Adding…" : "Add Lead"}
               </button>

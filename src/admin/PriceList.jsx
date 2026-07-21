@@ -14,7 +14,7 @@ const Toast = ({ msg, type, onClose }) => (
   </div>
 );
 
-const inp = "w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white";
+const inp = "w-full px-3.5 py-2.5 rounded-xl border border-white/10 text-sm font-medium focus:outline-none focus:border-emerald-500/50 transition-all bg-white/5 text-white placeholder:text-white/20";
 
 const CATEGORY_ORDER = ["Base", "Rooms", "Extras"];
 const CATEGORY_LABELS = { Base: "Core Services", Rooms: "Room Rates", Extras: "Add-ons & Extras" };
@@ -234,9 +234,9 @@ export default function PriceList() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   const CAT_COLORS = {
-    Base:   { dot: "bg-emerald-500", hdr: "bg-emerald-50 border-emerald-100", lbl: "text-emerald-700" },
-    Rooms:  { dot: "bg-blue-500",    hdr: "bg-blue-50 border-blue-100",       lbl: "text-blue-700" },
-    Extras: { dot: "bg-amber-500",   hdr: "bg-amber-50 border-amber-100",     lbl: "text-amber-700" },
+    Base:   { dot: "bg-emerald-500", hdr: "bg-emerald-500/10 border-emerald-500/20", lbl: "text-emerald-400" },
+    Rooms:  { dot: "bg-blue-500",    hdr: "bg-blue-500/10 border-blue-500/20",       lbl: "text-blue-400" },
+    Extras: { dot: "bg-amber-500",   hdr: "bg-amber-500/10 border-amber-500/20",     lbl: "text-amber-400" },
   };
 
   return (
@@ -244,7 +244,7 @@ export default function PriceList() {
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
       {/* ── Page header ─────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-primary p-8">
+      <div className="relative overflow-hidden rounded-3xl bg-[#0B2D22] border border-white/7 p-8">
         <div className="absolute inset-0 opacity-[0.07]">
           <Tag size={280} className="absolute -right-16 -bottom-12 text-white" />
         </div>
@@ -253,12 +253,12 @@ export default function PriceList() {
             <img src={logo} alt="Cleaniq Services" className="h-14 rounded-2xl shadow-lg shadow-black/30 flex-shrink-0" />
             <div>
               <h1 className="text-2xl font-black text-white tracking-tight">Price List Generator</h1>
-              <p className="text-sm text-white/50 mt-1">Build a branded price list and send it directly to any company</p>
+              <p className="text-sm text-white/40 mt-1">Build a branded price list and send it directly to any company</p>
             </div>
           </div>
           <button
             onClick={() => setTab(tab === "edit" ? "preview" : "edit")}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-bold transition-all flex-shrink-0"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 text-sm font-bold transition-all flex-shrink-0"
           >
             <Eye size={15} />
             {tab === "edit" ? "Preview" : "Back to Edit"}
@@ -267,14 +267,14 @@ export default function PriceList() {
       </div>
 
       {tab === "preview" ? (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-5 py-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Live Preview</span>
+        <div className="bg-[#0B2D22] rounded-2xl border border-white/7 overflow-hidden">
+          <div className="px-5 py-3 border-b border-white/[0.04] bg-[#071D16] flex items-center justify-between">
+            <span className="text-xs font-bold text-white/40 uppercase tracking-wider">Live Preview</span>
             <div className="flex gap-2">
-              <button onClick={handleDownload} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-all">
+              <button onClick={handleDownload} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 text-xs font-bold transition-all">
                 <Download size={12} /> Save PDF
               </button>
-              <button onClick={handleSend} disabled={sending} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-all disabled:opacity-60">
+              <button onClick={handleSend} disabled={sending} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold transition-all disabled:opacity-60">
                 <Send size={12} /> {sending ? "Sending…" : "Send"}
               </button>
             </div>
@@ -287,27 +287,27 @@ export default function PriceList() {
           {/* ── Column 1: Catalogue ─────────────────────────────── */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-black text-slate-700 flex items-center gap-2">
-                <span className="w-5 h-5 rounded-md bg-slate-200 flex items-center justify-center">
-                  <Search size={11} className="text-slate-500" />
+              <h2 className="text-sm font-black text-white/80 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-md bg-white/10 flex items-center justify-center">
+                  <Search size={11} className="text-white/40" />
                 </span>
                 Service Catalogue
               </h2>
-              <span className="text-[11px] text-slate-400 font-semibold bg-slate-100 px-2 py-0.5 rounded-full">{catalogue.length} services</span>
+              <span className="text-[11px] text-white/40 font-semibold bg-white/10 px-2 py-0.5 rounded-full">{catalogue.length} services</span>
             </div>
 
             <div className="relative">
-              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search services…"
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-white/20 text-sm focus:outline-none focus:border-emerald-500/50 transition-all"
               />
             </div>
 
             {loading ? (
-              <div className="flex items-center justify-center py-16 text-slate-400 text-sm">
+              <div className="flex items-center justify-center py-16 text-white/40 text-sm">
                 <RefreshCw size={16} className="animate-spin mr-2" /> Loading catalogue…
               </div>
             ) : (
@@ -317,7 +317,7 @@ export default function PriceList() {
                 const allAdded = items.every((s) => inList(s._id));
                 const cc = CAT_COLORS[cat] || CAT_COLORS.Extras;
                 return (
-                  <div key={cat} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                  <div key={cat} className="bg-[#0B2D22] rounded-2xl border border-white/7 overflow-hidden">
                     <div className={`flex items-center justify-between px-4 py-3 border-b ${cc.hdr}`}>
                       <div className="flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full ${cc.dot}`} />
@@ -326,20 +326,20 @@ export default function PriceList() {
                       <button
                         onClick={() => addAllInCategory(cat)}
                         disabled={allAdded}
-                        className={`text-xs font-bold transition-colors ${allAdded ? "text-slate-300 cursor-not-allowed" : "text-primary hover:text-primary/70"}`}
+                        className={`text-xs font-bold transition-colors ${allAdded ? "text-white/25 cursor-not-allowed" : "text-emerald-400 hover:text-emerald-300"}`}
                       >
                         {allAdded ? "✓ All added" : "+ Add all"}
                       </button>
                     </div>
-                    <div className="divide-y divide-slate-50">
+                    <div className="divide-y divide-white/[0.04]">
                       {items.map((s) => {
                         const added = inList(s._id);
                         return (
-                          <div key={s._id} className={`flex items-center gap-3 px-4 py-3 transition-colors ${added ? "bg-emerald-50/50" : "hover:bg-slate-50"}`}>
+                          <div key={s._id} className={`flex items-center gap-3 px-4 py-3 transition-colors ${added ? "bg-emerald-500/10" : "hover:bg-white/[0.04]"}`}>
                             <div className="flex-1 min-w-0">
-                              <p className={`text-sm font-semibold truncate ${added ? "text-slate-400" : "text-slate-800"}`}>{s.name}</p>
+                              <p className={`text-sm font-semibold truncate ${added ? "text-white/40" : "text-white"}`}>{s.name}</p>
                               {s.rate ? (
-                                <p className={`text-xs tabular-nums mt-0.5 ${added ? "text-slate-300" : "text-primary font-bold"}`}>
+                                <p className={`text-xs tabular-nums mt-0.5 ${added ? "text-white/25" : "text-emerald-400 font-bold"}`}>
                                   £{Number(s.rate).toFixed(2)}{unitLabel(s.type)}
                                 </p>
                               ) : null}
@@ -349,7 +349,7 @@ export default function PriceList() {
                             ) : (
                               <button
                                 onClick={() => addFromCatalogue(s)}
-                                className="flex-shrink-0 w-7 h-7 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all flex items-center justify-center"
+                                className="flex-shrink-0 w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center"
                               >
                                 <Plus size={14} />
                               </button>
@@ -367,28 +367,28 @@ export default function PriceList() {
           {/* ── Column 2: Price List (editable) ─────────────────── */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-black text-slate-700 flex items-center gap-2">
-                <span className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center">
-                  <Tag size={11} className="text-primary" />
+              <h2 className="text-sm font-black text-white/80 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-md bg-emerald-500/15 flex items-center justify-center">
+                  <Tag size={11} className="text-emerald-400" />
                 </span>
                 Your Price List
               </h2>
-              <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-1 rounded-full">
                 {listItems.filter((it) => it.name).length} items
               </span>
             </div>
 
             {listItems.length === 0 ? (
-              <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                  <Tag size={24} className="text-slate-300" />
+              <div className="bg-[#0B2D22] rounded-2xl border-2 border-dashed border-white/10 p-12 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
+                  <Tag size={24} className="text-white/25" />
                 </div>
-                <p className="text-sm font-bold text-slate-400">No services added yet</p>
-                <p className="text-xs text-slate-300 mt-1.5">Click + in the catalogue to add services</p>
+                <p className="text-sm font-bold text-white/40">No services added yet</p>
+                <p className="text-xs text-white/25 mt-1.5">Click + in the catalogue to add services</p>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                <div className="divide-y divide-slate-100">
+              <div className="bg-[#0B2D22] rounded-2xl border border-white/7 overflow-hidden">
+                <div className="divide-y divide-white/[0.04]">
                   {listItems.map((it) => (
                     <div key={it.id} className="p-4 space-y-2.5">
                       <div className="flex items-center gap-2">
@@ -396,30 +396,30 @@ export default function PriceList() {
                           value={it.name}
                           onChange={(e) => updateItem(it.id, "name", e.target.value)}
                           placeholder="Service name"
-                          className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all"
+                          className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-sm font-semibold text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all"
                         />
                         <button
                           onClick={() => removeItem(it.id)}
-                          className="flex-shrink-0 w-8 h-8 rounded-xl text-slate-300 hover:bg-rose-50 hover:text-rose-500 transition-all flex items-center justify-center border border-transparent hover:border-rose-200"
+                          className="flex-shrink-0 w-8 h-8 rounded-xl text-white/25 hover:bg-rose-500/10 hover:text-rose-400 transition-all flex items-center justify-center border border-transparent hover:border-rose-500/20"
                         >
                           <X size={15} />
                         </button>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1 flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
-                          <span className="text-sm font-bold text-slate-400">£</span>
+                        <div className="flex items-center gap-1 flex-1 bg-white/5 border border-white/10 rounded-xl px-3 focus-within:border-emerald-500/50 transition-all">
+                          <span className="text-sm font-bold text-white/40">£</span>
                           <input
                             type="number" min="0" step="0.01"
                             value={it.price}
                             onChange={(e) => updateItem(it.id, "price", e.target.value)}
                             placeholder="0.00"
-                            className="flex-1 py-2 bg-transparent text-sm font-bold text-right tabular-nums text-primary focus:outline-none"
+                            className="flex-1 py-2 bg-transparent text-sm font-bold text-right tabular-nums text-emerald-400 focus:outline-none"
                           />
                         </div>
                         <select
                           value={it.unit}
                           onChange={(e) => updateItem(it.id, "unit", e.target.value)}
-                          className="px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                          className="px-2.5 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-bold text-white/60 focus:outline-none focus:border-emerald-500/50 transition-all"
                         >
                           <option value="flat">flat</option>
                           <option value="hourly">/hr</option>
@@ -430,7 +430,7 @@ export default function PriceList() {
                         value={it.description}
                         onChange={(e) => updateItem(it.id, "description", e.target.value)}
                         placeholder="Short description (optional)"
-                        className="w-full px-3 py-1.5 rounded-lg border border-slate-100 bg-slate-50/50 text-xs text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        className="w-full px-3 py-1.5 rounded-lg border border-white/[0.04] bg-white/[0.03] text-xs text-white/40 placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all"
                       />
                     </div>
                   ))}
@@ -440,7 +440,7 @@ export default function PriceList() {
 
             <button
               onClick={addCustom}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-dashed border-slate-200 text-sm font-bold text-slate-500 hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-dashed border-white/10 text-sm font-bold text-white/40 hover:border-emerald-500/40 hover:text-emerald-400 hover:bg-emerald-500/5 transition-all"
             >
               <Plus size={16} /> Add Custom Service
             </button>
@@ -448,7 +448,7 @@ export default function PriceList() {
             {listItems.length > 0 && (
               <button
                 onClick={() => setListItems([])}
-                className="w-full flex items-center justify-center gap-2 py-2 text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2 text-xs font-bold text-white/40 hover:text-rose-400 transition-colors"
               >
                 <Trash2 size={13} /> Clear all
               </button>
@@ -458,14 +458,14 @@ export default function PriceList() {
           {/* ── Column 3: Recipient + Actions ───────────────────── */}
           <div className="space-y-4">
             {/* Recipient card */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-              <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/80 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Building2 size={14} className="text-primary" />
+            <div className="bg-[#0B2D22] rounded-2xl border border-white/7 overflow-hidden">
+              <div className="px-5 py-4 border-b border-white/[0.04] bg-[#071D16] flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+                  <Building2 size={14} className="text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-black text-slate-700">Send To</p>
-                  <p className="text-[10px] text-slate-400 font-medium">Recipient details</p>
+                  <p className="text-sm font-black text-white/80">Send To</p>
+                  <p className="text-[10px] text-white/40 font-medium">Recipient details</p>
                 </div>
               </div>
               <div className="p-5 space-y-3">
@@ -477,7 +477,7 @@ export default function PriceList() {
                   { label: "Address",       key: "address",      type: "text",  ph: "Business address" },
                 ].map(({ label, key, type, ph }) => (
                   <div key={key}>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">{label}</label>
+                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1">{label}</label>
                     <input type={type} value={recipient[key]} onChange={setR(key)} placeholder={ph} className={inp} />
                   </div>
                 ))}
@@ -485,63 +485,63 @@ export default function PriceList() {
             </div>
 
             {/* Cover note */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-              <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/80 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <FileText size={14} className="text-primary" />
+            <div className="bg-[#0B2D22] rounded-2xl border border-white/7 overflow-hidden">
+              <div className="px-5 py-4 border-b border-white/[0.04] bg-[#071D16] flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+                  <FileText size={14} className="text-emerald-400" />
                 </div>
-                <p className="text-sm font-black text-slate-700">Cover Note</p>
+                <p className="text-sm font-black text-white/80">Cover Note</p>
               </div>
               <div className="p-5 space-y-3">
                 <textarea
                   value={intro}
                   onChange={(e) => setIntro(e.target.value)}
                   rows={3}
-                  className="w-full px-3.5 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all"
+                  className="w-full px-3.5 py-3 rounded-xl border border-white/10 bg-white/5 text-sm text-white/80 placeholder:text-white/20 resize-none focus:outline-none focus:border-emerald-500/50 transition-all"
                   placeholder="Opening message…"
                 />
                 <label className="flex items-center gap-2.5 cursor-pointer select-none">
                   <div
                     onClick={() => setIncludeVat((v) => !v)}
-                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${includeVat ? "bg-primary border-primary" : "border-slate-300"}`}
+                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${includeVat ? "bg-emerald-500 border-emerald-500" : "border-white/25"}`}
                   >
                     {includeVat && <X size={11} className="text-white" />}
                   </div>
-                  <span className="text-sm font-semibold text-slate-600">Include VAT notice</span>
+                  <span className="text-sm font-semibold text-white/80">Include VAT notice</span>
                 </label>
               </div>
             </div>
 
             {/* Actions sticky card */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm sticky top-4">
-              <div className="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-primary/5 to-transparent">
-                <p className="text-xs font-black uppercase tracking-wider text-primary">Actions</p>
+            <div className="bg-[#0B2D22] rounded-2xl border border-white/7 overflow-hidden sticky top-4">
+              <div className="px-5 py-4 border-b border-white/[0.04] bg-gradient-to-r from-emerald-500/5 to-transparent">
+                <p className="text-xs font-black uppercase tracking-wider text-emerald-400">Actions</p>
               </div>
               <div className="p-5 space-y-2.5">
                 <button
                   onClick={handleSend}
                   disabled={sending}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-primary text-white font-bold text-sm hover:bg-primary/90 disabled:opacity-60 transition-colors shadow-lg shadow-primary/20"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-sm disabled:opacity-60 transition-colors"
                 >
                   {sending ? <RefreshCw size={15} className="animate-spin" /> : <Send size={15} />}
                   {sending ? "Sending…" : "Send to Email"}
                 </button>
                 <button
                   onClick={() => setTab("preview")}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:border-primary/40 hover:text-primary transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/5 border border-white/10 text-white/80 font-bold text-sm hover:bg-white/10 hover:border-emerald-500/40 hover:text-emerald-400 transition-colors"
                 >
                   <Eye size={15} /> Preview Price List
                 </button>
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   <button
                     onClick={handleDownload}
-                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-xs hover:border-primary/40 hover:text-primary transition-colors"
+                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/60 font-bold text-xs hover:border-emerald-500/40 hover:text-emerald-400 transition-colors"
                   >
                     <Download size={13} /> Save PDF
                   </button>
                   <button
                     onClick={handlePrint}
-                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-xs hover:border-primary/40 hover:text-primary transition-colors"
+                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/60 font-bold text-xs hover:border-emerald-500/40 hover:text-emerald-400 transition-colors"
                   >
                     <Printer size={13} /> Print
                   </button>

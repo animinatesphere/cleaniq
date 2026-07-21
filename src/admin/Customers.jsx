@@ -238,7 +238,7 @@ const Customers = () => {
     <div className="min-h-screen bg-[#061A13]">
 
       {toast && (
-        <div className={`fixed top-4 right-4 z-[9999] flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg text-sm font-medium border
+        <div className={`fixed top-4 right-4 z-9999 flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg text-sm font-medium border
           ${toast.type === "success" ? "bg-[#0B2D22] border-emerald-500/25 text-emerald-400" : "bg-[#0B2D22] border-rose-500/25 text-rose-400"}`}>
           {toast.type === "success" ? <CheckCircle2 size={16} className="text-emerald-400"/> : <XCircle size={16} className="text-rose-400"/>}
           {toast.msg}
@@ -246,7 +246,7 @@ const Customers = () => {
       )}
 
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-9998 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-[#0B2D22] rounded-2xl border border-white/10 shadow-2xl p-6 w-full max-w-sm">
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-rose-500/15 mx-auto mb-4">
               <AlertTriangle size={22} className="text-rose-400"/>
@@ -262,7 +262,7 @@ const Customers = () => {
       )}
 
       {showCreate && (
-        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-9998 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-[#0B2D22] rounded-2xl border border-white/10 shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <div className="flex items-center gap-2.5">
@@ -315,7 +315,7 @@ const Customers = () => {
 
         <div className={`flex flex-col overflow-hidden transition-all ${selected ? "w-0 md:w-1/2 lg:w-[55%]" : "w-full"}`}>
 
-          <div className="bg-[#0B2D22] border-b border-white/10 px-6 py-5 flex-shrink-0">
+          <div className="bg-[#0B2D22] border-b border-white/10 px-6 py-5 shrink-0">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h1 className="text-xl font-semibold text-white">Customers</h1>
@@ -404,12 +404,12 @@ const Customers = () => {
                     <th className="px-4 py-3 w-10"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/[0.06]">
+                <tbody className="divide-y divide-white/6">
                   {filtered.map(c => (
                     <tr
                       key={c.email}
                       onClick={() => openCustomer(c)}
-                      className={`cursor-pointer hover:bg-[#0A2A1F] transition-colors ${selected?.email === c.email ? "bg-emerald-500/[0.08]" : ""}`}
+                      className={`cursor-pointer hover:bg-[#0A2A1F] transition-colors ${selected?.email === c.email ? "bg-emerald-500/8" : ""}`}
                     >
                       <td className="px-4 py-3.5" onClick={e => e.stopPropagation()}>
                         <input type="checkbox"
@@ -424,7 +424,7 @@ const Customers = () => {
                       </td>
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0">
                             {(c.firstName?.[0] || "?").toUpperCase()}
                           </div>
                           <div>
@@ -472,7 +472,7 @@ const Customers = () => {
         {selected && (
           <div className="w-full md:w-1/2 lg:w-[45%] flex flex-col border-l border-white/10 bg-[#0B2D22] overflow-hidden">
 
-            <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between flex-shrink-0">
+            <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold">
                   {(selected.firstName?.[0] || "?").toUpperCase()}
@@ -505,7 +505,7 @@ const Customers = () => {
               </div>
             </div>
 
-            <div className="flex border-b border-white/10 px-6 flex-shrink-0">
+            <div className="flex border-b border-white/10 px-6 shrink-0">
               {[
                 { key:"overview", label:"Overview" },
                 { key:"activity", label:"Login Activity" },
@@ -547,7 +547,7 @@ const Customers = () => {
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide">Personal Information</h3>
                     </div>
-                    <div className="border border-white/10 rounded-xl divide-y divide-white/[0.06]">
+                    <div className="border border-white/10 rounded-xl divide-y divide-white/6">
                       {isEditing ? (
                         <div className="p-4 space-y-3">
                           <div className="grid grid-cols-2 gap-3">
@@ -570,8 +570,8 @@ const Customers = () => {
                             { Icon:Calendar, label:"Registered",   value:fmtDate(selected.createdAt) },
                           ].map(({Icon,label,value}) => (
                             <div key={label} className="flex items-center gap-3 px-4 py-3">
-                              <Icon size={14} className="text-white/40 flex-shrink-0"/>
-                              <span className="text-xs text-white/40 w-24 flex-shrink-0">{label}</span>
+                              <Icon size={14} className="text-white/40 shrink-0"/>
+                              <span className="text-xs text-white/40 w-24 shrink-0">{label}</span>
                               <span className="text-sm text-white/70 font-medium truncate">{value}</span>
                             </div>
                           ))}
@@ -582,7 +582,7 @@ const Customers = () => {
 
                   <div>
                     <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-3">Account Status</h3>
-                    <div className="border border-white/10 rounded-xl divide-y divide-white/[0.06]">
+                    <div className="border border-white/10 rounded-xl divide-y divide-white/6">
                       <div className="flex items-center gap-3 px-4 py-3">
                         <LogIn size={14} className="text-white/40"/>
                         <span className="text-xs text-white/40 w-24">Last login</span>
@@ -632,8 +632,8 @@ const Customers = () => {
                     <div className="space-y-1">
                       <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-3">Session History</h3>
                       {selected.loginHistory.slice().reverse().map((session, i) => (
-                        <div key={i} className="flex items-start gap-3 p-3 rounded-xl border border-white/[0.06] bg-[#071D16] hover:border-white/10 transition-all">
-                          <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        <div key={i} className="flex items-start gap-3 p-3 rounded-xl border border-white/6 bg-[#071D16] hover:border-white/10 transition-all">
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
                             session.action === "logout" ? "bg-white/10" : "bg-emerald-500/15"
                           }`}>
                             {session.action === "logout"
@@ -713,7 +713,7 @@ const Customers = () => {
             </div>
 
             {!isEditing && (
-              <div className="px-6 py-4 border-t border-white/10 flex-shrink-0">
+              <div className="px-6 py-4 border-t border-white/10 shrink-0">
                 <Btn variant="outline" size="sm" className="text-rose-400 border-rose-500/25 hover:bg-rose-500/15 hover:border-rose-500/40"
                   onClick={() => setShowDeleteConfirm(selected.email)}>
                   <Trash2 size={12}/> Delete account

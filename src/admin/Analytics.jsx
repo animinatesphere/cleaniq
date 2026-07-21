@@ -53,7 +53,7 @@ const KpiCard = ({ icon: Icon, label, value, accent }) => (
       </div>
     </div>
     <p className="text-2xl font-bold text-white tabular-nums">{value}</p>
-    <p className="text-[11px] font-semibold text-slate-300 mt-1">{label}</p>
+    <p className="text-[11px] font-semibold text-white/40 mt-1">{label}</p>
   </div>
 );
 
@@ -61,7 +61,7 @@ const BreakdownList = ({ title, items, renderLabel, valueKey, total }) => (
   <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-sm p-5 sm:p-6">
     <h3 className="text-sm font-bold text-white mb-4">{title}</h3>
     {items.length === 0 ? (
-      <p className="text-xs text-slate-400 py-6 text-center">No data yet</p>
+      <p className="text-xs text-white/40 py-6 text-center">No data yet</p>
     ) : (
       <div className="space-y-3">
         {items.map((item, i) => {
@@ -69,7 +69,7 @@ const BreakdownList = ({ title, items, renderLabel, valueKey, total }) => (
           return (
             <div key={i}>
               <div className="flex items-center justify-between gap-3 mb-1.5">
-                <span className="text-xs font-semibold text-slate-300 truncate flex-1 min-w-0">
+                <span className="text-xs font-semibold text-white/80 truncate flex-1 min-w-0">
                   {renderLabel(item)}
                 </span>
                 <span className="text-xs font-bold text-white tabular-nums shrink-0">
@@ -166,7 +166,7 @@ const Analytics = () => {
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Globe size={22} className="text-primary" /> Website Analytics
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-white/40 mt-1">
             Live traffic data from Google Analytics
           </p>
         </div>
@@ -180,7 +180,7 @@ const Analytics = () => {
               <span className="text-[11px] font-bold text-white tabular-nums">
                 {liveUsers}
               </span>
-              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+              <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">
                 online now
               </span>
             </div>
@@ -193,7 +193,7 @@ const Analytics = () => {
                 className={`px-3.5 py-2 rounded-lg text-[11px] font-bold transition-all ${
                   days === p.value
                     ? "bg-primary text-white shadow-sm"
-                    : "text-slate-400 hover:text-slate-100"
+                    : "text-white/40 hover:text-white"
                 }`}
               >
                 {p.label}
@@ -211,17 +211,17 @@ const Analytics = () => {
 
       {error ? (
         <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-sm p-16 text-center">
-          <Globe size={32} className="text-slate-200 mx-auto mb-4" />
+          <Globe size={32} className="text-white/25 mx-auto mb-4" />
           <p className="text-sm font-bold text-white">
             Google Analytics isn't connected yet
           </p>
-          <p className="text-xs text-slate-400 mt-2 max-w-md mx-auto">
+          <p className="text-xs text-white/40 mt-2 max-w-md mx-auto">
             Add{" "}
-            <code className="bg-slate-800 text-slate-100 px-1.5 py-0.5 rounded">
+            <code className="bg-white/10 text-white/80 px-1.5 py-0.5 rounded">
               GA4_PROPERTY_ID
             </code>{" "}
             and{" "}
-            <code className="bg-slate-800 text-slate-100 px-1.5 py-0.5 rounded">
+            <code className="bg-white/10 text-white/80 px-1.5 py-0.5 rounded">
               GA4_SERVICE_ACCOUNT_JSON
             </code>{" "}
             to the server's environment variables, then restart the server.
@@ -232,7 +232,7 @@ const Analytics = () => {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="h-28 bg-slate-50 rounded-2xl animate-pulse"
+              className="h-28 bg-white/[0.03] rounded-2xl animate-pulse"
             />
           ))}
         </div>
@@ -244,48 +244,48 @@ const Analytics = () => {
               icon={Users}
               label="Visitors"
               value={data.totals.activeUsers.toLocaleString("en-GB")}
-              accent="bg-emerald-50 text-emerald-600"
+              accent="bg-emerald-500/15 text-emerald-400"
             />
             <KpiCard
               icon={ArrowUpRight}
               label="New Users"
               value={data.totals.newUsers.toLocaleString("en-GB")}
-              accent="bg-blue-50 text-blue-600"
+              accent="bg-blue-500/15 text-blue-400"
             />
             <KpiCard
               icon={MousePointerClick}
               label="Sessions"
               value={data.totals.sessions.toLocaleString("en-GB")}
-              accent="bg-violet-50 text-violet-600"
+              accent="bg-violet-500/15 text-violet-400"
             />
             <KpiCard
               icon={FileText}
               label="Page Views"
               value={data.totals.pageViews.toLocaleString("en-GB")}
-              accent="bg-amber-50 text-amber-600"
+              accent="bg-amber-500/15 text-amber-400"
             />
             <KpiCard
               icon={Clock}
               label="Avg. Session"
               value={formatDuration(data.totals.avgSessionDurationSec)}
-              accent="bg-cyan-50 text-cyan-600"
+              accent="bg-cyan-500/15 text-cyan-400"
             />
             <KpiCard
               icon={TrendingDown}
               label="Bounce Rate"
               value={`${data.totals.bounceRate.toFixed(1)}%`}
-              accent="bg-rose-50 text-rose-600"
+              accent="bg-rose-500/15 text-rose-400"
             />
           </div>
 
           {/* Trend chart */}
           <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-sm p-5 sm:p-6">
             <h3 className="text-sm font-bold text-white mb-1">Visitor Trend</h3>
-            <p className="text-[11px] text-slate-400 mb-5">
+            <p className="text-[11px] text-white/40 mb-5">
               Daily active users over the last {days} days
             </p>
             {trendPoints.length === 0 ? (
-              <p className="text-xs text-slate-300 py-12 text-center">
+              <p className="text-xs text-white/40 py-12 text-center">
                 No data yet
               </p>
             ) : (
@@ -294,7 +294,7 @@ const Analytics = () => {
                   {[0, 25, 50, 75].map((g) => (
                     <div
                       key={g}
-                      className="absolute left-0 right-0 border-t border-dashed border-slate-100"
+                      className="absolute left-0 right-0 border-t border-dashed border-white/[0.06]"
                       style={{ bottom: `${g}%` }}
                     />
                   ))}
@@ -355,7 +355,7 @@ const Analytics = () => {
                           >
                             {p.activeUsers.toLocaleString("en-GB")} visitors
                             <br />
-                            <span className="text-slate-400">
+                            <span className="text-white/40">
                               {p.sessions.toLocaleString("en-GB")} sessions ·{" "}
                               {formatGaDate(p.date)}
                             </span>
@@ -377,7 +377,7 @@ const Analytics = () => {
                   {trendPoints.map((p, i) => (
                     <div key={i} className="flex-1 text-center">
                       {i % trendLabelStep === 0 && (
-                        <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">
+                        <span className="text-[9px] font-semibold text-white/40 uppercase tracking-wider">
                           {formatGaDate(p.date)}
                         </span>
                       )}
@@ -413,7 +413,7 @@ const Analytics = () => {
                 const Icon = deviceIcon(d.category);
                 return (
                   <span className="flex items-center gap-1.5 capitalize">
-                    <Icon size={12} className="text-slate-400" /> {d.category}
+                    <Icon size={12} className="text-white/40" /> {d.category}
                   </span>
                 );
               }}
@@ -468,7 +468,7 @@ const Analytics = () => {
                     <span
                       className={`w-2.5 h-2.5 rounded-full ${i === 0 ? "bg-primary" : "bg-secondary"}`}
                     />
-                    <span className="text-xs font-semibold text-slate-300 capitalize">
+                    <span className="text-xs font-semibold text-white/80 capitalize">
                       {r.type === "new" ? "New" : "Returning"}
                     </span>
                     <span className="text-xs font-bold text-white tabular-nums">

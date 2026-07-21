@@ -7,10 +7,10 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 const STATUS_FLOW = ["pending", "booked", "completed", "rewarded"];
 
 const STATUS_STYLES = {
-  pending:   "bg-zinc-100 text-zinc-600 border-zinc-200",
-  booked:    "bg-blue-50 text-blue-700 border-blue-200",
-  completed: "bg-green-50 text-green-700 border-green-200",
-  rewarded:  "bg-amber-50 text-amber-700 border-amber-200",
+  pending:   "bg-white/10 text-white/60 border-white/10",
+  booked:    "bg-blue-500/15 text-blue-400 border-blue-500/25",
+  completed: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+  rewarded:  "bg-amber-500/15 text-amber-400 border-amber-500/25",
 };
 
 function fmtDate(d) {
@@ -92,7 +92,7 @@ export default function Referrals() {
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl flex items-center justify-between">
+        <div className="bg-rose-500/15 border border-rose-500/25 text-rose-400 text-sm px-4 py-3 rounded-xl flex items-center justify-between">
           {error}
           <button onClick={() => setError("")}><X size={14} /></button>
         </div>
@@ -101,16 +101,19 @@ export default function Referrals() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Referral Tracking</h1>
-          <p className="text-sm text-zinc-500 mt-1">Monitor referrals and manage reward payouts.</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Referral Tracking</h1>
+          <p className="text-sm text-white/40 mt-1">Monitor referrals and manage reward payouts.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={fetchAll} className="p-2 rounded-xl text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors">
+          <button
+            onClick={fetchAll}
+            className="p-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.06] transition-colors"
+          >
             <RefreshCw size={15} />
           </button>
           <button
             onClick={() => setShowForm(s => !s)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-zinc-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold transition-colors"
           >
             <Plus size={15} /> Log Referral
           </button>
@@ -120,45 +123,45 @@ export default function Referrals() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Total Referrals", val: stats.total,                   bg: "bg-zinc-50",   color: "text-zinc-900" },
-          { label: "Booked",          val: stats.booked,                  bg: "bg-blue-50",   color: "text-blue-700" },
-          { label: "Completed",       val: stats.completed,               bg: "bg-green-50",  color: "text-green-700" },
-          { label: "Rewards Paid",    val: `£${stats.rewardsPaid.toFixed(2)}`, bg: "bg-amber-50", color: "text-amber-700" },
+          { label: "Total Referrals", val: stats.total,                        bg: "bg-[#0B2D22] border border-white/[0.07]",             color: "text-white" },
+          { label: "Booked",          val: stats.booked,                       bg: "bg-blue-500/10 border border-blue-500/20",            color: "text-blue-400" },
+          { label: "Completed",       val: stats.completed,                    bg: "bg-emerald-500/10 border border-emerald-500/20",      color: "text-emerald-400" },
+          { label: "Rewards Paid",    val: `£${stats.rewardsPaid.toFixed(2)}`, bg: "bg-amber-500/10 border border-amber-500/20",         color: "text-amber-400" },
         ].map(s => (
-          <div key={s.label} className={`${s.bg} rounded-xl px-5 py-4 border border-zinc-100`}>
+          <div key={s.label} className={`${s.bg} rounded-xl px-5 py-4`}>
             <p className={`text-2xl font-black ${s.color}`}>{s.val}</p>
-            <p className="text-xs text-zinc-500 font-medium mt-0.5">{s.label}</p>
+            <p className="text-xs text-white/40 font-medium mt-0.5">{s.label}</p>
           </div>
         ))}
       </div>
 
       {/* New Referral Form */}
       {showForm && (
-        <div className="bg-white border border-zinc-200 rounded-2xl p-6 space-y-4 shadow-sm">
+        <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-zinc-900">Log Referral</h2>
-            <button onClick={() => setShowForm(false)}><X size={16} className="text-zinc-400" /></button>
+            <h2 className="text-sm font-bold text-white">Log Referral</h2>
+            <button onClick={() => setShowForm(false)}><X size={16} className="text-white/40" /></button>
           </div>
           <form onSubmit={handleCreate} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <input required placeholder="Referrer name *"
                 value={form.referrerName} onChange={e => setForm(f => ({ ...f, referrerName: e.target.value }))}
-                className="px-4 py-2.5 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none focus:border-zinc-400" />
+                className="px-4 py-2.5 bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none rounded-xl text-sm" />
               <input type="email" placeholder="Referrer email"
                 value={form.referrerEmail} onChange={e => setForm(f => ({ ...f, referrerEmail: e.target.value }))}
-                className="px-4 py-2.5 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none focus:border-zinc-400" />
+                className="px-4 py-2.5 bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none rounded-xl text-sm" />
               <input placeholder="Referee name"
                 value={form.refereeName} onChange={e => setForm(f => ({ ...f, refereeName: e.target.value }))}
-                className="px-4 py-2.5 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none focus:border-zinc-400" />
+                className="px-4 py-2.5 bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none rounded-xl text-sm" />
               <input required type="email" placeholder="Referee email *"
                 value={form.refereeEmail} onChange={e => setForm(f => ({ ...f, refereeEmail: e.target.value }))}
-                className="px-4 py-2.5 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none focus:border-zinc-400" />
+                className="px-4 py-2.5 bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none rounded-xl text-sm" />
             </div>
             <textarea placeholder="Notes" rows={2}
               value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-              className="w-full px-4 py-2.5 border border-zinc-200 rounded-xl bg-zinc-50 text-sm outline-none focus:border-zinc-400 resize-none" />
+              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none rounded-xl text-sm resize-none" />
             <button type="submit" disabled={saving}
-              className="px-6 py-2.5 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-zinc-700 disabled:opacity-50 transition-colors">
+              className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold disabled:opacity-50 transition-colors">
               {saving ? "Saving…" : "Log Referral"}
             </button>
           </form>
@@ -166,16 +169,16 @@ export default function Referrals() {
       )}
 
       {/* Referrals table */}
-      <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-zinc-100">
-          <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-widest">All Referrals</h2>
+      <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-white/[0.07]">
+          <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest">All Referrals</h2>
         </div>
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
           </div>
         ) : referrals.length === 0 ? (
-          <div className="text-center py-16 text-zinc-400">
+          <div className="text-center py-16 text-white/25">
             <p className="text-3xl mb-2">🤝</p>
             <p className="text-sm font-medium">No referrals logged yet</p>
           </div>
@@ -183,7 +186,7 @@ export default function Referrals() {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-zinc-50 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                <tr className="bg-white/[0.03] text-white/40 text-xs font-semibold uppercase tracking-wide">
                   <th className="px-6 py-3">Referrer</th>
                   <th className="px-4 py-3">Referee</th>
                   <th className="px-4 py-3">Status</th>
@@ -193,22 +196,22 @@ export default function Referrals() {
                   <th className="px-4 py-3">Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-50">
+              <tbody>
                 {referrals.map(r => (
-                  <tr key={r._id} className="hover:bg-zinc-50/60 transition-colors">
+                  <tr key={r._id} className="hover:bg-white/[0.04] transition-colors border-b border-white/[0.04] last:border-b-0">
                     <td className="px-6 py-4">
-                      <p className="text-sm font-semibold text-zinc-900">{r.referrerName || "—"}</p>
-                      <p className="text-xs text-zinc-400">{r.referrerEmail}</p>
+                      <p className="text-sm font-semibold text-white">{r.referrerName || "—"}</p>
+                      <p className="text-xs text-white/40">{r.referrerEmail}</p>
                     </td>
                     <td className="px-4 py-4">
-                      <p className="text-sm font-medium text-zinc-700">{r.refereeName || "—"}</p>
-                      <p className="text-xs text-zinc-400">{r.refereeEmail}</p>
+                      <p className="text-sm font-medium text-white/80">{r.refereeName || "—"}</p>
+                      <p className="text-xs text-white/40">{r.refereeEmail}</p>
                     </td>
                     <td className="px-4 py-4">
                       <select
                         value={r.status || "pending"}
                         onChange={e => patchReferral(r._id, { status: e.target.value })}
-                        className={`text-xs font-bold px-2 py-1 rounded-lg border outline-none cursor-pointer ${STATUS_STYLES[r.status] || STATUS_STYLES.pending}`}
+                        className={`text-xs font-bold px-2 py-1 rounded-lg border outline-none cursor-pointer bg-transparent ${STATUS_STYLES[r.status] || STATUS_STYLES.pending}`}
                       >
                         {STATUS_FLOW.map(s => (
                           <option key={s} value={s}>{s}</option>
@@ -216,22 +219,22 @@ export default function Referrals() {
                       </select>
                     </td>
                     <td className="px-4 py-4">
-                      <span className="text-xs font-mono text-zinc-500">{r.bookingRef || "—"}</span>
+                      <span className="text-xs font-mono text-white/40">{r.bookingRef || "—"}</span>
                     </td>
                     <td className="px-4 py-4">
-                      <span className="text-sm font-semibold text-zinc-700">{fmtCurrency(r.rewardAmount)}</span>
+                      <span className="text-sm font-semibold text-white/80">{fmtCurrency(r.rewardAmount)}</span>
                     </td>
                     <td className="px-4 py-4">
                       <button
                         onClick={() => patchReferral(r._id, { rewardPaid: !r.rewardPaid })}
                         className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${
-                          r.rewardPaid ? "bg-zinc-900" : "bg-zinc-300"
+                          r.rewardPaid ? "bg-emerald-500" : "bg-white/20"
                         }`}
                       >
                         <span className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${r.rewardPaid ? "translate-x-4" : ""}`} />
                       </button>
                     </td>
-                    <td className="px-4 py-4 text-xs text-zinc-400">{fmtDate(r.createdAt)}</td>
+                    <td className="px-4 py-4 text-xs text-white/40">{fmtDate(r.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

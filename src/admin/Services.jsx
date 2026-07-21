@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Settings, Save, Plus, Trash2, 
-  RefreshCcw, DollarSign, MapPin, 
+import {
+  Settings, Save, Plus, Trash2,
+  RefreshCcw, DollarSign, MapPin,
   AlertCircle, CheckCircle2, Clock,
   Info, Layout, Zap, Home as HomeIcon, Star, ListChecks, X as XIcon
 } from 'lucide-react';
@@ -13,7 +13,7 @@ const ServicesManagement = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
-  
+
   const [newFeature, setNewFeature] = useState({ name: '', rate: '', type: 'flat', description: '' });
 
   const fetchServices = async () => {
@@ -90,7 +90,7 @@ const ServicesManagement = () => {
     setSaving(true);
     try {
       const isExisting = service._id && service._id.match(/^[0-9a-fA-F]{24}$/);
-      const url = isExisting 
+      const url = isExisting
         ? `${import.meta.env.VITE_API_URL}/services/${service._id}`
         : `${import.meta.env.VITE_API_URL}/services`;
       const method = isExisting ? 'PUT' : 'POST';
@@ -98,9 +98,9 @@ const ServicesManagement = () => {
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          ...service, 
-          name: service.name.trim(), 
+        body: JSON.stringify({
+          ...service,
+          name: service.name.trim(),
           region: activeRegion,
           category: service.category || service.originalCategory || 'Extras'
         })
@@ -110,9 +110,9 @@ const ServicesManagement = () => {
         fetchServices();
         setTimeout(() => setMessage(null), 3000);
       }
-    } catch (error) { 
+    } catch (error) {
       console.error('Save error:', error);
-      setMessage({ type: 'error', text: `Failed to update: ${error.message}` }); 
+      setMessage({ type: 'error', text: `Failed to update: ${error.message}` });
     } finally { setSaving(false); }
   };
 
@@ -143,12 +143,12 @@ const ServicesManagement = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Services & Pricing</h2>
-          <p className="text-sm text-slate-400 font-medium mt-1">Manage all rates, rooms, and extra add-ons</p>
+          <h2 className="text-2xl font-bold text-white tracking-tight">Services & Pricing</h2>
+          <p className="text-sm text-white/40 font-medium mt-1">Manage all rates, rooms, and extra add-ons</p>
         </div>
-        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1">
+        <div className="flex items-center gap-1 bg-[#0B2D22] border border-white/7 rounded-xl p-1">
           {Object.keys(categories).map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${activeTab === tab ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+            <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all ${activeTab === tab ? 'bg-emerald-500 text-white shadow-sm' : 'text-white/40 hover:text-white/70'}`}>
               {tab}
             </button>
           ))}
@@ -156,51 +156,83 @@ const ServicesManagement = () => {
       </div>
 
       {message && (
-        <div className={`p-4 rounded-2xl border flex items-center gap-3 animate-in slide-in-from-top-2 shadow-sm ${message.type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-rose-50 border-rose-100 text-rose-700'}`}>
+        <div className={`p-4 rounded-2xl border flex items-center gap-3 animate-in slide-in-from-top-2 ${message.type === 'success' ? 'bg-emerald-500/15 border-emerald-500/25 text-emerald-400' : 'bg-rose-500/15 border-rose-500/25 text-rose-400'}`}>
           {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
           <p className="text-sm font-semibold">{message.text}</p>
         </div>
       )}
 
       {/* Add New Service for current Tab */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-6">
-        <h3 className="text-sm font-bold text-slate-800 mb-5 flex items-center gap-2"><Plus size={16} className="text-primary"/> Add New {activeTab} Service</h3>
+      <div className="bg-[#0B2D22] border border-white/7 rounded-2xl p-6">
+        <h3 className="text-sm font-bold text-white mb-5 flex items-center gap-2">
+          <Plus size={16} className="text-emerald-400"/> Add New {activeTab} Service
+        </h3>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
-          <input type="text" placeholder="Name (e.g. Fridge Cleaning)" value={newFeature.name} onChange={(e) => setNewFeature({...newFeature, name: e.target.value})} className="p-3 rounded-xl bg-slate-50 border border-slate-200 outline-none font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
-          <input type="number" placeholder="Rate / Price" value={newFeature.rate} onChange={(e) => setNewFeature({...newFeature, rate: e.target.value})} className="p-3 rounded-xl bg-slate-50 border border-slate-200 outline-none font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
-          <select value={newFeature.type} onChange={(e) => setNewFeature({...newFeature, type: e.target.value})} className="p-3 rounded-xl bg-slate-50 border border-slate-200 outline-none font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+          <input
+            type="text"
+            placeholder="Name (e.g. Fridge Cleaning)"
+            value={newFeature.name}
+            onChange={(e) => setNewFeature({...newFeature, name: e.target.value})}
+            className="p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 font-medium text-sm transition-all"
+          />
+          <input
+            type="number"
+            placeholder="Rate / Price"
+            value={newFeature.rate}
+            onChange={(e) => setNewFeature({...newFeature, rate: e.target.value})}
+            className="p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 font-medium text-sm transition-all"
+          />
+          <select
+            value={newFeature.type}
+            onChange={(e) => setNewFeature({...newFeature, type: e.target.value})}
+            className="p-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-emerald-500/50 font-medium text-sm transition-all"
+          >
             <option value="flat">Flat Rate</option>
             <option value="hourly">Hourly Rate</option>
           </select>
-          <button onClick={handleAddFeature} className="bg-primary text-white p-3 rounded-xl font-bold text-sm hover:bg-primary-dark transition-all">Add {activeTab}</button>
+          <button
+            onClick={handleAddFeature}
+            className="bg-emerald-500 hover:bg-emerald-400 text-white p-3 rounded-xl font-bold text-sm transition-all"
+          >
+            Add {activeTab}
+          </button>
           <div className="md:col-span-2 lg:col-span-4">
-            <input type="text" placeholder="Brief description (optional)" value={newFeature.description} onChange={(e) => setNewFeature({...newFeature, description: e.target.value})} className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 outline-none font-medium text-sm focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+            <input
+              type="text"
+              placeholder="Brief description (optional)"
+              value={newFeature.description}
+              onChange={(e) => setNewFeature({...newFeature, description: e.target.value})}
+              className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 font-medium text-sm transition-all"
+            />
           </div>
         </div>
       </div>
 
       {/* Categorized Rates */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-slate-400"><RefreshCcw size={32} className="animate-spin mb-3"/><p className="font-semibold text-sm">Loading services…</p></div>
+        <div className="py-20 flex flex-col items-center justify-center text-white/40">
+          <RefreshCcw size={32} className="animate-spin mb-3"/>
+          <p className="font-semibold text-sm">Loading services…</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {categories[activeTab].map((service) => (
-            <div key={service._id} className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all group">
+            <div key={service._id} className="bg-[#0B2D22] border border-white/7 rounded-2xl p-6 hover:border-white/15 transition-all group">
               <div className="flex justify-between items-start mb-5">
                 <div className="flex-1 mr-2">
                   <input
                     type="text"
                     value={service.name}
                     onChange={(e) => handleNameChange(service._id, e.target.value)}
-                    className="font-bold text-slate-900 bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl px-3 py-2 text-sm transition-all w-full mb-1 cursor-text"
+                    className="font-bold text-white bg-white/5 border border-white/10 focus:border-emerald-500/50 focus:outline-none rounded-xl px-3 py-2 text-sm transition-all w-full mb-1 cursor-text"
                     title="Click to edit name"
                   />
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] font-semibold text-slate-400 px-1">Rate Type:</span>
+                    <span className="text-[10px] font-semibold text-white/40 px-1">Rate Type:</span>
                     <select
                       value={service.type}
                       onChange={(e) => handleTypeChange(service._id, e.target.value)}
-                      className="text-[9px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white rounded-lg px-2 py-0.5 outline-none transition-all cursor-pointer"
+                      className="text-[9px] font-black text-white/60 uppercase tracking-widest bg-white/5 border border-white/10 focus:border-emerald-500/50 focus:outline-none rounded-lg px-2 py-0.5 transition-all cursor-pointer"
                     >
                       <option value="flat">Flat</option>
                       <option value="hourly">Hourly</option>
@@ -210,44 +242,53 @@ const ServicesManagement = () => {
                     value={service.description || ''}
                     onChange={(e) => handleDescriptionChange(service._id, e.target.value)}
                     placeholder="Enter brief description..."
-                    className="font-medium text-slate-500 bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl px-3 py-2 text-xs transition-all w-full mt-2 h-16 resize-none cursor-text"
+                    className="font-medium text-white/60 bg-white/5 border border-white/10 focus:border-emerald-500/50 focus:outline-none rounded-xl px-3 py-2 text-xs placeholder:text-white/20 transition-all w-full mt-2 h-16 resize-none cursor-text"
                     title="Click to edit description"
                   />
                 </div>
-                <button onClick={() => deleteService(service._id)} className="p-2 text-slate-200 hover:text-rose-500 transition-colors shrink-0"><Trash2 size={16}/></button>
+                <button
+                  onClick={() => deleteService(service._id)}
+                  className="p-2 text-white/25 hover:text-rose-400 transition-colors shrink-0"
+                >
+                  <Trash2 size={16}/>
+                </button>
               </div>
-              
+
               {/* Bullets editor — only for Base services */}
               {service.originalCategory === 'Base' && (
-                <div className="mt-4 border-t border-slate-100 pt-4">
+                <div className="mt-4 border-t border-white/[0.04] pt-4">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-[10px] font-semibold text-slate-400 flex items-center gap-1">
+                    <p className="text-[10px] font-semibold text-white/40 flex items-center gap-1">
                       <ListChecks size={12} /> Feature Bullets
                     </p>
-                    <button onClick={() => handleAddBullet(service._id)}
-                      className="flex items-center gap-1 text-[10px] font-bold text-primary hover:bg-primary/5 px-2 py-1 rounded-lg transition-all">
+                    <button
+                      onClick={() => handleAddBullet(service._id)}
+                      className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 hover:bg-emerald-500/10 px-2 py-1 rounded-lg transition-all"
+                    >
                       <Plus size={11} /> Add
                     </button>
                   </div>
                   <div className="space-y-2">
                     {(service.bullets || []).map((bullet, idx) => (
                       <div key={idx} className="flex items-center gap-2">
-                        <CheckCircle2 size={11} className="text-primary/30 shrink-0" />
+                        <CheckCircle2 size={11} className="text-emerald-400/30 shrink-0" />
                         <input
                           type="text"
                           value={bullet}
                           onChange={e => handleBulletChange(service._id, idx, e.target.value)}
                           placeholder={`Bullet point ${idx + 1}`}
-                          className="flex-1 text-xs font-bold bg-slate-50 border border-slate-200 focus:border-primary focus:bg-white focus:outline-none rounded-lg px-3 py-1.5 transition-all"
+                          className="flex-1 text-xs font-bold text-white bg-white/5 border border-white/10 focus:border-emerald-500/50 focus:outline-none placeholder:text-white/20 rounded-lg px-3 py-1.5 transition-all"
                         />
-                        <button onClick={() => handleRemoveBullet(service._id, idx)}
-                          className="text-slate-300 hover:text-rose-400 transition-colors shrink-0">
+                        <button
+                          onClick={() => handleRemoveBullet(service._id, idx)}
+                          className="text-white/25 hover:text-rose-400 transition-colors shrink-0"
+                        >
                           <XIcon size={13} />
                         </button>
                       </div>
                     ))}
                     {(!service.bullets || service.bullets.length === 0) && (
-                      <p className="text-[10px] text-slate-300 font-bold italic">No bullets yet — click Add to create one</p>
+                      <p className="text-[10px] text-white/25 font-bold italic">No bullets yet — click Add to create one</p>
                     )}
                   </div>
                 </div>
@@ -255,15 +296,20 @@ const ServicesManagement = () => {
 
               <div className="flex gap-2 mt-4">
                 <div className="relative flex-1">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-300">{activeRegion === 'UK' ? '£' : '₦'}</span>
-                  <input 
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-white/40">{activeRegion === 'UK' ? '£' : '₦'}</span>
+                  <input
                     type="number"
                     value={service.rate}
                     onChange={(e) => handleRateChange(service._id, e.target.value)}
-                    className="w-full pl-8 pr-4 py-3 bg-slate-50 rounded-xl border-none font-bold text-slate-900 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full pl-8 pr-4 py-3 bg-white/5 rounded-xl border border-white/10 font-bold text-white text-sm focus:outline-none focus:border-emerald-500/50 transition-all"
                   />
                 </div>
-                <button onClick={() => saveService(service)} className="bg-primary/10 text-primary p-3 rounded-xl hover:bg-primary hover:text-white transition-all"><Save size={20}/></button>
+                <button
+                  onClick={() => saveService(service)}
+                  className="bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 p-3 rounded-xl hover:bg-emerald-500 hover:text-white transition-all"
+                >
+                  <Save size={20}/>
+                </button>
               </div>
             </div>
           ))}

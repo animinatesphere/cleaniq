@@ -259,7 +259,7 @@ const Checklist = () => {
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
       {/* ── Page header ──────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-primary p-8">
+      <div className="relative overflow-hidden rounded-3xl bg-[#0B2D22] border border-white/7 p-8">
         <div className="absolute inset-0 opacity-[0.06]">
           <ListChecks size={300} className="absolute -right-10 -bottom-10 text-white" />
         </div>
@@ -268,12 +268,12 @@ const Checklist = () => {
             <img src={logo} alt="Cleaniq Services" className="h-14 rounded-2xl shadow-lg shadow-black/30 flex-shrink-0" />
             <div>
               <h1 className="text-2xl font-black text-white tracking-tight">Cleaning Checklists</h1>
-              <p className="text-sm text-white/50 mt-1">Edit tasks per booking and send directly to customers</p>
+              <p className="text-sm text-white/40 mt-1">Edit tasks per booking and send directly to customers</p>
             </div>
           </div>
           <button
             onClick={fetchBookings}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-bold transition-all flex-shrink-0"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 text-sm font-bold transition-all flex-shrink-0"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
             Refresh
@@ -283,23 +283,23 @@ const Checklist = () => {
 
       {/* ── Search ───────────────────────────────────────────── */}
       <div className="relative max-w-md">
-        <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by booking, customer or service…"
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all"
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-white/20 text-sm focus:outline-none focus:border-emerald-500/50 transition-all"
         />
       </div>
 
       {/* ── Booking list ─────────────────────────────────────── */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm divide-y divide-slate-100 overflow-hidden">
+      <div className="bg-[#0B2D22] border border-white/7 rounded-2xl divide-y divide-white/[0.04] overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-sm text-slate-400 flex items-center justify-center gap-2">
+          <div className="p-12 text-center text-sm text-white/40 flex items-center justify-center gap-2">
             <RefreshCw size={15} className="animate-spin" /> Loading bookings…
           </div>
         ) : upcoming.length === 0 ? (
-          <p className="p-12 text-center text-sm text-slate-400">No bookings found</p>
+          <p className="p-12 text-center text-sm text-white/40">No bookings found</p>
         ) : (
           upcoming.map((booking) => {
             const tasks = tasksFor(booking);
@@ -313,16 +313,16 @@ const Checklist = () => {
                 {/* Row header */}
                 <button
                   onClick={() => setOpenId(isOpen ? null : booking._id)}
-                  className="w-full flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50 transition-colors text-left"
+                  className="w-full flex items-center justify-between gap-4 px-5 py-4 hover:bg-white/[0.04] transition-colors text-left"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="font-bold text-slate-800 text-sm flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                    <p className="font-bold text-white text-sm flex items-center gap-2 flex-wrap">
+                      <span className="font-mono text-xs bg-white/10 text-white/60 px-2 py-0.5 rounded-md">
                         {booking.bookingId}
                       </span>
-                      <span className="text-slate-700 font-semibold">{booking.service}</span>
+                      <span className="text-white/80 font-semibold">{booking.service}</span>
                     </p>
-                    <p className="text-[11px] text-slate-400 mt-1.5 flex items-center gap-3 flex-wrap">
+                    <p className="text-[11px] text-white/40 mt-1.5 flex items-center gap-3 flex-wrap">
                       <span className="flex items-center gap-1">
                         <User size={10} />
                         {booking.customer?.firstName} {booking.customer?.lastName}
@@ -344,14 +344,14 @@ const Checklist = () => {
 
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {/* Progress pill */}
-                    <span className={`text-[11px] font-bold px-3 py-1 rounded-full whitespace-nowrap ${allDone ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+                    <span className={`text-[11px] font-bold px-3 py-1 rounded-full whitespace-nowrap ${allDone ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25" : "bg-white/10 text-white/60"}`}>
                       {doneCount}/{tasks.length} done
                     </span>
 
                     {/* Progress bar mini */}
-                    <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
+                    <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden hidden sm:block">
                       <div
-                        className="h-full bg-primary rounded-full transition-all"
+                        className="h-full bg-emerald-500 rounded-full transition-all"
                         style={{ width: tasks.length ? `${(doneCount / tasks.length) * 100}%` : "0%" }}
                       />
                     </div>
@@ -361,7 +361,7 @@ const Checklist = () => {
                       onClick={(e) => { e.stopPropagation(); sendChecklist(booking); }}
                       disabled={sendingId === booking._id}
                       title="Send checklist to customer by email"
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all text-xs font-bold disabled:opacity-50"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all text-xs font-bold disabled:opacity-50"
                     >
                       <Send size={12} className={sendingId === booking._id ? "animate-pulse" : ""} />
                       Send
@@ -369,8 +369,8 @@ const Checklist = () => {
 
                     {/* Expand chevron */}
                     {isOpen
-                      ? <ChevronUp size={16} className="text-slate-400" />
-                      : <ChevronDown size={16} className="text-slate-400" />
+                      ? <ChevronUp size={16} className="text-white/40" />
+                      : <ChevronDown size={16} className="text-white/40" />
                     }
                   </div>
                 </button>
@@ -379,20 +379,20 @@ const Checklist = () => {
                 {isOpen && (
                   <div className="px-5 pb-5">
                     {/* Progress bar full */}
-                    <div className="h-1.5 w-full bg-slate-100 rounded-full mb-4 overflow-hidden">
+                    <div className="h-1.5 w-full bg-white/10 rounded-full mb-4 overflow-hidden">
                       <div
-                        className="h-full bg-primary rounded-full transition-all duration-500"
+                        className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                         style={{ width: tasks.length ? `${(doneCount / tasks.length) * 100}%` : "0%" }}
                       />
                     </div>
 
-                    <div className="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden">
+                    <div className="bg-white/[0.03] rounded-2xl border border-white/[0.04] overflow-hidden">
                       {tasks.map((t, idx) => {
                         const isEditing = editKey?.bookingId === booking._id && editKey?.idx === idx;
                         return (
                           <div
                             key={idx}
-                            className={`flex items-center gap-3 px-4 py-3 border-b border-slate-100 last:border-b-0 transition-colors ${t.done && !isEditing ? "bg-emerald-50/60" : "hover:bg-white"}`}
+                            className={`flex items-center gap-3 px-4 py-3 border-b border-white/[0.04] last:border-b-0 transition-colors ${t.done && !isEditing ? "bg-emerald-500/10" : "hover:bg-white/[0.04]"}`}
                           >
                             {isEditing ? (
                               /* Edit mode */
@@ -405,18 +405,18 @@ const Checklist = () => {
                                     if (e.key === "Enter") confirmEdit(booking);
                                     if (e.key === "Escape") cancelEdit();
                                   }}
-                                  className="flex-1 px-3 py-1.5 rounded-lg border-2 border-primary/40 bg-white text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                  className="flex-1 px-3 py-1.5 rounded-lg border border-emerald-500/50 bg-white/5 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50"
                                 />
                                 <button
                                   onClick={() => confirmEdit(booking)}
                                   disabled={saving}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex-shrink-0"
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white transition-colors flex-shrink-0"
                                 >
                                   <Check size={14} strokeWidth={2.5} />
                                 </button>
                                 <button
                                   onClick={cancelEdit}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-200 text-slate-500 hover:bg-slate-300 transition-colors flex-shrink-0"
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 text-white/60 hover:bg-white/20 transition-colors flex-shrink-0"
                                 >
                                   <X size={14} strokeWidth={2.5} />
                                 </button>
@@ -431,15 +431,15 @@ const Checklist = () => {
                                 >
                                   {t.done
                                     ? <CheckCircle2 size={19} className="text-emerald-500" />
-                                    : <Circle size={19} className="text-slate-300 hover:text-primary transition-colors" />
+                                    : <Circle size={19} className="text-white/25 hover:text-emerald-400 transition-colors" />
                                   }
                                 </button>
-                                <span className={`flex-1 text-sm font-medium ${t.done ? "text-slate-400 line-through" : "text-slate-700"}`}>
+                                <span className={`flex-1 text-sm font-medium ${t.done ? "text-white/40 line-through" : "text-white/80"}`}>
                                   {t.task}
                                 </span>
                                 <button
                                   onClick={() => startEdit(booking, idx)}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-primary hover:bg-primary/10 transition-all flex-shrink-0"
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg text-white/25 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all flex-shrink-0"
                                   title="Edit task"
                                 >
                                   <Pencil size={13} strokeWidth={2} />
@@ -447,7 +447,7 @@ const Checklist = () => {
                                 <button
                                   onClick={() => deleteTask(booking, idx)}
                                   disabled={saving}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all flex-shrink-0"
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg text-white/25 hover:text-rose-400 hover:bg-rose-500/10 transition-all flex-shrink-0"
                                   title="Delete task"
                                 >
                                   <Trash2 size={13} strokeWidth={2} />
@@ -460,8 +460,8 @@ const Checklist = () => {
 
                       {/* Add task row */}
                       {isAdding ? (
-                        <div className="flex items-center gap-3 px-4 py-3 bg-emerald-50/50 border-t border-slate-100">
-                          <div className="w-5 h-5 rounded-full border-2 border-dashed border-primary/30 flex-shrink-0" />
+                        <div className="flex items-center gap-3 px-4 py-3 bg-emerald-500/10 border-t border-white/[0.04]">
+                          <div className="w-5 h-5 rounded-full border-2 border-dashed border-emerald-500/30 flex-shrink-0" />
                           <input
                             autoFocus
                             value={newTaskText}
@@ -471,18 +471,18 @@ const Checklist = () => {
                               if (e.key === "Escape") setAddingTo(null);
                             }}
                             placeholder="Type a new task…"
-                            className="flex-1 px-3 py-1.5 rounded-lg border-2 border-primary/40 bg-white text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            className="flex-1 px-3 py-1.5 rounded-lg border border-emerald-500/50 bg-white/5 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50"
                           />
                           <button
                             onClick={() => confirmAdd(booking)}
                             disabled={saving}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex-shrink-0"
+                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white transition-colors flex-shrink-0"
                           >
                             <Check size={14} strokeWidth={2.5} />
                           </button>
                           <button
                             onClick={() => setAddingTo(null)}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-200 text-slate-500 hover:bg-slate-300 transition-colors flex-shrink-0"
+                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 text-white/60 hover:bg-white/20 transition-colors flex-shrink-0"
                           >
                             <X size={14} strokeWidth={2.5} />
                           </button>
@@ -490,7 +490,7 @@ const Checklist = () => {
                       ) : (
                         <button
                           onClick={() => startAdd(booking._id)}
-                          className="w-full flex items-center gap-2 px-4 py-3 text-sm font-semibold text-primary hover:bg-primary/5 transition-colors border-t border-slate-100"
+                          className="w-full flex items-center gap-2 px-4 py-3 text-sm font-semibold text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-white/[0.04]"
                         >
                           <Plus size={15} strokeWidth={2.5} />
                           Add task
@@ -500,14 +500,14 @@ const Checklist = () => {
 
                     {/* Send button */}
                     <div className="flex items-center justify-between mt-3 pt-3">
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-white/40">
                         {doneCount}/{tasks.length} tasks completed
-                        {allDone && <span className="ml-1 text-emerald-600 font-bold">— All done! 🎉</span>}
+                        {allDone && <span className="ml-1 text-emerald-400 font-bold">— All done! 🎉</span>}
                       </p>
                       <button
                         onClick={() => sendChecklist(booking)}
                         disabled={sendingId === booking._id}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition-all disabled:opacity-60 shadow-md shadow-primary/20"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold transition-all disabled:opacity-60"
                       >
                         {sendingId === booking._id
                           ? <RefreshCw size={13} className="animate-spin" />

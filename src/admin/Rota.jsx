@@ -291,10 +291,10 @@ export default function Rota() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { icon: Users,         label: "Active Staff",    value: workers.length,           accent: "bg-blue-500/15 text-blue-400"     },
+          { icon: Users,         label: "Active Staff",    value: workers.length,           accent: "bg-blue-500/15 text-blue-400"      },
           { icon: CheckCircle2,  label: "Shifts Assigned", value: assignedThisWeek.length,  accent: "bg-emerald-500/15 text-emerald-400" },
           { icon: AlertTriangle, label: "Unassigned",      value: unassigned.length,        accent: unassigned.length > 0 ? "bg-rose-500/15 text-rose-400" : "bg-white/5 text-white/40" },
-          { icon: Hourglass,     label: "Hours Scheduled", value: `${totalHoursThisWeek}h`, accent: "bg-violet-500/15 text-violet-400" },
+          { icon: Hourglass,     label: "Hours Scheduled", value: `${totalHoursThisWeek}h`, accent: "bg-violet-500/15 text-violet-400"   },
         ].map(({ icon: Icon, label, value, accent }) => (
           <div key={label} className="bg-[#0B2D22] border border-white/7 rounded-2xl p-4 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${accent}`}>

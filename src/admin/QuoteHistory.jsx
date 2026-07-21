@@ -20,10 +20,10 @@ const QUOTE_EXPORT_HEADERS = [
 // ── Status badge ──────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
   if (status === "accepted")
-    return <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">Accepted</span>;
+    return <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">Accepted</span>;
   if (status === "declined")
-    return <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-100">Declined</span>;
-  return <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200">Sent</span>;
+    return <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/25">Declined</span>;
+  return <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/10 text-white/60 border border-white/10">Sent</span>;
 };
 
 // ── Row ⋯ menu ────────────────────────────────────────────────────────────────
@@ -42,36 +42,36 @@ function RowMenu({ quote, onView, onEdit, onResend, onDelete, resending }) {
     <div ref={ref} className="relative" onClick={e => e.stopPropagation()}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+        className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-white/80 hover:bg-white/[0.06] transition-colors"
       >
         <MoreHorizontal size={16} />
       </button>
       {open && (
-        <div className="absolute right-0 top-9 z-20 w-44 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+        <div className="absolute right-0 top-9 z-20 w-44 bg-[#0B2D22] border border-white/10 rounded-xl shadow-lg overflow-hidden">
           <button
             onClick={() => { setOpen(false); onView(quote); }}
-            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-semibold text-white/80 hover:bg-white/[0.06] transition-colors"
           >
             <Eye size={13} /> View Details
           </button>
           <button
             onClick={() => { setOpen(false); onEdit(quote); }}
-            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-semibold text-white/80 hover:bg-white/[0.06] transition-colors"
           >
             <Pencil size={13} /> Edit & Duplicate
           </button>
           <button
             onClick={() => { setOpen(false); onResend(quote); }}
             disabled={resending}
-            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-semibold text-white/80 hover:bg-white/[0.06] transition-colors disabled:opacity-50"
           >
             {resending ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
             Resend Email
           </button>
-          <div className="border-t border-slate-100" />
+          <div className="border-t border-white/[0.07]" />
           <button
             onClick={() => { setOpen(false); onDelete(quote); }}
-            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors"
           >
             <Trash2 size={13} /> Delete
           </button>
@@ -89,27 +89,27 @@ function QuoteDrawer({ quote, onClose, onEdit, onResend, onDelete, resending }) 
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-full sm:w-125 bg-white z-50 flex flex-col shadow-2xl">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={onClose} />
+      <div className="fixed right-0 top-0 h-full w-full sm:w-125 bg-[#0B2D22] border-l border-white/10 z-50 flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b border-slate-100 shrink-0">
+        <div className="flex items-start justify-between px-6 py-5 border-b border-white/[0.07] shrink-0">
           <div className="min-w-0 pr-4">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Quote</p>
-            <h2 className="text-base font-bold text-slate-900">{quote.companyName}</h2>
-            <p className="text-xs text-slate-400 mt-0.5">{quote.quoteRef} · {quote.email}</p>
+            <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Quote</p>
+            <h2 className="text-base font-bold text-white">{quote.companyName}</h2>
+            <p className="text-xs text-white/40 mt-0.5">{quote.quoteRef} · {quote.email}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => { onResend(quote); }}
               disabled={resending}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 transition-all font-semibold text-xs disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/25 transition-all font-semibold text-xs disabled:opacity-50"
             >
               {resending ? <RefreshCw size={12} className="animate-spin" /> : <Send size={12} />}
               Resend
             </button>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/80 transition-colors"
             >
               <X size={16} />
             </button>
@@ -117,20 +117,20 @@ function QuoteDrawer({ quote, onClose, onEdit, onResend, onDelete, resending }) 
         </div>
 
         {/* Status + date strip */}
-        <div className="px-6 py-3 border-b border-slate-50 flex flex-wrap items-center gap-3 shrink-0">
+        <div className="px-6 py-3 border-b border-white/[0.04] flex flex-wrap items-center gap-3 shrink-0">
           <StatusBadge status={quote.status} />
           {quote.createdAt && (
-            <span className="text-xs text-slate-400 font-medium">
+            <span className="text-xs text-white/40 font-medium">
               Sent {new Date(quote.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
             </span>
           )}
           {quote.acceptedAt && (
-            <span className="text-xs text-emerald-500 font-semibold">
+            <span className="text-xs text-emerald-400 font-semibold">
               Accepted {new Date(quote.acceptedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
             </span>
           )}
           {quote.declinedAt && (
-            <span className="text-xs text-red-500 font-semibold">
+            <span className="text-xs text-rose-400 font-semibold">
               Declined {new Date(quote.declinedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
             </span>
           )}
@@ -141,8 +141,8 @@ function QuoteDrawer({ quote, onClose, onEdit, onResend, onDelete, resending }) 
 
           {/* Contact info */}
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Contact</p>
-            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-1.5 text-sm">
+            <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Contact</p>
+            <div className="bg-white/[0.03] rounded-xl p-4 border border-white/[0.05] space-y-1.5 text-sm">
               {[
                 { label: "Company",  value: quote.companyName },
                 { label: "Contact",  value: quote.contactName || "—" },
@@ -152,8 +152,8 @@ function QuoteDrawer({ quote, onClose, onEdit, onResend, onDelete, resending }) 
                 { label: "Frequency",value: freq },
               ].map(r => (
                 <div key={r.label} className="flex justify-between gap-3">
-                  <span className="text-slate-400 text-xs shrink-0">{r.label}</span>
-                  <span className="font-semibold text-slate-800 text-xs text-right wrap-break-word">{r.value}</span>
+                  <span className="text-white/40 text-xs shrink-0">{r.label}</span>
+                  <span className="font-semibold text-white/80 text-xs text-right wrap-break-word">{r.value}</span>
                 </div>
               ))}
             </div>
@@ -162,24 +162,24 @@ function QuoteDrawer({ quote, onClose, onEdit, onResend, onDelete, resending }) 
           {/* Line items */}
           {quote.items?.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Line Items</p>
-              <div className="bg-slate-50 rounded-xl border border-slate-100 overflow-hidden">
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Line Items</p>
+              <div className="bg-white/[0.03] rounded-xl border border-white/[0.05] overflow-hidden">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                    <tr className="text-[9px] font-bold text-white/40 uppercase tracking-wider border-b border-white/[0.05]">
                       <th className="px-4 py-2 text-left">Description</th>
                       <th className="px-3 py-2 text-right">Qty</th>
                       <th className="px-3 py-2 text-right">Rate</th>
                       <th className="px-4 py-2 text-right">Total</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-white/[0.04]">
                     {quote.items.map((item, i) => (
                       <tr key={i}>
-                        <td className="px-4 py-2 text-slate-700 font-medium">{item.description}</td>
-                        <td className="px-3 py-2 text-slate-500 text-right tabular-nums">{item.quantity}</td>
-                        <td className="px-3 py-2 text-slate-500 text-right tabular-nums">{fmtCcy(item.unitPrice)}</td>
-                        <td className="px-4 py-2 font-bold text-slate-800 text-right tabular-nums">{fmtCcy(item.total)}</td>
+                        <td className="px-4 py-2 text-white/80 font-medium">{item.description}</td>
+                        <td className="px-3 py-2 text-white/40 text-right tabular-nums">{item.quantity}</td>
+                        <td className="px-3 py-2 text-white/40 text-right tabular-nums">{fmtCcy(item.unitPrice)}</td>
+                        <td className="px-4 py-2 font-bold text-white text-right tabular-nums">{fmtCcy(item.total)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -189,42 +189,42 @@ function QuoteDrawer({ quote, onClose, onEdit, onResend, onDelete, resending }) 
           )}
 
           {/* Totals */}
-          <div className="bg-slate-900 rounded-xl p-4 text-white space-y-2">
+          <div className="bg-[#071D16] rounded-xl p-4 border border-white/[0.05] space-y-2">
             {[
               { label: "Subtotal", value: fmtCcy(quote.subtotal) },
               { label: `VAT (${quote.vatRate ?? 20}%)`, value: fmtCcy(quote.vat) },
             ].map(r => (
               <div key={r.label} className="flex justify-between text-xs">
-                <span className="text-slate-400">{r.label}</span>
-                <span className="font-semibold tabular-nums">{r.value}</span>
+                <span className="text-white/40">{r.label}</span>
+                <span className="font-semibold tabular-nums text-white/80">{r.value}</span>
               </div>
             ))}
-            <div className="border-t border-slate-700 pt-2 flex justify-between">
-              <span className="text-sm font-bold">Total</span>
-              <span className="text-lg font-black tabular-nums">{fmtCcy(quote.grandTotal)}</span>
+            <div className="border-t border-white/[0.07] pt-2 flex justify-between">
+              <span className="text-sm font-bold text-white">Total</span>
+              <span className="text-lg font-black tabular-nums text-white">{fmtCcy(quote.grandTotal)}</span>
             </div>
           </div>
 
           {/* Notes */}
           {quote.notes && (
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Notes</p>
-              <p className="text-sm text-slate-600 bg-slate-50 rounded-xl p-4 border border-slate-100 leading-relaxed">{quote.notes}</p>
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Notes</p>
+              <p className="text-sm text-white/80 bg-white/[0.03] rounded-xl p-4 border border-white/[0.05] leading-relaxed">{quote.notes}</p>
             </div>
           )}
         </div>
 
         {/* Footer actions */}
-        <div className="px-6 py-4 border-t border-slate-100 shrink-0 flex gap-2">
+        <div className="px-6 py-4 border-t border-white/[0.07] shrink-0 flex gap-2">
           <button
             onClick={() => { onEdit(quote); onClose(); }}
-            className="flex-1 flex items-center justify-center gap-2 h-9 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 h-9 bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 rounded-xl text-sm font-semibold transition-colors"
           >
             <Pencil size={13} /> Edit & Duplicate
           </button>
           <button
             onClick={() => { onDelete(quote); onClose(); }}
-            className="flex items-center justify-center gap-2 h-9 px-4 bg-red-50 border border-red-200 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors"
+            className="flex items-center justify-center gap-2 h-9 px-4 bg-rose-500/15 border border-rose-500/25 text-rose-400 hover:bg-rose-500/25 rounded-xl text-sm font-semibold transition-colors"
           >
             <Trash2 size={13} /> Delete
           </button>
@@ -234,7 +234,7 @@ function QuoteDrawer({ quote, onClose, onEdit, onResend, onDelete, resending }) 
   );
 }
 
-// ── Main component ──────────────────────────────────────────────────��─────────
+// ── Main component ────────────────────────────────────────────────────────────
 const QuoteHistory = () => {
   const navigate = useNavigate();
   const [quotes, setQuotes]         = useState([]);
@@ -407,7 +407,7 @@ const QuoteHistory = () => {
       {/* Toast */}
       {toast && (
         <div className={`fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-72 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold text-white flex items-center gap-2 ${
-          toast.type === "error" ? "bg-red-600" : "bg-slate-900"
+          toast.type === "error" ? "bg-rose-600" : "bg-[#0B2D22] border border-white/10"
         }`}>
           {toast.type === "error" ? <AlertCircle size={14} /> : <CheckCircle2 size={14} />}
           {toast.msg}
@@ -428,26 +428,26 @@ const QuoteHistory = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Quote History</h2>
-          <p className="text-sm text-slate-400 font-medium mt-1">
+          <h2 className="text-2xl font-bold text-white tracking-tight">Quote History</h2>
+          <p className="text-sm text-white/40 font-medium mt-1">
             {loading ? "Loading…" : `${quotes.length} quotes sent in total`}
           </p>
         </div>
         <div className="flex items-center gap-2.5 flex-wrap">
-          <button onClick={exportCSV} className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">
+          <button onClick={exportCSV} className="flex items-center gap-2 px-3.5 py-2 bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 rounded-xl text-sm font-semibold transition-all">
             <Download size={14} /> CSV
           </button>
-          <button onClick={exportExcel} className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all">
+          <button onClick={exportExcel} className="flex items-center gap-2 px-3.5 py-2 bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 rounded-xl text-sm font-semibold transition-all">
             <Download size={14} /> Excel
           </button>
-          <button onClick={() => navigate("/admin/quotes")} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-sm hover:bg-primary-dark transition-all">
+          <button onClick={() => navigate("/admin/quotes")} className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold shadow-sm transition-all">
             <Plus size={14} /> New Quote
           </button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm flex flex-wrap divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+      <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl flex flex-wrap divide-y sm:divide-y-0 sm:divide-x divide-white/[0.07]">
         {[
           { label: "Total Quoted",       value: `£${stats.totalValue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}` },
           { label: "Accepted Value",     value: `£${stats.acceptedValue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}` },
@@ -457,8 +457,8 @@ const QuoteHistory = () => {
           { label: "Awaiting Response",  value: stats.pendingCount },
         ].map(m => (
           <div key={m.label} className="flex-1 min-w-32.5 px-5 py-4">
-            <p className="text-[11px] font-semibold text-slate-400 mb-1">{m.label}</p>
-            <p className="text-xl font-bold text-slate-900 tabular-nums">{m.value}</p>
+            <p className="text-[11px] font-semibold text-white/40 mb-1">{m.label}</p>
+            <p className="text-xl font-bold text-white tabular-nums">{m.value}</p>
           </div>
         ))}
       </div>
@@ -466,12 +466,12 @@ const QuoteHistory = () => {
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search company, email, or ref…"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none text-sm"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -486,8 +486,8 @@ const QuoteHistory = () => {
               onClick={() => setStatusFilter(f.key)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                 statusFilter === f.key
-                  ? "bg-slate-900 text-white border-slate-900"
-                  : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+                  ? "bg-emerald-500 text-white border-emerald-500"
+                  : "bg-white/5 text-white/60 border-white/10 hover:border-white/20"
               }`}
             >
               {f.label}
@@ -498,16 +498,16 @@ const QuoteHistory = () => {
 
       {/* Bulk action bar */}
       {someSelected && (
-        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-[#0B2D22] border border-white/10 text-white rounded-xl">
           <p className="text-sm font-semibold">{selected.size} quote{selected.size !== 1 ? "s" : ""} selected</p>
           <div className="flex items-center gap-2">
-            <button onClick={() => setSelected(new Set())} className="text-xs text-slate-400 hover:text-white transition-colors px-2 py-1">
+            <button onClick={() => setSelected(new Set())} className="text-xs text-white/40 hover:text-white/80 transition-colors px-2 py-1">
               Clear
             </button>
             <button
               onClick={handleBulkDelete}
               disabled={bulkDeleting}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/15 border border-rose-500/25 text-rose-400 hover:bg-rose-500/25 rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
             >
               <Trash2 size={12} /> Delete {selected.size} selected
             </button>
@@ -516,17 +516,17 @@ const QuoteHistory = () => {
       )}
 
       {/* Table */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.12em] bg-slate-50/60">
+              <tr className="text-white/40 text-xs font-semibold uppercase tracking-wide bg-white/[0.03]">
                 <th className="pl-5 pr-2 py-3.5 w-10">
                   <input
                     type="checkbox"
                     checked={allSelected}
                     onChange={toggleAll}
-                    className="rounded border-slate-300 accent-slate-900 w-3.5 h-3.5 cursor-pointer"
+                    className="rounded border-white/20 accent-emerald-500 w-3.5 h-3.5 cursor-pointer"
                   />
                 </th>
                 <th className="px-4 py-3.5">Company</th>
@@ -538,19 +538,19 @@ const QuoteHistory = () => {
                 <th className="px-5 py-3.5 w-12"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center text-slate-400 font-semibold">
+                  <td colSpan={8} className="py-16 text-center text-white/40 font-semibold">
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
                       Loading…
                     </div>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center text-slate-300 font-semibold">
+                  <td colSpan={8} className="py-16 text-center text-white/25 font-semibold">
                     No quotes found
                   </td>
                 </tr>
@@ -561,29 +561,29 @@ const QuoteHistory = () => {
                     <tr
                       key={q.quoteRef}
                       onClick={() => setViewingQuote(q)}
-                      className={`transition-colors cursor-pointer ${isSelected ? "bg-slate-50" : "hover:bg-slate-50/70"}`}
+                      className={`transition-colors cursor-pointer border-b border-white/[0.04] ${isSelected ? "bg-white/[0.05]" : "hover:bg-white/[0.04]"}`}
                     >
                       <td className="pl-5 pr-2 py-4 w-10" onClick={e => e.stopPropagation()}>
                         <input
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => toggleRow(q.quoteRef)}
-                          className="rounded border-slate-300 accent-slate-900 w-3.5 h-3.5 cursor-pointer"
+                          className="rounded border-white/20 accent-emerald-500 w-3.5 h-3.5 cursor-pointer"
                         />
                       </td>
                       <td className="px-4 py-4">
-                        <p className="font-semibold text-slate-800 text-sm leading-tight">{q.companyName}</p>
-                        <p className="text-[11px] text-slate-400 font-medium mt-0.5">{q.email}</p>
+                        <p className="font-semibold text-white text-sm leading-tight">{q.companyName}</p>
+                        <p className="text-[11px] text-white/40 font-medium mt-0.5">{q.email}</p>
                       </td>
-                      <td className="px-4 py-4 text-sm font-medium text-slate-600">{q.quoteRef}</td>
-                      <td className="px-4 py-4 text-sm font-medium text-slate-600 hidden md:table-cell">
+                      <td className="px-4 py-4 text-sm font-medium text-white/60">{q.quoteRef}</td>
+                      <td className="px-4 py-4 text-sm font-medium text-white/60 hidden md:table-cell">
                         {FREQUENCY_OPTIONS.find(f => f.value === q.frequency)?.label.split(" ")[0] || q.frequency}
                       </td>
-                      <td className="px-4 py-4 text-sm font-bold text-slate-900 tabular-nums">
+                      <td className="px-4 py-4 text-sm font-bold text-white tabular-nums">
                         £{Number(q.grandTotal || 0).toFixed(2)}
                       </td>
                       <td className="px-4 py-4"><StatusBadge status={q.status} /></td>
-                      <td className="px-4 py-4 text-[11px] font-semibold text-slate-400 hidden sm:table-cell">
+                      <td className="px-4 py-4 text-[11px] font-semibold text-white/40 hidden sm:table-cell">
                         {q.createdAt ? new Date(q.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—"}
                       </td>
                       <td className="px-5 py-4 w-12">
@@ -606,8 +606,8 @@ const QuoteHistory = () => {
 
         {/* Pagination */}
         {!loading && filtered.length > 0 && (
-          <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/40">
-            <p className="text-xs text-slate-400 font-medium">
+          <div className="px-5 py-3.5 border-t border-white/[0.07] flex items-center justify-between gap-3 bg-white/[0.02]">
+            <p className="text-xs text-white/40 font-medium">
               {filtered.length} quote{filtered.length !== 1 ? "s" : ""}
               {someSelected ? ` · ${selected.size} selected` : ""}
               {" "}· Page {safePage} of {totalPages}
@@ -616,7 +616,7 @@ const QuoteHistory = () => {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={safePage === 1}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 text-white/40 hover:bg-white/[0.06] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft size={14} />
               </button>
@@ -626,7 +626,7 @@ const QuoteHistory = () => {
                 return range.map(p => (
                   <button key={p} onClick={() => setPage(p)}
                     className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
-                      p === safePage ? "bg-slate-900 text-white" : "border border-slate-200 text-slate-500 hover:bg-white"
+                      p === safePage ? "bg-emerald-500 text-white" : "border border-white/10 text-white/40 hover:bg-white/[0.06]"
                     }`}
                   >{p}</button>
                 ));
@@ -634,7 +634,7 @@ const QuoteHistory = () => {
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={safePage === totalPages}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 text-white/40 hover:bg-white/[0.06] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight size={14} />
               </button>

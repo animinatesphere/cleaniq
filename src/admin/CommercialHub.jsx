@@ -35,20 +35,20 @@ const readMedia = (file) =>
 
 const Field = ({ label, children }) => (
   <div>
-    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">{label}</label>
+    <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">{label}</label>
     {children}
   </div>
 );
 
 const Input = (props) => (
-  <input {...props} className={`w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all ${props.className || ""}`} />
+  <input {...props} className={`w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm text-white font-medium focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-white/20 ${props.className || ""}`} />
 );
 
 const Section = ({ title, icon: Icon, children }) => (
-  <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-    <div className="flex items-center gap-2.5 px-4 py-3 sm:px-5 sm:py-4 border-b border-slate-100 bg-slate-50">
+  <div className="bg-[#0B2D22] rounded-2xl border border-white/7 overflow-hidden">
+    <div className="flex items-center gap-2.5 px-4 py-3 sm:px-5 sm:py-4 border-b border-white/[0.04] bg-white/5">
       {Icon && <Icon size={15} className="text-primary flex-shrink-0" />}
-      <h3 className="text-sm font-bold text-slate-700 leading-tight">{title}</h3>
+      <h3 className="text-sm font-bold text-white/80 leading-tight">{title}</h3>
     </div>
     <div className="p-4 sm:p-5">{children}</div>
   </div>
@@ -57,9 +57,9 @@ const Section = ({ title, icon: Icon, children }) => (
 // ── Config ─────────────────────────────────────────────────────────────────────
 
 const CONDITIONS = [
-  { id: "slightly", label: "Slightly Dirty", ring: "ring-yellow-400", bg: "bg-yellow-50", text: "text-yellow-800", dot: "bg-yellow-400" },
-  { id: "moderately", label: "Moderately Dirty", ring: "ring-orange-400", bg: "bg-orange-50", text: "text-orange-800", dot: "bg-orange-500" },
-  { id: "very", label: "Very Dirty", ring: "ring-red-500", bg: "bg-red-50", text: "text-red-800", dot: "bg-red-500" },
+  { id: "slightly", label: "Slightly Dirty", ring: "ring-yellow-400/50", bg: "bg-yellow-500/15", text: "text-yellow-400", dot: "bg-yellow-400" },
+  { id: "moderately", label: "Moderately Dirty", ring: "ring-orange-400/50", bg: "bg-orange-500/15", text: "text-orange-400", dot: "bg-orange-500" },
+  { id: "very", label: "Very Dirty", ring: "ring-red-500/50", bg: "bg-red-500/15", text: "text-red-400", dot: "bg-red-500" },
 ];
 
 const SUPPLIES = [
@@ -103,9 +103,9 @@ const MediaGrid = ({ items, onAdd, onRemove, label, compact = false }) => {
     <div>
       {label && (
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</p>
+          <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{label}</p>
           {(items || []).length > 0 && (
-            <span className="text-[10px] text-slate-400 font-medium">
+            <span className="text-[10px] text-white/40 font-medium">
               {imgCount > 0 && `${imgCount} photo${imgCount !== 1 ? "s" : ""}`}
               {imgCount > 0 && vidCount > 0 && " · "}
               {vidCount > 0 && `${vidCount} video${vidCount !== 1 ? "s" : ""}`}
@@ -115,7 +115,7 @@ const MediaGrid = ({ items, onAdd, onRemove, label, compact = false }) => {
       )}
       <div className={`grid ${cols} gap-2`}>
         {(items || []).map((item, i) => (
-          <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-slate-100">
+          <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-white/10 group bg-white/10">
             {item.type === "video" ? (
               <>
                 <video
@@ -146,7 +146,7 @@ const MediaGrid = ({ items, onAdd, onRemove, label, compact = false }) => {
         ))}
         <button
           onClick={() => ref.current?.click()}
-          className={`aspect-square rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center gap-1 text-slate-400 hover:border-primary hover:text-primary transition-colors ${compact ? "min-h-[64px]" : ""}`}
+          className={`aspect-square rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-1 text-white/40 hover:border-emerald-500/50 hover:text-emerald-400 transition-colors ${compact ? "min-h-[64px]" : ""}`}
         >
           <div className="flex items-center gap-0.5">
             <Camera size={compact ? 12 : 15} />
@@ -567,19 +567,19 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
         {/* Customer / Booking search */}
         <div ref={searchRef} className="relative mb-5">
           <div className="relative">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setShowResults(true); }}
               onFocus={() => search.length >= 2 && setShowResults(true)}
               placeholder="Search by customer name, email or booking ref to auto-fill…"
-              className="w-full pl-10 pr-4 py-3 rounded-2xl border-2 border-slate-200 bg-white text-sm font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full pl-10 pr-4 py-3 rounded-2xl border border-white/10 bg-white/5 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all"
             />
             {search && (
               <button
                 onClick={() => { setSearch(""); setShowResults(false); }}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/60 transition-colors"
               >
                 <X size={15} />
               </button>
@@ -588,7 +588,7 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
 
           {/* Results dropdown */}
           {showResults && searchResults.length > 0 && (
-            <div className="absolute z-30 top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+            <div className="absolute z-30 top-full mt-2 left-0 right-0 bg-[#071D16] border border-white/10 rounded-2xl shadow-xl overflow-hidden">
               {searchResults.map((b) => {
                 const name = [b.customer?.firstName, b.customer?.lastName].filter(Boolean).join(" ") || "Unknown";
                 const addr = b.property?.address || b.details?.address || "";
@@ -596,23 +596,23 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
                   <button
                     key={b._id}
                     onMouseDown={(e) => { e.preventDefault(); fillFromBooking(b); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0 group"
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04] transition-colors text-left border-b border-white/[0.04] last:border-0 group"
                   >
                     <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
                       <User size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-slate-800 truncate">{name}</p>
-                      <p className="text-[11px] text-slate-400 font-medium truncate">
+                      <p className="text-sm font-bold text-white truncate">{name}</p>
+                      <p className="text-[11px] text-white/40 font-medium truncate">
                         {b.bookingId} · {b.customer?.email || "no email"}
                         {addr ? ` · ${addr}` : ""}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${b.status === "Completed" ? "bg-emerald-50 text-emerald-600" : b.status === "Cancelled" ? "bg-red-50 text-red-500" : "bg-blue-50 text-blue-600"}`}>
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${b.status === "Completed" ? "bg-emerald-500/15 text-emerald-400" : b.status === "Cancelled" ? "bg-rose-500/15 text-rose-400" : "bg-blue-500/15 text-blue-400"}`}>
                         {b.status}
                       </span>
-                      <ChevronRight size={14} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
+                      <ChevronRight size={14} className="text-white/25 group-hover:text-white/60 transition-colors" />
                     </div>
                   </button>
                 );
@@ -621,7 +621,7 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
           )}
 
           {showResults && q.length >= 2 && searchResults.length === 0 && (
-            <div className="absolute z-30 top-full mt-2 left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 text-center text-sm text-slate-400 font-medium">
+            <div className="absolute z-30 top-full mt-2 left-0 right-0 bg-[#071D16] border border-white/10 rounded-2xl shadow-xl p-4 text-center text-sm text-white/40 font-medium">
               No bookings found for "{search}"
             </div>
           )}
@@ -645,7 +645,7 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
             <button
               key={c.id}
               onClick={() => setCondition(c.id)}
-              className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl border-2 font-bold text-sm transition-all ${condition === c.id ? `${c.ring} ${c.bg} ${c.text} ring-2` : "border-slate-200 text-slate-500 hover:border-slate-300"}`}
+              className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl border-2 font-bold text-sm transition-all ${condition === c.id ? `${c.ring} ${c.bg} ${c.text} ring-2` : "border-white/10 text-white/40 hover:border-white/20"}`}
             >
               <span className={`w-2.5 h-2.5 rounded-full ${c.dot}`} />
               {c.label}
@@ -658,22 +658,22 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
       <Section title="Before & After — Photos & Videos" icon={Camera}>
         <div className="space-y-5">
           {photoSections.map((sec, idx) => (
-            <div key={sec.id} className="rounded-2xl border border-slate-200 overflow-hidden">
+            <div key={sec.id} className="rounded-2xl border border-white/10 overflow-hidden">
               {/* Section header */}
-              <div className="flex items-center gap-2 px-3 py-3 bg-slate-50 border-b border-slate-200 sm:px-4 sm:gap-3">
-                <span className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-wider flex-shrink-0">
+              <div className="flex items-center gap-2 px-3 py-3 bg-white/5 border-b border-white/[0.04] sm:px-4 sm:gap-3">
+                <span className="text-[10px] sm:text-xs font-black text-white/40 uppercase tracking-wider flex-shrink-0">
                   #{idx + 1}
                 </span>
                 <input
                   value={sec.label}
                   onChange={(e) => updSection(sec.id, "label", e.target.value)}
                   placeholder="e.g. Living Room, Bathroom…"
-                  className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-sm font-semibold text-white focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-white/20"
                 />
                 {photoSections.length > 1 && (
                   <button
                     onClick={() => removeSection(sec.id)}
-                    className="flex-shrink-0 w-7 h-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all flex items-center justify-center"
+                    className="flex-shrink-0 w-7 h-7 rounded-lg text-white/25 hover:text-rose-400 hover:bg-rose-500/10 transition-all flex items-center justify-center"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -688,7 +688,7 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
                   onAdd={(items) => addSectionMedia(sec.id, "before", items)}
                   onRemove={(i) => removeSectionMedia(sec.id, "before", i)}
                 />
-                <div className="border-t border-slate-100 pt-4">
+                <div className="border-t border-white/[0.04] pt-4">
                   <MediaGrid
                     items={sec.after}
                     label="After"
@@ -703,7 +703,7 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
           {/* Add section */}
           <button
             onClick={addSection}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed border-slate-300 text-sm font-bold text-slate-500 hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-white/15 text-sm font-bold text-white/40 hover:border-emerald-500/40 hover:text-emerald-400 hover:bg-emerald-500/5 transition-all"
           >
             <Plus size={16} /> Add Before & After Section
           </button>
@@ -714,14 +714,14 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
       <Section title="Damage Report" icon={AlertTriangle}>
         <div className="space-y-4">
           {damages.length === 0 && (
-            <p className="text-sm text-slate-400 py-2">No damage items recorded. Click below to add one.</p>
+            <p className="text-sm text-white/40 py-2">No damage items recorded. Click below to add one.</p>
           )}
           {damages.map((d, dmgIdx) => (
-            <div key={d.id} className="p-4 bg-rose-50/60 rounded-2xl border border-rose-200 space-y-3">
+            <div key={d.id} className="p-4 bg-rose-500/10 rounded-2xl border border-rose-500/20 space-y-3">
               {/* Header row */}
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-rose-600 uppercase tracking-wider">Damage #{dmgIdx + 1}</span>
-                <button onClick={() => delDamage(d.id)} className="flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors">
+                <span className="text-xs font-black text-rose-400 uppercase tracking-wider">Damage #{dmgIdx + 1}</span>
+                <button onClick={() => delDamage(d.id)} className="flex items-center gap-1.5 text-xs font-bold text-white/40 hover:text-rose-400 transition-colors">
                   <Trash2 size={13} /> Remove
                 </button>
               </div>
@@ -738,7 +738,7 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
                   <select
                     value={d.severity}
                     onChange={(e) => updDamage(d.id, "severity", e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-[#071D16] text-sm font-medium text-white focus:outline-none focus:border-emerald-500/50 transition-all"
                   >
                     {["Minor", "Moderate", "Major"].map((s) => <option key={s}>{s}</option>)}
                   </select>
@@ -761,7 +761,7 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
             </div>
           ))}
 
-          <button onClick={addDamage} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-slate-300 text-sm font-bold text-slate-500 hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all">
+          <button onClick={addDamage} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-white/15 text-sm font-bold text-white/40 hover:border-emerald-500/40 hover:text-emerald-400 hover:bg-emerald-500/5 transition-all">
             <Plus size={15} /> Add Damage Item
           </button>
         </div>
@@ -771,18 +771,18 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
       <Section title="Cleaning Supplies Restock" icon={Package}>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
           {SUPPLIES.map((s) => (
-            <div key={s} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all select-none ${supplies[s] ? "border-primary/30 bg-primary/5" : "border-slate-200 bg-slate-50 hover:border-slate-300"}`} onClick={() => toggleItem(supplies, setSupplies, s)}>
-              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${supplies[s] ? "bg-primary border-primary" : "border-slate-300"}`}>
+            <div key={s} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all select-none ${supplies[s] ? "border-primary/30 bg-primary/5" : "border-white/10 bg-white/5 hover:border-white/20"}`} onClick={() => toggleItem(supplies, setSupplies, s)}>
+              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${supplies[s] ? "bg-primary border-primary" : "border-white/25"}`}>
                 {supplies[s] && <X size={11} className="text-white" />}
               </div>
-              <span className="text-sm font-medium text-slate-700 flex-1">{s}</span>
+              <span className="text-sm font-medium text-white/70 flex-1">{s}</span>
               {supplies[s] && (
                 <input
                   type="number" min="1" placeholder="Qty"
                   value={supplies[`qty_${s}`] || ""}
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) => setQty(supplies, setSupplies, s, e.target.value)}
-                  className="w-14 px-2 py-1 rounded-lg border border-primary/30 bg-white text-xs font-bold text-center focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-14 px-2 py-1 rounded-lg border border-primary/30 bg-white/5 text-white text-xs font-bold text-center focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               )}
             </div>
@@ -794,18 +794,18 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
       <Section title="Consumables Replenish" icon={Package}>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
           {CONSUMABLES.map((s) => (
-            <div key={s} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all select-none ${consumables[s] ? "border-primary/30 bg-primary/5" : "border-slate-200 bg-slate-50 hover:border-slate-300"}`} onClick={() => toggleItem(consumables, setConsumables, s)}>
-              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${consumables[s] ? "bg-primary border-primary" : "border-slate-300"}`}>
+            <div key={s} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all select-none ${consumables[s] ? "border-primary/30 bg-primary/5" : "border-white/10 bg-white/5 hover:border-white/20"}`} onClick={() => toggleItem(consumables, setConsumables, s)}>
+              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${consumables[s] ? "bg-primary border-primary" : "border-white/25"}`}>
                 {consumables[s] && <X size={11} className="text-white" />}
               </div>
-              <span className="text-sm font-medium text-slate-700 flex-1">{s}</span>
+              <span className="text-sm font-medium text-white/70 flex-1">{s}</span>
               {consumables[s] && (
                 <input
                   type="number" min="1" placeholder="Qty"
                   value={consumables[`qty_${s}`] || ""}
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) => setQty(consumables, setConsumables, s, e.target.value)}
-                  className="w-14 px-2 py-1 rounded-lg border border-primary/30 bg-white text-xs font-bold text-center focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-14 px-2 py-1 rounded-lg border border-primary/30 bg-white/5 text-white text-xs font-bold text-center focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               )}
             </div>
@@ -815,7 +815,7 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
 
       {/* Vending Machine */}
       <Section title="Vending Machine — Photos & Videos" icon={Camera}>
-        <p className="text-xs text-slate-400 mb-3">Document stock levels and any vending machine issues. Add as many photos or videos as needed.</p>
+        <p className="text-xs text-white/40 mb-3">Document stock levels and any vending machine issues. Add as many photos or videos as needed.</p>
         <MediaGrid
           items={vendingPhotos}
           onAdd={(items) => setVendingPhotos((p) => [...p, ...items])}
@@ -828,27 +828,27 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
         <div className="overflow-x-auto -mx-5 px-5">
           <table className="w-full text-sm" style={{ minWidth: "500px" }}>
             <thead>
-              <tr className="border-b border-slate-200">
-                <th className="text-left py-2.5 pr-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Item</th>
-                <th className="text-center py-2.5 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 w-20">Expected</th>
-                <th className="text-center py-2.5 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 w-20">Actual</th>
-                <th className="text-left py-2.5 pl-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 w-36">Notes</th>
+              <tr className="border-b border-white/10">
+                <th className="text-left py-2.5 pr-3 text-[10px] font-bold uppercase tracking-wider text-white/40">Item</th>
+                <th className="text-center py-2.5 px-2 text-[10px] font-bold uppercase tracking-wider text-white/40 w-20">Expected</th>
+                <th className="text-center py-2.5 px-2 text-[10px] font-bold uppercase tracking-wider text-white/40 w-20">Actual</th>
+                <th className="text-left py-2.5 pl-3 text-[10px] font-bold uppercase tracking-wider text-white/40 w-36">Notes</th>
               </tr>
             </thead>
             <tbody>
               {inventory.map((row, i) => {
                 const mismatch = row.expected !== "" && row.actual !== "" && String(row.expected) !== String(row.actual);
                 return (
-                  <tr key={i} className={`border-b border-slate-100 ${mismatch ? "bg-red-50" : ""}`}>
-                    <td className="py-2 pr-3 font-medium text-slate-700 text-xs whitespace-nowrap">{row.item}</td>
+                  <tr key={i} className={`border-b border-white/[0.04] ${mismatch ? "bg-rose-500/10" : ""}`}>
+                    <td className="py-2 pr-3 font-medium text-white/70 text-xs whitespace-nowrap">{row.item}</td>
                     <td className="py-2 px-2">
-                      <input type="number" min="0" value={row.expected} onChange={(e) => updInv(i, "expected", e.target.value)} placeholder="0" className="w-full text-center px-1.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
+                      <input type="number" min="0" value={row.expected} onChange={(e) => updInv(i, "expected", e.target.value)} placeholder="0" className="w-full text-center px-1.5 py-1.5 rounded-lg border border-white/10 bg-white/5 text-white text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
                     </td>
                     <td className="py-2 px-2">
-                      <input type="number" min="0" value={row.actual} onChange={(e) => updInv(i, "actual", e.target.value)} placeholder="0" className={`w-full text-center px-1.5 py-1.5 rounded-lg border text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary ${mismatch ? "border-red-300 bg-red-50 text-red-700" : "border-slate-200 bg-slate-50"}`} />
+                      <input type="number" min="0" value={row.actual} onChange={(e) => updInv(i, "actual", e.target.value)} placeholder="0" className={`w-full text-center px-1.5 py-1.5 rounded-lg border text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary ${mismatch ? "border-rose-500/40 bg-rose-500/10 text-rose-400" : "border-white/10 bg-white/5 text-white"}`} />
                     </td>
                     <td className="py-2 pl-3">
-                      <input value={row.notes} onChange={(e) => updInv(i, "notes", e.target.value)} placeholder={mismatch ? "⚠ Mismatch" : "Note"} className={`w-full px-2 py-1.5 rounded-lg border text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary ${mismatch ? "border-red-200 bg-red-50 placeholder:text-red-400" : "border-slate-200 bg-slate-50"}`} />
+                      <input value={row.notes} onChange={(e) => updInv(i, "notes", e.target.value)} placeholder={mismatch ? "⚠ Mismatch" : "Note"} className={`w-full px-2 py-1.5 rounded-lg border text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary ${mismatch ? "border-rose-500/30 bg-rose-500/10 text-rose-400 placeholder:text-rose-400" : "border-white/10 bg-white/5 text-white placeholder:text-white/20"}`} />
                     </td>
                   </tr>
                 );
@@ -860,20 +860,20 @@ ${notes ? `<div class="sh"><div class="sh-bar"></div><span class="sh-txt">Additi
 
       {/* Additional Notes */}
       <Section title="Additional Notes" icon={FileText}>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Any additional observations, issues, or comments…" className="w-full px-3.5 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all" />
+        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4} placeholder="Any additional observations, issues, or comments…" className="w-full px-3.5 py-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm resize-none focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-white/20" />
       </Section>
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-end gap-3">
-        <button onClick={handleSendEmail} disabled={sending} className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-2xl border-2 border-primary text-primary font-bold text-sm hover:bg-primary/5 disabled:opacity-60 transition-colors">
+        <button onClick={handleSendEmail} disabled={sending} className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-white/80 font-bold text-sm hover:bg-white/10 disabled:opacity-60 transition-colors">
           {sending ? <RefreshCw size={15} className="animate-spin" /> : <Send size={15} />}
           {sending ? "Sending…" : "Send to Email"}
         </button>
-        <button onClick={handleDownload} disabled={downloading} className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-2xl bg-primary text-white font-bold text-sm hover:bg-primary/90 disabled:opacity-70 transition-colors shadow-sm shadow-primary/20">
+        <button onClick={handleDownload} disabled={downloading} className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-2xl bg-emerald-500 text-white font-bold text-sm hover:bg-emerald-400 disabled:opacity-70 transition-colors shadow-sm shadow-primary/20">
           {downloading ? <RefreshCw size={15} className="animate-spin" /> : <Download size={15} />}
           {downloading ? "Generating PDF…" : "Download PDF"}
         </button>
-        <button onClick={printReport} className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold text-sm hover:border-primary/40 hover:text-primary transition-colors">
+        <button onClick={printReport} className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-white/80 font-bold text-sm hover:bg-white/10 transition-colors">
           <Printer size={15} /> Print
         </button>
       </div>
@@ -929,15 +929,15 @@ const CommercialHub = () => {
               className={`flex items-start gap-3 p-4 rounded-2xl border-2 text-left transition-all duration-200 ${
                 active
                   ? "bg-primary/5 border-primary shadow-sm"
-                  : "bg-white border-slate-200 hover:border-primary/30 hover:shadow-sm"
+                  : "bg-white/5 border-white/10 hover:border-white/20"
               }`}
             >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${active ? "bg-primary shadow-lg shadow-primary/30" : "bg-slate-100"}`}>
-                <Icon size={18} className={active ? "text-white" : "text-slate-500"} />
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${active ? "bg-primary shadow-lg shadow-primary/30" : "bg-white/10"}`}>
+                <Icon size={18} className={active ? "text-white" : "text-white/40"} />
               </div>
               <div className="pt-0.5">
-                <p className={`text-sm font-bold leading-tight ${active ? "text-primary" : "text-slate-700"}`}>{t.label}</p>
-                <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">{t.desc}</p>
+                <p className={`text-sm font-bold leading-tight ${active ? "text-primary" : "text-white/60"}`}>{t.label}</p>
+                <p className="text-[11px] text-white/40 mt-0.5 leading-snug">{t.desc}</p>
               </div>
             </button>
           );

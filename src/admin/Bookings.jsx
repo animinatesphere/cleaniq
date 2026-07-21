@@ -2773,7 +2773,7 @@ ${extrasRows}
                             },
                           })
                         }
-                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
+                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
                       />
                     </div>
                     <div className="space-y-1">
@@ -2792,7 +2792,7 @@ ${extrasRows}
                             },
                           })
                         }
-                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
+                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
                       />
                     </div>
                     <div className="space-y-1">
@@ -2811,7 +2811,7 @@ ${extrasRows}
                             },
                           })
                         }
-                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
+                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
                       />
                     </div>
                     <div className="space-y-1">
@@ -2823,7 +2823,7 @@ ${extrasRows}
                         onChange={(e) =>
                           setEditData({ ...editData, status: e.target.value })
                         }
-                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
+                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
                       >
                         <option value="Confirmed">Confirmed</option>
                         <option value="Pending">Pending</option>
@@ -2878,7 +2878,7 @@ ${extrasRows}
                               workerRate: Number(e.target.value) || 0,
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold text-lg"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-lg"
                           placeholder="0.00"
                         />
                       </div>
@@ -2895,7 +2895,7 @@ ${extrasRows}
                               workerDuration: Number(e.target.value) || 0,
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold text-lg"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-lg"
                           placeholder="e.g. 2"
                         />
                       </div>
@@ -3122,7 +3122,7 @@ ${extrasRows}
                                         },
                                       })
                                     }
-                                    className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 font-bold text-sm"
+                                    className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 text-white font-bold text-sm"
                                   />
                                 </div>
                               </div>
@@ -3154,7 +3154,7 @@ ${extrasRows}
                               },
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
                         />
                       </div>
                       <div className="space-y-1">
@@ -3173,7 +3173,7 @@ ${extrasRows}
                               },
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
                         />
                       </div>
                       <div className="space-y-1">
@@ -3192,7 +3192,7 @@ ${extrasRows}
                               },
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
                         />
                       </div>
                     </div>
@@ -3218,7 +3218,7 @@ ${extrasRows}
                               },
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
                         >
                           <option value="Once">Once</option>
                           <option value="Weekly">Weekly</option>
@@ -3242,7 +3242,7 @@ ${extrasRows}
                               },
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
                         />
                       </div>
                       <div className="space-y-1">
@@ -3257,7 +3257,7 @@ ${extrasRows}
                               suppliesProvidedBy: e.target.value,
                             })
                           }
-                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 font-bold"
+                          className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
                         >
                           <option value="">Not specified</option>
                           <option value="Cleaniq">Cleaniq</option>
@@ -3344,7 +3344,7 @@ ${extrasRows}
                           })
                         }
                         placeholder="e.g. Oven Clean (x1)&#10;Parking: Available on-site&#10;Entry: I will be home"
-                        className="w-full p-4 rounded-xl bg-white/5 border border-white/10 font-bold text-xs h-24 resize-none"
+                        className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-white font-bold text-xs h-24 resize-none"
                       />
                       <p className="text-[10px] text-white/40 ml-4">
                         Click an add-on above or type below — one item per line.
@@ -3367,7 +3367,7 @@ ${extrasRows}
                           },
                         })
                       }
-                      className="w-full p-4 rounded-xl bg-white/5 border border-white/10 font-bold text-xs h-24 resize-none"
+                      className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-white font-bold text-xs h-24 resize-none"
                     />
                   </div>
                 </div>
@@ -3475,7 +3475,7 @@ ${extrasRows}
                                   </span>
                                 ) : (
                                   <span className="text-[9px] font-black text-violet-400 uppercase tracking-wide shrink-0">
-                                    Open â†’
+                                    Open
                                   </span>
                                 )}
                                 <button
@@ -4156,7 +4156,7 @@ ${extrasRows}
                       hours: e.target.value,
                     }))
                   }
-                  className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-blue-500 transition-all text-sm font-bold placeholder:text-white/40"
+                  className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-blue-500 transition-all text-sm font-bold placeholder:text-white/40"
                 />
               </div>
 
@@ -4177,7 +4177,7 @@ ${extrasRows}
                       hourlyRate: e.target.value,
                     }))
                   }
-                  className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-blue-500 transition-all text-sm font-bold placeholder:text-white/40"
+                  className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-blue-500 transition-all text-sm font-bold placeholder:text-white/40"
                 />
               </div>
 
@@ -4506,7 +4506,7 @@ ${extrasRows}
                                   onChange={(e) =>
                                     setCreateFlatAmount(e.target.value)
                                   }
-                                  className="w-full pl-7 p-3 rounded-xl border-2 border-white/10 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                  className="w-full pl-7 p-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder:text-white/20 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                                 />
                               </div>
                               <p className="text-[10px] text-white/40 mt-1.5">
@@ -4571,9 +4571,9 @@ ${extrasRows}
                                       : Math.min(50, Math.max(1, val)),
                                   );
                                 }}
-                                className={`w-full p-3 rounded-xl border-2 transition-all text-sm font-bold focus:outline-none focus:ring-2 ${
+                                className={`w-full p-3 rounded-xl bg-white/5 border-2 transition-all text-sm text-white font-bold focus:outline-none focus:ring-2 ${
                                   formErrors["details.duration"]
-                                    ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500"
+                                    ? "border-rose-400 focus:ring-rose-500/30 focus:border-rose-500"
                                     : "border-white/10 focus:ring-primary/30 focus:border-primary"
                                 }`}
                               />
@@ -4603,9 +4603,9 @@ ${extrasRows}
                           </label>
                           <input
                             placeholder="Enter complete address"
-                            className={`w-full p-4 rounded-2xl bg-white/5 border-2 transition-all text-sm font-medium placeholder:text-white/40 focus:outline-none focus:ring-2 ${
+                            className={`w-full p-4 rounded-2xl bg-white/5 border-2 transition-all text-sm text-white font-medium placeholder:text-white/40 focus:outline-none focus:ring-2 ${
                               formErrors["details.address"]
-                                ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500"
+                                ? "border-rose-400 focus:ring-rose-500/30 focus:border-rose-500"
                                 : "border-white/10 focus:ring-primary/30 focus:border-primary"
                             }`}
                             value={createData.details.address || ""}
@@ -4660,9 +4660,9 @@ ${extrasRows}
                                   e.target.value,
                                 )
                               }
-                              className={`w-full p-4 rounded-2xl bg-white/5 border-2 transition-all text-sm font-medium focus:outline-none focus:ring-2 ${
+                              className={`w-full p-4 rounded-2xl bg-white/5 border-2 transition-all text-sm text-white font-medium focus:outline-none focus:ring-2 ${
                                 formErrors["details.frequency"]
-                                  ? "border-rose-400 focus:ring-rose-200 focus:border-rose-500"
+                                  ? "border-rose-400 focus:ring-rose-500/30 focus:border-rose-500"
                                   : "border-white/10 focus:ring-primary/30 focus:border-primary"
                               }`}
                             >
@@ -4735,9 +4735,9 @@ ${extrasRows}
                               onClick={() => handleFieldChange("service", s.id)}
                               className={`p-4 rounded-2xl border-2 transition-all text-left transform hover:scale-105 ${
                                 createData.service === s.id
-                                  ? "border-primary bg-gradient-to-br from-primary/10 to-blue-50 shadow-lg scale-105"
+                                  ? "border-primary bg-primary/10 shadow-lg scale-105"
                                   : formErrors.service
-                                    ? "border-rose-200 bg-white/5 hover:shadow-md"
+                                    ? "border-rose-500/25 bg-white/5 hover:shadow-md"
                                     : "border-white/10 bg-white/5 hover:shadow-md hover:border-primary/30"
                               }`}
                             >
@@ -4818,7 +4818,7 @@ ${extrasRows}
                                 e.target.value,
                               )
                             }
-                            className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-bold"
+                            className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-bold"
                           >
                             <option value="No">No</option>
                             <option value="Yes">Yes</option>
@@ -4938,7 +4938,7 @@ ${extrasRows}
                                 key={extra._id}
                                 className={`p-4 rounded-2xl border-2 transition-all transform hover:scale-105 ${
                                   currentQty > 0
-                                    ? "bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-300 shadow-md"
+                                    ? "bg-emerald-500/15 border-emerald-500/25 shadow-md"
                                     : "bg-white/5 border-white/10 hover:border-primary/30"
                                 }`}
                               >
@@ -4987,7 +4987,7 @@ ${extrasRows}
                                           };
                                         });
                                       }}
-                                      className="w-8 h-8 rounded-lg bg-white/10 hover:bg-red-100 text-white/70 hover:text-red-600 flex items-center justify-center transition-colors font-bold"
+                                      className="w-8 h-8 rounded-lg bg-white/10 hover:bg-rose-500/20 text-white/70 hover:text-rose-400 flex items-center justify-center transition-colors font-bold"
                                     >
                                       âˆ’
                                     </button>
@@ -5022,7 +5022,7 @@ ${extrasRows}
                                           };
                                         });
                                       }}
-                                      className="w-8 h-8 rounded-lg bg-[#10B981]/20 hover:bg-emerald-200 text-emerald-400/70 flex items-center justify-center transition-colors font-bold"
+                                      className="w-8 h-8 rounded-lg bg-[#10B981]/20 hover:bg-emerald-500/25 text-emerald-400/70 flex items-center justify-center transition-colors font-bold"
                                     >
                                       +
                                     </button>
@@ -5391,7 +5391,7 @@ ${extrasRows}
                                           );
                                         }
                                       }}
-                                      className="flex-1 p-4 rounded-xl bg-white/5 border-2 border-white/10 focus:border-primary focus:bg-white/10 shadow-sm outline-none font-bold text-sm text-white/70"
+                                      className="flex-1 p-4 rounded-xl bg-white/5 border-2 border-white/10 focus:border-primary focus:bg-white/10 shadow-sm outline-none font-bold text-sm text-white placeholder:text-white/20"
                                       min="08:00"
                                       max="20:00"
                                     />
@@ -5433,7 +5433,7 @@ ${extrasRows}
                                         e.target.value,
                                       )
                                     }
-                                    className="w-full p-3 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-white/40"
+                                    className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-medium placeholder:text-white/40"
                                   />
                                 </div>
                               )}
@@ -5463,10 +5463,10 @@ ${extrasRows}
                                     "customer.firstName": true,
                                   }))
                                 }
-                                className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm focus:outline-none focus:ring-2 ${
+                                className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm text-white focus:outline-none focus:ring-2 ${
                                   formErrors["customer.firstName"]
-                                    ? "bg-white border-rose-400/50 focus:ring-rose-400/30 focus:border-rose-400 placeholder:text-rose-300"
-                                    : "bg-gradient-to-br from-slate-50 to-slate-100 border-white/10 focus:ring-primary/30 focus:border-primary placeholder:text-white/40"
+                                    ? "bg-white/5 border-rose-400/50 focus:ring-rose-500/30 focus:border-rose-400 placeholder:text-rose-300/60"
+                                    : "bg-white/5 border-white/10 focus:ring-primary/30 focus:border-primary placeholder:text-white/40"
                                 }`}
                               />
                               {formErrors["customer.firstName"] && (
@@ -5491,10 +5491,10 @@ ${extrasRows}
                                     "customer.lastName": true,
                                   }))
                                 }
-                                className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm focus:outline-none focus:ring-2 ${
+                                className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm text-white focus:outline-none focus:ring-2 ${
                                   formErrors["customer.lastName"]
-                                    ? "bg-white border-rose-400/50 focus:ring-rose-400/30 focus:border-rose-400 placeholder:text-rose-300"
-                                    : "bg-gradient-to-br from-slate-50 to-slate-100 border-white/10 focus:ring-primary/30 focus:border-primary placeholder:text-white/40"
+                                    ? "bg-white/5 border-rose-400/50 focus:ring-rose-500/30 focus:border-rose-400 placeholder:text-rose-300/60"
+                                    : "bg-white/5 border-white/10 focus:ring-primary/30 focus:border-primary placeholder:text-white/40"
                                 }`}
                               />
                               {formErrors["customer.lastName"] && (
@@ -5521,10 +5521,10 @@ ${extrasRows}
                                   "customer.email": true,
                                 }))
                               }
-                              className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm focus:outline-none focus:ring-2 ${
+                              className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm text-white focus:outline-none focus:ring-2 ${
                                 formErrors["customer.email"]
-                                  ? "bg-white border-rose-400/50 focus:ring-rose-400/30 focus:border-rose-400 placeholder:text-rose-300"
-                                  : "bg-gradient-to-br from-slate-50 to-slate-100 border-white/10 focus:ring-primary/30 focus:border-primary placeholder:text-white/40"
+                                  ? "bg-white/5 border-rose-400/50 focus:ring-rose-500/30 focus:border-rose-400 placeholder:text-rose-300/60"
+                                  : "bg-white/5 border-white/10 focus:ring-primary/30 focus:border-primary placeholder:text-white/40"
                               }`}
                             />
                             {formErrors["customer.email"] && (
@@ -5549,10 +5549,10 @@ ${extrasRows}
                                   "customer.phone": true,
                                 }))
                               }
-                              className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm focus:outline-none focus:ring-2 ${
+                              className={`w-full p-3 rounded-xl border-2 transition-all font-medium text-sm text-white focus:outline-none focus:ring-2 ${
                                 formErrors["customer.phone"]
-                                  ? "bg-white border-rose-400/50 focus:ring-rose-400/30 focus:border-rose-400 placeholder:text-rose-300"
-                                  : "bg-gradient-to-br from-slate-50 to-slate-100 border-white/10 focus:ring-primary/30 focus:border-primary placeholder:text-white/40"
+                                  ? "bg-white/5 border-rose-400/50 focus:ring-rose-500/30 focus:border-rose-400 placeholder:text-rose-300/60"
+                                  : "bg-white/5 border-white/10 focus:ring-primary/30 focus:border-primary placeholder:text-white/40"
                               }`}
                             />
                             {formErrors["customer.phone"] && (
@@ -5565,7 +5565,7 @@ ${extrasRows}
                       </div>
 
                       {/* Final Summary */}
-                      <div className="p-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-[#10B981]/30">
+                      <div className="p-5 bg-emerald-500/15 rounded-2xl border-2 border-emerald-500/30">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-[10px] text-emerald-400/70 uppercase font-bold tracking-wider">
@@ -5836,7 +5836,7 @@ ${extrasRows}
               {/* Row 1: Reference & Customer */}
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Booking Reference */}
-                <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-6 border border-white/10">
+                <div className="bg-[#071D16] rounded-2xl p-6 border border-white/10">
                   <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">
                     📋 Booking Reference
                   </p>
@@ -5846,7 +5846,7 @@ ${extrasRows}
                 </div>
 
                 {/* Customer Info */}
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+                <div className="bg-blue-500/15 rounded-2xl p-6 border border-blue-500/25">
                   <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">
                     👤 Customer
                   </p>
@@ -5866,7 +5866,7 @@ ${extrasRows}
               {/* Row 2: Service & Schedule */}
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Service Type */}
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
+                <div className="bg-purple-500/15 rounded-2xl p-6 border border-purple-500/25">
                   <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">
                     🧹 Service Type
                   </p>
@@ -5882,7 +5882,7 @@ ${extrasRows}
                 </div>
 
                 {/* Schedule */}
-                <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-6 border border-amber-200">
+                <div className="bg-amber-500/15 rounded-2xl p-6 border border-amber-500/25">
                   <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">
                     📅 Schedule
                   </p>
@@ -5896,7 +5896,7 @@ ${extrasRows}
               </div>
 
               {/* Row 3: Location */}
-              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-[#10B981]/30">
+              <div className="bg-emerald-500/15 rounded-2xl p-6 border border-emerald-500/25">
                 <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">
                   📍 Location
                 </p>
@@ -5927,7 +5927,7 @@ ${extrasRows}
                     successBooking.details[r] && successBooking.details[r] > 0,
                 );
                 return rooms.length > 0 ? (
-                  <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-6 border border-indigo-200">
+                  <div className="bg-indigo-500/15 rounded-2xl p-6 border border-indigo-500/25">
                     <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">
                       🏠 Property Rooms
                     </p>
@@ -5935,9 +5935,9 @@ ${extrasRows}
                       {rooms.map((room) => (
                         <div
                           key={room}
-                          className="bg-white/5 rounded-xl p-3 border border-indigo-200 flex flex-col items-center justify-center"
+                          className="bg-white/[0.05] rounded-xl p-3 border border-indigo-500/25 flex flex-col items-center justify-center"
                         >
-                          <p className="text-xs font-bold text-indigo-600">
+                          <p className="text-xs font-bold text-indigo-400">
                             {successBooking.details[room]}x
                           </p>
                           <p className="text-xs font-bold text-white/70 text-center mt-1">
@@ -5953,7 +5953,7 @@ ${extrasRows}
               {/* Row 5: Extra Services */}
               {successBooking.details.extras &&
                 successBooking.details.extras.length > 0 && (
-                  <div className="bg-gradient-to-br from-rose-50 to-rose-100 rounded-2xl p-6 border border-rose-200">
+                  <div className="bg-rose-500/15 rounded-2xl p-6 border border-rose-500/25">
                     <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">
                       ⭐ Extra Services
                     </p>
@@ -5968,7 +5968,7 @@ ${extrasRows}
                         return (
                           <div
                             key={idx}
-                            className="bg-white/5 rounded-xl p-4 border border-rose-200 flex items-start justify-between"
+                            className="bg-white/[0.05] rounded-xl p-4 border border-rose-500/25 flex items-start justify-between"
                           >
                             <div>
                               <p className="text-sm font-bold text-white">
@@ -5991,7 +5991,7 @@ ${extrasRows}
                 )}
 
               {/* Row 6: Payment */}
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
+              <div className="bg-emerald-500/15 rounded-2xl p-6 border border-emerald-500/25">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-2">
@@ -5999,13 +5999,13 @@ ${extrasRows}
                     </p>
                     <p className="text-xs text-white/70 mb-1">
                       Status:{" "}
-                      <span className="font-bold text-amber-600">
+                      <span className="font-bold text-amber-400">
                         Pending Payment
                       </span>
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-4xl font-bold text-green-600">
+                    <p className="text-4xl font-bold text-emerald-400">
                       {successBooking.payment.currency === "GBP" ? "£" : "â‚¦"}
                       {successBooking.payment.amount}
                     </p>

@@ -49,31 +49,31 @@ function EmailDrawer({ log, onClose, onDelete }) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-full sm:w-[520px] bg-white z-50 flex flex-col shadow-2xl">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={onClose} />
+      <div className="fixed right-0 top-0 h-full w-full sm:w-[520px] bg-[#0B2D22] border-l border-white/10 z-50 flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-4 border-b border-slate-100 shrink-0 bg-slate-50/50">
+        <div className="flex items-start justify-between px-6 py-4 border-b border-white/[0.07] shrink-0 bg-white/[0.03]">
           <div className="min-w-0 pr-4">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Email</p>
-            <p className="text-sm font-bold text-slate-900 leading-snug">{log.subject}</p>
-            <p className="text-xs text-slate-500 mt-0.5">To: {log.to}</p>
+            <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Email</p>
+            <p className="text-sm font-bold text-white leading-snug">{log.subject}</p>
+            <p className="text-xs text-white/40 mt-0.5">To: {log.to}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleDownload}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 transition-all font-semibold text-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/25 transition-all font-semibold text-xs"
             >
               <Download size={12} /> Download
             </button>
             <button
               onClick={() => { onDelete(log._id); onClose(); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-all font-semibold text-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/15 text-rose-400 border border-rose-500/25 hover:bg-rose-500/25 transition-all font-semibold text-xs"
             >
               <Trash2 size={12} /> Delete
             </button>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/80 transition-colors"
             >
               <X size={16} />
             </button>
@@ -81,24 +81,24 @@ function EmailDrawer({ log, onClose, onDelete }) {
         </div>
 
         {/* Meta strip */}
-        <div className="px-6 py-3 border-b border-slate-50 flex flex-wrap items-center gap-3 shrink-0">
+        <div className="px-6 py-3 border-b border-white/[0.04] flex flex-wrap items-center gap-3 shrink-0">
           {log.success ? (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 rounded-full">
               <CheckCircle2 size={10} /> Sent
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-400 bg-rose-500/15 border border-rose-500/25 px-2 py-0.5 rounded-full">
               <XCircle size={10} /> Failed
             </span>
           )}
-          <span className="text-xs text-slate-400 font-medium">{fmtDate(log.sentAt)}</span>
+          <span className="text-xs text-white/40 font-medium">{fmtDate(log.sentAt)}</span>
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-hidden bg-slate-100">
+        <div className="flex-1 overflow-hidden bg-[#071D16]">
           {htmlLoading ? (
             <div className="flex items-center justify-center h-full">
-              <div className="w-5 h-5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
             </div>
           ) : (
             <iframe
@@ -130,27 +130,27 @@ function RowMenu({ log, onView, onDownload, onDelete }) {
     <div ref={ref} className="relative" onClick={e => e.stopPropagation()}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+        className="w-7 h-7 flex items-center justify-center rounded-lg text-white/25 hover:text-white/80 hover:bg-white/[0.06] transition-colors"
       >
         <MoreHorizontal size={15} />
       </button>
       {open && (
-        <div className="absolute right-0 top-8 z-20 w-40 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+        <div className="absolute right-0 top-8 z-20 w-40 bg-[#0B2D22] border border-white/10 rounded-xl shadow-lg overflow-hidden">
           <button
             onClick={() => { setOpen(false); onView(log); }}
-            className="flex items-center gap-2 w-full px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2 w-full px-3.5 py-2.5 text-xs font-semibold text-white/80 hover:bg-white/[0.06] transition-colors"
           >
             <Eye size={13} /> View Email
           </button>
           <button
             onClick={() => { setOpen(false); onDownload(log); }}
-            className="flex items-center gap-2 w-full px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2 w-full px-3.5 py-2.5 text-xs font-semibold text-white/80 hover:bg-white/[0.06] transition-colors"
           >
             <Download size={13} /> Download
           </button>
           <button
             onClick={() => { setOpen(false); onDelete(log._id); }}
-            className="flex items-center gap-2 w-full px-3.5 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+            className="flex items-center gap-2 w-full px-3.5 py-2.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors"
           >
             <Trash2 size={13} /> Delete
           </button>
@@ -292,7 +292,7 @@ const EmailHistory = () => {
       {/* Toast */}
       {toast && (
         <div className={`fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-72 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold text-white flex items-center gap-2 ${
-          toast.type === "error" ? "bg-red-600" : "bg-slate-900"
+          toast.type === "error" ? "bg-rose-600" : "bg-[#0B2D22] border border-white/10"
         }`}>
           {toast.type === "error" ? <AlertCircle size={14} /> : <CheckCircle2 size={14} />}
           {toast.msg}
@@ -309,16 +309,16 @@ const EmailHistory = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Mail size={22} className="text-primary" /> Email History
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Mail size={22} className="text-emerald-400" /> Email History
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-white/40 mt-1">
             Every email the system has sent — confirmations, invoices, campaigns and more
           </p>
         </div>
         <button
           onClick={fetchLogs}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-dark transition-all font-semibold text-sm shadow-sm self-start shrink-0"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white transition-all font-semibold text-sm shadow-sm self-start shrink-0"
         >
           <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
           Refresh
@@ -328,13 +328,13 @@ const EmailHistory = () => {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Total Sent",    val: logs.length,  color: "text-slate-900",  bg: "bg-white" },
-          { label: "Delivered",     val: sentCount,    color: "text-emerald-600",bg: "bg-emerald-50" },
-          { label: "Failed",        val: failedCount,  color: "text-red-600",    bg: "bg-red-50" },
+          { label: "Total Sent",    val: logs.length,  color: "text-white",        bg: "bg-[#0B2D22] border border-white/[0.07]" },
+          { label: "Delivered",     val: sentCount,    color: "text-emerald-400",  bg: "bg-emerald-500/10 border border-emerald-500/20" },
+          { label: "Failed",        val: failedCount,  color: "text-rose-400",     bg: "bg-rose-500/10 border border-rose-500/20" },
         ].map(s => (
-          <div key={s.label} className={`${s.bg} rounded-xl px-4 py-3 border border-slate-100`}>
+          <div key={s.label} className={`${s.bg} rounded-xl px-4 py-3`}>
             <p className={`text-2xl font-black ${s.color} leading-none`}>{s.val}</p>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">{s.label}</p>
+            <p className="text-[11px] text-white/40 font-medium mt-0.5">{s.label}</p>
           </div>
         ))}
       </div>
@@ -342,12 +342,12 @@ const EmailHistory = () => {
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="relative flex-1 min-w-0 max-w-sm">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search recipient or subject…"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none text-sm"
           />
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -357,8 +357,8 @@ const EmailHistory = () => {
               onClick={() => setStatusFilter(f)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize border transition-colors ${
                 statusFilter === f
-                  ? "bg-slate-900 text-white border-slate-900"
-                  : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+                  ? "bg-emerald-500 text-white border-emerald-500"
+                  : "bg-white/5 text-white/60 border-white/10 hover:border-white/20"
               }`}
             >
               {f === "all" ? "All" : f === "sent" ? "Delivered" : "Failed"}
@@ -369,21 +369,21 @@ const EmailHistory = () => {
 
       {/* Bulk action bar */}
       {someSelected && (
-        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-[#0B2D22] border border-white/10 text-white rounded-xl">
           <p className="text-sm font-semibold">
             {selected.size} email{selected.size !== 1 ? "s" : ""} selected
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSelected(new Set())}
-              className="text-xs text-slate-400 hover:text-white transition-colors px-2 py-1"
+              className="text-xs text-white/40 hover:text-white/80 transition-colors px-2 py-1"
             >
               Clear
             </button>
             <button
               onClick={handleBulkDelete}
               disabled={deleting}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/15 border border-rose-500/25 text-rose-400 hover:bg-rose-500/25 rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
             >
               <Trash2 size={12} /> Delete {selected.size} selected
             </button>
@@ -392,17 +392,17 @@ const EmailHistory = () => {
       )}
 
       {/* Table */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.12em] bg-slate-50/60">
+              <tr className="text-white/40 text-xs font-semibold uppercase tracking-wide bg-white/[0.03]">
                 <th className="pl-5 pr-2 py-3.5 w-10">
                   <input
                     type="checkbox"
                     checked={allPageSelected}
                     onChange={toggleAll}
-                    className="rounded border-slate-300 accent-slate-900 w-3.5 h-3.5 cursor-pointer"
+                    className="rounded border-white/20 accent-emerald-500 w-3.5 h-3.5 cursor-pointer"
                   />
                 </th>
                 <th className="px-4 py-3.5">Recipient</th>
@@ -412,19 +412,19 @@ const EmailHistory = () => {
                 <th className="px-5 py-3.5"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="py-16 text-center text-sm text-slate-400">
+                  <td colSpan="6" className="py-16 text-center text-sm text-white/40">
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
                       Loading…
                     </div>
                   </td>
                 </tr>
               ) : pageItems.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="py-16 text-center text-sm text-slate-300 font-semibold">
+                  <td colSpan="6" className="py-16 text-center text-sm text-white/25 font-semibold">
                     No emails found
                   </td>
                 </tr>
@@ -434,8 +434,8 @@ const EmailHistory = () => {
                   return (
                     <tr
                       key={log._id}
-                      className={`transition-colors cursor-pointer ${
-                        isSelected ? "bg-slate-50" : "hover:bg-slate-50/70"
+                      className={`transition-colors cursor-pointer border-b border-white/[0.04] ${
+                        isSelected ? "bg-white/[0.05]" : "hover:bg-white/[0.04]"
                       }`}
                       onClick={() => setViewing(log)}
                     >
@@ -444,25 +444,25 @@ const EmailHistory = () => {
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => toggleRow(log._id)}
-                          className="rounded border-slate-300 accent-slate-900 w-3.5 h-3.5 cursor-pointer"
+                          className="rounded border-white/20 accent-emerald-500 w-3.5 h-3.5 cursor-pointer"
                         />
                       </td>
-                      <td className="px-4 py-3.5 text-sm font-semibold text-slate-800 max-w-[140px] truncate">
+                      <td className="px-4 py-3.5 text-sm font-semibold text-white max-w-[140px] truncate">
                         {log.to}
                       </td>
-                      <td className="px-4 py-3.5 text-sm text-slate-600 max-w-xs truncate">
+                      <td className="px-4 py-3.5 text-sm text-white/60 max-w-xs truncate">
                         {log.subject}
                       </td>
-                      <td className="px-4 py-3.5 text-xs text-slate-400 font-medium whitespace-nowrap hidden sm:table-cell">
+                      <td className="px-4 py-3.5 text-xs text-white/40 font-medium whitespace-nowrap hidden sm:table-cell">
                         {fmtDate(log.sentAt)}
                       </td>
                       <td className="px-4 py-3.5">
                         {log.success ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 rounded-full">
                             <CheckCircle2 size={10} /> Sent
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-400 bg-rose-500/15 border border-rose-500/25 px-2 py-0.5 rounded-full">
                             <XCircle size={10} /> Failed
                           </span>
                         )}
@@ -485,8 +485,8 @@ const EmailHistory = () => {
 
         {/* Pagination */}
         {!loading && filtered.length > 0 && (
-          <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/40">
-            <p className="text-xs text-slate-400 font-medium">
+          <div className="px-5 py-3.5 border-t border-white/[0.07] flex items-center justify-between gap-3 bg-white/[0.02]">
+            <p className="text-xs text-white/40 font-medium">
               {filtered.length} email{filtered.length !== 1 ? "s" : ""}
               {someSelected ? ` · ${selected.size} selected` : ""}
               {" "}· Page {safePage} of {totalPages}
@@ -495,7 +495,7 @@ const EmailHistory = () => {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={safePage === 1}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 text-white/40 hover:bg-white/[0.06] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft size={14} />
               </button>
@@ -513,8 +513,8 @@ const EmailHistory = () => {
                     onClick={() => setPage(p)}
                     className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
                       p === safePage
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-200 text-slate-500 hover:bg-white"
+                        ? "bg-emerald-500 text-white"
+                        : "border border-white/10 text-white/40 hover:bg-white/[0.06]"
                     }`}
                   >
                     {p}
@@ -525,7 +525,7 @@ const EmailHistory = () => {
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={safePage === totalPages}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/10 text-white/40 hover:bg-white/[0.06] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight size={14} />
               </button>

@@ -65,30 +65,30 @@ function CardMenu({ lead, currentStage, onMove, onEdit, onDelete }) {
     <div ref={ref} className="relative" onClick={e => e.stopPropagation()}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="p-1 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors"
+        className="p-1 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
       >
         <MoreHorizontal size={15} />
       </button>
 
       {open && (
         <div className="absolute right-0 top-full mt-1 w-48 bg-[#0B2D22] border border-white/10 rounded-xl shadow-xl z-30 overflow-hidden">
-          <div className="px-3 py-2 border-b border-white/10">
+          <div className="px-3 py-2 border-b border-white/7">
             <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Move to stage</p>
           </div>
           {STAGES.filter(s => s !== currentStage).map(s => (
             <button
               key={s}
               onClick={() => { onMove(s); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-white/70 hover:bg-[#0A2A1F] font-medium transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-white/80 hover:bg-white/[0.04] font-medium transition-colors"
             >
-              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${STAGE_STYLES[s]?.dot}`} />
+              <span className={`w-2 h-2 rounded-full shrink-0 ${STAGE_STYLES[s]?.dot}`} />
               {s}
             </button>
           ))}
-          <div className="border-t border-white/10">
+          <div className="border-t border-white/7">
             <button
               onClick={() => { onEdit(); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-white/70 hover:bg-[#0A2A1F] font-medium transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs text-white/80 hover:bg-white/[0.04] font-medium transition-colors"
             >
               <Edit2 size={12} className="text-white/40" /> Edit details
             </button>
@@ -142,9 +142,9 @@ function LeadDrawer({ lead, onClose, onMove, onDelete, onSave, movingId }) {
 
       <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-[#0B2D22] shadow-2xl z-50 flex flex-col border-l border-white/10 animate-in slide-in-from-right duration-200">
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/7">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-[#061A13] flex items-center justify-center text-white font-black text-sm">
+            <div className="w-9 h-9 rounded-full bg-[#071D16] flex items-center justify-center text-white font-black text-sm">
               {(lead.name?.[0] || "?").toUpperCase()}
             </div>
             <div>
@@ -154,7 +154,7 @@ function LeadDrawer({ lead, onClose, onMove, onDelete, onSave, movingId }) {
               </span>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-xl text-white/40 hover:text-white hover:bg-white/10 transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -169,30 +169,30 @@ function LeadDrawer({ lead, onClose, onMove, onDelete, onSave, movingId }) {
                 <div>
                   <label className="text-xs text-white/40 font-semibold mb-1 block">Full Name</label>
                   <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-white/10 rounded-xl bg-[#071D16] text-white outline-none focus:border-emerald-500/50" />
+                    className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-all" />
                 </div>
                 <div>
                   <label className="text-xs text-white/40 font-semibold mb-1 block">Email</label>
                   <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-white/10 rounded-xl bg-[#071D16] text-white outline-none focus:border-emerald-500/50" />
+                    className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-all" />
                 </div>
                 <div>
                   <label className="text-xs text-white/40 font-semibold mb-1 block">Phone</label>
                   <input value={form.phone || ""} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-white/10 rounded-xl bg-[#071D16] text-white outline-none focus:border-emerald-500/50" />
+                    className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-all" />
                 </div>
                 <div>
                   <label className="text-xs text-white/40 font-semibold mb-1 block">Service Interest</label>
                   <input value={form.serviceInterest || ""} onChange={e => setForm(f => ({ ...f, serviceInterest: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-white/10 rounded-xl bg-[#071D16] text-white outline-none focus:border-emerald-500/50" />
+                    className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-all" />
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button onClick={saveEdit} disabled={saving}
-                    className="flex-1 py-2 bg-emerald-500 text-white text-xs font-bold rounded-xl hover:bg-emerald-400 disabled:opacity-50 transition-colors">
+                    className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold rounded-xl disabled:opacity-50 transition-colors">
                     {saving ? "Saving…" : "Save Changes"}
                   </button>
                   <button onClick={() => setEditing(false)}
-                    className="px-3 py-2 border border-white/10 rounded-xl text-xs text-white/40 hover:bg-white/10 transition-colors">
+                    className="px-3 py-2 bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 rounded-xl text-xs transition-colors">
                     Cancel
                   </button>
                 </div>
@@ -200,35 +200,35 @@ function LeadDrawer({ lead, onClose, onMove, onDelete, onSave, movingId }) {
             ) : (
               <>
                 <div className="flex items-center gap-3">
-                  <User size={14} className="text-white/40 flex-shrink-0" />
+                  <User size={14} className="text-white/40 shrink-0" />
                   <span className="text-sm font-semibold text-white">{lead.name}</span>
                 </div>
                 {lead.email && (
                   <div className="flex items-center gap-3">
-                    <Mail size={14} className="text-white/40 flex-shrink-0" />
+                    <Mail size={14} className="text-white/40 shrink-0" />
                     <a href={`mailto:${lead.email}`} className="text-sm text-blue-400 hover:underline truncate">{lead.email}</a>
                   </div>
                 )}
                 {lead.phone && (
                   <div className="flex items-center gap-3">
-                    <Phone size={14} className="text-white/40 flex-shrink-0" />
-                    <a href={`tel:${lead.phone}`} className="text-sm text-white/70">{lead.phone}</a>
+                    <Phone size={14} className="text-white/40 shrink-0" />
+                    <a href={`tel:${lead.phone}`} className="text-sm text-white/80">{lead.phone}</a>
                   </div>
                 )}
                 {lead.serviceInterest && (
                   <div className="flex items-center gap-3">
-                    <Briefcase size={14} className="text-white/40 flex-shrink-0" />
-                    <span className="text-sm text-white/70">{lead.serviceInterest}</span>
+                    <Briefcase size={14} className="text-white/40 shrink-0" />
+                    <span className="text-sm text-white/80">{lead.serviceInterest}</span>
                   </div>
                 )}
                 {lead.source && (
                   <div className="flex items-center gap-3">
-                    <Tag size={14} className="text-white/40 flex-shrink-0" />
+                    <Tag size={14} className="text-white/40 shrink-0" />
                     <span className="text-sm text-white/40">{lead.source}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-3">
-                  <Calendar size={14} className="text-white/40 flex-shrink-0" />
+                  <Calendar size={14} className="text-white/40 shrink-0" />
                   <span className="text-sm text-white/40">Added {fmtDate(lead.createdAt)}</span>
                 </div>
               </>
@@ -250,11 +250,11 @@ function LeadDrawer({ lead, onClose, onMove, onDelete, onSave, movingId }) {
                       isActive
                         ? `${stageStyle?.badge} border font-bold cursor-default`
                         : isPast
-                        ? "text-white/25 bg-white/5 border border-white/[0.06] hover:bg-white/10"
-                        : "text-white/60 bg-[#071D16] border border-white/10 hover:bg-[#0A2A1F] hover:border-white/20"
+                        ? "text-white/25 bg-white/5 border border-white/6 hover:bg-white/10"
+                        : "text-white/80 bg-[#071D16] border border-white/10 hover:bg-white/[0.04] hover:border-white/20"
                     }`}
                   >
-                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isActive || isPast ? STAGE_STYLES[s]?.dot : "bg-white/20"}`} />
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${isActive || isPast ? STAGE_STYLES[s]?.dot : "bg-white/20"}`} />
                     {s}
                     {isActive && <CheckCircle size={13} className="ml-auto opacity-60" />}
                     {!isActive && <ArrowRight size={12} className="ml-auto opacity-30" />}
@@ -265,11 +265,11 @@ function LeadDrawer({ lead, onClose, onMove, onDelete, onSave, movingId }) {
           </div>
         </div>
 
-        <div className="px-5 py-4 border-t border-white/10 space-y-2">
+        <div className="px-5 py-4 border-t border-white/7 space-y-2">
           {!editing && (
             <button
               onClick={() => setEditing(true)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm font-semibold text-white/60 hover:bg-white/10 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 rounded-xl text-sm font-semibold transition-colors"
             >
               <Edit2 size={14} /> Edit Details
             </button>
@@ -420,7 +420,7 @@ export default function Pipeline() {
   }
 
   return (
-    <div className="p-4 sm:p-6 max-w-[1400px] mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-350 mx-auto space-y-6">
       {error && (
         <div className="bg-rose-500/15 border border-rose-500/25 text-rose-400 text-sm px-4 py-3 rounded-xl flex items-center justify-between">
           {error}
@@ -453,9 +453,9 @@ export default function Pipeline() {
 
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Total Leads",     val: total,          color: "text-white",       bg: "bg-[#071D16] border-white/10" },
-          { label: "Conversion Rate", val: `${convRate}%`, color: "text-emerald-400", bg: "bg-[#071D16] border-white/10" },
-          { label: "This Week",       val: thisWeek,       color: "text-blue-400",    bg: "bg-[#071D16] border-white/10" },
+          { label: "Total Leads",     val: total,          color: "text-white",       bg: "bg-[#071D16] border-white/7" },
+          { label: "Conversion Rate", val: `${convRate}%`, color: "text-emerald-400", bg: "bg-[#071D16] border-white/7" },
+          { label: "This Week",       val: thisWeek,       color: "text-blue-400",    bg: "bg-[#071D16] border-white/7" },
         ].map(s => (
           <div key={s.label} className={`${s.bg} rounded-xl px-4 py-3 border`}>
             <p className={`text-2xl font-black ${s.color}`}>{s.val}</p>
@@ -472,7 +472,7 @@ export default function Pipeline() {
           const hasMore = cards.length > visibleCount;
           const isExpanded = (colPages[stage] || 1) > 1;
           return (
-            <div key={stage} className="flex-shrink-0 w-72 bg-[#071D16] rounded-2xl p-3">
+            <div key={stage} className="shrink-0 w-72 bg-[#071D16] rounded-xl p-3">
               <div className={`flex items-center justify-between px-3 py-2 rounded-xl mb-3 ${STAGE_HEADER[stage]}`}>
                 <span className="text-xs font-bold uppercase tracking-widest">{stage}</span>
                 <span className="text-xs font-black">{cards.length}</span>
@@ -481,33 +481,33 @@ export default function Pipeline() {
               {stage === "New" && (
                 <div className="mb-3">
                   {showAddForm ? (
-                    <form onSubmit={handleAdd} className="bg-[#0B2D22] border border-white/10 rounded-2xl p-4 space-y-2.5">
+                    <form onSubmit={handleAdd} className="bg-[#0B2D22] border border-white/7 rounded-xl p-4 space-y-2.5">
                       <input autoFocus placeholder="Full name *" value={addForm.name}
                         onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))}
-                        className="w-full px-3 py-2 text-sm border border-white/10 rounded-xl bg-[#071D16] text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50" />
+                        className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-all" />
                       <input type="email" placeholder="Email *" value={addForm.email}
                         onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))}
-                        className="w-full px-3 py-2 text-sm border border-white/10 rounded-xl bg-[#071D16] text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50" />
+                        className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-all" />
                       <input placeholder="Phone" value={addForm.phone}
                         onChange={e => setAddForm(f => ({ ...f, phone: e.target.value }))}
-                        className="w-full px-3 py-2 text-sm border border-white/10 rounded-xl bg-[#071D16] text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50" />
+                        className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-all" />
                       <input placeholder="Service interest" value={addForm.serviceInterest}
                         onChange={e => setAddForm(f => ({ ...f, serviceInterest: e.target.value }))}
-                        className="w-full px-3 py-2 text-sm border border-white/10 rounded-xl bg-[#071D16] text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50" />
+                        className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 outline-none focus:border-emerald-500/50 transition-all" />
                       <div className="flex gap-2 pt-1">
                         <button type="submit" disabled={adding}
-                          className="flex-1 py-2 bg-emerald-500 text-white text-xs font-bold rounded-xl hover:bg-emerald-400 disabled:opacity-50 transition-colors">
+                          className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold rounded-xl disabled:opacity-50 transition-colors">
                           {adding ? "Adding…" : "Add Lead"}
                         </button>
                         <button type="button" onClick={() => { setShowAddForm(false); setAddForm(BLANK_LEAD); }}
-                          className="px-3 py-2 border border-white/10 rounded-xl text-xs text-white/40 hover:bg-white/10 transition-colors">
+                          className="px-3 py-2 bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 rounded-xl text-xs transition-colors">
                           <X size={13} />
                         </button>
                       </div>
                     </form>
                   ) : (
                     <button onClick={() => setShowAddForm(true)}
-                      className="w-full flex items-center gap-2 px-3 py-2 border border-dashed border-white/20 rounded-xl text-xs text-white/40 hover:border-white/40 hover:text-white/70 transition-colors">
+                      className="w-full flex items-center gap-2 px-3 py-2 border border-dashed border-white/20 rounded-xl text-xs text-white/40 hover:border-white/40 hover:text-white/80 transition-colors">
                       <Plus size={13} /> Add Lead
                     </button>
                   )}
@@ -524,7 +524,7 @@ export default function Pipeline() {
                   <div
                     key={lead._id}
                     onClick={() => setSelectedLead(lead)}
-                    className={`bg-[#0B2D22] border border-white/10 border-l-4 ${STAGE_STYLES[stage]?.border} rounded-xl p-4 relative cursor-pointer hover:border-white/20 transition-all group`}
+                    className={`bg-[#0B2D22] border border-white/7 border-l-4 ${STAGE_STYLES[stage]?.border} rounded-xl p-4 relative cursor-pointer hover:border-white/20 transition-all group`}
                   >
                     {movingId === lead._id && (
                       <div className="absolute inset-0 bg-[#0B2D22]/70 rounded-xl flex items-center justify-center z-10">

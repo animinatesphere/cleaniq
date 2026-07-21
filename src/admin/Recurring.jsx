@@ -102,16 +102,16 @@ const MiniCalendar = ({ value, onChange }) => {
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={prevMonth}
-          className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-all"
+          className="w-8 h-8 rounded-xl flex items-center justify-center text-white/40 hover:bg-white/10 hover:text-white/70 transition-all"
         >
           <ChevronLeft size={15} />
         </button>
-        <p className="text-sm font-black text-slate-800 tracking-tight">
+        <p className="text-sm font-black text-white tracking-tight">
           {MONTH_NAMES[m]} {y}
         </p>
         <button
           onClick={nextMonth}
-          className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-all"
+          className="w-8 h-8 rounded-xl flex items-center justify-center text-white/40 hover:bg-white/10 hover:text-white/70 transition-all"
         >
           <ChevronRight size={15} />
         </button>
@@ -120,7 +120,7 @@ const MiniCalendar = ({ value, onChange }) => {
       {/* Day labels */}
       <div className="grid grid-cols-7 mb-1">
         {["Mo","Tu","We","Th","Fr","Sa","Su"].map((d) => (
-          <div key={d} className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest py-1.5">
+          <div key={d} className="text-center text-[10px] font-black text-white/40 uppercase tracking-widest py-1.5">
             {d}
           </div>
         ))}
@@ -146,8 +146,8 @@ const MiniCalendar = ({ value, onChange }) => {
                   : isToday
                   ? "bg-primary/10 text-primary ring-2 ring-primary/20"
                   : isPast
-                  ? "text-slate-200 cursor-not-allowed"
-                  : "text-slate-700 hover:bg-primary/8 hover:text-primary"}
+                  ? "text-white/20 cursor-not-allowed"
+                  : "text-white/60 hover:bg-emerald-500/10 hover:text-emerald-400"}
               `}
             >
               {day}
@@ -160,12 +160,12 @@ const MiniCalendar = ({ value, onChange }) => {
 };
 
 // ── Shared primitives ──────────────────────────────────────────────────────
-const inp = "w-full px-4 py-3 rounded-xl border-2 border-slate-200 bg-white text-sm text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300";
+const inp = "w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm text-white font-medium focus:outline-none focus:border-emerald-500/50 transition-all placeholder:text-white/20";
 const Field = ({ label, error, hint, children }) => (
   <div>
-    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">{label}</p>
+    <p className="text-xs font-bold text-white/40 uppercase tracking-wider mb-1.5">{label}</p>
     {children}
-    {hint && !error && <p className="text-[11px] text-slate-400 mt-1">{hint}</p>}
+    {hint && !error && <p className="text-[11px] text-white/40 mt-1">{hint}</p>}
     {error && <p className="text-xs text-rose-500 mt-1 flex items-center gap-1"><AlertCircle size={11} />{error}</p>}
   </div>
 );
@@ -380,28 +380,28 @@ const CreatePage = ({ onClose, onCreated }) => {
   const selectedFreq = FREQ_OPTIONS.find((o) => o.value === form.frequencyType);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-[#071D16] flex flex-col">
 
       {/* ── Top bar ── */}
-      <div className="bg-white border-b border-slate-200 px-4 sm:px-8 py-4 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
+      <div className="bg-[#0B2D22] border-b border-white/7 px-4 sm:px-8 py-4 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
         <button
           onClick={onClose}
-          className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors font-semibold text-sm"
+          className="flex items-center gap-2 text-white/40 hover:text-white transition-colors font-semibold text-sm"
         >
           <ArrowLeft size={15} /> Back
         </button>
-        <span className="text-slate-200">|</span>
-        <span className="text-slate-400 text-sm">Recurring Bookings</span>
-        <ChevronRight size={13} className="text-slate-300" />
-        <span className="text-sm font-bold text-slate-700">New Series</span>
-        <div className="ml-auto flex items-center gap-2 text-xs font-bold text-slate-400">
+        <span className="text-white/20">|</span>
+        <span className="text-white/40 text-sm">Recurring Bookings</span>
+        <ChevronRight size={13} className="text-white/25" />
+        <span className="text-sm font-bold text-white">New Series</span>
+        <div className="ml-auto flex items-center gap-2 text-xs font-bold text-white/40">
           <span className="hidden sm:block">Step {step} of 4</span>
           <div className="flex gap-1">
             {STEPS.map((s) => (
               <div
                 key={s.id}
                 className={`h-1.5 rounded-full transition-all ${
-                  step === s.id ? "w-6 bg-primary" : step > s.id ? "w-3 bg-emerald-400" : "w-3 bg-slate-200"
+                  step === s.id ? "w-6 bg-primary" : step > s.id ? "w-3 bg-emerald-400" : "w-3 bg-white/10"
                 }`}
               />
             ))}
@@ -422,22 +422,22 @@ const CreatePage = ({ onClose, onCreated }) => {
                 <div className="flex flex-col items-center">
                   <div
                     className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm transition-all duration-300 ${
-                      done   ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+                      done   ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20"
                       : active ? "bg-primary text-white shadow-lg shadow-primary/30"
-                               : "bg-white border-2 border-slate-200 text-slate-300"
+                               : "bg-white/5 border border-white/10 text-white/25"
                     }`}
                   >
                     {done ? <Check size={16} strokeWidth={3} /> : <Icon size={15} />}
                   </div>
                   <p className={`text-[10px] font-black mt-1.5 tracking-wide hidden sm:block ${
-                    active ? "text-primary" : done ? "text-emerald-500" : "text-slate-300"
+                    active ? "text-primary" : done ? "text-emerald-500" : "text-white/25"
                   }`}>
                     {s.label.toUpperCase()}
                   </p>
                 </div>
                 {idx < STEPS.length - 1 && (
                   <div className={`flex-1 h-0.5 mx-2 mt-[-14px] sm:mt-[-20px] transition-all duration-300 ${
-                    step > s.id ? "bg-emerald-400" : "bg-slate-200"
+                    step > s.id ? "bg-emerald-400" : "bg-white/10"
                   }`} />
                 )}
               </React.Fragment>
@@ -451,13 +451,13 @@ const CreatePage = ({ onClose, onCreated }) => {
             {React.createElement(STEPS[step - 1].icon, { size: 18, className: "text-white" })}
           </div>
           <div>
-            <h1 className="text-xl font-black text-slate-900 leading-tight">
+            <h1 className="text-xl font-black text-white leading-tight">
               {step === 1 && "Who is this booking for?"}
               {step === 2 && "What service & where?"}
               {step === 3 && "When & how often?"}
               {step === 4 && "Review & confirm"}
             </h1>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-white/40 mt-0.5">
               {step === 1 && "Find an existing customer or enter their details manually"}
               {step === 2 && "Service type, address and session duration"}
               {step === 3 && "Choose the frequency, start date and total sessions"}
@@ -471,19 +471,19 @@ const CreatePage = ({ onClose, onCreated }) => {
           <div className="space-y-4">
 
             {/* Quick fill */}
-            <div className="bg-gradient-to-br from-indigo-50 to-primary/8 border-2 border-primary/20 rounded-2xl p-5">
+            <div className="bg-gradient-to-br from-indigo-950/40 to-emerald-950/30 border border-white/10 rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-1">
                 <Zap size={14} className="text-primary" />
                 <p className="text-sm font-black text-primary">Quick Fill — Load from Booking ID</p>
               </div>
-              <p className="text-xs text-slate-500 mb-3">Auto-fill all details from an existing booking.</p>
+              <p className="text-xs text-white/40 mb-3">Auto-fill all details from an existing booking.</p>
               <div className="flex gap-2">
                 <input
                   value={form.bookingIdQuery}
                   onChange={(e) => { set("bookingIdQuery", e.target.value); setLoadError(""); }}
                   onKeyDown={(e) => e.key === "Enter" && loadFromBookingId()}
                   placeholder="e.g. BK-4821"
-                  className="flex-1 px-4 py-2.5 rounded-xl border-2 border-white bg-white text-sm font-mono font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary shadow-sm"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm font-mono font-bold text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all"
                 />
                 <button
                   onClick={loadFromBookingId}
@@ -496,9 +496,9 @@ const CreatePage = ({ onClose, onCreated }) => {
               </div>
               {loadError && <p className="text-xs text-rose-500 mt-2 flex items-center gap-1"><AlertCircle size={11} />{loadError}</p>}
               {form.loadedFrom && (
-                <div className="mt-3 flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-                  <CheckCircle2 size={13} className="text-emerald-500 flex-shrink-0" />
-                  <p className="text-xs font-bold text-emerald-700">
+                <div className="mt-3 flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/25 rounded-xl px-3 py-2">
+                  <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0" />
+                  <p className="text-xs font-bold text-emerald-400">
                     Loaded from <span className="font-mono">{form.loadedFrom}</span> — review and edit below
                   </p>
                 </div>
@@ -506,19 +506,19 @@ const CreatePage = ({ onClose, onCreated }) => {
             </div>
 
             {/* Customer details */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <User size={13} className="text-slate-500" />
+            <div className="bg-[#0B2D22] rounded-2xl border border-white/7 shadow-sm p-5 space-y-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-white/[0.04]">
+                <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
+                  <User size={13} className="text-white/40" />
                 </div>
-                <p className="font-black text-slate-700 text-sm">Customer Details</p>
+                <p className="font-black text-white/80 text-sm">Customer Details</p>
               </div>
 
               {/* Name search */}
               <div className="relative">
                 <Field label="Search existing customer">
                   <div className="relative">
-                    <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
                     <input
                       value={form.customerQuery}
                       onChange={(e) => set("customerQuery", e.target.value)}
@@ -528,18 +528,18 @@ const CreatePage = ({ onClose, onCreated }) => {
                   </div>
                 </Field>
                 {showCustDrop && customerResults.length > 0 && (
-                  <div className="absolute z-30 left-0 right-0 mt-1 bg-white border-2 border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                  <div className="absolute z-30 left-0 right-0 mt-1 bg-[#071D16] border border-white/10 rounded-2xl shadow-xl overflow-hidden">
                     {customerResults.map((c) => (
                       <button key={c._id} onClick={() => pickCustomer(c)}
-                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-left border-b border-slate-100 last:border-0">
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04] text-left border-b border-white/[0.04] last:border-0">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-black text-primary flex-shrink-0">
                           {c.firstName?.[0]}{c.lastName?.[0]}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-slate-800 text-sm">{c.firstName} {c.lastName}</p>
-                          <p className="text-xs text-slate-400 truncate">{c.email}</p>
+                          <p className="font-bold text-white text-sm">{c.firstName} {c.lastName}</p>
+                          <p className="text-xs text-white/40 truncate">{c.email}</p>
                         </div>
-                        <ChevronRight size={13} className="text-slate-300 ml-auto flex-shrink-0" />
+                        <ChevronRight size={13} className="text-white/25 ml-auto flex-shrink-0" />
                       </button>
                     ))}
                   </div>
@@ -556,13 +556,13 @@ const CreatePage = ({ onClose, onCreated }) => {
               </div>
               <Field label="Email Address *" error={errors.email}>
                 <div className="relative">
-                  <Mail size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Mail size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
                   <input type="email" value={form.customer.email} onChange={(e) => setC("email", e.target.value)} placeholder="jane@example.com" className={`${inp} pl-10`} />
                 </div>
               </Field>
               <Field label="Phone Number">
                 <div className="relative">
-                  <Phone size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Phone size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
                   <input type="tel" value={form.customer.phone} onChange={(e) => setC("phone", e.target.value)} placeholder="+44 7700 000000" className={`${inp} pl-10`} />
                 </div>
               </Field>
@@ -572,12 +572,12 @@ const CreatePage = ({ onClose, onCreated }) => {
 
         {/* ══════════════════ STEP 2 — SERVICE ══════════════════ */}
         {step === 2 && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                <Building2 size={13} className="text-slate-500" />
+          <div className="bg-[#0B2D22] rounded-2xl border border-white/7 shadow-sm p-5 space-y-4">
+            <div className="flex items-center gap-2 pb-3 border-b border-white/[0.04]">
+              <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
+                <Building2 size={13} className="text-white/40" />
               </div>
-              <p className="font-black text-slate-700 text-sm">Service & Location</p>
+              <p className="font-black text-white/80 text-sm">Service & Location</p>
             </div>
 
             <Field label="Service Type *" error={errors.service}>
@@ -587,7 +587,7 @@ const CreatePage = ({ onClose, onCreated }) => {
 
             <Field label="Property Address *" error={errors.address}>
               <div className="relative">
-                <MapPin size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <MapPin size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
                 <input value={form.address} onChange={(e) => set("address", e.target.value)}
                   placeholder="Full property address" className={`${inp} pl-10`} />
               </div>
@@ -617,12 +617,12 @@ const CreatePage = ({ onClose, onCreated }) => {
           <div className="space-y-4">
 
             {/* Frequency picker */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
-                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <Repeat size={13} className="text-slate-500" />
+            <div className="bg-[#0B2D22] rounded-2xl border border-white/7 shadow-sm p-5">
+              <div className="flex items-center gap-2 pb-3 border-b border-white/[0.04] mb-4">
+                <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
+                  <Repeat size={13} className="text-white/40" />
                 </div>
-                <p className="font-black text-slate-700 text-sm">How often does this repeat?</p>
+                <p className="font-black text-white/80 text-sm">How often does this repeat?</p>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -633,7 +633,7 @@ const CreatePage = ({ onClose, onCreated }) => {
                       key={opt.value}
                       onClick={() => set("frequencyType", opt.value)}
                       className={`relative flex flex-col items-start p-3.5 rounded-xl border-2 text-left transition-all ${
-                        isActive ? "shadow-md" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/80"
+                        isActive ? "shadow-md" : "border-white/10 hover:border-white/20 hover:bg-white/5"
                       }`}
                       style={isActive ? {
                         borderColor: opt.accent,
@@ -642,10 +642,10 @@ const CreatePage = ({ onClose, onCreated }) => {
                     >
                       <span className="text-xl mb-2 leading-none">{opt.icon}</span>
                       <p className={`text-sm font-black leading-tight`}
-                        style={{ color: isActive ? opt.accent : "#334155" }}>
+                        style={{ color: isActive ? opt.accent : "rgba(255,255,255,0.8)" }}>
                         {opt.label}
                       </p>
-                      <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">{opt.sub}</p>
+                      <p className="text-[11px] text-white/40 mt-0.5 leading-tight">{opt.sub}</p>
                       {isActive && (
                         <div
                           className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full flex items-center justify-center"
@@ -661,8 +661,8 @@ const CreatePage = ({ onClose, onCreated }) => {
 
               {/* Day picker */}
               {form.frequencyType === "specific_days" && (
-                <div className="mt-5 pt-4 border-t border-slate-100">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Which days each week? *</p>
+                <div className="mt-5 pt-4 border-t border-white/[0.04]">
+                  <p className="text-xs font-bold text-white/40 uppercase tracking-wider mb-3">Which days each week? *</p>
                   <div className="flex gap-2 flex-wrap">
                     {DAYS_OF_WEEK.map((d) => (
                       <button
@@ -670,8 +670,8 @@ const CreatePage = ({ onClose, onCreated }) => {
                         onClick={() => toggleDay(d)}
                         className={`w-12 h-12 rounded-xl font-black text-sm border-2 transition-all ${
                           form.specificDays.includes(d)
-                            ? "bg-violet-600 border-violet-600 text-white shadow-md shadow-violet-200"
-                            : "border-slate-200 text-slate-500 hover:border-violet-300 hover:text-violet-600"
+                            ? "bg-violet-600 border-violet-600 text-white shadow-md shadow-violet-500/20"
+                            : "border-white/10 text-white/40 hover:border-violet-500/40 hover:text-violet-400"
                         }`}
                       >
                         {d}
@@ -684,7 +684,7 @@ const CreatePage = ({ onClose, onCreated }) => {
                     </p>
                   )}
                   {form.specificDays.length > 0 && (
-                    <p className="text-xs font-bold text-violet-600 mt-2">
+                    <p className="text-xs font-bold text-violet-400 mt-2">
                       ✓ {form.specificDays.join(", ")} — {form.specificDays.length}× per week
                     </p>
                   )}
@@ -693,12 +693,12 @@ const CreatePage = ({ onClose, onCreated }) => {
             </div>
 
             {/* Start date — mini calendar */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
-                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <Calendar size={13} className="text-slate-500" />
+            <div className="bg-[#0B2D22] rounded-2xl border border-white/7 shadow-sm p-5">
+              <div className="flex items-center gap-2 pb-3 border-b border-white/[0.04] mb-4">
+                <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
+                  <Calendar size={13} className="text-white/40" />
                 </div>
-                <p className="font-black text-slate-700 text-sm">Start Date</p>
+                <p className="font-black text-white/80 text-sm">Start Date</p>
                 {form.startDate && (
                   <span className="ml-auto text-xs font-bold text-primary bg-primary/8 px-2.5 py-1 rounded-full">
                     {fmtDateLong(form.startDate)}
@@ -719,17 +719,17 @@ const CreatePage = ({ onClose, onCreated }) => {
             </div>
 
             {/* Time + sessions */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-5">
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <Clock size={13} className="text-slate-500" />
+            <div className="bg-[#0B2D22] rounded-2xl border border-white/7 shadow-sm p-5 space-y-5">
+              <div className="flex items-center gap-2 pb-3 border-b border-white/[0.04]">
+                <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
+                  <Clock size={13} className="text-white/40" />
                 </div>
-                <p className="font-black text-slate-700 text-sm">Time & Sessions</p>
+                <p className="font-black text-white/80 text-sm">Time & Sessions</p>
               </div>
 
               <Field label="Session Time" hint="Same time every session">
                 <div className="relative">
-                  <Clock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Clock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
                   <input type="time" value={form.timeSlot}
                     onChange={(e) => set("timeSlot", e.target.value)}
                     className={`${inp} pl-10`} />
@@ -740,17 +740,17 @@ const CreatePage = ({ onClose, onCreated }) => {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => set("occurrences", Math.max(1, form.occurrences - 1))}
-                    className="w-12 h-12 rounded-2xl border-2 border-slate-200 flex items-center justify-center text-slate-500 hover:border-primary/40 hover:text-primary font-black text-2xl transition-all flex-shrink-0"
+                    className="w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center text-white/40 hover:border-primary/40 hover:text-primary font-black text-2xl transition-all flex-shrink-0"
                   >
                     −
                   </button>
-                  <div className="flex-1 text-center py-2 bg-slate-50 rounded-2xl border border-slate-200">
-                    <span className="text-4xl font-black text-slate-900 tabular-nums">{form.occurrences}</span>
-                    <p className="text-xs text-slate-400 mt-0.5 font-medium">sessions</p>
+                  <div className="flex-1 text-center py-2 bg-white/5 rounded-2xl border border-white/10">
+                    <span className="text-4xl font-black text-white tabular-nums">{form.occurrences}</span>
+                    <p className="text-xs text-white/40 mt-0.5 font-medium">sessions</p>
                   </div>
                   <button
                     onClick={() => set("occurrences", Math.min(104, form.occurrences + 1))}
-                    className="w-12 h-12 rounded-2xl border-2 border-slate-200 flex items-center justify-center text-slate-500 hover:border-primary/40 hover:text-primary font-black text-2xl transition-all flex-shrink-0"
+                    className="w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center text-white/40 hover:border-primary/40 hover:text-primary font-black text-2xl transition-all flex-shrink-0"
                   >
                     +
                   </button>
@@ -760,7 +760,7 @@ const CreatePage = ({ onClose, onCreated }) => {
 
             {/* Live preview of dates */}
             {preview.length > 0 && (
-              <div className="bg-gradient-to-br from-primary/5 to-primary/8 border-2 border-primary/15 rounded-2xl p-4">
+              <div className="bg-gradient-to-br from-primary/5 to-primary/8 border border-white/10 rounded-2xl p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles size={13} className="text-primary" />
                   <p className="text-xs font-black text-primary uppercase tracking-wider">
@@ -769,7 +769,7 @@ const CreatePage = ({ onClose, onCreated }) => {
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {preview.slice(0, 8).map((d, i) => (
-                    <span key={d} className="text-xs font-bold bg-white/80 text-slate-700 border border-primary/20 px-2.5 py-1 rounded-lg">
+                    <span key={d} className="text-xs font-bold bg-white/5 text-white/80 border border-white/10 px-2.5 py-1 rounded-lg">
                       {fmtDate(d)}
                     </span>
                   ))}
@@ -789,12 +789,12 @@ const CreatePage = ({ onClose, onCreated }) => {
           <div className="space-y-4">
 
             {/* Email notification toggle */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
-                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <Mail size={13} className="text-slate-500" />
+            <div className="bg-[#0B2D22] rounded-2xl border border-white/7 shadow-sm p-5">
+              <div className="flex items-center gap-2 pb-3 border-b border-white/[0.04] mb-4">
+                <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
+                  <Mail size={13} className="text-white/40" />
                 </div>
-                <p className="font-black text-slate-700 text-sm">Email Notifications</p>
+                <p className="font-black text-white/80 text-sm">Email Notifications</p>
               </div>
               <div className="grid grid-cols-2 gap-2.5">
                 {[
@@ -809,22 +809,22 @@ const CreatePage = ({ onClose, onCreated }) => {
                       className={`flex flex-col items-start gap-2 p-4 rounded-xl border-2 text-left transition-all ${
                         active
                           ? color === "amber"
-                            ? "border-amber-400 bg-amber-50"
-                            : "border-emerald-400 bg-emerald-50"
-                          : "border-slate-200 hover:border-slate-300"
+                            ? "border-amber-500/40 bg-amber-500/10"
+                            : "border-emerald-500/40 bg-emerald-500/10"
+                          : "border-white/10 hover:border-white/20"
                       }`}
                     >
                       <Icon size={18} className={active
-                        ? color === "amber" ? "text-amber-500" : "text-emerald-500"
-                        : "text-slate-300"
+                        ? color === "amber" ? "text-amber-400" : "text-emerald-400"
+                        : "text-white/25"
                       } />
                       <div>
                         <p className={`font-black text-sm leading-tight ${active
-                          ? color === "amber" ? "text-amber-700" : "text-emerald-700"
-                          : "text-slate-500"}`}>
+                          ? color === "amber" ? "text-amber-400" : "text-emerald-400"
+                          : "text-white/40"}`}>
                           {title}
                         </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">{sub}</p>
+                        <p className="text-[11px] text-white/40 mt-0.5 leading-tight">{sub}</p>
                       </div>
                     </button>
                   );
@@ -833,30 +833,30 @@ const CreatePage = ({ onClose, onCreated }) => {
             </div>
 
             {/* Payment */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <CreditCard size={13} className="text-slate-500" />
+            <div className="bg-[#0B2D22] rounded-2xl border border-white/7 shadow-sm p-5 space-y-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-white/[0.04]">
+                <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
+                  <CreditCard size={13} className="text-white/40" />
                 </div>
-                <p className="font-black text-slate-700 text-sm">Payment</p>
+                <p className="font-black text-white/80 text-sm">Payment</p>
               </div>
 
               <button
                 onClick={() => set("noPayment", !form.noPayment)}
                 className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
-                  form.noPayment ? "border-primary bg-primary/5" : "border-slate-200 hover:border-slate-300"
+                  form.noPayment ? "border-primary bg-primary/5" : "border-white/10 hover:border-white/20"
                 }`}
               >
                 <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                  form.noPayment ? "bg-primary border-primary" : "border-slate-300"
+                  form.noPayment ? "bg-primary border-primary" : "border-white/25"
                 }`}>
                   {form.noPayment && <Check size={13} className="text-white" strokeWidth={3} />}
                 </div>
                 <div>
-                  <p className={`font-bold text-sm ${form.noPayment ? "text-primary" : "text-slate-700"}`}>
+                  <p className={`font-bold text-sm ${form.noPayment ? "text-primary" : "text-white/80"}`}>
                     No Payment Required
                   </p>
-                  <p className="text-xs text-slate-400">Staff visits, complimentary cleans, internal bookings</p>
+                  <p className="text-xs text-white/40">Staff visits, complimentary cleans, internal bookings</p>
                 </div>
               </button>
 
@@ -869,7 +869,7 @@ const CreatePage = ({ onClose, onCreated }) => {
                     : undefined}
                 >
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-400 text-sm">£</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-white/40 text-sm">£</span>
                     <input type="number" min="0" step="0.01" value={form.amount}
                       onChange={(e) => set("amount", e.target.value)}
                       placeholder="0.00" className={`${inp} pl-8`} />
@@ -879,12 +879,12 @@ const CreatePage = ({ onClose, onCreated }) => {
             </div>
 
             {/* Booking summary */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-              <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
-                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                  <Layers size={13} className="text-slate-500" />
+            <div className="bg-[#0B2D22] rounded-2xl border border-white/7 shadow-sm p-5">
+              <div className="flex items-center gap-2 pb-3 border-b border-white/[0.04] mb-4">
+                <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
+                  <Layers size={13} className="text-white/40" />
                 </div>
-                <p className="font-black text-slate-700 text-sm">Booking Summary</p>
+                <p className="font-black text-white/80 text-sm">Booking Summary</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
@@ -902,8 +902,8 @@ const CreatePage = ({ onClose, onCreated }) => {
                   { label: "Payment",    value: form.noPayment ? "No charge" : `£${parseFloat(form.amount || 0).toFixed(2)} / session` },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex flex-col gap-0.5">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{label}</span>
-                    <span className="font-bold text-slate-800 text-sm leading-tight">{value || "—"}</span>
+                    <span className="text-[10px] font-black text-white/40 uppercase tracking-wider">{label}</span>
+                    <span className="font-bold text-white text-sm leading-tight">{value || "—"}</span>
                   </div>
                 ))}
               </div>
@@ -911,15 +911,15 @@ const CreatePage = ({ onClose, onCreated }) => {
 
             {/* Sessions grid by month */}
             {previewByMonth.length > 0 && (
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-                <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 mb-4">
+              <div className="bg-[#0B2D22] rounded-2xl border border-white/7 shadow-sm p-5">
+                <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/[0.04] mb-4">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
-                      <Hash size={13} className="text-emerald-600" />
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                      <Hash size={13} className="text-emerald-400" />
                     </div>
-                    <p className="font-black text-slate-700 text-sm">All {preview.length} Sessions</p>
+                    <p className="font-black text-white/80 text-sm">All {preview.length} Sessions</p>
                   </div>
-                  <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                  <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/25 px-2.5 py-1 rounded-full">
                     Ready to create
                   </span>
                 </div>
@@ -927,19 +927,19 @@ const CreatePage = ({ onClose, onCreated }) => {
                 <div className="space-y-4">
                   {previewByMonth.map(({ key, label, dates: monthDates }) => (
                     <div key={key}>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{label}</p>
+                      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">{label}</p>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                         {monthDates.map((d, i) => {
                           const dt = new Date(d + "T12:00:00");
                           return (
-                            <div key={d} className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5">
+                            <div key={d} className="flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5">
                               <div className="w-8 h-8 rounded-lg bg-primary/8 flex flex-col items-center justify-center flex-shrink-0">
                                 <span className="text-[9px] font-black text-primary/60 uppercase leading-none">
                                   {dt.toLocaleDateString("en-GB", { weekday: "short" })}
                                 </span>
                                 <span className="text-sm font-black text-primary leading-none mt-0.5">{dt.getDate()}</span>
                               </div>
-                              <span className="text-xs font-bold text-slate-600">
+                              <span className="text-xs font-bold text-white/60">
                                 {dt.toLocaleDateString("en-GB", { month: "short", day: "numeric" })}
                               </span>
                             </div>
@@ -953,9 +953,9 @@ const CreatePage = ({ onClose, onCreated }) => {
             )}
 
             {errors._submit && (
-              <div className="bg-rose-50 border border-rose-200 rounded-xl px-4 py-3 flex items-center gap-2">
-                <AlertCircle size={14} className="text-rose-500 flex-shrink-0" />
-                <p className="text-sm text-rose-600 font-medium">{errors._submit}</p>
+              <div className="bg-rose-500/15 border border-rose-500/25 rounded-xl px-4 py-3 flex items-center gap-2">
+                <AlertCircle size={14} className="text-rose-400 flex-shrink-0" />
+                <p className="text-sm text-rose-400 font-medium">{errors._submit}</p>
               </div>
             )}
           </div>
@@ -965,7 +965,7 @@ const CreatePage = ({ onClose, onCreated }) => {
         <div className="flex items-center justify-between gap-3 pt-2 pb-6">
           <button
             onClick={step === 1 ? onClose : back}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl border-2 border-slate-200 text-slate-600 font-bold text-sm hover:border-slate-300 hover:bg-slate-50 transition-all"
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-white/10 text-white/60 font-bold text-sm hover:bg-white/5 transition-all"
           >
             <ArrowLeft size={14} />
             {step === 1 ? "Cancel" : "Back"}
@@ -982,7 +982,7 @@ const CreatePage = ({ onClose, onCreated }) => {
             <button
               onClick={handleCreate}
               disabled={submitting || preview.length === 0}
-              className="flex items-center gap-2 px-7 py-3 rounded-2xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 disabled:opacity-60 transition-all shadow-lg shadow-emerald-200"
+              className="flex items-center gap-2 px-7 py-3 rounded-2xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 disabled:opacity-60 transition-all shadow-lg shadow-emerald-500/20"
             >
               {submitting ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} strokeWidth={3} />}
               {submitting ? "Creating…" : `Create ${preview.length} Booking${preview.length !== 1 ? "s" : ""}`}
@@ -1082,20 +1082,20 @@ const Recurring = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
               <Repeat size={18} className="text-primary" />
             </div>
             Recurring Bookings
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-white/40 mt-1">
             Manage recurring series — daily, weekly, custom schedules &amp; more
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={fetchBookings}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:border-slate-300 transition-all font-semibold text-sm"
+            className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/10 text-white/60 hover:border-white/20 transition-all font-semibold text-sm"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           </button>
@@ -1113,12 +1113,12 @@ const Recurring = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: "Active Series",     value: series.length,                                               color: "text-primary" },
-            { label: "Upcoming Sessions", value: series.reduce((s, g) => s + g.upcomingCount, 0),             color: "text-indigo-600" },
-            { label: "Total Revenue",     value: `£${series.reduce((s, g) => s + g.totalRevenue, 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}`, color: "text-emerald-600" },
-            { label: "No-Pay Series",     value: series.filter((g) => g.noPayment).length,                    color: "text-amber-600" },
+            { label: "Upcoming Sessions", value: series.reduce((s, g) => s + g.upcomingCount, 0),             color: "text-indigo-400" },
+            { label: "Total Revenue",     value: `£${series.reduce((s, g) => s + g.totalRevenue, 0).toLocaleString("en-GB", { maximumFractionDigits: 0 })}`, color: "text-emerald-400" },
+            { label: "No-Pay Series",     value: series.filter((g) => g.noPayment).length,                    color: "text-amber-400" },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stat.label}</p>
+            <div key={stat.label} className="bg-[#0B2D22] rounded-2xl border border-white/7 p-4 shadow-sm">
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{stat.label}</p>
               <p className={`text-2xl font-black mt-1 tabular-nums ${stat.color}`}>{stat.value}</p>
             </div>
           ))}
@@ -1127,26 +1127,26 @@ const Recurring = () => {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
         <input value={search} onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by customer or service…"
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white transition-all" />
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 text-sm focus:outline-none focus:border-emerald-500/50 bg-white/5 text-white placeholder:text-white/20 transition-all" />
       </div>
 
       {/* Series list */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm divide-y divide-slate-100 overflow-hidden">
+      <div className="bg-[#0B2D22] border border-white/7 rounded-2xl shadow-sm divide-y divide-white/[0.04] overflow-hidden">
         {loading ? (
-          <div className="p-14 text-center text-sm text-slate-400 flex flex-col items-center gap-3">
+          <div className="p-14 text-center text-sm text-white/40 flex flex-col items-center gap-3">
             <RefreshCw size={22} className="animate-spin text-primary/40" />
             Loading recurring series…
           </div>
         ) : series.length === 0 ? (
           <div className="p-14 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-              <Repeat size={24} className="text-slate-300" />
+            <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-3">
+              <Repeat size={24} className="text-white/20" />
             </div>
-            <p className="font-bold text-slate-600 mb-1">No recurring series yet</p>
-            <p className="text-sm text-slate-400 mb-5">Create a repeating schedule for a customer</p>
+            <p className="font-bold text-white/60 mb-1">No recurring series yet</p>
+            <p className="text-sm text-white/40 mb-5">Create a repeating schedule for a customer</p>
             <button
               onClick={() => setView("create")}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-colors shadow-md shadow-primary/20"
@@ -1162,17 +1162,17 @@ const Recurring = () => {
               <div key={group.groupId}>
                 <button
                   onClick={() => setOpenGroup(isOpen ? null : group.groupId)}
-                  className="w-full flex items-center justify-between gap-3 px-5 py-4 hover:bg-slate-50/80 transition-colors text-left"
+                  className="w-full flex items-center justify-between gap-3 px-5 py-4 hover:bg-white/[0.04] transition-colors text-left"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <span className="text-sm font-black text-primary">{initials}</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="font-bold text-slate-800 text-sm">
+                      <p className="font-bold text-white text-sm">
                         {group.first?.customer?.firstName} {group.first?.customer?.lastName}
                       </p>
-                      <p className="text-xs text-slate-400 truncate mt-0.5">{group.first?.service}</p>
+                      <p className="text-xs text-white/40 truncate mt-0.5">{group.first?.service}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
@@ -1180,64 +1180,64 @@ const Recurring = () => {
                       {group.frequency}
                     </span>
                     {group.noPayment && (
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-200">
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/25">
                         No pay
                       </span>
                     )}
-                    <span className="text-[11px] text-slate-400 hidden sm:flex items-center gap-1">
+                    <span className="text-[11px] text-white/40 hidden sm:flex items-center gap-1">
                       <Calendar size={10} />
                       {group.nextDate
                         ? new Date(group.nextDate + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" })
                         : "No upcoming"}
                     </span>
                     {!group.noPayment && (
-                      <span className="text-sm font-black text-slate-700 tabular-nums">
+                      <span className="text-sm font-black text-white tabular-nums">
                         £{group.totalRevenue.toLocaleString("en-GB", { maximumFractionDigits: 0 })}
                       </span>
                     )}
-                    {isOpen ? <ChevronUp size={15} className="text-slate-400" /> : <ChevronDown size={15} className="text-slate-400" />}
+                    {isOpen ? <ChevronUp size={15} className="text-white/40" /> : <ChevronDown size={15} className="text-white/40" />}
                   </div>
                 </button>
 
                 {isOpen && (
                   <div className="px-5 pb-5 space-y-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs text-slate-500 font-semibold">
+                      <p className="text-xs text-white/40 font-semibold">
                         {group.count} total · {group.upcomingCount} upcoming
                       </p>
                       <button
                         disabled={cancelling === group.groupId || group.upcomingCount === 0}
                         onClick={() => cancelRemaining(group)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-all font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/25 hover:bg-rose-500/25 transition-all font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Ban size={11} />
                         {group.upcomingCount === 0 ? "None upcoming" : `Cancel ${group.upcomingCount} upcoming`}
                       </button>
                     </div>
-                    <div className="bg-slate-50 rounded-xl border border-slate-200 divide-y divide-slate-100 overflow-hidden">
+                    <div className="bg-white/[0.03] rounded-xl border border-white/7 divide-y divide-white/[0.04] overflow-hidden">
                       {group.bookings.map((b, i) => (
                         <div key={b._id} className="flex items-center gap-2 px-4 py-2.5 text-xs">
-                          <span className="text-[10px] font-black text-slate-300 tabular-nums w-5 flex-shrink-0">
+                          <span className="text-[10px] font-black text-white/25 tabular-nums w-5 flex-shrink-0">
                             {String(i + 1).padStart(2, "0")}
                           </span>
-                          <span className="font-mono font-bold text-slate-400 flex-shrink-0 text-[11px]">{b.bookingId}</span>
-                          <span className="text-slate-600 flex items-center gap-1 flex-1 min-w-0 truncate">
+                          <span className="font-mono font-bold text-white/40 flex-shrink-0 text-[11px]">{b.bookingId}</span>
+                          <span className="text-white/60 flex items-center gap-1 flex-1 min-w-0 truncate">
                             <Calendar size={9} className="flex-shrink-0" />
                             {b.schedule?.date
                               ? new Date(b.schedule.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })
                               : "—"}
                           </span>
-                          <span className="text-slate-400 flex items-center gap-1 flex-shrink-0">
+                          <span className="text-white/40 flex items-center gap-1 flex-shrink-0">
                             <Clock size={9} /> {b.schedule?.timeSlot || "—"}
                           </span>
                           {!group.noPayment && (
-                            <span className="font-bold text-slate-600 flex-shrink-0 tabular-nums">£{b.payment?.amount || 0}</span>
+                            <span className="font-bold text-white/60 flex-shrink-0 tabular-nums">£{b.payment?.amount || 0}</span>
                           )}
                           <span className={`font-bold px-2 py-0.5 rounded-full flex-shrink-0 text-[10px] ${
-                            b.status === "Cancelled"    ? "bg-rose-100 text-rose-600"
-                            : b.status === "Completed"  ? "bg-emerald-100 text-emerald-700"
-                            : b.status === "In Progress"? "bg-purple-100 text-purple-700"
-                            : "bg-slate-200 text-slate-600"
+                            b.status === "Cancelled"    ? "bg-rose-500/15 text-rose-400 border border-rose-500/25"
+                            : b.status === "Completed"  ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25"
+                            : b.status === "In Progress"? "bg-purple-500/15 text-purple-400 border border-purple-500/25"
+                            : "bg-white/10 text-white/60"
                           }`}>
                             {b.status}
                           </span>

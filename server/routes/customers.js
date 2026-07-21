@@ -313,7 +313,34 @@ router.patch('/:id/tags', async (req, res) => {
   }
 });
 
-// Toggle CRM automation emails on/off for a customer
+// GET CRM email preference for a customer
+router.get('/:id/crm-emails', async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.params.id, 'crmEmailsEnabled');
+    if (!customer) return res.status(404).json({ message: 'Customer not found' });
+    res.json({ crmEmailsEnabled: customer.crmEmailsEnabled !== false });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Toggle CRM automation emails on/off for a customer (PATCH or POST)
+router.post('/:id/crm-emails', async (req, res) => {
+  try {
+    const { enabled } = req.body;
+    if (typeof enabled !== 'boolean') return res.status(400).json({ message: 'enabled must be a boolean' });
+    const customer = await Customer.findByIdAndUpdate(
+      req.params.id,
+      { crmEmailsEnabled: enabled },
+      { new: true, select: '-passwordHash' }
+    );
+    if (!customer) return res.status(404).json({ message: 'Customer not found' });
+    res.json(customer);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 router.patch('/:id/crm-emails', async (req, res) => {
   try {
     const { enabled } = req.body;

@@ -305,7 +305,7 @@ const AdminBlog = () => {
                 setShowForm(!showForm);
                 if (!showForm) setEditingId(null);
               }}
-              className="bg-emerald-500 text-white font-black flex items-center justify-center gap-2 px-6 sm:px-8 py-4 rounded-xl text-sm sm:text-base whitespace-nowrap shadow-lg hover:shadow-xl transition-shadow hover:bg-emerald-400"
+              className="bg-emerald-500 hover:bg-emerald-400 text-white font-black flex items-center justify-center gap-2 px-6 sm:px-8 py-4 rounded-xl text-sm sm:text-base whitespace-nowrap shadow-lg hover:shadow-xl transition-all"
             >
               <Plus size={20} />
               New Post
@@ -376,7 +376,7 @@ const AdminBlog = () => {
                 </h2>
                 <button
                   onClick={handleCancel}
-                  className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+                  className="text-white/80 hover:bg-white/10 p-2 rounded-lg transition-colors"
                 >
                   ✕
                 </button>
@@ -393,7 +393,7 @@ const AdminBlog = () => {
                     value={formData.title}
                     onChange={handleInputChange}
                     placeholder="Enter your compelling blog post title..."
-                    className="w-full px-5 py-3 rounded-xl border border-white/10 bg-[#071D16] text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 font-medium transition-all"
+                    className="w-full px-5 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 font-medium transition-all"
                   />
                 </div>
 
@@ -409,7 +409,7 @@ const AdminBlog = () => {
                       onChange={handleInputChange}
                       placeholder="Brief description that appears in the blog listing..."
                       maxLength="150"
-                      className="w-full px-5 py-3 rounded-xl border border-white/10 bg-[#071D16] text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 font-medium transition-all"
+                      className="w-full px-5 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 font-medium transition-all"
                     />
                     <span className="absolute right-4 top-3 text-xs font-bold text-white/40">
                       {formData.description.length}/150
@@ -433,7 +433,7 @@ const AdminBlog = () => {
                         value={formData.author}
                         onChange={handleInputChange}
                         placeholder="Author name"
-                        className="w-full pl-12 pr-5 py-3 rounded-xl border border-white/10 bg-[#071D16] text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 font-medium transition-all"
+                        className="w-full pl-12 pr-5 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 font-medium transition-all"
                       />
                     </div>
                   </div>
@@ -491,7 +491,7 @@ const AdminBlog = () => {
                     onChange={handleInputChange}
                     placeholder="Write your complete blog post content here..."
                     rows="12"
-                    className="w-full px-5 py-3 rounded-xl border border-white/10 bg-[#071D16] text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 font-medium resize-none transition-all"
+                    className="w-full px-5 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 font-medium resize-none transition-all"
                   />
                   <p className="text-xs text-white/40 mt-2 font-bold">
                     ⏱️ Estimated read time:{" "}
@@ -523,17 +523,17 @@ const AdminBlog = () => {
                   </label>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-end pt-6 border-t border-white/10">
+                <div className="flex flex-col sm:flex-row gap-4 justify-end pt-6 border-t border-white/7">
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="px-6 sm:px-8 py-3 rounded-xl font-bold bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 transition-all"
+                    className="px-6 sm:px-8 py-3 rounded-xl font-bold bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="bg-emerald-500 text-white px-6 sm:px-8 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-shadow hover:bg-emerald-400"
+                    className="bg-emerald-500 hover:bg-emerald-400 text-white px-6 sm:px-8 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all"
                   >
                     {editingId ? "✓ Update Post" : "✓ Create Post"}
                   </button>
@@ -569,7 +569,7 @@ const AdminBlog = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  className="bg-[#0B2D22] border border-white/7 rounded-2xl hover:bg-[#0A2A1F] transition-all p-4 sm:p-6"
+                  className="bg-[#0B2D22] border border-white/7 rounded-2xl hover:border-white/15 transition-all p-4 sm:p-6"
                 >
                   <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                     {post.image && (
@@ -616,7 +616,7 @@ const AdminBlog = () => {
                         {post.description}
                       </p>
 
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-3 border-t border-white/[0.06]">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-3 border-t border-white/6">
                         <div className="text-xs text-white/40 font-bold space-y-1 sm:space-y-0 sm:space-x-4 sm:flex">
                           <span>👤 {post.author}</span>
                           <span>👁️ {post.views || 0} views</span>
@@ -681,7 +681,7 @@ const AdminBlog = () => {
                   setCommentsModal(null);
                   setComments([]);
                 }}
-                className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+                className="text-white/80 hover:bg-white/10 p-2 rounded-lg transition-colors"
               >
                 ✕
               </button>
@@ -729,8 +729,8 @@ const AdminBlog = () => {
                         <span
                           className={`text-xs font-black px-3 py-1 rounded-full whitespace-nowrap ${
                             comment.approved
-                              ? "bg-emerald-500/15 text-emerald-400"
-                              : "bg-amber-500/15 text-amber-400"
+                              ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25"
+                              : "bg-amber-500/15 text-amber-400 border border-amber-500/25"
                           }`}
                         >
                           {comment.approved ? "✓ Approved" : "⏳ Pending"}
@@ -747,7 +747,7 @@ const AdminBlog = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handleApproveComment(comment._id)}
-                            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-400 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl font-bold transition-colors"
                           >
                             <Check size={16} />
                             Approve

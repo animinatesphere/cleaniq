@@ -211,7 +211,7 @@ const WorkerPay = () => {
             fetchBookings();
             fetchDefaults();
           }}
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#071D16] border border-white/10 text-white/60 text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+          className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all"
         >
           <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
           Refresh
@@ -259,7 +259,7 @@ const WorkerPay = () => {
         ].map((stat, i) => (
           <div
             key={i}
-            className="bg-[#0B2D22] rounded-[28px] p-5 border border-white/7"
+            className="bg-[#0B2D22] rounded-2xl p-5 border border-white/7"
           >
             <div
               className={`w-10 h-10 rounded-xl mb-3 flex items-center justify-center ${stat.colorClasses}`}
@@ -276,7 +276,7 @@ const WorkerPay = () => {
         ))}
       </div>
 
-      <div className="bg-[#071D16] rounded-[32px] p-7 border border-emerald-500/25">
+      <div className="bg-[#071D16] rounded-2xl p-7 border border-emerald-500/25">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 flex items-center justify-center">
             <Settings size={20} className="text-emerald-400" />
@@ -304,13 +304,13 @@ const WorkerPay = () => {
                 setDefaults((d) => ({ ...d, defaultWorkerRate: e.target.value }))
               }
               placeholder="e.g. 15.00"
-              className="w-full p-4 rounded-2xl border border-white/10 bg-[#0B2D22] text-white placeholder:text-white/20 font-black text-lg focus:outline-none focus:border-emerald-500/50 transition-all"
+              className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 font-black text-lg focus:outline-none focus:border-emerald-500/50 transition-all"
             />
           </div>
           <button
             onClick={handleSaveDefaults}
             disabled={savingDefaults}
-            className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-emerald-500 text-white font-black text-xs uppercase tracking-widest hover:bg-emerald-400 transition-all disabled:opacity-60"
+            className="flex items-center gap-2 px-8 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs uppercase tracking-widest transition-all disabled:opacity-60"
           >
             {savingDefaults ? (
               <RefreshCw size={16} className="animate-spin" />
@@ -322,7 +322,7 @@ const WorkerPay = () => {
         </div>
       </div>
 
-      <div className="bg-[#0B2D22] rounded-[32px] border border-white/7 overflow-hidden">
+      <div className="bg-[#0B2D22] rounded-2xl border border-white/7 overflow-hidden">
         <div className="p-6 border-b border-white/[0.06] flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <h2 className="text-lg font-black text-white flex items-center gap-2">
             <Zap size={18} className="text-emerald-400" />
@@ -345,7 +345,7 @@ const WorkerPay = () => {
               className="px-4 py-2.5 rounded-xl border border-white/10 text-sm font-bold bg-[#071D16] text-white focus:outline-none focus:border-emerald-500/50 transition-all"
             >
               {statusOptions.map((o) => (
-                <option key={o.value} value={o.value}>
+                <option key={o.value} value={o.value} className="bg-[#0B2D22]">
                   {o.label}
                 </option>
               ))}
@@ -379,7 +379,7 @@ const WorkerPay = () => {
 
               return (
                 <div key={booking._id} className="transition-all">
-                  <div className="px-6 py-5 hover:bg-[#0A2A1F] transition-colors">
+                  <div className="px-6 py-5 hover:bg-white/[0.04] transition-colors">
                     <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-1">

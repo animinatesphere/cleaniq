@@ -95,7 +95,7 @@ const TabBtn = ({ icon: Icon, label, active, onClick, badge }) => (
       background: active
         ? "linear-gradient(135deg, #0F172A 0%, #1e3a5f 100%)"
         : "transparent",
-      color: active ? "#6EE7B7" : "#64748b",
+      color: active ? "#6EE7B7" : "rgba(255,255,255,0.4)",
       boxShadow: active ? "0 4px 15px rgba(15,23,42,0.25)" : "none",
     }}
   >
@@ -140,10 +140,10 @@ const ActionBtn = ({
       boxShadow: "0 8px 20px rgba(5,150,105,0.3)",
     },
     outline: {
-      background: "white",
-      color: "#0F172A",
+      background: "rgba(255,255,255,0.05)",
+      color: "rgba(255,255,255,0.8)",
       boxShadow: "none",
-      border: "2px solid #e2e8f0",
+      border: "1px solid rgba(255,255,255,0.1)",
     },
     accent: {
       background: "linear-gradient(135deg, #6EE7B7 0%, #10b981 100%)",
@@ -190,9 +190,9 @@ const SentBadge = ({ date, label }) => {
         display: "inline-flex",
         alignItems: "center",
         gap: "6px",
-        background: "#ecfdf5",
-        color: "#059669",
-        border: "1px solid #a7f3d0",
+        background: "rgba(16,185,129,0.15)",
+        color: "#34d399",
+        border: "1px solid rgba(16,185,129,0.25)",
         padding: "6px 12px",
         borderRadius: "20px",
         fontSize: "12px",
@@ -528,7 +528,7 @@ const AdminCRM = ({ booking, onClose }) => {
                 margin: "0 0 4px",
                 fontSize: "11px",
                 fontWeight: 800,
-                color: "#94a3b8",
+                color: "rgba(255,255,255,0.4)",
                 textTransform: "uppercase",
                 letterSpacing: "2px",
               }}
@@ -571,7 +571,7 @@ const AdminCRM = ({ booking, onClose }) => {
               style={{
                 margin: "0 0 4px",
                 fontSize: "11px",
-                color: "#94a3b8",
+                color: "rgba(255,255,255,0.4)",
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "1px",
@@ -593,7 +593,7 @@ const AdminCRM = ({ booking, onClose }) => {
               style={{
                 margin: "0 0 4px",
                 fontSize: "11px",
-                color: "#94a3b8",
+                color: "rgba(255,255,255,0.4)",
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "1px",
@@ -615,10 +615,10 @@ const AdminCRM = ({ booking, onClose }) => {
 
       <div
         style={{
-          background: "#f8fafc",
+          background: "rgba(255,255,255,0.03)",
           borderRadius: "16px",
           padding: "20px",
-          border: "1px solid #e2e8f0",
+          border: "1px solid rgba(255,255,255,0.07)",
         }}
       >
         <h4
@@ -626,7 +626,7 @@ const AdminCRM = ({ booking, onClose }) => {
             margin: "0 0 8px",
             fontSize: "13px",
             fontWeight: 800,
-            color: "#0F172A",
+            color: "white",
             textTransform: "uppercase",
             letterSpacing: "1px",
           }}
@@ -638,7 +638,7 @@ const AdminCRM = ({ booking, onClose }) => {
             margin: 0,
             padding: "0 0 0 16px",
             fontSize: "13px",
-            color: "#64748b",
+            color: "rgba(255,255,255,0.5)",
             lineHeight: 2,
           }}
         >
@@ -693,10 +693,10 @@ const AdminCRM = ({ booking, onClose }) => {
       <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
         <div
           style={{
-            border: "2px solid #e2e8f0",
+            border: "1px solid rgba(255,255,255,0.07)",
             borderRadius: "20px",
             overflow: "hidden",
-            background: "white",
+            background: "rgba(7,29,22,0.9)",
           }}
         >
           <div
@@ -724,7 +724,7 @@ const AdminCRM = ({ booking, onClose }) => {
                 style={{
                   margin: 0,
                   fontSize: "13px",
-                  color: "#94a3b8",
+                  color: "rgba(255,255,255,0.4)",
                   fontWeight: 600,
                 }}
               >
@@ -736,7 +736,7 @@ const AdminCRM = ({ booking, onClose }) => {
                 style={{
                   margin: "0 0 4px",
                   fontSize: "12px",
-                  color: "#94a3b8",
+                  color: "rgba(255,255,255,0.4)",
                   fontWeight: 700,
                   textTransform: "uppercase",
                 }}
@@ -759,7 +759,7 @@ const AdminCRM = ({ booking, onClose }) => {
           <div
             style={{
               padding: "24px 32px",
-              borderBottom: "1px solid #f1f5f9",
+              borderBottom: "1px solid rgba(255,255,255,0.04)",
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
               gap: "24px",
@@ -771,7 +771,7 @@ const AdminCRM = ({ booking, onClose }) => {
                   margin: "0 0 8px",
                   fontSize: "11px",
                   fontWeight: 800,
-                  color: "#64748b",
+                  color: "rgba(255,255,255,0.4)",
                   textTransform: "uppercase",
                   letterSpacing: "1px",
                 }}
@@ -783,7 +783,7 @@ const AdminCRM = ({ booking, onClose }) => {
                   margin: "0 0 4px",
                   fontSize: "15px",
                   fontWeight: 800,
-                  color: "#0F172A",
+                  color: "white",
                 }}
               >
                 {booking.customer?.firstName} {booking.customer?.lastName}
@@ -792,12 +792,12 @@ const AdminCRM = ({ booking, onClose }) => {
                 style={{
                   margin: "0 0 4px",
                   fontSize: "13px",
-                  color: "#64748b",
+                  color: "rgba(255,255,255,0.4)",
                 }}
               >
                 {booking.customer?.email}
               </p>
-              <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
+              <p style={{ margin: 0, fontSize: "13px", color: "rgba(255,255,255,0.4)" }}>
                 {booking.customer?.phone}
               </p>
             </div>
@@ -807,7 +807,7 @@ const AdminCRM = ({ booking, onClose }) => {
                   margin: "0 0 8px",
                   fontSize: "11px",
                   fontWeight: 800,
-                  color: "#64748b",
+                  color: "rgba(255,255,255,0.4)",
                   textTransform: "uppercase",
                   letterSpacing: "1px",
                 }}
@@ -819,7 +819,7 @@ const AdminCRM = ({ booking, onClose }) => {
                   margin: "0 0 4px",
                   fontSize: "15px",
                   fontWeight: 800,
-                  color: "#0F172A",
+                  color: "white",
                 }}
               >
                 Cleaniq Services
@@ -828,30 +828,30 @@ const AdminCRM = ({ booking, onClose }) => {
                 style={{
                   margin: "0 0 4px",
                   fontSize: "13px",
-                  color: "#64748b",
+                  color: "rgba(255,255,255,0.4)",
                 }}
               >
                 info@cleaniqservices.com
               </p>
-              <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
+              <p style={{ margin: 0, fontSize: "13px", color: "rgba(255,255,255,0.4)" }}>
                 cleaniqservices.com
               </p>
             </div>
           </div>
 
           <div
-            style={{ padding: "24px 32px", borderBottom: "1px solid #f1f5f9" }}
+            style={{ padding: "24px 32px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
           >
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ borderBottom: "2px solid #0F172A" }}>
+                <tr style={{ borderBottom: "2px solid rgba(110,231,183,0.3)" }}>
                   <th
                     style={{
                       textAlign: "left",
                       padding: "10px 0",
                       fontSize: "11px",
                       fontWeight: 800,
-                      color: "#0F172A",
+                      color: "rgba(255,255,255,0.4)",
                       textTransform: "uppercase",
                       letterSpacing: "1px",
                     }}
@@ -864,7 +864,7 @@ const AdminCRM = ({ booking, onClose }) => {
                       padding: "10px",
                       fontSize: "11px",
                       fontWeight: 800,
-                      color: "#0F172A",
+                      color: "rgba(255,255,255,0.4)",
                       textTransform: "uppercase",
                       letterSpacing: "1px",
                     }}
@@ -877,7 +877,7 @@ const AdminCRM = ({ booking, onClose }) => {
                       padding: "10px 0",
                       fontSize: "11px",
                       fontWeight: 800,
-                      color: "#0F172A",
+                      color: "rgba(255,255,255,0.4)",
                       textTransform: "uppercase",
                       letterSpacing: "1px",
                     }}
@@ -887,12 +887,12 @@ const AdminCRM = ({ booking, onClose }) => {
                 </tr>
               </thead>
               <tbody>
-                <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
+                <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                   <td
                     style={{
                       padding: "14px 0",
                       fontSize: "14px",
-                      color: "#1e293b",
+                      color: "white",
                       fontWeight: 600,
                     }}
                   >
@@ -901,7 +901,7 @@ const AdminCRM = ({ booking, onClose }) => {
                     <span
                       style={{
                         fontSize: "12px",
-                        color: "#94a3b8",
+                        color: "rgba(255,255,255,0.4)",
                         fontWeight: 500,
                       }}
                     >
@@ -918,7 +918,7 @@ const AdminCRM = ({ booking, onClose }) => {
                       textAlign: "center",
                       padding: "14px 10px",
                       fontSize: "14px",
-                      color: "#64748b",
+                      color: "rgba(255,255,255,0.4)",
                     }}
                   >
                     1
@@ -929,19 +929,19 @@ const AdminCRM = ({ booking, onClose }) => {
                       padding: "14px 0",
                       fontSize: "15px",
                       fontWeight: 800,
-                      color: "#0F172A",
+                      color: "white",
                     }}
                   >
                     £{booking.payment?.amount || "0.00"}
                   </td>
                 </tr>
                 {(booking.details?.extras || []).map((e, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                  <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                     <td
                       style={{
                         padding: "12px 0",
                         fontSize: "13px",
-                        color: "#475569",
+                        color: "rgba(255,255,255,0.6)",
                       }}
                     >
                       {typeof e === "object" ? e.name : e}
@@ -951,7 +951,7 @@ const AdminCRM = ({ booking, onClose }) => {
                         textAlign: "center",
                         padding: "12px 10px",
                         fontSize: "13px",
-                        color: "#64748b",
+                        color: "rgba(255,255,255,0.4)",
                       }}
                     >
                       {typeof e === "object" ? e.qty || 1 : 1}
@@ -961,7 +961,7 @@ const AdminCRM = ({ booking, onClose }) => {
                         textAlign: "right",
                         padding: "12px 0",
                         fontSize: "13px",
-                        color: "#64748b",
+                        color: "rgba(255,255,255,0.4)",
                       }}
                     >
                       Included
@@ -975,7 +975,7 @@ const AdminCRM = ({ booking, onClose }) => {
           <div
             style={{
               padding: "20px 32px",
-              background: "#f8fafc",
+              background: "rgba(255,255,255,0.03)",
               display: "flex",
               justifyContent: "flex-end",
             }}
@@ -992,7 +992,7 @@ const AdminCRM = ({ booking, onClose }) => {
                 <span
                   style={{
                     fontSize: "13px",
-                    color: "#64748b",
+                    color: "rgba(255,255,255,0.4)",
                     fontWeight: 700,
                   }}
                 >
@@ -1002,7 +1002,7 @@ const AdminCRM = ({ booking, onClose }) => {
                   style={{
                     fontSize: "14px",
                     fontWeight: 800,
-                    color: "#0F172A",
+                    color: "white",
                   }}
                 >
                   £{booking.payment?.amount || "0.00"}
@@ -1014,14 +1014,14 @@ const AdminCRM = ({ booking, onClose }) => {
                   gap: "48px",
                   alignItems: "center",
                   paddingTop: "12px",
-                  borderTop: "2px solid #0F172A",
+                  borderTop: "2px solid rgba(110,231,183,0.3)",
                 }}
               >
                 <span
                   style={{
                     fontSize: "15px",
                     fontWeight: 900,
-                    color: "#0F172A",
+                    color: "white",
                   }}
                 >
                   TOTAL
@@ -1030,7 +1030,7 @@ const AdminCRM = ({ booking, onClose }) => {
                   style={{
                     fontSize: "22px",
                     fontWeight: 900,
-                    color: "#0F172A",
+                    color: "white",
                   }}
                 >
                   £{booking.payment?.amount || "0.00"}
@@ -1042,14 +1042,14 @@ const AdminCRM = ({ booking, onClose }) => {
                     background:
                       booking.payment?.status === "Completed" ||
                       booking.payment?.status === "Paid"
-                        ? "#ecfdf5"
-                        : "#fef3c7",
+                        ? "rgba(16,185,129,0.15)"
+                        : "rgba(245,158,11,0.15)",
                     color:
                       booking.payment?.status === "Completed" ||
                       booking.payment?.status === "Paid"
-                        ? "#059669"
-                        : "#b45309",
-                    border: `1px solid ${booking.payment?.status === "Completed" || booking.payment?.status === "Paid" ? "#a7f3d0" : "#fcd34d"}`,
+                        ? "#34d399"
+                        : "#fbbf24",
+                    border: `1px solid ${booking.payment?.status === "Completed" || booking.payment?.status === "Paid" ? "rgba(16,185,129,0.25)" : "rgba(245,158,11,0.25)"}`,
                     padding: "4px 14px",
                     borderRadius: "20px",
                     fontSize: "12px",
@@ -1103,8 +1103,8 @@ const AdminCRM = ({ booking, onClose }) => {
         {!isCompleted && (
           <div
             style={{
-              background: "#fffbeb",
-              border: "1px solid #fcd34d",
+              background: "rgba(245,158,11,0.1)",
+              border: "1px solid rgba(245,158,11,0.25)",
               borderRadius: "16px",
               padding: "16px 20px",
               display: "flex",
@@ -1114,7 +1114,7 @@ const AdminCRM = ({ booking, onClose }) => {
           >
             <AlertCircle
               size={18}
-              style={{ color: "#d97706", flexShrink: 0, marginTop: "1px" }}
+              style={{ color: "#fbbf24", flexShrink: 0, marginTop: "1px" }}
             />
             <div>
               <p
@@ -1122,12 +1122,12 @@ const AdminCRM = ({ booking, onClose }) => {
                   margin: "0 0 4px",
                   fontSize: "13px",
                   fontWeight: 800,
-                  color: "#92400e",
+                  color: "#fbbf24",
                 }}
               >
                 Job Not Yet Completed
               </p>
-              <p style={{ margin: 0, fontSize: "12px", color: "#b45309" }}>
+              <p style={{ margin: 0, fontSize: "12px", color: "rgba(251,191,36,0.7)" }}>
                 You can still send a review request, but it's best practice to
                 send this after the job is marked as Completed.
               </p>
@@ -1137,10 +1137,9 @@ const AdminCRM = ({ booking, onClose }) => {
 
         <div
           style={{
-            border: "2px solid #e2e8f0",
+            border: "1px solid rgba(255,255,255,0.07)",
             borderRadius: "20px",
             overflow: "hidden",
-            background: "white",
           }}
         >
           <div
@@ -1161,20 +1160,20 @@ const AdminCRM = ({ booking, onClose }) => {
             >
               How did we do?
             </h3>
-            <p style={{ margin: 0, color: "#94a3b8", fontSize: "14px" }}>
+            <p style={{ margin: 0, color: "rgba(255,255,255,0.4)", fontSize: "14px" }}>
               Your feedback helps us be better
             </p>
           </div>
-          <div style={{ padding: "24px 28px" }}>
+          <div style={{ padding: "24px 28px", background: "rgba(7,29,22,0.9)" }}>
             <p
               style={{
                 margin: "0 0 16px",
                 fontSize: "15px",
-                color: "#475569",
+                color: "rgba(255,255,255,0.6)",
                 lineHeight: 1.7,
               }}
             >
-              Hi <strong>{booking.customer?.firstName}</strong>, we hope you
+              Hi <strong style={{ color: "white" }}>{booking.customer?.firstName}</strong>, we hope you
               loved your recent cleaning session! Your honest feedback helps us
               keep delivering 5-star results.
             </p>
@@ -1195,7 +1194,7 @@ const AdminCRM = ({ booking, onClose }) => {
                   style={{
                     margin: "0 0 4px",
                     fontSize: "10px",
-                    color: "#94a3b8",
+                    color: "rgba(255,255,255,0.4)",
                     textTransform: "uppercase",
                     letterSpacing: "2px",
                     fontWeight: 800,
@@ -1212,7 +1211,7 @@ const AdminCRM = ({ booking, onClose }) => {
                   style={{
                     margin: "0 0 4px",
                     fontSize: "10px",
-                    color: "#94a3b8",
+                    color: "rgba(255,255,255,0.4)",
                     textTransform: "uppercase",
                     letterSpacing: "2px",
                     fontWeight: 800,
@@ -1240,7 +1239,7 @@ const AdminCRM = ({ booking, onClose }) => {
                 style={{
                   margin: "8px 0 0",
                   fontSize: "12px",
-                  color: "#94a3b8",
+                  color: "rgba(255,255,255,0.4)",
                 }}
               >
                 Tap a star in the email to rate
@@ -1268,10 +1267,10 @@ const AdminCRM = ({ booking, onClose }) => {
 
         <div
           style={{
-            background: "#f8fafc",
+            background: "rgba(255,255,255,0.03)",
             borderRadius: "16px",
             padding: "16px 20px",
-            border: "1px solid #e2e8f0",
+            border: "1px solid rgba(255,255,255,0.07)",
           }}
         >
           <p
@@ -1279,7 +1278,7 @@ const AdminCRM = ({ booking, onClose }) => {
               margin: "0 0 8px",
               fontSize: "12px",
               fontWeight: 800,
-              color: "#64748b",
+              color: "rgba(255,255,255,0.4)",
               textTransform: "uppercase",
               letterSpacing: "1px",
             }}
@@ -1290,13 +1289,13 @@ const AdminCRM = ({ booking, onClose }) => {
             style={{
               margin: 0,
               fontSize: "12px",
-              color: "#475569",
+              color: "rgba(255,255,255,0.6)",
               wordBreak: "break-all",
               fontFamily: "monospace",
-              background: "white",
+              background: "rgba(255,255,255,0.05)",
               padding: "10px 14px",
               borderRadius: "10px",
-              border: "1px solid #e2e8f0",
+              border: "1px solid rgba(255,255,255,0.07)",
             }}
           >
             {reviewUrl}
@@ -1335,7 +1334,7 @@ const AdminCRM = ({ booking, onClose }) => {
             margin: "0 0 14px",
             fontSize: "13px",
             fontWeight: 800,
-            color: "#0F172A",
+            color: "white",
             textTransform: "uppercase",
             letterSpacing: "1px",
             display: "flex",
@@ -1363,7 +1362,7 @@ const AdminCRM = ({ booking, onClose }) => {
         </h4>
         {loadingServices ? (
           <div
-            style={{ textAlign: "center", padding: "32px", color: "#94a3b8" }}
+            style={{ textAlign: "center", padding: "32px", color: "rgba(255,255,255,0.4)" }}
           >
             <Loader2
               size={24}
@@ -1398,10 +1397,10 @@ const AdminCRM = ({ booking, onClose }) => {
                     style={{
                       padding: "12px 14px",
                       borderRadius: "14px",
-                      border: `2px solid ${isSelected ? "#6EE7B7" : "#e2e8f0"}`,
+                      border: `2px solid ${isSelected ? "#6EE7B7" : "rgba(255,255,255,0.1)"}`,
                       background: isSelected
-                        ? "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)"
-                        : "white",
+                        ? "rgba(110,231,183,0.08)"
+                        : "rgba(255,255,255,0.03)",
                       cursor: "pointer",
                       textAlign: "left",
                       transition: "all 0.2s ease",
@@ -1416,7 +1415,7 @@ const AdminCRM = ({ booking, onClose }) => {
                           margin: "0 0 3px",
                           fontSize: "12px",
                           fontWeight: 700,
-                          color: "#0F172A",
+                          color: "white",
                         }}
                       >
                         {svc.name}
@@ -1426,7 +1425,7 @@ const AdminCRM = ({ booking, onClose }) => {
                           margin: 0,
                           fontSize: "13px",
                           fontWeight: 800,
-                          color: isSelected ? "#059669" : "#64748b",
+                          color: isSelected ? "#34d399" : "rgba(255,255,255,0.4)",
                         }}
                       >
                         £{svc.rate}
@@ -1435,7 +1434,7 @@ const AdminCRM = ({ booking, onClose }) => {
                     {isSelected && (
                       <CheckCircle2
                         size={16}
-                        style={{ color: "#059669", flexShrink: 0 }}
+                        style={{ color: "#34d399", flexShrink: 0 }}
                       />
                     )}
                   </button>
@@ -1451,7 +1450,7 @@ const AdminCRM = ({ booking, onClose }) => {
             margin: "0 0 12px",
             fontSize: "13px",
             fontWeight: 800,
-            color: "#0F172A",
+            color: "white",
             textTransform: "uppercase",
             letterSpacing: "1px",
             display: "flex",
@@ -1490,7 +1489,9 @@ const AdminCRM = ({ booking, onClose }) => {
               minWidth: "140px",
               padding: "12px 14px",
               borderRadius: "12px",
-              border: "1px solid #e2e8f0",
+              border: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.05)",
+              color: "white",
               fontSize: "13px",
               outline: "none",
             }}
@@ -1507,7 +1508,9 @@ const AdminCRM = ({ booking, onClose }) => {
               minWidth: "90px",
               padding: "12px 14px",
               borderRadius: "12px",
-              border: "1px solid #e2e8f0",
+              border: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.05)",
+              color: "white",
               fontSize: "13px",
               outline: "none",
             }}
@@ -1527,7 +1530,9 @@ const AdminCRM = ({ booking, onClose }) => {
               width: "64px",
               padding: "12px 14px",
               borderRadius: "12px",
-              border: "1px solid #e2e8f0",
+              border: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.05)",
+              color: "white",
               fontSize: "13px",
               outline: "none",
             }}
@@ -1560,7 +1565,7 @@ const AdminCRM = ({ booking, onClose }) => {
               margin: "0 0 12px",
               fontSize: "13px",
               fontWeight: 800,
-              color: "#0F172A",
+              color: "white",
               textTransform: "uppercase",
               letterSpacing: "1px",
               display: "flex",
@@ -1588,7 +1593,7 @@ const AdminCRM = ({ booking, onClose }) => {
           </h4>
           <div
             style={{
-              border: "1px solid #e2e8f0",
+              border: "1px solid rgba(255,255,255,0.07)",
               borderRadius: "16px",
               overflow: "hidden",
             }}
@@ -1603,9 +1608,9 @@ const AdminCRM = ({ booking, onClose }) => {
                   padding: "14px 18px",
                   borderBottom:
                     idx < selectedItems.length - 1
-                      ? "1px solid #f1f5f9"
+                      ? "1px solid rgba(255,255,255,0.04)"
                       : "none",
-                  background: idx % 2 === 0 ? "white" : "#fafafa",
+                  background: idx % 2 === 0 ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.01)",
                 }}
               >
                 <div style={{ flex: 1 }}>
@@ -1614,7 +1619,7 @@ const AdminCRM = ({ booking, onClose }) => {
                       margin: 0,
                       fontSize: "14px",
                       fontWeight: 700,
-                      color: "#0F172A",
+                      color: "white",
                     }}
                   >
                     {item.name}
@@ -1623,7 +1628,7 @@ const AdminCRM = ({ booking, onClose }) => {
                     style={{
                       margin: "2px 0 0",
                       fontSize: "12px",
-                      color: "#94a3b8",
+                      color: "rgba(255,255,255,0.4)",
                     }}
                   >
                     £{item.amount} each
@@ -1637,7 +1642,7 @@ const AdminCRM = ({ booking, onClose }) => {
                       display: "flex",
                       alignItems: "center",
                       gap: "8px",
-                      background: "#f1f5f9",
+                      background: "rgba(255,255,255,0.07)",
                       borderRadius: "10px",
                       padding: "4px 10px",
                     }}
@@ -1648,7 +1653,7 @@ const AdminCRM = ({ booking, onClose }) => {
                         background: "none",
                         border: "none",
                         cursor: "pointer",
-                        color: "#64748b",
+                        color: "rgba(255,255,255,0.4)",
                         display: "flex",
                         padding: "2px",
                       }}
@@ -1659,7 +1664,7 @@ const AdminCRM = ({ booking, onClose }) => {
                       style={{
                         fontSize: "13px",
                         fontWeight: 700,
-                        color: "#0F172A",
+                        color: "white",
                         minWidth: "16px",
                         textAlign: "center",
                       }}
@@ -1672,7 +1677,7 @@ const AdminCRM = ({ booking, onClose }) => {
                         background: "none",
                         border: "none",
                         cursor: "pointer",
-                        color: "#64748b",
+                        color: "rgba(255,255,255,0.4)",
                         display: "flex",
                         padding: "2px",
                       }}
@@ -1684,7 +1689,7 @@ const AdminCRM = ({ booking, onClose }) => {
                     style={{
                       fontSize: "14px",
                       fontWeight: 800,
-                      color: "#0F172A",
+                      color: "white",
                       minWidth: "64px",
                       textAlign: "right",
                     }}
@@ -1709,20 +1714,20 @@ const AdminCRM = ({ booking, onClose }) => {
             <div
               style={{
                 padding: "16px 18px",
-                background: "linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)",
+                background: "rgba(16,185,129,0.1)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                borderTop: "2px solid #a7f3d0",
+                borderTop: "2px solid rgba(16,185,129,0.25)",
               }}
             >
               <span
-                style={{ fontSize: "14px", fontWeight: 800, color: "#065f46" }}
+                style={{ fontSize: "14px", fontWeight: 800, color: "#34d399" }}
               >
                 TOTAL
               </span>
               <span
-                style={{ fontSize: "22px", fontWeight: 900, color: "#065f46" }}
+                style={{ fontSize: "22px", fontWeight: 900, color: "#34d399" }}
               >
                 £{totalAmount.toFixed(2)}
               </span>
@@ -1738,7 +1743,7 @@ const AdminCRM = ({ booking, onClose }) => {
             marginBottom: "8px",
             fontSize: "12px",
             fontWeight: 800,
-            color: "#64748b",
+            color: "rgba(255,255,255,0.4)",
             textTransform: "uppercase",
             letterSpacing: "1px",
           }}
@@ -1754,7 +1759,9 @@ const AdminCRM = ({ booking, onClose }) => {
             width: "100%",
             padding: "12px 14px",
             borderRadius: "12px",
-            border: "1px solid #e2e8f0",
+            border: "1px solid rgba(255,255,255,0.1)",
+            background: "rgba(255,255,255,0.05)",
+            color: "white",
             fontSize: "13px",
             outline: "none",
             resize: "none",
@@ -1767,10 +1774,10 @@ const AdminCRM = ({ booking, onClose }) => {
       {generatedLink && (
         <div
           style={{
-            background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
+            background: "rgba(16,185,129,0.1)",
             borderRadius: "16px",
             padding: "18px 20px",
-            border: "2px solid #86efac",
+            border: "1px solid rgba(16,185,129,0.25)",
           }}
         >
           <p
@@ -1778,7 +1785,7 @@ const AdminCRM = ({ booking, onClose }) => {
               margin: "0 0 8px",
               fontSize: "12px",
               fontWeight: 800,
-              color: "#065f46",
+              color: "#34d399",
               textTransform: "uppercase",
               letterSpacing: "1px",
               display: "flex",
@@ -1793,14 +1800,14 @@ const AdminCRM = ({ booking, onClose }) => {
               style={{
                 margin: 0,
                 fontSize: "12px",
-                color: "#065f46",
+                color: "#34d399",
                 fontFamily: "monospace",
                 wordBreak: "break-all",
                 flex: 1,
-                background: "white",
+                background: "rgba(255,255,255,0.05)",
                 padding: "10px 12px",
                 borderRadius: "10px",
-                border: "1px solid #a7f3d0",
+                border: "1px solid rgba(16,185,129,0.25)",
               }}
             >
               {generatedLink.substring(0, 80)}...
@@ -1813,12 +1820,12 @@ const AdminCRM = ({ booking, onClose }) => {
                 style={{
                   padding: "8px 12px",
                   borderRadius: "10px",
-                  border: "1px solid #86efac",
-                  background: "white",
+                  border: "1px solid rgba(16,185,129,0.25)",
+                  background: "rgba(255,255,255,0.05)",
                   cursor: "pointer",
                   fontSize: "12px",
                   fontWeight: 700,
-                  color: "#059669",
+                  color: "#34d399",
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
@@ -1834,12 +1841,12 @@ const AdminCRM = ({ booking, onClose }) => {
                 style={{
                   padding: "8px 12px",
                   borderRadius: "10px",
-                  border: "1px solid #86efac",
-                  background: "white",
+                  border: "1px solid rgba(16,185,129,0.25)",
+                  background: "rgba(255,255,255,0.05)",
                   cursor: "pointer",
                   fontSize: "12px",
                   fontWeight: 700,
-                  color: "#059669",
+                  color: "#34d399",
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
@@ -1939,10 +1946,10 @@ const AdminCRM = ({ booking, onClose }) => {
 
         <div
           style={{
-            border: "2px solid #e2e8f0",
+            border: "1px solid rgba(255,255,255,0.07)",
             borderRadius: "16px",
             padding: "20px",
-            background: "#f9fafb",
+            background: "rgba(255,255,255,0.03)",
           }}
         >
           <p
@@ -1950,7 +1957,7 @@ const AdminCRM = ({ booking, onClose }) => {
               margin: "0 0 16px",
               fontSize: "13px",
               fontWeight: 800,
-              color: "#0F172A",
+              color: "white",
               textTransform: "uppercase",
             }}
           >
@@ -1971,7 +1978,7 @@ const AdminCRM = ({ booking, onClose }) => {
                   marginBottom: "6px",
                   fontSize: "11px",
                   fontWeight: 800,
-                  color: "#64748b",
+                  color: "rgba(255,255,255,0.4)",
                   textTransform: "uppercase",
                 }}
               >
@@ -1993,7 +2000,9 @@ const AdminCRM = ({ booking, onClose }) => {
                   width: "100%",
                   padding: "12px 14px",
                   borderRadius: "10px",
-                  border: "1px solid #cbd5e1",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "rgba(255,255,255,0.05)",
+                  color: "white",
                   fontSize: "14px",
                   fontWeight: 600,
                   outline: "none",
@@ -2008,7 +2017,7 @@ const AdminCRM = ({ booking, onClose }) => {
                   marginBottom: "6px",
                   fontSize: "11px",
                   fontWeight: 800,
-                  color: "#64748b",
+                  color: "rgba(255,255,255,0.4)",
                   textTransform: "uppercase",
                 }}
               >
@@ -2030,7 +2039,9 @@ const AdminCRM = ({ booking, onClose }) => {
                   width: "100%",
                   padding: "12px 14px",
                   borderRadius: "10px",
-                  border: "1px solid #cbd5e1",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "rgba(255,255,255,0.05)",
+                  color: "white",
                   fontSize: "14px",
                   fontWeight: 600,
                   outline: "none",
@@ -2043,24 +2054,24 @@ const AdminCRM = ({ booking, onClose }) => {
           {hoursTotal > 0 && (
             <div
               style={{
-                background: "white",
+                background: "rgba(255,255,255,0.05)",
                 borderRadius: "12px",
                 padding: "14px",
                 marginBottom: "16px",
-                border: "2px solid #3b82f6",
+                border: "1px solid rgba(59,130,246,0.4)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
               }}
             >
               <span
-                style={{ fontSize: "14px", fontWeight: 600, color: "#64748b" }}
+                style={{ fontSize: "14px", fontWeight: 600, color: "rgba(255,255,255,0.4)" }}
               >
                 {additionalHoursForm.hours}h × £
                 {parseFloat(additionalHoursForm.hourlyRate).toFixed(2)}
               </span>
               <span
-                style={{ fontSize: "20px", fontWeight: 900, color: "#0F172A" }}
+                style={{ fontSize: "20px", fontWeight: 900, color: "white" }}
               >
                 £{hoursTotal.toFixed(2)}
               </span>
@@ -2070,10 +2081,10 @@ const AdminCRM = ({ booking, onClose }) => {
 
         <div
           style={{
-            background: "#f0fdf4",
+            background: "rgba(16,185,129,0.1)",
             borderRadius: "16px",
             padding: "16px 20px",
-            border: "1px solid #a7f3d0",
+            border: "1px solid rgba(16,185,129,0.25)",
           }}
         >
           <p
@@ -2081,7 +2092,7 @@ const AdminCRM = ({ booking, onClose }) => {
               margin: "0 0 8px",
               fontSize: "12px",
               fontWeight: 800,
-              color: "#065f46",
+              color: "#34d399",
               display: "flex",
               alignItems: "center",
               gap: "6px",
@@ -2094,7 +2105,7 @@ const AdminCRM = ({ booking, onClose }) => {
               margin: 0,
               padding: "0 0 0 16px",
               fontSize: "12px",
-              color: "#047857",
+              color: "rgba(52,211,153,0.8)",
               lineHeight: "1.8",
             }}
           >
@@ -2192,7 +2203,7 @@ const AdminCRM = ({ booking, onClose }) => {
           maxHeight: "90vh",
           display: "flex",
           flexDirection: "column",
-          background: "white",
+          background: "#0B2D22",
           borderRadius: "28px",
           boxShadow: "0 30px 80px rgba(0,0,0,0.4)",
           animation: "modalIn 0.3s ease",
@@ -2203,7 +2214,7 @@ const AdminCRM = ({ booking, onClose }) => {
         <div
           style={{
             padding: "24px 28px",
-            borderBottom: "1px solid #f1f5f9",
+            borderBottom: "1px solid rgba(255,255,255,0.07)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -2239,7 +2250,7 @@ const AdminCRM = ({ booking, onClose }) => {
                 style={{
                   margin: 0,
                   fontSize: "12px",
-                  color: "#94a3b8",
+                  color: "rgba(255,255,255,0.4)",
                   fontWeight: 600,
                 }}
               >
@@ -2256,7 +2267,7 @@ const AdminCRM = ({ booking, onClose }) => {
               borderRadius: "10px",
               padding: "8px",
               cursor: "pointer",
-              color: "#94a3b8",
+              color: "rgba(255,255,255,0.4)",
               display: "flex",
               transition: "all 0.2s",
             }}
@@ -2269,11 +2280,11 @@ const AdminCRM = ({ booking, onClose }) => {
         <div
           style={{
             padding: "16px 24px",
-            borderBottom: "1px solid #f1f5f9",
+            borderBottom: "1px solid rgba(255,255,255,0.07)",
             display: "flex",
             gap: "6px",
             flexShrink: 0,
-            background: "#fafafa",
+            background: "#071D16",
             flexWrap: "wrap",
           }}
         >

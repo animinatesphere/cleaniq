@@ -72,10 +72,10 @@ const Field = ({ label, required, error, children }) => (
 );
 
 const inputCls = (error) =>
-  `w-full h-9 px-3 text-sm border rounded-lg bg-white/8 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 transition ${
+  `w-full h-9 px-3 text-sm border rounded-xl bg-white/5 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition ${
     error
       ? "border-rose-400/50 focus:border-rose-400"
-      : "border-white/10 focus:border-[#10B981]/50"
+      : "border-white/10"
   }`;
 
 /* ── Calendar (re-implemented cleanly) ─────────────────────────────────── */
@@ -771,7 +771,7 @@ const NewBookingPage = () => {
           <div className="flex gap-3">
             <button
               onClick={() => navigate("/admin/bookings")}
-              className="flex-1 h-10 border border-white/10 rounded-lg text-sm font-semibold text-white/70 hover:bg-white/10 transition-all"
+              className="flex-1 h-10 bg-white/5 border border-white/10 rounded-xl text-sm font-semibold text-white/80 hover:bg-white/10 transition-all"
             >
               Back to Bookings
             </button>
@@ -820,7 +820,7 @@ const NewBookingPage = () => {
                 setSkipEmail(false);
                 setFormErrors({});
               }}
-              className="flex-1 h-10 bg-[#10B981] rounded-lg text-sm font-semibold text-white hover:bg-[#059669] transition-all"
+              className="flex-1 h-10 bg-emerald-500 rounded-xl text-sm font-semibold text-white hover:bg-emerald-400 transition-all"
             >
               New Booking
             </button>
@@ -848,14 +848,14 @@ const NewBookingPage = () => {
             <React.Fragment key={s.n}>
               <div
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
-                ${step === s.n ? "bg-[#10B981] text-white" : step > s.n ? "bg-white/10 text-white/80" : "text-white/40"}`}
+                ${step === s.n ? "bg-emerald-500 text-white" : step > s.n ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25" : "bg-white/[0.07] text-white/40"}`}
               >
                 {step > s.n ? <CheckCircle2 size={13} /> : s.icon}
                 {s.label}
               </div>
               {i < steps.length - 1 && (
                 <div
-                  className={`w-6 h-px ${step > s.n ? "bg-white/30" : "bg-white/15"}`}
+                  className={`w-6 h-px ${step > s.n ? "bg-emerald-500" : "bg-white/10"}`}
                 />
               )}
             </React.Fragment>
@@ -1197,7 +1197,7 @@ const NewBookingPage = () => {
                   <select
                     value={data.details.hasPet || "No"}
                     onChange={(e) => set("details.hasPet", e.target.value)}
-                    className="h-8 px-2 text-sm border border-white/10 rounded-md bg-white/5 focus:outline-none cursor-pointer"
+                    className="h-8 px-2 text-sm border border-white/10 rounded-md bg-white/5 text-white focus:outline-none cursor-pointer"
                   >
                     <option>No</option>
                     <option>Yes</option>
@@ -1745,7 +1745,7 @@ const NewBookingPage = () => {
                 {step > 1 && (
                   <button
                     onClick={() => setStep((s) => s - 1)}
-                    className="flex items-center gap-1.5 h-9 px-4 border border-white/10 rounded-lg text-sm font-medium text-white/70 hover:bg-white/5 transition-all"
+                    className="flex items-center gap-1.5 h-9 px-4 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-white/80 hover:bg-white/10 transition-all"
                   >
                     <ChevronLeft size={15} /> Back
                   </button>
@@ -1755,7 +1755,7 @@ const NewBookingPage = () => {
                 {step < 4 ? (
                   <button
                     onClick={nextStep}
-                    className="flex items-center gap-1.5 h-9 px-5 bg-[#10B981] rounded-lg text-sm font-semibold text-white hover:bg-[#059669] transition-all"
+                    className="flex items-center gap-1.5 h-9 px-5 bg-emerald-500 rounded-xl text-sm font-semibold text-white hover:bg-emerald-400 transition-all"
                   >
                     Continue <ChevronRight size={15} />
                   </button>
@@ -1763,7 +1763,7 @@ const NewBookingPage = () => {
                   <button
                     onClick={handleSubmit}
                     disabled={submitting}
-                    className="flex items-center gap-1.5 h-9 px-5 bg-[#10B981] rounded-lg text-sm font-semibold text-white hover:bg-[#059669] transition-all disabled:opacity-50"
+                    className="flex items-center gap-1.5 h-9 px-5 bg-emerald-500 rounded-xl text-sm font-semibold text-white hover:bg-emerald-400 transition-all disabled:opacity-50"
                   >
                     {submitting ? (
                       <RefreshCw size={14} className="animate-spin" />

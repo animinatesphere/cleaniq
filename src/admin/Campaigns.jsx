@@ -96,7 +96,7 @@ function CampaignMenu({ campaign, onView, onDelete }) {
     <div ref={ref} className="relative" onClick={e => e.stopPropagation()}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white/70 hover:bg-white/10 transition-colors"
+        className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
       >
         <MoreHorizontal size={15} />
       </button>
@@ -104,7 +104,7 @@ function CampaignMenu({ campaign, onView, onDelete }) {
         <div className="absolute right-0 top-8 z-20 w-40 bg-[#0B2D22] border border-white/10 rounded-xl shadow-lg overflow-hidden">
           <button
             onClick={() => { setOpen(false); onView(campaign); }}
-            className="flex items-center gap-2 w-full px-3.5 py-2.5 text-xs font-semibold text-white/70 hover:bg-[#0A2A1F] transition-colors"
+            className="flex items-center gap-2 w-full px-3.5 py-2.5 text-xs font-semibold text-white/80 hover:bg-white/[0.04] transition-colors"
           >
             <Eye size={13} /> View Message
           </button>
@@ -130,38 +130,38 @@ function MessageDrawer({ campaign, onClose }) {
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity"
         onClick={onClose}
       />
-      <div className="fixed right-0 top-0 h-full w-full sm:w-120 bg-[#0B2D22] z-50 flex flex-col shadow-2xl">
-        <div className="flex items-start justify-between px-6 py-5 border-b border-white/10 shrink-0">
+      <div className="fixed right-0 top-0 h-full w-full sm:w-120 bg-[#0B2D22] z-50 flex flex-col shadow-2xl border-l border-white/10">
+        <div className="flex items-start justify-between px-6 py-5 border-b border-white/7 shrink-0">
           <div className="min-w-0 pr-4">
             <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-1">Campaign</p>
             <h2 className="text-base font-bold text-white leading-tight">{campaign.name}</h2>
           </div>
           <button
             onClick={onClose}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/10 text-white/40 hover:text-white transition-colors"
           >
             <X size={16} />
           </button>
         </div>
 
-        <div className="px-6 py-4 border-b border-white/[0.06] flex flex-wrap gap-3 shrink-0">
+        <div className="px-6 py-4 border-b border-white/[0.04] flex flex-wrap gap-3 shrink-0">
           <StatusBadge status={campaign.status} />
           <span className="text-xs text-white/40 font-medium">{fmtDatetime(campaign.sentAt || campaign.createdAt)}</span>
           {(campaign.totalCount || campaign.recipientCount) > 0 && (
-            <span className="text-xs font-semibold text-white/60">
+            <span className="text-xs font-semibold text-white/80">
               {campaign.sentCount || campaign.recipientCount || campaign.totalCount} recipient{(campaign.totalCount ?? campaign.recipientCount) !== 1 ? "s" : ""}
             </span>
           )}
         </div>
 
-        <div className="px-6 py-4 border-b border-white/[0.06] shrink-0">
+        <div className="px-6 py-4 border-b border-white/[0.04] shrink-0">
           <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Subject</p>
           <p className="text-sm font-semibold text-white">{campaign.subject}</p>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-5">
           <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Message</p>
-          <div className="bg-[#071D16] rounded-xl px-5 py-4 text-sm text-white/70 whitespace-pre-wrap leading-relaxed font-mono border border-white/10">
+          <div className="bg-[#071D16] rounded-xl px-5 py-4 text-sm text-white/80 whitespace-pre-wrap leading-relaxed font-mono border border-white/10">
             {body || <span className="text-white/25 italic">No message body recorded.</span>}
           </div>
 
@@ -172,7 +172,7 @@ function MessageDrawer({ campaign, onClose }) {
               </p>
               <div className="bg-[#071D16] rounded-xl p-3 max-h-40 overflow-y-auto border border-white/10 space-y-1">
                 {campaign.recipients.slice(0, 30).map((email, i) => (
-                  <p key={i} className="text-xs text-white/60 font-mono truncate">{email}</p>
+                  <p key={i} className="text-xs text-white/80 font-mono truncate">{email}</p>
                 ))}
                 {campaign.recipients.length > 30 && (
                   <p className="text-xs text-white/25 italic">…and {campaign.recipients.length - 30} more</p>
@@ -346,7 +346,7 @@ export default function Campaigns() {
 
       {toast && (
         <div className={`fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-80 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold text-white flex items-center gap-2 ${
-          toast.type === "error" ? "bg-rose-600" : "bg-[#061A13]"
+          toast.type === "error" ? "bg-rose-600" : "bg-emerald-600"
         }`}>
           {toast.type === "error" ? <X size={14} /> : <Zap size={14} />}
           {toast.msg}
@@ -363,14 +363,14 @@ export default function Campaigns() {
         <div className="flex items-center gap-2">
           <button
             onClick={fetchAll}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white/60 hover:text-white bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white/80 hover:text-white bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors"
           >
             <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
             Refresh
           </button>
           <button
             onClick={() => setShowComposer(o => !o)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500 text-white text-xs font-bold rounded-lg hover:bg-emerald-400 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold rounded-xl transition-colors"
           >
             <Plus size={13} /> New Campaign
           </button>
@@ -379,9 +379,9 @@ export default function Campaigns() {
 
       <div className="grid grid-cols-3 gap-3">
         {[
-          { icon: <Mail size={15} />,      label: "Total Campaigns", val: campaigns.length, color: "text-white",       bg: "bg-[#071D16] border-white/10" },
-          { icon: <Users size={15} />,     label: "Emails Sent",     val: totalSent,         color: "text-emerald-400", bg: "bg-[#071D16] border-white/10" },
-          { icon: <BarChart2 size={15} />, label: "Active",          val: activeCampaigns,   color: "text-blue-400",   bg: "bg-[#071D16] border-white/10" },
+          { icon: <Mail size={15} />,      label: "Total Campaigns", val: campaigns.length, color: "text-white",       bg: "bg-[#071D16] border-white/7" },
+          { icon: <Users size={15} />,     label: "Emails Sent",     val: totalSent,         color: "text-emerald-400", bg: "bg-[#071D16] border-white/7" },
+          { icon: <BarChart2 size={15} />, label: "Active",          val: activeCampaigns,   color: "text-blue-400",   bg: "bg-[#071D16] border-white/7" },
         ].map(s => (
           <div key={s.label} className={`${s.bg} rounded-xl px-4 py-3.5 border flex items-center gap-3`}>
             <span className={`${s.color} opacity-70 shrink-0`}>{s.icon}</span>
@@ -394,13 +394,13 @@ export default function Campaigns() {
       </div>
 
       {showComposer && (
-        <div className="bg-[#0B2D22] border border-white/10 rounded-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
+        <div className="bg-[#0B2D22] border border-white/7 rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-white/7 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-white">Compose Campaign</h2>
               <p className="text-xs text-white/40 mt-0.5">Emails are queued and sent at 1 per minute.</p>
             </div>
-            <button onClick={() => setShowComposer(false)} className="text-white/40 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors">
+            <button onClick={() => setShowComposer(false)} className="text-white/40 hover:text-white w-7 h-7 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors">
               <X size={15} />
             </button>
           </div>
@@ -414,7 +414,7 @@ export default function Campaigns() {
                   placeholder="e.g. Summer Re-engagement"
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 border border-white/10 rounded-xl bg-[#071D16] text-white placeholder:text-white/20 text-sm outline-none focus:border-emerald-500/50 transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 text-sm outline-none focus:border-emerald-500/50 transition-colors"
                 />
               </div>
               <div>
@@ -422,7 +422,7 @@ export default function Campaigns() {
                 <select
                   value={form.segment}
                   onChange={e => setForm(f => ({ ...f, segment: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 border border-white/10 rounded-xl bg-[#071D16] text-white text-sm outline-none focus:border-emerald-500/50"
+                  className="w-full px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm outline-none focus:border-emerald-500/50 transition-colors"
                 >
                   {SEGMENTS.map(s => (
                     <option key={s.value} value={s.value}>{s.label}</option>
@@ -430,7 +430,7 @@ export default function Campaigns() {
                 </select>
                 {form.segment !== "custom" && (
                   <p className="text-xs text-white/40 mt-1">
-                    <span className="font-semibold text-white/70">{targetEmails.length}</span> recipient{targetEmails.length !== 1 ? "s" : ""} matched
+                    <span className="font-semibold text-white/80">{targetEmails.length}</span> recipient{targetEmails.length !== 1 ? "s" : ""} matched
                   </p>
                 )}
               </div>
@@ -439,7 +439,7 @@ export default function Campaigns() {
             {form.segment === "custom" && (
               <div className="bg-[#071D16] rounded-xl p-4 border border-white/10 space-y-3">
                 <div className="flex items-center gap-2">
-                  <label className="flex items-center gap-2 px-3.5 py-2 border border-dashed border-white/20 rounded-xl bg-[#0B2D22] hover:bg-white/5 cursor-pointer text-xs font-semibold text-white/60 transition-colors">
+                  <label className="flex items-center gap-2 px-3.5 py-2 border border-dashed border-white/20 rounded-xl bg-white/[0.03] hover:bg-white/5 cursor-pointer text-xs font-semibold text-white/80 transition-colors">
                     <Upload size={12} />
                     {fileName ? `${fileName} (${fileEmails.length} emails)` : "Upload CSV…"}
                     <input ref={fileRef} type="file" accept=".csv,.txt,.tsv" className="hidden" onChange={handleFileUpload} />
@@ -455,11 +455,11 @@ export default function Campaigns() {
                   rows={3}
                   value={form.customEmails}
                   onChange={e => setForm(f => ({ ...f, customEmails: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 border border-white/10 rounded-xl bg-[#0B2D22] text-white placeholder:text-white/20 text-sm outline-none focus:border-emerald-500/50 resize-none"
+                  className="w-full px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 text-sm outline-none focus:border-emerald-500/50 resize-none transition-colors"
                 />
                 <p className="text-xs text-white/40">
                   <span className="font-semibold text-white">{targetEmails.length} unique email{targetEmails.length !== 1 ? "s" : ""}</span>
-                  {targetEmails.length > 0 && <span className="text-white/30"> · ~{targetEmails.length} min to send</span>}
+                  {targetEmails.length > 0 && <span className="text-white/25"> · ~{targetEmails.length} min to send</span>}
                 </p>
               </div>
             )}
@@ -471,7 +471,7 @@ export default function Campaigns() {
                 placeholder="e.g. A special offer just for you"
                 value={form.subject}
                 onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
-                className="w-full px-3.5 py-2.5 border border-white/10 rounded-xl bg-[#071D16] text-white placeholder:text-white/20 text-sm outline-none focus:border-emerald-500/50 transition-colors"
+                className="w-full px-3.5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 text-sm outline-none focus:border-emerald-500/50 transition-colors"
               />
             </div>
 
@@ -492,18 +492,18 @@ export default function Campaigns() {
                 placeholder={"Hi [name],\n\nWrite your message here...\n\nThanks,\nCleaniq Services"}
                 value={form.body}
                 onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
-                className="w-full px-3.5 py-3 border border-white/10 rounded-xl bg-[#071D16] text-white placeholder:text-white/20 text-sm outline-none focus:border-emerald-500/50 transition-colors resize-none font-mono"
+                className="w-full px-3.5 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 text-sm outline-none focus:border-emerald-500/50 transition-colors resize-none font-mono"
               />
               <p className="text-[11px] text-white/40 mt-1">Use [name] for the customer's first name.</p>
             </div>
 
             {showPreview && form.body && (
               <div className="border border-white/10 rounded-xl overflow-hidden">
-                <div className="px-4 py-2.5 border-b border-white/10 bg-[#071D16]">
+                <div className="px-4 py-2.5 border-b border-white/7 bg-[#071D16]">
                   <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Email Preview</p>
                   {form.subject && <p className="text-sm font-semibold text-white mt-1">{form.subject}</p>}
                 </div>
-                <div className="px-5 py-4 text-sm text-white/70 whitespace-pre-wrap leading-relaxed max-h-56 overflow-y-auto">
+                <div className="px-5 py-4 bg-[#071D16] text-sm text-white/80 whitespace-pre-wrap leading-relaxed max-h-56 overflow-y-auto">
                   {form.body.replace(/\[name\]/gi, "Alex")}
                 </div>
               </div>
@@ -519,7 +519,7 @@ export default function Campaigns() {
             <button
               type="submit"
               disabled={sending}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-400 disabled:opacity-50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold disabled:opacity-50 transition-colors"
             >
               {sending ? (
                 <><RefreshCw size={14} className="animate-spin" /> Queuing…</>
@@ -531,8 +531,8 @@ export default function Campaigns() {
         </div>
       )}
 
-      <div className="bg-[#0B2D22] border border-white/10 rounded-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+      <div className="bg-[#0B2D22] border border-white/7 rounded-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/7 flex items-center justify-between">
           <h2 className="text-sm font-bold text-white">Campaign History</h2>
           <span className="text-xs text-white/40 font-medium">{campaigns.length} campaign{campaigns.length !== 1 ? "s" : ""}</span>
         </div>
@@ -546,17 +546,17 @@ export default function Campaigns() {
             <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-3">
               <Mail size={20} className="text-white/40" />
             </div>
-            <p className="text-sm font-semibold text-white/60">No campaigns yet</p>
+            <p className="text-sm font-semibold text-white/80">No campaigns yet</p>
             <p className="text-xs text-white/40 mt-1">Click "New Campaign" to compose and send your first bulk email.</p>
             <button
               onClick={() => setShowComposer(true)}
-              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 text-white text-xs font-bold rounded-lg hover:bg-emerald-400 transition-colors"
+              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold rounded-xl transition-colors"
             >
               <Plus size={12} /> New Campaign
             </button>
           </div>
         ) : (
-          <div className="divide-y divide-white/[0.06]">
+          <div className="divide-y divide-white/[0.04]">
             {campaigns.map(c => {
               const isActive = c.status === "sending" || c.status === "queued";
               const total = c.totalCount || c.recipientCount || 0;
@@ -566,7 +566,7 @@ export default function Campaigns() {
               return (
                 <div
                   key={c._id}
-                  className={`px-5 py-4 flex items-start gap-4 group transition-colors ${isDeleting ? "opacity-40" : "hover:bg-[#0A2A1F]"}`}
+                  className={`px-5 py-4 flex items-start gap-4 group transition-colors ${isDeleting ? "opacity-40" : "hover:bg-white/[0.04]"}`}
                 >
                   <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center mt-0.5 ${
                     isActive ? "bg-blue-500/15" : c.status === "sent" ? "bg-emerald-500/15" : c.status === "failed" ? "bg-rose-500/15" : "bg-white/5"

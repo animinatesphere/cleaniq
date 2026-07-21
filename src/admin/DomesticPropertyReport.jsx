@@ -60,13 +60,13 @@ const MediaGrid = ({ items, onAdd, onRemove, label, hint }) => {
     <div>
       {label && (
         <div className="mb-2">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</p>
-          {hint && <p className="text-[10px] text-slate-400 mt-0.5">{hint}</p>}
+          <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider">{label}</p>
+          {hint && <p className="text-[10px] text-white/40 mt-0.5">{hint}</p>}
         </div>
       )}
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
         {(items || []).map((item, i) => (
-          <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-slate-100">
+          <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-white/10 group bg-white/10">
             {item.type === "video" ? (
               <>
                 <video src={item.src} className="w-full h-full object-cover" muted playsInline preload="metadata" />
@@ -87,7 +87,7 @@ const MediaGrid = ({ items, onAdd, onRemove, label, hint }) => {
         ))}
         <button
           onClick={() => ref.current?.click()}
-          className="aspect-square rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center gap-1 text-slate-400 hover:border-primary hover:text-primary transition-colors"
+          className="aspect-square rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-1 text-white/40 hover:border-emerald-500/50 hover:text-emerald-400 transition-colors"
         >
           <div className="flex items-center gap-0.5"><Camera size={13} /><Film size={11} /></div>
           <span className="text-[9px] font-bold">Add Photo</span>
@@ -467,35 +467,35 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+    <div className="bg-[#0B2D22] rounded-3xl border border-white/7 overflow-hidden">
       {/* Toggle header */}
       <button
         onClick={() => setOpen((p) => !p)}
-        className="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-colors"
+        className="w-full flex items-center justify-between p-6 hover:bg-white/[0.04] transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
             <Clock size={16} />
           </div>
           <div className="text-left">
-            <p className="text-sm font-black text-slate-800">Extra Time Request</p>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
+            <p className="text-sm font-black text-white">Extra Time Request</p>
+            <p className="text-xs text-white/40 font-medium mt-0.5">
               Upload photos · select reasons · send report to customer
             </p>
           </div>
         </div>
-        {open ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+        {open ? <ChevronUp size={16} className="text-white/40" /> : <ChevronDown size={16} className="text-white/40" />}
       </button>
 
       {open && (
-        <div className="border-t border-slate-100 p-6 space-y-7">
+        <div className="border-t border-white/7 p-6 space-y-7">
 
           {/* ── Step 1: Area photos ────────────────────────────────────────── */}
           <div>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <p className="text-sm font-black text-slate-800">Step 1 — Photo Evidence</p>
-                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                <p className="text-sm font-black text-white">Step 1 — Photo Evidence</p>
+                <p className="text-xs text-white/40 font-medium mt-0.5">
                   Upload photos of each area as found. These go into the report the customer receives.
                 </p>
               </div>
@@ -509,15 +509,15 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
 
             <div className="space-y-4 mt-4">
               {areas.map((area) => (
-                <div key={area.id} className="border border-slate-200 rounded-2xl overflow-hidden">
-                  <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-100">
+                <div key={area.id} className="border border-white/10 rounded-2xl overflow-hidden">
+                  <div className="flex items-center gap-2 px-4 py-3 bg-white/5 border-b border-white/[0.04]">
                     <input
                       value={area.label}
                       onChange={(e) => updLabel(area.id, e.target.value)}
                       placeholder="Area name (e.g. Kitchen, Bedroom 1…)"
-                      className="flex-1 text-sm font-bold bg-transparent border-none outline-none text-slate-700 placeholder-slate-400"
+                      className="flex-1 text-sm font-bold bg-transparent border-none outline-none text-white placeholder:text-white/20"
                     />
-                    <button onClick={() => removeArea(area.id)} className="text-slate-300 hover:text-rose-500 transition-colors">
+                    <button onClick={() => removeArea(area.id)} className="text-white/25 hover:text-rose-400 transition-colors">
                       <Trash2 size={14} />
                     </button>
                   </div>
@@ -536,8 +536,8 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
 
           {/* ── Step 2: Reasons ───────────────────────────────────────────── */}
           <div>
-            <p className="text-sm font-black text-slate-800 mb-1">Step 2 — Reasons for Extra Time</p>
-            <p className="text-xs text-slate-400 font-medium mb-4">Select all that apply — these appear in the customer email and PDF.</p>
+            <p className="text-sm font-black text-white mb-1">Step 2 — Reasons for Extra Time</p>
+            <p className="text-xs text-white/40 font-medium mb-4">Select all that apply — these appear in the customer email and PDF.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
               {REASONS.map((r) => {
                 const active = reasons.includes(r);
@@ -545,9 +545,9 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
                   <button
                     key={r}
                     onClick={() => toggleReason(r)}
-                    className={`flex items-start gap-2.5 px-3.5 py-3 rounded-xl border-2 text-left text-xs font-semibold transition-all ${active ? "border-amber-400 bg-amber-50 text-amber-800" : "border-slate-200 text-slate-600 hover:border-slate-300"}`}
+                    className={`flex items-start gap-2.5 px-3.5 py-3 rounded-xl border-2 text-left text-xs font-semibold transition-all ${active ? "border-amber-500/40 bg-amber-500/15 text-amber-400" : "border-white/10 text-white/60 hover:border-white/20"}`}
                   >
-                    <span className={`w-4 h-4 rounded-md border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${active ? "bg-amber-500 border-amber-500" : "border-slate-300"}`}>
+                    <span className={`w-4 h-4 rounded-md border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${active ? "bg-amber-500 border-amber-500" : "border-white/25"}`}>
                       {active && <CheckCircle2 size={10} className="text-white" />}
                     </span>
                     {r}
@@ -560,24 +560,24 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
               onChange={(e) => setExtraNotes(e.target.value)}
               placeholder="Add any additional notes or explanation for the customer…"
               rows={3}
-              className="w-full px-3.5 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+              className="w-full px-3.5 py-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm font-medium focus:outline-none focus:border-emerald-500/50 resize-none placeholder:text-white/20"
             />
           </div>
 
           {/* ── Step 3: Extra hours ───────────────────────────────────────── */}
           <div>
-            <p className="text-sm font-black text-slate-800 mb-1">Step 3 — How Much Extra Time?</p>
-            <p className="text-xs text-slate-400 font-medium mb-3">
+            <p className="text-sm font-black text-white mb-1">Step 3 — How Much Extra Time?</p>
+            <p className="text-xs text-white/40 font-medium mb-3">
               {bookedHrs > 0 ? `Booked: ${bookedHrs} hrs` : "No duration on booking"}
               {autoRate ? ` · Auto rate: £${autoRate.toFixed(2)}/hr` : ""}
             </p>
 
             {/* Admin rate override */}
-            <div className="flex items-center gap-2 mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+            <div className="flex items-center gap-2 mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
               <div className="flex-1">
-                <p className="text-[10px] font-black text-amber-800 uppercase tracking-wider mb-1">Hourly Rate for Extra Time</p>
+                <p className="text-[10px] font-black text-amber-400 uppercase tracking-wider mb-1">Hourly Rate for Extra Time</p>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-amber-700">£</span>
+                  <span className="text-sm font-bold text-amber-400">£</span>
                   <input
                     type="number"
                     min="0"
@@ -585,13 +585,13 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
                     value={manualRate}
                     onChange={(e) => setManualRate(e.target.value)}
                     placeholder={autoRate ? autoRate.toFixed(2) : "e.g. 25.00"}
-                    className="w-28 px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-sm font-bold text-slate-800 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                    className="w-28 px-3 py-1.5 rounded-lg border border-amber-500/30 bg-white/5 text-sm font-bold text-white focus:outline-none focus:border-amber-500/60 placeholder:text-white/20"
                   />
-                  <span className="text-xs text-amber-700 font-medium">/hr</span>
+                  <span className="text-xs text-amber-400 font-medium">/hr</span>
                   {manualRate !== "" && (
                     <button
                       onClick={() => setManualRate("")}
-                      className="text-[10px] text-amber-600 hover:text-amber-900 font-bold underline"
+                      className="text-[10px] text-amber-400 hover:text-amber-300 font-bold underline"
                     >
                       Reset to auto
                     </button>
@@ -600,8 +600,8 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
               </div>
               {effectiveRate && (
                 <div className="text-right shrink-0">
-                  <p className="text-[10px] font-black text-amber-700 uppercase tracking-wider">Extra Cost</p>
-                  <p className="text-xl font-black text-amber-800">£{(effectiveRate * extraHrs).toFixed(2)}</p>
+                  <p className="text-[10px] font-black text-amber-400 uppercase tracking-wider">Extra Cost</p>
+                  <p className="text-xl font-black text-amber-300">£{(effectiveRate * extraHrs).toFixed(2)}</p>
                 </div>
               )}
             </div>
@@ -610,7 +610,7 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
                 <button
                   key={h}
                   onClick={() => setExtraHrs(h)}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-black transition-all ${extraHrs === h ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-black transition-all ${extraHrs === h ? "bg-amber-500 text-white" : "bg-white/10 text-white/60 hover:bg-white/15"}`}
                 >
                   +{h}h
                 </button>
@@ -619,27 +619,27 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
 
             {bookedHrs > 0 && (
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-2xl bg-slate-50 p-4 text-center">
-                  <p className="text-xl font-black text-slate-600">{bookedHrs}h</p>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Booked</p>
+                <div className="rounded-2xl bg-white/5 p-4 text-center">
+                  <p className="text-xl font-black text-white/60">{bookedHrs}h</p>
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">Booked</p>
                 </div>
-                <div className="rounded-2xl bg-amber-50 p-4 text-center">
-                  <p className="text-xl font-black text-amber-600">+{extraHrs}h</p>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Extra</p>
+                <div className="rounded-2xl bg-amber-500/15 p-4 text-center">
+                  <p className="text-xl font-black text-amber-400">+{extraHrs}h</p>
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">Extra</p>
                 </div>
-                <div className="rounded-2xl bg-emerald-50 p-4 text-center">
-                  <p className="text-xl font-black text-emerald-700">{newHrs}h</p>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">New Total</p>
+                <div className="rounded-2xl bg-emerald-500/15 p-4 text-center">
+                  <p className="text-xl font-black text-emerald-400">{newHrs}h</p>
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">New Total</p>
                 </div>
               </div>
             )}
 
             {extraCost != null && (
-              <div className="mt-3 flex justify-between items-center px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-                <span className="text-sm font-bold text-slate-500">Additional charge</span>
-                <span className="text-base font-black text-emerald-700">
+              <div className="mt-3 flex justify-between items-center px-4 py-3 bg-emerald-500/15 border border-emerald-500/25 rounded-xl">
+                <span className="text-sm font-bold text-white/60">Additional charge</span>
+                <span className="text-base font-black text-emerald-400">
                   +£{extraCost.toFixed(2)}
-                  {newTotal != null && <span className="text-xs text-slate-400 font-medium ml-1">(new total: £{newTotal.toFixed(2)})</span>}
+                  {newTotal != null && <span className="text-xs text-white/40 font-medium ml-1">(new total: £{newTotal.toFixed(2)})</span>}
                 </span>
               </div>
             )}
@@ -649,8 +649,8 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
           <div>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <p className="text-sm font-black text-slate-800">Step 4 — Lost &amp; Found Items</p>
-                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                <p className="text-sm font-black text-white">Step 4 — Lost &amp; Found Items</p>
+                <p className="text-xs text-white/40 font-medium mt-0.5">
                   Record any items found that don't belong. Add a description and photos for each item.
                 </p>
               </div>
@@ -665,18 +665,18 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
             {lostFound.length === 0 ? (
               <button
                 onClick={addLostFoundItem}
-                className="mt-3 w-full flex items-center justify-center gap-2 py-6 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 hover:border-amber-400 hover:text-amber-600 transition-colors text-sm font-bold"
+                className="mt-3 w-full flex items-center justify-center gap-2 py-6 rounded-2xl border-2 border-dashed border-white/10 text-white/40 hover:border-amber-500/40 hover:text-amber-400 transition-colors text-sm font-bold"
               >
                 <Plus size={14} /> Log a Found Item
               </button>
             ) : (
               <div className="space-y-4 mt-4">
                 {lostFound.map((item, i) => (
-                  <div key={item.id} className="border border-amber-200 rounded-2xl overflow-hidden bg-amber-50/30">
-                    <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border-b border-amber-100">
-                      <span className="text-xs font-black text-amber-700 uppercase tracking-wider">Item {i + 1}</span>
+                  <div key={item.id} className="border border-amber-500/20 rounded-2xl overflow-hidden bg-amber-500/5">
+                    <div className="flex items-center gap-2 px-4 py-3 bg-amber-500/10 border-b border-amber-500/15">
+                      <span className="text-xs font-black text-amber-400 uppercase tracking-wider">Item {i + 1}</span>
                       <div className="flex-1" />
-                      <button onClick={() => removeLostFoundItem(item.id)} className="text-slate-300 hover:text-rose-500 transition-colors">
+                      <button onClick={() => removeLostFoundItem(item.id)} className="text-white/25 hover:text-rose-400 transition-colors">
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -686,7 +686,7 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
                         onChange={(e) => updateLostFoundDesc(item.id, e.target.value)}
                         placeholder="Describe the item (e.g. black iPhone found under sofa cushion in living room)…"
                         rows={2}
-                        className="w-full px-3.5 py-3 rounded-xl border border-amber-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-300/40 resize-none"
+                        className="w-full px-3.5 py-3 rounded-xl border border-amber-500/20 bg-white/5 text-white text-sm font-medium focus:outline-none focus:border-amber-500/50 resize-none placeholder:text-white/20"
                       />
                       <MediaGrid
                         items={item.photos}
@@ -700,7 +700,7 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
                 ))}
                 <button
                   onClick={addLostFoundItem}
-                  className="flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:underline"
+                  className="flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:underline"
                 >
                   <Plus size={12} /> Add another item
                 </button>
@@ -709,14 +709,14 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
           </div>
 
           {/* ── Actions ───────────────────────────────────────────────────── */}
-          <div className="pt-2 border-t border-slate-100 space-y-3">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</p>
+          <div className="pt-2 border-t border-white/7 space-y-3">
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Actions</p>
             <div className="flex flex-wrap gap-2">
               {/* Send to customer */}
               <button
                 onClick={handleSendEmail}
                 disabled={sending}
-                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 text-white text-sm font-black hover:bg-emerald-700 transition-colors disabled:opacity-60"
+                className="flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 text-white text-sm font-black hover:bg-emerald-400 transition-colors disabled:opacity-60"
               >
                 {sending ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
                 {sending ? "Sending…" : `Send to Customer${booking?.customer?.email ? ` (${booking.customer.email})` : ""}`}
@@ -726,7 +726,7 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
               <button
                 onClick={handleDownload}
                 disabled={downloading}
-                className="flex items-center gap-2 px-4 py-3 rounded-xl bg-zinc-800 text-white text-sm font-black hover:bg-zinc-700 transition-colors disabled:opacity-60"
+                className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm font-black hover:bg-white/10 transition-colors disabled:opacity-60"
               >
                 {downloading ? <RefreshCw size={14} className="animate-spin" /> : <Download size={14} />}
                 {downloading ? "Generating…" : "Download PDF"}
@@ -737,14 +737,14 @@ ${newTotal != null ? `<p style="font-size:10px;color:#64748b;margin-top:8px">New
                 <button
                   onClick={handleUpdateBooking}
                   disabled={updating}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-100 text-slate-700 text-sm font-black hover:bg-slate-200 transition-colors disabled:opacity-60"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white/80 text-sm font-black hover:bg-white/10 transition-colors disabled:opacity-60"
                 >
                   {updating ? <RefreshCw size={14} className="animate-spin" /> : <AlertCircle size={14} />}
                   {updating ? "Updating…" : `Update Booking to ${newHrs}h`}
                 </button>
               )}
             </div>
-            <p className="text-[10px] text-slate-400 font-medium">
+            <p className="text-[10px] text-white/40 font-medium">
               "Send to Customer" emails the report with PDF attached. "Update Booking" changes the duration and total on the booking record.
             </p>
           </div>
