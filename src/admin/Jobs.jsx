@@ -235,7 +235,7 @@ const Jobs = () => {
     fetch(`${API}/bookings`)
       .then(r => r.json())
       .then(data =>
-        setBookings(Array.isArray(data) ? data.filter(b => b.status !== "Blackout") : [])
+        setBookings(Array.isArray(data) ? data.filter(b => b.status !== "Blackout" && b.status !== "Cancelled") : [])
       )
       .catch(() => {})
       .finally(() => setLoading(false));
