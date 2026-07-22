@@ -946,6 +946,30 @@ router.get("/:id/conversations", async (req, res) => {
 });
 
 // DELETE a worker (must come last to avoid route conflicts)
+// DELETE /:id/delete-account — worker self-service account deletion (App Store requirement)
+router.delete("/:id/delete-account", async (req, res) => {
+  try {
+    const worker = await Worker.findById(req.params.id);
+    if (!worker) return res.status(404).json({ error: "Account not found" });
+
+    // Anonymise assigned bookings so business records stay intact
+    await Booking.updateMany(
+      { assignedWorker: worker._id },
+      { $set: { assignedWorker: null, assignedWorkerName: "Deleted Worker" } },
+    );
+
+    await moveToTrash(
+      "Worker",
+      worker,
+      `${worker.firstName} ${worker.lastName} — ${worker.workerId} [self-deleted]`,
+    );
+    await worker.deleteOne();
+    res.json({ message: "Account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.delete("/:id", async (req, res) => {
   try {
     const worker = await Worker.findById(req.params.id);

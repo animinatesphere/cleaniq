@@ -268,6 +268,39 @@ router.patch('/profile', verifyCustomer, async (req, res) => {
   }
 });
 
+// DELETE /api/customer-auth/account — permanently delete the customer's own account
+router.delete('/account', verifyCustomer, async (req, res) => {
+  try {
+    const Booking = require('../models/Booking');
+    const customer = await Customer.findById(req.customer.id);
+    if (!customer) return res.status(404).json({ message: 'Account not found' });
+
+    // Anonymise bookings so business records stay intact but PII is removed
+    await Booking.updateMany(
+      { 'customer.email': customer.email.toLowerCase() },
+      {
+        $set: {
+          'customer.firstName': 'Deleted',
+          'customer.lastName':  'User',
+          'customer.email':     `deleted_${customer._id}@removed.local`,
+          'customer.phone':     '',
+        },
+      },
+    );
+
+    // Remove any lead record captured at signup
+    await Lead.deleteOne({ email: customer.email.toLowerCase() });
+
+    // Delete the account
+    await customer.deleteOne();
+
+    res.json({ message: 'Account deleted successfully' });
+  } catch (err) {
+    console.error('Account deletion error:', err);
+    res.status(500).json({ message: 'Failed to delete account. Please try again.' });
+  }
+});
+
 module.exports = router;
 module.exports.verifyCustomer = verifyCustomer;
 module.exports.JWT_SECRET = JWT_SECRET;

@@ -30,6 +30,7 @@ import {
   EyeOff,
   Shield,
   Calendar,
+  Trash2,
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
@@ -273,6 +274,45 @@ const ProfileScreen = ({ navigation }) => {
       setChangingPwd(false);
       Alert.alert("Failed", "Could not change password.");
     }
+  };
+
+  // ── Delete account ────────────────────────────────────────────────────────
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
+  const deleteAccount = () => {
+    Alert.alert(
+      "Delete Account",
+      "This will permanently delete your account and all your personal data. This cannot be undone.\n\nYour booking history will be anonymised.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete My Account",
+          style: "destructive",
+          onPress: async () => {
+            setDeletingAccount(true);
+            try {
+              const token = await AsyncStorage.getItem("customerToken");
+              const res = await fetch(`${API_URL}/customer-auth/account`, {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data?.message || "Failed to delete account");
+              Alert.alert("Account Deleted", "Your account has been permanently deleted.", [
+                { text: "OK", onPress: logout },
+              ]);
+            } catch (err) {
+              Alert.alert("Error", err.message || "Could not delete account. Please try again.");
+            } finally {
+              setDeletingAccount(false);
+            }
+          },
+        },
+      ],
+    );
   };
 
   // ── Visual card ───────────────────────────────────────────────────────────
@@ -615,6 +655,18 @@ const ProfileScreen = ({ navigation }) => {
               <Text style={styles.logoutTxt}>Log Out</Text>
             </TouchableOpacity>
 
+            {/* ── Delete Account ────────────────────────────────────────── */}
+            <TouchableOpacity
+              style={styles.deleteAccountBtn}
+              onPress={deleteAccount}
+              disabled={deletingAccount}
+              activeOpacity={0.85}
+            >
+              {deletingAccount
+                ? <ActivityIndicator size="small" color="#9CA3AF" />
+                : <><Trash2 size={16} color="#9CA3AF" /><Text style={styles.deleteAccountTxt}>Delete Account</Text></>}
+            </TouchableOpacity>
+
             <View style={{ height: 40 }} />
           </View>
         </ScrollView>
@@ -789,6 +841,13 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: "#FECACA",
   },
   logoutTxt: { fontSize: 14, fontWeight: "800", color: "#EF4444" },
+
+  // Delete account
+  deleteAccountBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+    borderRadius: 18, height: 48, borderWidth: 1, borderColor: "#E5E7EB",
+  },
+  deleteAccountTxt: { fontSize: 13, fontWeight: "600", color: "#9CA3AF" },
 });
 
 export default ProfileScreen;

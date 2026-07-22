@@ -32,6 +32,7 @@ import {
   ArrowUpRight,
   AlertCircle,
   Check,
+  Trash2,
 } from "lucide-react-native";
 import axios from "axios";
 import {
@@ -227,6 +228,40 @@ const MyAccountScreen = ({ navigation }) => {
       { text: "Cancel", style: "cancel" },
       { text: "Log Out", style: "destructive", onPress: logout },
     ]);
+  };
+
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Delete Account",
+      "This will permanently delete your account and all your personal data. This cannot be undone.\n\nYour completed job records will be anonymised.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete My Account",
+          style: "destructive",
+          onPress: async () => {
+            setDeletingAccount(true);
+            try {
+              const response = await axios.delete(
+                `${API_URL}/workers/${workerInfo.id}/delete-account`,
+              );
+              Alert.alert("Account Deleted", "Your account has been permanently deleted.", [
+                { text: "OK", onPress: logout },
+              ]);
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                error.response?.data?.error || "Could not delete account. Please try again.",
+              );
+            } finally {
+              setDeletingAccount(false);
+            }
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -617,6 +652,24 @@ const MyAccountScreen = ({ navigation }) => {
           </TouchableOpacity>
         )}
 
+        {/* Delete Account Button */}
+        {!isEditing && (
+          <TouchableOpacity
+            style={styles.deleteAccountButton}
+            onPress={handleDeleteAccount}
+            disabled={deletingAccount}
+          >
+            {deletingAccount ? (
+              <ActivityIndicator size="small" color="#9CA3AF" />
+            ) : (
+              <>
+                <Trash2 size={16} color="#9CA3AF" />
+                <Text style={styles.deleteAccountText}>Delete Account</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
+
         <View style={{ height: 40 }} />
       </ScrollView>
 
@@ -850,6 +903,19 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logoutButtonText: { fontSize: 15, fontWeight: "700", color: "#EF4444" },
+  deleteAccountButton: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    paddingVertical: 14,
+    borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  deleteAccountText: { fontSize: 14, fontWeight: "600", color: "#9CA3AF" },
   editForm: { paddingHorizontal: 16 },
   sectionHeader: {
     fontSize: 18,

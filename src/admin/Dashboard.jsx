@@ -18,6 +18,8 @@ import {
   Wallet,
   Briefcase,
   Percent,
+  Users,
+  MapPin,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -408,6 +410,7 @@ const Dashboard = () => {
   const [calMonth, setCalMonth] = useState(new Date());
   const [selStart, setSelStart] = useState(null);
   const [selEnd, setSelEnd] = useState(null);
+  const [workers, setWorkers] = useState([]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -484,6 +487,10 @@ const Dashboard = () => {
     fetch(`${API}/expenses`)
       .then((r) => r.json())
       .then((data) => setExpenses(Array.isArray(data) ? data : []))
+      .catch(() => {});
+    fetch(`${API}/workers`)
+      .then((r) => r.json())
+      .then((data) => setWorkers(Array.isArray(data) ? data : []))
       .catch(() => {});
   }, [fetchData]);
 
@@ -835,6 +842,24 @@ const Dashboard = () => {
   const newCustCount = Object.values(customerBookingCounts).filter(
     (c) => c === 1,
   ).length;
+
+  // ── Workers ──────────────────────────────────────────────────────────────────
+  const activeWorkers = workers.filter((w) => w.status === "Active");
+  const pendingWorkers = workers.filter((w) => w.status === "Pending");
+  const suspendedWorkers = workers.filter((w) => w.status === "Suspended");
+  const onJobWorkers = workers.filter((w) => w.location?.sharing === true);
+  const totalWorkerEarnings = workers.reduce(
+    (s, w) => s + Number(w.wallet?.totalEarned || 0),
+    0,
+  );
+  const totalJobsDone = workers.reduce(
+    (s, w) => s + Number(w.jobsCompleted || 0),
+    0,
+  );
+  const avgWorkerRating =
+    workers.length > 0
+      ? workers.reduce((s, w) => s + Number(w.rating || 0), 0) / workers.length
+      : 0;
 
   // ── Greeting ─────────────────────────────────────────────────────────────────
   const nowHour = new Date().getHours();
@@ -2465,6 +2490,150 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* ── Workers overview ─────────────────────────────────────────────────── */}
+        <div className={`${card} overflow-hidden`}>
+          {/* Header */}
+          <div className="flex flex-wrap items-start justify-between gap-4 px-5 sm:px-6 pt-5 pb-4 border-b border-white/[0.05]">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-400/10 flex items-center justify-center shrink-0">
+                <Users size={16} className="text-emerald-400" />
+              </div>
+              <div>
+                <p className={`${eyebrow} mb-0.5`}>Team</p>
+                <h3 className={cardTitle}>Workers overview</h3>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {[
+                { label: "Active", count: activeWorkers.length, cls: "bg-emerald-400/10 text-emerald-400" },
+                { label: "Pending", count: pendingWorkers.length, cls: "bg-amber-400/10 text-amber-400" },
+                { label: "Suspended", count: suspendedWorkers.length, cls: "bg-rose-400/10 text-rose-400" },
+              ].map((s) => (
+                <span key={s.label} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${s.cls}`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
+                  {s.count} {s.label}
+                </span>
+              ))}
+              <button
+                onClick={() => navigate("/admin/workers")}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors ml-1"
+              >
+                Manage <ChevronRight size={13} />
+              </button>
+            </div>
+          </div>
+
+          {/* KPI strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-white/[0.05] border-b border-white/[0.05]">
+            {[
+              { label: "Total staff", value: workers.length, sub: `${activeWorkers.length} active` },
+              { label: "On job now", value: onJobWorkers.length, sub: "live tracking", accent: onJobWorkers.length > 0 },
+              { label: "Jobs completed", value: totalJobsDone.toLocaleString("en-GB"), sub: "all time" },
+              { label: "Total paid out", value: gbp(totalWorkerEarnings), sub: `avg ${avgWorkerRating.toFixed(1)} ★` },
+            ].map((k) => (
+              <div key={k.label} className="px-5 py-3.5">
+                <p className={eyebrow}>{k.label}</p>
+                <p className={`text-xl font-semibold tabular-nums mt-1 ${k.accent ? "text-emerald-400" : "text-white"}`}>
+                  {loading ? "—" : k.value}
+                </p>
+                <p className={`text-[10px] ${muted} mt-0.5`}>{k.sub}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Worker roster */}
+          {workers.length === 0 ? (
+            <p className={`${muted} text-sm text-center py-10`}>
+              No workers added yet.
+            </p>
+          ) : (
+            <div className="divide-y divide-white/[0.04]">
+              {workers.slice(0, 8).map((w) => {
+                const statusCls =
+                  w.status === "Active"
+                    ? "bg-emerald-400/10 text-emerald-400"
+                    : w.status === "Suspended"
+                      ? "bg-rose-400/10 text-rose-400"
+                      : "bg-amber-400/10 text-amber-400";
+                const avatarCls =
+                  w.status === "Active"
+                    ? "bg-emerald-400/10 text-emerald-400"
+                    : w.status === "Suspended"
+                      ? "bg-rose-400/10 text-rose-400"
+                      : "bg-white/[0.06] text-white/40";
+                return (
+                  <button
+                    key={w._id}
+                    onClick={() => navigate("/admin/workers")}
+                    className="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/[0.03] transition-colors text-left"
+                  >
+                    {/* Avatar */}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[10px] font-semibold ${avatarCls}`}>
+                      {((w.firstName?.[0] || "") + (w.lastName?.[0] || "")).toUpperCase()}
+                    </div>
+
+                    {/* Name + role */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium text-white/85 truncate">
+                        {w.firstName} {w.lastName}
+                      </p>
+                      <p className={`text-[11px] ${muted} truncate`}>
+                        {w.role} · {w.region}
+                      </p>
+                    </div>
+
+                    {/* Live badge */}
+                    {w.location?.sharing && (
+                      <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-400/10 text-emerald-400 text-[10px] font-semibold shrink-0">
+                        <MapPin size={9} /> Live
+                      </span>
+                    )}
+
+                    {/* Status */}
+                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold shrink-0 ${statusCls}`}>
+                      <span className="w-1 h-1 rounded-full bg-current" />
+                      {w.status}
+                    </span>
+
+                    {/* Jobs */}
+                    <div className="text-right shrink-0 w-12 hidden sm:block">
+                      <p className="text-[13px] font-semibold text-white/80 tabular-nums">{w.jobsCompleted}</p>
+                      <p className={`text-[10px] ${dimmed}`}>jobs</p>
+                    </div>
+
+                    {/* Rating */}
+                    <div className="text-right shrink-0 w-14 hidden md:block">
+                      <p className="text-[13px] font-semibold text-amber-400 tabular-nums">
+                        ★ {Number(w.rating || 0).toFixed(1)}
+                      </p>
+                      <p className={`text-[10px] ${dimmed}`}>rating</p>
+                    </div>
+
+                    {/* Earned */}
+                    <div className="text-right shrink-0 w-16 hidden lg:block">
+                      <p className="text-[13px] font-semibold text-white/80 tabular-nums">
+                        {gbp(w.wallet?.totalEarned || 0)}
+                      </p>
+                      <p className={`text-[10px] ${dimmed}`}>earned</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {workers.length > 8 && (
+            <div className="px-5 py-3 border-t border-white/[0.05]">
+              <button
+                onClick={() => navigate("/admin/workers")}
+                className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors inline-flex items-center gap-1"
+              >
+                View all {workers.length} workers <ChevronRight size={12} />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── Modals ───────────────────────────────────────────────────────────── */}
