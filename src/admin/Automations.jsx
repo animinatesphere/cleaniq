@@ -393,6 +393,28 @@ export default function Automations() {
   const [quickSendType, setQuickSendType] = useState("referral_offer_48h");
   const [quickSending, setQuickSending] = useState(false);
 
+  // Message preview modal
+  const [previewTask, setPreviewTask] = useState(null);
+  const [previewHtml, setPreviewHtml] = useState("");
+  const [previewLoading, setPreviewLoading] = useState(false);
+
+  const openPreview = async (task) => {
+    setPreviewTask(task);
+    setPreviewHtml("");
+    setPreviewLoading(true);
+    try {
+      const { data } = await axios.post(`${API}/automations/preview`, {
+        type: task.type,
+        payload: task.payload,
+      });
+      setPreviewHtml(data.html || "");
+    } catch {
+      setPreviewHtml("<p style='font-family:sans-serif;padding:24px;color:#666'>Could not render email preview.</p>");
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
   // Audience tab
   const [customers, setCustomers] = useState([]);
   const [audienceLoading, setAudienceLoading] = useState(false);
@@ -999,7 +1021,8 @@ export default function Automations() {
               {history.map((task) => (
                 <div
                   key={task._id}
-                  className="px-5 py-4 flex items-start gap-3 hover:bg-[#0A2A1F] transition-colors"
+                  className="px-5 py-4 flex items-start gap-3 hover:bg-[#0A2A1F] transition-colors cursor-pointer group"
+                  onClick={() => openPreview(task)}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -1010,18 +1033,12 @@ export default function Automations() {
                     </div>
                     <p className="text-[11px] text-white/35 mt-0.5 break-all">
                       {task.payload?.email}
-                      {task.payload?.firstName &&
-                        ` · ${task.payload.firstName}`}
+                      {task.payload?.firstName && ` · ${task.payload.firstName}`}
                     </p>
                     {task.error && (
-                      <div className="flex items-start gap-1.5 mt-1.5 p-2 rounded-lg bg-rose-500/10 border border-rose-500/20">
-                        <AlertCircle
-                          size={11}
-                          className="text-rose-400 shrink-0 mt-0.5"
-                        />
-                        <p className="text-[10px] text-rose-400">
-                          {task.error}
-                        </p>
+                      <div className="flex items-start gap-1.5 mt-1.5 p-2 rounded-lg bg-rose-500/10 border border-rose-500/20" onClick={(e) => e.stopPropagation()}>
+                        <AlertCircle size={11} className="text-rose-400 shrink-0 mt-0.5" />
+                        <p className="text-[10px] text-rose-400">{task.error}</p>
                       </div>
                     )}
                     <div className="flex items-center gap-1 mt-1">
@@ -1031,21 +1048,26 @@ export default function Automations() {
                       </p>
                     </div>
                   </div>
-                  {(task.status === "failed" ||
-                    task.status === "cancelled") && (
-                    <button
-                      onClick={() => resendTask(task)}
-                      disabled={resendingId === task._id}
-                      className="shrink-0 flex items-center gap-1.5 text-[10px] font-black px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/25 hover:bg-amber-500/25 transition-all disabled:opacity-40"
-                    >
-                      {resendingId === task._id ? (
-                        <RefreshCw size={11} className="animate-spin" />
-                      ) : (
-                        <RotateCcw size={11} />
-                      )}
-                      {resendingId === task._id ? "…" : "Retry"}
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10px] text-white/20 group-hover:text-white/50 transition-colors font-medium hidden sm:inline">
+                      View email
+                    </span>
+                    <Mail size={13} className="text-white/20 group-hover:text-emerald-400 transition-colors" />
+                    {(task.status === "failed" || task.status === "cancelled") && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); resendTask(task); }}
+                        disabled={resendingId === task._id}
+                        className="flex items-center gap-1.5 text-[10px] font-black px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/25 hover:bg-amber-500/25 transition-all disabled:opacity-40"
+                      >
+                        {resendingId === task._id ? (
+                          <RefreshCw size={11} className="animate-spin" />
+                        ) : (
+                          <RotateCcw size={11} />
+                        )}
+                        {resendingId === task._id ? "…" : "Retry"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -1325,6 +1347,84 @@ export default function Automations() {
           </div>
         )}
       </div>
+
+      {/* ── EMAIL PREVIEW MODAL ── */}
+      {previewTask && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={() => setPreviewTask(null)}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+
+          {/* Panel */}
+          <div
+            className="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col bg-[#071D16] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-white/10 shrink-0">
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-white truncate">
+                  {TYPE_META[previewTask.type]?.icon} {TYPE_META[previewTask.type]?.label || previewTask.type}
+                </p>
+                <p className="text-[11px] text-white/40 mt-0.5">
+                  To: {previewTask.payload?.email}
+                  {previewTask.payload?.firstName ? ` (${previewTask.payload.firstName})` : ""}
+                  {" · "}{fmtDate(previewTask.executedAt || previewTask.createdAt)}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <StatusBadge status={previewTask.status} />
+                <button
+                  onClick={() => setPreviewTask(null)}
+                  className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Email preview */}
+            <div className="flex-1 overflow-auto bg-white">
+              {previewLoading ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <iframe
+                  srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:24px;background:#f8fafc;">${previewHtml}</body></html>`}
+                  title="Email preview"
+                  className="w-full"
+                  style={{ minHeight: "480px", border: "none" }}
+                  onLoad={(e) => {
+                    const doc = e.target.contentDocument;
+                    if (doc) {
+                      e.target.style.height = doc.body.scrollHeight + 48 + "px";
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Footer actions */}
+            <div className="px-5 py-3 border-t border-white/10 flex items-center justify-between shrink-0 bg-[#071D16]">
+              <p className="text-[10px] text-white/30">
+                Payload: {previewTask.payload?.bookingRef || previewTask.payload?.quoteRef || "—"}
+              </p>
+              {(previewTask.status === "failed" || previewTask.status === "cancelled") && (
+                <button
+                  onClick={() => { resendTask(previewTask); setPreviewTask(null); }}
+                  disabled={resendingId === previewTask._id}
+                  className="flex items-center gap-1.5 text-[10px] font-black px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/25 hover:bg-amber-500/25 transition-all disabled:opacity-40"
+                >
+                  <RotateCcw size={11} /> Retry send
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

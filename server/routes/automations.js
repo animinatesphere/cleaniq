@@ -167,4 +167,33 @@ router.post("/send-manual", async (req, res) => {
   }
 });
 
+// POST /api/automations/preview — render email HTML for a task type + payload (no send)
+router.post("/preview", (req, res) => {
+  const { type, payload } = req.body;
+  if (!type || !payload) return res.status(400).json({ message: "type and payload are required" });
+
+  const { automationTemplates } = require("../utils/emailService");
+  const REVIEW_URL = "https://g.page/r/cleaniqservices/review";
+
+  const builders = {
+    booking_reminder_24h:  () => automationTemplates.bookingReminder24h(payload),
+    booking_reminder_3h:   () => automationTemplates.bookingReminder3h(payload),
+    review_request_2h:     () => automationTemplates.reviewRequest({ ...payload, reviewUrl: REVIEW_URL }),
+    referral_offer_48h:    () => automationTemplates.referralOffer(payload),
+    rebooking_discount_3d: () => automationTemplates.rebookingDiscount(payload),
+    quote_followup_24h:    () => automationTemplates.quoteFollowup24h(payload),
+    quote_followup_3d:     () => automationTemplates.quoteFollowup3d(payload),
+    lost_lead_7d:          () => automationTemplates.lostLead7d(payload),
+  };
+
+  const build = builders[type];
+  if (!build) return res.status(400).json({ message: `No template for type: ${type}` });
+
+  try {
+    res.json({ html: build() });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
