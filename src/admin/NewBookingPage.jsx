@@ -78,11 +78,19 @@ const inputCls = (error) =>
       : "border-white/10"
   }`;
 
-/* ── Calendar (re-implemented cleanly) ─────────────────────────────────── */
+/* ── Calendar ────────────────────────────────────────────────────────────── */
 const BookingCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
-  const [month, setMonth] = useState(new Date());
-  const y = month.getFullYear(),
-    m = month.getMonth();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const [month, setMonth] = useState(() => {
+    const m = new Date();
+    m.setDate(1);
+    m.setHours(0, 0, 0, 0);
+    return m;
+  });
+
+  const y = month.getFullYear(), m = month.getMonth();
   const daysInMonth = new Date(y, m + 1, 0).getDate();
   const startDow = new Date(y, m, 1).getDay();
   const days = [];
@@ -90,75 +98,98 @@ const BookingCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
   for (let d = 1; d <= daysInMonth; d++) days.push(new Date(y, m, d));
 
   const pad = (n) => String(n).padStart(2, "0");
-  const toKey = (d) =>
-    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const toKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
   const isSelected = (d) => d && selectedDate && toKey(d) === selectedDate;
-  const isBooked = (d) => d && bookedDates.includes(toKey(d));
-  const isToday = (d) => d && toKey(d) === toKey(today);
+  const isBooked   = (d) => d && bookedDates.includes(toKey(d));
+  const isToday    = (d) => d && toKey(d) === toKey(today);
+  const isPast     = (d) => d && d < today;
+
+  const atMinMonth = y === today.getFullYear() && m === today.getMonth();
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
+    <div className="select-none">
+      {/* Month nav */}
+      <div className="flex items-center justify-between mb-4">
         <button
+          type="button"
           onClick={() => setMonth(new Date(y, m - 1))}
-          className="p-1.5 rounded-md text-white/40 hover:bg-white/10 transition-all"
+          disabled={atMinMonth}
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-white/40 hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={15} />
         </button>
-        <p className="text-sm font-semibold text-white">
+        <span className="text-sm font-bold text-white tracking-wide">
           {month.toLocaleString("default", { month: "long" })} {y}
-        </p>
+        </span>
         <button
+          type="button"
           onClick={() => setMonth(new Date(y, m + 1))}
-          className="p-1.5 rounded-md text-white/40 hover:bg-white/10 transition-all"
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-white/40 hover:bg-white/10 transition-all"
         >
-          <ChevronRight size={16} />
+          <ChevronRight size={15} />
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-1 mb-1">
+
+      {/* Day-of-week headers */}
+      <div className="grid grid-cols-7 mb-2">
         {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-          <div
-            key={d}
-            className="text-[10px] font-semibold text-white/40 text-center py-1"
-          >
+          <div key={d} className="text-[10px] font-bold text-white/30 text-center py-1 uppercase tracking-widest">
             {d}
           </div>
         ))}
       </div>
+
+      {/* Days */}
       <div className="grid grid-cols-7 gap-1">
         {days.map((d, i) => {
           if (!d) return <div key={i} />;
-          const booked = isBooked(d);
+          const past     = isPast(d);
+          const booked   = isBooked(d);
           const selected = isSelected(d);
+          const blocked  = past || booked;
           return (
             <button
               key={i}
               type="button"
-              disabled={booked}
+              disabled={blocked}
               onClick={() => onDateSelect(toKey(d))}
-              className={`aspect-square rounded-lg text-xs font-semibold flex items-center justify-center transition-all relative
-                ${
-                  selected
-                    ? "bg-[#10B981] text-white"
+              title={past ? "Past date — cannot book" : booked ? "Already booked" : undefined}
+              className={`relative aspect-square rounded-lg text-xs font-semibold flex items-center justify-center transition-all
+                ${selected
+                  ? "bg-[#10B981] text-white shadow-lg shadow-[#10B981]/30 ring-2 ring-[#10B981]/40"
+                  : past
+                    ? "text-white/15 cursor-not-allowed line-through"
                     : booked
-                      ? "bg-white/10 text-white/40 cursor-not-allowed"
+                      ? "bg-rose-500/10 text-rose-400/50 cursor-not-allowed"
                       : isToday(d)
-                        ? "border border-[#10B981] text-white hover:bg-white/10"
-                        : "text-white/80 hover:bg-white/10"
+                        ? "ring-2 ring-[#10B981]/60 text-[#10B981] font-black hover:bg-[#10B981]/15"
+                        : "text-white/70 hover:bg-white/10 hover:text-white"
                 }`}
             >
               {d.getDate()}
-              {booked && (
-                <span className="absolute top-0 right-0.5 text-[7px] text-red-400">
-                  ✕
-                </span>
+              {booked && !past && (
+                <span className="absolute top-0.5 right-0.5 w-1 h-1 rounded-full bg-rose-400" />
               )}
             </button>
           );
         })}
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center gap-4 mt-4 pt-3 border-t border-white/8">
+        <span className="flex items-center gap-1.5 text-[10px] text-white/40">
+          <span className="w-2.5 h-2.5 rounded-sm bg-[#10B981]" /> Selected
+        </span>
+        <span className="flex items-center gap-1.5 text-[10px] text-white/40">
+          <span className="w-2.5 h-2.5 rounded-sm ring-2 ring-[#10B981]/60" /> Today
+        </span>
+        <span className="flex items-center gap-1.5 text-[10px] text-white/40">
+          <span className="w-2.5 h-2.5 rounded-sm bg-rose-500/20" /> Booked
+        </span>
+        <span className="flex items-center gap-1.5 text-[10px] text-white/40">
+          <span className="w-2.5 h-2.5 rounded-sm bg-white/5 line-through text-white/15 text-[8px] flex items-center justify-center">9</span> Past
+        </span>
       </div>
     </div>
   );
@@ -1311,13 +1342,24 @@ const NewBookingPage = () => {
             {step === 4 && (
               <div className="space-y-4">
                 {/* Date & time */}
-                <div className="bg-[#0B2D22] border border-white/10 rounded-xl p-5">
-                  <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                    <Calendar size={15} className="text-white/50" /> Date & Time{" "}
-                    <span className="text-rose-400 text-xs font-normal">*</span>
-                  </h2>
+                <div className="bg-[#0B2D22] border border-white/10 rounded-xl overflow-hidden">
+                  {/* Section header */}
+                  <div className="px-5 py-4 border-b border-white/8 flex items-center justify-between">
+                    <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                      <Calendar size={15} className="text-[#10B981]" /> Schedule
+                    </h2>
+                    {data.schedule.date && (
+                      <span className="text-xs font-bold text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/20 px-3 py-1 rounded-full">
+                        {new Date(data.schedule.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
+                        {data.schedule.timeSlot ? ` · ${data.schedule.timeSlot === "Flexible" ? data.schedule.preferredTime || "Flexible" : data.schedule.timeSlot}` : ""}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="p-5">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Pick a date <span className="text-rose-400">*</span></p>
                       <BookingCalendar
                         selectedDate={data.schedule.date}
                         onDateSelect={(d) => set("schedule.date", d)}
@@ -1326,6 +1368,7 @@ const NewBookingPage = () => {
                       <FieldError msg={formErrors["schedule.date"]} />
                     </div>
                     <div className="space-y-4">
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Pick a time <span className="text-rose-400">*</span></p>
                       {/* Traditional Slots */}
                       <div>
                         <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-2">
@@ -1584,6 +1627,7 @@ const NewBookingPage = () => {
                           </div>
                         )}
                     </div>
+                  </div>
                   </div>
                 </div>
 
