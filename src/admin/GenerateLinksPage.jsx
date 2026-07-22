@@ -5,14 +5,22 @@ import {
   Loader2,
   Search,
   Send,
-  Sparkles,
   CreditCard,
   CheckCircle2,
   AlertCircle,
+  ArrowRight,
+  Calendar,
+  Clock,
+  User,
+  Mail,
+  Hash,
+  Zap,
+  LinkIcon,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "https://api.cleaniqservices.com";
 
+/* ── Toast ─────────────────────────────────────────────────────────── */
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
     const t = setTimeout(onClose, 3200);
@@ -21,18 +29,66 @@ const Toast = ({ message, type, onClose }) => {
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-[9999] flex items-center gap-3 rounded-2xl border px-4 py-3 shadow-2xl ${type === "success" ? "border-emerald-400/30 bg-[#0B2D22] text-emerald-200" : "border-rose-400/30 bg-[#2a1113] text-rose-200"}`}
+      className={`fixed bottom-6 right-6 z-[9999] flex items-center gap-3 rounded-2xl border px-4 py-3 shadow-2xl backdrop-blur-sm ${
+        type === "success"
+          ? "border-emerald-400/30 bg-[#071D16] text-emerald-200"
+          : "border-rose-400/30 bg-[#1a0810] text-rose-200"
+      }`}
     >
       {type === "success" ? (
-        <CheckCircle2 size={18} />
+        <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
       ) : (
-        <AlertCircle size={18} />
+        <AlertCircle size={16} className="text-rose-400 shrink-0" />
       )}
       <span className="text-sm font-semibold">{message}</span>
     </div>
   );
 };
 
+/* ── Step indicator ─────────────────────────────────────────────────── */
+const StepBadge = ({ n, label, active, done }) => (
+  <div className="flex items-center gap-2">
+    <div
+      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all ${
+        done
+          ? "bg-emerald-500 text-white"
+          : active
+          ? "bg-emerald-500/20 border-2 border-emerald-400 text-emerald-300"
+          : "bg-white/[0.05] border border-white/10 text-white/25"
+      }`}
+    >
+      {done ? <CheckCircle2 size={13} /> : n}
+    </div>
+    <span
+      className={`text-xs font-bold transition-colors ${
+        done ? "text-emerald-400" : active ? "text-white" : "text-white/25"
+      }`}
+    >
+      {label}
+    </span>
+  </div>
+);
+
+/* ── Info row inside booking card ───────────────────────────────────── */
+const InfoRow = ({ icon: Icon, label, value, mono }) => (
+  <div className="flex items-start gap-3">
+    <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.07] flex items-center justify-center shrink-0 mt-0.5">
+      <Icon size={13} className="text-white/40" />
+    </div>
+    <div className="min-w-0">
+      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/35 mb-0.5">
+        {label}
+      </p>
+      <p
+        className={`text-sm font-semibold text-white leading-snug ${mono ? "font-mono" : ""}`}
+      >
+        {value || "—"}
+      </p>
+    </div>
+  </div>
+);
+
+/* ── Main page ──────────────────────────────────────────────────────── */
 const GenerateLinksPage = () => {
   const [bookingId, setBookingId] = useState("");
   const [booking, setBooking] = useState(null);
@@ -43,39 +99,39 @@ const GenerateLinksPage = () => {
   const [hours, setHours] = useState("");
   const [hourlyRate, setHourlyRate] = useState("");
   const [note, setNote] = useState("");
+  const [copied, setCopied] = useState(false);
 
+  const step = !booking ? 1 : !linkResult ? 2 : 3;
+
+  /* ── Lookup ─────────────────────────────────────────────────────── */
   const lookupBooking = async () => {
     if (!bookingId.trim()) {
-      setToast({
-        type: "error",
-        message: "Enter a booking reference or booking ID",
-      });
+      setToast({ type: "error", message: "Enter a booking reference" });
       return;
     }
-
     setLoadingBooking(true);
     setBooking(null);
     setLinkResult(null);
-
+    setHours("");
+    setHourlyRate("");
+    setNote("");
     try {
       const res = await fetch(
         `${API}/bookings/by-ref/${encodeURIComponent(bookingId.trim())}`,
       );
       const data = await res.json();
-      if (!res.ok || !data?.booking)
+      if (!res.ok || !data?._id)
         throw new Error(data?.message || "Booking not found");
-      setBooking(data.booking);
+      setBooking(data);
       setToast({ type: "success", message: "Booking found" });
     } catch (err) {
-      setToast({
-        type: "error",
-        message: err.message || "Unable to find booking",
-      });
+      setToast({ type: "error", message: err.message || "Unable to find booking" });
     } finally {
       setLoadingBooking(false);
     }
   };
 
+  /* ── Generate link ──────────────────────────────────────────────── */
   const createLink = async () => {
     if (!booking?._id) return;
     if (!hours || Number(hours) <= 0) {
@@ -86,10 +142,8 @@ const GenerateLinksPage = () => {
       setToast({ type: "error", message: "Enter a valid hourly rate" });
       return;
     }
-
     setLoadingLink(true);
     setLinkResult(null);
-
     try {
       const res = await fetch(`${API}/payments/additional-hours-checkout`, {
         method: "POST",
@@ -102,22 +156,16 @@ const GenerateLinksPage = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.message || "Failed to create link");
-      setLinkResult({
-        ...data,
-        bookingRef: booking.bookingId || booking.bookingId,
-        note,
-      });
+      setLinkResult({ ...data, note });
       setToast({ type: "success", message: "Payment link generated" });
     } catch (err) {
-      setToast({
-        type: "error",
-        message: err.message || "Unable to create payment link",
-      });
+      setToast({ type: "error", message: err.message || "Unable to create payment link" });
     } finally {
       setLoadingLink(false);
     }
   };
 
+  /* ── Send email ─────────────────────────────────────────────────── */
   const sendEmail = async () => {
     if (!booking?._id || !linkResult?.checkoutUrl) return;
     setLoadingLink(true);
@@ -128,8 +176,7 @@ const GenerateLinksPage = () => {
         body: JSON.stringify({
           bookingId: booking._id,
           customerEmail: booking.customer?.email,
-          customerName:
-            `${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}`.trim(),
+          customerName: `${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}`.trim(),
           checkoutUrl: linkResult.checkoutUrl,
           additionalHours: Number(hours),
           additionalAmount: Number(linkResult.additionalAmount),
@@ -140,162 +187,191 @@ const GenerateLinksPage = () => {
       if (!res.ok) throw new Error(data?.message || "Email failed");
       setToast({ type: "success", message: "Email sent to customer" });
     } catch (err) {
-      setToast({
-        type: "error",
-        message: err.message || "Unable to send email",
-      });
+      setToast({ type: "error", message: err.message || "Unable to send email" });
     } finally {
       setLoadingLink(false);
     }
   };
 
+  /* ── Copy link ──────────────────────────────────────────────────── */
   const copyLink = async () => {
     if (!linkResult?.checkoutUrl) return;
     await navigator.clipboard.writeText(linkResult.checkoutUrl);
-    setToast({ type: "success", message: "Link copied" });
+    setCopied(true);
+    setToast({ type: "success", message: "Link copied to clipboard" });
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const bookingSummary = useMemo(() => {
-    if (!booking) return null;
-    return {
-      ref: booking.bookingId,
-      customer:
-        `${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}`.trim(),
-      email: booking.customer?.email || "—",
-      currentHours: booking.hours || booking.totalHours || "—",
-      service: booking.service || booking.serviceType || "—",
-      amount: linkResult?.additionalAmount
-        ? `£${linkResult.additionalAmount.toFixed(2)}`
-        : null,
-    };
-  }, [booking, linkResult]);
+  /* ── Derived values ─────────────────────────────────────────────── */
+  const liveTotal = useMemo(() => {
+    const h = Number(hours);
+    const r = Number(hourlyRate);
+    if (h > 0 && r > 0) return (h * r).toFixed(2);
+    return null;
+  }, [hours, hourlyRate]);
+
+  const currentHours = booking?.details?.duration ?? null;
+
+  const scheduleDate = booking?.schedule?.date
+    ? new Date(booking.schedule.date).toLocaleDateString("en-GB", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : null;
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-[28px] border border-white/[0.08] bg-[#0B2D22] p-6 shadow-[0_18px_55px_rgba(0,0,0,0.24)]">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-300/80">
-              Admin Link Generator
-            </p>
-            <h1 className="mt-2 text-2xl font-black text-white">
-              Generate a secure payment link for extra hours
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-300">
-              Look up a booking, choose the extra hours, and send a payment link
-              or email in seconds.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-white/[0.08] bg-[#05201A] px-4 py-3 text-sm text-slate-300">
-            <div className="flex items-center gap-2 font-semibold text-white">
-              <Sparkles size={16} className="text-emerald-400" /> Works for any
-              booking
-            </div>
-          </div>
-        </div>
+    <div className="space-y-5 max-w-5xl">
+
+      {/* ── Page header ─────────────────────────────────────────────── */}
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-400/70 mb-1.5">
+          Admin Tools
+        </p>
+        <h1 className="text-xl font-black text-white">Generate Payment Link</h1>
+        <p className="text-sm text-white/40 mt-1">
+          Charge a customer for extra hours on an existing booking.
+        </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-[28px] border border-white/[0.08] bg-[#0B2D22] p-6 shadow-[0_18px_55px_rgba(0,0,0,0.24)]">
-          <div className="flex items-center gap-2 text-sm font-semibold text-white">
-            <Search size={16} className="text-emerald-400" /> Find booking
-          </div>
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+      {/* ── Step indicator ──────────────────────────────────────────── */}
+      <div className="flex items-center gap-2">
+        <StepBadge n={1} label="Find booking" active={step === 1} done={step > 1} />
+        <div className={`flex-1 max-w-[40px] h-px transition-colors ${step > 1 ? "bg-emerald-500/40" : "bg-white/[0.08]"}`} />
+        <StepBadge n={2} label="Configure link" active={step === 2} done={step > 2} />
+        <div className={`flex-1 max-w-[40px] h-px transition-colors ${step > 2 ? "bg-emerald-500/40" : "bg-white/[0.08]"}`} />
+        <StepBadge n={3} label="Send to customer" active={step === 3} done={false} />
+      </div>
+
+      {/* ── Stage 1: Search bar ──────────────────────────────────────── */}
+      <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl p-5">
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35 mb-3">
+          Booking reference
+        </p>
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search
+              size={15}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none"
+            />
             <input
               value={bookingId}
               onChange={(e) => setBookingId(e.target.value)}
-              placeholder="Booking ID or reference"
-              className="flex-1 rounded-2xl border border-white/[0.08] bg-[#05201A] px-4 py-3 text-sm font-medium text-white placeholder:text-white/35 focus:border-emerald-400 focus:outline-none"
+              onKeyDown={(e) => e.key === "Enter" && lookupBooking()}
+              placeholder="e.g. BK-R123456"
+              className="w-full pl-10 pr-4 py-3 bg-[#071D16] border border-white/[0.08] rounded-xl text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/60 transition-colors"
             />
-            <button
-              onClick={lookupBooking}
-              disabled={loadingBooking}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all disabled:opacity-60"
-            >
-              {loadingBooking ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <Search size={16} />
-              )}
-              Find booking
-            </button>
           </div>
-
-          <div className="mt-6 rounded-2xl border border-white/[0.08] bg-[#05201A] p-4 text-sm text-slate-300">
-            {booking ? (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                    Booking summary
-                  </span>
-                  <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
-                    Found
-                  </span>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
-                      Reference
-                    </p>
-                    <p className="mt-1 font-semibold text-white">
-                      {bookingSummary?.ref}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
-                      Customer
-                    </p>
-                    <p className="mt-1 font-semibold text-white">
-                      {bookingSummary?.customer || "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
-                      Email
-                    </p>
-                    <p className="mt-1 font-semibold text-white">
-                      {bookingSummary?.email || "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
-                      Current hours
-                    </p>
-                    <p className="mt-1 font-semibold text-white">
-                      {bookingSummary?.currentHours ?? "—"}
-                    </p>
-                  </div>
-                </div>
-              </div>
+          <button
+            onClick={lookupBooking}
+            disabled={loadingBooking}
+            className="inline-flex items-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50 shrink-0"
+          >
+            {loadingBooking ? (
+              <Loader2 size={15} className="animate-spin" />
             ) : (
-              <p className="text-slate-400">
-                Search for a booking to start generating a payment link.
-              </p>
+              <Search size={15} />
             )}
-          </div>
+            Find
+          </button>
         </div>
+      </div>
 
-        <div className="rounded-[28px] border border-white/[0.08] bg-[#0B2D22] p-6 shadow-[0_18px_55px_rgba(0,0,0,0.24)]">
-          <div className="flex items-center gap-2 text-sm font-semibold text-white">
-            <CreditCard size={16} className="text-emerald-400" /> Link details
+      {/* ── Stage 2: Booking found + Link config ────────────────────── */}
+      {booking && (
+        <div className="grid gap-5 lg:grid-cols-[1fr_380px]">
+
+          {/* Booking summary card */}
+          <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl p-5">
+            <div className="flex items-start justify-between mb-5">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35 mb-1">
+                  Booking details
+                </p>
+                <p className="text-lg font-black text-white font-mono">
+                  {booking.bookingId}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
+                    booking.status === "Completed"
+                      ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-300"
+                      : booking.status === "Cancelled"
+                      ? "bg-rose-500/10 border-rose-500/25 text-rose-300"
+                      : "bg-amber-500/10 border-amber-500/25 text-amber-300"
+                  }`}
+                >
+                  {booking.status}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <InfoRow
+                icon={User}
+                label="Customer"
+                value={`${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}`.trim()}
+              />
+              <InfoRow
+                icon={Mail}
+                label="Email"
+                value={booking.customer?.email}
+              />
+              <InfoRow
+                icon={Hash}
+                label="Service"
+                value={booking.service}
+              />
+              <InfoRow
+                icon={Clock}
+                label="Current hours"
+                value={currentHours != null ? `${currentHours}h` : "—"}
+              />
+              {scheduleDate && (
+                <InfoRow
+                  icon={Calendar}
+                  label="Scheduled date"
+                  value={scheduleDate}
+                />
+              )}
+              <InfoRow
+                icon={CreditCard}
+                label="Amount paid"
+                value={
+                  booking.payment?.amount != null
+                    ? `£${Number(booking.payment.amount).toFixed(2)}`
+                    : "—"
+                }
+              />
+            </div>
           </div>
-          <div className="mt-4 space-y-4">
+
+          {/* Link configuration card */}
+          <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl p-5 flex flex-col gap-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35">
+              Link configuration
+            </p>
+
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <label className="block text-xs font-bold text-white/50 mb-2">
                 Additional hours
               </label>
               <input
                 value={hours}
                 onChange={(e) => setHours(e.target.value)}
                 type="number"
-                min="1"
+                min="0.5"
+                step="0.5"
                 placeholder="e.g. 2"
-                className="w-full rounded-2xl border border-white/[0.08] bg-[#05201A] px-4 py-3 text-sm font-medium text-white placeholder:text-white/35 focus:border-emerald-400 focus:outline-none"
+                className="w-full px-4 py-3 bg-[#071D16] border border-white/[0.08] rounded-xl text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/60 transition-colors"
               />
             </div>
+
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Hourly rate
+              <label className="block text-xs font-bold text-white/50 mb-2">
+                Hourly rate (£)
               </label>
               <input
                 value={hourlyRate}
@@ -303,89 +379,127 @@ const GenerateLinksPage = () => {
                 type="number"
                 min="1"
                 placeholder="e.g. 35"
-                className="w-full rounded-2xl border border-white/[0.08] bg-[#05201A] px-4 py-3 text-sm font-medium text-white placeholder:text-white/35 focus:border-emerald-400 focus:outline-none"
+                className="w-full px-4 py-3 bg-[#071D16] border border-white/[0.08] rounded-xl text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/60 transition-colors"
               />
             </div>
+
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Note for customer
+              <label className="block text-xs font-bold text-white/50 mb-2">
+                Note <span className="text-white/25 font-medium normal-case">(optional)</span>
               </label>
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                rows="3"
-                placeholder="Optional note"
-                className="w-full rounded-2xl border border-white/[0.08] bg-[#05201A] px-4 py-3 text-sm font-medium text-white placeholder:text-white/35 focus:border-emerald-400 focus:outline-none"
+                rows={2}
+                placeholder="e.g. Extra bedroom cleaned"
+                className="w-full px-4 py-3 bg-[#071D16] border border-white/[0.08] rounded-xl text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/60 transition-colors resize-none"
               />
             </div>
+
+            {/* Live price preview */}
+            {liveTotal && (
+              <div className="flex items-center justify-between px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                <span className="text-xs font-bold text-emerald-400/80">Total charge</span>
+                <span className="text-lg font-black text-emerald-300 tabular-nums">
+                  £{liveTotal}
+                </span>
+              </div>
+            )}
+
             <button
               onClick={createLink}
-              disabled={loadingLink || !booking}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all disabled:opacity-60"
+              disabled={loadingLink || !hours || !hourlyRate}
+              className="mt-auto flex items-center justify-center gap-2 w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {loadingLink ? (
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={15} className="animate-spin" />
               ) : (
-                <CreditCard size={16} />
+                <LinkIcon size={15} />
               )}
-              Generate link
+              Generate payment link
             </button>
           </div>
         </div>
-      </div>
+      )}
 
+      {/* ── Stage 3: Result ──────────────────────────────────────────── */}
       {linkResult && (
-        <div className="rounded-[28px] border border-white/[0.08] bg-[#0B2D22] p-6 shadow-[0_18px_55px_rgba(0,0,0,0.24)]">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-300/80">
-                Generated payment link
-              </p>
-              <h2 className="mt-1 text-xl font-black text-white">
-                {bookingSummary?.ref}
-              </h2>
-              <p className="mt-2 text-sm text-slate-300">
-                Amount:{" "}
-                <span className="font-semibold text-white">
-                  £{Number(linkResult.additionalAmount || 0).toFixed(2)}
-                </span>{" "}
-                for {hours} extra hours
-              </p>
+        <div className="bg-[#0B2D22] border border-emerald-500/20 rounded-2xl overflow-hidden">
+          {/* Top strip */}
+          <div className="bg-emerald-500/10 border-b border-emerald-500/15 px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                <Zap size={15} className="text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-400/70">
+                  Payment link ready
+                </p>
+                <p className="text-sm font-black text-white">
+                  £{Number(linkResult.additionalAmount || 0).toFixed(2)}{" "}
+                  <span className="text-white/40 font-semibold text-xs">
+                    · {hours}h extra
+                  </span>
+                </p>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-3">
+
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={copyLink}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/[0.08] bg-[#05201A] px-4 py-3 text-sm font-semibold text-white hover:bg-white/[0.06]"
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition-all ${
+                  copied
+                    ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-300"
+                    : "border-white/[0.08] bg-white/[0.04] text-white/70 hover:bg-white/[0.08] hover:text-white"
+                }`}
               >
-                <Copy size={16} /> Copy link
+                {copied ? (
+                  <CheckCircle2 size={14} className="text-emerald-400" />
+                ) : (
+                  <Copy size={14} />
+                )}
+                {copied ? "Copied!" : "Copy link"}
               </button>
               <a
                 href={linkResult.checkoutUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-300 hover:bg-emerald-500/20"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-white/[0.08] bg-white/[0.04] text-sm font-semibold text-white/70 hover:bg-white/[0.08] hover:text-white transition-all"
               >
-                <ExternalLink size={16} /> Open link
+                <ExternalLink size={14} />
+                Open
               </a>
               <button
                 onClick={sendEmail}
                 disabled={loadingLink}
-                className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 disabled:opacity-60"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-bold rounded-xl shadow-md shadow-emerald-500/20 transition-all disabled:opacity-50"
               >
                 {loadingLink ? (
-                  <Loader2 size={16} className="animate-spin" />
+                  <Loader2 size={14} className="animate-spin" />
                 ) : (
-                  <Send size={16} />
+                  <Send size={14} />
                 )}
                 Send email
               </button>
             </div>
           </div>
-          <div className="mt-4 rounded-2xl border border-white/[0.08] bg-[#05201A] p-4 text-sm text-slate-300">
-            <div className="break-all font-mono text-sm text-emerald-300">
-              {linkResult.checkoutUrl}
+
+          {/* URL display */}
+          <div className="px-5 py-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/25 mb-2">
+              Checkout URL
+            </p>
+            <div className="flex items-center gap-3 px-4 py-3 bg-[#071D16] rounded-xl border border-white/[0.06]">
+              <LinkIcon size={13} className="text-white/20 shrink-0" />
+              <p className="text-xs font-mono text-emerald-300/80 break-all flex-1 leading-relaxed">
+                {linkResult.checkoutUrl}
+              </p>
             </div>
-            {note ? <p className="mt-3 text-slate-400">Note: {note}</p> : null}
+            {linkResult.note && (
+              <p className="mt-3 text-xs text-white/35">
+                Note: <span className="text-white/55">{linkResult.note}</span>
+              </p>
+            )}
           </div>
         </div>
       )}

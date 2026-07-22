@@ -36,7 +36,10 @@ const AdminHeader = ({ setSidebarOpen, isBookingAgent }) => {
             type: "booking",
             title: "New Booking Received",
             desc: `${b.customer.firstName} booked ${b.service}`,
-            time: new Date(b.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            time: new Date(b.createdAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
             path: "/admin/bookings",
           })),
           ...applicants.slice(0, 3).map((a) => ({
@@ -77,11 +80,14 @@ const AdminHeader = ({ setSidebarOpen, isBookingAgent }) => {
       </div>
 
       {/* Right: notifications + avatar */}
-      <div className="flex items-center gap-2 sm:gap-3 lg:gap-6 relative" ref={notifRef}>
+      <div
+        className="flex items-center gap-2 sm:gap-3 lg:gap-6 relative"
+        ref={notifRef}
+      >
         {/* Bell */}
         <button
           onClick={() => setIsNotifOpen(!isNotifOpen)}
-          className={`relative p-2 rounded-xl border transition-all ${
+          className={`relative p-2 rounded-xl border transition-all  cursor-pointer ${
             isNotifOpen
               ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
               : "bg-white/[0.06] border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80"
@@ -89,7 +95,7 @@ const AdminHeader = ({ setSidebarOpen, isBookingAgent }) => {
         >
           <Bell size={20} />
           {notifications.length > 0 && (
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-[#05201A]" />
+            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-[#05201A] cursor-pointer" />
           )}
         </button>
 
@@ -106,7 +112,10 @@ const AdminHeader = ({ setSidebarOpen, isBookingAgent }) => {
               {notifications.map((n, i) => (
                 <div
                   key={i}
-                  onClick={() => { navigate(n.path); setIsNotifOpen(false); }}
+                  onClick={() => {
+                    navigate(n.path);
+                    setIsNotifOpen(false);
+                  }}
                   className="p-4 border-b border-white/[0.05] hover:bg-white/[0.05] transition-colors cursor-pointer group"
                 >
                   <div className="flex gap-3">
@@ -117,11 +126,19 @@ const AdminHeader = ({ setSidebarOpen, isBookingAgent }) => {
                           : "bg-blue-500/20 text-blue-400"
                       }`}
                     >
-                      {n.type === "booking" ? <CheckCircle2 size={18} /> : <Users size={18} />}
+                      {n.type === "booking" ? (
+                        <CheckCircle2 size={18} />
+                      ) : (
+                        <Users size={18} />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black text-white/80 truncate">{n.title}</p>
-                      <p className="text-[11px] text-white/40 font-medium line-clamp-2">{n.desc}</p>
+                      <p className="text-xs font-black text-white/80 truncate">
+                        {n.title}
+                      </p>
+                      <p className="text-[11px] text-white/40 font-medium line-clamp-2">
+                        {n.desc}
+                      </p>
                       <div className="flex items-center gap-1 mt-1 text-[10px] text-white/30 font-bold uppercase tracking-wider">
                         <Clock size={10} /> {n.time}
                       </div>

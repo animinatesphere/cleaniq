@@ -110,11 +110,11 @@ const AdminLayout = () => {
   if (!isAuthenticated) return <Login onLogin={() => setIsAuthenticated(true)} />;
 
   return (
-    <div className="flex min-h-screen bg-[#061A13] text-white print:bg-white">
+    <div className="flex h-screen overflow-hidden bg-[#061A13] text-white print:bg-white">
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -131,15 +131,18 @@ const AdminLayout = () => {
         isBookingAgent={isBookingAgent}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 relative">
+      {/* Right panel — scrolls independently */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AdminHeader
           setSidebarOpen={setSidebarOpen}
           isBookingAgent={isBookingAgent}
         />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-400 mx-auto w-full">
-          <div className="min-h-full rounded-[32px] bg-[#05201A] border border-white/[0.06] shadow-[0_24px_80px_rgba(0,0,0,0.25)] p-6">
-            <Outlet />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-[1600px] mx-auto w-full">
+            <div className="min-h-full rounded-[32px] bg-[#05201A] border border-white/[0.06] shadow-[0_24px_80px_rgba(0,0,0,0.25)] p-6">
+              <Outlet />
+            </div>
           </div>
         </main>
       </div>

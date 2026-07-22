@@ -168,7 +168,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
 
   return (
     <div className="space-y-6">
-      {/* â"€â"€ MAIN CALENDAR â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
+      {/* main calendar */}
       <div className="bg-[#0B2D22] rounded-[28px] sm:rounded-[40px] p-4 sm:p-10 border border-white/10 shadow-sm animate-in fade-in">
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6 sm:mb-10">
           <div>
@@ -752,7 +752,7 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
                                 }}
                               >
                                 {fmtTimeRange(b) || b.schedule?.timeSlot || ""}{" "}
-                                Â· {b.bookingId}
+                                · {b.bookingId}
                               </p>
                             </div>
                           </div>
@@ -1851,7 +1851,7 @@ const Bookings = () => {
 <style>@media print{body{margin:0}}.page{max-width:680px;margin:40px auto;font-family:Arial,sans-serif;color:#1e293b}</style></head>
 <body><div class="page">
 <div style="background:#0f172a;padding:28px 32px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;">
-<div><p style="margin:0;color:#6ee7b7;font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">Cleaniq Services</p><p style="margin:4px 0 0;color:#94a3b8;font-size:12px;">info@cleaniqservices.com Â· +44 7752 476368</p></div>
+<div><p style="margin:0;color:#6ee7b7;font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">Cleaniq Services</p><p style="margin:4px 0 0;color:#94a3b8;font-size:12px;">info@cleaniqservices.com  +44 7752 476368</p></div>
 <div style="text-align:right"><p style="margin:0;color:#fff;font-size:18px;font-weight:900;">INVOICE</p><p style="margin:4px 0 0;color:#64748b;font-size:12px;">${b.bookingId}</p></div>
 </div>
 <div style="border:1px solid #e2e8f0;border-top:none;padding:24px 32px;background:#fff;">
@@ -2159,7 +2159,7 @@ ${extrasRows}
 
   return (
     <div className="space-y-6 pb-20 relative">
-      {/* â"€â"€ CRM MODAL â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
+      {/*  CRM MODAL */}
       {crmBooking && (
         <AdminCRM booking={crmBooking} onClose={() => setCrmBooking(null)} />
       )}
@@ -2193,15 +2193,29 @@ ${extrasRows}
           (b) => b.status === "Completed",
         );
         const completedCount = completedBookings.length;
-        const totalRevenue = completedBookings
-          .reduce((s, b) => s + Number(b.payment?.amount || 0), 0);
+        const totalRevenue = completedBookings.reduce(
+          (s, b) => s + Number(b.payment?.amount || 0),
+          0,
+        );
         const bookingRenderItem = (b) => (
           <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white/85 truncate">{b.customer?.firstName} {b.customer?.lastName}</p>
-              <p className="text-xs text-white/40 truncate">{b.service} · {b.schedule?.date ? new Date(b.schedule.date).toLocaleDateString("en-GB", {day:"numeric",month:"short"}) : "—"}</p>
+              <p className="text-sm font-medium text-white/85 truncate">
+                {b.customer?.firstName} {b.customer?.lastName}
+              </p>
+              <p className="text-xs text-white/40 truncate">
+                {b.service} ·{" "}
+                {b.schedule?.date
+                  ? new Date(b.schedule.date).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                    })
+                  : "—"}
+              </p>
             </div>
-            <span className="text-[11px] font-semibold text-white/60 shrink-0">£{Number(b.payment?.amount||0).toFixed(0)}</span>
+            <span className="text-[11px] font-semibold text-white/60 shrink-0">
+              £{Number(b.payment?.amount || 0).toFixed(0)}
+            </span>
           </div>
         );
         return (
@@ -2213,7 +2227,14 @@ ${extrasRows}
                 sub: "scheduled",
                 color: "text-cyan-400",
                 dot: "bg-cyan-400",
-                onClick: () => setDrawer({ title: "Today's Bookings", subtitle: `${todayCount} scheduled today`, items: todayBookings, accentColor: "blue", renderItem: bookingRenderItem }),
+                onClick: () =>
+                  setDrawer({
+                    title: "Today's Bookings",
+                    subtitle: `${todayCount} scheduled today`,
+                    items: todayBookings,
+                    accentColor: "blue",
+                    renderItem: bookingRenderItem,
+                  }),
               },
               {
                 label: "Pending",
@@ -2221,7 +2242,14 @@ ${extrasRows}
                 sub: "need action",
                 color: "text-amber-400",
                 dot: "bg-amber-400",
-                onClick: () => setDrawer({ title: "Pending Bookings", subtitle: `${pendingCount} need action`, items: pendingBookings, accentColor: "amber", renderItem: bookingRenderItem }),
+                onClick: () =>
+                  setDrawer({
+                    title: "Pending Bookings",
+                    subtitle: `${pendingCount} need action`,
+                    items: pendingBookings,
+                    accentColor: "amber",
+                    renderItem: bookingRenderItem,
+                  }),
               },
               {
                 label: "Active",
@@ -2229,7 +2257,14 @@ ${extrasRows}
                 sub: "in progress",
                 color: "text-emerald-400",
                 dot: "bg-[#10B981]",
-                onClick: () => setDrawer({ title: "Active Bookings", subtitle: `${activeCount} in progress`, items: activeBookings, accentColor: "emerald", renderItem: bookingRenderItem }),
+                onClick: () =>
+                  setDrawer({
+                    title: "Active Bookings",
+                    subtitle: `${activeCount} in progress`,
+                    items: activeBookings,
+                    accentColor: "emerald",
+                    renderItem: bookingRenderItem,
+                  }),
               },
               {
                 label: "Completed",
@@ -2237,7 +2272,14 @@ ${extrasRows}
                 sub: "all time",
                 color: "text-blue-400",
                 dot: "bg-blue-400",
-                onClick: () => setDrawer({ title: "Completed Bookings", subtitle: `${completedCount} all time`, items: completedBookings, accentColor: "emerald", renderItem: bookingRenderItem }),
+                onClick: () =>
+                  setDrawer({
+                    title: "Completed Bookings",
+                    subtitle: `${completedCount} all time`,
+                    items: completedBookings,
+                    accentColor: "emerald",
+                    renderItem: bookingRenderItem,
+                  }),
               },
               {
                 label: "Revenue",
@@ -2245,7 +2287,18 @@ ${extrasRows}
                 sub: "earned",
                 color: "text-emerald-300",
                 dot: "bg-emerald-300",
-                onClick: () => setDrawer({ title: "Revenue Breakdown", subtitle: `£${totalRevenue.toFixed(0)} from ${completedCount} completed`, items: [...completedBookings].sort((a,b) => Number(b.payment?.amount||0) - Number(a.payment?.amount||0)), accentColor: "emerald", renderItem: bookingRenderItem }),
+                onClick: () =>
+                  setDrawer({
+                    title: "Revenue Breakdown",
+                    subtitle: `£${totalRevenue.toFixed(0)} from ${completedCount} completed`,
+                    items: [...completedBookings].sort(
+                      (a, b) =>
+                        Number(b.payment?.amount || 0) -
+                        Number(a.payment?.amount || 0),
+                    ),
+                    accentColor: "emerald",
+                    renderItem: bookingRenderItem,
+                  }),
               },
             ].map((s) => (
               <div
@@ -2488,7 +2541,7 @@ ${extrasRows}
                             </p>
                             {b._recurringCount > 1 && (
                               <span className="text-[9px] font-black bg-violet-500/20 text-violet-400 px-1.5 py-0.5 rounded-full uppercase tracking-wide border border-violet-500/25">
-                                Recurring Â· {b._recurringCount}
+                                Recurring {b._recurringCount}
                               </span>
                             )}
                           </div>
@@ -2671,9 +2724,9 @@ ${extrasRows}
               {displayBookings.length} booking
               {displayBookings.length !== 1 ? "s" : ""}
               {selectedBookings.size > 0
-                ? ` Â· ${selectedBookings.size} selected`
+                ? `  ${selectedBookings.size} selected`
                 : ""}{" "}
-              Â· Page {bookingsSafePage} of {bookingsTotalPages}
+              Page {bookingsSafePage} of {bookingsTotalPages}
             </p>
             <div className="flex items-center gap-1">
               <button
@@ -3391,7 +3444,7 @@ ${extrasRows}
                 </div>
               ) : (
                 <>
-                  {/* â"€â"€ Recurring series overview â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
+                  {/*Recurring series overview  */}
                   {selectedBooking.meta?.recurringGroup &&
                     (() => {
                       const siblings = bookings
@@ -3578,12 +3631,12 @@ ${extrasRows}
                                     confirmedAt: new Date().toISOString(),
                                   },
                                 }));
-                                alert("âœ… Payment confirmed!");
+                                alert("… Payment confirmed!");
                                 fetchBookings();
                               }
                             } catch (err) {
                               console.error("Failed to confirm payment:", err);
-                              alert("âŒ Failed to confirm payment");
+                              alert("Failed to confirm payment");
                             }
                           }}
                           className="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-[8px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-all"
@@ -3753,7 +3806,7 @@ ${extrasRows}
                     </div>
                   )}
 
-                  {/* â"€â"€ Worker Submission: Photos & Report â"€â"€ */}
+                  {/* Worker Submission: Photos & Report */}
                   {(selectedBooking.photos?.length > 0 ||
                     selectedBooking.workerReport) && (
                     <div className="bg-white/5 border border-white/10 rounded-[32px] p-6">
@@ -3896,7 +3949,7 @@ ${extrasRows}
                               "Not set"}
                           </p>
                           <p className="text-[11px] font-bold text-primary uppercase mt-1">
-                            Arrival â†’ Finish:{" "}
+                            Arrival ’ Finish:{" "}
                             {fmtTimeRange(selectedBooking) ||
                               getPreferredTime(selectedBooking) ||
                               "Not specified"}
@@ -4281,17 +4334,15 @@ ${extrasRows}
 
                     if (emailResponse.ok) {
                       alert(
-                        `âœ… Payment link sent to ${selectedBooking.customer.email}!\n\nAmount: £${data.additionalAmount.toFixed(2)}`,
+                        `Payment link sent to ${selectedBooking.customer.email}!\n\nAmount: £${data.additionalAmount.toFixed(2)}`,
                       );
                       setShowAdditionalHoursModal(false);
                     } else {
-                      alert(
-                        "âœ… Payment link created, but email failed to send",
-                      );
+                      alert(" Payment link created, but email failed to send");
                     }
                   } catch (error) {
                     console.error("Error:", error);
-                    alert(`âŒ ${error.message}`);
+                    alert(` ${error.message}`);
                   } finally {
                     setAdditionalHoursForm((prev) => ({
                       ...prev,
@@ -4538,16 +4589,15 @@ ${extrasRows}
                               <p className="text-[11px] font-bold text-amber-400">
                                 No confirmation email is sent automatically for
                                 flat-rate bookings. Send the invoice yourself
-                                from the booking's CRM actions (âœ¨) whenever
-                                you're ready.
+                                from the booking's CRM actions whenever you're
+                                ready.
                               </p>
                             </div>
                           </>
                         ) : (
                           <div>
                             <label className="text-[9px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">
-                              â±ï¸ Hours{" "}
-                              <span className="text-rose-500">*</span>
+                              Hours <span className="text-rose-500">*</span>
                             </label>
                             <div className="grid grid-cols-8 sm:grid-cols-10 gap-1.5 max-h-36 overflow-y-auto p-1 mb-2 bg-white/5 rounded-xl border border-white/10">
                               {Array.from({ length: 50 }, (_, i) => i + 1).map(
@@ -4767,7 +4817,7 @@ ${extrasRows}
                               </div>
                               {createData.service === s.id && (
                                 <div className="text-primary text-sm font-bold mt-2">
-                                  âœ" Selected
+                                  Selected
                                 </div>
                               )}
                             </button>
@@ -5007,7 +5057,7 @@ ${extrasRows}
                                       }}
                                       className="w-8 h-8 rounded-lg bg-white/10 hover:bg-rose-500/20 text-white/70 hover:text-rose-400 flex items-center justify-center transition-colors font-bold"
                                     >
-                                      âˆ’
+                                      ’
                                     </button>
                                     <span className="text-lg font-bold text-primary w-8 text-center">
                                       {currentQty}

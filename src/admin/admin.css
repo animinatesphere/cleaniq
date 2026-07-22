@@ -99,6 +99,18 @@
   color: #64748b;
 }
 
+/* Fix select dropdown visibility in dark admin theme */
+select {
+  background-color: #071D16;
+  color: white;
+  color-scheme: dark;
+}
+
+select option {
+  background-color: #071D16;
+  color: white;
+}
+
 .sidebar-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.12) transparent;

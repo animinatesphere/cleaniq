@@ -203,7 +203,7 @@ const RoomCounter = ({ label, value, onChange }) => (
       <button
         type="button"
         onClick={() => onChange(Math.max(0, (value || 0) - 1))}
-        className="w-7 h-7 rounded-md border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-all"
+        className="w-7 h-7 rounded-md border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-all cursor-pointer"
       >
         <Minus size={13} />
       </button>
@@ -213,7 +213,7 @@ const RoomCounter = ({ label, value, onChange }) => (
       <button
         type="button"
         onClick={() => onChange((value || 0) + 1)}
-        className="w-7 h-7 rounded-md border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-all"
+        className="w-7 h-7 rounded-md border border-white/10 bg-white/5 flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-all cursor-pointer"
       >
         <Plus size={13} />
       </button>
@@ -753,8 +753,8 @@ const NewBookingPage = () => {
   /* ── JSX ────────────────────────────────────────────────────────────── */
   if (success)
     return (
-      <div className="min-h-screen bg-[#03110C] flex items-center justify-center p-6">
-        <div className="bg-[#0B2D22] border border-white/10 rounded-2xl shadow-xl p-8 w-full max-w-lg text-center">
+      <div className="flex items-center justify-center py-12">
+        <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl shadow-xl p-8 w-full max-w-lg text-center">
           <div className="w-14 h-14 rounded-full bg-[#10B981]/20 flex items-center justify-center mx-auto mb-5">
             <CheckCircle2 size={28} className="text-[#10B981]" />
           </div>
@@ -861,77 +861,75 @@ const NewBookingPage = () => {
     );
 
   return (
-    <div className="min-h-screen bg-[#03110C]">
-      {/* Top bar */}
-      <div className="bg-[#0B2D22] border-b border-white/10 px-4 sm:px-6 py-4 flex items-center gap-4 sticky top-0 z-30">
-        <button
-          onClick={() => navigate("/admin/bookings")}
-          className="flex items-center gap-1.5 text-sm font-medium text-white/60 hover:text-white transition-all"
-        >
-          <ArrowLeft size={16} /> Bookings
-        </button>
-        <span className="text-white/15">|</span>
-        <h1 className="text-sm font-semibold text-white">New Booking</h1>
+    <div>
+      {/* ── Page header (not sticky) ───────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate("/admin/bookings")}
+            className="w-9 h-9 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <div>
+            <h1 className="text-base font-bold text-white leading-tight">New Booking</h1>
+            <p className="text-[11px] text-white/40 mt-0.5">
+              Step {step} of {steps.length} — {steps[step - 1].label}
+            </p>
+          </div>
+        </div>
 
-        {/* Step progress — desktop */}
-        <div className="hidden md:flex items-center gap-1 ml-auto">
+        {/* Step chips */}
+        <div className="flex items-center gap-1.5 sm:ml-auto flex-wrap">
           {steps.map((s, i) => (
             <React.Fragment key={s.n}>
               <div
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
-                ${step === s.n ? "bg-emerald-500 text-white" : step > s.n ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25" : "bg-white/[0.07] text-white/40"}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  step === s.n
+                    ? "bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20"
+                    : step > s.n
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/25"
+                    : "bg-white/[0.04] text-white/30 border-white/[0.07]"
+                }`}
               >
-                {step > s.n ? <CheckCircle2 size={13} /> : s.icon}
-                {s.label}
+                {step > s.n ? <CheckCircle2 size={12} /> : s.icon}
+                <span className="hidden sm:inline">{s.label}</span>
               </div>
               {i < steps.length - 1 && (
-                <div
-                  className={`w-6 h-px ${step > s.n ? "bg-emerald-500" : "bg-white/10"}`}
-                />
+                <div className={`w-4 h-px ${step > s.n ? "bg-emerald-500/40" : "bg-white/10"}`} />
               )}
             </React.Fragment>
           ))}
         </div>
-
-        {/* Step progress — mobile */}
-        <div className="flex md:hidden items-center gap-1 ml-auto text-xs font-semibold text-white/60">
-          Step {step} of {steps.length} — {steps[step - 1].label}
-        </div>
       </div>
 
-      {/* Non-pay mode banner */}
+      {/* Already-paid banner */}
       {noPaymentRequired && (
-        <div className="bg-[#10B981]/10 border-b border-[#10B981]/30 px-4 sm:px-6 py-2.5 flex items-center gap-3">
-          <span className="text-xs font-bold text-[#10B981] bg-[#10B981]/20 border border-[#10B981]/30 px-2 py-0.5 rounded-full">
-            Already Paid
-          </span>
-          <p className="text-xs text-[#10B981] flex-1">
-            This booking is marked as already paid — no Stripe link will be
-            sent.
-            {skipEmail
-              ? " No confirmation email will be sent."
-              : " A confirmation email will still be sent unless you opt out on Step 1."}
+        <div className="mb-5 bg-emerald-500/10 border border-emerald-500/25 rounded-xl px-4 py-3 flex items-center gap-3">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
+          <p className="text-xs text-emerald-400 flex-1">
+            <strong>Already Paid</strong> — no Stripe payment link will be sent.
+            {skipEmail ? " No confirmation email will be sent." : " A confirmation email will still be sent unless you opt out on Step 1."}
           </p>
           <button
             type="button"
             onClick={() => setNoPaymentRequired(false)}
-            className="text-[11px] text-[#10B981] hover:text-[#059669] underline flex-shrink-0"
+            className="text-[11px] text-emerald-400 hover:text-emerald-300 underline flex-shrink-0"
           >
             Remove
           </button>
         </div>
       )}
 
-      {/* Body */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 lg:py-8">
-        <div className="flex flex-col lg:flex-row gap-6">
+      {/* ── Two-column layout ───────────────────────────────────────────── */}
+      <div className="flex flex-col lg:flex-row gap-6">
           {/* ── Main form area ─────────────────────────────────────────── */}
-          <div className="flex-1 min-w-0">
-            {/* Billing type toggle (always visible at top) */}
+          <div className="flex-1 min-w-0 space-y-4">
+            {/* Billing type card — Step 1 only */}
             {step === 1 && (
-              <div className="bg-[#0B2D22] border border-white/10 rounded-xl p-4 mb-4">
-                <Label>Billing type</Label>
-                <div className="flex gap-2 mt-1">
+              <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl p-5 mb-0">
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.15em] mb-3">Billing Type</p>
+                <div className="flex gap-2">
                   {[
                     { v: "hourly", l: "Hourly rate", s: "Priced by duration" },
                     { v: "flat", l: "Flat rate", s: "One fixed price" },
@@ -940,16 +938,14 @@ const NewBookingPage = () => {
                       key={o.v}
                       type="button"
                       onClick={() => set("payment.billingType", o.v)}
-                      className={`flex-1 flex flex-col gap-0.5 p-3 rounded-lg border text-left transition-all ${
+                      className={`flex-1 flex flex-col gap-0.5 p-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
                         (data.payment?.billingType || "hourly") === o.v
-                          ? "border-[#10B981] bg-[#10B981] text-white"
-                          : "border-white/10 bg-white/5 text-white/70 hover:border-white/20"
+                          ? "border-emerald-500 bg-emerald-500/15 text-white"
+                          : "border-white/[0.08] bg-white/[0.03] text-white/60 hover:border-white/20 hover:bg-white/[0.06]"
                       }`}
                     >
-                      <span className="text-sm font-semibold">{o.l}</span>
-                      <span
-                        className={`text-[11px] ${(data.payment?.billingType || "hourly") === o.v ? "text-white/80" : "text-white/40"}`}
-                      >
+                      <span className="text-sm font-bold">{o.l}</span>
+                      <span className={`text-[11px] ${(data.payment?.billingType || "hourly") === o.v ? "text-white/60" : "text-white/35"}`}>
                         {o.s}
                       </span>
                     </button>
@@ -975,7 +971,7 @@ const NewBookingPage = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-3">
+                  <div className="mt-4">
                     <Label required>Duration (hours)</Label>
                     <div className="flex flex-wrap gap-1.5 mb-2">
                       {[1, 2, 3, 4, 5, 6, 7, 8].map((h) => (
@@ -983,10 +979,10 @@ const NewBookingPage = () => {
                           key={h}
                           type="button"
                           onClick={() => set("details.duration", h)}
-                          className={`w-9 h-9 rounded-lg text-sm font-semibold border transition-all ${
+                          className={`w-9 h-9 rounded-xl text-sm font-bold border-2 transition-all cursor-pointer ${
                             data.details.duration === h
-                              ? "bg-[#10B981] text-white border-[#10B981]"
-                              : "bg-white/5 text-white/70 border-white/10 hover:border-white/20"
+                              ? "bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20"
+                              : "bg-white/[0.03] text-white/60 border-white/[0.08] hover:border-white/20 hover:text-white"
                           }`}
                         >
                           {h}
@@ -996,7 +992,7 @@ const NewBookingPage = () => {
                         type="number"
                         min="1"
                         max="50"
-                        placeholder="More"
+                        placeholder="…"
                         value={
                           data.details.duration > 8 ? data.details.duration : ""
                         }
@@ -1008,7 +1004,7 @@ const NewBookingPage = () => {
                               Math.min(50, Math.max(1, v)),
                             );
                         }}
-                        className="w-20 h-9 px-2 text-sm border border-white/10 rounded-lg bg-white/5 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981]/50 transition"
+                        className="w-20 h-9 px-2 text-sm border border-white/10 rounded-xl bg-[#071D16] text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 transition"
                       />
                     </div>
                     <FieldError msg={formErrors["details.duration"]} />
@@ -1016,27 +1012,27 @@ const NewBookingPage = () => {
                 )}
 
                 {/* Non-pay toggle */}
-                <div className="mt-3 pt-3 border-t border-white/10">
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                <div className="mt-4 pt-4 border-t border-white/[0.06] space-y-2">
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={noPaymentRequired}
                       onChange={(e) => setNoPaymentRequired(e.target.checked)}
-                      className="rounded border-white/20 accent-[#10B981] w-4 h-4"
+                      className="rounded border-white/20 accent-emerald-500 w-4 h-4"
                     />
-                    <span className="text-sm font-medium text-white/70">
+                    <span className="text-sm text-white/70">
                       Already paid (cash / bank transfer)
                     </span>
                   </label>
                   {noPaymentRequired && (
-                    <label className="flex items-center gap-2 mt-2 cursor-pointer select-none ml-6">
+                    <label className="flex items-center gap-2.5 mt-1 cursor-pointer select-none ml-6">
                       <input
                         type="checkbox"
                         checked={skipEmail}
                         onChange={(e) => setSkipEmail(e.target.checked)}
-                        className="rounded border-white/20 accent-[#10B981] w-4 h-4"
+                        className="rounded border-white/20 accent-emerald-500 w-4 h-4"
                       />
-                      <span className="text-sm text-white/60">
+                      <span className="text-sm text-white/50">
                         Don't send a confirmation email
                       </span>
                     </label>
@@ -1048,10 +1044,10 @@ const NewBookingPage = () => {
             {/* STEP 1 — Location & Service */}
             {step === 1 && (
               <div className="space-y-4">
-                <div className="bg-[#0B2D22] border border-white/10 rounded-xl p-5">
-                  <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                    <MapPin size={15} className="text-white/50" /> Location
-                  </h2>
+                <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl p-5">
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
+                    <MapPin size={12} /> Location
+                  </p>
                   <div className="space-y-3">
                     <Field
                       label="Full address"
@@ -1140,47 +1136,39 @@ const NewBookingPage = () => {
                   </div>
                 </div>
 
-                <div className="bg-[#0B2D22] border border-white/10 rounded-xl p-5">
-                  <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                    <Zap size={15} className="text-white/50" /> Service type{" "}
-                    <span className="text-rose-400 text-xs font-normal">*</span>
-                  </h2>
+                <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl p-5">
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
+                    <Zap size={12} /> Service type <span className="text-rose-400">*</span>
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
                     {serviceOptions.map((s) => (
                       <button
                         key={s.id}
                         type="button"
                         onClick={() => set("service", s.id)}
-                        className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
+                        className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
                           data.service === s.id
-                            ? "border-[#10B981] bg-[#10B981] text-white"
+                            ? "border-emerald-500 bg-emerald-500/15"
                             : formErrors.service
-                              ? "border-rose-400/30 bg-rose-500/10 hover:border-red-300"
-                              : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
+                              ? "border-rose-400/30 bg-rose-500/10 hover:border-rose-300"
+                              : "border-white/[0.08] bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]"
                         }`}
                       >
                         <span
-                          className={`flex-shrink-0 ${data.service === s.id ? "text-white" : "text-white/40"}`}
+                          className={`flex-shrink-0 ${data.service === s.id ? "text-emerald-400" : "text-white/30"}`}
                         >
                           {s.icon}
                         </span>
                         <div className="min-w-0">
-                          <p
-                            className={`text-sm font-semibold leading-tight ${data.service === s.id ? "text-white" : "text-white"}`}
-                          >
+                          <p className="text-sm font-semibold text-white leading-tight truncate">
                             {s.title}
                           </p>
-                          <p
-                            className={`text-[11px] mt-0.5 ${data.service === s.id ? "text-white/30" : "text-white/40"}`}
-                          >
+                          <p className={`text-[11px] mt-0.5 ${data.service === s.id ? "text-emerald-400/60" : "text-white/35"}`}>
                             {s.tag}
                           </p>
                         </div>
                         {data.service === s.id && (
-                          <CheckCircle2
-                            size={15}
-                            className="ml-auto text-white flex-shrink-0"
-                          />
+                          <CheckCircle2 size={14} className="ml-auto text-emerald-400 flex-shrink-0" />
                         )}
                       </button>
                     ))}
@@ -1192,13 +1180,12 @@ const NewBookingPage = () => {
 
             {/* STEP 2 — Property rooms */}
             {step === 2 && (
-              <div className="bg-[#0B2D22] border border-white/10 rounded-xl p-5">
-                <h2 className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-                  <HomeIcon size={15} className="text-white/50" /> Property
-                  details
-                </h2>
-                <p className="text-xs text-white/40 mb-5">
-                  Count the rooms in the property (0 if not applicable)
+              <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl p-5">
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.15em] mb-1 flex items-center gap-2">
+                  <HomeIcon size={12} /> Property details
+                </p>
+                <p className="text-xs text-white/35 mb-5">
+                  Count the rooms in the property — use 0 if not applicable
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
@@ -1221,14 +1208,14 @@ const NewBookingPage = () => {
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-white/[0.03] border border-white/[0.08] rounded-xl">
                   <span className="text-sm font-medium text-white/70">
                     Pet on premises?
                   </span>
                   <select
                     value={data.details.hasPet || "No"}
                     onChange={(e) => set("details.hasPet", e.target.value)}
-                    className="h-8 px-2 text-sm border border-white/10 rounded-md bg-[#071D16] text-white focus:outline-none cursor-pointer"
+                    className="h-8 px-3 text-sm border border-white/10 rounded-lg bg-[#071D16] text-white focus:outline-none cursor-pointer"
                   >
                     <option>No</option>
                     <option>Yes</option>
@@ -1239,17 +1226,17 @@ const NewBookingPage = () => {
 
             {/* STEP 3 — Add-ons */}
             {step === 3 && (
-              <div className="bg-[#0B2D22] border border-white/10 rounded-xl p-5">
-                <h2 className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-                  <Zap size={15} className="text-white/50" /> Extra services
-                </h2>
-                <p className="text-xs text-white/40 mb-5">
+              <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl p-5">
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.15em] mb-1 flex items-center gap-2">
+                  <Zap size={12} /> Extra services
+                </p>
+                <p className="text-xs text-white/35 mb-5">
                   Optional add-ons — each adds to the total price
                 </p>
 
                 {extrasList.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-white/40 border border-dashed border-white/10 rounded-lg">
-                    <Zap size={24} strokeWidth={1.5} className="mb-2" />
+                  <div className="flex flex-col items-center justify-center py-12 text-white/30 border border-dashed border-white/[0.08] rounded-xl">
+                    <Zap size={22} strokeWidth={1.5} className="mb-2" />
                     <p className="text-sm font-medium">No add-ons configured</p>
                   </div>
                 ) : (
@@ -1284,20 +1271,20 @@ const NewBookingPage = () => {
                       return (
                         <div
                           key={ex._id}
-                          className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+                          className={`flex items-center justify-between p-3.5 rounded-xl border-2 transition-all ${
                             curr > 0
-                              ? "border-[#10B981] bg-[#10B981]/20"
-                              : "border-white/10 bg-white/5 hover:border-white/20"
+                              ? "border-emerald-500/50 bg-emerald-500/10"
+                              : "border-white/[0.08] bg-white/[0.03] hover:border-white/15"
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <div
-                              className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 ${curr > 0 ? "bg-[#10B981]" : "bg-white/10"}`}
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${curr > 0 ? "bg-emerald-500/20" : "bg-white/[0.06]"}`}
                             >
                               <Zap
                                 size={13}
                                 className={
-                                  curr > 0 ? "text-white" : "text-white/40"
+                                  curr > 0 ? "text-emerald-400" : "text-white/35"
                                 }
                               />
                             </div>
@@ -1310,14 +1297,14 @@ const NewBookingPage = () => {
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 bg-[#0B2D22] border border-white/10 rounded-lg p-1">
+                          <div className="flex items-center gap-1.5 bg-white/[0.06] border border-white/[0.08] rounded-lg p-1">
                             <button
                               type="button"
                               onClick={() => toggle(-1)}
                               disabled={curr === 0}
-                              className="w-7 h-7 rounded-md hover:bg-white/10 text-white/50 hover:text-white flex items-center justify-center transition-all disabled:opacity-40"
+                              className="w-7 h-7 rounded-md hover:bg-white/10 text-white/50 hover:text-white flex items-center justify-center transition-all disabled:opacity-30 cursor-pointer"
                             >
-                              <Minus size={13} />
+                              <Minus size={12} />
                             </button>
                             <span className="w-5 text-center font-bold text-white text-sm tabular-nums">
                               {curr}
@@ -1325,9 +1312,9 @@ const NewBookingPage = () => {
                             <button
                               type="button"
                               onClick={() => toggle(1)}
-                              className="w-7 h-7 rounded-md hover:bg-white/10 text-white/50 hover:text-white flex items-center justify-center transition-all"
+                              className="w-7 h-7 rounded-md hover:bg-white/10 text-white/50 hover:text-white flex items-center justify-center transition-all cursor-pointer"
                             >
-                              <Plus size={13} />
+                              <Plus size={12} />
                             </button>
                           </div>
                         </div>
@@ -1342,12 +1329,11 @@ const NewBookingPage = () => {
             {step === 4 && (
               <div className="space-y-4">
                 {/* Date & time */}
-                <div className="bg-[#0B2D22] border border-white/10 rounded-xl overflow-hidden">
-                  {/* Section header */}
-                  <div className="px-5 py-4 border-b border-white/8 flex items-center justify-between">
-                    <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                      <Calendar size={15} className="text-[#10B981]" /> Schedule
-                    </h2>
+                <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl overflow-hidden">
+                  <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.15em] flex items-center gap-2">
+                      <Calendar size={12} className="text-emerald-500" /> Schedule
+                    </p>
                     {data.schedule.date && (
                       <span className="text-xs font-bold text-[#10B981] bg-[#10B981]/10 border border-[#10B981]/20 px-3 py-1 rounded-full">
                         {new Date(data.schedule.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
@@ -1434,12 +1420,12 @@ const NewBookingPage = () => {
                                     set("schedule.timeSlot", slot.value);
                                     set("schedule.preferredTime", "");
                                   }}
-                                  className={`py-3 px-2 rounded-xl border-2 text-[10px] font-bold uppercase transition-all ${
+                                  className={`py-3 px-2 rounded-xl border-2 text-[10px] font-bold uppercase tracking-wider transition-all ${
                                     isSelected
-                                      ? "border-[#10B981] bg-[#10B981] text-white shadow-md"
+                                      ? "border-emerald-500 bg-emerald-500 text-white shadow-md shadow-emerald-500/20"
                                       : isBooked
-                                        ? "border-rose-400/30 bg-rose-500/10 text-rose-400 cursor-not-allowed opacity-60"
-                                        : "border-white/10 bg-white/5 text-white/60 hover:border-white/20"
+                                        ? "border-rose-400/30 bg-rose-500/10 text-rose-400/50 cursor-not-allowed"
+                                        : "border-white/[0.08] bg-white/[0.03] text-white/50 hover:border-white/20 hover:text-white cursor-pointer"
                                   }`}
                                 >
                                   {slot.label}
@@ -1455,15 +1441,14 @@ const NewBookingPage = () => {
                         </div>
                       </div>
 
-                      {/* Flexible time — ALWAYS visible, clicking a time sets timeSlot="Flexible" */}
-                      <div className="border-2 border-white/10 rounded-xl p-4 space-y-4 bg-[#0B2D22]">
+                      {/* Flexible / specific time picker */}
+                      <div className="border border-white/[0.08] rounded-xl p-4 space-y-4 bg-white/[0.02]">
                         <div>
-                          <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest flex items-center gap-2">
-                            <Clock size={14} className="text-white/50" /> Choose
-                            Your Flexible Time
+                          <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.15em] flex items-center gap-2">
+                            <Clock size={11} /> Specific time
                           </p>
-                          <p className="text-[9px] text-white/40 mt-0.5">
-                            Available: 8:00 AM – 8:00 PM
+                          <p className="text-[9px] text-white/30 mt-0.5">
+                            8:00 AM – 8:00 PM · selects Flexible slot with your time
                           </p>
                         </div>
 
@@ -1544,12 +1529,12 @@ const NewBookingPage = () => {
                                     set("schedule.timeSlot", "Flexible");
                                     set("schedule.preferredTime", time);
                                   }}
-                                  className={`py-3 px-2 rounded-xl border-2 text-[10px] font-bold transition-all hover:scale-105 ${
+                                  className={`py-2 rounded-lg text-[10px] font-bold transition-all ${
                                     isSelected
-                                      ? "border-[#10B981] bg-[#10B981] text-white shadow-lg scale-110"
+                                      ? "border-2 border-emerald-500 bg-emerald-500 text-white shadow-md shadow-emerald-500/20"
                                       : isBooked
-                                        ? "border-rose-400/30 bg-rose-500/10 text-rose-400 cursor-not-allowed opacity-50"
-                                        : "border-white/10 bg-white/5 text-white/60 hover:border-white/20"
+                                        ? "bg-rose-500/10 text-rose-400/50 cursor-not-allowed"
+                                        : "bg-white/[0.04] text-white/50 hover:bg-white/10 hover:text-white cursor-pointer"
                                   }`}
                                 >
                                   {time}
@@ -1560,9 +1545,9 @@ const NewBookingPage = () => {
                         </div>
 
                         {/* Custom time input */}
-                        <div className="border-t-2 border-white/10 pt-3 space-y-2">
-                          <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                            ⏰ Custom Time
+                        <div className="border-t border-white/[0.08] pt-3 space-y-2">
+                          <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.15em]">
+                            Custom time
                           </p>
                           <div className="flex gap-3 items-center">
                             <input
@@ -1592,7 +1577,7 @@ const NewBookingPage = () => {
                                   set("schedule.timeSlot", "Flexible");
                                 }
                               }}
-                              className="flex-1 p-3 rounded-xl bg-white/5 border-2 border-white/10 focus:border-[#10B981]/50 focus:bg-white/10 outline-none font-bold text-sm text-white/70 transition-all"
+                              className="flex-1 p-2.5 rounded-xl bg-[#071D16] border border-white/10 focus:border-emerald-500/50 outline-none font-semibold text-sm text-white/70 transition-all"
                             />
                             <span className="text-[10px] font-bold text-white/50 whitespace-nowrap">
                               {data.schedule.preferredTime &&
@@ -1609,12 +1594,12 @@ const NewBookingPage = () => {
 
                       <FieldError msg={formErrors["schedule.timeSlot"]} />
 
-                      {/* Preferred time hint for non-flexible slots */}
+                      {/* Preferred arrival time hint for non-flexible traditional slots */}
                       {data.schedule.timeSlot &&
                         data.schedule.timeSlot !== "Flexible" && (
                           <div>
-                            <label className="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-2 block">
-                              ⏰ Preferred Arrival Time (Optional)
+                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.15em] mb-2 block">
+                              Preferred Arrival Time (Optional)
                             </label>
                             <input
                               placeholder="e.g. 10:00 AM"
@@ -1622,7 +1607,7 @@ const NewBookingPage = () => {
                               onChange={(e) =>
                                 set("schedule.preferredTime", e.target.value)
                               }
-                              className="w-full p-3 rounded-xl bg-white/5 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-[#10B981]/20 focus:border-[#10B981]/50 transition-all font-medium placeholder:text-white/40 text-sm"
+                              className="w-full p-2.5 rounded-xl bg-[#071D16] border border-white/10 focus:outline-none focus:border-emerald-500/50 transition-all font-medium placeholder:text-white/30 text-sm"
                             />
                           </div>
                         )}
@@ -1632,11 +1617,10 @@ const NewBookingPage = () => {
                 </div>
 
                 {/* Customer info */}
-                <div className="bg-[#0B2D22] border border-white/10 rounded-xl p-5">
-                  <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                    <User size={15} className="text-white/50" /> Customer
-                    information
-                  </h2>
+                <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl p-5">
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
+                    <User size={12} /> Customer information
+                  </p>
 
                   {/* Search existing customers */}
                   <div className="mb-4 relative">
@@ -1644,11 +1628,11 @@ const NewBookingPage = () => {
                     <div className="relative">
                       <Search
                         size={14}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35 pointer-events-none"
                       />
                       <input
                         type="text"
-                        placeholder="Type a name or email to find existing client…"
+                        placeholder="Type name or email to find existing client…"
                         value={customerQuery}
                         onChange={(e) => {
                           setCustomerQuery(e.target.value);
@@ -1661,7 +1645,7 @@ const NewBookingPage = () => {
                         onBlur={() =>
                           setTimeout(() => setShowCustomerDrop(false), 200)
                         }
-                        className="w-full h-9 pl-9 pr-3 text-sm border border-white/10 rounded-lg bg-white/5 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981]/50 transition"
+                        className="w-full h-9 pl-9 pr-3 text-sm border border-white/10 rounded-xl bg-[#071D16] text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 transition"
                       />
                       {customerSearching && (
                         <RefreshCw
@@ -1671,15 +1655,15 @@ const NewBookingPage = () => {
                       )}
                     </div>
                     {showCustomerDrop && customerResults.length > 0 && (
-                      <div className="absolute z-30 top-full left-0 right-0 mt-1 bg-[#0B2D22] border border-white/10 rounded-xl shadow-lg overflow-hidden">
+                      <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-[#0B2D22] border border-white/10 rounded-xl shadow-lg overflow-hidden">
                         {customerResults.map((c, i) => (
                           <button
                             key={c._id || i}
                             type="button"
                             onMouseDown={() => pickCustomer(c)}
-                            className="w-full text-left px-4 py-2.5 hover:bg-white/5 text-sm border-b border-white/10 last:border-0 flex items-center gap-3"
+                            className="w-full text-left px-4 py-2.5 hover:bg-white/[0.06] text-sm border-b border-white/[0.06] last:border-0 flex items-center gap-3 transition-colors cursor-pointer"
                           >
-                            <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white/60 flex-shrink-0">
+                            <div className="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center text-xs font-bold text-emerald-400 shrink-0">
                               {(c.firstName?.[0] || "?").toUpperCase()}
                             </div>
                             <div className="min-w-0">
@@ -1699,7 +1683,7 @@ const NewBookingPage = () => {
                       customerQuery.length >= 2 &&
                       customerResults.length === 0 &&
                       !customerSearching && (
-                        <div className="absolute z-30 top-full left-0 right-0 mt-1 bg-[#0B2D22] border border-white/10 rounded-xl shadow-lg px-4 py-3 text-xs text-white/40">
+                        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-[#0B2D22] border border-white/10 rounded-xl shadow-lg px-4 py-3 text-xs text-white/40">
                           No existing client found — fill in details below
                         </div>
                       )}
@@ -1768,7 +1752,7 @@ const NewBookingPage = () => {
                         value={data.notes || ""}
                         onChange={(e) => set("notes", e.target.value)}
                         rows={3}
-                        className="w-full px-3 py-2 text-sm border border-white/10 rounded-lg bg-white/5 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 focus:border-[#10B981]/50 transition resize-none"
+                        className="w-full px-3 py-2.5 text-sm border border-white/10 rounded-xl bg-[#071D16] text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 transition resize-none"
                       />
                     </Field>
                   </div>
@@ -1784,12 +1768,12 @@ const NewBookingPage = () => {
             )}
 
             {/* Navigation */}
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/10">
+            <div className="flex items-center justify-between mt-5 pt-4 border-t border-white/[0.06]">
               <div>
                 {step > 1 && (
                   <button
                     onClick={() => setStep((s) => s - 1)}
-                    className="flex items-center gap-1.5 h-9 px-4 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-white/80 hover:bg-white/10 transition-all"
+                    className="flex items-center gap-1.5 h-9 px-4 bg-white/5 border border-white/10 rounded-xl text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-all"
                   >
                     <ChevronLeft size={15} /> Back
                   </button>
@@ -1799,7 +1783,7 @@ const NewBookingPage = () => {
                 {step < 4 ? (
                   <button
                     onClick={nextStep}
-                    className="flex items-center gap-1.5 h-9 px-5 bg-emerald-500 rounded-xl text-sm font-semibold text-white hover:bg-emerald-400 transition-all"
+                    className="flex items-center gap-1.5 h-9 px-5 bg-emerald-500 rounded-xl text-sm font-bold text-white hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20"
                   >
                     Continue <ChevronRight size={15} />
                   </button>
@@ -1807,7 +1791,7 @@ const NewBookingPage = () => {
                   <button
                     onClick={handleSubmit}
                     disabled={submitting}
-                    className="flex items-center gap-1.5 h-9 px-5 bg-emerald-500 rounded-xl text-sm font-semibold text-white hover:bg-emerald-400 transition-all disabled:opacity-50"
+                    className="flex items-center gap-1.5 h-9 px-5 bg-emerald-500 rounded-xl text-sm font-bold text-white hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
                   >
                     {submitting ? (
                       <RefreshCw size={14} className="animate-spin" />
@@ -1821,15 +1805,15 @@ const NewBookingPage = () => {
             </div>
           </div>
 
-          {/* ── Sticky summary sidebar ──────────────────────────────────── */}
-          <div className="w-full lg:w-72 xl:w-80 flex-shrink-0">
-            <div className="sticky top-[73px] bg-[#0B2D22] border border-white/10 rounded-xl overflow-hidden">
-              <div className="px-4 py-3 border-b border-white/10 bg-white/5">
-                <p className="text-xs font-semibold text-white/50 uppercase tracking-wide">
-                  Booking summary
+          {/* ── Summary sidebar ─────────────────────────────────────────── */}
+          <div className="w-full lg:w-72 xl:w-80 shrink-0">
+            <div className="sticky top-6 bg-[#0B2D22] border border-white/[0.08] rounded-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-white/[0.06]">
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.15em]">
+                  Booking Summary
                 </p>
               </div>
-              <div className="p-4 space-y-3">
+              <div className="p-4 space-y-2.5">
                 {[
                   { label: "Service", value: data.service || "—" },
                   { label: "Address", value: data.details.address || "—" },
@@ -1853,36 +1837,32 @@ const NewBookingPage = () => {
                 ].map((r) => (
                   <div
                     key={r.label}
-                    className="flex items-start justify-between gap-3 text-sm"
+                    className="flex items-start justify-between gap-3"
                   >
-                    <span className="text-white/40 flex-shrink-0 text-xs">
+                    <span className="text-[11px] text-white/35 shrink-0">
                       {r.label}
                     </span>
-                    <span className="font-medium text-white text-right text-xs break-words max-w-[160px]">
+                    <span className="text-[11px] font-semibold text-white text-right max-w-40 wrap-break-word">
                       {r.value}
                     </span>
                   </div>
                 ))}
 
-                {/* Extras */}
                 {(data.details.extras || []).length > 0 && (
-                  <div>
-                    <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wide mb-1.5">
+                  <div className="pt-2 border-t border-white/[0.06]">
+                    <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.15em] mb-1.5">
                       Add-ons
                     </p>
                     {data.details.extras.map((e) => (
                       <div
                         key={e.name}
-                        className="flex justify-between text-xs mb-1"
+                        className="flex justify-between text-[11px] mb-1"
                       >
-                        <span className="text-white/60">
+                        <span className="text-white/50">
                           {e.name} ×{e.qty}
                         </span>
-                        <span className="font-medium text-white">
-                          £
-                          {(
-                            (dynamicRates[clean(e.name || "")] || 0) * e.qty
-                          ).toFixed(2)}
+                        <span className="font-semibold text-white">
+                          £{((dynamicRates[clean(e.name || "")] || 0) * e.qty).toFixed(2)}
                         </span>
                       </div>
                     ))}
@@ -1892,36 +1872,35 @@ const NewBookingPage = () => {
 
               {/* Total */}
               <div
-                className={`px-4 py-4 border-t border-white/10 ${noPaymentRequired ? "bg-[#10B981]/10" : "bg-[#10B981]"}`}
+                className={`px-4 py-4 border-t border-white/[0.06] ${noPaymentRequired ? "bg-emerald-500/10" : "bg-emerald-500"}`}
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <p
-                      className={`text-[10px] font-semibold uppercase tracking-wide ${noPaymentRequired ? "text-[#10B981]" : "text-white/40"}`}
+                      className={`text-[10px] font-black uppercase tracking-[0.12em] ${noPaymentRequired ? "text-emerald-400" : "text-white/60"}`}
                     >
-                      Estimated total
+                      Estimated Total
                     </p>
                     <p
-                      className={`text-2xl font-bold tabular-nums mt-0.5 ${noPaymentRequired ? "text-[#10B981]" : "text-white"}`}
+                      className={`text-2xl font-black tabular-nums mt-0.5 ${noPaymentRequired ? "text-emerald-400" : "text-white"}`}
                     >
                       £{createTotal.toFixed(2)}
                     </p>
                   </div>
                   {noPaymentRequired && (
-                    <span className="text-[10px] font-bold text-[#10B981] bg-[#10B981]/20 border border-[#10B981]/30 px-2 py-1 rounded-full">
-                      Paid
+                    <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+                      PAID
                     </span>
                   )}
                 </div>
                 {!noPaymentRequired && (
-                  <p className="text-[11px] text-white/40 mt-1">
+                  <p className="text-[11px] text-white/50 mt-1">
                     Payment link sent by email on creation
                   </p>
                 )}
               </div>
             </div>
           </div>
-        </div>
       </div>
     </div>
   );
