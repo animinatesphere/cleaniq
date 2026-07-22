@@ -40,24 +40,16 @@
       [
         "expo-updates",
         {
-          "username": "hexcode-dan"
+          "username": "hexmane99"
         }
       ]
     ],
     "runtimeVersion": {
       "policy": "appVersion"
     },
-    "updates": {
-      "url": "https://u.expo.dev/3b274192-4aec-474b-b5c1-4c5a05438455",
-      "enabled": true,
-      "checkAutomatically": "ON_LOAD",
-      "fallbackToCacheTimeout": 30000
-    },
     "extra": {
-      "eas": {
-        "projectId": "3b274192-4aec-474b-b5c1-4c5a05438455"
-      }
+      "eas": {}
     },
-    "owner": "hexcode-dan"
+    "owner": "hexmane99"
   }
 }
