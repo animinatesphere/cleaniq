@@ -709,7 +709,7 @@ export default function Automations() {
           firstName: c.firstName,
           lastName: c.lastName,
           phone: c.phone,
-          enabled,
+          enabled: enable,
         });
         // Replace the guest entry with the new registered record (now has _id)
         setCustomers((prev) =>

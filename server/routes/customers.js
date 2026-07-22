@@ -45,9 +45,9 @@ router.get("/", async (req, res) => {
     // Map registered customers and merge with booking data
     const customersMap = new Map();
 
-    // First add registered customers
+    // First add registered customers (key by lowercase email to avoid case-mismatch duplicates)
     registeredCustomers.forEach((customer) => {
-      customersMap.set(customer.email, {
+      customersMap.set(customer.email.toLowerCase(), {
         _id: customer._id,
         email: customer.email,
         firstName: customer.firstName,
@@ -58,6 +58,7 @@ router.get("/", async (req, res) => {
         totalSpent: 0,
         region: "UK",
         isRegistered: true,
+        crmEmailsEnabled: customer.crmEmailsEnabled !== false,
         createdAt: customer.createdAt,
         lastLoginAt:  customer.lastLoginAt  || null,
         lastLogoutAt: customer.lastLogoutAt || null,
@@ -65,20 +66,22 @@ router.get("/", async (req, res) => {
       });
     });
 
-    // Then merge/add booking data
+    // Then merge/add booking data (also key by lowercase email)
     bookingCustomers.forEach((bookingCustomer) => {
-      if (customersMap.has(bookingCustomer.email)) {
+      const key = (bookingCustomer.email || "").toLowerCase();
+      if (customersMap.has(key)) {
         // Update existing registered customer with booking stats
-        const existing = customersMap.get(bookingCustomer.email);
+        const existing = customersMap.get(key);
         existing.totalBookings = bookingCustomer.totalBookings;
         existing.lastBooking = bookingCustomer.lastBooking;
         existing.totalSpent = bookingCustomer.totalSpent;
         existing.region = bookingCustomer.region || existing.region;
       } else {
         // Add guest customer (only has bookings, not registered)
-        customersMap.set(bookingCustomer.email, {
+        customersMap.set(key, {
           ...bookingCustomer,
           isRegistered: false,
+          crmEmailsEnabled: true,
         });
       }
     });
