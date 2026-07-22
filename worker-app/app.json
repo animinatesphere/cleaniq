@@ -4,7 +4,11 @@
     "slug": "worker-app",
     "scheme": "cleaniqworker",
     "version": "1.2.0",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "orientation": "portrait",
     "icon": "./assets/icon.jpg",
     "userInterfaceStyle": "light",
@@ -48,11 +52,13 @@
       ]
     ],
     "extra": {
-      "eas": {}
+      "eas": {
+        "projectId": "b9f0b0a1-f183-4e8c-8db2-585dd515be49"
+      }
     },
     "owner": "hexmane99",
     "runtimeVersion": {
       "policy": "appVersion"
-    },
+    }
   }
 }

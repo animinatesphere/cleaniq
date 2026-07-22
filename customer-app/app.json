@@ -48,7 +48,9 @@
       "policy": "appVersion"
     },
     "extra": {
-      "eas": {}
+      "eas": {
+        "projectId": "6e8d9497-1c90-41ce-8276-32f0cf142458"
+      }
     },
     "owner": "hexmane99"
   }
