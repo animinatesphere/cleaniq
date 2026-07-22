@@ -72,7 +72,7 @@ const Field = ({ label, required, error, children }) => (
 );
 
 const inputCls = (error) =>
-  `w-full h-9 px-3 text-sm border rounded-xl bg-white/5 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition ${
+  `w-full h-9 px-3 text-sm border rounded-xl bg-[#071D16] text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition ${
     error
       ? "border-rose-400/50 focus:border-rose-400"
       : "border-white/10"
@@ -1197,7 +1197,7 @@ const NewBookingPage = () => {
                   <select
                     value={data.details.hasPet || "No"}
                     onChange={(e) => set("details.hasPet", e.target.value)}
-                    className="h-8 px-2 text-sm border border-white/10 rounded-md bg-white/5 text-white focus:outline-none cursor-pointer"
+                    className="h-8 px-2 text-sm border border-white/10 rounded-md bg-[#071D16] text-white focus:outline-none cursor-pointer"
                   >
                     <option>No</option>
                     <option>Yes</option>

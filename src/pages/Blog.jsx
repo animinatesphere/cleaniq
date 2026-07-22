@@ -98,7 +98,10 @@ const Blog = () => {
         />
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-br mt-12 from-slate-900 via-slate-800 to-slate-900">
+      <div
+        className="min-h-screen bg-white mt-12"
+        style={{ backgroundColor: "#ffffff" }}
+      >
         {/* Navigation Background */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-20 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
@@ -117,16 +120,16 @@ const Blog = () => {
               {/* Badge */}
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 mb-6"
+                className="inline-flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-full px-4 py-2 mb-6"
               >
                 <BookOpen size={16} className="text-primary" />
-                <span className="text-sm font-bold text-white uppercase tracking-widest">
+                <span className="text-sm font-bold text-black uppercase tracking-widest">
                   Expert Insights
                 </span>
               </motion.div>
 
               {/* Main Title */}
-              <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white mb-6 tracking-tight leading-tight">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-black mb-6 tracking-tight leading-tight">
                 Cleaning Tips & <br />
                 <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
                   Industry Insights
@@ -134,7 +137,7 @@ const Blog = () => {
               </h1>
 
               {/* Subtitle */}
-              <p className="text-lg md:text-xl text-slate-300 mb-10 leading-relaxed max-w-3xl mx-auto">
+              <p className="text-lg md:text-xl text-slate-600 mb-10 leading-relaxed max-w-3xl mx-auto">
                 Discover expert advice, proven strategies, and insider tips from
                 Cleaniq professionals to maintain a spotless and healthy home.
               </p>
@@ -155,7 +158,7 @@ const Blog = () => {
                   placeholder="Search articles, tips, and insights..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white/10 backdrop-blur-md border-2 border-white/20 text-white placeholder:text-slate-400 focus:border-primary focus:outline-none font-medium transition-all hover:border-white/30"
+                  className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white border-2 border-slate-200 text-black placeholder:text-slate-400 focus:border-primary focus:outline-none font-medium transition-all hover:border-slate-300 shadow-sm"
                 />
               </motion.div>
             </motion.div>
@@ -177,7 +180,7 @@ const Blog = () => {
                   to={`/blog/${generateBlogSlug(featuredPost._id, featuredPost.title)}`}
                   className="group"
                 >
-                  <div className="relative overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500">
+                  <div className="relative overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 border border-slate-200">
                     {/* Image with Overlay */}
                     {featuredPost.image && (
                       <div className="relative h-96 md:h-125 overflow-hidden">
@@ -198,7 +201,7 @@ const Blog = () => {
                       </span>
                     </div>
 
-                    {/* Content */}
+                    {/* Content (sits on the dark image overlay, so text stays white here) */}
                     <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
                       {/* Meta */}
                       <div className="flex flex-wrap gap-4 md:gap-6 text-white/80 text-sm font-bold mb-6">
@@ -244,7 +247,7 @@ const Blog = () => {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="mb-12"
               >
-                <h2 className="text-3xl md:text-4xl font-black text-white flex items-center gap-3">
+                <h2 className="text-3xl md:text-4xl font-black text-black flex items-center gap-3">
                   <div className="w-1 h-10 bg-gradient-to-b from-primary to-secondary rounded-full" />
                   Latest Articles
                 </h2>
@@ -258,8 +261,8 @@ const Blog = () => {
                 animate={{ opacity: 1 }}
                 className="text-center py-20"
               >
-                <BookOpen size={64} className="mx-auto mb-4 text-slate-500" />
-                <p className="text-slate-300 text-xl font-bold">
+                <BookOpen size={64} className="mx-auto mb-4 text-slate-300" />
+                <p className="text-slate-600 text-xl font-bold">
                   {searchQuery
                     ? "No articles match your search. Try different keywords."
                     : "No blog posts available yet. Check back soon!"}
@@ -279,7 +282,7 @@ const Blog = () => {
                       to={`/blog/${generateBlogSlug(post._id, post.title)}`}
                       className="block h-full"
                     >
-                      <div className="h-full bg-white/5 backdrop-blur border border-white/10 rounded-2xl overflow-hidden hover:border-primary/50 hover:bg-white/10 transition-all duration-300 flex flex-col group-hover:-translate-y-2">
+                      <div className="h-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:border-primary/50 hover:shadow-xl transition-all duration-300 flex flex-col group-hover:-translate-y-2">
                         {/* Image */}
                         {post.image && (
                           <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20">
@@ -302,17 +305,17 @@ const Blog = () => {
                           </div>
 
                           {/* Title */}
-                          <h3 className="text-lg md:text-xl font-black text-white mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+                          <h3 className="text-lg md:text-xl font-black text-black mb-3 line-clamp-2 group-hover:text-primary transition-colors">
                             {post.title}
                           </h3>
 
                           {/* Description */}
-                          <p className="text-slate-300 text-sm md:text-base mb-6 flex-1 line-clamp-3">
+                          <p className="text-slate-600 text-sm md:text-base mb-6 flex-1 line-clamp-3">
                             {post.description}
                           </p>
 
                           {/* Meta */}
-                          <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                          <div className="flex items-center justify-between pt-4 border-t border-slate-200">
                             <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
                               <Clock size={14} />
                               {estimateReadTime(post.content)} min
@@ -345,14 +348,14 @@ const Blog = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
-                className="flex justify-center items-center gap-2 md:gap-3 flex-wrap pt-12 border-t border-white/10"
+                className="flex justify-center items-center gap-2 md:gap-3 flex-wrap pt-12 border-t border-slate-200"
               >
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-lg font-bold border-2 border-white/20 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:bg-primary/10 transition-all"
+                  className="px-4 py-2 rounded-lg font-bold border-2 border-slate-200 text-black disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:bg-primary/10 transition-all"
                 >
                   ← Previous
                 </motion.button>
@@ -378,7 +381,7 @@ const Blog = () => {
                         className={`w-10 h-10 rounded-lg font-bold transition-all ${
                           currentPage === page
                             ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30"
-                            : "border-2 border-white/20 text-white hover:border-primary hover:bg-primary/10"
+                            : "border-2 border-slate-200 text-black hover:border-primary hover:bg-primary/10"
                         }`}
                       >
                         {page}
@@ -394,7 +397,7 @@ const Blog = () => {
                     setCurrentPage(Math.min(totalPages, currentPage + 1))
                   }
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 rounded-lg font-bold border-2 border-white/20 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:bg-primary/10 transition-all"
+                  className="px-4 py-2 rounded-lg font-bold border-2 border-slate-200 text-black disabled:opacity-40 disabled:cursor-not-allowed hover:border-primary hover:bg-primary/10 transition-all"
                 >
                   Next →
                 </motion.button>
