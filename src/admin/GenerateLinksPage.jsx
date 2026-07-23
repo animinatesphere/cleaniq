@@ -98,6 +98,8 @@ const GenerateLinksPage = () => {
   const [toast, setToast] = useState(null);
   const [hours, setHours] = useState("");
   const [hourlyRate, setHourlyRate] = useState("");
+  const [flatAmount, setFlatAmount] = useState("");
+  const [billingMode, setBillingMode] = useState("hourly"); // "hourly" | "flat"
   const [note, setNote] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -114,6 +116,8 @@ const GenerateLinksPage = () => {
     setLinkResult(null);
     setHours("");
     setHourlyRate("");
+    setFlatAmount("");
+    setBillingMode("hourly");
     setNote("");
     try {
       const res = await fetch(
@@ -134,14 +138,29 @@ const GenerateLinksPage = () => {
   /* ── Generate link ──────────────────────────────────────────────── */
   const createLink = async () => {
     if (!booking?._id) return;
-    if (!hours || Number(hours) <= 0) {
-      setToast({ type: "error", message: "Enter valid additional hours" });
-      return;
+
+    let sendHours, sendRate;
+    if (billingMode === "flat") {
+      if (!flatAmount || Number(flatAmount) <= 0) {
+        setToast({ type: "error", message: "Enter a valid flat rate amount" });
+        return;
+      }
+      // Send as 1 hour at flatAmount rate so backend total = flatAmount
+      sendHours = 1;
+      sendRate  = Number(flatAmount);
+    } else {
+      if (!hours || Number(hours) <= 0) {
+        setToast({ type: "error", message: "Enter valid additional hours" });
+        return;
+      }
+      if (!hourlyRate || Number(hourlyRate) <= 0) {
+        setToast({ type: "error", message: "Enter a valid hourly rate" });
+        return;
+      }
+      sendHours = Number(hours);
+      sendRate  = Number(hourlyRate);
     }
-    if (!hourlyRate || Number(hourlyRate) <= 0) {
-      setToast({ type: "error", message: "Enter a valid hourly rate" });
-      return;
-    }
+
     setLoadingLink(true);
     setLinkResult(null);
     try {
@@ -149,14 +168,14 @@ const GenerateLinksPage = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          bookingId: booking._id,
-          additionalHours: Number(hours),
-          hourlyRate: Number(hourlyRate),
+          bookingId:       booking._id,
+          additionalHours: sendHours,
+          hourlyRate:      sendRate,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.message || "Failed to create link");
-      setLinkResult({ ...data, note });
+      setLinkResult({ ...data, note, billingMode, flatAmount: billingMode === "flat" ? Number(flatAmount) : null });
       setToast({ type: "success", message: "Payment link generated" });
     } catch (err) {
       setToast({ type: "error", message: err.message || "Unable to create payment link" });
@@ -204,11 +223,15 @@ const GenerateLinksPage = () => {
 
   /* ── Derived values ─────────────────────────────────────────────── */
   const liveTotal = useMemo(() => {
+    if (billingMode === "flat") {
+      const f = Number(flatAmount);
+      return f > 0 ? f.toFixed(2) : null;
+    }
     const h = Number(hours);
     const r = Number(hourlyRate);
     if (h > 0 && r > 0) return (h * r).toFixed(2);
     return null;
-  }, [hours, hourlyRate]);
+  }, [billingMode, flatAmount, hours, hourlyRate]);
 
   const currentHours = booking?.details?.duration ?? null;
 
@@ -354,34 +377,99 @@ const GenerateLinksPage = () => {
               Link configuration
             </p>
 
-            <div>
-              <label className="block text-xs font-bold text-white/50 mb-2">
-                Additional hours
-              </label>
-              <input
-                value={hours}
-                onChange={(e) => setHours(e.target.value)}
-                type="number"
-                min="0.5"
-                step="0.5"
-                placeholder="e.g. 2"
-                className="w-full px-4 py-3 bg-[#071D16] border border-white/[0.08] rounded-xl text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/60 transition-colors"
-              />
+            {/* Billing mode toggle */}
+            <div className="flex rounded-xl overflow-hidden border border-white/[0.08] bg-[#071D16] p-1 gap-1">
+              <button
+                onClick={() => setBillingMode("hourly")}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                  billingMode === "hourly"
+                    ? "bg-emerald-500 text-white shadow-md"
+                    : "text-white/40 hover:text-white/70"
+                }`}
+              >
+                Hourly
+              </button>
+              <button
+                onClick={() => setBillingMode("flat")}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                  billingMode === "flat"
+                    ? "bg-emerald-500 text-white shadow-md"
+                    : "text-white/40 hover:text-white/70"
+                }`}
+              >
+                Flat Rate
+              </button>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-white/50 mb-2">
-                Hourly rate (£)
-              </label>
-              <input
-                value={hourlyRate}
-                onChange={(e) => setHourlyRate(e.target.value)}
-                type="number"
-                min="1"
-                placeholder="e.g. 35"
-                className="w-full px-4 py-3 bg-[#071D16] border border-white/[0.08] rounded-xl text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/60 transition-colors"
-              />
-            </div>
+            {/* Hourly mode inputs */}
+            {billingMode === "hourly" && (
+              <>
+                <div>
+                  <label className="block text-xs font-bold text-white/50 mb-2">
+                    Additional hours
+                  </label>
+                  <input
+                    value={hours}
+                    onChange={(e) => setHours(e.target.value)}
+                    type="number"
+                    min="0.5"
+                    step="0.5"
+                    placeholder="e.g. 2"
+                    className="w-full px-4 py-3 bg-[#071D16] border border-white/[0.08] rounded-xl text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/60 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-white/50 mb-2">
+                    Hourly rate (£)
+                  </label>
+                  <input
+                    value={hourlyRate}
+                    onChange={(e) => setHourlyRate(e.target.value)}
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 35"
+                    className="w-full px-4 py-3 bg-[#071D16] border border-white/[0.08] rounded-xl text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/60 transition-colors"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Flat rate mode inputs */}
+            {billingMode === "flat" && (
+              <>
+                <div>
+                  <label className="block text-xs font-bold text-white/50 mb-2">
+                    Additional hours
+                  </label>
+                  <input
+                    value={hours}
+                    onChange={(e) => setHours(e.target.value)}
+                    type="number"
+                    min="0.5"
+                    step="0.5"
+                    placeholder="e.g. 2"
+                    className="w-full px-4 py-3 bg-[#071D16] border border-white/[0.08] rounded-xl text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/60 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-white/50 mb-2">
+                    Flat rate amount (£)
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-bold pointer-events-none">£</span>
+                    <input
+                      value={flatAmount}
+                      onChange={(e) => setFlatAmount(e.target.value)}
+                      type="number"
+                      min="1"
+                      placeholder="e.g. 80"
+                      className="w-full pl-8 pr-4 py-3 bg-[#071D16] border border-white/[0.08] rounded-xl text-sm font-medium text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/60 transition-colors"
+                    />
+                  </div>
+                  <p className="text-[10px] text-white/30 mt-1.5">Fixed total charge for the extra hours — overrides the hourly rate calculation.</p>
+                </div>
+              </>
+            )}
 
             <div>
               <label className="block text-xs font-bold text-white/50 mb-2">
@@ -399,7 +487,9 @@ const GenerateLinksPage = () => {
             {/* Live price preview */}
             {liveTotal && (
               <div className="flex items-center justify-between px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                <span className="text-xs font-bold text-emerald-400/80">Total charge</span>
+                <span className="text-xs font-bold text-emerald-400/80">
+                  {billingMode === "flat" ? "Flat charge" : "Total charge"}
+                </span>
                 <span className="text-lg font-black text-emerald-300 tabular-nums">
                   £{liveTotal}
                 </span>
@@ -408,7 +498,7 @@ const GenerateLinksPage = () => {
 
             <button
               onClick={createLink}
-              disabled={loadingLink || !hours || !hourlyRate}
+              disabled={loadingLink || (billingMode === "hourly" ? (!hours || !hourlyRate) : (!hours || !flatAmount))}
               className="mt-auto flex items-center justify-center gap-2 w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {loadingLink ? (
@@ -438,7 +528,7 @@ const GenerateLinksPage = () => {
                 <p className="text-sm font-black text-white">
                   £{Number(linkResult.additionalAmount || 0).toFixed(2)}{" "}
                   <span className="text-white/40 font-semibold text-xs">
-                    · {hours}h extra
+                    · {linkResult.billingMode === "flat" ? "flat rate" : `${hours}h extra`}
                   </span>
                 </p>
               </div>
