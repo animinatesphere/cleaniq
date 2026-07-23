@@ -159,6 +159,67 @@ router.post("/create", async (req, res) => {
   }
 });
 
+// POST /api/customers/create-company — admin creates a company account
+router.post("/create-company", async (req, res) => {
+  try {
+    const { companyName, firstName, lastName, email, phone, password } = req.body;
+    if (!companyName || !firstName || !lastName || !email || !password) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    const existing = await Customer.findOne({ email: email.toLowerCase() });
+    if (existing) {
+      return res.status(409).json({ message: "An account with this email already exists." });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const customer = new Customer({
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      phone: phone || "",
+      passwordHash,
+      role: "company",
+      companyName,
+    });
+    await customer.save();
+
+    await sendEmail({
+      to: email,
+      subject: "Your Cleaniq Services Company Account Is Ready",
+      html: `
+        <div style="font-family:'Segoe UI',sans-serif;max-width:520px;margin:auto;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;background:#fff;">
+          <div style="background:#0F172A;padding:36px;text-align:center;">
+            <h1 style="color:#6EE7B7;margin:0;font-size:22px;font-weight:800;">Cleaniq Services</h1>
+            <p style="color:#94a3b8;margin-top:8px;font-size:14px;">Company Portal Access</p>
+          </div>
+          <div style="padding:40px;color:#1e293b;line-height:1.7;">
+            <h2 style="font-size:18px;margin-top:0;">Hi ${firstName},</h2>
+            <p>A company account has been created for <strong>${companyName}</strong> on Cleaniq Services. You can now post cleaning jobs directly from the app.</p>
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin:24px 0;">
+              <p style="margin:0 0 8px 0;font-size:13px;color:#64748b;">Email address</p>
+              <p style="margin:0 0 20px 0;font-weight:700;font-size:16px;">${email.toLowerCase()}</p>
+              <p style="margin:0 0 8px 0;font-size:13px;color:#64748b;">Password</p>
+              <p style="margin:0;font-weight:700;font-size:16px;letter-spacing:2px;">${password}</p>
+            </div>
+            <p style="font-size:13px;color:#64748b;">Download the Cleaniq app and log in with these credentials to start posting jobs.</p>
+            <div style="margin-top:32px;padding-top:24px;border-top:1px solid #f1f5f9;text-align:center;">
+              <p style="margin:0;font-size:12px;color:#94a3b8;">© 2026 Cleaniq Services. All rights reserved.</p>
+            </div>
+          </div>
+        </div>
+      `,
+    });
+
+    res.status(201).json({
+      message: "Company account created and credentials sent.",
+      customer: { _id: customer._id, firstName, lastName, email: customer.email, companyName, role: "company" },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Update customer info across all their bookings
 router.put("/:email", async (req, res) => {
   try {

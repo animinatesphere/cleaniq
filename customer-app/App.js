@@ -6,7 +6,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
-import { Home, CalendarDays, User } from "lucide-react-native";
+import { Home, CalendarDays, User, Briefcase, LayoutDashboard } from "lucide-react-native";
 import { AuthProvider, AuthContext, API_URL } from "./src/context/AuthContext";
 import OnboardingScreen from "./src/screens/OnboardingScreen";
 import LoginScreen from "./src/screens/LoginScreen";
@@ -16,6 +16,10 @@ import BookingScreen from "./src/screens/BookingScreen";
 import BookingDetailScreen from "./src/screens/BookingDetailScreen";
 import ChatScreen from "./src/screens/ChatScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
+import CompanyDashboardScreen from "./src/screens/CompanyDashboardScreen";
+import CompanyJobsScreen from "./src/screens/CompanyJobsScreen";
+import PostJobScreen from "./src/screens/PostJobScreen";
+import JobDetailScreen from "./src/screens/JobDetailScreen";
 import { C } from "./src/theme/flat";
 
 // Never import expo-notifications at module level — in Expo Go SDK 53 the module
@@ -42,41 +46,50 @@ if (!isExpoGo) {
 const Stack = createNativeStackNavigator();
 const Tab   = createBottomTabNavigator();
 
+const tabBarStyle = {
+  backgroundColor:  "#FFFFFF",
+  borderTopWidth:   0,
+  height:           Platform.OS === "ios" ? 88 : 72,
+  paddingBottom:    Platform.OS === "ios" ? 24 : 10,
+  paddingTop:       10,
+  marginHorizontal: 16,
+  borderRadius:     24,
+  position:         "absolute",
+  bottom:           Platform.OS === "ios" ? 28 : 16,
+  left:             16,
+  right:            16,
+  shadowColor:      "#000",
+  shadowOffset:     { width: 0, height: 4 },
+  shadowOpacity:    0.12,
+  shadowRadius:     16,
+  elevation:        14,
+};
+
+const tabScreenOptions = ({ route, iconMap }) => ({
+  headerShown: false,
+  tabBarIcon: ({ focused, color }) => {
+    const Icon = iconMap[route.name];
+    return Icon ? <Icon size={22} color={color} strokeWidth={focused ? 2.2 : 1.8} /> : null;
+  },
+  tabBarActiveTintColor:   C.primary,
+  tabBarInactiveTintColor: C.textMuted,
+  tabBarStyle,
+  tabBarLabelStyle: { fontSize: 11, fontWeight: "700", marginTop: 3 },
+});
+
 const MainTabs = () => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      headerShown: false,
-      tabBarIcon: ({ focused, color }) => {
-        const icons = { Home, Bookings: CalendarDays, Profile: User };
-        const Icon = icons[route.name];
-        return <Icon size={22} color={color} strokeWidth={focused ? 2.2 : 1.8} />;
-      },
-      tabBarActiveTintColor:   C.primary,
-      tabBarInactiveTintColor: C.textMuted,
-      tabBarStyle: {
-        backgroundColor:  "#FFFFFF",
-        borderTopWidth:   0,
-        height:           Platform.OS === "ios" ? 88 : 72,
-        paddingBottom:    Platform.OS === "ios" ? 24 : 10,
-        paddingTop:       10,
-        marginHorizontal: 16,
-        borderRadius:     24,
-        position:         "absolute",
-        bottom:           Platform.OS === "ios" ? 28 : 16,
-        left:             16,
-        right:            16,
-        shadowColor:      "#000",
-        shadowOffset:     { width: 0, height: 4 },
-        shadowOpacity:    0.12,
-        shadowRadius:     16,
-        elevation:        14,
-      },
-      tabBarLabelStyle: { fontSize: 11, fontWeight: "700", marginTop: 3 },
-    })}
-  >
+  <Tab.Navigator screenOptions={(p) => tabScreenOptions({ ...p, iconMap: { Home, Bookings: CalendarDays, Profile: User } })}>
     <Tab.Screen name="Home"     component={HomeScreen}     options={{ title: "Home" }} />
     <Tab.Screen name="Bookings" component={BookingsScreen} options={{ title: "Bookings" }} />
     <Tab.Screen name="Profile"  component={ProfileScreen}  options={{ title: "Profile" }} />
+  </Tab.Navigator>
+);
+
+const CompanyTabs = () => (
+  <Tab.Navigator screenOptions={(p) => tabScreenOptions({ ...p, iconMap: { Dashboard: LayoutDashboard, Jobs: Briefcase, Profile: User } })}>
+    <Tab.Screen name="Dashboard" component={CompanyDashboardScreen} options={{ title: "Dashboard" }} />
+    <Tab.Screen name="Jobs"      component={CompanyJobsScreen}      options={{ title: "Jobs" }} />
+    <Tab.Screen name="Profile"   component={ProfileScreen}          options={{ title: "Profile" }} />
   </Tab.Navigator>
 );
 
@@ -110,7 +123,7 @@ const registerForPushNotificationsAsync = async () => {
 };
 
 const AppNavigation = () => {
-  const { isLoading, userToken } = useContext(AuthContext);
+  const { isLoading, userToken, customerInfo } = useContext(AuthContext);
   const [hasOnboarded,    setHasOnboarded]    = useState(false);
   const [checkingOnboard, setCheckingOnboard] = useState(true);
   const [goToLogin,       setGoToLogin]       = useState(false);
@@ -178,11 +191,13 @@ const AppNavigation = () => {
         initialRouteName={goToLogin ? "Login" : "Main"}
         screenOptions={{ headerShown: false }}
       >
-        <Stack.Screen name="Main"          component={MainTabs} />
+        <Stack.Screen name="Main"          component={customerInfo?.role === "company" ? CompanyTabs : MainTabs} />
         <Stack.Screen name="Login"         component={LoginScreen} />
         <Stack.Screen name="Booking"       component={BookingScreen} />
         <Stack.Screen name="BookingDetail" component={BookingDetailScreen} />
         <Stack.Screen name="Chat"          component={ChatScreen} />
+        <Stack.Screen name="PostJob"       component={PostJobScreen} />
+        <Stack.Screen name="JobDetail"     component={JobDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

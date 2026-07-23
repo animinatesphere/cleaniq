@@ -193,13 +193,13 @@ router.post('/login', async (req, res) => {
     });
 
     const token = jwt.sign(
-      { id: customer._id, email: customer.email, firstName: customer.firstName, lastName: customer.lastName },
+      { id: customer._id, email: customer.email, firstName: customer.firstName, lastName: customer.lastName, role: customer.role || 'customer' },
       JWT_SECRET,
       { expiresIn: '30d' }
     );
     res.json({
       token,
-      customer: { id: customer._id, firstName: customer.firstName, lastName: customer.lastName, email: customer.email, phone: customer.phone }
+      customer: { id: customer._id, firstName: customer.firstName, lastName: customer.lastName, email: customer.email, phone: customer.phone, role: customer.role || 'customer', companyName: customer.companyName || '' }
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

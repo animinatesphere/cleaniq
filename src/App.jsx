@@ -71,6 +71,7 @@ import DomesticHub from "./admin/DomesticHub";
 import PriceList from "./admin/PriceList";
 import JobDetail from "./admin/JobDetail";
 import Jobs from "./admin/Jobs";
+import CompanyJobs from "./admin/CompanyJobs";
 
 function App() {
   const location = useLocation();
@@ -157,6 +158,7 @@ function App() {
               <Route path="customers/:id" element={<CustomerProfile />} />
               <Route path="jobs" element={<Jobs />} />
               <Route path="jobs/:id" element={<JobDetail />} />
+              <Route path="company-jobs" element={<CompanyJobs />} />
             </Route>
           </Routes>
         </main>

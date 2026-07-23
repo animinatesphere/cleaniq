@@ -3,7 +3,7 @@ import {
   Search, Download, X, Edit3, Save, CheckCircle2, XCircle,
   Trash2, Mail, Phone, MapPin, ShoppingBag, LogIn, LogOut,
   Calendar, Clock, RefreshCw, User, Activity,
-  CreditCard, Globe, AlertTriangle, UserPlus, Eye, EyeOff,
+  CreditCard, Globe, AlertTriangle, UserPlus, Eye, EyeOff, Building2,
 } from "lucide-react";
 import StatDetailDrawer from "./StatDetailDrawer";
 
@@ -83,6 +83,10 @@ const Customers = () => {
   const [createData,      setCreateData]      = useState({ firstName:"", lastName:"", email:"", phone:"", password:"" });
   const [showCreatePw,    setShowCreatePw]    = useState(false);
   const [creating,        setCreating]        = useState(false);
+  const [showCreateCompany,   setShowCreateCompany]   = useState(false);
+  const [companyData,         setCompanyData]         = useState({ companyName:"", firstName:"", lastName:"", email:"", phone:"", password:"" });
+  const [showCompanyPw,       setShowCompanyPw]       = useState(false);
+  const [creatingCompany,     setCreatingCompany]     = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState("overview");
   const [drawer, setDrawer] = useState(null);
 
@@ -190,6 +194,35 @@ const Customers = () => {
     }
   };
 
+  const handleCreateCompany = async () => {
+    const { companyName, firstName, lastName, email, password } = companyData;
+    if (!companyName || !firstName || !lastName || !email || !password) {
+      showToast("Please fill in all required fields", "error");
+      return;
+    }
+    setCreatingCompany(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/customers/create-company`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(companyData),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        await fetchCustomers(true);
+        setShowCreateCompany(false);
+        setCompanyData({ companyName:"", firstName:"", lastName:"", email:"", phone:"", password:"" });
+        showToast("Company account created — login details sent");
+      } else {
+        showToast(data.message || "Failed to create company account", "error");
+      }
+    } catch {
+      showToast("Failed to create company account", "error");
+    } finally {
+      setCreatingCompany(false);
+    }
+  };
+
   const downloadCSV = () => {
     const headers = ["Name","Email","Phone","Region","Bookings","Total Spent","Last Login","Created"];
     const rows    = filtered.map(c => [
@@ -237,7 +270,7 @@ const Customers = () => {
   };
 
   const customerDrawerItem = (c) => (
-    <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.04] transition-colors">
+    <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/4 transition-colors">
       <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0">
         <span className="text-[10px] font-semibold text-emerald-400">
           {((c.firstName?.[0]||"")+(c.lastName?.[0]||"")).toUpperCase()||"?"}
@@ -328,6 +361,56 @@ const Customers = () => {
         </div>
       )}
 
+      {showCreateCompany && (
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#0B2D22] rounded-2xl border border-white/10 shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-sky-500 flex items-center justify-center">
+                  <Building2 size={15} className="text-white" />
+                </div>
+                <h3 className="text-base font-semibold text-white">Create Company Account</h3>
+              </div>
+              <button onClick={() => setShowCreateCompany(false)} className="p-1.5 rounded-md text-white/40 hover:bg-white/10">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <p className="text-sm text-white/70">The company will receive login credentials by email and can post jobs from the customer app.</p>
+              <Input label="Company Name *" placeholder="e.g. Sparkle Cleaning Ltd" value={companyData.companyName} onChange={e => setCompanyData({...companyData, companyName: e.target.value})} />
+              <div className="grid grid-cols-2 gap-3">
+                <Input label="Contact First Name *" placeholder="Jane" value={companyData.firstName} onChange={e => setCompanyData({...companyData, firstName: e.target.value})} />
+                <Input label="Last Name *" placeholder="Smith" value={companyData.lastName} onChange={e => setCompanyData({...companyData, lastName: e.target.value})} />
+              </div>
+              <Input label="Email Address *" type="email" placeholder="jane@company.com" value={companyData.email} onChange={e => setCompanyData({...companyData, email: e.target.value})} />
+              <Input label="Phone (optional)" type="tel" placeholder="+44 7700 000000" value={companyData.phone} onChange={e => setCompanyData({...companyData, phone: e.target.value})} />
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-white/60">Password *</label>
+                <div className="relative">
+                  <input
+                    type={showCompanyPw ? "text" : "password"}
+                    placeholder="Set a temporary password"
+                    value={companyData.password}
+                    onChange={e => setCompanyData({...companyData, password: e.target.value})}
+                    className="w-full h-9 px-3 pr-10 text-sm bg-[#071D16] border border-white/10 text-white placeholder:text-white/20 rounded-xl focus:outline-none focus:border-emerald-500/50 transition"
+                  />
+                  <button type="button" onClick={() => setShowCompanyPw(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70">
+                    {showCompanyPw ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-white/10 flex gap-3 justify-end">
+              <Btn variant="outline" onClick={() => setShowCreateCompany(false)}>Cancel</Btn>
+              <Btn onClick={handleCreateCompany} disabled={creatingCompany} className="bg-sky-500 hover:bg-sky-400">
+                {creatingCompany ? <RefreshCw size={12} className="animate-spin" /> : <Building2 size={12} />}
+                Create Company &amp; Send Email
+              </Btn>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={`flex h-screen overflow-hidden transition-all`}>
 
         <div className={`flex flex-col overflow-hidden transition-all ${selected ? "w-0 md:w-1/2 lg:w-[55%]" : "w-full"}`}>
@@ -348,6 +431,9 @@ const Customers = () => {
                 </Btn>
                 <Btn size="sm" onClick={() => setShowCreate(true)}>
                   <UserPlus size={13}/> Create Account
+                </Btn>
+                <Btn size="sm" variant="outline" onClick={() => setShowCreateCompany(true)}>
+                  <Building2 size={13}/> Create Company
                 </Btn>
               </div>
             </div>

@@ -277,6 +277,12 @@ export const fullMenuGroups = [
         key: "customers",
         icon: <User size={20} />,
       },
+      {
+        name: "Company Jobs",
+        path: "/admin/company-jobs",
+        key: "company-jobs",
+        icon: <Building2 size={20} />,
+      },
     ],
   },
   {
