@@ -34,6 +34,7 @@
         "foregroundImage": "./assets/icon.jpg"
       },
       "permissions": [
+        "android.permission.POST_NOTIFICATIONS",
         "android.permission.POST_NOTIFICATIONS"
       ]
     },
@@ -53,6 +54,9 @@
         "projectId": "6e8d9497-1c90-41ce-8276-32f0cf142458"
       }
     },
-    "owner": "hexmane99"
+    "owner": "hexmane99",
+    "updates": {
+      "url": "https://u.expo.dev/6e8d9497-1c90-41ce-8276-32f0cf142458"
+    }
   }
 }

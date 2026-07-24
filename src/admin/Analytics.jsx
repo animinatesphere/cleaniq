@@ -11,6 +11,11 @@ import {
   Smartphone,
   Monitor,
   Tablet,
+  Building2,
+  HardHat,
+  Activity,
+  Wifi,
+  CheckCircle2,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -90,6 +95,173 @@ const BreakdownList = ({ title, items, renderLabel, valueKey, total }) => (
   </div>
 );
 
+const buildMonthlyData = (customerMonthly = [], workerMonthly = []) => {
+  const now = new Date();
+  const months = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({ year: d.getFullYear(), month: d.getMonth() + 1, label: d.toLocaleDateString("en-GB", { month: "short" }) });
+  }
+  const custMap = {};
+  const compMap = {};
+  const workMap = {};
+  customerMonthly.forEach((r) => {
+    const k = `${r._id.year}-${r._id.month}`;
+    if (r._id.role === "customer") custMap[k] = (custMap[k] || 0) + r.count;
+    else compMap[k] = (compMap[k] || 0) + r.count;
+  });
+  workerMonthly.forEach((r) => {
+    const k = `${r._id.year}-${r._id.month}`;
+    workMap[k] = (workMap[k] || 0) + r.count;
+  });
+  return months.map((m) => {
+    const k = `${m.year}-${m.month}`;
+    return { label: m.label, customers: custMap[k] || 0, companies: compMap[k] || 0, workers: workMap[k] || 0 };
+  });
+};
+
+const AppUsersSection = ({ data }) => {
+  if (!data) return null;
+  const months = buildMonthlyData(data.customerMonthly, data.workerMonthly);
+  const maxVal = Math.max(...months.flatMap((m) => [m.customers, m.companies, m.workers]), 1);
+  const totalActive = data.totals.activeCustomers + data.totals.activeCompanies + data.totals.activeWorkers;
+  const totalDevices = data.totals.devicesCustomerApp + data.totals.devicesWorkerApp;
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <Smartphone size={18} className="text-primary" /> App Users
+        </h2>
+        <p className="text-sm text-white/40 mt-1">Registered users across both mobile apps</p>
+      </div>
+
+      {/* KPI cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <KpiCard icon={Smartphone} label="Customer App Users" value={data.totals.customers.toLocaleString("en-GB")} accent="bg-emerald-500/15 text-emerald-400" />
+        <KpiCard icon={Building2} label="Business Accounts" value={data.totals.companies.toLocaleString("en-GB")} accent="bg-blue-500/15 text-blue-400" />
+        <KpiCard icon={HardHat} label="Worker App Users" value={data.totals.workers.toLocaleString("en-GB")} accent="bg-amber-500/15 text-amber-400" />
+        <KpiCard icon={Activity} label="Active (30 days)" value={totalActive.toLocaleString("en-GB")} accent="bg-violet-500/15 text-violet-400" />
+      </div>
+
+      {/* Monthly signups bar chart */}
+      <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl p-5 sm:p-6">
+        <h3 className="text-sm font-bold text-white mb-1">Monthly Registrations</h3>
+        <p className="text-[11px] text-white/40 mb-5">New signups per month (last 12 months)</p>
+        <div className="flex items-end gap-1 sm:gap-1.5" style={{ height: "112px" }}>
+          {months.map((m, i) => {
+            const cH = (m.customers / maxVal) * 100;
+            const coH = (m.companies / maxVal) * 100;
+            const wH = (m.workers / maxVal) * 100;
+            return (
+              <div key={i} className="flex-1 flex flex-col items-end gap-px" style={{ height: "100%" }}>
+                <div className="w-full flex items-end gap-px flex-1">
+                  <div className="flex-1 bg-emerald-500/70 rounded-t-[2px] transition-all" style={{ height: `${cH}%`, minHeight: m.customers > 0 ? "3px" : "0" }} />
+                  <div className="flex-1 bg-blue-500/70 rounded-t-[2px] transition-all" style={{ height: `${coH}%`, minHeight: m.companies > 0 ? "3px" : "0" }} />
+                  <div className="flex-1 bg-amber-500/70 rounded-t-[2px] transition-all" style={{ height: `${wH}%`, minHeight: m.workers > 0 ? "3px" : "0" }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {/* X-axis labels */}
+        <div className="flex gap-1 sm:gap-1.5 mt-2">
+          {months.map((m, i) => (
+            <div key={i} className="flex-1 text-center">
+              <span className="text-[8px] sm:text-[9px] font-semibold text-white/30">{m.label}</span>
+            </div>
+          ))}
+        </div>
+        {/* Legend */}
+        <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-white/[0.06]">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500/70 shrink-0" />
+            <span className="text-[11px] font-semibold text-white/60">Customers</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-sm bg-blue-500/70 shrink-0" />
+            <span className="text-[11px] font-semibold text-white/60">Companies</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-sm bg-amber-500/70 shrink-0" />
+            <span className="text-[11px] font-semibold text-white/60">Workers</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Device & activity breakdown */}
+      <div className="grid sm:grid-cols-3 gap-4">
+        {/* Customer App */}
+        <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Smartphone size={13} className="text-emerald-400" />
+            <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Customer App</span>
+          </div>
+          <p className="text-2xl font-bold text-white tabular-nums">{data.totals.customers.toLocaleString("en-GB")}</p>
+          <p className="text-[11px] text-white/40 mt-0.5">Total registered users</p>
+          <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-white/50 flex items-center gap-1.5"><Wifi size={11} /> Push-enabled devices</span>
+              <span className="text-[11px] font-bold text-white tabular-nums">{data.totals.devicesCustomerApp.toLocaleString("en-GB")}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-white/50 flex items-center gap-1.5"><Activity size={11} /> Active (30 days)</span>
+              <span className="text-[11px] font-bold text-white tabular-nums">{(data.totals.activeCustomers + data.totals.activeCompanies).toLocaleString("en-GB")}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Worker App */}
+        <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <HardHat size={13} className="text-amber-400" />
+            <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Worker App</span>
+          </div>
+          <p className="text-2xl font-bold text-white tabular-nums">{data.totals.workers.toLocaleString("en-GB")}</p>
+          <p className="text-[11px] text-white/40 mt-0.5">Total registered workers</p>
+          <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-white/50 flex items-center gap-1.5"><Wifi size={11} /> Push-enabled devices</span>
+              <span className="text-[11px] font-bold text-white tabular-nums">{data.totals.devicesWorkerApp.toLocaleString("en-GB")}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-white/50 flex items-center gap-1.5"><CheckCircle2 size={11} /> App access granted</span>
+              <span className="text-[11px] font-bold text-white tabular-nums">{data.totals.activeWorkers.toLocaleString("en-GB")}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Combined totals */}
+        <div className="bg-[#0B2D22] border border-white/[0.08] rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Users size={13} className="text-violet-400" />
+            <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">All Apps Combined</span>
+          </div>
+          <p className="text-2xl font-bold text-white tabular-nums">{(data.totals.customers + data.totals.companies + data.totals.workers).toLocaleString("en-GB")}</p>
+          <p className="text-[11px] text-white/40 mt-0.5">Total registered users</p>
+          <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-white/50 flex items-center gap-1.5"><Wifi size={11} /> All push devices</span>
+              <span className="text-[11px] font-bold text-white tabular-nums">{totalDevices.toLocaleString("en-GB")}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-white/50 flex items-center gap-1.5"><Activity size={11} /> Active (30 days)</span>
+              <span className="text-[11px] font-bold text-white tabular-nums">{totalActive.toLocaleString("en-GB")}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="flex items-center gap-4 pt-2">
+        <div className="flex-1 h-px bg-white/[0.06]" />
+        <span className="text-[11px] font-bold text-white/30 uppercase tracking-wider">Website Analytics</span>
+        <div className="flex-1 h-px bg-white/[0.06]" />
+      </div>
+    </div>
+  );
+};
+
 const Analytics = () => {
   const [days, setDays] = useState(28);
   const [data, setData] = useState(null);
@@ -97,6 +269,7 @@ const Analytics = () => {
   const [error, setError] = useState(false);
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [liveUsers, setLiveUsers] = useState(null);
+  const [appUsers, setAppUsers] = useState(null);
 
   const fetchAnalytics = () => {
     setLoading(true);
@@ -131,6 +304,13 @@ const Analytics = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    fetch(`${API}/analytics/app-users`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((res) => setAppUsers(res))
+      .catch(() => {});
+  }, []);
+
   const trendPoints = useMemo(() => {
     if (!data?.trend?.length) return [];
     const max = Math.max(...data.trend.map((t) => t.activeUsers), 1);
@@ -161,6 +341,21 @@ const Analytics = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
+      {/* App Users section — always visible, no GA4 dependency */}
+      {appUsers ? (
+        <AppUsersSection data={appUsers} />
+      ) : (
+        <div className="space-y-5">
+          <div className="h-6 w-48 bg-white/[0.04] rounded-lg animate-pulse" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-28 bg-white/[0.03] rounded-2xl animate-pulse" />
+            ))}
+          </div>
+          <div className="h-52 bg-white/[0.03] rounded-2xl animate-pulse" />
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
