@@ -5,6 +5,120 @@ const { nanoid } = require("nanoid");
 const Job = require("../models/Job");
 const Booking = require("../models/Booking");
 const Customer = require("../models/Customer");
+const { sendEmail } = require("../utils/emailService");
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "cleaniqservices@gmail.com";
+
+/* ── Email helpers ─────────────────────────────────────────────────────────── */
+const jobSubmittedEmail = (job) => `
+<div style="font-family:'Segoe UI',sans-serif;max-width:600px;margin:auto;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;background:#fff;">
+  <div style="background:#083D2E;padding:36px;text-align:center;">
+    <h1 style="color:#6EE7B7;margin:0;font-size:26px;letter-spacing:-0.5px;">Job Request Received</h1>
+    <p style="color:#94a3b8;margin-top:8px;">We've received your cleaning job request</p>
+  </div>
+  <div style="padding:36px;color:#1e293b;">
+    <p style="font-size:16px;">Hi <strong>${job.company?.name || "there"}</strong>,</p>
+    <p>Your job request has been submitted successfully. Our team will review it and confirm within <strong>24 hours</strong>.</p>
+    <div style="background:#f8fafc;border-radius:16px;padding:24px;margin:24px 0;border:1px solid #e2e8f0;">
+      <p style="margin:0 0 4px;font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Job Reference</p>
+      <p style="margin:0 0 20px;font-size:22px;font-weight:900;color:#0F6B4C;">${job.jobId}</p>
+      <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse:collapse;background:#fff;border-radius:10px;border:1px solid #e2e8f0;">
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="font-size:13px;font-weight:700;color:#64748b;">Service</td>
+          <td align="right" style="font-size:13px;font-weight:700;color:#0F172A;">${job.service}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="font-size:13px;font-weight:700;color:#64748b;">Address</td>
+          <td align="right" style="font-size:13px;font-weight:700;color:#0F172A;">${job.property?.address || "—"}, ${job.property?.postcode || ""}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="font-size:13px;font-weight:700;color:#64748b;">Date</td>
+          <td align="right" style="font-size:13px;font-weight:700;color:#0F172A;">${job.schedule?.date ? new Date(job.schedule.date).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) : "—"}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="font-size:13px;font-weight:700;color:#64748b;">Time Slot</td>
+          <td align="right" style="font-size:13px;font-weight:700;color:#0F172A;">${job.schedule?.timeSlot || "—"}</td>
+        </tr>
+        ${job.contact?.name ? `<tr><td style="font-size:13px;font-weight:700;color:#64748b;">Contact at Property</td><td align="right" style="font-size:13px;font-weight:700;color:#0F172A;">${job.contact.name} · ${job.contact.phone || ""}</td></tr>` : ""}
+      </table>
+    </div>
+    <p style="color:#64748b;font-size:14px;">You'll receive another email once our team approves your job and assigns a cleaner. If you have any questions, reply to this email.</p>
+    <div style="margin-top:32px;padding-top:24px;border-top:1px solid #e2e8f0;text-align:center;">
+      <p style="color:#94a3b8;font-size:12px;margin:0;">Cleaniq Services · cleaniqservices.com</p>
+    </div>
+  </div>
+</div>`;
+
+const jobApprovedEmail = (job, booking) => `
+<div style="font-family:'Segoe UI',sans-serif;max-width:600px;margin:auto;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;background:#fff;">
+  <div style="background:#083D2E;padding:36px;text-align:center;">
+    <div style="width:60px;height:60px;border-radius:50%;background:#6EE7B7;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;">
+      <span style="font-size:28px;">✓</span>
+    </div>
+    <h1 style="color:#6EE7B7;margin:0;font-size:26px;">Job Approved!</h1>
+    <p style="color:#94a3b8;margin-top:8px;">Your cleaning job is confirmed</p>
+  </div>
+  <div style="padding:36px;color:#1e293b;">
+    <p style="font-size:16px;">Hi <strong>${job.company?.name || "there"}</strong>,</p>
+    <p>Great news! Your job request has been <strong style="color:#0F6B4C;">approved</strong> and a booking has been created. We're now finding the best available cleaner for your job.</p>
+    <div style="background:#E4F7EE;border-radius:16px;padding:20px 24px;margin:20px 0;border:1px solid #0F6B4C30;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div>
+          <p style="margin:0;font-size:11px;font-weight:800;color:#0F6B4C;text-transform:uppercase;letter-spacing:1px;">Job Reference</p>
+          <p style="margin:4px 0 0;font-size:20px;font-weight:900;color:#083D2E;">${job.jobId}</p>
+        </div>
+        ${booking ? `<div>
+          <p style="margin:0;font-size:11px;font-weight:800;color:#0F6B4C;text-transform:uppercase;letter-spacing:1px;">Booking Reference</p>
+          <p style="margin:4px 0 0;font-size:20px;font-weight:900;color:#083D2E;">${booking.bookingId}</p>
+        </div>` : ""}
+      </div>
+    </div>
+    <div style="background:#f8fafc;border-radius:16px;padding:24px;margin:20px 0;border:1px solid #e2e8f0;">
+      <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse:collapse;">
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="font-size:13px;font-weight:700;color:#64748b;">Service</td>
+          <td align="right" style="font-size:13px;font-weight:700;color:#0F172A;">${job.service}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="font-size:13px;font-weight:700;color:#64748b;">Date</td>
+          <td align="right" style="font-size:13px;font-weight:700;color:#0F172A;">${job.schedule?.date ? new Date(job.schedule.date).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) : "—"}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="font-size:13px;font-weight:700;color:#64748b;">Time Slot</td>
+          <td align="right" style="font-size:13px;font-weight:700;color:#0F172A;">${job.schedule?.timeSlot || "—"}</td>
+        </tr>
+        <tr>
+          <td style="font-size:13px;font-weight:700;color:#64748b;">Address</td>
+          <td align="right" style="font-size:13px;font-weight:700;color:#0F172A;">${job.property?.address || "—"}</td>
+        </tr>
+      </table>
+    </div>
+    <p style="color:#64748b;font-size:14px;">You'll receive a further update once a cleaner is assigned. If you need to make any changes, please contact us.</p>
+    <div style="margin-top:32px;padding-top:24px;border-top:1px solid #e2e8f0;text-align:center;">
+      <p style="color:#94a3b8;font-size:12px;margin:0;">Cleaniq Services · cleaniqservices.com</p>
+    </div>
+  </div>
+</div>`;
+
+const jobRejectedEmail = (job, reason) => `
+<div style="font-family:'Segoe UI',sans-serif;max-width:600px;margin:auto;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;background:#fff;">
+  <div style="background:#1e0a0a;padding:36px;text-align:center;">
+    <h1 style="color:#FCA5A5;margin:0;font-size:26px;">Job Request Update</h1>
+    <p style="color:#94a3b8;margin-top:8px;">Regarding your recent submission</p>
+  </div>
+  <div style="padding:36px;color:#1e293b;">
+    <p style="font-size:16px;">Hi <strong>${job.company?.name || "there"}</strong>,</p>
+    <p>After reviewing your job request <strong>${job.jobId}</strong>, we're unfortunately unable to fulfil it at this time.</p>
+    <div style="background:#FEF2F2;border-radius:14px;padding:18px 22px;margin:20px 0;border-left:4px solid #EF4444;">
+      <p style="margin:0;font-size:12px;font-weight:800;color:#b91c1c;text-transform:uppercase;letter-spacing:0.5px;">Reason</p>
+      <p style="margin:6px 0 0;font-size:15px;color:#7f1d1d;">${reason || "Please contact us for further information."}</p>
+    </div>
+    <p style="color:#64748b;font-size:14px;">We're sorry for any inconvenience. You're welcome to submit a new request or contact our team if you'd like to discuss this further.</p>
+    <div style="margin-top:32px;padding-top:24px;border-top:1px solid #e2e8f0;text-align:center;">
+      <p style="color:#94a3b8;font-size:12px;margin:0;">Cleaniq Services · cleaniqservices.com</p>
+    </div>
+  </div>
+</div>`;
 
 const JWT_SECRET = process.env.JWT_SECRET || "cleaniq_customer_secret_2024";
 
@@ -58,6 +172,23 @@ router.post("/", verifyCompany, async (req, res) => {
       region:   req.body.region || "",
       notes:    req.body.notes || "",
     });
+
+    // Emails: confirmation to company + notification to admin
+    setImmediate(async () => {
+      try {
+        await sendEmail({
+          to: company.email,
+          subject: `Job Request Received – ${job.jobId}`,
+          html: jobSubmittedEmail(job),
+        });
+        await sendEmail({
+          to: ADMIN_EMAIL,
+          subject: `[New Job] ${job.jobId} – ${job.service} – ${job.company.name}`,
+          html: `<p><strong>New job submitted:</strong> ${job.jobId}</p><p>Company: ${job.company.name}</p><p>Service: ${job.service}</p><p>Date: ${job.schedule?.date ? new Date(job.schedule.date).toDateString() : "—"}</p><p>Address: ${job.property?.address || "—"}</p>`,
+        });
+      } catch (e) { console.error("Job submit email error:", e.message); }
+    });
+
     res.status(201).json(job);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -186,6 +317,25 @@ router.put("/:id/approve", async (req, res) => {
     job.linkedBookingId = booking._id;
     await job.save();
 
+    // Email company
+    setImmediate(async () => {
+      try {
+        await sendEmail({
+          to: job.company.email,
+          subject: `✓ Job Approved – ${job.jobId} | Cleaniq Services`,
+          html: jobApprovedEmail(job, booking),
+        });
+        // Also email the contact person if they have an email
+        if (job.contact?.email && job.contact.email !== job.company.email) {
+          await sendEmail({
+            to: job.contact.email,
+            subject: `Upcoming Cleaning – ${new Date(job.schedule?.date || Date.now()).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})}`,
+            html: `<div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px;background:#f8fafc;border-radius:16px;"><h2 style="color:#0F6B4C;">Hi ${job.contact.name},</h2><p>A cleaning has been arranged at your property:</p><p><strong>Date:</strong> ${job.schedule?.date ? new Date(job.schedule.date).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) : "—"}</p><p><strong>Time:</strong> ${job.schedule?.timeSlot || "—"}</p><p><strong>Service:</strong> ${job.service}</p><p>Our cleaner will contact you on arrival. If you have any questions please contact ${job.company.name}.</p><p style="color:#94a3b8;font-size:12px;margin-top:24px;">Cleaniq Services</p></div>`,
+          });
+        }
+      } catch (e) { console.error("Job approved email error:", e.message); }
+    });
+
     res.json({ job, booking });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -200,6 +350,18 @@ router.put("/:id/reject", async (req, res) => {
     job.status = "rejected";
     job.rejectedReason = req.body.reason || "";
     await job.save();
+
+    // Email company
+    setImmediate(async () => {
+      try {
+        await sendEmail({
+          to: job.company.email,
+          subject: `Job Request Update – ${job.jobId} | Cleaniq Services`,
+          html: jobRejectedEmail(job, job.rejectedReason),
+        });
+      } catch (e) { console.error("Job rejected email error:", e.message); }
+    });
+
     res.json(job);
   } catch (err) {
     res.status(500).json({ message: err.message });

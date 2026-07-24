@@ -1,33 +1,147 @@
 import { useState, useEffect } from "react";
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
-  TouchableOpacity, ActivityIndicator,
+  TouchableOpacity, ActivityIndicator, Platform, Dimensions,
 } from "react-native";
-import { ChevronLeft, MapPin, Calendar, Clock, Briefcase, User, FileText, AlertCircle } from "lucide-react-native";
+import {
+  ChevronLeft, MapPin, Calendar, Clock, Briefcase,
+  User, FileText, AlertCircle, CheckCircle2, Circle,
+  Phone, Home, Repeat, ShoppingBag, PawPrint,
+  UserCheck, Hash, Zap,
+} from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
-import { C, cardShadow } from "../theme/flat";
 
-const STATUS_META = {
-  pending_review: { label: "Pending Review",  color: C.warning,   bg: C.warningBg,   desc: "Our team is reviewing your job and will confirm shortly."         },
-  approved:       { label: "Approved",         color: C.info,      bg: C.infoBg,      desc: "Your job is approved and we're finding the right worker for you." },
-  assigned:       { label: "Worker Assigned",  color: C.purple,    bg: C.purpleBg,    desc: "A worker has been assigned to your job."                         },
-  in_progress:    { label: "In Progress",      color: C.primary,   bg: C.primaryLight,desc: "The cleaner is currently on site."                               },
-  completed:      { label: "Completed",        color: C.success,   bg: C.successBg,   desc: "This job has been completed."                                    },
-  cancelled:      { label: "Cancelled",        color: C.textMuted, bg: C.surfaceAlt,  desc: "This job was cancelled."                                         },
-  rejected:       { label: "Rejected",         color: C.error,     bg: C.errorBg,     desc: "This job was not approved."                                      },
+const { width: SW } = Dimensions.get("window");
+
+/* ─── tokens ─────────────────────────────────────────────────────────────── */
+const G = {
+  primary:      "#0F6B4C",
+  primaryMid:   "#14A66B",
+  primaryLight: "#E4F7EE",
+  bg:           "#F0F5F2",
+  surface:      "#FFFFFF",
+  surfaceAlt:   "#F5FAF7",
+  dark:         "#0F172A",
+  med:          "#475569",
+  muted:        "#94A3B8",
+  border:       "#E2E8F0",
+  error:        "#EF4444", errorBg: "#FEF2F2",
+  warning:      "#F59E0B", warningBg: "#FFFBEB",
+  info:         "#3B82F6", infoBg: "#EFF6FF",
+  purple:       "#7C3AED", purpleBg: "#F5F3FF",
+  success:      "#10B981", successBg: "#D1FAE5",
+  indigo:       "#4F46E5", indigoBg: "#EEF2FF",
+  orange:       "#F97316", orangeBg: "#FFF4ED",
 };
 
-const Row = ({ icon, label, value }) => (
-  <View style={styles.row}>
-    <View style={styles.rowIcon}>{icon}</View>
-    <View style={styles.rowText}>
-      <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={styles.rowValue}>{value || "—"}</Text>
+const sh = Platform.select({
+  ios:     { shadowColor:"#0F172A", shadowOffset:{width:0,height:2}, shadowOpacity:0.07, shadowRadius:12 },
+  android: { elevation:3 },
+  default: {},
+});
+
+const shGreen = Platform.select({
+  ios:     { shadowColor:"#0F6B4C", shadowOffset:{width:0,height:4}, shadowOpacity:0.2, shadowRadius:14 },
+  android: { elevation:6 },
+  default: {},
+});
+
+/* ─── status config ───────────────────────────────────────────────────────── */
+const STATUS = {
+  pending_review: { label:"Pending Review",  color:G.warning,  bg:G.warningBg, desc:"Our team is reviewing your job request."             },
+  approved:       { label:"Approved",         color:G.info,     bg:G.infoBg,   desc:"Approved! We're finding the perfect cleaner for you." },
+  assigned:       { label:"Worker Assigned",  color:G.purple,   bg:G.purpleBg, desc:"A cleaner has been assigned to your job."             },
+  in_progress:    { label:"In Progress",      color:G.primary,  bg:G.primaryLight, desc:"Cleaning is currently underway at the property."  },
+  completed:      { label:"Completed",        color:G.success,  bg:G.successBg,desc:"Your job has been completed successfully."            },
+  cancelled:      { label:"Cancelled",        color:G.muted,    bg:"#F8FAFC",  desc:"This job was cancelled."                             },
+  rejected:       { label:"Rejected",         color:G.error,    bg:G.errorBg,  desc:"This job was not approved by our team."              },
+};
+
+/* Job lifecycle steps — each step has a status key it "activates" at */
+const LIFECYCLE = [
+  { key:"submitted",  label:"Job Submitted",    sub:"We received your request",           activateAt:["pending_review","approved","assigned","in_progress","completed"] },
+  { key:"approved",   label:"Job Approved",      sub:"Our team reviewed & approved",       activateAt:["approved","assigned","in_progress","completed"] },
+  { key:"assigned",   label:"Cleaner Assigned",  sub:"A cleaner is on their way",          activateAt:["assigned","in_progress","completed"] },
+  { key:"arrived",    label:"Cleaner Arrived",   sub:"Arrived at the property",            activateAt:["in_progress","completed"], timeField:"jobArrivedTime" },
+  { key:"started",    label:"Cleaning Started",  sub:"Job commenced on site",              activateAt:["in_progress","completed"], timeField:"jobStartTime"   },
+  { key:"completed",  label:"Job Completed",     sub:"All done!",                          activateAt:["completed"],               timeField:"jobEndTime"    },
+];
+
+const ROOM_KEYS = ["Bedroom","Bathroom","Kitchen","Living Room","Utility Room","Reception Room","Conservatory","Cloakroom"];
+
+const fmtTime = (d) => d
+  ? new Date(d).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })
+  : null;
+
+const fmtDate = (d) => d
+  ? new Date(d).toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", year:"numeric" })
+  : null;
+
+const slotLabel = (s) => ({
+  Morning:  "Morning · 8:00 AM – 12:00 PM",
+  Afternoon:"Afternoon · 12:00 PM – 4:00 PM",
+  Evening:  "Evening · 4:00 PM – 8:00 PM",
+  Flexible: "Flexible time",
+}[s] || s || "Not specified");
+
+/* ─── Live progress step component ─────────────────────────────────────────── */
+const ProgressStep = ({ label, sub, done, active, isLast, time }) => (
+  <View style={ps.row}>
+    {/* Line + dot */}
+    <View style={ps.track}>
+      <View style={[ps.dot, done && ps.dotDone, active && ps.dotActive]}>
+        {done
+          ? <CheckCircle2 size={14} color="#fff" />
+          : <View style={[ps.inner, active && { backgroundColor: G.primary }]} />
+        }
+      </View>
+      {!isLast && <View style={[ps.line, done && { backgroundColor: G.primaryMid }]} />}
+    </View>
+    {/* Content */}
+    <View style={[ps.content, isLast && { paddingBottom: 0 }]}>
+      <Text style={[ps.label, done && { color: G.dark }, active && { color: G.primary }]}>{label}</Text>
+      <Text style={ps.sub}>{time ? `${sub} · ${time}` : sub}</Text>
+      {active && !done && (
+        <View style={ps.activePill}>
+          <View style={ps.activeDot} />
+          <Text style={ps.activeTxt}>Current stage</Text>
+        </View>
+      )}
     </View>
   </View>
 );
 
+const ps = StyleSheet.create({
+  row:       { flexDirection:"row", gap:12 },
+  track:     { alignItems:"center", width:28 },
+  dot:       { width:28, height:28, borderRadius:14, borderWidth:2, borderColor:G.border, backgroundColor:G.surface, alignItems:"center", justifyContent:"center", zIndex:1 },
+  dotDone:   { backgroundColor:G.primaryMid, borderColor:G.primaryMid },
+  dotActive: { borderColor:G.primary, borderWidth:2.5 },
+  inner:     { width:10, height:10, borderRadius:5, backgroundColor:G.muted },
+  line:      { flex:1, width:2, backgroundColor:G.border, marginVertical:3 },
+  content:   { flex:1, paddingBottom:20 },
+  label:     { fontSize:14, fontWeight:"700", color:G.muted, marginBottom:2 },
+  sub:       { fontSize:12, color:G.muted, lineHeight:17 },
+  activePill:{ flexDirection:"row", alignItems:"center", gap:5, marginTop:6, backgroundColor:G.primaryLight, borderRadius:8, paddingHorizontal:9, paddingVertical:5, alignSelf:"flex-start", borderWidth:1, borderColor:G.primary+"30" },
+  activeDot: { width:6, height:6, borderRadius:3, backgroundColor:G.primary },
+  activeTxt: { fontSize:11, fontWeight:"700", color:G.primary },
+});
+
+/* ─── Room tile ─────────────────────────────────────────────────────────────── */
+const RoomTile = ({ label, count }) => (
+  <View style={rt.tile}>
+    <Text style={rt.count}>{count}×</Text>
+    <Text style={rt.label} numberOfLines={2}>{label}</Text>
+  </View>
+);
+const rt = StyleSheet.create({
+  tile:  { width:(SW-68)/4, backgroundColor:G.indigoBg, borderRadius:12, paddingVertical:12, paddingHorizontal:6, alignItems:"center", borderWidth:1.5, borderColor:G.indigo+"30" },
+  count: { fontSize:16, fontWeight:"900", color:G.indigo },
+  label: { fontSize:10, fontWeight:"700", color:G.med, textAlign:"center", marginTop:3, lineHeight:13 },
+});
+
+/* ══ Main screen ═══════════════════════════════════════════════════════════════ */
 export default function JobDetailScreen({ navigation, route }) {
   const { jobId } = route.params;
   const [job,     setJob]     = useState(null);
@@ -39,160 +153,417 @@ export default function JobDetailScreen({ navigation, route }) {
       try {
         const token = await AsyncStorage.getItem("customerToken");
         const res   = await fetch(`${API_URL}/jobs/${jobId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization:`Bearer ${token}` },
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to load job");
         setJob(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { setError(err.message); }
+      finally { setLoading(false); }
     })();
   }, [jobId]);
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.center}><ActivityIndicator size="large" color={C.primary} /></View>
-      </SafeAreaView>
-    );
-  }
+  if (loading) return (
+    <SafeAreaView style={s.safe}>
+      <View style={s.center}><ActivityIndicator size="large" color={G.primary} /></View>
+    </SafeAreaView>
+  );
 
-  if (error || !job) {
-    return (
-      <SafeAreaView style={styles.safe}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <ChevronLeft size={22} color={C.textDark} />
+  if (error || !job) return (
+    <SafeAreaView style={s.safe}>
+      <View style={s.topBar}>
+        <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
+          <ChevronLeft size={20} color={G.dark} />
         </TouchableOpacity>
-        <View style={styles.center}>
-          <AlertCircle size={40} color={C.error} />
-          <Text style={styles.errorTxt}>{error || "Job not found"}</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+      </View>
+      <View style={s.center}>
+        <AlertCircle size={44} color={G.error} strokeWidth={1.5} />
+        <Text style={s.errH}>{error || "Job not found"}</Text>
+        <Text style={s.errT}>Try going back and refreshing the list.</Text>
+      </View>
+    </SafeAreaView>
+  );
 
-  const m = STATUS_META[job.status] || STATUS_META.pending_review;
+  const sm      = STATUS[job.status] || STATUS.pending_review;
+  const rooms   = ROOM_KEYS.filter(k => (job.details?.[k] || 0) > 0);
+  const hasContact = job.contact?.name || job.contact?.phone;
+  const hasPet  = job.details?.hasPet && job.details.hasPet !== "No";
 
-  const dateStr = job.schedule?.date
-    ? new Date(job.schedule.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
-    : null;
+  /* Which lifecycle steps are done / active */
+  const statusOrder = ["pending_review","approved","assigned","in_progress","completed","cancelled","rejected"];
+  const statusIdx   = statusOrder.indexOf(job.status);
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.headerBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <ChevronLeft size={22} color={C.textDark} />
+    <SafeAreaView style={s.safe}>
+      {/* Top bar */}
+      <View style={s.topBar}>
+        <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
+          <ChevronLeft size={20} color={G.dark} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Job Details</Text>
-        <View style={{ width: 36 }} />
+        <View style={{ flex:1, alignItems:"center" }}>
+          <Text style={s.topTitle}>Job Details</Text>
+          <Text style={s.topSub}>{job.jobId}</Text>
+        </View>
+        <View style={{ width:40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Status Banner */}
-        <View style={[styles.statusBanner, { backgroundColor: m.bg }]}>
-          <Text style={[styles.statusLabel, { color: m.color }]}>{m.label}</Text>
-          <Text style={[styles.statusDesc, { color: m.color }]}>{m.desc}</Text>
-          {job.rejectedReason && (
-            <Text style={[styles.rejectedReason, { color: m.color }]}>Reason: {job.rejectedReason}</Text>
-          )}
-        </View>
+      <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
 
-        {/* Job ID */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.jobId}>{job.jobId}</Text>
-            <Text style={styles.jobDate}>
-              Posted {new Date(job.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-            </Text>
+        {/* ── Status hero ─────────────────────────────────────────── */}
+        <View style={[s.hero, { backgroundColor: sm.bg, borderColor: sm.color+"30" }]}>
+          <View style={[s.heroDot, { backgroundColor: sm.color }]} />
+          <View style={{ flex:1 }}>
+            <Text style={[s.heroStatus, { color: sm.color }]}>{sm.label}</Text>
+            <Text style={[s.heroDesc, { color: sm.color }]} numberOfLines={2}>{sm.desc}</Text>
           </View>
-          <Text style={styles.service}>{job.service}</Text>
-        </View>
-
-        {/* Property */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Property</Text>
-          <Row
-            icon={<MapPin size={16} color={C.primary} />}
-            label="Address"
-            value={[job.property?.address, job.property?.postcode].filter(Boolean).join(", ")}
-          />
-          {job.region && (
-            <Row icon={<MapPin size={16} color={C.textMuted} />} label="Region" value={job.region} />
-          )}
-          {(job.details?.bedrooms || job.details?.bathrooms) && (
-            <Row
-              icon={<Briefcase size={16} color={C.textMuted} />}
-              label="Rooms"
-              value={[job.details.bedrooms && `${job.details.bedrooms} bed`, job.details.bathrooms && `${job.details.bathrooms} bath`].filter(Boolean).join(" · ")}
-            />
+          {job.rejectedReason && (
+            <View style={s.heroReason}>
+              <AlertCircle size={14} color={G.error} />
+              <Text style={s.heroReasonTxt}>{job.rejectedReason}</Text>
+            </View>
           )}
         </View>
 
-        {/* Schedule */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Schedule</Text>
-          {dateStr && <Row icon={<Calendar size={16} color={C.primary} />} label="Date" value={dateStr} />}
-          {job.schedule?.preferredTime && (
-            <Row icon={<Clock size={16} color={C.textMuted} />} label="Time" value={job.schedule.preferredTime} />
-          )}
-          {job.details?.duration && (
-            <Row icon={<Clock size={16} color={C.textMuted} />} label="Duration" value={`${job.details.duration} hours`} />
-          )}
-        </View>
-
-        {/* Worker (only show if assigned) */}
-        {job.assignedWorkerName && (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Assigned Worker</Text>
-            <View style={styles.workerRow}>
-              <View style={styles.workerAvatar}>
-                <Text style={styles.workerInitial}>{job.assignedWorkerName[0]}</Text>
+        {/* ── Job header card ─────────────────────────────────────── */}
+        <View style={s.card}>
+          <View style={s.jobHead}>
+            <View style={s.jobIconWrap}>
+              <Briefcase size={22} color={G.primary} strokeWidth={1.8} />
+            </View>
+            <View style={{ flex:1 }}>
+              <Text style={s.jobService} numberOfLines={2}>{job.service}</Text>
+              <View style={s.jobMeta}>
+                <Text style={s.jobId}>{job.jobId}</Text>
+                <Text style={s.jobPosted}>
+                  · Posted {new Date(job.createdAt).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" })}
+                </Text>
               </View>
-              <Text style={styles.workerName}>{job.assignedWorkerName}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* ── Live progress timeline ───────────────────────────────── */}
+        <View style={s.card}>
+          <Text style={s.secTitle}>Job Progress</Text>
+          <View style={{ marginTop: 6 }}>
+            {LIFECYCLE.map((step, i) => {
+              const done   = step.activateAt.includes(job.status);
+              const active = !done && (() => {
+                const prevStep = LIFECYCLE[i - 1];
+                return prevStep && prevStep.activateAt.includes(job.status);
+              })();
+              const time = step.timeField ? fmtTime(job[step.timeField]) : null;
+              return (
+                <ProgressStep
+                  key={step.key}
+                  label={step.label}
+                  sub={step.sub}
+                  done={done}
+                  active={active}
+                  isLast={i === LIFECYCLE.length - 1}
+                  time={time}
+                />
+              );
+            })}
+          </View>
+        </View>
+
+        {/* ── Assigned Worker + Location ──────────────────────────── */}
+        {job.assignedWorkerName && (
+          <View style={s.card}>
+            {/* Worker identity */}
+            <View style={s.workerCard}>
+              <View style={s.workerAvatar}>
+                <Text style={s.workerInitial}>{job.assignedWorkerName[0]?.toUpperCase()}</Text>
+              </View>
+              <View style={{ flex:1 }}>
+                <Text style={s.workerSub}>Your Assigned Cleaner</Text>
+                <Text style={s.workerName}>{job.assignedWorkerName}</Text>
+                {job.status === "in_progress" && (
+                  <View style={s.liveTag}>
+                    <View style={s.liveDot} />
+                    <Text style={s.liveTxt}>Currently cleaning</Text>
+                  </View>
+                )}
+                {job.status === "assigned" && (
+                  <View style={[s.liveTag, { backgroundColor:"#EFF6FF", borderColor:"#BFDBFE" }]}>
+                    <View style={[s.liveDot, { backgroundColor:G.info }]} />
+                    <Text style={[s.liveTxt, { color:G.info }]}>Heading to your property</Text>
+                  </View>
+                )}
+              </View>
+              <CheckCircle2 size={22} color={G.primary} />
+            </View>
+
+            {/* Worker location / property address */}
+            {(job.property?.address || job.property?.postcode) && (
+              <View style={s.locationCard}>
+                <View style={s.locationHeader}>
+                  <MapPin size={15} color={G.primary} />
+                  <Text style={s.locationTitle}>
+                    {job.status === "in_progress"
+                      ? "Cleaner is currently at"
+                      : job.status === "assigned"
+                      ? "Cleaner is heading to"
+                      : job.status === "completed"
+                      ? "Job completed at"
+                      : "Property address"}
+                  </Text>
+                  {job.status === "in_progress" && (
+                    <View style={s.liveIndicator}>
+                      <View style={s.livePing} />
+                      <Text style={s.livePingTxt}>LIVE</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={s.locationAddr}>{job.property?.address}</Text>
+                {job.property?.postcode && (
+                  <Text style={s.locationPost}>{job.property.postcode}</Text>
+                )}
+                {job.region && (
+                  <Text style={s.locationRegion}>{job.region}</Text>
+                )}
+                {/* Arrival/start times */}
+                {job.jobArrivedTime && (
+                  <View style={s.locationTime}>
+                    <CheckCircle2 size={13} color={G.success} />
+                    <Text style={s.locationTimeTxt}>
+                      Arrived {new Date(job.jobArrivedTime).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}
+                    </Text>
+                  </View>
+                )}
+                {job.jobStartTime && (
+                  <View style={s.locationTime}>
+                    <CheckCircle2 size={13} color={G.primary} />
+                    <Text style={s.locationTimeTxt}>
+                      Started cleaning {new Date(job.jobStartTime).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* ── Contact at Property ─────────────────────────────────── */}
+        {hasContact && (
+          <View style={[s.card, { borderWidth:1.5, borderColor:G.orange+"40" }]}>
+            <View style={s.contactHead}>
+              <View style={[s.iconWrap, { backgroundColor: G.orangeBg }]}>
+                <UserCheck size={17} color={G.orange} />
+              </View>
+              <View style={{ flex:1 }}>
+                <Text style={s.secTitle}>Contact at Property</Text>
+                <Text style={[s.hint, { color:G.orange }]}>This is who the cleaner will ask for on arrival</Text>
+              </View>
+            </View>
+            <View style={s.contactGrid}>
+              {job.contact?.name && (
+                <View style={s.contactItem}>
+                  <User size={14} color={G.muted} />
+                  <View>
+                    <Text style={s.contactLbl}>Name</Text>
+                    <Text style={s.contactVal}>{job.contact.name}</Text>
+                  </View>
+                </View>
+              )}
+              {job.contact?.phone && (
+                <View style={s.contactItem}>
+                  <Phone size={14} color={G.muted} />
+                  <View>
+                    <Text style={s.contactLbl}>Phone</Text>
+                    <Text style={[s.contactVal, { color:G.primary }]}>{job.contact.phone}</Text>
+                  </View>
+                </View>
+              )}
+              {job.contact?.email && (
+                <View style={s.contactItem}>
+                  <Text style={s.contactLbl}>Email</Text>
+                  <Text style={[s.contactVal, { color:G.info }]}>{job.contact.email}</Text>
+                </View>
+              )}
             </View>
           </View>
         )}
 
-        {/* Notes */}
-        {job.notes ? (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Notes</Text>
-            <Row icon={<FileText size={16} color={C.textMuted} />} label="Instructions" value={job.notes} />
+        {/* ── Property & Schedule ─────────────────────────────────── */}
+        <View style={s.card}>
+          <Text style={s.secTitle}>Location & Schedule</Text>
+
+          <IconRow icon={<MapPin size={16} color={G.primary} />} label="Address">
+            <Text style={s.rowVal}>{[job.property?.address, job.property?.postcode].filter(Boolean).join(", ")}</Text>
+            {job.region && <Text style={s.rowSub}>{job.region}</Text>}
+          </IconRow>
+
+          {job.schedule?.date && (
+            <IconRow icon={<Calendar size={16} color={G.primary} />} label="Scheduled Date">
+              <Text style={s.rowVal}>{fmtDate(job.schedule.date)}</Text>
+            </IconRow>
+          )}
+
+          {(job.schedule?.timeSlot || job.schedule?.preferredTime) && (
+            <IconRow icon={<Clock size={16} color={G.primary} />} label="Time Slot">
+              <Text style={s.rowVal}>{slotLabel(job.schedule?.timeSlot)}</Text>
+              {job.schedule?.preferredTime && (
+                <Text style={s.rowSub}>Preferred: {job.schedule.preferredTime}</Text>
+              )}
+            </IconRow>
+          )}
+
+          {job.details?.duration && (
+            <IconRow icon={<Zap size={16} color={G.primary} />} label="Duration" last>
+              <Text style={s.rowVal}>{job.details.duration} hour{job.details.duration !== 1 ? "s" : ""}</Text>
+            </IconRow>
+          )}
+        </View>
+
+        {/* ── Room breakdown ──────────────────────────────────────── */}
+        {rooms.length > 0 && (
+          <View style={s.card}>
+            <View style={s.contactHead}>
+              <View style={[s.iconWrap, { backgroundColor:G.indigoBg }]}>
+                <Home size={17} color={G.indigo} />
+              </View>
+              <Text style={s.secTitle}>Property Rooms</Text>
+            </View>
+            <View style={s.roomGrid}>
+              {rooms.map(k => (
+                <RoomTile key={k} label={k} count={job.details[k]} />
+              ))}
+            </View>
+            {hasPet && (
+              <View style={s.petRow}>
+                <Text style={s.petEmoji}>🐾</Text>
+                <View>
+                  <Text style={[s.rowVal, { color:G.warning }]}>Pet on Premises</Text>
+                  <Text style={s.rowSub}>Cleaner is aware of this</Text>
+                </View>
+              </View>
+            )}
           </View>
-        ) : null}
+        )}
+
+        {/* ── Service details ─────────────────────────────────────── */}
+        {(job.details?.frequency || job.details?.suppliesProvidedBy) && (
+          <View style={s.card}>
+            <Text style={s.secTitle}>Service Details</Text>
+            {job.details?.frequency && (
+              <IconRow icon={<Repeat size={16} color={G.primary} />} label="Frequency">
+                <Text style={s.rowVal}>{job.details.frequency}</Text>
+              </IconRow>
+            )}
+            {job.details?.suppliesProvidedBy && (
+              <IconRow icon={<ShoppingBag size={16} color={G.primary} />} label="Supplies" last>
+                <Text style={s.rowVal}>Provided by {job.details.suppliesProvidedBy}</Text>
+              </IconRow>
+            )}
+          </View>
+        )}
+
+        {/* ── Notes ──────────────────────────────────────────────── */}
+        {job.notes && (
+          <View style={s.card}>
+            <View style={s.contactHead}>
+              <View style={[s.iconWrap, { backgroundColor:G.surfaceAlt }]}>
+                <FileText size={17} color={G.muted} />
+              </View>
+              <Text style={s.secTitle}>Notes & Instructions</Text>
+            </View>
+            <View style={s.notesBox}>
+              <Text style={s.notesText}>"{job.notes}"</Text>
+            </View>
+          </View>
+        )}
+
+        <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  safe:          { flex: 1, backgroundColor: C.bg },
-  center:        { flex: 1, alignItems: "center", justifyContent: "center" },
-  headerBar:     { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8 },
-  backBtn:       { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
-  headerTitle:   { fontSize: 17, fontWeight: "800", color: C.textDark },
-  scroll:        { paddingHorizontal: 16, paddingBottom: 40, paddingTop: 4, gap: 12 },
-  statusBanner:  { borderRadius: 14, padding: 16 },
-  statusLabel:   { fontSize: 15, fontWeight: "800", marginBottom: 4 },
-  statusDesc:    { fontSize: 13, fontWeight: "500", lineHeight: 18 },
-  rejectedReason:{ fontSize: 13, fontWeight: "600", marginTop: 8 },
-  card:          { backgroundColor: C.surface, borderRadius: 14, padding: 16, ...cardShadow },
-  cardHeader:    { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 },
-  jobId:         { fontSize: 13, color: C.primary, fontWeight: "700" },
-  jobDate:       { fontSize: 12, color: C.textMuted },
-  service:       { fontSize: 20, fontWeight: "800", color: C.textDark },
-  sectionTitle:  { fontSize: 13, fontWeight: "700", color: C.textMuted, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 },
-  row:           { flexDirection: "row", alignItems: "flex-start", marginBottom: 12 },
-  rowIcon:       { width: 28, marginTop: 1 },
-  rowText:       { flex: 1 },
-  rowLabel:      { fontSize: 11, color: C.textMuted, fontWeight: "600", marginBottom: 2 },
-  rowValue:      { fontSize: 14, color: C.textDark, fontWeight: "600", lineHeight: 20 },
-  workerRow:     { flexDirection: "row", alignItems: "center", gap: 12 },
-  workerAvatar:  { width: 40, height: 40, borderRadius: 20, backgroundColor: C.primaryLight, alignItems: "center", justifyContent: "center" },
-  workerInitial: { fontSize: 18, fontWeight: "800", color: C.primary },
-  workerName:    { fontSize: 16, fontWeight: "700", color: C.textDark },
-  errorTxt:      { fontSize: 15, color: C.textMed, marginTop: 12 },
+/* ─── IconRow helper ────────────────────────────────────────────────────────── */
+const IconRow = ({ icon, label, children, last }) => (
+  <View style={[ir.row, !last && { borderBottomWidth:1, borderBottomColor:G.border }]}>
+    <View style={ir.iconWrap}>{icon}</View>
+    <View style={{ flex:1 }}>
+      <Text style={ir.label}>{label}</Text>
+      {children}
+    </View>
+  </View>
+);
+const ir = StyleSheet.create({
+  row:     { flexDirection:"row", alignItems:"flex-start", paddingVertical:14, gap:12 },
+  iconWrap:{ width:32, height:32, borderRadius:9, backgroundColor:G.primaryLight, alignItems:"center", justifyContent:"center", flexShrink:0 },
+  label:   { fontSize:10, fontWeight:"700", color:G.muted, textTransform:"uppercase", letterSpacing:0.7, marginBottom:4 },
+});
+
+/* ─── Styles ────────────────────────────────────────────────────────────────── */
+const s = StyleSheet.create({
+  safe:    { flex:1, backgroundColor:G.bg },
+  center:  { flex:1, alignItems:"center", justifyContent:"center", padding:24 },
+  errH:    { fontSize:17, fontWeight:"700", color:G.dark, marginTop:14 },
+  errT:    { fontSize:14, color:G.muted, marginTop:6, textAlign:"center" },
+
+  topBar:  { flexDirection:"row", alignItems:"center", backgroundColor:G.surface, paddingHorizontal:16, paddingTop:Platform.OS==="android"?12:6, paddingBottom:12, borderBottomWidth:1, borderBottomColor:G.border, ...sh },
+  backBtn: { width:40, height:40, borderRadius:12, backgroundColor:G.surfaceAlt, alignItems:"center", justifyContent:"center", borderWidth:1, borderColor:G.border },
+  topTitle:{ fontSize:17, fontWeight:"800", color:G.dark },
+  topSub:  { fontSize:11, color:G.primary, fontWeight:"700", marginTop:1 },
+
+  scroll:  { paddingHorizontal:16, paddingTop:16, gap:14 },
+
+  hero:    { borderRadius:18, padding:16, flexDirection:"row", alignItems:"flex-start", gap:12, borderWidth:1.5 },
+  heroDot: { width:10, height:10, borderRadius:5, marginTop:5, flexShrink:0 },
+  heroStatus: { fontSize:16, fontWeight:"800", marginBottom:4 },
+  heroDesc:   { fontSize:13, fontWeight:"500", lineHeight:18 },
+  heroReason: { flexDirection:"row", gap:6, alignItems:"center", marginTop:10, backgroundColor:"rgba(0,0,0,0.05)", borderRadius:8, padding:8 },
+  heroReasonTxt: { fontSize:12, color:G.error, fontWeight:"600", flex:1 },
+
+  card:    { backgroundColor:G.surface, borderRadius:20, padding:18, ...sh },
+  secTitle:{ fontSize:13, fontWeight:"800", color:G.dark, textTransform:"uppercase", letterSpacing:0.5, marginBottom:12 },
+  hint:    { fontSize:11, fontWeight:"600", marginTop:2 },
+
+  jobHead: { flexDirection:"row", alignItems:"center", gap:14 },
+  jobIconWrap: { width:50, height:50, borderRadius:14, backgroundColor:G.primaryLight, alignItems:"center", justifyContent:"center", flexShrink:0, borderWidth:1.5, borderColor:G.primary+"30" },
+  jobService:{ fontSize:18, fontWeight:"800", color:G.dark, lineHeight:24 },
+  jobMeta: { flexDirection:"row", alignItems:"center", marginTop:5, flexWrap:"wrap", gap:4 },
+  jobId:   { fontSize:12, color:G.primary, fontWeight:"700" },
+  jobPosted:{ fontSize:12, color:G.muted },
+
+  workerCard: { flexDirection:"row", alignItems:"center", gap:14, marginBottom:14 },
+  workerAvatar:{ width:52, height:52, borderRadius:26, backgroundColor:G.primary, alignItems:"center", justifyContent:"center", flexShrink:0 },
+  workerInitial:{ fontSize:22, fontWeight:"900", color:"#fff" },
+  workerSub:  { fontSize:10, fontWeight:"700", color:G.primary, textTransform:"uppercase", letterSpacing:0.6, marginBottom:3 },
+  workerName: { fontSize:17, fontWeight:"800", color:G.dark },
+  liveTag:  { flexDirection:"row", alignItems:"center", gap:5, marginTop:6, backgroundColor:G.primaryLight, borderRadius:8, paddingHorizontal:9, paddingVertical:4, alignSelf:"flex-start", borderWidth:1, borderColor:G.primary+"30" },
+  liveDot:  { width:6, height:6, borderRadius:3, backgroundColor:G.primary },
+  liveTxt:  { fontSize:11, color:G.primary, fontWeight:"700" },
+
+  locationCard:  { backgroundColor:G.primaryLight, borderRadius:14, padding:14, borderWidth:1.5, borderColor:G.primary+"30" },
+  locationHeader:{ flexDirection:"row", alignItems:"center", gap:7, marginBottom:10 },
+  locationTitle: { fontSize:11, fontWeight:"700", color:G.primary, textTransform:"uppercase", letterSpacing:0.5, flex:1 },
+  locationAddr:  { fontSize:16, fontWeight:"800", color:G.dark, lineHeight:22, marginBottom:3 },
+  locationPost:  { fontSize:13, fontWeight:"600", color:G.med, marginBottom:2 },
+  locationRegion:{ fontSize:12, fontWeight:"600", color:G.muted },
+  locationTime:  { flexDirection:"row", alignItems:"center", gap:6, marginTop:8, paddingTop:8, borderTopWidth:1, borderTopColor:G.primary+"20" },
+  locationTimeTxt:{ fontSize:12, fontWeight:"600", color:G.med },
+  liveIndicator: { flexDirection:"row", alignItems:"center", gap:4, backgroundColor:G.primary, borderRadius:6, paddingHorizontal:6, paddingVertical:2 },
+  livePing:      { width:6, height:6, borderRadius:3, backgroundColor:"#fff" },
+  livePingTxt:   { fontSize:9, fontWeight:"900", color:"#fff", letterSpacing:0.5 },
+
+  contactHead:{ flexDirection:"row", alignItems:"center", gap:10, marginBottom:14 },
+  iconWrap:   { width:36, height:36, borderRadius:10, alignItems:"center", justifyContent:"center", flexShrink:0 },
+  contactGrid:{ gap:10 },
+  contactItem:{ flexDirection:"row", alignItems:"flex-start", gap:10, backgroundColor:G.surfaceAlt, borderRadius:12, padding:12 },
+  contactLbl: { fontSize:10, fontWeight:"700", color:G.muted, textTransform:"uppercase", letterSpacing:0.5, marginBottom:2 },
+  contactVal: { fontSize:14, fontWeight:"700", color:G.dark },
+
+  rowVal:  { fontSize:14, fontWeight:"700", color:G.dark, lineHeight:20 },
+  rowSub:  { fontSize:12, color:G.muted, marginTop:3, lineHeight:17 },
+
+  roomGrid:{ flexDirection:"row", flexWrap:"wrap", gap:8, marginBottom:4 },
+  petRow:  { flexDirection:"row", alignItems:"center", gap:10, marginTop:12, paddingTop:12, borderTopWidth:1, borderTopColor:G.border },
+  petEmoji:{ fontSize:22 },
+
+  notesBox:{ backgroundColor:G.surfaceAlt, borderRadius:12, padding:14, borderWidth:1.5, borderColor:G.border },
+  notesText:{ fontSize:14, color:G.med, lineHeight:22, fontStyle:"italic" },
 });

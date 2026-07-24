@@ -705,12 +705,13 @@ export default function PostJobScreen({ navigation }) {
           ref={scrollRef}
           contentContainerStyle={s.scroll}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps="always"
+          keyboardDismissMode="none"
         >
-          {step===1 && <Step1/>}
-          {step===2 && <Step2/>}
-          {step===3 && <Step3/>}
-          {step===4 && <Step4/>}
+          {step===1 && Step1()}
+          {step===2 && Step2()}
+          {step===3 && Step3()}
+          {step===4 && Step4()}
           <View style={{height:110}}/>
         </ScrollView>
 
