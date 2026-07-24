@@ -126,7 +126,6 @@ const AppNavigation = () => {
   const { isLoading, userToken, customerInfo } = useContext(AuthContext);
   const [hasOnboarded,    setHasOnboarded]    = useState(false);
   const [checkingOnboard, setCheckingOnboard] = useState(true);
-  const [goToLogin,       setGoToLogin]       = useState(false);
   const notifListener    = useRef();
   const responseListener = useRef();
 
@@ -179,7 +178,7 @@ const AppNavigation = () => {
     return (
       <OnboardingScreen
         onFinished={() => setHasOnboarded(true)}
-        onLogin={() => { setGoToLogin(true); setHasOnboarded(true); }}
+        onLogin={() => setHasOnboarded(true)}
       />
     );
   }
@@ -187,17 +186,19 @@ const AppNavigation = () => {
   return (
     <NavigationContainer>
       <StatusBar style="light" />
-      <Stack.Navigator
-        initialRouteName={goToLogin ? "Login" : "Main"}
-        screenOptions={{ headerShown: false }}
-      >
-        <Stack.Screen name="Main"          component={customerInfo?.role === "company" ? CompanyTabs : MainTabs} />
-        <Stack.Screen name="Login"         component={LoginScreen} />
-        <Stack.Screen name="Booking"       component={BookingScreen} />
-        <Stack.Screen name="BookingDetail" component={BookingDetailScreen} />
-        <Stack.Screen name="Chat"          component={ChatScreen} />
-        <Stack.Screen name="PostJob"       component={PostJobScreen} />
-        <Stack.Screen name="JobDetail"     component={JobDetailScreen} />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!userToken ? (
+          <Stack.Screen name="Login" component={LoginScreen} />
+        ) : (
+          <>
+            <Stack.Screen name="Main"          component={customerInfo?.role === "company" ? CompanyTabs : MainTabs} />
+            <Stack.Screen name="Booking"       component={BookingScreen} />
+            <Stack.Screen name="BookingDetail" component={BookingDetailScreen} />
+            <Stack.Screen name="Chat"          component={ChatScreen} />
+            <Stack.Screen name="PostJob"       component={PostJobScreen} />
+            <Stack.Screen name="JobDetail"     component={JobDetailScreen} />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );
