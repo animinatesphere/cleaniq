@@ -16,6 +16,11 @@ const jobSchema = new mongoose.Schema({
     timeSlot:      String,
     preferredTime: String,
   },
+  contact: {
+    name:  { type: String, default: "" },
+    phone: { type: String, default: "" },
+    email: { type: String, default: "" },
+  },
   region:   { type: String, default: "" },
   notes:    { type: String, default: "" },
   status: {

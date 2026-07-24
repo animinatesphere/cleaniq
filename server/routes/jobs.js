@@ -51,6 +51,7 @@ router.post("/", verifyCompany, async (req, res) => {
         phone: company.phone,
       },
       service:  req.body.service,
+      contact:  req.body.contact  || {},
       details:  req.body.details,
       property: req.body.property,
       schedule: req.body.schedule,
@@ -68,6 +69,60 @@ router.get("/my", verifyCompany, async (req, res) => {
   try {
     const jobs = await Job.find({ "company.id": req.customer.id }).sort({ createdAt: -1 });
     res.json(jobs);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/jobs/slots?date=YYYY-MM-DD — available time slots for a date
+router.get("/slots", verifyCompany, async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date) return res.status(400).json({ message: "date is required" });
+
+    const dayStart = new Date(date + "T00:00:00.000Z");
+    const dayEnd   = new Date(date + "T23:59:59.999Z");
+
+    const bookings = await Booking.find({
+      "schedule.date": { $gte: dayStart, $lte: dayEnd },
+      status: { $nin: ["Cancelled"] },
+    });
+
+    const takenSlots = new Set();
+    const takenTimes = new Set();
+
+    bookings.forEach(b => {
+      const slot = b.schedule?.timeSlot;
+      if (slot && slot !== "Flexible") takenSlots.add(slot);
+      if (slot === "Flexible" && b.schedule?.preferredTime) {
+        takenTimes.add(b.schedule.preferredTime);
+        const [h] = b.schedule.preferredTime.split(":").map(Number);
+        if      (h < 12) takenSlots.add("Morning");
+        else if (h < 16) takenSlots.add("Afternoon");
+        else             takenSlots.add("Evening");
+      }
+    });
+
+    const ALL_SLOTS = ["Morning", "Afternoon", "Evening"];
+    const available = ALL_SLOTS.filter(s => !takenSlots.has(s));
+
+    // All 30-min specific times 08:00 – 20:00
+    const allTimes = [];
+    for (let h = 8; h < 20; h++) {
+      allTimes.push(`${String(h).padStart(2, "0")}:00`);
+      allTimes.push(`${String(h).padStart(2, "0")}:30`);
+    }
+    allTimes.push("20:00");
+
+    const availableTimes = allTimes.filter(t => !takenTimes.has(t));
+
+    res.json({
+      available,
+      taken:          [...takenSlots],
+      takenTimes:     [...takenTimes],
+      availableTimes,
+      bookingCount:   bookings.length,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -111,10 +166,10 @@ router.put("/:id/approve", async (req, res) => {
     const booking = await Booking.create({
       bookingId,
       customer: {
-        firstName: job.company.name,
+        firstName: job.contact?.name  || job.company.name,
         lastName:  "",
-        email:     job.company.email,
-        phone:     job.company.phone,
+        email:     job.contact?.email || job.company.email,
+        phone:     job.contact?.phone || job.company.phone,
       },
       service:  job.service,
       details:  job.details,
