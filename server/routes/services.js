@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Service = require("../models/Service");
+const SystemSetting = require("../models/SystemSetting");
 const { moveToTrash } = require("../utils/trash");
 
 // Get all services for a region
@@ -8,13 +9,11 @@ router.get("/", async (req, res) => {
   try {
     const { region } = req.query;
     const filter = region ? { region } : {};
-    // Sort by updatedAt desc to get newest first
     const services = await Service.find(filter).sort({ updatedAt: -1 });
 
     // Deduplicate by trimmed name
     const uniqueServices = [];
     const seenNames = new Set();
-
     services.forEach((s) => {
       const trimmedName = s.name.trim();
       if (!seenNames.has(trimmedName)) {
@@ -22,6 +21,22 @@ router.get("/", async (req, res) => {
         uniqueServices.push(s);
       }
     });
+
+    // Strip prices for unauthenticated requests when the toggle is off
+    const isAuthenticated = Boolean(req.headers.authorization);
+    if (!isAuthenticated) {
+      const setting = await SystemSetting.findOne({ key: "showPricesPublic" });
+      const showPrices = setting ? Boolean(setting.value) : true;
+      if (!showPrices) {
+        return res.json(uniqueServices.map((s) => {
+          const obj = s.toObject();
+          delete obj.rate;
+          delete obj.workerHourlyRate;
+          delete obj.workerPaymentRate;
+          return obj;
+        }));
+      }
+    }
 
     res.json(uniqueServices);
   } catch (err) {

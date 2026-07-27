@@ -2,6 +2,16 @@ const express = require('express');
 const router = express.Router();
 const SystemSetting = require('../models/SystemSetting');
 
+// Public endpoint — no auth needed, mobile app reads this to decide whether to show prices
+router.get('/show-prices', async (req, res) => {
+  try {
+    const setting = await SystemSetting.findOne({ key: 'showPricesPublic' });
+    res.json({ showPrices: setting ? Boolean(setting.value) : true });
+  } catch (err) {
+    res.json({ showPrices: true }); // default open if DB unreachable
+  }
+});
+
 // GET all settings
 router.get('/', async (req, res) => {
   try {

@@ -23,7 +23,8 @@ async function htmlToPdfBuffer(innerHtml, title = "Cleaniq Services") {
 
   try {
     const page = await browser.newPage();
-    const fullHtml = `<!DOCTYPE html>
+    const isFullDoc = innerHtml.trim().toLowerCase().startsWith("<!doctype");
+    const fullHtml = isFullDoc ? innerHtml : `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />

@@ -4,7 +4,7 @@ import {
   Save, RefreshCw, Plus, Trash2,
   Sliders, Star, Edit3, X, Check,
   Megaphone, Send, Key, ThumbsUp, ThumbsDown,
-  UserPlus, Users as UsersIcon, Mail
+  UserPlus, Users as UsersIcon, Mail, Smartphone, Eye, EyeOff
 } from 'lucide-react';
 
 // Pages a restricted admin account can be granted access to. Dashboard
@@ -53,6 +53,9 @@ const Settings = () => {
   const [newAdmin, setNewAdmin] = useState({ username: '', email: '', password: '', role: 'restricted', permissions: [] });
   const [addingAdmin, setAddingAdmin] = useState(false);
   const [adminMsg, setAdminMsg] = useState({ type: '', text: '' });
+  const [showPricesPublic, setShowPricesPublic] = useState(true);
+  const [savingAppSetting, setSavingAppSetting] = useState(false);
+  const [appSettingMsg, setAppSettingMsg] = useState({ type: '', text: '' });
 
   useEffect(() => {
     fetchData();
@@ -77,6 +80,11 @@ const Settings = () => {
         ]);
         setLeads(await leadsRes.json());
         setCampaigns(await campaignsRes.json());
+      } else if (activeTab === 'app') {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/settings`);
+        const all = await res.json();
+        const sp = all.find((s) => s.key === 'showPricesPublic');
+        setShowPricesPublic(sp ? Boolean(sp.value) : true);
       }
     } catch (err) {
       console.error(err);
@@ -218,6 +226,28 @@ const Settings = () => {
     } catch (err) { console.error(err); }
   };
 
+  const handleSaveAppSetting = async (key, value) => {
+    setSavingAppSetting(true);
+    setAppSettingMsg({ type: '', text: '' });
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value }),
+      });
+      if (res.ok) {
+        setAppSettingMsg({ type: 'success', text: 'Setting saved.' });
+      } else {
+        setAppSettingMsg({ type: 'error', text: 'Failed to save setting.' });
+      }
+    } catch {
+      setAppSettingMsg({ type: 'error', text: 'Failed to save setting.' });
+    } finally {
+      setSavingAppSetting(false);
+      setTimeout(() => setAppSettingMsg({ type: '', text: '' }), 3000);
+    }
+  };
+
   const handleDeleteReview = async (id) => {
     if (!window.confirm('Delete this review permanently?')) return;
     try {
@@ -231,6 +261,7 @@ const Settings = () => {
     { id: 'marketing', name: 'Marketing', icon: <Megaphone size={18} /> },
     { id: 'reviews', name: 'Reviews', icon: <Star size={18} /> },
     { id: 'team', name: 'Team Access', icon: <UsersIcon size={18} /> },
+    { id: 'app', name: 'App Settings', icon: <Smartphone size={18} /> },
     { id: 'security', name: 'Security', icon: <Shield size={18} /> },
   ];
 
@@ -560,6 +591,58 @@ const Settings = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'app' && (
+            <div className="space-y-6">
+              {appSettingMsg.text && (
+                <div className={`p-4 rounded-2xl border flex items-center gap-3 ${appSettingMsg.type === 'success' ? 'bg-emerald-500/15 border-emerald-500/25 text-emerald-400' : 'bg-rose-500/15 border-rose-500/25 text-rose-400'}`}>
+                  <p className="text-sm font-semibold">{appSettingMsg.text}</p>
+                </div>
+              )}
+
+              <div className="bg-[#0B2D22] border border-white/[0.07] rounded-2xl p-8 space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                    <Smartphone size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white">Customer App Settings</h3>
+                    <p className="text-sm text-white/40 font-medium mt-0.5">Control what guest users see in the app — no app update needed.</p>
+                  </div>
+                </div>
+
+                <div className="border border-white/[0.07] rounded-2xl p-6 flex items-center justify-between gap-6">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${showPricesPublic ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/[0.06] text-white/30'}`}>
+                      {showPricesPublic ? <Eye size={20} /> : <EyeOff size={20} />}
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-sm">Show Prices to Guest Users</p>
+                      <p className="text-xs text-white/40 font-medium mt-1 leading-relaxed">
+                        When <span className="text-emerald-400 font-semibold">ON</span> — everyone sees service prices, including users who haven't signed up.<br />
+                        When <span className="text-rose-400 font-semibold">OFF</span> — prices are hidden from guests. Only logged-in customers see them.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      const newVal = !showPricesPublic;
+                      setShowPricesPublic(newVal);
+                      await handleSaveAppSetting('showPricesPublic', newVal);
+                    }}
+                    disabled={savingAppSetting}
+                    className={`relative flex-shrink-0 w-14 h-7 rounded-full transition-all duration-300 focus:outline-none disabled:opacity-60 ${showPricesPublic ? 'bg-emerald-500' : 'bg-white/[0.12]'}`}
+                  >
+                    <span className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${showPricesPublic ? 'left-8' : 'left-1'}`} />
+                  </button>
+                </div>
+
+                <p className="text-[11px] text-white/30 font-medium leading-relaxed">
+                  This setting takes effect immediately. The app reads it from the server on each launch — no build or update required.
+                </p>
               </div>
             </div>
           )}
