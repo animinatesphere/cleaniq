@@ -20,7 +20,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.cleaniq.worker",
-      "buildNumber": "3",
+      "buildNumber": "10",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "Cleaniq uses your location, only while you have it switched on for a job, so the customer can see when you're on the way."
