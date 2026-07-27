@@ -78,6 +78,15 @@ const tabScreenOptions = ({ route, iconMap }) => ({
   tabBarLabelStyle: { fontSize: 11, fontWeight: "700", marginTop: 3 },
 });
 
+// Shown after onboarding when the user hasn't signed in yet — lets them
+// browse services and tap Sign In when ready.
+const GuestTabs = () => (
+  <Tab.Navigator screenOptions={(p) => tabScreenOptions({ ...p, iconMap: { Home, "Sign In": User } })}>
+    <Tab.Screen name="Home"    component={HomeScreen}  options={{ title: "Home" }} />
+    <Tab.Screen name="Sign In" component={LoginScreen} options={{ title: "Sign In" }} />
+  </Tab.Navigator>
+);
+
 const MainTabs = () => (
   <Tab.Navigator screenOptions={(p) => tabScreenOptions({ ...p, iconMap: { Home, Bookings: CalendarDays, Calendar: CalendarDays, Profile: User } })}>
     <Tab.Screen name="Home"     component={HomeScreen}     options={{ title: "Home" }} />
@@ -191,7 +200,11 @@ const AppNavigation = () => {
       <StatusBar style="light" />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!userToken ? (
-          <Stack.Screen name="Login" component={LoginScreen} />
+          <>
+            <Stack.Screen name="Main"    component={GuestTabs} />
+            <Stack.Screen name="Login"   component={LoginScreen} />
+            <Stack.Screen name="Booking" component={BookingScreen} />
+          </>
         ) : (
           <>
             <Stack.Screen name="Main"          component={customerInfo?.role === "company" ? CompanyTabs : MainTabs} />

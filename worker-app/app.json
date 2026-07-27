@@ -10,7 +10,7 @@
       "web"
     ],
     "orientation": "portrait",
-    "icon": "./assets/icon.jpg",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/logo.jpg",
@@ -30,7 +30,7 @@
       "package": "com.cleaniq.worker",
       "adaptiveIcon": {
         "backgroundColor": "#0A5C43",
-        "foregroundImage": "./assets/icon.jpg"
+        "foregroundImage": "./assets/icon.png"
       },
       "permissions": [
         "android.permission.POST_NOTIFICATIONS",

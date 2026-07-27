@@ -61,11 +61,6 @@ export default function ApplyScreen({ navigation }) {
       Alert.alert("Required", "Please provide your Right to Work share code or upload the document.");
       return;
     }
-    if (!idDoc) {
-      Alert.alert("Required", "Please upload a valid UK ID.");
-      return;
-    }
-
     setLoading(true);
     try {
       const fd = new FormData();
@@ -178,12 +173,13 @@ export default function ApplyScreen({ navigation }) {
       </View>
 
       <View style={S.section}>
-        <Text style={S.sectionTitle}>Required Documents</Text>
+        <Text style={S.sectionTitle}>Supporting Documents</Text>
+        <Text style={S.sectionNote}>These can be uploaded now or provided to our team after submission.</Text>
 
-        <DocPicker label="Valid UK ID (passport, BRP, driving licence) *" required
+        <DocPicker label="Valid UK ID (passport, BRP, driving licence) – optional"
           file={idDoc} onPick={() => pickDoc("ID document", setIdDoc)} />
 
-        <DocPicker label="DBS Check Certificate" file={dbsCheck}
+        <DocPicker label="DBS Check Certificate – optional" file={dbsCheck}
           onPick={() => pickDoc("DBS certificate", setDbsCheck)} />
 
         <DocPicker label="CV / Resume (optional)" file={cv}
@@ -233,7 +229,8 @@ const S = StyleSheet.create({
     backgroundColor: C.card, borderRadius: 14, borderWidth: 1, borderColor: C.border,
     padding: 16, marginBottom: 14,
   },
-  sectionTitle: { fontSize: 13, fontWeight: "700", color: C.text, marginBottom: 14, textTransform: "uppercase", letterSpacing: 0.5 },
+  sectionTitle: { fontSize: 13, fontWeight: "700", color: C.text, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 },
+  sectionNote: { fontSize: 12, color: C.mutedFg, marginBottom: 14, lineHeight: 18 },
 
   field: { marginBottom: 14 },
   label: { fontSize: 12, fontWeight: "600", color: C.text, marginBottom: 6 },
