@@ -38,7 +38,10 @@ export default function PriceList() {
   useEffect(() => {
     (async () => {
       try {
-        const res  = await fetch(`${API}/services?region=UK`);
+        const token = localStorage.getItem("adminToken") || "";
+        const res  = await fetch(`${API}/services?region=UK`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         const data = await res.json();
         const clean = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
         const baseN = ["residential cleaning","deep clean","airbnb cleaning","office cleaning","end of tenancy","general cleaning"];
