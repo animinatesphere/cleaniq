@@ -420,12 +420,9 @@ router.post("/", async (req, res) => {
         };
         const ms24h = 24 * 60 * 60 * 1000;
         const ms3h  = 3  * 60 * 60 * 1000;
-        if (bookingDate - ms24h > new Date()) {
-          await scheduleTask("booking_reminder_24h", new Date(bookingDate - ms24h), payload);
-        }
-        if (bookingDate - ms3h > new Date()) {
-          await scheduleTask("booking_reminder_3h", new Date(bookingDate - ms3h), payload);
-        }
+        const soon  = Date.now() + 2 * 60 * 1000; // fire in 2 min if already past-due
+        await scheduleTask("booking_reminder_24h", new Date(Math.max(bookingDate.getTime() - ms24h, soon)), payload);
+        await scheduleTask("booking_reminder_3h",  new Date(Math.max(bookingDate.getTime() - ms3h,  soon)), payload);
       }
     } catch (schedErr) {
       console.error("⚠️ Failed to schedule booking reminders:", schedErr.message);
@@ -761,6 +758,32 @@ router.put("/:id", async (req, res) => {
         }
       } catch (walletErr) {
         console.error("⚠️ Worker wallet update failed for Completed-Unpaid:", walletErr.message);
+      }
+    }
+
+    // ── Schedule reminders when admin manually confirms a Pending booking ─────
+    if (prevStatus !== "Confirmed" && newStatus === "Confirmed") {
+      try {
+        const bookingDate = updatedBooking.schedule?.date ? new Date(updatedBooking.schedule.date) : null;
+        if (bookingDate && bookingDate > new Date()) {
+          const payload = {
+            bookingId:  updatedBooking._id.toString(),
+            bookingRef: updatedBooking.bookingId,
+            email:      updatedBooking.customer?.email,
+            firstName:  updatedBooking.customer?.firstName,
+            service:    updatedBooking.service,
+            date:       bookingDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
+            amount:     updatedBooking.payment?.amount,
+          };
+          const ms24h = 24 * 60 * 60 * 1000;
+          const ms3h  = 3  * 60 * 60 * 1000;
+          const soon  = Date.now() + 2 * 60 * 1000;
+          await scheduleTask("booking_reminder_24h", new Date(Math.max(bookingDate.getTime() - ms24h, soon)), payload);
+          await scheduleTask("booking_reminder_3h",  new Date(Math.max(bookingDate.getTime() - ms3h,  soon)), payload);
+          console.log(`⚙️ Reminders scheduled for manually-confirmed booking ${updatedBooking.bookingId}`);
+        }
+      } catch (schedErr) {
+        console.error("⚠️ Failed to schedule reminders on manual confirmation:", schedErr.message);
       }
     }
 

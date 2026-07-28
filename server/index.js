@@ -304,12 +304,9 @@ app.post(
                   };
                   const ms24h = 24 * 60 * 60 * 1000;
                   const ms3h  = 3  * 60 * 60 * 1000;
-                  if (bookingDate - ms24h > Date.now()) {
-                    await scheduleTask("booking_reminder_24h", new Date(bookingDate - ms24h), payload);
-                  }
-                  if (bookingDate - ms3h > Date.now()) {
-                    await scheduleTask("booking_reminder_3h", new Date(bookingDate - ms3h), payload);
-                  }
+                  const soon  = Date.now() + 2 * 60 * 1000;
+                  await scheduleTask("booking_reminder_24h", new Date(Math.max(bookingDate.getTime() - ms24h, soon)), payload);
+                  await scheduleTask("booking_reminder_3h",  new Date(Math.max(bookingDate.getTime() - ms3h,  soon)), payload);
                 }
               } catch (schedErr) {
                 console.error("⚠️ Failed to schedule Stripe booking reminders:", schedErr.message);

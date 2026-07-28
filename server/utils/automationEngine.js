@@ -181,18 +181,16 @@ function startAutomationEngine() {
   setInterval(processDueTasks, 2 * 60 * 1000);
 }
 
-// Schedule a task (idempotent for booking reminders — won't duplicate)
+// Schedule a task (idempotent — won't duplicate for same booking/quote + type)
 async function scheduleTask(type, runAt, payload) {
   try {
-    // Avoid duplicates for booking/quote-specific automations
-    const keyField = payload.bookingRef || payload.quoteRef;
-    if (keyField) {
-      const exists = await ScheduledTask.findOne({
-        type,
-        "payload.bookingRef": payload.bookingRef,
-        "payload.quoteRef": payload.quoteRef,
-        status: "pending",
-      });
+    // Build a dedup filter using only the key that's actually present
+    const dedupFilter = { type, status: "pending" };
+    if (payload.bookingRef) dedupFilter["payload.bookingRef"] = payload.bookingRef;
+    else if (payload.quoteRef) dedupFilter["payload.quoteRef"] = payload.quoteRef;
+
+    if (payload.bookingRef || payload.quoteRef) {
+      const exists = await ScheduledTask.findOne(dedupFilter);
       if (exists) return exists;
     }
     return await ScheduledTask.create({ type, runAt, payload });
