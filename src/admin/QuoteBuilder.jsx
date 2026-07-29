@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   FileText,
   Send,
@@ -18,6 +18,8 @@ import {
   Clock,
   History,
   Download,
+  Search,
+  UserCheck,
 } from "lucide-react";
 import logo from "../assets/logo DP.jpg";
 
@@ -733,6 +735,14 @@ const QuoteBuilder = () => {
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState(null);
 
+  // Customer search
+  const [allCustomers, setAllCustomers] = useState([]);
+  const [customersLoaded, setCustomersLoaded] = useState(false);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [customerResults, setCustomerResults] = useState([]);
+  const [customerDropdownOpen, setCustomerDropdownOpen] = useState(false);
+  const customerDropdownRef = useRef(null);
+
   const [form, setForm] = useState({
     companyName: "",
     contactName: "",
@@ -829,6 +839,84 @@ const QuoteBuilder = () => {
     const next = !showAllHistory;
     setShowAllHistory(next);
     loadHistory(next ? 100 : 10);
+  };
+
+  // Close customer dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (customerDropdownRef.current && !customerDropdownRef.current.contains(e.target)) {
+        setCustomerDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const loadAllCustomers = useCallback(async () => {
+    if (customersLoaded) return;
+    try {
+      const token = localStorage.getItem("adminToken") || "";
+      const res = await fetch(`${API}/customers`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setAllCustomers(data);
+        setCustomersLoaded(true);
+      }
+    } catch {}
+  }, [customersLoaded]);
+
+  const handleCustomerSearch = (val) => {
+    setCustomerSearch(val);
+    if (!val.trim()) {
+      setCustomerResults([]);
+      setCustomerDropdownOpen(false);
+      return;
+    }
+    if (!customersLoaded) loadAllCustomers();
+    const q = val.toLowerCase();
+    const results = allCustomers
+      .filter(
+        (c) =>
+          `${c.firstName || ""} ${c.lastName || ""}`.toLowerCase().includes(q) ||
+          (c.email || "").toLowerCase().includes(q) ||
+          (c.phone || "").includes(q),
+      )
+      .slice(0, 8);
+    setCustomerResults(results);
+    setCustomerDropdownOpen(results.length > 0);
+  };
+
+  // Re-filter when customers finish loading
+  useEffect(() => {
+    if (!customersLoaded || !customerSearch.trim()) return;
+    const q = customerSearch.toLowerCase();
+    const results = allCustomers
+      .filter(
+        (c) =>
+          `${c.firstName || ""} ${c.lastName || ""}`.toLowerCase().includes(q) ||
+          (c.email || "").toLowerCase().includes(q) ||
+          (c.phone || "").includes(q),
+      )
+      .slice(0, 8);
+    setCustomerResults(results);
+    setCustomerDropdownOpen(results.length > 0);
+  }, [customersLoaded, allCustomers, customerSearch]);
+
+  const selectCustomer = (c) => {
+    const fullName = `${c.firstName || ""} ${c.lastName || ""}`.trim();
+    setForm((f) => ({
+      ...f,
+      companyName: fullName,
+      contactName: "",
+      email: c.email || "",
+      phone: c.phone || "",
+      address: c.address || "",
+    }));
+    setCustomerSearch(fullName);
+    setCustomerResults([]);
+    setCustomerDropdownOpen(false);
   };
 
   const updateForm = (key, val) => setForm((f) => ({ ...f, [key]: val }));
@@ -1121,7 +1209,64 @@ tbody tr:nth-child(even){background:#f8fafc;}
                 </p>
               </div>
             </div>
-            <div className="p-8 grid sm:grid-cols-2 gap-5">
+            <div className="p-8 space-y-6">
+              {/* Customer search */}
+              <div className="relative" ref={customerDropdownRef}>
+                <label className="text-[11px] font-semibold text-white/40 mb-1.5 block uppercase tracking-wider">
+                  Search Existing Customer
+                </label>
+                <div className="relative">
+                  <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Type name, email, or phone to auto-fill…"
+                    value={customerSearch}
+                    onChange={(e) => handleCustomerSearch(e.target.value)}
+                    onFocus={() => { loadAllCustomers(); if (customerResults.length > 0) setCustomerDropdownOpen(true); }}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-semibold text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all"
+                  />
+                  {customerSearch && (
+                    <button
+                      type="button"
+                      onClick={() => { setCustomerSearch(""); setCustomerResults([]); setCustomerDropdownOpen(false); }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+                {customerDropdownOpen && customerResults.length > 0 && (
+                  <div className="absolute z-20 mt-1 w-full bg-[#0B2D22] border border-white/10 rounded-xl shadow-2xl shadow-black/40 overflow-hidden max-h-56 overflow-y-auto">
+                    {customerResults.map((c, i) => (
+                      <button
+                        key={c.email || i}
+                        type="button"
+                        onClick={() => selectCustomer(c)}
+                        className="w-full px-4 py-3 text-left hover:bg-white/[0.06] flex items-center gap-3 border-b border-white/[0.05] last:border-0 transition-colors"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center flex-shrink-0">
+                          <UserCheck size={14} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-white truncate">
+                            {c.firstName} {c.lastName}
+                          </p>
+                          <p className="text-[11px] text-white/40 truncate">
+                            {c.email}{c.phone ? ` · ${c.phone}` : ""}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {!customersLoaded && customerSearch.trim() && (
+                  <p className="text-[11px] text-white/30 mt-1 flex items-center gap-1.5">
+                    <RefreshCw size={10} className="animate-spin" /> Loading customers…
+                  </p>
+                )}
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-5">
               {[
                 {
                   key: "companyName",
@@ -1175,6 +1320,7 @@ tbody tr:nth-child(even){background:#f8fafc;}
                   />
                 </div>
               ))}
+              </div>
             </div>
           </div>
 
