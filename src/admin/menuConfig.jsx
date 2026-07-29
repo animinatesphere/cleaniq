@@ -301,6 +301,12 @@ export const fullMenuGroups = [
         key: "chat",
         icon: <MessageSquare size={20} />,
       },
+      {
+        name: "Send Guides",
+        path: "/admin/guide-distribution",
+        key: "guide-distribution",
+        icon: <BookOpen size={20} />,
+      },
     ],
   },
   {

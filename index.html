@@ -2,7 +2,7 @@
 <html lang="en-GB">
   <head>
     <!-- Admin theme sync: runs synchronously before first paint to avoid flash -->
-    <script>try{if(localStorage.getItem('adminTheme')==='light')document.documentElement.setAttribute('data-admin-theme','light')}catch(e){}</script>
+    <script>try{if(location.pathname.startsWith('/admin')&&localStorage.getItem('adminTheme')==='light')document.documentElement.setAttribute('data-admin-theme','light')}catch(e){}</script>
     <!-- Google Tag Manager -->
     <script>
       (function (w, d, s, l, i) {

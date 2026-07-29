@@ -72,6 +72,7 @@ import PriceList from "./admin/PriceList";
 import JobDetail from "./admin/JobDetail";
 import Jobs from "./admin/Jobs";
 import CompanyJobs from "./admin/CompanyJobs";
+import GuideDistribution from "./admin/GuideDistribution";
 
 function App() {
   const location = useLocation();
@@ -159,6 +160,7 @@ function App() {
               <Route path="jobs" element={<Jobs />} />
               <Route path="jobs/:id" element={<JobDetail />} />
               <Route path="company-jobs" element={<CompanyJobs />} />
+              <Route path="guide-distribution" element={<GuideDistribution />} />
             </Route>
           </Routes>
         </main>
