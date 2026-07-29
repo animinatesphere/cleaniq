@@ -19,7 +19,10 @@ const ServicesManagement = () => {
   const fetchServices = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${activeRegion}`);
+      const token = localStorage.getItem("adminToken") || "";
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/services?region=${activeRegion}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       const data = await response.json();
       const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
       const baseNames = ['Residential Cleaning', 'Deep Clean', 'Airbnb Cleaning', 'Office Cleaning', 'End of Tenancy', 'General Cleaning'];

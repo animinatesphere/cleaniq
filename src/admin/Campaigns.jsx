@@ -342,7 +342,7 @@ export default function Campaigns() {
   const activeCampaigns = campaigns.filter(c => c.status === "sending" || c.status === "queued").length;
 
   return (
-    <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-5">
+    <div className="space-y-5">
 
       {toast && (
         <div className={`fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:w-80 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-semibold text-white flex items-center gap-2 ${

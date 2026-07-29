@@ -842,6 +842,7 @@ const AdminCRM = ({ booking, onClose }) => {
           <div
             style={{ padding: "24px 32px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
           >
+            <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "2px solid rgba(110,231,183,0.3)" }}>
@@ -970,6 +971,7 @@ const AdminCRM = ({ booking, onClose }) => {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           <div

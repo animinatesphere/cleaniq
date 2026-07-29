@@ -22,9 +22,12 @@ router.get("/", async (req, res) => {
       }
     });
 
-    // Strip prices for unauthenticated requests when the toggle is off
+    // Strip prices for unauthenticated requests when the toggle is off.
+    // Exceptions: authenticated admins always see prices; booking=1 param
+    // also bypasses hiding because the booking form needs prices to function.
     const isAuthenticated = Boolean(req.headers.authorization);
-    if (!isAuthenticated) {
+    const isBookingContext = req.query.booking === "1";
+    if (!isAuthenticated && !isBookingContext) {
       const setting = await SystemSetting.findOne({ key: "showPricesPublic" });
       const showPrices = setting ? Boolean(setting.value) : true;
       if (!showPrices) {

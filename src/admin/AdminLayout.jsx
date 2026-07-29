@@ -14,6 +14,9 @@ const AdminLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(
     () => localStorage.getItem("adminSidebarCollapsed") === "true",
   );
+  const [adminTheme, setAdminTheme] = useState(
+    () => localStorage.getItem("adminTheme") || "dark",
+  );
   const [openGroups, setOpenGroups] = useState(() => {
     try {
       const saved = localStorage.getItem("adminSidebarOpenGroups");
@@ -41,6 +44,20 @@ const AdminLayout = () => {
     localStorage.removeItem("adminRole");
     localStorage.removeItem("adminPermissions");
     setIsAuthenticated(false);
+  };
+
+  // Keep <html> data-admin-theme in sync so CSS overrides apply before React paints
+  useEffect(() => {
+    document.documentElement.setAttribute("data-admin-theme", adminTheme);
+    return () => document.documentElement.removeAttribute("data-admin-theme");
+  }, [adminTheme]);
+
+  const toggleTheme = () => {
+    setAdminTheme((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      localStorage.setItem("adminTheme", next);
+      return next;
+    });
   };
 
   const toggleCollapsed = () => {
@@ -110,7 +127,7 @@ const AdminLayout = () => {
   if (!isAuthenticated) return <Login onLogin={() => setIsAuthenticated(true)} />;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#061A13] text-white print:bg-white">
+    <div data-admin-theme={adminTheme} className="flex h-screen overflow-hidden bg-[#061A13] text-white print:bg-white">
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <div
@@ -136,11 +153,13 @@ const AdminLayout = () => {
         <AdminHeader
           setSidebarOpen={setSidebarOpen}
           isBookingAgent={isBookingAgent}
+          adminTheme={adminTheme}
+          toggleTheme={toggleTheme}
         />
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-[1600px] mx-auto w-full">
-            <div className="min-h-full rounded-[32px] bg-[#05201A] border border-white/[0.06] shadow-[0_24px_80px_rgba(0,0,0,0.25)] p-6">
+            <div className="min-h-full rounded-2xl sm:rounded-[32px] bg-[#05201A] border border-white/[0.06] shadow-[0_24px_80px_rgba(0,0,0,0.25)] p-3 sm:p-6">
               <Outlet />
             </div>
           </div>

@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Menu, User, CheckCircle2, Users, Clock } from "lucide-react";
+import { Bell, Menu, User, CheckCircle2, Users, Clock, Sun, Moon } from "lucide-react";
 
-const AdminHeader = ({ setSidebarOpen, isBookingAgent }) => {
+const AdminHeader = ({ setSidebarOpen, isBookingAgent, adminTheme, toggleTheme }) => {
   const navigate = useNavigate();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -84,6 +84,15 @@ const AdminHeader = ({ setSidebarOpen, isBookingAgent }) => {
         className="flex items-center gap-2 sm:gap-3 lg:gap-6 relative"
         ref={notifRef}
       >
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          title={adminTheme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+          className="p-2 rounded-xl border transition-all cursor-pointer bg-white/[0.06] border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80"
+        >
+          {adminTheme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+        </button>
+
         {/* Bell */}
         <button
           onClick={() => setIsNotifOpen(!isNotifOpen)}

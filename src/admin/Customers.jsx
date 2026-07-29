@@ -438,7 +438,7 @@ const Customers = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-3 mb-5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
               {[
                 { label:"Total",     value: stats.total,                            color:"text-white",       drawerTitle:"All Customers",     drawerSub:`${stats.total} total`,                               drawerItems:customers,                                                                                                      accent:"emerald" },
                 { label:"Active",    value: stats.active,                           color:"text-emerald-400", drawerTitle:"Active Customers",  drawerSub:`${stats.active} with login activity`,                drawerItems:customers.filter(c => c.lastLoginAt),                                                                          accent:"emerald" },
@@ -490,6 +490,7 @@ const Customers = () => {
                 <p className="text-sm font-medium">No customers found</p>
               </div>
             ) : (
+              <div className="overflow-x-auto">
               <table className="w-full text-left text-sm border-collapse">
                 <thead className="sticky top-0 bg-[#071D16] border-b border-white/10 z-10">
                   <tr>
@@ -572,6 +573,7 @@ const Customers = () => {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </div>
         </div>

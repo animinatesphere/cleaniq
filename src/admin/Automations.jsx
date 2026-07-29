@@ -767,7 +767,7 @@ export default function Automations() {
   ).length;
 
   return (
-    <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-5">
+    <div className="space-y-5">
       {/* Toast */}
       {toast && (
         <div

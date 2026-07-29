@@ -285,7 +285,10 @@ const NewBookingPage = () => {
 
   /* ── Data fetches ───────────────────────────────────────────────────── */
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/services`)
+    const _tok = localStorage.getItem("adminToken") || "";
+    fetch(`${import.meta.env.VITE_API_URL}/services`, {
+      headers: _tok ? { Authorization: `Bearer ${_tok}` } : {},
+    })
       .then((r) => r.json())
       .then((d) => {
         setServicesList(d || []);

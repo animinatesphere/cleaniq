@@ -1191,7 +1191,10 @@ const Bookings = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/services`);
+        const token = localStorage.getItem("adminToken") || "";
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/services`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         const data = await res.json();
         setServicesList(data || []);
         const ratesObj = {};

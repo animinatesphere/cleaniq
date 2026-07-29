@@ -164,7 +164,7 @@ export default function CustomerProfile() {
   const fullName = `${customer.firstName || ""} ${customer.lastName || ""}`.trim() || customer.name || "—";
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       {error && (
         <div className="bg-rose-500/15 border border-rose-500/25 text-rose-400 text-sm px-4 py-3 rounded-xl flex items-center justify-between">
           {error}

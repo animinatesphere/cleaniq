@@ -501,7 +501,7 @@ const Booking = () => {
     const fetchRates = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/services?region=${region.id}&t=${Date.now()}`,
+          `${import.meta.env.VITE_API_URL}/services?region=${region.id}&booking=1&t=${Date.now()}`,
         );
         const data = await response.json();
 

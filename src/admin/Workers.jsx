@@ -263,7 +263,7 @@ const Workers = () => {
       </div>
 
       {/* Stats strip */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: "Total Staff",   value: workers.length,                                                             icon: <Briefcase size={18} />,  color: "bg-emerald-500/15 text-emerald-400", drawerTitle: "All Staff",      drawerSub: `${workers.length} workers total`,                                                        drawerItems: workers,                                                         accent: "emerald" },
           { label: "Active",        value: workers.filter((w) => w.status === "Active" || w.appAccessGranted).length, icon: <ShieldCheck size={18} />, color: "bg-emerald-500/15 text-emerald-400", drawerTitle: "Active Workers",  drawerSub: `${workers.filter(w => w.status === "Active" || w.appAccessGranted).length} active`,  drawerItems: workers.filter(w => w.status === "Active" || w.appAccessGranted), accent: "emerald" },
