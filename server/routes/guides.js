@@ -4,8 +4,8 @@ const { sendEmail } = require("../utils/emailService");
 const Worker = require("../models/Worker");
 const Customer = require("../models/Customer");
 
-const WORKER_GUIDE_URL = process.env.WORKER_GUIDE_URL || "https://www.cleaniqservices.com/worker-guide";
-const CUSTOMER_GUIDE_URL = process.env.CUSTOMER_GUIDE_URL || "https://www.cleaniqservices.com/customer-guide";
+const WORKER_GUIDE_URL = process.env.WORKER_GUIDE_URL || "https://claude.ai/code/artifact/f5a5de1e-0030-46dc-8504-37f3db072729";
+const CUSTOMER_GUIDE_URL = process.env.CUSTOMER_GUIDE_URL || "https://claude.ai/code/artifact/ca53c295-922c-417c-a9ff-6043aade0bc9";
 
 const workerGuideEmail = (name) => `
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:32px 0;font-family:'Segoe UI',Arial,sans-serif">
