@@ -142,7 +142,7 @@ function buildEmailHtml(rawBody, unsubUrl) {
               <tr>
                 <td>
                   <span style="display:inline-block;width:34px;height:34px;background:#10b981;border-radius:8px;text-align:center;line-height:34px;font-size:17px;font-weight:800;color:#fff;vertical-align:middle;margin-right:10px;">C</span>
-                  <span style="color:#ffffff;font-size:16px;font-weight:700;letter-spacing:-0.3px;vertical-align:middle;">CleanIQ Services</span>
+                  <span style="color:#ffffff;font-size:16px;font-weight:700;letter-spacing:-0.3px;vertical-align:middle;">cleaniq services</span>
                 </td>
               </tr>
             </table>
@@ -170,7 +170,7 @@ function buildEmailHtml(rawBody, unsubUrl) {
             <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;">
               <a href="${unsubUrl}" style="color:#64748b;text-decoration:none;border-bottom:1px solid #cbd5e1;padding-bottom:1px;">Unsubscribe</a>
               &nbsp;·&nbsp;
-              <span style="color:#94a3b8;">CleanIQ Services &nbsp;·&nbsp; cleaniqservices.com</span>
+              <span style="color:#94a3b8;">cleaniq services &nbsp;·&nbsp; cleaniqservices.com</span>
             </p>
           </td>
         </tr>
@@ -186,7 +186,7 @@ function buildEmailHtml(rawBody, unsubUrl) {
 // Keep legacy alias used by older code paths
 function unsubscribeFooter(url) {
   return `<p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:32px;">
-    <a href="${url}" style="color:#64748b;">Unsubscribe</a> · CleanIQ Services</p>`;
+    <a href="${url}" style="color:#64748b;">Unsubscribe</a> · cleaniq services</p>`;
 }
 
 // ── Daily counter reset ───────────────────────────────────────────────────────

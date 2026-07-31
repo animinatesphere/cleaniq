@@ -352,7 +352,7 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                         value={s.body}
                         onChange={(e) => setStepField(idx, "body", e.target.value)}
                         rows={9}
-                        placeholder={"Hi {{first_name}},\n\nI noticed {{company}} could benefit from our professional cleaning services.\n\nWould you be open to a quick 10-minute call this week?\n\nBest,\nThe CleanIQ Services team"}
+                        placeholder={"Hi {{first_name}},\n\nI noticed {{company}} could benefit from our professional cleaning services.\n\nWould you be open to a quick 10-minute call this week?\n\nBest,\nThe cleaniq services team"}
                         className="w-full bg-transparent px-4 pt-4 pb-8 text-white/85 placeholder:text-white/15 text-sm focus:outline-none resize-none leading-relaxed"
                       />
                       <div className="absolute bottom-2.5 right-3.5 text-white/20 text-[11px] select-none pointer-events-none">

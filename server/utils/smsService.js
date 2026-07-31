@@ -58,22 +58,22 @@ async function sendSms({ to, body, trigger, bookingId, bookingRef, recipient = "
 // ── Templates ──────────────────────────────────────────────────────────────
 const templates = {
   booking_confirmed: (b) =>
-    `Hi ${b.firstName}, your ${b.service} clean is confirmed for ${b.date} at ${b.time}. Ref: ${b.bookingRef}. Questions? Call us on 0121 000 0000. — CleanIQ`,
+    `Hi ${b.firstName}, your ${b.service} clean is confirmed for ${b.date} at ${b.time}. Ref: ${b.bookingRef}. Questions? Call us on 0121 000 0000. — cleaniq services`,
 
   worker_assigned: (b) =>
-    `Great news ${b.firstName}! ${b.workerName} has been assigned to your clean on ${b.date} at ${b.time}. Ref: ${b.bookingRef}. — CleanIQ`,
+    `Great news ${b.firstName}! ${b.workerName} has been assigned to your clean on ${b.date} at ${b.time}. Ref: ${b.bookingRef}. — cleaniq services`,
 
   booking_reminder_24h: (b) =>
-    `Reminder: Your ${b.service} clean is tomorrow at ${b.time}. Please ensure access to the property. Ref: ${b.bookingRef}. Need help? Reply STOP to opt out. — CleanIQ`,
+    `Reminder: Your ${b.service} clean is tomorrow at ${b.time}. Please ensure access to the property. Ref: ${b.bookingRef}. Need help? Reply STOP to opt out. — cleaniq services`,
 
   booking_completed: (b) =>
-    `Your clean is done! Thanks for choosing CleanIQ, ${b.firstName}. ⭐ Leave us a review: https://g.page/r/cleaniqservices/review — We hope to see you again!`,
+    `Your clean is done! Thanks for choosing cleaniq services, ${b.firstName}. ⭐ Leave us a review: https://g.page/r/cleaniqservices/review — We hope to see you again!`,
 
   booking_cancelled: (b) =>
-    `Your booking ${b.bookingRef} on ${b.date} has been cancelled. Contact us to rebook: 0121 000 0000. — CleanIQ`,
+    `Your booking ${b.bookingRef} on ${b.date} has been cancelled. Contact us to rebook: 0121 000 0000. — cleaniq services`,
 
   worker_job_assigned: (b) =>
-    `New job: ${b.customerName} at ${b.address} on ${b.date} at ${b.time}. Ref: ${b.bookingRef}. Log in for details. — CleanIQ`,
+    `New job: ${b.customerName} at ${b.address} on ${b.date} at ${b.time}. Ref: ${b.bookingRef}. Log in for details. — cleaniq services`,
 };
 
 // ── Phone resolver — uses booking phone or falls back to Customer record ───
