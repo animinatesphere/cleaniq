@@ -440,7 +440,9 @@ function CampaignDetail({ campaignId, onBack, onRefresh }) {
                       <div className="flex items-center gap-3 px-4 py-2.5 border-b border-emerald-500/15 bg-emerald-500/[0.04]">
                         <MessageSquare size={13} className="text-emerald-400 shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-emerald-300 text-xs font-bold truncate">{send.replySubject || `Re: ${campaign?.steps?.[0]?.subject || "your email"}`}</p>
+                          <p className="text-emerald-300 text-xs font-bold truncate">
+                            {send.replySubject || `Re: ${(campaign?.steps?.[0]?.subject || "your email").replace(/\{\{[^}]+\}\}/g, "…")}`}
+                          </p>
                           <p className="text-emerald-400/50 text-[10px]">
                             From {send.replyFrom || send.contactEmail}
                             {send.repliedAt && ` · ${new Date(send.repliedAt).toLocaleDateString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`}

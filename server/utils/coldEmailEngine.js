@@ -427,33 +427,63 @@ async function detectReplies() {
   }
 }
 
-// Extract plain-text body from Gmail message payload
-function extractGmailBody(payload) {
-  if (!payload) return "";
-  // Simple (non-multipart) message
+// Decode Gmail base64url safely
+function b64Decode(data) {
+  if (!data) return "";
+  try {
+    // Gmail uses base64url (- and _ instead of + and /)
+    const std = data.replace(/-/g, "+").replace(/_/g, "/");
+    return Buffer.from(std, "base64").toString("utf8");
+  } catch { return ""; }
+}
+
+// Recursively search MIME parts for text content
+function extractGmailBody(payload, depth = 0) {
+  if (!payload || depth > 6) return "";
+
+  // Direct body data (simple messages)
   if (payload.body?.data) {
-    return Buffer.from(payload.body.data, "base64url").toString("utf8");
+    const text = b64Decode(payload.body.data);
+    if (text.trim()) return text;
   }
-  // Multipart — look for text/plain first, then text/html
-  if (payload.parts) {
-    for (const part of payload.parts) {
-      if (part.mimeType === "text/plain" && part.body?.data) {
-        return Buffer.from(part.body.data, "base64url").toString("utf8");
-      }
-    }
-    for (const part of payload.parts) {
-      if (part.mimeType === "text/html" && part.body?.data) {
-        // Strip HTML tags for plain preview
-        return Buffer.from(part.body.data, "base64url").toString("utf8")
-          .replace(/<[^>]+>/g, "").replace(/\s{2,}/g, " ").trim();
-      }
-      // Nested multipart
-      if (part.parts) {
-        const nested = extractGmailBody(part);
-        if (nested) return nested;
-      }
+
+  if (!payload.parts) return "";
+
+  // Search text/plain parts first (most reliable for reply content)
+  for (const part of payload.parts) {
+    if (part.mimeType === "text/plain" && part.body?.data) {
+      const text = b64Decode(part.body.data);
+      if (text.trim()) return text;
     }
   }
+
+  // Recursively search nested multipart containers
+  for (const part of payload.parts) {
+    if (part.mimeType?.startsWith("multipart/")) {
+      const nested = extractGmailBody(part, depth + 1);
+      if (nested) return nested;
+    }
+  }
+
+  // Fall back to text/html (strip tags)
+  for (const part of payload.parts) {
+    if (part.mimeType === "text/html" && part.body?.data) {
+      const html = b64Decode(part.body.data);
+      if (html.trim()) {
+        return html
+          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/&nbsp;/g, " ")
+          .replace(/&amp;/g, "&")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">")
+          .replace(/[ \t]{2,}/g, " ")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim();
+      }
+    }
+  }
+
   return "";
 }
 
@@ -484,11 +514,14 @@ async function detectRepliesForMailbox(mailbox) {
 
     // Extract reply content
     const headers  = msg.data.payload?.headers || [];
-    const fromHdr  = headers.find(h => h.name === "From");
-    const subHdr   = headers.find(h => h.name === "Subject");
+    const fromHdr  = headers.find(h => h.name?.toLowerCase() === "from");
+    const subHdr   = headers.find(h => h.name?.toLowerCase() === "subject");
     const replyFrom    = fromHdr?.value || "";
     const replySubject = subHdr?.value  || "";
-    const replyBody    = extractGmailBody(msg.data.payload).slice(0, 5000); // cap at 5k chars
+    // Try full body extraction first, fall back to Gmail snippet
+    let replyBody = extractGmailBody(msg.data.payload);
+    if (!replyBody && msg.data.snippet) replyBody = msg.data.snippet;
+    replyBody = replyBody.slice(0, 5000); // cap at 5k chars
 
     // Stop sequence — mark all pending sends for this contact in this campaign
     await ColdSend.updateMany(
