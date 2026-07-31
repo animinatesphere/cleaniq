@@ -560,6 +560,26 @@ h1{color:#0f172a;font-size:22px;font-weight:800;margin-bottom:12px}p{color:#6474
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  MANUAL REPLY CHECK
+// ═══════════════════════════════════════════════════════════════════════════════
+
+router.post("/campaigns/:id/check-replies", async (req, res) => {
+  try {
+    const campaign = await ColdCampaign.findById(req.params.id);
+    if (!campaign) return res.status(404).json({ message: "Campaign not found" });
+
+    const { detectReplies } = require("../utils/coldEmailEngine");
+    await detectReplies();
+
+    // Return fresh campaign stats
+    const updated = await ColdCampaign.findById(req.params.id).lean();
+    res.json({ message: "Reply check complete", stats: updated.stats });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  OVERALL STATS
 // ═══════════════════════════════════════════════════════════════════════════════
 

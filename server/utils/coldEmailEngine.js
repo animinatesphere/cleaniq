@@ -112,63 +112,122 @@ function buildEmailHtml(rawBody, unsubUrl) {
   // Already a full HTML doc — use as-is
   if (/<html|<!DOCTYPE/i.test(rawBody)) return rawBody;
 
-  // Convert plain text to <p> blocks; preserve existing HTML tags
+  // Convert plain text to styled <p> blocks; preserve existing HTML tags
   const hasHtml = /<[a-z][\s\S]*>/i.test(rawBody);
   const content = hasHtml
     ? rawBody
     : rawBody
-        .split(/\n\n+/)
-        .filter((p) => p.trim())
-        .map((p) => `<p style="margin:0 0 18px;line-height:1.75;">${p.replace(/\n/g, "<br>")}</p>`)
-        .join("") || `<p style="margin:0;line-height:1.75;">${rawBody.replace(/\n/g, "<br>")}</p>`;
+        .split(/\n/)
+        .map((line) => {
+          if (!line.trim()) return `<tr><td style="height:10px;font-size:10px;line-height:10px;">&nbsp;</td></tr>`;
+          return `<tr><td style="padding:0 0 6px;color:#1e293b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;">${line}</td></tr>`;
+        })
+        .join("\n");
+
+  const logoUrl = `${process.env.BACKEND_URL || "https://api.cleaniqservices.com"}/public/images/logo.jpg`;
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Email</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="x-apple-disable-message-reformatting">
+<title>Email from cleaniq services</title>
+<style>
+  body { margin:0; padding:0; -webkit-font-smoothing:antialiased; background:#edf1f7; }
+  a { color:#0a6644; text-decoration:none; }
+  @media only screen and (max-width:620px) {
+    .wrapper { width:100% !important; }
+    .inner-cell { padding:28px 20px !important; }
+    .header-cell { padding:24px 20px !important; }
+  }
+</style>
 </head>
-<body style="margin:0;padding:0;background:#eef2f7;-webkit-font-smoothing:antialiased;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+<body style="margin:0;padding:0;background:#edf1f7;">
+
+<!-- Preheader (hidden, shows in inbox preview) -->
+<div style="display:none;max-height:0;overflow:hidden;color:#edf1f7;font-size:1px;">
+  A message from the cleaniq services team.&nbsp;
+  &#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;&#847;&nbsp;
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+       style="background:#edf1f7;min-height:100%;">
   <tr>
-    <td align="center" style="padding:36px 16px;">
-      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;" role="presentation">
+    <td align="center" style="padding:40px 12px 48px;">
 
-        <!-- Brand header -->
+      <!-- Card wrapper -->
+      <table class="wrapper" role="presentation" cellpadding="0" cellspacing="0" border="0"
+             style="width:600px;max-width:600px;">
+
+        <!-- ── HEADER ── -->
         <tr>
-          <td style="background:#0a6644;border-radius:14px 14px 0 0;padding:20px 36px;text-align:center;">
-            <img src="${process.env.BACKEND_URL || "https://api.cleaniqservices.com"}/public/images/logo.jpg"
+          <td class="header-cell" align="center"
+              style="background:#073d27;border-radius:16px 16px 0 0;padding:28px 36px;text-align:center;">
+
+            <!-- Logo image with text fallback -->
+            <img src="${logoUrl}"
                  alt="cleaniq services"
-                 width="160" height="160"
-                 style="display:inline-block;width:160px;height:160px;border-radius:12px;object-fit:cover;" />
+                 width="80" height="80"
+                 style="display:block;margin:0 auto 12px;width:80px;height:80px;border-radius:14px;object-fit:cover;border:2px solid rgba(255,255,255,0.12);" />
+
+            <p style="margin:0;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.4px;line-height:1.2;">cleaniq services</p>
+            <p style="margin:4px 0 0;color:rgba(255,255,255,0.45);font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;">Professional Cleaning Solutions</p>
           </td>
         </tr>
 
-        <!-- Divider accent -->
-        <tr><td style="height:3px;background:linear-gradient(90deg,#10b981,#3b82f6);"></td></tr>
-
-        <!-- Body -->
+        <!-- Gradient accent bar -->
         <tr>
-          <td style="background:#ffffff;padding:40px 36px;border-left:1px solid #dde3ed;border-right:1px solid #dde3ed;">
-            <div style="color:#1e293b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15.5px;line-height:1.75;">
+          <td style="height:4px;background:linear-gradient(90deg,#10b981 0%,#3b82f6 60%,#8b5cf6 100%);font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
+
+        <!-- ── BODY ── -->
+        <tr>
+          <td class="inner-cell"
+              style="background:#ffffff;padding:40px 40px 32px;border-left:1px solid #dde5ed;border-right:1px solid #dde5ed;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
               ${content}
-            </div>
+            </table>
           </td>
         </tr>
 
-        <!-- Footer -->
+        <!-- Divider before footer -->
         <tr>
-          <td style="background:#f8fafc;border:1px solid #dde3ed;border-top:none;border-radius:0 0 14px 14px;padding:20px 36px;text-align:center;">
-            <p style="margin:0 0 8px;color:#94a3b8;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;">
-              You received this email because you're on our professional outreach list.
+          <td style="background:#ffffff;border-left:1px solid #dde5ed;border-right:1px solid #dde5ed;padding:0 40px;">
+            <div style="height:1px;background:linear-gradient(90deg,transparent,#e2e8f0 20%,#e2e8f0 80%,transparent);font-size:0;line-height:0;">&nbsp;</div>
+          </td>
+        </tr>
+
+        <!-- ── FOOTER ── -->
+        <tr>
+          <td style="background:#f8fafc;border:1px solid #dde5ed;border-top:none;border-radius:0 0 16px 16px;padding:22px 40px 24px;text-align:center;">
+
+            <!-- Brand badge -->
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 14px;">
+              <tr>
+                <td style="background:#073d27;border-radius:50px;padding:6px 14px;">
+                  <span style="color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:800;letter-spacing:0.3px;">cleaniq services</span>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:0 0 8px;color:#94a3b8;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;">
+              You received this because you're on our outreach list.
             </p>
-            <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;">
-              <a href="${unsubUrl}" style="color:#64748b;text-decoration:none;border-bottom:1px solid #cbd5e1;padding-bottom:1px;">Unsubscribe</a>
-              &nbsp;·&nbsp;
-              <span style="color:#94a3b8;">cleaniq services &nbsp;·&nbsp; cleaniqservices.com</span>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#94a3b8;">
+              <a href="${unsubUrl}"
+                 style="color:#64748b;text-decoration:underline;text-underline-offset:2px;">Unsubscribe</a>
+              &nbsp;&nbsp;·&nbsp;&nbsp;
+              <a href="https://cleaniqservices.com"
+                 style="color:#64748b;text-decoration:none;">cleaniqservices.com</a>
             </p>
           </td>
+        </tr>
+
+        <!-- Bottom spacing -->
+        <tr>
+          <td style="height:24px;font-size:0;line-height:0;">&nbsp;</td>
         </tr>
 
       </table>
@@ -373,8 +432,8 @@ async function detectRepliesForMailbox(mailbox) {
 
   const list = await gmail.users.messages.list({
     userId:     "me",
-    q:          "in:inbox newer_than:3d",
-    maxResults: 50,
+    q:          "in:inbox newer_than:14d",
+    maxResults: 100,
   });
 
   if (!list.data.messages) return;

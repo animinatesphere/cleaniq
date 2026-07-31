@@ -25,69 +25,183 @@ const SEND_STATUS_COLOR = {
   bounced: "bg-orange-500/15 text-orange-400",
 };
 
+// ── Email template builder (mirrors server/utils/coldEmailEngine.js buildEmailHtml) ──
+
+function buildPreviewHtml(rawBody, subject) {
+  const logoUrl = `${(import.meta.env.VITE_API_URL || "https://api.cleaniqservices.com/api").replace(/\/api$/, "")}/public/images/logo.jpg`;
+  const lines = (rawBody || "").split("\n");
+  const content = lines.map(line =>
+    line.trim()
+      ? `<tr><td style="padding:0 0 6px;color:#1e293b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;">${line}</td></tr>`
+      : `<tr><td style="height:10px;font-size:10px;line-height:10px;">&nbsp;</td></tr>`
+  ).join("\n");
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${subject || "Email Preview"}</title>
+<style>
+  * { box-sizing:border-box; }
+  body { margin:0;padding:0;background:#edf1f7;-webkit-font-smoothing:antialiased; }
+  a { color:#0a6644; }
+</style>
+</head>
+<body style="margin:0;padding:0;background:#edf1f7;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#edf1f7;">
+  <tr>
+    <td align="center" style="padding:32px 12px 40px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:560px;max-width:560px;">
+
+        <!-- Header -->
+        <tr>
+          <td align="center" style="background:#073d27;border-radius:16px 16px 0 0;padding:28px 36px;text-align:center;">
+            <img src="${logoUrl}" alt="cleaniq services" width="72" height="72"
+                 style="display:block;margin:0 auto 12px;width:72px;height:72px;border-radius:12px;object-fit:cover;border:2px solid rgba(255,255,255,0.12);" />
+            <p style="margin:0;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:800;letter-spacing:-0.4px;line-height:1.2;">cleaniq services</p>
+            <p style="margin:4px 0 0;color:rgba(255,255,255,0.45);font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:0.8px;text-transform:uppercase;">Professional Cleaning Solutions</p>
+          </td>
+        </tr>
+
+        <!-- Accent bar -->
+        <tr>
+          <td style="height:4px;background:linear-gradient(90deg,#10b981 0%,#3b82f6 60%,#8b5cf6 100%);font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="background:#ffffff;padding:36px 40px 28px;border-left:1px solid #dde5ed;border-right:1px solid #dde5ed;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+              ${content}
+            </table>
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr>
+          <td style="background:#ffffff;border-left:1px solid #dde5ed;border-right:1px solid #dde5ed;padding:0 40px;">
+            <div style="height:1px;background:#e2e8f0;font-size:0;line-height:0;">&nbsp;</div>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#f8fafc;border:1px solid #dde5ed;border-top:none;border-radius:0 0 16px 16px;padding:20px 40px 22px;text-align:center;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 12px;">
+              <tr>
+                <td style="background:#073d27;border-radius:50px;padding:5px 13px;">
+                  <span style="color:#fff;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:800;letter-spacing:0.3px;">cleaniq services</span>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:0 0 6px;color:#94a3b8;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;">
+              You received this because you're on our outreach list.
+            </p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#94a3b8;">
+              <a href="#" style="color:#64748b;text-decoration:underline;">Unsubscribe</a>
+              &nbsp;&nbsp;·&nbsp;&nbsp;
+              <a href="https://cleaniqservices.com" style="color:#64748b;text-decoration:none;">cleaniqservices.com</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
+}
+
 // ── Email Preview Modal ────────────────────────────────────────────────────────
 
 function PreviewModal({ emailStep, onClose }) {
+  const [tab, setTab] = useState("preview"); // "preview" | "source"
+  const [copied, setCopied] = useState(false);
+
   const sample = { "{{first_name}}": "James", "{{last_name}}": "Wilson", "{{company}}": "ABC Ltd", "{{email}}": "james@abcltd.com" };
   const sub  = Object.entries(sample).reduce((t, [k, v]) => t.replaceAll(k, v), emailStep.subject || "");
   const body = Object.entries(sample).reduce((t, [k, v]) => t.replaceAll(k, v), emailStep.body || "");
-  const bodyHtml = body.split("\n").map(l => l.trim()
-    ? `<p style="margin:0 0 14px;color:#1e293b;">${l}</p>`
-    : `<p style="margin:0 0 6px;">&nbsp;</p>`
-  ).join("");
+  const html = buildPreviewHtml(body, sub);
+
+  function copyHtml() {
+    navigator.clipboard.writeText(html).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4" onClick={onClose}>
-      <div className="w-full max-w-[580px] max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-        {/* Preview header */}
-        <div className="flex items-center justify-between mb-3">
+      <div className="w-full max-w-[660px] max-h-[90vh] flex flex-col gap-3" onClick={e => e.stopPropagation()}>
+
+        {/* Toolbar */}
+        <div className="flex items-center justify-between">
           <div>
             <p className="text-white font-bold text-sm">Email Preview</p>
-            <p className="text-white/30 text-xs">Variables replaced with sample data · James Wilson · ABC Ltd</p>
+            <p className="text-white/30 text-xs mt-0.5">Sample data: James Wilson · ABC Ltd · james@abcltd.com</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center text-white/50 hover:text-white cursor-pointer transition-colors">
-            <X size={14} />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Tab switcher */}
+            <div className="flex bg-white/[0.06] border border-white/[0.08] rounded-lg p-0.5">
+              {[["preview","Preview"],["source","HTML Source"]].map(([id,label]) => (
+                <button key={id} onClick={() => setTab(id)}
+                  className={`text-xs px-3 py-1.5 rounded-md font-bold cursor-pointer transition-all ${tab === id ? "bg-white/[0.12] text-white" : "text-white/30 hover:text-white/60"}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+            <button onClick={onClose} className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center text-white/40 hover:text-white cursor-pointer transition-colors">
+              <X size={14} />
+            </button>
+          </div>
         </div>
 
-        {/* Email chrome */}
-        <div className="flex-1 overflow-y-auto rounded-2xl shadow-2xl">
-          {/* Fake email client header */}
-          <div className="bg-gray-100 border-b border-gray-200 px-5 py-4 rounded-t-2xl">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-full bg-[#0a6644] flex items-center justify-center text-white text-xs font-black shrink-0">CS</div>
-              <div>
-                <p className="text-gray-800 text-sm font-bold">cleaniq services</p>
-                <p className="text-gray-400 text-xs">via gmail.com · to james@abcltd.com</p>
-              </div>
-            </div>
-            <p className="text-gray-900 font-bold text-base">{sub || "(no subject)"}</p>
-          </div>
+        {/* Preview/Source pane */}
+        <div className="flex-1 min-h-0 rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl">
 
-          {/* Email body */}
-          <div style={{background:"#eef2f7",padding:"24px 16px"}}>
-            <div style={{maxWidth:"520px",margin:"0 auto"}}>
-              {/* Logo header */}
-              <div style={{background:"#0a6644",borderRadius:"12px 12px 0 0",padding:"18px",textAlign:"center"}}>
-                <span style={{color:"#ffffff",fontSize:"18px",fontWeight:"800",letterSpacing:"-0.5px",fontFamily:"Arial,sans-serif"}}>cleaniq services</span>
+          {tab === "preview" && (
+            <div className="h-full flex flex-col">
+              {/* Fake Gmail client bar */}
+              <div className="bg-[#f2f2f2] border-b border-gray-200 px-5 py-3.5 shrink-0">
+                <div className="flex items-center gap-2.5 mb-2.5">
+                  <div className="w-8 h-8 rounded-full bg-[#073d27] flex items-center justify-center text-white text-[11px] font-black shrink-0">CS</div>
+                  <div>
+                    <p className="text-gray-800 text-sm font-bold leading-tight">cleaniq services &lt;via gmail.com&gt;</p>
+                    <p className="text-gray-400 text-xs">to james@abcltd.com</p>
+                  </div>
+                </div>
+                <p className="text-gray-900 font-semibold text-base leading-tight">{sub || "(no subject)"}</p>
               </div>
-              {/* Accent bar */}
-              <div style={{height:"3px",background:"linear-gradient(90deg,#10b981,#3b82f6)"}} />
-              {/* Body */}
-              <div
-                style={{background:"#ffffff",padding:"36px 32px",borderLeft:"1px solid #dde3ed",borderRight:"1px solid #dde3ed",fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif",fontSize:"15px",lineHeight:"1.75",color:"#1e293b"}}
-                dangerouslySetInnerHTML={{ __html: bodyHtml }}
+              {/* iFrame showing actual email HTML */}
+              <iframe
+                srcDoc={html}
+                title="Email Preview"
+                className="flex-1 w-full border-0"
+                style={{ background: "#edf1f7", minHeight: "400px" }}
+                sandbox="allow-same-origin"
               />
-              {/* Footer */}
-              <div style={{background:"#f8fafc",border:"1px solid #dde3ed",borderTop:"none",borderRadius:"0 0 12px 12px",padding:"18px 32px",textAlign:"center"}}>
-                <p style={{margin:"0",fontSize:"11px",color:"#94a3b8",fontFamily:"Arial,sans-serif",lineHeight:"1.6"}}>
-                  You received this email because you're on our outreach list.<br/>
-                  <a href="#" style={{color:"#64748b",textDecoration:"none",borderBottom:"1px solid #cbd5e1"}}>Unsubscribe</a>
-                  {" · "}cleaniq services{" · "}cleaniqservices.com
-                </p>
-              </div>
             </div>
-          </div>
+          )}
+
+          {tab === "source" && (
+            <div className="h-full flex flex-col bg-[#0d1117]">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.07] shrink-0">
+                <p className="text-white/35 text-xs font-bold uppercase tracking-wider">HTML Source · {html.length.toLocaleString()} chars</p>
+                <button onClick={copyHtml}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 font-bold hover:bg-emerald-500/25 cursor-pointer transition-all">
+                  {copied ? "Copied!" : "Copy HTML"}
+                </button>
+              </div>
+              <textarea
+                readOnly
+                value={html}
+                className="flex-1 w-full bg-transparent text-[11px] text-emerald-300/60 font-mono resize-none focus:outline-none px-4 py-3 leading-relaxed"
+                style={{ minHeight: "400px" }}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -105,6 +219,7 @@ function CampaignPanel({ campaignId, onClose, onRefresh }) {
   const [page, setPage]         = useState(1);
   const [total, setTotal]       = useState(0);
   const [actionBusy, setActionBusy] = useState("");
+  const [checkingReplies, setCheckingReplies] = useState(false);
 
   const loadCampaign = useCallback(async () => {
     const r = await afetch(`${API}/cold-email/campaigns/${campaignId}`);
@@ -174,7 +289,25 @@ function CampaignPanel({ campaignId, onClose, onRefresh }) {
                 {actionBusy === "resume" ? "…" : "Resume"}
               </button>
             )}
-            <button onClick={() => { loadCampaign(); loadSends(); }} className="w-7 h-7 rounded-lg bg-white/[0.04] flex items-center justify-center text-white/30 hover:text-white/70 cursor-pointer transition-colors">
+            <button
+              onClick={async () => {
+                setCheckingReplies(true);
+                await afetch(`${API}/cold-email/campaigns/${campaignId}/check-replies`, { method: "POST" });
+                await loadCampaign();
+                await loadSends();
+                setCheckingReplies(false);
+              }}
+              disabled={checkingReplies}
+              title="Check for new replies now"
+              className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.07] text-white/30 hover:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/20 cursor-pointer disabled:opacity-40 transition-all"
+            >
+              {checkingReplies
+                ? <div className="w-3 h-3 border border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                : <RefreshCw size={11} />
+              }
+              {checkingReplies ? "Checking…" : "Check replies"}
+            </button>
+            <button onClick={() => { loadCampaign(); loadSends(); }} className="w-7 h-7 rounded-lg bg-white/[0.04] flex items-center justify-center text-white/30 hover:text-white/70 cursor-pointer transition-colors" title="Refresh panel">
               <RefreshCw size={12} />
             </button>
             <button onClick={onClose} className="w-7 h-7 rounded-lg bg-white/[0.04] flex items-center justify-center text-white/30 hover:text-white/70 cursor-pointer transition-colors">
