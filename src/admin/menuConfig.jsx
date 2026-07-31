@@ -307,6 +307,12 @@ export const fullMenuGroups = [
         key: "guide-distribution",
         icon: <BookOpen size={20} />,
       },
+      {
+        name: "Cold Email",
+        path: "/admin/cold-email",
+        key: "cold-email",
+        icon: <Mail size={20} />,
+      },
     ],
   },
   {

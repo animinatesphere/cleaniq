@@ -175,10 +175,36 @@ async function processDueTasks() {
   }
 }
 
+let coldEmailTick = 0;
+
 function startAutomationEngine() {
   console.log("⚙️  Automation engine started — checking every 2 minutes");
-  processDueTasks(); // run immediately on startup
-  setInterval(processDueTasks, 2 * 60 * 1000);
+
+  const tick = async () => {
+    await processDueTasks();
+
+    // Cold email sends — every tick (2 min)
+    try {
+      const { processColdEmailSends } = require("./coldEmailEngine");
+      await processColdEmailSends();
+    } catch (e) {
+      console.error("Cold email send error:", e.message);
+    }
+
+    // Reply detection — every 5th tick (~10 min) to avoid Gmail API quota
+    coldEmailTick++;
+    if (coldEmailTick % 5 === 0) {
+      try {
+        const { detectReplies } = require("./coldEmailEngine");
+        await detectReplies();
+      } catch (e) {
+        console.error("Reply detection error:", e.message);
+      }
+    }
+  };
+
+  tick(); // run immediately on startup
+  setInterval(tick, 2 * 60 * 1000);
 }
 
 // Schedule a task (idempotent — won't duplicate for same booking/quote + type)
