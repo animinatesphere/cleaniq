@@ -168,33 +168,43 @@ function Wizard({ onClose, onCreated, editCampaign }) {
   const stepLabels = ["Campaign Info", "Build Sequence", "Select Contacts", "Review & Launch"];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-[#061A13] border border-white/[0.08] rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+      <div className="bg-[#061A13] border border-white/[0.08] rounded-2xl w-full max-w-[740px] max-h-[88vh] flex flex-col shadow-2xl">
+
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-          <div>
-            <h2 className="text-white font-black text-base">{editCampaign ? "Edit Campaign" : "New Campaign"}</h2>
-            <p className="text-white/40 text-xs mt-0.5">Step {step} of {TOTAL_STEPS} — {stepLabels[step - 1]}</p>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center shrink-0">
+              <Mail size={15} className="text-emerald-400" />
+            </div>
+            <div>
+              <h2 className="text-white font-black text-sm leading-none">{editCampaign ? "Edit Campaign" : "New Campaign"}</h2>
+              <p className="text-white/35 text-xs mt-0.5">Step {step} of {TOTAL_STEPS} — {stepLabels[step - 1]}</p>
+            </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-white/[0.05] flex items-center justify-center text-white/40 hover:text-white/80 hover:bg-white/10 cursor-pointer">
+          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-white/30 hover:text-white/70 hover:bg-white/[0.08] cursor-pointer transition-colors">
             <X size={14} />
           </button>
         </div>
 
         {/* Step indicator */}
-        <div className="flex items-center gap-0 px-6 pt-4">
+        <div className="flex items-center px-6 pt-5 pb-1">
           {stepLabels.map((label, i) => (
             <div key={i} className="flex items-center flex-1">
-              <div className={`flex items-center gap-2 shrink-0 ${i + 1 <= step ? "opacity-100" : "opacity-30"}`}>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${
+              <div className={`flex items-center gap-2 shrink-0 ${i + 1 <= step ? "opacity-100" : "opacity-25"}`}>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all ${
                   i + 1 < step  ? "bg-emerald-500 text-white" :
-                  i + 1 === step ? "bg-emerald-500 text-white ring-4 ring-emerald-500/20" :
-                                   "bg-white/[0.06] text-white/40"
-                }`}>{i + 1 < step ? "✓" : i + 1}</div>
-                <span className={`text-xs font-semibold hidden sm:block ${i + 1 === step ? "text-white" : "text-white/40"}`}>{label}</span>
+                  i + 1 === step ? "bg-emerald-500 text-white ring-[3px] ring-emerald-500/25" :
+                                   "bg-white/[0.07] text-white/40"
+                }`}>
+                  {i + 1 < step ? (
+                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  ) : i + 1}
+                </div>
+                <span className={`text-xs font-bold hidden sm:block ${i + 1 === step ? "text-white" : "text-white/40"}`}>{label}</span>
               </div>
               {i < stepLabels.length - 1 && (
-                <div className={`flex-1 h-px mx-3 ${i + 1 < step ? "bg-emerald-500/40" : "bg-white/[0.06]"}`} />
+                <div className={`flex-1 h-px mx-3 transition-colors ${i + 1 < step ? "bg-emerald-500/50" : "bg-white/[0.07]"}`} />
               )}
             </div>
           ))}
@@ -205,54 +215,67 @@ function Wizard({ onClose, onCreated, editCampaign }) {
 
           {/* ── Step 1: Campaign Info ── */}
           {step === 1 && (
-            <div className="space-y-4">
-              <div>
-                <label className="text-white/60 text-xs font-bold uppercase tracking-wider block mb-1.5">Campaign Name *</label>
-                <input
-                  type="text"
-                  value={data.name}
-                  onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))}
-                  placeholder="e.g. Q3 Commercial Outreach"
-                  className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/40 text-sm"
-                />
+            <div className="space-y-5">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-white/50 text-xs font-bold uppercase tracking-wider block mb-2">Campaign Name *</label>
+                  <input
+                    type="text"
+                    value={data.name}
+                    onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))}
+                    placeholder="e.g. Q3 Commercial Outreach"
+                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.06] text-sm transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-white/50 text-xs font-bold uppercase tracking-wider block mb-2">
+                    From Name <span className="text-white/25 font-normal normal-case text-[11px]">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={data.fromName}
+                    onChange={(e) => setData((d) => ({ ...d, fromName: e.target.value }))}
+                    placeholder="e.g. Adeyemi at CleanIQ"
+                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.06] text-sm transition-all"
+                  />
+                </div>
               </div>
+
               <div>
-                <label className="text-white/60 text-xs font-bold uppercase tracking-wider block mb-1.5">From Name <span className="text-white/30 font-normal normal-case">(optional — defaults to email address)</span></label>
-                <input
-                  type="text"
-                  value={data.fromName}
-                  onChange={(e) => setData((d) => ({ ...d, fromName: e.target.value }))}
-                  placeholder="e.g. Adeyemi at cleaniq services"
-                  className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/40 text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-white/60 text-xs font-bold uppercase tracking-wider block mb-3">Select Sending Mailboxes *</label>
+                <label className="text-white/50 text-xs font-bold uppercase tracking-wider block mb-3">Sending Mailboxes *</label>
                 {mailboxes.length === 0 ? (
-                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 flex items-center gap-2">
-                    <AlertCircle size={14} className="text-amber-400 shrink-0" />
-                    <p className="text-amber-400 text-sm">No mailboxes connected. Go to the Mailboxes tab first and connect a Gmail account.</p>
+                  <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-xl px-4 py-3.5 flex items-center gap-3">
+                    <AlertCircle size={15} className="text-amber-400 shrink-0" />
+                    <p className="text-amber-400/90 text-sm">No mailboxes connected. Go to the Mailboxes tab first.</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {mailboxes.map((box) => {
-                      const on = data.mailboxIds.includes(box._id);
+                      const on  = data.mailboxIds.includes(box._id);
+                      const pct = box.dailyLimit > 0 ? Math.round((box.sentToday / box.dailyLimit) * 100) : 0;
                       return (
                         <div
                           key={box._id}
                           onClick={() => toggleMailbox(box._id)}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
-                            on ? "bg-emerald-500/10 border-emerald-500/30" : "bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.05]"
+                          className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border cursor-pointer transition-all ${
+                            on ? "bg-emerald-500/[0.08] border-emerald-500/30" : "bg-white/[0.025] border-white/[0.07] hover:bg-white/[0.04] hover:border-white/[0.12]"
                           }`}
                         >
-                          <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${on ? "bg-emerald-500 border-emerald-500" : "border-white/20"}`}>
+                          <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${on ? "bg-emerald-500 border-emerald-500" : "border-white/20"}`}>
                             {on && <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2.5 2.5 5-5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-white/90 text-sm font-semibold truncate">{box.email}</p>
-                            <p className="text-white/30 text-xs">Daily limit: {box.dailyLimit} · {box.sentToday} sent today</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-white/90 text-sm font-semibold truncate">{box.email}</p>
+                              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full uppercase ${STATUS_STYLES[box.status] || STATUS_STYLES.draft}`}>{box.status}</span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden max-w-[80px]">
+                                <div className={`h-full rounded-full ${pct >= 100 ? "bg-rose-500" : pct >= 80 ? "bg-amber-400" : "bg-emerald-500"}`} style={{ width: `${Math.min(100, pct)}%` }} />
+                              </div>
+                              <p className="text-white/30 text-[11px]">{box.sentToday}/{box.dailyLimit} sent today</p>
+                            </div>
                           </div>
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${STATUS_STYLES[box.status] || STATUS_STYLES.draft}`}>{box.status}</span>
                         </div>
                       );
                     })}
@@ -264,73 +287,102 @@ function Wizard({ onClose, onCreated, editCampaign }) {
 
           {/* ── Step 2: Build Sequence ── */}
           {step === 2 && (
-            <div className="space-y-4">
-              <p className="text-white/40 text-xs">Use <code className="text-emerald-400">{"{{first_name}}"}</code>, <code className="text-emerald-400">{"{{company}}"}</code> etc. to personalize. Every email automatically gets an unsubscribe footer.</p>
+            <div className="space-y-5">
+              <div className="flex items-start gap-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3">
+                <div className="w-4 h-4 mt-0.5 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                </div>
+                <p className="text-white/40 text-xs leading-relaxed">
+                  Write your email sequence below. Use{" "}
+                  <code className="text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded text-[11px]">{"{{first_name}}"}</code>,{" "}
+                  <code className="text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded text-[11px]">{"{{company}}"}</code> to personalize.
+                  An unsubscribe link is added automatically to every send.
+                </p>
+              </div>
+
               {data.steps.map((s, idx) => (
-                <div key={idx} className="bg-white/[0.03] border border-white/[0.07] rounded-xl overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 bg-white/[0.03] border-b border-white/[0.06]">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-xs font-black text-emerald-400">{idx + 1}</div>
-                      <span className="text-white/70 text-sm font-bold">
-                        {idx === 0 ? "First email (sent immediately on launch)" : `Follow-up ${idx}`}
+                <div key={idx} className="border border-white/[0.08] rounded-2xl overflow-hidden">
+                  {/* Email card header */}
+                  <div className={`flex items-center justify-between px-4 py-3 border-b border-white/[0.07] ${idx === 0 ? "bg-emerald-500/[0.06]" : "bg-white/[0.03]"}`}>
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${idx === 0 ? "bg-emerald-500/25 text-emerald-400" : "bg-white/[0.08] text-white/50"}`}>{idx + 1}</div>
+                      <span className={`text-sm font-bold ${idx === 0 ? "text-emerald-300/90" : "text-white/70"}`}>
+                        {idx === 0 ? "First email" : `Follow-up ${idx}`}
                       </span>
+                      {idx === 0 && <span className="text-emerald-400/40 text-xs hidden sm:inline">· sent immediately on launch</span>}
                     </div>
-                    {idx > 0 && (
-                      <button onClick={() => removeStep(idx)} className="text-white/30 hover:text-rose-400 cursor-pointer"><X size={14} /></button>
-                    )}
+                    <div className="flex items-center gap-3">
+                      {idx > 0 && (
+                        <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.07] rounded-lg px-3 py-1.5">
+                          <span className="text-white/35 text-xs">Wait</span>
+                          <input
+                            type="number" min="1" max="30"
+                            value={s.waitDays}
+                            onChange={(e) => setStepField(idx, "waitDays", Number(e.target.value))}
+                            className="w-8 bg-transparent text-white text-sm text-center focus:outline-none font-bold"
+                          />
+                          <span className="text-white/35 text-xs">days</span>
+                        </div>
+                      )}
+                      {idx > 0 && (
+                        <button onClick={() => removeStep(idx)} className="text-white/20 hover:text-rose-400 cursor-pointer transition-colors p-1">
+                          <X size={13} />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="p-4 space-y-3">
-                    {idx > 0 && (
-                      <div className="flex items-center gap-2">
-                        <label className="text-white/40 text-xs font-semibold whitespace-nowrap">Send after</label>
-                        <input
-                          type="number" min="1" max="30"
-                          value={s.waitDays}
-                          onChange={(e) => setStepField(idx, "waitDays", Number(e.target.value))}
-                          className="w-16 bg-white/[0.05] border border-white/[0.08] rounded-lg px-2 py-1 text-white text-sm text-center focus:outline-none focus:border-emerald-500/40"
-                        />
-                        <label className="text-white/40 text-xs font-semibold">days with no reply</label>
-                      </div>
-                    )}
-                    <div>
-                      <label className="text-white/40 text-xs font-semibold block mb-1">Subject Line</label>
+
+                  {/* Email compose body */}
+                  <div className="bg-white/[0.015]">
+                    {/* Subject row */}
+                    <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
+                      <span className="text-white/25 text-xs font-bold uppercase tracking-wider w-14 shrink-0">Subject</span>
                       <input
                         type="text"
                         value={s.subject}
                         onChange={(e) => setStepField(idx, "subject", e.target.value)}
-                        placeholder="e.g. Quick question, {{first_name}}"
-                        className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white/90 placeholder:text-white/20 text-sm focus:outline-none focus:border-emerald-500/40"
+                        placeholder={idx === 0 ? "e.g. Quick question, {{first_name}}" : "e.g. Following up, {{first_name}}"}
+                        className="flex-1 bg-transparent text-white/90 placeholder:text-white/20 text-sm focus:outline-none"
                       />
                     </div>
-                    <div>
-                      <label className="text-white/40 text-xs font-semibold block mb-1">Message Body</label>
+
+                    {/* Body textarea */}
+                    <div className="relative">
                       <textarea
                         value={s.body}
                         onChange={(e) => setStepField(idx, "body", e.target.value)}
-                        rows={6}
-                        placeholder="Hi {{first_name}},&#10;&#10;I noticed {{company}} might benefit from our cleaning services...&#10;&#10;Best,&#10;The cleaniq services team"
-                        className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white/90 placeholder:text-white/20 text-sm focus:outline-none focus:border-emerald-500/40 resize-none font-mono"
+                        rows={9}
+                        placeholder={"Hi {{first_name}},\n\nI noticed {{company}} could benefit from our professional cleaning services.\n\nWould you be open to a quick 10-minute call this week?\n\nBest,\nThe CleanIQ Services team"}
+                        className="w-full bg-transparent px-4 pt-4 pb-8 text-white/85 placeholder:text-white/15 text-sm focus:outline-none resize-none leading-relaxed"
                       />
+                      <div className="absolute bottom-2.5 right-3.5 text-white/20 text-[11px] select-none pointer-events-none">
+                        {s.body.trim() ? s.body.trim().split(/\s+/).filter(Boolean).length : 0} words · {s.body.length} chars
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-white/30 text-xs">Insert variable:</span>
+
+                    {/* Variable chips */}
+                    <div className="flex items-center gap-2 px-4 py-3 border-t border-white/[0.05] flex-wrap">
+                      <span className="text-white/20 text-xs font-semibold shrink-0">Insert:</span>
                       {VARS.map((v) => (
                         <button
                           key={v}
-                          onClick={() => insertVar(idx, "body", " " + v)}
-                          className="text-xs px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 cursor-pointer font-mono"
+                          onClick={() => insertVar(idx, "body", v)}
+                          className="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-500/[0.07] text-emerald-400/70 border border-emerald-500/[0.15] hover:bg-emerald-500/15 hover:text-emerald-300 hover:border-emerald-500/30 cursor-pointer font-mono transition-all"
                         >{v}</button>
                       ))}
                     </div>
                   </div>
                 </div>
               ))}
+
               {data.steps.length < 3 && (
                 <button
                   onClick={addStep}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-white/10 text-white/30 hover:text-white/60 hover:border-white/20 text-sm font-semibold cursor-pointer transition-all"
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border border-dashed border-white/[0.08] text-white/30 hover:text-white/60 hover:border-white/[0.15] hover:bg-white/[0.02] text-sm font-semibold cursor-pointer transition-all"
                 >
-                  <Plus size={14} /> Add follow-up step ({data.steps.length}/3 steps)
+                  <Plus size={14} />
+                  Add follow-up email
+                  <span className="text-white/20 text-xs">({data.steps.length} of 3)</span>
                 </button>
               )}
             </div>
@@ -339,9 +391,17 @@ function Wizard({ onClose, onCreated, editCampaign }) {
           {/* ── Step 3: Select Contacts ── */}
           {step === 3 && (
             <div className="space-y-3">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <p className="text-white/60 text-sm font-semibold">{data.contactIds.length.toLocaleString()} selected</p>
-                <div className="flex gap-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-white font-bold text-sm">
+                    {data.contactIds.length > 0
+                      ? <>{data.contactIds.length.toLocaleString()} <span className="text-emerald-400">selected</span></>
+                      : <span className="text-white/40">No contacts selected</span>
+                    }
+                  </p>
+                  <p className="text-white/30 text-xs mt-0.5">{contactTotal.toLocaleString()} total in database</p>
+                </div>
+                <div className="flex items-center gap-3">
                   <button
                     onClick={async () => {
                       const params = new URLSearchParams({ search: contactSearch });
@@ -349,34 +409,37 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                       const d = await r.json();
                       if (d.ids) setData((prev) => ({ ...prev, contactIds: d.ids }));
                     }}
-                    className="text-xs text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer"
+                    className="text-xs text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer transition-colors"
                   >
                     Select all {contactTotal.toLocaleString()}
                   </button>
+                  <span className="text-white/10">|</span>
                   <button
                     onClick={() => setData((prev) => ({ ...prev, contactIds: [] }))}
-                    className="text-xs text-white/30 hover:text-white/60 font-bold cursor-pointer"
+                    className="text-xs text-white/30 hover:text-white/60 font-bold cursor-pointer transition-colors"
                   >
                     Clear
                   </button>
                   <button
                     onClick={toggleAllContacts}
-                    className="text-xs text-white/40 hover:text-white/70 font-bold cursor-pointer"
+                    className="text-xs text-white/30 hover:text-white/60 font-semibold cursor-pointer transition-colors"
                   >
                     {contacts.every((c) => data.contactIds.includes(c._id)) ? "Deselect page" : "Select page"}
                   </button>
                 </div>
               </div>
+
               <input
                 type="text"
                 value={contactSearch}
                 onChange={(e) => { setContactSearch(e.target.value); setContactPage(1); }}
-                placeholder="Search contacts…"
-                className="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-emerald-500/40"
+                placeholder="Search by name, email or company…"
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-emerald-500/40 transition-all"
               />
-              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl max-h-64 overflow-y-auto">
+
+              <div className="bg-white/[0.025] border border-white/[0.06] rounded-xl max-h-64 overflow-y-auto">
                 {contacts.length === 0 ? (
-                  <div className="py-8 text-center text-white/30 text-sm">No contacts found</div>
+                  <div className="py-10 text-center text-white/30 text-sm">No contacts found</div>
                 ) : (
                   contacts.map((c) => {
                     const sel  = data.contactIds.includes(c._id);
@@ -385,26 +448,27 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                       <div
                         key={c._id}
                         onClick={() => toggleContact(c._id)}
-                        className={`flex items-center gap-3 px-4 py-2.5 border-b border-white/[0.04] cursor-pointer transition-all last:border-0 ${sel ? "bg-emerald-500/[0.06]" : "hover:bg-white/[0.02]"}`}
+                        className={`flex items-center gap-3 px-4 py-2.5 border-b border-white/[0.04] cursor-pointer transition-colors last:border-0 ${sel ? "bg-emerald-500/[0.07]" : "hover:bg-white/[0.03]"}`}
                       >
-                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${sel ? "bg-emerald-500 border-emerald-500" : "border-white/20"}`}>
+                        <div className={`w-[18px] h-[18px] rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${sel ? "bg-emerald-500 border-emerald-500" : "border-white/20"}`}>
                           {sel && <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2.5 2.5 5-5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-white/80 text-sm font-medium truncate">{name}</p>
+                          <p className="text-white/85 text-sm font-medium truncate">{name}</p>
                           <p className="text-white/30 text-xs truncate">{c.email}</p>
                         </div>
-                        {c.company && <span className="text-white/25 text-xs truncate max-w-[100px]">{c.company}</span>}
+                        {c.company && <span className="text-white/20 text-xs truncate max-w-[100px] hidden sm:block">{c.company}</span>}
                       </div>
                     );
                   })
                 )}
               </div>
-              <div className="flex items-center justify-between text-xs text-white/30">
-                <span>{contactTotal.toLocaleString()} total contacts</span>
-                <div className="flex gap-2">
-                  <button onClick={() => setContactPage((p) => Math.max(1, p - 1))} disabled={contactPage === 1} className="px-2 py-1 rounded bg-white/[0.05] disabled:opacity-30 cursor-pointer disabled:cursor-default">Prev</button>
-                  <button onClick={() => setContactPage((p) => p + 1)} disabled={contacts.length < 50} className="px-2 py-1 rounded bg-white/[0.05] disabled:opacity-30 cursor-pointer disabled:cursor-default">Next</button>
+
+              <div className="flex items-center justify-between text-xs text-white/25">
+                <span>Page {contactPage}</span>
+                <div className="flex gap-1.5">
+                  <button onClick={() => setContactPage((p) => Math.max(1, p - 1))} disabled={contactPage === 1} className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] disabled:opacity-30 cursor-pointer disabled:cursor-default hover:bg-white/[0.07] transition-colors">← Prev</button>
+                  <button onClick={() => setContactPage((p) => p + 1)} disabled={contacts.length < 50} className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] disabled:opacity-30 cursor-pointer disabled:cursor-default hover:bg-white/[0.07] transition-colors">Next →</button>
                 </div>
               </div>
             </div>
@@ -413,27 +477,33 @@ function Wizard({ onClose, onCreated, editCampaign }) {
           {/* ── Step 4: Review ── */}
           {step === 4 && (
             <div className="space-y-4">
-              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl divide-y divide-white/[0.06]">
+              <div className="bg-white/[0.025] border border-white/[0.07] rounded-2xl overflow-hidden divide-y divide-white/[0.06]">
                 {[
-                  { label: "Campaign",   value: data.name },
-                  { label: "From name",  value: data.fromName || <span className="text-white/30">Defaults to mailbox email</span> },
-                  { label: "Mailboxes",  value: `${data.mailboxIds.length} selected` },
-                  { label: "Steps",      value: `${data.steps.length} email${data.steps.length > 1 ? "s" : ""} in sequence` },
-                  { label: "Contacts",   value: `${data.contactIds.length.toLocaleString()} contacts will receive this campaign` },
-                ].map(({ label, value }) => (
-                  <div key={label} className="flex items-center justify-between px-4 py-3">
-                    <span className="text-white/40 text-sm">{label}</span>
-                    <span className="text-white text-sm font-semibold">{value}</span>
+                  { label: "Campaign name", value: data.name,         icon: "📋" },
+                  { label: "From name",     value: data.fromName || "Defaults to mailbox email", dim: !data.fromName, icon: "👤" },
+                  { label: "Mailboxes",     value: `${data.mailboxIds.length} mailbox${data.mailboxIds.length !== 1 ? "es" : ""} selected`, icon: "📬" },
+                  { label: "Email steps",   value: `${data.steps.length} email${data.steps.length > 1 ? "s" : ""} in sequence`, icon: "✉️" },
+                  { label: "Recipients",    value: `${data.contactIds.length.toLocaleString()} contacts`, icon: "👥" },
+                ].map(({ label, value, dim, icon }) => (
+                  <div key={label} className="flex items-center justify-between px-5 py-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base leading-none">{icon}</span>
+                      <span className="text-white/40 text-sm">{label}</span>
+                    </div>
+                    <span className={`text-sm font-semibold ${dim ? "text-white/30" : "text-white"}`}>{value}</span>
                   </div>
                 ))}
               </div>
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3">
-                <p className="text-amber-400 text-sm font-bold mb-0.5">Before you launch</p>
-                <ul className="text-amber-400/80 text-xs space-y-1 list-disc list-inside">
+
+              <div className="bg-amber-500/[0.07] border border-amber-500/[0.18] rounded-xl px-4 py-3.5 space-y-1.5">
+                <p className="text-amber-400 text-sm font-bold flex items-center gap-2">
+                  <AlertCircle size={14} /> Before you launch
+                </p>
+                <ul className="text-amber-400/70 text-xs space-y-1 list-disc list-inside">
                   <li>Every email includes a mandatory unsubscribe link</li>
-                  <li>Sends are spread across business hours (9am–5pm) with random gaps</li>
+                  <li>Sends are spread with random gaps across contacts</li>
                   <li>Daily limits per mailbox are enforced automatically</li>
-                  <li>Set <code className="font-mono">COLD_EMAIL_DRY_RUN=false</code> on the server to send real emails</li>
+                  <li>Set <code className="font-mono">COLD_EMAIL_DRY_RUN=false</code> on the server to deliver real emails</li>
                 </ul>
               </div>
             </div>
@@ -441,7 +511,7 @@ function Wizard({ onClose, onCreated, editCampaign }) {
 
           {/* Error */}
           {error && (
-            <div className="flex items-center gap-2 bg-rose-500/10 border border-rose-500/20 rounded-xl px-4 py-3">
+            <div className="flex items-center gap-2.5 bg-rose-500/[0.08] border border-rose-500/20 rounded-xl px-4 py-3">
               <AlertCircle size={14} className="text-rose-400 shrink-0" />
               <p className="text-rose-400 text-sm">{error}</p>
             </div>
@@ -449,22 +519,22 @@ function Wizard({ onClose, onCreated, editCampaign }) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06] bg-white/[0.01]">
           <button
             onClick={back}
             disabled={step === 1}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.05] text-white/50 text-sm font-bold hover:bg-white/10 hover:text-white/80 disabled:opacity-0 disabled:pointer-events-none cursor-pointer transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white/40 text-sm font-bold hover:text-white/70 disabled:opacity-0 disabled:pointer-events-none cursor-pointer transition-all"
           >
             <ArrowLeft size={14} /> Back
           </button>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2.5">
             {step < TOTAL_STEPS && (
               <button
                 onClick={next}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-bold hover:bg-emerald-400 cursor-pointer shadow-lg shadow-emerald-500/20 transition-all"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-bold hover:bg-emerald-400 cursor-pointer shadow-lg shadow-emerald-500/25 transition-all"
               >
-                Next <ArrowRight size={14} />
+                Continue <ArrowRight size={14} />
               </button>
             )}
             {step === TOTAL_STEPS && (
@@ -472,14 +542,14 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                 <button
                   onClick={() => save(false)}
                   disabled={saving}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.07] border border-white/[0.08] text-white/70 text-sm font-bold hover:bg-white/10 cursor-pointer transition-all disabled:opacity-40"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.06] border border-white/[0.09] text-white/60 text-sm font-bold hover:bg-white/[0.09] cursor-pointer transition-all disabled:opacity-40"
                 >
                   <Save size={14} /> Save Draft
                 </button>
                 <button
                   onClick={() => save(true)}
                   disabled={saving}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-bold hover:bg-emerald-400 cursor-pointer shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-40"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-bold hover:bg-emerald-400 cursor-pointer shadow-lg shadow-emerald-500/25 transition-all disabled:opacity-40"
                 >
                   {saving ? (
                     <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Launching…</>
