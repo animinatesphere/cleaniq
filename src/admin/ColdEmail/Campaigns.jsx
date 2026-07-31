@@ -141,6 +141,7 @@ function CampaignDetail({ campaignId, onBack, onRefresh }) {
   const [checkBusy, setCheckBusy]   = useState(false);
   const [previewStep, setPreviewStep] = useState(null);
   const [expandedStep, setExpandedStep] = useState(0);
+  const [viewReply, setViewReply]   = useState(null); // the send object whose reply to show
 
   const loadCampaign = useCallback(async () => {
     setLoading(true);
@@ -400,28 +401,57 @@ function CampaignDetail({ campaignId, onBack, onRefresh }) {
                 </p>
               </div>
             ) : sends.map((send) => {
-              const c    = send.contactId || {};
-              const name = [c.firstName, c.lastName].filter(Boolean).join(" ") || send.contactEmail;
-              const init = (name[0] || "?").toUpperCase();
-              const when = send.sentAt || send.scheduledAt;
-              const sInfo = SEND_STATUS[send.status] || SEND_STATUS.skipped;
+              const c      = send.contactId || {};
+              const name   = [c.firstName, c.lastName].filter(Boolean).join(" ") || send.contactEmail;
+              const init   = (name[0] || "?").toUpperCase();
+              const when   = send.sentAt || send.scheduledAt;
+              const sInfo  = SEND_STATUS[send.status] || SEND_STATUS.skipped;
+              const hasReply = send.status === "replied" && (send.replyBody || send.replySubject);
               return (
-                <div key={send._id}
-                  className="grid grid-cols-[auto_1fr_1fr_auto_auto] gap-4 px-4 py-3 border-b border-white/[0.03] last:border-0 hover:bg-white/[0.02] transition-colors items-center">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-[11px] font-black text-emerald-400">
-                    {init}
+                <div key={send._id} className="border-b border-white/[0.03] last:border-0">
+                  <div className="grid grid-cols-[auto_1fr_1fr_auto_auto] gap-4 px-4 py-3 hover:bg-white/[0.02] transition-colors items-center">
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-black ${send.status==="replied" ? "bg-emerald-500/15 border border-emerald-500/25 text-emerald-400" : "bg-white/[0.06] border border-white/[0.07] text-white/40"}`}>
+                      {init}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white/85 text-sm font-semibold truncate">{name}</p>
+                      <p className="text-white/25 text-xs truncate">{send.contactEmail}</p>
+                    </div>
+                    <p className="text-white/35 text-xs truncate hidden sm:block">{c.company || "—"}</p>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-black px-2 py-1 rounded-full uppercase tracking-wide whitespace-nowrap ${sInfo.color}`}>
+                        {sInfo.label}
+                      </span>
+                      {hasReply && (
+                        <button onClick={() => setViewReply(viewReply?._id === send._id ? null : send)}
+                          className={`text-[10px] font-bold px-2 py-1 rounded-full cursor-pointer transition-all ${viewReply?._id===send._id ? "bg-emerald-500 text-white" : "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20"}`}>
+                          {viewReply?._id===send._id ? "Hide reply" : "View reply"}
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-white/25 text-[11px] whitespace-nowrap">
+                      {when ? new Date(when).toLocaleDateString("en-GB", { day:"numeric", month:"short" }) : "—"}
+                    </p>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-white/85 text-sm font-semibold truncate">{name}</p>
-                    <p className="text-white/25 text-xs truncate">{send.contactEmail}</p>
-                  </div>
-                  <p className="text-white/35 text-xs truncate hidden sm:block">{c.company || "—"}</p>
-                  <span className={`text-[10px] font-black px-2 py-1 rounded-full uppercase tracking-wide whitespace-nowrap ${sInfo.color}`}>
-                    {sInfo.label}
-                  </span>
-                  <p className="text-white/25 text-[11px] whitespace-nowrap">
-                    {when ? new Date(when).toLocaleDateString("en-GB", { day:"numeric", month:"short" }) : "—"}
-                  </p>
+
+                  {/* Inline reply viewer */}
+                  {viewReply?._id === send._id && (
+                    <div className="mx-4 mb-3 bg-emerald-500/[0.05] border border-emerald-500/20 rounded-xl overflow-hidden">
+                      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-emerald-500/15 bg-emerald-500/[0.04]">
+                        <MessageSquare size={13} className="text-emerald-400 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-emerald-300 text-xs font-bold truncate">{send.replySubject || `Re: ${campaign?.steps?.[0]?.subject || "your email"}`}</p>
+                          <p className="text-emerald-400/50 text-[10px]">
+                            From {send.replyFrom || send.contactEmail}
+                            {send.repliedAt && ` · ${new Date(send.repliedAt).toLocaleDateString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="px-4 py-3">
+                        <p className="text-white/65 text-sm leading-relaxed whitespace-pre-wrap">{send.replyBody || "(Reply content not yet loaded — click Check Replies to fetch it)"}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

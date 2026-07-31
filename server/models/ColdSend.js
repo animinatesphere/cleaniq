@@ -16,6 +16,10 @@ const coldSendSchema = new mongoose.Schema({
   gmailMessageId:  { type: String },
   gmailThreadId:   { type: String },
   error:           { type: String },
+  replyFrom:       { type: String },
+  replySubject:    { type: String },
+  replyBody:       { type: String },
+  repliedAt:       { type: Date   },
 });
 
 coldSendSchema.index({ campaignId: 1, contactId: 1, stepIndex: 1 }, { unique: true });

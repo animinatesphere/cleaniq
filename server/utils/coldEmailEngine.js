@@ -427,6 +427,36 @@ async function detectReplies() {
   }
 }
 
+// Extract plain-text body from Gmail message payload
+function extractGmailBody(payload) {
+  if (!payload) return "";
+  // Simple (non-multipart) message
+  if (payload.body?.data) {
+    return Buffer.from(payload.body.data, "base64url").toString("utf8");
+  }
+  // Multipart — look for text/plain first, then text/html
+  if (payload.parts) {
+    for (const part of payload.parts) {
+      if (part.mimeType === "text/plain" && part.body?.data) {
+        return Buffer.from(part.body.data, "base64url").toString("utf8");
+      }
+    }
+    for (const part of payload.parts) {
+      if (part.mimeType === "text/html" && part.body?.data) {
+        // Strip HTML tags for plain preview
+        return Buffer.from(part.body.data, "base64url").toString("utf8")
+          .replace(/<[^>]+>/g, "").replace(/\s{2,}/g, " ").trim();
+      }
+      // Nested multipart
+      if (part.parts) {
+        const nested = extractGmailBody(part);
+        if (nested) return nested;
+      }
+    }
+  }
+  return "";
+}
+
 async function detectRepliesForMailbox(mailbox) {
   const gmail = await getGmailClient(mailbox);
 
@@ -442,8 +472,8 @@ async function detectRepliesForMailbox(mailbox) {
     const msg = await gmail.users.messages.get({
       userId:          "me",
       id:              ref.id,
-      format:          "metadata",
-      metadataHeaders: ["From"],
+      format:          "full",
+      metadataHeaders: ["From", "Subject"],
     });
 
     const threadId = msg.data.threadId;
@@ -452,13 +482,27 @@ async function detectRepliesForMailbox(mailbox) {
     const originalSend = await ColdSend.findOne({ gmailThreadId: threadId, status: "sent" });
     if (!originalSend) continue;
 
+    // Extract reply content
+    const headers  = msg.data.payload?.headers || [];
+    const fromHdr  = headers.find(h => h.name === "From");
+    const subHdr   = headers.find(h => h.name === "Subject");
+    const replyFrom    = fromHdr?.value || "";
+    const replySubject = subHdr?.value  || "";
+    const replyBody    = extractGmailBody(msg.data.payload).slice(0, 5000); // cap at 5k chars
+
     // Stop sequence — mark all pending sends for this contact in this campaign
     await ColdSend.updateMany(
       { campaignId: originalSend.campaignId, contactId: originalSend.contactId, status: "pending" },
       { status: "skipped", error: "Contact replied" }
     );
-    // Mark the original send as replied
-    await ColdSend.findByIdAndUpdate(originalSend._id, { status: "replied" });
+    // Mark the original send as replied with reply content
+    await ColdSend.findByIdAndUpdate(originalSend._id, {
+      status:       "replied",
+      replyFrom,
+      replySubject,
+      replyBody,
+      repliedAt:    new Date(msg.data.internalDate ? parseInt(msg.data.internalDate) : Date.now()),
+    });
     // Increment campaign replied counter (only once per contact)
     const alreadyCounted = await ColdSend.findOne({
       campaignId: originalSend.campaignId,
