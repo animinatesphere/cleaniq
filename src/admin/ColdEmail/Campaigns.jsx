@@ -406,7 +406,7 @@ function CampaignDetail({ campaignId, onBack, onRefresh }) {
               const init   = (name[0] || "?").toUpperCase();
               const when   = send.sentAt || send.scheduledAt;
               const sInfo  = SEND_STATUS[send.status] || SEND_STATUS.skipped;
-              const hasReply = send.status === "replied" && (send.replyBody || send.replySubject);
+              const hasReply = send.status === "replied";
               return (
                 <div key={send._id} className="border-b border-white/[0.03] last:border-0">
                   <div className="grid grid-cols-[auto_1fr_1fr_auto_auto] gap-4 px-4 py-3 hover:bg-white/[0.02] transition-colors items-center">
@@ -448,7 +448,17 @@ function CampaignDetail({ campaignId, onBack, onRefresh }) {
                         </div>
                       </div>
                       <div className="px-4 py-3">
-                        <p className="text-white/65 text-sm leading-relaxed whitespace-pre-wrap">{send.replyBody || "(Reply content not yet loaded — click Check Replies to fetch it)"}</p>
+                        {send.replyBody ? (
+                          <p className="text-white/65 text-sm leading-relaxed whitespace-pre-wrap">{send.replyBody}</p>
+                        ) : (
+                          <div className="flex items-start gap-2.5">
+                            <AlertCircle size={14} className="text-amber-400 shrink-0 mt-0.5" />
+                            <div>
+                              <p className="text-amber-400/90 text-sm font-semibold">Reply content not yet loaded</p>
+                              <p className="text-white/35 text-xs mt-1">Click the <strong className="text-white/60">Check Replies</strong> button at the top to fetch the reply content from Gmail. It will appear here after.</p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
