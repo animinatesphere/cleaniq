@@ -13,6 +13,15 @@ export default defineConfig({
   optimizeDeps: {
     include: ["react-helmet-async"],
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "https://api.cleaniqservices.com",
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
   build: {
     rollupOptions: {
       // keep default chunking but encourage Vite to pre-bundle heavy deps
