@@ -164,10 +164,16 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
     let duplicates = 0;
     let invalid    = 0;
     const batchLabel = req.file.originalname;
-    const emailCols  = ["email", "Email", "EMAIL", "e-mail", "E-mail"];
+
+    // Detect email column: exact matches first, then any key containing "email"
+    const headers = records.length ? Object.keys(records[0]) : [];
+    const exactEmailKeys = ["email", "Email", "EMAIL", "e-mail", "E-mail", "contact_professions_email"];
+    const emailKey = exactEmailKeys.find((k) => headers.includes(k))
+      || headers.find((k) => k.toLowerCase().includes("email"))
+      || null;
 
     for (const rec of records) {
-      const rawEmail = emailCols.reduce((v, k) => v || rec[k] || "", "");
+      const rawEmail = emailKey ? (rec[emailKey] || "") : "";
       const email    = rawEmail.toLowerCase().trim();
 
       if (!email || !isValidEmail(email)) { invalid++; continue; }
@@ -175,15 +181,28 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
       const exists = await ColdContact.findOne({ email });
       if (exists) { duplicates++; continue; }
 
-      const firstName = rec.first_name || rec.firstName || rec.First_Name || rec["First Name"] || "";
-      const lastName  = rec.last_name  || rec.lastName  || rec.Last_Name  || rec["Last Name"]  || "";
-      const company   = rec.company    || rec.Company   || rec.COMPANY    || "";
+      // Support both split first/last name columns and a combined full_name column
+      let firstName = rec.first_name || rec.firstName || rec.First_Name || rec["First Name"] || "";
+      let lastName  = rec.last_name  || rec.lastName  || rec.Last_Name  || rec["Last Name"]  || "";
+      if (!firstName && !lastName) {
+        const fullName = rec.full_name || rec.fullName || rec["Full Name"] || rec.prospect_full_name || "";
+        const parts    = fullName.trim().split(/\s+/);
+        firstName      = parts[0] || "";
+        lastName       = parts.slice(1).join(" ") || "";
+      }
+      const company = rec.company || rec.Company || rec.COMPANY
+        || rec.prospect_company_name || rec.company_name || rec["Company Name"] || "";
 
+      const knownKeys = new Set([
+        emailKey,
+        "first_name","firstName","First_Name","First Name",
+        "last_name","lastName","Last_Name","Last Name",
+        "full_name","fullName","Full Name","prospect_full_name",
+        "company","Company","COMPANY","prospect_company_name","company_name","Company Name",
+      ]);
       const extraFields = {};
-      const skipKeys = new Set([...emailCols, "first_name","firstName","First_Name","First Name",
-                                "last_name","lastName","Last_Name","Last Name","company","Company","COMPANY"]);
       for (const [k, v] of Object.entries(rec)) {
-        if (!skipKeys.has(k) && v) extraFields[k] = v;
+        if (!knownKeys.has(k) && v) extraFields[k] = v;
       }
 
       await ColdContact.create({ email, firstName, lastName, company, extraFields, importBatch: batchLabel });
