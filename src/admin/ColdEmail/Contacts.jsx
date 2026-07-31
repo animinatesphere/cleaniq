@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Upload, Trash2, Search, Users, CheckSquare, Square, X } from "lucide-react";
+import { Upload, Trash2, Search, Users, CheckSquare, Square, X, UserPlus } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
 const auth = () => ({ Authorization: `Bearer ${localStorage.getItem("adminToken") || ""}` });
@@ -16,6 +16,10 @@ export default function Contacts() {
   const [importRes, setImportRes] = useState(null);
   const [deleting,  setDeleting]  = useState(false);
   const [dragOver,  setDragOver]  = useState(false);
+  const [addOpen,   setAddOpen]   = useState(false);
+  const [addForm,   setAddForm]   = useState({ email: "", firstName: "", lastName: "", company: "" });
+  const [addErr,    setAddErr]    = useState("");
+  const [addSaving, setAddSaving] = useState(false);
   const fileRef = useRef();
   const LIMIT = 50;
 
@@ -77,6 +81,28 @@ export default function Contacts() {
     load();
   }
 
+  async function submitAdd(e) {
+    e.preventDefault();
+    setAddErr("");
+    if (!addForm.email.trim()) { setAddErr("Email is required"); return; }
+    setAddSaving(true);
+    try {
+      const r = await fetch(`${API}/cold-email/contacts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...auth() },
+        body: JSON.stringify(addForm),
+      });
+      const d = await r.json();
+      if (!r.ok) { setAddErr(d.message || "Failed to add contact"); setAddSaving(false); return; }
+      setAddOpen(false);
+      setAddForm({ email: "", firstName: "", lastName: "", company: "" });
+      load();
+    } catch {
+      setAddErr("Network error — check connection");
+    }
+    setAddSaving(false);
+  }
+
   const allSelected = contacts.length > 0 && contacts.every((c) => selected.has(c._id));
   function toggleAll() {
     if (allSelected) { const s = new Set(selected); contacts.forEach((c) => s.delete(c._id)); setSelected(s); }
@@ -114,6 +140,12 @@ export default function Contacts() {
               <Trash2 size={13} /> {deleting ? "Deleting…" : `Delete ${selected.size}`}
             </button>
           )}
+          <button
+            onClick={() => { setAddOpen(true); setAddErr(""); }}
+            className="flex items-center gap-2 px-4 py-2 bg-white/6 border border-white/10 text-white/70 text-sm font-bold rounded-xl hover:bg-white/10 transition-all cursor-pointer"
+          >
+            <UserPlus size={14} /> Add Contact
+          </button>
           <button
             onClick={() => fileRef.current?.click()}
             className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white text-sm font-bold rounded-xl hover:bg-emerald-400 transition-all cursor-pointer shadow-lg shadow-emerald-500/20"
@@ -170,9 +202,9 @@ export default function Contacts() {
 
       {/* Contacts table */}
       {(loading || contacts.length > 0 || search) && (
-        <div className="bg-[#0B2D22] border border-white/[0.06] rounded-2xl overflow-hidden">
+        <div className="bg-[#0B2D22] border border-white/6 rounded-2xl overflow-hidden">
           {/* Toolbar */}
-          <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-3">
+          <div className="px-4 py-3 border-b border-white/6 flex items-center gap-3">
             <button onClick={toggleAll} className="p-1 text-white/40 hover:text-white/80 cursor-pointer">
               {allSelected ? <CheckSquare size={16} className="text-emerald-400" /> : <Square size={16} />}
             </button>
@@ -183,7 +215,7 @@ export default function Contacts() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by name, email or company…"
-                className="w-full bg-white/[0.04] border border-white/[0.06] rounded-xl pl-8 pr-4 py-2 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/40"
+                className="w-full bg-white/[0.04] border border-white/6 rounded-xl pl-8 pr-4 py-2 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-emerald-500/40"
               />
             </div>
             {search && (
@@ -246,15 +278,15 @@ export default function Contacts() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 border-t border-white/[0.06]">
+                <div className="flex items-center justify-between px-4 py-3 border-t border-white/6">
                   <p className="text-white/30 text-xs">{total.toLocaleString()} contacts · page {page} of {totalPages}</p>
                   <div className="flex gap-1.5">
                     <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-                      className="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.07] text-white/50 text-xs font-semibold hover:bg-white/10 disabled:opacity-30 cursor-pointer disabled:cursor-default">
+                      className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/[0.07] text-white/50 text-xs font-semibold hover:bg-white/10 disabled:opacity-30 cursor-pointer disabled:cursor-default">
                       Prev
                     </button>
                     <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                      className="px-3 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.07] text-white/50 text-xs font-semibold hover:bg-white/10 disabled:opacity-30 cursor-pointer disabled:cursor-default">
+                      className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/[0.07] text-white/50 text-xs font-semibold hover:bg-white/10 disabled:opacity-30 cursor-pointer disabled:cursor-default">
                       Next
                     </button>
                   </div>
@@ -271,6 +303,91 @@ export default function Contacts() {
           <div className="bg-[#0B2D22] border border-white/10 rounded-2xl px-8 py-6 flex flex-col items-center gap-3">
             <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
             <p className="text-white font-bold text-sm">Importing contacts…</p>
+          </div>
+        </div>
+      )}
+
+      {/* Add single contact modal */}
+      {addOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-[#0a1f16] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/6">
+              <h3 className="text-white font-black text-base">Add Contact</h3>
+              <button onClick={() => setAddOpen(false)} className="text-white/30 hover:text-white/70 cursor-pointer"><X size={16} /></button>
+            </div>
+
+            <form onSubmit={submitAdd} className="px-6 py-5 space-y-4">
+              {/* Email */}
+              <div>
+                <label className="block text-white/50 text-xs font-bold mb-1.5 uppercase tracking-wider">Email address *</label>
+                <input
+                  type="email"
+                  required
+                  autoFocus
+                  value={addForm.email}
+                  onChange={(e) => setAddForm((f) => ({ ...f, email: e.target.value }))}
+                  placeholder="name@company.com"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-emerald-500/50"
+                />
+              </div>
+
+              {/* Name row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-white/50 text-xs font-bold mb-1.5 uppercase tracking-wider">First name</label>
+                  <input
+                    type="text"
+                    value={addForm.firstName}
+                    onChange={(e) => setAddForm((f) => ({ ...f, firstName: e.target.value }))}
+                    placeholder="John"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-emerald-500/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-white/50 text-xs font-bold mb-1.5 uppercase tracking-wider">Last name</label>
+                  <input
+                    type="text"
+                    value={addForm.lastName}
+                    onChange={(e) => setAddForm((f) => ({ ...f, lastName: e.target.value }))}
+                    placeholder="Smith"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-emerald-500/50"
+                  />
+                </div>
+              </div>
+
+              {/* Company */}
+              <div>
+                <label className="block text-white/50 text-xs font-bold mb-1.5 uppercase tracking-wider">Company</label>
+                <input
+                  type="text"
+                  value={addForm.company}
+                  onChange={(e) => setAddForm((f) => ({ ...f, company: e.target.value }))}
+                  placeholder="Acme Ltd"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-white/25 focus:outline-none focus:border-emerald-500/50"
+                />
+              </div>
+
+              {addErr && (
+                <p className="text-rose-400 text-sm font-semibold">{addErr}</p>
+              )}
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setAddOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-white/10 text-white/50 text-sm font-bold hover:bg-white/5 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={addSaving}
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-bold hover:bg-emerald-400 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {addSaving ? "Adding…" : "Add Contact"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

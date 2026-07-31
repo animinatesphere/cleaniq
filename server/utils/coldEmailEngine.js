@@ -108,17 +108,85 @@ function personalizeTemplate(template, contact) {
     .replace(/\{\{email\}\}/gi,      contact.email     || "");
 }
 
-function wrapBody(body) {
-  if (/<[a-z][\s\S]*>/i.test(body)) return body;
-  return `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.7;color:#1e293b">${body.replace(/\n/g, "<br>")}</div>`;
+function buildEmailHtml(rawBody, unsubUrl) {
+  // Already a full HTML doc — use as-is
+  if (/<html|<!DOCTYPE/i.test(rawBody)) return rawBody;
+
+  // Convert plain text to <p> blocks; preserve existing HTML tags
+  const hasHtml = /<[a-z][\s\S]*>/i.test(rawBody);
+  const content = hasHtml
+    ? rawBody
+    : rawBody
+        .split(/\n\n+/)
+        .filter((p) => p.trim())
+        .map((p) => `<p style="margin:0 0 18px;line-height:1.75;">${p.replace(/\n/g, "<br>")}</p>`)
+        .join("") || `<p style="margin:0;line-height:1.75;">${rawBody.replace(/\n/g, "<br>")}</p>`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Email</title>
+</head>
+<body style="margin:0;padding:0;background:#eef2f7;-webkit-font-smoothing:antialiased;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+  <tr>
+    <td align="center" style="padding:36px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;" role="presentation">
+
+        <!-- Brand header -->
+        <tr>
+          <td style="background:#0d1f2d;border-radius:14px 14px 0 0;padding:22px 36px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+              <tr>
+                <td>
+                  <span style="display:inline-block;width:34px;height:34px;background:#10b981;border-radius:8px;text-align:center;line-height:34px;font-size:17px;font-weight:800;color:#fff;vertical-align:middle;margin-right:10px;">C</span>
+                  <span style="color:#ffffff;font-size:16px;font-weight:700;letter-spacing:-0.3px;vertical-align:middle;">CleanIQ Services</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Divider accent -->
+        <tr><td style="height:3px;background:linear-gradient(90deg,#10b981,#3b82f6);"></td></tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="background:#ffffff;padding:40px 36px;border-left:1px solid #dde3ed;border-right:1px solid #dde3ed;">
+            <div style="color:#1e293b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15.5px;line-height:1.75;">
+              ${content}
+            </div>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#f8fafc;border:1px solid #dde3ed;border-top:none;border-radius:0 0 14px 14px;padding:20px 36px;text-align:center;">
+            <p style="margin:0 0 8px;color:#94a3b8;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;">
+              You received this email because you're on our professional outreach list.
+            </p>
+            <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;">
+              <a href="${unsubUrl}" style="color:#64748b;text-decoration:none;border-bottom:1px solid #cbd5e1;padding-bottom:1px;">Unsubscribe</a>
+              &nbsp;·&nbsp;
+              <span style="color:#94a3b8;">CleanIQ Services &nbsp;·&nbsp; cleaniqservices.com</span>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
 }
 
+// Keep legacy alias used by older code paths
 function unsubscribeFooter(url) {
-  return `
-<div style="margin-top:40px;padding-top:16px;border-top:1px solid #e2e8f0;font-family:Arial,sans-serif;font-size:12px;color:#94a3b8;text-align:center">
-  <p style="margin:0">You received this because you're on our outreach list.</p>
-  <p style="margin:6px 0 0"><a href="${url}" style="color:#64748b;text-decoration:underline">Unsubscribe</a> · cleaniq services · cleaniqservices@gmail.com</p>
-</div>`;
+  return `<p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:32px;">
+    <a href="${url}" style="color:#64748b;">Unsubscribe</a> · CleanIQ Services</p>`;
 }
 
 // ── Daily counter reset ───────────────────────────────────────────────────────
@@ -208,7 +276,7 @@ async function processSingleSend(send) {
   }
 
   const subject = personalizeTemplate(step.subject, contact);
-  const body    = wrapBody(personalizeTemplate(step.body, contact));
+  const body    = personalizeTemplate(step.body, contact);
 
   const unsubToken = jwt.sign(
     { email: contact.email, campaignId: send.campaignId.toString() },
@@ -216,7 +284,7 @@ async function processSingleSend(send) {
     { expiresIn: "90d" }
   );
   const unsubUrl = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/cold-email/unsubscribe/${unsubToken}`;
-  const fullHtml = body + unsubscribeFooter(unsubUrl);
+  const fullHtml = buildEmailHtml(body, unsubUrl);
 
   // ── Dry-run mode ──────────────────────────────────────────────────────────
   if (process.env.COLD_EMAIL_DRY_RUN === "true") {

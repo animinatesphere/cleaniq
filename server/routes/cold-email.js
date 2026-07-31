@@ -215,6 +215,23 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
   }
 });
 
+// POST /api/cold-email/contacts — add a single contact manually
+router.post("/contacts", async (req, res) => {
+  try {
+    const { email: rawEmail, firstName = "", lastName = "", company = "" } = req.body;
+    const email = (rawEmail || "").toLowerCase().trim();
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({ message: "Invalid email address" });
+    }
+    const exists = await ColdContact.findOne({ email });
+    if (exists) return res.status(409).json({ message: "Contact already exists" });
+    const contact = await ColdContact.create({ email, firstName, lastName, company });
+    res.status(201).json(contact);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // DELETE /api/cold-email/contacts/:id
 router.delete("/contacts/:id", async (req, res) => {
   try {
