@@ -165,7 +165,7 @@ export default function Mailboxes() {
                             type="number"
                             value={editLimit}
                             onChange={(e) => setEditLimit(e.target.value)}
-                            min="1" max="500"
+                            min="1" max="10000"
                             className="w-20 bg-white/[0.07] border border-white/10 rounded-lg px-2 py-1 text-white text-xs focus:outline-none focus:border-emerald-500/40"
                           />
                           <button onClick={() => saveLimit(box._id)} disabled={saving} className="text-xs text-emerald-400 font-bold hover:text-emerald-300 cursor-pointer">

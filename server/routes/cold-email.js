@@ -99,7 +99,7 @@ router.patch("/mailboxes/:id", async (req, res) => {
   try {
     const { dailyLimit, status } = req.body;
     const update = {};
-    if (dailyLimit !== undefined) update.dailyLimit = Math.max(1, Math.min(500, Number(dailyLimit)));
+    if (dailyLimit !== undefined) update.dailyLimit = Math.max(1, Math.min(10000, Number(dailyLimit)));
     if (status     !== undefined) update.status     = status;
     const box = await ColdMailbox.findByIdAndUpdate(req.params.id, update, { new: true }).lean();
     if (!box) return res.status(404).json({ message: "Mailbox not found" });
@@ -210,6 +210,22 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
     }
 
     res.json({ imported, duplicates, invalid, total: records.length });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/cold-email/contacts/all-ids — returns every active contact ID (for select-all)
+router.get("/contacts/all-ids", async (req, res) => {
+  try {
+    const search = (req.query.search || "").trim();
+    const filter = { status: "active" };
+    if (search) {
+      const re = new RegExp(search, "i");
+      filter.$or = [{ email: re }, { firstName: re }, { lastName: re }, { company: re }];
+    }
+    const contacts = await ColdContact.find(filter).select("_id").lean();
+    res.json({ ids: contacts.map((c) => c._id.toString()), total: contacts.length });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -348,13 +364,12 @@ router.post("/campaigns/:id/launch", async (req, res) => {
     const mailboxes = await ColdMailbox.find({ _id: { $in: campaign.mailboxIds }, status: "active" }).lean();
     const totalCap  = mailboxes.reduce((sum, m) => sum + (m.dailyLimit || 40), 0);
 
-    // Spread sends evenly over business hours (9am – 5pm = 480 min)
-    const minuteSpread = contacts.length > 0 ? Math.min(480 / contacts.length, 480) : 2;
+    // Spread sends starting from NOW, spacing them to fit within daily cap
+    // minuteSpread: at minimum 1 minute apart, spread over up to 8 hours per day
+    const minuteSpread = contacts.length > 1 ? Math.max(1, Math.floor(480 / Math.min(contacts.length, 480))) : 0;
+    const baseTime = new Date(); // start immediately
 
     let queued = 0;
-    const baseTime = new Date();
-    baseTime.setHours(9, 0, 0, 0);
-    if (baseTime < new Date()) baseTime.setDate(baseTime.getDate() + 1);
 
     for (let i = 0; i < contacts.length; i++) {
       const contact = contacts[i];

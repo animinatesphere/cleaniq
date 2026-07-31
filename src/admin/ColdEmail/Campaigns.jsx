@@ -339,14 +339,33 @@ function Wizard({ onClose, onCreated, editCampaign }) {
           {/* ── Step 3: Select Contacts ── */}
           {step === 3 && (
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-white/60 text-sm font-semibold">{data.contactIds.length.toLocaleString()} contacts selected</p>
-                <button
-                  onClick={toggleAllContacts}
-                  className="text-xs text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer"
-                >
-                  {contacts.every((c) => data.contactIds.includes(c._id)) ? "Deselect page" : "Select page"}
-                </button>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <p className="text-white/60 text-sm font-semibold">{data.contactIds.length.toLocaleString()} selected</p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={async () => {
+                      const params = new URLSearchParams({ search: contactSearch });
+                      const r = await fetch(`${API}/cold-email/contacts/all-ids?${params}`, { headers: auth() });
+                      const d = await r.json();
+                      if (d.ids) setData((prev) => ({ ...prev, contactIds: d.ids }));
+                    }}
+                    className="text-xs text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer"
+                  >
+                    Select all {contactTotal.toLocaleString()}
+                  </button>
+                  <button
+                    onClick={() => setData((prev) => ({ ...prev, contactIds: [] }))}
+                    className="text-xs text-white/30 hover:text-white/60 font-bold cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                  <button
+                    onClick={toggleAllContacts}
+                    className="text-xs text-white/40 hover:text-white/70 font-bold cursor-pointer"
+                  >
+                    {contacts.every((c) => data.contactIds.includes(c._id)) ? "Deselect page" : "Select page"}
+                  </button>
+                </div>
               </div>
               <input
                 type="text"
