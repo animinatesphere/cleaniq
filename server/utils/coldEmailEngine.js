@@ -137,15 +137,11 @@ function buildEmailHtml(rawBody, unsubUrl) {
 
         <!-- Brand header -->
         <tr>
-          <td style="background:#0d1f2d;border-radius:14px 14px 0 0;padding:22px 36px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
-              <tr>
-                <td>
-                  <span style="display:inline-block;width:34px;height:34px;background:#10b981;border-radius:8px;text-align:center;line-height:34px;font-size:17px;font-weight:800;color:#fff;vertical-align:middle;margin-right:10px;">C</span>
-                  <span style="color:#ffffff;font-size:16px;font-weight:700;letter-spacing:-0.3px;vertical-align:middle;">cleaniq services</span>
-                </td>
-              </tr>
-            </table>
+          <td style="background:#0a6644;border-radius:14px 14px 0 0;padding:20px 36px;text-align:center;">
+            <img src="${process.env.BACKEND_URL || "https://api.cleaniqservices.com"}/public/images/logo.jpg"
+                 alt="cleaniq services"
+                 width="160" height="160"
+                 style="display:inline-block;width:160px;height:160px;border-radius:12px;object-fit:cover;" />
           </td>
         </tr>
 
