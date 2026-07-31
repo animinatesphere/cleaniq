@@ -110,19 +110,20 @@ function Wizard({ onClose, onCreated, editCampaign }) {
   }
 
   // ── Validate per step ──────────────────────────────────────────────────────
+  // Step order: 1=Write Email, 2=Campaign Setup, 3=Select Recipients, 4=Review
   function validate() {
     if (step === 1) {
-      if (!data.name.trim()) return "Campaign name is required";
-      if (data.mailboxIds.length === 0) return "Select at least one mailbox";
-    }
-    if (step === 2) {
       for (const s of data.steps) {
-        if (!s.subject.trim()) return "Every step needs a subject line";
-        if (!s.body.trim())    return "Every step needs a message body";
+        if (!s.subject.trim()) return "Every email needs a subject line";
+        if (!s.body.trim())    return "Every email needs a message body";
       }
     }
+    if (step === 2) {
+      if (!data.name.trim()) return "Campaign name is required";
+      if (data.mailboxIds.length === 0) return "Select at least one Gmail account to send from";
+    }
     if (step === 3) {
-      if (data.contactIds.length === 0) return "Select at least one contact";
+      if (data.contactIds.length === 0) return "Select at least one contact to send to";
     }
     return "";
   }
@@ -165,7 +166,7 @@ function Wizard({ onClose, onCreated, editCampaign }) {
     }
   }
 
-  const stepLabels = ["Campaign Info", "Build Sequence", "Select Contacts", "Review & Launch"];
+  const stepLabels = ["Write Your Email", "Campaign Setup", "Select Recipients", "Review & Launch"];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
@@ -213,89 +214,17 @@ function Wizard({ onClose, onCreated, editCampaign }) {
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-          {/* ── Step 1: Campaign Info ── */}
+          {/* ── Step 1: Write Your Email ── */}
           {step === 1 && (
-            <div className="space-y-5">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="text-white/50 text-xs font-bold uppercase tracking-wider block mb-2">Campaign Name *</label>
-                  <input
-                    type="text"
-                    value={data.name}
-                    onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))}
-                    placeholder="e.g. Q3 Commercial Outreach"
-                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.06] text-sm transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="text-white/50 text-xs font-bold uppercase tracking-wider block mb-2">
-                    From Name <span className="text-white/25 font-normal normal-case text-[11px]">(optional)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={data.fromName}
-                    onChange={(e) => setData((d) => ({ ...d, fromName: e.target.value }))}
-                    placeholder="e.g. Adeyemi at CleanIQ"
-                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.06] text-sm transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-white/50 text-xs font-bold uppercase tracking-wider block mb-3">Sending Mailboxes *</label>
-                {mailboxes.length === 0 ? (
-                  <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-xl px-4 py-3.5 flex items-center gap-3">
-                    <AlertCircle size={15} className="text-amber-400 shrink-0" />
-                    <p className="text-amber-400/90 text-sm">No mailboxes connected. Go to the Mailboxes tab first.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {mailboxes.map((box) => {
-                      const on  = data.mailboxIds.includes(box._id);
-                      const pct = box.dailyLimit > 0 ? Math.round((box.sentToday / box.dailyLimit) * 100) : 0;
-                      return (
-                        <div
-                          key={box._id}
-                          onClick={() => toggleMailbox(box._id)}
-                          className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border cursor-pointer transition-all ${
-                            on ? "bg-emerald-500/[0.08] border-emerald-500/30" : "bg-white/[0.025] border-white/[0.07] hover:bg-white/[0.04] hover:border-white/[0.12]"
-                          }`}
-                        >
-                          <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${on ? "bg-emerald-500 border-emerald-500" : "border-white/20"}`}>
-                            {on && <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2.5 2.5 5-5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="text-white/90 text-sm font-semibold truncate">{box.email}</p>
-                              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full uppercase ${STATUS_STYLES[box.status] || STATUS_STYLES.draft}`}>{box.status}</span>
-                            </div>
-                            <div className="flex items-center gap-2 mt-1.5">
-                              <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden max-w-[80px]">
-                                <div className={`h-full rounded-full ${pct >= 100 ? "bg-rose-500" : pct >= 80 ? "bg-amber-400" : "bg-emerald-500"}`} style={{ width: `${Math.min(100, pct)}%` }} />
-                              </div>
-                              <p className="text-white/30 text-[11px]">{box.sentToday}/{box.dailyLimit} sent today</p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ── Step 2: Build Sequence ── */}
-          {step === 2 && (
             <div className="space-y-5">
               <div className="flex items-start gap-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3">
                 <div className="w-4 h-4 mt-0.5 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 </div>
                 <p className="text-white/40 text-xs leading-relaxed">
-                  Write your email sequence below. Use{" "}
+                  Write the email your contacts will receive. Use{" "}
                   <code className="text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded text-[11px]">{"{{first_name}}"}</code>,{" "}
-                  <code className="text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded text-[11px]">{"{{company}}"}</code> to personalize.
+                  <code className="text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded text-[11px]">{"{{company}}"}</code> to personalise each message.
                   An unsubscribe link is added automatically to every send.
                 </p>
               </div>
@@ -388,7 +317,82 @@ function Wizard({ onClose, onCreated, editCampaign }) {
             </div>
           )}
 
-          {/* ── Step 3: Select Contacts ── */}
+          {/* ── Step 2: Campaign Setup ── */}
+          {step === 2 && (
+            <div className="space-y-5">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-white/50 text-xs font-bold uppercase tracking-wider block mb-2">Campaign Name *</label>
+                  <p className="text-white/25 text-xs mb-2">A name to identify this campaign in your dashboard</p>
+                  <input
+                    type="text"
+                    value={data.name}
+                    onChange={(e) => setData((d) => ({ ...d, name: e.target.value }))}
+                    placeholder="e.g. Commercial Cleaning Outreach"
+                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.06] text-sm transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-white/50 text-xs font-bold uppercase tracking-wider block mb-2">
+                    Your Name <span className="text-white/25 font-normal normal-case text-[11px]">(optional)</span>
+                  </label>
+                  <p className="text-white/25 text-xs mb-2">Shown as the sender name in the inbox</p>
+                  <input
+                    type="text"
+                    value={data.fromName}
+                    onChange={(e) => setData((d) => ({ ...d, fromName: e.target.value }))}
+                    placeholder="e.g. Adeyemi from cleaniq services"
+                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.06] text-sm transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-white/50 text-xs font-bold uppercase tracking-wider block mb-1">Send emails from *</label>
+                <p className="text-white/25 text-xs mb-3">Choose which Gmail account sends these emails. Connect one in the Mailboxes tab first.</p>
+                {mailboxes.length === 0 ? (
+                  <div className="bg-amber-500/[0.07] border border-amber-500/20 rounded-xl px-4 py-3.5 flex items-center gap-3">
+                    <AlertCircle size={15} className="text-amber-400 shrink-0" />
+                    <p className="text-amber-400/90 text-sm">No Gmail accounts connected yet. Go to the <strong>Mailboxes</strong> tab and connect one first.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {mailboxes.map((box) => {
+                      const on  = data.mailboxIds.includes(box._id);
+                      const pct = box.dailyLimit > 0 ? Math.round((box.sentToday / box.dailyLimit) * 100) : 0;
+                      return (
+                        <div
+                          key={box._id}
+                          onClick={() => toggleMailbox(box._id)}
+                          className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border cursor-pointer transition-all ${
+                            on ? "bg-emerald-500/[0.08] border-emerald-500/30" : "bg-white/[0.025] border-white/[0.07] hover:bg-white/[0.04] hover:border-white/[0.12]"
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${on ? "bg-emerald-500 border-emerald-500" : "border-white/20"}`}>
+                            {on && <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2.5 2.5 5-5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-white/90 text-sm font-semibold truncate">{box.email}</p>
+                              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full uppercase ${STATUS_STYLES[box.status] || STATUS_STYLES.draft}`}>{box.status}</span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden max-w-[80px]">
+                                <div className={`h-full rounded-full ${pct >= 100 ? "bg-rose-500" : pct >= 80 ? "bg-amber-400" : "bg-emerald-500"}`} style={{ width: `${Math.min(100, pct)}%` }} />
+                              </div>
+                              <p className="text-white/30 text-[11px]">{box.sentToday}/{box.dailyLimit} sent today</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── Step 3: Select Recipients ── */}
           {step === 3 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
