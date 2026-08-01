@@ -9,6 +9,17 @@ const { moveToTrash } = require("../utils/trash");
 const { scheduleTask } = require("../utils/automationEngine");
 const sms = require("../utils/smsService");
 
+// GET /api/bookings/test-email?to=you@example.com — quick Resend smoke-test (admin only)
+router.get("/test-email", async (req, res) => {
+  const to = req.query.to || process.env.EMAIL_USER;
+  const ok = await sendEmail({
+    to,
+    subject: "✅ cleaniq email test",
+    html: `<p style="font-family:sans-serif">If you can read this, Resend is working correctly for booking status emails.<br><br>Sent at ${new Date().toISOString()}</p>`,
+  });
+  res.json({ success: ok, sentTo: to, message: ok ? "Email sent — check inbox" : "Email failed — check server console for RESEND ERROR" });
+});
+
 // GET all bookings (Admin)
 router.get("/", async (req, res) => {
   try {
@@ -788,28 +799,37 @@ router.put("/:id", async (req, res) => {
     }
 
     // ── Status-change customer emails (fire-and-forget) ───────────────────
+    console.log(`🔄 Status change detected: "${prevStatus}" → "${newStatus}" | customer email: ${updatedBooking.customer?.email || "MISSING"}`);
     if (prevStatus !== newStatus && updatedBooking.customer?.email) {
       setImmediate(async () => {
         try {
           if (prevStatus !== "Confirmed" && newStatus === "Confirmed") {
-            await sendEmail({
+            console.log(`📧 Sending confirmation email to ${updatedBooking.customer.email}...`);
+            const ok = await sendEmail({
               to: updatedBooking.customer.email,
               subject: `Booking Confirmed — ${updatedBooking.bookingId} | Cleaniq Services`,
               html: templates.bookingStatusConfirmed(updatedBooking),
             });
-            console.log(`📧 Confirmation email sent to ${updatedBooking.customer.email} for booking ${updatedBooking.bookingId}`);
+            console.log(`📧 Confirmation email result: ${ok ? "✅ sent" : "❌ failed"} → ${updatedBooking.customer.email}`);
           } else if (prevStatus !== "Cancelled" && newStatus === "Cancelled") {
-            await sendEmail({
+            console.log(`📧 Sending cancellation email to ${updatedBooking.customer.email}...`);
+            const ok = await sendEmail({
               to: updatedBooking.customer.email,
               subject: `Booking Cancellation — ${updatedBooking.bookingId} | Cleaniq Services`,
               html: templates.bookingCancelled(updatedBooking),
             });
-            console.log(`📧 Cancellation email sent to ${updatedBooking.customer.email} for booking ${updatedBooking.bookingId}`);
+            console.log(`📧 Cancellation email result: ${ok ? "✅ sent" : "❌ failed"} → ${updatedBooking.customer.email}`);
+          } else {
+            console.log(`📧 No email template for status: "${newStatus}" — skipping`);
           }
         } catch (emailErr) {
-          console.error("⚠️ Status-change email error:", emailErr.message);
+          console.error("⚠️ Status-change email error:", emailErr.message, emailErr.stack);
         }
       });
+    } else if (prevStatus === newStatus) {
+      console.log(`📧 Status unchanged ("${prevStatus}") — no email needed`);
+    } else {
+      console.log(`📧 No customer email on booking ${updatedBooking.bookingId} — cannot send`);
     }
 
     // ── SMS triggers (fire-and-forget — never block the response) ──────────
