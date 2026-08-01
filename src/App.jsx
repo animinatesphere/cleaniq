@@ -75,6 +75,7 @@ import CompanyJobs from "./admin/CompanyJobs";
 import GuideDistribution from "./admin/GuideDistribution";
 import ColdEmail from "./admin/ColdEmail/index.jsx";
 import CampaignDetail from "./admin/ColdEmail/CampaignDetail.jsx";
+import TodoPage from "./admin/TodoPage";
 
 function App() {
   const location = useLocation();
@@ -165,6 +166,7 @@ function App() {
               <Route path="guide-distribution" element={<GuideDistribution />} />
               <Route path="cold-email" element={<ColdEmail />} />
               <Route path="cold-email/:campaignId" element={<CampaignDetail />} />
+              <Route path="todo" element={<TodoPage />} />
             </Route>
           </Routes>
         </main>

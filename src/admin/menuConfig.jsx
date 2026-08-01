@@ -35,6 +35,7 @@ import {
   User,
   BookOpen,
   Trash2,
+  CheckSquare,
 } from "lucide-react";
 
 export const fullMenuGroups = [
@@ -65,6 +66,12 @@ export const fullMenuGroups = [
         path: "/admin/expenses",
         key: "expenses",
         icon: <Receipt size={20} />,
+      },
+      {
+        name: "To-Do List",
+        path: "/admin/todo",
+        key: "todo",
+        icon: <CheckSquare size={20} />,
       },
     ],
   },

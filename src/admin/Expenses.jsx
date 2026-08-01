@@ -10,6 +10,7 @@ import {
   Wallet,
   Calendar,
   TrendingDown,
+  Download,
 } from "lucide-react";
 import StatDetailDrawer from "./StatDetailDrawer";
 
@@ -164,6 +165,28 @@ const Expenses = () => {
     ? Object.entries(stats.byCategory).sort((a, b) => b[1] - a[1])[0]
     : null;
 
+  const exportCSV = () => {
+    const rows = [
+      ["Description", "Category", "Date", "Payment Method", "Amount (£)", "Notes"],
+      ...filtered.map((e) => [
+        `"${(e.description || "").replace(/"/g, '""')}"`,
+        `"${(e.category || "").replace(/"/g, '""')}"`,
+        e.date ? new Date(e.date).toLocaleDateString("en-GB") : "",
+        `"${(e.paymentMethod || "").replace(/"/g, '""')}"`,
+        Number(e.amount || 0).toFixed(2),
+        `"${(e.notes || "").replace(/"/g, '""')}"`,
+      ]),
+    ];
+    const csv = rows.map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `expenses-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -182,6 +205,13 @@ const Expenses = () => {
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 font-semibold text-sm transition-all"
           >
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+          </button>
+          <button
+            onClick={exportCSV}
+            title="Download CSV"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:bg-emerald-500/15 hover:text-emerald-400 hover:border-emerald-500/30 font-semibold text-sm transition-all"
+          >
+            <Download size={15} /> Export CSV
           </button>
           <button
             onClick={openAdd}

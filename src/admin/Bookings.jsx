@@ -2033,6 +2033,18 @@ ${extrasRows}
     return colors[status] || "bg-white/10 text-white/60 border-white/20";
   };
 
+  const STATUS_OPTION_COLORS = {
+    Pending:              { background: "#3b1d00", color: "#fbbf24" },
+    Confirmed:            { background: "#052e16", color: "#4ade80" },
+    Assigned:             { background: "#1e1b4b", color: "#a5b4fc" },
+    Arrived:              { background: "#042f2e", color: "#2dd4bf" },
+    "In Progress":        { background: "#431407", color: "#fb923c" },
+    Completed:            { background: "#0c2547", color: "#7dd3fc" },
+    "Completed - Unpaid": { background: "#2e1065", color: "#c084fc" },
+    Cancelled:            { background: "#450a0a", color: "#f87171" },
+    Accepted:             { background: "#082f49", color: "#38bdf8" },
+  };
+
   const getPropertyData = (b) => {
     if (!b) return {};
     const data = {};
@@ -2598,7 +2610,8 @@ ${extrasRows}
                         onChange={(e) =>
                           handleQuickStatusChange(b._id, e.target.value)
                         }
-                        className={`px-2.5 py-1.5 rounded-full text-[10px] font-black border uppercase tracking-wide cursor-pointer appearance-none bg-transparent ${getStatusColor(b.status)}`}
+                        className={`px-2.5 py-1.5 rounded-full text-[10px] font-black border uppercase tracking-wide cursor-pointer appearance-none ${getStatusColor(b.status)}`}
+                        style={STATUS_OPTION_COLORS[b.status] || { background: "#1e293b", color: "#94a3b8" }}
                       >
                         {[
                           "Pending",
@@ -2610,7 +2623,7 @@ ${extrasRows}
                           "Completed - Unpaid",
                           "Cancelled",
                         ].map((s) => (
-                          <option key={s} value={s}>
+                          <option key={s} value={s} style={STATUS_OPTION_COLORS[s] || { background: "#1e293b", color: "#94a3b8" }}>
                             {s}
                           </option>
                         ))}
@@ -2899,15 +2912,23 @@ ${extrasRows}
                         onChange={(e) =>
                           setEditData({ ...editData, status: e.target.value })
                         }
-                        className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
+                        className="w-full p-4 rounded-2xl border font-bold"
+                        style={STATUS_OPTION_COLORS[editData.status] || { background: "#1e293b", color: "#94a3b8", borderColor: "#334155" }}
                       >
-                        <option value="Confirmed">Confirmed</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Completed - Unpaid">
-                          Completed - Unpaid
-                        </option>
-                        <option value="Cancelled">Cancelled</option>
+                        {[
+                          "Pending",
+                          "Confirmed",
+                          "Assigned",
+                          "Arrived",
+                          "In Progress",
+                          "Completed",
+                          "Completed - Unpaid",
+                          "Cancelled",
+                        ].map((s) => (
+                          <option key={s} value={s} style={STATUS_OPTION_COLORS[s] || { background: "#1e293b", color: "#94a3b8" }}>
+                            {s}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
