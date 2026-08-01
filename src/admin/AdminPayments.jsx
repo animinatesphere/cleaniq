@@ -112,14 +112,14 @@ const AdminPayments = () => {
 
   const statusBadgeClass = (status) => {
     const map = {
-      upcoming:   "bg-amber-500/15 text-amber-400 border-amber-500/25",
-      pending:    "bg-amber-500/15 text-amber-400 border-amber-500/25",
-      approved:   "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
-      processing: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
-      completed:  "bg-white/10 text-white/60 border-white/10",
-      rejected:   "bg-rose-500/15 text-rose-400 border-rose-500/25",
+      upcoming:   "bg-amber-500/30   text-amber-300   border-amber-400/60",
+      pending:    "bg-amber-500/30   text-amber-300   border-amber-400/60",
+      approved:   "bg-emerald-500/30 text-emerald-300 border-emerald-400/60",
+      processing: "bg-blue-500/30    text-blue-300    border-blue-400/60",
+      completed:  "bg-white/15       text-white/70    border-white/25",
+      rejected:   "bg-rose-500/30    text-rose-300    border-rose-400/60",
     };
-    return `inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${map[status] || "bg-white/10 text-white/60 border-white/10"}`;
+    return `inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${map[status] || "bg-white/10 text-white/60 border-white/20"}`;
   };
 
   return (

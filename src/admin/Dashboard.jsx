@@ -903,11 +903,15 @@ const Dashboard = () => {
         : 0,
   }));
   const statusColors = {
-    Completed: "#10B981",
-    Confirmed: "#3B82F6",
-    Pending: "#F59E0B",
-    "In Progress": "#8B5CF6",
-    Cancelled: "#F43F5E",
+    Confirmed:          "#10B981",
+    Pending:            "#F59E0B",
+    Completed:          "#3B82F6",
+    "Completed - Unpaid": "#A855F7",
+    Cancelled:          "#F43F5E",
+    "In Progress":      "#F97316",
+    Accepted:           "#0EA5E9",
+    Assigned:           "#6366F1",
+    Arrived:            "#14B8A6",
   };
 
   // ── KPI strip data ───────────────────────────────────────────────────────────

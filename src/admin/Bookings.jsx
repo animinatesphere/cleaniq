@@ -471,12 +471,15 @@ export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
               b.status !== "Blackout",
           );
           const statusColors = {
-            Confirmed: "#059669",
-            Pending: "#D97706",
-            Completed: "#6366F1",
-            "Completed - Unpaid": "#9333EA",
-            Cancelled: "#EF4444",
-            Accepted: "#0EA5E9",
+            Confirmed:          "#10B981",
+            Pending:            "#F59E0B",
+            Completed:          "#3B82F6",
+            "Completed - Unpaid": "#A855F7",
+            Cancelled:          "#F43F5E",
+            "In Progress":      "#F97316",
+            Accepted:           "#0EA5E9",
+            Assigned:           "#6366F1",
+            Arrived:            "#14B8A6",
           };
 
           // Time slot grid data
@@ -2017,18 +2020,17 @@ ${extrasRows}
 
   const getStatusColor = (status) => {
     const colors = {
-      Confirmed: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
-      Pending: "bg-amber-500/15  text-amber-400  border-amber-500/25",
-      Completed: "bg-blue-500/15   text-blue-400   border-blue-500/25",
-      "Completed - Unpaid":
-        "bg-purple-500/15 text-purple-400 border-purple-500/25",
-      Cancelled: "bg-rose-500/15   text-rose-400   border-rose-500/25",
-      "In Progress": "bg-violet-500/15 text-violet-400 border-violet-500/25",
-      Accepted: "bg-indigo-500/15 text-indigo-400 border-indigo-500/25",
-      Assigned: "bg-cyan-500/15   text-cyan-400   border-cyan-500/25",
-      Arrived: "bg-teal-500/15   text-teal-400   border-teal-500/25",
+      Confirmed:          "bg-emerald-500/30 text-emerald-300 border-emerald-400/60",
+      Pending:            "bg-amber-500/30   text-amber-300   border-amber-400/60",
+      Completed:          "bg-blue-500/30    text-blue-300    border-blue-400/60",
+      "Completed - Unpaid": "bg-purple-500/30 text-purple-300 border-purple-400/60",
+      Cancelled:          "bg-rose-500/30    text-rose-300    border-rose-400/60",
+      "In Progress":      "bg-orange-500/30  text-orange-300  border-orange-400/60",
+      Accepted:           "bg-sky-500/30     text-sky-300     border-sky-400/60",
+      Assigned:           "bg-indigo-500/30  text-indigo-300  border-indigo-400/60",
+      Arrived:            "bg-teal-500/30    text-teal-300    border-teal-400/60",
     };
-    return colors[status] || "bg-white/[0.06] text-white/50 border-white/10";
+    return colors[status] || "bg-white/10 text-white/60 border-white/20";
   };
 
   const getPropertyData = (b) => {

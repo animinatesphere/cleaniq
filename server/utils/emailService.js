@@ -2359,6 +2359,90 @@ const workerEventEmails = {
   </div>
 </div></body></html>`;
   },
+
+  // ─── Booking status-change emails ──────────────────────────────────────────
+
+  bookingStatusConfirmed: (booking) => `
+<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+  <div style="background:#0F172A;padding:36px 40px;text-align:center;">
+    <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq" style="width:100px;height:auto;border-radius:10px;margin-bottom:16px;" />
+    <h1 style="margin:0;color:#6EE7B7;font-size:26px;letter-spacing:-1px;">Booking Confirmed ✓</h1>
+    <p style="margin:8px 0 0;color:#94a3b8;font-size:14px;">We're looking forward to seeing you!</p>
+  </div>
+  <div style="padding:36px 40px;color:#1e293b;line-height:1.7;">
+    <p style="margin:0 0 20px;font-size:16px;">Hi ${booking.customer?.firstName || "there"},</p>
+    <p style="margin:0 0 24px;font-size:14px;color:#475569;">Great news — your booking with Cleaniq Services has been <strong style="color:#059669;">confirmed</strong>. Here's a quick summary:</p>
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:24px;margin-bottom:24px;">
+      <p style="margin:0 0 4px;font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Booking Reference</p>
+      <p style="margin:0 0 20px;font-size:22px;font-weight:900;color:#0F172A;">${booking.bookingId}</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="padding:11px 0;font-size:13px;color:#64748b;font-weight:600;">Service</td>
+          <td style="padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;">${booking.service || "Cleaning Service"}</td>
+        </tr>
+        ${booking.schedule?.date ? `
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="padding:11px 0;font-size:13px;color:#64748b;font-weight:600;">Date</td>
+          <td style="padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;">${new Date(booking.schedule.date).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</td>
+        </tr>` : ""}
+        ${booking.schedule?.timeSlot ? `
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="padding:11px 0;font-size:13px;color:#64748b;font-weight:600;">Time Slot</td>
+          <td style="padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;">${booking.schedule.timeSlot}</td>
+        </tr>` : ""}
+        ${booking.details?.address ? `
+        <tr>
+          <td style="padding:11px 0;font-size:13px;color:#64748b;font-weight:600;">Address</td>
+          <td style="padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;">${booking.details.address}</td>
+        </tr>` : ""}
+      </table>
+    </div>
+    <p style="margin:0 0 24px;font-size:13px;color:#64748b;line-height:1.7;">If you have any questions or need to make changes, just reply to this email or contact us at <a href="mailto:info@cleaniqservices.com" style="color:#059669;font-weight:600;">info@cleaniqservices.com</a>.</p>
+    <div style="text-align:center;">
+      <a href="https://cleaniqservices.com" style="display:inline-block;background:#0F172A;color:#6EE7B7;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;">Visit Our Website</a>
+    </div>
+  </div>
+  <div style="background:#f8fafc;padding:20px 40px;text-align:center;border-top:1px solid #f1f5f9;">
+    <p style="margin:0;font-size:11px;color:#94a3b8;">© 2026 Cleaniq Services · Professional Cleaning You Can Trust</p>
+    <p style="margin:4px 0 0;font-size:11px;color:#cbd5e1;">Questions? <a href="mailto:info@cleaniqservices.com" style="color:#0A5C43;">info@cleaniqservices.com</a></p>
+  </div>
+</div>`,
+
+  bookingCancelled: (booking) => `
+<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+  <div style="background:#0F172A;padding:36px 40px;text-align:center;">
+    <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq" style="width:100px;height:auto;border-radius:10px;margin-bottom:16px;" />
+    <h1 style="margin:0;color:#fca5a5;font-size:26px;letter-spacing:-1px;">Booking Cancelled</h1>
+    <p style="margin:8px 0 0;color:#94a3b8;font-size:14px;">We're sorry to see this booking go</p>
+  </div>
+  <div style="padding:36px 40px;color:#1e293b;line-height:1.7;">
+    <p style="margin:0 0 20px;font-size:16px;">Hi ${booking.customer?.firstName || "there"},</p>
+    <p style="margin:0 0 24px;font-size:14px;color:#475569;">Your booking has been <strong style="color:#dc2626;">cancelled</strong>. Here are the details for your records:</p>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:16px;padding:24px;margin-bottom:24px;">
+      <p style="margin:0 0 4px;font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Booking Reference</p>
+      <p style="margin:0 0 20px;font-size:22px;font-weight:900;color:#0F172A;">${booking.bookingId}</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+        <tr style="border-bottom:1px solid #fee2e2;">
+          <td style="padding:11px 0;font-size:13px;color:#64748b;font-weight:600;">Service</td>
+          <td style="padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;">${booking.service || "Cleaning Service"}</td>
+        </tr>
+        ${booking.schedule?.date ? `
+        <tr>
+          <td style="padding:11px 0;font-size:13px;color:#64748b;font-weight:600;">Was Scheduled For</td>
+          <td style="padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;">${new Date(booking.schedule.date).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</td>
+        </tr>` : ""}
+      </table>
+    </div>
+    <p style="margin:0 0 16px;font-size:13px;color:#64748b;line-height:1.7;">If this was a mistake or you'd like to rebook, please don't hesitate to get in touch — we'd love to help.</p>
+    <div style="text-align:center;">
+      <a href="mailto:info@cleaniqservices.com" style="display:inline-block;background:#0F172A;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;">Contact Us to Rebook</a>
+    </div>
+  </div>
+  <div style="background:#f8fafc;padding:20px 40px;text-align:center;border-top:1px solid #f1f5f9;">
+    <p style="margin:0;font-size:11px;color:#94a3b8;">© 2026 Cleaniq Services · Professional Cleaning You Can Trust</p>
+    <p style="margin:4px 0 0;font-size:11px;color:#cbd5e1;">Questions? <a href="mailto:info@cleaniqservices.com" style="color:#0A5C43;">info@cleaniqservices.com</a></p>
+  </div>
+</div>`,
 };
 
 module.exports = { sendEmail, templates, automationTemplates, workerEventEmails };

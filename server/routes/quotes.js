@@ -1007,11 +1007,17 @@ function generateQuoteResponseAlert(quote, outcome, bookingsCreated = 0) {
     </div>`;
 }
 
-// When a quote with a scheduled service date/time is accepted, automatically
-// create the matching booking(s) so they appear on the calendar — a single
-// booking for one-time quotes, or a forward-looking series for recurring ones.
+// When a quote is accepted, automatically create the matching booking(s) so
+// they appear on the calendar. If no serviceDate is set on the quote the
+// booking is still created with a null date (admin can set it later).
 async function generateBookingsFromQuote(quote) {
-  if (!quote.serviceDate) return 0;
+  // Guard against re-inserting bookings if this quote was already processed
+  // (e.g. the customer declined then re-accepted). Duplicate bookingId values
+  // would throw a unique-key error and show the customer an error page.
+  const existingCount = await Booking.countDocuments({
+    bookingId: { $regex: `^Q-${quote.quoteRef}-` },
+  });
+  if (existingCount > 0) return existingCount;
 
   const OCCURRENCES_BY_FREQUENCY = {
     once: 1,
@@ -1074,7 +1080,9 @@ async function generateBookingsFromQuote(quote) {
       notes: `Generated from accepted quote ${quote.quoteRef} (${quote.companyName})`,
     },
     schedule: {
-      date: addInterval(quote.serviceDate, quote.frequency, i),
+      // If the quote has no service date the booking is still created so it
+      // appears on the admin calendar — the admin can set the date later.
+      date: quote.serviceDate ? addInterval(quote.serviceDate, quote.frequency, i) : null,
       timeSlot: quote.serviceTimeSlot || "Morning (8am-12pm)",
     },
     payment: {
@@ -1092,7 +1100,13 @@ async function generateBookingsFromQuote(quote) {
       occurrenceCount > 1 ? { recurringGroup: `Q-${quote.quoteRef}` } : {},
   }));
 
-  await Booking.insertMany(bookings);
+  try {
+    await Booking.insertMany(bookings, { ordered: false });
+  } catch (insertErr) {
+    // ordered:false lets non-duplicate docs insert even if one fails.
+    // Log but don't surface to the customer — the accept page still shows.
+    console.error("⚠️ generateBookingsFromQuote insertMany error:", insertErr.message);
+  }
   return bookings.length;
 }
 

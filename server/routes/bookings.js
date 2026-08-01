@@ -787,6 +787,31 @@ router.put("/:id", async (req, res) => {
       }
     }
 
+    // ── Status-change customer emails (fire-and-forget) ───────────────────
+    if (prevStatus !== newStatus && updatedBooking.customer?.email) {
+      setImmediate(async () => {
+        try {
+          if (prevStatus !== "Confirmed" && newStatus === "Confirmed") {
+            await sendEmail({
+              to: updatedBooking.customer.email,
+              subject: `Booking Confirmed — ${updatedBooking.bookingId} | Cleaniq Services`,
+              html: templates.bookingStatusConfirmed(updatedBooking),
+            });
+            console.log(`📧 Confirmation email sent to ${updatedBooking.customer.email} for booking ${updatedBooking.bookingId}`);
+          } else if (prevStatus !== "Cancelled" && newStatus === "Cancelled") {
+            await sendEmail({
+              to: updatedBooking.customer.email,
+              subject: `Booking Cancellation — ${updatedBooking.bookingId} | Cleaniq Services`,
+              html: templates.bookingCancelled(updatedBooking),
+            });
+            console.log(`📧 Cancellation email sent to ${updatedBooking.customer.email} for booking ${updatedBooking.bookingId}`);
+          }
+        } catch (emailErr) {
+          console.error("⚠️ Status-change email error:", emailErr.message);
+        }
+      });
+    }
+
     // ── SMS triggers (fire-and-forget — never block the response) ──────────
     setImmediate(async () => {
       try {

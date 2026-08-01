@@ -9,12 +9,17 @@ import StatDetailDrawer from "./StatDetailDrawer";
 
 const Badge = ({ children, variant = "default" }) => {
   const cls = {
-    default:     "bg-white/5 text-white/40 border-white/10",
-    success:     "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
-    warning:     "bg-amber-500/15  text-amber-400  border-amber-500/25",
-    destructive: "bg-rose-500/15    text-rose-400    border-rose-500/25",
-    blue:        "bg-blue-500/15   text-blue-400   border-blue-500/25",
-  }[variant] || "bg-white/5 text-white/40 border-white/10";
+    default:     "bg-white/10    text-white/60    border-white/20",
+    success:     "bg-emerald-500/30 text-emerald-300 border-emerald-400/60",
+    warning:     "bg-amber-500/30   text-amber-300   border-amber-400/60",
+    destructive: "bg-rose-500/30    text-rose-300     border-rose-400/60",
+    blue:        "bg-blue-500/30    text-blue-300     border-blue-400/60",
+    purple:      "bg-purple-500/30  text-purple-300   border-purple-400/60",
+    orange:      "bg-orange-500/30  text-orange-300   border-orange-400/60",
+    sky:         "bg-sky-500/30     text-sky-300      border-sky-400/60",
+    indigo:      "bg-indigo-500/30  text-indigo-300   border-indigo-400/60",
+    teal:        "bg-teal-500/30    text-teal-300     border-teal-400/60",
+  }[variant] || "bg-white/10 text-white/60 border-white/20";
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border ${cls}`}>
       {children}
@@ -787,8 +792,15 @@ const Customers = () => {
                       <p className="text-xs text-white/40 mb-3">{customerBookings.length} booking{customerBookings.length !== 1 ? "s" : ""} found</p>
                       {customerBookings.map(b => {
                         const statusColor = {
-                          completed: "success", "in progress": "blue",
-                          pending: "warning", cancelled: "destructive",
+                          confirmed:            "success",
+                          completed:            "blue",
+                          "completed - unpaid": "purple",
+                          "in progress":        "orange",
+                          pending:              "warning",
+                          cancelled:            "destructive",
+                          accepted:             "sky",
+                          assigned:             "indigo",
+                          arrived:              "teal",
                         }[b.status?.toLowerCase()] || "default";
                         return (
                           <div key={b._id} className="border border-white/10 rounded-xl p-4 bg-[#071D16] hover:border-white/20 transition-all">
