@@ -798,38 +798,38 @@ router.put("/:id", async (req, res) => {
       }
     }
 
-    // ── Status-change customer emails (fire-and-forget) ───────────────────
-    console.log(`🔄 Status change detected: "${prevStatus}" → "${newStatus}" | customer email: ${updatedBooking.customer?.email || "MISSING"}`);
-    if (prevStatus !== newStatus && updatedBooking.customer?.email) {
+    // ── Status-change customer email — fires for every status switch ─────────
+    // Completed and Completed-Unpaid are excluded here because they already
+    // send a dedicated invoice email in the blocks above.
+    const statusEmailExcluded = ["Completed", "Completed - Unpaid"];
+    if (
+      prevStatus !== newStatus &&
+      newStatus &&
+      !statusEmailExcluded.includes(newStatus) &&
+      updatedBooking.customer?.email
+    ) {
       setImmediate(async () => {
         try {
-          if (prevStatus !== "Confirmed" && newStatus === "Confirmed") {
-            console.log(`📧 Sending confirmation email to ${updatedBooking.customer.email}...`);
-            const ok = await sendEmail({
-              to: updatedBooking.customer.email,
-              subject: `Booking Confirmed — ${updatedBooking.bookingId} | Cleaniq Services`,
-              html: templates.bookingStatusConfirmed(updatedBooking),
-            });
-            console.log(`📧 Confirmation email result: ${ok ? "✅ sent" : "❌ failed"} → ${updatedBooking.customer.email}`);
-          } else if (prevStatus !== "Cancelled" && newStatus === "Cancelled") {
-            console.log(`📧 Sending cancellation email to ${updatedBooking.customer.email}...`);
-            const ok = await sendEmail({
-              to: updatedBooking.customer.email,
-              subject: `Booking Cancellation — ${updatedBooking.bookingId} | Cleaniq Services`,
-              html: templates.bookingCancelled(updatedBooking),
-            });
-            console.log(`📧 Cancellation email result: ${ok ? "✅ sent" : "❌ failed"} → ${updatedBooking.customer.email}`);
-          } else {
-            console.log(`📧 No email template for status: "${newStatus}" — skipping`);
-          }
+          const subjectMap = {
+            Confirmed:     `Booking Confirmed ✅ — ${updatedBooking.bookingId}`,
+            Pending:       `Booking Received — ${updatedBooking.bookingId}`,
+            Assigned:      `Cleaner Assigned — ${updatedBooking.bookingId}`,
+            Arrived:       `Your Cleaner Has Arrived — ${updatedBooking.bookingId}`,
+            "In Progress": `Cleaning In Progress 🧹 — ${updatedBooking.bookingId}`,
+            Cancelled:     `Booking Cancelled — ${updatedBooking.bookingId}`,
+          };
+          const subject = subjectMap[newStatus] || `Booking Update — ${updatedBooking.bookingId} | Cleaniq Services`;
+          console.log(`📧 Status changed "${prevStatus}" → "${newStatus}" — sending email to ${updatedBooking.customer.email}`);
+          const ok = await sendEmail({
+            to: updatedBooking.customer.email,
+            subject,
+            html: templates.bookingStatusUpdate(updatedBooking),
+          });
+          console.log(`📧 Status email ${ok ? "✅ sent" : "❌ failed"} → ${updatedBooking.customer.email} [${newStatus}]`);
         } catch (emailErr) {
-          console.error("⚠️ Status-change email error:", emailErr.message, emailErr.stack);
+          console.error("⚠️ Status-change email error:", emailErr.message);
         }
       });
-    } else if (prevStatus === newStatus) {
-      console.log(`📧 Status unchanged ("${prevStatus}") — no email needed`);
-    } else {
-      console.log(`📧 No customer email on booking ${updatedBooking.bookingId} — cannot send`);
     }
 
     // ── SMS triggers (fire-and-forget — never block the response) ──────────
