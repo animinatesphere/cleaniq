@@ -2461,4 +2461,4 @@ const workerEventEmails = {
   bookingStatusUpdate: buildBookingStatusUpdateEmail,
 };
 
-module.exports = { sendEmail, templates, automationTemplates, workerEventEmails };
+module.exports = { sendEmail, templates, automationTemplates, workerEventEmails, buildBookingStatusUpdateEmail };

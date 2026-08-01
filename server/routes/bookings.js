@@ -4,7 +4,7 @@ const Booking = require("../models/Booking");
 const Worker = require("../models/Worker");
 const SystemSetting = require("../models/SystemSetting");
 const Lead = require("../models/Lead");
-const { sendEmail, templates } = require("../utils/emailService");
+const { sendEmail, templates, buildBookingStatusUpdateEmail } = require("../utils/emailService");
 const { moveToTrash } = require("../utils/trash");
 const { scheduleTask } = require("../utils/automationEngine");
 const sms = require("../utils/smsService");
@@ -823,7 +823,7 @@ router.put("/:id", async (req, res) => {
           const ok = await sendEmail({
             to: updatedBooking.customer.email,
             subject,
-            html: templates.bookingStatusUpdate(updatedBooking),
+            html: buildBookingStatusUpdateEmail(updatedBooking),
           });
           console.log(`📧 Status email ${ok ? "✅ sent" : "❌ failed"} → ${updatedBooking.customer.email} [${newStatus}]`);
         } catch (emailErr) {
