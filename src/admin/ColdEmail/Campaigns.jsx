@@ -40,7 +40,44 @@ function buildPreviewHtml(rawBody, subject) {
       ? `<tr><td style="padding:0 0 8px;color:#1e293b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;line-height:1.75;">${line.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</td></tr>`
       : `<tr><td style="height:12px;font-size:12px;">&nbsp;</td></tr>`
   ).join("");
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;padding:0;background:#edf1f7;-webkit-font-smoothing:antialiased}a{color:#0a6644}</style></head><body style="margin:0;padding:0;background:#edf1f7;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#edf1f7;"><tr><td align="center" style="padding:32px 16px 48px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:580px;max-width:580px;"><tr><td align="center" style="background:#073d27;border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;"><img src="${logoUrl}" alt="cleaniq services" width="80" height="80" style="display:block;margin:0 auto 14px;width:80px;height:80px;border-radius:14px;object-fit:cover;border:2px solid rgba(255,255,255,0.15);"/><p style="margin:0;color:#fff;font-family:Arial,sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.4px;">cleaniq services</p><p style="margin:5px 0 0;color:rgba(255,255,255,0.4);font-family:Arial,sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;">Professional Cleaning Solutions</p></td></tr><tr><td style="height:4px;background:linear-gradient(90deg,#10b981,#3b82f6 60%,#8b5cf6);font-size:0;">&nbsp;</td></tr><tr><td style="background:#fff;padding:40px 44px 32px;border-left:1px solid #dde5ed;border-right:1px solid #dde5ed;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${content}</table></td></tr><tr><td style="background:#fff;border-left:1px solid #dde5ed;border-right:1px solid #dde5ed;padding:0 44px;"><div style="height:1px;background:#e2e8f0;">&nbsp;</div></td></tr><tr><td style="background:#f8fafc;border:1px solid #dde5ed;border-top:none;border-radius:0 0 16px 16px;padding:22px 44px 26px;text-align:center;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 14px;"><tr><td style="background:#073d27;border-radius:50px;padding:6px 16px;"><span style="color:#fff;font-family:Arial,sans-serif;font-size:11px;font-weight:800;">cleaniq services</span></td></tr></table><p style="margin:0 0 7px;color:#94a3b8;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;">You received this because you're on our outreach list.</p><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#94a3b8;"><a href="#" style="color:#64748b;text-decoration:underline;">Unsubscribe</a>&nbsp;·&nbsp;<a href="https://cleaniqservices.com" style="color:#64748b;">cleaniqservices.com</a></p></td></tr></table></td></tr></table></body></html>`;
+  const replySubject = encodeURIComponent("Re: " + (subject || "Your message").replace(/\{\{[^}]+\}\}/g, "…"));
+  const replyBody    = encodeURIComponent("Hi,\n\nI received your email and I'm interested in learning more about your cleaning services.\n\nPlease get in touch.\n\nKind regards,");
+  const replyHref    = `mailto:info@cleaniqservices.com?subject=${replySubject}&body=${replyBody}`;
+
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;padding:0;background:#edf1f7;-webkit-font-smoothing:antialiased}a{color:#0a6644}</style></head><body style="margin:0;padding:0;background:#edf1f7;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#edf1f7;"><tr><td align="center" style="padding:32px 16px 48px;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:580px;max-width:580px;">
+
+<!-- Header -->
+<tr><td align="center" style="background:#073d27;border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;">
+  <img src="${logoUrl}" alt="cleaniq services" width="80" height="80" style="display:block;margin:0 auto 14px;width:80px;height:80px;border-radius:14px;object-fit:cover;border:2px solid rgba(255,255,255,0.15);"/>
+  <p style="margin:0;color:#fff;font-family:Arial,sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.4px;">cleaniq services</p>
+  <p style="margin:5px 0 0;color:rgba(255,255,255,0.4);font-family:Arial,sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;">Professional Cleaning Solutions</p>
+</td></tr>
+<tr><td style="height:4px;background:linear-gradient(90deg,#10b981,#3b82f6 60%,#8b5cf6);font-size:0;">&nbsp;</td></tr>
+
+<!-- Body -->
+<tr><td style="background:#fff;padding:40px 44px 32px;border-left:1px solid #dde5ed;border-right:1px solid #dde5ed;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${content}</table>
+</td></tr>
+
+<!-- Reply CTA -->
+<tr><td style="background:#fff;border-left:1px solid #dde5ed;border-right:1px solid #dde5ed;padding:4px 44px 28px;text-align:center;">
+  <a href="${replyHref}" style="display:inline-block;background:#073d27;color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:800;letter-spacing:0.2px;text-decoration:none;padding:14px 32px;border-radius:50px;border:2px solid #0a5c43;">&#9993;&nbsp; Yes, I'm Interested — Reply Now</a>
+  <p style="margin:10px 0 0;color:#94a3b8;font-family:Arial,sans-serif;font-size:11px;line-height:1.5;">Clicking this opens your email client with a pre-filled reply to us</p>
+</td></tr>
+
+<!-- Divider -->
+<tr><td style="background:#fff;border-left:1px solid #dde5ed;border-right:1px solid #dde5ed;padding:0 44px;"><div style="height:1px;background:#e2e8f0;">&nbsp;</div></td></tr>
+
+<!-- Footer -->
+<tr><td style="background:#f8fafc;border:1px solid #dde5ed;border-top:none;border-radius:0 0 16px 16px;padding:22px 44px 26px;text-align:center;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 14px;"><tr><td style="background:#073d27;border-radius:50px;padding:6px 16px;"><span style="color:#fff;font-family:Arial,sans-serif;font-size:11px;font-weight:800;">cleaniq services</span></td></tr></table>
+  <p style="margin:0 0 7px;color:#94a3b8;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;">You received this because you're on our outreach list.</p>
+  <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#94a3b8;"><a href="#" style="color:#64748b;text-decoration:underline;">Unsubscribe</a>&nbsp;·&nbsp;<a href="https://cleaniqservices.com" style="color:#64748b;">cleaniqservices.com</a></p>
+</td></tr>
+
+</table></td></tr></table></body></html>`;
 }
 
 // ── Email Preview Modal ────────────────────────────────────────────────────────

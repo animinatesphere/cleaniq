@@ -108,7 +108,7 @@ function personalizeTemplate(template, contact) {
     .replace(/\{\{email\}\}/gi,      contact.email     || "");
 }
 
-function buildEmailHtml(rawBody, unsubUrl) {
+function buildEmailHtml(rawBody, unsubUrl, replySubject) {
   // Already a full HTML doc — use as-is
   if (/<html|<!DOCTYPE/i.test(rawBody)) return rawBody;
 
@@ -189,6 +189,19 @@ function buildEmailHtml(rawBody, unsubUrl) {
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
               ${content}
             </table>
+          </td>
+        </tr>
+
+        <!-- ── REPLY CTA ── -->
+        <tr>
+          <td style="background:#ffffff;border-left:1px solid #dde5ed;border-right:1px solid #dde5ed;padding:4px 40px 32px;text-align:center;">
+            <a href="mailto:info@cleaniqservices.com?subject=${encodeURIComponent("Re: " + (replySubject || "Your message"))}&body=${encodeURIComponent("Hi,\n\nI received your email and I'm interested in learning more about your cleaning services.\n\nPlease get in touch.\n\nKind regards,")}"
+               style="display:inline-block;background:#073d27;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;letter-spacing:0.2px;text-decoration:none;padding:14px 32px;border-radius:50px;border:2px solid #0a5c43;">
+              &#9993;&nbsp; Yes, I'm Interested — Reply Now
+            </a>
+            <p style="margin:12px 0 0;color:#94a3b8;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.5;">
+              Clicking this opens your email client with a pre-filled reply to us
+            </p>
           </td>
         </tr>
 
@@ -339,7 +352,7 @@ async function processSingleSend(send) {
     { expiresIn: "90d" }
   );
   const unsubUrl = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/cold-email/unsubscribe/${unsubToken}`;
-  const fullHtml = buildEmailHtml(body, unsubUrl);
+  const fullHtml = buildEmailHtml(body, unsubUrl, subject);
 
   // ── Dry-run mode ──────────────────────────────────────────────────────────
   if (process.env.COLD_EMAIL_DRY_RUN === "true") {
