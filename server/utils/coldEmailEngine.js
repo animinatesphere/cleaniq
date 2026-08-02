@@ -397,22 +397,26 @@ async function processColdEmailSends() {
     const now     = new Date();
     const pending = await ColdSend.find({ status: "pending", scheduledAt: { $lte: now } })
       .sort({ scheduledAt: 1 })
-      .limit(15)
+      .limit(150)
       .lean();
 
-    for (const send of pending) {
-      try {
-        await processSingleSend(send);
-      } catch (err) {
-        console.error(`Cold send error (${send.contactEmail}):`, err.message);
-        await ColdSend.findByIdAndUpdate(send._id, { status: "failed", error: err.message });
-        // If Gmail auth fails, pause the mailbox
-        if (err.message && (err.message.includes("invalid_grant") || err.message.includes("Invalid Credentials"))) {
-          if (send.mailboxId) {
-            await ColdMailbox.findByIdAndUpdate(send.mailboxId, { status: "error", errorMessage: err.message });
+    // Process in parallel batches of 5 to stay within Gmail API rate limits
+    const CONCURRENCY = 5;
+    for (let i = 0; i < pending.length; i += CONCURRENCY) {
+      const chunk = pending.slice(i, i + CONCURRENCY);
+      await Promise.all(chunk.map(async (send) => {
+        try {
+          await processSingleSend(send);
+        } catch (err) {
+          console.error(`Cold send error (${send.contactEmail}):`, err.message);
+          await ColdSend.findByIdAndUpdate(send._id, { status: "failed", error: err.message });
+          if (err.message && (err.message.includes("invalid_grant") || err.message.includes("Invalid Credentials"))) {
+            if (send.mailboxId) {
+              await ColdMailbox.findByIdAndUpdate(send.mailboxId, { status: "error", errorMessage: err.message });
+            }
           }
         }
-      }
+      }));
     }
   } finally {
     sendRunning = false;

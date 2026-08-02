@@ -364,13 +364,12 @@ router.post("/campaigns/:id/launch", async (req, res) => {
     const mailboxes = await ColdMailbox.find({ _id: { $in: campaign.mailboxIds }, status: "active" }).lean();
     const totalCap  = mailboxes.reduce((sum, m) => sum + (m.dailyLimit || 40), 0);
 
-    // Spread sends starting from NOW, spacing them to fit within daily cap
-    // minuteSpread: at minimum 1 minute apart, spread over up to 8 hours per day
-    const minuteSpread = contacts.length > 1 ? Math.max(1, Math.floor(480 / Math.min(contacts.length, 480))) : 0;
-    const baseTime = new Date(); // start immediately
-
+    const baseTime = new Date();
     let queued = 0;
 
+    // Build sends in bulk — all scheduled for now with a tiny random jitter
+    // (a few seconds apart so Gmail doesn't see a single burst timestamp)
+    const sendDocs = [];
     for (let i = 0; i < contacts.length; i++) {
       const contact = contacts[i];
       if (suppressedEmails.has(contact.email)) continue;
@@ -379,10 +378,11 @@ router.post("/campaigns/:id/launch", async (req, res) => {
       const exists = await ColdSend.findOne({ campaignId: campaign._id, contactId: contact._id, stepIndex: 0 });
       if (exists) continue;
 
-      const offset      = Math.floor(i * minuteSpread) + Math.floor(Math.random() * 3);
-      const scheduledAt = new Date(baseTime.getTime() + offset * 60_000);
+      // Jitter: 0–10 seconds per contact so they don't all share the exact same timestamp
+      const jitterMs    = i * 10_000 + Math.floor(Math.random() * 5_000);
+      const scheduledAt = new Date(baseTime.getTime() + jitterMs);
 
-      await ColdSend.create({
+      sendDocs.push({
         campaignId:   campaign._id,
         contactId:    contact._id,
         contactEmail: contact.email,
@@ -393,9 +393,22 @@ router.post("/campaigns/:id/launch", async (req, res) => {
       queued++;
     }
 
+    if (sendDocs.length) await ColdSend.insertMany(sendDocs, { ordered: false });
+
     campaign.status     = "active";
     campaign.launchedAt = new Date();
     await campaign.save();
+
+    // Kick the send processor immediately so first batch goes out now
+    // rather than waiting up to 2 minutes for the automation tick
+    setImmediate(async () => {
+      try {
+        const { processColdEmailSends } = require("../utils/coldEmailEngine");
+        await processColdEmailSends();
+      } catch (e) {
+        console.error("Post-launch send error:", e.message);
+      }
+    });
 
     res.json({ success: true, queued, totalContacts: contacts.length });
   } catch (err) {
