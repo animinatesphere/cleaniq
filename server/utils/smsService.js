@@ -25,9 +25,35 @@ async function isTriggerEnabled(trigger) {
   return setting.value !== false;
 }
 
+// ── Phone normalisation to E.164 ───────────────────────────────────────────
+// Handles UK numbers stored without country code or with double-prefix.
+// Default country: GB (+44). Extend the map for other countries if needed.
+function normalizePhone(raw, defaultCountry = "GB") {
+  if (!raw) return raw;
+  // Strip whitespace, dashes, parentheses, dots
+  let n = String(raw).replace(/[\s\-().]/g, "").trim();
+
+  // Fix common double-prefix mistake: +4407... → +447...
+  n = n.replace(/^\+440/, "+44");
+
+  // UK numbers stored without country code: 07... → +447...
+  if (/^0[1-9]\d{8,9}$/.test(n)) {
+    n = "+44" + n.slice(1);
+  }
+
+  // If it already starts with + it's assumed E.164 — return as-is
+  // If it starts with digits only and isn't handled above, prepend +44 as a last resort
+  if (defaultCountry === "GB" && /^\d{10,11}$/.test(n)) {
+    n = "+44" + (n.startsWith("0") ? n.slice(1) : n);
+  }
+
+  return n;
+}
+
 // ── Core send ──────────────────────────────────────────────────────────────
 async function sendSms({ to, body, trigger, bookingId, bookingRef, recipient = "customer" }) {
-  const log = await SmsLog.create({ to, body, trigger, bookingId, bookingRef, recipient, status: "pending" });
+  const normalizedTo = normalizePhone(to);
+  const log = await SmsLog.create({ to: normalizedTo, body, trigger, bookingId, bookingRef, recipient, status: "pending" });
 
   try {
     const client = await getTwilioClient();
@@ -42,7 +68,7 @@ async function sendSms({ to, body, trigger, bookingId, bookingRef, recipient = "
       return { success: false, error: "No sender number" };
     }
 
-    const message = await client.messages.create({ to, from, body });
+    const message = await client.messages.create({ to: normalizedTo, from, body });
     await SmsLog.findByIdAndUpdate(log._id, {
       status: "sent",
       twilioSid: message.sid,

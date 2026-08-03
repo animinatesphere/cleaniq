@@ -489,10 +489,13 @@ export default function SmsAutomation() {
                   </div>
                   <div className="divide-y divide-white/[0.04] max-h-[520px] overflow-y-auto">
                     {logs.map(log => (
-                      <div key={log._id} className="grid grid-cols-[1fr_140px_100px_90px_90px] items-center px-5 py-3 hover:bg-white/2 transition-colors">
+                      <div key={log._id} className="grid grid-cols-[1fr_140px_100px_90px_90px] items-start px-5 py-3 hover:bg-white/2 transition-colors">
                         <div className="min-w-0 pr-4">
                           <p className="text-xs font-bold text-white truncate">{log.to}</p>
                           <p className="text-[11px] text-white/35 font-medium truncate mt-0.5">{log.body}</p>
+                          {log.status === "failed" && log.error && (
+                            <p className="text-[10px] text-rose-400/80 font-medium mt-1 break-words whitespace-pre-wrap">⚠ {log.error}</p>
+                          )}
                         </div>
                         <div>
                           <span className="text-[10px] font-bold text-white/40 bg-white/8 px-2 py-0.5 rounded-full">
