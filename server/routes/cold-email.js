@@ -9,7 +9,7 @@ const ColdCampaign        = require("../models/ColdCampaign");
 const ColdSend            = require("../models/ColdSend");
 const ColdSuppressionList = require("../models/ColdSuppressionList");
 
-const { encrypt, decrypt, buildOAuth2Client, REDIRECT_URI } = require("../utils/coldEmailEngine");
+const { encrypt, decrypt, buildOAuth2Client, REDIRECT_URI, buildMsAuthUrl, exchangeMsCode } = require("../utils/coldEmailEngine");
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
 
@@ -76,6 +76,56 @@ router.get("/auth/callback", async (req, res) => {
     res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&connected=1`);
   } catch (err) {
     console.error("OAuth callback error:", err.message);
+    res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=oauth_failed`);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  MICROSOFT OAUTH
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// GET /api/cold-email/auth/microsoft — redirect to Microsoft consent screen
+router.get("/auth/microsoft", (req, res) => {
+  if (!process.env.MS_CLIENT_ID || !process.env.MS_CLIENT_SECRET) {
+    return res.status(500).json({ message: "MS_CLIENT_ID / MS_CLIENT_SECRET not configured in .env" });
+  }
+  res.redirect(buildMsAuthUrl());
+});
+
+// GET /api/cold-email/auth/microsoft/callback — Microsoft redirects here after consent
+router.get("/auth/microsoft/callback", async (req, res) => {
+  const { code, error } = req.query;
+  if (error) return res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=${encodeURIComponent(error)}`);
+  if (!code)  return res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=no_code`);
+
+  try {
+    const tokens = await exchangeMsCode(code);
+
+    // Get email address via Microsoft Graph
+    const userRes = await fetch("https://graph.microsoft.com/v1.0/me?$select=mail,userPrincipalName", {
+      headers: { Authorization: `Bearer ${tokens.access_token}` },
+    });
+    const user  = await userRes.json();
+    const email = (user.mail || user.userPrincipalName || "").toLowerCase();
+    if (!email) throw new Error("Could not retrieve email from Microsoft account");
+
+    await ColdMailbox.findOneAndUpdate(
+      { email },
+      {
+        email,
+        provider:     "outlook",
+        accessToken:  encrypt(tokens.access_token),
+        refreshToken: tokens.refresh_token ? encrypt(tokens.refresh_token) : undefined,
+        tokenExpiry:  new Date(Date.now() + (tokens.expires_in || 3600) * 1000),
+        status:       "active",
+        errorMessage: "",
+      },
+      { upsert: true, new: true }
+    );
+
+    res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&connected=1`);
+  } catch (err) {
+    console.error("MS OAuth callback error:", err.message);
     res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=oauth_failed`);
   }
 });

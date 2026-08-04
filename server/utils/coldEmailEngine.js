@@ -35,7 +35,77 @@ function decrypt(encText) {
 
 // ── Gmail OAuth client ────────────────────────────────────────────────────────
 
-const REDIRECT_URI = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/cold-email/auth/callback`;
+const REDIRECT_URI    = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/cold-email/auth/callback`;
+const MS_REDIRECT_URI = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/cold-email/auth/microsoft/callback`;
+
+const MS_TOKEN_URL = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+const MS_AUTH_URL  = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
+const MS_SCOPES    = "offline_access https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read";
+
+function buildMsAuthUrl() {
+  const p = new URLSearchParams({
+    client_id:     process.env.MS_CLIENT_ID || "",
+    response_type: "code",
+    redirect_uri:  MS_REDIRECT_URI,
+    scope:         MS_SCOPES,
+    response_mode: "query",
+    prompt:        "consent",
+  });
+  return `${MS_AUTH_URL}?${p.toString()}`;
+}
+
+async function exchangeMsCode(code) {
+  const params = new URLSearchParams({
+    client_id:     process.env.MS_CLIENT_ID || "",
+    client_secret: process.env.MS_CLIENT_SECRET || "",
+    code,
+    redirect_uri:  MS_REDIRECT_URI,
+    grant_type:    "authorization_code",
+  });
+  const res = await fetch(MS_TOKEN_URL, {
+    method:  "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body:    params.toString(),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error_description || data.error || "MS token exchange failed");
+  return data;
+}
+
+async function refreshMsToken(rawRefreshToken) {
+  const params = new URLSearchParams({
+    client_id:     process.env.MS_CLIENT_ID || "",
+    client_secret: process.env.MS_CLIENT_SECRET || "",
+    refresh_token: rawRefreshToken,
+    grant_type:    "refresh_token",
+    scope:         MS_SCOPES,
+  });
+  const res = await fetch(MS_TOKEN_URL, {
+    method:  "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body:    params.toString(),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error_description || data.error || "MS token refresh failed");
+  return data;
+}
+
+async function getMsAccessToken(mailbox) {
+  const expiry = mailbox.tokenExpiry ? new Date(mailbox.tokenExpiry).getTime() : 0;
+  if (expiry - Date.now() > 5 * 60 * 1000) {
+    return decrypt(mailbox.accessToken);
+  }
+  const raw = decrypt(mailbox.refreshToken);
+  if (!raw) throw new Error("No Microsoft refresh token — reconnect this mailbox");
+  const tokens = await refreshMsToken(raw);
+  const update = {
+    accessToken: encrypt(tokens.access_token),
+    tokenExpiry: new Date(Date.now() + (tokens.expires_in || 3600) * 1000),
+  };
+  if (tokens.refresh_token) update.refreshToken = encrypt(tokens.refresh_token);
+  await ColdMailbox.findByIdAndUpdate(mailbox._id, update);
+  return tokens.access_token;
+}
 
 function buildOAuth2Client() {
   return new google.auth.OAuth2(
@@ -94,6 +164,43 @@ async function sendViaGmail(mailbox, { to, subject, html, fromName }) {
   });
 
   return result.data;
+}
+
+// ── Microsoft Graph send ──────────────────────────────────────────────────────
+// Creates a draft first (so we get message ID + conversationId), then sends it.
+async function sendViaOutlook(mailbox, { to, subject, html, fromName }) {
+  const accessToken = await getMsAccessToken(mailbox);
+
+  const draft = {
+    subject,
+    body:          { contentType: "HTML", content: html },
+    toRecipients:  [{ emailAddress: { address: to } }],
+    from:          { emailAddress: { name: fromName || "", address: mailbox.email } },
+  };
+
+  // Step 1 — create draft
+  const createRes = await fetch("https://graph.microsoft.com/v1.0/me/messages", {
+    method:  "POST",
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+    body:    JSON.stringify(draft),
+  });
+  if (!createRes.ok) {
+    const err = await createRes.json().catch(() => ({}));
+    throw new Error(`MS Graph create: ${err?.error?.message || createRes.status}`);
+  }
+  const msg = await createRes.json();
+
+  // Step 2 — send
+  const sendRes = await fetch(`https://graph.microsoft.com/v1.0/me/messages/${msg.id}/send`, {
+    method:  "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!sendRes.ok) {
+    const err = await sendRes.json().catch(() => ({}));
+    throw new Error(`MS Graph send: ${err?.error?.message || sendRes.status}`);
+  }
+
+  return { id: msg.id, conversationId: msg.conversationId };
 }
 
 // ── Template helpers ──────────────────────────────────────────────────────────
@@ -364,20 +471,18 @@ async function processSingleSend(send) {
     return;
   }
 
-  // ── Real send ─────────────────────────────────────────────────────────────
-  const result = await sendViaGmail(mailbox, {
-    to:       contact.email,
-    subject,
-    html:     fullHtml,
-    fromName: campaign.fromName || "",
-  });
+  // ── Real send — route based on provider ──────────────────────────────────
+  const sendOpts = { to: contact.email, subject, html: fullHtml, fromName: campaign.fromName || "" };
+  const result = mailbox.provider === "outlook"
+    ? await sendViaOutlook(mailbox, sendOpts)
+    : await sendViaGmail(mailbox, sendOpts);
 
   await ColdSend.findByIdAndUpdate(send._id, {
     status:         "sent",
     sentAt:         new Date(),
     mailboxId:      mailbox._id,
     gmailMessageId: result.id,
-    gmailThreadId:  result.threadId,
+    gmailThreadId:  mailbox.provider === "outlook" ? result.conversationId : result.threadId,
   });
   await ColdMailbox.findByIdAndUpdate(mailbox._id, { $inc: { sentToday: 1 } });
   await ColdCampaign.findByIdAndUpdate(send.campaignId, { $inc: { "stats.sent": 1 } });
@@ -410,10 +515,14 @@ async function processColdEmailSends() {
         } catch (err) {
           console.error(`Cold send error (${send.contactEmail}):`, err.message);
           await ColdSend.findByIdAndUpdate(send._id, { status: "failed", error: err.message });
-          if (err.message && (err.message.includes("invalid_grant") || err.message.includes("Invalid Credentials"))) {
-            if (send.mailboxId) {
-              await ColdMailbox.findByIdAndUpdate(send.mailboxId, { status: "error", errorMessage: err.message });
-            }
+          const tokenError = err.message && (
+            err.message.includes("invalid_grant") ||
+            err.message.includes("Invalid Credentials") ||
+            err.message.includes("InvalidAuthenticationToken") ||
+            err.message.includes("reconnect this mailbox")
+          );
+          if (tokenError && send.mailboxId) {
+            await ColdMailbox.findByIdAndUpdate(send.mailboxId, { status: "error", errorMessage: err.message });
           }
         }
       }));
@@ -434,7 +543,11 @@ async function detectReplies() {
     const mailboxes = await ColdMailbox.find({ status: "active" });
     for (const mailbox of mailboxes) {
       try {
-        await detectRepliesForMailbox(mailbox);
+        if (mailbox.provider === "outlook") {
+          await detectRepliesForOutlookMailbox(mailbox);
+        } else {
+          await detectRepliesForMailbox(mailbox);
+        }
       } catch (err) {
         console.error(`Reply detect error (${mailbox.email}):`, err.message);
       }
@@ -502,6 +615,52 @@ function extractGmailBody(payload, depth = 0) {
   }
 
   return "";
+}
+
+async function detectRepliesForOutlookMailbox(mailbox) {
+  const accessToken = await getMsAccessToken(mailbox);
+
+  const sentSends = await ColdSend.find({
+    mailboxId: mailbox._id,
+    status:    "sent",
+    gmailThreadId: { $exists: true, $ne: null },
+  }).limit(200).lean();
+
+  for (const send of sentSends) {
+    try {
+      const url = `https://graph.microsoft.com/v1.0/me/messages?$filter=conversationId eq '${send.gmailThreadId}' and isDraft eq false&$orderby=receivedDateTime asc&$select=id,from,subject,bodyPreview,receivedDateTime`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const messages = data.value || [];
+
+      const reply = messages.find(
+        (m) => m.id !== send.gmailMessageId &&
+               m.from?.emailAddress?.address?.toLowerCase() !== mailbox.email.toLowerCase()
+      );
+      if (!reply) continue;
+
+      const replyFrom    = reply.from?.emailAddress?.address || "";
+      const replySubject = reply.subject || "";
+      const replyBody    = (reply.bodyPreview || "").slice(0, 2000);
+
+      await ColdSend.updateMany(
+        { campaignId: send.campaignId, contactId: send.contactId, status: "pending" },
+        { status: "skipped", error: "Contact replied" }
+      );
+      await ColdSend.findByIdAndUpdate(send._id, {
+        status: "replied", repliedAt: new Date(reply.receivedDateTime),
+        replyFrom, replySubject, replyBody,
+      });
+      const alreadyCounted = await ColdSend.findOne({
+        campaignId: send.campaignId, contactId: send.contactId,
+        status: "replied", _id: { $ne: send._id },
+      });
+      if (!alreadyCounted) {
+        await ColdCampaign.findByIdAndUpdate(send.campaignId, { $inc: { "stats.replied": 1 } });
+      }
+    } catch { continue; }
+  }
 }
 
 async function detectRepliesForMailbox(mailbox) {
@@ -572,7 +731,10 @@ module.exports = {
   encrypt,
   decrypt,
   buildOAuth2Client,
+  buildMsAuthUrl,
+  exchangeMsCode,
   processColdEmailSends,
   detectReplies,
   REDIRECT_URI,
+  MS_REDIRECT_URI,
 };

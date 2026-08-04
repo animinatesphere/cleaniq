@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Inbox, Plus, Trash2, Pause, Play, RefreshCw, AlertCircle } from "lucide-react";
+import { Inbox, Trash2, Pause, Play, AlertCircle } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
 const token = () => localStorage.getItem("adminToken") || "";
@@ -7,6 +7,26 @@ const token = () => localStorage.getItem("adminToken") || "";
 function authFetch(url, opts = {}) {
   return fetch(url, { ...opts, headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}`, ...(opts.headers || {}) } });
 }
+
+const GoogleIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48">
+    <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.4 30.2 0 24 0 14.8 0 6.9 5.4 3 13.3l7.8 6C12.7 13.3 17.9 9.5 24 9.5z"/>
+    <path fill="#4285F4" d="M46.6 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.2-10.1 7.2-17z"/>
+    <path fill="#FBBC05" d="M10.8 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l8.3-6z"/>
+    <path fill="#34A853" d="M24 48c6.2 0 11.4-2.1 15.2-5.6l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.1 0-11.3-3.8-13.2-9.2l-8.3 6C6.9 42.6 14.8 48 24 48z"/>
+  </svg>
+);
+
+// Microsoft 365 "M" logo colours
+const OutlookIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
+    <rect width="48" height="48" rx="8" fill="#0078D4"/>
+    <path d="M24 12C17.373 12 12 17.373 12 24C12 30.627 17.373 36 24 36C30.627 36 36 30.627 36 24C36 17.373 30.627 12 24 12Z" fill="white"/>
+    <path d="M24 15C19.029 15 15 19.029 15 24C15 28.971 19.029 33 24 33C28.971 33 33 28.971 33 24C33 19.029 28.971 15 24 15Z" fill="#0078D4"/>
+    <path d="M18 21H30V27H18V21Z" fill="white"/>
+    <path d="M21 18H27V30H21V18Z" fill="white"/>
+  </svg>
+);
 
 export default function Mailboxes() {
   const [mailboxes, setMailboxes] = useState([]);
@@ -51,29 +71,37 @@ export default function Mailboxes() {
     load();
   }
 
-  const gmailAuthUrl = `${API}/cold-email/auth/google`;
+  const gmailAuthUrl   = `${API}/cold-email/auth/google`;
+  const outlookAuthUrl = `${API}/cold-email/auth/microsoft`;
 
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h2 className="text-white font-black text-lg">Connected Mailboxes</h2>
-          <p className="text-white/40 text-sm mt-0.5">Outbound emails rotate across your connected Gmail accounts</p>
+          <p className="text-white/40 text-sm mt-0.5">Outbound emails rotate across your connected accounts</p>
         </div>
-        <a
-          href={gmailAuthUrl}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white text-gray-800 font-bold text-sm rounded-xl hover:bg-gray-100 transition-all shadow-lg"
-        >
-          {/* Google G */}
-          <svg width="18" height="18" viewBox="0 0 48 48">
-            <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.4 30.2 0 24 0 14.8 0 6.9 5.4 3 13.3l7.8 6C12.7 13.3 17.9 9.5 24 9.5z"/>
-            <path fill="#4285F4" d="M46.6 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.2-10.1 7.2-17z"/>
-            <path fill="#FBBC05" d="M10.8 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l8.3-6z"/>
-            <path fill="#34A853" d="M24 48c6.2 0 11.4-2.1 15.2-5.6l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.1 0-11.3-3.8-13.2-9.2l-8.3 6C6.9 42.6 14.8 48 24 48z"/>
-          </svg>
-          Connect Gmail
-        </a>
+        <div className="flex items-center gap-2 flex-wrap">
+          <a
+            href={gmailAuthUrl}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white text-gray-800 font-bold text-sm rounded-xl hover:bg-gray-100 transition-all shadow-lg"
+          >
+            <GoogleIcon size={18} />
+            Connect Gmail
+          </a>
+          <a
+            href={outlookAuthUrl}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#0078D4] text-white font-bold text-sm rounded-xl hover:bg-[#106EBE] transition-all shadow-lg"
+          >
+            <svg width="18" height="18" viewBox="0 0 21 21" fill="none">
+              <path d="M10.5 0L21 5.25V15.75L10.5 21L0 15.75V5.25L10.5 0Z" fill="white" fillOpacity="0.2"/>
+              <path d="M0 5.25L10.5 10.5L21 5.25" stroke="white" strokeWidth="1.5"/>
+              <path d="M10.5 10.5V21" stroke="white" strokeWidth="1.5"/>
+            </svg>
+            Connect Microsoft 365
+          </a>
+        </div>
       </div>
 
       {loading ? (
@@ -81,51 +109,62 @@ export default function Mailboxes() {
           <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : mailboxes.length === 0 ? (
-        <div className="bg-[#0B2D22] border border-white/[0.06] border-dashed rounded-2xl py-20 flex flex-col items-center text-center px-8">
+        <div className="bg-[#0B2D22] border border-white/[0.06] border-dashed rounded-2xl py-16 flex flex-col items-center text-center px-8">
           <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-4">
             <Inbox size={28} className="text-emerald-400/60" />
           </div>
           <h3 className="text-white font-bold text-base mb-1">No mailboxes connected yet</h3>
-          <p className="text-white/30 text-sm max-w-xs mb-6">
-            Connect your Gmail account to start sending cold emails. You can connect multiple accounts to rotate and stay within daily limits.
+          <p className="text-white/30 text-sm max-w-sm mb-6">
+            Connect Gmail or Microsoft 365. Microsoft 365 accounts land in the inbox far more reliably for cold outreach.
           </p>
-          <a
-            href={gmailAuthUrl}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-800 font-bold text-sm rounded-xl hover:bg-gray-100 transition-all"
-          >
-            <svg width="16" height="16" viewBox="0 0 48 48">
-              <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.4 30.2 0 24 0 14.8 0 6.9 5.4 3 13.3l7.8 6C12.7 13.3 17.9 9.5 24 9.5z"/>
-              <path fill="#4285F4" d="M46.6 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.2-10.1 7.2-17z"/>
-              <path fill="#FBBC05" d="M10.8 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l8.3-6z"/>
-              <path fill="#34A853" d="M24 48c6.2 0 11.4-2.1 15.2-5.6l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.1 0-11.3-3.8-13.2-9.2l-8.3 6C6.9 42.6 14.8 48 24 48z"/>
-            </svg>
-            Connect your first Gmail account
-          </a>
-          <p className="text-white/20 text-xs mt-4">
-            You'll be asked to grant Gmail Send and Read permissions. Tokens are encrypted and stored securely.
+          <div className="flex items-center gap-3 flex-wrap justify-center">
+            <a href={gmailAuthUrl} className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-800 font-bold text-sm rounded-xl hover:bg-gray-100 transition-all">
+              <GoogleIcon size={16} /> Connect Gmail
+            </a>
+            <a href={outlookAuthUrl} className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0078D4] text-white font-bold text-sm rounded-xl hover:bg-[#106EBE] transition-all">
+              <svg width="16" height="16" viewBox="0 0 21 21" fill="none">
+                <path d="M0 5.25L10.5 10.5L21 5.25" stroke="white" strokeWidth="1.8"/>
+                <path d="M10.5 10.5V21" stroke="white" strokeWidth="1.8"/>
+                <path d="M10.5 0L21 5.25V15.75L10.5 21L0 15.75V5.25L10.5 0Z" stroke="white" strokeWidth="1.8" fill="none"/>
+              </svg>
+              Connect Microsoft 365
+            </a>
+          </div>
+          <p className="text-white/20 text-xs mt-5 max-w-xs">
+            Tokens are AES-256 encrypted before being stored. We never share your credentials.
           </p>
         </div>
       ) : (
         <div className="grid gap-4">
           {mailboxes.map((box) => {
-            const pct   = box.dailyLimit > 0 ? Math.min(100, Math.round((box.sentToday / box.dailyLimit) * 100)) : 0;
+            const pct    = box.dailyLimit > 0 ? Math.min(100, Math.round((box.sentToday / box.dailyLimit) * 100)) : 0;
             const isEdit = editId === box._id;
+            const isOutlook = box.provider === "outlook";
             return (
               <div key={box._id} className="bg-[#0B2D22] border border-white/[0.06] rounded-2xl p-5">
                 <div className="flex items-start gap-4">
-                  {/* Avatar */}
-                  <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center shrink-0 shadow">
-                    <svg width="20" height="20" viewBox="0 0 48 48">
-                      <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.4 30.2 0 24 0 14.8 0 6.9 5.4 3 13.3l7.8 6C12.7 13.3 17.9 9.5 24 9.5z"/>
-                      <path fill="#4285F4" d="M46.6 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.2-10.1 7.2-17z"/>
-                      <path fill="#FBBC05" d="M10.8 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l8.3-6z"/>
-                      <path fill="#34A853" d="M24 48c6.2 0 11.4-2.1 15.2-5.6l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.1 0-11.3-3.8-13.2-9.2l-8.3 6C6.9 42.6 14.8 48 24 48z"/>
-                    </svg>
+                  {/* Provider avatar */}
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow ${isOutlook ? "bg-[#0078D4]" : "bg-white"}`}>
+                    {isOutlook
+                      ? <svg width="20" height="20" viewBox="0 0 21 21" fill="none">
+                          <path d="M0 5.25L10.5 10.5L21 5.25" stroke="white" strokeWidth="2"/>
+                          <path d="M10.5 10.5V21" stroke="white" strokeWidth="2"/>
+                          <path d="M10.5 0L21 5.25V15.75L10.5 21L0 15.75V5.25L10.5 0Z" stroke="white" strokeWidth="2" fill="none"/>
+                        </svg>
+                      : <GoogleIcon size={20} />
+                    }
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-white font-bold text-sm">{box.email}</p>
+                      {/* Provider badge */}
+                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                        isOutlook ? "bg-blue-500/15 text-blue-400" : "bg-white/10 text-white/50"
+                      }`}>
+                        {isOutlook ? "Microsoft 365" : "Gmail"}
+                      </span>
+                      {/* Status badge */}
                       <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${
                         box.status === "active" ? "bg-emerald-500/15 text-emerald-400" :
                         box.status === "paused" ? "bg-amber-500/15 text-amber-400"   :
@@ -150,7 +189,7 @@ export default function Mailboxes() {
                       </div>
                       <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all ${pct >= 100 ? "bg-rose-500" : pct >= 80 ? "bg-amber-400" : "bg-emerald-500"}`}
+                          className={`h-full rounded-full transition-all ${pct >= 100 ? "bg-rose-500" : pct >= 80 ? "bg-amber-400" : isOutlook ? "bg-blue-500" : "bg-emerald-500"}`}
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -208,14 +247,20 @@ export default function Mailboxes() {
         </div>
       )}
 
-      {/* Setup instructions */}
-      <div className="bg-[#0B2D22]/60 border border-white/[0.04] rounded-xl p-4">
-        <p className="text-white/50 text-xs font-bold mb-1">Setup required in Google Cloud Console</p>
-        <p className="text-white/30 text-xs leading-relaxed">
-          Add <code className="text-emerald-400">{`${API}/cold-email/auth/callback`}</code> as an Authorised redirect URI.
-          Set <code className="text-emerald-400">GOOGLE_CLIENT_ID</code> and <code className="text-emerald-400">GOOGLE_CLIENT_SECRET</code> in your server <code className="text-white/40">.env</code> file.
-          For production add <code className="text-emerald-400">COLD_EMAIL_DRY_RUN=false</code> — while it's <code className="text-amber-400">true</code> sends are only logged, not delivered.
-        </p>
+      {/* Setup instructions — both providers */}
+      <div className="grid sm:grid-cols-2 gap-3">
+        <div className="bg-[#0B2D22]/60 border border-white/[0.04] rounded-xl p-4">
+          <p className="text-white/50 text-xs font-bold mb-1">Gmail setup (Google Cloud Console)</p>
+          <p className="text-white/30 text-xs leading-relaxed">
+            Add <code className="text-emerald-400">{`${API}/cold-email/auth/callback`}</code> as an Authorised redirect URI. Set <code className="text-emerald-400">GOOGLE_CLIENT_ID</code> and <code className="text-emerald-400">GOOGLE_CLIENT_SECRET</code> in your server <code className="text-white/40">.env</code>.
+          </p>
+        </div>
+        <div className="bg-[#0d2540]/60 border border-blue-500/[0.08] rounded-xl p-4">
+          <p className="text-blue-400/70 text-xs font-bold mb-1">Microsoft 365 setup (Azure Portal)</p>
+          <p className="text-white/30 text-xs leading-relaxed">
+            Register an app at <code className="text-blue-400">portal.azure.com</code>. Add redirect URI <code className="text-blue-400">{`${API}/cold-email/auth/microsoft/callback`}</code>. Add delegated permissions: <code className="text-white/50">Mail.Send, Mail.ReadWrite, User.Read, offline_access</code>. Set <code className="text-blue-400">MS_CLIENT_ID</code> and <code className="text-blue-400">MS_CLIENT_SECRET</code> in <code className="text-white/40">.env</code>.
+          </p>
+        </div>
       </div>
     </div>
   );

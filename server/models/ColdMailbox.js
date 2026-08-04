@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const coldMailboxSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  provider: { type: String, enum: ["gmail"], default: "gmail" },
+  provider: { type: String, enum: ["gmail", "outlook"], default: "gmail" },
   accessToken: { type: String },       // AES-256-GCM encrypted
   refreshToken: { type: String },      // AES-256-GCM encrypted
   tokenExpiry: { type: Date },
