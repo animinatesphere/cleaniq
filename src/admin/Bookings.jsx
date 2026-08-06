@@ -1150,6 +1150,7 @@ const Bookings = () => {
   const [openActionMenu, setOpenActionMenu] = useState(null);
   const [formErrors, setFormErrors] = useState({});
   const [fieldTouched, setFieldTouched] = useState({});
+  const [resendingConfirmation, setResendingConfirmation] = useState(false);
   const [selectedBookings, setSelectedBookings] = useState(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [bookingsPage, setBookingsPage] = useState(1);
@@ -1814,6 +1815,24 @@ const Bookings = () => {
       } catch {
         setStatusMessage({ type: "error", text: "Failed to delete booking" });
       }
+    }
+  };
+
+  const resendConfirmation = async () => {
+    if (!selectedBooking?._id) return;
+    setResendingConfirmation(true);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/bookings/${selectedBooking._id}/send-confirmation`,
+        { method: "POST", headers: { "Content-Type": "application/json" } }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed");
+      alert(`✅ Confirmation email resent to ${selectedBooking.customer?.email}`);
+    } catch (err) {
+      alert(`❌ Failed to resend: ${err.message}`);
+    } finally {
+      setResendingConfirmation(false);
     }
   };
 
@@ -4167,9 +4186,18 @@ ${extrasRows}
                           status: "Cancelled",
                         });
                     }}
-                    className="flex-1 py-3 rounded-xl bg-rose-500/15 border border-rose-500/25 text-rose-400 text-xs font-black uppercase tracking-widest hover:bg-rose-500/25 transition-all"
+                    className="py-3 px-4 rounded-xl bg-rose-500/15 border border-rose-500/25 text-rose-400 text-xs font-black uppercase tracking-widest hover:bg-rose-500/25 transition-all"
                   >
-                    Cancel Booking
+                    Cancel
+                  </button>
+                  <button
+                    onClick={resendConfirmation}
+                    disabled={resendingConfirmation}
+                    title="Resend booking confirmation email to customer"
+                    className="py-3 px-4 rounded-xl bg-blue-500/15 border border-blue-500/25 text-blue-400 text-xs font-black uppercase tracking-widest hover:bg-blue-500/25 transition-all flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Mail size={13} />
+                    {resendingConfirmation ? "Sending…" : "Resend"}
                   </button>
                   <button
                     onClick={() => setIsEditing(true)}
