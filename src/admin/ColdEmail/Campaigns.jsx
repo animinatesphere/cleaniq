@@ -802,12 +802,30 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                 </div>
               ))}
 
-              {data.steps.length < 3 && (
-                <button onClick={() => setData(d=>({...d, steps:[...d.steps,{order:d.steps.length,subject:"",body:"",waitDays:3}]}))}
-                  className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border border-dashed border-white/[0.07] text-white/25 hover:text-white/55 hover:border-white/[0.14] hover:bg-white/[0.02] text-sm font-semibold cursor-pointer transition-all">
-                  <Plus size={14} /> Add follow-up email <span className="text-white/15 text-xs">({data.steps.length}/3)</span>
-                </button>
-              )}
+              <div className="flex gap-2 flex-wrap">
+                {data.steps.length < 10 && (
+                  <button onClick={() => setData(d=>({...d, steps:[...d.steps,{order:d.steps.length,subject:"",body:"",waitDays:7}]}))}
+                    className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl border border-dashed border-white/[0.07] text-white/25 hover:text-white/55 hover:border-white/[0.14] hover:bg-white/[0.02] text-sm font-semibold cursor-pointer transition-all">
+                    <Plus size={14} /> Add follow-up <span className="text-white/15 text-xs">({data.steps.length}/10)</span>
+                  </button>
+                )}
+                {data.steps.length === 1 && (
+                  <button onClick={() => setData(d => ({
+                    ...d,
+                    steps: [
+                      d.steps[0],
+                      { order:1, subject:"Following up — "+d.steps[0].subject, body:"Hi {{first_name}},\n\nJust following up on my previous email. Have you had a chance to consider it?\n\nWe'd love to help {{company}} with their cleaning needs.\n\nBest,\nAdeyemi", waitDays:7 },
+                      { order:2, subject:"Quick check-in — "+d.steps[0].subject, body:"Hi {{first_name}},\n\nI know you're busy — just wanted to check in one more time.\n\nIf now isn't the right time, no worries at all. Feel free to reach out whenever works for you.\n\nBest,\nAdeyemi", waitDays:7 },
+                      { order:3, subject:"One last message — cleaniq services", body:"Hi {{first_name}},\n\nThis will be my last follow-up — I don't want to clutter your inbox.\n\nIf you ever need professional cleaning for {{company}}, we'd love to hear from you.\n\nAll the best,\nAdeyemi\ncleaniq services", waitDays:16 },
+                      { order:4, subject:"Checking back in — cleaniq services", body:"Hi {{first_name}},\n\nIt's been a little while since I reached out. Wanted to check if anything has changed on your end regarding your cleaning needs.\n\nWe're still here and happy to help.\n\nBest,\nAdeyemi", waitDays:30 },
+                      { order:5, subject:"Still here if you need us — cleaniq services", body:"Hi {{first_name}},\n\nJust a gentle touch base — we've been helping businesses across Birmingham keep their spaces spotless and thought of {{company}}.\n\nIf the timing is right now, I'd love to chat.\n\nAdeyemi\ncleaniq services", waitDays:30 },
+                    ]
+                  }))}
+                    className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl border border-dashed border-emerald-500/20 text-emerald-500/50 hover:text-emerald-400 hover:border-emerald-500/40 hover:bg-emerald-500/[0.03] text-sm font-semibold cursor-pointer transition-all whitespace-nowrap">
+                    ⚡ Add full follow-up sequence
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
