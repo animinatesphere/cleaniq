@@ -1041,20 +1041,63 @@ router.post("/:id/send-confirmation", async (req, res) => {
     const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    const ok = await sendEmail({
-      to: booking.customer.email,
-      subject: `✓ Booking Confirmed — ${booking.bookingId} | Cleaniq Services`,
-      html: templates.bookingConfirmation(booking),
-    });
+    let subject, html;
+    const isPending = booking.payment?.status === "Pending" && !booking.noPaymentRequired;
 
+    if (isPending) {
+      // Regenerate a fresh Stripe checkout session so the link works
+      try {
+        const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          mode: "payment",
+          customer_email: booking.customer.email,
+          payment_intent_data: {
+            capture_method: "manual",
+            metadata: {
+              bookingId: booking._id.toString(),
+              bookingRef: booking.bookingId,
+              company: "Cleaniq Services",
+            },
+          },
+          line_items: [{
+            price_data: {
+              currency: (booking.payment.currency || "GBP").toLowerCase(),
+              product_data: {
+                name: `Cleaniq - ${booking.service}`,
+                description: `Booking Reference: ${booking.bookingId}`,
+              },
+              unit_amount: Math.round(booking.payment.amount * 100),
+            },
+            quantity: 1,
+          }],
+          metadata: { bookingId: booking._id.toString(), company: "Cleaniq Services" },
+          success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=success&bookingId=${booking._id}`,
+          cancel_url:  `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=cancelled`,
+        });
+        subject = `Payment Required: Cleaniq Booking ${booking.bookingId}`;
+        html    = templates.paymentRequired(booking, session.url);
+      } catch (stripeErr) {
+        // Stripe failed — still send the email but without a payment link
+        subject = `Payment Required: Cleaniq Booking ${booking.bookingId}`;
+        html    = templates.paymentRequired(booking, null);
+      }
+    } else if (booking.noPaymentRequired) {
+      subject = `✓ Booking Confirmed — ${booking.bookingId} | Cleaniq Services`;
+      html    = templates.adminBookingCreatedEmail2(booking);
+    } else {
+      subject = `✓ Booking Confirmed — ${booking.bookingId} | Cleaniq Services`;
+      html    = templates.bookingConfirmation(booking);
+    }
+
+    const ok = await sendEmail({ to: booking.customer.email, subject, html });
     if (!ok) return res.status(500).json({ message: "Failed to send email" });
 
-    // Track that confirmation was sent
     booking.meta = booking.meta || {};
     booking.meta.confirmationSentAt = new Date();
     await booking.save();
 
-    res.json({ success: true, message: "Booking confirmation sent successfully" });
+    res.json({ success: true, message: "Email resent successfully" });
   } catch (err) {
     console.error("CRM send-confirmation error:", err);
     res.status(500).json({ message: err.message });
