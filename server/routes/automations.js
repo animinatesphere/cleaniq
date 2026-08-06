@@ -11,9 +11,14 @@ const AUTOMATION_TYPES = [
   { key: "review_request_2h",     label: "Review Request — 2 hours after job",  category: "after_service" },
   { key: "referral_offer_48h",    label: "Referral Offer — 48 hours after job", category: "after_service" },
   { key: "rebooking_discount_3d", label: "Re-booking Discount — 3 days after",  category: "after_service" },
-  { key: "quote_followup_24h",    label: "Quote Follow-up — 24 hours",          category: "quote" },
-  { key: "quote_followup_3d",     label: "Quote Follow-up — 3 days",            category: "quote" },
-  { key: "lost_lead_7d",          label: "Lost Lead Win-back — 7 days",         category: "quote" },
+  { key: "quote_followup_24h",    label: "Quote Follow-up — 24 hours",          category: "quote"     },
+  { key: "quote_followup_3d",     label: "Quote Follow-up — 3 days",            category: "quote"     },
+  { key: "lost_lead_7d",          label: "Lost Lead Win-back — 7 days",         category: "quote"     },
+  { key: "followup_1w",           label: "Customer Follow-up — 1 week",         category: "followup"  },
+  { key: "followup_2w",           label: "Customer Follow-up — 2 weeks",        category: "followup"  },
+  { key: "followup_1m",           label: "Customer Follow-up — 1 month",        category: "followup"  },
+  { key: "followup_2m",           label: "Customer Follow-up — 2 months",       category: "followup"  },
+  { key: "followup_3m",           label: "Customer Follow-up — 3 months",       category: "followup"  },
 ];
 
 // GET /api/automations/settings — return toggle states for all automation types
@@ -184,6 +189,11 @@ router.post("/preview", (req, res) => {
     quote_followup_24h:    () => automationTemplates.quoteFollowup24h(payload),
     quote_followup_3d:     () => automationTemplates.quoteFollowup3d(payload),
     lost_lead_7d:          () => automationTemplates.lostLead7d(payload),
+    followup_1w:           () => automationTemplates.followup1w(payload),
+    followup_2w:           () => automationTemplates.followup2w(payload),
+    followup_1m:           () => automationTemplates.followup1m(payload),
+    followup_2m:           () => automationTemplates.followup2m(payload),
+    followup_3m:           () => automationTemplates.followup3m(payload),
   };
 
   const build = builders[type];

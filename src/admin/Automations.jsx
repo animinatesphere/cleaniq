@@ -88,6 +88,41 @@ const TYPE_META = {
     delay: "7 days after lost",
     trigger: "lead_lost",
   },
+  followup_1w: {
+    label: "Customer Follow-up — 1 week",
+    icon: "📬",
+    category: "followup",
+    delay: "7 days after job done",
+    trigger: "booking_completed",
+  },
+  followup_2w: {
+    label: "Customer Follow-up — 2 weeks",
+    icon: "📬",
+    category: "followup",
+    delay: "14 days after job done",
+    trigger: "booking_completed",
+  },
+  followup_1m: {
+    label: "Customer Follow-up — 1 month",
+    icon: "📬",
+    category: "followup",
+    delay: "30 days after job done",
+    trigger: "booking_completed",
+  },
+  followup_2m: {
+    label: "Customer Follow-up — 2 months",
+    icon: "📬",
+    category: "followup",
+    delay: "60 days after job done",
+    trigger: "booking_completed",
+  },
+  followup_3m: {
+    label: "Customer Follow-up — 3 months",
+    icon: "📬",
+    category: "followup",
+    delay: "90 days after job done",
+    trigger: "booking_completed",
+  },
 };
 
 const CATEGORY_META = {
@@ -108,6 +143,12 @@ const CATEGORY_META = {
     color: "text-amber-400",
     bg: "bg-amber-500/15",
     border: "border-amber-500/25",
+  },
+  followup: {
+    label: "Customer Follow-ups",
+    color: "text-purple-400",
+    bg: "bg-purple-500/15",
+    border: "border-purple-500/25",
   },
 };
 

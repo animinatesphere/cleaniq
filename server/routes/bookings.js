@@ -724,9 +724,14 @@ router.put("/:id", async (req, res) => {
           firstName: updatedBooking.customer?.firstName,
           service: updatedBooking.service,
         };
-        await scheduleTask("review_request_2h",     new Date(now.getTime() + 2  * 60 * 60 * 1000), payload);
-        await scheduleTask("referral_offer_48h",    new Date(now.getTime() + 48 * 60 * 60 * 1000), payload);
-        await scheduleTask("rebooking_discount_3d", new Date(now.getTime() + 72 * 60 * 60 * 1000), payload);
+        await scheduleTask("review_request_2h",     new Date(now.getTime() + 2  * 60 * 60 * 1000),        payload);
+        await scheduleTask("referral_offer_48h",    new Date(now.getTime() + 48 * 60 * 60 * 1000),        payload);
+        await scheduleTask("rebooking_discount_3d", new Date(now.getTime() + 72 * 60 * 60 * 1000),        payload);
+        await scheduleTask("followup_1w",           new Date(now.getTime() +  7 * 24 * 60 * 60 * 1000),  payload);
+        await scheduleTask("followup_2w",           new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),  payload);
+        await scheduleTask("followup_1m",           new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),  payload);
+        await scheduleTask("followup_2m",           new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000),  payload);
+        await scheduleTask("followup_3m",           new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000),  payload);
         console.log(`⚙️ Post-service automations scheduled for booking ${updatedBooking.bookingId}`);
       } catch (schedErr) {
         console.error("⚠️ Failed to schedule post-service automations:", schedErr.message);

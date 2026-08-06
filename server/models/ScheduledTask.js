@@ -13,6 +13,11 @@ const scheduledTaskSchema = new mongoose.Schema({
       "quote_followup_24h",
       "quote_followup_3d",
       "lost_lead_7d",
+      "followup_1w",
+      "followup_2w",
+      "followup_1m",
+      "followup_2m",
+      "followup_3m",
     ],
   },
   status: {

@@ -117,6 +117,51 @@ const handlers = {
       html: automationTemplates.lostLead7d({ firstName, service, quoteRef }),
     });
   },
+
+  followup_1w: async (task) => {
+    const { email, firstName, service } = task.payload;
+    await sendEmail({
+      to: email,
+      subject: `Following up — how's your space looking, ${firstName}?`,
+      html: automationTemplates.followup1w({ firstName, service }),
+    });
+  },
+
+  followup_2w: async (task) => {
+    const { email, firstName, service } = task.payload;
+    await sendEmail({
+      to: email,
+      subject: `Quick check-in from cleaniq services`,
+      html: automationTemplates.followup2w({ firstName, service }),
+    });
+  },
+
+  followup_1m: async (task) => {
+    const { email, firstName, service } = task.payload;
+    await sendEmail({
+      to: email,
+      subject: `A month on — time for your next clean?`,
+      html: automationTemplates.followup1m({ firstName, service }),
+    });
+  },
+
+  followup_2m: async (task) => {
+    const { email, firstName } = task.payload;
+    await sendEmail({
+      to: email,
+      subject: `Checking back in — cleaniq services`,
+      html: automationTemplates.followup2m({ firstName }),
+    });
+  },
+
+  followup_3m: async (task) => {
+    const { email, firstName } = task.payload;
+    await sendEmail({
+      to: email,
+      subject: `We're still here whenever you need us, ${firstName}`,
+      html: automationTemplates.followup3m({ firstName }),
+    });
+  },
 };
 
 async function processDueTasks() {

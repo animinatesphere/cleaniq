@@ -2139,6 +2139,112 @@ const automationTemplates = {
       </div>
     </div>
   `,
+
+  // ─── CUSTOMER FOLLOW-UP EMAILS ────────────────────────────────────────────
+
+  followup1w: ({ firstName, service }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:#0F172A;padding:36px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">Following up 👋</h1>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.8;">
+        <p style="margin-top:0;font-size:15px;">Hi ${firstName},</p>
+        <p style="font-size:15px;">It's been a week since your <strong>${service}</strong> — we hope your space is still looking great!</p>
+        <p style="font-size:15px;">If you'd like to keep it that way with a regular clean, we'd love to set something up for you. Regular customers get priority booking and consistent cleaning standards.</p>
+        <p style="font-size:15px;">Just reply to this email or click below to book your next clean.</p>
+        <div style="text-align:center;margin-top:32px;">
+          <a href="https://cleaniqservices.com/booking" style="background:#0F172A;color:#6EE7B7;padding:16px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;">Book My Next Clean</a>
+        </div>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  followup2w: ({ firstName, service }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:#0F172A;padding:36px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">Quick check-in ✅</h1>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.8;">
+        <p style="margin-top:0;font-size:15px;">Hi ${firstName},</p>
+        <p style="font-size:15px;">Two weeks on from your <strong>${service}</strong> — just wanted to check in and see how things are.</p>
+        <p style="font-size:15px;">We know life gets busy. If you haven't had a chance to book a follow-up yet, now is a great time. A fortnightly or monthly clean keeps your space consistently fresh without you having to think about it.</p>
+        <p style="font-size:15px;">If now isn't the right time, no worries at all — we're here whenever you're ready.</p>
+        <div style="text-align:center;margin-top:32px;">
+          <a href="https://cleaniqservices.com/booking" style="background:#0F172A;color:#6EE7B7;padding:16px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;">Book a Clean</a>
+        </div>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  followup1m: ({ firstName, service }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:#0F172A;padding:36px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">A month on — how's your space? 🏡</h1>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.8;">
+        <p style="margin-top:0;font-size:15px;">Hi ${firstName},</p>
+        <p style="font-size:15px;">It's been about a month since your <strong>${service}</strong> with us. Dust and grime have a way of building back up — a monthly deep clean is one of the best ways to stay on top of it.</p>
+        <p style="font-size:15px;">We'd love to welcome you back. Book this month and we'll make sure your space feels as fresh as the first time.</p>
+        <div style="text-align:center;margin-top:32px;">
+          <a href="https://cleaniqservices.com/booking" style="background:#0F172A;color:#6EE7B7;padding:16px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;">Book Now</a>
+        </div>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  followup2m: ({ firstName }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:#0F172A;padding:36px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">Checking back in 💬</h1>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.8;">
+        <p style="margin-top:0;font-size:15px;">Hi ${firstName},</p>
+        <p style="font-size:15px;">It's been a couple of months — we've been thinking about you!</p>
+        <p style="font-size:15px;">Whether things have changed at home or work and you'd like some extra support, or you're just ready for a proper deep clean, we're here to help.</p>
+        <p style="font-size:15px;">Our team is fully available and we'd love to have you back as a customer.</p>
+        <div style="text-align:center;margin-top:32px;">
+          <a href="https://cleaniqservices.com/booking" style="background:#0F172A;color:#6EE7B7;padding:16px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;">Book a Clean</a>
+        </div>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  followup3m: ({ firstName }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#0F172A,#073d27);padding:40px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">We're still here for you 💚</h1>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.8;">
+        <p style="margin-top:0;font-size:15px;">Hi ${firstName},</p>
+        <p style="font-size:15px;">It's been 3 months since we last cleaned for you — time flies!</p>
+        <p style="font-size:15px;">This is our final gentle check-in. We don't want to clutter your inbox, but we did want you to know that cleaniq services is always here whenever you need us — whether that's a one-off deep clean, end of tenancy, or regular visits.</p>
+        <p style="font-size:15px;">It would be a pleasure to serve you again.</p>
+        <div style="text-align:center;margin-top:32px;">
+          <a href="https://cleaniqservices.com/booking" style="background:#0F172A;color:#6EE7B7;padding:16px 36px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;">Book a Clean</a>
+        </div>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
 };
 
 // ─── Transactional worker-event emails sent to the customer ──────────────────
