@@ -2154,18 +2154,12 @@ const AdminCRM = ({ booking, onClose }) => {
 
   const renderTab = () => {
     switch (activeTab) {
-      case "confirmation":
-        return <ConfirmationTab />;
-      case "invoice":
-        return <InvoiceTab />;
-      case "review":
-        return <ReviewTab />;
-      case "payment":
-        return <PaymentLinkTab />;
-      case "additional-hours":
-        return <AdditionalHoursTab />;
-      default:
-        return null;
+      case "confirmation":    return ConfirmationTab();
+      case "invoice":         return InvoiceTab();
+      case "review":          return ReviewTab();
+      case "payment":         return PaymentLinkTab();
+      case "additional-hours":return AdditionalHoursTab();
+      default:                return null;
     }
   };
 
