@@ -28,6 +28,7 @@ const coldCampaignSchema = new mongoose.Schema({
     unsubscribed: { type: Number, default: 0 },
     failed:       { type: Number, default: 0 },
   },
+  emailStyle: { type: String, enum: ["branded", "plain"], default: "branded" },
   createdAt:  { type: Date, default: () => new Date() },
   launchedAt: { type: Date },
 });

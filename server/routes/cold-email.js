@@ -337,9 +337,9 @@ router.get("/campaigns", async (req, res) => {
 // POST /api/cold-email/campaigns
 router.post("/campaigns", async (req, res) => {
   try {
-    const { name, fromName, steps, mailboxIds, contactIds } = req.body;
+    const { name, fromName, steps, mailboxIds, contactIds, emailStyle } = req.body;
     if (!name) return res.status(400).json({ message: "name is required" });
-    const campaign = await ColdCampaign.create({ name, fromName, steps: steps || [], mailboxIds: mailboxIds || [], contactIds: contactIds || [] });
+    const campaign = await ColdCampaign.create({ name, fromName, steps: steps || [], mailboxIds: mailboxIds || [], contactIds: contactIds || [], emailStyle: emailStyle || "branded" });
     res.json(campaign);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -368,12 +368,10 @@ router.get("/campaigns/:id", async (req, res) => {
 // PUT /api/cold-email/campaigns/:id
 router.put("/campaigns/:id", async (req, res) => {
   try {
-    const { name, fromName, steps, mailboxIds, contactIds } = req.body;
-    const campaign = await ColdCampaign.findByIdAndUpdate(
-      req.params.id,
-      { name, fromName, steps, mailboxIds, contactIds },
-      { new: true }
-    );
+    const { name, fromName, steps, mailboxIds, contactIds, emailStyle } = req.body;
+    const update = { name, fromName, steps, mailboxIds, contactIds };
+    if (emailStyle) update.emailStyle = emailStyle;
+    const campaign = await ColdCampaign.findByIdAndUpdate(req.params.id, update, { new: true });
     if (!campaign) return res.status(404).json({ message: "Campaign not found" });
     res.json(campaign);
   } catch (err) {

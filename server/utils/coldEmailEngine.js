@@ -358,6 +358,27 @@ function buildEmailHtml(rawBody, unsubUrl, replySubject) {
 </html>`;
 }
 
+function buildPlainEmailHtml(rawBody, unsubUrl) {
+  const content = (rawBody || "")
+    .split(/\n/)
+    .map((line) =>
+      line.trim()
+        ? `<p style="margin:0 0 14px;color:#1e293b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;line-height:1.75;">${line}</p>`
+        : `<p style="margin:0 0 14px;font-size:15px;">&nbsp;</p>`
+    )
+    .join("");
+  return `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#ffffff;">
+<div style="max-width:600px;margin:0 auto;padding:40px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+${content}
+<p style="margin:36px 0 0;padding-top:16px;border-top:1px solid #e2e8f0;color:#94a3b8;font-size:11px;line-height:1.6;font-family:Arial,sans-serif;">
+  <a href="${unsubUrl}" style="color:#64748b;text-decoration:underline;">Unsubscribe</a>
+</p>
+</div>
+</body></html>`;
+}
+
 // Keep legacy alias used by older code paths
 function unsubscribeFooter(url) {
   return `<p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:32px;">
@@ -459,7 +480,9 @@ async function processSingleSend(send) {
     { expiresIn: "90d" }
   );
   const unsubUrl = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/cold-email/unsubscribe/${unsubToken}`;
-  const fullHtml = buildEmailHtml(body, unsubUrl, subject);
+  const fullHtml = campaign.emailStyle === "plain"
+    ? buildPlainEmailHtml(body, unsubUrl)
+    : buildEmailHtml(body, unsubUrl, subject);
 
   // ── Dry-run mode ──────────────────────────────────────────────────────────
   if (process.env.COLD_EMAIL_DRY_RUN === "true") {

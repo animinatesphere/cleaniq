@@ -80,9 +80,28 @@ function buildPreviewHtml(rawBody, subject) {
 </table></td></tr></table></body></html>`;
 }
 
+// ── Plain email preview ────────────────────────────────────────────────────────
+
+function buildPreviewHtmlPlain(rawBody) {
+  const content = (rawBody || "").split("\n").map(line =>
+    line.trim()
+      ? `<p style="margin:0 0 14px;color:#1e293b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;line-height:1.75;">${line.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</p>`
+      : `<p style="margin:0 0 14px;font-size:15px;">&nbsp;</p>`
+  ).join("");
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#ffffff;">
+<div style="max-width:600px;margin:0 auto;padding:40px 28px;">
+${content}
+<p style="margin:36px 0 0;padding-top:16px;border-top:1px solid #e2e8f0;color:#94a3b8;font-size:11px;font-family:Arial,sans-serif;">
+  <a href="#" style="color:#64748b;text-decoration:underline;">Unsubscribe</a>
+</p>
+</div>
+</body></html>`;
+}
+
 // ── Email Preview Modal ────────────────────────────────────────────────────────
 
-function PreviewModal({ emailStep, onClose }) {
+function PreviewModal({ emailStep, emailStyle, onClose }) {
   const [tab, setTab] = useState("preview");
   const [copied, setCopied] = useState(false);
 
@@ -90,7 +109,7 @@ function PreviewModal({ emailStep, onClose }) {
   const replace = (t) => Object.entries(sample).reduce((s, [k, v]) => s.replaceAll(k, v), t || "");
   const sub  = replace(emailStep.subject);
   const body = replace(emailStep.body);
-  const html = buildPreviewHtml(body, sub);
+  const html = emailStyle === "plain" ? buildPreviewHtmlPlain(body) : buildPreviewHtml(body, sub);
 
   return (
     <div className="fixed inset-0 z-[80] flex items-stretch justify-center bg-black/90 backdrop-blur-md p-0 sm:p-6 sm:items-center" onClick={onClose}>
@@ -588,11 +607,12 @@ function Wizard({ onClose, onCreated, editCampaign }) {
 
   const [data, setData] = useState(editCampaign ? {
     name: editCampaign.name || "", fromName: editCampaign.fromName || "",
+    emailStyle: editCampaign.emailStyle || "branded",
     mailboxIds: editCampaign.mailboxIds || [],
     steps: editCampaign.steps?.length ? editCampaign.steps : [{ order:0, subject:"", body:"", waitDays:0 }],
     contactIds: editCampaign.contactIds || [],
   } : {
-    name: "", fromName: "", mailboxIds: [],
+    name: "", fromName: "", emailStyle: "branded", mailboxIds: [],
     steps: [{ order:0, subject:"", body:"", waitDays:0 }],
     contactIds: [],
   });
@@ -810,6 +830,30 @@ function Wizard({ onClose, onCreated, editCampaign }) {
               </div>
 
               <div>
+                <label className="text-white/40 text-xs font-bold uppercase tracking-wider block mb-2">Email Style</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { value: "branded", label: "Branded", desc: "Logo, header, reply button & footer", icon: "🎨" },
+                    { value: "plain",   label: "Plain text", desc: "Just your message — no logo or branding", icon: "✉️" },
+                  ].map(opt => {
+                    const on = data.emailStyle === opt.value;
+                    return (
+                      <div key={opt.value} onClick={() => setData(d=>({...d,emailStyle:opt.value}))}
+                        className={`flex items-start gap-3 px-4 py-3.5 rounded-xl border cursor-pointer transition-all ${on ? "bg-emerald-500/[0.07] border-emerald-500/30" : "bg-white/[0.025] border-white/[0.07] hover:border-white/[0.12] hover:bg-white/[0.04]"}`}>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${on ? "bg-emerald-500 border-emerald-500" : "border-white/20"}`}>
+                          {on && <div className="w-2 h-2 rounded-full bg-white" />}
+                        </div>
+                        <div>
+                          <p className={`text-sm font-bold ${on ? "text-white" : "text-white/60"}`}>{opt.icon} {opt.label}</p>
+                          <p className="text-white/30 text-xs mt-0.5 leading-relaxed">{opt.desc}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
                 <label className="text-white/40 text-xs font-bold uppercase tracking-wider block mb-1.5">Send emails from *</label>
                 {mailboxes.length === 0 ? (
                   <div className="flex items-center gap-3 bg-amber-500/[0.07] border border-amber-500/20 rounded-xl px-4 py-3.5">
@@ -911,6 +955,7 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                 {[
                   { icon:"📋", label:"Campaign name", value: data.name },
                   { icon:"👤", label:"From name",     value: data.fromName || "Defaults to mailbox email", dim: !data.fromName },
+                  { icon:"🎨", label:"Email style",   value: data.emailStyle === "plain" ? "Plain text (no branding)" : "Branded (logo + footer)" },
                   { icon:"📬", label:"Mailboxes",     value: `${data.mailboxIds.length} selected` },
                   { icon:"✉️", label:"Email sequence", value: `${data.steps.length} email${data.steps.length>1?"s":""}` },
                   { icon:"👥", label:"Recipients",    value: `${data.contactIds.length.toLocaleString()} contacts` },
@@ -988,7 +1033,7 @@ function Wizard({ onClose, onCreated, editCampaign }) {
     </div>
 
     {previewIdx !== null && (
-      <PreviewModal emailStep={data.steps[previewIdx]} onClose={() => setPreviewIdx(null)} />
+      <PreviewModal emailStep={data.steps[previewIdx]} emailStyle={data.emailStyle} onClose={() => setPreviewIdx(null)} />
     )}
     </>
   );
