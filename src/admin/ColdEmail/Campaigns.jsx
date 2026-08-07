@@ -610,6 +610,10 @@ function Wizard({ onClose, onCreated, editCampaign }) {
   const [previewIdx, setPreviewIdx] = useState(null);
   const [scheduleMode, setScheduleMode] = useState(false);
   const [scheduleDate, setScheduleDate] = useState("");
+  const [templates, setTemplates]         = useState([]);
+  const [showTplPicker, setShowTplPicker] = useState(false);
+  const [savingTpl, setSavingTpl]         = useState(false);
+  const [tplName, setTplName]             = useState("");
 
   const [data, setData] = useState(editCampaign ? {
     name: editCampaign.name || "", fromName: editCampaign.fromName || "",
@@ -625,6 +629,7 @@ function Wizard({ onClose, onCreated, editCampaign }) {
 
   useEffect(() => {
     afetch(`${API}/cold-email/mailboxes`).then(r=>r.json()).then(setMailboxes).catch(()=>{});
+    afetch(`${API}/cold-email/templates`).then(r=>r.json()).then(d => Array.isArray(d) && setTemplates(d)).catch(()=>{});
   }, []);
 
   const loadContacts = useCallback(async () => {
@@ -647,7 +652,29 @@ function Wizard({ onClose, onCreated, editCampaign }) {
     setData(d => ({ ...d, mailboxIds: d.mailboxIds.includes(id) ? d.mailboxIds.filter(m=>m!==id) : [...d.mailboxIds, id] }));
 
   const toggleContact = id =>
-    setData(d => ({ ...d, contactIds: d.contactIds.includes(id) ? d.contactIds.filter(c=>c!==id) : [...d.contactIds, id] }));
+    setData(d => ({ ...d, contactIds: d.contactIds.map(String).includes(String(id)) ? d.contactIds.filter(c=>String(c)!==String(id)) : [...d.contactIds, id] }));
+
+  const selectN = async (n) => {
+    const url = `${API}/cold-email/contacts/all-ids?search=${encodeURIComponent(cSearch)}${n ? `&limit=${n}` : ""}`;
+    const r = await fetch(url, { headers: auth() });
+    const d = await r.json();
+    if (d.ids) setData(p => ({ ...p, contactIds: d.ids }));
+  };
+
+  const saveTemplate = async () => {
+    if (!tplName.trim()) return;
+    setSavingTpl(true);
+    try {
+      const r = await afetch(`${API}/cold-email/templates`, { method:"POST", body: JSON.stringify({ name: tplName.trim(), steps: data.steps }) });
+      const t = await r.json();
+      if (t._id) { setTemplates(prev => [t, ...prev]); setTplName(""); setShowTplPicker(false); }
+    } finally { setSavingTpl(false); }
+  };
+
+  const deleteTpl = async (id) => {
+    await afetch(`${API}/cold-email/templates/${id}`, { method:"DELETE" });
+    setTemplates(prev => prev.filter(t => t._id !== id));
+  };
 
   function validate() {
     if (step === 1) {
@@ -741,9 +768,55 @@ function Wizard({ onClose, onCreated, editCampaign }) {
           {/* ── Step 1 ── */}
           {step === 1 && (
             <div className="space-y-4">
-              <div className="bg-emerald-500/[0.05] border border-emerald-500/[0.15] rounded-xl px-4 py-3 text-white/45 text-xs leading-relaxed">
-                Write the email your contacts receive. Use <code className="text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">{"{{first_name}}"}</code>, <code className="text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">{"{{company}}"}</code> to personalise. Unsubscribe link added automatically.
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-emerald-500/[0.05] border border-emerald-500/[0.15] rounded-xl px-4 py-3 text-white/45 text-xs leading-relaxed">
+                  Write the email your contacts receive. Use <code className="text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">{"{{first_name}}"}</code>, <code className="text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">{"{{company}}"}</code> to personalise. Unsubscribe link added automatically.
+                </div>
+                <button onClick={() => setShowTplPicker(v => !v)}
+                  className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.09] text-white/40 text-xs font-bold hover:text-white/70 hover:bg-white/[0.07] cursor-pointer transition-all whitespace-nowrap shrink-0">
+                  <Inbox size={13} /> Templates
+                </button>
               </div>
+
+              {/* Template picker panel */}
+              {showTplPicker && (
+                <div className="bg-white/[0.025] border border-white/[0.08] rounded-2xl overflow-hidden">
+                  <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+                    <p className="text-white/50 text-xs font-bold uppercase tracking-wider">Saved Templates</p>
+                    <button onClick={() => setShowTplPicker(false)} className="text-white/25 hover:text-white/60 cursor-pointer"><X size={13}/></button>
+                  </div>
+                  {templates.length === 0
+                    ? <p className="text-white/25 text-sm text-center py-8">No saved templates yet — save one below.</p>
+                    : <div className="divide-y divide-white/[0.04] max-h-52 overflow-y-auto">
+                        {templates.map(t => (
+                          <div key={t._id} className="flex items-center justify-between px-4 py-3 hover:bg-white/[0.03]">
+                            <div>
+                              <p className="text-white/80 text-sm font-semibold">{t.name}</p>
+                              <p className="text-white/30 text-xs mt-0.5">{t.steps.length} email{t.steps.length>1?"s":""} · {t.steps[0]?.subject}</p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button onClick={() => { setData(d=>({...d, steps: t.steps.map((s,i)=>({...s,order:i}))})); setShowTplPicker(false); }}
+                                className="text-[11px] px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold hover:bg-emerald-500/20 cursor-pointer transition-all">
+                                Load
+                              </button>
+                              <button onClick={() => deleteTpl(t._id)} className="text-white/20 hover:text-rose-400 cursor-pointer transition-colors p-1"><Trash2 size={12}/></button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                  }
+                  <div className="px-4 py-3 border-t border-white/[0.06] flex items-center gap-2">
+                    <input type="text" value={tplName} onChange={e=>setTplName(e.target.value)}
+                      onKeyDown={e=>e.key==="Enter"&&saveTemplate()}
+                      placeholder="Template name…"
+                      className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20" />
+                    <button onClick={saveTemplate} disabled={savingTpl || !tplName.trim()}
+                      className="px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-sm font-bold hover:bg-emerald-500/25 cursor-pointer disabled:opacity-40 transition-all whitespace-nowrap">
+                      {savingTpl ? "Saving…" : "Save current"}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {data.steps.map((s, idx) => (
                 <div key={idx} className="border border-white/[0.08] rounded-2xl overflow-hidden bg-white/[0.01]">
@@ -926,16 +999,19 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                   </p>
                   <p className="text-white/25 text-xs mt-0.5">{cTotal.toLocaleString()} total</p>
                 </div>
-                <div className="flex items-center gap-3 text-xs font-bold">
-                  <button onClick={async () => {
-                    const r = await fetch(`${API}/cold-email/contacts/all-ids?search=${cSearch}`, { headers: auth() });
-                    const d = await r.json();
-                    if (d.ids) setData(p=>({...p, contactIds: d.ids}));
-                  }} className="text-emerald-400 hover:text-emerald-300 cursor-pointer transition-colors">
-                    Select all {cTotal.toLocaleString()}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {[100, 200, 300, 500].filter(n => n < cTotal).map(n => (
+                    <button key={n} onClick={() => selectN(n)}
+                      className="text-[11px] px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.07] text-white/40 hover:text-white/70 hover:bg-white/[0.07] cursor-pointer font-bold transition-all">
+                      {n}
+                    </button>
+                  ))}
+                  <button onClick={() => selectN(0)}
+                    className="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 cursor-pointer font-bold transition-all">
+                    All {cTotal.toLocaleString()}
                   </button>
-                  <span className="text-white/10">|</span>
-                  <button onClick={() => setData(p=>({...p,contactIds:[]}))} className="text-white/30 hover:text-white/60 cursor-pointer">Clear</button>
+                  <span className="text-white/[0.08] text-xs">|</span>
+                  <button onClick={() => setData(p=>({...p,contactIds:[]}))} className="text-[11px] text-white/25 hover:text-white/55 cursor-pointer font-bold transition-all">Clear</button>
                 </div>
               </div>
 
@@ -945,7 +1021,7 @@ function Wizard({ onClose, onCreated, editCampaign }) {
 
               <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl max-h-64 overflow-y-auto">
                 {contacts.map(c => {
-                  const sel = data.contactIds.includes(c._id);
+                  const sel = data.contactIds.map(String).includes(String(c._id));
                   const name = [c.firstName, c.lastName].filter(Boolean).join(" ") || c.email;
                   return (
                     <div key={c._id} onClick={() => toggleContact(c._id)}

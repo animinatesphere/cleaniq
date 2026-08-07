@@ -8,6 +8,7 @@ const ColdContact         = require("../models/ColdContact");
 const ColdCampaign        = require("../models/ColdCampaign");
 const ColdSend            = require("../models/ColdSend");
 const ColdSuppressionList = require("../models/ColdSuppressionList");
+const ColdTemplate        = require("../models/ColdTemplate");
 
 const { encrypt, decrypt, buildOAuth2Client, REDIRECT_URI, buildMsAuthUrl, exchangeMsCode } = require("../utils/coldEmailEngine");
 
@@ -265,16 +266,19 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
   }
 });
 
-// GET /api/cold-email/contacts/all-ids — returns every active contact ID (for select-all)
+// GET /api/cold-email/contacts/all-ids — returns active contact IDs (optionally limited)
 router.get("/contacts/all-ids", async (req, res) => {
   try {
     const search = (req.query.search || "").trim();
+    const limit  = parseInt(req.query.limit) || 0; // 0 = no limit
     const filter = { status: "active" };
     if (search) {
       const re = new RegExp(search, "i");
       filter.$or = [{ email: re }, { firstName: re }, { lastName: re }, { company: re }];
     }
-    const contacts = await ColdContact.find(filter).select("_id").lean();
+    let q = ColdContact.find(filter).select("_id").lean();
+    if (limit > 0) q = q.limit(limit);
+    const contacts = await q;
     res.json({ ids: contacts.map((c) => c._id.toString()), total: contacts.length });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -674,6 +678,41 @@ router.get("/stats", async (req, res) => {
       totalCampaigns, activeCampaigns, totalMailboxes,
       totalSent: agg.sent, totalReplied: agg.replied,
     });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ── Templates ─────────────────────────────────────────────────────────────────
+
+// GET /api/cold-email/templates
+router.get("/templates", async (req, res) => {
+  try {
+    const templates = await ColdTemplate.find().sort({ createdAt: -1 }).lean();
+    res.json(templates);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/cold-email/templates
+router.post("/templates", async (req, res) => {
+  try {
+    const { name, steps } = req.body;
+    if (!name?.trim()) return res.status(400).json({ message: "Name is required" });
+    if (!steps?.length) return res.status(400).json({ message: "At least one step is required" });
+    const template = await ColdTemplate.create({ name: name.trim(), steps });
+    res.json(template);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// DELETE /api/cold-email/templates/:id
+router.delete("/templates/:id", async (req, res) => {
+  try {
+    await ColdTemplate.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
