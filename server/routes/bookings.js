@@ -9,6 +9,39 @@ const { moveToTrash } = require("../utils/trash");
 const { scheduleTask } = require("../utils/automationEngine");
 const sms = require("../utils/smsService");
 
+/**
+ * Build the exact booking start datetime from a schedule.date + schedule.timeSlot.
+ * schedule.date is stored as midnight UTC; timeSlot is "HH:MM-HH:MM" (UK local time).
+ * Without this, "3h before 11am BST" fires at 10pm the previous night instead of 8am.
+ */
+function buildBookingDateTime(scheduleDate, timeSlot) {
+  const base = new Date(scheduleDate);
+  if (!timeSlot) return base;
+
+  const startStr = (timeSlot.split(/[-–]/)[0] || "").trim(); // "11:00"
+  const m = startStr.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return base;
+
+  const hours   = parseInt(m[1], 10);
+  const minutes = parseInt(m[2], 10);
+
+  // Get the calendar date in UTC (how it's stored in MongoDB)
+  const dateStr = base.toISOString().split("T")[0]; // "2026-08-07"
+  const [y, mo, d] = dateStr.split("-").map(Number);
+
+  // Determine the UK UTC offset on this date (+1 BST, +0 GMT)
+  // by checking what hour it is in London at noon UTC that day
+  const noonUTC = new Date(Date.UTC(y, mo - 1, d, 12, 0, 0));
+  const ukNoonHour = parseInt(
+    new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", hour12: false }).format(noonUTC),
+    10
+  );
+  const ukOffset = ukNoonHour - 12; // +1 in BST, 0 in GMT
+
+  // Convert UK local time → UTC: subtract the offset
+  return new Date(Date.UTC(y, mo - 1, d, hours - ukOffset, minutes, 0, 0));
+}
+
 // GET /api/bookings/test-email?to=you@example.com — quick Resend smoke-test (admin only)
 router.get("/test-email", async (req, res) => {
   const to = req.query.to || process.env.EMAIL_USER;
@@ -418,7 +451,9 @@ router.post("/", async (req, res) => {
     try {
       const isConfirmed = newBooking.noPaymentRequired ||
         ["Confirmed", "Authorized"].includes(newBooking.status);
-      const bookingDate = newBooking.schedule?.date ? new Date(newBooking.schedule.date) : null;
+      const bookingDate = newBooking.schedule?.date
+        ? buildBookingDateTime(newBooking.schedule.date, newBooking.schedule.timeSlot)
+        : null;
       if (isConfirmed && bookingDate && bookingDate > new Date()) {
         const payload = {
           bookingId: newBooking._id.toString(),
@@ -780,7 +815,9 @@ router.put("/:id", async (req, res) => {
     // ── Schedule reminders when admin manually confirms a Pending booking ─────
     if (prevStatus !== "Confirmed" && newStatus === "Confirmed") {
       try {
-        const bookingDate = updatedBooking.schedule?.date ? new Date(updatedBooking.schedule.date) : null;
+        const bookingDate = updatedBooking.schedule?.date
+          ? buildBookingDateTime(updatedBooking.schedule.date, updatedBooking.schedule.timeSlot)
+          : null;
         if (bookingDate && bookingDate > new Date()) {
           const payload = {
             bookingId:  updatedBooking._id.toString(),
