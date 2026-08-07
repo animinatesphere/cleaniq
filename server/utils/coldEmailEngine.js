@@ -438,9 +438,22 @@ async function scheduleNextStep(send, campaign) {
 // ── Process one send ──────────────────────────────────────────────────────────
 
 async function processSingleSend(send) {
-  // Campaign still active?
   const campaign = await ColdCampaign.findById(send.campaignId);
-  if (!campaign || campaign.status !== "active") {
+  if (!campaign) {
+    return ColdSend.findByIdAndUpdate(send._id, { status: "skipped", error: "Campaign not found" });
+  }
+
+  // Auto-activate scheduled campaigns whose start time has arrived
+  if (campaign.status === "scheduled") {
+    if (campaign.scheduledStartAt && campaign.scheduledStartAt <= new Date()) {
+      campaign.status = "active";
+      await campaign.save();
+    } else {
+      return; // not time yet — leave pending
+    }
+  }
+
+  if (campaign.status !== "active") {
     return ColdSend.findByIdAndUpdate(send._id, { status: "skipped", error: "Campaign not active" });
   }
 

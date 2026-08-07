@@ -395,7 +395,7 @@ router.post("/campaigns/:id/launch", async (req, res) => {
   try {
     const campaign = await ColdCampaign.findById(req.params.id);
     if (!campaign) return res.status(404).json({ message: "Campaign not found" });
-    if (campaign.status === "active") return res.status(400).json({ message: "Already active" });
+    if (campaign.status === "active" || campaign.status === "scheduled") return res.status(400).json({ message: "Campaign already queued or running" });
     if (!campaign.steps || campaign.steps.length === 0) return res.status(400).json({ message: "No steps defined" });
     if (!campaign.mailboxIds || campaign.mailboxIds.length === 0) return res.status(400).json({ message: "No mailboxes selected" });
     if (!campaign.contactIds || campaign.contactIds.length === 0) return res.status(400).json({ message: "No contacts selected" });
@@ -412,11 +412,13 @@ router.post("/campaigns/:id/launch", async (req, res) => {
     const mailboxes = await ColdMailbox.find({ _id: { $in: campaign.mailboxIds }, status: "active" }).lean();
     const totalCap  = mailboxes.reduce((sum, m) => sum + (m.dailyLimit || 40), 0);
 
-    const baseTime = new Date();
+    const now = new Date();
+    const rawScheduled = req.body?.scheduledStartAt ? new Date(req.body.scheduledStartAt) : null;
+    const isScheduled  = rawScheduled && rawScheduled > now;
+    const baseTime     = isScheduled ? rawScheduled : now;
     let queued = 0;
 
-    // Build sends in bulk — all scheduled for now with a tiny random jitter
-    // (a few seconds apart so Gmail doesn't see a single burst timestamp)
+    // Build sends — all anchored to baseTime with a tiny jitter so timestamps are staggered
     const sendDocs = [];
     for (let i = 0; i < contacts.length; i++) {
       const contact = contacts[i];
@@ -443,20 +445,22 @@ router.post("/campaigns/:id/launch", async (req, res) => {
 
     if (sendDocs.length) await ColdSend.insertMany(sendDocs, { ordered: false });
 
-    campaign.status     = "active";
-    campaign.launchedAt = new Date();
+    campaign.status           = isScheduled ? "scheduled" : "active";
+    campaign.launchedAt       = now;
+    campaign.scheduledStartAt = isScheduled ? rawScheduled : undefined;
     await campaign.save();
 
-    // Kick the send processor immediately so first batch goes out now
-    // rather than waiting up to 2 minutes for the automation tick
-    setImmediate(async () => {
-      try {
-        const { processColdEmailSends } = require("../utils/coldEmailEngine");
-        await processColdEmailSends();
-      } catch (e) {
-        console.error("Post-launch send error:", e.message);
-      }
-    });
+    // Only kick immediate processor if sending now (not scheduled for future)
+    if (!isScheduled) {
+      setImmediate(async () => {
+        try {
+          const { processColdEmailSends } = require("../utils/coldEmailEngine");
+          await processColdEmailSends();
+        } catch (e) {
+          console.error("Post-launch send error:", e.message);
+        }
+      });
+    }
 
     res.json({ success: true, queued, totalContacts: contacts.length });
   } catch (err) {

@@ -15,10 +15,11 @@ function afetch(url, opts = {}) {
 const VARS = ["{{first_name}}", "{{last_name}}", "{{company}}", "{{email}}"];
 
 const STATUS_STYLES = {
-  active:    { badge: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30", dot: "bg-emerald-400" },
-  paused:    { badge: "bg-amber-500/20 text-amber-400 border border-amber-500/30",       dot: "bg-amber-400"   },
-  draft:     { badge: "bg-white/10 text-white/50 border border-white/10",                dot: "bg-white/30"    },
-  completed: { badge: "bg-blue-500/20 text-blue-400 border border-blue-500/30",          dot: "bg-blue-400"    },
+  active:    { badge: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30", dot: "bg-emerald-400"  },
+  scheduled: { badge: "bg-violet-500/20 text-violet-400 border border-violet-500/30",    dot: "bg-violet-400"   },
+  paused:    { badge: "bg-amber-500/20 text-amber-400 border border-amber-500/30",       dot: "bg-amber-400"    },
+  draft:     { badge: "bg-white/10 text-white/50 border border-white/10",                dot: "bg-white/30"     },
+  completed: { badge: "bg-blue-500/20 text-blue-400 border border-blue-500/30",          dot: "bg-blue-400"     },
 };
 
 const SEND_STATUS = {
@@ -364,7 +365,10 @@ function CampaignDetail({ campaignId, onBack, onRefresh }) {
                 { label: "Name",      value: campaign.name },
                 { label: "From name", value: campaign.fromName || <span className="text-white/25 italic">defaults to mailbox</span> },
                 { label: "Status",    value: <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${STATUS_STYLES[campaign.status]?.badge}`}>{campaign.status}</span> },
-                { label: "Launched",  value: campaign.launchedAt ? new Date(campaign.launchedAt).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }) : <span className="text-white/25 italic">not launched</span> },
+                { label: campaign.status === "scheduled" ? "Sends at" : "Launched",
+                  value: campaign.status === "scheduled" && campaign.scheduledStartAt
+                    ? new Date(campaign.scheduledStartAt).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" })
+                    : campaign.launchedAt ? new Date(campaign.launchedAt).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }) : <span className="text-white/25 italic">not launched</span> },
                 { label: "Contacts",  value: `${total.toLocaleString()} recipients` },
                 { label: "Steps",     value: `${(campaign.steps||[]).length} email${campaign.steps?.length>1?"s":""} in sequence` },
               ].map(({ label, value }) => (
@@ -604,6 +608,8 @@ function Wizard({ onClose, onCreated, editCampaign }) {
   const [cSearch, setCSearch]     = useState("");
   const [cPage, setCPage]         = useState(1);
   const [previewIdx, setPreviewIdx] = useState(null);
+  const [scheduleMode, setScheduleMode] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState("");
 
   const [data, setData] = useState(editCampaign ? {
     name: editCampaign.name || "", fromName: editCampaign.fromName || "",
@@ -675,7 +681,8 @@ function Wizard({ onClose, onCreated, editCampaign }) {
       }
       if (camp.message) throw new Error(camp.message);
       if (launch) {
-        const r = await afetch(`${API}/cold-email/campaigns/${camp._id}/launch`, { method:"POST" });
+        const body = scheduleMode && scheduleDate ? { scheduledStartAt: new Date(scheduleDate).toISOString() } : {};
+        const r = await afetch(`${API}/cold-email/campaigns/${camp._id}/launch`, { method:"POST", body: JSON.stringify(body) });
         const d = await r.json();
         if (d.message) throw new Error(d.message);
       }
@@ -1000,6 +1007,30 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                 <p className="text-white/35 text-sm leading-relaxed line-clamp-4 whitespace-pre-wrap">{data.steps[0]?.body || "(empty)"}</p>
               </div>
 
+              {/* Schedule toggle */}
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+                <p className="text-white/40 text-xs font-bold uppercase tracking-wider mb-3">Send time</p>
+                <div className="flex gap-2 mb-3">
+                  <button onClick={() => setScheduleMode(false)}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all cursor-pointer ${!scheduleMode ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" : "bg-white/[0.03] border-white/[0.07] text-white/35 hover:text-white/55"}`}>
+                    Send now
+                  </button>
+                  <button onClick={() => setScheduleMode(true)}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all cursor-pointer ${scheduleMode ? "bg-violet-500/15 border-violet-500/30 text-violet-400" : "bg-white/[0.03] border-white/[0.07] text-white/35 hover:text-white/55"}`}>
+                    Schedule for later
+                  </button>
+                </div>
+                {scheduleMode && (
+                  <input
+                    type="datetime-local"
+                    value={scheduleDate}
+                    min={new Date(Date.now() + 60000).toISOString().slice(0,16)}
+                    onChange={e => setScheduleDate(e.target.value)}
+                    className="w-full bg-white/[0.04] border border-white/[0.09] rounded-xl px-4 py-2.5 text-white/80 text-sm focus:outline-none focus:border-violet-500/40"
+                  />
+                )}
+              </div>
+
               <div className="bg-amber-500/[0.06] border border-amber-500/[0.15] rounded-xl px-4 py-3.5">
                 <p className="text-amber-400 text-xs font-bold flex items-center gap-2 mb-1.5"><AlertCircle size={13} /> Before launching</p>
                 <ul className="text-amber-400/60 text-xs space-y-1 list-disc list-inside">
@@ -1037,11 +1068,14 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.06] border border-white/[0.09] text-white/55 text-sm font-bold hover:bg-white/[0.09] cursor-pointer disabled:opacity-40 transition-all">
                 <Save size={14} /> Save Draft
               </button>
-              <button onClick={() => save(true)} disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-bold hover:bg-emerald-400 cursor-pointer shadow-lg shadow-emerald-500/25 disabled:opacity-40 transition-all">
+              <button onClick={() => {
+                  if (scheduleMode && !scheduleDate) { setError("Please pick a date and time to schedule the campaign."); return; }
+                  save(true);
+                }} disabled={saving}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-bold cursor-pointer disabled:opacity-40 transition-all shadow-lg ${scheduleMode ? "bg-violet-600 hover:bg-violet-500 shadow-violet-500/25" : "bg-emerald-500 hover:bg-emerald-400 shadow-emerald-500/25"}`}>
                 {saving
-                  ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Launching…</>
-                  : <><Rocket size={14} /> Launch Campaign</>
+                  ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> {scheduleMode ? "Scheduling…" : "Launching…"}</>
+                  : scheduleMode ? <><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Schedule Campaign</> : <><Rocket size={14} /> Launch Campaign</>
                 }
               </button>
             </>}
@@ -1087,8 +1121,9 @@ function CampaignCard({ campaign, onOpen, onRefresh }) {
   const st        = STATUS_STYLES[campaign.status] || STATUS_STYLES.draft;
 
   const accentBorder = {
-    active: "border-l-emerald-500", paused: "border-l-amber-400",
-    completed: "border-l-blue-400", draft: "border-l-white/10",
+    active: "border-l-emerald-500", scheduled: "border-l-violet-500",
+    paused: "border-l-amber-400",   completed: "border-l-blue-400",
+    draft:  "border-l-white/10",
   }[campaign.status] || "border-l-white/10";
 
   return (
@@ -1164,7 +1199,10 @@ function CampaignCard({ campaign, onOpen, onRefresh }) {
         </div>
 
         <div className="flex items-center gap-2 text-white/20 text-xs">
-          {campaign.launchedAt && <span>{new Date(campaign.launchedAt).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>}
+          {campaign.status === "scheduled" && campaign.scheduledStartAt
+            ? <span className="text-violet-400/60">Sends {new Date(campaign.scheduledStartAt).toLocaleDateString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</span>
+            : campaign.launchedAt && <span>{new Date(campaign.launchedAt).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
+          }
           <div className="flex items-center gap-1 text-emerald-400/40 group-hover:text-emerald-400/80 transition-colors font-bold text-xs">
             View details <ChevronLeft size={12} className="rotate-180" />
           </div>

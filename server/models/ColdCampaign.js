@@ -15,7 +15,7 @@ const coldCampaignSchema = new mongoose.Schema({
   fromName: { type: String, default: "" },
   status: {
     type: String,
-    enum: ["draft", "active", "paused", "completed"],
+    enum: ["draft", "active", "scheduled", "paused", "completed"],
     default: "draft",
   },
   steps: [stepSchema],
@@ -28,9 +28,10 @@ const coldCampaignSchema = new mongoose.Schema({
     unsubscribed: { type: Number, default: 0 },
     failed:       { type: Number, default: 0 },
   },
-  emailStyle: { type: String, enum: ["branded", "plain"], default: "branded" },
-  createdAt:  { type: Date, default: () => new Date() },
-  launchedAt: { type: Date },
+  emailStyle:       { type: String, enum: ["branded", "plain"], default: "branded" },
+  createdAt:        { type: Date, default: () => new Date() },
+  launchedAt:       { type: Date },
+  scheduledStartAt: { type: Date },
 });
 
 module.exports = mongoose.model("ColdCampaign", coldCampaignSchema);
