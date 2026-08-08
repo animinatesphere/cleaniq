@@ -4,43 +4,15 @@ const Booking = require("../models/Booking");
 const Worker = require("../models/Worker");
 const SystemSetting = require("../models/SystemSetting");
 const Lead = require("../models/Lead");
-const { sendEmail, templates, buildBookingStatusUpdateEmail } = require("../utils/emailService");
+const {
+  sendEmail,
+  templates,
+  buildBookingStatusUpdateEmail,
+} = require("../utils/emailService");
 const { moveToTrash } = require("../utils/trash");
 const { scheduleTask } = require("../utils/automationEngine");
+const { buildBookingDateTime } = require("../utils/bookingDateTime");
 const sms = require("../utils/smsService");
-
-/**
- * Build the exact booking start datetime from a schedule.date + schedule.timeSlot.
- * schedule.date is stored as midnight UTC; timeSlot is "HH:MM-HH:MM" (UK local time).
- * Without this, "3h before 11am BST" fires at 10pm the previous night instead of 8am.
- */
-function buildBookingDateTime(scheduleDate, timeSlot) {
-  const base = new Date(scheduleDate);
-  if (!timeSlot) return base;
-
-  const startStr = (timeSlot.split(/[-–]/)[0] || "").trim(); // "11:00"
-  const m = startStr.match(/^(\d{1,2}):(\d{2})$/);
-  if (!m) return base;
-
-  const hours   = parseInt(m[1], 10);
-  const minutes = parseInt(m[2], 10);
-
-  // Get the calendar date in UTC (how it's stored in MongoDB)
-  const dateStr = base.toISOString().split("T")[0]; // "2026-08-07"
-  const [y, mo, d] = dateStr.split("-").map(Number);
-
-  // Determine the UK UTC offset on this date (+1 BST, +0 GMT)
-  // by checking what hour it is in London at noon UTC that day
-  const noonUTC = new Date(Date.UTC(y, mo - 1, d, 12, 0, 0));
-  const ukNoonHour = parseInt(
-    new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", hour: "2-digit", hour12: false }).format(noonUTC),
-    10
-  );
-  const ukOffset = ukNoonHour - 12; // +1 in BST, 0 in GMT
-
-  // Convert UK local time → UTC: subtract the offset
-  return new Date(Date.UTC(y, mo - 1, d, hours - ukOffset, minutes, 0, 0));
-}
 
 // GET /api/bookings/test-email?to=you@example.com — quick Resend smoke-test (admin only)
 router.get("/test-email", async (req, res) => {
@@ -50,7 +22,13 @@ router.get("/test-email", async (req, res) => {
     subject: "✅ cleaniq email test",
     html: `<p style="font-family:sans-serif">If you can read this, Resend is working correctly for booking status emails.<br><br>Sent at ${new Date().toISOString()}</p>`,
   });
-  res.json({ success: ok, sentTo: to, message: ok ? "Email sent — check inbox" : "Email failed — check server console for RESEND ERROR" });
+  res.json({
+    success: ok,
+    sentTo: to,
+    message: ok
+      ? "Email sent — check inbox"
+      : "Email failed — check server console for RESEND ERROR",
+  });
 });
 
 // GET all bookings (Admin)
@@ -182,8 +160,8 @@ router.post("/", async (req, res) => {
     const booking = new Booking(req.body);
     // If postcode is provided separately and not already in address, append it
     if (req.body.details?.postcode && req.body.details?.address) {
-      const postcode = (req.body.details.postcode || '').trim();
-      const address = (req.body.details.address || '').trim();
+      const postcode = (req.body.details.postcode || "").trim();
+      const address = (req.body.details.address || "").trim();
       if (postcode && !address.toLowerCase().includes(postcode.toLowerCase())) {
         req.body.details.address = `${address}, ${postcode}`;
       }
@@ -240,16 +218,18 @@ router.post("/", async (req, res) => {
       const groupId = `RG-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 
       // Tag the first booking with the group ID
-      await Booking.findByIdAndUpdate(newBooking._id, { $set: { meta: { recurringGroup: groupId } } });
+      await Booking.findByIdAndUpdate(newBooking._id, {
+        $set: { meta: { recurringGroup: groupId } },
+      });
       newBooking.meta = { recurringGroup: groupId };
 
       const RECUR_SCHEDULES = {
-        Weekly:      { type: "days",   step: 7,  total: 12 },
-        Fortnightly: { type: "days",   step: 14, total: 12 },
-        "Bi-weekly": { type: "days",   step: 14, total: 12 },
-        Monthly:     { type: "months", step: 1,  total: 12 },
-        Quarterly:   { type: "months", step: 3,  total: 4  },
-        Yearly:      { type: "months", step: 12, total: 2  },
+        Weekly: { type: "days", step: 7, total: 12 },
+        Fortnightly: { type: "days", step: 14, total: 12 },
+        "Bi-weekly": { type: "days", step: 14, total: 12 },
+        Monthly: { type: "months", step: 1, total: 12 },
+        Quarterly: { type: "months", step: 3, total: 4 },
+        Yearly: { type: "months", step: 12, total: 2 },
       };
       const rule = RECUR_SCHEDULES[recurFreq];
 
@@ -272,7 +252,11 @@ router.post("/", async (req, res) => {
               status: "Confirmed",
               skipConfirmationEmail: true,
               noPaymentRequired: true,
-              payment: { ...baseData.payment, status: "Pending", stripePaymentIntentId: null },
+              payment: {
+                ...baseData.payment,
+                status: "Pending",
+                stripePaymentIntentId: null,
+              },
               meta: { recurringGroup: groupId },
               assignedWorker: null,
               assignedWorkerName: null,
@@ -286,10 +270,15 @@ router.post("/", async (req, res) => {
               createdAt: new Date(),
             });
           } catch (recurErr) {
-            console.error(`⚠️ Recurring instance ${i} failed:`, recurErr.message);
+            console.error(
+              `⚠️ Recurring instance ${i} failed:`,
+              recurErr.message,
+            );
           }
         }
-        console.log(`📅 Created ${rule.total}-booking ${recurFreq} series → group ${groupId}`);
+        console.log(
+          `📅 Created ${rule.total}-booking ${recurFreq} series → group ${groupId}`,
+        );
       }
     }
     // ── End recurring ────────────────────────────────────────────────────────
@@ -449,10 +438,15 @@ router.post("/", async (req, res) => {
 
     // Schedule booking reminders for confirmed bookings (payment done or noPaymentRequired)
     try {
-      const isConfirmed = newBooking.noPaymentRequired ||
+      const isConfirmed =
+        newBooking.noPaymentRequired ||
         ["Confirmed", "Authorized"].includes(newBooking.status);
       const bookingDate = newBooking.schedule?.date
-        ? buildBookingDateTime(newBooking.schedule.date, newBooking.schedule.timeSlot)
+        ? buildBookingDateTime(
+            newBooking.schedule.date,
+            newBooking.schedule.timeSlot,
+            newBooking.schedule?.preferredTime,
+          )
         : null;
       if (isConfirmed && bookingDate && bookingDate > new Date()) {
         const payload = {
@@ -461,17 +455,32 @@ router.post("/", async (req, res) => {
           email: newBooking.customer?.email,
           firstName: newBooking.customer?.firstName,
           service: newBooking.service,
-          date: bookingDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
+          date: bookingDate.toLocaleDateString("en-GB", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+          }),
           amount: newBooking.payment?.amount,
         };
         const ms24h = 24 * 60 * 60 * 1000;
-        const ms3h  = 3  * 60 * 60 * 1000;
-        const soon  = Date.now() + 2 * 60 * 1000; // fire in 2 min if already past-due
-        await scheduleTask("booking_reminder_24h", new Date(Math.max(bookingDate.getTime() - ms24h, soon)), payload);
-        await scheduleTask("booking_reminder_3h",  new Date(Math.max(bookingDate.getTime() - ms3h,  soon)), payload);
+        const ms3h = 3 * 60 * 60 * 1000;
+        const soon = Date.now() + 2 * 60 * 1000; // fire in 2 min if already past-due
+        await scheduleTask(
+          "booking_reminder_24h",
+          new Date(Math.max(bookingDate.getTime() - ms24h, soon)),
+          payload,
+        );
+        await scheduleTask(
+          "booking_reminder_3h",
+          new Date(Math.max(bookingDate.getTime() - ms3h, soon)),
+          payload,
+        );
       }
     } catch (schedErr) {
-      console.error("⚠️ Failed to schedule booking reminders:", schedErr.message);
+      console.error(
+        "⚠️ Failed to schedule booking reminders:",
+        schedErr.message,
+      );
     }
 
     // SMS: confirm new booking (fire-and-forget)
@@ -498,18 +507,20 @@ router.put("/:id", async (req, res) => {
     if (!existingBooking)
       return res.status(404).json({ message: "Booking not found" });
 
-    const wasCompleted = existingBooking.status === "Completed" || existingBooking.status === "Completed - Unpaid";
+    const wasCompleted =
+      existingBooking.status === "Completed" ||
+      existingBooking.status === "Completed - Unpaid";
     const isNowCompleted = req.body.status === "Completed";
     const isNowCompletedUnpaid = req.body.status === "Completed - Unpaid";
     const prevStatus = existingBooking.status;
-    const newStatus  = req.body.status;
+    const newStatus = req.body.status;
     const prevWorker = existingBooking.assignedWorker?.toString();
-    const newWorker  = req.body.assignedWorker?.toString();
+    const newWorker = req.body.assignedWorker?.toString();
 
     // If postcode is provided separately and not already in address, append it
     if (req.body.details?.postcode && req.body.details?.address) {
-      const postcode = (req.body.details.postcode || '').trim();
-      const address = (req.body.details.address || '').trim();
+      const postcode = (req.body.details.postcode || "").trim();
+      const address = (req.body.details.address || "").trim();
       if (postcode && !address.toLowerCase().includes(postcode.toLowerCase())) {
         req.body.details.address = `${address}, ${postcode}`;
       }
@@ -529,134 +540,136 @@ router.put("/:id", async (req, res) => {
       // Update worker wallet with earned amount — isolated so a failure here
       // never prevents the invoice email from being sent below.
       try {
-      if (updatedBooking.assignedWorker) {
-        const Worker = require("../models/Worker");
-        const workerEarnings =
-          (updatedBooking.workerRate || 0) *
-          (updatedBooking.details?.duration ||
-            updatedBooking.workerDuration ||
-            updatedBooking.duration ||
-            0);
+        if (updatedBooking.assignedWorker) {
+          const Worker = require("../models/Worker");
+          const workerEarnings =
+            (updatedBooking.workerRate || 0) *
+            (updatedBooking.details?.duration ||
+              updatedBooking.workerDuration ||
+              updatedBooking.duration ||
+              0);
 
-        if (workerEarnings > 0) {
-          const worker = await Worker.findById(updatedBooking.assignedWorker);
-          if (worker) {
-            if (!worker.wallet) {
-              worker.wallet = {
-                totalEarned: 0,
-                balance: 0,
-                onHold: 0,
-                withdrawn: 0,
-              };
-            }
-            // Just ensure wallet exists - balance will be calculated on fetch
-            worker.wallet.lastUpdated = new Date();
-            await worker.save();
-            console.log(
-              `💰 Booking completed for worker ${updatedBooking.assignedWorkerName}: +£${workerEarnings.toFixed(2)}`,
-            );
+          if (workerEarnings > 0) {
+            const worker = await Worker.findById(updatedBooking.assignedWorker);
+            if (worker) {
+              if (!worker.wallet) {
+                worker.wallet = {
+                  totalEarned: 0,
+                  balance: 0,
+                  onHold: 0,
+                  withdrawn: 0,
+                };
+              }
+              // Just ensure wallet exists - balance will be calculated on fetch
+              worker.wallet.lastUpdated = new Date();
+              await worker.save();
+              console.log(
+                `💰 Booking completed for worker ${updatedBooking.assignedWorkerName}: +£${workerEarnings.toFixed(2)}`,
+              );
 
-            // Auto-create scheduled payout if bank details exist
-            if (
-              worker.bankDetails?.accountName &&
-              worker.bankDetails?.accountNumber
-            ) {
-              try {
-                const Withdrawal = require("../models/Withdrawal");
-                const Service = require("../models/Service");
+              // Auto-create scheduled payout if bank details exist
+              if (
+                worker.bankDetails?.accountName &&
+                worker.bankDetails?.accountNumber
+              ) {
+                try {
+                  const Withdrawal = require("../models/Withdrawal");
+                  const Service = require("../models/Service");
 
-                // Calculate earnings for THIS job (just completed)
-                const service = await Service.findOne({
-                  name: updatedBooking.service,
-                });
-
-                let jobEarnings = 0;
-
-                if (service?.type === "hourly") {
-                  // For hourly services: hourlyRate × duration
-                  const duration =
-                    updatedBooking.details?.duration ||
-                    updatedBooking.workerDuration ||
-                    updatedBooking.duration ||
-                    0;
-                  jobEarnings = (service?.workerHourlyRate || 0) * duration;
-                } else {
-                  // For flat-rate services: use workerPaymentRate
-                  jobEarnings = service?.workerPaymentRate || 0;
-                }
-
-                // Fallback to old calculation if no service rate available
-                if (jobEarnings === 0) {
-                  jobEarnings =
-                    (updatedBooking.workerRate || 0) *
-                    (updatedBooking.details?.duration ||
-                      updatedBooking.workerDuration ||
-                      updatedBooking.duration ||
-                      0);
-                }
-
-                // Skip if no earnings
-                if (jobEarnings > 0) {
-                  // Calculate payout date: 8 days from now
-                  const expectedPayoutDate = new Date();
-                  expectedPayoutDate.setDate(expectedPayoutDate.getDate() + 8);
-                  // Set to start of day for consistency
-                  expectedPayoutDate.setHours(0, 0, 0, 0);
-
-                  const jobRecord = {
-                    bookingId: updatedBooking.bookingId,
-                    service: updatedBooking.service,
-                    amount: jobEarnings,
-                    completedDate: updatedBooking.updatedAt,
-                  };
-
-                  // CREATE NEW withdrawal for EACH job (no accumulation)
-                  // Each job gets its own separate withdrawal record
-                  const withdrawal = new Withdrawal({
-                    workerId: updatedBooking.assignedWorker,
-                    workerName: `${worker.firstName} ${worker.lastName}`,
-                    workerEmail: worker.email,
-                    workerPhone: worker.phone,
-                    workerAddress: worker.address,
-                    workerPostcode: worker.postcode,
-                    amount: jobEarnings,
-                    completedJobs: [jobRecord],
-                    bankDetails: {
-                      accountName: worker.bankDetails.accountName,
-                      accountNumber: worker.bankDetails.accountNumber,
-                      sortCode: worker.bankDetails.sortCode,
-                      bankName: worker.bankDetails.bankName,
-                    },
-                    status: "upcoming",
-                    payoutType: "fixed_8days",
-                    expectedPayoutDate,
+                  // Calculate earnings for THIS job (just completed)
+                  const service = await Service.findOne({
+                    name: updatedBooking.service,
                   });
 
-                  await withdrawal.save();
+                  let jobEarnings = 0;
 
-                  console.log(
-                    `✅ Created withdrawal: £${jobEarnings.toFixed(
-                      2,
-                    )} for ${updatedBooking.service} on ${expectedPayoutDate.toDateString()}`,
-                  );
+                  if (service?.type === "hourly") {
+                    // For hourly services: hourlyRate × duration
+                    const duration =
+                      updatedBooking.details?.duration ||
+                      updatedBooking.workerDuration ||
+                      updatedBooking.duration ||
+                      0;
+                    jobEarnings = (service?.workerHourlyRate || 0) * duration;
+                  } else {
+                    // For flat-rate services: use workerPaymentRate
+                    jobEarnings = service?.workerPaymentRate || 0;
+                  }
 
-                  // Update worker wallet - add to onHold
-                  worker.wallet.onHold =
-                    (worker.wallet.onHold || 0) + jobEarnings;
-                  await worker.save();
+                  // Fallback to old calculation if no service rate available
+                  if (jobEarnings === 0) {
+                    jobEarnings =
+                      (updatedBooking.workerRate || 0) *
+                      (updatedBooking.details?.duration ||
+                        updatedBooking.workerDuration ||
+                        updatedBooking.duration ||
+                        0);
+                  }
 
-                  console.log(
-                    `✅ Payment scheduled: £${jobEarnings.toFixed(
-                      2,
-                    )} for ${worker.firstName} ${worker.lastName} - Will pay on ${expectedPayoutDate.toDateString()}`,
-                  );
+                  // Skip if no earnings
+                  if (jobEarnings > 0) {
+                    // Calculate payout date: 8 days from now
+                    const expectedPayoutDate = new Date();
+                    expectedPayoutDate.setDate(
+                      expectedPayoutDate.getDate() + 8,
+                    );
+                    // Set to start of day for consistency
+                    expectedPayoutDate.setHours(0, 0, 0, 0);
 
-                  // Send notification email
-                  try {
-                    await sendEmail({
-                      to: worker.email,
-                      subject: "✅ Payment Scheduled - Cleaniq",
-                      html: `
+                    const jobRecord = {
+                      bookingId: updatedBooking.bookingId,
+                      service: updatedBooking.service,
+                      amount: jobEarnings,
+                      completedDate: updatedBooking.updatedAt,
+                    };
+
+                    // CREATE NEW withdrawal for EACH job (no accumulation)
+                    // Each job gets its own separate withdrawal record
+                    const withdrawal = new Withdrawal({
+                      workerId: updatedBooking.assignedWorker,
+                      workerName: `${worker.firstName} ${worker.lastName}`,
+                      workerEmail: worker.email,
+                      workerPhone: worker.phone,
+                      workerAddress: worker.address,
+                      workerPostcode: worker.postcode,
+                      amount: jobEarnings,
+                      completedJobs: [jobRecord],
+                      bankDetails: {
+                        accountName: worker.bankDetails.accountName,
+                        accountNumber: worker.bankDetails.accountNumber,
+                        sortCode: worker.bankDetails.sortCode,
+                        bankName: worker.bankDetails.bankName,
+                      },
+                      status: "upcoming",
+                      payoutType: "fixed_8days",
+                      expectedPayoutDate,
+                    });
+
+                    await withdrawal.save();
+
+                    console.log(
+                      `✅ Created withdrawal: £${jobEarnings.toFixed(
+                        2,
+                      )} for ${updatedBooking.service} on ${expectedPayoutDate.toDateString()}`,
+                    );
+
+                    // Update worker wallet - add to onHold
+                    worker.wallet.onHold =
+                      (worker.wallet.onHold || 0) + jobEarnings;
+                    await worker.save();
+
+                    console.log(
+                      `✅ Payment scheduled: £${jobEarnings.toFixed(
+                        2,
+                      )} for ${worker.firstName} ${worker.lastName} - Will pay on ${expectedPayoutDate.toDateString()}`,
+                    );
+
+                    // Send notification email
+                    try {
+                      await sendEmail({
+                        to: worker.email,
+                        subject: "✅ Payment Scheduled - Cleaniq",
+                        html: `
                         <h2>Payment Scheduled</h2>
                         <p>Hi ${worker.firstName},</p>
                         <p>Your completed cleaning work has been recorded and a payment of <strong>£${jobEarnings.toFixed(
@@ -667,26 +680,29 @@ router.put("/:id", async (req, res) => {
                         <p><strong>Expected Payment Date:</strong> ${expectedPayoutDate.toLocaleDateString()}</p>
                         <p>You'll receive another email confirmation when payment has been processed.</p>
                       `,
-                    });
-                    console.log(
-                      `✅ Payment scheduled email sent to: ${worker.email}`,
-                    );
-                  } catch (err) {
-                    console.error(
-                      "⚠️ Failed to send payout notification:",
-                      err,
-                    );
+                      });
+                      console.log(
+                        `✅ Payment scheduled email sent to: ${worker.email}`,
+                      );
+                    } catch (err) {
+                      console.error(
+                        "⚠️ Failed to send payout notification:",
+                        err,
+                      );
+                    }
                   }
+                } catch (err) {
+                  console.error("⚠️ Error auto-creating payout:", err);
                 }
-              } catch (err) {
-                console.error("⚠️ Error auto-creating payout:", err);
               }
             }
           }
         }
-      }
       } catch (walletErr) {
-        console.error("⚠️ Worker wallet update failed (invoice will still send):", walletErr.message);
+        console.error(
+          "⚠️ Worker wallet update failed (invoice will still send):",
+          walletErr.message,
+        );
       }
 
       // CAPTURE AUTHORIZED PAYMENT when booking is completed
@@ -744,9 +760,14 @@ router.put("/:id", async (req, res) => {
           subject: `Your Cleaniq Invoice & Receipt: ${updatedBooking.bookingId}`,
           html: templates.invoiceReceipt(updatedBooking),
         });
-        console.log(`📧 Invoice email sent to ${updatedBooking.customer.email} for booking ${updatedBooking.bookingId}`);
+        console.log(
+          `📧 Invoice email sent to ${updatedBooking.customer.email} for booking ${updatedBooking.bookingId}`,
+        );
       } catch (invoiceErr) {
-        console.error(`❌ Failed to send invoice email for ${updatedBooking.bookingId}:`, invoiceErr.message);
+        console.error(
+          `❌ Failed to send invoice email for ${updatedBooking.bookingId}:`,
+          invoiceErr.message,
+        );
       }
 
       // Schedule post-service automation sequence
@@ -759,24 +780,63 @@ router.put("/:id", async (req, res) => {
           firstName: updatedBooking.customer?.firstName,
           service: updatedBooking.service,
         };
-        await scheduleTask("review_request_2h",     new Date(now.getTime() + 2  * 60 * 60 * 1000),        payload);
-        await scheduleTask("referral_offer_48h",    new Date(now.getTime() + 48 * 60 * 60 * 1000),        payload);
-        await scheduleTask("rebooking_discount_3d", new Date(now.getTime() + 72 * 60 * 60 * 1000),        payload);
-        await scheduleTask("followup_1w",           new Date(now.getTime() +  7 * 24 * 60 * 60 * 1000),  payload);
-        await scheduleTask("followup_2w",           new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),  payload);
-        await scheduleTask("followup_1m",           new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),  payload);
-        await scheduleTask("followup_2m",           new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000),  payload);
-        await scheduleTask("followup_3m",           new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000),  payload);
-        console.log(`⚙️ Post-service automations scheduled for booking ${updatedBooking.bookingId}`);
+        await scheduleTask(
+          "review_request_2h",
+          new Date(now.getTime() + 2 * 60 * 60 * 1000),
+          payload,
+        );
+        await scheduleTask(
+          "referral_offer_48h",
+          new Date(now.getTime() + 48 * 60 * 60 * 1000),
+          payload,
+        );
+        await scheduleTask(
+          "rebooking_discount_3d",
+          new Date(now.getTime() + 72 * 60 * 60 * 1000),
+          payload,
+        );
+        await scheduleTask(
+          "followup_1w",
+          new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+          payload,
+        );
+        await scheduleTask(
+          "followup_2w",
+          new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
+          payload,
+        );
+        await scheduleTask(
+          "followup_1m",
+          new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
+          payload,
+        );
+        await scheduleTask(
+          "followup_2m",
+          new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000),
+          payload,
+        );
+        await scheduleTask(
+          "followup_3m",
+          new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000),
+          payload,
+        );
+        console.log(
+          `⚙️ Post-service automations scheduled for booking ${updatedBooking.bookingId}`,
+        );
       } catch (schedErr) {
-        console.error("⚠️ Failed to schedule post-service automations:", schedErr.message);
+        console.error(
+          "⚠️ Failed to schedule post-service automations:",
+          schedErr.message,
+        );
       }
     }
 
     // Completed - Unpaid: send invoice email (no PAID label) + update worker wallet, no Stripe capture
     // Used for corporate/B2B clients that pay on a fortnightly or monthly cycle
     if (!wasCompleted && isNowCompletedUnpaid) {
-      console.log(`✅ Booking ${updatedBooking.bookingId} marked as Completed - Unpaid. Sending awaiting-payment invoice...`);
+      console.log(
+        `✅ Booking ${updatedBooking.bookingId} marked as Completed - Unpaid. Sending awaiting-payment invoice...`,
+      );
 
       try {
         await sendEmail({
@@ -784,31 +844,49 @@ router.put("/:id", async (req, res) => {
           subject: `Invoice & Service Completion: ${updatedBooking.bookingId} — Payment Due`,
           html: templates.invoiceAwaitingPayment(updatedBooking),
         });
-        console.log(`📧 Awaiting-payment invoice sent to ${updatedBooking.customer.email}`);
+        console.log(
+          `📧 Awaiting-payment invoice sent to ${updatedBooking.customer.email}`,
+        );
       } catch (invoiceErr) {
-        console.error(`❌ Failed to send awaiting-payment invoice for ${updatedBooking.bookingId}:`, invoiceErr.message);
+        console.error(
+          `❌ Failed to send awaiting-payment invoice for ${updatedBooking.bookingId}:`,
+          invoiceErr.message,
+        );
       }
       try {
         if (updatedBooking.assignedWorker) {
           const Worker = require("../models/Worker");
           const workerEarnings =
             (updatedBooking.workerRate || 0) *
-            (updatedBooking.details?.duration || updatedBooking.workerDuration || updatedBooking.duration || 0);
+            (updatedBooking.details?.duration ||
+              updatedBooking.workerDuration ||
+              updatedBooking.duration ||
+              0);
 
           if (workerEarnings > 0) {
             const worker = await Worker.findById(updatedBooking.assignedWorker);
             if (worker) {
               if (!worker.wallet) {
-                worker.wallet = { totalEarned: 0, balance: 0, onHold: 0, withdrawn: 0 };
+                worker.wallet = {
+                  totalEarned: 0,
+                  balance: 0,
+                  onHold: 0,
+                  withdrawn: 0,
+                };
               }
               worker.wallet.lastUpdated = new Date();
               await worker.save();
-              console.log(`💰 Completed-Unpaid: worker wallet updated for ${updatedBooking.assignedWorkerName}`);
+              console.log(
+                `💰 Completed-Unpaid: worker wallet updated for ${updatedBooking.assignedWorkerName}`,
+              );
             }
           }
         }
       } catch (walletErr) {
-        console.error("⚠️ Worker wallet update failed for Completed-Unpaid:", walletErr.message);
+        console.error(
+          "⚠️ Worker wallet update failed for Completed-Unpaid:",
+          walletErr.message,
+        );
       }
     }
 
@@ -816,27 +894,48 @@ router.put("/:id", async (req, res) => {
     if (prevStatus !== "Confirmed" && newStatus === "Confirmed") {
       try {
         const bookingDate = updatedBooking.schedule?.date
-          ? buildBookingDateTime(updatedBooking.schedule.date, updatedBooking.schedule.timeSlot)
+          ? buildBookingDateTime(
+              updatedBooking.schedule.date,
+              updatedBooking.schedule.timeSlot,
+              updatedBooking.schedule?.preferredTime,
+            )
           : null;
         if (bookingDate && bookingDate > new Date()) {
           const payload = {
-            bookingId:  updatedBooking._id.toString(),
+            bookingId: updatedBooking._id.toString(),
             bookingRef: updatedBooking.bookingId,
-            email:      updatedBooking.customer?.email,
-            firstName:  updatedBooking.customer?.firstName,
-            service:    updatedBooking.service,
-            date:       bookingDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
-            amount:     updatedBooking.payment?.amount,
+            email: updatedBooking.customer?.email,
+            firstName: updatedBooking.customer?.firstName,
+            service: updatedBooking.service,
+            date: bookingDate.toLocaleDateString("en-GB", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+            }),
+            amount: updatedBooking.payment?.amount,
           };
           const ms24h = 24 * 60 * 60 * 1000;
-          const ms3h  = 3  * 60 * 60 * 1000;
-          const soon  = Date.now() + 2 * 60 * 1000;
-          await scheduleTask("booking_reminder_24h", new Date(Math.max(bookingDate.getTime() - ms24h, soon)), payload);
-          await scheduleTask("booking_reminder_3h",  new Date(Math.max(bookingDate.getTime() - ms3h,  soon)), payload);
-          console.log(`⚙️ Reminders scheduled for manually-confirmed booking ${updatedBooking.bookingId}`);
+          const ms3h = 3 * 60 * 60 * 1000;
+          const soon = Date.now() + 2 * 60 * 1000;
+          await scheduleTask(
+            "booking_reminder_24h",
+            new Date(Math.max(bookingDate.getTime() - ms24h, soon)),
+            payload,
+          );
+          await scheduleTask(
+            "booking_reminder_3h",
+            new Date(Math.max(bookingDate.getTime() - ms3h, soon)),
+            payload,
+          );
+          console.log(
+            `⚙️ Reminders scheduled for manually-confirmed booking ${updatedBooking.bookingId}`,
+          );
         }
       } catch (schedErr) {
-        console.error("⚠️ Failed to schedule reminders on manual confirmation:", schedErr.message);
+        console.error(
+          "⚠️ Failed to schedule reminders on manual confirmation:",
+          schedErr.message,
+        );
       }
     }
 
@@ -853,21 +952,27 @@ router.put("/:id", async (req, res) => {
       setImmediate(async () => {
         try {
           const subjectMap = {
-            Confirmed:     `Booking Confirmed ✅ — ${updatedBooking.bookingId}`,
-            Pending:       `Booking Received — ${updatedBooking.bookingId}`,
-            Assigned:      `Cleaner Assigned — ${updatedBooking.bookingId}`,
-            Arrived:       `Your Cleaner Has Arrived — ${updatedBooking.bookingId}`,
+            Confirmed: `Booking Confirmed ✅ — ${updatedBooking.bookingId}`,
+            Pending: `Booking Received — ${updatedBooking.bookingId}`,
+            Assigned: `Cleaner Assigned — ${updatedBooking.bookingId}`,
+            Arrived: `Your Cleaner Has Arrived — ${updatedBooking.bookingId}`,
             "In Progress": `Cleaning In Progress 🧹 — ${updatedBooking.bookingId}`,
-            Cancelled:     `Booking Cancelled — ${updatedBooking.bookingId}`,
+            Cancelled: `Booking Cancelled — ${updatedBooking.bookingId}`,
           };
-          const subject = subjectMap[newStatus] || `Booking Update — ${updatedBooking.bookingId} | Cleaniq Services`;
-          console.log(`📧 Status changed "${prevStatus}" → "${newStatus}" — sending email to ${updatedBooking.customer.email}`);
+          const subject =
+            subjectMap[newStatus] ||
+            `Booking Update — ${updatedBooking.bookingId} | Cleaniq Services`;
+          console.log(
+            `📧 Status changed "${prevStatus}" → "${newStatus}" — sending email to ${updatedBooking.customer.email}`,
+          );
           const ok = await sendEmail({
             to: updatedBooking.customer.email,
             subject,
             html: buildBookingStatusUpdateEmail(updatedBooking),
           });
-          console.log(`📧 Status email ${ok ? "✅ sent" : "❌ failed"} → ${updatedBooking.customer.email} [${newStatus}]`);
+          console.log(
+            `📧 Status email ${ok ? "✅ sent" : "❌ failed"} → ${updatedBooking.customer.email} [${newStatus}]`,
+          );
         } catch (emailErr) {
           console.error("⚠️ Status-change email error:", emailErr.message);
         }
@@ -891,10 +996,15 @@ router.put("/:id", async (req, res) => {
         }
         // Worker assigned (new assignment or change)
         if (newWorker && newWorker !== prevWorker) {
-          const worker = await Worker.findById(newWorker).select("firstName lastName phone");
-          const workerName = worker ? `${worker.firstName} ${worker.lastName}`.trim() : "your cleaner";
+          const worker = await Worker.findById(newWorker).select(
+            "firstName lastName phone",
+          );
+          const workerName = worker
+            ? `${worker.firstName} ${worker.lastName}`.trim()
+            : "your cleaner";
           await sms.triggerWorkerAssigned(updatedBooking, workerName);
-          if (worker) await sms.triggerWorkerJobAssigned(updatedBooking, worker);
+          if (worker)
+            await sms.triggerWorkerJobAssigned(updatedBooking, worker);
         }
       } catch (smsErr) {
         console.error("SMS trigger error:", smsErr.message);
@@ -948,7 +1058,13 @@ router.post("/:id/resend", async (req, res) => {
 // bank-transfer email. Flips the booking to Confirmed and alerts admin to
 // verify the transfer actually landed.
 router.get("/:id/confirm-payment-sent", async (req, res) => {
-  const outcomePage = (heading, message, color = "#059669", bg = "#d1fae5", icon = "✓") => `
+  const outcomePage = (
+    heading,
+    message,
+    color = "#059669",
+    bg = "#d1fae5",
+    icon = "✓",
+  ) => `
 <!DOCTYPE html>
 <html>
   <head><meta charset="utf-8" /><title>Cleaniq Services</title></head>
@@ -1000,7 +1116,13 @@ router.get("/:id/confirm-payment-sent", async (req, res) => {
       await booking.save();
 
       // SMS: booking confirmed (fire-and-forget)
-      setImmediate(() => sms.triggerBookingConfirmed(booking).catch(e => console.error("SMS payment-sent trigger error:", e.message)));
+      setImmediate(() =>
+        sms
+          .triggerBookingConfirmed(booking)
+          .catch((e) =>
+            console.error("SMS payment-sent trigger error:", e.message),
+          ),
+      );
 
       try {
         await sendEmail({
@@ -1021,7 +1143,10 @@ router.get("/:id/confirm-payment-sent", async (req, res) => {
           `,
         });
       } catch (emailErr) {
-        console.error("⚠️ Failed to send payment-reported alert:", emailErr.message);
+        console.error(
+          "⚠️ Failed to send payment-reported alert:",
+          emailErr.message,
+        );
       }
     }
 
@@ -1079,7 +1204,8 @@ router.post("/:id/send-confirmation", async (req, res) => {
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
     let subject, html;
-    const isPending = booking.payment?.status === "Pending" && !booking.noPaymentRequired;
+    const isPending =
+      booking.payment?.status === "Pending" && !booking.noPaymentRequired;
 
     if (isPending) {
       // Regenerate a fresh Stripe checkout session so the link works
@@ -1097,34 +1223,39 @@ router.post("/:id/send-confirmation", async (req, res) => {
               company: "Cleaniq Services",
             },
           },
-          line_items: [{
-            price_data: {
-              currency: (booking.payment.currency || "GBP").toLowerCase(),
-              product_data: {
-                name: `Cleaniq - ${booking.service}`,
-                description: `Booking Reference: ${booking.bookingId}`,
+          line_items: [
+            {
+              price_data: {
+                currency: (booking.payment.currency || "GBP").toLowerCase(),
+                product_data: {
+                  name: `Cleaniq - ${booking.service}`,
+                  description: `Booking Reference: ${booking.bookingId}`,
+                },
+                unit_amount: Math.round(booking.payment.amount * 100),
               },
-              unit_amount: Math.round(booking.payment.amount * 100),
+              quantity: 1,
             },
-            quantity: 1,
-          }],
-          metadata: { bookingId: booking._id.toString(), company: "Cleaniq Services" },
+          ],
+          metadata: {
+            bookingId: booking._id.toString(),
+            company: "Cleaniq Services",
+          },
           success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=success&bookingId=${booking._id}`,
-          cancel_url:  `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=cancelled`,
+          cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=cancelled`,
         });
         subject = `Payment Required: Cleaniq Booking ${booking.bookingId}`;
-        html    = templates.paymentRequired(booking, session.url);
+        html = templates.paymentRequired(booking, session.url);
       } catch (stripeErr) {
         // Stripe failed — still send the email but without a payment link
         subject = `Payment Required: Cleaniq Booking ${booking.bookingId}`;
-        html    = templates.paymentRequired(booking, null);
+        html = templates.paymentRequired(booking, null);
       }
     } else if (booking.noPaymentRequired) {
       subject = `✓ Booking Confirmed — ${booking.bookingId} | Cleaniq Services`;
-      html    = templates.adminBookingCreatedEmail2(booking);
+      html = templates.adminBookingCreatedEmail2(booking);
     } else {
       subject = `✓ Booking Confirmed — ${booking.bookingId} | Cleaniq Services`;
-      html    = templates.bookingConfirmation(booking);
+      html = templates.bookingConfirmation(booking);
     }
 
     const ok = await sendEmail({ to: booking.customer.email, subject, html });
@@ -1153,13 +1284,17 @@ router.post("/:id/send-invoice", async (req, res) => {
       html: templates.invoiceReceipt(booking),
     });
 
-    if (!ok) return res.status(500).json({ message: "Failed to send invoice email" });
+    if (!ok)
+      return res.status(500).json({ message: "Failed to send invoice email" });
 
     booking.meta = booking.meta || {};
     booking.meta.invoiceSentAt = new Date();
     await booking.save();
 
-    res.json({ success: true, message: "Invoice sent to customer successfully" });
+    res.json({
+      success: true,
+      message: "Invoice sent to customer successfully",
+    });
   } catch (err) {
     console.error("CRM send-invoice error:", err);
     res.status(500).json({ message: err.message });
@@ -1172,7 +1307,7 @@ router.post("/:id/send-review-request", async (req, res) => {
     const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    const reviewUrl = `https://cleaniqservices.com/review?booking=${booking.bookingId}&customer=${encodeURIComponent(booking.customer.firstName + ' ' + booking.customer.lastName)}`;
+    const reviewUrl = `https://cleaniqservices.com/review?booking=${booking.bookingId}&customer=${encodeURIComponent(booking.customer.firstName + " " + booking.customer.lastName)}`;
 
     const ok = await sendEmail({
       to: booking.customer.email,
@@ -1180,13 +1315,17 @@ router.post("/:id/send-review-request", async (req, res) => {
       html: templates.reviewRequest(booking, reviewUrl),
     });
 
-    if (!ok) return res.status(500).json({ message: "Failed to send review request" });
+    if (!ok)
+      return res.status(500).json({ message: "Failed to send review request" });
 
     booking.meta = booking.meta || {};
     booking.meta.reviewRequestSentAt = new Date();
     await booking.save();
 
-    res.json({ success: true, message: "Review request sent to customer successfully" });
+    res.json({
+      success: true,
+      message: "Review request sent to customer successfully",
+    });
   } catch (err) {
     console.error("CRM send-review-request error:", err);
     res.status(500).json({ message: err.message });
@@ -1257,22 +1396,35 @@ router.post("/:id/send-payment-link", async (req, res) => {
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
     const { url, items, totalAmount, note } = req.body;
-    if (!url) return res.status(400).json({ message: "Payment URL is required" });
+    if (!url)
+      return res.status(400).json({ message: "Payment URL is required" });
 
     const ok = await sendEmail({
       to: booking.customer.email,
       subject: `💳 Payment Request — £${Number(totalAmount).toFixed(2)} | Cleaniq Services`,
-      html: templates.paymentLinkEmail(booking, items || [], totalAmount || 0, url, note || ""),
+      html: templates.paymentLinkEmail(
+        booking,
+        items || [],
+        totalAmount || 0,
+        url,
+        note || "",
+      ),
     });
 
-    if (!ok) return res.status(500).json({ message: "Failed to send payment link email" });
+    if (!ok)
+      return res
+        .status(500)
+        .json({ message: "Failed to send payment link email" });
 
     booking.meta = booking.meta || {};
     booking.meta.paymentLinkSentAt = new Date();
     booking.meta.lastPaymentLinkUrl = url;
     await booking.save();
 
-    res.json({ success: true, message: "Payment link sent to customer successfully" });
+    res.json({
+      success: true,
+      message: "Payment link sent to customer successfully",
+    });
   } catch (err) {
     console.error("CRM send-payment-link error:", err);
     res.status(500).json({ message: err.message });
