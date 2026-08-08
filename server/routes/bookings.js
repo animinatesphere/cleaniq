@@ -12,7 +12,10 @@ const {
 const { moveToTrash } = require("../utils/trash");
 const { scheduleTask } = require("../utils/automationEngine");
 const { buildBookingDateTime } = require("../utils/bookingDateTime");
+const adminAuth = require("../middleware/adminAuth");
 const sms = require("../utils/smsService");
+
+router.use(adminAuth);
 
 // GET /api/bookings/test-email?to=you@example.com — quick Resend smoke-test (admin only)
 router.get("/test-email", async (req, res) => {

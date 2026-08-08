@@ -46,7 +46,8 @@ const sendEmail = async ({ to, subject, html, attachments }) => {
       subject,
       html: wrappedHtml,
     };
-    if (attachments && attachments.length > 0) payload.attachments = attachments;
+    if (attachments && attachments.length > 0)
+      payload.attachments = attachments;
     const { data, error } = await resend.emails.send(payload);
 
     if (error) {
@@ -69,95 +70,227 @@ const sendEmail = async ({ to, subject, html, attachments }) => {
 // avoid any runtime-order issue with complex nested template literals) ────
 function buildBookingStatusUpdateEmail(booking) {
   var STATUS = {
-    "Confirmed":    { accent: "#059669", bg: "#f0fdf4", border: "#a7f3d0", badge: "#dcfce7", badgeText: "#166534", emoji: "✅", headline: "Booking Confirmed!", sub: "We're looking forward to seeing you.", body: "Your booking has been <strong style=\"color:#059669;\">confirmed</strong>. We'll be there on the scheduled date." },
-    "Pending":      { accent: "#d97706", bg: "#fffbeb", border: "#fde68a", badge: "#fef3c7", badgeText: "#92400e", emoji: "⏳", headline: "Booking Received", sub: "We've got your booking request.", body: "Your booking is currently <strong style=\"color:#d97706;\">pending</strong>. We will confirm it shortly." },
-    "Assigned":     { accent: "#2563eb", bg: "#eff6ff", border: "#bfdbfe", badge: "#dbeafe", badgeText: "#1e40af", emoji: "👤", headline: "Cleaner Assigned", sub: "A cleaner has been allocated to your job.", body: "Great news - a cleaner has been <strong style=\"color:#2563eb;\">assigned</strong> to your booking and will be with you on the scheduled date." },
-    "Arrived":      { accent: "#0891b2", bg: "#ecfeff", border: "#a5f3fc", badge: "#cffafe", badgeText: "#155e75", emoji: "📍", headline: "Cleaner Has Arrived", sub: "Your cleaner is on-site.", body: "Your cleaner has <strong style=\"color:#0891b2;\">arrived</strong> at the property and will begin shortly." },
-    "In Progress":  { accent: "#ea580c", bg: "#fff7ed", border: "#fed7aa", badge: "#ffedd5", badgeText: "#7c2d12", emoji: "🧹", headline: "Cleaning In Progress", sub: "Your clean is underway.", body: "Your cleaning service is now <strong style=\"color:#ea580c;\">in progress</strong>. We'll let you know when it's done." },
-    "Cancelled":    { accent: "#dc2626", bg: "#fef2f2", border: "#fecaca", badge: "#fee2e2", badgeText: "#991b1b", emoji: "❌", headline: "Booking Cancelled", sub: "We're sorry to see this booking go.", body: "Your booking has been <strong style=\"color:#dc2626;\">cancelled</strong>. If this was a mistake or you'd like to rebook, please get in touch." },
+    Confirmed: {
+      accent: "#059669",
+      bg: "#f0fdf4",
+      border: "#a7f3d0",
+      badge: "#dcfce7",
+      badgeText: "#166534",
+      emoji: "✅",
+      headline: "Booking Confirmed!",
+      sub: "We're looking forward to seeing you.",
+      body: 'Your booking has been <strong style="color:#059669;">confirmed</strong>. We\'ll be there on the scheduled date.',
+    },
+    Pending: {
+      accent: "#d97706",
+      bg: "#fffbeb",
+      border: "#fde68a",
+      badge: "#fef3c7",
+      badgeText: "#92400e",
+      emoji: "⏳",
+      headline: "Booking Received",
+      sub: "We've got your booking request.",
+      body: 'Your booking is currently <strong style="color:#d97706;">pending</strong>. We will confirm it shortly.',
+    },
+    Assigned: {
+      accent: "#2563eb",
+      bg: "#eff6ff",
+      border: "#bfdbfe",
+      badge: "#dbeafe",
+      badgeText: "#1e40af",
+      emoji: "👤",
+      headline: "Cleaner Assigned",
+      sub: "A cleaner has been allocated to your job.",
+      body: 'Great news - a cleaner has been <strong style="color:#2563eb;">assigned</strong> to your booking and will be with you on the scheduled date.',
+    },
+    Arrived: {
+      accent: "#0891b2",
+      bg: "#ecfeff",
+      border: "#a5f3fc",
+      badge: "#cffafe",
+      badgeText: "#155e75",
+      emoji: "📍",
+      headline: "Cleaner Has Arrived",
+      sub: "Your cleaner is on-site.",
+      body: 'Your cleaner has <strong style="color:#0891b2;">arrived</strong> at the property and will begin shortly.',
+    },
+    "In Progress": {
+      accent: "#ea580c",
+      bg: "#fff7ed",
+      border: "#fed7aa",
+      badge: "#ffedd5",
+      badgeText: "#7c2d12",
+      emoji: "🧹",
+      headline: "Cleaning In Progress",
+      sub: "Your clean is underway.",
+      body: "Your cleaning service is now <strong style=\"color:#ea580c;\">in progress</strong>. We'll let you know when it's done.",
+    },
+    Cancelled: {
+      accent: "#dc2626",
+      bg: "#fef2f2",
+      border: "#fecaca",
+      badge: "#fee2e2",
+      badgeText: "#991b1b",
+      emoji: "❌",
+      headline: "Booking Cancelled",
+      sub: "We're sorry to see this booking go.",
+      body: 'Your booking has been <strong style="color:#dc2626;">cancelled</strong>. If this was a mistake or you\'d like to rebook, please get in touch.',
+    },
   };
 
   var cfg = STATUS[booking.status] || {
-    accent: "#475569", bg: "#f8fafc", border: "#e2e8f0", badge: "#f1f5f9", badgeText: "#334155",
-    emoji: "📋", headline: "Booking " + booking.status,
+    accent: "#475569",
+    bg: "#f8fafc",
+    border: "#e2e8f0",
+    badge: "#f1f5f9",
+    badgeText: "#334155",
+    emoji: "📋",
+    headline: "Booking " + booking.status,
     sub: "Your booking status has been updated.",
-    body: "Your booking status has been updated to <strong>" + booking.status + "</strong>.",
+    body:
+      "Your booking status has been updated to <strong>" +
+      booking.status +
+      "</strong>.",
   };
 
-  var firstName = (booking.customer && booking.customer.firstName) ? booking.customer.firstName : "there";
+  var firstName =
+    booking.customer && booking.customer.firstName
+      ? booking.customer.firstName
+      : "there";
   var bookingId = booking.bookingId || "";
-  var service   = booking.service || "Cleaning Service";
-  var status    = booking.status || "";
-  var dateStr   = "";
+  var service = booking.service || "Cleaning Service";
+  var status = booking.status || "";
+  var dateStr = "";
   if (booking.schedule && booking.schedule.date) {
     try {
-      dateStr = new Date(booking.schedule.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-    } catch (e) { dateStr = ""; }
+      dateStr = new Date(booking.schedule.date).toLocaleDateString("en-GB", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch (e) {
+      dateStr = "";
+    }
   }
-  var timeSlot = (booking.schedule && booking.schedule.timeSlot) ? booking.schedule.timeSlot : "";
-  var address  = (booking.details && booking.details.address) ? booking.details.address : "";
-  var amount   = (booking.payment && booking.payment.amount) ? "£" + booking.payment.amount : "";
+  var timeSlot =
+    booking.schedule && booking.schedule.timeSlot
+      ? booking.schedule.timeSlot
+      : "";
+  var address =
+    booking.details && booking.details.address ? booking.details.address : "";
+  var amount =
+    booking.payment && booking.payment.amount
+      ? "£" + booking.payment.amount
+      : "";
 
-  var dateRow = dateStr ? (
-    "<tr style=\"border-bottom:1px solid " + cfg.border + ";\">" +
-    "<td style=\"padding:11px 0;font-size:13px;color:#64748b;font-weight:600;\">Date</td>" +
-    "<td style=\"padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;\">" + dateStr + "</td>" +
-    "</tr>"
-  ) : "";
+  var dateRow = dateStr
+    ? '<tr style="border-bottom:1px solid ' +
+      cfg.border +
+      ';">' +
+      '<td style="padding:11px 0;font-size:13px;color:#64748b;font-weight:600;">Date</td>' +
+      '<td style="padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;">' +
+      dateStr +
+      "</td>" +
+      "</tr>"
+    : "";
 
-  var timeRow = timeSlot ? (
-    "<tr style=\"border-bottom:1px solid " + cfg.border + ";\">" +
-    "<td style=\"padding:11px 0;font-size:13px;color:#64748b;font-weight:600;\">Time Slot</td>" +
-    "<td style=\"padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;\">" + timeSlot + "</td>" +
-    "</tr>"
-  ) : "";
+  var timeRow = timeSlot
+    ? '<tr style="border-bottom:1px solid ' +
+      cfg.border +
+      ';">' +
+      '<td style="padding:11px 0;font-size:13px;color:#64748b;font-weight:600;">Time Slot</td>' +
+      '<td style="padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;">' +
+      timeSlot +
+      "</td>" +
+      "</tr>"
+    : "";
 
-  var addrRow = address ? (
-    "<tr style=\"border-bottom:1px solid " + cfg.border + ";\">" +
-    "<td style=\"padding:11px 0;font-size:13px;color:#64748b;font-weight:600;\">Address</td>" +
-    "<td style=\"padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;\">" + address + "</td>" +
-    "</tr>"
-  ) : "";
+  var addrRow = address
+    ? '<tr style="border-bottom:1px solid ' +
+      cfg.border +
+      ';">' +
+      '<td style="padding:11px 0;font-size:13px;color:#64748b;font-weight:600;">Address</td>' +
+      '<td style="padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;">' +
+      address +
+      "</td>" +
+      "</tr>"
+    : "";
 
-  var amtRow = amount ? (
-    "<tr>" +
-    "<td style=\"padding:11px 0;font-size:13px;color:#64748b;font-weight:600;\">Amount</td>" +
-    "<td style=\"padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;\">" + amount + "</td>" +
-    "</tr>"
-  ) : "";
+  var amtRow = amount
+    ? "<tr>" +
+      '<td style="padding:11px 0;font-size:13px;color:#64748b;font-weight:600;">Amount</td>' +
+      '<td style="padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;">' +
+      amount +
+      "</td>" +
+      "</tr>"
+    : "";
 
   return (
     "<div style=\"font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;\">" +
-    "<div style=\"background:#0F172A;padding:36px 40px;text-align:center;\">" +
-    "<img src=\"https://cleaniqservices.com/preview.jpg\" alt=\"Cleaniq\" style=\"width:90px;height:auto;border-radius:10px;margin-bottom:18px;\" />" +
-    "<div style=\"display:inline-block;background:" + cfg.badge + ";border:1px solid " + cfg.border + ";border-radius:50px;padding:6px 18px;margin-bottom:14px;\">" +
-    "<span style=\"font-size:12px;font-weight:800;color:" + cfg.badgeText + ";text-transform:uppercase;letter-spacing:1px;\">" + cfg.emoji + " " + status + "</span>" +
+    '<div style="background:#0F172A;padding:36px 40px;text-align:center;">' +
+    '<img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq" style="width:90px;height:auto;border-radius:10px;margin-bottom:18px;" />' +
+    '<div style="display:inline-block;background:' +
+    cfg.badge +
+    ";border:1px solid " +
+    cfg.border +
+    ';border-radius:50px;padding:6px 18px;margin-bottom:14px;">' +
+    '<span style="font-size:12px;font-weight:800;color:' +
+    cfg.badgeText +
+    ';text-transform:uppercase;letter-spacing:1px;">' +
+    cfg.emoji +
+    " " +
+    status +
+    "</span>" +
     "</div>" +
-    "<h1 style=\"margin:0;color:#fff;font-size:24px;font-weight:900;letter-spacing:-0.5px;\">" + cfg.headline + "</h1>" +
-    "<p style=\"margin:8px 0 0;color:#94a3b8;font-size:13px;\">" + cfg.sub + "</p>" +
+    '<h1 style="margin:0;color:#fff;font-size:24px;font-weight:900;letter-spacing:-0.5px;">' +
+    cfg.headline +
+    "</h1>" +
+    '<p style="margin:8px 0 0;color:#94a3b8;font-size:13px;">' +
+    cfg.sub +
+    "</p>" +
     "</div>" +
-    "<div style=\"padding:36px 40px;color:#1e293b;line-height:1.75;\">" +
-    "<p style=\"margin:0 0 16px;font-size:15px;\">Hi " + firstName + ",</p>" +
-    "<p style=\"margin:0 0 28px;font-size:14px;color:#475569;\">" + cfg.body + "</p>" +
-    "<div style=\"background:" + cfg.bg + ";border:1.5px solid " + cfg.border + ";border-radius:16px;padding:24px;margin-bottom:24px;\">" +
-    "<p style=\"margin:0 0 3px;font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1.2px;\">Booking Reference</p>" +
-    "<p style=\"margin:0 0 20px;font-size:22px;font-weight:900;color:#0F172A;letter-spacing:-0.5px;\">" + bookingId + "</p>" +
-    "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse;\">" +
-    "<tr style=\"border-bottom:1px solid " + cfg.border + ";\">" +
-    "<td style=\"padding:11px 0;font-size:13px;color:#64748b;font-weight:600;\">Service</td>" +
-    "<td style=\"padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;\">" + service + "</td>" +
+    '<div style="padding:36px 40px;color:#1e293b;line-height:1.75;">' +
+    '<p style="margin:0 0 16px;font-size:15px;">Hi ' +
+    firstName +
+    ",</p>" +
+    '<p style="margin:0 0 28px;font-size:14px;color:#475569;">' +
+    cfg.body +
+    "</p>" +
+    '<div style="background:' +
+    cfg.bg +
+    ";border:1.5px solid " +
+    cfg.border +
+    ';border-radius:16px;padding:24px;margin-bottom:24px;">' +
+    '<p style="margin:0 0 3px;font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1.2px;">Booking Reference</p>' +
+    '<p style="margin:0 0 20px;font-size:22px;font-weight:900;color:#0F172A;letter-spacing:-0.5px;">' +
+    bookingId +
+    "</p>" +
+    '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">' +
+    '<tr style="border-bottom:1px solid ' +
+    cfg.border +
+    ';">' +
+    '<td style="padding:11px 0;font-size:13px;color:#64748b;font-weight:600;">Service</td>' +
+    '<td style="padding:11px 0;font-size:13px;color:#0f172a;font-weight:700;text-align:right;">' +
+    service +
+    "</td>" +
     "</tr>" +
-    dateRow + timeRow + addrRow + amtRow +
+    dateRow +
+    timeRow +
+    addrRow +
+    amtRow +
     "</table>" +
     "</div>" +
-    "<p style=\"margin:0 0 24px;font-size:13px;color:#64748b;line-height:1.7;\">Questions or changes? Reply to this email or reach us at <a href=\"mailto:info@cleaniqservices.com\" style=\"color:" + cfg.accent + ";font-weight:700;\">info@cleaniqservices.com</a>.</p>" +
-    "<div style=\"text-align:center;\">" +
-    "<a href=\"https://cleaniqservices.com\" style=\"display:inline-block;background:#0F172A;color:#6EE7B7;padding:13px 32px;border-radius:12px;text-decoration:none;font-weight:800;font-size:13px;\">Visit Cleaniq Services</a>" +
+    '<p style="margin:0 0 24px;font-size:13px;color:#64748b;line-height:1.7;">Questions or changes? Reply to this email or reach us at <a href="mailto:info@cleaniqservices.com" style="color:' +
+    cfg.accent +
+    ';font-weight:700;">info@cleaniqservices.com</a>.</p>' +
+    '<div style="text-align:center;">' +
+    '<a href="https://cleaniqservices.com" style="display:inline-block;background:#0F172A;color:#6EE7B7;padding:13px 32px;border-radius:12px;text-decoration:none;font-weight:800;font-size:13px;">Visit Cleaniq Services</a>' +
     "</div>" +
     "</div>" +
-    "<div style=\"background:#f8fafc;padding:20px 40px;text-align:center;border-top:1px solid #f1f5f9;\">" +
-    "<p style=\"margin:0;font-size:11px;color:#94a3b8;\">© 2026 Cleaniq Services · Professional Cleaning You Can Trust</p>" +
-    "<p style=\"margin:4px 0 0;font-size:11px;color:#cbd5e1;\">Questions? <a href=\"mailto:info@cleaniqservices.com\" style=\"color:#0A5C43;\">info@cleaniqservices.com</a></p>" +
+    '<div style="background:#f8fafc;padding:20px 40px;text-align:center;border-top:1px solid #f1f5f9;">' +
+    '<p style="margin:0;font-size:11px;color:#94a3b8;">© 2026 Cleaniq Services · Professional Cleaning You Can Trust</p>' +
+    '<p style="margin:4px 0 0;font-size:11px;color:#cbd5e1;">Questions? <a href="mailto:info@cleaniqservices.com" style="color:#0A5C43;">info@cleaniqservices.com</a></p>' +
     "</div>" +
     "</div>"
   );
@@ -276,9 +409,9 @@ const templates = {
       <td valign="top" align="right">
         <p style="margin:0 0 8px;font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;">Invoice Details</p>
         <table cellpadding="3" cellspacing="0" align="right">
-          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Issue Date:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"})}</td></tr>
-          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Service Date:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${new Date(booking.schedule?.date||Date.now()).toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"})}</td></tr>
-          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Time Slot:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${booking.schedule?.timeSlot||"N/A"}</td></tr>
+          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Issue Date:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</td></tr>
+          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Service Date:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${new Date(booking.schedule?.date || Date.now()).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</td></tr>
+          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Time Slot:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${booking.schedule?.timeSlot || "N/A"}</td></tr>
         </table>
       </td>
     </tr></table>
@@ -293,7 +426,7 @@ const templates = {
       <thead>
         <tr style="background:#0F172A;">
           <th style="padding:14px 16px;text-align:left;font-size:11px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">Service Description</th>
-          <th style="padding:14px 16px;text-align:center;font-size:11px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">${booking.payment?.billingType==="flat"?"Type":"Duration"}</th>
+          <th style="padding:14px 16px;text-align:center;font-size:11px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">${booking.payment?.billingType === "flat" ? "Type" : "Duration"}</th>
           <th style="padding:14px 16px;text-align:right;font-size:11px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">Amount</th>
         </tr>
       </thead>
@@ -301,10 +434,10 @@ const templates = {
         <tr style="border-bottom:1px solid #f1f5f9;">
           <td style="padding:20px 16px;">
             <p style="margin:0;font-size:15px;font-weight:700;color:#0F172A;">${booking.service}</p>
-            ${booking.details?.frequency?`<p style="margin:4px 0 0;font-size:13px;color:#64748b;">Frequency: ${booking.details.frequency}</p>`:""}
-            ${booking.details?.address?`<p style="margin:4px 0 0;font-size:13px;color:#64748b;">&#128205; ${booking.details.address}${booking.details.postcode&&!booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase())?", "+booking.details.postcode:""}</p>`:""}
+            ${booking.details?.frequency ? `<p style="margin:4px 0 0;font-size:13px;color:#64748b;">Frequency: ${booking.details.frequency}</p>` : ""}
+            ${booking.details?.address ? `<p style="margin:4px 0 0;font-size:13px;color:#64748b;">&#128205; ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ", " + booking.details.postcode : ""}</p>` : ""}
           </td>
-          <td style="padding:20px 16px;text-align:center;font-size:14px;color:#334155;font-weight:600;">${booking.payment?.billingType==="flat"?"Flat Rate":`${booking.details?.duration||"N/A"} hrs`}</td>
+          <td style="padding:20px 16px;text-align:center;font-size:14px;color:#334155;font-weight:600;">${booking.payment?.billingType === "flat" ? "Flat Rate" : `${booking.details?.duration || "N/A"} hrs`}</td>
           <td style="padding:20px 16px;text-align:right;font-size:16px;font-weight:800;color:#0F172A;">&#163;${booking.payment.amount}</td>
         </tr>
       </tbody>
@@ -405,9 +538,9 @@ const templates = {
       <td valign="top" align="right">
         <p style="margin:0 0 8px;font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;">Invoice Details</p>
         <table cellpadding="3" cellspacing="0" align="right">
-          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Issue Date:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"})}</td></tr>
-          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Service Date:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${new Date(booking.schedule?.date||Date.now()).toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"})}</td></tr>
-          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Time Slot:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${booking.schedule?.timeSlot||"N/A"}</td></tr>
+          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Issue Date:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</td></tr>
+          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Service Date:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${new Date(booking.schedule?.date || Date.now()).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</td></tr>
+          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Time Slot:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${booking.schedule?.timeSlot || "N/A"}</td></tr>
         </table>
       </td>
     </tr></table>
@@ -422,7 +555,7 @@ const templates = {
       <thead>
         <tr style="background:#0F172A;">
           <th style="padding:14px 16px;text-align:left;font-size:11px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">Service Description</th>
-          <th style="padding:14px 16px;text-align:center;font-size:11px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">${booking.payment?.billingType==="flat"?"Type":"Duration"}</th>
+          <th style="padding:14px 16px;text-align:center;font-size:11px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">${booking.payment?.billingType === "flat" ? "Type" : "Duration"}</th>
           <th style="padding:14px 16px;text-align:right;font-size:11px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">Amount</th>
         </tr>
       </thead>
@@ -430,10 +563,10 @@ const templates = {
         <tr style="border-bottom:1px solid #f1f5f9;">
           <td style="padding:20px 16px;">
             <p style="margin:0;font-size:15px;font-weight:700;color:#0F172A;">${booking.service}</p>
-            ${booking.details?.frequency?`<p style="margin:4px 0 0;font-size:13px;color:#64748b;">Frequency: ${booking.details.frequency}</p>`:""}
-            ${booking.details?.address?`<p style="margin:4px 0 0;font-size:13px;color:#64748b;">&#128205; ${booking.details.address}${booking.details.postcode&&!booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase())?", "+booking.details.postcode:""}</p>`:""}
+            ${booking.details?.frequency ? `<p style="margin:4px 0 0;font-size:13px;color:#64748b;">Frequency: ${booking.details.frequency}</p>` : ""}
+            ${booking.details?.address ? `<p style="margin:4px 0 0;font-size:13px;color:#64748b;">&#128205; ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ", " + booking.details.postcode : ""}</p>` : ""}
           </td>
-          <td style="padding:20px 16px;text-align:center;font-size:14px;color:#334155;font-weight:600;">${booking.payment?.billingType==="flat"?"Flat Rate":`${booking.details?.duration||"N/A"} hrs`}</td>
+          <td style="padding:20px 16px;text-align:center;font-size:14px;color:#334155;font-weight:600;">${booking.payment?.billingType === "flat" ? "Flat Rate" : `${booking.details?.duration || "N/A"} hrs`}</td>
           <td style="padding:20px 16px;text-align:right;font-size:16px;font-weight:800;color:#0F172A;">&#163;${booking.payment.amount}</td>
         </tr>
       </tbody>
@@ -703,9 +836,12 @@ const templates = {
   `,
 
   staffAppInvite: (staff) => {
-    const androidLink = "https://expo.dev/artifacts/eas/j8DzdUDFEfmfLUiK7QVUSG.apk";
+    const androidLink =
+      "https://expo.dev/artifacts/eas/j8DzdUDFEfmfLUiK7QVUSG.apk";
     // Plug in the TestFlight public link here once it's live (App Store Connect → TestFlight → External Testing).
-    const iosLink = process.env.IOS_TESTFLIGHT_LINK || "https://testflight.apple.com/join/PLACEHOLDER";
+    const iosLink =
+      process.env.IOS_TESTFLIGHT_LINK ||
+      "https://testflight.apple.com/join/PLACEHOLDER";
 
     return `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; background-color: #f1f5f9; padding: 24px 0;">
@@ -800,6 +936,56 @@ const templates = {
         <div style="margin-top: 40px; padding-top: 25px; border-top: 1px solid #edf2f7; text-align: center;">
           <p style="margin: 0; font-size: 14px; color: #94a3b8; font-weight: 600;">Welcome aboard!</p>
           <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #0F172A;">The Cleaniq Operations Team</p>
+        </div>
+      </div>
+    </div>
+  `,
+
+  adminLoginAlert: (admin, location, userAgent, dateTime) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0F172A; padding: 30px; text-align: center;">
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 26px; font-weight: 800;">Admin Login Alert</h1>
+        <p style="color: #cbd5e1; margin-top: 10px; font-size: 15px;">Your admin account was signed in successfully.</p>
+      </div>
+      <div style="padding: 35px 40px; color: #1e293b; line-height: 1.7;">
+        <p style="margin: 0 0 16px 0; font-size: 15px;">Hi ${admin.username},</p>
+        <p style="margin: 0 0 18px 0; font-size: 14px; color: #475569;">We detected an admin login to your account.</p>
+
+        <div style="background-color: #f8fafc; padding: 22px; border-radius: 20px; border: 1px solid #e2e8f0;">
+          <p style="margin: 0 0 10px 0; font-size: 14px;"><strong>Date & Time:</strong> ${dateTime}</p>
+          <p style="margin: 0 0 10px 0; font-size: 14px;"><strong>Location / IP:</strong> ${location}</p>
+          <p style="margin: 0; font-size: 14px;"><strong>Device:</strong> ${userAgent}</p>
+        </div>
+
+        <p style="margin: 24px 0 0 0; font-size: 14px; color: #475569;">If this was you, no action is needed. If you did not sign in, please change your password immediately and contact support.</p>
+
+        <div style="margin-top: 28px; text-align: center;">
+          <a href="https://cleaniqservices.com/admin/settings" style="display: inline-block; background-color: #0F172A; color: #ffffff; padding: 14px 32px; border-radius: 14px; text-decoration: none; font-weight: 700;">Review Security Settings</a>
+        </div>
+      </div>
+    </div>
+  `,
+
+  adminPasswordChangedAlert: (admin, location, userAgent, dateTime) => `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; background-color: #ffffff;">
+      <div style="background-color: #0F172A; padding: 30px; text-align: center;">
+        <h1 style="color: #6EE7B7; margin: 0; font-size: 26px; font-weight: 800;">Password Change Alert</h1>
+        <p style="color: #cbd5e1; margin-top: 10px; font-size: 15px;">This email confirms your admin password was changed.</p>
+      </div>
+      <div style="padding: 35px 40px; color: #1e293b; line-height: 1.7;">
+        <p style="margin: 0 0 16px 0; font-size: 15px;">Hi ${admin.username},</p>
+        <p style="margin: 0 0 18px 0; font-size: 14px; color: #475569;">Your admin password was updated successfully.</p>
+
+        <div style="background-color: #f8fafc; padding: 22px; border-radius: 20px; border: 1px solid #e2e8f0;">
+          <p style="margin: 0 0 10px 0; font-size: 14px;"><strong>Date & Time:</strong> ${dateTime}</p>
+          <p style="margin: 0 0 10px 0; font-size: 14px;"><strong>Location / IP:</strong> ${location}</p>
+          <p style="margin: 0; font-size: 14px;"><strong>Device:</strong> ${userAgent}</p>
+        </div>
+
+        <p style="margin: 24px 0 0 0; font-size: 14px; color: #475569;">If you did not change your password, please reset it immediately and contact support.</p>
+
+        <div style="margin-top: 28px; text-align: center;">
+          <a href="https://cleaniqservices.com/admin/security" style="display: inline-block; background-color: #0F172A; color: #ffffff; padding: 14px 32px; border-radius: 14px; text-decoration: none; font-weight: 700;">Review Security Settings</a>
         </div>
       </div>
     </div>
@@ -1856,13 +2042,17 @@ const templates = {
             </tr>
           </thead>
           <tbody>
-            ${items.map((item, idx) => `
+            ${items
+              .map(
+                (item, idx) => `
             <tr style="background:${idx % 2 === 0 ? "#ffffff" : "#f9fafb"}">
               <td style="padding:14px 18px;font-size:14px;color:#0f172a;font-weight:600;border-bottom:1px solid #f1f5f9">${item.description || "—"}</td>
               <td style="padding:14px 18px;text-align:center;font-size:14px;color:#64748b;border-bottom:1px solid #f1f5f9">${item.qty || 1}</td>
               <td style="padding:14px 18px;text-align:right;font-size:14px;color:#64748b;border-bottom:1px solid #f1f5f9">${currencySymbol}${Number(item.rate || 0).toFixed(2)}</td>
               <td style="padding:14px 18px;text-align:right;font-size:14px;font-weight:700;color:#0f172a;border-bottom:1px solid #f1f5f9">${currencySymbol}${((Number(item.qty) || 0) * (Number(item.rate) || 0)).toFixed(2)}</td>
-            </tr>`).join("")}
+            </tr>`,
+              )
+              .join("")}
           </tbody>
         </table>
       </td>
@@ -1887,7 +2077,9 @@ const templates = {
       </td>
     </tr>
 
-    ${paymentLink ? `
+    ${
+      paymentLink
+        ? `
     <!-- ░░ PAY NOW ░░ -->
     <tr>
       <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:28px 40px;text-align:center">
@@ -1895,9 +2087,13 @@ const templates = {
         <a href="${paymentLink}" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#ffffff;padding:16px 48px;border-radius:14px;text-decoration:none;font-weight:800;font-size:15px;box-shadow:0 8px 24px -4px rgba(79,70,229,0.4)">💳 Pay Now Securely</a>
         <p style="margin:12px 0 0;font-size:11px;color:#94a3b8">Encrypted · Powered by Stripe</p>
       </td>
-    </tr>` : ""}
+    </tr>`
+        : ""
+    }
 
-    ${paymentInstructions ? `
+    ${
+      paymentInstructions
+        ? `
     <!-- ░░ BANK DETAILS ░░ -->
     <tr>
       <td style="background:#f8fafc;padding:${paymentLink ? "0" : "28px"} 40px 28px">
@@ -1906,9 +2102,13 @@ const templates = {
           <tr><td style="background:#ffffff;padding:20px"><p style="margin:0;font-size:13px;color:#334155;white-space:pre-line;line-height:2;font-weight:500">${paymentInstructions}</p></td></tr>
         </table>
       </td>
-    </tr>` : ""}
+    </tr>`
+        : ""
+    }
 
-    ${notes ? `
+    ${
+      notes
+        ? `
     <!-- ░░ NOTES ░░ -->
     <tr>
       <td style="padding:0 40px 28px;background:#f8fafc">
@@ -1917,7 +2117,9 @@ const templates = {
           <p style="margin:0;font-size:13px;color:#065f46;white-space:pre-line;line-height:1.7">${notes}</p>
         </div>
       </td>
-    </tr>` : ""}
+    </tr>`
+        : ""
+    }
 
     <!-- ░░ THANK YOU ░░ -->
     <tr>
@@ -2250,23 +2452,36 @@ const automationTemplates = {
 // ─── Transactional worker-event emails sent to the customer ──────────────────
 
 const workerEventEmails = {
-
   // Sent when a worker accepts the job
   workerAccepted: (booking, worker) => {
-    const firstName  = booking.customer?.firstName || "there";
+    const firstName = booking.customer?.firstName || "there";
     const workerName = worker
       ? `${worker.firstName} ${worker.lastName}`
       : booking.assignedWorkerName || "Your cleaner";
-    const initials   = workerName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
-    const service    = booking.service || "Cleaning Service";
-    const ref        = booking.bookingId || "";
-    const address    = [booking.details?.address, booking.details?.postcode].filter(Boolean).join(", ");
-    const dateStr    = booking.schedule?.date
-      ? new Date(booking.schedule.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+    const initials = workerName
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+    const service = booking.service || "Cleaning Service";
+    const ref = booking.bookingId || "";
+    const address = [booking.details?.address, booking.details?.postcode]
+      .filter(Boolean)
+      .join(", ");
+    const dateStr = booking.schedule?.date
+      ? new Date(booking.schedule.date).toLocaleDateString("en-GB", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
       : "Scheduled date";
-    const timeSlot   = booking.schedule?.timeSlot || "";
-    const phone      = worker?.phone || "";
-    const acceptedAt = new Date(booking.jobAcceptedTime || Date.now()).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    const timeSlot = booking.schedule?.timeSlot || "";
+    const phone = worker?.phone || "";
+    const acceptedAt = new Date(
+      booking.jobAcceptedTime || Date.now(),
+    ).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#f1f5f9;">
 <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
@@ -2350,17 +2565,28 @@ const workerEventEmails = {
 
   // Sent when worker marks themselves as arrived
   workerArrived: (booking) => {
-    const firstName  = booking.customer?.firstName || "there";
+    const firstName = booking.customer?.firstName || "there";
     const workerName = booking.assignedWorkerName || "Your cleaner";
-    const initials   = workerName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
-    const service    = booking.service || "Cleaning Service";
-    const ref        = booking.bookingId || "";
-    const address    = [booking.details?.address, booking.details?.postcode].filter(Boolean).join(", ");
-    const mapsLink   = address
+    const initials = workerName
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+    const service = booking.service || "Cleaning Service";
+    const ref = booking.bookingId || "";
+    const address = [booking.details?.address, booking.details?.postcode]
+      .filter(Boolean)
+      .join(", ");
+    const mapsLink = address
       ? `https://www.google.com/maps/search/${encodeURIComponent(address)}`
       : "https://www.google.com/maps";
-    const arrivedAt  = new Date(booking.jobArrivedTime || Date.now()).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-    const arrivedDate = new Date(booking.jobArrivedTime || Date.now()).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+    const arrivedAt = new Date(
+      booking.jobArrivedTime || Date.now(),
+    ).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    const arrivedDate = new Date(
+      booking.jobArrivedTime || Date.now(),
+    ).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
 
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#f1f5f9;">
 <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
@@ -2444,25 +2670,45 @@ const workerEventEmails = {
 
   // Sent when worker marks the job as complete
   jobCompleted: (booking) => {
-    const firstName  = booking.customer?.firstName || "there";
+    const firstName = booking.customer?.firstName || "there";
     const workerName = booking.assignedWorkerName || "Your cleaner";
-    const initials   = workerName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
-    const service    = booking.service || "Cleaning Service";
-    const ref        = booking.bookingId || "";
-    const address    = [booking.details?.address, booking.details?.postcode].filter(Boolean).join(", ");
+    const initials = workerName
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+    const service = booking.service || "Cleaning Service";
+    const ref = booking.bookingId || "";
+    const address = [booking.details?.address, booking.details?.postcode]
+      .filter(Boolean)
+      .join(", ");
     const durationMins = booking.jobDurationActual || 0;
-    const durationHrs  = durationMins > 0
-      ? durationMins >= 60
-        ? `${Math.floor(durationMins / 60)}h ${durationMins % 60 > 0 ? `${durationMins % 60}m` : ""}`.trim()
-        : `${durationMins}m`
+    const durationHrs =
+      durationMins > 0
+        ? durationMins >= 60
+          ? `${Math.floor(durationMins / 60)}h ${durationMins % 60 > 0 ? `${durationMins % 60}m` : ""}`.trim()
+          : `${durationMins}m`
+        : null;
+    const startTime = booking.jobStartTime
+      ? new Date(booking.jobStartTime).toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
       : null;
-    const startTime  = booking.jobStartTime
-      ? new Date(booking.jobStartTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+    const endTime = booking.jobEndTime
+      ? new Date(booking.jobEndTime).toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
       : null;
-    const endTime    = booking.jobEndTime
-      ? new Date(booking.jobEndTime).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
-      : null;
-    const completedDate = new Date(booking.jobEndTime || Date.now()).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+    const completedDate = new Date(
+      booking.jobEndTime || Date.now(),
+    ).toLocaleDateString("en-GB", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
 
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#f1f5f9;">
 <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
@@ -2490,25 +2736,41 @@ const workerEventEmails = {
   </div>
 
   <!-- Stats row -->
-  ${durationHrs || startTime ? `
+  ${
+    durationHrs || startTime
+      ? `
   <div style="margin:24px 40px 0;">
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-spacing:8px 0;">
       <tr>
-        ${durationHrs ? `<td style="text-align:center;background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:14px;padding:16px 8px;">
+        ${
+          durationHrs
+            ? `<td style="text-align:center;background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:14px;padding:16px 8px;">
           <p style="margin:0;font-size:22px;font-weight:900;color:#0A5C43;">${durationHrs}</p>
           <p style="margin:4px 0 0;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Duration</p>
-        </td>` : ""}
-        ${startTime ? `<td style="text-align:center;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 8px;">
+        </td>`
+            : ""
+        }
+        ${
+          startTime
+            ? `<td style="text-align:center;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 8px;">
           <p style="margin:0;font-size:22px;font-weight:900;color:#0f172a;">${startTime}</p>
           <p style="margin:4px 0 0;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Started</p>
-        </td>` : ""}
-        ${endTime ? `<td style="text-align:center;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 8px;">
+        </td>`
+            : ""
+        }
+        ${
+          endTime
+            ? `<td style="text-align:center;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 8px;">
           <p style="margin:0;font-size:22px;font-weight:900;color:#0f172a;">${endTime}</p>
           <p style="margin:4px 0 0;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Finished</p>
-        </td>` : ""}
+        </td>`
+            : ""
+        }
       </tr>
     </table>
-  </div>` : ""}
+  </div>`
+      : ""
+  }
 
   <!-- Job summary -->
   <div style="margin:24px 40px 0;">
@@ -2567,4 +2829,10 @@ const workerEventEmails = {
   bookingStatusUpdate: buildBookingStatusUpdateEmail,
 };
 
-module.exports = { sendEmail, templates, automationTemplates, workerEventEmails, buildBookingStatusUpdateEmail };
+module.exports = {
+  sendEmail,
+  templates,
+  automationTemplates,
+  workerEventEmails,
+  buildBookingStatusUpdateEmail,
+};

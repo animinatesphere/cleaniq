@@ -17,6 +17,7 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
+app.disable("x-powered-by");
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -37,15 +38,39 @@ app.use(
   }),
 );
 
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "same-origin");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
+  if (process.env.NODE_ENV === "production") {
+    res.setHeader(
+      "Strict-Transport-Security",
+      "max-age=63072000; includeSubDomains; preload",
+    );
+  }
+  next();
+});
+
 // Explicit OPTIONS handler so preflight always responds with full CORS headers
 app.options("*", (req, res) => {
   const origin = req.headers.origin;
-  if (origin && (allowedOrigins.includes(origin) || origin.endsWith("cleaniqservices.com"))) {
+  if (
+    origin &&
+    (allowedOrigins.includes(origin) || origin.endsWith("cleaniqservices.com"))
+  ) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Access-Control-Allow-Credentials", "true");
   }
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type,Authorization,X-Requested-With",
+  );
   res.setHeader("Access-Control-Max-Age", "86400");
   res.sendStatus(204);
 });
@@ -76,7 +101,7 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/public",  express.static(path.join(__dirname, "public")));
+app.use("/public", express.static(path.join(__dirname, "public")));
 
 // MongoDB Connection
 const MONGODB_URI =
@@ -154,6 +179,7 @@ app.use("/api/cold-email", coldEmailRoutes);
 
 // Stripe webhook endpoint (raw body required)
 const { scheduleTask } = require("./utils/automationEngine");
+const { buildBookingDateTime } = require("./utils/bookingDateTime");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "");
 const Booking = require("./models/Booking");
 const { sendEmail, templates } = require("./utils/emailService");
@@ -183,7 +209,8 @@ const applyAdditionalHoursPayment = async (
     (booking.details.additionalHoursPurchased || 0) + additionalHoursAmount;
 
   booking.payment = booking.payment || {};
-  booking.payment.amount = (booking.payment.amount || 0) + (additionalAmount || 0);
+  booking.payment.amount =
+    (booking.payment.amount || 0) + (additionalAmount || 0);
   booking.payment.status = "Completed";
   booking.payment.capturedAt = new Date();
   booking.payment.additionalHoursApplied =
@@ -285,7 +312,13 @@ app.post(
               await booking.save();
 
               // SMS: booking confirmed (fire-and-forget)
-              setImmediate(() => sms.triggerBookingConfirmed(booking).catch(e => console.error("SMS Stripe trigger error:", e.message)));
+              setImmediate(() =>
+                sms
+                  .triggerBookingConfirmed(booking)
+                  .catch((e) =>
+                    console.error("SMS Stripe trigger error:", e.message),
+                  ),
+              );
 
               // Send Authorization Email to Customer (payment held)
               await sendEmail({
@@ -296,7 +329,13 @@ app.post(
 
               // Schedule booking reminders now that payment is confirmed
               try {
-                const bookingDate = booking.schedule?.date ? new Date(booking.schedule.date) : null;
+                const bookingDate = booking.schedule?.date
+                  ? buildBookingDateTime(
+                      booking.schedule.date,
+                      booking.schedule.timeSlot,
+                      booking.schedule?.preferredTime,
+                    )
+                  : null;
                 if (bookingDate && bookingDate > new Date()) {
                   const payload = {
                     bookingId: booking._id.toString(),
@@ -304,17 +343,32 @@ app.post(
                     email: booking.customer?.email,
                     firstName: booking.customer?.firstName,
                     service: booking.service,
-                    date: bookingDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
+                    date: bookingDate.toLocaleDateString("en-GB", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                    }),
                     amount: booking.payment?.amount,
                   };
                   const ms24h = 24 * 60 * 60 * 1000;
-                  const ms3h  = 3  * 60 * 60 * 1000;
-                  const soon  = Date.now() + 2 * 60 * 1000;
-                  await scheduleTask("booking_reminder_24h", new Date(Math.max(bookingDate.getTime() - ms24h, soon)), payload);
-                  await scheduleTask("booking_reminder_3h",  new Date(Math.max(bookingDate.getTime() - ms3h,  soon)), payload);
+                  const ms3h = 3 * 60 * 60 * 1000;
+                  const soon = Date.now() + 2 * 60 * 1000;
+                  await scheduleTask(
+                    "booking_reminder_24h",
+                    new Date(Math.max(bookingDate.getTime() - ms24h, soon)),
+                    payload,
+                  );
+                  await scheduleTask(
+                    "booking_reminder_3h",
+                    new Date(Math.max(bookingDate.getTime() - ms3h, soon)),
+                    payload,
+                  );
                 }
               } catch (schedErr) {
-                console.error("⚠️ Failed to schedule Stripe booking reminders:", schedErr.message);
+                console.error(
+                  "⚠️ Failed to schedule Stripe booking reminders:",
+                  schedErr.message,
+                );
               }
 
               console.log(
