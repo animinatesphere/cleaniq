@@ -415,7 +415,10 @@ const Dashboard = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/bookings`);
+      const token = localStorage.getItem("adminToken") || "";
+      const res = await fetch(`${API}/bookings`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       const data = await res.json();
       setBookings(Array.isArray(data) ? data : []);
       setLastRefresh(new Date());

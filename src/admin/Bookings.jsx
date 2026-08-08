@@ -71,6 +71,8 @@ const fmtTimeRange = (b) => {
   return `${fmt(s)} — ${fmt(s + Number(dur) * 60)}`;
 };
 
+const admTok = () => localStorage.getItem("adminToken") || "";
+
 export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarView, setCalendarView] = useState("month"); // "month" | "year"
@@ -1177,7 +1179,9 @@ const Bookings = () => {
   const fetchBookings = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
+        headers: { Authorization: `Bearer ${admTok()}` },
+      });
       const data = await response.json();
       setBookings(data);
     } catch (error) {
@@ -1695,6 +1699,7 @@ const Bookings = () => {
         bookingIds.map((id) =>
           fetch(`${import.meta.env.VITE_API_URL}/bookings/${id}`, {
             method: "DELETE",
+            headers: { Authorization: `Bearer ${admTok()}` },
           }),
         ),
       );
@@ -1745,7 +1750,7 @@ const Bookings = () => {
         `${import.meta.env.VITE_API_URL}/bookings/${booking._id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${admTok()}` },
           body: JSON.stringify({ status: "Completed" }),
         },
       );
@@ -1779,7 +1784,7 @@ const Bookings = () => {
         `${import.meta.env.VITE_API_URL}/bookings/${bookingId}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${admTok()}` },
           body: JSON.stringify({ status: newStatus }),
         },
       );
@@ -1802,7 +1807,7 @@ const Bookings = () => {
       try {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL}/bookings/${id}`,
-          { method: "DELETE" },
+          { method: "DELETE", headers: { Authorization: `Bearer ${admTok()}` } },
         );
         if (response.ok) {
           fetchBookings();
@@ -1824,7 +1829,7 @@ const Bookings = () => {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/bookings/${selectedBooking._id}/send-confirmation`,
-        { method: "POST", headers: { "Content-Type": "application/json" } }
+        { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${admTok()}` } }
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed");
@@ -1844,7 +1849,7 @@ const Bookings = () => {
         `${import.meta.env.VITE_API_URL}/bookings/${selectedBooking._id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${admTok()}` },
           body: JSON.stringify(payload),
         },
       );
@@ -3516,7 +3521,7 @@ ${extrasRows}
                         try {
                           const res = await fetch(
                             `${import.meta.env.VITE_API_URL}/bookings/${sib._id}`,
-                            { method: "DELETE" },
+                            { method: "DELETE", headers: { Authorization: `Bearer ${admTok()}` } },
                           );
                           if (!res.ok) throw new Error("Delete failed");
                           // If we just deleted the one being viewed, switch to the next sibling
@@ -3657,6 +3662,7 @@ ${extrasRows}
                                   method: "PUT",
                                   headers: {
                                     "Content-Type": "application/json",
+                                    Authorization: `Bearer ${admTok()}`,
                                   },
                                   body: JSON.stringify({
                                     payment: {

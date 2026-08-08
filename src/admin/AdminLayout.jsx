@@ -46,6 +46,26 @@ const AdminLayout = () => {
     setIsAuthenticated(false);
   };
 
+  // Automatically attach Authorization header to all admin API requests
+  useEffect(() => {
+    const API = import.meta.env.VITE_API_URL;
+    const orig = window.fetch;
+    window.fetch = (url, opts) => {
+      opts = opts || {};
+      if (typeof url === "string" && url.startsWith(API)) {
+        const token = localStorage.getItem("adminToken") || "";
+        if (token) {
+          opts = {
+            ...opts,
+            headers: { Authorization: `Bearer ${token}`, ...(opts.headers || {}) },
+          };
+        }
+      }
+      return orig.call(window, url, opts);
+    };
+    return () => { window.fetch = orig; };
+  }, []);
+
   // Keep <html> data-admin-theme in sync so CSS overrides apply before React paints
   useEffect(() => {
     document.documentElement.setAttribute("data-admin-theme", adminTheme);
