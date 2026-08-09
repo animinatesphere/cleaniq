@@ -42,6 +42,45 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const sendOtp = async (firstName, lastName, email, phone, password) => {
+    try {
+      await apiFetch(`${API_URL}/customer-auth/send-otp`, {
+        method: "POST",
+        body: JSON.stringify({ firstName, lastName, email, phone, password }),
+      });
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message ||
+          "Failed to send verification code. Check your internet.",
+      };
+    }
+  };
+
+  const verifyOtp = async (email, code) => {
+    try {
+      const response = await apiFetch(`${API_URL}/customer-auth/verify-otp`, {
+        method: "POST",
+        body: JSON.stringify({ email, code }),
+      });
+      const { token, customer } = response.data;
+      await AsyncStorage.setItem("customerToken", token);
+      await AsyncStorage.setItem("customerInfo", JSON.stringify(customer));
+      setUserToken(token);
+      setCustomerInfo(customer);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message ||
+          "Incorrect code or it has expired. Please try again.",
+      };
+    }
+  };
+
   const login = async (email, password) => {
     try {
       const response = await apiFetch(`${API_URL}/customer-auth/login`, {
@@ -114,7 +153,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ login, register, logout, updateProfile, isLoading, userToken, customerInfo }}
+      value={{ login, register, sendOtp, verifyOtp, logout, updateProfile, isLoading, userToken, customerInfo }}
     >
       {children}
     </AuthContext.Provider>
