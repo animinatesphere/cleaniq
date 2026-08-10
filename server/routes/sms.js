@@ -205,4 +205,72 @@ router.delete("/logs", async (req, res) => {
   }
 });
 
+// ─── Bulk SMS ────────────────────────────────────────────────────────────────
+
+// GET /api/sms/bulk/contacts — return unique customers with phone numbers from bookings
+router.get("/bulk/contacts", async (req, res) => {
+  try {
+    const Booking = require("../models/Booking");
+    const bookings = await Booking.find(
+      { "customer.phone": { $exists: true, $ne: "" } },
+      { "customer.firstName": 1, "customer.lastName": 1, "customer.email": 1, "customer.phone": 1 }
+    ).sort({ createdAt: -1 });
+
+    // Deduplicate by phone number — keep the most recent booking's customer info
+    const seen = new Map();
+    for (const b of bookings) {
+      const phone = b.customer?.phone?.trim();
+      if (!phone || seen.has(phone)) continue;
+      seen.set(phone, {
+        _id:   b._id.toString(),
+        name:  `${b.customer.firstName || ""} ${b.customer.lastName || ""}`.trim() || "Unknown",
+        email: b.customer.email || "",
+        phone,
+      });
+    }
+    res.json({ contacts: Array.from(seen.values()), total: seen.size });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/sms/bulk/send — send SMS to a list of phone numbers
+router.post("/bulk/send", async (req, res) => {
+  try {
+    const { contacts, message } = req.body;
+    if (!Array.isArray(contacts) || contacts.length === 0)
+      return res.status(400).json({ error: "No contacts provided" });
+    if (!message?.trim())
+      return res.status(400).json({ error: "Message is required" });
+
+    const { sendSms } = require("../utils/smsService");
+
+    // Send in batches of 10 to avoid overwhelming Twilio rate limits
+    const results = { sent: 0, failed: 0, errors: [] };
+    const BATCH = 10;
+
+    for (let i = 0; i < contacts.length; i += BATCH) {
+      const batch = contacts.slice(i, i + BATCH);
+      await Promise.all(batch.map(async (c) => {
+        const result = await sendSms({
+          to:      c.phone,
+          body:    message.trim(),
+          trigger: "bulk",
+          recipient: "customer",
+        });
+        if (result.success) {
+          results.sent++;
+        } else {
+          results.failed++;
+          results.errors.push({ phone: c.phone, error: result.error });
+        }
+      }));
+    }
+
+    res.json({ success: true, ...results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

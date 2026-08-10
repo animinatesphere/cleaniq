@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   MessageSquare, Settings, Send, CheckCircle2, XCircle,
   Clock, RefreshCw, Trash2, User, Briefcase, AlertCircle,
-  Eye, EyeOff,
+  Eye, EyeOff, Search, Users,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -61,6 +61,15 @@ export default function SmsAutomation() {
   const [creds, setCreds]                 = useState({ accountSid: "", authToken: "", phoneNumber: "", verifySid: "" });
   const [savingCreds, setSavingCreds]     = useState(false);
   const [activeTab, setActiveTab]         = useState("triggers");
+
+  // Bulk SMS state
+  const [bulkContacts, setBulkContacts]       = useState([]);
+  const [bulkLoading, setBulkLoading]         = useState(false);
+  const [bulkSearch, setBulkSearch]           = useState("");
+  const [bulkSelected, setBulkSelected]       = useState(new Set());
+  const [bulkMessage, setBulkMessage]         = useState("");
+  const [bulkSending, setBulkSending]         = useState(false);
+  const [bulkResult, setBulkResult]           = useState(null);
 
   // Verify state
   const [verifyPhone, setVerifyPhone]         = useState("");
@@ -228,8 +237,75 @@ export default function SmsAutomation() {
   const customerTriggers = config?.triggers?.filter(t => t.recipient === "customer") || [];
   const workerTriggers   = config?.triggers?.filter(t => t.recipient === "worker")   || [];
 
+  const fetchBulkContacts = useCallback(async () => {
+    setBulkLoading(true);
+    try {
+      const res  = await fetch(`${API}/sms/bulk/contacts`);
+      const data = await res.json();
+      setBulkContacts(data.contacts || []);
+    } catch {
+      showToast("Failed to load contacts", "error");
+    } finally {
+      setBulkLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "bulk") fetchBulkContacts();
+  }, [activeTab, fetchBulkContacts]);
+
+  const bulkToggle = (phone) => {
+    setBulkSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(phone)) next.delete(phone); else next.add(phone);
+      return next;
+    });
+  };
+
+  const bulkSelectAll = () => {
+    const filtered = bulkContacts.filter(c =>
+      !bulkSearch || c.name.toLowerCase().includes(bulkSearch.toLowerCase()) || c.phone.includes(bulkSearch)
+    );
+    setBulkSelected(prev => {
+      const allSelected = filtered.every(c => prev.has(c.phone));
+      const next = new Set(prev);
+      if (allSelected) filtered.forEach(c => next.delete(c.phone));
+      else filtered.forEach(c => next.add(c.phone));
+      return next;
+    });
+  };
+
+  const sendBulk = async () => {
+    if (bulkSelected.size === 0) return showToast("Select at least one contact", "error");
+    if (!bulkMessage.trim()) return showToast("Write a message first", "error");
+    if (!confirm(`Send SMS to ${bulkSelected.size} contact${bulkSelected.size > 1 ? "s" : ""}?`)) return;
+    setBulkSending(true);
+    setBulkResult(null);
+    try {
+      const contacts = bulkContacts.filter(c => bulkSelected.has(c.phone));
+      const res  = await fetch(`${API}/sms/bulk/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contacts, message: bulkMessage }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBulkResult(data);
+        setBulkSelected(new Set());
+        showToast(`Sent ${data.sent}, Failed ${data.failed}`);
+      } else {
+        showToast(data.error || "Send failed", "error");
+      }
+    } catch {
+      showToast("Failed to send bulk SMS", "error");
+    } finally {
+      setBulkSending(false);
+    }
+  };
+
   const TABS = [
     { id: "triggers",    label: "Triggers" },
+    { id: "bulk",        label: "Bulk SMS" },
     { id: "verify",      label: "Phone Verify", dot: config?.verifyConfigured },
     { id: "logs",        label: "SMS Logs" },
     { id: "credentials", label: "Credentials" },
@@ -434,6 +510,185 @@ export default function SmsAutomation() {
                 </div>
               </>
             )}
+          </div>
+        )}
+
+        {/* ── BULK SMS ── */}
+        {activeTab === "bulk" && (
+          <div className="p-5 space-y-4">
+            {!config?.configured && (
+              <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25">
+                <AlertCircle size={17} className="text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-black text-amber-400">Twilio not configured</p>
+                  <p className="text-xs text-amber-400/70 mt-0.5">
+                    Add your credentials in the{" "}
+                    <button onClick={() => setActiveTab("credentials")} className="underline font-bold text-amber-400">Credentials tab</button> first.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Left — contacts */}
+              <div className="rounded-2xl border border-white/7 overflow-hidden flex flex-col">
+                <div className="px-4 py-3 border-b border-white/6 bg-white/2 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Users size={14} className="text-white/40" />
+                    <p className="text-sm font-black text-white">Contacts</p>
+                    <span className="text-[10px] font-bold text-white/30 bg-white/8 px-2 py-0.5 rounded-full">
+                      {bulkSelected.size} selected
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={fetchBulkContacts}
+                      disabled={bulkLoading}
+                      className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
+                    >
+                      <RefreshCw size={12} className={bulkLoading ? "animate-spin" : ""} />
+                    </button>
+                    <button
+                      onClick={bulkSelectAll}
+                      className="text-[11px] font-black text-emerald-400 hover:text-emerald-300 transition-colors"
+                    >
+                      {bulkContacts.filter(c => !bulkSearch || c.name.toLowerCase().includes(bulkSearch.toLowerCase()) || c.phone.includes(bulkSearch)).every(c => bulkSelected.has(c.phone))
+                        ? "Deselect All" : "Select All"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Search */}
+                <div className="px-4 py-2.5 border-b border-white/6">
+                  <div className="relative">
+                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25" />
+                    <input
+                      type="text"
+                      value={bulkSearch}
+                      onChange={e => setBulkSearch(e.target.value)}
+                      placeholder="Search by name or number…"
+                      className="w-full pl-8 pr-3 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto max-h-80 divide-y divide-white/[0.04]">
+                  {bulkLoading ? (
+                    <div className="py-12 flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : bulkContacts.filter(c =>
+                    !bulkSearch || c.name.toLowerCase().includes(bulkSearch.toLowerCase()) || c.phone.includes(bulkSearch)
+                  ).length === 0 ? (
+                    <div className="py-12 text-center">
+                      <Users size={24} className="text-white/15 mx-auto mb-2" />
+                      <p className="text-xs text-white/30 font-bold">No contacts found</p>
+                    </div>
+                  ) : (
+                    bulkContacts
+                      .filter(c => !bulkSearch || c.name.toLowerCase().includes(bulkSearch.toLowerCase()) || c.phone.includes(bulkSearch))
+                      .map(c => (
+                        <button
+                          key={c.phone}
+                          onClick={() => bulkToggle(c.phone)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/3 transition-colors ${
+                            bulkSelected.has(c.phone) ? "bg-emerald-500/8" : ""
+                          }`}
+                        >
+                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
+                            bulkSelected.has(c.phone)
+                              ? "bg-emerald-500 border-emerald-500"
+                              : "border-white/20"
+                          }`}>
+                            {bulkSelected.has(c.phone) && <CheckCircle2 size={10} className="text-white" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold text-white truncate">{c.name}</p>
+                            <p className="text-[11px] text-white/35 font-medium">{c.phone}</p>
+                          </div>
+                        </button>
+                      ))
+                  )}
+                </div>
+
+                <div className="px-4 py-2.5 border-t border-white/6 bg-white/2">
+                  <p className="text-[11px] text-white/30 font-medium">
+                    {bulkContacts.length} unique customer{bulkContacts.length !== 1 ? "s" : ""} with phone numbers
+                  </p>
+                </div>
+              </div>
+
+              {/* Right — compose */}
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-white/7 p-5 space-y-4">
+                  <div>
+                    <p className="text-sm font-black text-white mb-1">Compose Message</p>
+                    <p className="text-[11px] text-white/35 font-medium">Keep under 160 characters to avoid splitting into multiple SMS</p>
+                  </div>
+                  <textarea
+                    value={bulkMessage}
+                    onChange={e => setBulkMessage(e.target.value)}
+                    placeholder="Type your message here…"
+                    rows={6}
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all resize-none"
+                  />
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-3 text-[11px] font-bold">
+                      <span className={bulkMessage.length > 160 ? "text-amber-400" : "text-white/30"}>
+                        {bulkMessage.length} chars
+                      </span>
+                      {bulkMessage.length > 160 && (
+                        <span className="text-amber-400">
+                          ≈ {Math.ceil(bulkMessage.length / 153)} SMS parts
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[11px] text-white/25 font-medium">
+                      {bulkSelected.size} recipient{bulkSelected.size !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={sendBulk}
+                    disabled={bulkSending || bulkSelected.size === 0 || !bulkMessage.trim() || !config?.configured}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500 text-white font-black text-sm hover:bg-emerald-400 transition-colors disabled:opacity-50 shadow-sm shadow-emerald-500/25"
+                  >
+                    {bulkSending ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
+                    {bulkSending
+                      ? "Sending…"
+                      : bulkSelected.size === 0
+                        ? "Select contacts to send"
+                        : `Send to ${bulkSelected.size} contact${bulkSelected.size !== 1 ? "s" : ""}`}
+                  </button>
+                </div>
+
+                {bulkResult && (
+                  <div className="rounded-2xl border border-white/7 p-5 space-y-3">
+                    <p className="text-sm font-black text-white">Send Results</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-xl px-4 py-3 text-center">
+                        <p className="text-2xl font-black text-emerald-400 tabular-nums">{bulkResult.sent}</p>
+                        <p className="text-[10px] font-bold text-emerald-400/60 uppercase tracking-widest mt-0.5">Sent</p>
+                      </div>
+                      <div className="bg-rose-500/10 border border-rose-500/25 rounded-xl px-4 py-3 text-center">
+                        <p className="text-2xl font-black text-rose-400 tabular-nums">{bulkResult.failed}</p>
+                        <p className="text-[10px] font-bold text-rose-400/60 uppercase tracking-widest mt-0.5">Failed</p>
+                      </div>
+                    </div>
+                    {bulkResult.errors?.length > 0 && (
+                      <div className="space-y-1.5">
+                        {bulkResult.errors.map((e, i) => (
+                          <div key={i} className="flex items-start gap-2 text-[11px]">
+                            <XCircle size={12} className="text-rose-400 shrink-0 mt-0.5" />
+                            <span className="text-rose-400/80 font-medium">{e.phone}: {e.error}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

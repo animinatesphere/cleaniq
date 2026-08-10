@@ -81,6 +81,16 @@ async function sendSms({ to, body, trigger, bookingId, bookingRef, recipient = "
   }
 }
 
+// ── Date formatter ─────────────────────────────────────────────────────────
+function fmtDate(raw) {
+  if (!raw) return "";
+  try {
+    return new Date(raw).toLocaleDateString("en-GB", {
+      weekday: "short", day: "numeric", month: "short", year: "numeric",
+    });
+  } catch { return String(raw); }
+}
+
 // ── Templates ──────────────────────────────────────────────────────────────
 const templates = {
   booking_confirmed: (b) =>
@@ -125,7 +135,7 @@ async function triggerBookingConfirmed(booking) {
     body: templates.booking_confirmed({
       firstName:  booking.customer?.firstName || "there",
       service:    booking.service || "cleaning",
-      date:       booking.schedule?.date || "",
+      date:       fmtDate(booking.schedule?.date),
       time:       booking.schedule?.preferredTime || "",
       bookingRef: booking.bookingId || "",
     }),
@@ -144,7 +154,7 @@ async function triggerWorkerAssigned(booking, workerName) {
     body: templates.worker_assigned({
       firstName:  booking.customer?.firstName || "there",
       workerName: workerName || "your cleaner",
-      date:       booking.schedule?.date || "",
+      date:       fmtDate(booking.schedule?.date),
       time:       booking.schedule?.preferredTime || "",
       bookingRef: booking.bookingId || "",
     }),
@@ -195,7 +205,7 @@ async function triggerBookingCancelled(booking) {
     to: phone,
     body: templates.booking_cancelled({
       bookingRef: booking.bookingId || "",
-      date:       booking.schedule?.date || "",
+      date:       fmtDate(booking.schedule?.date),
     }),
     trigger:    "booking_cancelled",
     bookingId:  booking._id?.toString(),
@@ -212,7 +222,7 @@ async function triggerWorkerJobAssigned(booking, worker) {
     body: templates.worker_job_assigned({
       customerName: `${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}`.trim() || "Customer",
       address:      booking.details?.address || booking.address || "",
-      date:         booking.schedule?.date || "",
+      date:         fmtDate(booking.schedule?.date),
       time:         booking.schedule?.preferredTime || "",
       bookingRef:   booking.bookingId || "",
     }),
