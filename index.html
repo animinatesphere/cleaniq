@@ -2,7 +2,16 @@
 <html lang="en-GB">
   <head>
     <!-- Admin theme sync: runs synchronously before first paint to avoid flash -->
-    <script>try{if(location.pathname.startsWith('/admin')&&localStorage.getItem('adminTheme')==='light')document.documentElement.setAttribute('data-admin-theme','light')}catch(e){}</script>
+    twilio-domain-verification=464459e2817183f698073d8cd70d1998
+    <script>
+      try {
+        if (
+          location.pathname.startsWith("/admin") &&
+          localStorage.getItem("adminTheme") === "light"
+        )
+          document.documentElement.setAttribute("data-admin-theme", "light");
+      } catch (e) {}
+    </script>
     <!-- Google Tag Manager -->
     <script>
       (function (w, d, s, l, i) {
@@ -18,7 +27,10 @@
     </script>
     <!-- End Google Tag Manager -->
     <!-- Smart App Banner (iOS Safari) -->
-    <meta name="apple-itunes-app" content="app-id=6787302038, app-argument=https://www.cleaniqservices.com" />
+    <meta
+      name="apple-itunes-app"
+      content="app-id=6787302038, app-argument=https://www.cleaniqservices.com"
+    />
     <!-- Google tag (gtag.js) -->
     <link rel="preconnect" href="https://www.googletagmanager.com" />
     <link rel="preconnect" href="https://js.stripe.com" crossorigin />
@@ -110,13 +122,59 @@
 
     <!-- TikTok Pixel Code Start -->
     <script>
-      !function (w, d, t) {
-        w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(
-      var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script")
-      ;n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};
-        ttq.load('D961F53C77U133LMJNQG');
+      !(function (w, d, t) {
+        w.TiktokAnalyticsObject = t;
+        var ttq = (w[t] = w[t] || []);
+        ((ttq.methods = [
+          "page",
+          "track",
+          "identify",
+          "instances",
+          "debug",
+          "on",
+          "off",
+          "once",
+          "ready",
+          "alias",
+          "group",
+          "enableCookie",
+          "disableCookie",
+          "holdConsent",
+          "revokeConsent",
+          "grantConsent",
+        ]),
+          (ttq.setAndDefer = function (t, e) {
+            t[e] = function () {
+              t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+            };
+          }));
+        for (var i = 0; i < ttq.methods.length; i++)
+          ttq.setAndDefer(ttq, ttq.methods[i]);
+        ((ttq.instance = function (t) {
+          for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++)
+            ttq.setAndDefer(e, ttq.methods[n]);
+          return e;
+        }),
+          (ttq.load = function (e, n) {
+            var r = "https://analytics.tiktok.com/i18n/pixel/events.js",
+              o = n && n.partner;
+            ((ttq._i = ttq._i || {}),
+              (ttq._i[e] = []),
+              (ttq._i[e]._u = r),
+              (ttq._t = ttq._t || {}),
+              (ttq._t[e] = +new Date()),
+              (ttq._o = ttq._o || {}),
+              (ttq._o[e] = n || {}));
+            n = document.createElement("script");
+            ((n.type = "text/javascript"),
+              (n.async = !0),
+              (n.src = r + "?sdkid=" + e + "&lib=" + t));
+            e = document.getElementsByTagName("script")[0];
+            e.parentNode.insertBefore(n, e);
+          }));
+        ttq.load("D961F53C77U133LMJNQG");
         ttq.page();
-      }(window, document, 'ttq');
+      })(window, document, "ttq");
     </script>
     <!-- TikTok Pixel Code End -->
 
