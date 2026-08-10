@@ -91,26 +91,43 @@ function fmtDate(raw) {
   } catch { return String(raw); }
 }
 
-// ── Templates ──────────────────────────────────────────────────────────────
-const templates = {
-  booking_confirmed: (b) =>
-    `Hi ${b.firstName}, your ${b.service} clean is confirmed for ${b.date} at ${b.time}. Ref: ${b.bookingRef}. Questions? Call us on 0121 000 0000. — cleaniq services`,
-
-  worker_assigned: (b) =>
-    `Great news ${b.firstName}! ${b.workerName} has been assigned to your clean on ${b.date} at ${b.time}. Ref: ${b.bookingRef}. — cleaniq services`,
-
-  booking_reminder_24h: (b) =>
-    `Reminder: Your ${b.service} clean is tomorrow at ${b.time}. Please ensure access to the property. Ref: ${b.bookingRef}. Need help? Reply STOP to opt out. — cleaniq services`,
-
-  booking_completed: (b) =>
-    `Your clean is done! Thanks for choosing cleaniq services, ${b.firstName}. ⭐ Leave us a review: https://g.page/r/cleaniqservices/review — We hope to see you again!`,
-
-  booking_cancelled: (b) =>
-    `Your booking ${b.bookingRef} on ${b.date} has been cancelled. Contact us to rebook: 0121 000 0000. — cleaniq services`,
-
-  worker_job_assigned: (b) =>
-    `New job: ${b.customerName} at ${b.address} on ${b.date} at ${b.time}. Ref: ${b.bookingRef}. Log in for details. — cleaniq services`,
+// ── Default templates (string with {placeholder} syntax, editable in admin) ─
+const DEFAULT_TEMPLATES = {
+  booking_confirmed:
+    "Hi {firstName}, your {service} clean is confirmed for {date} at {time}. Ref: {bookingRef}. Questions? Call {bizPhone}. — Cleaniq Services",
+  worker_assigned:
+    "Great news {firstName}! {workerName} has been assigned to your clean on {date} at {time}. Ref: {bookingRef}. — Cleaniq Services",
+  booking_reminder_24h:
+    "Reminder: Your {service} clean is tomorrow at {time}. Please ensure access. Ref: {bookingRef}. Reply STOP to opt out. — Cleaniq Services",
+  booking_completed:
+    "Your clean is done! Thanks for choosing Cleaniq Services, {firstName}. Leave us a review: https://g.page/r/cleaniqservices/review",
+  booking_cancelled:
+    "Your booking {bookingRef} on {date} has been cancelled. To rebook call {bizPhone}. — Cleaniq Services",
+  worker_job_assigned:
+    "New job: {customerName} at {address} on {date} at {time}. Ref: {bookingRef}. Log in for details. — Cleaniq Services",
 };
+
+// Substitutes {key} placeholders with values from vars object
+function renderTemplate(tpl, vars) {
+  return tpl.replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ""));
+}
+
+// Load template from DB if admin has saved a custom version, else use default
+async function getTemplate(key) {
+  try {
+    const s = await SystemSetting.findOne({ key: `sms_tpl_${key}` });
+    if (s?.value) return s.value;
+  } catch {}
+  return DEFAULT_TEMPLATES[key] || "";
+}
+
+// Business contact number shown inside SMS messages
+async function getBizPhone() {
+  try {
+    const s = await SystemSetting.findOne({ key: "business_phone" });
+    return s?.value || "";
+  } catch { return ""; }
+}
 
 // ── Phone resolver — uses booking phone or falls back to Customer record ───
 async function resolvePhone(booking) {
@@ -130,14 +147,16 @@ async function triggerBookingConfirmed(booking) {
   if (!await isTriggerEnabled("booking_confirmed")) return;
   const phone = await resolvePhone(booking);
   if (!phone) return;
+  const [tpl, bizPhone] = await Promise.all([getTemplate("booking_confirmed"), getBizPhone()]);
   await sendSms({
     to: phone,
-    body: templates.booking_confirmed({
+    body: renderTemplate(tpl, {
       firstName:  booking.customer?.firstName || "there",
       service:    booking.service || "cleaning",
       date:       fmtDate(booking.schedule?.date),
       time:       booking.schedule?.preferredTime || "",
       bookingRef: booking.bookingId || "",
+      bizPhone,
     }),
     trigger:    "booking_confirmed",
     bookingId:  booking._id?.toString(),
@@ -149,9 +168,10 @@ async function triggerWorkerAssigned(booking, workerName) {
   if (!await isTriggerEnabled("worker_assigned")) return;
   const phone = await resolvePhone(booking);
   if (!phone) return;
+  const tpl = await getTemplate("worker_assigned");
   await sendSms({
     to: phone,
-    body: templates.worker_assigned({
+    body: renderTemplate(tpl, {
       firstName:  booking.customer?.firstName || "there",
       workerName: workerName || "your cleaner",
       date:       fmtDate(booking.schedule?.date),
@@ -168,9 +188,10 @@ async function triggerBookingReminder24h(booking) {
   if (!await isTriggerEnabled("booking_reminder_24h")) return;
   const phone = await resolvePhone(booking);
   if (!phone) return;
+  const tpl = await getTemplate("booking_reminder_24h");
   await sendSms({
     to: phone,
-    body: templates.booking_reminder_24h({
+    body: renderTemplate(tpl, {
       firstName:  booking.customer?.firstName || "there",
       service:    booking.service || "cleaning",
       time:       booking.schedule?.preferredTime || "",
@@ -186,9 +207,10 @@ async function triggerBookingCompleted(booking) {
   if (!await isTriggerEnabled("booking_completed")) return;
   const phone = await resolvePhone(booking);
   if (!phone) return;
+  const tpl = await getTemplate("booking_completed");
   await sendSms({
     to: phone,
-    body: templates.booking_completed({
+    body: renderTemplate(tpl, {
       firstName: booking.customer?.firstName || "there",
     }),
     trigger:    "booking_completed",
@@ -201,11 +223,13 @@ async function triggerBookingCancelled(booking) {
   if (!await isTriggerEnabled("booking_cancelled")) return;
   const phone = await resolvePhone(booking);
   if (!phone) return;
+  const [tpl, bizPhone] = await Promise.all([getTemplate("booking_cancelled"), getBizPhone()]);
   await sendSms({
     to: phone,
-    body: templates.booking_cancelled({
+    body: renderTemplate(tpl, {
       bookingRef: booking.bookingId || "",
       date:       fmtDate(booking.schedule?.date),
+      bizPhone,
     }),
     trigger:    "booking_cancelled",
     bookingId:  booking._id?.toString(),
@@ -217,9 +241,10 @@ async function triggerWorkerJobAssigned(booking, worker) {
   if (!await isTriggerEnabled("worker_job_assigned")) return;
   const phone = worker?.phone;
   if (!phone) return;
+  const tpl = await getTemplate("worker_job_assigned");
   await sendSms({
     to: phone,
-    body: templates.worker_job_assigned({
+    body: renderTemplate(tpl, {
       customerName: `${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}`.trim() || "Customer",
       address:      booking.details?.address || booking.address || "",
       date:         fmtDate(booking.schedule?.date),
@@ -235,6 +260,7 @@ async function triggerWorkerJobAssigned(booking, worker) {
 
 module.exports = {
   sendSms,
+  normalizePhone,
   isTriggerEnabled,
   triggerBookingConfirmed,
   triggerWorkerAssigned,
@@ -242,4 +268,7 @@ module.exports = {
   triggerBookingCompleted,
   triggerBookingCancelled,
   triggerWorkerJobAssigned,
+  DEFAULT_TEMPLATES,
+  getTemplate,
+  renderTemplate,
 };

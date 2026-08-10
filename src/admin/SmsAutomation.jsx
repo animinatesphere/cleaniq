@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   MessageSquare, Settings, Send, CheckCircle2, XCircle,
   Clock, RefreshCw, Trash2, User, Briefcase, AlertCircle,
-  Eye, EyeOff, Search, Users,
+  Eye, EyeOff, Search, Users, Edit3, RotateCcw, X, Phone,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -61,6 +61,17 @@ export default function SmsAutomation() {
   const [creds, setCreds]                 = useState({ accountSid: "", authToken: "", phoneNumber: "", verifySid: "" });
   const [savingCreds, setSavingCreds]     = useState(false);
   const [activeTab, setActiveTab]         = useState("triggers");
+
+  // Template editing state
+  const [templates, setTemplates]             = useState([]);
+  const [bizPhone, setBizPhone]               = useState("");
+  const [bizPhoneInput, setBizPhoneInput]     = useState("");
+  const [savingBizPhone, setSavingBizPhone]   = useState(false);
+  const [editTpl, setEditTpl]                 = useState(null); // { key, text, default }
+  const [savingTpl, setSavingTpl]             = useState(false);
+
+  // Log detail modal
+  const [detailLog, setDetailLog]             = useState(null);
 
   // Bulk SMS state
   const [bulkContacts, setBulkContacts]       = useState([]);
@@ -237,6 +248,73 @@ export default function SmsAutomation() {
   const customerTriggers = config?.triggers?.filter(t => t.recipient === "customer") || [];
   const workerTriggers   = config?.triggers?.filter(t => t.recipient === "worker")   || [];
 
+  const fetchTemplates = useCallback(async () => {
+    try {
+      const res  = await fetch(`${API}/sms/templates`);
+      const data = await res.json();
+      setTemplates(data.templates || []);
+      setBizPhone(data.bizPhone || "");
+      setBizPhoneInput(data.bizPhone || "");
+    } catch {}
+  }, []);
+
+  useEffect(() => { if (activeTab === "triggers") fetchTemplates(); }, [activeTab, fetchTemplates]);
+
+  const saveTpl = async () => {
+    if (!editTpl) return;
+    setSavingTpl(true);
+    try {
+      const res = await fetch(`${API}/sms/templates/${editTpl.key}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: editTpl.text }),
+      });
+      if (!res.ok) throw new Error();
+      showToast("Template saved");
+      setEditTpl(null);
+      fetchTemplates();
+    } catch {
+      showToast("Failed to save template", "error");
+    } finally {
+      setSavingTpl(false);
+    }
+  };
+
+  const resetTpl = async (key) => {
+    if (!confirm("Reset to default template?")) return;
+    try {
+      await fetch(`${API}/sms/templates/${key}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: "" }),
+      });
+      showToast("Template reset to default");
+      fetchTemplates();
+      if (editTpl?.key === key) setEditTpl(null);
+    } catch {
+      showToast("Failed to reset", "error");
+    }
+  };
+
+  const saveBizPhone = async () => {
+    if (!bizPhoneInput.trim()) return showToast("Enter a phone number", "error");
+    setSavingBizPhone(true);
+    try {
+      const res = await fetch(`${API}/sms/config/biz-phone`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: bizPhoneInput.trim() }),
+      });
+      if (!res.ok) throw new Error();
+      setBizPhone(bizPhoneInput.trim());
+      showToast("Business phone saved");
+    } catch {
+      showToast("Failed to save", "error");
+    } finally {
+      setSavingBizPhone(false);
+    }
+  };
+
   const fetchBulkContacts = useCallback(async () => {
     setBulkLoading(true);
     try {
@@ -313,6 +391,88 @@ export default function SmsAutomation() {
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto space-y-5 pb-20">
+
+      {/* ── Template edit modal ── */}
+      {editTpl && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-[#0B2D22] border border-white/10 rounded-3xl p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-black text-white">Edit Template</p>
+                <p className="text-[11px] text-white/35 font-medium mt-0.5">
+                  Use <span className="font-mono text-emerald-400">{"{firstName}"}</span>, <span className="font-mono text-emerald-400">{"{date}"}</span>, <span className="font-mono text-emerald-400">{"{time}"}</span>, <span className="font-mono text-emerald-400">{"{bookingRef}"}</span>, <span className="font-mono text-emerald-400">{"{bizPhone}"}</span>
+                </p>
+              </div>
+              <button onClick={() => setEditTpl(null)} className="w-8 h-8 rounded-xl bg-white/8 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+                <X size={15} />
+              </button>
+            </div>
+            <textarea
+              value={editTpl.text}
+              onChange={e => setEditTpl(t => ({ ...t, text: e.target.value }))}
+              rows={5}
+              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white focus:outline-none focus:border-emerald-500/50 transition-all resize-none"
+            />
+            <div className="flex items-center justify-between text-[11px] font-bold">
+              <span className={editTpl.text.length > 160 ? "text-amber-400" : "text-white/30"}>
+                {editTpl.text.length} chars {editTpl.text.length > 160 ? `(≈${Math.ceil(editTpl.text.length / 153)} SMS)` : ""}
+              </span>
+              {editTpl.isCustom && (
+                <button onClick={() => resetTpl(editTpl.key)} className="flex items-center gap-1 text-white/30 hover:text-rose-400 transition-colors">
+                  <RotateCcw size={11} /> Reset to default
+                </button>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setEditTpl(null)} className="flex-1 py-2.5 rounded-xl border border-white/10 text-sm font-black text-white/40 hover:text-white transition-colors">Cancel</button>
+              <button onClick={saveTpl} disabled={savingTpl} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 text-white font-black text-sm hover:bg-emerald-400 transition-colors disabled:opacity-50">
+                {savingTpl ? <RefreshCw size={13} className="animate-spin" /> : <CheckCircle2 size={13} />}
+                {savingTpl ? "Saving…" : "Save Template"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Log detail modal ── */}
+      {detailLog && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setDetailLog(null)}>
+          <div className="w-full max-w-lg bg-[#0B2D22] border border-white/10 rounded-3xl p-6 space-y-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-black text-white">Message Details</p>
+              <button onClick={() => setDetailLog(null)} className="w-8 h-8 rounded-xl bg-white/8 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+                <X size={15} />
+              </button>
+            </div>
+            <div className="space-y-3">
+              {[
+                ["To",         detailLog.to],
+                ["Trigger",    detailLog.trigger],
+                ["Recipient",  detailLog.recipient || "customer"],
+                ["Status",     detailLog.status],
+                ["Sent",       detailLog.createdAt ? new Date(detailLog.createdAt).toLocaleString("en-GB") : "—"],
+                ["Twilio SID", detailLog.twilioSid || "—"],
+                ["Cost",       detailLog.cost || "—"],
+              ].map(([label, val]) => (
+                <div key={label} className="flex gap-3 text-xs">
+                  <span className="w-24 shrink-0 font-black text-white/35 uppercase tracking-widest text-[10px] pt-0.5">{label}</span>
+                  <span className="font-medium text-white/70 break-all">{val}</span>
+                </div>
+              ))}
+              <div className="flex gap-3 text-xs">
+                <span className="w-24 shrink-0 font-black text-white/35 uppercase tracking-widest text-[10px] pt-0.5">Message</span>
+                <span className="font-medium text-white/85 leading-relaxed whitespace-pre-wrap">{detailLog.body}</span>
+              </div>
+              {detailLog.error && (
+                <div className="flex gap-3 text-xs">
+                  <span className="w-24 shrink-0 font-black text-rose-400/60 uppercase tracking-widest text-[10px] pt-0.5">Error</span>
+                  <span className="font-medium text-rose-400 break-all">{detailLog.error}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast */}
       {toast && (
@@ -429,6 +589,7 @@ export default function SmsAutomation() {
                     {customerTriggers.map(t => {
                       const meta = TRIGGER_META[t.key] || {};
                       const Icon = meta.icon || MessageSquare;
+                      const tplRow = templates.find(tp => tp.key === t.key);
                       return (
                         <div key={t.key} className="flex items-center gap-4 px-5 py-4 hover:bg-white/2 transition-colors">
                           <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${meta.bg} border ${meta.border}`}>
@@ -436,8 +597,15 @@ export default function SmsAutomation() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-white">{t.label}</p>
-                            <p className="text-[11px] text-white/35 font-medium mt-0.5">{t.description}</p>
+                            <p className="text-[11px] text-white/35 font-medium mt-0.5 truncate">{tplRow?.text || t.description}</p>
                           </div>
+                          <button
+                            onClick={() => setEditTpl(tplRow ? { ...tplRow } : { key: t.key, text: t.description, isCustom: false })}
+                            className="w-7 h-7 rounded-lg bg-white/6 border border-white/10 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+                            title="Edit template"
+                          >
+                            <Edit3 size={12} />
+                          </button>
                           <Toggle
                             enabled={t.enabled}
                             onChange={(val) => toggleTrigger(t.key, val)}
@@ -464,6 +632,7 @@ export default function SmsAutomation() {
                     {workerTriggers.map(t => {
                       const meta = TRIGGER_META[t.key] || {};
                       const Icon = meta.icon || MessageSquare;
+                      const tplRow = templates.find(tp => tp.key === t.key);
                       return (
                         <div key={t.key} className="flex items-center gap-4 px-5 py-4 hover:bg-white/2 transition-colors">
                           <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${meta.bg} border ${meta.border}`}>
@@ -471,8 +640,15 @@ export default function SmsAutomation() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-white">{t.label}</p>
-                            <p className="text-[11px] text-white/35 font-medium mt-0.5">{t.description}</p>
+                            <p className="text-[11px] text-white/35 font-medium mt-0.5 truncate">{tplRow?.text || t.description}</p>
                           </div>
+                          <button
+                            onClick={() => setEditTpl(tplRow ? { ...tplRow } : { key: t.key, text: t.description, isCustom: false })}
+                            className="w-7 h-7 rounded-lg bg-white/6 border border-white/10 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+                            title="Edit template"
+                          >
+                            <Edit3 size={12} />
+                          </button>
                           <Toggle
                             enabled={t.enabled}
                             onChange={(val) => toggleTrigger(t.key, val)}
@@ -482,6 +658,37 @@ export default function SmsAutomation() {
                       );
                     })}
                   </div>
+                </div>
+
+                {/* Business phone */}
+                <div className="rounded-2xl border border-white/7 p-5">
+                  <p className="text-sm font-black text-white mb-1">Business Phone Number</p>
+                  <p className="text-[11px] text-white/35 font-medium mb-4">
+                    Shown as <span className="font-mono text-emerald-400">{"{bizPhone}"}</span> in SMS templates — your real contact number for customers to call.
+                  </p>
+                  <div className="flex gap-3">
+                    <div className="relative flex-1">
+                      <Phone size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25" />
+                      <input
+                        type="tel"
+                        value={bizPhoneInput}
+                        onChange={e => setBizPhoneInput(e.target.value)}
+                        placeholder="e.g. 07700 900000"
+                        className="w-full pl-8 pr-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all"
+                      />
+                    </div>
+                    <button
+                      onClick={saveBizPhone}
+                      disabled={savingBizPhone}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-black hover:bg-emerald-400 transition-colors disabled:opacity-50"
+                    >
+                      {savingBizPhone ? <RefreshCw size={13} className="animate-spin" /> : <CheckCircle2 size={13} />}
+                      {savingBizPhone ? "Saving…" : "Save"}
+                    </button>
+                  </div>
+                  {bizPhone && (
+                    <p className="text-[11px] text-emerald-400 font-bold mt-2">Saved: {bizPhone}</p>
+                  )}
                 </div>
 
                 {/* Test send */}
@@ -604,7 +811,7 @@ export default function SmsAutomation() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-bold text-white truncate">{c.name}</p>
-                            <p className="text-[11px] text-white/35 font-medium">{c.phone}</p>
+                            <p className="text-[11px] text-white/35 font-medium font-mono">{c.normalizedPhone || c.phone}</p>
                           </div>
                         </button>
                       ))
@@ -744,7 +951,7 @@ export default function SmsAutomation() {
                   </div>
                   <div className="divide-y divide-white/[0.04] max-h-[520px] overflow-y-auto">
                     {logs.map(log => (
-                      <div key={log._id} className="grid grid-cols-[1fr_140px_100px_90px_90px] items-start px-5 py-3 hover:bg-white/2 transition-colors">
+                      <div key={log._id} onClick={() => setDetailLog(log)} className="grid grid-cols-[1fr_140px_100px_90px_90px] items-start px-5 py-3 hover:bg-white/2 transition-colors cursor-pointer">
                         <div className="min-w-0 pr-4">
                           <p className="text-xs font-bold text-white truncate">{log.to}</p>
                           <p className="text-[11px] text-white/35 font-medium truncate mt-0.5">{log.body}</p>

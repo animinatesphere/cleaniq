@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const SmsLog = require("../models/SmsLog");
 const SystemSetting = require("../models/SystemSetting");
-const { sendSms } = require("../utils/smsService");
+const { sendSms, DEFAULT_TEMPLATES, normalizePhone } = require("../utils/smsService");
 
 const SMS_TRIGGERS = [
   { key: "booking_confirmed",    label: "Booking Confirmed",        recipient: "customer", description: "Sent when a booking status changes to Confirmed" },
@@ -205,6 +205,68 @@ router.delete("/logs", async (req, res) => {
   }
 });
 
+// ─── Templates ───────────────────────────────────────────────────────────────
+
+// GET /api/sms/templates — return all templates (custom DB overrides + defaults)
+router.get("/templates", async (req, res) => {
+  try {
+    const keys    = Object.keys(DEFAULT_TEMPLATES);
+    const dbRows  = await SystemSetting.find({ key: { $in: keys.map(k => `sms_tpl_${k}`) } });
+    const dbMap   = {};
+    dbRows.forEach(r => { dbMap[r.key] = r.value; });
+
+    const bizRow  = await SystemSetting.findOne({ key: "business_phone" });
+
+    const result = keys.map(key => ({
+      key,
+      text:     dbMap[`sms_tpl_${key}`] || DEFAULT_TEMPLATES[key],
+      isCustom: !!dbMap[`sms_tpl_${key}`],
+      default:  DEFAULT_TEMPLATES[key],
+    }));
+    res.json({ templates: result, bizPhone: bizRow?.value || "" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/sms/templates/:key — save or reset a template
+router.post("/templates/:key", async (req, res) => {
+  try {
+    const { key } = req.params;
+    if (!DEFAULT_TEMPLATES[key]) return res.status(400).json({ error: "Unknown template key" });
+    const { text } = req.body;
+    if (text === null || text === "") {
+      // Reset to default — remove the override
+      await SystemSetting.deleteOne({ key: `sms_tpl_${key}` });
+    } else {
+      await SystemSetting.findOneAndUpdate(
+        { key: `sms_tpl_${key}` },
+        { key: `sms_tpl_${key}`, value: text },
+        { upsert: true },
+      );
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/sms/config/biz-phone — save business phone shown in SMS messages
+router.post("/config/biz-phone", async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone?.trim()) return res.status(400).json({ error: "Phone required" });
+    await SystemSetting.findOneAndUpdate(
+      { key: "business_phone" },
+      { key: "business_phone", value: phone.trim() },
+      { upsert: true },
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── Bulk SMS ────────────────────────────────────────────────────────────────
 
 // GET /api/sms/bulk/contacts — return unique customers with phone numbers from bookings
@@ -221,11 +283,13 @@ router.get("/bulk/contacts", async (req, res) => {
     for (const b of bookings) {
       const phone = b.customer?.phone?.trim();
       if (!phone || seen.has(phone)) continue;
+      const normalized = normalizePhone(phone);
       seen.set(phone, {
-        _id:   b._id.toString(),
-        name:  `${b.customer.firstName || ""} ${b.customer.lastName || ""}`.trim() || "Unknown",
-        email: b.customer.email || "",
+        _id:            b._id.toString(),
+        name:           `${b.customer.firstName || ""} ${b.customer.lastName || ""}`.trim() || "Unknown",
+        email:          b.customer.email || "",
         phone,
+        normalizedPhone: normalized !== phone ? normalized : null,
       });
     }
     res.json({ contacts: Array.from(seen.values()), total: seen.size });
