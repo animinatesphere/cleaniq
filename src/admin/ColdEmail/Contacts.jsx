@@ -8,6 +8,7 @@ import {
   Square,
   X,
   UserPlus,
+  Pencil,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -28,6 +29,7 @@ export default function Contacts() {
   const [deleting, setDeleting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [editingContact, setEditingContact] = useState(null);
   const [addForm, setAddForm] = useState({
     email: "",
     firstName: "",
@@ -118,6 +120,36 @@ export default function Contacts() {
     load();
   }
 
+  function resetAddForm() {
+    setAddForm({
+      email: "",
+      firstName: "",
+      lastName: "",
+      company: "",
+      domain: "",
+    });
+    setAddErr("");
+  }
+
+  function openAddModal() {
+    setEditingContact(null);
+    resetAddForm();
+    setAddOpen(true);
+  }
+
+  function openEditModal(contact) {
+    setEditingContact(contact);
+    setAddForm({
+      email: contact.email || "",
+      firstName: contact.firstName || "",
+      lastName: contact.lastName || "",
+      company: contact.company || "",
+      domain: contact.domain || "",
+    });
+    setAddErr("");
+    setAddOpen(true);
+  }
+
   async function submitAdd(e) {
     e.preventDefault();
     setAddErr("");
@@ -127,25 +159,29 @@ export default function Contacts() {
     }
     setAddSaving(true);
     try {
-      const r = await fetch(`${API}/cold-email/contacts`, {
-        method: "POST",
+      const method = editingContact ? "PUT" : "POST";
+      const url = editingContact
+        ? `${API}/cold-email/contacts/${editingContact._id}`
+        : `${API}/cold-email/contacts`;
+      const r = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json", ...auth() },
         body: JSON.stringify(addForm),
       });
       const d = await r.json();
       if (!r.ok) {
-        setAddErr(d.message || "Failed to add contact");
+        setAddErr(
+          d.message ||
+            (editingContact
+              ? "Failed to update contact"
+              : "Failed to add contact"),
+        );
         setAddSaving(false);
         return;
       }
       setAddOpen(false);
-      setAddForm({
-        email: "",
-        firstName: "",
-        lastName: "",
-        company: "",
-        domain: "",
-      });
+      setEditingContact(null);
+      resetAddForm();
       load();
     } catch {
       setAddErr("Network error — check connection");
@@ -204,10 +240,7 @@ export default function Contacts() {
             </button>
           )}
           <button
-            onClick={() => {
-              setAddOpen(true);
-              setAddErr("");
-            }}
+            onClick={openAddModal}
             className="flex items-center gap-2 px-4 py-2 bg-white/6 border border-white/10 text-white/70 text-sm font-bold rounded-xl hover:bg-white/10 transition-all cursor-pointer"
           >
             <UserPlus size={14} /> Add Contact
@@ -414,12 +447,22 @@ export default function Contacts() {
                       >
                         {c.status}
                       </span>
-                      <button
-                        onClick={() => deleteSingle(c._id)}
-                        className="text-white/20 hover:text-rose-400 transition-colors cursor-pointer"
-                      >
-                        <Trash2 size={13} />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => openEditModal(c)}
+                          className="text-white/20 hover:text-emerald-400 transition-colors cursor-pointer"
+                          title="Edit contact"
+                        >
+                          <Pencil size={13} />
+                        </button>
+                        <button
+                          onClick={() => deleteSingle(c._id)}
+                          className="text-white/20 hover:text-rose-400 transition-colors cursor-pointer"
+                          title="Delete contact"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -472,9 +515,15 @@ export default function Contacts() {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm p-4">
           <div className="bg-[#0a1f16] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/6">
-              <h3 className="text-white font-black text-base">Add Contact</h3>
+              <h3 className="text-white font-black text-base">
+                {editingContact ? "Edit Contact" : "Add Contact"}
+              </h3>
               <button
-                onClick={() => setAddOpen(false)}
+                onClick={() => {
+                  setAddOpen(false);
+                  setEditingContact(null);
+                  resetAddForm();
+                }}
                 className="text-white/30 hover:text-white/70 cursor-pointer"
               >
                 <X size={16} />
@@ -570,7 +619,11 @@ export default function Contacts() {
               <div className="flex gap-3 pt-1">
                 <button
                   type="button"
-                  onClick={() => setAddOpen(false)}
+                  onClick={() => {
+                    setAddOpen(false);
+                    setEditingContact(null);
+                    resetAddForm();
+                  }}
                   className="flex-1 py-2.5 rounded-xl border border-white/10 text-white/50 text-sm font-bold hover:bg-white/5 transition-all cursor-pointer"
                 >
                   Cancel
@@ -580,7 +633,13 @@ export default function Contacts() {
                   disabled={addSaving}
                   className="flex-1 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-bold hover:bg-emerald-400 transition-all cursor-pointer disabled:opacity-50"
                 >
-                  {addSaving ? "Adding…" : "Add Contact"}
+                  {addSaving
+                    ? editingContact
+                      ? "Saving…"
+                      : "Adding…"
+                    : editingContact
+                      ? "Save Contact"
+                      : "Add Contact"}
                 </button>
               </div>
             </form>

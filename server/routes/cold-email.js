@@ -38,12 +38,9 @@ function isValidEmail(e) {
 // GET /api/cold-email/auth/google — redirect to Google consent screen
 router.get("/auth/google", (req, res) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-    return res
-      .status(500)
-      .json({
-        message:
-          "GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET not configured in .env",
-      });
+    return res.status(500).json({
+      message: "GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET not configured in .env",
+    });
   }
   const oauth2 = buildOAuth2Client();
   const url = oauth2.generateAuthUrl({
@@ -115,11 +112,9 @@ router.get("/auth/callback", async (req, res) => {
 // GET /api/cold-email/auth/microsoft — redirect to Microsoft consent screen
 router.get("/auth/microsoft", (req, res) => {
   if (!process.env.MS_CLIENT_ID || !process.env.MS_CLIENT_SECRET) {
-    return res
-      .status(500)
-      .json({
-        message: "MS_CLIENT_ID / MS_CLIENT_SECRET not configured in .env",
-      });
+    return res.status(500).json({
+      message: "MS_CLIENT_ID / MS_CLIENT_SECRET not configured in .env",
+    });
   }
   res.redirect(buildMsAuthUrl());
 });
@@ -470,6 +465,52 @@ router.post("/contacts", async (req, res) => {
       domain: (domain || "").toString().trim().toLowerCase(),
     });
     res.status(201).json(contact);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// PUT /api/cold-email/contacts/:id — update an existing contact
+router.put("/contacts/:id", async (req, res) => {
+  try {
+    const {
+      email: rawEmail,
+      firstName = "",
+      lastName = "",
+      company = "",
+      domain = "",
+    } = req.body;
+    const email = (rawEmail || "").toLowerCase().trim();
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({ message: "Invalid email address" });
+    }
+
+    const existing = await ColdContact.findById(req.params.id);
+    if (!existing)
+      return res.status(404).json({ message: "Contact not found" });
+
+    const duplicate = await ColdContact.findOne({
+      email,
+      _id: { $ne: existing._id },
+    });
+    if (duplicate)
+      return res
+        .status(409)
+        .json({ message: "A contact with that email already exists" });
+
+    const updated = await ColdContact.findByIdAndUpdate(
+      req.params.id,
+      {
+        email,
+        firstName: firstName || "",
+        lastName: lastName || "",
+        company: company || "",
+        domain: (domain || "").toString().trim().toLowerCase(),
+      },
+      { new: true },
+    );
+
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

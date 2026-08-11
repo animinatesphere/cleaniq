@@ -1019,6 +1019,7 @@ function Wizard({ onClose, onCreated, editCampaign }) {
             ? editCampaign.steps
             : [{ order: 0, subject: "", body: "", waitDays: 0 }],
           contactIds: editCampaign.contactIds || [],
+          status: editCampaign.status || "draft",
         }
       : {
           name: "",
@@ -1027,6 +1028,7 @@ function Wizard({ onClose, onCreated, editCampaign }) {
           mailboxIds: [],
           steps: [{ order: 0, subject: "", body: "", waitDays: 0 }],
           contactIds: [],
+          status: "draft",
         },
   );
 
