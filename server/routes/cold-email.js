@@ -1,18 +1,28 @@
-const express  = require("express");
-const multer   = require("multer");
-const jwt      = require("jsonwebtoken");
-const router   = express.Router();
+const express = require("express");
+const multer = require("multer");
+const jwt = require("jsonwebtoken");
+const router = express.Router();
 
-const ColdMailbox         = require("../models/ColdMailbox");
-const ColdContact         = require("../models/ColdContact");
-const ColdCampaign        = require("../models/ColdCampaign");
-const ColdSend            = require("../models/ColdSend");
+const ColdMailbox = require("../models/ColdMailbox");
+const ColdContact = require("../models/ColdContact");
+const ColdCampaign = require("../models/ColdCampaign");
+const ColdSend = require("../models/ColdSend");
 const ColdSuppressionList = require("../models/ColdSuppressionList");
-const ColdTemplate        = require("../models/ColdTemplate");
+const ColdTemplate = require("../models/ColdTemplate");
 
-const { encrypt, decrypt, buildOAuth2Client, REDIRECT_URI, buildMsAuthUrl, exchangeMsCode } = require("../utils/coldEmailEngine");
+const {
+  encrypt,
+  decrypt,
+  buildOAuth2Client,
+  REDIRECT_URI,
+  buildMsAuthUrl,
+  exchangeMsCode,
+} = require("../utils/coldEmailEngine");
 
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 15 * 1024 * 1024 },
+});
 
 const JWT_SECRET = process.env.JWT_SECRET || "cleaniq_jwt_secret";
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
@@ -28,12 +38,17 @@ function isValidEmail(e) {
 // GET /api/cold-email/auth/google — redirect to Google consent screen
 router.get("/auth/google", (req, res) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-    return res.status(500).json({ message: "GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET not configured in .env" });
+    return res
+      .status(500)
+      .json({
+        message:
+          "GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET not configured in .env",
+      });
   }
   const oauth2 = buildOAuth2Client();
   const url = oauth2.generateAuthUrl({
     access_type: "offline",
-    prompt:      "consent",
+    prompt: "consent",
     scope: [
       "https://www.googleapis.com/auth/gmail.send",
       "https://www.googleapis.com/auth/gmail.readonly",
@@ -46,8 +61,14 @@ router.get("/auth/google", (req, res) => {
 // GET /api/cold-email/auth/callback — Google redirects here after consent
 router.get("/auth/callback", async (req, res) => {
   const { code, error } = req.query;
-  if (error) return res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=${error}`);
-  if (!code)  return res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=no_code`);
+  if (error)
+    return res.redirect(
+      `${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=${error}`,
+    );
+  if (!code)
+    return res.redirect(
+      `${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=no_code`,
+    );
 
   try {
     const oauth2 = buildOAuth2Client();
@@ -56,28 +77,34 @@ router.get("/auth/callback", async (req, res) => {
 
     // Get the email address of this account
     const { google } = require("googleapis");
-    const oauth2Api  = google.oauth2({ version: "v2", auth: oauth2 });
-    const userInfo   = await oauth2Api.userinfo.get();
-    const email      = userInfo.data.email;
+    const oauth2Api = google.oauth2({ version: "v2", auth: oauth2 });
+    const userInfo = await oauth2Api.userinfo.get();
+    const email = userInfo.data.email;
 
     await ColdMailbox.findOneAndUpdate(
       { email },
       {
         email,
-        provider:     "gmail",
-        accessToken:  encrypt(tokens.access_token),
-        refreshToken: tokens.refresh_token ? encrypt(tokens.refresh_token) : undefined,
-        tokenExpiry:  tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
-        status:       "active",
+        provider: "gmail",
+        accessToken: encrypt(tokens.access_token),
+        refreshToken: tokens.refresh_token
+          ? encrypt(tokens.refresh_token)
+          : undefined,
+        tokenExpiry: tokens.expiry_date
+          ? new Date(tokens.expiry_date)
+          : undefined,
+        status: "active",
         errorMessage: "",
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
 
     res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&connected=1`);
   } catch (err) {
     console.error("OAuth callback error:", err.message);
-    res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=oauth_failed`);
+    res.redirect(
+      `${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=oauth_failed`,
+    );
   }
 });
 
@@ -88,7 +115,11 @@ router.get("/auth/callback", async (req, res) => {
 // GET /api/cold-email/auth/microsoft — redirect to Microsoft consent screen
 router.get("/auth/microsoft", (req, res) => {
   if (!process.env.MS_CLIENT_ID || !process.env.MS_CLIENT_SECRET) {
-    return res.status(500).json({ message: "MS_CLIENT_ID / MS_CLIENT_SECRET not configured in .env" });
+    return res
+      .status(500)
+      .json({
+        message: "MS_CLIENT_ID / MS_CLIENT_SECRET not configured in .env",
+      });
   }
   res.redirect(buildMsAuthUrl());
 });
@@ -96,38 +127,52 @@ router.get("/auth/microsoft", (req, res) => {
 // GET /api/cold-email/auth/microsoft/callback — Microsoft redirects here after consent
 router.get("/auth/microsoft/callback", async (req, res) => {
   const { code, error } = req.query;
-  if (error) return res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=${encodeURIComponent(error)}`);
-  if (!code)  return res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=no_code`);
+  if (error)
+    return res.redirect(
+      `${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=${encodeURIComponent(error)}`,
+    );
+  if (!code)
+    return res.redirect(
+      `${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=no_code`,
+    );
 
   try {
     const tokens = await exchangeMsCode(code);
 
     // Get email address via Microsoft Graph
-    const userRes = await fetch("https://graph.microsoft.com/v1.0/me?$select=mail,userPrincipalName", {
-      headers: { Authorization: `Bearer ${tokens.access_token}` },
-    });
-    const user  = await userRes.json();
+    const userRes = await fetch(
+      "https://graph.microsoft.com/v1.0/me?$select=mail,userPrincipalName",
+      {
+        headers: { Authorization: `Bearer ${tokens.access_token}` },
+      },
+    );
+    const user = await userRes.json();
     const email = (user.mail || user.userPrincipalName || "").toLowerCase();
-    if (!email) throw new Error("Could not retrieve email from Microsoft account");
+    if (!email)
+      throw new Error("Could not retrieve email from Microsoft account");
 
     await ColdMailbox.findOneAndUpdate(
       { email },
       {
         email,
-        provider:     "outlook",
-        accessToken:  encrypt(tokens.access_token),
-        refreshToken: tokens.refresh_token ? encrypt(tokens.refresh_token) : undefined,
-        tokenExpiry:  new Date(Date.now() + (tokens.expires_in || 3600) * 1000),
-        status:       "active",
+        provider: "outlook",
+        accessToken: encrypt(tokens.access_token),
+        refreshToken: tokens.refresh_token
+          ? encrypt(tokens.refresh_token)
+          : undefined,
+        tokenExpiry: new Date(Date.now() + (tokens.expires_in || 3600) * 1000),
+        status: "active",
         errorMessage: "",
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
 
     res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&connected=1`);
   } catch (err) {
     console.error("MS OAuth callback error:", err.message);
-    res.redirect(`${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=oauth_failed`);
+    res.redirect(
+      `${FRONTEND_URL}/admin/cold-email?tab=mailboxes&error=oauth_failed`,
+    );
   }
 });
 
@@ -139,7 +184,13 @@ router.get("/auth/microsoft/callback", async (req, res) => {
 router.get("/mailboxes", async (req, res) => {
   try {
     const mailboxes = await ColdMailbox.find().sort({ createdAt: 1 }).lean();
-    res.json(mailboxes.map((m) => ({ ...m, accessToken: undefined, refreshToken: undefined })));
+    res.json(
+      mailboxes.map((m) => ({
+        ...m,
+        accessToken: undefined,
+        refreshToken: undefined,
+      })),
+    );
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -150,9 +201,12 @@ router.patch("/mailboxes/:id", async (req, res) => {
   try {
     const { dailyLimit, status } = req.body;
     const update = {};
-    if (dailyLimit !== undefined) update.dailyLimit = Math.max(1, Math.min(10000, Number(dailyLimit)));
-    if (status     !== undefined) update.status     = status;
-    const box = await ColdMailbox.findByIdAndUpdate(req.params.id, update, { new: true }).lean();
+    if (dailyLimit !== undefined)
+      update.dailyLimit = Math.max(1, Math.min(10000, Number(dailyLimit)));
+    if (status !== undefined) update.status = status;
+    const box = await ColdMailbox.findByIdAndUpdate(req.params.id, update, {
+      new: true,
+    }).lean();
     if (!box) return res.status(404).json({ message: "Mailbox not found" });
     res.json({ ...box, accessToken: undefined, refreshToken: undefined });
   } catch (err) {
@@ -177,16 +231,25 @@ router.delete("/mailboxes/:id", async (req, res) => {
 // GET /api/cold-email/contacts?page=1&limit=50&search=
 router.get("/contacts", async (req, res) => {
   try {
-    const page   = Math.max(1, parseInt(req.query.page  || "1"));
-    const limit  = Math.min(200, parseInt(req.query.limit || "50"));
+    const page = Math.max(1, parseInt(req.query.page || "1"));
+    const limit = Math.min(200, parseInt(req.query.limit || "50"));
     const search = (req.query.search || "").trim();
     const filter = {};
     if (search) {
       const re = new RegExp(search, "i");
-      filter.$or = [{ email: re }, { firstName: re }, { lastName: re }, { company: re }];
+      filter.$or = [
+        { email: re },
+        { firstName: re },
+        { lastName: re },
+        { company: re },
+      ];
     }
     const [contacts, total] = await Promise.all([
-      ColdContact.find(filter).sort({ importedAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+      ColdContact.find(filter)
+        .sort({ importedAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
       ColdContact.countDocuments(filter),
     ]);
     const stats = await ColdContact.aggregate([
@@ -206,48 +269,101 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
   try {
     const { parse } = require("csv-parse/sync");
     const records = parse(req.file.buffer, {
-      columns:          true,
+      columns: true,
       skip_empty_lines: true,
-      trim:             true,
+      trim: true,
     });
 
-    let imported   = 0;
+    let imported = 0;
     let duplicates = 0;
-    let invalid    = 0;
+    let invalid = 0;
     const batchLabel = req.file.originalname;
 
     // Detect email column: exact matches first, then any key containing "email"
     const headers = records.length ? Object.keys(records[0]) : [];
-    const exactEmailKeys = ["email", "Email", "EMAIL", "e-mail", "E-mail", "contact_professions_email"];
-    const emailKey = exactEmailKeys.find((k) => headers.includes(k))
-      || headers.find((k) => k.toLowerCase().includes("email"))
-      || null;
-    const domainKey = ["domain", "Domain", "DOMAIN", "company_domain", "Company_Domain", "companyDomain", "CompanyDomain", "website", "Website", "WEBSITE", "website_url", "Website_Url", "websiteUrl"]
-      .find((k) => headers.includes(k))
-      || headers.find((k) => k.toLowerCase().includes("domain") || k.toLowerCase().includes("website"))
-      || null;
+    const exactEmailKeys = [
+      "email",
+      "Email",
+      "EMAIL",
+      "e-mail",
+      "E-mail",
+      "contact_professions_email",
+    ];
+    const emailKey =
+      exactEmailKeys.find((k) => headers.includes(k)) ||
+      headers.find((k) => k.toLowerCase().includes("email")) ||
+      null;
+    const domainKey =
+      [
+        "domain",
+        "Domain",
+        "DOMAIN",
+        "company_domain",
+        "Company_Domain",
+        "companyDomain",
+        "CompanyDomain",
+        "website",
+        "Website",
+        "WEBSITE",
+        "website_url",
+        "Website_Url",
+        "websiteUrl",
+      ].find((k) => headers.includes(k)) ||
+      headers.find(
+        (k) =>
+          k.toLowerCase().includes("domain") ||
+          k.toLowerCase().includes("website"),
+      ) ||
+      null;
 
     for (const rec of records) {
-      const rawEmail = emailKey ? (rec[emailKey] || "") : "";
-      const email    = rawEmail.toLowerCase().trim();
+      const rawEmail = emailKey ? rec[emailKey] || "" : "";
+      const email = rawEmail.toLowerCase().trim();
 
-      if (!email || !isValidEmail(email)) { invalid++; continue; }
+      if (!email || !isValidEmail(email)) {
+        invalid++;
+        continue;
+      }
 
       const exists = await ColdContact.findOne({ email });
-      if (exists) { duplicates++; continue; }
+      if (exists) {
+        duplicates++;
+        continue;
+      }
 
       // Support both split first/last name columns and a combined full_name column
-      let firstName = rec.first_name || rec.firstName || rec.First_Name || rec["First Name"] || "";
-      let lastName  = rec.last_name  || rec.lastName  || rec.Last_Name  || rec["Last Name"]  || "";
+      let firstName =
+        rec.first_name ||
+        rec.firstName ||
+        rec.First_Name ||
+        rec["First Name"] ||
+        "";
+      let lastName =
+        rec.last_name ||
+        rec.lastName ||
+        rec.Last_Name ||
+        rec["Last Name"] ||
+        "";
       if (!firstName && !lastName) {
-        const fullName = rec.full_name || rec.fullName || rec["Full Name"] || rec.prospect_full_name || "";
-        const parts    = fullName.trim().split(/\s+/);
-        firstName      = parts[0] || "";
-        lastName       = parts.slice(1).join(" ") || "";
+        const fullName =
+          rec.full_name ||
+          rec.fullName ||
+          rec["Full Name"] ||
+          rec.prospect_full_name ||
+          "";
+        const parts = fullName.trim().split(/\s+/);
+        firstName = parts[0] || "";
+        lastName = parts.slice(1).join(" ") || "";
       }
-      const company = rec.company || rec.Company || rec.COMPANY
-        || rec.prospect_company_name || rec.company_name || rec["Company Name"] || "";
-      const rawDomain = domainKey ? (rec[domainKey] || "") : "";
+      const company =
+        rec.company ||
+        rec.Company ||
+        rec.COMPANY ||
+        rec.prospect_company_name ||
+        rec.company_name ||
+        rec["Company Name"] ||
+        "";
+      const rawDomain = domainKey ? rec[domainKey] || "" : "";
       const domain = (rawDomain || "")
         .toString()
         .trim()
@@ -259,17 +375,39 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
       const knownKeys = new Set([
         emailKey,
         domainKey,
-        "first_name","firstName","First_Name","First Name",
-        "last_name","lastName","Last_Name","Last Name",
-        "full_name","fullName","Full Name","prospect_full_name",
-        "company","Company","COMPANY","prospect_company_name","company_name","Company Name",
+        "first_name",
+        "firstName",
+        "First_Name",
+        "First Name",
+        "last_name",
+        "lastName",
+        "Last_Name",
+        "Last Name",
+        "full_name",
+        "fullName",
+        "Full Name",
+        "prospect_full_name",
+        "company",
+        "Company",
+        "COMPANY",
+        "prospect_company_name",
+        "company_name",
+        "Company Name",
       ]);
       const extraFields = {};
       for (const [k, v] of Object.entries(rec)) {
         if (!knownKeys.has(k) && v) extraFields[k] = v;
       }
 
-      await ColdContact.create({ email, firstName, lastName, company, domain, extraFields, importBatch: batchLabel });
+      await ColdContact.create({
+        email,
+        firstName,
+        lastName,
+        company,
+        domain,
+        extraFields,
+        importBatch: batchLabel,
+      });
       imported++;
     }
 
@@ -283,16 +421,25 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
 router.get("/contacts/all-ids", async (req, res) => {
   try {
     const search = (req.query.search || "").trim();
-    const limit  = parseInt(req.query.limit) || 0; // 0 = no limit
+    const limit = parseInt(req.query.limit) || 0; // 0 = no limit
     const filter = { status: "active" };
     if (search) {
       const re = new RegExp(search, "i");
-      filter.$or = [{ email: re }, { firstName: re }, { lastName: re }, { company: re }, { domain: re }];
+      filter.$or = [
+        { email: re },
+        { firstName: re },
+        { lastName: re },
+        { company: re },
+        { domain: re },
+      ];
     }
     let q = ColdContact.find(filter).select("_id").lean();
     if (limit > 0) q = q.limit(limit);
     const contacts = await q;
-    res.json({ ids: contacts.map((c) => c._id.toString()), total: contacts.length });
+    res.json({
+      ids: contacts.map((c) => c._id.toString()),
+      total: contacts.length,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -301,14 +448,27 @@ router.get("/contacts/all-ids", async (req, res) => {
 // POST /api/cold-email/contacts — add a single contact manually
 router.post("/contacts", async (req, res) => {
   try {
-    const { email: rawEmail, firstName = "", lastName = "", company = "", domain = "" } = req.body;
+    const {
+      email: rawEmail,
+      firstName = "",
+      lastName = "",
+      company = "",
+      domain = "",
+    } = req.body;
     const email = (rawEmail || "").toLowerCase().trim();
     if (!email || !isValidEmail(email)) {
       return res.status(400).json({ message: "Invalid email address" });
     }
     const exists = await ColdContact.findOne({ email });
-    if (exists) return res.status(409).json({ message: "Contact already exists" });
-    const contact = await ColdContact.create({ email, firstName, lastName, company, domain: (domain || "").toString().trim().toLowerCase() });
+    if (exists)
+      return res.status(409).json({ message: "Contact already exists" });
+    const contact = await ColdContact.create({
+      email,
+      firstName,
+      lastName,
+      company,
+      domain: (domain || "").toString().trim().toLowerCase(),
+    });
     res.status(201).json(contact);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -329,7 +489,8 @@ router.delete("/contacts/:id", async (req, res) => {
 router.delete("/contacts", async (req, res) => {
   try {
     const { ids } = req.body;
-    if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ message: "ids array required" });
+    if (!Array.isArray(ids) || ids.length === 0)
+      return res.status(400).json({ message: "ids array required" });
     await ColdContact.deleteMany({ _id: { $in: ids } });
     res.json({ deleted: ids.length });
   } catch (err) {
@@ -354,9 +515,25 @@ router.get("/campaigns", async (req, res) => {
 // POST /api/cold-email/campaigns
 router.post("/campaigns", async (req, res) => {
   try {
-    const { name, fromName, steps, mailboxIds, contactIds, emailStyle } = req.body;
+    const {
+      name,
+      fromName,
+      steps,
+      mailboxIds,
+      contactIds,
+      emailStyle,
+      status,
+    } = req.body;
     if (!name) return res.status(400).json({ message: "name is required" });
-    const campaign = await ColdCampaign.create({ name, fromName, steps: steps || [], mailboxIds: mailboxIds || [], contactIds: contactIds || [], emailStyle: emailStyle || "branded" });
+    const campaign = await ColdCampaign.create({
+      name,
+      fromName,
+      steps: steps || [],
+      mailboxIds: mailboxIds || [],
+      contactIds: contactIds || [],
+      emailStyle: emailStyle || "branded",
+      status: status || "draft",
+    });
     res.json(campaign);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -367,7 +544,8 @@ router.post("/campaigns", async (req, res) => {
 router.get("/campaigns/:id", async (req, res) => {
   try {
     const campaign = await ColdCampaign.findById(req.params.id).lean();
-    if (!campaign) return res.status(404).json({ message: "Campaign not found" });
+    if (!campaign)
+      return res.status(404).json({ message: "Campaign not found" });
 
     // Enrich with send stats breakdown
     const sendStats = await ColdSend.aggregate([
@@ -385,11 +563,25 @@ router.get("/campaigns/:id", async (req, res) => {
 // PUT /api/cold-email/campaigns/:id
 router.put("/campaigns/:id", async (req, res) => {
   try {
-    const { name, fromName, steps, mailboxIds, contactIds, emailStyle } = req.body;
+    const {
+      name,
+      fromName,
+      steps,
+      mailboxIds,
+      contactIds,
+      emailStyle,
+      status,
+    } = req.body;
     const update = { name, fromName, steps, mailboxIds, contactIds };
     if (emailStyle) update.emailStyle = emailStyle;
-    const campaign = await ColdCampaign.findByIdAndUpdate(req.params.id, update, { new: true });
-    if (!campaign) return res.status(404).json({ message: "Campaign not found" });
+    if (status !== undefined) update.status = status;
+    const campaign = await ColdCampaign.findByIdAndUpdate(
+      req.params.id,
+      update,
+      { new: true },
+    );
+    if (!campaign)
+      return res.status(404).json({ message: "Campaign not found" });
     res.json(campaign);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -411,14 +603,23 @@ router.delete("/campaigns/:id", async (req, res) => {
 router.post("/campaigns/:id/launch", async (req, res) => {
   try {
     const campaign = await ColdCampaign.findById(req.params.id);
-    if (!campaign) return res.status(404).json({ message: "Campaign not found" });
-    if (campaign.status === "active" || campaign.status === "scheduled") return res.status(400).json({ message: "Campaign already queued or running" });
-    if (!campaign.steps || campaign.steps.length === 0) return res.status(400).json({ message: "No steps defined" });
-    if (!campaign.mailboxIds || campaign.mailboxIds.length === 0) return res.status(400).json({ message: "No mailboxes selected" });
-    if (!campaign.contactIds || campaign.contactIds.length === 0) return res.status(400).json({ message: "No contacts selected" });
+    if (!campaign)
+      return res.status(404).json({ message: "Campaign not found" });
+    if (campaign.status === "active" || campaign.status === "scheduled")
+      return res
+        .status(400)
+        .json({ message: "Campaign already queued or running" });
+    if (!campaign.steps || campaign.steps.length === 0)
+      return res.status(400).json({ message: "No steps defined" });
+    if (!campaign.mailboxIds || campaign.mailboxIds.length === 0)
+      return res.status(400).json({ message: "No mailboxes selected" });
+    if (!campaign.contactIds || campaign.contactIds.length === 0)
+      return res.status(400).json({ message: "No contacts selected" });
 
     // Get active contacts (not suppressed)
-    const suppressed = await ColdSuppressionList.find({}).select("email").lean();
+    const suppressed = await ColdSuppressionList.find({})
+      .select("email")
+      .lean();
     const suppressedEmails = new Set(suppressed.map((s) => s.email));
 
     const contacts = await ColdContact.find({
@@ -426,13 +627,21 @@ router.post("/campaigns/:id/launch", async (req, res) => {
       status: "active",
     }).lean();
 
-    const mailboxes = await ColdMailbox.find({ _id: { $in: campaign.mailboxIds }, status: "active" }).lean();
-    const totalCap  = mailboxes.reduce((sum, m) => sum + (m.dailyLimit || 40), 0);
+    const mailboxes = await ColdMailbox.find({
+      _id: { $in: campaign.mailboxIds },
+      status: "active",
+    }).lean();
+    const totalCap = mailboxes.reduce(
+      (sum, m) => sum + (m.dailyLimit || 40),
+      0,
+    );
 
     const now = new Date();
-    const rawScheduled = req.body?.scheduledStartAt ? new Date(req.body.scheduledStartAt) : null;
-    const isScheduled  = rawScheduled && rawScheduled > now;
-    const baseTime     = isScheduled ? rawScheduled : now;
+    const rawScheduled = req.body?.scheduledStartAt
+      ? new Date(req.body.scheduledStartAt)
+      : null;
+    const isScheduled = rawScheduled && rawScheduled > now;
+    const baseTime = isScheduled ? rawScheduled : now;
     let queued = 0;
 
     // Build sends — all anchored to baseTime with a tiny jitter so timestamps are staggered
@@ -442,28 +651,33 @@ router.post("/campaigns/:id/launch", async (req, res) => {
       if (suppressedEmails.has(contact.email)) continue;
 
       // Skip if already has a send record for step 0
-      const exists = await ColdSend.findOne({ campaignId: campaign._id, contactId: contact._id, stepIndex: 0 });
+      const exists = await ColdSend.findOne({
+        campaignId: campaign._id,
+        contactId: contact._id,
+        stepIndex: 0,
+      });
       if (exists) continue;
 
       // Jitter: 0–10 seconds per contact so they don't all share the exact same timestamp
-      const jitterMs    = i * 10_000 + Math.floor(Math.random() * 5_000);
+      const jitterMs = i * 10_000 + Math.floor(Math.random() * 5_000);
       const scheduledAt = new Date(baseTime.getTime() + jitterMs);
 
       sendDocs.push({
-        campaignId:   campaign._id,
-        contactId:    contact._id,
+        campaignId: campaign._id,
+        contactId: contact._id,
         contactEmail: contact.email,
-        stepIndex:    0,
-        status:       "pending",
+        stepIndex: 0,
+        status: "pending",
         scheduledAt,
       });
       queued++;
     }
 
-    if (sendDocs.length) await ColdSend.insertMany(sendDocs, { ordered: false });
+    if (sendDocs.length)
+      await ColdSend.insertMany(sendDocs, { ordered: false });
 
-    campaign.status           = isScheduled ? "scheduled" : "active";
-    campaign.launchedAt       = now;
+    campaign.status = isScheduled ? "scheduled" : "active";
+    campaign.launchedAt = now;
     campaign.scheduledStartAt = isScheduled ? rawScheduled : undefined;
     await campaign.save();
 
@@ -489,7 +703,11 @@ router.post("/campaigns/:id/launch", async (req, res) => {
 // POST /api/cold-email/campaigns/:id/pause
 router.post("/campaigns/:id/pause", async (req, res) => {
   try {
-    const campaign = await ColdCampaign.findByIdAndUpdate(req.params.id, { status: "paused" }, { new: true });
+    const campaign = await ColdCampaign.findByIdAndUpdate(
+      req.params.id,
+      { status: "paused" },
+      { new: true },
+    );
     if (!campaign) return res.status(404).json({ message: "Not found" });
     res.json(campaign);
   } catch (err) {
@@ -500,7 +718,11 @@ router.post("/campaigns/:id/pause", async (req, res) => {
 // POST /api/cold-email/campaigns/:id/resume
 router.post("/campaigns/:id/resume", async (req, res) => {
   try {
-    const campaign = await ColdCampaign.findByIdAndUpdate(req.params.id, { status: "active" }, { new: true });
+    const campaign = await ColdCampaign.findByIdAndUpdate(
+      req.params.id,
+      { status: "active" },
+      { new: true },
+    );
     if (!campaign) return res.status(404).json({ message: "Not found" });
     res.json(campaign);
   } catch (err) {
@@ -511,7 +733,7 @@ router.post("/campaigns/:id/resume", async (req, res) => {
 // GET /api/cold-email/campaigns/:id/sends?page=1&limit=50
 router.get("/campaigns/:id/sends", async (req, res) => {
   try {
-    const page  = Math.max(1, parseInt(req.query.page  || "1"));
+    const page = Math.max(1, parseInt(req.query.page || "1"));
     const limit = Math.min(100, parseInt(req.query.limit || "50"));
     const filter = { campaignId: req.params.id };
     if (req.query.status) filter.status = req.query.status;
@@ -538,12 +760,16 @@ router.get("/campaigns/:id/sends", async (req, res) => {
 // GET /api/cold-email/suppression
 router.get("/suppression", async (req, res) => {
   try {
-    const page  = Math.max(1, parseInt(req.query.page  || "1"));
+    const page = Math.max(1, parseInt(req.query.page || "1"));
     const limit = Math.min(100, parseInt(req.query.limit || "50"));
     const search = (req.query.search || "").trim();
     const filter = search ? { email: new RegExp(search, "i") } : {};
     const [items, total] = await Promise.all([
-      ColdSuppressionList.find(filter).sort({ addedAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+      ColdSuppressionList.find(filter)
+        .sort({ addedAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
       ColdSuppressionList.countDocuments(filter),
     ]);
     res.json({ items, total });
@@ -556,11 +782,12 @@ router.get("/suppression", async (req, res) => {
 router.post("/suppression", async (req, res) => {
   try {
     const email = (req.body.email || "").toLowerCase().trim();
-    if (!email || !isValidEmail(email)) return res.status(400).json({ message: "Invalid email" });
+    if (!email || !isValidEmail(email))
+      return res.status(400).json({ message: "Invalid email" });
     const item = await ColdSuppressionList.findOneAndUpdate(
       { email },
       { email, reason: "manual", addedAt: new Date() },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
     // Also mark contact
     await ColdContact.findOneAndUpdate({ email }, { status: "suppressed" });
@@ -600,13 +827,18 @@ h1{color:#0f172a;font-size:22px;font-weight:800;margin-bottom:12px}p{color:#6474
 
   try {
     const decoded = jwt.verify(req.params.token, JWT_SECRET);
-    const email   = (decoded.email || "").toLowerCase().trim();
+    const email = (decoded.email || "").toLowerCase().trim();
     if (!email) throw new Error("no email");
 
     await ColdSuppressionList.findOneAndUpdate(
       { email },
-      { email, reason: "unsubscribed", addedAt: new Date(), campaignId: decoded.campaignId || undefined },
-      { upsert: true }
+      {
+        email,
+        reason: "unsubscribed",
+        addedAt: new Date(),
+        campaignId: decoded.campaignId || undefined,
+      },
+      { upsert: true },
     );
     await ColdContact.findOneAndUpdate({ email }, { status: "suppressed" });
 
@@ -615,29 +847,45 @@ h1{color:#0f172a;font-size:22px;font-weight:800;margin-bottom:12px}p{color:#6474
       if (contact) {
         const alreadyUnsub = await ColdSend.findOne({
           campaignId: decoded.campaignId,
-          contactId:  contact._id,
-          status:     "skipped",
-          error:      "Unsubscribed",
+          contactId: contact._id,
+          status: "skipped",
+          error: "Unsubscribed",
         });
         if (!alreadyUnsub) {
           await ColdSend.updateMany(
-            { campaignId: decoded.campaignId, contactId: contact._id, status: "pending" },
-            { status: "skipped", error: "Unsubscribed" }
+            {
+              campaignId: decoded.campaignId,
+              contactId: contact._id,
+              status: "pending",
+            },
+            { status: "skipped", error: "Unsubscribed" },
           );
-          await ColdCampaign.findByIdAndUpdate(decoded.campaignId, { $inc: { "stats.unsubscribed": 1 } });
+          await ColdCampaign.findByIdAndUpdate(decoded.campaignId, {
+            $inc: { "stats.unsubscribed": 1 },
+          });
         }
       }
     }
 
-    res.send(unsubHtml("Unsubscribed", `
+    res.send(
+      unsubHtml(
+        "Unsubscribed",
+        `
       <div class="icon" style="background:#ecfdf5">✓</div>
       <h1>You've been unsubscribed</h1>
-      <p>You've been removed from our mailing list and won't receive any further emails from this campaign.</p>`));
+      <p>You've been removed from our mailing list and won't receive any further emails from this campaign.</p>`,
+      ),
+    );
   } catch {
-    res.status(400).send(unsubHtml("Invalid link", `
+    res.status(400).send(
+      unsubHtml(
+        "Invalid link",
+        `
       <div class="icon" style="background:#fef2f2">✕</div>
       <h1>Invalid link</h1>
-      <p>This unsubscribe link is invalid or has expired. Please contact us directly if you'd like to be removed.</p>`));
+      <p>This unsubscribe link is invalid or has expired. Please contact us directly if you'd like to be removed.</p>`,
+      ),
+    );
   }
 });
 
@@ -648,7 +896,8 @@ h1{color:#0f172a;font-size:22px;font-weight:800;margin-bottom:12px}p{color:#6474
 router.post("/campaigns/:id/check-replies", async (req, res) => {
   try {
     const campaign = await ColdCampaign.findById(req.params.id);
-    if (!campaign) return res.status(404).json({ message: "Campaign not found" });
+    if (!campaign)
+      return res.status(404).json({ message: "Campaign not found" });
 
     const { detectReplies } = require("../utils/coldEmailEngine");
     await detectReplies();
@@ -682,14 +931,27 @@ router.get("/stats", async (req, res) => {
       ColdCampaign.countDocuments(),
       ColdCampaign.countDocuments({ status: "active" }),
       ColdMailbox.countDocuments({ status: "active" }),
-      ColdCampaign.aggregate([{ $group: { _id: null, sent: { $sum: "$stats.sent" }, replied: { $sum: "$stats.replied" } } }]),
+      ColdCampaign.aggregate([
+        {
+          $group: {
+            _id: null,
+            sent: { $sum: "$stats.sent" },
+            replied: { $sum: "$stats.replied" },
+          },
+        },
+      ]),
     ]);
 
     const agg = sendAgg[0] || { sent: 0, replied: 0 };
     res.json({
-      totalContacts, activeContacts, suppressed,
-      totalCampaigns, activeCampaigns, totalMailboxes,
-      totalSent: agg.sent, totalReplied: agg.replied,
+      totalContacts,
+      activeContacts,
+      suppressed,
+      totalCampaigns,
+      activeCampaigns,
+      totalMailboxes,
+      totalSent: agg.sent,
+      totalReplied: agg.replied,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -712,8 +974,10 @@ router.get("/templates", async (req, res) => {
 router.post("/templates", async (req, res) => {
   try {
     const { name, steps } = req.body;
-    if (!name?.trim()) return res.status(400).json({ message: "Name is required" });
-    if (!steps?.length) return res.status(400).json({ message: "At least one step is required" });
+    if (!name?.trim())
+      return res.status(400).json({ message: "Name is required" });
+    if (!steps?.length)
+      return res.status(400).json({ message: "At least one step is required" });
     const template = await ColdTemplate.create({ name: name.trim(), steps });
     res.json(template);
   } catch (err) {

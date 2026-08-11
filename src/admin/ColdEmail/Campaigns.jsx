@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   Users,
   Send,
+  Edit3,
   MessageSquare,
   TrendingUp,
   Clock,
@@ -288,7 +289,7 @@ function PreviewModal({ emailStep, emailStyle, onClose }) {
 
 // ── Campaign Detail (full-page inline view) ───────────────────────────────────
 
-function CampaignDetail({ campaignId, onBack, onRefresh }) {
+function CampaignDetail({ campaignId, onBack, onRefresh, onEditCampaign }) {
   const [campaign, setCampaign] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sends, setSends] = useState([]);
@@ -448,6 +449,14 @@ function CampaignDetail({ campaignId, onBack, onRefresh }) {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          {campaign.status === "draft" && (
+            <button
+              onClick={() => onEditCampaign(campaign)}
+              className="flex items-center gap-2 text-xs px-3.5 py-2 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/60 hover:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/25 cursor-pointer transition-all font-bold"
+            >
+              <Edit3 size={13} /> Edit Draft
+            </button>
+          )}
           <button
             onClick={checkReplies}
             disabled={checkBusy}
@@ -2086,7 +2095,7 @@ function Wizard({ onClose, onCreated, editCampaign }) {
 
 // ── Campaign Card ─────────────────────────────────────────────────────────────
 
-function CampaignCard({ campaign, onOpen, onRefresh }) {
+function CampaignCard({ campaign, onOpen, onRefresh, onEdit }) {
   const [busy, setBusy] = useState("");
 
   async function action(verb, e) {
@@ -2168,6 +2177,18 @@ function CampaignCard({ campaign, onOpen, onRefresh }) {
           className="flex items-center gap-1.5 shrink-0"
           onClick={(e) => e.stopPropagation()}
         >
+          {campaign.status === "draft" && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(campaign);
+              }}
+              title="Edit draft"
+              className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/[0.07] flex items-center justify-center text-white/30 hover:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer transition-all"
+            >
+              <Edit3 size={12} />
+            </button>
+          )}
           {(campaign.status === "active" || campaign.status === "paused") && (
             <button
               onClick={(e) =>
@@ -2280,6 +2301,7 @@ export default function Campaigns() {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState(null);
   const [filter, setFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
 
@@ -2305,6 +2327,11 @@ export default function Campaigns() {
           load();
         }}
         onRefresh={load}
+        onEditCampaign={(campaign) => {
+          setSelectedId(null);
+          setEditingCampaign(campaign);
+          setWizardOpen(true);
+        }}
       />
     );
   }
@@ -2334,7 +2361,10 @@ export default function Campaigns() {
           </p>
         </div>
         <button
-          onClick={() => setWizardOpen(true)}
+          onClick={() => {
+            setEditingCampaign(null);
+            setWizardOpen(true);
+          }}
           className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 text-white text-sm font-bold rounded-xl hover:bg-emerald-400 cursor-pointer shadow-lg shadow-emerald-500/20 transition-all"
         >
           <Plus size={14} /> New Campaign
@@ -2391,7 +2421,10 @@ export default function Campaigns() {
           </p>
           {filter === "all" && (
             <button
-              onClick={() => setWizardOpen(true)}
+              onClick={() => {
+                setEditingCampaign(null);
+                setWizardOpen(true);
+              }}
               className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 text-white text-sm font-bold rounded-xl hover:bg-emerald-400 cursor-pointer shadow-lg shadow-emerald-500/20 transition-all"
             >
               <Plus size={14} /> Create first campaign
@@ -2406,13 +2439,28 @@ export default function Campaigns() {
               campaign={c}
               onOpen={() => setSelectedId(c._id)}
               onRefresh={load}
+              onEdit={(campaign) => {
+                setEditingCampaign(campaign);
+                setWizardOpen(true);
+              }}
             />
           ))}
         </div>
       )}
 
       {wizardOpen && (
-        <Wizard onClose={() => setWizardOpen(false)} onCreated={load} />
+        <Wizard
+          editCampaign={editingCampaign}
+          onClose={() => {
+            setWizardOpen(false);
+            setEditingCampaign(null);
+          }}
+          onCreated={() => {
+            load();
+            setWizardOpen(false);
+            setEditingCampaign(null);
+          }}
+        />
       )}
     </div>
   );
