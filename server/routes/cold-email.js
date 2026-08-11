@@ -222,6 +222,10 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
     const emailKey = exactEmailKeys.find((k) => headers.includes(k))
       || headers.find((k) => k.toLowerCase().includes("email"))
       || null;
+    const domainKey = ["domain", "Domain", "DOMAIN", "company_domain", "Company_Domain", "companyDomain", "CompanyDomain", "website", "Website", "WEBSITE", "website_url", "Website_Url", "websiteUrl"]
+      .find((k) => headers.includes(k))
+      || headers.find((k) => k.toLowerCase().includes("domain") || k.toLowerCase().includes("website"))
+      || null;
 
     for (const rec of records) {
       const rawEmail = emailKey ? (rec[emailKey] || "") : "";
@@ -243,9 +247,18 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
       }
       const company = rec.company || rec.Company || rec.COMPANY
         || rec.prospect_company_name || rec.company_name || rec["Company Name"] || "";
+      const rawDomain = domainKey ? (rec[domainKey] || "") : "";
+      const domain = (rawDomain || "")
+        .toString()
+        .trim()
+        .replace(/^https?:\/\//i, "")
+        .replace(/^www\./i, "")
+        .split(/[\/?#]/)[0]
+        .toLowerCase();
 
       const knownKeys = new Set([
         emailKey,
+        domainKey,
         "first_name","firstName","First_Name","First Name",
         "last_name","lastName","Last_Name","Last Name",
         "full_name","fullName","Full Name","prospect_full_name",
@@ -256,7 +269,7 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
         if (!knownKeys.has(k) && v) extraFields[k] = v;
       }
 
-      await ColdContact.create({ email, firstName, lastName, company, extraFields, importBatch: batchLabel });
+      await ColdContact.create({ email, firstName, lastName, company, domain, extraFields, importBatch: batchLabel });
       imported++;
     }
 
@@ -274,7 +287,7 @@ router.get("/contacts/all-ids", async (req, res) => {
     const filter = { status: "active" };
     if (search) {
       const re = new RegExp(search, "i");
-      filter.$or = [{ email: re }, { firstName: re }, { lastName: re }, { company: re }];
+      filter.$or = [{ email: re }, { firstName: re }, { lastName: re }, { company: re }, { domain: re }];
     }
     let q = ColdContact.find(filter).select("_id").lean();
     if (limit > 0) q = q.limit(limit);
@@ -288,14 +301,14 @@ router.get("/contacts/all-ids", async (req, res) => {
 // POST /api/cold-email/contacts — add a single contact manually
 router.post("/contacts", async (req, res) => {
   try {
-    const { email: rawEmail, firstName = "", lastName = "", company = "" } = req.body;
+    const { email: rawEmail, firstName = "", lastName = "", company = "", domain = "" } = req.body;
     const email = (rawEmail || "").toLowerCase().trim();
     if (!email || !isValidEmail(email)) {
       return res.status(400).json({ message: "Invalid email address" });
     }
     const exists = await ColdContact.findOne({ email });
     if (exists) return res.status(409).json({ message: "Contact already exists" });
-    const contact = await ColdContact.create({ email, firstName, lastName, company });
+    const contact = await ColdContact.create({ email, firstName, lastName, company, domain: (domain || "").toString().trim().toLowerCase() });
     res.status(201).json(contact);
   } catch (err) {
     res.status(500).json({ message: err.message });

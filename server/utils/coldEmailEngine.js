@@ -1,31 +1,32 @@
-const crypto   = require("crypto");
-const jwt       = require("jsonwebtoken");
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const { google } = require("googleapis");
 
-const ColdMailbox        = require("../models/ColdMailbox");
-const ColdContact        = require("../models/ColdContact");
-const ColdCampaign       = require("../models/ColdCampaign");
-const ColdSend           = require("../models/ColdSend");
+const ColdMailbox = require("../models/ColdMailbox");
+const ColdContact = require("../models/ColdContact");
+const ColdCampaign = require("../models/ColdCampaign");
+const ColdSend = require("../models/ColdSend");
 const ColdSuppressionList = require("../models/ColdSuppressionList");
 
 // ── Token encryption ──────────────────────────────────────────────────────────
 
-const RAW_KEY = process.env.COLD_EMAIL_ENCRYPTION_KEY || "dev_cold_email_key_32chars_pad00";
+const RAW_KEY =
+  process.env.COLD_EMAIL_ENCRYPTION_KEY || "dev_cold_email_key_32chars_pad00";
 const ENC_KEY = crypto.createHash("sha256").update(RAW_KEY).digest();
 
 function encrypt(text) {
   if (!text) return "";
-  const iv      = crypto.randomBytes(16);
-  const cipher  = crypto.createCipheriv("aes-256-gcm", ENC_KEY, iv);
-  const enc     = Buffer.concat([cipher.update(text, "utf8"), cipher.final()]);
-  const tag     = cipher.getAuthTag();
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv("aes-256-gcm", ENC_KEY, iv);
+  const enc = Buffer.concat([cipher.update(text, "utf8"), cipher.final()]);
+  const tag = cipher.getAuthTag();
   return `${iv.toString("hex")}:${tag.toString("hex")}:${enc.toString("hex")}`;
 }
 
 function decrypt(encText) {
   if (!encText) return "";
   const [ivHex, tagHex, encHex] = encText.split(":");
-  const iv  = Buffer.from(ivHex,  "hex");
+  const iv = Buffer.from(ivHex, "hex");
   const tag = Buffer.from(tagHex, "hex");
   const enc = Buffer.from(encHex, "hex");
   const dec = crypto.createDecipheriv("aes-256-gcm", ENC_KEY, iv);
@@ -35,68 +36,80 @@ function decrypt(encText) {
 
 // ── Gmail OAuth client ────────────────────────────────────────────────────────
 
-const REDIRECT_URI    = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/cold-email/auth/callback`;
+const REDIRECT_URI = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/cold-email/auth/callback`;
 const MS_REDIRECT_URI = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/cold-email/auth/microsoft/callback`;
 
-const MS_TOKEN_URL = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
-const MS_AUTH_URL  = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
-const MS_SCOPES    = "offline_access https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read";
+const MS_TOKEN_URL =
+  "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+const MS_AUTH_URL =
+  "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
+const MS_SCOPES =
+  "offline_access https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read";
 
 function buildMsAuthUrl() {
   const p = new URLSearchParams({
-    client_id:     process.env.MS_CLIENT_ID || "",
+    client_id: process.env.MS_CLIENT_ID || "",
     response_type: "code",
-    redirect_uri:  MS_REDIRECT_URI,
-    scope:         MS_SCOPES,
+    redirect_uri: MS_REDIRECT_URI,
+    scope: MS_SCOPES,
     response_mode: "query",
-    prompt:        "consent",
+    prompt: "consent",
   });
   return `${MS_AUTH_URL}?${p.toString()}`;
 }
 
 async function exchangeMsCode(code) {
   const params = new URLSearchParams({
-    client_id:     process.env.MS_CLIENT_ID || "",
+    client_id: process.env.MS_CLIENT_ID || "",
     client_secret: process.env.MS_CLIENT_SECRET || "",
     code,
-    redirect_uri:  MS_REDIRECT_URI,
-    grant_type:    "authorization_code",
+    redirect_uri: MS_REDIRECT_URI,
+    grant_type: "authorization_code",
   });
   const res = await fetch(MS_TOKEN_URL, {
-    method:  "POST",
+    method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body:    params.toString(),
+    body: params.toString(),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error_description || data.error || "MS token exchange failed");
+  if (!res.ok)
+    throw new Error(
+      data.error_description || data.error || "MS token exchange failed",
+    );
   return data;
 }
 
 async function refreshMsToken(rawRefreshToken) {
   const params = new URLSearchParams({
-    client_id:     process.env.MS_CLIENT_ID || "",
+    client_id: process.env.MS_CLIENT_ID || "",
     client_secret: process.env.MS_CLIENT_SECRET || "",
     refresh_token: rawRefreshToken,
-    grant_type:    "refresh_token",
-    scope:         MS_SCOPES,
+    grant_type: "refresh_token",
+    scope: MS_SCOPES,
   });
   const res = await fetch(MS_TOKEN_URL, {
-    method:  "POST",
+    method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body:    params.toString(),
+    body: params.toString(),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error_description || data.error || "MS token refresh failed");
+  if (!res.ok)
+    throw new Error(
+      data.error_description || data.error || "MS token refresh failed",
+    );
   return data;
 }
 
 async function getMsAccessToken(mailbox) {
-  const expiry = mailbox.tokenExpiry ? new Date(mailbox.tokenExpiry).getTime() : 0;
+  const expiry = mailbox.tokenExpiry
+    ? new Date(mailbox.tokenExpiry).getTime()
+    : 0;
   if (expiry - Date.now() > 5 * 60 * 1000) {
     return decrypt(mailbox.accessToken);
   }
   const raw = decrypt(mailbox.refreshToken);
-  if (!raw) throw new Error("No Microsoft refresh token — reconnect this mailbox");
+  if (!raw)
+    throw new Error("No Microsoft refresh token — reconnect this mailbox");
   const tokens = await refreshMsToken(raw);
   const update = {
     accessToken: encrypt(tokens.access_token),
@@ -111,23 +124,25 @@ function buildOAuth2Client() {
   return new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    REDIRECT_URI
+    REDIRECT_URI,
   );
 }
 
 async function getGmailClient(mailbox) {
   const oauth2 = buildOAuth2Client();
   oauth2.setCredentials({
-    access_token:  decrypt(mailbox.accessToken),
+    access_token: decrypt(mailbox.accessToken),
     refresh_token: decrypt(mailbox.refreshToken),
-    expiry_date:   mailbox.tokenExpiry ? mailbox.tokenExpiry.getTime() : undefined,
+    expiry_date: mailbox.tokenExpiry
+      ? mailbox.tokenExpiry.getTime()
+      : undefined,
   });
 
   // Persist refreshed tokens
   oauth2.on("tokens", async (tokens) => {
     const update = {};
     if (tokens.access_token) update.accessToken = encrypt(tokens.access_token);
-    if (tokens.expiry_date)  update.tokenExpiry  = new Date(tokens.expiry_date);
+    if (tokens.expiry_date) update.tokenExpiry = new Date(tokens.expiry_date);
     if (Object.keys(update).length) {
       await ColdMailbox.findByIdAndUpdate(mailbox._id, update);
     }
@@ -140,7 +155,7 @@ async function getGmailClient(mailbox) {
 
 async function sendViaGmail(mailbox, { to, subject, html, fromName }) {
   const gmail = await getGmailClient(mailbox);
-  const from  = fromName ? `${fromName} <${mailbox.email}>` : mailbox.email;
+  const from = fromName ? `${fromName} <${mailbox.email}>` : mailbox.email;
 
   const mime = [
     `MIME-Version: 1.0`,
@@ -173,28 +188,39 @@ async function sendViaOutlook(mailbox, { to, subject, html, fromName }) {
 
   const draft = {
     subject,
-    body:          { contentType: "HTML", content: html },
-    toRecipients:  [{ emailAddress: { address: to } }],
-    from:          { emailAddress: { name: fromName || "", address: mailbox.email } },
+    body: { contentType: "HTML", content: html },
+    toRecipients: [{ emailAddress: { address: to } }],
+    from: { emailAddress: { name: fromName || "", address: mailbox.email } },
   };
 
   // Step 1 — create draft
-  const createRes = await fetch("https://graph.microsoft.com/v1.0/me/messages", {
-    method:  "POST",
-    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-    body:    JSON.stringify(draft),
-  });
+  const createRes = await fetch(
+    "https://graph.microsoft.com/v1.0/me/messages",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(draft),
+    },
+  );
   if (!createRes.ok) {
     const err = await createRes.json().catch(() => ({}));
-    throw new Error(`MS Graph create: ${err?.error?.message || createRes.status}`);
+    throw new Error(
+      `MS Graph create: ${err?.error?.message || createRes.status}`,
+    );
   }
   const msg = await createRes.json();
 
   // Step 2 — send
-  const sendRes = await fetch(`https://graph.microsoft.com/v1.0/me/messages/${msg.id}/send`, {
-    method:  "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  const sendRes = await fetch(
+    `https://graph.microsoft.com/v1.0/me/messages/${msg.id}/send`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
   if (!sendRes.ok) {
     const err = await sendRes.json().catch(() => ({}));
     throw new Error(`MS Graph send: ${err?.error?.message || sendRes.status}`);
@@ -206,13 +232,15 @@ async function sendViaOutlook(mailbox, { to, subject, html, fromName }) {
 // ── Template helpers ──────────────────────────────────────────────────────────
 
 function personalizeTemplate(template, contact) {
-  const fullName = `${contact.firstName || ""} ${contact.lastName || ""}`.trim();
+  const fullName =
+    `${contact.firstName || ""} ${contact.lastName || ""}`.trim();
   return template
     .replace(/\{\{first_name\}\}/gi, contact.firstName || "")
-    .replace(/\{\{last_name\}\}/gi,  contact.lastName  || "")
-    .replace(/\{\{full_name\}\}/gi,  fullName)
-    .replace(/\{\{company\}\}/gi,    contact.company   || "")
-    .replace(/\{\{email\}\}/gi,      contact.email     || "");
+    .replace(/\{\{last_name\}\}/gi, contact.lastName || "")
+    .replace(/\{\{full_name\}\}/gi, fullName)
+    .replace(/\{\{company\}\}/gi, contact.company || "")
+    .replace(/\{\{email\}\}/gi, contact.email || "")
+    .replace(/\{\{domain\}\}/gi, contact.domain || "");
 }
 
 function buildEmailHtml(rawBody, unsubUrl, replySubject) {
@@ -226,7 +254,8 @@ function buildEmailHtml(rawBody, unsubUrl, replySubject) {
     : rawBody
         .split(/\n/)
         .map((line) => {
-          if (!line.trim()) return `<tr><td style="height:10px;font-size:10px;line-height:10px;">&nbsp;</td></tr>`;
+          if (!line.trim())
+            return `<tr><td style="height:10px;font-size:10px;line-height:10px;">&nbsp;</td></tr>`;
           return `<tr><td style="padding:0 0 6px;color:#1e293b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;">${line}</td></tr>`;
         })
         .join("\n");
@@ -364,7 +393,7 @@ function buildPlainEmailHtml(rawBody, unsubUrl) {
     .map((line) =>
       line.trim()
         ? `<p style="margin:0 0 14px;color:#1e293b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;line-height:1.75;">${line}</p>`
-        : `<p style="margin:0 0 14px;font-size:15px;">&nbsp;</p>`
+        : `<p style="margin:0 0 14px;font-size:15px;">&nbsp;</p>`,
     )
     .join("");
   return `<!DOCTYPE html>
@@ -392,14 +421,17 @@ async function resetDailyCounters() {
   today.setHours(0, 0, 0, 0);
   await ColdMailbox.updateMany(
     { lastResetDate: { $lt: today } },
-    { $set: { sentToday: 0, lastResetDate: new Date() } }
+    { $set: { sentToday: 0, lastResetDate: new Date() } },
   );
 }
 
 // ── Pick available mailbox ────────────────────────────────────────────────────
 
 async function pickMailbox(mailboxIds) {
-  const boxes = await ColdMailbox.find({ _id: { $in: mailboxIds }, status: "active" });
+  const boxes = await ColdMailbox.find({
+    _id: { $in: mailboxIds },
+    status: "active",
+  });
   for (const box of boxes) {
     if (box.sentToday < box.dailyLimit) return box;
   }
@@ -415,23 +447,28 @@ async function scheduleNextStep(send, campaign) {
 
   const base = new Date();
   base.setDate(base.getDate() + (nextStep.waitDays || 1));
-  base.setHours(9 + Math.floor(Math.random() * 7), Math.floor(Math.random() * 60), 0, 0);
+  base.setHours(
+    9 + Math.floor(Math.random() * 7),
+    Math.floor(Math.random() * 60),
+    0,
+    0,
+  );
 
   // Deduplicate — may already exist if this step was scheduled before
   const exists = await ColdSend.findOne({
     campaignId: send.campaignId,
-    contactId:  send.contactId,
-    stepIndex:  nextIdx,
+    contactId: send.contactId,
+    stepIndex: nextIdx,
   });
   if (exists) return;
 
   await ColdSend.create({
-    campaignId:   send.campaignId,
-    contactId:    send.contactId,
+    campaignId: send.campaignId,
+    contactId: send.contactId,
     contactEmail: send.contactEmail,
-    stepIndex:    nextIdx,
-    status:       "pending",
-    scheduledAt:  base,
+    stepIndex: nextIdx,
+    status: "pending",
+    scheduledAt: base,
   });
 }
 
@@ -440,7 +477,10 @@ async function scheduleNextStep(send, campaign) {
 async function processSingleSend(send) {
   const campaign = await ColdCampaign.findById(send.campaignId);
   if (!campaign) {
-    return ColdSend.findByIdAndUpdate(send._id, { status: "skipped", error: "Campaign not found" });
+    return ColdSend.findByIdAndUpdate(send._id, {
+      status: "skipped",
+      error: "Campaign not found",
+    });
   }
 
   // Auto-activate scheduled campaigns whose start time has arrived
@@ -454,19 +494,30 @@ async function processSingleSend(send) {
   }
 
   if (campaign.status !== "active") {
-    return ColdSend.findByIdAndUpdate(send._id, { status: "skipped", error: "Campaign not active" });
+    return ColdSend.findByIdAndUpdate(send._id, {
+      status: "skipped",
+      error: "Campaign not active",
+    });
   }
 
   // Suppressed?
-  const suppressed = await ColdSuppressionList.findOne({ email: send.contactEmail });
+  const suppressed = await ColdSuppressionList.findOne({
+    email: send.contactEmail,
+  });
   if (suppressed) {
-    return ColdSend.findByIdAndUpdate(send._id, { status: "skipped", error: "Suppressed" });
+    return ColdSend.findByIdAndUpdate(send._id, {
+      status: "skipped",
+      error: "Suppressed",
+    });
   }
 
   // Contact still active?
   const contact = await ColdContact.findById(send.contactId);
   if (!contact || contact.status !== "active") {
-    return ColdSend.findByIdAndUpdate(send._id, { status: "skipped", error: "Contact inactive" });
+    return ColdSend.findByIdAndUpdate(send._id, {
+      status: "skipped",
+      error: "Contact inactive",
+    });
   }
 
   // Pick mailbox
@@ -475,53 +526,81 @@ async function processSingleSend(send) {
     // Defer to tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(9 + Math.floor(Math.random() * 6), Math.floor(Math.random() * 60), 0, 0);
+    tomorrow.setHours(
+      9 + Math.floor(Math.random() * 6),
+      Math.floor(Math.random() * 60),
+      0,
+      0,
+    );
     return ColdSend.findByIdAndUpdate(send._id, { scheduledAt: tomorrow });
   }
 
   const step = campaign.steps[send.stepIndex];
   if (!step) {
-    return ColdSend.findByIdAndUpdate(send._id, { status: "skipped", error: "Step missing" });
+    return ColdSend.findByIdAndUpdate(send._id, {
+      status: "skipped",
+      error: "Step missing",
+    });
   }
 
   const subject = personalizeTemplate(step.subject, contact);
-  const body    = personalizeTemplate(step.body, contact);
+  const body = personalizeTemplate(step.body, contact);
 
   const unsubToken = jwt.sign(
     { email: contact.email, campaignId: send.campaignId.toString() },
     process.env.JWT_SECRET || "cleaniq_jwt_secret",
-    { expiresIn: "90d" }
+    { expiresIn: "90d" },
   );
   const unsubUrl = `${process.env.BACKEND_URL || "http://localhost:5000"}/api/cold-email/unsubscribe/${unsubToken}`;
-  const fullHtml = campaign.emailStyle === "plain"
-    ? buildPlainEmailHtml(body, unsubUrl)
-    : buildEmailHtml(body, unsubUrl, subject);
+  const fullHtml =
+    campaign.emailStyle === "plain"
+      ? buildPlainEmailHtml(body, unsubUrl)
+      : buildEmailHtml(body, unsubUrl, subject);
 
   // ── Dry-run mode ──────────────────────────────────────────────────────────
   if (process.env.COLD_EMAIL_DRY_RUN === "true") {
-    console.log(`[COLD EMAIL DRY RUN] → ${contact.email} | Step ${send.stepIndex + 1} | Subject: "${subject}"`);
-    await ColdSend.findByIdAndUpdate(send._id, { status: "sent", sentAt: new Date(), mailboxId: mailbox._id });
-    await ColdMailbox.findByIdAndUpdate(mailbox._id, { $inc: { sentToday: 1 } });
-    await ColdCampaign.findByIdAndUpdate(send.campaignId, { $inc: { "stats.sent": 1 } });
+    console.log(
+      `[COLD EMAIL DRY RUN] → ${contact.email} | Step ${send.stepIndex + 1} | Subject: "${subject}"`,
+    );
+    await ColdSend.findByIdAndUpdate(send._id, {
+      status: "sent",
+      sentAt: new Date(),
+      mailboxId: mailbox._id,
+    });
+    await ColdMailbox.findByIdAndUpdate(mailbox._id, {
+      $inc: { sentToday: 1 },
+    });
+    await ColdCampaign.findByIdAndUpdate(send.campaignId, {
+      $inc: { "stats.sent": 1 },
+    });
     await scheduleNextStep(send, campaign);
     return;
   }
 
   // ── Real send — route based on provider ──────────────────────────────────
-  const sendOpts = { to: contact.email, subject, html: fullHtml, fromName: campaign.fromName || "" };
-  const result = mailbox.provider === "outlook"
-    ? await sendViaOutlook(mailbox, sendOpts)
-    : await sendViaGmail(mailbox, sendOpts);
+  const sendOpts = {
+    to: contact.email,
+    subject,
+    html: fullHtml,
+    fromName: campaign.fromName || "",
+  };
+  const result =
+    mailbox.provider === "outlook"
+      ? await sendViaOutlook(mailbox, sendOpts)
+      : await sendViaGmail(mailbox, sendOpts);
 
   await ColdSend.findByIdAndUpdate(send._id, {
-    status:         "sent",
-    sentAt:         new Date(),
-    mailboxId:      mailbox._id,
+    status: "sent",
+    sentAt: new Date(),
+    mailboxId: mailbox._id,
     gmailMessageId: result.id,
-    gmailThreadId:  mailbox.provider === "outlook" ? result.conversationId : result.threadId,
+    gmailThreadId:
+      mailbox.provider === "outlook" ? result.conversationId : result.threadId,
   });
   await ColdMailbox.findByIdAndUpdate(mailbox._id, { $inc: { sentToday: 1 } });
-  await ColdCampaign.findByIdAndUpdate(send.campaignId, { $inc: { "stats.sent": 1 } });
+  await ColdCampaign.findByIdAndUpdate(send.campaignId, {
+    $inc: { "stats.sent": 1 },
+  });
   await scheduleNextStep(send, campaign);
 }
 
@@ -535,8 +614,11 @@ async function processColdEmailSends() {
   try {
     await resetDailyCounters();
 
-    const now     = new Date();
-    const pending = await ColdSend.find({ status: "pending", scheduledAt: { $lte: now } })
+    const now = new Date();
+    const pending = await ColdSend.find({
+      status: "pending",
+      scheduledAt: { $lte: now },
+    })
       .sort({ scheduledAt: 1 })
       .limit(150)
       .lean();
@@ -545,23 +627,34 @@ async function processColdEmailSends() {
     const CONCURRENCY = 5;
     for (let i = 0; i < pending.length; i += CONCURRENCY) {
       const chunk = pending.slice(i, i + CONCURRENCY);
-      await Promise.all(chunk.map(async (send) => {
-        try {
-          await processSingleSend(send);
-        } catch (err) {
-          console.error(`Cold send error (${send.contactEmail}):`, err.message);
-          await ColdSend.findByIdAndUpdate(send._id, { status: "failed", error: err.message });
-          const tokenError = err.message && (
-            err.message.includes("invalid_grant") ||
-            err.message.includes("Invalid Credentials") ||
-            err.message.includes("InvalidAuthenticationToken") ||
-            err.message.includes("reconnect this mailbox")
-          );
-          if (tokenError && send.mailboxId) {
-            await ColdMailbox.findByIdAndUpdate(send.mailboxId, { status: "error", errorMessage: err.message });
+      await Promise.all(
+        chunk.map(async (send) => {
+          try {
+            await processSingleSend(send);
+          } catch (err) {
+            console.error(
+              `Cold send error (${send.contactEmail}):`,
+              err.message,
+            );
+            await ColdSend.findByIdAndUpdate(send._id, {
+              status: "failed",
+              error: err.message,
+            });
+            const tokenError =
+              err.message &&
+              (err.message.includes("invalid_grant") ||
+                err.message.includes("Invalid Credentials") ||
+                err.message.includes("InvalidAuthenticationToken") ||
+                err.message.includes("reconnect this mailbox"));
+            if (tokenError && send.mailboxId) {
+              await ColdMailbox.findByIdAndUpdate(send.mailboxId, {
+                status: "error",
+                errorMessage: err.message,
+              });
+            }
           }
-        }
-      }));
+        }),
+      );
     }
   } finally {
     sendRunning = false;
@@ -600,7 +693,9 @@ function b64Decode(data) {
     // Gmail uses base64url (- and _ instead of + and /)
     const std = data.replace(/-/g, "+").replace(/_/g, "/");
     return Buffer.from(std, "base64").toString("utf8");
-  } catch { return ""; }
+  } catch {
+    return "";
+  }
 }
 
 // Recursively search MIME parts for text content
@@ -658,44 +753,63 @@ async function detectRepliesForOutlookMailbox(mailbox) {
 
   const sentSends = await ColdSend.find({
     mailboxId: mailbox._id,
-    status:    "sent",
+    status: "sent",
     gmailThreadId: { $exists: true, $ne: null },
-  }).limit(200).lean();
+  })
+    .limit(200)
+    .lean();
 
   for (const send of sentSends) {
     try {
       const url = `https://graph.microsoft.com/v1.0/me/messages?$filter=conversationId eq '${send.gmailThreadId}' and isDraft eq false&$orderby=receivedDateTime asc&$select=id,from,subject,bodyPreview,receivedDateTime`;
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
       if (!res.ok) continue;
       const data = await res.json();
       const messages = data.value || [];
 
       const reply = messages.find(
-        (m) => m.id !== send.gmailMessageId &&
-               m.from?.emailAddress?.address?.toLowerCase() !== mailbox.email.toLowerCase()
+        (m) =>
+          m.id !== send.gmailMessageId &&
+          m.from?.emailAddress?.address?.toLowerCase() !==
+            mailbox.email.toLowerCase(),
       );
       if (!reply) continue;
 
-      const replyFrom    = reply.from?.emailAddress?.address || "";
+      const replyFrom = reply.from?.emailAddress?.address || "";
       const replySubject = reply.subject || "";
-      const replyBody    = (reply.bodyPreview || "").slice(0, 2000);
+      const replyBody = (reply.bodyPreview || "").slice(0, 2000);
 
       await ColdSend.updateMany(
-        { campaignId: send.campaignId, contactId: send.contactId, status: "pending" },
-        { status: "skipped", error: "Contact replied" }
+        {
+          campaignId: send.campaignId,
+          contactId: send.contactId,
+          status: "pending",
+        },
+        { status: "skipped", error: "Contact replied" },
       );
       await ColdSend.findByIdAndUpdate(send._id, {
-        status: "replied", repliedAt: new Date(reply.receivedDateTime),
-        replyFrom, replySubject, replyBody,
+        status: "replied",
+        repliedAt: new Date(reply.receivedDateTime),
+        replyFrom,
+        replySubject,
+        replyBody,
       });
       const alreadyCounted = await ColdSend.findOne({
-        campaignId: send.campaignId, contactId: send.contactId,
-        status: "replied", _id: { $ne: send._id },
+        campaignId: send.campaignId,
+        contactId: send.contactId,
+        status: "replied",
+        _id: { $ne: send._id },
       });
       if (!alreadyCounted) {
-        await ColdCampaign.findByIdAndUpdate(send.campaignId, { $inc: { "stats.replied": 1 } });
+        await ColdCampaign.findByIdAndUpdate(send.campaignId, {
+          $inc: { "stats.replied": 1 },
+        });
       }
-    } catch { continue; }
+    } catch {
+      continue;
+    }
   }
 }
 
@@ -703,8 +817,8 @@ async function detectRepliesForMailbox(mailbox) {
   const gmail = await getGmailClient(mailbox);
 
   const list = await gmail.users.messages.list({
-    userId:     "me",
-    q:          "in:inbox newer_than:14d",
+    userId: "me",
+    q: "in:inbox newer_than:14d",
     maxResults: 100,
   });
 
@@ -712,24 +826,27 @@ async function detectRepliesForMailbox(mailbox) {
 
   for (const ref of list.data.messages) {
     const msg = await gmail.users.messages.get({
-      userId:          "me",
-      id:              ref.id,
-      format:          "full",
+      userId: "me",
+      id: ref.id,
+      format: "full",
       metadataHeaders: ["From", "Subject"],
     });
 
     const threadId = msg.data.threadId;
     if (!threadId) continue;
 
-    const originalSend = await ColdSend.findOne({ gmailThreadId: threadId, status: "sent" });
+    const originalSend = await ColdSend.findOne({
+      gmailThreadId: threadId,
+      status: "sent",
+    });
     if (!originalSend) continue;
 
     // Extract reply content
-    const headers  = msg.data.payload?.headers || [];
-    const fromHdr  = headers.find(h => h.name?.toLowerCase() === "from");
-    const subHdr   = headers.find(h => h.name?.toLowerCase() === "subject");
-    const replyFrom    = fromHdr?.value || "";
-    const replySubject = subHdr?.value  || "";
+    const headers = msg.data.payload?.headers || [];
+    const fromHdr = headers.find((h) => h.name?.toLowerCase() === "from");
+    const subHdr = headers.find((h) => h.name?.toLowerCase() === "subject");
+    const replyFrom = fromHdr?.value || "";
+    const replySubject = subHdr?.value || "";
     // Try full body extraction first, fall back to Gmail snippet
     let replyBody = extractGmailBody(msg.data.payload);
     if (!replyBody && msg.data.snippet) replyBody = msg.data.snippet;
@@ -737,26 +854,34 @@ async function detectRepliesForMailbox(mailbox) {
 
     // Stop sequence — mark all pending sends for this contact in this campaign
     await ColdSend.updateMany(
-      { campaignId: originalSend.campaignId, contactId: originalSend.contactId, status: "pending" },
-      { status: "skipped", error: "Contact replied" }
+      {
+        campaignId: originalSend.campaignId,
+        contactId: originalSend.contactId,
+        status: "pending",
+      },
+      { status: "skipped", error: "Contact replied" },
     );
     // Mark the original send as replied with reply content
     await ColdSend.findByIdAndUpdate(originalSend._id, {
-      status:       "replied",
+      status: "replied",
       replyFrom,
       replySubject,
       replyBody,
-      repliedAt:    new Date(msg.data.internalDate ? parseInt(msg.data.internalDate) : Date.now()),
+      repliedAt: new Date(
+        msg.data.internalDate ? parseInt(msg.data.internalDate) : Date.now(),
+      ),
     });
     // Increment campaign replied counter (only once per contact)
     const alreadyCounted = await ColdSend.findOne({
       campaignId: originalSend.campaignId,
-      contactId:  originalSend.contactId,
-      status:     "replied",
-      _id:        { $ne: originalSend._id },
+      contactId: originalSend.contactId,
+      status: "replied",
+      _id: { $ne: originalSend._id },
     });
     if (!alreadyCounted) {
-      await ColdCampaign.findByIdAndUpdate(originalSend.campaignId, { $inc: { "stats.replied": 1 } });
+      await ColdCampaign.findByIdAndUpdate(originalSend.campaignId, {
+        $inc: { "stats.replied": 1 },
+      });
     }
   }
 }
