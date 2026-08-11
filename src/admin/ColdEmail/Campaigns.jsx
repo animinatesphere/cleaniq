@@ -1000,6 +1000,7 @@ function Wizard({ onClose, onCreated, editCampaign }) {
   const [cTotal, setCTotal] = useState(0);
   const [cSearch, setCSearch] = useState("");
   const [cPage, setCPage] = useState(1);
+  const [contactView, setContactView] = useState("all");
   const [previewIdx, setPreviewIdx] = useState(null);
   const [scheduleMode, setScheduleMode] = useState(false);
   const [scheduleDate, setScheduleDate] = useState("");
@@ -1044,14 +1045,19 @@ function Wizard({ onClose, onCreated, editCampaign }) {
   }, []);
 
   const loadContacts = useCallback(async () => {
-    const p = new URLSearchParams({ page: cPage, limit: 50, search: cSearch });
+    const p = new URLSearchParams({
+      page: cPage,
+      limit: 50,
+      search: cSearch,
+      view: contactView,
+    });
     const r = await fetch(`${API}/cold-email/contacts?${p}`, {
       headers: auth(),
     });
     const d = await r.json();
     setContacts(d.contacts || []);
     setCTotal(d.total || 0);
-  }, [cPage, cSearch]);
+  }, [cPage, cSearch, contactView]);
 
   useEffect(() => {
     if (step === 3) loadContacts();
@@ -1084,7 +1090,12 @@ function Wizard({ onClose, onCreated, editCampaign }) {
     }));
 
   const selectN = async (n) => {
-    const url = `${API}/cold-email/contacts/all-ids?search=${encodeURIComponent(cSearch)}${n ? `&limit=${n}` : ""}`;
+    const params = new URLSearchParams({
+      search: cSearch,
+      view: contactView,
+    });
+    if (n) params.set("limit", String(n));
+    const url = `${API}/cold-email/contacts/all-ids?${params}`;
     const r = await fetch(url, { headers: auth() });
     const d = await r.json();
     if (d.ids) setData((p) => ({ ...p, contactIds: d.ids }));
@@ -1790,6 +1801,29 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                   </div>
                 </div>
 
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: "all", label: "All" },
+                    { id: "contacted", label: "Already contacted" },
+                    { id: "not-contacted", label: "Not contacted" },
+                  ].map((tab) => {
+                    const active = contactView === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => {
+                          setContactView(tab.id);
+                          setCPage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${active ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400" : "bg-white/[0.04] border border-white/[0.08] text-white/40 hover:bg-white/[0.07] hover:text-white/70"}`}
+                      >
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
                 <input
                   type="text"
                   value={cSearch}
@@ -1836,9 +1870,16 @@ function Wizard({ onClose, onCreated, editCampaign }) {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-white/85 text-sm font-medium truncate">
-                            {name}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-white/85 text-sm font-medium truncate">
+                              {name}
+                            </p>
+                            {c.contacted && (
+                              <span className="text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider bg-blue-500/15 text-blue-400 shrink-0">
+                                Sent before
+                              </span>
+                            )}
+                          </div>
                           <p className="text-white/25 text-xs truncate">
                             {c.email}
                           </p>

@@ -271,7 +271,7 @@ router.get("/contacts", async (req, res) => {
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]);
     const statusMap = Object.fromEntries(stats.map((s) => [s._id, s.count]));
-    res.json({ contacts, total, page, limit, stats: statusMap });
+    res.json({ contacts: pagedContacts, total, page, limit, stats: statusMap });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -460,6 +460,7 @@ router.get("/contacts/all-ids", async (req, res) => {
   try {
     const search = (req.query.search || "").trim();
     const limit = parseInt(req.query.limit) || 0; // 0 = no limit
+    const view = (req.query.view || "all").toLowerCase();
     const filter = { status: "active" };
     if (search) {
       const re = new RegExp(search, "i");
@@ -471,12 +472,36 @@ router.get("/contacts/all-ids", async (req, res) => {
         { domain: re },
       ];
     }
-    let q = ColdContact.find(filter).select("_id").lean();
-    if (limit > 0) q = q.limit(limit);
-    const contacts = await q;
+
+    const contacts = await ColdContact.find(filter).select("_id email").lean();
+    const contactIds = contacts.map((contact) => contact._id);
+    const sentMatches = contactIds.length
+      ? await ColdSend.aggregate([
+          {
+            $match: {
+              contactId: { $in: contactIds },
+              status: { $in: ["sent", "replied", "bounced"] },
+            },
+          },
+          { $group: { _id: "$contactId" } },
+        ])
+      : [];
+    const contactedIds = new Set(
+      sentMatches.map((match) => match._id.toString()),
+    );
+
+    const filteredContacts = contacts.filter((contact) => {
+      const contacted = contactedIds.has(contact._id.toString());
+      if (view === "contacted") return contacted;
+      if (view === "not-contacted") return !contacted;
+      return true;
+    });
+
+    const slicedContacts =
+      limit > 0 ? filteredContacts.slice(0, limit) : filteredContacts;
     res.json({
-      ids: contacts.map((c) => c._id.toString()),
-      total: contacts.length,
+      ids: slicedContacts.map((c) => c._id.toString()),
+      total: filteredContacts.length,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

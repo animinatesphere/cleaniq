@@ -449,15 +449,22 @@ export default function Contacts() {
                       <span className="text-white/40 text-sm truncate">
                         {c.domain || getDomainFromEmail(c.email) || "—"}
                       </span>
-                      <span
-                        className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider w-fit ${
-                          c.status === "active"
-                            ? "bg-emerald-500/15 text-emerald-400"
-                            : "bg-rose-500/15 text-rose-400"
-                        }`}
-                      >
-                        {c.status}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {c.contacted && (
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider bg-blue-500/15 text-blue-400">
+                            Sent before
+                          </span>
+                        )}
+                        <span
+                          className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider w-fit ${
+                            c.status === "active"
+                              ? "bg-emerald-500/15 text-emerald-400"
+                              : "bg-rose-500/15 text-rose-400"
+                          }`}
+                        >
+                          {c.status}
+                        </span>
+                      </div>
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => openEditModal(c)}
