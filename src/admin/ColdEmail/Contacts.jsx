@@ -16,6 +16,13 @@ const auth = () => ({
   Authorization: `Bearer ${localStorage.getItem("adminToken") || ""}`,
 });
 
+function getDomainFromEmail(email) {
+  const value = (email || "").trim().toLowerCase();
+  const atIndex = value.lastIndexOf("@");
+  if (atIndex <= 0 || atIndex === value.length - 1) return "";
+  return value.slice(atIndex + 1);
+}
+
 export default function Contacts() {
   const [contacts, setContacts] = useState([]);
   const [total, setTotal] = useState(0);
@@ -49,7 +56,11 @@ export default function Contacts() {
       headers: auth(),
     });
     const d = await r.json();
-    setContacts(d.contacts || []);
+    const resolvedContacts = (d.contacts || []).map((contact) => ({
+      ...contact,
+      domain: contact.domain || getDomainFromEmail(contact.email),
+    }));
+    setContacts(resolvedContacts);
     setTotal(d.total || 0);
     setStats(d.stats || {});
     setLoading(false);
@@ -144,7 +155,7 @@ export default function Contacts() {
       firstName: contact.firstName || "",
       lastName: contact.lastName || "",
       company: contact.company || "",
-      domain: contact.domain || "",
+      domain: contact.domain || getDomainFromEmail(contact.email),
     });
     setAddErr("");
     setAddOpen(true);
@@ -436,7 +447,7 @@ export default function Contacts() {
                         {c.company || "—"}
                       </span>
                       <span className="text-white/40 text-sm truncate">
-                        {c.domain || "—"}
+                        {c.domain || getDomainFromEmail(c.email) || "—"}
                       </span>
                       <span
                         className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider w-fit ${

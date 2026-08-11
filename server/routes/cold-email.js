@@ -240,7 +240,7 @@ router.get("/contacts", async (req, res) => {
         { company: re },
       ];
     }
-    const [contacts, total] = await Promise.all([
+    const [contactsResult, total] = await Promise.all([
       ColdContact.find(filter)
         .sort({ importedAt: -1 })
         .skip((page - 1) * limit)
@@ -248,6 +248,25 @@ router.get("/contacts", async (req, res) => {
         .lean(),
       ColdContact.countDocuments(filter),
     ]);
+
+    const contacts = [];
+    for (const contact of contactsResult) {
+      const resolvedDomain = resolveContactDomain(
+        contact.domain,
+        contact.email,
+      );
+      if (resolvedDomain && !contact.domain) {
+        await ColdContact.updateOne(
+          { _id: contact._id },
+          { $set: { domain: resolvedDomain } },
+        );
+      }
+      contacts.push({
+        ...contact,
+        domain: resolvedDomain || contact.domain || "",
+      });
+    }
+
     const stats = await ColdContact.aggregate([
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]);
