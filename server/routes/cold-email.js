@@ -9,6 +9,7 @@ const ColdCampaign = require("../models/ColdCampaign");
 const ColdSend = require("../models/ColdSend");
 const ColdSuppressionList = require("../models/ColdSuppressionList");
 const ColdTemplate = require("../models/ColdTemplate");
+const { resolveContactDomain } = require("../utils/contactDomain");
 
 const {
   encrypt,
@@ -257,6 +258,35 @@ router.get("/contacts", async (req, res) => {
   }
 });
 
+// POST /api/cold-email/contacts/backfill-domains — fill missing domains from existing email addresses
+router.post("/contacts/backfill-domains", async (req, res) => {
+  try {
+    const contacts = await ColdContact.find({
+      $or: [{ domain: "" }, { domain: null }, { domain: { $exists: false } }],
+    })
+      .select("_id email domain")
+      .lean();
+
+    let updated = 0;
+    for (const contact of contacts) {
+      const computedDomain = resolveContactDomain(
+        contact.domain,
+        contact.email,
+      );
+      if (!computedDomain || computedDomain === contact.domain) continue;
+      await ColdContact.updateOne(
+        { _id: contact._id },
+        { $set: { domain: computedDomain } },
+      );
+      updated += 1;
+    }
+
+    res.json({ updated, total: contacts.length });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // POST /api/cold-email/contacts/import — multipart CSV upload
 router.post("/contacts/import", upload.single("file"), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: "No file uploaded" });
@@ -359,13 +389,7 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
         rec["Company Name"] ||
         "";
       const rawDomain = domainKey ? rec[domainKey] || "" : "";
-      const domain = (rawDomain || "")
-        .toString()
-        .trim()
-        .replace(/^https?:\/\//i, "")
-        .replace(/^www\./i, "")
-        .split(/[\/?#]/)[0]
-        .toLowerCase();
+      const domain = resolveContactDomain(rawDomain, email);
 
       const knownKeys = new Set([
         emailKey,
@@ -462,7 +486,7 @@ router.post("/contacts", async (req, res) => {
       firstName,
       lastName,
       company,
-      domain: (domain || "").toString().trim().toLowerCase(),
+      domain: resolveContactDomain(domain, email),
     });
     res.status(201).json(contact);
   } catch (err) {
@@ -505,7 +529,7 @@ router.put("/contacts/:id", async (req, res) => {
         firstName: firstName || "",
         lastName: lastName || "",
         company: company || "",
-        domain: (domain || "").toString().trim().toLowerCase(),
+        domain: resolveContactDomain(domain, email),
       },
       { new: true },
     );
