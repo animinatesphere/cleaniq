@@ -1,8 +1,12 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
 const SmsLog = require("../models/SmsLog");
+const SmsContact = require("../models/SmsContact");
 const SystemSetting = require("../models/SystemSetting");
 const { sendSms, DEFAULT_TEMPLATES, normalizePhone } = require("../utils/smsService");
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 const SMS_TRIGGERS = [
   { key: "booking_confirmed",    label: "Booking Confirmed",        recipient: "customer", description: "Sent when a booking status changes to Confirmed" },
@@ -267,70 +271,177 @@ router.post("/config/biz-phone", async (req, res) => {
   }
 });
 
-// ─── Bulk SMS ────────────────────────────────────────────────────────────────
+// ─── SMS Contacts ─────────────────────────────────────────────────────────────
 
-// GET /api/sms/bulk/contacts — return unique customers with phone numbers from bookings
-router.get("/bulk/contacts", async (req, res) => {
+// GET /api/sms/contacts
+router.get("/contacts", async (req, res) => {
   try {
-    const Booking = require("../models/Booking");
-    const bookings = await Booking.find(
-      { "customer.phone": { $exists: true, $ne: "" } },
-      { "customer.firstName": 1, "customer.lastName": 1, "customer.email": 1, "customer.phone": 1 }
-    ).sort({ createdAt: -1 });
+    const page   = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit  = Math.min(200, parseInt(req.query.limit) || 50);
+    const search = (req.query.search || "").trim();
 
-    // Deduplicate by phone number — keep the most recent booking's customer info
-    const seen = new Map();
-    for (const b of bookings) {
-      const phone = b.customer?.phone?.trim();
-      if (!phone || seen.has(phone)) continue;
-      const normalized = normalizePhone(phone);
-      seen.set(phone, {
-        _id:            b._id.toString(),
-        name:           `${b.customer.firstName || ""} ${b.customer.lastName || ""}`.trim() || "Unknown",
-        email:          b.customer.email || "",
-        phone,
-        normalizedPhone: normalized !== phone ? normalized : null,
-      });
+    const filter = {};
+    if (search) {
+      filter.$or = [
+        { firstName:       { $regex: search, $options: "i" } },
+        { lastName:        { $regex: search, $options: "i" } },
+        { phone:           { $regex: search, $options: "i" } },
+        { normalizedPhone: { $regex: search, $options: "i" } },
+        { notes:           { $regex: search, $options: "i" } },
+      ];
     }
-    res.json({ contacts: Array.from(seen.values()), total: seen.size });
+
+    const [contacts, total] = await Promise.all([
+      SmsContact.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit),
+      SmsContact.countDocuments(filter),
+    ]);
+    const stats = {
+      active:     await SmsContact.countDocuments({ status: "active" }),
+      suppressed: await SmsContact.countDocuments({ status: "suppressed" }),
+    };
+    res.json({ contacts, total, page, pages: Math.ceil(total / limit), stats });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// POST /api/sms/bulk/send — send SMS to a list of phone numbers
+// POST /api/sms/contacts — add single contact
+router.post("/contacts", async (req, res) => {
+  try {
+    const { firstName = "", lastName = "", phone, notes = "", status = "active" } = req.body;
+    if (!phone?.trim()) return res.status(400).json({ message: "Phone number is required" });
+    const normalized = normalizePhone(phone.trim());
+    const contact = await SmsContact.create({
+      firstName: firstName.trim(),
+      lastName:  lastName.trim(),
+      phone:     phone.trim(),
+      normalizedPhone: normalized,
+      notes:     notes.trim(),
+      status,
+    });
+    res.json(contact);
+  } catch (err) {
+    if (err.code === 11000) return res.status(400).json({ message: "This phone number already exists" });
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// PUT /api/sms/contacts/:id — edit contact
+router.put("/contacts/:id", async (req, res) => {
+  try {
+    const { firstName, lastName, phone, notes, status } = req.body;
+    const update = {};
+    if (firstName !== undefined) update.firstName = firstName.trim();
+    if (lastName  !== undefined) update.lastName  = lastName.trim();
+    if (phone     !== undefined) {
+      update.phone = phone.trim();
+      update.normalizedPhone = normalizePhone(phone.trim());
+    }
+    if (notes  !== undefined) update.notes  = notes.trim();
+    if (status !== undefined) update.status = status;
+    const contact = await SmsContact.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!contact) return res.status(404).json({ message: "Contact not found" });
+    res.json(contact);
+  } catch (err) {
+    if (err.code === 11000) return res.status(400).json({ message: "Phone number already exists" });
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// DELETE /api/sms/contacts/:id — delete single
+router.delete("/contacts/:id", async (req, res) => {
+  try {
+    await SmsContact.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/sms/contacts — bulk delete
+router.delete("/contacts", async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || !ids.length) return res.status(400).json({ error: "IDs required" });
+    await SmsContact.deleteMany({ _id: { $in: ids } });
+    res.json({ success: true, deleted: ids.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/sms/contacts/import — CSV import (columns: phone, first_name, last_name, notes)
+router.post("/contacts/import", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "CSV file required" });
+    const csv = req.file.buffer.toString("utf-8");
+    const lines = csv.split(/\r?\n/).filter(l => l.trim());
+    if (!lines.length) return res.status(400).json({ message: "Empty file" });
+
+    const header = lines[0].split(",").map(h => h.trim().toLowerCase().replace(/^"|"$/g, ""));
+    const phoneIdx = header.indexOf("phone");
+    if (phoneIdx === -1) return res.status(400).json({ message: 'CSV must have a "phone" column' });
+    const fnIdx    = header.indexOf("first_name");
+    const lnIdx    = header.indexOf("last_name");
+    const notesIdx = header.indexOf("notes");
+
+    let imported = 0, duplicates = 0, invalid = 0;
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+      const phone = cols[phoneIdx] || "";
+      if (!phone) { invalid++; continue; }
+      try {
+        const normalized = normalizePhone(phone);
+        await SmsContact.create({
+          phone,
+          normalizedPhone: normalized,
+          firstName: fnIdx >= 0 ? (cols[fnIdx] || "") : "",
+          lastName:  lnIdx >= 0 ? (cols[lnIdx] || "") : "",
+          notes:     notesIdx >= 0 ? (cols[notesIdx] || "") : "",
+        });
+        imported++;
+      } catch (e) {
+        if (e.code === 11000) duplicates++; else invalid++;
+      }
+    }
+    res.json({ imported, duplicates, invalid, total: lines.length - 1 });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/sms/bulk/send — send SMS to selected contact IDs
 router.post("/bulk/send", async (req, res) => {
   try {
-    const { contacts, message } = req.body;
-    if (!Array.isArray(contacts) || contacts.length === 0)
+    const { ids, message } = req.body;
+    if (!Array.isArray(ids) || !ids.length)
       return res.status(400).json({ error: "No contacts provided" });
     if (!message?.trim())
       return res.status(400).json({ error: "Message is required" });
 
-    const { sendSms } = require("../utils/smsService");
+    const contacts = await SmsContact.find({ _id: { $in: ids }, status: "active" });
+    if (!contacts.length) return res.status(400).json({ error: "No active contacts found" });
 
-    // Send in batches of 10 to avoid overwhelming Twilio rate limits
     const results = { sent: 0, failed: 0, errors: [] };
     const BATCH = 10;
-
     for (let i = 0; i < contacts.length; i += BATCH) {
       const batch = contacts.slice(i, i + BATCH);
       await Promise.all(batch.map(async (c) => {
         const result = await sendSms({
-          to:      c.phone,
-          body:    message.trim(),
-          trigger: "bulk",
+          to:        c.normalizedPhone || c.phone,
+          body:      message.trim(),
+          trigger:   "bulk",
           recipient: "customer",
         });
         if (result.success) {
           results.sent++;
+          await SmsContact.findByIdAndUpdate(c._id, { contacted: true });
         } else {
           results.failed++;
           results.errors.push({ phone: c.phone, error: result.error });
         }
       }));
     }
-
     res.json({ success: true, ...results });
   } catch (err) {
     res.status(500).json({ error: err.message });

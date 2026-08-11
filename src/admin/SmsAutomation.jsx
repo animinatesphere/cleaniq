@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
-  MessageSquare, Settings, Send, CheckCircle2, XCircle,
+  MessageSquare, Send, CheckCircle2, XCircle,
   Clock, RefreshCw, Trash2, User, Briefcase, AlertCircle,
   Eye, EyeOff, Search, Users, Edit3, RotateCcw, X, Phone,
+  UserPlus, Upload, Square, CheckSquare, Pencil,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -73,14 +74,26 @@ export default function SmsAutomation() {
   // Log detail modal
   const [detailLog, setDetailLog]             = useState(null);
 
-  // Bulk SMS state
-  const [bulkContacts, setBulkContacts]       = useState([]);
-  const [bulkLoading, setBulkLoading]         = useState(false);
-  const [bulkSearch, setBulkSearch]           = useState("");
-  const [bulkSelected, setBulkSelected]       = useState(new Set());
+  // SMS Contacts state
+  const [contacts, setContacts]               = useState([]);
+  const [contactsTotal, setContactsTotal]     = useState(0);
+  const [contactStats, setContactStats]       = useState({});
+  const [contactPage, setContactPage]         = useState(1);
+  const [contactSearch, setContactSearch]     = useState("");
+  const [contactsLoading, setContactsLoading] = useState(false);
+  const [selected, setSelected]               = useState(new Set());
+  const [addOpen, setAddOpen]                 = useState(false);
+  const [editingContact, setEditingContact]   = useState(null);
+  const [addForm, setAddForm]                 = useState({ firstName: "", lastName: "", phone: "", notes: "" });
+  const [addErr, setAddErr]                   = useState("");
+  const [addSaving, setAddSaving]             = useState(false);
+  const [importing, setImporting]             = useState(false);
+  const [importRes, setImportRes]             = useState(null);
+  const [deleting, setDeleting]               = useState(false);
   const [bulkMessage, setBulkMessage]         = useState("");
   const [bulkSending, setBulkSending]         = useState(false);
   const [bulkResult, setBulkResult]           = useState(null);
+  const fileRef                               = useRef();
 
   // Verify state
   const [verifyPhone, setVerifyPhone]         = useState("");
@@ -315,70 +328,97 @@ export default function SmsAutomation() {
     }
   };
 
-  const fetchBulkContacts = useCallback(async () => {
-    setBulkLoading(true);
+  const CONTACT_LIMIT = 50;
+
+  const loadContacts = useCallback(async () => {
+    setContactsLoading(true);
     try {
-      const res  = await fetch(`${API}/sms/bulk/contacts`);
+      const p = new URLSearchParams({ page: contactPage, limit: CONTACT_LIMIT, search: contactSearch });
+      const res  = await fetch(`${API}/sms/contacts?${p}`);
       const data = await res.json();
-      setBulkContacts(data.contacts || []);
+      setContacts(data.contacts || []);
+      setContactsTotal(data.total || 0);
+      setContactStats(data.stats || {});
     } catch {
       showToast("Failed to load contacts", "error");
     } finally {
-      setBulkLoading(false);
+      setContactsLoading(false);
     }
-  }, []);
+  }, [contactPage, contactSearch]);
 
-  useEffect(() => {
-    if (activeTab === "bulk") fetchBulkContacts();
-  }, [activeTab, fetchBulkContacts]);
+  useEffect(() => { if (activeTab === "bulk") loadContacts(); }, [activeTab, loadContacts]);
+  useEffect(() => { setContactPage(1); }, [contactSearch]);
 
-  const bulkToggle = (phone) => {
-    setBulkSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(phone)) next.delete(phone); else next.add(phone);
-      return next;
-    });
+  const allSelected = contacts.length > 0 && contacts.every(c => selected.has(c._id));
+  const toggleAll = () => {
+    if (allSelected) { const s = new Set(selected); contacts.forEach(c => s.delete(c._id)); setSelected(s); }
+    else             { const s = new Set(selected); contacts.forEach(c => s.add(c._id));    setSelected(s); }
+  };
+  const toggleOne = (id) => { const s = new Set(selected); s.has(id) ? s.delete(id) : s.add(id); setSelected(s); };
+
+  const resetAddForm = () => { setAddForm({ firstName: "", lastName: "", phone: "", notes: "" }); setAddErr(""); };
+  const openAddModal  = () => { setEditingContact(null); resetAddForm(); setAddOpen(true); };
+  const openEditModal = (c) => {
+    setEditingContact(c);
+    setAddForm({ firstName: c.firstName || "", lastName: c.lastName || "", phone: c.phone || "", notes: c.notes || "" });
+    setAddErr("");
+    setAddOpen(true);
   };
 
-  const bulkSelectAll = () => {
-    const filtered = bulkContacts.filter(c =>
-      !bulkSearch || c.name.toLowerCase().includes(bulkSearch.toLowerCase()) || c.phone.includes(bulkSearch)
-    );
-    setBulkSelected(prev => {
-      const allSelected = filtered.every(c => prev.has(c.phone));
-      const next = new Set(prev);
-      if (allSelected) filtered.forEach(c => next.delete(c.phone));
-      else filtered.forEach(c => next.add(c.phone));
-      return next;
-    });
+  const submitAdd = async (e) => {
+    e.preventDefault();
+    setAddErr("");
+    if (!addForm.phone.trim()) { setAddErr("Phone number is required"); return; }
+    setAddSaving(true);
+    try {
+      const method = editingContact ? "PUT" : "POST";
+      const url    = editingContact ? `${API}/sms/contacts/${editingContact._id}` : `${API}/sms/contacts`;
+      const res    = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(addForm) });
+      const data   = await res.json();
+      if (!res.ok) { setAddErr(data.message || "Failed"); setAddSaving(false); return; }
+      setAddOpen(false); setEditingContact(null); resetAddForm(); loadContacts();
+    } catch { setAddErr("Network error"); }
+    setAddSaving(false);
+  };
+
+  const deleteSingle = async (id) => {
+    await fetch(`${API}/sms/contacts/${id}`, { method: "DELETE" });
+    loadContacts();
+  };
+
+  const deleteSelected = async () => {
+    if (!selected.size) return;
+    if (!confirm(`Delete ${selected.size} contact${selected.size > 1 ? "s" : ""}? Cannot be undone.`)) return;
+    setDeleting(true);
+    await fetch(`${API}/sms/contacts`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids: [...selected] }) });
+    setSelected(new Set()); setDeleting(false); loadContacts();
+  };
+
+  const handleFile = async (file) => {
+    if (!file || !file.name.endsWith(".csv")) return showToast("Please choose a .csv file", "error");
+    setImporting(true); setImportRes(null);
+    const form = new FormData(); form.append("file", file);
+    const res  = await fetch(`${API}/sms/contacts/import`, { method: "POST", body: form });
+    const data = await res.json();
+    setImportRes(data); setImporting(false); loadContacts();
   };
 
   const sendBulk = async () => {
-    if (bulkSelected.size === 0) return showToast("Select at least one contact", "error");
+    if (selected.size === 0) return showToast("Select at least one contact", "error");
     if (!bulkMessage.trim()) return showToast("Write a message first", "error");
-    if (!confirm(`Send SMS to ${bulkSelected.size} contact${bulkSelected.size > 1 ? "s" : ""}?`)) return;
-    setBulkSending(true);
-    setBulkResult(null);
+    if (!confirm(`Send SMS to ${selected.size} contact${selected.size > 1 ? "s" : ""}?`)) return;
+    setBulkSending(true); setBulkResult(null);
     try {
-      const contacts = bulkContacts.filter(c => bulkSelected.has(c.phone));
       const res  = await fetch(`${API}/sms/bulk/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contacts, message: bulkMessage }),
+        body: JSON.stringify({ ids: [...selected], message: bulkMessage }),
       });
       const data = await res.json();
-      if (data.success) {
-        setBulkResult(data);
-        setBulkSelected(new Set());
-        showToast(`Sent ${data.sent}, Failed ${data.failed}`);
-      } else {
-        showToast(data.error || "Send failed", "error");
-      }
-    } catch {
-      showToast("Failed to send bulk SMS", "error");
-    } finally {
-      setBulkSending(false);
-    }
+      if (data.success) { setBulkResult(data); setSelected(new Set()); showToast(`Sent ${data.sent} · Failed ${data.failed}`); }
+      else showToast(data.error || "Send failed", "error");
+    } catch { showToast("Failed to send", "error"); }
+    setBulkSending(false);
   };
 
   const TABS = [
@@ -720,7 +760,7 @@ export default function SmsAutomation() {
           </div>
         )}
 
-        {/* ── BULK SMS ── */}
+        {/* ── BULK SMS / CONTACTS ── */}
         {activeTab === "bulk" && (
           <div className="p-5 space-y-4">
             {!config?.configured && (
@@ -736,165 +776,283 @@ export default function SmsAutomation() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Left — contacts */}
-              <div className="rounded-2xl border border-white/7 overflow-hidden flex flex-col">
-                <div className="px-4 py-3 border-b border-white/6 bg-white/2 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <Users size={14} className="text-white/40" />
-                    <p className="text-sm font-black text-white">Contacts</p>
-                    <span className="text-[10px] font-bold text-white/30 bg-white/8 px-2 py-0.5 rounded-full">
-                      {bulkSelected.size} selected
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={fetchBulkContacts}
-                      disabled={bulkLoading}
-                      className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-colors"
-                    >
-                      <RefreshCw size={12} className={bulkLoading ? "animate-spin" : ""} />
-                    </button>
-                    <button
-                      onClick={bulkSelectAll}
-                      className="text-[11px] font-black text-emerald-400 hover:text-emerald-300 transition-colors"
-                    >
-                      {bulkContacts.filter(c => !bulkSearch || c.name.toLowerCase().includes(bulkSearch.toLowerCase()) || c.phone.includes(bulkSearch)).every(c => bulkSelected.has(c.phone))
-                        ? "Deselect All" : "Select All"}
-                    </button>
-                  </div>
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: "Total", value: contactStats.total ?? 0, color: "text-white" },
+                { label: "Active", value: contactStats.active ?? 0, color: "text-emerald-400" },
+                { label: "Messaged", value: contactStats.contacted ?? 0, color: "text-sky-400" },
+              ].map(s => (
+                <div key={s.label} className="rounded-2xl border border-white/7 p-4 text-center">
+                  <p className={`text-2xl font-black tabular-nums ${s.color}`}>{s.value}</p>
+                  <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-0.5">{s.label}</p>
                 </div>
+              ))}
+            </div>
 
-                {/* Search */}
-                <div className="px-4 py-2.5 border-b border-white/6">
-                  <div className="relative">
-                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25" />
-                    <input
-                      type="text"
-                      value={bulkSearch}
-                      onChange={e => setBulkSearch(e.target.value)}
-                      placeholder="Search by name or number…"
-                      className="w-full pl-8 pr-3 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50"
-                    />
-                  </div>
-                </div>
+            {/* Header actions */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative flex-1 min-w-48">
+                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25" />
+                <input
+                  type="text"
+                  value={contactSearch}
+                  onChange={e => setContactSearch(e.target.value)}
+                  placeholder="Search name or phone…"
+                  className="w-full pl-8 pr-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-xs font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50"
+                />
+              </div>
+              <button
+                onClick={openAddModal}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-black hover:bg-emerald-400 transition-colors shadow-sm shadow-emerald-500/25"
+              >
+                <UserPlus size={13} /> Add Contact
+              </button>
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={importing}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white text-xs font-black hover:bg-white/10 transition-colors"
+              >
+                {importing ? <RefreshCw size={13} className="animate-spin" /> : <Upload size={13} />}
+                Import CSV
+              </button>
+              <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={e => { handleFile(e.target.files[0]); e.target.value = ""; }} />
+              {selected.size > 0 && (
+                <button
+                  onClick={deleteSelected}
+                  disabled={deleting}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-400 text-xs font-black hover:bg-rose-500/20 transition-colors"
+                >
+                  <Trash2 size={13} /> Delete {selected.size}
+                </button>
+              )}
+              <button onClick={loadContacts} disabled={contactsLoading} className="w-9 h-9 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors ml-auto">
+                <RefreshCw size={13} className={contactsLoading ? "animate-spin" : ""} />
+              </button>
+            </div>
 
-                <div className="flex-1 overflow-y-auto max-h-80 divide-y divide-white/[0.04]">
-                  {bulkLoading ? (
-                    <div className="py-12 flex items-center justify-center">
-                      <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-                    </div>
-                  ) : bulkContacts.filter(c =>
-                    !bulkSearch || c.name.toLowerCase().includes(bulkSearch.toLowerCase()) || c.phone.includes(bulkSearch)
-                  ).length === 0 ? (
-                    <div className="py-12 text-center">
-                      <Users size={24} className="text-white/15 mx-auto mb-2" />
-                      <p className="text-xs text-white/30 font-bold">No contacts found</p>
-                    </div>
-                  ) : (
-                    bulkContacts
-                      .filter(c => !bulkSearch || c.name.toLowerCase().includes(bulkSearch.toLowerCase()) || c.phone.includes(bulkSearch))
-                      .map(c => (
-                        <button
-                          key={c.phone}
-                          onClick={() => bulkToggle(c.phone)}
-                          className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/3 transition-colors ${
-                            bulkSelected.has(c.phone) ? "bg-emerald-500/8" : ""
-                          }`}
-                        >
-                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                            bulkSelected.has(c.phone)
-                              ? "bg-emerald-500 border-emerald-500"
-                              : "border-white/20"
-                          }`}>
-                            {bulkSelected.has(c.phone) && <CheckCircle2 size={10} className="text-white" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold text-white truncate">{c.name}</p>
-                            <p className="text-[11px] text-white/35 font-medium font-mono">{c.normalizedPhone || c.phone}</p>
-                          </div>
-                        </button>
-                      ))
+            {/* Import result */}
+            {importRes && (
+              <div className={`flex items-start gap-3 p-4 rounded-2xl border ${importRes.imported > 0 ? "bg-emerald-500/10 border-emerald-500/25" : "bg-amber-500/10 border-amber-500/25"}`}>
+                <CheckCircle2 size={16} className={importRes.imported > 0 ? "text-emerald-400 shrink-0 mt-0.5" : "text-amber-400 shrink-0 mt-0.5"} />
+                <div className="text-xs font-bold">
+                  <span className={importRes.imported > 0 ? "text-emerald-400" : "text-amber-400"}>
+                    Imported {importRes.imported} · Skipped {importRes.skipped}
+                  </span>
+                  {importRes.errors?.length > 0 && (
+                    <p className="text-white/40 font-medium mt-0.5">{importRes.errors.slice(0, 3).join(" · ")}</p>
                   )}
                 </div>
+                <button onClick={() => setImportRes(null)} className="ml-auto text-white/30 hover:text-white"><XCircle size={14} /></button>
+              </div>
+            )}
 
-                <div className="px-4 py-2.5 border-t border-white/6 bg-white/2">
-                  <p className="text-[11px] text-white/30 font-medium">
-                    {bulkContacts.length} unique customer{bulkContacts.length !== 1 ? "s" : ""} with phone numbers
-                  </p>
-                </div>
+            {/* Contacts table */}
+            <div className="rounded-2xl border border-white/7 overflow-hidden">
+              {/* Table header */}
+              <div className="grid grid-cols-[2rem_1fr_1fr_1fr_6rem_3rem] items-center px-4 py-2.5 border-b border-white/6 bg-white/2">
+                <button onClick={toggleAll} className="flex items-center justify-center text-white/40 hover:text-white transition-colors">
+                  {allSelected ? <CheckSquare size={14} className="text-emerald-400" /> : <Square size={14} />}
+                </button>
+                {["Name", "Phone", "Notes", "Status", ""].map(h => (
+                  <p key={h} className="text-[10px] font-black text-white/30 uppercase tracking-widest">{h}</p>
+                ))}
               </div>
 
-              {/* Right — compose */}
-              <div className="space-y-4">
-                <div className="rounded-2xl border border-white/7 p-5 space-y-4">
-                  <div>
-                    <p className="text-sm font-black text-white mb-1">Compose Message</p>
-                    <p className="text-[11px] text-white/35 font-medium">Keep under 160 characters to avoid splitting into multiple SMS</p>
+              {/* Rows */}
+              <div className="divide-y divide-white/[0.04]">
+                {contactsLoading ? (
+                  <div className="py-16 flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
                   </div>
-                  <textarea
-                    value={bulkMessage}
-                    onChange={e => setBulkMessage(e.target.value)}
-                    placeholder="Type your message here…"
-                    rows={6}
-                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all resize-none"
-                  />
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-3 text-[11px] font-bold">
-                      <span className={bulkMessage.length > 160 ? "text-amber-400" : "text-white/30"}>
-                        {bulkMessage.length} chars
-                      </span>
-                      {bulkMessage.length > 160 && (
-                        <span className="text-amber-400">
-                          ≈ {Math.ceil(bulkMessage.length / 153)} SMS parts
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-[11px] text-white/25 font-medium">
-                      {bulkSelected.size} recipient{bulkSelected.size !== 1 ? "s" : ""}
+                ) : contacts.length === 0 ? (
+                  <div className="py-16 text-center">
+                    <Users size={28} className="text-white/15 mx-auto mb-3" />
+                    <p className="text-sm font-black text-white/25">No contacts yet</p>
+                    <p className="text-xs text-white/20 font-medium mt-1">Add a contact or import a CSV file</p>
+                  </div>
+                ) : contacts.map(c => (
+                  <div
+                    key={c._id}
+                    className={`grid grid-cols-[2rem_1fr_1fr_1fr_6rem_3rem] items-center px-4 py-3 hover:bg-white/3 transition-colors ${selected.has(c._id) ? "bg-emerald-500/5" : ""}`}
+                  >
+                    <button onClick={() => toggleOne(c._id)} className="flex items-center justify-center text-white/30 hover:text-white transition-colors">
+                      {selected.has(c._id) ? <CheckSquare size={14} className="text-emerald-400" /> : <Square size={14} />}
+                    </button>
+                    <p className="text-xs font-bold text-white truncate pr-2">
+                      {[c.firstName, c.lastName].filter(Boolean).join(" ") || <span className="text-white/30 font-medium italic">—</span>}
+                    </p>
+                    <p className="text-xs text-white/60 font-mono truncate pr-2">{c.normalizedPhone || c.phone}</p>
+                    <p className="text-xs text-white/40 font-medium truncate pr-2">{c.notes || "—"}</p>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full w-fit ${
+                      c.status === "active"
+                        ? "bg-emerald-500/15 text-emerald-400"
+                        : "bg-rose-500/15 text-rose-400"
+                    }`}>
+                      {c.contacted ? "Messaged" : c.status}
                     </span>
+                    <div className="flex items-center gap-1 justify-end">
+                      <button onClick={() => openEditModal(c)} className="w-7 h-7 rounded-lg hover:bg-white/8 flex items-center justify-center text-white/30 hover:text-white transition-colors">
+                        <Pencil size={12} />
+                      </button>
+                      <button onClick={() => deleteSingle(c._id)} className="w-7 h-7 rounded-lg hover:bg-rose-500/15 flex items-center justify-center text-white/30 hover:text-rose-400 transition-colors">
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   </div>
+                ))}
+              </div>
 
+              {/* Pagination footer */}
+              {contactsTotal > CONTACT_LIMIT && (
+                <div className="flex items-center justify-between px-4 py-3 border-t border-white/6 bg-white/2">
+                  <p className="text-[11px] text-white/30 font-medium">
+                    {(contactPage - 1) * CONTACT_LIMIT + 1}–{Math.min(contactPage * CONTACT_LIMIT, contactsTotal)} of {contactsTotal}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setContactPage(p => Math.max(1, p - 1))}
+                      disabled={contactPage === 1}
+                      className="px-3 py-1.5 rounded-lg border border-white/10 text-[11px] font-black text-white/50 hover:text-white hover:bg-white/5 disabled:opacity-30 transition-colors"
+                    >Prev</button>
+                    <button
+                      onClick={() => setContactPage(p => p + 1)}
+                      disabled={contactPage * CONTACT_LIMIT >= contactsTotal}
+                      className="px-3 py-1.5 rounded-lg border border-white/10 text-[11px] font-black text-white/50 hover:text-white hover:bg-white/5 disabled:opacity-30 transition-colors"
+                    >Next</button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Compose & send panel */}
+            {selected.size > 0 && (
+              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-black text-white">
+                    Send to <span className="text-emerald-400">{selected.size}</span> contact{selected.size !== 1 ? "s" : ""}
+                  </p>
+                  <button onClick={() => setSelected(new Set())} className="text-[11px] text-white/30 hover:text-white font-bold transition-colors">Clear selection</button>
+                </div>
+                <textarea
+                  value={bulkMessage}
+                  onChange={e => setBulkMessage(e.target.value)}
+                  placeholder="Type your SMS message here…"
+                  rows={5}
+                  className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all resize-none"
+                />
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-3 text-[11px] font-bold">
+                    <span className={bulkMessage.length > 160 ? "text-amber-400" : "text-white/30"}>{bulkMessage.length} chars</span>
+                    {bulkMessage.length > 160 && <span className="text-amber-400">≈ {Math.ceil(bulkMessage.length / 153)} parts/msg</span>}
+                  </div>
                   <button
                     onClick={sendBulk}
-                    disabled={bulkSending || bulkSelected.size === 0 || !bulkMessage.trim() || !config?.configured}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500 text-white font-black text-sm hover:bg-emerald-400 transition-colors disabled:opacity-50 shadow-sm shadow-emerald-500/25"
+                    disabled={bulkSending || !bulkMessage.trim() || !config?.configured}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-500 text-white font-black text-sm hover:bg-emerald-400 transition-colors disabled:opacity-50 shadow-sm shadow-emerald-500/25"
                   >
                     {bulkSending ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
-                    {bulkSending
-                      ? "Sending…"
-                      : bulkSelected.size === 0
-                        ? "Select contacts to send"
-                        : `Send to ${bulkSelected.size} contact${bulkSelected.size !== 1 ? "s" : ""}`}
+                    {bulkSending ? "Sending…" : `Send SMS`}
                   </button>
                 </div>
+              </div>
+            )}
 
-                {bulkResult && (
-                  <div className="rounded-2xl border border-white/7 p-5 space-y-3">
-                    <p className="text-sm font-black text-white">Send Results</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-xl px-4 py-3 text-center">
-                        <p className="text-2xl font-black text-emerald-400 tabular-nums">{bulkResult.sent}</p>
-                        <p className="text-[10px] font-bold text-emerald-400/60 uppercase tracking-widest mt-0.5">Sent</p>
+            {/* Bulk result */}
+            {bulkResult && (
+              <div className="rounded-2xl border border-white/7 p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-black text-white">Send Results</p>
+                  <button onClick={() => setBulkResult(null)} className="text-white/30 hover:text-white"><XCircle size={14} /></button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-xl px-4 py-3 text-center">
+                    <p className="text-2xl font-black text-emerald-400 tabular-nums">{bulkResult.sent}</p>
+                    <p className="text-[10px] font-bold text-emerald-400/60 uppercase tracking-widest mt-0.5">Sent</p>
+                  </div>
+                  <div className="bg-rose-500/10 border border-rose-500/25 rounded-xl px-4 py-3 text-center">
+                    <p className="text-2xl font-black text-rose-400 tabular-nums">{bulkResult.failed}</p>
+                    <p className="text-[10px] font-bold text-rose-400/60 uppercase tracking-widest mt-0.5">Failed</p>
+                  </div>
+                </div>
+                {bulkResult.errors?.length > 0 && (
+                  <div className="space-y-1.5">
+                    {bulkResult.errors.map((e, i) => (
+                      <div key={i} className="flex items-start gap-2 text-[11px]">
+                        <XCircle size={12} className="text-rose-400 shrink-0 mt-0.5" />
+                        <span className="text-rose-400/80 font-medium">{e.phone}: {e.error}</span>
                       </div>
-                      <div className="bg-rose-500/10 border border-rose-500/25 rounded-xl px-4 py-3 text-center">
-                        <p className="text-2xl font-black text-rose-400 tabular-nums">{bulkResult.failed}</p>
-                        <p className="text-[10px] font-bold text-rose-400/60 uppercase tracking-widest mt-0.5">Failed</p>
-                      </div>
-                    </div>
-                    {bulkResult.errors?.length > 0 && (
-                      <div className="space-y-1.5">
-                        {bulkResult.errors.map((e, i) => (
-                          <div key={i} className="flex items-start gap-2 text-[11px]">
-                            <XCircle size={12} className="text-rose-400 shrink-0 mt-0.5" />
-                            <span className="text-rose-400/80 font-medium">{e.phone}: {e.error}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    ))}
                   </div>
                 )}
               </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Add / Edit Contact Modal ── */}
+        {addOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#141414] shadow-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-white/7">
+                <p className="font-black text-white">{editingContact ? "Edit Contact" : "Add Contact"}</p>
+                <button onClick={() => { setAddOpen(false); setEditingContact(null); resetAddForm(); }} className="text-white/30 hover:text-white transition-colors">
+                  <XCircle size={18} />
+                </button>
+              </div>
+              <form onSubmit={submitAdd} className="p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  {[["firstName", "First Name"], ["lastName", "Last Name"]].map(([k, label]) => (
+                    <div key={k}>
+                      <label className="text-[11px] font-black text-white/40 uppercase tracking-widest block mb-1.5">{label}</label>
+                      <input
+                        type="text"
+                        value={addForm[k]}
+                        onChange={e => setAddForm(f => ({ ...f, [k]: e.target.value }))}
+                        placeholder={label}
+                        className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <label className="text-[11px] font-black text-white/40 uppercase tracking-widest block mb-1.5">Phone Number *</label>
+                  <input
+                    type="tel"
+                    value={addForm.phone}
+                    onChange={e => setAddForm(f => ({ ...f, phone: e.target.value }))}
+                    placeholder="e.g. 07700 900000 or +447700900000"
+                    required
+                    className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-black text-white/40 uppercase tracking-widest block mb-1.5">Notes</label>
+                  <input
+                    type="text"
+                    value={addForm.notes}
+                    onChange={e => setAddForm(f => ({ ...f, notes: e.target.value }))}
+                    placeholder="Optional note"
+                    className="w-full px-3 py-2.5 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all"
+                  />
+                </div>
+                {addErr && <p className="text-xs text-rose-400 font-bold">{addErr}</p>}
+                <div className="flex gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => { setAddOpen(false); setEditingContact(null); resetAddForm(); }}
+                    className="flex-1 py-2.5 rounded-xl border border-white/10 text-white/60 text-sm font-black hover:bg-white/5 transition-colors"
+                  >Cancel</button>
+                  <button
+                    type="submit"
+                    disabled={addSaving}
+                    className="flex-1 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-black hover:bg-emerald-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {addSaving ? <RefreshCw size={13} className="animate-spin" /> : null}
+                    {addSaving ? "Saving…" : editingContact ? "Save Changes" : "Add Contact"}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
