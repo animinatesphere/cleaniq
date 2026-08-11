@@ -271,7 +271,7 @@ router.get("/contacts", async (req, res) => {
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]);
     const statusMap = Object.fromEntries(stats.map((s) => [s._id, s.count]));
-    res.json({ contacts: pagedContacts, total, page, limit, stats: statusMap });
+    res.json({ contacts, total, page, limit, stats: statusMap });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
