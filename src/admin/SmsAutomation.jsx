@@ -3,7 +3,7 @@ import {
   MessageSquare, Send, CheckCircle2, XCircle,
   Clock, RefreshCw, Trash2, User, Briefcase, AlertCircle,
   Eye, EyeOff, Search, Users, Edit3, RotateCcw, X, Phone,
-  UserPlus, Upload, Square, CheckSquare, Pencil,
+  UserPlus, Upload, Square, CheckSquare, Pencil, Settings,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
