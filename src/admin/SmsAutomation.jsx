@@ -555,14 +555,18 @@ export default function SmsAutomation() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Sent",    val: logStats.sent,    color: "text-emerald-400" },
-          { label: "Failed",  val: logStats.failed,  color: "text-rose-400"   },
-          { label: "Pending", val: logStats.pending, color: "text-amber-400"  },
+          { label: "Sent",    val: logStats.sent,    color: "text-emerald-400", filter: "sent"    },
+          { label: "Failed",  val: logStats.failed,  color: "text-rose-400",    filter: "failed"  },
+          { label: "Pending", val: logStats.pending, color: "text-amber-400",   filter: "pending" },
         ].map(s => (
-          <div key={s.label} className="bg-[#0B2D22] border border-white/7 rounded-2xl px-4 py-3">
+          <button
+            key={s.label}
+            onClick={() => { setActiveTab("logs"); setLogFilter(s.filter); }}
+            className="bg-[#0B2D22] border border-white/7 rounded-2xl px-4 py-3 text-left cursor-pointer hover:border-white/15 hover:bg-white/5 transition-all group"
+          >
             <p className={`text-2xl font-black tabular-nums ${s.color}`}>{s.val}</p>
-            <p className="text-[10px] text-white/35 font-bold mt-0.5 uppercase tracking-widest">{s.label}</p>
-          </div>
+            <p className="text-[10px] text-white/35 font-bold mt-0.5 uppercase tracking-widest group-hover:text-white/60 transition-colors">{s.label}</p>
+          </button>
         ))}
       </div>
 
