@@ -224,53 +224,70 @@ router.delete("/mailboxes/:id", async (req, res) => {
 //  CONTACTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// GET /api/cold-email/contacts?page=1&limit=50&search=
+// GET /api/cold-email/contacts?page=1&limit=50&search=&view=all|emailed|not-emailed
 router.get("/contacts", async (req, res) => {
   try {
-    const page = Math.max(1, parseInt(req.query.page || "1"));
+    const page  = Math.max(1, parseInt(req.query.page  || "1"));
     const limit = Math.min(200, parseInt(req.query.limit || "50"));
     const search = (req.query.search || "").trim();
+    const view   = (req.query.view   || "all").toLowerCase();
+
     const filter = {};
     if (search) {
       const re = new RegExp(search, "i");
-      filter.$or = [
-        { email: re },
-        { firstName: re },
-        { lastName: re },
-        { company: re },
-      ];
+      filter.$or = [{ email: re }, { firstName: re }, { lastName: re }, { company: re }];
     }
-    const [contactsResult, total] = await Promise.all([
-      ColdContact.find(filter)
-        .sort({ importedAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .lean(),
-      ColdContact.countDocuments(filter),
-    ]);
+
+    // Fetch all matching IDs first so we can determine contacted status
+    const allMatching = await ColdContact.find(filter).select("_id email domain").lean();
+
+    // Aggregate ColdSend to find which contacts have been sent to
+    const allIds = allMatching.map((c) => c._id);
+    const sentMatches = allIds.length
+      ? await ColdSend.aggregate([
+          { $match: { contactId: { $in: allIds }, status: { $in: ["sent", "replied", "bounced"] } } },
+          { $group: { _id: "$contactId" } },
+        ])
+      : [];
+    const contactedSet = new Set(sentMatches.map((m) => m._id.toString()));
+
+    // Apply view filter
+    const viewFiltered = allMatching.filter((c) => {
+      const emailed = contactedSet.has(c._id.toString());
+      if (view === "emailed")     return emailed;
+      if (view === "not-emailed") return !emailed;
+      return true;
+    });
+
+    const total = viewFiltered.length;
+    const pageSlice = viewFiltered.slice((page - 1) * limit, page * limit);
+
+    // Fetch full documents for the page slice
+    const pageIds = pageSlice.map((c) => c._id);
+    const contactsResult = await ColdContact.find({ _id: { $in: pageIds } })
+      .sort({ importedAt: -1 })
+      .lean();
 
     const contacts = [];
     for (const contact of contactsResult) {
-      const resolvedDomain = resolveContactDomain(
-        contact.domain,
-        contact.email,
-      );
+      const resolvedDomain = resolveContactDomain(contact.domain, contact.email);
       if (resolvedDomain && !contact.domain) {
-        await ColdContact.updateOne(
-          { _id: contact._id },
-          { $set: { domain: resolvedDomain } },
-        );
+        await ColdContact.updateOne({ _id: contact._id }, { $set: { domain: resolvedDomain } });
       }
       contacts.push({
         ...contact,
-        domain: resolvedDomain || contact.domain || "",
+        domain:    resolvedDomain || contact.domain || "",
+        contacted: contactedSet.has(contact._id.toString()),
       });
     }
 
-    const stats = await ColdContact.aggregate([
+    const statsAgg = await ColdContact.aggregate([
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]);
-    const statusMap = Object.fromEntries(stats.map((s) => [s._id, s.count]));
+    const statusMap = Object.fromEntries(statsAgg.map((s) => [s._id, s.count]));
+    statusMap.emailed     = contactedSet.size;
+    statusMap.notEmailed  = allMatching.length - contactedSet.size;
+
     res.json({ contacts, total, page, limit, stats: statusMap });
   } catch (err) {
     res.status(500).json({ message: err.message });

@@ -29,6 +29,7 @@ export default function Contacts() {
   const [stats, setStats] = useState({});
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [view, setView] = useState("all");
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(new Set());
   const [uploading, setUploading] = useState(false);
@@ -51,7 +52,7 @@ export default function Contacts() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams({ page, limit: LIMIT, search });
+    const params = new URLSearchParams({ page, limit: LIMIT, search, view });
     const r = await fetch(`${API}/cold-email/contacts?${params}`, {
       headers: auth(),
     });
@@ -64,16 +65,14 @@ export default function Contacts() {
     setTotal(d.total || 0);
     setStats(d.stats || {});
     setLoading(false);
-  }, [page, search]);
+  }, [page, search, view]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  // Reset page on search change
-  useEffect(() => {
-    setPage(1);
-  }, [search]);
+  // Reset page on search/view change
+  useEffect(() => { setPage(1); }, [search, view]);
 
   async function handleFile(file) {
     if (!file || !file.name.endsWith(".csv")) return;
@@ -220,8 +219,10 @@ export default function Contacts() {
   }
 
   const totalPages = Math.ceil(total / LIMIT);
-  const activeCount = stats.active || 0;
+  const activeCount     = stats.active    || 0;
   const suppressedCount = stats.suppressed || 0;
+  const emailedCount    = stats.emailed    || 0;
+  const notEmailedCount = stats.notEmailed || 0;
 
   return (
     <div className="space-y-5">
@@ -230,13 +231,9 @@ export default function Contacts() {
         <div>
           <h2 className="text-white font-black text-lg">Contacts</h2>
           <div className="flex items-center gap-3 mt-1 text-xs text-white/40 font-medium">
-            <span>{total.toLocaleString()} total</span>
-            <span className="text-emerald-400">
-              {activeCount.toLocaleString()} active
-            </span>
-            <span className="text-rose-400">
-              {suppressedCount.toLocaleString()} suppressed
-            </span>
+            <span>{(stats.active !== undefined ? (activeCount + suppressedCount) : total).toLocaleString()} total</span>
+            <span className="text-emerald-400">{activeCount.toLocaleString()} active</span>
+            <span className="text-rose-400">{suppressedCount.toLocaleString()} suppressed</span>
           </div>
         </div>
         <div className="flex gap-2">
@@ -270,6 +267,30 @@ export default function Contacts() {
             className="hidden"
           />
         </div>
+      </div>
+
+      {/* Emailed / Not emailed filter tabs */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {[
+          { id: "all",         label: "All contacts",  count: activeCount + suppressedCount },
+          { id: "emailed",     label: "Emailed",        count: emailedCount,    color: "text-blue-400" },
+          { id: "not-emailed", label: "Not yet emailed", count: notEmailedCount, color: "text-white/50" },
+        ].map(({ id, label, count, color }) => (
+          <button
+            key={id}
+            onClick={() => setView(id)}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all border ${
+              view === id
+                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
+                : "bg-white/[0.03] border-white/[0.07] text-white/35 hover:text-white/70 hover:bg-white/[0.06]"
+            }`}
+          >
+            {label}
+            <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full tabular-nums ${view === id ? "bg-emerald-500/25 text-emerald-300" : "bg-white/[0.07] " + (color || "text-white/30")}`}>
+              {count.toLocaleString()}
+            </span>
+          </button>
+        ))}
       </div>
 
       {/* Import result */}
@@ -402,7 +423,7 @@ export default function Contacts() {
           ) : (
             <>
               {/* Header row */}
-              <div className="grid grid-cols-[40px_1.2fr_1.2fr_1fr_1fr_80px_40px] gap-x-4 px-4 py-2 border-b border-white/[0.04] text-[10px] font-bold text-white/30 uppercase tracking-wider">
+              <div className="grid grid-cols-[40px_1.4fr_1.4fr_1fr_1fr_auto_40px] gap-x-4 px-4 py-2 border-b border-white/[0.04] text-[10px] font-bold text-white/30 uppercase tracking-wider">
                 <span />
                 <span>Name</span>
                 <span>Email</span>
@@ -414,13 +435,12 @@ export default function Contacts() {
 
               <div className="max-h-[480px] overflow-y-auto">
                 {contacts.map((c) => {
-                  const name =
-                    `${c.firstName || ""} ${c.lastName || ""}`.trim() || "—";
-                  const sel = selected.has(c._id);
+                  const name = `${c.firstName || ""} ${c.lastName || ""}`.trim() || "—";
+                  const sel  = selected.has(c._id);
                   return (
                     <div
                       key={c._id}
-                      className={`grid grid-cols-[40px_1.2fr_1.2fr_1fr_1fr_80px_40px] gap-x-4 px-4 py-3 border-b border-white/[0.03] items-center transition-colors ${sel ? "bg-emerald-500/[0.06]" : "hover:bg-white/[0.02]"}`}
+                      className={`grid grid-cols-[40px_1.4fr_1.4fr_1fr_1fr_auto_40px] gap-x-4 px-4 py-3 border-b border-white/[0.03] items-center transition-colors ${sel ? "bg-emerald-500/[0.06]" : "hover:bg-white/[0.02]"}`}
                     >
                       <button
                         onClick={() => toggleOne(c._id)}
@@ -433,51 +453,29 @@ export default function Contacts() {
                         )}
                       </button>
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-white/[0.07] flex items-center justify-center text-xs font-black text-white/50 shrink-0">
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${c.contacted ? "bg-blue-500/15 text-blue-400" : "bg-white/[0.07] text-white/50"}`}>
                           {(name[0] || "?").toUpperCase()}
                         </div>
-                        <span className="text-white/80 text-sm font-medium truncate">
-                          {name}
-                        </span>
+                        <span className="text-white/80 text-sm font-medium truncate">{name}</span>
                       </div>
-                      <span className="text-white/50 text-sm truncate">
-                        {c.email}
-                      </span>
-                      <span className="text-white/40 text-sm truncate">
-                        {c.company || "—"}
-                      </span>
-                      <span className="text-white/40 text-sm truncate">
-                        {c.domain || getDomainFromEmail(c.email) || "—"}
-                      </span>
-                      <div className="flex items-center gap-2">
+                      <span className="text-white/50 text-sm truncate">{c.email}</span>
+                      <span className="text-white/40 text-sm truncate">{c.company || "—"}</span>
+                      <span className="text-white/40 text-sm truncate">{c.domain || getDomainFromEmail(c.email) || "—"}</span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         {c.contacted && (
-                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider bg-blue-500/15 text-blue-400">
-                            Sent before
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider bg-blue-500/15 text-blue-400 border border-blue-500/20 whitespace-nowrap">
+                            ✓ Emailed
                           </span>
                         )}
-                        <span
-                          className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider w-fit ${
-                            c.status === "active"
-                              ? "bg-emerald-500/15 text-emerald-400"
-                              : "bg-rose-500/15 text-rose-400"
-                          }`}
-                        >
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider whitespace-nowrap ${c.status === "active" ? "bg-emerald-500/15 text-emerald-400" : "bg-rose-500/15 text-rose-400"}`}>
                           {c.status}
                         </span>
                       </div>
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => openEditModal(c)}
-                          className="text-white/20 hover:text-emerald-400 transition-colors cursor-pointer"
-                          title="Edit contact"
-                        >
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button onClick={() => openEditModal(c)} className="text-white/20 hover:text-emerald-400 transition-colors cursor-pointer" title="Edit contact">
                           <Pencil size={13} />
                         </button>
-                        <button
-                          onClick={() => deleteSingle(c._id)}
-                          className="text-white/20 hover:text-rose-400 transition-colors cursor-pointer"
-                          title="Delete contact"
-                        >
+                        <button onClick={() => deleteSingle(c._id)} className="text-white/20 hover:text-rose-400 transition-colors cursor-pointer" title="Delete contact">
                           <Trash2 size={13} />
                         </button>
                       </div>

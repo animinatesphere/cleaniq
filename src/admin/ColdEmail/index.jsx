@@ -80,23 +80,27 @@ export default function ColdEmail() {
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: "Total Sent",     value: stats.totalSent,      icon: "✉",  color: "emerald" },
-            { label: "Replies",        value: stats.totalReplied,   icon: "💬", color: "blue"    },
-            { label: "Contacts",       value: stats.activeContacts, icon: "👥", color: "purple"  },
-            { label: "Active Mailboxes", value: stats.totalMailboxes, icon: "📬", color: "amber" },
-          ].map(({ label, value, icon, color }) => (
-            <div key={label} className="bg-[#0B2D22] border border-white/[0.06] rounded-xl px-4 py-3 flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-lg shrink-0 ${
-                color === "emerald" ? "bg-emerald-500/15" :
-                color === "blue"   ? "bg-blue-500/15"    :
-                color === "purple" ? "bg-purple-500/15"  :
-                                     "bg-amber-500/15"
+            { label: "Total Sent",       value: stats.totalSent,      icon: "✉",  color: "emerald", tab: "campaigns"   },
+            { label: "Replies",          value: stats.totalReplied,   icon: "💬", color: "blue",    tab: "campaigns"   },
+            { label: "Contacts",         value: stats.activeContacts, icon: "👥", color: "purple",  tab: "contacts"    },
+            { label: "Active Mailboxes", value: stats.totalMailboxes, icon: "📬", color: "amber",   tab: "mailboxes"   },
+          ].map(({ label, value, icon, color, tab }) => (
+            <button
+              key={label}
+              onClick={() => switchTab(tab)}
+              className={`bg-[#0B2D22] border border-white/[0.06] rounded-xl px-4 py-3 flex items-center gap-3 text-left cursor-pointer transition-all hover:border-white/[0.12] hover:bg-[#0d3528] group`}
+            >
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-lg shrink-0 transition-all ${
+                color === "emerald" ? "bg-emerald-500/15 group-hover:bg-emerald-500/25" :
+                color === "blue"   ? "bg-blue-500/15 group-hover:bg-blue-500/25"       :
+                color === "purple" ? "bg-purple-500/15 group-hover:bg-purple-500/25"   :
+                                     "bg-amber-500/15 group-hover:bg-amber-500/25"
               }`}>{icon}</div>
               <div>
                 <p className="text-white font-black text-xl leading-none">{(value || 0).toLocaleString()}</p>
-                <p className="text-white/40 text-xs mt-0.5">{label}</p>
+                <p className="text-white/40 text-xs mt-0.5 group-hover:text-white/60 transition-colors">{label}</p>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       )}
