@@ -310,6 +310,7 @@ router.post("/", async (req, res) => {
           `🔇 Flat-rate booking ${newBooking.bookingId} created — no automatic customer email sent. Send the invoice manually via CRM actions.`,
         );
       } else if (
+        !newBooking.noPaymentRequired &&
         newBooking.payment &&
         newBooking.payment.status === "Pending" &&
         !isPaymentCompleted
@@ -367,6 +368,14 @@ router.post("/", async (req, res) => {
             "❌ Failed to send payment email:",
             paymentEmailErr.message,
           );
+          // Fallback: send plain confirmation so the customer always gets something
+          if (!newBooking.skipConfirmationEmail) {
+            await sendEmail({
+              to: newBooking.customer.email,
+              subject: `✓ Booking Received - ${newBooking.bookingId}`,
+              html: templates.adminBookingCreatedEmail2(newBooking),
+            }).catch(() => {});
+          }
         }
       } else if (!newBooking.skipConfirmationEmail) {
         // Send Success Confirmation Email (payment already completed or admin booking).
