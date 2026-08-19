@@ -87,6 +87,8 @@ const LoginScreen = ({ navigation }) => {
     setLoading(false);
     if (!result.success) {
       setLoginError(result.message || "Incorrect email or password. Please try again.");
+    } else {
+      navigation.goBack();
     }
   };
 
@@ -134,6 +136,8 @@ const LoginScreen = ({ navigation }) => {
     setLoading(false);
     if (!result.success) {
       setSignupError(result.message || "Incorrect code. Please try again.");
+    } else {
+      navigation.goBack();
     }
   };
 

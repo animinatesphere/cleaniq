@@ -190,20 +190,14 @@ const AppNavigation = () => {
     <NavigationContainer>
       <StatusBar style="light" />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!userToken ? (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Main"          component={customerInfo?.role === "company" ? CompanyTabs : MainTabs} />
-            <Stack.Screen name="Booking"       component={BookingScreen} />
-            <Stack.Screen name="BookingDetail" component={BookingDetailScreen} />
-            <Stack.Screen name="Chat"          component={ChatScreen} />
-            <Stack.Screen name="PostJob"       component={PostJobScreen} />
-            <Stack.Screen name="JobDetail"     component={JobDetailScreen} />
-          </>
-        )}
+        {/* Main tabs are always accessible — no auth required to browse */}
+        <Stack.Screen name="Main"          component={userToken && customerInfo?.role === "company" ? CompanyTabs : MainTabs} />
+        <Stack.Screen name="Login"         component={LoginScreen} />
+        <Stack.Screen name="Booking"       component={BookingScreen} />
+        <Stack.Screen name="BookingDetail" component={BookingDetailScreen} />
+        <Stack.Screen name="Chat"          component={ChatScreen} />
+        <Stack.Screen name="PostJob"       component={PostJobScreen} />
+        <Stack.Screen name="JobDetail"     component={JobDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
