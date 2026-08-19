@@ -390,21 +390,15 @@ function buildEmailHtml(rawBody, unsubUrl, replySubject) {
 function buildPlainEmailHtml(rawBody, unsubUrl) {
   const content = (rawBody || "")
     .split(/\n/)
-    .map((line) =>
-      line.trim()
-        ? `<p style="margin:0 0 14px;color:#1e293b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:15px;line-height:1.75;">${line}</p>`
-        : `<p style="margin:0 0 14px;font-size:15px;">&nbsp;</p>`,
-    )
+    .map((line) => line.trim() ? `<p>${line}</p>` : `<br>`)
     .join("");
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#ffffff;">
-<div style="max-width:600px;margin:0 auto;padding:40px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+<body>
 ${content}
-<p style="margin:36px 0 0;padding-top:16px;border-top:1px solid #e2e8f0;color:#94a3b8;font-size:11px;line-height:1.6;font-family:Arial,sans-serif;">
+<p style="margin-top:32px;font-size:11px;color:#94a3b8;">
   <a href="${unsubUrl}" style="color:#64748b;text-decoration:underline;">Unsubscribe</a>
 </p>
-</div>
 </body></html>`;
 }
 
