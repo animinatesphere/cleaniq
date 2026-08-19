@@ -323,6 +323,31 @@ router.post("/contacts/backfill-domains", async (req, res) => {
   }
 });
 
+// POST /api/cold-email/contacts/import-bulk — paste a list of emails (JSON body)
+// Accepts { emails: ["a@b.com", "c@d.com", ...] } — no file needed.
+router.post("/contacts/import-bulk", async (req, res) => {
+  const raw = req.body.emails;
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return res.status(400).json({ message: "No emails provided" });
+  }
+
+  let imported = 0;
+  let duplicates = 0;
+  let invalid = 0;
+
+  for (const entry of raw) {
+    const email = (entry || "").toString().toLowerCase().trim();
+    if (!email || !isValidEmail(email)) { invalid++; continue; }
+    const exists = await ColdContact.findOne({ email });
+    if (exists) { duplicates++; continue; }
+    const domain = resolveContactDomain("", email);
+    await ColdContact.create({ email, domain });
+    imported++;
+  }
+
+  res.json({ imported, duplicates, invalid, total: raw.length });
+});
+
 // POST /api/cold-email/contacts/import — multipart CSV upload
 router.post("/contacts/import", upload.single("file"), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: "No file uploaded" });

@@ -38,6 +38,10 @@ export default function Contacts() {
   const [dragOver, setDragOver] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [editingContact, setEditingContact] = useState(null);
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const [pasteRes, setPasteRes] = useState(null);
+  const [pasteSaving, setPasteSaving] = useState(false);
   const [addForm, setAddForm] = useState({
     email: "",
     firstName: "",
@@ -199,6 +203,29 @@ export default function Contacts() {
     setAddSaving(false);
   }
 
+  async function submitPaste(e) {
+    e.preventDefault();
+    setPasteRes(null);
+    // Split on commas, semicolons, whitespace, newlines — grab anything that looks like an email
+    const emails = pasteText
+      .split(/[\s,;]+/)
+      .map((s) => s.trim().toLowerCase())
+      .filter((s) => s.includes("@"));
+    if (!emails.length) { setPasteRes({ error: "No valid emails found in the text." }); return; }
+    setPasteSaving(true);
+    try {
+      const r = await fetch(`${API}/cold-email/contacts/import-bulk`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...auth() },
+        body: JSON.stringify({ emails }),
+      });
+      const d = await r.json();
+      if (!r.ok) { setPasteRes({ error: d.message || "Import failed" }); }
+      else { setPasteRes(d); load(); }
+    } catch { setPasteRes({ error: "Network error" }); }
+    setPasteSaving(false);
+  }
+
   const allSelected =
     contacts.length > 0 && contacts.every((c) => selected.has(c._id));
   function toggleAll() {
@@ -252,6 +279,12 @@ export default function Contacts() {
             className="flex items-center gap-2 px-4 py-2 bg-white/6 border border-white/10 text-white/70 text-sm font-bold rounded-xl hover:bg-white/10 transition-all cursor-pointer"
           >
             <UserPlus size={14} /> Add Contact
+          </button>
+          <button
+            onClick={() => { setPasteOpen(true); setPasteText(""); setPasteRes(null); }}
+            className="flex items-center gap-2 px-4 py-2 bg-white/6 border border-white/10 text-white/70 text-sm font-bold rounded-xl hover:bg-white/10 transition-all cursor-pointer"
+          >
+            Paste Emails
           </button>
           <button
             onClick={() => fileRef.current?.click()}
@@ -522,6 +555,48 @@ export default function Contacts() {
           <div className="bg-[#0B2D22] border border-white/10 rounded-2xl px-8 py-6 flex flex-col items-center gap-3">
             <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
             <p className="text-white font-bold text-sm">Importing contacts…</p>
+          </div>
+        </div>
+      )}
+
+      {/* Paste emails modal */}
+      {pasteOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-[#0a1f16] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/6">
+              <div>
+                <h3 className="text-white font-black text-base">Paste Emails</h3>
+                <p className="text-white/35 text-xs mt-0.5">Comma, semicolon, space, or one per line — any format works</p>
+              </div>
+              <button onClick={() => setPasteOpen(false)} className="text-white/30 hover:text-white/70 cursor-pointer"><X size={16} /></button>
+            </div>
+            <form onSubmit={submitPaste} className="px-6 py-5 space-y-4">
+              <textarea
+                autoFocus
+                value={pasteText}
+                onChange={(e) => { setPasteText(e.target.value); setPasteRes(null); }}
+                placeholder={"john@acme.com, sarah@corp.com\nbob@example.com; alice@ltd.co.uk"}
+                rows={8}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 resize-none font-mono"
+              />
+              {pasteRes && (
+                pasteRes.error
+                  ? <p className="text-rose-400 text-sm font-semibold">{pasteRes.error}</p>
+                  : <p className="text-emerald-400 text-sm font-semibold">
+                      ✓ {pasteRes.imported} added
+                      {pasteRes.duplicates > 0 && <span className="text-white/40"> · {pasteRes.duplicates} already existed</span>}
+                      {pasteRes.invalid > 0 && <span className="text-amber-400"> · {pasteRes.invalid} invalid</span>}
+                    </p>
+              )}
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setPasteOpen(false)} className="flex-1 py-2.5 rounded-xl border border-white/10 text-white/50 text-sm font-bold hover:bg-white/5 transition-all cursor-pointer">
+                  {pasteRes && !pasteRes.error ? "Done" : "Cancel"}
+                </button>
+                <button type="submit" disabled={pasteSaving || !pasteText.trim()} className="flex-1 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-bold hover:bg-emerald-400 transition-all cursor-pointer disabled:opacity-50">
+                  {pasteSaving ? "Importing…" : "Import Emails"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
