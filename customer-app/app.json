@@ -34,7 +34,6 @@
         "foregroundImage": "./assets/icon.jpg"
       },
       "permissions": [
-        "android.permission.POST_NOTIFICATIONS",
         "android.permission.POST_NOTIFICATIONS"
       ]
     },
