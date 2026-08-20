@@ -723,11 +723,14 @@ const Booking = () => {
     };
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/customer-bookings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bookingPayload),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/customer-bookings`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bookingPayload),
+        },
+      );
       if (response.ok) {
         localStorage.removeItem("ciq_booking_draft");
         setIsSubmitted(true);
@@ -751,7 +754,7 @@ const Booking = () => {
   //     );
   //     return;
   //   }
-  //
+
   //   console.log("🧪 [DEV MODE] Rate breakdown:", {
   //     region: region.id,
   //     serviceType: formData.serviceType,
@@ -765,7 +768,7 @@ const Booking = () => {
   //     })),
   //     totalPrice,
   //   });
-  //
+
   //   const bookingPayload = {
   //     bookingId: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
   //     customer: {
@@ -809,11 +812,14 @@ const Booking = () => {
   //   };
   //   setIsSubmitting(true);
   //   try {
-  //     const response = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(bookingPayload),
-  //     });
+  //     const response = await fetch(
+  //       `${import.meta.env.VITE_API_URL}/bookings/public`,
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify(bookingPayload),
+  //       },
+  //     );
   //     if (response.ok) {
   //       localStorage.removeItem("ciq_booking_draft");
   //       setIsSubmitted(true);
@@ -1849,8 +1855,8 @@ const Booking = () => {
                                       🧪 Dev Mode: Test Booking
                                     </p>
                                     <p className="text-[8px] text-blue-600 mt-1">
-                                      Submit without payment for testing -
-                                      check console for rate breakdown
+                                      Submit without payment for testing - check
+                                      console for rate breakdown
                                     </p>
                                   </div>
                                   <button

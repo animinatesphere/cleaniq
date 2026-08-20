@@ -15,6 +15,66 @@ const { buildBookingDateTime } = require("../utils/bookingDateTime");
 const adminAuth = require("../middleware/adminAuth");
 const sms = require("../utils/smsService");
 
+// Public booking creation endpoint (no admin auth) - used by frontend
+// Creates a booking record from client POST and returns the saved booking.
+// WARNING: This endpoint is intentionally minimal to unblock customer flow.
+// In production please add validation, rate-limiting and anti-fraud checks.
+router.post("/public", async (req, res) => {
+  try {
+    const booking = new Booking(req.body);
+
+    // Ensure Mixed fields are stored
+    booking.set("details", req.body.details);
+    booking.set("property", req.body.property);
+    booking.set("meta", req.body.meta);
+
+    // Apply global default workerRate if not provided
+    if (booking.workerRate == null) {
+      try {
+        const rateSetting = await SystemSetting.findOne({
+          key: "defaultWorkerRate",
+        });
+        if (rateSetting) {
+          booking.workerRate = rateSetting.value;
+        }
+      } catch (settingsErr) {
+        // noop - not critical for booking creation
+      }
+    }
+
+    // Prevent accidental admin-only flags from client
+    booking.createdByAdmin = null;
+
+    const newBooking = await booking.save();
+
+    // Try to capture lead info (best-effort)
+    try {
+      const email = (newBooking.customer?.email || "").trim().toLowerCase();
+      if (email) {
+        const existingLead = await Lead.findOne({ email });
+        if (!existingLead) {
+          await Lead.create({
+            name: `${newBooking.customer?.firstName || ""} ${newBooking.customer?.lastName || ""}`.trim(),
+            email,
+            phone: newBooking.customer?.phone || "",
+            source: "Booking",
+            acknowledged: true,
+          });
+        }
+      }
+    } catch (leadErr) {
+      console.error(
+        "⚠️ Failed to capture booking lead (public):",
+        leadErr.message,
+      );
+    }
+
+    res.status(201).json(newBooking);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 router.use(adminAuth);
 
 // GET /api/bookings/test-email?to=you@example.com — quick Resend smoke-test (admin only)
