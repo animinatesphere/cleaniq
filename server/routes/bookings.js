@@ -69,6 +69,193 @@ router.post("/public", async (req, res) => {
       );
     }
 
+    // Send emails and notifications similar to admin-created booking flow
+    try {
+      const isDevMode =
+        newBooking.payment && newBooking.payment.method === "Dev Mode";
+
+      const isPaymentCompleted =
+        newBooking.payment &&
+        (newBooking.payment.status === "Completed" ||
+          newBooking.payment.status === "Confirmed" ||
+          newBooking.payment.method === "Card");
+
+      const isFlatRate = newBooking.payment?.billingType === "flat";
+
+      if (!isDevMode) {
+        if (isFlatRate) {
+          // No automatic customer email for flat-rate bookings
+          console.log(
+            `🔇 Flat-rate public booking ${newBooking.bookingId} created — no automatic customer email sent.`,
+          );
+        } else if (
+          !newBooking.noPaymentRequired &&
+          newBooking.payment &&
+          newBooking.payment.status === "Pending" &&
+          !isPaymentCompleted
+        ) {
+          try {
+            const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+            const session = await stripe.checkout.sessions.create({
+              payment_method_types: ["card"],
+              mode: "payment",
+              customer_email: newBooking.customer.email,
+              payment_intent_data: {
+                capture_method: "manual",
+                metadata: {
+                  bookingId: newBooking._id.toString(),
+                  bookingRef: newBooking.bookingId,
+                  company: "Cleaniq Services",
+                },
+              },
+              line_items: [
+                {
+                  price_data: {
+                    currency: (newBooking.payment?.currency || "GBP").toLowerCase(),
+                    product_data: {
+                      name: `Cleaniq - ${newBooking.service}`,
+                      description: `Booking Reference: ${newBooking.bookingId}`,
+                    },
+                    unit_amount: Math.round(newBooking.payment.amount * 100),
+                  },
+                  quantity: 1,
+                },
+              ],
+              metadata: {
+                bookingId: newBooking._id.toString(),
+                company: "Cleaniq Services",
+              },
+              success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=success&bookingId=${newBooking._id}`,
+              cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=cancelled`,
+            });
+
+            await sendEmail({
+              to: newBooking.customer.email,
+              subject: `Payment Required: Cleaniq Booking ${newBooking.bookingId}`,
+              html: templates.paymentRequired(newBooking, session.url),
+            });
+
+            console.log(
+              `✅ Payment email sent to ${newBooking.customer.email} with checkout link (public)`,
+            );
+          } catch (paymentEmailErr) {
+            console.error("❌ Failed to send payment email (public):", paymentEmailErr.message);
+            // Fallback: send plain confirmation so the customer always gets something
+            if (!newBooking.skipConfirmationEmail) {
+              await sendEmail({
+                to: newBooking.customer.email,
+                subject: `✓ Booking Received - ${newBooking.bookingId}`,
+                html: templates.adminBookingCreatedEmail2(newBooking),
+              }).catch(() => {});
+            }
+          }
+        } else if (!newBooking.skipConfirmationEmail) {
+          // Send Success Confirmation Email
+          await sendEmail({
+            to: newBooking.customer.email,
+            subject: `✓ Booking Successful - ${newBooking.bookingId}`,
+            html: newBooking.noPaymentRequired
+              ? templates.adminBookingCreatedEmail2(newBooking)
+              : templates.adminBookingCreatedEmail1(newBooking),
+          });
+          console.log(
+            `✅ Email sent to ${newBooking.customer.email} - Booking confirmation (public)`,
+          );
+        } else {
+          console.log(
+            `🔇 Confirmation email skipped for public booking ${newBooking.bookingId}`,
+          );
+        }
+      } else {
+        // DEV MODE: send dev mode success confirmation
+        try {
+          await sendEmail({
+            to: newBooking.customer.email,
+            subject: `✓ Booking Confirmed - ${newBooking.bookingId}`,
+            html: templates.devModeBookingSuccess(newBooking),
+          });
+          console.log(`🧪 [DEV MODE] Public booking ${newBooking.bookingId} created - Success email sent`);
+        } catch (devEmailErr) {
+          console.error(`❌ Failed to send dev mode confirmation email (public):`, devEmailErr.message);
+        }
+      }
+
+      // Send admin alert
+      try {
+        await sendEmail({
+          to: process.env.EMAIL_USER || "admin@cleaniqservices.com",
+          subject: `🚨 New Booking: ${newBooking.bookingId}`,
+          html: templates.adminNewBookingAlert(newBooking),
+        });
+      } catch (adminAlertErr) {
+        console.error("⚠️ Failed to send admin alert (public):", adminAlertErr.message);
+      }
+
+      // Notify active staff (best-effort)
+      try {
+        const activeStaff = await Worker.find({
+          status: "Active",
+          appAccessGranted: true,
+        });
+        if (activeStaff && activeStaff.length > 0) {
+          for (const staff of activeStaff) {
+            await sendEmail({
+              to: staff.email,
+              subject: `🧹 New Job Alert: ${newBooking.service} is available!`,
+              html: templates.staffNewJobAlert(newBooking),
+            });
+          }
+        }
+      } catch (staffEmailErr) {
+        console.error("❌ Failed to email staff new job notification (public):", staffEmailErr);
+      }
+
+      // Schedule reminders if booking is confirmed or payment authorized
+      try {
+        const isConfirmed =
+          newBooking.noPaymentRequired || ["Confirmed", "Authorized"].includes(newBooking.status);
+        const bookingDate = newBooking.schedule?.date
+          ? buildBookingDateTime(
+              newBooking.schedule.date,
+              newBooking.schedule.timeSlot,
+              newBooking.schedule?.preferredTime,
+            )
+          : null;
+        if (isConfirmed && bookingDate && bookingDate > new Date()) {
+          const payload = {
+            bookingId: newBooking._id.toString(),
+            bookingRef: newBooking.bookingId,
+            email: newBooking.customer?.email,
+            firstName: newBooking.customer?.firstName,
+            service: newBooking.service,
+            date: bookingDate.toLocaleDateString("en-GB", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+            }),
+            amount: newBooking.payment?.amount,
+          };
+          const ms24h = 24 * 60 * 60 * 1000;
+          const ms3h = 3 * 60 * 60 * 1000;
+          const soon = Date.now() + 2 * 60 * 1000;
+          await scheduleTask(
+            "booking_reminder_24h",
+            new Date(Math.max(bookingDate.getTime() - ms24h, soon)),
+            payload,
+          );
+          await scheduleTask(
+            "booking_reminder_3h",
+            new Date(Math.max(bookingDate.getTime() - ms3h, soon)),
+            payload,
+          );
+        }
+      } catch (schedErr) {
+        console.error("⚠️ Failed to schedule public booking reminders:", schedErr.message);
+      }
+    } catch (notifyErr) {
+      console.error("⚠️ Public booking post-save notification error:", notifyErr.message);
+    }
+
     res.status(201).json(newBooking);
   } catch (err) {
     res.status(400).json({ message: err.message });
