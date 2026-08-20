@@ -443,6 +443,8 @@ const Analytics = () => {
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [liveUsers, setLiveUsers] = useState(null);
   const [appUsers, setAppUsers] = useState(null);
+  const [metaAds, setMetaAds] = useState(null);
+  const [metaAdsLoading, setMetaAdsLoading] = useState(true);
 
   const fetchAnalytics = () => {
     setLoading(true);
@@ -484,6 +486,15 @@ const Analytics = () => {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    setMetaAdsLoading(true);
+    fetch(`${API}/analytics/meta-ads?days=${days}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((res) => setMetaAds(res))
+      .catch(() => setMetaAds(null))
+      .finally(() => setMetaAdsLoading(false));
+  }, [days]);
+
   const trendPoints = useMemo(() => {
     if (!data?.trend?.length) return [];
     const max = Math.max(...data.trend.map((t) => t.activeUsers), 1);
@@ -514,6 +525,9 @@ const Analytics = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24">
+      {/* Meta Ads section */}
+      <MetaAdsSection data={metaAds} loading={metaAdsLoading} days={days} />
+
       {/* App Users section — always visible, no GA4 dependency */}
       {appUsers ? (
         <AppUsersSection data={appUsers} />
