@@ -301,6 +301,94 @@ router.delete('/account', verifyCustomer, async (req, res) => {
   }
 });
 
+// POST /api/customer-auth/forgot-password — send OTP to reset password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required.' });
+
+    const customer = await Customer.findOne({ email: email.toLowerCase() });
+    if (!customer) {
+      // Don't reveal whether account exists
+      return res.json({ message: 'If an account exists, a reset code has been sent.' });
+    }
+
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = Date.now() + 10 * 60 * 1000;
+    otpStore.set(`reset:${email.toLowerCase()}`, { code, expiresAt });
+
+    await sendEmail({
+      to: email,
+      subject: 'Reset Your Cleaniq Password',
+      html: `
+        <div style="font-family:'Segoe UI',sans-serif;max-width:520px;margin:auto;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;background:#fff;">
+          <div style="background:#0F172A;padding:36px;text-align:center;">
+            <h1 style="color:#6EE7B7;margin:0;font-size:22px;font-weight:800;">Password Reset</h1>
+            <p style="color:#94a3b8;margin-top:8px;font-size:14px;">Cleaniq Services</p>
+          </div>
+          <div style="padding:40px;color:#1e293b;line-height:1.6;">
+            <h2 style="font-size:18px;margin-top:0;">Hi ${customer.firstName},</h2>
+            <p>We received a request to reset your Cleaniq password. Use the code below.</p>
+            <div style="margin:32px 0;text-align:center;">
+              <div style="display:inline-block;background:#F8FAFC;border:2px solid #e2e8f0;border-radius:20px;padding:28px 48px;">
+                <p style="margin:0;font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:2px;">Reset Code</p>
+                <p style="margin:12px 0 0 0;font-size:48px;font-weight:900;color:#0F172A;letter-spacing:12px;">${code}</p>
+              </div>
+            </div>
+            <p style="font-size:13px;color:#64748b;text-align:center;">This code expires in <strong>10 minutes</strong>. Do not share it with anyone.</p>
+            <div style="margin-top:32px;padding-top:24px;border-top:1px solid #f1f5f9;text-align:center;">
+              <p style="margin:0;font-size:12px;color:#94a3b8;">If you didn't request this, you can safely ignore this email.</p>
+            </div>
+          </div>
+        </div>
+      `,
+    });
+
+    res.json({ message: 'If an account exists, a reset code has been sent.' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/customer-auth/reset-password — verify OTP and set new password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ message: 'All fields are required.' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters.' });
+    }
+
+    const key = `reset:${email.toLowerCase()}`;
+    const entry = otpStore.get(key);
+    if (!entry) {
+      return res.status(400).json({ message: 'No reset request found. Please request a new code.' });
+    }
+    if (Date.now() > entry.expiresAt) {
+      otpStore.delete(key);
+      return res.status(400).json({ message: 'Reset code has expired. Please request a new one.' });
+    }
+    if (entry.code !== String(code).trim()) {
+      return res.status(400).json({ message: 'Incorrect code. Please try again.' });
+    }
+
+    otpStore.delete(key);
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    const customer = await Customer.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      { $set: { passwordHash } },
+      { new: true },
+    );
+    if (!customer) return res.status(404).json({ message: 'Account not found.' });
+
+    res.json({ message: 'Password reset successfully. You can now log in.' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
 module.exports.verifyCustomer = verifyCustomer;
 module.exports.JWT_SECRET = JWT_SECRET;

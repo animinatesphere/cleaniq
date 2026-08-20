@@ -123,6 +123,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const forgotPassword = async (email) => {
+    try {
+      await apiFetch(`${API_URL}/customer-auth/forgot-password`, {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || "Failed to send reset code." };
+    }
+  };
+
+  const resetPassword = async (email, code, newPassword) => {
+    try {
+      await apiFetch(`${API_URL}/customer-auth/reset-password`, {
+        method: "POST",
+        body: JSON.stringify({ email, code, newPassword }),
+      });
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || "Failed to reset password." };
+    }
+  };
+
   const logout = async () => {
     setIsLoading(true);
     await AsyncStorage.removeItem("customerToken");
@@ -153,7 +177,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ login, register, sendOtp, verifyOtp, logout, updateProfile, isLoading, userToken, customerInfo }}
+      value={{ login, register, sendOtp, verifyOtp, forgotPassword, resetPassword, logout, updateProfile, isLoading, userToken, customerInfo }}
     >
       {children}
     </AuthContext.Provider>

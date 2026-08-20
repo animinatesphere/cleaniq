@@ -15,7 +15,8 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
-  Mail, Lock, Eye, EyeOff, User, Phone, ChevronRight, X, AlertCircle, ShieldCheck,
+  Mail, Lock, Eye, EyeOff, User, Phone, ChevronRight,
+  X, AlertCircle, ShieldCheck, CheckCircle2, KeyRound, ArrowLeft,
 } from "lucide-react-native";
 import { AuthContext } from "../context/AuthContext";
 import { C } from "../theme/flat";
@@ -48,12 +49,32 @@ const Field = ({
   </View>
 );
 
-const LoginScreen = ({ navigation }) => {
-  const { login, sendOtp, verifyOtp } = useContext(AuthContext);
+const OtpBoxes = ({ digits, refs, onChange, onKeyPress }) => (
+  <View style={styles.otpBoxes}>
+    {digits.map((digit, i) => (
+      <TextInput
+        key={i}
+        ref={ref => { refs.current[i] = ref; }}
+        style={[styles.otpBox, digit ? styles.otpBoxFilled : null]}
+        value={digit}
+        onChangeText={v => onChange(i, v)}
+        onKeyPress={e => onKeyPress(i, e)}
+        keyboardType="number-pad"
+        maxLength={1}
+        textAlign="center"
+        selectTextOnFocus
+        returnKeyType={i < 5 ? "next" : "done"}
+      />
+    ))}
+  </View>
+);
 
-  const [tab, setTab] = useState("login");
+const LoginScreen = ({ navigation }) => {
+  const { login, sendOtp, verifyOtp, forgotPassword, resetPassword } = useContext(AuthContext);
+
+  const [tab, setTab]         = useState("login");
   const [loading, setLoading] = useState(false);
-  const [loginError, setLoginError] = useState("");
+  const [loginError, setLoginError]   = useState("");
   const [signupError, setSignupError] = useState("");
 
   // Login fields
@@ -71,11 +92,23 @@ const LoginScreen = ({ navigation }) => {
   const [showSignupPwd, setShowSignupPwd]   = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 
-  // OTP step
+  // Signup OTP
   const [signupStep, setSignupStep] = useState("form"); // "form" | "otp"
   const [otpDigits, setOtpDigits]   = useState(["", "", "", "", "", ""]);
   const otpRefs = useRef([]);
 
+  // Forgot password
+  const [forgotPhase, setForgotPhase]           = useState(null); // null | "email" | "otp" | "done"
+  const [forgotEmail, setForgotEmail]           = useState("");
+  const [forgotOtpDigits, setForgotOtpDigits]   = useState(["", "", "", "", "", ""]);
+  const forgotOtpRefs                           = useRef([]);
+  const [forgotNewPwd, setForgotNewPwd]         = useState("");
+  const [forgotConfirmPwd, setForgotConfirmPwd] = useState("");
+  const [showForgotPwd, setShowForgotPwd]       = useState(false);
+  const [showForgotConfirm, setShowForgotConfirm] = useState(false);
+  const [forgotError, setForgotError]           = useState("");
+
+  // ── Login ───────────────────────────────────────────────────────────────────
   const handleLogin = async () => {
     setLoginError("");
     if (!loginEmail.trim() || !loginPassword.trim()) {
@@ -92,6 +125,7 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
+  // ── Signup OTP ───────────────────────────────────────────────────────────────
   const handleSendOtp = async () => {
     setSignupError("");
     if (!firstName.trim() || !lastName.trim()) {
@@ -164,6 +198,75 @@ const LoginScreen = ({ navigation }) => {
     otpRefs.current[0]?.focus();
   };
 
+  // ── Forgot password ─────────────────────────────────────────────────────────
+  const handleForgotSendOtp = async () => {
+    setForgotError("");
+    if (!forgotEmail.trim()) {
+      setForgotError("Please enter your email address.");
+      return;
+    }
+    setLoading(true);
+    const result = await forgotPassword(forgotEmail.trim().toLowerCase());
+    setLoading(false);
+    if (!result.success) {
+      setForgotError(result.message || "Something went wrong. Please try again.");
+    } else {
+      setForgotOtpDigits(["", "", "", "", "", ""]);
+      setForgotNewPwd("");
+      setForgotConfirmPwd("");
+      setForgotPhase("otp");
+    }
+  };
+
+  const handleForgotReset = async () => {
+    setForgotError("");
+    const code = forgotOtpDigits.join("");
+    if (code.length !== 6) {
+      setForgotError("Please enter the complete 6-digit code.");
+      return;
+    }
+    if (forgotNewPwd.length < 6) {
+      setForgotError("Password must be at least 6 characters.");
+      return;
+    }
+    if (forgotNewPwd !== forgotConfirmPwd) {
+      setForgotError("Passwords don't match.");
+      return;
+    }
+    setLoading(true);
+    const result = await resetPassword(forgotEmail.trim().toLowerCase(), code, forgotNewPwd);
+    setLoading(false);
+    if (!result.success) {
+      setForgotError(result.message || "Failed to reset password. Please try again.");
+    } else {
+      setForgotPhase("done");
+    }
+  };
+
+  const handleForgotDigitChange = (index, value) => {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    const next = [...forgotOtpDigits];
+    next[index] = digit;
+    setForgotOtpDigits(next);
+    setForgotError("");
+    if (digit && index < 5) forgotOtpRefs.current[index + 1]?.focus();
+  };
+
+  const handleForgotDigitKeyPress = (index, e) => {
+    if (e.nativeEvent.key === "Backspace" && !forgotOtpDigits[index] && index > 0) {
+      forgotOtpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const resetForgotFlow = () => {
+    setForgotPhase(null);
+    setForgotEmail("");
+    setForgotOtpDigits(["", "", "", "", "", ""]);
+    setForgotNewPwd("");
+    setForgotConfirmPwd("");
+    setForgotError("");
+  };
+
   const isLogin = tab === "login";
 
   return (
@@ -173,7 +276,7 @@ const LoginScreen = ({ navigation }) => {
     >
       <StatusBar barStyle="light-content" />
 
-      {/* ── Hero photo with dark overlay ── */}
+      {/* ── Hero ── */}
       <View style={styles.hero}>
         <Image
           source={{ uri: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80" }}
@@ -181,30 +284,26 @@ const LoginScreen = ({ navigation }) => {
           resizeMode="cover"
         />
         <LinearGradient
-          colors={["rgba(8,61,43,0.55)", "rgba(8,61,43,0.92)"]}
+          colors={["rgba(8,61,43,0.55)", "rgba(8,61,43,0.95)"]}
           style={styles.heroOverlay}
         />
 
         {navigation.canGoBack() && (
-          <TouchableOpacity style={styles.skipBtn} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.closeBtn} onPress={() => navigation.goBack()}>
             <X size={18} color="rgba(255,255,255,0.85)" strokeWidth={2.5} />
           </TouchableOpacity>
         )}
 
         <View style={styles.brand}>
           <View style={styles.logoWrap}>
-            <Image
-              source={require("../../assets/logo.jpg")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
+            <Image source={require("../../assets/logo.jpg")} style={styles.logo} resizeMode="contain" />
           </View>
           <Text style={styles.brandName}>Cleaniq Services</Text>
           <Text style={styles.brandTag}>Professional cleaning, on demand.</Text>
         </View>
       </View>
 
-      {/* ── White card ── */}
+      {/* ── Card ── */}
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -213,272 +312,420 @@ const LoginScreen = ({ navigation }) => {
       >
         <View style={styles.card}>
 
-          {/* Tab switcher — hidden during OTP step */}
-          {signupStep === "form" && (
-            <View style={styles.tabBar}>
-              <TouchableOpacity
-                style={[styles.tabBtn, isLogin && styles.tabBtnActive]}
-                onPress={() => { setTab("login"); setLoginError(""); setSignupError(""); }}
-                activeOpacity={0.8}
-              >
-                <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>Log In</Text>
+          {/* ══ FORGOT PASSWORD FLOW ══ */}
+          {forgotPhase !== null && (
+            <>
+              {/* Back header */}
+              <TouchableOpacity style={styles.backRow} onPress={resetForgotFlow}>
+                <ArrowLeft size={18} color={C.primary} strokeWidth={2.5} />
+                <Text style={styles.backText}>Back to login</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.tabBtn, !isLogin && styles.tabBtnActive]}
-                onPress={() => { setTab("signup"); setLoginError(""); setSignupError(""); }}
-                activeOpacity={0.8}
-              >
-                <Text style={[styles.tabText, !isLogin && styles.tabTextActive]}>Sign Up</Text>
-              </TouchableOpacity>
-            </View>
-          )}
 
-          {/* ── LOGIN FORM ── */}
-          {isLogin && (
-            <View style={styles.form}>
-              <Text style={styles.formTitle}>Welcome back 👋</Text>
-              <Text style={styles.formSub}>
-                Log in to manage your bookings and track your cleaner.
-              </Text>
+              {/* ── STEP 1: Enter email ── */}
+              {forgotPhase === "email" && (
+                <View style={styles.form}>
+                  <View style={styles.forgotIconWrap}>
+                    <KeyRound size={32} color={C.primary} strokeWidth={1.8} />
+                  </View>
+                  <Text style={styles.formTitle}>Forgot password?</Text>
+                  <Text style={styles.formSub}>
+                    Enter the email address linked to your account and we'll send you a reset code.
+                  </Text>
 
-              {!!loginError && (
-                <View style={styles.errorBanner}>
-                  <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
-                  <Text style={styles.errorBannerTxt}>{loginError}</Text>
+                  {!!forgotError && (
+                    <View style={styles.errorBanner}>
+                      <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                      <Text style={styles.errorBannerTxt}>{forgotError}</Text>
+                    </View>
+                  )}
+
+                  <Field
+                    icon={<Mail size={18} color={C.textMuted} />}
+                    placeholder="Email address"
+                    value={forgotEmail}
+                    onChangeText={v => { setForgotEmail(v); setForgotError(""); }}
+                    keyboardType="email-address"
+                  />
+
+                  <TouchableOpacity
+                    style={[styles.cta, loading && styles.ctaDisabled]}
+                    onPress={handleForgotSendOtp}
+                    disabled={loading}
+                    activeOpacity={0.85}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <View style={styles.ctaInner}>
+                        <Text style={styles.ctaText}>Send Reset Code</Text>
+                        <ChevronRight size={20} color="#fff" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
                 </View>
               )}
 
-              <Field
-                icon={<Mail size={18} color={C.textMuted} />}
-                placeholder="Email address"
-                value={loginEmail}
-                onChangeText={(v) => { setLoginEmail(v); setLoginError(""); }}
-                keyboardType="email-address"
-              />
-              <Field
-                icon={<Lock size={18} color={C.textMuted} />}
-                placeholder="Password"
-                value={loginPassword}
-                onChangeText={(v) => { setLoginPassword(v); setLoginError(""); }}
-                secureTextEntry={!showLoginPwd}
-                rightIcon={showLoginPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
-                onRightPress={() => setShowLoginPwd((v) => !v)}
-              />
-
-              <TouchableOpacity style={styles.forgotWrap}>
-                <Text style={styles.forgotText}>Forgot password?</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.cta, loading && styles.ctaDisabled]}
-                onPress={handleLogin}
-                disabled={loading}
-                activeOpacity={0.85}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <View style={styles.ctaInner}>
-                    <Text style={styles.ctaText}>Log In</Text>
-                    <ChevronRight size={20} color="#fff" />
+              {/* ── STEP 2: Enter OTP + new password ── */}
+              {forgotPhase === "otp" && (
+                <View style={styles.otpContainer}>
+                  <View style={styles.otpIconWrap}>
+                    <ShieldCheck size={36} color={C.primary} strokeWidth={1.8} />
                   </View>
-                )}
-              </TouchableOpacity>
+                  <Text style={styles.otpTitle}>Enter reset code</Text>
+                  <Text style={styles.otpSub}>
+                    We sent a 6-digit code to{"\n"}
+                    <Text style={styles.otpEmail}>{forgotEmail}</Text>
+                  </Text>
 
-              <TouchableOpacity onPress={() => setTab("signup")} style={styles.switchWrap}>
-                <Text style={styles.switchText}>
-                  Don't have an account?{"  "}
-                  <Text style={styles.switchLink}>Sign up free</Text>
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
+                  {!!forgotError && (
+                    <View style={[styles.errorBanner, { alignSelf: "stretch" }]}>
+                      <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                      <Text style={styles.errorBannerTxt}>{forgotError}</Text>
+                    </View>
+                  )}
 
-          {/* ── SIGNUP FORM ── */}
-          {!isLogin && signupStep === "form" && (
-            <View style={styles.form}>
-              <Text style={styles.formTitle}>Create account</Text>
-              <Text style={styles.formSub}>
-                Join thousands getting spotless homes across Manchester.
-              </Text>
+                  <OtpBoxes
+                    digits={forgotOtpDigits}
+                    refs={forgotOtpRefs}
+                    onChange={handleForgotDigitChange}
+                    onKeyPress={handleForgotDigitKeyPress}
+                  />
 
-              {!!signupError && (
-                <View style={styles.errorBanner}>
-                  <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
-                  <Text style={styles.errorBannerTxt}>{signupError}</Text>
+                  <View style={[styles.form, { alignSelf: "stretch", gap: 10, marginTop: 8 }]}>
+                    <Field
+                      icon={<Lock size={18} color={C.textMuted} />}
+                      placeholder="New password (min 6 characters)"
+                      value={forgotNewPwd}
+                      onChangeText={v => { setForgotNewPwd(v); setForgotError(""); }}
+                      secureTextEntry={!showForgotPwd}
+                      rightIcon={showForgotPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
+                      onRightPress={() => setShowForgotPwd(v => !v)}
+                    />
+                    <Field
+                      icon={<Lock size={18} color={C.textMuted} />}
+                      placeholder="Confirm new password"
+                      value={forgotConfirmPwd}
+                      onChangeText={v => { setForgotConfirmPwd(v); setForgotError(""); }}
+                      secureTextEntry={!showForgotConfirm}
+                      rightIcon={showForgotConfirm ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
+                      onRightPress={() => setShowForgotConfirm(v => !v)}
+                    />
+                  </View>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.cta, { alignSelf: "stretch" },
+                      (loading || forgotOtpDigits.join("").length !== 6) && styles.ctaDisabled,
+                    ]}
+                    onPress={handleForgotReset}
+                    disabled={loading || forgotOtpDigits.join("").length !== 6}
+                    activeOpacity={0.85}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <View style={styles.ctaInner}>
+                        <Text style={styles.ctaText}>Reset Password</Text>
+                        <ChevronRight size={20} color="#fff" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => { setForgotPhase("email"); setForgotOtpDigits(["","","","","",""]); setForgotError(""); }}
+                    style={styles.switchWrap}
+                    disabled={loading}
+                  >
+                    <Text style={styles.switchText}>
+                      Didn't receive it?{"  "}
+                      <Text style={styles.switchLink}>Resend code</Text>
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               )}
 
-              <View style={styles.nameRow}>
-                <View style={[styles.fieldRow, styles.halfField]}>
-                  <View style={styles.fieldIcon}>
-                    <User size={18} color={C.textMuted} />
+              {/* ── STEP 3: Success ── */}
+              {forgotPhase === "done" && (
+                <View style={styles.otpContainer}>
+                  <View style={[styles.otpIconWrap, { backgroundColor: "#D1FAE5" }]}>
+                    <CheckCircle2 size={36} color="#059669" strokeWidth={1.8} />
                   </View>
-                  <TextInput
-                    style={styles.fieldInput}
-                    placeholder="First name"
-                    placeholderTextColor={C.textMuted}
-                    value={firstName}
-                    onChangeText={setFirstName}
-                    autoCapitalize="words"
-                    autoCorrect={false}
-                  />
+                  <Text style={styles.otpTitle}>Password reset!</Text>
+                  <Text style={[styles.otpSub, { marginBottom: 16 }]}>
+                    Your password has been updated successfully.{"\n"}You can now log in with your new password.
+                  </Text>
+                  <TouchableOpacity
+                    style={[styles.cta, { alignSelf: "stretch" }]}
+                    onPress={() => { resetForgotFlow(); setTab("login"); }}
+                    activeOpacity={0.85}
+                  >
+                    <View style={styles.ctaInner}>
+                      <Text style={styles.ctaText}>Back to Log In</Text>
+                      <ChevronRight size={20} color="#fff" />
+                    </View>
+                  </TouchableOpacity>
                 </View>
-                <View style={[styles.fieldRow, styles.halfField]}>
-                  <TextInput
-                    style={[styles.fieldInput, { paddingLeft: 14 }]}
-                    placeholder="Last name"
-                    placeholderTextColor={C.textMuted}
-                    value={lastName}
-                    onChangeText={setLastName}
-                    autoCapitalize="words"
-                    autoCorrect={false}
-                  />
-                </View>
-              </View>
-
-              <Field
-                icon={<Mail size={18} color={C.textMuted} />}
-                placeholder="Email address"
-                value={signupEmail}
-                onChangeText={setSignupEmail}
-                keyboardType="email-address"
-              />
-              <Field
-                icon={<Phone size={18} color={C.textMuted} />}
-                placeholder="Phone number (optional)"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                autoCapitalize="none"
-              />
-              <Field
-                icon={<Lock size={18} color={C.textMuted} />}
-                placeholder="Password (min 6 characters)"
-                value={signupPassword}
-                onChangeText={setSignupPassword}
-                secureTextEntry={!showSignupPwd}
-                rightIcon={showSignupPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
-                onRightPress={() => setShowSignupPwd((v) => !v)}
-              />
-              <Field
-                icon={<Lock size={18} color={C.textMuted} />}
-                placeholder="Confirm password"
-                value={confirmPwd}
-                onChangeText={setConfirmPwd}
-                secureTextEntry={!showConfirmPwd}
-                rightIcon={showConfirmPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
-                onRightPress={() => setShowConfirmPwd((v) => !v)}
-              />
-
-              <TouchableOpacity
-                style={[styles.cta, loading && styles.ctaDisabled]}
-                onPress={handleSendOtp}
-                disabled={loading}
-                activeOpacity={0.85}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <View style={styles.ctaInner}>
-                    <Text style={styles.ctaText}>Send Verification Code</Text>
-                    <ChevronRight size={20} color="#fff" />
-                  </View>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => setTab("login")} style={styles.switchWrap}>
-                <Text style={styles.switchText}>
-                  Already have an account?{"  "}
-                  <Text style={styles.switchLink}>Log in</Text>
-                </Text>
-              </TouchableOpacity>
-
-              <Text style={styles.terms}>
-                By signing up you agree to our{" "}
-                <Text style={styles.termsLink}>Terms of Service</Text> and{" "}
-                <Text style={styles.termsLink}>Privacy Policy</Text>.
-              </Text>
-            </View>
+              )}
+            </>
           )}
 
-          {/* ── OTP VERIFICATION STEP ── */}
-          {!isLogin && signupStep === "otp" && (
-            <View style={styles.otpContainer}>
-              <View style={styles.otpIconWrap}>
-                <ShieldCheck size={36} color={C.primary} strokeWidth={1.8} />
-              </View>
-
-              <Text style={styles.otpTitle}>Verify your email</Text>
-              <Text style={styles.otpSub}>
-                We sent a 6-digit code to{"\n"}
-                <Text style={styles.otpEmail}>{signupEmail}</Text>
-              </Text>
-
-              {!!signupError && (
-                <View style={[styles.errorBanner, { alignSelf: "stretch" }]}>
-                  <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
-                  <Text style={styles.errorBannerTxt}>{signupError}</Text>
+          {/* ══ NORMAL LOGIN / SIGNUP FLOW ══ */}
+          {forgotPhase === null && (
+            <>
+              {/* Tab switcher — hidden during OTP step */}
+              {signupStep === "form" && (
+                <View style={styles.tabBar}>
+                  <TouchableOpacity
+                    style={[styles.tabBtn, isLogin && styles.tabBtnActive]}
+                    onPress={() => { setTab("login"); setLoginError(""); setSignupError(""); }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>Log In</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.tabBtn, !isLogin && styles.tabBtnActive]}
+                    onPress={() => { setTab("signup"); setLoginError(""); setSignupError(""); }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[styles.tabText, !isLogin && styles.tabTextActive]}>Sign Up</Text>
+                  </TouchableOpacity>
                 </View>
               )}
 
-              {/* 6-digit boxes */}
-              <View style={styles.otpBoxes}>
-                {otpDigits.map((digit, i) => (
-                  <TextInput
-                    key={i}
-                    ref={ref => { otpRefs.current[i] = ref; }}
-                    style={[styles.otpBox, digit ? styles.otpBoxFilled : null]}
-                    value={digit}
-                    onChangeText={v => handleDigitChange(i, v)}
-                    onKeyPress={e => handleDigitKeyPress(i, e)}
-                    keyboardType="number-pad"
-                    maxLength={1}
-                    textAlign="center"
-                    selectTextOnFocus
-                    returnKeyType={i < 5 ? "next" : "done"}
+              {/* ── LOGIN FORM ── */}
+              {isLogin && (
+                <View style={styles.form}>
+                  <Text style={styles.formTitle}>Welcome back</Text>
+                  <Text style={styles.formSub}>
+                    Log in to manage your bookings and track your cleaner.
+                  </Text>
+
+                  {!!loginError && (
+                    <View style={styles.errorBanner}>
+                      <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                      <Text style={styles.errorBannerTxt}>{loginError}</Text>
+                    </View>
+                  )}
+
+                  <Field
+                    icon={<Mail size={18} color={C.textMuted} />}
+                    placeholder="Email address"
+                    value={loginEmail}
+                    onChangeText={v => { setLoginEmail(v); setLoginError(""); }}
+                    keyboardType="email-address"
                   />
-                ))}
-              </View>
+                  <Field
+                    icon={<Lock size={18} color={C.textMuted} />}
+                    placeholder="Password"
+                    value={loginPassword}
+                    onChangeText={v => { setLoginPassword(v); setLoginError(""); }}
+                    secureTextEntry={!showLoginPwd}
+                    rightIcon={showLoginPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
+                    onRightPress={() => setShowLoginPwd(v => !v)}
+                  />
 
-              <TouchableOpacity
-                style={[
-                  styles.cta,
-                  { alignSelf: "stretch" },
-                  (loading || otpDigits.join("").length !== 6) && styles.ctaDisabled,
-                ]}
-                onPress={handleVerifyOtp}
-                disabled={loading || otpDigits.join("").length !== 6}
-                activeOpacity={0.85}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <View style={styles.ctaInner}>
-                    <Text style={styles.ctaText}>Verify & Create Account</Text>
-                    <ChevronRight size={20} color="#fff" />
+                  <TouchableOpacity
+                    style={styles.forgotWrap}
+                    onPress={() => { setLoginError(""); setForgotEmail(""); setForgotPhase("email"); }}
+                  >
+                    <Text style={styles.forgotText}>Forgot password?</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.cta, loading && styles.ctaDisabled]}
+                    onPress={handleLogin}
+                    disabled={loading}
+                    activeOpacity={0.85}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <View style={styles.ctaInner}>
+                        <Text style={styles.ctaText}>Log In</Text>
+                        <ChevronRight size={20} color="#fff" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={() => setTab("signup")} style={styles.switchWrap}>
+                    <Text style={styles.switchText}>
+                      Don't have an account?{"  "}
+                      <Text style={styles.switchLink}>Sign up free</Text>
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* ── SIGNUP FORM ── */}
+              {!isLogin && signupStep === "form" && (
+                <View style={styles.form}>
+                  <Text style={styles.formTitle}>Create account</Text>
+                  <Text style={styles.formSub}>
+                    Join thousands getting spotless homes across Manchester.
+                  </Text>
+
+                  {!!signupError && (
+                    <View style={styles.errorBanner}>
+                      <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                      <Text style={styles.errorBannerTxt}>{signupError}</Text>
+                    </View>
+                  )}
+
+                  <View style={styles.nameRow}>
+                    <View style={[styles.fieldRow, styles.halfField]}>
+                      <View style={styles.fieldIcon}>
+                        <User size={18} color={C.textMuted} />
+                      </View>
+                      <TextInput
+                        style={styles.fieldInput}
+                        placeholder="First name"
+                        placeholderTextColor={C.textMuted}
+                        value={firstName}
+                        onChangeText={setFirstName}
+                        autoCapitalize="words"
+                        autoCorrect={false}
+                      />
+                    </View>
+                    <View style={[styles.fieldRow, styles.halfField]}>
+                      <TextInput
+                        style={[styles.fieldInput, { paddingLeft: 14 }]}
+                        placeholder="Last name"
+                        placeholderTextColor={C.textMuted}
+                        value={lastName}
+                        onChangeText={setLastName}
+                        autoCapitalize="words"
+                        autoCorrect={false}
+                      />
+                    </View>
                   </View>
-                )}
-              </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={handleResendOtp}
-                style={styles.switchWrap}
-                disabled={loading}
-              >
-                <Text style={styles.switchText}>
-                  Didn't receive it?{"  "}
-                  <Text style={styles.switchLink}>Resend code</Text>
-                </Text>
-              </TouchableOpacity>
+                  <Field
+                    icon={<Mail size={18} color={C.textMuted} />}
+                    placeholder="Email address"
+                    value={signupEmail}
+                    onChangeText={setSignupEmail}
+                    keyboardType="email-address"
+                  />
+                  <Field
+                    icon={<Phone size={18} color={C.textMuted} />}
+                    placeholder="Phone number (optional)"
+                    value={phone}
+                    onChangeText={setPhone}
+                    keyboardType="phone-pad"
+                    autoCapitalize="none"
+                  />
+                  <Field
+                    icon={<Lock size={18} color={C.textMuted} />}
+                    placeholder="Password (min 6 characters)"
+                    value={signupPassword}
+                    onChangeText={setSignupPassword}
+                    secureTextEntry={!showSignupPwd}
+                    rightIcon={showSignupPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
+                    onRightPress={() => setShowSignupPwd(v => !v)}
+                  />
+                  <Field
+                    icon={<Lock size={18} color={C.textMuted} />}
+                    placeholder="Confirm password"
+                    value={confirmPwd}
+                    onChangeText={setConfirmPwd}
+                    secureTextEntry={!showConfirmPwd}
+                    rightIcon={showConfirmPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
+                    onRightPress={() => setShowConfirmPwd(v => !v)}
+                  />
 
-              <TouchableOpacity
-                onPress={() => { setSignupStep("form"); setSignupError(""); setOtpDigits(["","","","","",""]); }}
-                style={styles.guestWrap}
-              >
-                <Text style={styles.guestText}>← Change email address</Text>
-              </TouchableOpacity>
-            </View>
+                  <TouchableOpacity
+                    style={[styles.cta, loading && styles.ctaDisabled]}
+                    onPress={handleSendOtp}
+                    disabled={loading}
+                    activeOpacity={0.85}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <View style={styles.ctaInner}>
+                        <Text style={styles.ctaText}>Send Verification Code</Text>
+                        <ChevronRight size={20} color="#fff" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={() => setTab("login")} style={styles.switchWrap}>
+                    <Text style={styles.switchText}>
+                      Already have an account?{"  "}
+                      <Text style={styles.switchLink}>Log in</Text>
+                    </Text>
+                  </TouchableOpacity>
+
+                  <Text style={styles.terms}>
+                    By signing up you agree to our{" "}
+                    <Text style={styles.termsLink}>Terms of Service</Text> and{" "}
+                    <Text style={styles.termsLink}>Privacy Policy</Text>.
+                  </Text>
+                </View>
+              )}
+
+              {/* ── SIGNUP OTP STEP ── */}
+              {!isLogin && signupStep === "otp" && (
+                <View style={styles.otpContainer}>
+                  <View style={styles.otpIconWrap}>
+                    <ShieldCheck size={36} color={C.primary} strokeWidth={1.8} />
+                  </View>
+
+                  <Text style={styles.otpTitle}>Verify your email</Text>
+                  <Text style={styles.otpSub}>
+                    We sent a 6-digit code to{"\n"}
+                    <Text style={styles.otpEmail}>{signupEmail}</Text>
+                  </Text>
+
+                  {!!signupError && (
+                    <View style={[styles.errorBanner, { alignSelf: "stretch" }]}>
+                      <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                      <Text style={styles.errorBannerTxt}>{signupError}</Text>
+                    </View>
+                  )}
+
+                  <OtpBoxes
+                    digits={otpDigits}
+                    refs={otpRefs}
+                    onChange={handleDigitChange}
+                    onKeyPress={handleDigitKeyPress}
+                  />
+
+                  <TouchableOpacity
+                    style={[
+                      styles.cta, { alignSelf: "stretch" },
+                      (loading || otpDigits.join("").length !== 6) && styles.ctaDisabled,
+                    ]}
+                    onPress={handleVerifyOtp}
+                    disabled={loading || otpDigits.join("").length !== 6}
+                    activeOpacity={0.85}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <View style={styles.ctaInner}>
+                        <Text style={styles.ctaText}>Verify & Create Account</Text>
+                        <ChevronRight size={20} color="#fff" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={handleResendOtp} style={styles.switchWrap} disabled={loading}>
+                    <Text style={styles.switchText}>
+                      Didn't receive it?{"  "}
+                      <Text style={styles.switchLink}>Resend code</Text>
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => { setSignupStep("form"); setSignupError(""); setOtpDigits(["","","","","",""]); }}
+                    style={styles.guestWrap}
+                  >
+                    <Text style={styles.guestText}>← Change email address</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
           )}
         </View>
       </ScrollView>
@@ -490,13 +737,13 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#083d2b" },
 
   hero: {
-    height: height * 0.32,
+    height: height * 0.3,
     position: "relative",
     justifyContent: "flex-end",
   },
   heroBg: { ...StyleSheet.absoluteFillObject, width: "100%", height: "100%" },
   heroOverlay: { ...StyleSheet.absoluteFillObject },
-  skipBtn: {
+  closeBtn: {
     position: "absolute",
     top: Platform.OS === "ios" ? 56 : 40,
     right: 20,
@@ -507,14 +754,14 @@ const styles = StyleSheet.create({
   },
   brand: { alignItems: "center", paddingBottom: 28, zIndex: 2 },
   logoWrap: {
-    width: 72, height: 72, borderRadius: 18,
+    width: 68, height: 68, borderRadius: 18,
     backgroundColor: "rgba(255,255,255,0.15)",
     alignItems: "center", justifyContent: "center",
     overflow: "hidden", marginBottom: 10,
     borderWidth: 2, borderColor: "rgba(255,255,255,0.25)",
   },
-  logo: { width: 72, height: 72 },
-  brandName: { fontSize: 20, fontWeight: "800", color: "#FFFFFF", letterSpacing: 0.3 },
+  logo: { width: 68, height: 68 },
+  brandName: { fontSize: 19, fontWeight: "800", color: "#FFFFFF", letterSpacing: 0.3 },
   brandTag: { fontSize: 12, color: "rgba(255,255,255,0.65)", marginTop: 3 },
 
   scroll: { flex: 1 },
@@ -523,8 +770,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F4F6F8",
     borderTopLeftRadius: 32, borderTopRightRadius: 32,
-    paddingTop: 28, paddingHorizontal: 20, paddingBottom: 40,
-    minHeight: 500,
+    paddingTop: 28, paddingHorizontal: 20, paddingBottom: 48,
+    minHeight: 520,
+  },
+
+  // Back row (forgot password)
+  backRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 20 },
+  backText: { fontSize: 14, fontWeight: "700", color: C.primary },
+
+  // Forgot icon
+  forgotIconWrap: {
+    width: 72, height: 72, borderRadius: 36,
+    backgroundColor: C.primaryLight,
+    alignItems: "center", justifyContent: "center",
+    alignSelf: "center", marginBottom: 8,
   },
 
   tabBar: {
@@ -560,7 +819,7 @@ const styles = StyleSheet.create({
   fieldRight: { paddingLeft: 8 },
 
   forgotWrap: { alignItems: "flex-end", marginTop: -4 },
-  forgotText: { fontSize: 13, color: C.primary, fontWeight: "600" },
+  forgotText: { fontSize: 13, color: C.primary, fontWeight: "700" },
 
   cta: {
     backgroundColor: C.primary, borderRadius: 999, height: 56,
@@ -589,7 +848,6 @@ const styles = StyleSheet.create({
   },
   errorBannerTxt: { flex: 1, fontSize: 13, color: "#DC2626", fontWeight: "500", lineHeight: 18 },
 
-  // OTP step
   otpContainer: { alignItems: "center", gap: 14, paddingVertical: 8 },
   otpIconWrap: {
     width: 80, height: 80, borderRadius: 40,
