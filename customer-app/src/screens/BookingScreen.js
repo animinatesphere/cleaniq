@@ -349,7 +349,7 @@ const BookingScreen = ({ navigation }) => {
         meta:    { source: "Customer App" },
       };
 
-      const res = await fetch(`${API_URL}/bookings`, {
+      const res = await fetch(`${API_URL}/customer-bookings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -358,6 +358,7 @@ const BookingScreen = ({ navigation }) => {
         body: JSON.stringify(payload),
       });
       const resData = await res.json();
+      if (!res.ok) throw new Error(resData.message || "Booking failed");
 
       setBookingRef(resData.bookingId || resData._id || payload.bookingId);
       setSubmitted(true);

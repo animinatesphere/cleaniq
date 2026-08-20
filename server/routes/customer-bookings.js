@@ -16,10 +16,6 @@ const { buildBookingDateTime } = require('../utils/bookingDateTime');
 // so no admin auth is needed here — the card hold is the proof of intent.
 router.post('/', async (req, res) => {
   try {
-    if (!req.body.payment?.stripePaymentIntentId) {
-      return res.status(400).json({ message: 'Payment authorization is required to create a booking.' });
-    }
-
     const booking = new Booking(req.body);
     booking.set('details', req.body.details);
     booking.set('property', req.body.property);
@@ -106,16 +102,75 @@ router.post('/', async (req, res) => {
       }
     }
 
-    // Confirmation email to customer
-    try {
-      await sendEmail({
-        to: newBooking.customer.email,
-        subject: `✓ Booking Confirmed - ${newBooking.bookingId}`,
-        html: templates.bookingConfirmation(newBooking),
-      });
-      console.log(`✅ Booking confirmation sent to ${newBooking.customer.email}`);
-    } catch (emailErr) {
-      console.error('❌ Failed to send customer confirmation email:', emailErr.message);
+    // Email to customer
+    const isInvoicePending =
+      newBooking.payment?.method === 'Invoice' && newBooking.payment?.status === 'Pending';
+
+    if (isInvoicePending) {
+      // App booking: create Stripe checkout and send payment link
+      try {
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ['card'],
+          mode: 'payment',
+          customer_email: newBooking.customer.email,
+          payment_intent_data: {
+            capture_method: 'manual',
+            metadata: {
+              bookingId: newBooking._id.toString(),
+              bookingRef: newBooking.bookingId,
+              company: 'Cleaniq Services',
+            },
+          },
+          line_items: [
+            {
+              price_data: {
+                currency: (newBooking.payment?.currency || 'GBP').toLowerCase(),
+                product_data: {
+                  name: `Cleaniq - ${newBooking.service}`,
+                  description: `Booking Reference: ${newBooking.bookingId}`,
+                },
+                unit_amount: Math.round(newBooking.payment.amount * 100),
+              },
+              quantity: 1,
+            },
+          ],
+          metadata: {
+            bookingId: newBooking._id.toString(),
+            company: 'Cleaniq Services',
+          },
+          success_url: `${process.env.FRONTEND_URL || 'https://cleaniqservices.com'}/account/bookings?payment=success&bookingId=${newBooking._id}`,
+          cancel_url: `${process.env.FRONTEND_URL || 'https://cleaniqservices.com'}/account/bookings?payment=cancelled`,
+        });
+
+        await sendEmail({
+          to: newBooking.customer.email,
+          subject: `Payment Required: Cleaniq Booking ${newBooking.bookingId}`,
+          html: templates.paymentRequired(newBooking, session.url),
+        });
+        console.log(`✅ Payment link sent to ${newBooking.customer.email}`);
+      } catch (payErr) {
+        console.error('❌ Failed to send payment link email:', payErr.message);
+        // Fallback so customer always gets something
+        try {
+          await sendEmail({
+            to: newBooking.customer.email,
+            subject: `✓ Booking Received - ${newBooking.bookingId}`,
+            html: templates.adminBookingCreatedEmail2(newBooking),
+          });
+        } catch {}
+      }
+    } else {
+      // Website booking (Stripe already authorized): send confirmation
+      try {
+        await sendEmail({
+          to: newBooking.customer.email,
+          subject: `✓ Booking Confirmed - ${newBooking.bookingId}`,
+          html: templates.bookingConfirmation(newBooking),
+        });
+        console.log(`✅ Booking confirmation sent to ${newBooking.customer.email}`);
+      } catch (emailErr) {
+        console.error('❌ Failed to send customer confirmation email:', emailErr.message);
+      }
     }
 
     // Admin alert
