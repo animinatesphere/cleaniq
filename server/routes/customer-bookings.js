@@ -8,6 +8,7 @@ const { verifyCustomer } = require('./customer-auth');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const sms = require('../utils/smsService');
 const { sendEmail, templates } = require('../utils/emailService');
+const { sendCapiEvent } = require('../utils/metaCapi');;
 const { scheduleTask } = require('../utils/automationEngine');
 const { buildBookingDateTime } = require('../utils/bookingDateTime');
 
@@ -48,6 +49,13 @@ router.post('/', async (req, res) => {
     } catch (leadErr) {
       console.error('⚠️ Failed to capture booking lead:', leadErr.message);
     }
+
+    // Fire Meta CAPI Lead event (non-blocking)
+    sendCapiEvent('Lead', {
+      email: newBooking.customer?.email,
+      phone: newBooking.customer?.phone,
+      bookingId: newBooking._id,
+    }).catch(() => {});
 
     // Recurring series generation
     const recurFreq = newBooking.details?.frequency;

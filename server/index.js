@@ -163,6 +163,7 @@ const { buildBookingDateTime } = require("./utils/bookingDateTime");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "");
 const Booking = require("./models/Booking");
 const { sendEmail, templates } = require("./utils/emailService");
+const { sendCapiEvent } = require("./utils/metaCapi");
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
 
 const applyAdditionalHoursPayment = async (
@@ -290,6 +291,16 @@ app.post(
               booking.payment.authorizedAt = new Date();
               booking.status = "Confirmed"; // Booking is confirmed but cleaning not done yet
               await booking.save();
+
+              // Fire Meta CAPI Purchase event (non-blocking)
+              sendCapiEvent("Purchase", {
+                email: booking.customer?.email,
+                phone: booking.customer?.phone,
+                value: session.amount_total ? session.amount_total / 100 : booking.payment?.amount,
+                currency: (session.currency || "gbp").toUpperCase(),
+                bookingId: booking._id,
+                sourceUrl: "https://cleaniqservices.com/book",
+              }).catch(() => {});
 
               // SMS: booking confirmed (fire-and-forget)
               setImmediate(() =>

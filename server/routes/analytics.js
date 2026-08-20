@@ -86,4 +86,102 @@ router.get("/app-users", async (req, res) => {
   }
 });
 
+// GET /api/analytics/meta-ads?days=N — Meta Ads campaign performance
+router.get("/meta-ads", async (req, res) => {
+  const { META_ACCESS_TOKEN, META_AD_ACCOUNT_ID } = process.env;
+  if (!META_ACCESS_TOKEN || !META_AD_ACCOUNT_ID) {
+    return res.status(503).json({ message: "Meta Ads not configured. Add META_ACCESS_TOKEN and META_AD_ACCOUNT_ID to your server environment." });
+  }
+
+  const days = parseInt(req.query.days, 10) || 28;
+  const preset = days <= 7 ? "last_7d" : days <= 14 ? "last_14d" : days <= 28 ? "last_28d" : "last_90d";
+
+  const fields = [
+    "campaign_name",
+    "spend",
+    "impressions",
+    "clicks",
+    "reach",
+    "cpm",
+    "cpc",
+    "ctr",
+    "actions",
+    "cost_per_action_type",
+  ].join(",");
+
+  try {
+    const accountId = META_AD_ACCOUNT_ID.startsWith("act_")
+      ? META_AD_ACCOUNT_ID
+      : `act_${META_AD_ACCOUNT_ID}`;
+
+    const url =
+      `https://graph.facebook.com/v19.0/${accountId}/insights` +
+      `?fields=${fields}&date_preset=${preset}&level=campaign` +
+      `&access_token=${META_ACCESS_TOKEN}`;
+
+    const r = await fetch(url);
+    const json = await r.json();
+
+    if (json.error) {
+      console.error("Meta Ads API error:", json.error.message);
+      return res.status(400).json({ message: json.error.message });
+    }
+
+    const campaigns = (json.data || []).map((c) => {
+      const findAction = (type) =>
+        (c.actions || []).find((a) => a.action_type === type);
+      const findCpa = (type) =>
+        (c.cost_per_action_type || []).find((a) => a.action_type === type);
+
+      const lead = findAction("lead");
+      const purchase = findAction("purchase");
+      const costPerLead = findCpa("lead");
+      const costPerPurchase = findCpa("purchase");
+
+      return {
+        campaign: c.campaign_name || "Unknown",
+        spend: parseFloat(c.spend || 0),
+        impressions: parseInt(c.impressions || 0, 10),
+        clicks: parseInt(c.clicks || 0, 10),
+        reach: parseInt(c.reach || 0, 10),
+        cpm: parseFloat(c.cpm || 0),
+        cpc: parseFloat(c.cpc || 0),
+        ctr: parseFloat(c.ctr || 0),
+        leads: lead ? parseInt(lead.value, 10) : 0,
+        purchases: purchase ? parseInt(purchase.value, 10) : 0,
+        costPerLead: costPerLead ? parseFloat(costPerLead.value) : 0,
+        costPerPurchase: costPerPurchase ? parseFloat(costPerPurchase.value) : 0,
+      };
+    });
+
+    const totals = campaigns.reduce(
+      (acc, c) => ({
+        spend: acc.spend + c.spend,
+        impressions: acc.impressions + c.impressions,
+        clicks: acc.clicks + c.clicks,
+        reach: acc.reach + c.reach,
+        leads: acc.leads + c.leads,
+        purchases: acc.purchases + c.purchases,
+      }),
+      { spend: 0, impressions: 0, clicks: 0, reach: 0, leads: 0, purchases: 0 }
+    );
+
+    totals.ctr =
+      totals.impressions > 0
+        ? (totals.clicks / totals.impressions) * 100
+        : 0;
+    totals.cpl = totals.leads > 0 ? totals.spend / totals.leads : 0;
+    totals.cpc = totals.clicks > 0 ? totals.spend / totals.clicks : 0;
+    totals.cpm =
+      totals.impressions > 0
+        ? (totals.spend / totals.impressions) * 1000
+        : 0;
+
+    res.json({ campaigns, totals, preset });
+  } catch (err) {
+    console.error("Meta Ads fetch error:", err.message);
+    res.status(500).json({ message: "Failed to fetch Meta Ads data" });
+  }
+});
+
 module.exports = router;
