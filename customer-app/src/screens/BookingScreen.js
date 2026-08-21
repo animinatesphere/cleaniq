@@ -196,17 +196,18 @@ const SectionLabel = ({ title, sub }) => (
 // ═══════════════════════════════════════════════════════════════════════════════
 //  MAIN SCREEN
 // ═══════════════════════════════════════════════════════════════════════════════
-const BookingScreen = ({ navigation }) => {
-  const { customerInfo } = useContext(AuthContext);
+const BookingScreen = ({ navigation, route }) => {
+  const { customerInfo, userToken } = useContext(AuthContext);
   const scrollRef = useRef(null);
 
-  const [step,         setStep]         = useState(0);
-  const [submitting,   setSubmitting]   = useState(false);
-  const [submitted,    setSubmitted]    = useState(false);
-  const [bookingRef,   setBookingRef]   = useState("");
-  const [rates,        setRates]        = useState({});
-  const [bookedSlots,  setBookedSlots]  = useState([]);
-  const [availLoading, setAvailLoading] = useState(false);
+  const [step,           setStep]           = useState(0);
+  const [submitting,     setSubmitting]     = useState(false);
+  const [submitted,      setSubmitted]      = useState(false);
+  const [bookingRef,     setBookingRef]     = useState("");
+  const [rates,          setRates]          = useState({});
+  const [bookedSlots,    setBookedSlots]    = useState([]);
+  const [availLoading,   setAvailLoading]   = useState(false);
+  const [autoSubmit,     setAutoSubmit]     = useState(false);
 
   const today = new Date();
   const [calYear,  setCalYear]  = useState(today.getFullYear());
@@ -237,9 +238,33 @@ const BookingScreen = ({ navigation }) => {
   const email     = customerInfo?.email     || "";
   const phone     = customerInfo?.phone     || "";
 
+  // Restore pending booking after guest logs in
+  useEffect(() => {
+    if (!route?.params?.resumeBooking) return;
+    AsyncStorage.getItem("@cleaniq_pending_booking").then((raw) => {
+      if (!raw) return;
+      try {
+        const saved = JSON.parse(raw);
+        if (saved.form) setForm(saved.form);
+        if (saved.calYear)  setCalYear(saved.calYear);
+        if (saved.calMonth) setCalMonth(saved.calMonth);
+        setStep(3);
+        setAutoSubmit(true);
+      } catch {}
+    });
+  }, [route?.params?.resumeBooking]);
+
+  // Trigger auto-submit once form is restored (runs on next render after state settles)
+  useEffect(() => {
+    if (!autoSubmit || !form.serviceType) return;
+    setAutoSubmit(false);
+    handleSubmit();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSubmit, form.serviceType]);
+
   // Fetch live service rates + load saved address from profile
   useEffect(() => {
-    fetch(`${API_URL}/services`).then((r) => r.json()).then((data) => {
+    fetch(`${API_URL}/services?booking=1`).then((r) => r.json()).then((data) => {
       const map = {};
       (data || []).forEach((s) => { if (s.name && s.rate) map[s.name] = s.rate; });
       setRates(map);
@@ -306,10 +331,18 @@ const BookingScreen = ({ navigation }) => {
 
   // ── Submit ──────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
+    const token = await AsyncStorage.getItem("customerToken");
+    if (!token) {
+      // Guest — save form, send to login then auto-complete after
+      await AsyncStorage.setItem(
+        "@cleaniq_pending_booking",
+        JSON.stringify({ form, calYear, calMonth }),
+      );
+      navigation.navigate("Login", { fromBooking: true });
+      return;
+    }
     setSubmitting(true);
     try {
-      const token   = await AsyncStorage.getItem("customerToken");
-
       // Convert extras object {name: qty} → array [{name, qty, price}] so admin/worker can read it
       const extrasArray = Object.entries(form.extras)
         .filter(([, qty]) => qty > 0)
@@ -360,6 +393,7 @@ const BookingScreen = ({ navigation }) => {
       const resData = await res.json();
       if (!res.ok) throw new Error(resData.message || "Booking failed");
 
+      await AsyncStorage.removeItem("@cleaniq_pending_booking");
       setBookingRef(resData.bookingId || resData._id || payload.bookingId);
       setSubmitted(true);
     } catch (err) {

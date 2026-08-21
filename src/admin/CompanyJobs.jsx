@@ -4,7 +4,7 @@ import {
   MapPin, Calendar, ChevronRight, User, X, Building2,
   Phone, Mail, Clock, Home as HomeIcon, Repeat,
   ShoppingBag, PawPrint, Hash, UserCheck, FileText,
-  AlertCircle, Info, Zap,
+  AlertCircle, Info, Zap, UserCog, ChevronDown,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -47,14 +47,22 @@ const fmtDateTime = (d) => d
   : null;
 
 export default function CompanyJobs() {
-  const [jobs,         setJobs]         = useState([]);
-  const [loading,      setLoading]      = useState(true);
-  const [tab,          setTab]          = useState("all");
-  const [search,       setSearch]       = useState("");
-  const [selected,     setSelected]     = useState(null);
-  const [rejecting,    setRejecting]    = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
-  const [acting,       setActing]       = useState(false);
+  const [jobs,            setJobs]           = useState([]);
+  const [loading,         setLoading]        = useState(true);
+  const [tab,             setTab]            = useState("all");
+  const [search,          setSearch]         = useState("");
+  const [selected,        setSelected]       = useState(null);
+  const [rejecting,       setRejecting]      = useState(false);
+  const [rejectReason,    setRejectReason]   = useState("");
+  const [acting,          setActing]         = useState(false);
+
+  // Worker assignment
+  const [workers,         setWorkers]        = useState([]);
+  const [workerSearch,    setWorkerSearch]   = useState("");
+  const [selectedWorker,  setSelectedWorker] = useState(null);
+  const [assigning,       setAssigning]      = useState(false);
+  const [assignSuccess,   setAssignSuccess]  = useState(false);
+  const [workerDropOpen,  setWorkerDropOpen] = useState(false);
 
   const fetchJobs = async () => {
     setLoading(true);
@@ -67,6 +75,16 @@ export default function CompanyJobs() {
   };
 
   useEffect(() => { fetchJobs(); }, []);
+
+  const fetchWorkers = async () => {
+    try {
+      const res  = await fetch(`${API}/workers`);
+      const data = await res.json();
+      if (Array.isArray(data)) setWorkers(data);
+    } catch {}
+  };
+
+  useEffect(() => { fetchWorkers(); }, []);
 
   const filtered = jobs.filter(j => {
     if (tab !== "all" && j.status !== tab) return false;
@@ -106,7 +124,48 @@ export default function CompanyJobs() {
     finally { setActing(false); }
   };
 
-  const closeModal = () => { setSelected(null); setRejecting(false); setRejectReason(""); };
+  const closeModal = () => {
+    setSelected(null);
+    setRejecting(false);
+    setRejectReason("");
+    setSelectedWorker(null);
+    setWorkerSearch("");
+    setAssignSuccess(false);
+    setWorkerDropOpen(false);
+  };
+
+  const assignWorker = async () => {
+    if (!selectedWorker || !selected) return;
+    setAssigning(true);
+    try {
+      const res = await fetch(`${API}/jobs/${selected._id}/assign-worker`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workerId:   selectedWorker._id,
+          workerName: `${selectedWorker.firstName || ""} ${selectedWorker.lastName || ""}`.trim(),
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAssignSuccess(true);
+        // update local selected and jobs list without a second fetch
+        if (data.job) setSelected(data.job);
+        setJobs(prev => prev.map(j => j._id === selected._id ? (data.job || j) : j));
+      }
+    } catch {}
+    finally { setAssigning(false); }
+  };
+
+  const filteredWorkers = workers.filter(w => {
+    if (!workerSearch) return true;
+    const q = workerSearch.toLowerCase();
+    return (
+      `${w.firstName} ${w.lastName}`.toLowerCase().includes(q) ||
+      w.email?.toLowerCase().includes(q) ||
+      w.phone?.toLowerCase().includes(q)
+    );
+  });
 
   const counts = { pending_review: jobs.filter(j => j.status === "pending_review").length };
 
@@ -350,15 +409,132 @@ export default function CompanyJobs() {
                   </div>
                 )}
 
-                {/* ── Assigned Worker ───────────────────────────────────── */}
+                {/* ── Assigned Worker (already assigned) ────────────────── */}
                 {selected.assignedWorkerName && (
-                  <div className="bg-emerald-500/10 rounded-2xl p-6 border border-emerald-500/20 flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center shrink-0">
-                      <User size={22} className="text-emerald-400" />
+                  <div className="bg-emerald-500/10 rounded-2xl p-5 border border-emerald-500/20 flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+                      <User size={20} className="text-emerald-400" />
                     </div>
-                    <div>
-                      <p className="text-[9px] font-bold text-emerald-400/70 uppercase tracking-widest">Assigned Worker</p>
+                    <div className="flex-1">
+                      <p className="text-[9px] font-bold text-emerald-400/70 uppercase tracking-widest">Worker Assigned</p>
                       <p className="text-sm font-bold text-white/85">{selected.assignedWorkerName}</p>
+                    </div>
+                    <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
+                  </div>
+                )}
+
+                {/* ── Worker Assignment Panel (approved, not yet assigned) ── */}
+                {selected.status === "approved" && !selected.assignedWorkerName && (
+                  <div className="rounded-2xl border border-violet-500/25 bg-violet-500/10 overflow-hidden">
+                    {/* Panel header */}
+                    <div className="flex items-center gap-3 px-5 py-4 border-b border-violet-500/15">
+                      <div className="w-9 h-9 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0">
+                        <UserCog size={17} className="text-violet-400" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-black text-violet-300">Assign a Worker</p>
+                        <p className="text-[10px] text-violet-400/60 font-semibold mt-0.5">
+                          Choose which cleaner handles this job
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-5 space-y-3">
+                      {assignSuccess ? (
+                        <div className="flex items-center gap-3 bg-emerald-500/15 border border-emerald-500/25 rounded-xl p-4">
+                          <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
+                          <div>
+                            <p className="text-emerald-300 font-bold text-sm">Worker assigned successfully!</p>
+                            <p className="text-emerald-400/60 text-xs mt-0.5">
+                              {selectedWorker ? `${selectedWorker.firstName} ${selectedWorker.lastName}` : ""} has been assigned and notified.
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Worker picker dropdown */}
+                          <div className="relative">
+                            <button
+                              onClick={() => setWorkerDropOpen(o => !o)}
+                              className="w-full flex items-center justify-between gap-3 bg-white/5 border border-white/10 hover:border-violet-500/40 rounded-xl px-4 py-3 transition-all text-left"
+                            >
+                              {selectedWorker ? (
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div className="w-7 h-7 rounded-full bg-violet-500/25 flex items-center justify-center shrink-0 text-violet-300 font-black text-xs">
+                                    {(selectedWorker.firstName || "?").charAt(0).toUpperCase()}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-bold text-white/85 leading-tight truncate">
+                                      {selectedWorker.firstName} {selectedWorker.lastName}
+                                    </p>
+                                    <p className="text-[10px] text-white/40 truncate">{selectedWorker.email}</p>
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-sm text-white/30 font-semibold">Select a worker…</span>
+                              )}
+                              <ChevronDown
+                                size={14}
+                                className={`text-white/30 shrink-0 transition-transform ${workerDropOpen ? "rotate-180" : ""}`}
+                              />
+                            </button>
+
+                            {workerDropOpen && (
+                              <div className="absolute left-0 right-0 top-full mt-1 bg-[#0D1F18] border border-white/10 rounded-xl shadow-xl z-10 overflow-hidden">
+                                {/* Search inside dropdown */}
+                                <div className="p-2 border-b border-white/[0.07]">
+                                  <div className="relative">
+                                    <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/25" />
+                                    <input
+                                      autoFocus
+                                      value={workerSearch}
+                                      onChange={e => setWorkerSearch(e.target.value)}
+                                      placeholder="Search workers…"
+                                      className="w-full bg-white/5 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-white/25 outline-none focus:ring-1 focus:ring-violet-500/40"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="max-h-48 overflow-y-auto">
+                                  {filteredWorkers.length === 0 ? (
+                                    <p className="text-center text-white/25 text-xs py-4">No workers found</p>
+                                  ) : filteredWorkers.map(w => (
+                                    <button
+                                      key={w._id}
+                                      onClick={() => { setSelectedWorker(w); setWorkerDropOpen(false); setWorkerSearch(""); }}
+                                      className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors text-left ${selectedWorker?._id === w._id ? "bg-violet-500/10" : ""}`}
+                                    >
+                                      <div className="w-7 h-7 rounded-full bg-violet-500/20 flex items-center justify-center shrink-0 text-violet-300 font-black text-xs">
+                                        {(w.firstName || "?").charAt(0).toUpperCase()}
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-semibold text-white/80 leading-tight truncate">
+                                          {w.firstName} {w.lastName}
+                                        </p>
+                                        <p className="text-[10px] text-white/35 truncate">{w.email || w.phone}</p>
+                                      </div>
+                                      {selectedWorker?._id === w._id && (
+                                        <CheckCircle2 size={14} className="text-violet-400 shrink-0" />
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Assign button */}
+                          <button
+                            onClick={assignWorker}
+                            disabled={!selectedWorker || assigning}
+                            className="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white py-3 rounded-xl font-black text-sm transition-all shadow-sm shadow-violet-500/20"
+                          >
+                            <UserCog size={15} />
+                            {assigning ? "Assigning…" : selectedWorker
+                              ? `Assign to ${selectedWorker.firstName} ${selectedWorker.lastName}`
+                              : "Select a worker first"}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}

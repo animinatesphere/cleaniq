@@ -342,6 +342,33 @@ router.put("/:id/approve", async (req, res) => {
   }
 });
 
+// PUT /api/jobs/:id/assign-worker — admin assigns a specific worker to an approved job
+router.put("/:id/assign-worker", async (req, res) => {
+  try {
+    const { workerId, workerName } = req.body;
+    if (!workerId) return res.status(400).json({ message: "workerId is required" });
+
+    const job = await Job.findById(req.params.id);
+    if (!job) return res.status(404).json({ message: "Job not found" });
+    if (!job.linkedBookingId) return res.status(400).json({ message: "Job must be approved before assigning a worker" });
+
+    const booking = await Booking.findById(job.linkedBookingId);
+    if (!booking) return res.status(404).json({ message: "Linked booking not found" });
+
+    booking.assignedWorker = workerId;
+    booking.status = "Assigned";
+    await booking.save();
+
+    job.status = "assigned";
+    job.assignedWorkerName = workerName || "";
+    await job.save();
+
+    res.json({ job, booking });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // PUT /api/jobs/:id/reject — admin rejects a job
 router.put("/:id/reject", async (req, res) => {
   try {

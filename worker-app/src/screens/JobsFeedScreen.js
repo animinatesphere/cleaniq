@@ -59,7 +59,7 @@ const JobsFeedScreen = ({ navigation }) => {
     try {
       // Fetch both available jobs and my jobs in parallel
       const [availableRes, myJobsRes] = await Promise.all([
-        axios.get(`${API_URL}/workers/jobs`),
+        axios.get(`${API_URL}/workers/jobs?workerId=${workerInfo.id}`),
         axios.get(`${API_URL}/workers/jobs/my-jobs/${workerInfo.id}`),
       ]);
 
@@ -454,6 +454,7 @@ const JobsFeedScreen = ({ navigation }) => {
     const isArrived = item.status === "Arrived";
     const isCleaning = item.status === "Cleaning";
     const isCompleted = item.status === "Completed";
+    const jobId = item._id || item.bookingId;
 
     return (
       <View
@@ -508,7 +509,10 @@ const JobsFeedScreen = ({ navigation }) => {
           <View style={[styles.infoRow, { alignItems: "flex-start" }]}>
             <MapPin size={16} color="#64748B" style={{ marginTop: 2 }} />
             <Text style={styles.fullAddressText}>
-              {(item.details?.address || '') + (item.details?.postcode ? ', ' + item.details.postcode : '') || "Address not provided"}
+              {item.details?.address ||
+               item.property?.address ||
+               (item.property?.postcode ? item.property.postcode : null) ||
+               "Address not provided"}
             </Text>
           </View>
         </View>
@@ -536,6 +540,17 @@ const JobsFeedScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.myJobFooter}>
+          {/* Always show View Details button */}
+          <TouchableOpacity
+            style={styles.viewDetailBtn}
+            onPress={() => navigation.navigate("AcceptedBookingDetail", { bookingId: jobId })}
+            activeOpacity={0.8}
+          >
+            <Info size={15} color="#0A5C43" />
+            <Text style={styles.viewDetailTxt}>View Full Job Details</Text>
+            <ChevronRight size={14} color="#0A5C43" />
+          </TouchableOpacity>
+
           {isAssigned && (
             <View style={{ width: "100%", gap: 10, flexDirection: "row" }}>
               <TouchableOpacity
@@ -1096,7 +1111,20 @@ const styles = StyleSheet.create({
     borderTopColor: "#F1F5F9",
     paddingTop: 16,
     width: "100%",
+    gap: 10,
   },
+  viewDetailBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: "#E6F4F1",
+    borderRadius: 12,
+    paddingVertical: 11,
+    borderWidth: 1,
+    borderColor: "#A7D9CC",
+  },
+  viewDetailTxt: { fontSize: 13, fontWeight: "700", color: "#0A5C43", flex: 1, textAlign: "center" },
 
   // Progress Action Button Styles
   actionButton: {

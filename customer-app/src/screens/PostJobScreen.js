@@ -9,7 +9,7 @@ import {
   Home as HomeIcon, Zap, Calendar, Clock, Moon, Sun,
   Plus, Minus, Briefcase, Star, Truck, Building2,
   Layers, HardHat, Flame, PartyPopper, Shield, Wrench,
-  Phone, Mail, User, MapPin,
+  Phone, Mail, User, MapPin, Sparkles,
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
@@ -52,6 +52,8 @@ const SERVICES = [
   { id:"Regular Domestic Cleaning",                title:"Regular Domestic",     tag:"Recurring home clean",    Icon:HomeIcon,    col:"#0F6B4C" },
   { id:"One-Off House Clean",                      title:"One-Off Clean",        tag:"Single visit",            Icon:Zap,         col:"#F59E0B" },
   { id:"Deep Cleaning",                            title:"Deep Cleaning",        tag:"Full deep clean",         Icon:Zap,         col:"#EF4444" },
+  { id:"Commercial Cleaning",                      title:"Commercial Cleaning",  tag:"Business & offices",      Icon:Building2,   col:"#1D4ED8" },
+  { id:"General Cleaning",                         title:"General Cleaning",     tag:"Standard clean",          Icon:Sparkles,    col:"#0891B2" },
   { id:"Airbnb & Holiday Let Cleaning",            title:"Airbnb / Holiday Let", tag:"Holiday let changeover",  Icon:Star,        col:"#F97316" },
   { id:"End of Tenancy Cleaning",                  title:"End of Tenancy",       tag:"Move-out clean",          Icon:Truck,       col:"#8B5CF6" },
   { id:"Move-In Cleaning",                         title:"Move-In Clean",        tag:"Move-in ready",           Icon:Building2,   col:"#06B6D4" },
@@ -62,6 +64,7 @@ const SERVICES = [
   { id:"Post-Party & Event Clean",                 title:"Post-Party / Event",   tag:"Post-party & events",     Icon:PartyPopper, col:"#EC4899" },
   { id:"Disinfection & Sanitisation",              title:"Disinfection",         tag:"Bio & sanitisation",      Icon:Shield,      col:"#059669" },
   { id:"Pressure Washing",                         title:"Pressure Washing",     tag:"Outdoor & driveway",      Icon:Wrench,      col:"#0EA5E9" },
+  { id:"Other",                                    title:"Other / Custom",       tag:"Describe your need",      Icon:Wrench,      col:"#6B7280" },
 ];
 
 const FREQS   = ["Once","Weekly","Fortnightly","Monthly","Quarterly"];
@@ -203,7 +206,8 @@ export default function PostJobScreen({ navigation }) {
   const [saving, setSaving] = useState(false);
 
   // Step 1 – Service
-  const [service, setService] = useState("");
+  const [service,     setService]     = useState("");
+  const [otherDetail, setOtherDetail] = useState("");
 
   // Step 2 – Location & Contact
   const [address,   setAddress]   = useState("");
@@ -276,6 +280,7 @@ export default function PostJobScreen({ navigation }) {
     const e = {};
     if (s === 1) {
       if (!service) e.service = "Please select a service type";
+      if (service === "Other" && !otherDetail.trim()) e.otherDetail = "Please describe the type of cleaning needed";
     }
     if (s === 2) {
       if (!address || address.trim().length < 5) e.address = "Enter a full address";
@@ -317,6 +322,7 @@ export default function PostJobScreen({ navigation }) {
         headers:{ "Content-Type":"application/json", Authorization:`Bearer ${token}` },
         body: JSON.stringify({
           service,
+          serviceDetail: service === "Other" ? otherDetail.trim() : undefined,
           contact:  { name:cName.trim(), phone:cPhone.trim(), email:cEmail.trim() },
           details:  { duration:dur, frequency, suppliesProvidedBy:supplies, ...rooms, hasPet },
           property: { address, postcode },
@@ -328,7 +334,7 @@ export default function PostJobScreen({ navigation }) {
       if (!res.ok) throw new Error(data.message || "Failed to post job");
       Alert.alert(
         "Job Submitted!",
-        `Job ${data.jobId} is under review. We'll confirm within 24 hours.`,
+        `Job ${data.jobId} has been submitted and is currently under review.`,
         [{ text:"Got it", onPress:()=>navigation.goBack() }],
       );
     } catch (err) {
@@ -340,7 +346,7 @@ export default function PostJobScreen({ navigation }) {
   const Step1 = () => (
     <View style={s.card}>
       <Text style={s.cardH}>What type of clean do you need?</Text>
-      <Text style={s.cardSub}>Select one service — you can add instructions in the notes later</Text>
+      <Text style={s.cardSub}>Select one service — you can add more instructions in the notes later</Text>
       {errors.service ? <ErrMsg msg={errors.service} /> : null}
       <View style={s.grid2}>
         {SERVICES.map(sv => {
@@ -348,7 +354,7 @@ export default function PostJobScreen({ navigation }) {
           return (
             <TouchableOpacity
               key={sv.id}
-              onPress={() => { setService(sv.id); setErrors(p=>({...p,service:undefined})); }}
+              onPress={() => { setService(sv.id); setErrors(p=>({...p,service:undefined,otherDetail:undefined})); }}
               activeOpacity={0.75}
               style={[s.svcCard, active && { borderColor:sv.col, backgroundColor:sv.col+"12" }]}
             >
@@ -366,6 +372,21 @@ export default function PostJobScreen({ navigation }) {
           );
         })}
       </View>
+
+      {service === "Other" && (
+        <View style={s.otherWrap}>
+          <FLabel req>Describe the type of cleaning</FLabel>
+          <TextInput
+            value={otherDetail}
+            onChangeText={v=>{ setOtherDetail(v); setErrors(p=>({...p,otherDetail:undefined})); }}
+            placeholder="e.g. Warehouse floor cleaning, gym equipment wipe-down…"
+            placeholderTextColor={G.muted}
+            multiline
+            style={[s.notesInput, {minHeight:80, marginTop:4}, errors.otherDetail&&{borderColor:G.error,backgroundColor:G.errorBg}]}
+          />
+          {errors.otherDetail ? <ErrMsg msg={errors.otherDetail} /> : null}
+        </View>
+      )}
     </View>
   );
 
@@ -505,9 +526,10 @@ export default function PostJobScreen({ navigation }) {
         </View>
       ))}
 
-      <View style={[s.roomRow,{borderBottomWidth:0,paddingBottom:0,marginTop:8}]}>
-        <Text style={s.roomLabel}>Pet on premises?</Text>
-        <TogglePair opts={["No","Yes"]} selected={hasPet} onSelect={setHasPet} compact />
+      <View style={s.petSection}>
+        <Text style={s.petQuestion}>Are there any pets on the premises?</Text>
+        <Text style={s.petSub}>This helps our cleaner prepare the right equipment and supplies.</Text>
+        <TogglePair opts={["No","Yes"]} selected={hasPet} onSelect={setHasPet} />
       </View>
     </View>
   );
@@ -872,6 +894,7 @@ const s = StyleSheet.create({
 
   // Service grid
   grid2:      { flexDirection:"row", flexWrap:"wrap", gap:10, marginTop:8 },
+  otherWrap:  { marginTop:14, backgroundColor:G.surfaceAlt, borderRadius:14, padding:14, borderWidth:1.5, borderColor:G.border },
   svcCard:    { width:"47%", backgroundColor:G.surfaceAlt, borderRadius:14, padding:12, borderWidth:2, borderColor:G.border, position:"relative" },
   svcIcon:    { width:42, height:42, borderRadius:11, alignItems:"center", justifyContent:"center" },
   svcTitle:   { fontSize:13, fontWeight:"700", color:G.dark, marginTop:9, marginBottom:3, lineHeight:17 },
@@ -899,6 +922,11 @@ const s = StyleSheet.create({
   roomRow:    { flexDirection:"row", alignItems:"center", justifyContent:"space-between", paddingVertical:13, borderBottomWidth:1, borderBottomColor:"#F1F5F9" },
   roomLabel:  { fontSize:14, color:G.dark, fontWeight:"500", flex:1 },
   roomCtr:    { flexDirection:"row", alignItems:"center", gap:14 },
+
+  // Pet question
+  petSection:   { marginTop:16, paddingTop:16, borderTopWidth:1, borderTopColor:"#F1F5F9" },
+  petQuestion:  { fontSize:15, fontWeight:"800", color:G.dark, marginBottom:4 },
+  petSub:       { fontSize:12, color:G.muted, lineHeight:17, marginBottom:12 },
   cntBtn:     { width:34, height:34, borderRadius:10, backgroundColor:G.primaryLight, borderWidth:1.5, borderColor:G.primary+"50", alignItems:"center", justifyContent:"center" },
   cntNum:     { fontSize:16, fontWeight:"800", color:G.dark, minWidth:22, textAlign:"center" },
 

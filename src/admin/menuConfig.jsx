@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Globe,
+  Eye,
   Receipt,
   CalendarRange,
   Calendar,
@@ -36,6 +37,7 @@ import {
   BookOpen,
   Trash2,
   CheckSquare,
+  UserCog,
 } from "lucide-react";
 
 export const fullMenuGroups = [
@@ -84,6 +86,18 @@ export const fullMenuGroups = [
         path: "/admin/jobs",
         key: "jobs",
         icon: <ClipboardList size={20} />,
+      },
+      {
+        name: "Company Jobs",
+        path: "/admin/company-jobs",
+        key: "company-jobs",
+        icon: <UserCog size={20} />,
+      },
+      {
+        name: "Job Visibility",
+        path: "/admin/job-visibility",
+        key: "job-visibility",
+        icon: <Eye size={20} />,
       },
       {
         name: "Bookings",
@@ -283,12 +297,6 @@ export const fullMenuGroups = [
         path: "/admin/customers",
         key: "customers",
         icon: <User size={20} />,
-      },
-      {
-        name: "Company Jobs",
-        path: "/admin/company-jobs",
-        key: "company-jobs",
-        icon: <Building2 size={20} />,
       },
     ],
   },

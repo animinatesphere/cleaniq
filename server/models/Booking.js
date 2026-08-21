@@ -54,6 +54,7 @@ const bookingSchema = new mongoose.Schema({
   workerRate: { type: Number, default: null }, // per hour rate set by admin
   workerDuration: { type: Number, default: null }, // expected duration set by admin
   rejectedBy: [{ type: String }],
+  visibleToWorkers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Worker" }],
   photos: [{
     photoType: { type: String, enum: ["before", "after", "damage", "other"] },
     url: String,

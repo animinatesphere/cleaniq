@@ -125,32 +125,63 @@ const generateTempPassword = () => {
 
 // GET available jobs — pass ?region=UK or ?region=NG to only see jobs in
 // the worker's own area (defaults to all regions if omitted).
+// Pass ?workerId=xxx so the visibility filter applies — jobs with a
+// non-empty visibleToWorkers list only show to workers in that list.
 // "Confirmed"        = paid via Stripe / admin-created / bank transfer confirmed
 // "Authorized"       = Stripe authorize-then-capture flow (payment held)
 // "Accepted"         = legacy flow
 // "Awaiting Payment" = customer submitted but hasn't paid yet — NOT shown to workers
 router.get("/jobs", async (req, res) => {
   try {
-    const { region } = req.query;
-    const filter = {
-      status: { $in: ["Confirmed", "Authorized", "Accepted"] },
-    };
-    // Include bookings with the matching region OR with no region set
-    // (older bookings and admin-created ones may not have a region field)
+    const { region, workerId, all } = req.query;
+
+    const andClauses = [
+      { status: { $in: ["Confirmed", "Authorized", "Accepted"] } },
+    ];
+
+    // Region filter
     if (region) {
-      filter.$or = [
-        { region },
-        { region: null },
-        { region: { $exists: false } },
-      ];
+      andClauses.push({
+        $or: [
+          { region },
+          { region: null },
+          { region: { $exists: false } },
+        ],
+      });
     }
 
-    const jobs = await Booking.find(filter).sort({ createdAt: -1 });
+    // Visibility filter: skip when ?all=1 (admin view sees every job regardless of restriction)
+    // Otherwise show if visibleToWorkers is empty/missing (open to all)
+    // OR if this specific worker is in the list
+    if (!all && workerId) {
+      andClauses.push({
+        $or: [
+          { visibleToWorkers: { $exists: false } },
+          { visibleToWorkers: null },
+          { visibleToWorkers: { $size: 0 } },
+          { visibleToWorkers: workerId },
+        ],
+      });
+    }
 
+    const jobs = await Booking.find({ $and: andClauses }).sort({ createdAt: -1 });
     res.json(jobs);
   } catch (error) {
     console.error("Error fetching jobs:", error);
     res.status(500).json({ error: "Internal server error fetching jobs" });
+  }
+});
+
+// PUT update visibility list for a booking (admin only)
+router.put("/jobs/:id/visibility", async (req, res) => {
+  try {
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+    booking.visibleToWorkers = req.body.visibleToWorkers || [];
+    await booking.save();
+    res.json(booking);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

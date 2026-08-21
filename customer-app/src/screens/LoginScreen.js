@@ -69,8 +69,16 @@ const OtpBoxes = ({ digits, refs, onChange, onKeyPress }) => (
   </View>
 );
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ navigation, route }) => {
   const { login, sendOtp, verifyOtp, forgotPassword, resetPassword } = useContext(AuthContext);
+  const fromBooking = route?.params?.fromBooking === true;
+  const afterAuth = () => {
+    if (fromBooking) {
+      navigation.navigate("Booking", { resumeBooking: true });
+    } else {
+      navigation.goBack();
+    }
+  };
 
   const [tab, setTab]         = useState("login");
   const [loading, setLoading] = useState(false);
@@ -121,7 +129,7 @@ const LoginScreen = ({ navigation }) => {
     if (!result.success) {
       setLoginError(result.message || "Incorrect email or password. Please try again.");
     } else {
-      navigation.goBack();
+      afterAuth();
     }
   };
 
@@ -171,7 +179,7 @@ const LoginScreen = ({ navigation }) => {
     if (!result.success) {
       setSignupError(result.message || "Incorrect code. Please try again.");
     } else {
-      navigation.goBack();
+      afterAuth();
     }
   };
 
