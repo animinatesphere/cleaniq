@@ -35,6 +35,9 @@
       "permissions": [
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION"
       ]
     },
@@ -60,6 +63,9 @@
     "owner": "hexmane99",
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b9f0b0a1-f183-4e8c-8db2-585dd515be49"
     }
   }
 }

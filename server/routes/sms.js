@@ -410,6 +410,41 @@ router.post("/contacts/import", upload.single("file"), async (req, res) => {
   }
 });
 
+// POST /api/sms/bulk/send-direct — send SMS to a raw list of phone numbers (no contact lookup)
+router.post("/bulk/send-direct", async (req, res) => {
+  try {
+    const { phones, message } = req.body;
+    if (!Array.isArray(phones) || !phones.length)
+      return res.status(400).json({ error: "No phone numbers provided" });
+    if (!message?.trim())
+      return res.status(400).json({ error: "Message is required" });
+
+    const results = { sent: 0, failed: 0, errors: [] };
+    const BATCH = 10;
+    const unique = [...new Set(phones.map(p => p.trim()).filter(Boolean))];
+    for (let i = 0; i < unique.length; i += BATCH) {
+      const batch = unique.slice(i, i + BATCH);
+      await Promise.all(batch.map(async (phone) => {
+        const result = await sendSms({
+          to:        phone,
+          body:      message.trim(),
+          trigger:   "bulk_direct",
+          recipient: "customer",
+        });
+        if (result.success) {
+          results.sent++;
+        } else {
+          results.failed++;
+          results.errors.push({ phone, error: result.error });
+        }
+      }));
+    }
+    res.json({ success: true, ...results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/sms/bulk/send — send SMS to selected contact IDs
 router.post("/bulk/send", async (req, res) => {
   try {

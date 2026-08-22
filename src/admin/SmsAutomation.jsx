@@ -95,6 +95,14 @@ export default function SmsAutomation() {
   const [bulkResult, setBulkResult]           = useState(null);
   const fileRef                               = useRef();
 
+  // Quick Send (paste phone numbers) state
+  const [bulkMode, setBulkMode]               = useState("contacts"); // "contacts" | "quick"
+  const [quickInput, setQuickInput]           = useState("");
+  const [quickNumbers, setQuickNumbers]       = useState([]); // parsed chips
+  const [quickMessage, setQuickMessage]       = useState("");
+  const [quickSending, setQuickSending]       = useState(false);
+  const [quickResult, setQuickResult]         = useState(null);
+
   // Verify state
   const [verifyPhone, setVerifyPhone]         = useState("");
   const [verifyCode, setVerifyCode]           = useState("");
@@ -419,6 +427,46 @@ export default function SmsAutomation() {
       else showToast(data.error || "Send failed", "error");
     } catch { showToast("Failed to send", "error"); }
     setBulkSending(false);
+  };
+
+  const parseQuickNumbers = (raw) => {
+    return [...new Set(
+      raw.split(/[\s,;\n]+/)
+         .map(s => s.trim())
+         .filter(s => s.length >= 7)
+    )];
+  };
+
+  const applyQuickInput = () => {
+    const parsed = parseQuickNumbers(quickInput);
+    setQuickNumbers(prev => [...new Set([...prev, ...parsed])]);
+    setQuickInput("");
+  };
+
+  const removeQuickNumber = (num) => setQuickNumbers(prev => prev.filter(n => n !== num));
+
+  const sendQuickSms = async () => {
+    if (!quickNumbers.length) return showToast("Add at least one phone number", "error");
+    if (!quickMessage.trim()) return showToast("Write a message first", "error");
+    if (!confirm(`Send SMS to ${quickNumbers.length} number${quickNumbers.length !== 1 ? "s" : ""}?`)) return;
+    setQuickSending(true); setQuickResult(null);
+    try {
+      const res  = await fetch(`${API}/sms/bulk/send-direct`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phones: quickNumbers, message: quickMessage }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setQuickResult(data);
+        setQuickNumbers([]);
+        setQuickMessage("");
+        showToast(`Sent ${data.sent} · Failed ${data.failed}`);
+      } else {
+        showToast(data.error || "Send failed", "error");
+      }
+    } catch { showToast("Failed to send", "error"); }
+    setQuickSending(false);
   };
 
   const TABS = [
@@ -780,6 +828,148 @@ export default function SmsAutomation() {
               </div>
             )}
 
+            {/* ── Mode switcher ── */}
+            <div className="flex gap-1 bg-white/5 rounded-xl p-1 border border-white/7 w-fit">
+              {[
+                { id: "contacts", label: "Contact List" },
+                { id: "quick",    label: "Quick Send" },
+              ].map(m => (
+                <button
+                  key={m.id}
+                  onClick={() => { setBulkMode(m.id); setQuickResult(null); setBulkResult(null); }}
+                  className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${
+                    bulkMode === m.id
+                      ? "bg-emerald-500 text-white shadow-sm shadow-emerald-500/25"
+                      : "text-white/35 hover:text-white/60"
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+
+            {/* ── QUICK SEND PANEL ── */}
+            {bulkMode === "quick" && (
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-white/7 p-5 space-y-4">
+                  <div>
+                    <p className="text-sm font-black text-white mb-1">Phone Numbers</p>
+                    <p className="text-[11px] text-white/35 font-medium mb-3">
+                      Paste or type numbers separated by commas. Use international format e.g. <span className="font-mono text-emerald-400">+447700900000</span>
+                    </p>
+
+                    {/* Number chips */}
+                    {quickNumbers.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {quickNumbers.map(num => (
+                          <div key={num} className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs font-bold px-2.5 py-1 rounded-full">
+                            <Phone size={10} />
+                            <span className="font-mono">{num}</span>
+                            <button onClick={() => removeQuickNumber(num)} className="text-emerald-400/50 hover:text-rose-400 transition-colors ml-0.5">
+                              <X size={11} />
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          onClick={() => setQuickNumbers([])}
+                          className="text-[10px] font-bold text-white/25 hover:text-rose-400 transition-colors self-center ml-1"
+                        >
+                          Clear all
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Input area */}
+                    <div className="flex gap-3">
+                      <textarea
+                        value={quickInput}
+                        onChange={e => setQuickInput(e.target.value)}
+                        onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); applyQuickInput(); } }}
+                        placeholder="+447700900000, +447700900001, +447700900002&#10;(paste multiple numbers separated by commas or new lines)"
+                        rows={3}
+                        className="flex-1 px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-mono text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all resize-none text-xs"
+                      />
+                      <button
+                        onClick={applyQuickInput}
+                        disabled={!quickInput.trim()}
+                        className="px-4 py-2 rounded-xl bg-white/8 border border-white/15 text-white/60 text-xs font-black hover:bg-emerald-500/15 hover:text-emerald-300 hover:border-emerald-500/30 transition-all disabled:opacity-30 self-start mt-1 whitespace-nowrap"
+                      >
+                        Add Numbers
+                      </button>
+                    </div>
+                    {quickNumbers.length > 0 && (
+                      <p className="text-[11px] text-emerald-400/70 font-bold mt-2">
+                        {quickNumbers.length} number{quickNumbers.length !== 1 ? "s" : ""} ready to send
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Message compose */}
+                  <div className="border-t border-white/7 pt-4 space-y-3">
+                    <p className="text-sm font-black text-white">Message</p>
+                    <textarea
+                      value={quickMessage}
+                      onChange={e => setQuickMessage(e.target.value)}
+                      placeholder="Type your SMS message here…"
+                      rows={4}
+                      className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-all resize-none"
+                    />
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-3 text-[11px] font-bold">
+                        <span className={quickMessage.length > 160 ? "text-amber-400" : "text-white/30"}>
+                          {quickMessage.length} chars
+                        </span>
+                        {quickMessage.length > 160 && (
+                          <span className="text-amber-400">≈ {Math.ceil(quickMessage.length / 153)} parts/msg</span>
+                        )}
+                      </div>
+                      <button
+                        onClick={sendQuickSms}
+                        disabled={quickSending || !quickMessage.trim() || !quickNumbers.length || !config?.configured}
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-500 text-white font-black text-sm hover:bg-emerald-400 transition-colors disabled:opacity-50 shadow-sm shadow-emerald-500/25"
+                      >
+                        {quickSending ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
+                        {quickSending ? "Sending…" : `Send to ${quickNumbers.length || "—"}`}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick send result */}
+                {quickResult && (
+                  <div className="rounded-2xl border border-white/7 p-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-black text-white">Send Results</p>
+                      <button onClick={() => setQuickResult(null)} className="text-white/30 hover:text-white"><XCircle size={14} /></button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-xl px-4 py-3 text-center">
+                        <p className="text-2xl font-black text-emerald-400 tabular-nums">{quickResult.sent}</p>
+                        <p className="text-[10px] font-bold text-emerald-400/60 uppercase tracking-widest mt-0.5">Sent</p>
+                      </div>
+                      <div className="bg-rose-500/10 border border-rose-500/25 rounded-xl px-4 py-3 text-center">
+                        <p className="text-2xl font-black text-rose-400 tabular-nums">{quickResult.failed}</p>
+                        <p className="text-[10px] font-bold text-rose-400/60 uppercase tracking-widest mt-0.5">Failed</p>
+                      </div>
+                    </div>
+                    {quickResult.errors?.length > 0 && (
+                      <div className="space-y-1.5">
+                        {quickResult.errors.map((e, i) => (
+                          <div key={i} className="flex items-start gap-2 text-[11px]">
+                            <XCircle size={12} className="text-rose-400 shrink-0 mt-0.5" />
+                            <span className="text-rose-400/80 font-medium">{e.phone}: {e.error}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── CONTACT LIST MODE ── */}
+            {bulkMode === "contacts" && (<>
+
             {/* Stats row */}
             <div className="grid grid-cols-3 gap-3">
               {[
@@ -991,6 +1181,7 @@ export default function SmsAutomation() {
                 )}
               </div>
             )}
+            </>)}
           </div>
         )}
 
