@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Tag, Send, Download, Printer, Plus, Trash2, RefreshCw,
-  X, Search, Building2, FileText, Sparkles, CheckCircle2, Eye,
+  X, Search, Building2, FileText, Sparkles, CheckCircle2, Eye, Minus, DoorOpen,
 } from "lucide-react";
 import logo from "../assets/logo DP.jpg";
 
@@ -31,6 +31,7 @@ export default function PriceList() {
   const [toast, setToast]           = useState(null);
   const [search, setSearch]         = useState("");
   const [tab, setTab]               = useState("edit"); // edit | preview
+  const [roomCounts, setRoomCounts] = useState({});    // { [serviceId]: count }
 
   const setR = (k) => (e) => setRecipient((p) => ({ ...p, [k]: e.target.value }));
 
@@ -56,6 +57,10 @@ export default function PriceList() {
           return { ...s, category: cat };
         });
         setCatalogue(mapped);
+        // Initialise room counters at 0
+        const initCounts = {};
+        mapped.filter((s) => s.category === "Rooms").forEach((s) => { initCounts[s._id] = 0; });
+        setRoomCounts(initCounts);
         // Pre-add Base services to the list
         setListItems(
           mapped
@@ -90,6 +95,12 @@ export default function PriceList() {
   const addCustom = () =>
     setListItems((p) => [...p, { id: `c_${Date.now()}`, name: "", price: "", unit: "flat", description: "", category: "custom" }]);
 
+  // ── Room counter helpers ───────────────────────────────────────────────────
+  const roomCatalogueItems = useMemo(() => catalogue.filter((s) => s.category === "Rooms"), [catalogue]);
+  const stepRoom = (id, delta) =>
+    setRoomCounts((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + delta) }));
+  const hasActiveRooms = roomCatalogueItems.some((s) => (roomCounts[s._id] || 0) > 0);
+
   // ── Filtered catalogue ────────────────────────────────────────────────────
   const filteredCatalogue = useMemo(() => {
     const q = search.toLowerCase();
@@ -103,13 +114,29 @@ export default function PriceList() {
   // ── Build HTML for PDF/print/email ───────────────────────────────────────
   const priceRows = useMemo(() => {
     const rows = [];
-    // Group by category in order
-    for (const cat of CATEGORY_ORDER) {
+    // Base and Extras from listItems (skip Rooms — handled separately via counters)
+    for (const cat of CATEGORY_ORDER.filter((c) => c !== "Rooms")) {
       const items = listItems.filter((it) => it.category === cat && it.name);
       if (items.length) {
         rows.push({ type: "heading", label: CATEGORY_LABELS[cat] });
         items.forEach((it) => rows.push({ type: "item", name: it.name, price: Number(it.price || 0), unit: it.unit, description: it.description }));
       }
+    }
+    // Rooms from counters — only those with count > 0
+    const activeRooms = roomCatalogueItems.filter((s) => (roomCounts[s._id] || 0) > 0);
+    if (activeRooms.length) {
+      rows.push({ type: "heading", label: CATEGORY_LABELS["Rooms"] });
+      activeRooms.forEach((s) => {
+        const count = roomCounts[s._id];
+        const rateEach = Number(s.rate || 0);
+        rows.push({
+          type: "item",
+          name: `${s.name}`,
+          price: rateEach * count,
+          unit: "flat",
+          description: `${count} room${count !== 1 ? "s" : ""} × £${rateEach.toFixed(2)} per room`,
+        });
+      });
     }
     const customs = listItems.filter((it) => it.category === "custom" && it.name);
     if (customs.length) {
@@ -117,7 +144,7 @@ export default function PriceList() {
       customs.forEach((it) => rows.push({ type: "item", name: it.name, price: Number(it.price || 0), unit: it.unit, description: it.description }));
     }
     return rows;
-  }, [listItems]);
+  }, [listItems, roomCounts, roomCatalogueItems]);
 
   const buildHtml = () => {
     const today      = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
@@ -438,6 +465,69 @@ export default function PriceList() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* ── Room counter panel ──────────────────────────────── */}
+            {roomCatalogueItems.length > 0 && (
+              <div className="bg-[#0B2D22] rounded-2xl border border-white/7 overflow-hidden">
+                <div className="px-4 py-3 border-b border-blue-500/20 bg-blue-500/10 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-blue-500" />
+                    <span className="text-xs font-black uppercase tracking-wide text-blue-400">Room Rates</span>
+                    {hasActiveRooms && (
+                      <span className="text-[10px] font-bold text-blue-300 bg-blue-500/15 px-1.5 py-0.5 rounded-full">
+                        {roomCatalogueItems.reduce((s, r) => s + (roomCounts[r._id] || 0), 0)} rooms
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-white/30 font-semibold">Only added rooms appear in the list</span>
+                </div>
+                <div className="divide-y divide-white/[0.04]">
+                  {roomCatalogueItems.map((s) => {
+                    const count = roomCounts[s._id] || 0;
+                    return (
+                      <div key={s._id} className={`flex items-center gap-3 px-4 py-3 transition-colors ${count > 0 ? "bg-blue-500/5" : ""}`}>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-semibold truncate ${count > 0 ? "text-white" : "text-white/40"}`}>{s.name}</p>
+                          {s.rate ? (
+                            <p className="text-xs text-blue-400/70 font-semibold tabular-nums mt-0.5">
+                              £{Number(s.rate).toFixed(2)}/room
+                              {count > 0 && <span className="text-blue-300 ml-1">= £{(Number(s.rate) * count).toFixed(2)}</span>}
+                            </p>
+                          ) : null}
+                        </div>
+                        {/* Stepper */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={() => stepRoom(s._id, -1)}
+                            disabled={count === 0}
+                            className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20 disabled:opacity-25 disabled:cursor-not-allowed transition-all"
+                          >
+                            <Minus size={12} />
+                          </button>
+                          <span className={`w-6 text-center text-sm font-black tabular-nums ${count > 0 ? "text-blue-300" : "text-white/25"}`}>
+                            {count}
+                          </span>
+                          <button
+                            onClick={() => stepRoom(s._id, 1)}
+                            className="w-7 h-7 rounded-lg bg-blue-500/15 border border-blue-500/25 flex items-center justify-center text-blue-400 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all"
+                          >
+                            <Plus size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {hasActiveRooms && (
+                  <div className="px-4 py-2.5 border-t border-white/[0.04] flex items-center justify-between">
+                    <span className="text-xs text-white/30 font-semibold">Room total</span>
+                    <span className="text-xs font-black text-blue-300 tabular-nums">
+                      £{roomCatalogueItems.reduce((s, r) => s + (roomCounts[r._id] || 0) * Number(r.rate || 0), 0).toFixed(2)}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
 

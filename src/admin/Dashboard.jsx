@@ -20,6 +20,8 @@ import {
   Percent,
   Users,
   MapPin,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -411,6 +413,16 @@ const Dashboard = () => {
   const [selStart, setSelStart] = useState(null);
   const [selEnd, setSelEnd] = useState(null);
   const [workers, setWorkers] = useState([]);
+  const [overviewHidden, setOverviewHidden] = useState(
+    () => localStorage.getItem("dash_overview_hidden") === "1"
+  );
+  const toggleOverview = () => {
+    setOverviewHidden(v => {
+      localStorage.setItem("dash_overview_hidden", v ? "0" : "1");
+      return !v;
+    });
+  };
+  const mask = (val) => overviewHidden ? "****" : val;
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -1029,6 +1041,18 @@ const Dashboard = () => {
                 <Download size={13} /> Excel
               </button>
               <button
+                onClick={toggleOverview}
+                aria-label={overviewHidden ? "Show overview" : "Hide overview"}
+                title={overviewHidden ? "Show overview" : "Hide overview"}
+                className={`flex items-center justify-center w-9 h-9 border rounded-xl transition-colors ${
+                  overviewHidden
+                    ? "bg-amber-500/15 border-amber-500/30 text-amber-400 hover:bg-amber-500/25"
+                    : "bg-white/[0.05] border-white/[0.08] text-white/40 hover:bg-white/10 hover:text-white/75"
+                }`}
+              >
+                {overviewHidden ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+              <button
                 onClick={fetchData}
                 disabled={loading}
                 aria-label="Refresh"
@@ -1058,9 +1082,9 @@ const Dashboard = () => {
               </div>
               <div className="flex items-baseline gap-2">
                 <p className="text-[26px] font-semibold text-white tracking-tight tabular-nums leading-none">
-                  {loading ? "—" : k.value}
+                  {loading ? "—" : mask(k.value)}
                 </p>
-                {k.delta != null && !loading && (
+                {k.delta != null && !loading && !overviewHidden && (
                   <span
                     className={`inline-flex items-center gap-0.5 text-[11px] font-semibold tabular-nums ${k.delta >= 0 ? "text-emerald-400" : "text-rose-400"}`}
                   >
@@ -1073,7 +1097,7 @@ const Dashboard = () => {
                   </span>
                 )}
               </div>
-              <p className={`text-[11px] ${muted} mt-1.5`}>{k.sub}</p>
+              <p className={`text-[11px] ${muted} mt-1.5`}>{mask(k.sub)}</p>
             </button>
           ))}
         </div>
@@ -1093,7 +1117,7 @@ const Dashboard = () => {
             </div>
             <div className="px-5 py-4 flex-1">
               <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
-                {newPending.length}
+                {mask(newPending.length)}
               </p>
               <p className={`text-[11px] ${muted} mt-1 mb-4`}>
                 new requests waiting
@@ -1140,9 +1164,9 @@ const Dashboard = () => {
                       {row.label}
                     </span>
                     <span className="text-xs font-semibold text-white/80 tabular-nums">
-                      {row.val}{" "}
+                      {mask(row.val)}{" "}
                       <span className={`font-medium ${dimmed}`}>
-                        · {row.note}
+                        · {mask(row.note)}
                       </span>
                     </span>
                   </button>
@@ -1211,12 +1235,12 @@ const Dashboard = () => {
             </div>
             <div className="px-5 py-4 flex-1">
               <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
-                {quoteStats?.accepted ?? "—"}
+                {mask(quoteStats?.accepted ?? "—")}
               </p>
               <p className={`text-[11px] ${muted} mt-1 mb-4`}>
                 approved
                 {quoteStats?.acceptedValue > 0
-                  ? ` · ${gbp(quoteStats.acceptedValue)}`
+                  ? ` · ${mask(gbp(quoteStats.acceptedValue))}`
                   : ""}
               </p>
               <div className="space-y-2.5">
@@ -1237,7 +1261,7 @@ const Dashboard = () => {
                       {row.label}
                     </span>
                     <span className="text-xs font-semibold text-white/80 tabular-nums">
-                      {row.val}
+                      {mask(row.val)}
                     </span>
                   </button>
                 ))}
@@ -1245,8 +1269,7 @@ const Dashboard = () => {
             </div>
             <div className="px-5 pb-4 pt-3 border-t border-white/[0.05]">
               <p className={`text-[10px] font-medium ${muted} mb-1.5`}>
-                Acceptance rate · {(quoteStats?.acceptanceRate || 0).toFixed(0)}
-                %
+                Acceptance rate · {mask(`${(quoteStats?.acceptanceRate || 0).toFixed(0)}%`)}
               </p>
               <div className="w-full h-1.5 bg-white/[0.05] rounded-full overflow-hidden flex">
                 <div
@@ -1276,7 +1299,7 @@ const Dashboard = () => {
             </div>
             <div className="px-5 py-4 flex-1">
               <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
-                {inProgress.length + accepted.length}
+                {mask(inProgress.length + accepted.length)}
               </p>
               <p className={`text-[11px] ${muted} mt-1 mb-4`}>
                 active right now
@@ -1320,7 +1343,7 @@ const Dashboard = () => {
                       {row.label}
                     </span>
                     <span className="text-xs font-semibold text-white/80 tabular-nums">
-                      {row.val}
+                      {mask(row.val)}
                     </span>
                   </button>
                 ))}
@@ -1381,10 +1404,10 @@ const Dashboard = () => {
             </div>
             <div className="px-5 py-4 flex-1">
               <p className="text-[34px] font-semibold text-white tracking-tight tabular-nums leading-none">
-                {gbp(completedRevenue)}
+                {mask(gbp(completedRevenue))}
               </p>
               <p className={`text-[11px] ${muted} mt-1 mb-4`}>
-                gross · {completed.length} completed jobs
+                gross · {mask(completed.length)} completed jobs
               </p>
               <div className="space-y-2.5">
                 {[
@@ -1418,7 +1441,7 @@ const Dashboard = () => {
                       {row.label}
                     </span>
                     <span className="text-xs font-semibold text-white/80 tabular-nums">
-                      {row.val}
+                      {mask(row.val)}
                     </span>
                   </button>
                 ))}
@@ -1492,7 +1515,7 @@ const Dashboard = () => {
                     Today's schedule
                   </p>
                   <p className={`text-xs ${muted}`}>
-                    {todaysBookings.length} job
+                    {mask(todaysBookings.length)} job
                     {todaysBookings.length !== 1 ? "s" : ""} on the board
                   </p>
                 </div>
@@ -1544,9 +1567,9 @@ const Dashboard = () => {
                 <CardHead kicker="Analytics" title="Revenue trend" />
                 <div className="flex items-baseline gap-2.5 mt-2">
                   <span className="text-2xl font-semibold text-white tabular-nums tracking-tight">
-                    {gbp(rangeRevenue, 2)}
+                    {mask(gbp(rangeRevenue, 2))}
                   </span>
-                  {changePct !== null ? (
+                  {changePct !== null && !overviewHidden ? (
                     <span
                       className={`inline-flex items-center gap-1 text-[11px] font-semibold tabular-nums ${changePct >= 0 ? "text-emerald-400" : "text-rose-400"}`}
                     >
@@ -1558,11 +1581,11 @@ const Dashboard = () => {
                       {changePct >= 0 ? "+" : ""}
                       {changePct.toFixed(1)}% vs prior period
                     </span>
-                  ) : (
+                  ) : !overviewHidden ? (
                     <span className={`text-[11px] ${muted}`}>
                       No prior period data yet
                     </span>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -1634,11 +1657,11 @@ const Dashboard = () => {
                             }}
                           >
                             <span className="font-semibold">
-                              {gbp(p.revenue, 2)}
+                              {mask(gbp(p.revenue, 2))}
                             </span>
                             <br />
                             <span className={muted}>
-                              {p.count} booking{p.count !== 1 ? "s" : ""} ·{" "}
+                              {mask(p.count)} booking{p.count !== 1 ? "s" : ""} ·{" "}
                               {p.label}
                             </span>
                           </div>
@@ -1677,7 +1700,7 @@ const Dashboard = () => {
             <CardHead
               kicker="Breakdown"
               title="Revenue split"
-              sub={`Net ${gbp(Math.max(netRevenue, 0))} after expenses`}
+              sub={`Net ${mask(gbp(Math.max(netRevenue, 0)))} after expenses`}
             />
             <div className="relative w-36 h-36 mx-auto my-6">
               <svg viewBox="0 0 42 42" className="w-full h-full">
@@ -1707,7 +1730,7 @@ const Dashboard = () => {
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <p className="text-lg font-semibold text-white tabular-nums tracking-tight">
-                  {gbp(Math.max(netRevenue, 0))}
+                  {mask(gbp(Math.max(netRevenue, 0)))}
                 </p>
                 <p className={eyebrow}>Net</p>
               </div>
@@ -1814,7 +1837,7 @@ const Dashboard = () => {
                         {name}
                       </span>
                       <span className="text-xs font-semibold text-white/80 tabular-nums shrink-0">
-                        {gbp(stats.revenue)}
+                        {mask(gbp(stats.revenue))}
                       </span>
                     </div>
                     <div className="w-full h-1 bg-white/[0.05] rounded-full overflow-hidden">
@@ -1858,10 +1881,10 @@ const Dashboard = () => {
                   </div>
                   <div className="w-16 text-right shrink-0 flex items-center gap-1.5 justify-end">
                     <span className="text-[13px] font-semibold text-white/80 tabular-nums">
-                      {s.count}
+                      {mask(s.count)}
                     </span>
                     <span className={`text-[10px] ${muted} tabular-nums`}>
-                      {s.pct.toFixed(0)}%
+                      {mask(`${s.pct.toFixed(0)}%`)}
                     </span>
                   </div>
                 </div>
@@ -1902,7 +1925,7 @@ const Dashboard = () => {
                   className="bg-white/[0.03] border border-white/[0.05] rounded-xl p-3 text-center"
                 >
                   <p className="text-lg font-semibold text-white tabular-nums">
-                    {s.val}
+                    {mask(s.val)}
                   </p>
                   <p className={`${eyebrow} mt-0.5`}>{s.label}</p>
                 </div>
@@ -1931,12 +1954,12 @@ const Dashboard = () => {
                       />
                     </div>
                     <span className="text-[11px] font-semibold text-white/80 tabular-nums w-6 text-right">
-                      {stats.count}
+                      {mask(stats.count)}
                     </span>
                     <span
                       className={`hidden sm:inline text-[10px] ${muted} tabular-nums w-16 text-right shrink-0`}
                     >
-                      {gbp(stats.revenue)}
+                      {mask(gbp(stats.revenue))}
                     </span>
                   </div>
                 ))
@@ -1979,11 +2002,11 @@ const Dashboard = () => {
                         {c.firstName} {c.lastName}
                       </p>
                       <p className={`text-[11px] ${muted}`}>
-                        {c.count} booking{c.count !== 1 ? "s" : ""}
+                        {mask(c.count)} booking{c.count !== 1 ? "s" : ""}
                       </p>
                     </div>
                     <p className="text-[13px] font-semibold text-white/80 tabular-nums shrink-0">
-                      {gbp(c.total)}
+                      {mask(gbp(c.total))}
                     </p>
                   </div>
                 ))
@@ -2020,7 +2043,7 @@ const Dashboard = () => {
                           />
                         </div>
                         <span className="text-[11px] font-semibold text-white/75 tabular-nums w-9 text-right">
-                          {share.toFixed(0)}%
+                          {mask(`${share.toFixed(0)}%`)}
                         </span>
                       </div>
                     </div>
@@ -2036,7 +2059,7 @@ const Dashboard = () => {
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-400/10">
                 <Star size={12} className="text-amber-400 fill-amber-400" />
                 <span className="text-[13px] font-semibold text-amber-300 tabular-nums">
-                  {avgRating.toFixed(1)}
+                  {mask(avgRating.toFixed(1))}
                 </span>
               </div>
             </div>
@@ -2048,7 +2071,7 @@ const Dashboard = () => {
             ) : (
               <>
                 <p className={`text-[11px] ${muted} mt-1 mb-4`}>
-                  {reviews.length.toLocaleString("en-GB")} total reviews
+                  {mask(reviews.length.toLocaleString("en-GB"))} total reviews
                 </p>
                 <div className="space-y-2.5">
                   {ratingBreakdown.map((r) => (
@@ -2091,7 +2114,7 @@ const Dashboard = () => {
               <>
                 <div className="flex items-end gap-2 mt-4 mb-4">
                   <span className="text-3xl font-semibold text-white tabular-nums tracking-tight">
-                    {(quoteStats.acceptanceRate || 0).toFixed(0)}%
+                    {mask(`${(quoteStats.acceptanceRate || 0).toFixed(0)}%`)}
                   </span>
                   <span className={`text-[11px] ${muted} mb-1.5`}>
                     acceptance rate
@@ -2116,17 +2139,17 @@ const Dashboard = () => {
                     {
                       color: "bg-emerald-500",
                       label: "Accepted",
-                      val: `${quoteStats.accepted || 0} · ${gbp(quoteStats.acceptedValue || 0)}`,
+                      val: mask(`${quoteStats.accepted || 0} · ${gbp(quoteStats.acceptedValue || 0)}`),
                     },
                     {
                       color: "bg-rose-500",
                       label: "Declined",
-                      val: `${quoteStats.declined || 0}`,
+                      val: mask(`${quoteStats.declined || 0}`),
                     },
                     {
                       color: "bg-white/20",
                       label: "Awaiting response",
-                      val: `${quoteStats.pending ?? quoteStats.total}`,
+                      val: mask(`${quoteStats.pending ?? quoteStats.total}`),
                     },
                   ].map((r) => (
                     <div
@@ -2190,7 +2213,7 @@ const Dashboard = () => {
                           {q.companyName}
                         </p>
                         <p className={`text-[11px] ${muted}`}>
-                          {q.quoteRef} · {gbp(q.grandTotal, 2)}
+                          {q.quoteRef} · {mask(gbp(q.grandTotal, 2))}
                         </p>
                       </div>
                       <span
@@ -2293,15 +2316,15 @@ const Dashboard = () => {
                     : ""}
                 </p>
                 <p className="text-xl font-semibold text-emerald-400 tabular-nums tracking-tight">
-                  {gbp(selectedRangeRevenue)}
+                  {mask(gbp(selectedRangeRevenue))}
                 </p>
                 <div className="flex gap-4 mt-2 text-[11px]">
                   <span className={muted}>
-                    {bookingsInRange.length} bookings
+                    {mask(bookingsInRange.length)} bookings
                   </span>
-                  <span className={muted}>{leadsInRange.length} leads</span>
+                  <span className={muted}>{mask(leadsInRange.length)} leads</span>
                   <span className={muted}>
-                    {conversionPct.toFixed(0)}% conversion
+                    {mask(`${conversionPct.toFixed(0)}%`)} conversion
                   </span>
                 </div>
                 <button
@@ -2345,7 +2368,7 @@ const Dashboard = () => {
                     className="flex-1 flex flex-col items-center gap-1.5 h-full"
                   >
                     <span className="text-[10px] font-semibold text-white/50 tabular-nums h-4">
-                      {count > 0 ? count : ""}
+                      {count > 0 ? mask(count) : ""}
                     </span>
                     <div className="w-full flex-1 flex flex-col justify-end">
                       <div
@@ -2390,7 +2413,7 @@ const Dashboard = () => {
                         />
                       </div>
                       <span className="text-[11px] font-semibold text-white/80 tabular-nums w-14 text-right shrink-0">
-                        {gbp(rev)}
+                        {mask(gbp(rev))}
                       </span>
                     </div>
                   </div>
@@ -2445,7 +2468,7 @@ const Dashboard = () => {
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-lg font-semibold text-white tabular-nums">
-                    {returningCount + newCustCount}
+                    {mask(returningCount + newCustCount)}
                   </span>
                   <span
                     className={`text-[9px] ${muted} uppercase tracking-wide`}
@@ -2476,7 +2499,7 @@ const Dashboard = () => {
                       {r.label}
                     </span>
                     <span className="text-[13px] font-semibold text-white/80 tabular-nums">
-                      {r.count}
+                      {mask(r.count)}
                     </span>
                   </div>
                 ))}
@@ -2484,11 +2507,7 @@ const Dashboard = () => {
                   <div className="pt-2 border-t border-white/[0.06]">
                     <p className={`text-[11px] ${muted}`}>
                       <span className="text-emerald-400 font-semibold">
-                        {(
-                          (returningCount / (returningCount + newCustCount)) *
-                          100
-                        ).toFixed(0)}
-                        %
+                        {mask(`${((returningCount / (returningCount + newCustCount)) * 100).toFixed(0)}%`)}
                       </span>{" "}
                       retention rate
                     </p>
@@ -2520,7 +2539,7 @@ const Dashboard = () => {
               ].map((s) => (
                 <span key={s.label} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${s.cls}`}>
                   <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
-                  {s.count} {s.label}
+                  {mask(s.count)} {s.label}
                 </span>
               ))}
               <button
@@ -2535,17 +2554,17 @@ const Dashboard = () => {
           {/* KPI strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-white/[0.05] border-b border-white/[0.05]">
             {[
-              { label: "Total staff", value: workers.length, sub: `${activeWorkers.length} active` },
+              { label: "Total staff", value: workers.length, sub: `${mask(activeWorkers.length)} active` },
               { label: "On job now", value: onJobWorkers.length, sub: "live tracking", accent: onJobWorkers.length > 0 },
               { label: "Jobs completed", value: totalJobsDone.toLocaleString("en-GB"), sub: "all time" },
-              { label: "Total paid out", value: gbp(totalWorkerEarnings), sub: `avg ${avgWorkerRating.toFixed(1)} ★` },
+              { label: "Total paid out", value: gbp(totalWorkerEarnings), sub: `avg ${mask(avgWorkerRating.toFixed(1))} ★` },
             ].map((k) => (
               <div key={k.label} className="px-5 py-3.5">
                 <p className={eyebrow}>{k.label}</p>
                 <p className={`text-xl font-semibold tabular-nums mt-1 ${k.accent ? "text-emerald-400" : "text-white"}`}>
-                  {loading ? "—" : k.value}
+                  {loading ? "—" : mask(k.value)}
                 </p>
-                <p className={`text-[10px] ${muted} mt-0.5`}>{k.sub}</p>
+                <p className={`text-[10px] ${muted} mt-0.5`}>{mask(k.sub)}</p>
               </div>
             ))}
           </div>
@@ -2606,14 +2625,14 @@ const Dashboard = () => {
 
                     {/* Jobs */}
                     <div className="text-right shrink-0 w-12 hidden sm:block">
-                      <p className="text-[13px] font-semibold text-white/80 tabular-nums">{w.jobsCompleted}</p>
+                      <p className="text-[13px] font-semibold text-white/80 tabular-nums">{mask(w.jobsCompleted)}</p>
                       <p className={`text-[10px] ${dimmed}`}>jobs</p>
                     </div>
 
                     {/* Rating */}
                     <div className="text-right shrink-0 w-14 hidden md:block">
                       <p className="text-[13px] font-semibold text-amber-400 tabular-nums">
-                        ★ {Number(w.rating || 0).toFixed(1)}
+                        ★ {mask(Number(w.rating || 0).toFixed(1))}
                       </p>
                       <p className={`text-[10px] ${dimmed}`}>rating</p>
                     </div>
@@ -2621,7 +2640,7 @@ const Dashboard = () => {
                     {/* Earned */}
                     <div className="text-right shrink-0 w-16 hidden lg:block">
                       <p className="text-[13px] font-semibold text-white/80 tabular-nums">
-                        {gbp(w.wallet?.totalEarned || 0)}
+                        {mask(gbp(w.wallet?.totalEarned || 0))}
                       </p>
                       <p className={`text-[10px] ${dimmed}`}>earned</p>
                     </div>
@@ -2637,7 +2656,7 @@ const Dashboard = () => {
                 onClick={() => navigate("/admin/workers")}
                 className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors inline-flex items-center gap-1"
               >
-                View all {workers.length} workers <ChevronRight size={12} />
+                View all {mask(workers.length)} workers <ChevronRight size={12} />
               </button>
             </div>
           )}
