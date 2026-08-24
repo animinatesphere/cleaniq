@@ -90,14 +90,28 @@ const EmptyState = ({ label, onBook }) => (
 const AuthGate = ({ navigation }) => (
   <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB", alignItems: "center", justifyContent: "center", padding: 32 }}>
     <ClipboardList size={48} color={C.textMuted} strokeWidth={1.2} />
-    <Text style={{ fontSize: 20, fontWeight: "800", color: "#111827", marginTop: 16, textAlign: "center" }}>Sign in to view bookings</Text>
-    <Text style={{ fontSize: 13, color: C.textMuted, marginTop: 8, textAlign: "center", lineHeight: 20 }}>Log in or create a free account to manage your cleaning bookings.</Text>
+    <Text style={{ fontSize: 20, fontWeight: "800", color: "#111827", marginTop: 16, textAlign: "center" }}>Your bookings</Text>
+    <Text style={{ fontSize: 13, color: C.textMuted, marginTop: 8, textAlign: "center", lineHeight: 20 }}>
+      Book a clean now — no account needed.{"\n"}Sign in to view and manage past bookings.
+    </Text>
+
+    {/* Primary: start booking without login */}
     <TouchableOpacity
-      onPress={() => navigation.navigate("Login")}
-      style={{ marginTop: 28, backgroundColor: C.primary, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 40 }}
+      onPress={() => navigation.navigate("Booking")}
+      style={{ marginTop: 28, backgroundColor: C.primary, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 40, flexDirection: "row", alignItems: "center", gap: 8 }}
       activeOpacity={0.85}
     >
-      <Text style={{ color: "#fff", fontWeight: "800", fontSize: 15 }}>Log In / Sign Up</Text>
+      <Plus size={18} color="#fff" strokeWidth={2.5} />
+      <Text style={{ color: "#fff", fontWeight: "800", fontSize: 15 }}>Book a Clean</Text>
+    </TouchableOpacity>
+
+    {/* Secondary: login to see past bookings */}
+    <TouchableOpacity
+      onPress={() => navigation.navigate("Login")}
+      style={{ marginTop: 14, borderWidth: 1.5, borderColor: C.primary, borderRadius: 999, paddingVertical: 12, paddingHorizontal: 40 }}
+      activeOpacity={0.85}
+    >
+      <Text style={{ color: C.primary, fontWeight: "800", fontSize: 14 }}>Log In to View My Bookings</Text>
     </TouchableOpacity>
   </SafeAreaView>
 );
