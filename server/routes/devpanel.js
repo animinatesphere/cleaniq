@@ -11,6 +11,10 @@ const Admin    = require("../models/Admin");
 const Customer = require("../models/Customer");
 const Worker   = require("../models/Worker");
 const Booking  = require("../models/Booking");
+const Quote    = require("../models/Quote");
+const Lead     = require("../models/Lead");
+const EmailLog = require("../models/EmailLog");
+const SmsLog   = require("../models/SmsLog");
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 const DEV_SECRET = process.env.DEV_PANEL_SECRET || "cleaniq-dev-2025";
@@ -363,6 +367,115 @@ router.get("/database", requireDev, async (req, res) => {
     let dbStats = null;
     try { dbStats = await db.stats(); } catch {}
     res.json({ collections: counts, stats: dbStats });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// QUOTES
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/quotes", requireDev, async (req, res) => {
+  try {
+    const page   = parseInt(req.query.page   || "1",  10);
+    const limit  = Math.min(parseInt(req.query.limit || "30", 10), 100);
+    const status = req.query.status || "";
+    const q      = req.query.q     || "";
+    const query  = {};
+    if (status) query.status = status;
+    if (q) query.$or = [
+      { quoteId: { $regex: q, $options: "i" } },
+      { "customer.name":  { $regex: q, $options: "i" } },
+      { "customer.email": { $regex: q, $options: "i" } },
+    ];
+    const [quotes, total] = await Promise.all([
+      Quote.find(query).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit)
+        .select("quoteId status grandTotal customer createdAt"),
+      Quote.countDocuments(query),
+    ]);
+    res.json({ quotes, total, page, pages: Math.ceil(total / limit) });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// EMAIL LOGS
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/email-logs", requireDev, async (req, res) => {
+  try {
+    const page  = parseInt(req.query.page  || "1",  10);
+    const limit = Math.min(parseInt(req.query.limit || "40", 10), 200);
+    const q     = req.query.q || "";
+    const query = q
+      ? { $or: [{ to: { $regex: q, $options: "i" } }, { subject: { $regex: q, $options: "i" } }] }
+      : {};
+    const [logs, total] = await Promise.all([
+      EmailLog.find(query).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit)
+        .select("to subject status error createdAt bookingId"),
+      EmailLog.countDocuments(query),
+    ]);
+    res.json({ logs, total, page, pages: Math.ceil(total / limit) });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SMS LOGS
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/sms-logs", requireDev, async (req, res) => {
+  try {
+    const page  = parseInt(req.query.page  || "1",  10);
+    const limit = Math.min(parseInt(req.query.limit || "40", 10), 200);
+    const [logs, total] = await Promise.all([
+      SmsLog.find({}).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit),
+      SmsLog.countDocuments(),
+    ]);
+    res.json({ logs, total, page, pages: Math.ceil(total / limit) });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// FINANCE OVERVIEW
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/finance", requireDev, async (req, res) => {
+  try {
+    const [byStatus, monthly, topServices] = await Promise.all([
+      Booking.aggregate([
+        { $group: { _id: "$status", count: { $sum: 1 }, revenue: { $sum: "$payment.amount" } } },
+        { $sort: { revenue: -1 } },
+      ]),
+      Booking.aggregate([
+        { $match: { status: "Completed", "payment.amount": { $gt: 0 } } },
+        { $group: { _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } }, revenue: { $sum: "$payment.amount" }, count: { $sum: 1 } } },
+        { $sort: { _id: -1 } },
+        { $limit: 12 },
+      ]),
+      Booking.aggregate([
+        { $match: { status: "Completed" } },
+        { $group: { _id: "$service.name", count: { $sum: 1 }, revenue: { $sum: "$payment.amount" } } },
+        { $sort: { revenue: -1 } },
+        { $limit: 8 },
+      ]),
+    ]);
+    res.json({ byStatus, monthly, topServices });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GLOBAL SEARCH
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/search", requireDev, async (req, res) => {
+  try {
+    const q = (req.query.q || "").trim();
+    if (q.length < 2) return res.json({ bookings: [], customers: [], workers: [], quotes: [] });
+    const re = { $regex: q, $options: "i" };
+    const [bookings, customers, workers, quotes] = await Promise.all([
+      Booking.find({ $or: [{ bookingId: re }, { "customer.name": re }, { "customer.email": re }] })
+        .limit(6).select("bookingId status customer schedule payment"),
+      Customer.find({ $or: [{ name: re }, { email: re }, { phone: re }] })
+        .limit(6).select("name email phone createdAt"),
+      Worker.find({ $or: [{ name: re }, { email: re }] })
+        .limit(6).select("name email status rating"),
+      Quote.find({ $or: [{ quoteId: re }, { "customer.name": re }, { "customer.email": re }] })
+        .limit(6).select("quoteId status grandTotal customer createdAt"),
+    ]);
+    res.json({ bookings, customers, workers, quotes });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

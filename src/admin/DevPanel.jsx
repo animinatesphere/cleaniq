@@ -4,6 +4,7 @@ import {
   ChevronUp, Trash2, CheckCircle2, Wifi, WifiOff, Shield, LogOut,
   Users, Briefcase, LayoutGrid, UserPlus, Eye, EyeOff, KeyRound,
   Search, X, Plus, BarChart3, Calendar, Database, Settings,
+  Mail, FileText, DollarSign, Zap, MessageSquare, TrendingUp,
 } from "lucide-react";
 import { install, getLog, clearLog, subscribe } from "../utils/fetchLogger";
 
@@ -152,6 +153,12 @@ const NAV = [
   { id: "customers", label: "Customers",      icon: Users },
   { id: "workers",   label: "Workers",        icon: Briefcase },
   { id: "bookings",  label: "Bookings",       icon: Calendar },
+  { id: "quotes",    label: "Quotes",         icon: FileText },
+  { id: "finance",   label: "Finance",        icon: DollarSign },
+  { id: "emails",    label: "Email Logs",     icon: Mail },
+  { id: "sms",       label: "SMS Logs",       icon: MessageSquare },
+  { id: "search",    label: "Global Search",  icon: Search },
+  { id: "feed",      label: "Live Feed",      icon: Zap },
   { id: "database",  label: "Database",       icon: Database },
   { id: "server",    label: "Server Control", icon: Shield },
 ];
@@ -181,6 +188,16 @@ function DevPanelMain({ token, onLogout }) {
   const [bkFilter,     setBkFilter]     = useState(""); // status filter
   const [bkSearch,     setBkSearch]     = useState("");
   const [dbInfo,       setDbInfo]       = useState(null);
+  const [quotes,       setQuotes]       = useState({ data: [], total: 0, page: 1, pages: 1 });
+  const [qtFilter,     setQtFilter]     = useState("");
+  const [emails,       setEmails]       = useState({ data: [], total: 0, page: 1, pages: 1 });
+  const [emailSearch,  setEmailSearch]  = useState("");
+  const [smsLogs,      setSmsLogs]      = useState({ data: [], total: 0, page: 1, pages: 1 });
+  const [finance,      setFinance]      = useState(null);
+  const [searchQuery,  setSearchQuery]  = useState("");
+  const [searchResults,setSearchResults]= useState(null);
+  const [searching,    setSearching]    = useState(false);
+  const [feed,         setFeed]         = useState([]); // combined live events
 
   const headers = { Authorization: `Bearer ${token}` };
   const toggle  = (id) => setExpanded((p) => p === id ? null : id);
@@ -217,8 +234,16 @@ function DevPanelMain({ token, onLogout }) {
             if (l.startsWith("data: ")) {
               try {
                 const d = JSON.parse(l.slice(6));
-                if (evt === "server_error") setServerErrors((p) => [d, ...p].slice(0,500));
-                if (evt === "request")      setBackendReqs((p)  => [d, ...p].slice(0,1000));
+                if (evt === "server_error") {
+                  setServerErrors((p) => [d, ...p].slice(0,500));
+                  setFeed((p) => [{ ...d, feedType: "error", ts: d.timestamp || new Date().toISOString() }, ...p].slice(0,200));
+                }
+                if (evt === "request") {
+                  setBackendReqs((p) => [d, ...p].slice(0,1000));
+                  if (d.status >= 400 || d.duration > 2000) {
+                    setFeed((p) => [{ ...d, feedType: "request", ts: d.timestamp || new Date().toISOString() }, ...p].slice(0,200));
+                  }
+                }
                 if (evt === "errors_cleared") setServerErrors([]);
               } catch {}
               evt = "message";
@@ -256,6 +281,10 @@ function DevPanelMain({ token, onLogout }) {
   // Load section-specific data on page change
   useEffect(() => {
     if (page === "bookings") fetchBookings(1, bkFilter, bkSearch);
+    if (page === "quotes")   fetchQuotes(1, qtFilter);
+    if (page === "emails")   fetchEmails(1, emailSearch);
+    if (page === "sms")      fetchSms(1);
+    if (page === "finance")  fetchFinance();
     if (page === "database") fetchDatabase();
   }, [page]);
 
@@ -342,6 +371,44 @@ function DevPanelMain({ token, onLogout }) {
       const r = await fetch(`${API}/devpanel/database`, { headers });
       if (r.ok) setDbInfo(await r.json());
     } catch {}
+  };
+
+  const fetchQuotes = async (p = 1, status = qtFilter) => {
+    try {
+      const r = await fetch(`${API}/devpanel/quotes?page=${p}&limit=30&status=${encodeURIComponent(status)}`, { headers });
+      if (r.ok) { const d = await r.json(); setQuotes({ data: d.quotes, total: d.total, page: d.page, pages: d.pages }); }
+    } catch {}
+  };
+
+  const fetchEmails = async (p = 1, q = emailSearch) => {
+    try {
+      const r = await fetch(`${API}/devpanel/email-logs?page=${p}&limit=40&q=${encodeURIComponent(q)}`, { headers });
+      if (r.ok) { const d = await r.json(); setEmails({ data: d.logs, total: d.total, page: d.page, pages: d.pages }); }
+    } catch {}
+  };
+
+  const fetchSms = async (p = 1) => {
+    try {
+      const r = await fetch(`${API}/devpanel/sms-logs?page=${p}&limit=40`, { headers });
+      if (r.ok) { const d = await r.json(); setSmsLogs({ data: d.logs, total: d.total, page: d.page, pages: d.pages }); }
+    } catch {}
+  };
+
+  const fetchFinance = async () => {
+    try {
+      const r = await fetch(`${API}/devpanel/finance`, { headers });
+      if (r.ok) setFinance(await r.json());
+    } catch {}
+  };
+
+  const globalSearch = async (q) => {
+    if (!q || q.length < 2) { setSearchResults(null); return; }
+    setSearching(true);
+    try {
+      const r = await fetch(`${API}/devpanel/search?q=${encodeURIComponent(q)}`, { headers });
+      if (r.ok) setSearchResults(await r.json());
+    } catch {}
+    setSearching(false);
   };
 
   // ── Filtered frontend log ──────────────────────────────────────────
@@ -851,6 +918,325 @@ function DevPanelMain({ token, onLogout }) {
                     className="px-3 py-1.5 rounded-lg border border-white/8 text-[9px] text-white/35 hover:text-white/60 disabled:opacity-25">Next →</button>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ══ QUOTES ══════════════════════════════════════════ */}
+          {page === "quotes" && (
+            <div>
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                {["","Draft","Sent","Accepted","Rejected","Expired"].map((s) => (
+                  <button key={s} onClick={() => { setQtFilter(s); fetchQuotes(1, s); }}
+                    className={`px-2.5 py-1 rounded-lg text-[9px] font-bold border transition-all ${qtFilter===s?"bg-emerald-500/20 border-emerald-500/40 text-emerald-400":"bg-white/4 border-white/8 text-white/30 hover:text-white/60"}`}>
+                    {s || "All"}
+                  </button>
+                ))}
+                <span className="ml-auto text-[9px] text-white/25">{quotes.total} total</span>
+              </div>
+              <div className="space-y-1.5">
+                {quotes.data.map((q) => (
+                  <div key={q._id} className="flex items-center gap-3 px-4 py-3 rounded-xl border border-white/5 bg-white/[0.015]">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-[11px] font-black text-white">{q.quoteId || q._id?.toString().slice(-8)}</span>
+                        <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${
+                          q.status==="Accepted"?"bg-emerald-500/15 text-emerald-400 border-emerald-500/25":
+                          q.status==="Rejected"?"bg-rose-500/15 text-rose-400 border-rose-500/25":
+                          q.status==="Sent"?"bg-sky-500/15 text-sky-400 border-sky-500/25":
+                          "bg-white/8 text-white/40 border-white/10"}`}>
+                          {q.status}
+                        </span>
+                      </div>
+                      <p className="text-[9px] text-white/35">{q.customer?.name} · {q.customer?.email}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[11px] font-black text-emerald-400">£{Number(q.grandTotal||0).toFixed(2)}</p>
+                      <p className="text-[9px] text-white/25">{fmtDate(q.createdAt)}</p>
+                    </div>
+                  </div>
+                ))}
+                {quotes.data.length === 0 && <div className="py-16 text-center text-white/15 text-[10px]"><FileText size={22} className="mx-auto mb-3 opacity-20"/><p>No quotes found</p></div>}
+              </div>
+              {quotes.pages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <button onClick={() => fetchQuotes(quotes.page-1,qtFilter)} disabled={quotes.page<=1} className="px-3 py-1.5 rounded-lg border border-white/8 text-[9px] text-white/35 hover:text-white/60 disabled:opacity-25">← Prev</button>
+                  <span className="text-[9px] text-white/25">{quotes.page} / {quotes.pages}</span>
+                  <button onClick={() => fetchQuotes(quotes.page+1,qtFilter)} disabled={quotes.page>=quotes.pages} className="px-3 py-1.5 rounded-lg border border-white/8 text-[9px] text-white/35 hover:text-white/60 disabled:opacity-25">Next →</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══ FINANCE ══════════════════════════════════════════ */}
+          {page === "finance" && (
+            <div className="space-y-5">
+              <div className="flex justify-end">
+                <button onClick={fetchFinance} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/8 bg-white/4 text-[9px] text-white/40 hover:text-white/70 font-bold transition-all"><RefreshCw size={10}/> Refresh</button>
+              </div>
+              {!finance
+                ? <div className="py-16 text-center text-white/15 text-[10px]"><DollarSign size={24} className="mx-auto mb-3 opacity-20"/><p>Loading…</p></div>
+                : <>
+                    {/* Status breakdown */}
+                    <div>
+                      <p className="text-[9px] font-bold text-white/25 uppercase tracking-widest mb-3">Revenue by Booking Status</p>
+                      <div className="space-y-2">
+                        {finance.byStatus.map((s) => {
+                          const max = Math.max(...finance.byStatus.map((x) => x.revenue || 0), 1);
+                          return (
+                            <div key={s._id} className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/5 bg-white/[0.015]">
+                              <span className="text-[10px] text-white/50 w-24 shrink-0 font-bold">{s._id || "Unknown"}</span>
+                              <div className="flex-1 h-1.5 rounded-full bg-white/5">
+                                <div className={`h-full rounded-full ${s._id==="Completed"?"bg-emerald-500":s._id==="Cancelled"?"bg-rose-500":"bg-amber-500"}`} style={{width:`${Math.min(100,((s.revenue||0)/max)*100)}%`}}/>
+                              </div>
+                              <span className="text-[10px] font-black text-emerald-400 tabular-nums w-20 text-right shrink-0">{gbp(s.revenue)}</span>
+                              <span className="text-[9px] text-white/25 tabular-nums w-12 text-right shrink-0">{s.count} bkgs</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Monthly revenue */}
+                    <div>
+                      <p className="text-[9px] font-bold text-white/25 uppercase tracking-widest mb-3">Monthly Revenue (Completed)</p>
+                      <div className="space-y-1.5">
+                        {[...finance.monthly].reverse().map((m) => {
+                          const max = Math.max(...finance.monthly.map((x) => x.revenue||0), 1);
+                          return (
+                            <div key={m._id} className="flex items-center gap-3 px-4 py-2 rounded-xl border border-white/5">
+                              <span className="text-[10px] text-white/40 w-16 shrink-0 tabular-nums">{m._id}</span>
+                              <div className="flex-1 h-1.5 rounded-full bg-white/5">
+                                <div className="h-full rounded-full bg-emerald-500/70" style={{width:`${Math.min(100,((m.revenue||0)/max)*100)}%`}}/>
+                              </div>
+                              <span className="text-[10px] font-black text-emerald-400 tabular-nums w-24 text-right shrink-0">{gbp(m.revenue)}</span>
+                              <span className="text-[9px] text-white/25 w-12 text-right shrink-0">{m.count} jobs</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Top services */}
+                    {finance.topServices?.length > 0 && (
+                      <div>
+                        <p className="text-[9px] font-bold text-white/25 uppercase tracking-widest mb-3">Top Services by Revenue</p>
+                        <div className="space-y-1.5">
+                          {finance.topServices.map((s, i) => (
+                            <div key={s._id||i} className="flex items-center gap-3 px-4 py-2 rounded-xl border border-white/5">
+                              <span className="text-[9px] text-white/20 w-4 shrink-0 tabular-nums">{i+1}</span>
+                              <span className="text-[10px] text-white/60 flex-1">{s._id || "—"}</span>
+                              <span className="text-[10px] font-black text-emerald-400 tabular-nums">{gbp(s.revenue)}</span>
+                              <span className="text-[9px] text-white/25 w-12 text-right">{s.count} jobs</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+              }
+            </div>
+          )}
+
+          {/* ══ EMAIL LOGS ═══════════════════════════════════════ */}
+          {page === "emails" && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="relative flex-1 max-w-xs">
+                  <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/25"/>
+                  <input value={emailSearch} onChange={(e) => { setEmailSearch(e.target.value); fetchEmails(1, e.target.value); }}
+                    placeholder="Search recipient or subject…"
+                    className="w-full pl-7 pr-3 py-1.5 rounded-lg border border-white/8 bg-white/4 text-[10px] text-white placeholder:text-white/18 focus:outline-none focus:border-emerald-500/40"/>
+                </div>
+                <span className="ml-auto text-[9px] text-white/25">{emails.total} total</span>
+              </div>
+              <div className="space-y-1">
+                {emails.data.map((e) => (
+                  <div key={e._id} className={`flex items-start gap-3 px-4 py-2.5 rounded-xl border ${e.status==="failed"?"border-rose-500/20 bg-rose-500/[0.03]":"border-white/5 hover:bg-white/[0.02]"} transition-colors`}>
+                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${e.status==="sent"||e.status==="delivered"?"bg-emerald-400":e.status==="failed"?"bg-rose-400":"bg-white/25"}`}/>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-bold text-white/70 truncate">{e.subject || "No subject"}</p>
+                      <p className="text-[9px] text-white/30">{e.to}</p>
+                      {e.error && <p className="text-[9px] text-rose-400 mt-0.5">{e.error}</p>}
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${e.status==="sent"||e.status==="delivered"?"bg-emerald-500/15 text-emerald-400 border-emerald-500/25":e.status==="failed"?"bg-rose-500/15 text-rose-400 border-rose-500/25":"bg-white/8 text-white/30 border-white/10"}`}>{e.status||"—"}</span>
+                      <p className="text-[9px] text-white/20 mt-0.5">{fmtTime(e.createdAt)}</p>
+                    </div>
+                  </div>
+                ))}
+                {emails.data.length === 0 && <div className="py-16 text-center text-white/15 text-[10px]"><Mail size={22} className="mx-auto mb-3 opacity-20"/><p>No email logs found</p></div>}
+              </div>
+              {emails.pages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <button onClick={() => fetchEmails(emails.page-1)} disabled={emails.page<=1} className="px-3 py-1.5 rounded-lg border border-white/8 text-[9px] text-white/35 disabled:opacity-25">← Prev</button>
+                  <span className="text-[9px] text-white/25">{emails.page} / {emails.pages}</span>
+                  <button onClick={() => fetchEmails(emails.page+1)} disabled={emails.page>=emails.pages} className="px-3 py-1.5 rounded-lg border border-white/8 text-[9px] text-white/35 disabled:opacity-25">Next →</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══ SMS LOGS ══════════════════════════════════════════ */}
+          {page === "sms" && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-[10px] text-white/25">{smsLogs.total} SMS sent total</p>
+              </div>
+              <div className="space-y-1">
+                {smsLogs.data.map((s) => (
+                  <div key={s._id} className="flex items-start gap-3 px-4 py-2.5 rounded-xl border border-white/5 hover:bg-white/[0.02] transition-colors">
+                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${s.status==="sent"||s.status==="delivered"?"bg-emerald-400":s.status==="failed"?"bg-rose-400":"bg-white/25"}`}/>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-bold text-white/70">{s.to || s.phone || "—"}</p>
+                      <p className="text-[9px] text-white/35 truncate">{s.message || s.body || "—"}</p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${s.status==="sent"||s.status==="delivered"?"bg-emerald-500/15 text-emerald-400 border-emerald-500/25":s.status==="failed"?"bg-rose-500/15 text-rose-400 border-rose-500/25":"bg-white/8 text-white/30 border-white/10"}`}>{s.status||"—"}</span>
+                      <p className="text-[9px] text-white/20 mt-0.5">{fmtTime(s.createdAt)}</p>
+                    </div>
+                  </div>
+                ))}
+                {smsLogs.data.length === 0 && <div className="py-16 text-center text-white/15 text-[10px]"><MessageSquare size={22} className="mx-auto mb-3 opacity-20"/><p>No SMS logs found</p></div>}
+              </div>
+              {smsLogs.pages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <button onClick={() => fetchSms(smsLogs.page-1)} disabled={smsLogs.page<=1} className="px-3 py-1.5 rounded-lg border border-white/8 text-[9px] text-white/35 disabled:opacity-25">← Prev</button>
+                  <span className="text-[9px] text-white/25">{smsLogs.page} / {smsLogs.pages}</span>
+                  <button onClick={() => fetchSms(smsLogs.page+1)} disabled={smsLogs.page>=smsLogs.pages} className="px-3 py-1.5 rounded-lg border border-white/8 text-[9px] text-white/35 disabled:opacity-25">Next →</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══ GLOBAL SEARCH ════════════════════════════════════ */}
+          {page === "search" && (
+            <div>
+              <div className="relative mb-6">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30"/>
+                <input
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); globalSearch(e.target.value); }}
+                  placeholder="Search across bookings, customers, workers, quotes…"
+                  autoFocus
+                  className="w-full pl-11 pr-4 py-4 rounded-2xl border border-white/10 bg-white/[0.03] text-[13px] text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/40 transition-all"
+                />
+                {searching && <RefreshCw size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/25 animate-spin"/>}
+              </div>
+
+              {searchResults && (
+                <div className="space-y-5">
+                  {/* Bookings */}
+                  {searchResults.bookings?.length > 0 && (
+                    <div>
+                      <p className="text-[9px] font-bold text-white/25 uppercase tracking-widest mb-2">Bookings ({searchResults.bookings.length})</p>
+                      <div className="space-y-1">
+                        {searchResults.bookings.map((b) => (
+                          <div key={b._id} className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/5 bg-white/[0.015]">
+                            <span className="text-[10px] font-black text-white">{b.bookingId}</span>
+                            <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${b.status==="Completed"?"bg-emerald-500/15 text-emerald-400 border-emerald-500/25":b.status==="Cancelled"?"bg-rose-500/15 text-rose-400 border-rose-500/25":"bg-amber-500/15 text-amber-400 border-amber-500/25"}`}>{b.status}</span>
+                            <span className="text-[9px] text-white/40 flex-1">{b.customer?.name} · {b.customer?.email}</span>
+                            {b.payment?.amount > 0 && <span className="text-[10px] font-black text-emerald-400">£{Number(b.payment.amount).toFixed(2)}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {/* Customers */}
+                  {searchResults.customers?.length > 0 && (
+                    <div>
+                      <p className="text-[9px] font-bold text-white/25 uppercase tracking-widest mb-2">Customers ({searchResults.customers.length})</p>
+                      <div className="space-y-1">
+                        {searchResults.customers.map((c) => (
+                          <div key={c._id} className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/5 bg-white/[0.015]">
+                            <div className="w-6 h-6 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0"><span className="text-[9px] font-black text-sky-400">{(c.name||"?")[0]}</span></div>
+                            <span className="text-[10px] font-bold text-white/80">{c.name}</span>
+                            <span className="text-[9px] text-white/35 flex-1">{c.email}</span>
+                            {c.phone && <span className="text-[9px] text-white/25">{c.phone}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {/* Workers */}
+                  {searchResults.workers?.length > 0 && (
+                    <div>
+                      <p className="text-[9px] font-bold text-white/25 uppercase tracking-widest mb-2">Workers ({searchResults.workers.length})</p>
+                      <div className="space-y-1">
+                        {searchResults.workers.map((w) => (
+                          <div key={w._id} className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/5 bg-white/[0.015]">
+                            <div className="w-6 h-6 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0"><span className="text-[9px] font-black text-purple-400">{(w.name||"?")[0]}</span></div>
+                            <span className="text-[10px] font-bold text-white/80">{w.name}</span>
+                            <span className="text-[9px] text-white/35 flex-1">{w.email}</span>
+                            {w.status && <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-white/8 text-white/40">{w.status}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {/* Quotes */}
+                  {searchResults.quotes?.length > 0 && (
+                    <div>
+                      <p className="text-[9px] font-bold text-white/25 uppercase tracking-widest mb-2">Quotes ({searchResults.quotes.length})</p>
+                      <div className="space-y-1">
+                        {searchResults.quotes.map((q) => (
+                          <div key={q._id} className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/5 bg-white/[0.015]">
+                            <span className="text-[10px] font-black text-white">{q.quoteId}</span>
+                            <span className="text-[9px] text-white/40 flex-1">{q.customer?.name}</span>
+                            <span className="text-[10px] font-black text-emerald-400">£{Number(q.grandTotal||0).toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {!searchResults.bookings?.length && !searchResults.customers?.length && !searchResults.workers?.length && !searchResults.quotes?.length && (
+                    <div className="py-12 text-center text-white/15 text-[10px]"><Search size={22} className="mx-auto mb-3 opacity-20"/><p>No results for "{searchQuery}"</p></div>
+                  )}
+                </div>
+              )}
+
+              {!searchResults && (
+                <div className="py-16 text-center text-white/10 text-[10px]">
+                  <Search size={32} className="mx-auto mb-3 opacity-20"/>
+                  <p>Type to search across all data</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══ LIVE FEED ════════════════════════════════════════ */}
+          {page === "feed" && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${sseStatus==="connected"?"bg-emerald-400 animate-pulse":"bg-white/20"}`}/>
+                  <p className="text-[10px] text-white/35">
+                    {sseStatus==="connected" ? "Live — showing errors and slow/failed requests in real time" : "Stream offline — connect to see live events"}
+                  </p>
+                </div>
+                {feed.length > 0 && <button onClick={() => setFeed([])} className="text-[9px] text-white/25 hover:text-rose-400 transition-colors flex items-center gap-1"><Trash2 size={10}/> Clear</button>}
+              </div>
+              {feed.length === 0
+                ? <div className="py-20 text-center"><Zap size={28} className="mx-auto text-white/10 mb-3"/><p className="text-[11px] text-white/15">Watching for errors and slow requests…</p><p className="text-[10px] text-white/10 mt-1">Events appear here automatically when they occur</p></div>
+                : <div className="space-y-2">
+                    {feed.map((e, i) => (
+                      <div key={e.id||i} className={`rounded-xl border p-3 ${e.feedType==="error"
+                        ? e.level==="fatal"?"border-rose-600/30 bg-rose-600/5":"border-rose-500/20 bg-rose-500/[0.03]"
+                        : e.status>=500?"border-rose-500/20 bg-rose-500/[0.03]":"border-amber-500/20 bg-amber-500/[0.03]"}`}>
+                        <div className="flex items-start gap-2.5">
+                          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border shrink-0 mt-0.5 uppercase ${e.feedType==="error"?levelCls(e.level):"bg-amber-500/15 text-amber-400 border-amber-500/30"}`}>
+                            {e.feedType==="error" ? (e.level||"error") : `${e.status} slow`}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[9px] text-white/20 mb-0.5">{fmtTime(e.ts)} · {e.feedType==="error" ? e.type : `${e.method} ${e.url}`}</p>
+                            <p className="text-[10px] text-white/65 break-all leading-relaxed">
+                              {e.feedType==="error" ? e.message : `${e.status} in ${fmtMs(e.duration)}`}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+              }
             </div>
           )}
 
