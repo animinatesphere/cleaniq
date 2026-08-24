@@ -532,7 +532,7 @@ const BookingScreen = ({ navigation, route }) => {
                     <Text style={styles.svcSub}>{s.sub}</Text>
                   </View>
                   <View style={styles.svcRight}>
-                    <Text style={[styles.svcRate, sel && { color: s.color }]}>£{s.rate}/hr</Text>
+                    <Text style={[styles.svcRate, sel && { color: s.color }]}>£{(rates[s.id] ?? s.rate).toFixed(2)}/hr</Text>
                     {sel
                       ? <View style={[styles.svcCheckBox, { backgroundColor: s.color }]}><Check size={11} color="#fff" strokeWidth={3} /></View>
                       : <View style={styles.svcCheckEmpty} />
