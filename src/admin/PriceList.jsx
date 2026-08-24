@@ -20,6 +20,16 @@ const CATEGORY_ORDER = ["Base", "Rooms", "Extras"];
 const CATEGORY_LABELS = { Base: "Core Services", Rooms: "Room Rates", Extras: "Add-ons & Extras" };
 const unitLabel = (type) => type === "hourly" ? "/hr" : type === "per_room" ? "/room" : "";
 
+const DEFAULT_ROOMS = [
+  { _id: "dr_bedroom",      name: "Bedroom",        rate: 0 },
+  { _id: "dr_bathroom",     name: "Bathroom",        rate: 0 },
+  { _id: "dr_kitchen",      name: "Kitchen",         rate: 0 },
+  { _id: "dr_reception",    name: "Reception Room",  rate: 0 },
+  { _id: "dr_toilet",       name: "Toilet / WC",     rate: 0 },
+  { _id: "dr_conservatory", name: "Conservatory",    rate: 0 },
+  { _id: "dr_utility",      name: "Utility Room",    rate: 0 },
+];
+
 export default function PriceList() {
   const [catalogue, setCatalogue]   = useState([]);      // all services from API
   const [loading, setLoading]       = useState(true);
@@ -32,6 +42,7 @@ export default function PriceList() {
   const [search, setSearch]         = useState("");
   const [tab, setTab]               = useState("edit"); // edit | preview
   const [roomCounts, setRoomCounts] = useState({});    // { [serviceId]: count }
+  const [roomPrices, setRoomPrices] = useState({});   // { [serviceId]: price string } for default rooms
 
   const setR = (k) => (e) => setRecipient((p) => ({ ...p, [k]: e.target.value }));
 
@@ -52,7 +63,7 @@ export default function PriceList() {
           if (!cat) {
             cat = "Extras";
             if (baseN.some((b) => clean(b) === clean(s.name))) cat = "Base";
-            else if (roomN.some((r) => clean(r) === clean(s.name))) cat = "Rooms";
+            else if (roomN.some((r) => clean(s.name).includes(clean(r)))) cat = "Rooms";
           }
           return { ...s, category: cat };
         });
@@ -96,7 +107,10 @@ export default function PriceList() {
     setListItems((p) => [...p, { id: `c_${Date.now()}`, name: "", price: "", unit: "flat", description: "", category: "custom" }]);
 
   // ── Room counter helpers ───────────────────────────────────────────────────
-  const roomCatalogueItems = useMemo(() => catalogue.filter((s) => s.category === "Rooms"), [catalogue]);
+  const roomCatalogueItems = useMemo(() => {
+    const fromCatalogue = catalogue.filter((s) => s.category === "Rooms");
+    return fromCatalogue.length > 0 ? fromCatalogue : DEFAULT_ROOMS;
+  }, [catalogue]);
   const stepRoom = (id, delta) =>
     setRoomCounts((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + delta) }));
   const hasActiveRooms = roomCatalogueItems.some((s) => (roomCounts[s._id] || 0) > 0);
@@ -128,7 +142,7 @@ export default function PriceList() {
       rows.push({ type: "heading", label: CATEGORY_LABELS["Rooms"] });
       activeRooms.forEach((s) => {
         const count = roomCounts[s._id];
-        const rateEach = Number(s.rate || 0);
+        const rateEach = Number(s.rate || roomPrices[s._id] || 0);
         rows.push({
           type: "item",
           name: `${s.name}`,
@@ -144,7 +158,7 @@ export default function PriceList() {
       customs.forEach((it) => rows.push({ type: "item", name: it.name, price: Number(it.price || 0), unit: it.unit, description: it.description }));
     }
     return rows;
-  }, [listItems, roomCounts, roomCatalogueItems]);
+  }, [listItems, roomCounts, roomCatalogueItems, roomPrices]);
 
   const buildHtml = () => {
     const today      = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
@@ -469,8 +483,7 @@ export default function PriceList() {
             )}
 
             {/* ── Room counter panel ──────────────────────────────── */}
-            {roomCatalogueItems.length > 0 && (
-              <div className="bg-[#0B2D22] rounded-2xl border border-white/7 overflow-hidden">
+            <div className="bg-[#0B2D22] rounded-2xl border border-white/7 overflow-hidden">
                 <div className="px-4 py-3 border-b border-blue-500/20 bg-blue-500/10 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-blue-500" />
@@ -495,7 +508,19 @@ export default function PriceList() {
                               £{Number(s.rate).toFixed(2)}/room
                               {count > 0 && <span className="text-blue-300 ml-1">= £{(Number(s.rate) * count).toFixed(2)}</span>}
                             </p>
-                          ) : null}
+                          ) : (
+                            <div className="flex items-center gap-1 mt-1">
+                              <span className="text-[10px] text-white/25">£</span>
+                              <input
+                                type="number" min="0" step="0.01"
+                                placeholder="price/room"
+                                value={roomPrices[s._id] || ""}
+                                onChange={(e) => setRoomPrices((p) => ({ ...p, [s._id]: e.target.value }))}
+                                className="w-20 px-1.5 py-0.5 rounded-md border border-white/10 bg-white/5 text-xs text-blue-300 font-bold placeholder:text-white/20 focus:outline-none focus:border-blue-500/50"
+                              />
+                              <span className="text-[10px] text-white/25">/room</span>
+                            </div>
+                          )}
                         </div>
                         {/* Stepper */}
                         <div className="flex items-center gap-1.5 shrink-0">
@@ -524,12 +549,11 @@ export default function PriceList() {
                   <div className="px-4 py-2.5 border-t border-white/[0.04] flex items-center justify-between">
                     <span className="text-xs text-white/30 font-semibold">Room total</span>
                     <span className="text-xs font-black text-blue-300 tabular-nums">
-                      £{roomCatalogueItems.reduce((s, r) => s + (roomCounts[r._id] || 0) * Number(r.rate || 0), 0).toFixed(2)}
+                      £{roomCatalogueItems.reduce((s, r) => s + (roomCounts[r._id] || 0) * Number(r.rate || roomPrices[r._id] || 0), 0).toFixed(2)}
                     </span>
                   </div>
                 )}
               </div>
-            )}
 
             <button
               onClick={addCustom}
