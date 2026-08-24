@@ -81,16 +81,17 @@ import DevPanel from "./admin/DevPanel";
 
 function App() {
   const location = useLocation();
-  const isAdminPath = location.pathname.startsWith("/admin");
+  const isAdminPath   = location.pathname.startsWith("/admin");
   const isAccountPath = location.pathname.startsWith("/account");
+  const isDevPanel    = location.pathname.startsWith("/devpanel");
 
   return (
     <CustomerAuthProvider>
       <div className="min-h-screen bg-slate-50 flex flex-col">
-        {!isAdminPath && <Preloader />}
+        {!isAdminPath && !isDevPanel && <Preloader />}
         <ScrollToTop />
-        {!isAdminPath && !isAccountPath && <TopNav />}
-        {!isAdminPath && !isAccountPath && <Navbar />}
+        {!isAdminPath && !isAccountPath && !isDevPanel && <TopNav />}
+        {!isAdminPath && !isAccountPath && !isDevPanel && <Navbar />}
         {isAccountPath && <Navbar />}
 
         <main className="grow">
@@ -177,8 +178,8 @@ function App() {
           </Routes>
         </main>
 
-        {!isAdminPath && !isAccountPath && <Footer />}
-        {!isAdminPath && <WhatsAppButton />}
+        {!isAdminPath && !isAccountPath && !isDevPanel && <Footer />}
+        {!isAdminPath && !isDevPanel && <WhatsAppButton />}
       </div>
     </CustomerAuthProvider>
   );

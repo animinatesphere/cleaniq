@@ -312,6 +312,61 @@ router.delete("/workers/:id", requireDev, async (req, res) => {
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
+// BOOKINGS
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/bookings", requireDev, async (req, res) => {
+  try {
+    const page   = parseInt(req.query.page  || "1",  10);
+    const limit  = Math.min(parseInt(req.query.limit || "30", 10), 100);
+    const status = req.query.status || "";
+    const q      = req.query.q     || "";
+    const query  = {};
+    if (status) query.status = status;
+    if (q)      query.$or = [{ bookingId: { $regex: q, $options: "i" } }, { "customer.email": { $regex: q, $options: "i" } }, { "customer.name": { $regex: q, $options: "i" } }];
+    const [bookings, total] = await Promise.all([
+      Booking.find(query).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit)
+        .select("bookingId status schedule payment service customer assignedWorker createdAt notes"),
+      Booking.countDocuments(query),
+    ]);
+    res.json({ bookings, total, page, pages: Math.ceil(total / limit) });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.put("/bookings/:id/status", requireDev, async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ error: "Not found" });
+    booking.status = req.body.status;
+    await booking.save();
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.delete("/bookings/:id", requireDev, async (req, res) => {
+  try {
+    await Booking.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DATABASE INSPECTOR
+// ══════════════════════════════════════════════════════════════════════════════
+router.get("/database", requireDev, async (req, res) => {
+  try {
+    const db   = mongoose.connection.db;
+    const cols = await db.listCollections().toArray();
+    const counts = await Promise.all(
+      cols.map(async (c) => ({ name: c.name, count: await db.collection(c.name).estimatedDocumentCount() }))
+    );
+    counts.sort((a, b) => b.count - a.count);
+    let dbStats = null;
+    try { dbStats = await db.stats(); } catch {}
+    res.json({ collections: counts, stats: dbStats });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
 // SERVER CONTROL
 // ══════════════════════════════════════════════════════════════════════════════
 router.get("/server/status", requireDev, (req, res) => {

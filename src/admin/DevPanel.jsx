@@ -3,7 +3,7 @@ import {
   Terminal, Activity, AlertTriangle, Heart, RefreshCw, ChevronDown,
   ChevronUp, Trash2, CheckCircle2, Wifi, WifiOff, Shield, LogOut,
   Users, Briefcase, LayoutGrid, UserPlus, Eye, EyeOff, KeyRound,
-  Search, X, Plus, BarChart3,
+  Search, X, Plus, BarChart3, Calendar, Database, Settings,
 } from "lucide-react";
 import { install, getLog, clearLog, subscribe } from "../utils/fetchLogger";
 
@@ -151,6 +151,8 @@ const NAV = [
   { id: "admins",    label: "Admin Accounts", icon: Shield },
   { id: "customers", label: "Customers",      icon: Users },
   { id: "workers",   label: "Workers",        icon: Briefcase },
+  { id: "bookings",  label: "Bookings",       icon: Calendar },
+  { id: "database",  label: "Database",       icon: Database },
   { id: "server",    label: "Server Control", icon: Shield },
 ];
 
@@ -175,6 +177,10 @@ function DevPanelMain({ token, onLogout }) {
   const [maintLoading, setMaintLoading] = useState(false);
   const [restartCount, setRestartCount] = useState(0);
   const [detail,       setDetail]       = useState(null); // { type: 'customer'|'worker', data, bookings }
+  const [bookings,     setBookings]     = useState({ data: [], total: 0, page: 1, pages: 1 });
+  const [bkFilter,     setBkFilter]     = useState(""); // status filter
+  const [bkSearch,     setBkSearch]     = useState("");
+  const [dbInfo,       setDbInfo]       = useState(null);
 
   const headers = { Authorization: `Bearer ${token}` };
   const toggle  = (id) => setExpanded((p) => p === id ? null : id);
@@ -247,6 +253,12 @@ function DevPanelMain({ token, onLogout }) {
     } catch {}
   };
 
+  // Load section-specific data on page change
+  useEffect(() => {
+    if (page === "bookings") fetchBookings(1, bkFilter, bkSearch);
+    if (page === "database") fetchDatabase();
+  }, [page]);
+
   useEffect(() => {
     fetchHealth(); fetchStats(); fetchAdmins(); fetchCustomers(); fetchWorkers(); fetchServerStatus();
     // Load initial buffered data
@@ -305,6 +317,33 @@ function DevPanelMain({ token, onLogout }) {
     } catch {}
   };
 
+  const fetchBookings = async (p = 1, status = bkFilter, q = bkSearch) => {
+    try {
+      const r = await fetch(`${API}/devpanel/bookings?page=${p}&limit=30&status=${encodeURIComponent(status)}&q=${encodeURIComponent(q)}`, { headers });
+      if (r.ok) { const d = await r.json(); setBookings({ data: d.bookings, total: d.total, page: d.page, pages: d.pages }); }
+    } catch {}
+  };
+
+  const changeBookingStatus = async (id, status) => {
+    try {
+      await fetch(`${API}/devpanel/bookings/${id}/status`, { method: "PUT", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+      fetchBookings(bookings.page, bkFilter, bkSearch);
+    } catch {}
+  };
+
+  const deleteBooking = async (id) => {
+    if (!confirm("Permanently delete this booking? This cannot be undone.")) return;
+    try { await fetch(`${API}/devpanel/bookings/${id}`, { method: "DELETE", headers }); } catch {}
+    fetchBookings(bookings.page, bkFilter, bkSearch);
+  };
+
+  const fetchDatabase = async () => {
+    try {
+      const r = await fetch(`${API}/devpanel/database`, { headers });
+      if (r.ok) setDbInfo(await r.json());
+    } catch {}
+  };
+
   // ── Filtered frontend log ──────────────────────────────────────────
   const filtered = frontendLog.filter((e) => {
     if (mFilter !== "ALL" && e.method !== mFilter) return false;
@@ -360,7 +399,7 @@ function DevPanelMain({ token, onLogout }) {
         <nav className="flex-1 py-3 px-2 space-y-0.5">
           {NAV.map((n) => {
             const Icon  = n.icon;
-            const badge = n.id === "errors" ? serverErrors.length : n.id === "admins" ? admins.length : n.id === "monitor" ? frontendLog.length : 0;
+            const badge = n.id === "errors" ? serverErrors.length : n.id === "admins" ? admins.length : n.id === "monitor" ? frontendLog.length : n.id === "bookings" ? bookings.total : 0;
             const alert = n.id === "errors" && hasErrors;
             return (
               <button key={n.id} onClick={() => setPage(n.id)}
@@ -737,6 +776,131 @@ function DevPanelMain({ token, onLogout }) {
                     className="px-3 py-1.5 rounded-lg border border-white/8 text-[9px] text-white/35 hover:text-white/60 disabled:opacity-25 transition-all">Next →</button>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ══ BOOKINGS ════════════════════════════════════════ */}
+          {page === "bookings" && (
+            <div>
+              {/* Filters */}
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                {["","Pending","Confirmed","In Progress","Completed","Cancelled"].map((s) => (
+                  <button key={s} onClick={() => { setBkFilter(s); fetchBookings(1, s, bkSearch); }}
+                    className={`px-2.5 py-1 rounded-lg text-[9px] font-bold border transition-all ${bkFilter===s ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-400" : "bg-white/4 border-white/8 text-white/30 hover:text-white/60"}`}>
+                    {s || "All"}
+                  </button>
+                ))}
+                <div className="ml-auto flex items-center gap-2">
+                  <div className="relative">
+                    <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/25" />
+                    <input value={bkSearch} onChange={(e) => { setBkSearch(e.target.value); fetchBookings(1, bkFilter, e.target.value); }}
+                      placeholder="Booking ID or customer…"
+                      className="pl-7 pr-3 py-1.5 rounded-lg border border-white/8 bg-white/4 text-[10px] text-white placeholder:text-white/18 focus:outline-none focus:border-emerald-500/40 w-44" />
+                  </div>
+                  <p className="text-[9px] text-white/25 shrink-0">{bookings.total.toLocaleString()} total</p>
+                </div>
+              </div>
+
+              {/* Bookings list */}
+              <div className="space-y-1.5">
+                {bookings.data.map((b) => (
+                  <div key={b._id} className="rounded-xl border border-white/5 bg-white/[0.015] px-4 py-3">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[11px] font-black text-white">{b.bookingId || b._id?.toString().slice(-8)}</span>
+                          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${
+                            b.status==="Completed"?"bg-emerald-500/15 text-emerald-400 border-emerald-500/25":
+                            b.status==="Confirmed"?"bg-sky-500/15 text-sky-400 border-sky-500/25":
+                            b.status==="In Progress"?"bg-blue-500/15 text-blue-400 border-blue-500/25":
+                            b.status==="Cancelled"?"bg-rose-500/15 text-rose-400 border-rose-500/25":
+                            "bg-amber-500/15 text-amber-400 border-amber-500/25"}`}>
+                            {b.status}
+                          </span>
+                          {b.payment?.amount > 0 && <span className="text-[9px] text-emerald-400 font-bold ml-auto">£{Number(b.payment.amount).toFixed(2)}</span>}
+                        </div>
+                        <p className="text-[10px] text-white/50">{b.customer?.name} · {b.customer?.email}</p>
+                        <p className="text-[9px] text-white/25">{b.service?.name || ""} {b.schedule?.date ? `· ${fmtDate(b.schedule.date)}` : ""} {b.schedule?.timeSlot || ""}</p>
+                      </div>
+                      {/* Status changer */}
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
+                        <select
+                          value={b.status}
+                          onChange={(e) => changeBookingStatus(b._id, e.target.value)}
+                          className="px-2 py-1 rounded-lg border border-white/10 bg-[#060D09] text-[9px] text-white/60 focus:outline-none focus:border-emerald-500/40"
+                          onClick={(e) => e.stopPropagation()}>
+                          {["Pending","Confirmed","In Progress","Completed","Cancelled"].map((s) => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                        <button onClick={() => deleteBooking(b._id)} className="text-white/15 hover:text-rose-400 transition-colors"><Trash2 size={11}/></button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {bookings.data.length === 0 && (
+                  <div className="py-16 text-center text-white/15 text-[10px]"><Calendar size={24} className="mx-auto mb-3 opacity-20"/><p>No bookings found</p></div>
+                )}
+              </div>
+
+              {/* Pagination */}
+              {bookings.pages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <button onClick={() => fetchBookings(bookings.page-1, bkFilter, bkSearch)} disabled={bookings.page<=1}
+                    className="px-3 py-1.5 rounded-lg border border-white/8 text-[9px] text-white/35 hover:text-white/60 disabled:opacity-25">← Prev</button>
+                  <span className="text-[9px] text-white/25">{bookings.page} / {bookings.pages}</span>
+                  <button onClick={() => fetchBookings(bookings.page+1, bkFilter, bkSearch)} disabled={bookings.page>=bookings.pages}
+                    className="px-3 py-1.5 rounded-lg border border-white/8 text-[9px] text-white/35 hover:text-white/60 disabled:opacity-25">Next →</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══ DATABASE INSPECTOR ══════════════════════════════ */}
+          {page === "database" && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-[10px] text-white/25">MongoDB collection document counts</p>
+                <button onClick={fetchDatabase} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/8 bg-white/4 text-[9px] text-white/40 hover:text-white/70 font-bold transition-all">
+                  <RefreshCw size={10}/> Refresh
+                </button>
+              </div>
+
+              {!dbInfo
+                ? <div className="py-16 text-center text-white/15 text-[10px]"><Database size={24} className="mx-auto mb-3 opacity-20"/><p>Loading…</p></div>
+                : <>
+                    {/* DB-level stats */}
+                    {dbInfo.stats && (
+                      <div className="grid grid-cols-3 gap-3 mb-5">
+                        {[
+                          ["Data Size",       fmtMem(dbInfo.stats.dataSize   || 0)],
+                          ["Storage Size",    fmtMem(dbInfo.stats.storageSize || 0)],
+                          ["Index Size",      fmtMem(dbInfo.stats.indexSize   || 0)],
+                        ].map(([l,v]) => (
+                          <div key={l} className="rounded-xl border border-white/6 bg-white/[0.02] p-3 text-center">
+                            <p className="text-[9px] text-white/25 mb-1">{l}</p>
+                            <p className="text-sm font-black text-white tabular-nums">{v}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {/* Collections */}
+                    <div className="space-y-1.5">
+                      {dbInfo.collections.map((c) => {
+                        const maxCount = dbInfo.collections[0]?.count || 1;
+                        const pct      = Math.min(100, (c.count / maxCount) * 100);
+                        return (
+                          <div key={c.name} className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/5 bg-white/[0.015]">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500/60 shrink-0" />
+                            <span className="text-[10px] text-white/60 flex-1 font-bold">{c.name}</span>
+                            <div className="w-32 h-1.5 rounded-full bg-white/5">
+                              <div className="h-full rounded-full bg-emerald-500/50" style={{ width: `${pct}%` }} />
+                            </div>
+                            <span className="text-[10px] text-white/40 tabular-nums w-16 text-right font-bold">{c.count.toLocaleString()}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+              }
             </div>
           )}
 
