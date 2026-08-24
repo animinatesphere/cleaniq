@@ -43,8 +43,64 @@ export default function PriceList() {
   const [tab, setTab]               = useState("edit"); // edit | preview
   const [roomCounts, setRoomCounts] = useState({});    // { [serviceId]: count }
   const [roomPrices, setRoomPrices] = useState({});   // { [serviceId]: price string } for default rooms
+  const [savingPrices, setSavingPrices] = useState(false);
 
   const setR = (k) => (e) => setRecipient((p) => ({ ...p, [k]: e.target.value }));
+
+  // ── Save room prices → writes back to the service records in the DB ───────
+  // This means the booking page and customer calculations all use the new rates.
+  const saveRoomPrices = async () => {
+    setSavingPrices(true);
+    try {
+      const token = localStorage.getItem("adminToken") || "";
+      const headers = { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+      await Promise.all(
+        roomCatalogueItems.map(async (s) => {
+          const rate = Number(roomPrices[s._id] || 0);
+          if (s._id.startsWith("dr_")) {
+            // DEFAULT_ROOM — upsert as a real service so it shows up in bookings
+            await fetch(`${API}/services`, {
+              method: "POST",
+              headers,
+              body: JSON.stringify({ name: s.name, rate, category: "Rooms", type: "per_room", region: "UK" }),
+            });
+          } else {
+            // Catalogue room — update rate on the existing service document
+            await fetch(`${API}/services/${s._id}`, {
+              method: "PUT",
+              headers,
+              body: JSON.stringify({ rate }),
+            });
+          }
+        })
+      );
+      // Refresh catalogue so the new rates reflect everywhere on this page
+      const res2 = await fetch(`${API}/services?region=UK`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res2.ok) {
+        const data = await res2.json();
+        const clean = (n) => n.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const baseN = ["residential cleaning","deep clean","airbnb cleaning","office cleaning","end of tenancy","general cleaning"];
+        const roomN = ["bedroom","bathroom","cloakroom","kitchen","utility room","reception room","conservatory"];
+        const mapped = data.map((s) => {
+          let cat = s.category;
+          if (!cat) {
+            cat = "Extras";
+            if (baseN.some((b) => clean(b) === clean(s.name))) cat = "Base";
+            else if (roomN.some((r) => clean(s.name).includes(clean(r)))) cat = "Rooms";
+          }
+          return { ...s, category: cat };
+        });
+        setCatalogue(mapped);
+      }
+      setToast({ msg: "Room prices saved — booking calculator updated", type: "success" });
+    } catch {
+      setToast({ msg: "Failed to save room prices", type: "error" });
+    } finally {
+      setSavingPrices(false);
+    }
+  };
 
   // ── Fetch services ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -72,6 +128,13 @@ export default function PriceList() {
         const initCounts = {};
         mapped.filter((s) => s.category === "Rooms").forEach((s) => { initCounts[s._id] = 0; });
         setRoomCounts(initCounts);
+        // Pre-fill room price inputs from existing service rates
+        const initPrices = {};
+        mapped.filter((s) => s.category === "Rooms").forEach((s) => {
+          if (s.rate) initPrices[s._id] = String(s.rate);
+        });
+        DEFAULT_ROOMS.forEach((s) => { if (!initPrices[s._id]) initPrices[s._id] = ""; });
+        setRoomPrices((prev) => ({ ...initPrices, ...prev }));
         // Pre-add Base services to the list
         setListItems(
           mapped
@@ -142,7 +205,7 @@ export default function PriceList() {
       rows.push({ type: "heading", label: CATEGORY_LABELS["Rooms"] });
       activeRooms.forEach((s) => {
         const count = roomCounts[s._id];
-        const rateEach = Number(s.rate || roomPrices[s._id] || 0);
+        const rateEach = Number(roomPrices[s._id] || s.rate || 0);
         rows.push({
           type: "item",
           name: `${s.name}`,
@@ -204,7 +267,7 @@ export default function PriceList() {
     <div style="flex:1">
       <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:6px">From</div>
       <div style="font-size:13px;font-weight:700;color:#1e293b">Cleaniq Services Ltd</div>
-      <div style="font-size:12px;color:#475569">cleaniqservices@gmail.com</div>
+      <div style="font-size:12px;color:#475569">info@cleaniqservices.com</div>
       <div style="font-size:12px;color:#475569">+44 7752 476368</div>
       <div style="font-size:12px;color:#475569">Manchester, United Kingdom</div>
     </div>
@@ -225,7 +288,7 @@ export default function PriceList() {
   </div>
   <div style="margin:32px 40px 0;padding-top:20px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center">
     <div style="font-size:10px;color:#94a3b8">© ${new Date().getFullYear()} Cleaniq Services Ltd</div>
-    <div style="font-size:10px;color:#94a3b8">cleaniqservices.com · cleaniqservices@gmail.com</div>
+    <div style="font-size:10px;color:#94a3b8">cleaniqservices.com · info@cleaniqservices.com</div>
   </div>
 </div></body></html>`;
   };
@@ -494,7 +557,14 @@ export default function PriceList() {
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] text-white/30 font-semibold">Only added rooms appear in the list</span>
+                  <button
+                    onClick={saveRoomPrices}
+                    disabled={savingPrices}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-300 hover:bg-blue-500/35 hover:text-white text-[10px] font-bold transition-all disabled:opacity-50"
+                  >
+                    {savingPrices ? <RefreshCw size={10} className="animate-spin" /> : <CheckCircle2 size={10} />}
+                    {savingPrices ? "Saving…" : "Save Prices"}
+                  </button>
                 </div>
                 <div className="divide-y divide-white/[0.04]">
                   {roomCatalogueItems.map((s) => {
@@ -503,24 +573,20 @@ export default function PriceList() {
                       <div key={s._id} className={`flex items-center gap-3 px-4 py-3 transition-colors ${count > 0 ? "bg-blue-500/5" : ""}`}>
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm font-semibold truncate ${count > 0 ? "text-white" : "text-white/40"}`}>{s.name}</p>
-                          {s.rate ? (
-                            <p className="text-xs text-blue-400/70 font-semibold tabular-nums mt-0.5">
-                              £{Number(s.rate).toFixed(2)}/room
-                              {count > 0 && <span className="text-blue-300 ml-1">= £{(Number(s.rate) * count).toFixed(2)}</span>}
-                            </p>
-                          ) : (
-                            <div className="flex items-center gap-1 mt-1">
-                              <span className="text-[10px] text-white/25">£</span>
-                              <input
-                                type="number" min="0" step="0.01"
-                                placeholder="price/room"
-                                value={roomPrices[s._id] || ""}
-                                onChange={(e) => setRoomPrices((p) => ({ ...p, [s._id]: e.target.value }))}
-                                className="w-20 px-1.5 py-0.5 rounded-md border border-white/10 bg-white/5 text-xs text-blue-300 font-bold placeholder:text-white/20 focus:outline-none focus:border-blue-500/50"
-                              />
-                              <span className="text-[10px] text-white/25">/room</span>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-1 mt-1">
+                            <span className="text-[10px] text-white/25">£</span>
+                            <input
+                              type="number" min="0" step="0.01"
+                              placeholder="0.00"
+                              value={roomPrices[s._id] || ""}
+                              onChange={(e) => setRoomPrices((p) => ({ ...p, [s._id]: e.target.value }))}
+                              className="w-20 px-1.5 py-0.5 rounded-md border border-white/10 bg-white/5 text-xs text-blue-300 font-bold placeholder:text-white/20 focus:outline-none focus:border-blue-500/50"
+                            />
+                            <span className="text-[10px] text-white/25">/room</span>
+                            {count > 0 && Number(roomPrices[s._id]) > 0 && (
+                              <span className="text-[10px] text-blue-300 ml-1">= £{(Number(roomPrices[s._id]) * count).toFixed(2)}</span>
+                            )}
+                          </div>
                         </div>
                         {/* Stepper */}
                         <div className="flex items-center gap-1.5 shrink-0">
