@@ -3,7 +3,7 @@
     "name": "Cleaniq Service",
     "slug": "cleaniq-customer",
     "scheme": "cleaniqcustomer",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "platforms": [
       "ios",
       "android",
@@ -21,7 +21,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.cleaniq.customer",
       "jsEngine": "hermes",
-      "buildNumber": "6",
+      "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
