@@ -2,12 +2,12 @@ import { useState, useContext, useCallback, useRef } from "react";
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
   TouchableOpacity, ActivityIndicator, RefreshControl,
-  TextInput, Platform, Image, Alert, KeyboardAvoidingView,
+  TextInput, Platform, Image, Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   Search, SlidersHorizontal, Bell, Star,
-  CalendarDays, CheckCircle, Clock, Eye,
+  CalendarDays, CheckCircle, Clock, Eye, FileText,
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
@@ -101,54 +101,6 @@ const HomeScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [search,     setSearch]     = useState("");
 
-  // Quote form
-  const [quoteName,    setQuoteName]    = useState("");
-  const [quotePhone,   setQuotePhone]   = useState("");
-  const [quoteEmail,   setQuoteEmail]   = useState("");
-  const [quoteMsg,     setQuoteMsg]     = useState("");
-  const [quoteSending, setQuoteSending] = useState(false);
-  const [quoteDone,    setQuoteDone]    = useState(false);
-
-  const handleQuote = async () => {
-    if (!quoteName.trim() || !quoteEmail.trim() || !quoteMsg.trim()) {
-      Alert.alert("Missing fields", "Please fill in name, email and message.");
-      return;
-    }
-    setQuoteSending(true);
-    try {
-      await Promise.all([
-        fetch(`${API_URL}/leads`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: quoteName.trim(),
-            email: quoteEmail.trim(),
-            phone: quotePhone.trim(),
-            message: quoteMsg.trim(),
-            source: "Customer App",
-            stage: "New",
-          }),
-        }),
-        fetch(`${API_URL}/contact`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: quoteName.trim(),
-            email: quoteEmail.trim(),
-            phone: quotePhone.trim(),
-            subject: "Quote Request — Customer App",
-            message: quoteMsg.trim(),
-          }),
-        }),
-      ]);
-      setQuoteDone(true);
-      setQuoteName(""); setQuotePhone(""); setQuoteEmail(""); setQuoteMsg("");
-    } catch {
-      Alert.alert("Error", "Could not send your request. Please try again.");
-    } finally {
-      setQuoteSending(false);
-    }
-  };
 
   const fetchAll = async () => {
     try {
@@ -220,10 +172,22 @@ const HomeScreen = ({ navigation }) => {
             </View>
             <Text style={S.heroTitle}>Professional{"\n"}End of Tenancy Cleaning.</Text>
             <Text style={S.heroSub}>Residential, commercial and specialist cleaning — booked in 60 seconds.</Text>
-            <TouchableOpacity style={S.heroCta} onPress={goBook} activeOpacity={0.85}>
-              <CalendarDays size={14} color="#fff" strokeWidth={2} />
-              <Text style={S.heroCtaTxt}>Book a Cleaning</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <TouchableOpacity style={S.heroCta} onPress={goBook} activeOpacity={0.85}>
+                <CalendarDays size={14} color="#fff" strokeWidth={2} />
+                <Text style={S.heroCtaTxt}>Book Now</Text>
+              </TouchableOpacity>
+              {!userToken && (
+                <TouchableOpacity
+                  style={[S.heroCta, { backgroundColor: "rgba(255,255,255,0.15)", borderWidth: 1.5, borderColor: "rgba(255,255,255,0.4)" }]}
+                  onPress={() => navigation.navigate("Quote")}
+                  activeOpacity={0.85}
+                >
+                  <FileText size={14} color="#fff" strokeWidth={2} />
+                  <Text style={S.heroCtaTxt}>Get a Quote</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
           {/* Trust stats */}
           <View style={S.heroStats}>
@@ -413,72 +377,18 @@ const HomeScreen = ({ navigation }) => {
           </View>
         )}
 
-        {/* ── Get Quote ──────────────────────────────────────── */}
-        <View style={S.quoteCard}>
-          <View style={S.quoteHeader}>
-            <Text style={S.quoteTitle}>Get a Free Quote</Text>
-            <Text style={S.quoteSub}>No account needed — we'll reply within 2 hours.</Text>
-          </View>
-          {quoteDone ? (
-            <View style={S.quoteDone}>
-              <Text style={S.quoteDoneIcon}>✓</Text>
-              <Text style={S.quoteDoneTitle}>Message sent!</Text>
-              <Text style={S.quoteDoneSub}>We'll be in touch shortly.</Text>
-              <TouchableOpacity onPress={() => setQuoteDone(false)} style={S.quoteAnotherBtn}>
-                <Text style={S.quoteAnotherTxt}>Send another</Text>
-              </TouchableOpacity>
+        {/* ── Get Quote banner (non-logged-in only) ──────────── */}
+        {!userToken && (
+          <TouchableOpacity style={S.quoteBanner} onPress={() => navigation.navigate("Quote")} activeOpacity={0.88}>
+            <View style={S.quoteBannerLeft}>
+              <Text style={S.quoteBannerTitle}>Not sure what you need?</Text>
+              <Text style={S.quoteBannerSub}>Get a free personalised quote — no account needed</Text>
             </View>
-          ) : (
-            <>
-              <TextInput
-                style={S.quoteInput}
-                placeholder="Your name"
-                placeholderTextColor="#9CA3AF"
-                value={quoteName}
-                onChangeText={setQuoteName}
-                autoCapitalize="words"
-              />
-              <TextInput
-                style={S.quoteInput}
-                placeholder="Phone number"
-                placeholderTextColor="#9CA3AF"
-                value={quotePhone}
-                onChangeText={setQuotePhone}
-                keyboardType="phone-pad"
-              />
-              <TextInput
-                style={S.quoteInput}
-                placeholder="Email address"
-                placeholderTextColor="#9CA3AF"
-                value={quoteEmail}
-                onChangeText={setQuoteEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-              <TextInput
-                style={[S.quoteInput, S.quoteTextArea]}
-                placeholder="Tell us what you need…"
-                placeholderTextColor="#9CA3AF"
-                value={quoteMsg}
-                onChangeText={setQuoteMsg}
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-              />
-              <TouchableOpacity
-                style={[S.quoteSendBtn, quoteSending && { opacity: 0.6 }]}
-                onPress={handleQuote}
-                disabled={quoteSending}
-                activeOpacity={0.85}
-              >
-                {quoteSending
-                  ? <ActivityIndicator size="small" color="#fff" />
-                  : <Text style={S.quoteSendTxt}>Send Request</Text>
-                }
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
+            <View style={S.quoteBannerBtn}>
+              <FileText size={16} color={C.primary} strokeWidth={2} />
+            </View>
+          </TouchableOpacity>
+        )}
 
         <View style={{ height: 110 }} />
       </ScrollView>
@@ -713,41 +623,18 @@ const S = StyleSheet.create({
   },
   bookBtnTxt: { fontSize: 12, fontWeight: "700", color: "#fff" },
 
-  // Quote form
-  quoteCard: {
-    marginHorizontal: 20, marginTop: 28,
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 22,
-    borderWidth: 1, borderColor: "#E5E7EB",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 3,
+  // Quote banner
+  quoteBanner: {
+    marginHorizontal: 20, marginTop: 20, marginBottom: 4,
+    backgroundColor: C.primaryLight,
+    borderRadius: 18, padding: 18,
+    flexDirection: "row", alignItems: "center",
+    borderWidth: 1, borderColor: "#BBF7D0",
   },
-  quoteHeader: { marginBottom: 16 },
-  quoteTitle: { fontSize: 18, fontWeight: "800", color: "#111827" },
-  quoteSub:   { fontSize: 12, color: "#6B7280", marginTop: 3 },
-  quoteInput: {
-    borderWidth: 1.5, borderColor: "#E5E7EB",
-    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
-    fontSize: 14, color: "#111827",
-    marginBottom: 10, backgroundColor: "#F9FAFB",
-  },
-  quoteTextArea: { height: 96, marginBottom: 14 },
-  quoteSendBtn: {
-    backgroundColor: C.primary,
-    borderRadius: 14, paddingVertical: 14,
-    alignItems: "center",
-  },
-  quoteSendTxt: { fontSize: 14, fontWeight: "800", color: "#fff" },
-  quoteDone: { alignItems: "center", paddingVertical: 20, gap: 6 },
-  quoteDoneIcon: { fontSize: 36, color: C.primary },
-  quoteDoneTitle: { fontSize: 18, fontWeight: "800", color: "#111827" },
-  quoteDoneSub:   { fontSize: 13, color: "#6B7280" },
-  quoteAnotherBtn: { marginTop: 8 },
-  quoteAnotherTxt: { fontSize: 13, fontWeight: "700", color: C.primary },
+  quoteBannerLeft:  { flex: 1 },
+  quoteBannerTitle: { fontSize: 14, fontWeight: "800", color: C.primaryDark },
+  quoteBannerSub:   { fontSize: 12, color: C.primary, marginTop: 3, lineHeight: 17 },
+  quoteBannerBtn:   { width: 40, height: 40, borderRadius: 12, backgroundColor: "#fff", alignItems: "center", justifyContent: "center", marginLeft: 12 },
 });
 
 export default HomeScreen;

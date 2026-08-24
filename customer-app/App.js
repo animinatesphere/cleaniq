@@ -21,6 +21,7 @@ import CompanyDashboardScreen from "./src/screens/CompanyDashboardScreen";
 import CompanyJobsScreen from "./src/screens/CompanyJobsScreen";
 import PostJobScreen from "./src/screens/PostJobScreen";
 import JobDetailScreen from "./src/screens/JobDetailScreen";
+import QuoteScreen from "./src/screens/QuoteScreen";
 import { C } from "./src/theme/flat";
 
 // Never import expo-notifications at module level — in Expo Go SDK 53 the module
@@ -198,6 +199,7 @@ const AppNavigation = () => {
         <Stack.Screen name="Chat"          component={ChatScreen} />
         <Stack.Screen name="PostJob"       component={PostJobScreen} />
         <Stack.Screen name="JobDetail"     component={JobDetailScreen} />
+        <Stack.Screen name="Quote"         component={QuoteScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
