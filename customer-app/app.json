@@ -21,7 +21,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.cleaniq.customer",
       "jsEngine": "hermes",
-      "buildNumber": "1",
+      "buildNumber": "6",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
