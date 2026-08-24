@@ -77,6 +77,7 @@ import GuideDistribution from "./admin/GuideDistribution";
 import ColdEmail from "./admin/ColdEmail/index.jsx";
 import CampaignDetail from "./admin/ColdEmail/CampaignDetail.jsx";
 import TodoPage from "./admin/TodoPage";
+import DevPanel from "./admin/DevPanel";
 
 function App() {
   const location = useLocation();
@@ -113,6 +114,9 @@ function App() {
             <Route path="/account/login" element={<CustomerLogin />} />
             <Route path="/account/signup" element={<CustomerSignup />} />
             <Route path="/account/dashboard" element={<CustomerDashboard />} />
+
+            {/* Dev Panel — standalone, no admin layout, own login */}
+            <Route path="/devpanel" element={<DevPanel />} />
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>

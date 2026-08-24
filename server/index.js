@@ -138,6 +138,32 @@ const smsRoutes = require("./routes/sms");
 const jobsRoutes = require("./routes/jobs");
 const guidesRoutes = require("./routes/guides");
 const coldEmailRoutes = require("./routes/cold-email");
+const devpanelRoutes  = require("./routes/devpanel");
+
+// ── Maintenance mode gate (devpanel routes bypass it) ─────────────
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api/devpanel")) return next();
+  if (devpanelRoutes.isMaintenanceMode()) {
+    return res.status(503).json({ error: "Server is in maintenance mode", maintenance: true });
+  }
+  next();
+});
+
+// ── Devpanel: capture every request (must be before route mounts) ─
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api/devpanel")) return next();
+  const start = Date.now();
+  res.on("finish", () => {
+    devpanelRoutes.captureRequest({
+      method: req.method,
+      url: req.originalUrl,
+      status: res.statusCode,
+      duration: Date.now() - start,
+      ip: req.ip || req.headers["x-forwarded-for"] || "",
+    });
+  });
+  next();
+});
 
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
@@ -156,6 +182,7 @@ app.use("/api/sms", smsRoutes);
 app.use("/api/jobs", jobsRoutes);
 app.use("/api/guides", guidesRoutes);
 app.use("/api/cold-email", coldEmailRoutes);
+app.use("/api/devpanel", devpanelRoutes);
 
 // Stripe webhook endpoint (raw body required)
 const { scheduleTask } = require("./utils/automationEngine");
@@ -466,6 +493,17 @@ app.use("/api/complaints", complaintsRoutes);
 app.use("/api/contracts", contractsRoutes);
 app.use("/api/referrals", referralsRoutes);
 app.use("/api/leads", leadsRoutes);
+
+// ── Global Express error middleware (must be last, after all routes) ─
+app.use((err, req, res, next) => {
+  devpanelRoutes.captureExpressError({
+    method: req.method,
+    url: req.originalUrl,
+    message: err.message,
+    stack: err.stack,
+  });
+  res.status(err.status || 500).json({ error: err.message || "Internal server error" });
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
