@@ -27,7 +27,7 @@ const corsOptions = {
     ) {
       return callback(null, true);
     }
-    return callback(new Error("Not allowed by CORS"));
+    return callback(Object.assign(new Error("Not allowed by CORS"), { isCorsError: true, status: 403 }));
   },
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
@@ -496,12 +496,15 @@ app.use("/api/leads", leadsRoutes);
 
 // ── Global Express error middleware (must be last, after all routes) ─
 app.use((err, req, res, next) => {
-  devpanelRoutes.captureExpressError({
-    method: req.method,
-    url: req.originalUrl,
-    message: err.message,
-    stack: err.stack,
-  });
+  // CORS rejections are expected security behaviour — don't log them as errors
+  if (!err.isCorsError) {
+    devpanelRoutes.captureExpressError({
+      method: req.method,
+      url: req.originalUrl,
+      message: err.message,
+      stack: err.stack,
+    });
+  }
   res.status(err.status || 500).json({ error: err.message || "Internal server error" });
 });
 
