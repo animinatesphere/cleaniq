@@ -1234,6 +1234,8 @@ const Booking = () => {
                           <div className="grid gap-3 mt-6">
                             {(servicesList || [])
                               .filter((s) => {
+                                // Room-category services are for internal pricing only
+                                if (s.category === "Rooms") return false;
                                 const baseServices = [
                                   ...dynamicServiceOptions.map((o) => o.id),
                                   "Bedroom",

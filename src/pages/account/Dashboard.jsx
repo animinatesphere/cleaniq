@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import {
@@ -29,6 +29,7 @@ export default function CustomerDashboard() {
   const { customer, logout, authFetch } = useCustomerAuth();
   const { region } = useRegion();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [tab, setTab] = useState('bookings');
   const [bookings, setBookings] = useState([]);
@@ -46,10 +47,26 @@ export default function CustomerDashboard() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const chatEndRef = useRef(null);
 
-  // Redirect if not logged in
+  // Redirect if not logged in — preserve payment params so the toast shows after login
   useEffect(() => {
-    if (!customer) navigate('/account/login');
+    if (!customer) {
+      const paymentParam = searchParams.get('payment');
+      const bookingIdParam = searchParams.get('bookingId');
+      let returnTo = '/account/dashboard';
+      if (paymentParam) {
+        returnTo += `?payment=${paymentParam}${bookingIdParam ? `&bookingId=${bookingIdParam}` : ''}`;
+      }
+      navigate(`/account/login?returnTo=${encodeURIComponent(returnTo)}`);
+    }
   }, [customer, navigate]);
+
+  // Show payment success toast when redirected from Stripe
+  useEffect(() => {
+    if (searchParams.get('payment') === 'success') {
+      setSuccessToast('Payment received! Your booking is confirmed.');
+      setTimeout(() => setSuccessToast(''), 6000);
+    }
+  }, []);
 
   // Fetch bookings
   const fetchBookings = async () => {

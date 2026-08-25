@@ -146,8 +146,8 @@ router.post('/', async (req, res) => {
             bookingId: newBooking._id.toString(),
             company: 'Cleaniq Services',
           },
-          success_url: `${process.env.FRONTEND_URL || 'https://cleaniqservices.com'}/account/bookings?payment=success&bookingId=${newBooking._id}`,
-          cancel_url: `${process.env.FRONTEND_URL || 'https://cleaniqservices.com'}/account/bookings?payment=cancelled`,
+          success_url: `${process.env.FRONTEND_URL || 'https://cleaniqservices.com'}/account/dashboard?payment=success&bookingId=${newBooking._id}`,
+          cancel_url: `${process.env.FRONTEND_URL || 'https://cleaniqservices.com'}/account/dashboard?payment=cancelled`,
         });
 
         await sendEmail({

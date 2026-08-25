@@ -125,8 +125,8 @@ router.post("/public", async (req, res) => {
                 bookingId: newBooking._id.toString(),
                 company: "Cleaniq Services",
               },
-              success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=success&bookingId=${newBooking._id}`,
-              cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=cancelled`,
+              success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/dashboard?payment=success&bookingId=${newBooking._id}`,
+              cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/dashboard?payment=cancelled`,
             });
 
             await sendEmail({
@@ -596,8 +596,8 @@ router.post("/", async (req, res) => {
               bookingId: newBooking._id.toString(),
               company: "Cleaniq Services",
             },
-            success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=success&bookingId=${newBooking._id}`,
-            cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=cancelled`,
+            success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/dashboard?payment=success&bookingId=${newBooking._id}`,
+            cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/dashboard?payment=cancelled`,
           });
 
           // Send Payment Required Email to Customer
@@ -1499,8 +1499,8 @@ router.post("/:id/send-confirmation", async (req, res) => {
             bookingId: booking._id.toString(),
             company: "Cleaniq Services",
           },
-          success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=success&bookingId=${booking._id}`,
-          cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/bookings?payment=cancelled`,
+          success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/dashboard?payment=success&bookingId=${booking._id}`,
+          cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/dashboard?payment=cancelled`,
         });
         subject = `Payment Required: Cleaniq Booking ${booking.bookingId}`;
         html = templates.paymentRequired(booking, session.url);
