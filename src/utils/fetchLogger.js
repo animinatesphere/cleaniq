@@ -6,7 +6,16 @@ const log = [];
 let _listeners = [];
 let _installed = false;
 
-const SKIP = ["/api/devpanel/"];
+const SKIP = [
+  "/api/devpanel/",
+  "google-analytics.com",
+  "googletagmanager.com",
+  "analytics.google.com",
+  "/g/collect",
+  "/ccm/collect",
+  "doubleclick.net",
+  "facebook.com/tr",
+];
 
 export const getLog    = () => [...log];
 export const clearLog  = () => { log.length = 0; _emit(); };
