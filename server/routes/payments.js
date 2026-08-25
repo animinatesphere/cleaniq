@@ -91,8 +91,8 @@ router.post("/create-checkout-session", async (req, res) => {
         bookingId,
         company: "Cleaniq Services",
       },
-      success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/dashboard?payment=success&bookingId=${bookingId}`,
-      cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/dashboard?payment=cancelled`,
+      success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/payment/success?bookingId=${bookingId}`,
+      cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/`,
     });
 
     res.json({
@@ -964,8 +964,8 @@ router.post("/additional-hours-checkout", async (req, res) => {
         type: "additional_hours",
         company: "Cleaniq Services",
       },
-      success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/dashboard?payment=success&bookingId=${booking._id}&type=additional_hours`,
-      cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/account/dashboard?payment=cancelled`,
+      success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/payment/success?bookingId=${booking._id}`,
+      cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/`,
     });
 
     console.log(

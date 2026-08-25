@@ -24,6 +24,7 @@ import CityLanding from "./pages/CityLanding";
 import CustomerLogin from "./pages/account/Login";
 import CustomerSignup from "./pages/account/Signup";
 import CustomerDashboard from "./pages/account/Dashboard";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import { CustomerAuthProvider } from "./context/CustomerAuthContext";
 
 // Admin Imports
@@ -115,6 +116,7 @@ function App() {
             <Route path="/account/login" element={<CustomerLogin />} />
             <Route path="/account/signup" element={<CustomerSignup />} />
             <Route path="/account/dashboard" element={<CustomerDashboard />} />
+            <Route path="/payment/success" element={<PaymentSuccess />} />
 
             {/* Dev Panel — standalone, no admin layout, own login */}
             <Route path="/devpanel" element={<DevPanel />} />
