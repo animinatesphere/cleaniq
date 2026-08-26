@@ -262,6 +262,43 @@ router.post("/public", async (req, res) => {
   }
 });
 
+// GET availability for a specific date (public — no admin auth needed)
+router.get("/availability/:date/:serviceType", async (req, res) => {
+  try {
+    const { date } = req.params;
+    const selectedDate = new Date(date);
+    if (isNaN(selectedDate.getTime())) {
+      return res.status(400).json({ message: "Invalid date format. Use YYYY-MM-DD" });
+    }
+    const dayStart = new Date(selectedDate);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(selectedDate);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    const bookingsOnDate = await Booking.find({
+      "schedule.date": { $gte: dayStart, $lte: dayEnd },
+      status: { $in: ["Confirmed", "Pending", "Accepted", "In Progress"] },
+    });
+
+    const bookedSlots = [];
+    const bookedHours = new Set();
+    for (const booking of bookingsOnDate) {
+      if (booking.schedule?.timeSlot) bookedSlots.push(booking.schedule.timeSlot);
+      if (booking.details?.duration)  bookedHours.add(booking.details.duration);
+    }
+
+    res.json({
+      date,
+      bookedSlots: [...new Set(bookedSlots)],
+      bookedHours: Array.from(bookedHours),
+      totalBookingsOnDate: bookingsOnDate.length,
+      availableHours: [2, 3, 4, 5, 6, 7].filter((h) => !bookedHours.has(h)),
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.use(adminAuth);
 
 // GET /api/bookings/test-email?to=you@example.com — quick Resend smoke-test (admin only)
@@ -343,65 +380,6 @@ router.delete("/all/delete", async (req, res) => {
   }
 });
 
-// GET availability for a specific date and service
-// Returns booked time slots and hours for a given date
-router.get("/availability/:date/:serviceType", async (req, res) => {
-  try {
-    const { date, serviceType } = req.params;
-
-    // Parse the date (YYYY-MM-DD format)
-    const selectedDate = new Date(date);
-    if (isNaN(selectedDate.getTime())) {
-      return res
-        .status(400)
-        .json({ message: "Invalid date format. Use YYYY-MM-DD" });
-    }
-
-    // Get start and end of the selected day
-    const dayStart = new Date(selectedDate);
-    dayStart.setHours(0, 0, 0, 0);
-
-    const dayEnd = new Date(selectedDate);
-    dayEnd.setHours(23, 59, 59, 999);
-
-    // Find all confirmed/pending bookings for this date
-    const bookingsOnDate = await Booking.find({
-      "schedule.date": {
-        $gte: dayStart,
-        $lte: dayEnd,
-      },
-      status: { $in: ["Confirmed", "Pending", "Accepted", "In Progress"] },
-    });
-
-    // Extract booked time slots and hours
-    const bookedSlots = [];
-    const bookedHours = new Set();
-
-    for (const booking of bookingsOnDate) {
-      // If has time slot (flexible services)
-      if (booking.schedule?.timeSlot) {
-        bookedSlots.push(booking.schedule.timeSlot);
-      }
-
-      // If has duration (hourly services) - mark those hours as partial/booked
-      if (booking.details?.duration) {
-        // Store duration for reference
-        bookedHours.add(booking.details.duration);
-      }
-    }
-
-    res.json({
-      date: date,
-      bookedSlots: [...new Set(bookedSlots)], // Remove duplicates
-      bookedHours: Array.from(bookedHours),
-      totalBookingsOnDate: bookingsOnDate.length,
-      availableHours: [2, 3, 4, 5, 6, 7].filter((h) => !bookedHours.has(h)),
-    });
-  } catch (err) {
-    console.error("Availability check error:", err);
-    res.status(500).json({ message: err.message });
-  }
-});
 
 // POST a new booking
 // POST a new booking

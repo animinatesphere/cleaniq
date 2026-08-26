@@ -25,7 +25,7 @@ import {
   KeyRound,
   Plus,
   Minus,
-  Sparkles,
+  Droplets,
   Package,
   ShoppingBag,
   CheckCircle2,
@@ -53,13 +53,14 @@ const { width } = Dimensions.get("window");
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
+// Fallback data used when the API is unavailable — sorted cheapest first
 const SERVICES = [
   { id: "Residential Cleaning",       label: "Residential",      sub: "Weekly / bi-weekly",  Icon: Home,      color: "#0F6B4C", bg: "#E8F5EE", rate: 17.90 },
-  { id: "End of Tenancy",             label: "End of Tenancy",   sub: "Deposit guarantee",   Icon: KeyRound,  color: "#7C3AED", bg: "#F3EEFF", rate: 20.90 },
   { id: "Office Cleaning",            label: "Office Clean",     sub: "Flexible schedule",   Icon: Building2, color: "#2563EB", bg: "#EFF6FF", rate: 19.90 },
-  { id: "Deep Clean",                 label: "Deep Clean",       sub: "Total refresh",       Icon: Sparkles,  color: "#DB2777", bg: "#FDF2F8", rate: 24.90 },
+  { id: "End of Tenancy",             label: "End of Tenancy",   sub: "Deposit guarantee",   Icon: KeyRound,  color: "#7C3AED", bg: "#F3EEFF", rate: 20.90 },
   { id: "Airbnb Cleaning",            label: "Airbnb",           sub: "Fast turnarounds",    Icon: Hotel,     color: "#EA580C", bg: "#FFF7ED", rate: 21.90 },
   { id: "Post Construction Cleaning", label: "Post Construction",sub: "Final handover",      Icon: HardHat,   color: "#B45309", bg: "#FFFBEB", rate: 22.90 },
+  { id: "Deep Clean",                 label: "Deep Clean",       sub: "Total refresh",       Icon: Droplets,  color: "#DB2777", bg: "#FDF2F8", rate: 24.90 },
 ];
 
 const EXTRAS = [
@@ -70,6 +71,38 @@ const EXTRAS = [
   { name: "Carpet Cleaning",  price: 25, Icon: Layers    },
   { name: "Laundry & Folding",price: 12, Icon: Shirt     },
 ];
+
+// Map a service name to icon + colour based on keywords
+const svcAssets = (name = "") => {
+  const n = name.toLowerCase();
+  if (n.includes("residential") || n.includes("domestic"))
+    return { Icon: Home,      color: "#0F6B4C", bg: "#E8F5EE" };
+  if (n.includes("tenancy") || n.includes("move"))
+    return { Icon: KeyRound,  color: "#7C3AED", bg: "#F3EEFF" };
+  if (n.includes("office") || n.includes("commercial"))
+    return { Icon: Building2, color: "#2563EB", bg: "#EFF6FF" };
+  if (n.includes("deep"))
+    return { Icon: Droplets,  color: "#DB2777", bg: "#FDF2F8" };
+  if (n.includes("airbnb") || n.includes("holiday") || n.includes("rental"))
+    return { Icon: Hotel,     color: "#EA580C", bg: "#FFF7ED" };
+  if (n.includes("construction") || n.includes("builder") || n.includes("post"))
+    return { Icon: HardHat,   color: "#B45309", bg: "#FFFBEB" };
+  return { Icon: Droplets, color: "#0F6B4C", bg: "#E8F5EE" };
+};
+
+// Map an extra name to an icon based on keywords
+const extraIcon = (name = "") => {
+  const n = name.toLowerCase();
+  if (n.includes("oven"))                         return Flame;
+  if (n.includes("fridge") || n.includes("freezer")) return Snowflake;
+  if (n.includes("cabinet") || n.includes("cupboard")) return Archive;
+  if (n.includes("window"))                       return AppWindow;
+  if (n.includes("carpet") || n.includes("rug"))  return Layers;
+  if (n.includes("laundry") || n.includes("fold") || n.includes("ironing")) return Shirt;
+  if (n.includes("pet") || n.includes("animal"))  return PawPrint;
+  if (n.includes("car") || n.includes("vehicle")) return Car;
+  return Package;
+};
 
 const FREQUENCIES    = ["Once", "Weekly", "Fortnightly", "Monthly"];
 const PARKING_OPTIONS = ["On-site parking", "Street parking", "Paid parking nearby", "No parking"];
@@ -102,13 +135,15 @@ const dateStr = (d) =>
 const fmtDate = (d) =>
   d ? d.toLocaleDateString("en-GB", { weekday:"short", day:"numeric", month:"short", year:"numeric" }) : "";
 
-const calcTotal = (form, rates) => {
+const calcTotal = (form, rates, extraPrices = {}) => {
   const svc  = SERVICES.find((s) => s.id === form.serviceType);
   const base = rates[form.serviceType] || svc?.rate || 17.90;
   let total  = base * form.duration;
   Object.entries(form.extras).forEach(([name, qty]) => {
+    const livePrice = extraPrices[name];
     const ex = EXTRAS.find((e) => e.name === name);
-    if (ex) total += ex.price * qty;
+    const price = livePrice !== undefined ? livePrice : (ex?.price || 0);
+    total += price * qty;
   });
   if (form.suppliesProvidedBy === "Cleaniq") total += SUPPLIES_FEE;
   return Math.round(total * 100) / 100;
@@ -205,6 +240,10 @@ const BookingScreen = ({ navigation, route }) => {
   const [submitted,      setSubmitted]      = useState(false);
   const [bookingRef,     setBookingRef]     = useState("");
   const [rates,          setRates]          = useState({});
+  const [liveServices,   setLiveServices]   = useState([]);
+  const [liveExtras,     setLiveExtras]     = useState([]);
+  const [liveRooms,      setLiveRooms]      = useState([]);
+  const [extraPrices,    setExtraPrices]    = useState({});
   const [bookedSlots,    setBookedSlots]    = useState([]);
   const [availLoading,   setAvailLoading]   = useState(false);
   const [autoSubmit,     setAutoSubmit]     = useState(false);
@@ -218,9 +257,8 @@ const BookingScreen = ({ navigation, route }) => {
     address:             "",
     postcode:            "",
     frequency:           "Once",
-    duration:            1,
-    bedrooms:            1,
-    bathrooms:           1,
+    duration:            2,
+    rooms:               {},
     kitchens:            1,
     receptionRooms:      1,
     hasPet:              null,
@@ -265,9 +303,41 @@ const BookingScreen = ({ navigation, route }) => {
   // Fetch live service rates + load saved address from profile
   useEffect(() => {
     fetch(`${API_URL}/services?booking=1`).then((r) => r.json()).then((data) => {
-      const map = {};
-      (data || []).forEach((s) => { if (s.name && s.rate) map[s.name] = s.rate; });
-      setRates(map);
+      const all = data || [];
+
+      // Build rates map for base services
+      const rateMap = {};
+      all.forEach((s) => { if (s.name && s.rate) rateMap[s.name] = s.rate; });
+      setRates(rateMap);
+
+      // Build live base services list (category === "Base")
+      const bases = all.filter((s) => s.category === "Base" || (!s.category && s.type !== "per_item" && s.type !== "fixed"));
+      if (bases.length > 0) {
+        setLiveServices(
+          bases
+            .map((s) => ({ id: s.name, label: s.name, sub: s.description || "", rate: s.rate || 0, ...svcAssets(s.name) }))
+            .sort((a, b) => a.rate - b.rate)
+        );
+      }
+
+      // Build live extras list (category === "Extras"), exclude "Cleaning Supply"
+      const extras = all.filter((s) => s.category === "Extras" && s.name !== "Cleaning Supply");
+      if (extras.length > 0) {
+        const priceMap = {};
+        extras.forEach((s) => { priceMap[s.name] = s.rate || 0; });
+        setExtraPrices(priceMap);
+        setLiveExtras(extras.map((s) => ({
+          name:  s.name,
+          price: s.rate || 0,
+          Icon:  extraIcon(s.name),
+        })));
+      }
+
+      // Build live rooms list (category === "Rooms")
+      const rooms = all.filter((s) => s.category === "Rooms");
+      if (rooms.length > 0) {
+        setLiveRooms(rooms.map((s) => s.name));
+      }
     }).catch(() => {});
 
     AsyncStorage.getItem("@cleaniq_saved_address").then((raw) => {
@@ -296,8 +366,11 @@ const BookingScreen = ({ navigation, route }) => {
 
   const set    = (key, val) => setForm((f) => ({ ...f, [key]: val }));
   const top    = () => scrollRef.current?.scrollTo({ y: 0, animated: true });
-  const total  = calcTotal(form, rates);
-  const selSvc = SERVICES.find((s) => s.id === form.serviceType);
+  const total  = calcTotal(form, rates, extraPrices);
+  const displayServices = liveServices.length > 0 ? liveServices : SERVICES;
+  const displayExtras   = liveExtras.length   > 0 ? liveExtras   : EXTRAS;
+  const displayRooms    = liveRooms.length    > 0 ? liveRooms    : ["Bedrooms", "Bathrooms", "Kitchens", "Living Room", "Reception rooms"];
+  const selSvc = displayServices.find((s) => s.id === form.serviceType);
   const baseRate = rates[form.serviceType] || selSvc?.rate || 17.90;
 
   // ── Validation ──────────────────────────────────────────────────────────────
@@ -347,8 +420,10 @@ const BookingScreen = ({ navigation, route }) => {
       const extrasArray = Object.entries(form.extras)
         .filter(([, qty]) => qty > 0)
         .map(([name, qty]) => {
-          const ex = EXTRAS.find((e) => e.name === name);
-          return { name, qty, price: ex?.price || 0 };
+          const price = extraPrices[name] !== undefined
+            ? extraPrices[name]
+            : (displayExtras.find((e) => e.name === name)?.price || 0);
+          return { name, qty, price };
         });
 
       const payload = {
@@ -368,12 +443,7 @@ const BookingScreen = ({ navigation, route }) => {
           hasPet:              form.hasPet === true ? "Yes" : form.hasPet === false ? "No" : null,
           extras:              extrasArray,
         },
-        property: {
-          bedrooms:       form.bedrooms,
-          bathrooms:      form.bathrooms,
-          kitchens:       form.kitchens,
-          receptionRooms: form.receptionRooms,
-        },
+        property: form.rooms,
         schedule: { date: dateStr(form.date), timeSlot: form.timeSlot, preferredTime: form.timeSlot },
         suppliesProvidedBy: form.suppliesProvidedBy,
         payment: { amount: total, method: "Invoice", status: "Pending", billingType: "hourly" },
@@ -515,7 +585,7 @@ const BookingScreen = ({ navigation, route }) => {
           <View style={styles.stepBody}>
             <SectionLabel title="What type of cleaning?" sub="Select the service you need" />
 
-            {SERVICES.map((s) => {
+            {displayServices.map((s) => {
               const sel = form.serviceType === s.id;
               return (
                 <TouchableOpacity
@@ -584,16 +654,16 @@ const BookingScreen = ({ navigation, route }) => {
         {/* ══ STEP 1 ═════════════════════════════════════════════════════════ */}
         {step === 1 && (
           <View style={styles.stepBody}>
-            <SectionLabel title="How many hours?" sub="From 1 hour" />
+            <SectionLabel title="How many hours?" sub="Minimum 2 hours" />
 
             {/* Duration large picker */}
             <View style={[styles.durationCard, cardShadow]}>
               <TouchableOpacity
-                style={[styles.durationBtn, form.duration <= 1 && styles.durationBtnOff]}
-                onPress={() => set("duration", Math.max(1, form.duration - 1))}
-                disabled={form.duration <= 1}
+                style={[styles.durationBtn, form.duration <= 2 && styles.durationBtnOff]}
+                onPress={() => set("duration", Math.max(2, form.duration - 1))}
+                disabled={form.duration <= 2}
               >
-                <Minus size={20} color={form.duration <= 1 ? C.textMuted : C.primary} strokeWidth={2.5} />
+                <Minus size={20} color={form.duration <= 2 ? C.textMuted : C.primary} strokeWidth={2.5} />
               </TouchableOpacity>
               <View style={styles.durationCenter}>
                 <Text style={styles.durationNum}>{form.duration}</Text>
@@ -613,13 +683,16 @@ const BookingScreen = ({ navigation, route }) => {
 
             <SectionLabel title="Property details" sub="Helps us plan our time" />
             <View style={[styles.roomsCard, cardShadow]}>
-              <RoomStepper label="Bedrooms"        value={form.bedrooms}       onChange={(v) => set("bedrooms",v)} />
-              <View style={styles.roomDivider} />
-              <RoomStepper label="Bathrooms"       value={form.bathrooms}      onChange={(v) => set("bathrooms",v)} />
-              <View style={styles.roomDivider} />
-              <RoomStepper label="Kitchens"        value={form.kitchens}       onChange={(v) => set("kitchens",v)} />
-              <View style={styles.roomDivider} />
-              <RoomStepper label="Reception rooms" value={form.receptionRooms} onChange={(v) => set("receptionRooms",v)} />
+              {displayRooms.map((roomName, i) => (
+                <React.Fragment key={roomName}>
+                  {i > 0 && <View style={styles.roomDivider} />}
+                  <RoomStepper
+                    label={roomName}
+                    value={form.rooms[roomName] || 0}
+                    onChange={(v) => set("rooms", { ...form.rooms, [roomName]: v })}
+                  />
+                </React.Fragment>
+              ))}
             </View>
 
             <SectionLabel title="Any pets at home?" />
@@ -686,7 +759,7 @@ const BookingScreen = ({ navigation, route }) => {
 
             <SectionLabel title="Add extras" sub="Optional add-ons billed to your total" />
             <View style={[styles.extrasCard, cardShadow]}>
-              {EXTRAS.map((ex, i) => {
+              {displayExtras.map((ex, i) => {
                 const qty = form.extras[ex.name] || 0;
                 const on  = qty > 0;
                 return (
@@ -856,11 +929,13 @@ const BookingScreen = ({ navigation, route }) => {
                   <Text style={styles.summaryVal}>£{(baseRate * form.duration).toFixed(2)}</Text>
                 </View>
                 {Object.entries(form.extras).map(([name, qty]) => {
-                  const ex = EXTRAS.find((e) => e.name === name);
+                  const price = extraPrices[name] !== undefined
+                    ? extraPrices[name]
+                    : (displayExtras.find((e) => e.name === name)?.price || 0);
                   return (
                     <View key={name} style={styles.summaryLine}>
                       <Text style={styles.summaryKey}>{name} x{qty}</Text>
-                      <Text style={styles.summaryVal}>£{((ex?.price || 0) * qty).toFixed(2)}</Text>
+                      <Text style={styles.summaryVal}>£{(price * qty).toFixed(2)}</Text>
                     </View>
                   );
                 })}

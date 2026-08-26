@@ -16,7 +16,7 @@ import { C } from "../theme/flat";
 // ── Static photos mapped by service name keywords ─────────────────────────────
 const SVC_PHOTOS = {
   residential: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=75",
-  tenancy:     "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400&q=75",
+  tenancy:     "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400&q=75",
   office:      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=400&q=75",
   deep:        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=75",
   airbnb:      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=75",
@@ -26,7 +26,7 @@ const SVC_PHOTOS = {
 
 const CAT_PHOTOS = {
   residential: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&q=70",
-  tenancy:     "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&q=70",
+  tenancy:     "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=200&q=70",
   office:      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=200&q=70",
   deep:        "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200&q=70",
   airbnb:      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=200&q=70",

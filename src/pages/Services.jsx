@@ -35,7 +35,7 @@ const Services = () => {
     const fetchServices = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/services?region=${region.id}&t=${Date.now()}`,
+          `${import.meta.env.VITE_API_URL}/services?region=${region.id}&booking=1&t=${Date.now()}`,
         );
         const data = await response.json();
         setDbServices(data || []);
@@ -219,7 +219,7 @@ const Services = () => {
         image: assets.image,
         features: (s.bullets && s.bullets.length > 0) ? s.bullets : assets.features,
         description: s.description || assets.defaultDesc,
-        pricing: `From ${region.symbol}${s.rate}${region.id === "UK" ? (s.type === "hourly" ? "/hr" : "") : ""}`,
+        pricing: s.rate ? `From ${region.symbol}${s.rate}${region.id === "UK" ? (s.type === "hourly" ? "/hr" : "") : ""}` : "",
       };
     });
 
