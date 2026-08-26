@@ -297,4 +297,67 @@ router.put('/:id/cancel', verifyCustomer, async (req, res) => {
   }
 });
 
+// PUT /api/customer-bookings/:id/reschedule — customer reschedules date/time
+router.put('/:id/reschedule', verifyCustomer, async (req, res) => {
+  try {
+    const { date, timeSlot } = req.body;
+    if (!date || !timeSlot) return res.status(400).json({ message: 'Date and time are required.' });
+
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: 'Booking not found.' });
+
+    if ((booking.customer.email || '').toLowerCase() !== req.customer.email.toLowerCase()) {
+      return res.status(403).json({ message: 'You can only reschedule your own bookings.' });
+    }
+
+    if (!['Confirmed', 'Pending'].includes(booking.status)) {
+      return res.status(400).json({ message: `Cannot reschedule a booking with status: ${booking.status}.` });
+    }
+
+    booking.schedule.date = new Date(date);
+    booking.schedule.timeSlot = timeSlot;
+    booking.schedule.preferredTime = timeSlot;
+    await booking.save();
+
+    const fmtDate = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Notify admin
+    setImmediate(() => sendEmail({
+      to: process.env.EMAIL_USER || 'info@cleaniqservices.com',
+      subject: `📅 Booking Rescheduled — ${booking.bookingId}`,
+      html: `<div style="font-family:sans-serif;max-width:600px;margin:auto">
+        <h2 style="color:#0F6B4C">Booking Rescheduled</h2>
+        <p>A customer has rescheduled their booking.</p>
+        <table style="width:100%;border-collapse:collapse">
+          <tr><td style="padding:8px;color:#666">Booking ID</td><td style="padding:8px;font-weight:bold">${booking.bookingId}</td></tr>
+          <tr><td style="padding:8px;color:#666">Customer</td><td style="padding:8px;font-weight:bold">${booking.customer?.firstName} ${booking.customer?.lastName}</td></tr>
+          <tr><td style="padding:8px;color:#666">Service</td><td style="padding:8px;font-weight:bold">${booking.service}</td></tr>
+          <tr><td style="padding:8px;color:#666">New Date</td><td style="padding:8px;font-weight:bold">${fmtDate(date)}</td></tr>
+          <tr><td style="padding:8px;color:#666">New Time</td><td style="padding:8px;font-weight:bold">${timeSlot}</td></tr>
+        </table>
+      </div>`,
+    }).catch(() => {}));
+
+    // Confirm to customer
+    setImmediate(() => sendEmail({
+      to: booking.customer?.email,
+      subject: `Your booking has been rescheduled — ${booking.bookingId}`,
+      html: `<div style="font-family:sans-serif;max-width:600px;margin:auto">
+        <h2 style="color:#0F6B4C">Booking Rescheduled ✓</h2>
+        <p>Hi ${booking.customer?.firstName}, your booking has been rescheduled.</p>
+        <table style="width:100%;border-collapse:collapse">
+          <tr><td style="padding:8px;color:#666">Service</td><td style="padding:8px;font-weight:bold">${booking.service}</td></tr>
+          <tr><td style="padding:8px;color:#666">New Date</td><td style="padding:8px;font-weight:bold">${fmtDate(date)}</td></tr>
+          <tr><td style="padding:8px;color:#666">New Time</td><td style="padding:8px;font-weight:bold">${timeSlot}</td></tr>
+        </table>
+        <p style="color:#666;font-size:13px">If you have any questions, please contact us at info@cleaniqservices.com</p>
+      </div>`,
+    }).catch(() => {}));
+
+    res.json({ message: 'Booking rescheduled successfully.', booking });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

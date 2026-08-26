@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
   TouchableOpacity, Alert, ActivityIndicator, Linking, Platform,
+  Modal, Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   ChevronLeft, CalendarDays, Clock, MapPin, User, CreditCard,
   CheckCircle2, XCircle, Radio, Package, FileText,
-  AlertTriangle, RefreshCw, Phone, MessageCircle,
+  AlertTriangle, RefreshCw, Phone, MessageCircle, ChevronRight,
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
@@ -68,10 +69,16 @@ const SectionCard = ({ title, children }) => (
 );
 
 const BookingDetailScreen = ({ route, navigation }) => {
-  const [booking,    setBooking]    = useState(route.params?.booking || null);
-  const [refreshing, setRefreshing] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
-  const [workerLoc,  setWorkerLoc]  = useState(null);
+  const [booking,       setBooking]       = useState(route.params?.booking || null);
+  const [refreshing,    setRefreshing]    = useState(false);
+  const [cancelling,    setCancelling]    = useState(false);
+  const [workerLoc,     setWorkerLoc]     = useState(null);
+  const [showReschedule,setShowReschedule]= useState(false);
+  const [newDate,       setNewDate]       = useState(null);
+  const [newTime,       setNewTime]       = useState("");
+  const [rescheduling,  setRescheduling]  = useState(false);
+  const [calYear,       setCalYear]       = useState(new Date().getFullYear());
+  const [calMonth,      setCalMonth]      = useState(new Date().getMonth());
 
   const bookingId = booking?._id || route.params?.bookingId;
 
@@ -139,6 +146,39 @@ const BookingDetailScreen = ({ route, navigation }) => {
         },
       ],
     );
+  };
+
+  const handleReschedule = async () => {
+    if (!newDate || !newTime) {
+      Alert.alert("Missing info", "Please select both a date and time.");
+      return;
+    }
+    setRescheduling(true);
+    try {
+      const token = await AsyncStorage.getItem("customerToken");
+      const dateStr = `${newDate.getFullYear()}-${String(newDate.getMonth()+1).padStart(2,"0")}-${String(newDate.getDate()).padStart(2,"0")}`;
+      const res = await fetch(`${API_URL}/customer-bookings/${bookingId}/reschedule`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ date: dateStr, timeSlot: newTime }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        Alert.alert("Failed", err.message || "Could not reschedule.");
+        return;
+      }
+      setBooking((b) => ({
+        ...b,
+        schedule: { ...b.schedule, date: newDate.toISOString(), timeSlot: newTime, preferredTime: newTime },
+      }));
+      setShowReschedule(false);
+      Alert.alert("Rescheduled", "Your booking has been updated.");
+    } catch {
+      Alert.alert("Error", "Could not reschedule. Please try again.");
+    } finally { setRescheduling(false); }
   };
 
   if (!booking) return (
@@ -318,6 +358,18 @@ const BookingDetailScreen = ({ route, navigation }) => {
             <Text style={styles.contactBtnTxt}>Call Cleaniq</Text>
           </TouchableOpacity>
 
+          {/* Reschedule */}
+          {canCancel && (
+            <TouchableOpacity
+              style={styles.rescheduleBtn}
+              onPress={() => setShowReschedule(true)}
+              activeOpacity={0.85}
+            >
+              <CalendarDays size={16} color="#fff" />
+              <Text style={styles.rescheduleBtnTxt}>Reschedule</Text>
+            </TouchableOpacity>
+          )}
+
           {/* Cancel */}
           {canCancel && (
             <TouchableOpacity
@@ -335,6 +387,76 @@ const BookingDetailScreen = ({ route, navigation }) => {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Reschedule Modal */}
+      <Modal visible={showReschedule} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>Reschedule Booking</Text>
+
+            {/* Mini calendar */}
+            <View style={styles.miniCalNav}>
+              <TouchableOpacity onPress={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(calYear-1); } else setCalMonth(calMonth-1); }}>
+                <ChevronLeft size={20} color={C.textMed} />
+              </TouchableOpacity>
+              <Text style={styles.miniCalMonthTxt}>
+                {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][calMonth]} {calYear}
+              </Text>
+              <TouchableOpacity onPress={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(calYear+1); } else setCalMonth(calMonth+1); }}>
+                <ChevronRight size={20} color={C.textMed} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.miniCalGrid}>
+              {["M","T","W","T","F","S","S"].map((d,i) => (
+                <Text key={i} style={styles.miniCalDayLbl}>{d}</Text>
+              ))}
+              {(() => {
+                const days = [];
+                const startDay = new Date(calYear, calMonth, 1).getDay();
+                const total = new Date(calYear, calMonth+1, 0).getDate();
+                const blanks = startDay === 0 ? 6 : startDay - 1;
+                for (let i = 0; i < blanks; i++) days.push(null);
+                for (let d = 1; d <= total; d++) days.push(new Date(calYear, calMonth, d));
+                return days.map((d, i) => {
+                  if (!d) return <View key={`e-${i}`} style={styles.miniCalCell} />;
+                  const past = d < new Date(new Date().setHours(0,0,0,0));
+                  const sel  = newDate && d.toDateString() === newDate.toDateString();
+                  return (
+                    <TouchableOpacity key={i} style={[styles.miniCalCell, sel && styles.miniCalCellSel, past && { opacity: 0.3 }]}
+                      onPress={() => !past && setNewDate(d)} disabled={past} activeOpacity={0.7}>
+                      <Text style={[styles.miniCalCellTxt, sel && styles.miniCalCellTxtSel]}>{d.getDate()}</Text>
+                    </TouchableOpacity>
+                  );
+                });
+              })()}
+            </View>
+
+            {/* Time slots */}
+            <Text style={styles.modalSubLabel}>Pick a time</Text>
+            <View style={styles.timeGrid}>
+              {["07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00"].map((t) => (
+                <TouchableOpacity key={t} style={[styles.timeChip, newTime === t && styles.timeChipOn]}
+                  onPress={() => setNewTime(t)} activeOpacity={0.8}>
+                  <Text style={[styles.timeChipTxt, newTime === t && styles.timeChipTxtOn]}>{t}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.modalCancel} onPress={() => setShowReschedule(false)}>
+                <Text style={styles.modalCancelTxt}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalConfirm, rescheduling && { opacity: 0.6 }]}
+                onPress={handleReschedule} disabled={rescheduling}>
+                {rescheduling
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Text style={styles.modalConfirmTxt}>Confirm</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -467,6 +589,38 @@ const styles = StyleSheet.create({
     backgroundColor: C.errorBg,
   },
   cancelBtnTxt: { fontSize: 14, fontWeight: "700", color: C.error },
+  rescheduleBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+    height: 52, borderRadius: 16, backgroundColor: C.primary,
+  },
+  rescheduleBtnTxt: { fontSize: 14, fontWeight: "700", color: "#fff" },
+  // Modal
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" },
+  modalSheet: {
+    backgroundColor: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    padding: 24, paddingBottom: 40,
+  },
+  modalHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: "#E0E0E0", alignSelf: "center", marginBottom: 18 },
+  modalTitle: { fontSize: 18, fontWeight: "800", color: C.textDark, marginBottom: 16, textAlign: "center" },
+  modalSubLabel: { fontSize: 12, fontWeight: "700", color: C.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10, marginTop: 16 },
+  miniCalNav: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 },
+  miniCalMonthTxt: { fontSize: 15, fontWeight: "800", color: C.textDark },
+  miniCalGrid: { flexDirection: "row", flexWrap: "wrap" },
+  miniCalDayLbl: { width: "14.28%", textAlign: "center", fontSize: 11, fontWeight: "700", color: C.textMuted, paddingVertical: 4 },
+  miniCalCell: { width: "14.28%", aspectRatio: 1, alignItems: "center", justifyContent: "center", borderRadius: 8 },
+  miniCalCellSel: { backgroundColor: C.primary },
+  miniCalCellTxt: { fontSize: 13, fontWeight: "600", color: C.textDark },
+  miniCalCellTxtSel: { color: "#fff", fontWeight: "800" },
+  timeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  timeChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: "#F4F6F8", borderWidth: 1.5, borderColor: "#E8EDF0" },
+  timeChipOn: { backgroundColor: C.primary, borderColor: C.primary },
+  timeChipTxt: { fontSize: 13, fontWeight: "700", color: C.textMed },
+  timeChipTxtOn: { color: "#fff" },
+  modalActions: { flexDirection: "row", gap: 12, marginTop: 24 },
+  modalCancel: { flex: 1, height: 50, borderRadius: 14, borderWidth: 1.5, borderColor: "#E0E0E0", alignItems: "center", justifyContent: "center" },
+  modalCancelTxt: { fontSize: 14, fontWeight: "700", color: C.textMed },
+  modalConfirm: { flex: 2, height: 50, borderRadius: 14, backgroundColor: C.primary, alignItems: "center", justifyContent: "center" },
+  modalConfirmTxt: { fontSize: 14, fontWeight: "800", color: "#fff" },
 });
 
 export default BookingDetailScreen;

@@ -369,7 +369,7 @@ const BookingScreen = ({ navigation, route }) => {
   const total  = calcTotal(form, rates, extraPrices);
   const displayServices = liveServices.length > 0 ? liveServices : SERVICES;
   const displayExtras   = liveExtras.length   > 0 ? liveExtras   : EXTRAS;
-  const displayRooms    = liveRooms.length    > 0 ? liveRooms    : ["Bedrooms", "Bathrooms", "Kitchens", "Living Room", "Reception rooms"];
+  const displayRooms    = liveRooms.length    > 0 ? liveRooms    : ["Bedrooms", "Bathrooms", "Kitchens", "Living Room"];
   const selSvc = displayServices.find((s) => s.id === form.serviceType);
   const baseRate = rates[form.serviceType] || selSvc?.rate || 17.90;
 
