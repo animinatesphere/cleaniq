@@ -3647,9 +3647,7 @@ ${extrasRows}
                         Payment
                       </p>
                       <p className="text-xs font-bold text-white/85">
-                        {selectedBooking.payment?.currency === "GBP"
-                          ? "£"
-                          : "â‚¦"}
+                        {selectedBooking.payment?.currency === "NGN" ? "₦" : "£"}
                         {selectedBooking.payment?.amount}
                       </p>
                       <div className="flex gap-1 mt-2 flex-col sm:flex-row">
@@ -6134,7 +6132,7 @@ ${extrasRows}
                   </div>
                   <div className="text-right">
                     <p className="text-4xl font-bold text-emerald-400">
-                      {successBooking.payment.currency === "GBP" ? "£" : "â‚¦"}
+                      {successBooking.payment.currency === "NGN" ? "₦" : "£"}
                       {successBooking.payment.amount}
                     </p>
                   </div>
