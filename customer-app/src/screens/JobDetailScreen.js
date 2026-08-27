@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
   TouchableOpacity, ActivityIndicator, Platform, Dimensions,
+  Modal, Alert,
 } from "react-native";
 import {
-  ChevronLeft, MapPin, Calendar, Clock, Briefcase,
+  ChevronLeft, ChevronRight, MapPin, Calendar, Clock, Briefcase,
   User, FileText, AlertCircle, CheckCircle2, Circle,
   Phone, Home, Repeat, ShoppingBag, PawPrint,
-  UserCheck, Hash, Zap,
+  UserCheck, Hash, Zap, CalendarDays,
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
@@ -69,6 +70,19 @@ const LIFECYCLE = [
 ];
 
 const ROOM_KEYS = ["Bedroom","Bathroom","Kitchen","Living Room","Utility Room","Reception Room","Conservatory","Cloakroom"];
+const TIME_SLOTS_CO = ["Morning", "Afternoon", "Evening", "Flexible"];
+const MONTH_NAMES   = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAY_LABELS    = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const RESCHEDULE_STATUSES = ["pending_review", "approved", "assigned"];
+
+const buildCal = (year, month) => {
+  const days = []; const start = new Date(year, month, 1).getDay();
+  const total = new Date(year, month + 1, 0).getDate();
+  for (let i = 0; i < (start === 0 ? 6 : start - 1); i++) days.push(null);
+  for (let d = 1; d <= total; d++) days.push(new Date(year, month, d));
+  return days;
+};
+const ds = (d) => d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}` : "";
 
 const fmtTime = (d) => d
   ? new Date(d).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })
@@ -144,24 +158,52 @@ const rt = StyleSheet.create({
 /* ══ Main screen ═══════════════════════════════════════════════════════════════ */
 export default function JobDetailScreen({ navigation, route }) {
   const { jobId } = route.params;
-  const [job,     setJob]     = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState(null);
+  const [job,          setJob]          = useState(null);
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState(null);
+  const [showModal,    setShowModal]    = useState(false);
+  const [selDate,      setSelDate]      = useState(null);
+  const [selSlot,      setSelSlot]      = useState("");
+  const [rescheduling, setRescheduling] = useState(false);
+  const today = new Date();
+  const [calYear,  setCalYear]  = useState(today.getFullYear());
+  const [calMonth, setCalMonth] = useState(today.getMonth());
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const token = await AsyncStorage.getItem("customerToken");
-        const res   = await fetch(`${API_URL}/jobs/${jobId}`, {
-          headers: { Authorization:`Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to load job");
-        setJob(data);
-      } catch (err) { setError(err.message); }
-      finally { setLoading(false); }
-    })();
-  }, [jobId]);
+  const loadJob = async () => {
+    try {
+      const token = await AsyncStorage.getItem("customerToken");
+      const res   = await fetch(`${API_URL}/jobs/${jobId}`, {
+        headers: { Authorization:`Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to load job");
+      setJob(data);
+    } catch (err) { setError(err.message); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { loadJob(); }, [jobId]);
+
+  const handleReschedule = async () => {
+    if (!selDate) return Alert.alert("No date selected", "Please pick a date.");
+    if (!selSlot) return Alert.alert("No time slot", "Please pick a time slot.");
+    setRescheduling(true);
+    try {
+      const token = await AsyncStorage.getItem("customerToken");
+      const res = await fetch(`${API_URL}/jobs/${jobId}/reschedule`, {
+        method: "PUT",
+        headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}` },
+        body: JSON.stringify({ date: ds(selDate), timeSlot: selSlot }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Reschedule failed");
+      setShowModal(false);
+      Alert.alert("Rescheduled ✓", "Your job has been rescheduled. Admin has been notified.");
+      loadJob();
+    } catch (err) {
+      Alert.alert("Error", err.message);
+    } finally { setRescheduling(false); }
+  };
 
   if (loading) return (
     <SafeAreaView style={s.safe}>
@@ -475,8 +517,93 @@ export default function JobDetailScreen({ navigation, route }) {
           </View>
         )}
 
+        {/* ── Reschedule button ───────────────────────────────────── */}
+        {RESCHEDULE_STATUSES.includes(job.status) && (
+          <TouchableOpacity
+            style={s.rescheduleBtn}
+            onPress={() => {
+              setSelDate(null); setSelSlot("");
+              setCalYear(today.getFullYear()); setCalMonth(today.getMonth());
+              setShowModal(true);
+            }}
+            activeOpacity={0.85}
+          >
+            <CalendarDays size={18} color="#fff" strokeWidth={2} />
+            <Text style={s.rescheduleBtnTxt}>Reschedule Job</Text>
+          </TouchableOpacity>
+        )}
+
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* ── Reschedule Modal ──────────────────────────────────────── */}
+      <Modal visible={showModal} transparent animationType="slide" onRequestClose={() => setShowModal(false)}>
+        <View style={s.modalOverlay}>
+          <View style={s.modalSheet}>
+            <View style={s.modalHandle} />
+            <Text style={s.modalTitle}>Reschedule Job</Text>
+            <Text style={s.modalSub}>Pick a new date and time slot</Text>
+
+            {/* Mini calendar */}
+            <View style={s.calNav}>
+              <TouchableOpacity onPress={() => {
+                if (calMonth === 0) { setCalMonth(11); setCalYear(y => y-1); }
+                else setCalMonth(m => m-1);
+              }} style={s.calNavBtn}><ChevronLeft size={16} color={G.med} /></TouchableOpacity>
+              <Text style={s.calMonthTxt}>{MONTH_NAMES[calMonth]} {calYear}</Text>
+              <TouchableOpacity onPress={() => {
+                if (calMonth === 11) { setCalMonth(0); setCalYear(y => y+1); }
+                else setCalMonth(m => m+1);
+              }} style={s.calNavBtn}><ChevronRight size={16} color={G.med} /></TouchableOpacity>
+            </View>
+            <View style={s.calDaysRow}>
+              {DAY_LABELS.map(d => <Text key={d} style={s.calDayLbl}>{d}</Text>)}
+            </View>
+            <View style={s.calGrid}>
+              {buildCal(calYear, calMonth).map((d, i) => {
+                if (!d) return <View key={`e-${i}`} style={s.calCell} />;
+                const t = new Date(); t.setHours(0,0,0,0);
+                const past = d < t;
+                const sel  = selDate && ds(d) === ds(selDate);
+                return (
+                  <TouchableOpacity key={ds(d)} style={[s.calCell, sel && s.calCellSel, past && s.calCellPast]}
+                    onPress={() => !past && setSelDate(d)} disabled={past} activeOpacity={0.7}>
+                    <Text style={[s.calCellTxt, sel && s.calCellTxtSel, past && s.calCellTxtPast]}>{d.getDate()}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Time slots */}
+            <Text style={s.slotLabel}>Time Slot</Text>
+            <View style={s.slotGrid}>
+              {TIME_SLOTS_CO.map(t => (
+                <TouchableOpacity key={t} style={[s.slotChip, selSlot===t && s.slotChipOn]}
+                  onPress={() => setSelSlot(t)} activeOpacity={0.8}>
+                  <Text style={[s.slotChipTxt, selSlot===t && s.slotChipTxtOn]}>{t}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Actions */}
+            <View style={s.modalActions}>
+              <TouchableOpacity style={s.modalCancel} onPress={() => setShowModal(false)}>
+                <Text style={s.modalCancelTxt}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[s.modalConfirm, (!selDate || !selSlot || rescheduling) && { opacity:0.5 }]}
+                onPress={handleReschedule}
+                disabled={!selDate || !selSlot || rescheduling}
+              >
+                {rescheduling
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Text style={s.modalConfirmTxt}>Confirm Reschedule</Text>
+                }
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -566,4 +693,44 @@ const s = StyleSheet.create({
 
   notesBox:{ backgroundColor:G.surfaceAlt, borderRadius:12, padding:14, borderWidth:1.5, borderColor:G.border },
   notesText:{ fontSize:14, color:G.med, lineHeight:22, fontStyle:"italic" },
+
+  // Reschedule button
+  rescheduleBtn:{ flexDirection:"row", alignItems:"center", justifyContent:"center", gap:10, backgroundColor:G.primary, borderRadius:16, paddingVertical:16, marginHorizontal:16, marginBottom:12, ...shGreen },
+  rescheduleBtnTxt:{ fontSize:15, fontWeight:"800", color:"#fff" },
+
+  // Modal
+  modalOverlay:{ flex:1, backgroundColor:"rgba(0,0,0,0.5)", justifyContent:"flex-end" },
+  modalSheet:{ backgroundColor:"#fff", borderTopLeftRadius:28, borderTopRightRadius:28, padding:24, paddingBottom:Platform.OS==="ios"?40:28 },
+  modalHandle:{ width:40, height:4, borderRadius:2, backgroundColor:"#E2E8F0", alignSelf:"center", marginBottom:18 },
+  modalTitle:{ fontSize:20, fontWeight:"900", color:G.dark, textAlign:"center", marginBottom:4 },
+  modalSub:{ fontSize:13, color:G.muted, textAlign:"center", marginBottom:18 },
+
+  // Mini calendar
+  calNav:{ flexDirection:"row", alignItems:"center", justifyContent:"space-between", marginBottom:10 },
+  calNavBtn:{ width:34, height:34, borderRadius:10, backgroundColor:G.bg, alignItems:"center", justifyContent:"center" },
+  calMonthTxt:{ fontSize:15, fontWeight:"800", color:G.dark },
+  calDaysRow:{ flexDirection:"row", marginBottom:6 },
+  calDayLbl:{ width:(SW-48)/7, textAlign:"center", fontSize:10, fontWeight:"700", color:G.muted },
+  calGrid:{ flexDirection:"row", flexWrap:"wrap", marginBottom:18 },
+  calCell:{ width:(SW-48)/7, height:36, alignItems:"center", justifyContent:"center", borderRadius:10 },
+  calCellSel:{ backgroundColor:G.primary },
+  calCellPast:{},
+  calCellTxt:{ fontSize:13, fontWeight:"600", color:G.dark },
+  calCellTxtSel:{ color:"#fff", fontWeight:"800" },
+  calCellTxtPast:{ color:"#D1D9E0" },
+
+  // Slot picker
+  slotLabel:{ fontSize:12, fontWeight:"800", color:G.muted, textTransform:"uppercase", letterSpacing:0.6, marginBottom:10 },
+  slotGrid:{ flexDirection:"row", flexWrap:"wrap", gap:8, marginBottom:22 },
+  slotChip:{ paddingHorizontal:18, paddingVertical:10, borderRadius:999, backgroundColor:G.bg, borderWidth:1.5, borderColor:G.border },
+  slotChipOn:{ backgroundColor:G.primary, borderColor:G.primary },
+  slotChipTxt:{ fontSize:13, fontWeight:"700", color:G.med },
+  slotChipTxtOn:{ color:"#fff" },
+
+  // Modal actions
+  modalActions:{ flexDirection:"row", gap:10 },
+  modalCancel:{ flex:1, paddingVertical:14, borderRadius:14, borderWidth:1.5, borderColor:G.border, alignItems:"center" },
+  modalCancelTxt:{ fontSize:14, fontWeight:"700", color:G.med },
+  modalConfirm:{ flex:2, paddingVertical:14, borderRadius:14, backgroundColor:G.primary, alignItems:"center", ...shGreen },
+  modalConfirmTxt:{ fontSize:14, fontWeight:"800", color:"#fff" },
 });

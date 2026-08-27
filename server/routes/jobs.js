@@ -205,6 +205,94 @@ router.get("/my", verifyCompany, async (req, res) => {
   }
 });
 
+// PUT /api/jobs/:id/reschedule — company reschedules their own job
+router.put("/:id/reschedule", verifyCompany, async (req, res) => {
+  try {
+    const { date, timeSlot } = req.body;
+    if (!date || !timeSlot) return res.status(400).json({ message: "Date and time slot are required." });
+
+    const job = await Job.findById(req.params.id);
+    if (!job) return res.status(404).json({ message: "Job not found." });
+
+    if (job.company.id.toString() !== req.customer.id)
+      return res.status(403).json({ message: "You can only reschedule your own jobs." });
+
+    if (!["pending_review", "approved", "assigned"].includes(job.status))
+      return res.status(400).json({ message: `Cannot reschedule a job with status: ${job.status}.` });
+
+    const newDate = new Date(date);
+    if (newDate < new Date()) return res.status(400).json({ message: "Cannot reschedule to a past date." });
+
+    const oldDate = job.schedule?.date
+      ? new Date(job.schedule.date).toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", year:"numeric" })
+      : "—";
+    const oldSlot = job.schedule?.timeSlot || "—";
+
+    job.schedule = { ...job.schedule, date: newDate, timeSlot, preferredTime: timeSlot };
+    await job.save();
+
+    // Update linked booking too if it exists
+    if (job.linkedBookingId) {
+      await Booking.findByIdAndUpdate(job.linkedBookingId, {
+        $set: { "schedule.date": newDate, "schedule.timeSlot": timeSlot, "schedule.preferredTime": timeSlot },
+      });
+    }
+
+    const fmtD = (d) => new Date(d).toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+
+    // Notify admin
+    setImmediate(() => sendEmail({
+      to: ADMIN_EMAIL,
+      subject: `📅 Job Rescheduled — ${job.jobId} | ${job.company.name}`,
+      html: `<div style="font-family:'Segoe UI',sans-serif;max-width:600px;margin:auto;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;background:#fff;">
+        <div style="background:#083D2E;padding:32px;text-align:center;">
+          <h1 style="color:#6EE7B7;margin:0;font-size:22px;">Job Rescheduled</h1>
+          <p style="color:#94a3b8;margin-top:6px;">${job.company.name} has rescheduled a booking</p>
+        </div>
+        <div style="padding:32px;color:#1e293b;">
+          <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse:collapse;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+            <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-size:13px;color:#64748b;font-weight:600;">Job ID</td><td align="right" style="font-size:13px;font-weight:700;color:#0F6B4C;">${job.jobId}</td></tr>
+            <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-size:13px;color:#64748b;font-weight:600;">Company</td><td align="right" style="font-size:13px;font-weight:700;">${job.company.name}</td></tr>
+            <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-size:13px;color:#64748b;font-weight:600;">Service</td><td align="right" style="font-size:13px;font-weight:700;">${job.service}</td></tr>
+            <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-size:13px;color:#64748b;font-weight:600;">Previous Date</td><td align="right" style="font-size:13px;color:#EF4444;font-weight:700;">${oldDate} · ${oldSlot}</td></tr>
+            <tr><td style="font-size:13px;color:#64748b;font-weight:600;">New Date</td><td align="right" style="font-size:13px;color:#0F6B4C;font-weight:700;">${fmtD(newDate)} · ${timeSlot}</td></tr>
+          </table>
+          ${job.linkedBookingId ? `<p style="font-size:13px;color:#64748b;margin-top:16px;">The linked booking has been updated automatically.</p>` : ""}
+        </div>
+      </div>`,
+    }).catch(() => {}));
+
+    // Confirm to company
+    setImmediate(() => sendEmail({
+      to: job.company.email,
+      subject: `✓ Job Rescheduled — ${job.jobId} | Cleaniq Services`,
+      html: `<div style="font-family:'Segoe UI',sans-serif;max-width:600px;margin:auto;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;background:#fff;">
+        <div style="background:#083D2E;padding:32px;text-align:center;">
+          <h1 style="color:#6EE7B7;margin:0;font-size:22px;">Reschedule Confirmed ✓</h1>
+          <p style="color:#94a3b8;margin-top:6px;">Your job has been rescheduled successfully</p>
+        </div>
+        <div style="padding:32px;color:#1e293b;">
+          <p>Hi <strong>${job.company.name}</strong>, your job has been rescheduled to the new date below.</p>
+          <div style="background:#E4F7EE;border-radius:14px;padding:20px;margin:20px 0;border:1px solid #0F6B4C30;">
+            <p style="margin:0;font-size:11px;font-weight:800;color:#0F6B4C;text-transform:uppercase;letter-spacing:1px;">New Schedule</p>
+            <p style="margin:8px 0 0;font-size:18px;font-weight:900;color:#083D2E;">${fmtD(newDate)}</p>
+            <p style="margin:4px 0 0;font-size:15px;font-weight:700;color:#0F6B4C;">${timeSlot} slot</p>
+          </div>
+          <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse:collapse;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+            <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-size:13px;color:#64748b;">Job Reference</td><td align="right" style="font-size:13px;font-weight:700;color:#0F6B4C;">${job.jobId}</td></tr>
+            <tr><td style="font-size:13px;color:#64748b;">Service</td><td align="right" style="font-size:13px;font-weight:700;">${job.service}</td></tr>
+          </table>
+          <p style="font-size:13px;color:#64748b;margin-top:16px;">Our team has been notified. If you need to make further changes, please contact us at info@cleaniqservices.com.</p>
+        </div>
+      </div>`,
+    }).catch(() => {}));
+
+    res.json({ message: "Job rescheduled successfully.", job });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // GET /api/jobs/slots?date=YYYY-MM-DD — available time slots for a date
 router.get("/slots", verifyCompany, async (req, res) => {
   try {
