@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
   TouchableOpacity, ActivityIndicator, Platform, Dimensions,
-  Modal, Alert,
+  Modal, Alert, TextInput, KeyboardAvoidingView,
 } from "react-native";
 import {
   ChevronLeft, ChevronRight, MapPin, Calendar, Clock, Briefcase,
@@ -164,6 +164,7 @@ export default function JobDetailScreen({ navigation, route }) {
   const [showModal,    setShowModal]    = useState(false);
   const [selDate,      setSelDate]      = useState(null);
   const [selSlot,      setSelSlot]      = useState("");
+  const [prefTime,     setPrefTime]     = useState("");
   const [rescheduling, setRescheduling] = useState(false);
   const today = new Date();
   const [calYear,  setCalYear]  = useState(today.getFullYear());
@@ -187,13 +188,15 @@ export default function JobDetailScreen({ navigation, route }) {
   const handleReschedule = async () => {
     if (!selDate) return Alert.alert("No date selected", "Please pick a date.");
     if (!selSlot) return Alert.alert("No time slot", "Please pick a time slot.");
+    if (selSlot !== "Flexible" && !prefTime.trim())
+      return Alert.alert("Preferred time required", `Please enter a preferred time for the ${selSlot} slot (e.g. 9:30 AM).`);
     setRescheduling(true);
     try {
       const token = await AsyncStorage.getItem("customerToken");
       const res = await fetch(`${API_URL}/jobs/${jobId}/reschedule`, {
         method: "PUT",
         headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}` },
-        body: JSON.stringify({ date: ds(selDate), timeSlot: selSlot }),
+        body: JSON.stringify({ date: ds(selDate), timeSlot: selSlot, preferredTime: prefTime.trim() || selSlot }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Reschedule failed");
@@ -522,7 +525,7 @@ export default function JobDetailScreen({ navigation, route }) {
           <TouchableOpacity
             style={s.rescheduleBtn}
             onPress={() => {
-              setSelDate(null); setSelSlot("");
+              setSelDate(null); setSelSlot(""); setPrefTime("");
               setCalYear(today.getFullYear()); setCalMonth(today.getMonth());
               setShowModal(true);
             }}
@@ -579,11 +582,31 @@ export default function JobDetailScreen({ navigation, route }) {
             <View style={s.slotGrid}>
               {TIME_SLOTS_CO.map(t => (
                 <TouchableOpacity key={t} style={[s.slotChip, selSlot===t && s.slotChipOn]}
-                  onPress={() => setSelSlot(t)} activeOpacity={0.8}>
+                  onPress={() => { setSelSlot(t); setPrefTime(""); }} activeOpacity={0.8}>
                   <Text style={[s.slotChipTxt, selSlot===t && s.slotChipTxtOn]}>{t}</Text>
                 </TouchableOpacity>
               ))}
             </View>
+
+            {/* Preferred time input — shown when a named slot is picked */}
+            {selSlot !== "" && selSlot !== "Flexible" && (
+              <View style={s.prefTimeWrap}>
+                <Text style={s.prefTimeLabel}>
+                  Preferred time within {selSlot} <Text style={{ color:G.error }}>*</Text>
+                </Text>
+                <TextInput
+                  style={s.prefTimeInput}
+                  placeholder={
+                    selSlot === "Morning"   ? "e.g. 9:00 AM"  :
+                    selSlot === "Afternoon" ? "e.g. 2:00 PM"  : "e.g. 5:30 PM"
+                  }
+                  placeholderTextColor={G.muted}
+                  value={prefTime}
+                  onChangeText={setPrefTime}
+                  returnKeyType="done"
+                />
+              </View>
+            )}
 
             {/* Actions */}
             <View style={s.modalActions}>
@@ -591,9 +614,9 @@ export default function JobDetailScreen({ navigation, route }) {
                 <Text style={s.modalCancelTxt}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[s.modalConfirm, (!selDate || !selSlot || rescheduling) && { opacity:0.5 }]}
+                style={[s.modalConfirm, (!selDate || !selSlot || (selSlot !== "Flexible" && !prefTime.trim()) || rescheduling) && { opacity:0.5 }]}
                 onPress={handleReschedule}
-                disabled={!selDate || !selSlot || rescheduling}
+                disabled={!selDate || !selSlot || (selSlot !== "Flexible" && !prefTime.trim()) || rescheduling}
               >
                 {rescheduling
                   ? <ActivityIndicator size="small" color="#fff" />
@@ -726,6 +749,11 @@ const s = StyleSheet.create({
   slotChipOn:{ backgroundColor:G.primary, borderColor:G.primary },
   slotChipTxt:{ fontSize:13, fontWeight:"700", color:G.med },
   slotChipTxtOn:{ color:"#fff" },
+
+  // Preferred time
+  prefTimeWrap:{ marginBottom:18 },
+  prefTimeLabel:{ fontSize:12, fontWeight:"700", color:G.med, marginBottom:8 },
+  prefTimeInput:{ backgroundColor:G.bg, borderRadius:12, paddingHorizontal:16, paddingVertical:12, fontSize:15, fontWeight:"600", color:G.dark, borderWidth:1.5, borderColor:G.border },
 
   // Modal actions
   modalActions:{ flexDirection:"row", gap:10 },

@@ -291,6 +291,8 @@ export default function PostJobScreen({ navigation }) {
     if (s === 4) {
       if (!date)     e.date     = "Please select a date";
       if (!timeSlot) e.timeSlot = "Please choose a time slot";
+      if (timeSlot && timeSlot !== "Flexible" && !preferredTime.trim())
+        e.preferredTime = `Please enter a preferred arrival time for the ${timeSlot} slot (e.g. 10:00 AM)`;
     }
     return e;
   };
@@ -609,15 +611,17 @@ export default function PostJobScreen({ navigation }) {
             </View>
             {timeSlot ? (
               <View style={{marginTop:14}}>
-                <FLabel>
-                  {timeSlot==="Flexible" ? "Specific time (optional)" : "Preferred arrival time (optional)"}
+                <FLabel req={timeSlot !== "Flexible"}>
+                  {timeSlot === "Flexible" ? "Specific time (optional)" : `Preferred arrival time in the ${timeSlot}`}
                 </FLabel>
                 <FInput
                   value={preferredTime}
-                  onChange={setPreferredTime}
-                  placeholder={timeSlot==="Flexible" ? "e.g. 09:30" : "e.g. 10:00 AM"}
+                  onChange={v => { setPreferredTime(v); setErrors(p => ({ ...p, preferredTime: undefined })); }}
+                  placeholder={timeSlot === "Flexible" ? "e.g. 09:30 AM" : timeSlot === "Morning" ? "e.g. 9:00 AM" : timeSlot === "Afternoon" ? "e.g. 2:00 PM" : "e.g. 5:30 PM"}
                   keyboard="numbers-and-punctuation"
+                  err={!!errors.preferredTime}
                 />
+                {errors.preferredTime ? <ErrMsg msg={errors.preferredTime} /> : null}
               </View>
             ) : null}
           </>
