@@ -23,6 +23,10 @@ const jobSchema = new mongoose.Schema({
   },
   region:   { type: String, default: "" },
   notes:    { type: String, default: "" },
+  payment: {
+    amount:   { type: Number, default: null },
+    currency: { type: String, default: "GBP" },
+  },
   status: {
     type: String,
     enum: ["pending_review", "approved", "assigned", "in_progress", "completed", "cancelled", "rejected"],

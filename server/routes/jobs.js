@@ -171,6 +171,9 @@ router.post("/", verifyCompany, async (req, res) => {
       schedule: req.body.schedule,
       region:   req.body.region || "",
       notes:    req.body.notes || "",
+      payment:  req.body.payment?.amount
+        ? { amount: parseFloat(req.body.payment.amount), currency: req.body.payment.currency || "GBP" }
+        : undefined,
     });
 
     // Emails: confirmation to company + notification to admin
@@ -208,7 +211,7 @@ router.get("/my", verifyCompany, async (req, res) => {
 // PUT /api/jobs/:id/reschedule — company reschedules their own job
 router.put("/:id/reschedule", verifyCompany, async (req, res) => {
   try {
-    const { date, timeSlot } = req.body;
+    const { date, timeSlot, preferredTime } = req.body;
     if (!date || !timeSlot) return res.status(400).json({ message: "Date and time slot are required." });
 
     const job = await Job.findById(req.params.id);
@@ -228,13 +231,13 @@ router.put("/:id/reschedule", verifyCompany, async (req, res) => {
       : "—";
     const oldSlot = job.schedule?.timeSlot || "—";
 
-    job.schedule = { ...job.schedule, date: newDate, timeSlot, preferredTime: timeSlot };
+    job.schedule = { ...job.schedule, date: newDate, timeSlot, preferredTime: preferredTime || "" };
     await job.save();
 
     // Update linked booking too if it exists
     if (job.linkedBookingId) {
       await Booking.findByIdAndUpdate(job.linkedBookingId, {
-        $set: { "schedule.date": newDate, "schedule.timeSlot": timeSlot, "schedule.preferredTime": timeSlot },
+        $set: { "schedule.date": newDate, "schedule.timeSlot": timeSlot, "schedule.preferredTime": preferredTime || "" },
       });
     }
 
@@ -391,13 +394,20 @@ router.put("/:id/approve", async (req, res) => {
         phone:     job.contact?.phone || job.company.phone,
       },
       service:  job.service,
-      details:  job.details,
+      details: {
+        ...job.details,
+        address:  [job.property?.address, job.property?.postcode].filter(Boolean).join(", "),
+        postcode: job.property?.postcode || "",
+      },
       property: job.property,
       schedule: job.schedule,
       region:   job.region,
       status:   "Confirmed",
-      leadSource:      "Company Job",
-      noPaymentRequired: true,
+      leadSource: "Company Job",
+      noPaymentRequired: !job.payment?.amount,
+      payment: job.payment?.amount
+        ? { amount: job.payment.amount, currency: job.payment.currency || "GBP", status: "Pending", billingType: "flat" }
+        : undefined,
       meta: { jobId: job._id },
     });
 

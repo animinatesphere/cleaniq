@@ -4,7 +4,7 @@ import {
   MapPin, Calendar, ChevronRight, User, X, Building2,
   Phone, Mail, Clock, Home as HomeIcon, Repeat,
   ShoppingBag, PawPrint, Hash, UserCheck, FileText,
-  AlertCircle, Info, Zap, UserCog, ChevronDown,
+  AlertCircle, Info, Zap, UserCog, ChevronDown, PoundSterling,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL;
@@ -617,6 +617,21 @@ export default function CompanyJobs() {
                               Supplies by: {selected.details.suppliesProvidedBy}
                             </p>
                           )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Quoted Price */}
+                    {selected.payment?.amount > 0 && (
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center text-amber-400 mt-1 shrink-0">
+                          <PoundSterling size={20} />
+                        </div>
+                        <div>
+                          <h4 className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Quoted Price</h4>
+                          <p className="font-bold text-amber-400 text-lg">
+                            £{Number(selected.payment.amount).toFixed(2)}
+                          </p>
                         </div>
                       </div>
                     )}

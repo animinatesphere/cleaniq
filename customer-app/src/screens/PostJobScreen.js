@@ -227,6 +227,7 @@ export default function PostJobScreen({ navigation }) {
   const [date,          setDate]          = useState("");
   const [timeSlot,      setTimeSlot]      = useState("");
   const [preferredTime, setPreferredTime] = useState("");
+  const [price,         setPrice]         = useState("");
   const [duration,      setDuration]      = useState(0);
   const [customDur,     setCustomDur]     = useState("");
   const [notes,         setNotes]         = useState("");
@@ -329,6 +330,7 @@ export default function PostJobScreen({ navigation }) {
           details:  { duration:dur, frequency, suppliesProvidedBy:supplies, ...rooms, hasPet },
           property: { address, postcode },
           schedule: { date, timeSlot, preferredTime },
+          payment:  price.trim() ? { amount: parseFloat(price), currency: "GBP" } : undefined,
           region, notes,
         }),
       });
@@ -663,6 +665,24 @@ export default function PostJobScreen({ navigation }) {
             </Text>
           </View>
         )}
+      </View>
+
+      {/* Price */}
+      <View style={s.card}>
+        <Text style={s.cardH}>Quoted Price</Text>
+        <Text style={s.cardSub}>How much will you be paying for this job? (in £)</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: errors.price ? "#EF4444" : G.border, borderRadius: 12, backgroundColor: G.inputBg, paddingHorizontal: 14, marginTop: 8 }}>
+          <Text style={{ fontSize: 18, fontWeight: "700", color: G.dark, marginRight: 4 }}>£</Text>
+          <TextInput
+            value={price}
+            onChangeText={v => { setPrice(v); setErrors(p => ({ ...p, price: undefined })); }}
+            placeholder="0.00"
+            placeholderTextColor={G.muted}
+            keyboardType="decimal-pad"
+            style={{ flex: 1, fontSize: 18, color: G.dark, paddingVertical: 14 }}
+          />
+        </View>
+        {errors.price ? <ErrMsg msg={errors.price} /> : null}
       </View>
 
       {/* Notes */}
