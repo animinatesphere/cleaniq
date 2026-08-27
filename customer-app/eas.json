@@ -26,10 +26,10 @@
       },
       "android": {
         "buildType": "app-bundle",
-        "gradleCommand": ":app:bundleRelease"
+        "gradleCommand": ":app:bundleRelease -x lintVitalAnalyzeRelease"
       },
       "env": {
-        "GRADLE_OPTS": "-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError",
+        "GRADLE_OPTS": "-Xmx4096m -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError",
         "NODE_ENV": "production"
       }
     }
