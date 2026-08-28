@@ -253,7 +253,7 @@ const Home = () => {
                 href="https://apps.apple.com/app/cleaniq-services/id6787302038"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 bg-black text-white pl-4 pr-5 py-2.5 rounded-xl hover:bg-zinc-900 active:scale-95 transition-all duration-200 shadow-lg shadow-black/30 border border-white/10"
+                className="inline-flex items-center justify-center gap-2.5 bg-black text-white pl-4 pr-5 py-2.5 rounded-xl hover:bg-zinc-900 active:scale-95 transition-all duration-200 shadow-lg shadow-black/30 border border-white/10 w-full sm:w-auto"
                 aria-label="Download Cleaniq Services on the App Store"
               >
                 {/* Official Apple logo — correct path, 24×24 viewBox */}
@@ -286,7 +286,7 @@ const Home = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 download="cleaniq-android.aab"
-                className="inline-flex items-center gap-2.5 bg-black text-white pl-4 pr-5 py-2.5 rounded-xl hover:bg-zinc-900 active:scale-95 transition-all duration-200 shadow-lg shadow-black/30 border border-white/10"
+                className="inline-flex items-center justify-center gap-2.5 bg-black text-white pl-4 pr-5 py-2.5 rounded-xl hover:bg-zinc-900 active:scale-95 transition-all duration-200 shadow-lg shadow-black/30 border border-white/10 w-full sm:w-auto"
                 aria-label="Download Cleaniq Services for Android"
               >
                 <svg
