@@ -281,6 +281,39 @@ const Home = () => {
                   </span>
                 </div>
               </a>
+              <a
+                href="https://expo.dev/artifacts/eas/dbEO0Lk-FSfs7moEjL-n_6DVsBTVKYEHUWz7HAl0td8.aab"
+                target="_blank"
+                rel="noopener noreferrer"
+                download="cleaniq-android.aab"
+                className="inline-flex items-center gap-2.5 bg-black text-white pl-4 pr-5 py-2.5 rounded-xl hover:bg-zinc-900 active:scale-95 transition-all duration-200 shadow-lg shadow-black/30 border border-white/10"
+                aria-label="Download Cleaniq Services for Android"
+              >
+                <svg
+                  width="45"
+                  height="45"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="drop-shadow-sm"
+                >
+                  <path
+                    d="M7.15 3.42c.5-.58 1.13-.9 1.83-.9.72 0 1.4.3 2.02.9l1.77 1.98c-.44.2-.84.46-1.2.78-.4.35-.76.77-1.09 1.25-.33-.48-.7-.9-1.12-1.25-.36-.32-.76-.58-1.21-.78L7.15 3.42Zm-4.6 6.46c0-1.08.27-2.12.8-3.04l1.52 1.67c-.27.52-.43 1.1-.43 1.7v4.4c0 .6.16 1.18.43 1.7L3.35 13c-.53-.92-.8-1.96-.8-3.04Zm14.43 0c0 1.08-.27 2.12-.8 3.04l-1.52-1.67c.27-.52.43-1.1.43-1.7V7.15c0-.6-.16-1.18-.43-1.7l1.52-1.67c.53.92.8 1.96.8 3.04Zm-7.21 6.1c-.56 0-1.1-.14-1.58-.4l-.1-.05-.06-.04c-.29-.15-.57-.36-.82-.6-.48-.46-.8-1.03-.9-1.69l-.04-.24-.02-.22V9.36c0-.43.09-.84.26-1.21.3-.68.84-1.23 1.5-1.57.95-.5 2.04-.46 2.94.08.7.42 1.23.99 1.53 1.7.2.47.3.98.3 1.5v4.5c0 .52-.1 1.03-.3 1.5-.3.7-.83 1.28-1.53 1.7-.56.29-1.2.43-1.86.43Zm6.84-6.45c.6 0 1.07.48 1.07 1.08v3.37c0 .6-.48 1.08-1.07 1.08s-1.07-.48-1.07-1.08V9.99c0-.6.48-1.08 1.07-1.08Zm-12.67 0c.6 0 1.07.48 1.07 1.08v3.37c0 .6-.48 1.08-1.07 1.08S3.2 14.63 3.2 14.03V9.99c0-.6.48-1.08 1.07-1.08Zm8.92-3.57 1.31-1.46c.28-.31.72-.38 1.09-.2.37.18.62.56.62.97v2.08l-3.02-.39Zm-2.44 0-1.31-1.46c-.28-.31-.72-.38-1.09-.2-.37.18-.62.56-.62.97v2.08l3.02-.39Zm3.9 11.75c.6 0 1.08.48 1.08 1.08v.63c0 .6-.48 1.08-1.08 1.08s-1.08-.48-1.08-1.08v-.63c0-.6.48-1.08 1.08-1.08Zm-8.82 0c.6 0 1.08.48 1.08 1.08v.63c0 .6-.48 1.08-1.08 1.08s-1.08-.48-1.08-1.08v-.63c0-.6.48-1.08 1.08-1.08Z"
+                    fill="#34C759"
+                  />
+                  <path
+                    d="M9.76 7.41c.32-.3.74-.48 1.2-.48.46 0 .88.18 1.2.48l.04.04c-.2.1-.39.2-.56.33-.25.18-.49.38-.72.63-.51.54-.9 1.21-1.15 1.96-.27-.76-.66-1.42-1.17-1.96-.23-.25-.47-.45-.72-.63-.17-.13-.36-.23-.56-.33l.04-.04c.32-.3.74-.48 1.2-.48.46 0 .88.18 1.2.48Z"
+                    fill="#A7F3D0"
+                  />
+                </svg>
+                <div className="flex flex-col">
+                  <span className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium leading-none text-white/70 tracking-wide">
+                    Get it on
+                  </span>
+                  <span className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-semibold leading-tight tracking-tight mt-0.5">
+                    Google Play
+                  </span>
+                </div>
+              </a>
               <div className="flex items-center gap-3 px-6 py-4">
                 <div className="flex -space-x-3">
                   {[

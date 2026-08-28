@@ -31,13 +31,16 @@ const Footer = () => {
     document.body.appendChild(mjqScript);
 
     const barkScript = document.createElement("script");
-    barkScript.src = "https://www.bark.com/assets/js/frontend-v2/widgets-v2.7f94dbb7d9ce0d27fb12f0374e491545.v2.js";
+    barkScript.src =
+      "https://www.bark.com/assets/js/frontend-v2/widgets-v2.7f94dbb7d9ce0d27fb12f0374e491545.v2.js";
     barkScript.defer = true;
     document.body.appendChild(barkScript);
 
     return () => {
-      if (document.body.contains(mjqScript)) document.body.removeChild(mjqScript);
-      if (document.body.contains(barkScript)) document.body.removeChild(barkScript);
+      if (document.body.contains(mjqScript))
+        document.body.removeChild(mjqScript);
+      if (document.body.contains(barkScript))
+        document.body.removeChild(barkScript);
     };
   }, []);
 
@@ -81,22 +84,70 @@ const Footer = () => {
 
               {/* App Store badge */}
               <div>
-                <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">Get Our App</p>
-                <a
-                  href="https://apps.apple.com/app/cleaniq-services/id6787302038"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2.5 bg-black border border-white/15 hover:bg-zinc-900 hover:border-white/25 text-white pl-3.5 pr-4 py-2.5 rounded-xl transition-all duration-200 active:scale-95 shadow-lg shadow-black/40"
-                  aria-label="Download Cleaniq Services on the App Store"
-                >
-                  <svg width="19" height="19" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-                  </svg>
-                  <div className="flex flex-col">
-                    <span className="text-[9px] font-medium leading-none text-white/60 tracking-wide">Download on the</span>
-                    <span className="text-[14px] font-semibold leading-tight tracking-tight mt-0.5">App Store</span>
-                  </div>
-                </a>
+                <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">
+                  Get Our App
+                </p>
+                <div className="flex flex-col gap-3">
+                  <a
+                    href="https://apps.apple.com/app/cleaniq-services/id6787302038"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2.5 bg-black border border-white/15 hover:bg-zinc-900 hover:border-white/25 text-white pl-3.5 pr-4 py-2.5 rounded-xl transition-all duration-200 active:scale-95 shadow-lg shadow-black/40"
+                    aria-label="Download Cleaniq Services on the App Store"
+                  >
+                    <svg
+                      width="19"
+                      height="19"
+                      viewBox="0 0 24 24"
+                      fill="white"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+                    </svg>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-medium leading-none text-white/60 tracking-wide">
+                        Download on the
+                      </span>
+                      <span className="text-[14px] font-semibold leading-tight tracking-tight mt-0.5">
+                        App Store
+                      </span>
+                    </div>
+                  </a>
+
+                  <a
+                    href="https://expo.dev/artifacts/eas/dbEO0Lk-FSfs7moEjL-n_6DVsBTVKYEHUWz7HAl0td8.aab"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download="cleaniq-android.aab"
+                    className="inline-flex items-center gap-2.5 bg-black border border-white/15 hover:bg-zinc-900 hover:border-white/25 text-white pl-3.5 pr-4 py-2.5 rounded-xl transition-all duration-200 active:scale-95 shadow-lg shadow-black/40"
+                    aria-label="Download Cleaniq Services for Android"
+                  >
+                    <svg
+                      width="19"
+                      height="19"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M7.15 3.42c.5-.58 1.13-.9 1.83-.9.72 0 1.4.3 2.02.9l1.77 1.98c-.44.2-.84.46-1.2.78-.4.35-.76.77-1.09 1.25-.33-.48-.7-.9-1.12-1.25-.36-.32-.76-.58-1.21-.78L7.15 3.42Zm-4.6 6.46c0-1.08.27-2.12.8-3.04l1.52 1.67c-.27.52-.43 1.1-.43 1.7v4.4c0 .6.16 1.18.43 1.7L3.35 13c-.53-.92-.8-1.96-.8-3.04Zm14.43 0c0 1.08-.27 2.12-.8 3.04l-1.52-1.67c.27-.52.43-1.1.43-1.7V7.15c0-.6-.16-1.18-.43-1.7l1.52-1.67c.53.92.8 1.96.8 3.04Zm-7.21 6.1c-.56 0-1.1-.14-1.58-.4l-.1-.05-.06-.04c-.29-.15-.57-.36-.82-.6-.48-.46-.8-1.03-.9-1.69l-.04-.24-.02-.22V9.36c0-.43.09-.84.26-1.21.3-.68.84-1.23 1.5-1.57.95-.5 2.04-.46 2.94.08.7.42 1.23.99 1.53 1.7.2.47.3.98.3 1.5v4.5c0 .52-.1 1.03-.3 1.5-.3.7-.83 1.28-1.53 1.7-.56.29-1.2.43-1.86.43Zm6.84-6.45c.6 0 1.07.48 1.07 1.08v3.37c0 .6-.48 1.08-1.07 1.08s-1.07-.48-1.07-1.08V9.99c0-.6.48-1.08 1.07-1.08Zm-12.67 0c.6 0 1.07.48 1.07 1.08v3.37c0 .6-.48 1.08-1.07 1.08S3.2 14.63 3.2 14.03V9.99c0-.6.48-1.08 1.07-1.08Zm8.92-3.57 1.31-1.46c.28-.31.72-.38 1.09-.2.37.18.62.56.62.97v2.08l-3.02-.39Zm-2.44 0-1.31-1.46c-.28-.31-.72-.38-1.09-.2-.37.18-.62.56-.62.97v2.08l3.02-.39Zm3.9 11.75c.6 0 1.08.48 1.08 1.08v.63c0 .6-.48 1.08-1.08 1.08s-1.08-.48-1.08-1.08v-.63c0-.6.48-1.08 1.08-1.08Zm-8.82 0c.6 0 1.08.48 1.08 1.08v.63c0 .6-.48 1.08-1.08 1.08s-1.08-.48-1.08-1.08v-.63c0-.6.48-1.08 1.08-1.08Z"
+                        fill="#34C759"
+                      />
+                      <path
+                        d="M9.76 7.41c.32-.3.74-.48 1.2-.48.46 0 .88.18 1.2.48l.04.04c-.2.1-.39.2-.56.33-.25.18-.49.38-.72.63-.51.54-.9 1.21-1.15 1.96-.27-.76-.66-1.42-1.17-1.96-.23-.25-.47-.45-.72-.63-.17-.13-.36-.23-.56-.33l.04-.04c.32-.3.74-.48 1.2-.48.46 0 .88.18 1.2.48Z"
+                        fill="#A7F3D0"
+                      />
+                    </svg>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-medium leading-none text-white/60 tracking-wide">
+                        Get it on
+                      </span>
+                      <span className="text-[14px] font-semibold leading-tight tracking-tight mt-0.5">
+                        Google Play
+                      </span>
+                    </div>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -206,7 +257,6 @@ const Footer = () => {
             Trusted &amp; Verified On
           </p>
           <div className="flex flex-wrap items-center gap-2">
-
             {/* MyJobQuote badge */}
             {/* <div
               style={{ transform: "scale(0.52)", transformOrigin: "left center", height: 32, overflow: "hidden" }}
@@ -236,27 +286,52 @@ const Footer = () => {
 
             {/* Google Reviews badge */}
             <a
-              href={import.meta.env.VITE_GMB_REVIEW_URL || "https://g.page/r/CTGJLR1Z7dySEBM/review"}
+              href={
+                import.meta.env.VITE_GMB_REVIEW_URL ||
+                "https://g.page/r/CTGJLR1Z7dySEBM/review"
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 hover:bg-white/10 transition-colors flex-shrink-0"
               aria-label="See our Google Reviews"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  fill="#EA4335"
+                />
               </svg>
               <div>
-                <p className="text-[9px] font-black text-white/50 leading-none">Google</p>
+                <p className="text-[9px] font-black text-white/50 leading-none">
+                  Google
+                </p>
                 <div className="flex items-center gap-px mt-0.5">
-                  {[1,2,3,4,5].map((s) => (
-                    <svg key={s} width="7" height="7" viewBox="0 0 24 24" fill="#FBBC05">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <svg
+                      key={s}
+                      width="7"
+                      height="7"
+                      viewBox="0 0 24 24"
+                      fill="#FBBC05"
+                    >
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                     </svg>
                   ))}
-                  <span className="text-[8px] font-bold text-slate-400 ml-0.5">5.0</span>
+                  <span className="text-[8px] font-bold text-slate-400 ml-0.5">
+                    5.0
+                  </span>
                 </div>
               </div>
             </a>
@@ -264,11 +339,13 @@ const Footer = () => {
             {/* Stripe badge */}
             <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 flex-shrink-0">
               <svg width="28" height="12" viewBox="0 0 60 26" fill="none">
-                <path d="M5.452 10.172c0-.613.504-.849 1.34-.849 1.195 0 2.709.362 3.904 1.01V6.67c-1.307-.52-2.6-.724-3.904-.724C3.29 5.946 1 7.447 1 10.316c0 4.46 6.14 3.748 6.14 5.67 0 .724-.63.96-1.508.96-1.307 0-2.976-.543-4.294-1.274v3.704c1.463.63 2.94.897 4.294.897 3.276 0 5.53-1.618 5.53-4.52-.016-4.813-6.71-3.955-6.71-5.581zm14.543-3.85l-2.45.52-.016 12.02h3.386V6.994l-.92-.672zm5.403.672V6.67l-3.386.016v12.687l3.386-.016V10.9c.8-1.046 2.16-.854 2.578-.712V6.91c-.433-.16-2.02-.4-2.578.084zm5.64-1.843l-3.386.724v2.725l3.386-.016V18.7h3.387V6.81l-3.387.341zm4.36 12.352h3.387V6.655h-3.387V18.5zm1.697-13.48c1.083 0 1.955-.872 1.955-1.956C38.05.98 37.178 0 36.095 0c-1.083 0-1.955.98-1.955 2.064 0 1.084.872 1.956 1.955 1.956zm9.048 12.736c-1.084 0-1.83-.48-1.83-1.956V9.896h2.24V6.994h-2.24V3.75l-3.42.718v2.526H38.5v2.903h1.393v6.22c0 2.528 1.272 3.883 3.812 3.883.928 0 1.97-.236 2.67-.63v-2.77c-.522.27-1.24.557-1.78.557z" fill="#635BFF"/>
+                <path
+                  d="M5.452 10.172c0-.613.504-.849 1.34-.849 1.195 0 2.709.362 3.904 1.01V6.67c-1.307-.52-2.6-.724-3.904-.724C3.29 5.946 1 7.447 1 10.316c0 4.46 6.14 3.748 6.14 5.67 0 .724-.63.96-1.508.96-1.307 0-2.976-.543-4.294-1.274v3.704c1.463.63 2.94.897 4.294.897 3.276 0 5.53-1.618 5.53-4.52-.016-4.813-6.71-3.955-6.71-5.581zm14.543-3.85l-2.45.52-.016 12.02h3.386V6.994l-.92-.672zm5.403.672V6.67l-3.386.016v12.687l3.386-.016V10.9c.8-1.046 2.16-.854 2.578-.712V6.91c-.433-.16-2.02-.4-2.578.084zm5.64-1.843l-3.386.724v2.725l3.386-.016V18.7h3.387V6.81l-3.387.341zm4.36 12.352h3.387V6.655h-3.387V18.5zm1.697-13.48c1.083 0 1.955-.872 1.955-1.956C38.05.98 37.178 0 36.095 0c-1.083 0-1.955.98-1.955 2.064 0 1.084.872 1.956 1.955 1.956zm9.048 12.736c-1.084 0-1.83-.48-1.83-1.956V9.896h2.24V6.994h-2.24V3.75l-3.42.718v2.526H38.5v2.903h1.393v6.22c0 2.528 1.272 3.883 3.812 3.883.928 0 1.97-.236 2.67-.63v-2.77c-.522.27-1.24.557-1.78.557z"
+                  fill="#635BFF"
+                />
               </svg>
               <p className="text-[9px] font-bold text-white/40">Secure Pay</p>
             </div>
-
           </div>
         </div>
 
