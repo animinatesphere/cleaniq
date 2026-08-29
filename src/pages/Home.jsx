@@ -284,7 +284,7 @@ const Home = () => {
               {/* apple store  */}
               {/* play store button */}s
               <a
-                href="https://expo.dev/artifacts/eas/dbEO0Lk-FSfs7moEjL-n_6DVsBTVKYEHUWz7HAl0td8.aab"
+                href="https://expo.dev/artifacts/eas/yUF7N6zJ9lCSOwooWtkD7nZjaRD5jBnaihsb7UOgF1A.apk"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Download Cleaniq Services for Android"
