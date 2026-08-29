@@ -7,14 +7,13 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "ios": {
-        "simulator": true
-      }
+      "ios": { "simulator": true }
     },
     "preview": {
       "distribution": "internal",
-      "ios": {
-        "distribution": "internal"
+      "ios": { "distribution": "internal" },
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {
@@ -31,6 +30,14 @@
       "env": {
         "GRADLE_OPTS": "-Xmx4096m -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError",
         "NODE_ENV": "production"
+      }
+    },
+    "production-apk": {
+      "extends": "production",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease -x lintVitalAnalyzeRelease"
       }
     }
   },
