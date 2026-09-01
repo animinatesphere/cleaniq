@@ -1153,6 +1153,11 @@ const Bookings = () => {
   const [formErrors, setFormErrors] = useState({});
   const [fieldTouched, setFieldTouched] = useState({});
   const [resendingConfirmation, setResendingConfirmation] = useState(false);
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [rescheduleDate,      setRescheduleDate]      = useState("");
+  const [rescheduleSlot,      setRescheduleSlot]      = useState("");
+  const [rescheduleTime,      setRescheduleTime]      = useState("");
+  const [rescheduling,        setRescheduling]        = useState(false);
   const [selectedBookings, setSelectedBookings] = useState(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [bookingsPage, setBookingsPage] = useState(1);
@@ -1820,6 +1825,32 @@ const Bookings = () => {
       } catch {
         setStatusMessage({ type: "error", text: "Failed to delete booking" });
       }
+    }
+  };
+
+  const handleReschedule = async () => {
+    if (!selectedBooking?._id || !rescheduleDate || !rescheduleSlot) return;
+    setRescheduling(true);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/bookings/${selectedBooking._id}/reschedule`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${admTok()}` },
+          body: JSON.stringify({ date: rescheduleDate, timeSlot: rescheduleSlot, preferredTime: rescheduleTime }),
+        }
+      );
+      if (!res.ok) throw new Error((await res.json()).message || "Failed");
+      const data = await res.json();
+      setSelectedBooking(data.booking);
+      setBookings((prev) => prev.map((b) => b._id === data.booking._id ? data.booking : b));
+      setShowRescheduleModal(false);
+      setRescheduleDate(""); setRescheduleSlot(""); setRescheduleTime("");
+      setStatusMessage({ type: "success", text: "Booking rescheduled and customer notified." });
+    } catch (e) {
+      setStatusMessage({ type: "error", text: e.message || "Reschedule failed." });
+    } finally {
+      setRescheduling(false);
     }
   };
 
@@ -4195,6 +4226,18 @@ ${extrasRows}
                     Cancel
                   </button>
                   <button
+                    onClick={() => {
+                      setRescheduleDate(selectedBooking.schedule?.date ? new Date(selectedBooking.schedule.date).toISOString().slice(0,10) : "");
+                      setRescheduleSlot(selectedBooking.schedule?.timeSlot || "");
+                      setRescheduleTime(selectedBooking.schedule?.preferredTime || "");
+                      setShowRescheduleModal(true);
+                    }}
+                    title="Reschedule this booking and notify the customer"
+                    className="py-3 px-4 rounded-xl bg-amber-500/15 border border-amber-500/25 text-amber-400 text-xs font-black uppercase tracking-widest hover:bg-amber-500/25 transition-all flex items-center gap-2"
+                  >
+                    <Calendar size={13} /> Reschedule
+                  </button>
+                  <button
                     onClick={resendConfirmation}
                     disabled={resendingConfirmation}
                     title="Resend booking confirmation email to customer"
@@ -4211,6 +4254,96 @@ ${extrasRows}
                   </button>
                 </>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reschedule Modal */}
+      {showRescheduleModal && selectedBooking && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 sm:p-6 lg:p-10">
+          <div
+            className="absolute inset-0 bg-primary-dark/60 backdrop-blur-md"
+            onClick={() => setShowRescheduleModal(false)}
+          />
+          <div className="relative w-full max-w-md bg-[#0B2D22] rounded-[28px] overflow-hidden shadow-2xl border border-white/10 animate-in fade-in zoom-in-95">
+            {/* Header */}
+            <div className="bg-[#0D3527] border-b border-white/[0.07] px-6 py-5 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                  <Calendar size={20} className="text-amber-400" />
+                  Reschedule Booking
+                </h3>
+                <p className="text-white/60 text-[11px] font-bold uppercase tracking-widest mt-1">
+                  {selectedBooking.bookingId} · Customer will be emailed
+                </p>
+              </div>
+              <button
+                onClick={() => setShowRescheduleModal(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-all"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              {/* New Date */}
+              <div>
+                <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-2">New Date</label>
+                <input
+                  type="date"
+                  value={rescheduleDate}
+                  min={new Date().toISOString().slice(0, 10)}
+                  onChange={(e) => setRescheduleDate(e.target.value)}
+                  className="w-full bg-white/[0.06] border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-semibold focus:outline-none focus:border-amber-400/50 focus:bg-white/[0.09] transition-all"
+                />
+              </div>
+
+              {/* Time Slot */}
+              <div>
+                <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-2">Time Slot</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {["Morning", "Afternoon", "Evening", "Flexible"].map((slot) => (
+                    <button
+                      key={slot}
+                      onClick={() => setRescheduleSlot(slot)}
+                      className={`py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${
+                        rescheduleSlot === slot
+                          ? "bg-amber-500 border-amber-400 text-white shadow-lg shadow-amber-500/20"
+                          : "bg-white/[0.05] border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
+                      }`}
+                    >
+                      {slot}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Preferred Time */}
+              {rescheduleSlot && rescheduleSlot !== "Flexible" && (
+                <div>
+                  <label className="block text-[10px] font-black text-white/50 uppercase tracking-widest mb-2">
+                    Preferred Arrival Time
+                  </label>
+                  <input
+                    type="text"
+                    value={rescheduleTime}
+                    onChange={(e) => setRescheduleTime(e.target.value)}
+                    placeholder={rescheduleSlot === "Morning" ? "e.g. 9:00 AM" : rescheduleSlot === "Afternoon" ? "e.g. 2:00 PM" : "e.g. 5:30 PM"}
+                    className="w-full bg-white/[0.06] border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-semibold placeholder:text-white/30 focus:outline-none focus:border-amber-400/50 focus:bg-white/[0.09] transition-all"
+                  />
+                </div>
+              )}
+
+              {/* Confirm */}
+              <button
+                onClick={handleReschedule}
+                disabled={rescheduling || !rescheduleDate || !rescheduleSlot}
+                className="w-full py-4 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
+              >
+                <Calendar size={15} />
+                {rescheduling ? "Rescheduling…" : "Confirm Reschedule & Notify Customer"}
+              </button>
             </div>
           </div>
         </div>

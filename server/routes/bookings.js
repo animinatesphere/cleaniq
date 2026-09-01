@@ -235,19 +235,18 @@ router.post("/public", async (req, res) => {
             }),
             amount: newBooking.payment?.amount,
           };
-          const ms24h = 24 * 60 * 60 * 1000;
-          const ms3h = 3 * 60 * 60 * 1000;
-          const soon = Date.now() + 2 * 60 * 1000;
-          await scheduleTask(
-            "booking_reminder_24h",
-            new Date(Math.max(bookingDate.getTime() - ms24h, soon)),
-            payload,
-          );
-          await scheduleTask(
-            "booking_reminder_3h",
-            new Date(Math.max(bookingDate.getTime() - ms3h, soon)),
-            payload,
-          );
+          const ms24h  = 24 * 60 * 60 * 1000;
+          const ms3h   =  3 * 60 * 60 * 1000;
+          const MIN_LEAD = 15 * 60 * 1000; // skip if trigger is < 15 min away
+          const now    = Date.now();
+          const t24h   = bookingDate.getTime() - ms24h;
+          const t3h    = bookingDate.getTime() - ms3h;
+          if (t24h > now + MIN_LEAD) {
+            await scheduleTask("booking_reminder_24h", new Date(t24h), payload);
+          }
+          if (t3h > now + MIN_LEAD) {
+            await scheduleTask("booking_reminder_3h", new Date(t3h), payload);
+          }
         }
       } catch (schedErr) {
         console.error("⚠️ Failed to schedule public booking reminders:", schedErr.message);
@@ -699,19 +698,18 @@ router.post("/", async (req, res) => {
           }),
           amount: newBooking.payment?.amount,
         };
-        const ms24h = 24 * 60 * 60 * 1000;
-        const ms3h = 3 * 60 * 60 * 1000;
-        const soon = Date.now() + 2 * 60 * 1000; // fire in 2 min if already past-due
-        await scheduleTask(
-          "booking_reminder_24h",
-          new Date(Math.max(bookingDate.getTime() - ms24h, soon)),
-          payload,
-        );
-        await scheduleTask(
-          "booking_reminder_3h",
-          new Date(Math.max(bookingDate.getTime() - ms3h, soon)),
-          payload,
-        );
+        const ms24h  = 24 * 60 * 60 * 1000;
+        const ms3h   =  3 * 60 * 60 * 1000;
+        const MIN_LEAD = 15 * 60 * 1000; // skip if trigger is < 15 min away
+        const now    = Date.now();
+        const t24h   = bookingDate.getTime() - ms24h;
+        const t3h    = bookingDate.getTime() - ms3h;
+        if (t24h > now + MIN_LEAD) {
+          await scheduleTask("booking_reminder_24h", new Date(t24h), payload);
+        }
+        if (t3h > now + MIN_LEAD) {
+          await scheduleTask("booking_reminder_3h", new Date(t3h), payload);
+        }
       }
     } catch (schedErr) {
       console.error(
@@ -1251,6 +1249,81 @@ router.put("/:id", async (req, res) => {
     res.json(updatedBooking);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+});
+
+// PUT /:id/reschedule — Admin reschedules a booking and emails the customer
+router.put("/:id/reschedule", adminAuth, async (req, res) => {
+  try {
+    const { date, timeSlot, preferredTime } = req.body;
+    if (!date || !timeSlot)
+      return res.status(400).json({ message: "date and timeSlot are required." });
+
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: "Booking not found." });
+
+    const oldDate = booking.schedule?.date
+      ? new Date(booking.schedule.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+      : "—";
+    const oldSlot = booking.schedule?.timeSlot || "—";
+    const oldPref = booking.schedule?.preferredTime || "";
+
+    booking.schedule = {
+      ...booking.schedule,
+      date:          new Date(date),
+      timeSlot,
+      preferredTime: preferredTime || "",
+    };
+    await booking.save();
+
+    const newDateFmt = new Date(date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    const customerEmail = booking.customer?.email;
+    const customerName  = booking.customer?.firstName || "there";
+
+    if (customerEmail) {
+      setImmediate(async () => {
+        try {
+          await sendEmail({
+            to: customerEmail,
+            subject: `📅 Your booking has been rescheduled – ${booking.bookingId} | Cleaniq Services`,
+            html: `
+<div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:580px;margin:auto;background:#f8fafc;padding:32px;border-radius:20px;">
+  <div style="background:#0F6B4C;border-radius:16px;padding:28px 32px;margin-bottom:24px;">
+    <h1 style="color:#fff;font-size:22px;font-weight:800;margin:0 0 4px;">Booking Rescheduled</h1>
+    <p style="color:#a7f3d0;font-size:13px;margin:0;font-weight:600;">Ref: ${booking.bookingId}</p>
+  </div>
+  <div style="background:#fff;border-radius:16px;padding:28px 32px;margin-bottom:16px;border:1px solid #e2e8f0;">
+    <p style="font-size:15px;color:#1e293b;margin:0 0 20px;">Hi <strong>${customerName}</strong>,</p>
+    <p style="font-size:14px;color:#475569;margin:0 0 24px;">Your cleaning appointment has been rescheduled by our team. Please see the updated details below.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:8px;">
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="font-size:12px;font-weight:700;color:#64748b;padding:10px 0;">Previous Date</td>
+        <td align="right" style="font-size:12px;font-weight:700;color:#EF4444;padding:10px 0;">${oldDate}${oldSlot ? " · " + oldSlot : ""}${oldPref ? " (" + oldPref + ")" : ""}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="font-size:12px;font-weight:700;color:#64748b;padding:10px 0;">New Date</td>
+        <td align="right" style="font-size:13px;font-weight:800;color:#0F6B4C;padding:10px 0;">${newDateFmt} · ${timeSlot}${preferredTime ? " (" + preferredTime + ")" : ""}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #f1f5f9;">
+        <td style="font-size:12px;font-weight:700;color:#64748b;padding:10px 0;">Service</td>
+        <td align="right" style="font-size:12px;font-weight:700;color:#0F172A;padding:10px 0;">${booking.service || "—"}</td>
+      </tr>
+      ${booking.details?.address ? `<tr><td style="font-size:12px;font-weight:700;color:#64748b;padding:10px 0;">Address</td><td align="right" style="font-size:12px;font-weight:700;color:#0F172A;padding:10px 0;">${booking.details.address}</td></tr>` : ""}
+    </table>
+  </div>
+  <p style="font-size:13px;color:#64748b;text-align:center;">Questions? Reply to this email or call us at <strong>+44 7752 476368</strong>.</p>
+  <p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:24px;">Cleaniq Services · cleaniqservices.com</p>
+</div>`,
+          });
+        } catch (e) {
+          console.error("Reschedule email error:", e.message);
+        }
+      });
+    }
+
+    res.json({ message: "Booking rescheduled.", booking });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
