@@ -37,6 +37,7 @@ const jobSchema = new mongoose.Schema({
   linkedBookingId:    { type: mongoose.Schema.Types.ObjectId, ref: "Booking", default: null },
   rejectedReason:     { type: String, default: null },
   jobAcceptedTime:    { type: Date, default: null },
+  jobArrivedTime:     { type: Date, default: null },
   jobStartTime:       { type: Date, default: null },
   jobEndTime:         { type: Date, default: null },
   createdAt:          { type: Date, default: Date.now },

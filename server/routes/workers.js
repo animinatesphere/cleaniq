@@ -3,6 +3,7 @@ const router = express.Router();
 const Worker = require("../models/Worker");
 const Booking = require("../models/Booking");
 const Notification = require("../models/Notification");
+const Job = require("../models/Job");
 const { moveToTrash } = require("../utils/trash");
 const jwt = require("jsonwebtoken");
 const { sendEmail, templates, workerEventEmails } = require("../utils/emailService");
@@ -246,6 +247,15 @@ router.post("/jobs/:id/accept", async (req, res) => {
 
     await booking.save();
 
+    if (booking.meta?.jobId) {
+      await Job.findByIdAndUpdate(booking.meta.jobId, {
+        status: "assigned",
+        assignedWorker: workerId,
+        assignedWorkerName: workerName,
+        jobAcceptedTime: booking.jobAcceptedTime,
+      }).catch(() => {});
+    }
+
     // Create notification
     await Notification.create({
       workerId: workerId,
@@ -314,6 +324,15 @@ router.put("/jobs/:id/assign", async (req, res) => {
     }
     booking.jobAcceptedTime = booking.jobAcceptedTime || new Date();
     await booking.save();
+
+    if (booking.meta?.jobId) {
+      await Job.findByIdAndUpdate(booking.meta.jobId, {
+        status: "assigned",
+        assignedWorker: worker._id,
+        assignedWorkerName: `${worker.firstName} ${worker.lastName}`,
+        jobAcceptedTime: booking.jobAcceptedTime,
+      }).catch(() => {});
+    }
 
     await Notification.create({
       workerId: worker._id,
@@ -444,6 +463,12 @@ router.post("/jobs/:id/arrive", async (req, res) => {
     booking.jobArrivedTime = new Date();
     await booking.save();
 
+    if (booking.meta?.jobId) {
+      await Job.findByIdAndUpdate(booking.meta.jobId, {
+        jobArrivedTime: booking.jobArrivedTime,
+      }).catch(() => {});
+    }
+
     // Notify customer
     await notifyCustomer(booking, {
       title: "Your Cleaner Has Arrived!",
@@ -484,9 +509,16 @@ router.post("/jobs/:id/start", async (req, res) => {
     if (!booking) {
       return res.status(404).json({ error: "Booking not found" });
     }
-    booking.status = "Cleaning";
+    booking.status = "In Progress";
     booking.jobStartTime = new Date();
     await booking.save();
+
+    if (booking.meta?.jobId) {
+      await Job.findByIdAndUpdate(booking.meta.jobId, {
+        status: "in_progress",
+        jobStartTime: booking.jobStartTime,
+      }).catch(() => {});
+    }
 
     // Notify customer
     await notifyCustomer(booking, {
@@ -533,6 +565,13 @@ router.post("/jobs/:id/complete", async (req, res) => {
     }
 
     await booking.save();
+
+    if (booking.meta?.jobId) {
+      await Job.findByIdAndUpdate(booking.meta.jobId, {
+        status: "completed",
+        jobEndTime: booking.jobEndTime,
+      }).catch(() => {});
+    }
 
     // Update worker wallet and create Withdrawal
     if (booking.assignedWorker) {

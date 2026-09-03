@@ -613,6 +613,14 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         nextLabel: "Complete Service",
         nextColor: "#0F6B4C",
       },
+      Cleaning: {
+        color: "#8B5CF6",
+        bg: "#F5F3FF",
+        label: "In Progress",
+        next: "complete",
+        nextLabel: "Complete Service",
+        nextColor: "#0F6B4C",
+      },
       Completed: {
         color: "#0F6B4C",
         bg: "#EAF5EE",
@@ -920,7 +928,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         )}
 
         {/* ── Cleaning Checklist ── */}
-        {["Assigned", "Arrived", "In Progress", "Completed"].includes(booking.status) && (() => {
+        {["Assigned", "Arrived", "In Progress", "Cleaning", "Completed"].includes(booking.status) && (() => {
           const doneCount = tasks.filter((_, i) => checkedTasks[`${bookingId}_${i}`]).length;
           return (
             <>
@@ -1001,7 +1009,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         })()}
 
         {/* ── Before & After Photos ── */}
-        {["Arrived", "In Progress", "Completed"].includes(booking.status) && (
+        {["Arrived", "In Progress", "Cleaning", "Completed"].includes(booking.status) && (
           <>
             <View style={styles.sectionHeader}>
               <Camera size={14} color="#0A5C43" />
@@ -1053,7 +1061,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             </View>
 
             {/* After Photo */}
-            {["In Progress", "Completed"].includes(booking.status) && (
+            {["In Progress", "Cleaning", "Completed"].includes(booking.status) && (
               <View style={styles.card}>
                 <View style={styles.photoLabelRow}>
                   <View style={[styles.photoBadge, { backgroundColor: "#DCFCE7" }]}>
