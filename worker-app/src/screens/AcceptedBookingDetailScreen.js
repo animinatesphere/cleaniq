@@ -127,8 +127,11 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
       const res = await axios.get(`${API_URL}/workers/jobs/${bookingId}`);
       setBooking(res.data);
       // Restore any photos already uploaded for this booking
-      if (res.data?.photos?.before) setBeforePhoto(res.data.photos.before);
-      if (res.data?.photos?.after)  setAfterPhoto(res.data.photos.after);
+      const BASE = API_URL.replace("/api", "");
+      const prevBefore = res.data.photos?.find(p => p.photoType === "before");
+      const prevAfter  = res.data.photos?.find(p => p.photoType === "after");
+      if (prevBefore?.url) setBeforePhoto(`${BASE}/${prevBefore.url}`);
+      if (prevAfter?.url)  setAfterPhoto(`${BASE}/${prevAfter.url}`);
     } catch (error) {
       console.error("Error fetching booking:", error);
       Alert.alert("Error", "Failed to load booking details");

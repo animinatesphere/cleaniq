@@ -73,6 +73,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
   const [refreshing,    setRefreshing]    = useState(false);
   const [cancelling,    setCancelling]    = useState(false);
   const [workerLoc,     setWorkerLoc]     = useState(null);
+  const [workerAddress, setWorkerAddress] = useState(null);
   const [showReschedule,setShowReschedule]= useState(false);
   const [newDate,       setNewDate]       = useState(null);
   const [newTime,       setNewTime]       = useState("");
@@ -96,6 +97,15 @@ const BookingDetailScreen = ({ route, navigation }) => {
     } catch {} finally { setRefreshing(false); }
   };
 
+  // Auto-refresh booking data every 30 seconds when active
+  useEffect(() => {
+    if (!bookingId) return;
+    const active = !["Completed", "Cancelled"].includes(booking?.status);
+    if (!active) return;
+    const iv = setInterval(fetchBooking, 30000);
+    return () => clearInterval(iv);
+  }, [bookingId, booking?.status]);
+
   // Poll worker location for active bookings
   useEffect(() => {
     if (!bookingId || !booking) return;
@@ -105,7 +115,23 @@ const BookingDetailScreen = ({ route, navigation }) => {
     const poll = async () => {
       try {
         const r = await fetch(`${API_URL}/workers/jobs/${bookingId}/worker-location`);
-        setWorkerLoc(await r.json());
+        const data = await r.json();
+        setWorkerLoc(data);
+        // Reverse geocode address when location is shared
+        if (data?.sharing && data?.lat && data?.lng) {
+          try {
+            const geo = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${data.lat}&lon=${data.lng}&format=json`,
+              { headers: { "Accept-Language": "en", "User-Agent": "CleaniqApp/1.0" } }
+            );
+            const geoData = await geo.json();
+            const road = geoData.address?.road || geoData.address?.street || "";
+            const suburb = geoData.address?.suburb || geoData.address?.neighbourhood || geoData.address?.city_district || "";
+            setWorkerAddress([road, suburb].filter(Boolean).join(", ") || geoData.display_name?.split(",").slice(0,2).join(","));
+          } catch { setWorkerAddress(null); }
+        } else {
+          setWorkerAddress(null);
+        }
       } catch { setWorkerLoc(null); }
     };
     poll();
@@ -238,16 +264,33 @@ const BookingDetailScreen = ({ route, navigation }) => {
         {/* Worker live location */}
         {workerLoc?.sharing && isActive && (
           <TouchableOpacity
-            style={styles.liveTrack}
+            style={styles.liveTrackCard}
             onPress={() => Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${workerLoc.lat},${workerLoc.lng}`)}
             activeOpacity={0.88}
           >
-            <View style={styles.liveTrackDot}><Radio size={11} color="#fff" /></View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.liveTrackTitle}>{workerLoc.workerName} is on the way</Text>
-              <Text style={styles.liveTrackSub}>Tap to open live map</Text>
+            {/* Static map thumbnail via Google Maps Static API */}
+            <View style={styles.liveMapThumb}>
+              <Image
+                source={{ uri: `https://maps.googleapis.com/maps/api/staticmap?center=${workerLoc.lat},${workerLoc.lng}&zoom=15&size=300x120&markers=color:green|${workerLoc.lat},${workerLoc.lng}&scale=2` }}
+                style={styles.liveMapImg}
+                resizeMode="cover"
+              />
+              <View style={styles.liveMapOverlay}>
+                <View style={styles.liveTrackDot}><Radio size={11} color="#fff" /></View>
+              </View>
             </View>
-            <MapPin size={18} color={C.primary} />
+            <View style={styles.liveTrackInfo}>
+              <Text style={styles.liveTrackTitle}>{workerLoc.workerName} has arrived</Text>
+              {workerAddress ? (
+                <Text style={styles.liveTrackAddr} numberOfLines={2}>{workerAddress}</Text>
+              ) : (
+                <Text style={styles.liveTrackSub}>Tap to open in Google Maps</Text>
+              )}
+              <View style={styles.liveMapBtn}>
+                <MapPin size={12} color={C.primary} />
+                <Text style={styles.liveMapBtnTxt}>Open in Maps</Text>
+              </View>
+            </View>
           </TouchableOpacity>
         )}
 
@@ -498,18 +541,31 @@ const styles = StyleSheet.create({
   scroll:        { flex: 1 },
   scrollContent: { padding: 16, gap: 14 },
 
-  // Live track banner
-  liveTrack: {
-    flexDirection: "row", alignItems: "center", gap: 12,
-    backgroundColor: C.primaryLight, borderRadius: 16,
-    padding: 16, borderWidth: 1, borderColor: "#BBE8D5",
+  // Live track card
+  liveTrackCard: {
+    backgroundColor: C.surface, borderRadius: 20,
+    overflow: "hidden", borderWidth: 1, borderColor: "#BBE8D5",
+  },
+  liveMapThumb: { width: "100%", height: 110, position: "relative" },
+  liveMapImg: { width: "100%", height: "100%", backgroundColor: "#E8F5F0" },
+  liveMapOverlay: {
+    position: "absolute", top: 10, left: 10,
+    backgroundColor: "rgba(15,107,76,0.85)", borderRadius: 20, padding: 4,
   },
   liveTrackDot: {
     width: 28, height: 28, borderRadius: 14,
     backgroundColor: C.primary, alignItems: "center", justifyContent: "center",
   },
+  liveTrackInfo: { padding: 14, gap: 4 },
   liveTrackTitle: { fontSize: 14, fontWeight: "700", color: C.primaryDark },
+  liveTrackAddr:  { fontSize: 12, color: C.textMed, lineHeight: 17 },
   liveTrackSub:   { fontSize: 12, color: C.primary, marginTop: 2 },
+  liveMapBtn: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    marginTop: 6, alignSelf: "flex-start",
+    backgroundColor: C.primaryLight, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+  },
+  liveMapBtnTxt: { fontSize: 12, fontWeight: "700", color: C.primary },
 
   // Section card
   sectionCard: {

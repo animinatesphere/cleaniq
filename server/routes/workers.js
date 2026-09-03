@@ -282,12 +282,21 @@ router.post("/jobs/:id/accept", async (req, res) => {
     });
 
     // Send customer email — tell them who accepted and all job details
+    const workerDoc = await Worker.findById(workerId).catch(() => null);
     if (booking.customer?.email) {
-      const workerDoc = await Worker.findById(workerId).catch(() => null);
       sendEmail({
         to: booking.customer.email,
         subject: `Your cleaner is confirmed — ${workerName} · ${booking.bookingId}`,
         html: workerEventEmails.workerAccepted(booking, workerDoc),
+      }).catch(() => {});
+    }
+
+    // Send confirmation email to the worker themselves
+    if (workerDoc?.email) {
+      sendEmail({
+        to: workerDoc.email,
+        subject: `📋 Job Confirmed — ${booking.bookingId}`,
+        html: templates.staffShiftAssigned(booking, workerDoc),
       }).catch(() => {});
     }
 

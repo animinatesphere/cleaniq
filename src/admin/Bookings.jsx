@@ -4149,39 +4149,38 @@ ${extrasRows}
                   </div>
 
                   {/* Worker Before & After Photos */}
-                  {(selectedBooking.photos?.before ||
-                    selectedBooking.photos?.after) && (
+                  {selectedBooking.photos?.some(p => ["before","after"].includes(p.photoType)) && (
                     <div>
                       <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <Camera size={14} /> Worker Photos
                       </h4>
                       <div className="grid grid-cols-2 gap-4">
-                        {selectedBooking.photos?.before && (
-                          <div>
-                            <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-2">
-                              Before
-                            </p>
-                            <img
-                              src={selectedBooking.photos.before}
-                              alt="Before clean"
-                              className="w-full rounded-2xl object-cover border border-white/10"
-                              style={{ aspectRatio: "4/3" }}
-                            />
+                        {selectedBooking.photos.filter(p => p.photoType === "before").map((p, i) => (
+                          <div key={i}>
+                            <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-2">Before</p>
+                            <a href={`https://api.cleaniqservices.com/${p.url}`} target="_blank" rel="noreferrer">
+                              <img
+                                src={`https://api.cleaniqservices.com/${p.url}`}
+                                alt="Before clean"
+                                className="w-full rounded-2xl object-cover border border-white/10 hover:opacity-90 transition-opacity"
+                                style={{ aspectRatio: "4/3" }}
+                              />
+                            </a>
                           </div>
-                        )}
-                        {selectedBooking.photos?.after && (
-                          <div>
-                            <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wider mb-2">
-                              After
-                            </p>
-                            <img
-                              src={selectedBooking.photos.after}
-                              alt="After clean"
-                              className="w-full rounded-2xl object-cover border border-white/10"
-                              style={{ aspectRatio: "4/3" }}
-                            />
+                        ))}
+                        {selectedBooking.photos.filter(p => p.photoType === "after").map((p, i) => (
+                          <div key={i}>
+                            <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wider mb-2">After</p>
+                            <a href={`https://api.cleaniqservices.com/${p.url}`} target="_blank" rel="noreferrer">
+                              <img
+                                src={`https://api.cleaniqservices.com/${p.url}`}
+                                alt="After clean"
+                                className="w-full rounded-2xl object-cover border border-white/10 hover:opacity-90 transition-opacity"
+                                style={{ aspectRatio: "4/3" }}
+                              />
+                            </a>
                           </div>
-                        )}
+                        ))}
                       </div>
                     </div>
                   )}
