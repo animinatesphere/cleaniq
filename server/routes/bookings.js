@@ -14,6 +14,7 @@ const { scheduleTask } = require("../utils/automationEngine");
 const { buildBookingDateTime } = require("../utils/bookingDateTime");
 const adminAuth = require("../middleware/adminAuth");
 const sms = require("../utils/smsService");
+const { sendWorkersPush } = require("../utils/pushNotifications");
 
 // Public booking creation endpoint (no admin auth) - used by frontend
 // Creates a booking record from client POST and returns the saved booking.
@@ -205,6 +206,14 @@ router.post("/public", async (req, res) => {
               html: templates.staffNewJobAlert(newBooking),
             });
           }
+          const dateStr = newBooking.schedule?.date
+            ? new Date(newBooking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
+            : "TBC";
+          await sendWorkersPush(activeStaff.map(s => s.expoPushToken), {
+            title: "New Job Available!",
+            body: `${newBooking.service} · ${dateStr}`,
+            data: { type: "new_job", bookingId: newBooking.bookingId },
+          });
         }
       } catch (staffEmailErr) {
         console.error("❌ Failed to email staff new job notification (public):", staffEmailErr);
@@ -729,6 +738,29 @@ router.post("/", async (req, res) => {
       }
     });
 
+    // Push: notify workers in region about the new available job
+    if (newBooking.status === "Confirmed" || newBooking.noPaymentRequired) {
+      setImmediate(async () => {
+        try {
+          const dateStr = newBooking.schedule?.date
+            ? new Date(newBooking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
+            : "TBC";
+          const workers = await Worker.find({
+            $or: [{ region: newBooking.region }, { region: null }, { region: { $exists: false } }],
+            expoPushToken: { $exists: true, $ne: "" },
+            status: "Active",
+          }).select("expoPushToken").lean();
+          await sendWorkersPush(workers.map(w => w.expoPushToken), {
+            title: "New Job Available!",
+            body: `${newBooking.service} · ${dateStr}`,
+            data: { type: "new_job", bookingId: newBooking.bookingId },
+          });
+        } catch (err) {
+          console.error("Worker push notification error:", err.message);
+        }
+      });
+    }
+
     res.status(201).json(newBooking);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -1174,6 +1206,28 @@ router.put("/:id", async (req, res) => {
       }
     }
 
+    // ── Notify workers when a booking first becomes Confirmed ────────────────
+    if (prevStatus !== "Confirmed" && newStatus === "Confirmed" && !updatedBooking.assignedWorker) {
+      setImmediate(async () => {
+        try {
+          const dateStr = updatedBooking.schedule?.date
+            ? new Date(updatedBooking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
+            : "TBC";
+          const workers = await Worker.find({
+            status: "Active",
+            expoPushToken: { $exists: true, $ne: "" },
+          }).select("expoPushToken").lean();
+          await sendWorkersPush(workers.map(w => w.expoPushToken), {
+            title: "New Job Available!",
+            body: `${updatedBooking.service} · ${dateStr}`,
+            data: { type: "new_job", bookingId: updatedBooking.bookingId },
+          });
+        } catch (err) {
+          console.error("Worker push (confirm) error:", err.message);
+        }
+      });
+    }
+
     // ── Status-change customer email — fires for every status switch ─────────
     // Completed and Completed-Unpaid are excluded here because they already
     // send a dedicated invoice email in the blocks above.
@@ -1221,9 +1275,23 @@ router.put("/:id", async (req, res) => {
         if (prevStatus !== "Confirmed" && newStatus === "Confirmed") {
           await sms.triggerBookingConfirmed(updatedBooking);
         }
-        // Booking cancelled
+        // Booking cancelled — push assigned worker if any
         if (prevStatus !== "Cancelled" && newStatus === "Cancelled") {
           await sms.triggerBookingCancelled(updatedBooking);
+          if (updatedBooking.assignedWorker) {
+            try {
+              const w = await Worker.findById(updatedBooking.assignedWorker).select("expoPushToken").lean();
+              if (w?.expoPushToken) {
+                await sendWorkersPush([w.expoPushToken], {
+                  title: "Booking Cancelled",
+                  body: `${updatedBooking.service} on ${updatedBooking.schedule?.timeSlot || ""} has been cancelled.`,
+                  data: { type: "cancelled", bookingId: updatedBooking.bookingId },
+                });
+              }
+            } catch (e) {
+              console.error("Worker cancel push error:", e.message);
+            }
+          }
         }
         // Booking completed
         if (!wasCompleted && isNowCompleted) {
@@ -1317,6 +1385,25 @@ router.put("/:id/reschedule", adminAuth, async (req, res) => {
           });
         } catch (e) {
           console.error("Reschedule email error:", e.message);
+        }
+      });
+    }
+
+    // Push assigned worker about the reschedule
+    if (booking.assignedWorker) {
+      setImmediate(async () => {
+        try {
+          const w = await Worker.findById(booking.assignedWorker).select("expoPushToken").lean();
+          if (w?.expoPushToken) {
+            const { sendWorkersPush: push } = require("../utils/pushNotifications");
+            await push([w.expoPushToken], {
+              title: "Booking Rescheduled",
+              body: `${booking.service} · ${booking.schedule?.timeSlot || ""}`,
+              data: { type: "reschedule", bookingId: booking.bookingId },
+            });
+          }
+        } catch (e) {
+          console.error("Worker reschedule push error:", e.message);
         }
       });
     }

@@ -43,6 +43,13 @@
     },
     "plugins": [
       [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#0A5C43"
+        }
+      ],
+      [
         "expo-updates",
         {
           "username": "hexmane99"

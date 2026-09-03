@@ -13,4 +13,23 @@ const sendCustomerPush = async (expoPushToken, { title, body, data = {} }) => {
   }
 };
 
-module.exports = { sendCustomerPush };
+// Send to multiple worker push tokens in a single batched request
+const sendWorkersPush = async (tokens, { title, body, data = {} }) => {
+  const valid = (tokens || []).filter(t => t && t.startsWith("ExponentPushToken"));
+  if (valid.length === 0) return;
+  const messages = valid.map(to => ({
+    to, sound: "default", title, body, data, priority: "high",
+  }));
+  try {
+    await axios.post(
+      "https://exp.host/--/api/v2/push/send",
+      messages,
+      { headers: { "Content-Type": "application/json", "Accept": "application/json" } },
+    );
+    console.log(`📲 Worker push sent to ${valid.length} device(s): ${title}`);
+  } catch (err) {
+    console.error("Worker batch push failed:", err.message);
+  }
+};
+
+module.exports = { sendCustomerPush, sendWorkersPush };
