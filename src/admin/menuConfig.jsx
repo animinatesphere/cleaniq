@@ -1,5 +1,6 @@
 import {
   LayoutDashboard,
+  UserCheck,
   Globe,
   Eye,
   Receipt,
@@ -92,6 +93,12 @@ export const fullMenuGroups = [
         path: "/admin/company-jobs",
         key: "company-jobs",
         icon: <UserCog size={20} />,
+      },
+      {
+        name: "Assign Jobs",
+        path: "/admin/assign-jobs",
+        key: "assign-jobs",
+        icon: <UserCheck size={20} />,
       },
       {
         name: "Job Visibility",

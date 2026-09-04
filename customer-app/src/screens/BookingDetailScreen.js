@@ -263,35 +263,36 @@ const BookingDetailScreen = ({ route, navigation }) => {
 
         {/* Worker live location */}
         {workerLoc?.sharing && isActive && (
-          <TouchableOpacity
-            style={styles.liveTrackCard}
-            onPress={() => Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${workerLoc.lat},${workerLoc.lng}`)}
-            activeOpacity={0.88}
-          >
-            {/* Static map thumbnail via Google Maps Static API */}
+          <View style={styles.liveTrackCard}>
+            {/* Static map thumbnail */}
             <View style={styles.liveMapThumb}>
               <Image
-                source={{ uri: `https://maps.googleapis.com/maps/api/staticmap?center=${workerLoc.lat},${workerLoc.lng}&zoom=15&size=300x120&markers=color:green|${workerLoc.lat},${workerLoc.lng}&scale=2` }}
+                source={{ uri: `https://maps.googleapis.com/maps/api/staticmap?center=${workerLoc.lat},${workerLoc.lng}&zoom=15&size=600x240&markers=color:green|label:W|${workerLoc.lat},${workerLoc.lng}&scale=2` }}
                 style={styles.liveMapImg}
                 resizeMode="cover"
               />
               <View style={styles.liveMapOverlay}>
                 <View style={styles.liveTrackDot}><Radio size={11} color="#fff" /></View>
+                <Text style={styles.liveMapLiveTxt}>LIVE</Text>
               </View>
             </View>
             <View style={styles.liveTrackInfo}>
               <Text style={styles.liveTrackTitle}>{workerLoc.workerName} has arrived</Text>
               {workerAddress ? (
-                <Text style={styles.liveTrackAddr} numberOfLines={2}>{workerAddress}</Text>
+                <Text style={styles.liveTrackAddr}>{workerAddress}</Text>
               ) : (
-                <Text style={styles.liveTrackSub}>Tap to open in Google Maps</Text>
+                <Text style={styles.liveTrackAddr}>Locating address...</Text>
               )}
-              <View style={styles.liveMapBtn}>
+              <TouchableOpacity
+                style={styles.liveMapBtn}
+                onPress={() => Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${workerLoc.lat},${workerLoc.lng}`)}
+                activeOpacity={0.8}
+              >
                 <MapPin size={12} color={C.primary} />
-                <Text style={styles.liveMapBtnTxt}>Open in Maps</Text>
-              </View>
+                <Text style={styles.liveMapBtnTxt}>Open in Google Maps</Text>
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
+          </View>
         )}
 
         {/* Timeline */}
@@ -551,6 +552,10 @@ const styles = StyleSheet.create({
   liveMapOverlay: {
     position: "absolute", top: 10, left: 10,
     backgroundColor: "rgba(15,107,76,0.85)", borderRadius: 20, padding: 4,
+  },
+  liveMapLiveTxt: {
+    fontSize: 9, fontWeight: "800", color: "#fff", letterSpacing: 1,
+    textShadowColor: "rgba(0,0,0,0.4)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2,
   },
   liveTrackDot: {
     width: 28, height: 28, borderRadius: 14,

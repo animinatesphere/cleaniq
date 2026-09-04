@@ -3740,6 +3740,66 @@ ${extrasRows}
                     </div>
                   </div>
 
+                  {/* Worker Job Submission: Photos & Report */}
+                  {(selectedBooking.photos?.length > 0 ||
+                    selectedBooking.workerReport) && (
+                    <div className="bg-white/5 border border-white/10 rounded-[32px] p-6">
+                      <h5 className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <Camera size={14} /> Worker Job Submission
+                      </h5>
+
+                      {selectedBooking.photos?.length > 0 &&
+                        (() => {
+                          const groups = { before: [], after: [], damage: [], other: [] };
+                          selectedBooking.photos.forEach((p) => {
+                            (groups[p.photoType] || groups.other).push(p);
+                          });
+                          const labels = { before: "Before", after: "After", damage: "Damage", other: "Other" };
+                          const colors = {
+                            before: "bg-amber-500/15 text-amber-400 border-amber-500/25",
+                            after: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
+                            damage: "bg-rose-500/15 text-rose-400 border-rose-500/25",
+                            other: "bg-white/5 text-white/70 border-white/10",
+                          };
+                          return (
+                            <div className="space-y-4 mb-4">
+                              {Object.entries(groups)
+                                .filter(([, arr]) => arr.length > 0)
+                                .map(([type, photos]) => (
+                                  <div key={type}>
+                                    <p className={`inline-block text-[10px] font-bold px-3 py-1 rounded-full border mb-2 ${colors[type]}`}>
+                                      {labels[type]} — {photos.length} photo{photos.length > 1 ? "s" : ""}
+                                    </p>
+                                    <div className="flex gap-2 flex-wrap">
+                                      {photos.map((p, i) => (
+                                        <a key={i} href={`https://api.cleaniqservices.com/${p.url}`} target="_blank" rel="noreferrer">
+                                          <img
+                                            src={`https://api.cleaniqservices.com/${p.url}`}
+                                            alt={`${type}-${i}`}
+                                            className="w-24 h-24 rounded-2xl object-cover border border-white/10 hover:opacity-90 transition-opacity"
+                                          />
+                                        </a>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          );
+                        })()}
+
+                      {selectedBooking.workerReport && (
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                          <p className="text-[10px] font-bold text-white/40 uppercase mb-2 flex items-center gap-1">
+                            <FileText size={12} /> Worker Report
+                          </p>
+                          <p className="text-sm text-white/70 leading-relaxed">
+                            {selectedBooking.workerReport}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {(selectedBooking.assignedWorker ||
                     selectedBooking.assignedWorkerName) && (
                     <div className="bg-emerald-500/10 rounded-2xl p-6 border border-emerald-500/20 flex flex-col md:flex-row gap-8">
@@ -3883,89 +3943,6 @@ ${extrasRows}
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-
-                  {/* Worker Submission: Photos & Report */}
-                  {(selectedBooking.photos?.length > 0 ||
-                    selectedBooking.workerReport) && (
-                    <div className="bg-white/5 border border-white/10 rounded-[32px] p-6">
-                      <h5 className="text-[10px] font-bold text-white/60 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <Camera size={14} /> Worker Job Submission
-                      </h5>
-
-                      {/* Photos grouped by type */}
-                      {selectedBooking.photos?.length > 0 &&
-                        (() => {
-                          const groups = {
-                            before: [],
-                            after: [],
-                            damage: [],
-                            other: [],
-                          };
-                          selectedBooking.photos.forEach((p) => {
-                            (groups[p.photoType] || groups.other).push(p);
-                          });
-                          const labels = {
-                            before: "Before",
-                            after: "After",
-                            damage: "Damage",
-                            other: "Other",
-                          };
-                          const colors = {
-                            before:
-                              "bg-amber-500/15 text-amber-400 border-amber-500/25",
-                            after:
-                              "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
-                            damage:
-                              "bg-rose-500/15 text-rose-400 border-rose-500/25",
-                            other: "bg-white/5 text-white/70 border-white/10",
-                          };
-                          return (
-                            <div className="space-y-4 mb-4">
-                              {Object.entries(groups)
-                                .filter(([, arr]) => arr.length > 0)
-                                .map(([type, photos]) => (
-                                  <div key={type}>
-                                    <p
-                                      className={`inline-block text-[10px] font-bold px-3 py-1 rounded-full border mb-2 ${colors[type]}`}
-                                    >
-                                      {labels[type]} — {photos.length} photo
-                                      {photos.length > 1 ? "s" : ""}
-                                    </p>
-                                    <div className="flex gap-2 flex-wrap">
-                                      {photos.map((p, i) => (
-                                        <a
-                                          key={i}
-                                          href={`https://api.cleaniqservices.com/${p.url}`}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                        >
-                                          <img
-                                            src={`https://api.cleaniqservices.com/${p.url}`}
-                                            alt={`${type}-${i}`}
-                                            className="w-24 h-24 rounded-2xl object-cover border border-white/10 hover:opacity-90 transition-opacity"
-                                          />
-                                        </a>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ))}
-                            </div>
-                          );
-                        })()}
-
-                      {/* Written report */}
-                      {selectedBooking.workerReport && (
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
-                          <p className="text-[10px] font-bold text-white/40 uppercase mb-2 flex items-center gap-1">
-                            <FileText size={12} /> Worker Report
-                          </p>
-                          <p className="text-sm text-white/70 leading-relaxed">
-                            {selectedBooking.workerReport}
-                          </p>
-                        </div>
-                      )}
                     </div>
                   )}
 
@@ -4148,42 +4125,6 @@ ${extrasRows}
                     </div>
                   </div>
 
-                  {/* Worker Before & After Photos */}
-                  {selectedBooking.photos?.some(p => ["before","after"].includes(p.photoType)) && (
-                    <div>
-                      <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <Camera size={14} /> Worker Photos
-                      </h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        {selectedBooking.photos.filter(p => p.photoType === "before").map((p, i) => (
-                          <div key={i}>
-                            <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-2">Before</p>
-                            <a href={`https://api.cleaniqservices.com/${p.url}`} target="_blank" rel="noreferrer">
-                              <img
-                                src={`https://api.cleaniqservices.com/${p.url}`}
-                                alt="Before clean"
-                                className="w-full rounded-2xl object-cover border border-white/10 hover:opacity-90 transition-opacity"
-                                style={{ aspectRatio: "4/3" }}
-                              />
-                            </a>
-                          </div>
-                        ))}
-                        {selectedBooking.photos.filter(p => p.photoType === "after").map((p, i) => (
-                          <div key={i}>
-                            <p className="text-[10px] font-bold text-emerald-400/70 uppercase tracking-wider mb-2">After</p>
-                            <a href={`https://api.cleaniqservices.com/${p.url}`} target="_blank" rel="noreferrer">
-                              <img
-                                src={`https://api.cleaniqservices.com/${p.url}`}
-                                alt="After clean"
-                                className="w-full rounded-2xl object-cover border border-white/10 hover:opacity-90 transition-opacity"
-                                style={{ aspectRatio: "4/3" }}
-                              />
-                            </a>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </>
               )}
             </div>

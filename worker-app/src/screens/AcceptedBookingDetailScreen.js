@@ -86,9 +86,9 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   const [locationLoading, setLocationLoading] = useState(false);
   const locationSubscription = useRef(null);
 
-  // Before & after photos
-  const [beforePhoto, setBeforePhoto] = useState(null);
-  const [afterPhoto, setAfterPhoto] = useState(null);
+  // Before & after photos (arrays for multiple uploads)
+  const [beforePhotos, setBeforePhotos] = useState([]);
+  const [afterPhotos, setAfterPhotos] = useState([]);
   const [photoUploading, setPhotoUploading] = useState(null); // "before" | "after" | null
 
   // Completion modal state
@@ -128,10 +128,10 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
       setBooking(res.data);
       // Restore any photos already uploaded for this booking
       const BASE = API_URL.replace("/api", "");
-      const prevBefore = res.data.photos?.find(p => p.photoType === "before");
-      const prevAfter  = res.data.photos?.find(p => p.photoType === "after");
-      if (prevBefore?.url) setBeforePhoto(`${BASE}/${prevBefore.url}`);
-      if (prevAfter?.url)  setAfterPhoto(`${BASE}/${prevAfter.url}`);
+      const prevBefores = (res.data.photos || []).filter(p => p.photoType === "before");
+      const prevAfters  = (res.data.photos || []).filter(p => p.photoType === "after");
+      if (prevBefores.length) setBeforePhotos(prevBefores.map(p => `${BASE}/${p.url}`));
+      if (prevAfters.length)  setAfterPhotos(prevAfters.map(p => `${BASE}/${p.url}`));
     } catch (error) {
       console.error("Error fetching booking:", error);
       Alert.alert("Error", "Failed to load booking details");
@@ -239,9 +239,9 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     const asset = result.assets[0];
     const photoData = `data:image/jpeg;base64,${asset.base64}`;
 
-    // Show preview immediately
-    if (type === "before") setBeforePhoto(asset.uri);
-    else setAfterPhoto(asset.uri);
+    // Append to photos array
+    if (type === "before") setBeforePhotos(prev => [...prev, asset.uri]);
+    else setAfterPhotos(prev => [...prev, asset.uri]);
 
     // Upload to server
     setPhotoUploading(type);
@@ -338,7 +338,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   };
 
   const handleCompleteWithSubmission = async () => {
-    if (!afterPhoto) {
+    if (afterPhotos.length === 0) {
       Alert.alert("After Photo Required", "Please take an after photo before completing the job.");
       return;
     }
@@ -566,7 +566,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   };
 
   const doAction = async (endpoint, nextStatus, successMsg) => {
-    if (endpoint === "start" && !beforePhoto) {
+    if (endpoint === "start" && beforePhotos.length === 0) {
       Alert.alert("Before Photo Required", "Please take a before photo of the property before you start cleaning.");
       return;
     }
@@ -1025,25 +1025,31 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 <View style={[styles.photoBadge, { backgroundColor: "#FEF3C7" }]}>
                   <Text style={[styles.photoBadgeTxt, { color: "#92400E" }]}>BEFORE</Text>
                 </View>
-                {beforePhoto && (
+                {beforePhotos.length > 0 && (
                   <View style={styles.photoTakenTag}>
                     <CheckCircle2 size={11} color="#0A5C43" strokeWidth={2.5} />
-                    <Text style={styles.photoTakenTxt}>Taken</Text>
+                    <Text style={styles.photoTakenTxt}>{beforePhotos.length} photo{beforePhotos.length > 1 ? "s" : ""}</Text>
                   </View>
                 )}
               </View>
-              {beforePhoto ? (
-                <View style={styles.photoPreviewWrap}>
-                  <Image source={{ uri: beforePhoto }} style={styles.photoPreview} resizeMode="cover" />
-                  {booking.status !== "Completed" && (
-                    <TouchableOpacity style={styles.retakeBtn} onPress={() => takePhoto("before")}>
-                      <Camera size={13} color="#fff" />
-                      <Text style={styles.retakeTxt}>Retake</Text>
-                    </TouchableOpacity>
-                  )}
+              {beforePhotos.length > 0 ? (
+                <View>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 6 }}>
+                    <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
+                      {beforePhotos.map((uri, i) => (
+                        <Image key={i} source={{ uri }} style={styles.photoThumb} resizeMode="cover" />
+                      ))}
+                      {booking.status !== "Completed" && (
+                        <TouchableOpacity style={[styles.photoThumb, styles.photoAddBtn]} onPress={() => takePhoto("before")}>
+                          <Camera size={18} color="#92400E" />
+                          <Text style={[styles.photoAddTxt, { color: "#92400E" }]}>Add</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </ScrollView>
                   {photoUploading === "before" && (
-                    <View style={styles.photoOverlay}>
-                      <ActivityIndicator color="#fff" />
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                      <ActivityIndicator size="small" color="#0A5C43" />
                       <Text style={styles.photoUploadTxt}>Uploading...</Text>
                     </View>
                   )}
@@ -1070,25 +1076,31 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                   <View style={[styles.photoBadge, { backgroundColor: "#DCFCE7" }]}>
                     <Text style={[styles.photoBadgeTxt, { color: "#166534" }]}>AFTER</Text>
                   </View>
-                  {afterPhoto && (
+                  {afterPhotos.length > 0 && (
                     <View style={styles.photoTakenTag}>
                       <CheckCircle2 size={11} color="#0A5C43" strokeWidth={2.5} />
-                      <Text style={styles.photoTakenTxt}>Taken</Text>
+                      <Text style={styles.photoTakenTxt}>{afterPhotos.length} photo{afterPhotos.length > 1 ? "s" : ""}</Text>
                     </View>
                   )}
                 </View>
-                {afterPhoto ? (
-                  <View style={styles.photoPreviewWrap}>
-                    <Image source={{ uri: afterPhoto }} style={styles.photoPreview} resizeMode="cover" />
-                    {booking.status !== "Completed" && (
-                      <TouchableOpacity style={styles.retakeBtn} onPress={() => takePhoto("after")}>
-                        <Camera size={13} color="#fff" />
-                        <Text style={styles.retakeTxt}>Retake</Text>
-                      </TouchableOpacity>
-                    )}
+                {afterPhotos.length > 0 ? (
+                  <View>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 6 }}>
+                      <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
+                        {afterPhotos.map((uri, i) => (
+                          <Image key={i} source={{ uri }} style={styles.photoThumb} resizeMode="cover" />
+                        ))}
+                        {booking.status !== "Completed" && (
+                          <TouchableOpacity style={[styles.photoThumb, styles.photoAddBtn, { backgroundColor: "#DCFCE7" }]} onPress={() => takePhoto("after")}>
+                            <Camera size={18} color="#166534" />
+                            <Text style={[styles.photoAddTxt, { color: "#166534" }]}>Add</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </ScrollView>
                     {photoUploading === "after" && (
-                      <View style={styles.photoOverlay}>
-                        <ActivityIndicator color="#fff" />
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                        <ActivityIndicator size="small" color="#0A5C43" />
                         <Text style={styles.photoUploadTxt}>Uploading...</Text>
                       </View>
                     )}
@@ -1258,13 +1270,13 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
               <Text style={styles.sheetSectionLbl}>📸 Job Photos</Text>
               <View style={styles.photoStatusRow}>
-                <View style={[styles.photoStatusChip, beforePhoto ? styles.photoStatusDone : styles.photoStatusWarn]}>
-                  {beforePhoto ? <CheckCircle2 size={14} color="#0A5C43" strokeWidth={2.5} /> : <AlertCircle size={14} color="#B45309" />}
-                  <Text style={beforePhoto ? styles.photoStatusTxtDone : styles.photoStatusTxtWarn}>Before photo {beforePhoto ? "✓" : "missing"}</Text>
+                <View style={[styles.photoStatusChip, beforePhotos.length > 0 ? styles.photoStatusDone : styles.photoStatusWarn]}>
+                  {beforePhotos.length > 0 ? <CheckCircle2 size={14} color="#0A5C43" strokeWidth={2.5} /> : <AlertCircle size={14} color="#B45309" />}
+                  <Text style={beforePhotos.length > 0 ? styles.photoStatusTxtDone : styles.photoStatusTxtWarn}>Before {beforePhotos.length > 0 ? `${beforePhotos.length} photo${beforePhotos.length > 1 ? "s" : ""} ✓` : "missing"}</Text>
                 </View>
-                <View style={[styles.photoStatusChip, afterPhoto ? styles.photoStatusDone : styles.photoStatusWarn]}>
-                  {afterPhoto ? <CheckCircle2 size={14} color="#0A5C43" strokeWidth={2.5} /> : <AlertCircle size={14} color="#B45309" />}
-                  <Text style={afterPhoto ? styles.photoStatusTxtDone : styles.photoStatusTxtWarn}>After photo {afterPhoto ? "✓" : "missing — required"}</Text>
+                <View style={[styles.photoStatusChip, afterPhotos.length > 0 ? styles.photoStatusDone : styles.photoStatusWarn]}>
+                  {afterPhotos.length > 0 ? <CheckCircle2 size={14} color="#0A5C43" strokeWidth={2.5} /> : <AlertCircle size={14} color="#B45309" />}
+                  <Text style={afterPhotos.length > 0 ? styles.photoStatusTxtDone : styles.photoStatusTxtWarn}>After {afterPhotos.length > 0 ? `${afterPhotos.length} photo${afterPhotos.length > 1 ? "s" : ""} ✓` : "missing — required"}</Text>
                 </View>
               </View>
 
@@ -1290,9 +1302,9 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
               <TextInput style={styles.reportInput} placeholder="e.g. Found mould behind washing machine. Notified customer. Extra 20 min spent on oven..." placeholderTextColor="#9CA3AF" value={workerReport} onChangeText={setWorkerReport} multiline textAlignVertical="top" />
 
               <TouchableOpacity
-                style={[styles.submitBtn, (!afterPhoto || submittingCompletion) && { opacity: 0.6 }]}
+                style={[styles.submitBtn, (afterPhotos.length === 0 || submittingCompletion) && { opacity: 0.6 }]}
                 onPress={handleCompleteWithSubmission}
-                disabled={!afterPhoto || submittingCompletion}
+                disabled={afterPhotos.length === 0 || submittingCompletion}
               >
                 {submittingCompletion ? <ActivityIndicator color="#fff" /> : (
                   <>
@@ -1301,7 +1313,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                   </>
                 )}
               </TouchableOpacity>
-              {!afterPhoto && <Text style={styles.warnTxt}>⚠️ Go back and take an after photo before you can complete this job.</Text>}
+              {afterPhotos.length === 0 && <Text style={styles.warnTxt}>⚠️ Go back and take an after photo before you can complete this job.</Text>}
             </ScrollView>
           </View>
         </View>
@@ -1575,7 +1587,17 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.45)",
     alignItems: "center", justifyContent: "center", gap: 6,
   },
-  photoUploadTxt: { fontSize: 12, fontWeight: "700", color: "#fff" },
+  photoUploadTxt: { fontSize: 12, fontWeight: "700", color: "#6B7280" },
+  photoThumb: {
+    width: 90, height: 90, borderRadius: 12, overflow: "hidden",
+    backgroundColor: "#F3F4F6",
+  },
+  photoAddBtn: {
+    alignItems: "center", justifyContent: "center", gap: 4,
+    backgroundColor: "#FEF3C7", borderWidth: 1.5, borderColor: "#FCD34D",
+    borderStyle: "dashed",
+  },
+  photoAddTxt: { fontSize: 10, fontWeight: "800" },
 
   // Pay
   payRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10 },

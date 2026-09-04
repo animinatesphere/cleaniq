@@ -73,6 +73,7 @@ import PriceList from "./admin/PriceList";
 import JobDetail from "./admin/JobDetail";
 import Jobs from "./admin/Jobs";
 import CompanyJobs from "./admin/CompanyJobs";
+import AssignJobs from "./admin/AssignJobs";
 import JobVisibility from "./admin/JobVisibility";
 import GuideDistribution from "./admin/GuideDistribution";
 import ColdEmail from "./admin/ColdEmail/index.jsx";
@@ -171,6 +172,7 @@ function App() {
               <Route path="jobs" element={<Jobs />} />
               <Route path="jobs/:id" element={<JobDetail />} />
               <Route path="company-jobs" element={<CompanyJobs />} />
+              <Route path="assign-jobs" element={<AssignJobs />} />
               <Route path="job-visibility" element={<JobVisibility />} />
               <Route path="guide-distribution" element={<GuideDistribution />} />
               <Route path="cold-email" element={<ColdEmail />} />
