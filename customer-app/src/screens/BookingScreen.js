@@ -895,7 +895,7 @@ const BookingScreen = ({ navigation, route }) => {
                 <Text style={styles.availLoaderTxt}>Checking availability for this date...</Text>
               </View>
             ) : (
-              {(() => {
+              (() => {
                 const visible = TIME_SLOTS.filter(t => !isPastTime(t));
                 if (visible.length === 0) {
                   return (
@@ -933,7 +933,7 @@ const BookingScreen = ({ navigation, route }) => {
                     })}
                   </View>
                 );
-              })()}
+              })()
             )}
 
             <SectionLabel title="Special instructions" sub="Anything specific we should know?" />
