@@ -1019,7 +1019,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
               <Text style={styles.sectionTitle}>Before & After Photos</Text>
             </View>
 
-            {/* Before Photo */}
+            {/* Before Photos */}
             <View style={styles.card}>
               <View style={styles.photoLabelRow}>
                 <View style={[styles.photoBadge, { backgroundColor: "#FEF3C7" }]}>
@@ -1028,47 +1028,49 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 {beforePhotos.length > 0 && (
                   <View style={styles.photoTakenTag}>
                     <CheckCircle2 size={11} color="#0A5C43" strokeWidth={2.5} />
-                    <Text style={styles.photoTakenTxt}>{beforePhotos.length} photo{beforePhotos.length > 1 ? "s" : ""}</Text>
+                    <Text style={styles.photoTakenTxt}>{beforePhotos.length} photo{beforePhotos.length > 1 ? "s" : ""} added</Text>
                   </View>
                 )}
               </View>
-              {beforePhotos.length > 0 ? (
-                <View style={{ gap: 10 }}>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View style={{ flexDirection: "row", gap: 8, paddingRight: 4 }}>
-                      {beforePhotos.map((uri, i) => (
-                        <Image key={i} source={{ uri }} style={styles.photoThumb} resizeMode="cover" />
-                      ))}
-                    </View>
-                  </ScrollView>
-                  {photoUploading === "before" ? (
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                      <ActivityIndicator size="small" color="#0A5C43" />
-                      <Text style={styles.photoUploadTxt}>Uploading photo...</Text>
-                    </View>
-                  ) : booking.status !== "Completed" ? (
-                    <TouchableOpacity style={styles.photoAddMoreBtn} onPress={() => takePhoto("before")}>
-                      <Camera size={15} color="#92400E" />
-                      <Text style={[styles.photoAddMoreTxt, { color: "#92400E" }]}>+ Add Another Before Photo</Text>
-                    </TouchableOpacity>
-                  ) : null}
-                </View>
-              ) : (
-                <TouchableOpacity style={styles.photoSnapBtn} onPress={() => takePhoto("before")} disabled={booking.status === "Completed"}>
-                  {photoUploading === "before" ? <ActivityIndicator color="#0A5C43" /> : (
-                    <>
-                      <View style={styles.photoSnapIcon}>
-                        <Camera size={26} color="#0A5C43" />
-                      </View>
-                      <Text style={styles.photoSnapTxt}>Tap to take BEFORE photo</Text>
-                      <Text style={styles.photoSnapSub}>Required before you start cleaning</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
+
+              {/* Existing thumbnails */}
+              {beforePhotos.length > 0 && (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    {beforePhotos.map((uri, i) => (
+                      <Image key={i} source={{ uri }} style={styles.photoThumb} resizeMode="cover" />
+                    ))}
+                  </View>
+                </ScrollView>
+              )}
+
+              {/* Always-visible add button */}
+              {booking.status !== "Completed" && (
+                photoUploading === "before" ? (
+                  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14 }}>
+                    <ActivityIndicator size="small" color="#0A5C43" />
+                    <Text style={styles.photoUploadTxt}>Uploading photo...</Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={[styles.photoAddMoreBtn, beforePhotos.length === 0 && { paddingVertical: 22 }]}
+                    onPress={() => takePhoto("before")}
+                  >
+                    <Camera size={beforePhotos.length === 0 ? 22 : 15} color="#92400E" />
+                    <Text style={[styles.photoAddMoreTxt, { color: "#92400E" }]}>
+                      {beforePhotos.length === 0 ? "Tap to add BEFORE photo" : "+ Add Another Before Photo"}
+                    </Text>
+                  </TouchableOpacity>
+                )
+              )}
+              {beforePhotos.length === 0 && booking.status !== "Completed" && (
+                <Text style={{ fontSize: 11, color: "#9CA3AF", textAlign: "center", marginTop: 6 }}>
+                  Required before you start cleaning
+                </Text>
               )}
             </View>
 
-            {/* After Photo */}
+            {/* After Photos */}
             {["In Progress", "Cleaning", "Completed"].includes(booking.status) && (
               <View style={styles.card}>
                 <View style={styles.photoLabelRow}>
@@ -1078,43 +1080,45 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                   {afterPhotos.length > 0 && (
                     <View style={styles.photoTakenTag}>
                       <CheckCircle2 size={11} color="#0A5C43" strokeWidth={2.5} />
-                      <Text style={styles.photoTakenTxt}>{afterPhotos.length} photo{afterPhotos.length > 1 ? "s" : ""}</Text>
+                      <Text style={styles.photoTakenTxt}>{afterPhotos.length} photo{afterPhotos.length > 1 ? "s" : ""} added</Text>
                     </View>
                   )}
                 </View>
-                {afterPhotos.length > 0 ? (
-                  <View style={{ gap: 10 }}>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                      <View style={{ flexDirection: "row", gap: 8, paddingRight: 4 }}>
-                        {afterPhotos.map((uri, i) => (
-                          <Image key={i} source={{ uri }} style={styles.photoThumb} resizeMode="cover" />
-                        ))}
-                      </View>
-                    </ScrollView>
-                    {photoUploading === "after" ? (
-                      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                        <ActivityIndicator size="small" color="#0A5C43" />
-                        <Text style={styles.photoUploadTxt}>Uploading photo...</Text>
-                      </View>
-                    ) : booking.status !== "Completed" ? (
-                      <TouchableOpacity style={[styles.photoAddMoreBtn, { backgroundColor: "#DCFCE7", borderColor: "#86EFAC" }]} onPress={() => takePhoto("after")}>
-                        <Camera size={15} color="#166534" />
-                        <Text style={[styles.photoAddMoreTxt, { color: "#166534" }]}>+ Add Another After Photo</Text>
-                      </TouchableOpacity>
-                    ) : null}
-                  </View>
-                ) : (
-                  <TouchableOpacity style={styles.photoSnapBtn} onPress={() => takePhoto("after")} disabled={booking.status === "Completed"}>
-                    {photoUploading === "after" ? <ActivityIndicator color="#0A5C43" /> : (
-                      <>
-                        <View style={[styles.photoSnapIcon, { backgroundColor: "#DCFCE7" }]}>
-                          <Camera size={26} color="#0A5C43" />
-                        </View>
-                        <Text style={styles.photoSnapTxt}>Tap to take AFTER photo</Text>
-                        <Text style={styles.photoSnapSub}>Required before marking job complete</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
+
+                {/* Existing thumbnails */}
+                {afterPhotos.length > 0 && (
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
+                    <View style={{ flexDirection: "row", gap: 8 }}>
+                      {afterPhotos.map((uri, i) => (
+                        <Image key={i} source={{ uri }} style={styles.photoThumb} resizeMode="cover" />
+                      ))}
+                    </View>
+                  </ScrollView>
+                )}
+
+                {/* Always-visible add button */}
+                {booking.status !== "Completed" && (
+                  photoUploading === "after" ? (
+                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14 }}>
+                      <ActivityIndicator size="small" color="#0A5C43" />
+                      <Text style={styles.photoUploadTxt}>Uploading photo...</Text>
+                    </View>
+                  ) : (
+                    <TouchableOpacity
+                      style={[styles.photoAddMoreBtn, { backgroundColor: "#DCFCE7", borderColor: "#86EFAC" }, afterPhotos.length === 0 && { paddingVertical: 22 }]}
+                      onPress={() => takePhoto("after")}
+                    >
+                      <Camera size={afterPhotos.length === 0 ? 22 : 15} color="#166534" />
+                      <Text style={[styles.photoAddMoreTxt, { color: "#166534" }]}>
+                        {afterPhotos.length === 0 ? "Tap to add AFTER photo" : "+ Add Another After Photo"}
+                      </Text>
+                    </TouchableOpacity>
+                  )
+                )}
+                {afterPhotos.length === 0 && booking.status !== "Completed" && (
+                  <Text style={{ fontSize: 11, color: "#9CA3AF", textAlign: "center", marginTop: 6 }}>
+                    Required before marking the job complete
+                  </Text>
                 )}
               </View>
             )}
