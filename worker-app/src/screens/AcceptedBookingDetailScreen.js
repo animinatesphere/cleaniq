@@ -1033,26 +1033,25 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 )}
               </View>
               {beforePhotos.length > 0 ? (
-                <View>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 6 }}>
-                    <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
+                <View style={{ gap: 10 }}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <View style={{ flexDirection: "row", gap: 8, paddingRight: 4 }}>
                       {beforePhotos.map((uri, i) => (
                         <Image key={i} source={{ uri }} style={styles.photoThumb} resizeMode="cover" />
                       ))}
-                      {booking.status !== "Completed" && (
-                        <TouchableOpacity style={[styles.photoThumb, styles.photoAddBtn]} onPress={() => takePhoto("before")}>
-                          <Camera size={18} color="#92400E" />
-                          <Text style={[styles.photoAddTxt, { color: "#92400E" }]}>Add</Text>
-                        </TouchableOpacity>
-                      )}
                     </View>
                   </ScrollView>
-                  {photoUploading === "before" && (
+                  {photoUploading === "before" ? (
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                       <ActivityIndicator size="small" color="#0A5C43" />
-                      <Text style={styles.photoUploadTxt}>Uploading...</Text>
+                      <Text style={styles.photoUploadTxt}>Uploading photo...</Text>
                     </View>
-                  )}
+                  ) : booking.status !== "Completed" ? (
+                    <TouchableOpacity style={styles.photoAddMoreBtn} onPress={() => takePhoto("before")}>
+                      <Camera size={15} color="#92400E" />
+                      <Text style={[styles.photoAddMoreTxt, { color: "#92400E" }]}>+ Add Another Before Photo</Text>
+                    </TouchableOpacity>
+                  ) : null}
                 </View>
               ) : (
                 <TouchableOpacity style={styles.photoSnapBtn} onPress={() => takePhoto("before")} disabled={booking.status === "Completed"}>
@@ -1084,26 +1083,25 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                   )}
                 </View>
                 {afterPhotos.length > 0 ? (
-                  <View>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 6 }}>
-                      <View style={{ flexDirection: "row", gap: 8, paddingRight: 8 }}>
+                  <View style={{ gap: 10 }}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                      <View style={{ flexDirection: "row", gap: 8, paddingRight: 4 }}>
                         {afterPhotos.map((uri, i) => (
                           <Image key={i} source={{ uri }} style={styles.photoThumb} resizeMode="cover" />
                         ))}
-                        {booking.status !== "Completed" && (
-                          <TouchableOpacity style={[styles.photoThumb, styles.photoAddBtn, { backgroundColor: "#DCFCE7" }]} onPress={() => takePhoto("after")}>
-                            <Camera size={18} color="#166534" />
-                            <Text style={[styles.photoAddTxt, { color: "#166534" }]}>Add</Text>
-                          </TouchableOpacity>
-                        )}
                       </View>
                     </ScrollView>
-                    {photoUploading === "after" && (
+                    {photoUploading === "after" ? (
                       <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                         <ActivityIndicator size="small" color="#0A5C43" />
-                        <Text style={styles.photoUploadTxt}>Uploading...</Text>
+                        <Text style={styles.photoUploadTxt}>Uploading photo...</Text>
                       </View>
-                    )}
+                    ) : booking.status !== "Completed" ? (
+                      <TouchableOpacity style={[styles.photoAddMoreBtn, { backgroundColor: "#DCFCE7", borderColor: "#86EFAC" }]} onPress={() => takePhoto("after")}>
+                        <Camera size={15} color="#166534" />
+                        <Text style={[styles.photoAddMoreTxt, { color: "#166534" }]}>+ Add Another After Photo</Text>
+                      </TouchableOpacity>
+                    ) : null}
                   </View>
                 ) : (
                   <TouchableOpacity style={styles.photoSnapBtn} onPress={() => takePhoto("after")} disabled={booking.status === "Completed"}>
@@ -1598,6 +1596,12 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
   },
   photoAddTxt: { fontSize: 10, fontWeight: "800" },
+  photoAddMoreBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+    backgroundColor: "#FEF3C7", borderWidth: 1.5, borderColor: "#FCD34D",
+    borderStyle: "dashed", borderRadius: 12, paddingVertical: 12,
+  },
+  photoAddMoreTxt: { fontSize: 13, fontWeight: "800" },
 
   // Pay
   payRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10 },
