@@ -111,7 +111,12 @@ const SUPPLY_OPTIONS  = [
   { id: "Customer", label: "I'll provide supplies",   sub: "You supply cleaning products",  Icon: ShoppingBag },
   { id: "Cleaniq",  label: "Cleaniq brings supplies", sub: "+ £10 added to your total",     Icon: Package     },
 ];
-const TIME_SLOTS = ["07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00"];
+const TIME_SLOTS = [
+  "08:00","08:30","09:00","09:30","10:00","10:30",
+  "11:00","11:30","12:00","12:30","13:00","13:30",
+  "14:00","14:30","15:00","15:30","16:00","16:30",
+  "17:00","17:30","18:00","18:30","19:00","19:30","20:00",
+];
 const STEPS      = ["Service", "Property", "Access", "Schedule"];
 const MONTH_NAMES = ["January","February","March","April","May","June",
                      "July","August","September","October","November","December"];
@@ -536,13 +541,12 @@ const BookingScreen = ({ navigation, route }) => {
   const calDays = buildCalendar(calYear, calMonth);
   const isPast  = (d) => { if (!d) return false; const t = new Date(); t.setHours(0,0,0,0); return d < t; };
 
-  // Grey out time slots that have already passed on today's date
+  // Hide time slots that have already passed on today's date (30-min buffer)
   const isPastTime = (slot) => {
     if (!form.date) return false;
     if (dateStr(form.date) !== dateStr(new Date())) return false;
     const [h, m] = slot.split(":").map(Number);
     const now = new Date();
-    // Add 30-min buffer so customers can't book something starting very soon
     return h * 60 + m <= now.getHours() * 60 + now.getMinutes() + 30;
   };
 
@@ -842,7 +846,22 @@ const BookingScreen = ({ navigation, route }) => {
                         sel  && styles.calCellSel,
                         past && styles.calCellPast,
                       ]}
-                      onPress={() => !past && set("date", d)}
+                      onPress={() => {
+                        if (past) return;
+                        set("date", d);
+                        // Clear time if switching to today and chosen time is now past
+                        if (form.timeSlot) {
+                          const now = new Date();
+                          const todayStr = dateStr(new Date());
+                          const selStr = dateStr(d);
+                          if (selStr === todayStr) {
+                            const [h, mm] = form.timeSlot.split(":").map(Number);
+                            if (h * 60 + mm <= now.getHours() * 60 + now.getMinutes() + 30) {
+                              set("timeSlot", "");
+                            }
+                          }
+                        }
+                      }}
                       disabled={past}
                       activeOpacity={0.75}
                     >
@@ -876,34 +895,45 @@ const BookingScreen = ({ navigation, route }) => {
                 <Text style={styles.availLoaderTxt}>Checking availability for this date...</Text>
               </View>
             ) : (
-              <View style={styles.timeGrid}>
-                {TIME_SLOTS.map((t) => {
-                  const sel      = form.timeSlot === t;
-                  const booked   = bookedSlots.includes(t);
-                  const pastTime = isPastTime(t);
-                  const disabled = booked || pastTime;
+              {(() => {
+                const visible = TIME_SLOTS.filter(t => !isPastTime(t));
+                if (visible.length === 0) {
                   return (
-                    <TouchableOpacity
-                      key={t}
-                      style={[
-                        styles.timeChip,
-                        sel      && styles.timeChipOn,
-                        disabled && styles.timeChipBooked,
-                      ]}
-                      onPress={() => !disabled && set("timeSlot", t)}
-                      disabled={disabled}
-                      activeOpacity={0.8}
-                    >
-                      <Clock size={12} color={disabled ? "#C0CACC" : sel ? "#fff" : C.textMuted} style={{ marginRight: 5 }} />
-                      <Text style={[styles.timeChipTxt, sel && styles.timeChipTxtOn, disabled && styles.timeChipTxtBooked]}>
-                        {t}
-                      </Text>
-                      {booked   && <Text style={styles.timeChipBookedTag}> Full</Text>}
-                      {pastTime && <Text style={styles.timeChipBookedTag}> Past</Text>}
-                    </TouchableOpacity>
+                    <View style={{ alignItems: "center", paddingVertical: 20, gap: 6 }}>
+                      <Clock size={28} color={C.textMuted} strokeWidth={1.5} />
+                      <Text style={{ fontSize: 13, fontWeight: "700", color: C.textMuted }}>No times available today</Text>
+                      <Text style={{ fontSize: 12, color: C.textLight, textAlign: "center" }}>All time slots for today have passed. Please choose a different date.</Text>
+                    </View>
                   );
-                })}
-              </View>
+                }
+                return (
+                  <View style={styles.timeGrid}>
+                    {visible.map((t) => {
+                      const sel    = form.timeSlot === t;
+                      const booked = bookedSlots.includes(t);
+                      return (
+                        <TouchableOpacity
+                          key={t}
+                          style={[
+                            styles.timeChip,
+                            sel    && styles.timeChipOn,
+                            booked && styles.timeChipBooked,
+                          ]}
+                          onPress={() => !booked && set("timeSlot", t)}
+                          disabled={booked}
+                          activeOpacity={0.8}
+                        >
+                          <Clock size={12} color={booked ? "#C0CACC" : sel ? "#fff" : C.textMuted} style={{ marginRight: 5 }} />
+                          <Text style={[styles.timeChipTxt, sel && styles.timeChipTxtOn, booked && styles.timeChipTxtBooked]}>
+                            {t}
+                          </Text>
+                          {booked && <Text style={styles.timeChipBookedTag}> Full</Text>}
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                );
+              })()}
             )}
 
             <SectionLabel title="Special instructions" sub="Anything specific we should know?" />

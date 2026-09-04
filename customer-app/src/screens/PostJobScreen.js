@@ -255,6 +255,18 @@ export default function PostJobScreen({ navigation }) {
     })();
   }, []);
 
+  /* Returns true if the broad slot (Morning/Afternoon/Evening) has already passed today */
+  const isPastSlot = (slotKey) => {
+    if (!date) return false;
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+    if (date !== todayStr) return false;
+    // If minutes ≥ 30, round up to next hour (30-min buffer)
+    const effHour = now.getMinutes() >= 30 ? now.getHours() + 1 : now.getHours();
+    const LIMITS = { Morning: 12, Afternoon: 16, Evening: 20 };
+    return slotKey !== "Flexible" && effHour >= (LIMITS[slotKey] ?? 24);
+  };
+
   /* Fetch available time slots when date is selected */
   const fetchSlots = async (d) => {
     setAvailableSlots(null); setTimeSlot(""); setPreferredTime(""); setLoadingSlots(true);
@@ -273,6 +285,16 @@ export default function PostJobScreen({ navigation }) {
   const handleDateSelect = (d) => {
     setDate(d);
     setErrors(p => ({ ...p, date: undefined }));
+    // Clear time slot if it has become past for the newly selected date
+    setTimeSlot(prev => {
+      if (!prev || prev === "Flexible") return prev;
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+      if (d !== todayStr) return prev;
+      const effHour = now.getMinutes() >= 30 ? now.getHours() + 1 : now.getHours();
+      const LIMITS = { Morning: 12, Afternoon: 16, Evening: 20 };
+      return effHour >= (LIMITS[prev] ?? 24) ? "" : prev;
+    });
     fetchSlots(d);
   };
 
@@ -600,16 +622,25 @@ export default function PostJobScreen({ navigation }) {
                 </Text>
               </View>
             )}
+            {["Morning","Afternoon","Evening"].every(k => isPastSlot(k)) && (
+              <View style={[s.slotBanner,{backgroundColor:"#FFF7ED",borderColor:"#FED7AA",marginBottom:8}]}>
+                <Text style={[s.slotBannerTxt,{color:"#9A3412"}]}>
+                  All named slots have passed for today. Choose Flexible to set a custom time, or pick a different date.
+                </Text>
+              </View>
+            )}
             <View style={s.timeGrid}>
-              {["Morning","Afternoon","Evening","Flexible"].map(k => (
-                <TimeCard
-                  key={k}
-                  slotKey={k}
-                  available={k==="Flexible" || availableSlots.includes(k)}
-                  selected={timeSlot===k}
-                  onPress={v=>{ setTimeSlot(v); setPreferredTime(""); setErrors(p=>({...p,timeSlot:undefined})); }}
-                />
-              ))}
+              {["Morning","Afternoon","Evening","Flexible"]
+                .filter(k => !isPastSlot(k))
+                .map(k => (
+                  <TimeCard
+                    key={k}
+                    slotKey={k}
+                    available={k==="Flexible" || availableSlots.includes(k)}
+                    selected={timeSlot===k}
+                    onPress={v=>{ setTimeSlot(v); setPreferredTime(""); setErrors(p=>({...p,timeSlot:undefined})); }}
+                  />
+                ))}
             </View>
             {timeSlot ? (
               <View style={{marginTop:14}}>
