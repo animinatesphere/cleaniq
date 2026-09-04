@@ -3770,13 +3770,13 @@ ${extrasRows}
                                     <p className={`inline-block text-[10px] font-bold px-3 py-1 rounded-full border mb-2 ${colors[type]}`}>
                                       {labels[type]} — {photos.length} photo{photos.length > 1 ? "s" : ""}
                                     </p>
-                                    <div className="flex gap-2 flex-wrap">
+                                    <div className="grid grid-cols-2 gap-2 mt-2">
                                       {photos.map((p, i) => (
-                                        <a key={i} href={`https://api.cleaniqservices.com/${p.url}`} target="_blank" rel="noreferrer">
+                                        <a key={i} href={`https://api.cleaniqservices.com/${p.url}`} target="_blank" rel="noreferrer" className="block rounded-2xl overflow-hidden border border-white/10 hover:border-white/25 hover:opacity-90 transition-all">
                                           <img
                                             src={`https://api.cleaniqservices.com/${p.url}`}
-                                            alt={`${type}-${i}`}
-                                            className="w-24 h-24 rounded-2xl object-cover border border-white/10 hover:opacity-90 transition-opacity"
+                                            alt={`${type}-${i + 1}`}
+                                            className="w-full h-36 object-cover"
                                           />
                                         </a>
                                       ))}
