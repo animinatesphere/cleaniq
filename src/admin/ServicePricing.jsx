@@ -29,7 +29,10 @@ const ServicePricing = () => {
   const fetchServices = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/services`);
+      const token = localStorage.getItem("adminToken") || "";
+      const res = await axios.get(`${API_URL}/services`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       setServices(res.data || []);
     } catch (err) {
       console.error("Error fetching services:", err);
@@ -80,9 +83,12 @@ const ServicePricing = () => {
     setSavingId(serviceId);
     try {
       const newRate = editMap[serviceId]?.workerPaymentRate || 0;
-      await axios.put(`${API_URL}/services/${serviceId}`, {
-        workerPaymentRate: newRate,
-      });
+      const token = localStorage.getItem("adminToken") || "";
+      await axios.put(
+        `${API_URL}/services/${serviceId}`,
+        { workerPaymentRate: newRate },
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+      );
       setServices(
         services.map((s) =>
           s._id === serviceId ? { ...s, workerPaymentRate: newRate } : s,

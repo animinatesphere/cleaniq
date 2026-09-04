@@ -27,7 +27,10 @@ const StaffPay = () => {
   const fetchServices = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/services`);
+      const token = localStorage.getItem("adminToken") || "";
+      const res = await axios.get(`${API_URL}/services`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       setServices(res.data || []);
     } catch (err) {
       console.error("Error fetching services:", err);
@@ -73,9 +76,12 @@ const StaffPay = () => {
 
       console.log(`Saving ${serviceId} with rate: £${newRate}/hr`);
 
-      const response = await axios.put(`${API_URL}/services/${serviceId}`, {
-        workerHourlyRate: newRate,
-      });
+      const token = localStorage.getItem("adminToken") || "";
+      const response = await axios.put(
+        `${API_URL}/services/${serviceId}`,
+        { workerHourlyRate: newRate },
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+      );
 
       console.log(
         `Server response: ${response.data.name} now has rate £${response.data.workerHourlyRate}`,
