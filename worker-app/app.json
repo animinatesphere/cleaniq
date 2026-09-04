@@ -52,7 +52,7 @@
       [
         "expo-updates",
         {
-          "username": "hexmane99"
+          "username": "hexmane99s-team"
         }
       ],
       [
@@ -64,15 +64,15 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "b9f0b0a1-f183-4e8c-8db2-585dd515be49"
+        "projectId": "182cc56f-a629-4a07-8235-06fd4e07c6fb"
       }
     },
-    "owner": "hexmane99",
+    "owner": "hexmane99s-team",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/b9f0b0a1-f183-4e8c-8db2-585dd515be49"
+      "url": "https://u.expo.dev/182cc56f-a629-4a07-8235-06fd4e07c6fb"
     }
   }
 }
