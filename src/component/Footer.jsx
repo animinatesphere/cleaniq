@@ -82,95 +82,46 @@ const Footer = () => {
                 Follow us: @cleaniqservices
               </p>
 
-              {/* App Store badge */}
+              {/* App Download */}
               <div>
-                <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">
+                <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-3">
                   Get Our App
                 </p>
-              </div>
-              <div className="flex w-full items-stretch gap-2 ml-[5] sm:gap-4 sm:justify-center">
-                {/* App Store */}
-
-                <a
-                  href="https://apps.apple.com/app/cleaniq-services/id6787302038"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Download Cleaniq Services on the App Store"
-                  className="group inline-flex flex-1 sm:flex-none items-center justify-center gap-2 sm:gap-3
-               rounded-xl border border-white/15 bg-black px-3 py-2.5 sm:px-5 sm:py-3
-               text-white shadow-lg shadow-black/30
-               transition-all duration-200
-               hover:bg-zinc-900 hover:border-white/25
-               active:scale-[0.97]
-               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
-                    className="h-6 w-6 sm:h-8 sm:w-8 shrink-0"
+                <div className="flex flex-col gap-2">
+                  <a
+                    href="https://apps.apple.com/app/cleaniq-services/id6787302038"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Download on the App Store"
+                    className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 hover:bg-white/10 hover:border-white/20 transition-all"
                   >
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-                  </svg>
-
-                  <span className="flex min-w-0 flex-col items-start leading-none">
-                    <span className="text-[8px] sm:text-[10px] font-medium uppercase tracking-[0.12em] sm:tracking-[0.18em] text-white/70">
-                      Download on the
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="h-5 w-5 shrink-0 text-white">
+                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+                    </svg>
+                    <span className="flex flex-col leading-none">
+                      <span className="text-[9px] font-medium text-white/50 uppercase tracking-wider">Download on the</span>
+                      <span className="text-sm font-semibold text-white">App Store</span>
                     </span>
-                    <span className="mt-0.5 sm:mt-1 whitespace-nowrap text-sm sm:text-lg font-semibold tracking-tight">
-                      App Store
-                    </span>
-                  </span>
-                </a>
-
-                {/* Android */}
-
-                <a
-                  href="https://expo.dev/artifacts/eas/yUF7N6zJ9lCSOwooWtkD7nZjaRD5jBnaihsb7UOgF1A.apk"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Download Cleaniq Services for Android"
-                  className="group inline-flex flex-1 sm:flex-none items-center justify-center gap-2 sm:gap-3
-               rounded-xl border border-white/15 bg-black px-3 py-2.5 sm:px-5 sm:py-3
-               text-white shadow-lg shadow-black/30
-               transition-all duration-200
-               hover:bg-zinc-900 hover:border-white/25
-               active:scale-[0.97]
-               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                >
-                  <svg
-                    viewBox="0 0 512 512"
-                    aria-hidden="true"
-                    className="h-6 w-6 sm:h-8 sm:w-8 shrink-0"
+                  </a>
+                  <a
+                    href="https://expo.dev/artifacts/eas/yUF7N6zJ9lCSOwooWtkD7nZjaRD5jBnaihsb7UOgF1A.apk"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Download for Android"
+                    className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 hover:bg-white/10 hover:border-white/20 transition-all"
                   >
-                    <path
-                      fill="#00A0FF"
-                      d="M47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0z"
-                    />
-                    <path
-                      fill="#00E676"
-                      d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z"
-                    />
-                    <path
-                      fill="#FFC900"
-                      d="M472.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8z"
-                    />
-                    <path
-                      fill="#FF3A44"
-                      d="M104.6 499l280.8-161.2-60.1-60.1L104.6 499z"
-                    />
-                  </svg>
-
-                  <span className="flex min-w-0 flex-col items-start leading-none">
-                    <span className="text-[8px] sm:text-[10px] font-medium uppercase tracking-[0.12em] sm:tracking-[0.18em] text-white/70">
-                      Download for
+                    <svg viewBox="0 0 512 512" aria-hidden="true" className="h-5 w-5 shrink-0">
+                      <path fill="#00A0FF" d="M47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0z" />
+                      <path fill="#00E676" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z" />
+                      <path fill="#FFC900" d="M472.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8z" />
+                      <path fill="#FF3A44" d="M104.6 499l280.8-161.2-60.1-60.1L104.6 499z" />
+                    </svg>
+                    <span className="flex flex-col leading-none">
+                      <span className="text-[9px] font-medium text-white/50 uppercase tracking-wider">Download for</span>
+                      <span className="text-sm font-semibold text-white">Android</span>
                     </span>
-                    <span className="mt-0.5 sm:mt-1 whitespace-nowrap text-sm sm:text-lg font-semibold tracking-tight">
-                      Android
-                    </span>
-                  </span>
-                </a>
-              </div>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
