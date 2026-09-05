@@ -228,7 +228,7 @@ const BlogDetail = () => {
 
       <div className="min-h-screen bg-white">
         {/* Header Section */}
-        <div className="bg-gradient-to-br from-primary/5 mt-12 to-secondary/5 pt-32 pb-12">
+        <div className="bg-gradient-to-br from-primary/5 mt-12 to-secondary/5 pt-20 sm:pt-28 md:pt-32 pb-12">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8">
             {/* Back Button */}
             <motion.div
@@ -263,7 +263,7 @@ const BlogDetail = () => {
                 </div>
 
                 {/* Title */}
-                <h1 className="text-4xl sm:text-5xl font-black text-primary-dark mb-6 leading-tight tracking-tight">
+                <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-primary-dark mb-6 leading-tight tracking-tight">
                   {post.title}
                 </h1>
 

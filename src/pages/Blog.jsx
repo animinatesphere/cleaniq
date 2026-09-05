@@ -109,7 +109,7 @@ const Blog = () => {
         </div>
 
         {/* Hero Section */}
-        <div className="relative pt-32 pb-16 md:pb-24 px-4 md:px-8">
+        <div className="relative pt-20 sm:pt-28 md:pt-32 pb-10 md:pb-24 px-4 md:px-8">
           <div className="max-w-6xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -129,7 +129,7 @@ const Blog = () => {
               </motion.div>
 
               {/* Main Title */}
-              <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-black mb-6 tracking-tight leading-tight">
+              <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-black mb-6 tracking-tight leading-tight">
                 Cleaning Tips & <br />
                 <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
                   Industry Insights
@@ -180,58 +180,71 @@ const Blog = () => {
                   to={`/blog/${generateBlogSlug(featuredPost._id, featuredPost.title)}`}
                   className="group"
                 >
-                  <div className="relative overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 border border-slate-200">
-                    {/* Image with Overlay */}
+                  <div className="overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500 border border-slate-200">
+                    {/* Image */}
                     {featuredPost.image && (
-                      <div className="relative h-96 md:h-125 overflow-hidden">
+                      <div className="relative h-56 sm:h-72 md:h-[500px] overflow-hidden">
                         <img
                           src={getImageUrl(featuredPost.image)}
                           alt={featuredPost.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                        {/* Gradient only on md+ where text overlays image */}
+                        <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+                        {/* Badge — always shown over image */}
+                        <div className="absolute top-4 left-4 md:top-6 md:left-6 bg-gradient-to-r from-primary to-secondary px-4 py-2 md:px-5 md:py-2.5 rounded-full shadow-lg">
+                          <span className="text-white font-black text-xs md:text-sm flex items-center gap-2">
+                            <Zap size={14} />
+                            Featured Post
+                          </span>
+                        </div>
+
+                        {/* Desktop-only overlay content */}
+                        <div className="hidden md:block absolute bottom-0 left-0 right-0 p-12">
+                          <div className="flex flex-wrap gap-6 text-white/80 text-sm font-bold mb-6">
+                            <span className="flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1 rounded-full">
+                              <Clock size={16} />
+                              {estimateReadTime(featuredPost.content)} min read
+                            </span>
+                            <span className="flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1 rounded-full">
+                              <Calendar size={16} />
+                              {new Date(featuredPost.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            </span>
+                          </div>
+                          <h2 className="text-5xl font-black text-white mb-4 leading-tight group-hover:text-primary transition-colors">
+                            {featuredPost.title}
+                          </h2>
+                          <p className="text-white/90 text-xl mb-6 line-clamp-2">
+                            {featuredPost.description}
+                          </p>
+                          <div className="flex items-center gap-2 text-primary font-black text-lg group-hover:gap-4 transition-all">
+                            Read Article <ChevronRight size={24} />
+                          </div>
+                        </div>
                       </div>
                     )}
 
-                    {/* Badge */}
-                    <div className="absolute top-6 left-6 bg-gradient-to-r from-primary to-secondary px-5 py-2.5 rounded-full shadow-lg">
-                      <span className="text-white font-black text-sm flex items-center gap-2">
-                        <Zap size={16} />
-                        Featured Post
-                      </span>
-                    </div>
-
-                    {/* Content (sits on the dark image overlay, so text stays white here) */}
-                    <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
-                      {/* Meta */}
-                      <div className="flex flex-wrap gap-4 md:gap-6 text-white/80 text-sm font-bold mb-6">
-                        <span className="flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1 rounded-full">
-                          <Clock size={16} />
+                    {/* Mobile-only content — below image */}
+                    <div className="block md:hidden p-5 bg-white">
+                      <div className="flex flex-wrap gap-3 text-slate-500 text-xs font-bold mb-3">
+                        <span className="flex items-center gap-1.5">
+                          <Clock size={13} />
                           {estimateReadTime(featuredPost.content)} min read
                         </span>
-                        <span className="flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1 rounded-full">
-                          <Calendar size={16} />
-                          {new Date(featuredPost.createdAt).toLocaleDateString(
-                            "en-US",
-                            { month: "short", day: "numeric", year: "numeric" },
-                          )}
+                        <span className="flex items-center gap-1.5">
+                          <Calendar size={13} />
+                          {new Date(featuredPost.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                         </span>
                       </div>
-
-                      {/* Title */}
-                      <h2 className="text-3xl md:text-5xl font-black text-white mb-4 leading-tight group-hover:text-primary transition-colors">
+                      <h2 className="text-xl font-black text-black mb-2 leading-snug group-hover:text-primary transition-colors line-clamp-3">
                         {featuredPost.title}
                       </h2>
-
-                      {/* Description */}
-                      <p className="text-white/90 text-lg md:text-xl mb-6 line-clamp-2">
+                      <p className="text-slate-600 text-sm mb-4 line-clamp-2">
                         {featuredPost.description}
                       </p>
-
-                      {/* CTA */}
-                      <div className="flex items-center gap-2 text-primary font-black text-lg group-hover:gap-4 transition-all">
-                        Read Article
-                        <ChevronRight size={24} />
+                      <div className="flex items-center gap-2 text-primary font-black text-sm">
+                        Read Article <ChevronRight size={18} />
                       </div>
                     </div>
                   </div>
