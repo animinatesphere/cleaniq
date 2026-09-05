@@ -1848,7 +1848,7 @@ const Booking = () => {
                             </p>
                           </div>
                         ) : (
-                          {/* Coupon Code */}
+                          <>
                           <div className="mb-4 bg-slate-50 border border-slate-200 rounded-[24px] p-5">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Have a Coupon Code?</p>
                             {couponApplied ? (
@@ -1954,6 +1954,7 @@ const Booking = () => {
                               </div>
                             )}
                           </div>
+                          </>
                         )}
                       </div>
                     </div>
