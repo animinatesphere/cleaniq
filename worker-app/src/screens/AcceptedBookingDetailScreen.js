@@ -126,12 +126,10 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     try {
       const res = await axios.get(`${API_URL}/workers/jobs/${bookingId}`);
       setBooking(res.data);
-      // Restore any photos already uploaded for this booking
+      // Always sync photo arrays from server — clears stale local URIs on every fetch
       const BASE = API_URL.replace("/api", "");
-      const prevBefores = (res.data.photos || []).filter(p => p.photoType === "before");
-      const prevAfters  = (res.data.photos || []).filter(p => p.photoType === "after");
-      if (prevBefores.length) setBeforePhotos(prevBefores.map(p => `${BASE}/${p.url}`));
-      if (prevAfters.length)  setAfterPhotos(prevAfters.map(p => `${BASE}/${p.url}`));
+      setBeforePhotos((res.data.photos || []).filter(p => p.photoType === "before").map(p => `${BASE}/${p.url}`));
+      setAfterPhotos((res.data.photos || []).filter(p => p.photoType === "after").map(p => `${BASE}/${p.url}`));
     } catch (error) {
       console.error("Error fetching booking:", error);
       Alert.alert("Error", "Failed to load booking details");
@@ -239,20 +237,24 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     const asset = result.assets[0];
     const photoData = `data:image/jpeg;base64,${asset.base64}`;
 
-    // Append to photos array
+    // Optimistic: show local preview immediately so the user sees it right away
     if (type === "before") setBeforePhotos(prev => [...prev, asset.uri]);
     else setAfterPhotos(prev => [...prev, asset.uri]);
 
-    // Upload to server
     setPhotoUploading(type);
     try {
       await axios.post(`${API_URL}/workers/jobs/${bookingId}/photos`, {
         photos: [{ photoType: type, base64: photoData }],
       });
+      // Replace optimistic local URI with confirmed server URLs
+      await fetchBookingDetails();
     } catch (err) {
+      // Remove the failed optimistic entry
+      if (type === "before") setBeforePhotos(prev => prev.filter(u => u !== asset.uri));
+      else setAfterPhotos(prev => prev.filter(u => u !== asset.uri));
       Alert.alert(
         "Upload Failed",
-        "Photo saved locally but could not be uploaded. Please check your connection and try again.",
+        "Could not upload photo. Please check your connection and try again.",
         [{ text: "OK" }]
       );
     } finally {
@@ -1033,15 +1035,13 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 )}
               </View>
 
-              {/* Existing thumbnails */}
+              {/* Before photos grid */}
               {beforePhotos.length > 0 && (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
-                  <View style={{ flexDirection: "row", gap: 8 }}>
-                    {beforePhotos.map((uri, i) => (
-                      <Image key={i} source={{ uri }} style={styles.photoThumb} resizeMode="cover" />
-                    ))}
-                  </View>
-                </ScrollView>
+                <View style={styles.photoGrid}>
+                  {beforePhotos.map((uri, i) => (
+                    <Image key={i} source={{ uri }} style={styles.photoGridItem} resizeMode="cover" />
+                  ))}
+                </View>
               )}
 
               {/* Always-visible add button */}
@@ -1085,15 +1085,13 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                   )}
                 </View>
 
-                {/* Existing thumbnails */}
+                {/* After photos grid */}
                 {afterPhotos.length > 0 && (
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
-                    <View style={{ flexDirection: "row", gap: 8 }}>
-                      {afterPhotos.map((uri, i) => (
-                        <Image key={i} source={{ uri }} style={styles.photoThumb} resizeMode="cover" />
-                      ))}
-                    </View>
-                  </ScrollView>
+                  <View style={styles.photoGrid}>
+                    {afterPhotos.map((uri, i) => (
+                      <Image key={i} source={{ uri }} style={styles.photoGridItem} resizeMode="cover" />
+                    ))}
+                  </View>
                 )}
 
                 {/* Always-visible add button */}
@@ -1323,6 +1321,9 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
     </SafeAreaView>
   );
 };
+
+const SCREEN_W = Dimensions.get("window").width;
+const PHOTO_TILE = (SCREEN_W - 64 - 6) / 2; // card padding 32px each side + 6px gap
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F4F6F5" },
@@ -1590,6 +1591,13 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center", gap: 6,
   },
   photoUploadTxt: { fontSize: 12, fontWeight: "700", color: "#6B7280" },
+  photoGrid: {
+    flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 10,
+  },
+  photoGridItem: {
+    width: PHOTO_TILE, height: PHOTO_TILE,
+    borderRadius: 12, backgroundColor: "#F3F4F6",
+  },
   photoThumb: {
     width: 90, height: 90, borderRadius: 12, overflow: "hidden",
     backgroundColor: "#F3F4F6",

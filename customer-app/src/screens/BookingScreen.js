@@ -252,6 +252,10 @@ const BookingScreen = ({ navigation, route }) => {
   const [bookedSlots,    setBookedSlots]    = useState([]);
   const [availLoading,   setAvailLoading]   = useState(false);
   const [autoSubmit,     setAutoSubmit]     = useState(false);
+  const [couponCode,     setCouponCode]     = useState("");
+  const [couponApplied,  setCouponApplied]  = useState(null); // { code, discountPercent }
+  const [couponError,    setCouponError]    = useState("");
+  const [couponLoading,  setCouponLoading]  = useState(false);
 
   const today = new Date();
   const [calYear,  setCalYear]  = useState(today.getFullYear());
@@ -371,7 +375,9 @@ const BookingScreen = ({ navigation, route }) => {
 
   const set    = (key, val) => setForm((f) => ({ ...f, [key]: val }));
   const top    = () => scrollRef.current?.scrollTo({ y: 0, animated: true });
-  const total  = calcTotal(form, rates, extraPrices);
+  const rawTotal = calcTotal(form, rates, extraPrices);
+  const discount = couponApplied ? Math.round((rawTotal * couponApplied.discountPercent) / 100 * 100) / 100 : 0;
+  const total  = Math.round((rawTotal - discount) * 100) / 100;
   const displayServices = liveServices.length > 0 ? liveServices : SERVICES;
   const displayExtras   = liveExtras.length   > 0 ? liveExtras   : EXTRAS;
   const BASE_ROOMS      = ["Bedrooms", "Bathrooms", "Kitchens", "Living Room"];
@@ -401,6 +407,31 @@ const BookingScreen = ({ navigation, route }) => {
       if (!form.timeSlot) { Alert.alert("No time selected",  "Please select a start time."); return false; }
     }
     return true;
+  };
+
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError("");
+    try {
+      const res = await fetch(`${API_URL}/coupons/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode.trim() }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setCouponApplied({ code: couponCode.trim().toUpperCase(), discountPercent: data.discountPercent });
+        setCouponError("");
+      } else {
+        setCouponError(data.message || "Invalid coupon code");
+        setCouponApplied(null);
+      }
+    } catch {
+      setCouponError("Could not validate coupon. Try again.");
+    } finally {
+      setCouponLoading(false);
+    }
   };
 
   const nextStep = () => {
@@ -471,6 +502,15 @@ const BookingScreen = ({ navigation, route }) => {
       const resData = await res.json();
       if (!res.ok) throw new Error(resData.message || "Booking failed");
 
+      if (couponApplied) {
+        try {
+          await fetch(`${API_URL}/coupons/apply`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: couponApplied.code, customerEmail: email, bookingId: resData._id || resData.bookingId || "" }),
+          });
+        } catch { /* non-blocking */ }
+      }
       await AsyncStorage.removeItem("@cleaniq_pending_booking");
       setBookingRef(resData.bookingId || resData._id || payload.bookingId);
       setSubmitted(true);
@@ -979,9 +1019,53 @@ const BookingScreen = ({ navigation, route }) => {
                   </View>
                 )}
               </View>
+              {/* Coupon Code */}
+              <View style={styles.couponSection}>
+                <Text style={styles.couponLabel}>Have a coupon code?</Text>
+                {couponApplied ? (
+                  <View style={styles.couponApplied}>
+                    <Text style={styles.couponAppliedTxt}>
+                      {couponApplied.code} — {couponApplied.discountPercent}% off applied!
+                    </Text>
+                    <TouchableOpacity onPress={() => { setCouponApplied(null); setCouponCode(""); setCouponError(""); }}>
+                      <Text style={styles.couponRemoveTxt}>Remove</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <View style={styles.couponRow}>
+                    <TextInput
+                      style={styles.couponInput}
+                      value={couponCode}
+                      onChangeText={t => { setCouponCode(t.toUpperCase()); setCouponError(""); }}
+                      placeholder="Enter code"
+                      placeholderTextColor={C.textMuted}
+                      autoCapitalize="characters"
+                    />
+                    <TouchableOpacity
+                      style={[styles.couponBtn, (!couponCode.trim() || couponLoading) && { opacity: 0.5 }]}
+                      onPress={validateCoupon}
+                      disabled={!couponCode.trim() || couponLoading}
+                    >
+                      {couponLoading
+                        ? <ActivityIndicator size="small" color="#fff" />
+                        : <Text style={styles.couponBtnTxt}>Apply</Text>
+                      }
+                    </TouchableOpacity>
+                  </View>
+                )}
+                {!!couponError && <Text style={styles.couponErrorTxt}>{couponError}</Text>}
+              </View>
+
               <View style={styles.summaryFooter}>
                 <Text style={styles.summaryTotalLbl}>Total due</Text>
-                <Text style={styles.summaryTotalAmt}>£{total.toFixed(2)}</Text>
+                <View>
+                  {couponApplied && (
+                    <Text style={{ fontSize: 11, fontWeight: "700", color: C.primary, textAlign: "right" }}>
+                      {couponApplied.discountPercent}% discount applied
+                    </Text>
+                  )}
+                  <Text style={styles.summaryTotalAmt}>£{total.toFixed(2)}</Text>
+                </View>
               </View>
               <View style={styles.summaryNote}>
                 <CreditCard size={13} color={C.textMuted} />
@@ -1295,6 +1379,30 @@ const styles = StyleSheet.create({
   },
   summaryTotalLbl: { fontSize: 15, fontWeight: "800", color: C.primaryDark },
   summaryTotalAmt: { fontSize: 22, fontWeight: "900", color: C.primary },
+  couponSection: {
+    paddingHorizontal: 18, paddingVertical: 14,
+    borderTopWidth: 1, borderTopColor: "rgba(0,0,0,0.06)",
+  },
+  couponLabel: { fontSize: 11, fontWeight: "800", color: "#6B7280", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 },
+  couponRow: { flexDirection: "row", gap: 8 },
+  couponInput: {
+    flex: 1, backgroundColor: "#F9FAFB", borderWidth: 1.5, borderColor: "#E5E7EB",
+    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10,
+    fontSize: 14, fontWeight: "700", color: "#111",
+  },
+  couponBtn: {
+    backgroundColor: "#0A5C43", borderRadius: 12,
+    paddingHorizontal: 18, justifyContent: "center", alignItems: "center",
+  },
+  couponBtnTxt: { fontSize: 13, fontWeight: "900", color: "#fff" },
+  couponApplied: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    backgroundColor: "#ECFDF5", borderWidth: 1, borderColor: "#6EE7B7",
+    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10,
+  },
+  couponAppliedTxt: { fontSize: 13, fontWeight: "800", color: "#065F46", flex: 1 },
+  couponRemoveTxt: { fontSize: 12, fontWeight: "700", color: "#EF4444" },
+  couponErrorTxt: { fontSize: 12, fontWeight: "700", color: "#EF4444", marginTop: 6 },
   summaryNote: {
     flexDirection: "row", alignItems: "center", gap: 8,
     paddingHorizontal: 18, paddingVertical: 12,

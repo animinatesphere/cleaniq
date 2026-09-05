@@ -243,6 +243,10 @@ const NewBookingPage = () => {
     () => !!location.state?.noPaymentRequired,
   );
   const [skipEmail, setSkipEmail] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(null); // { code, discountPercent }
+  const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
   const [success, setSuccess] = useState(null);
 
   // Customer search/autocomplete
@@ -547,7 +551,9 @@ const NewBookingPage = () => {
   /* ── Pricing ────────────────────────────────────────────────────────── */
   useEffect(() => {
     if (data.payment?.billingType === "flat") {
-      setCreateTotal(Math.round((parseFloat(flatAmount) || 0) * 100) / 100);
+      const raw = Math.round((parseFloat(flatAmount) || 0) * 100) / 100;
+      const disc = couponApplied ? Math.round(raw * couponApplied.discountPercent) / 100 : 0;
+      setCreateTotal(Math.round((raw - disc) * 100) / 100);
       return;
     }
     if (!data.service) {
@@ -560,8 +566,9 @@ const NewBookingPage = () => {
     (data.details.extras || []).forEach((ex) => {
       total += (dynamicRates[clean(ex.name || "")] || 0) * (ex.qty || 1);
     });
-    setCreateTotal(Math.round(total * 100) / 100);
-  }, [data, dynamicRates, flatAmount]);
+    const disc = couponApplied ? Math.round(total * couponApplied.discountPercent) / 100 : 0;
+    setCreateTotal(Math.round((total - disc) * 100) / 100);
+  }, [data, dynamicRates, flatAmount, couponApplied]);
 
   /* ── Field change ───────────────────────────────────────────────────── */
   const set = (path, value) => {
@@ -681,6 +688,34 @@ const NewBookingPage = () => {
     }
   };
 
+  /* ── Coupon ─────────────────────────────────────────────────────────── */
+  const API_URL = import.meta.env.VITE_API_URL || "https://api.cleaniqservices.com/api";
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError("");
+    try {
+      const res = await fetch(`${API_URL}/coupons/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode.trim() }),
+      });
+      const d = await res.json();
+      if (d.valid) {
+        setCouponApplied({ code: couponCode.trim().toUpperCase(), discountPercent: d.discountPercent });
+        setCouponError("");
+      } else {
+        setCouponError(d.message || "Invalid coupon");
+        setCouponApplied(null);
+      }
+    } catch {
+      setCouponError("Could not validate coupon.");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+  const removeCoupon = () => { setCouponApplied(null); setCouponCode(""); setCouponError(""); };
+
   /* ── Submit ─────────────────────────────────────────────────────────── */
   const handleSubmit = async () => {
     const v = validateStep(4);
@@ -706,6 +741,7 @@ const NewBookingPage = () => {
         noPaymentRequired,
         skipConfirmationEmail: noPaymentRequired && skipEmail,
         createdByAdmin: localStorage.getItem("adminUser") || null,
+        meta: { ...(data.meta || {}), coupon: couponApplied || null },
       };
       const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings`, {
         method: "POST",
@@ -714,6 +750,16 @@ const NewBookingPage = () => {
       });
       if (!res.ok) throw new Error("Failed");
       const booking = await res.json();
+      // Mark coupon as used
+      if (couponApplied) {
+        try {
+          await fetch(`${import.meta.env.VITE_API_URL}/coupons/apply`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: couponApplied.code, customerEmail: data.customer?.email || "", bookingId: booking._id || booking.bookingId || "" }),
+          });
+        } catch { /* non-blocking */ }
+      }
       setSuccess(booking);
     } catch {
       setFormErrors((p) => ({
@@ -800,6 +846,14 @@ const NewBookingPage = () => {
                 </span>
               </div>
             ))}
+            {success.meta?.coupon && (
+              <div className="flex justify-between py-2 border-b border-emerald-500/20 text-sm bg-emerald-500/5 rounded-lg px-2">
+                <span className="text-emerald-400/80">Coupon Applied</span>
+                <span className="font-black text-emerald-400">
+                  {success.meta.coupon.code} — {success.meta.coupon.discountPercent}% off
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3">
@@ -1873,6 +1927,36 @@ const NewBookingPage = () => {
                 )}
               </div>
 
+              {/* Coupon */}
+              <div className="px-4 py-4 border-t border-white/[0.06]">
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.12em] mb-2">Coupon Code</p>
+                {couponApplied ? (
+                  <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2.5">
+                    <div>
+                      <span className="text-emerald-400 font-black text-sm">{couponApplied.code}</span>
+                      <span className="text-emerald-400/70 text-xs font-bold ml-2">— {couponApplied.discountPercent}% off</span>
+                    </div>
+                    <button onClick={removeCoupon} className="text-[10px] font-bold text-white/30 hover:text-rose-400 transition-colors ml-3">Remove</button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
+                      onKeyDown={e => e.key === "Enter" && validateCoupon()}
+                      placeholder="Enter code"
+                      className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white font-bold text-sm placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50"
+                    />
+                    <button onClick={validateCoupon} disabled={couponLoading || !couponCode.trim()}
+                      className="px-3 py-2 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white font-black text-xs rounded-xl transition-all whitespace-nowrap">
+                      {couponLoading ? "..." : "Apply"}
+                    </button>
+                  </div>
+                )}
+                {couponError && <p className="text-rose-400 text-xs font-bold mt-1.5">{couponError}</p>}
+              </div>
+
               {/* Total */}
               <div
                 className={`px-4 py-4 border-t border-white/[0.06] ${noPaymentRequired ? "bg-emerald-500/10" : "bg-emerald-500"}`}
@@ -1884,6 +1968,11 @@ const NewBookingPage = () => {
                     >
                       Estimated Total
                     </p>
+                    {couponApplied && (
+                      <p className={`text-[10px] font-bold mt-0.5 ${noPaymentRequired ? "text-emerald-400/70" : "text-white/70"}`}>
+                        {couponApplied.discountPercent}% discount applied
+                      </p>
+                    )}
                     <p
                       className={`text-2xl font-black tabular-nums mt-0.5 ${noPaymentRequired ? "text-emerald-400" : "text-white"}`}
                     >

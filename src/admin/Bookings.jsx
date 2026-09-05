@@ -3681,6 +3681,14 @@ ${extrasRows}
                         {selectedBooking.payment?.currency === "NGN" ? "₦" : "£"}
                         {selectedBooking.payment?.amount}
                       </p>
+                      {selectedBooking.meta?.coupon && (
+                        <div className="mt-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-2.5 py-1.5 text-left">
+                          <p className="text-[9px] font-black text-emerald-400/70 uppercase tracking-wider">Coupon</p>
+                          <p className="text-xs font-black text-emerald-400">
+                            {selectedBooking.meta.coupon.code} — {selectedBooking.meta.coupon.discountPercent}% off
+                          </p>
+                        </div>
+                      )}
                       <div className="flex gap-1 mt-2 flex-col sm:flex-row">
                         <button
                           onClick={async () => {

@@ -44,6 +44,9 @@ export default function PriceList() {
   const [roomCounts, setRoomCounts] = useState({});    // { [serviceId]: count }
   const [roomPrices, setRoomPrices] = useState({});   // { [serviceId]: price string } for default rooms
   const [savingPrices, setSavingPrices] = useState(false);
+  const [showCoupon, setShowCoupon] = useState(false);
+  const [couponPromoCode, setCouponPromoCode] = useState("");
+  const [couponPromoPercent, setCouponPromoPercent] = useState("");
 
   const setR = (k) => (e) => setRecipient((p) => ({ ...p, [k]: e.target.value }));
 
@@ -282,6 +285,15 @@ export default function PriceList() {
       <tbody>${rowsHtml}</tbody>
     </table>
   </div>
+  ${showCoupon && couponPromoCode ? `
+  <div style="margin:24px 40px 0;padding:18px 24px;background:linear-gradient(135deg,#0A5C43 0%,#0d7a5a 100%);border-radius:12px;display:flex;align-items:center;gap:20px">
+    <div style="font-size:32px;line-height:1">🏷️</div>
+    <div>
+      <div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.55);margin-bottom:4px">Exclusive Offer</div>
+      <div style="font-size:16px;font-weight:900;color:#fff;letter-spacing:-.2px">Use code <span style="background:rgba(255,255,255,.15);padding:2px 10px;border-radius:6px;font-family:monospace;letter-spacing:.05em">${couponPromoCode.toUpperCase()}</span>${couponPromoPercent ? ` to get <span style="color:#6ee7b7">${couponPromoPercent}% off</span>` : ""} your booking</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:5px">Book online at cleaniqservices.com — discount applied automatically at checkout</div>
+    </div>
+  </div>` : ""}
   <div style="margin:24px 40px 0;display:grid;grid-template-columns:1fr 1fr;gap:16px">
     ${includeVat ? `<div style="padding:14px 16px;background:#fef9c3;border:1px solid #fde68a;border-radius:8px"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#92400e;margin-bottom:4px">VAT Notice</div><div style="font-size:11px;color:#78350f;line-height:1.6">All prices shown are exclusive of VAT. VAT at the prevailing rate (currently 20%) will be added where applicable.</div></div>` : ""}
     <div style="padding:14px 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#166534;margin-bottom:4px">Terms</div><div style="font-size:11px;color:#15803d;line-height:1.6">Prices are subject to change. A formal quote will be issued before any work commences. POA = Price on Application.</div></div>
@@ -692,6 +704,48 @@ export default function PriceList() {
                   </div>
                   <span className="text-sm font-semibold text-white/80">Include VAT notice</span>
                 </label>
+
+                {/* Coupon promo section */}
+                <label className="flex items-center gap-2.5 cursor-pointer select-none mt-1">
+                  <div
+                    onClick={() => setShowCoupon((v) => !v)}
+                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${showCoupon ? "bg-emerald-500 border-emerald-500" : "border-white/25"}`}
+                  >
+                    {showCoupon && <X size={11} className="text-white" />}
+                  </div>
+                  <span className="text-sm font-semibold text-white/80">Include coupon offer in PDF</span>
+                </label>
+
+                {showCoupon && (
+                  <div className="mt-3 space-y-3 pl-7 border-l-2 border-emerald-500/20 ml-2.5">
+                    <div>
+                      <label className="text-[10px] font-black text-white/40 uppercase tracking-wide block mb-1.5">Coupon Code</label>
+                      <input
+                        type="text"
+                        value={couponPromoCode}
+                        onChange={e => setCouponPromoCode(e.target.value.toUpperCase())}
+                        placeholder="e.g. SUMMER20"
+                        className={inp}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black text-white/40 uppercase tracking-wide block mb-1.5">Discount % <span className="text-white/20 normal-case font-normal">(optional)</span></label>
+                      <input
+                        type="number"
+                        min="1" max="100"
+                        value={couponPromoPercent}
+                        onChange={e => setCouponPromoPercent(e.target.value)}
+                        placeholder="e.g. 10"
+                        className={inp}
+                      />
+                    </div>
+                    {couponPromoCode && (
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-xs text-emerald-400 font-medium">
+                        Preview: <span className="font-black">Use code {couponPromoCode}{couponPromoPercent ? ` to get ${couponPromoPercent}% off` : ""} your booking</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

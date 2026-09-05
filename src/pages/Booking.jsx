@@ -243,6 +243,10 @@ const Booking = () => {
   }, [customer]);
 
   const [totalPrice, setTotalPrice] = useState(0);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(null); // { code, discountPercent }
+  const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
   const [dynamicRates, setDynamicRates] = useState({});
@@ -588,10 +592,42 @@ const Booking = () => {
     // if (formData.frequency === "Weekly") total *= 0.9;
     // if (formData.frequency === "Fortnightly") total *= 0.95;
 
-    setTotalPrice(Math.round(total * 100) / 100);
-  }, [formData, region, dynamicRates]);
+    const discount = couponApplied ? (total * couponApplied.discountPercent) / 100 : 0;
+    setTotalPrice(Math.round((total - discount) * 100) / 100);
+  }, [formData, region, dynamicRates, couponApplied]);
 
   // auth modal is derived from step/customer/isSubmitted
+
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError("");
+    try {
+      const res = await fetch(`${API_URL}/coupons/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode.trim() }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setCouponApplied({ code: couponCode.trim().toUpperCase(), discountPercent: data.discountPercent });
+        setCouponError("");
+      } else {
+        setCouponError(data.message || "Invalid coupon");
+        setCouponApplied(null);
+      }
+    } catch {
+      setCouponError("Could not validate coupon. Try again.");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCouponApplied(null);
+    setCouponCode("");
+    setCouponError("");
+  };
 
   const updateRoom = (name, delta) => {
     setFormData((prev) => {
@@ -732,6 +768,21 @@ const Booking = () => {
         },
       );
       if (response.ok) {
+        const bookingData = await response.json();
+        // Mark coupon as used
+        if (couponApplied) {
+          try {
+            await fetch(`${import.meta.env.VITE_API_URL}/coupons/apply`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                code: couponApplied.code,
+                customerEmail: formData.email,
+                bookingId: bookingData._id || bookingData.bookingId || "",
+              }),
+            });
+          } catch { /* non-blocking */ }
+        }
         localStorage.removeItem("ciq_booking_draft");
         setIsSubmitted(true);
       }
@@ -1797,6 +1848,35 @@ const Booking = () => {
                             </p>
                           </div>
                         ) : (
+                          {/* Coupon Code */}
+                          <div className="mb-4 bg-slate-50 border border-slate-200 rounded-[24px] p-5">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Have a Coupon Code?</p>
+                            {couponApplied ? (
+                              <div className="flex items-center justify-between bg-[#10B981]/10 border border-[#10B981]/30 rounded-2xl px-4 py-3">
+                                <div>
+                                  <p className="font-black text-[#10B981] text-sm">{couponApplied.code} — {couponApplied.discountPercent}% off applied!</p>
+                                </div>
+                                <button onClick={removeCoupon} className="text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors ml-4">Remove</button>
+                              </div>
+                            ) : (
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={couponCode}
+                                  onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
+                                  onKeyDown={e => e.key === "Enter" && validateCoupon()}
+                                  placeholder="Enter code"
+                                  className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-black font-bold text-sm placeholder:text-slate-300 focus:outline-none focus:border-[#10B981]"
+                                />
+                                <button onClick={validateCoupon} disabled={couponLoading || !couponCode.trim()}
+                                  className="px-4 py-2.5 bg-[#10B981] hover:bg-[#0ea572] disabled:opacity-50 text-white font-black text-sm rounded-xl transition-all whitespace-nowrap">
+                                  {couponLoading ? "..." : "Apply"}
+                                </button>
+                              </div>
+                            )}
+                            {couponError && <p className="text-rose-500 text-xs font-bold mt-2">{couponError}</p>}
+                          </div>
+
                           <div className="bg-[#10B981]/10 p-6 rounded-[32px] border border-[#10B981]/20">
                             <div className="flex items-center gap-3 text-[10px] font-black text-[#10B981] uppercase tracking-widest mb-4">
                               <ShieldCheck size={18} />
@@ -2018,6 +2098,11 @@ const Booking = () => {
                   <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">
                     Estimated Total
                   </p>
+                  {couponApplied && (
+                    <p className="text-sm text-[#10B981] font-black">
+                      {couponApplied.discountPercent}% coupon applied
+                    </p>
+                  )}
                   <p className="text-2xl font-black text-black">
                     {region.symbol}
                     {totalPrice}
