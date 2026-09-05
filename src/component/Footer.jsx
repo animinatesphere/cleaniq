@@ -87,6 +87,7 @@ const Footer = () => {
                 <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-2">
                   Get Our App
                 </p>
+              </div>
               <div className="flex w-full items-stretch gap-2 sm:gap-4 sm:justify-center">
                 {/* App Store */}
 
