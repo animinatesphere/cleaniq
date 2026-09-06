@@ -3,7 +3,7 @@
     "name": "Cleaniq Services Pro",
     "slug": "worker-app",
     "scheme": "cleaniqworker",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "platforms": [
       "ios",
       "android",
@@ -20,7 +20,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.cleaniq.worker",
-      "buildNumber": "11",
+      "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "Cleaniq uses your location, only while you have it switched on for a job, so the customer can see when you're on the way."
