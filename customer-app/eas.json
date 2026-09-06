@@ -21,7 +21,8 @@
       "ios": {
         "distribution": "store",
         "buildConfiguration": "Release",
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "autoIncrement": true
       },
       "android": {
         "buildType": "app-bundle",
