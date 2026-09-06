@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Cleaniq Service",
-    "slug": "cleaniq-customer",
+    "slug": "customer-app",
     "scheme": "cleaniqcustomer",
     "version": "1.6.0",
     "platforms": [
