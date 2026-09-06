@@ -29,6 +29,7 @@ import {
   StatusBar,
   Image,
   TextInput,
+  Dimensions,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { AuthContext, API_URL } from "../context/AuthContext";
@@ -1174,7 +1175,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
               <Text style={styles.sheetSectionLbl}>📸 Step 1 — Take Photos</Text>
               <Text style={styles.sheetHint}>Show the areas that need more work — kitchen grease, dirty bathrooms, cluttered rooms, etc.</Text>
-              <View style={styles.photoGrid}>
+              <View style={styles.photoThumbGrid}>
                 {extraTimePhotos.map((p, i) => (
                   <View key={i} style={styles.thumbWrap}>
                     <Image source={{ uri: p.uri }} style={styles.thumb} resizeMode="cover" />
@@ -1282,7 +1283,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 
               <Text style={styles.sheetSectionLbl}>⚠️ Damage Photos (optional)</Text>
               <Text style={styles.sheetHint}>Add photos of any damage found at the property.</Text>
-              <View style={styles.photoGrid}>
+              <View style={styles.photoThumbGrid}>
                 {damagePhotos.map((p, i) => (
                   <View key={i} style={styles.thumbWrap}>
                     <Image source={{ uri: p.uri }} style={styles.thumb} resizeMode="cover" />
@@ -1653,7 +1654,7 @@ const styles = StyleSheet.create({
   sheetHint: { fontSize: 12, color: "#9CA3AF", marginBottom: 10 },
 
   // Photo grid (in modals)
-  photoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 4 },
+  photoThumbGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 4 },
   thumbWrap: { width: 80, height: 80, borderRadius: 12, overflow: "hidden", position: "relative" },
   thumb: { width: "100%", height: "100%" },
   thumbRemove: {
