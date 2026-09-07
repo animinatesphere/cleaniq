@@ -603,7 +603,7 @@ const Booking = () => {
     setCouponLoading(true);
     setCouponError("");
     try {
-      const res = await fetch(`${API_URL}/coupons/validate`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/coupons/validate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: couponCode.trim() }),

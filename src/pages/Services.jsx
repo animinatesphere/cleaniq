@@ -220,6 +220,7 @@ const Services = () => {
         features: (s.bullets && s.bullets.length > 0) ? s.bullets : assets.features,
         description: s.description || assets.defaultDesc,
         pricing: s.rate ? `From ${region.symbol}${s.rate}${region.id === "UK" ? (s.type === "hourly" ? "/hr" : "") : ""}` : "",
+        rawRate: s.rate ? parseFloat(s.rate) : Infinity,
       };
     });
 
@@ -227,6 +228,7 @@ const Services = () => {
     keys.forEach((k) => {
       if (!mapped.some((m) => m.id === k)) {
         const assets = layoutAssets[k];
+        const defaultPricing = region.id === "UK" ? assets.defaultRateUK : assets.defaultRateNG;
         mapped.push({
           id: k,
           title: assets.defaultName,
@@ -236,13 +238,13 @@ const Services = () => {
           image: assets.image,
           features: assets.features,
           description: assets.defaultDesc,
-          pricing:
-            region.id === "UK" ? assets.defaultRateUK : assets.defaultRateNG,
+          pricing: defaultPricing,
+          rawRate: parseFloat(defaultPricing.replace(/[^0-9.]/g, "")) || Infinity,
         });
       }
     });
 
-    return mapped.sort((a, b) => keys.indexOf(a.id) - keys.indexOf(b.id));
+    return mapped.sort((a, b) => a.rawRate - b.rawRate);
   }, [dbServices, region]);
 
   const containerVariants = {
