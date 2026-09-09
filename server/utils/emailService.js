@@ -2315,6 +2315,18 @@ const templates = {
         : ""
     }
 
+    <!-- ░░ DOWNLOAD BUTTON ░░ -->
+    ${data.downloadUrl ? `
+    <tr>
+      <td style="background:#f8fafc;padding:28px 40px;text-align:center;border-top:1px solid #e2e8f0">
+        <p style="margin:0 0 14px;font-size:13px;color:#64748b;font-weight:600">Your invoice is also attached to this email, or tap below to download it anytime:</p>
+        <a href="${data.downloadUrl}"
+           style="display:inline-block;background:#0A5C43;color:#ffffff;text-decoration:none;font-size:14px;font-weight:800;padding:14px 36px;border-radius:12px;letter-spacing:0.3px">
+          ⬇&nbsp; Download Invoice PDF
+        </a>
+      </td>
+    </tr>` : ""}
+
     <!-- ░░ THANK YOU ░░ -->
     <tr>
       <td style="background:#0A5C43;padding:28px 40px;text-align:center">

@@ -1,7 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const crypto = require("crypto");
 const { sendEmail, templates } = require("../utils/emailService");
 const { htmlToPdfBuffer } = require("../utils/pdf");
+const SentInvoice = require("../models/SentInvoice");
+
+const SERVER_URL = process.env.SERVER_URL || "https://api.cleaniqservices.com";
 
 // POST /api/custom-invoice/payment-link — generate a Stripe Checkout link
 // for the invoice total, to embed as a "Pay Now" button when admin wants one.
@@ -62,6 +66,25 @@ router.post("/payment-link", async (req, res) => {
   }
 });
 
+// GET /api/custom-invoice/download/:token — public: serve stored invoice as PDF download
+router.get("/download/:token", async (req, res) => {
+  try {
+    const invoice = await SentInvoice.findOne({ token: req.params.token });
+    if (!invoice) return res.status(404).send("Invoice not found or has expired.");
+
+    const html = templates.customInvoice(invoice.data);
+    const label = invoice.data.invoiceNumber ? `-${invoice.data.invoiceNumber}` : "";
+    const pdf = await htmlToPdfBuffer(html, `Cleaniq Services - Invoice${label}`);
+
+    res.setHeader("Content-Disposition", `attachment; filename="Cleaniq-Invoice${label}.pdf"`);
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(pdf);
+  } catch (err) {
+    console.error("Invoice download error:", err.message);
+    res.status(500).send("Failed to generate invoice PDF.");
+  }
+});
+
 // POST /api/custom-invoice/send — build and email a free-form invoice with PDF attachment
 router.post("/send", async (req, res) => {
   try {
@@ -72,7 +95,12 @@ router.post("/send", async (req, res) => {
         .json({ message: "Customer email and at least one item are required" });
     }
 
-    const html = templates.customInvoice(data);
+    // Save invoice data so the customer can download it via a unique link
+    const token = crypto.randomBytes(20).toString("hex");
+    await SentInvoice.create({ token, data });
+    const downloadUrl = `${SERVER_URL}/api/custom-invoice/download/${token}`;
+
+    const html = templates.customInvoice({ ...data, downloadUrl });
     const invoiceLabel = data.invoiceNumber ? ` ${data.invoiceNumber}` : "";
     const subject = `Invoice${invoiceLabel} from Cleaniq Services`;
 
