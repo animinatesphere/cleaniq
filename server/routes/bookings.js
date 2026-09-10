@@ -1508,10 +1508,43 @@ router.post("/:id/resend", async (req, res) => {
     };
 
     switch (emailType) {
-      case "confirmation":
-        subject = `Your Booking is Confirmed — ${booking.bookingId} | Cleaniq Services`;
-        html    = templates.bookingConfirmation(booking);
+      case "confirmation": {
+        const paymentPending = booking.payment?.status === "Pending" && !booking.noPaymentRequired;
+        if (paymentPending) {
+          try {
+            const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+            const stripeSession = await stripe.checkout.sessions.create({
+              payment_method_types: ["card"],
+              mode: "payment",
+              customer_email: booking.customer.email,
+              payment_intent_data: {
+                capture_method: "manual",
+                metadata: { bookingId: booking._id.toString(), bookingRef: booking.bookingId, company: "Cleaniq Services" },
+              },
+              line_items: [{
+                price_data: {
+                  currency: (booking.payment.currency || "GBP").toLowerCase(),
+                  product_data: { name: `Cleaniq - ${booking.service}`, description: `Booking Reference: ${booking.bookingId}` },
+                  unit_amount: Math.round(booking.payment.amount * 100),
+                },
+                quantity: 1,
+              }],
+              metadata: { bookingId: booking._id.toString(), company: "Cleaniq Services" },
+              success_url: `https://cleaniqservices.com/account/dashboard?payment=success&bookingId=${booking._id}`,
+              cancel_url: `https://cleaniqservices.com/`,
+            });
+            subject = `Payment Required: Cleaniq Booking ${booking.bookingId}`;
+            html    = templates.paymentRequired(booking, stripeSession.url);
+          } catch {
+            subject = `Payment Required: Cleaniq Booking ${booking.bookingId}`;
+            html    = templates.paymentRequired(booking, null);
+          }
+        } else {
+          subject = `Your Booking is Confirmed — ${booking.bookingId} | Cleaniq Services`;
+          html    = templates.bookingConfirmation(booking);
+        }
         break;
+      }
       case "status-update":
         subject = subjectMap[booking.status] || `Booking Update — ${booking.bookingId} | Cleaniq Services`;
         html    = buildBookingStatusUpdateEmail(booking);
