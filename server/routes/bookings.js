@@ -1521,10 +1521,50 @@ router.post("/:id/resend", async (req, res) => {
         html    = templates.invoiceReceipt(booking);
         attachments = await buildInvoiceAttachment(booking);
         break;
-      case "awaiting-payment":
-        subject = `Payment Awaited — ${booking.bookingId} | Cleaniq Services`;
-        html    = templates.invoiceAwaitingPayment(booking);
+      case "awaiting-payment": {
+        // Try to reuse the last stored payment link URL first
+        let paymentUrl = booking.meta?.lastPaymentLinkUrl || null;
+
+        // If no stored URL, generate a fresh Stripe checkout session
+        if (!paymentUrl) {
+          try {
+            const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "");
+            const totalPence = Math.round((Number(booking.payment?.amount || booking.totalAmount || booking.price || 0)) * 100);
+            const stripeSession = await stripe.checkout.sessions.create({
+              payment_method_types: ["card"],
+              line_items: [{
+                price_data: {
+                  currency: "gbp",
+                  product_data: { name: booking.service || "Cleaning Service", description: `Cleaniq Booking ${booking.bookingId}` },
+                  unit_amount: totalPence,
+                },
+                quantity: 1,
+              }],
+              mode: "payment",
+              payment_intent_data: {
+                capture_method: "manual",
+                metadata: { bookingId: String(booking._id), bookingRef: booking.bookingId, company: "Cleaniq Services" },
+              },
+              success_url: `https://cleaniqservices.com/account/dashboard?payment=success&booking=${booking.bookingId}`,
+              cancel_url: `https://cleaniqservices.com/`,
+              customer_email: booking.customer.email,
+              metadata: { bookingId: String(booking._id), bookingRef: booking.bookingId, type: "resend-payment-link" },
+            });
+            paymentUrl = stripeSession.url;
+            // Store so it can be reused
+            booking.meta = booking.meta || {};
+            booking.meta.lastPaymentLinkUrl = paymentUrl;
+            await booking.save();
+          } catch (stripeErr) {
+            console.error("Stripe session error on resend:", stripeErr.message);
+            // Fall back to payment email without a link
+          }
+        }
+
+        subject = `Payment Required: Cleaniq Booking ${booking.bookingId}`;
+        html    = templates.paymentRequired(booking, paymentUrl);
         break;
+      }
       case "review-request": {
         const reviewUrl = `https://cleaniqservices.com/review?booking=${booking.bookingId}&customer=${encodeURIComponent((booking.customer.firstName || "") + " " + (booking.customer.lastName || ""))}`;
         subject = `How did we do? Leave us a review ⭐ — Cleaniq Services`;
