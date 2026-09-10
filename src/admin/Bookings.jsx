@@ -4226,6 +4226,7 @@ ${extrasRows}
                   >
                     <Calendar size={13} /> Reschedule
                   </button>
+                  {/* RESEND EMAIL BUTTON — commented out, uncomment to re-enable
                   <button
                     onClick={() => setResendModal({
                       bookingId: selectedBooking._id,
@@ -4238,6 +4239,7 @@ ${extrasRows}
                   >
                     <Mail size={13} /> Emails
                   </button>
+                  */}
                   <button
                     onClick={() => setIsEditing(true)}
                     className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-black uppercase tracking-widest shadow-sm shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all"
@@ -6415,7 +6417,7 @@ ${extrasRows}
         </div>
       )}
 
-      {/* ── Resend Email Modal ────────────────────────────────────────── */}
+      {/* ── Resend Email Modal — commented out, uncomment to re-enable ──
       {resendModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setResendModal(null)} />
@@ -6450,6 +6452,7 @@ ${extrasRows}
           </div>
         </div>
       )}
+      ── End Resend Email Modal ── */}
 
     </div>
   );
