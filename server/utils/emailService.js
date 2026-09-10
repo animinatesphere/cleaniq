@@ -30,7 +30,7 @@ const wrapEmail = (body) => {
 </html>`;
 };
 
-const sendEmail = async ({ to, subject, html, attachments }) => {
+const sendEmail = async ({ to, subject, html, attachments, from: fromOverride, isCampaign = false }) => {
   try {
     if (!resend) {
       console.error("❌ EMAIL ERROR: RESEND_API_KEY is missing in .env");
@@ -50,17 +50,34 @@ const sendEmail = async ({ to, subject, html, attachments }) => {
 
     const wrappedHtml = wrapEmail(html);
     console.log(`📧 Resend: Attempting to send email to: ${to}...`);
-    const unsubUrl = `https://api.cleaniqservices.com/api/unsubscribe?email=${encodeURIComponent(to)}`;
+
+    // Campaign emails use a real reply-to address and no List-Unsubscribe-Post header
+    // (the unsubscribe link is embedded in the email body instead).
+    // This avoids Gmail's automatic Promotions tab categorisation.
+    const fromAddress = fromOverride ||
+      (isCampaign
+        ? "Cleaniq Services <info@cleaniqservices.com>"
+        : "Cleaniq Services <noreply@cleaniqservices.com>");
+
     const payload = {
-      from: "Cleaniq Services <noreply@cleaniqservices.com>",
+      from: fromAddress,
       to,
       subject,
       html: wrappedHtml,
-      headers: {
+    };
+
+    // Only add List-Unsubscribe headers on transactional emails.
+    // Campaign emails embed the unsubscribe link in the body — adding the
+    // List-Unsubscribe-Post header tells Gmail explicitly "this is bulk mail"
+    // and moves it to Promotions.
+    if (!isCampaign) {
+      const unsubUrl = `https://api.cleaniqservices.com/api/unsubscribe?email=${encodeURIComponent(to)}`;
+      payload.headers = {
         "List-Unsubscribe": `<${unsubUrl}>`,
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-      },
-    };
+      };
+    }
+
     if (attachments && attachments.length > 0)
       payload.attachments = attachments;
     const { data, error } = await resend.emails.send(payload);

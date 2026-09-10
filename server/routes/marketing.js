@@ -176,7 +176,7 @@ router.post('/send', async (req, res) => {
     const results = await Promise.allSettled(
       emails.map(email => {
         const body = personalise(message, email, customerMap);
-        return sendEmail({ to: email, subject, html: campaignEmailHtml(subject, body, email) });
+        return sendEmail({ to: email, subject, html: campaignEmailHtml(subject, body, email), isCampaign: true });
       })
     );
     const successCount = results.filter(r => r.status === 'fulfilled' && r.value).length;
@@ -234,7 +234,7 @@ router.post('/campaign', async (req, res) => {
     const to = validEmails[i++];
     try {
       const personalBody = personalise(body, to, customerMap);
-      await sendEmail({ to, subject, html: campaignEmailHtml(subject, personalBody, to) });
+      await sendEmail({ to, subject, html: campaignEmailHtml(subject, personalBody, to), isCampaign: true });
       await Campaign.findByIdAndUpdate(campaign._id, { $inc: { sentCount: 1 }, status: 'sending' });
       console.log(`📧 Campaign [${i}/${validEmails.length}] → ${to}`);
     } catch (err) {
