@@ -63,7 +63,7 @@ async function htmlToPdfBuffer(innerHtml, title = "Cleaniq Services") {
       printBackground: true,
       margin: { top: "20px", bottom: "20px", left: "0px", right: "0px" },
     });
-    return pdf;
+    return Buffer.from(pdf);
   } finally {
     await browser.close();
     fs.rm(userDataDir, { recursive: true, force: true }, () => {});
