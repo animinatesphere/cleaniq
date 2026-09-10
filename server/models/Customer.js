@@ -12,6 +12,7 @@ const customerSchema = new mongoose.Schema({
   loginCount:     { type: Number, default: 0 },
   tags: { type: [String], default: [] },
   crmEmailsEnabled: { type: Boolean, default: true },
+  emailUnsubscribed: { type: Boolean, default: false },
   role:        { type: String, enum: ["customer", "company"], default: "customer" },
   companyName: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now }

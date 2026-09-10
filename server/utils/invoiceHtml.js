@@ -1,7 +1,7 @@
 // Shared invoice HTML builder — used by both the email template and the
 // public PDF download route. Design mirrors the InvoiceBuilder exactly.
 function buildBookingInvoiceHtml(booking, opts = {}) {
-  const { includeDownloadButton = false, downloadUrl = "" } = opts;
+  const { includeDownloadButton = false, downloadUrl = "", customerEmail = "" } = opts;
 
   const logoUrl = "https://cleaniqservices.com/preview.jpg";
 
@@ -183,9 +183,10 @@ function buildBookingInvoiceHtml(booking, opts = {}) {
     <p style="margin:4px 0 0;font-size:11px;color:rgba(255,255,255,0.6);">We&#39;re committed to delivering a spotless clean every time.</p>
   </td></tr>
   <tr><td style="background:#0f172a;padding:16px 44px;text-align:center;">
-    <p style="margin:0;font-size:11px;color:#64748b;font-weight:600;">Cleaniq Services Limited</p>
-    <p style="margin:4px 0 0;font-size:10px;color:#475569;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7752 476368</p>
-    <p style="margin:6px 0 0;font-size:9px;color:#334155;">&copy; ${new Date().getFullYear()} Cleaniq Services. All rights reserved.</p>
+    <p style="margin:0;font-size:11px;color:#94a3b8;font-weight:600;">Cleaniq Services Limited</p>
+    <p style="margin:4px 0 0;font-size:10px;color:#94a3b8;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7752 476368</p>
+    <p style="margin:6px 0 0;font-size:9px;color:#64748b;">&copy; ${new Date().getFullYear()} Cleaniq Services. All rights reserved.</p>
+    ${customerEmail ? `<p style="margin:8px 0 0;font-size:9px;color:#475569;">Don&#39;t want to receive emails? <a href="https://api.cleaniqservices.com/api/unsubscribe?email=${encodeURIComponent(customerEmail)}" style="color:#64748b;">Unsubscribe</a></p>` : ""}
   </td></tr>
 
 </table>

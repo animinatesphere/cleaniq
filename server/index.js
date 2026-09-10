@@ -172,6 +172,42 @@ app.use((req, res, next) => {
   next();
 });
 
+// Unsubscribe from marketing/notification emails
+app.get("/api/unsubscribe", async (req, res) => {
+  const { email } = req.query;
+  const sanitised = (email || "").trim().toLowerCase();
+  if (sanitised) {
+    try {
+      const Customer = require("./models/Customer");
+      await Customer.findOneAndUpdate({ email: sanitised }, { emailUnsubscribed: true });
+    } catch {}
+  }
+  res.setHeader("Content-Type", "text/html");
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unsubscribed — Cleaniq Services</title>
+<style>body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;display:flex;align-items:center;justify-content:center;min-height:100vh;}</style>
+</head>
+<body>
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 16px;">
+<table width="500" cellpadding="0" cellspacing="0" style="max-width:500px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.09);">
+  <tr><td style="background:#0A5C43;padding:32px;text-align:center;">
+    <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq" style="height:48px;border-radius:8px;" />
+    <p style="color:#fff;font-size:20px;font-weight:800;margin:16px 0 0;">You&#39;ve been unsubscribed</p>
+  </td></tr>
+  <tr><td style="padding:32px;text-align:center;color:#334155;">
+    <p style="font-size:15px;margin:0 0 12px;">You won&#39;t receive marketing emails from Cleaniq Services anymore.</p>
+    <p style="font-size:13px;color:#64748b;margin:0;">You will still receive transactional emails about your bookings.<br>If you unsubscribed by mistake, please <a href="mailto:info@cleaniqservices.com" style="color:#0A5C43;">contact us</a>.</p>
+  </td></tr>
+  <tr><td style="background:#f8fafc;padding:16px;text-align:center;border-top:1px solid #e2e8f0;">
+    <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; ${new Date().getFullYear()} Cleaniq Services. All rights reserved.</p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`);
+});
+
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/recruitment", recruitmentRoutes);
 app.use("/api/services", serviceRoutes);

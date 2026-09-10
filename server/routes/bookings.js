@@ -16,6 +16,19 @@ const adminAuth = require("../middleware/adminAuth");
 const sms = require("../utils/smsService");
 const { sendWorkersPush } = require("../utils/pushNotifications");
 
+// Generate a PDF invoice attachment; returns [] if Puppeteer is unavailable
+async function buildInvoiceAttachment(booking) {
+  try {
+    const { buildBookingInvoiceHtml } = require("../utils/invoiceHtml");
+    const { htmlToPdfBuffer } = require("../utils/pdf");
+    const html = buildBookingInvoiceHtml(booking, { includeDownloadButton: false });
+    const buf = await htmlToPdfBuffer(html, `Cleaniq Invoice ${booking.bookingId}`);
+    return [{ filename: `Cleaniq-Invoice-${booking.bookingId}.pdf`, content: buf }];
+  } catch {
+    return [];
+  }
+}
+
 // Public booking creation endpoint (no admin auth) - used by frontend
 // Creates a booking record from client POST and returns the saved booking.
 // WARNING: This endpoint is intentionally minimal to unblock customer flow.
@@ -1063,10 +1076,12 @@ router.put("/:id", async (req, res) => {
       }
 
       try {
+        const invoiceAttachments = await buildInvoiceAttachment(updatedBooking);
         await sendEmail({
           to: updatedBooking.customer.email,
           subject: `Your Cleaniq Invoice & Receipt: ${updatedBooking.bookingId}`,
           html: templates.invoiceReceipt(updatedBooking),
+          attachments: invoiceAttachments,
         });
         console.log(
           `📧 Invoice email sent to ${updatedBooking.customer.email} for booking ${updatedBooking.bookingId}`,
@@ -1481,7 +1496,7 @@ router.post("/:id/resend", async (req, res) => {
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
     const { emailType = "confirmation" } = req.body;
-    let subject, html;
+    let subject, html, attachments = [];
 
     const subjectMap = {
       Confirmed:        `Booking Confirmed ✅ — ${booking.bookingId}`,
@@ -1504,6 +1519,7 @@ router.post("/:id/resend", async (req, res) => {
       case "invoice":
         subject = `🧾 Invoice — ${booking.bookingId} | Cleaniq Services`;
         html    = templates.invoiceReceipt(booking);
+        attachments = await buildInvoiceAttachment(booking);
         break;
       case "awaiting-payment":
         subject = `Payment Awaited — ${booking.bookingId} | Cleaniq Services`;
@@ -1519,7 +1535,7 @@ router.post("/:id/resend", async (req, res) => {
         return res.status(400).json({ message: "Unknown emailType" });
     }
 
-    const ok = await sendEmail({ to: booking.customer.email, subject, html });
+    const ok = await sendEmail({ to: booking.customer.email, subject, html, attachments });
     if (!ok) return res.status(500).json({ message: "Failed to send email" });
     res.json({ message: "Email sent successfully" });
   } catch (err) {
@@ -1727,10 +1743,12 @@ router.post("/:id/send-invoice", async (req, res) => {
     const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
+    const invoiceAttachments = await buildInvoiceAttachment(booking);
     const ok = await sendEmail({
       to: booking.customer.email,
       subject: `🧾 Invoice — ${booking.bookingId} | Cleaniq Services`,
       html: templates.invoiceReceipt(booking),
+      attachments: invoiceAttachments,
     });
 
     if (!ok)

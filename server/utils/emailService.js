@@ -38,13 +38,28 @@ const sendEmail = async ({ to, subject, html, attachments }) => {
       return false;
     }
 
+    // Skip sending to unsubscribed customers
+    try {
+      const Customer = require("../models/Customer");
+      const cust = await Customer.findOne({ email: to.toLowerCase() }).select("emailUnsubscribed").lean();
+      if (cust?.emailUnsubscribed) {
+        console.log(`📭 Skipping email to ${to} — customer has unsubscribed`);
+        return false;
+      }
+    } catch {}
+
     const wrappedHtml = wrapEmail(html);
     console.log(`📧 Resend: Attempting to send email to: ${to}...`);
+    const unsubUrl = `https://api.cleaniqservices.com/api/unsubscribe?email=${encodeURIComponent(to)}`;
     const payload = {
       from: "Cleaniq Services <noreply@cleaniqservices.com>",
       to,
       subject,
       html: wrappedHtml,
+      headers: {
+        "List-Unsubscribe": `<${unsubUrl}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      },
     };
     if (attachments && attachments.length > 0)
       payload.attachments = attachments;
@@ -423,7 +438,11 @@ const templates = {
   invoiceReceipt: (booking) => {
     const { buildBookingInvoiceHtml } = require("./invoiceHtml");
     const downloadUrl = `https://api.cleaniqservices.com/api/bookings/${booking._id}/invoice`;
-    return buildBookingInvoiceHtml(booking, { includeDownloadButton: true, downloadUrl });
+    return buildBookingInvoiceHtml(booking, {
+      includeDownloadButton: true,
+      downloadUrl,
+      customerEmail: booking.customer?.email || "",
+    });
   },
 
   _invoiceReceiptOld: (booking) => {
