@@ -23,7 +23,7 @@ async function buildInvoiceAttachment(booking) {
     const { htmlToPdfBuffer } = require("../utils/pdf");
     const html = buildBookingInvoiceHtml(booking, { includeDownloadButton: false });
     const buf = await htmlToPdfBuffer(html, `Cleaniq Invoice ${booking.bookingId}`);
-    return [{ filename: `Cleaniq-Invoice-${booking.bookingId}.pdf`, content: buf }];
+    return [{ filename: `Cleaniq-Invoice-${booking.bookingId}.pdf`, content: buf.toString("base64") }];
   } catch {
     return [];
   }
