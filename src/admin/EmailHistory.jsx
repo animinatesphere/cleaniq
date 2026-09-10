@@ -32,13 +32,17 @@ function EmailDrawer({ log, onClose, onDelete }) {
       .finally(() => setHtmlLoading(false));
   }, [log]);
 
-  const handleDownload = () => {
-    if (!html) return;
-    const blob = new Blob([html], { type: "text/html" });
+  const handleDownload = async () => {
+    const token = localStorage.getItem("adminToken");
+    const res = await fetch(`${API}/email-logs/${log._id}/pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement("a");
     a.href     = url;
-    a.download = `${(log.subject || "email").replace(/[^a-z0-9]+/gi, "-")}.html`;
+    a.download = `${(log.subject || "email").replace(/[^a-z0-9]+/gi, "-")}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

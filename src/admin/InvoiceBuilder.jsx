@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import html2pdf from "html2pdf.js";
 import {
   FileText, Plus, Trash2, Send, Download, X, Search,
   CreditCard, Copy, GripVertical, Eye, EyeOff, ChevronDown,
@@ -35,25 +34,24 @@ const Field = ({ label, span = 1, children }) => (
 
 const inp = "w-full p-2.5 rounded-xl border border-white/10 text-xs font-medium focus:outline-none focus:border-emerald-500/50 transition-colors bg-white/5 text-white placeholder:text-white/20";
 
-const PDF_OPTS = {
-  margin: [8, 8, 8, 8],
-  image: { type: "jpeg", quality: 0.95 },
-  html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, imageTimeout: 15000 },
-  jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-  pagebreak: { mode: ["avoid-all", "css"] },
-};
-
-const mountForPdf = (html) =>
-  new Promise((resolve) => {
-    const parsed = new DOMParser().parseFromString(html, "text/html");
-    const root = parsed.getElementById("inv-root");
-    if (!root) { resolve(null); return; }
-    const host = document.createElement("div");
-    Object.assign(host.style, { position: "absolute", top: "-99999px", left: "0", width: "794px", background: "#fff" });
-    host.appendChild(root);
-    document.body.appendChild(host);
-    setTimeout(() => { host.style.height = host.scrollHeight + "px"; resolve(host); }, 800);
+const downloadPdfFromServer = async (html, filename) => {
+  const token = localStorage.getItem("adminToken");
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/email-logs/html-to-pdf`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ html, filename }),
   });
+  if (!res.ok) throw new Error("PDF generation failed");
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
 
 const InvoiceBuilder = () => {
   const [sections, setSections]       = useState(SECTION_DEFS.map((s) => ({ ...s, enabled: s.id !== "stripe" })));
@@ -408,11 +406,9 @@ const InvoiceBuilder = () => {
 </div>
 </div></body></html>`;
 
-    const host = await mountForPdf(html);
     try {
-      await html2pdf().set({ ...PDF_OPTS, filename }).from(host.firstElementChild).save();
+      await downloadPdfFromServer(html, filename);
     } finally {
-      if (host && host.parentNode) document.body.removeChild(host);
       setDownloading(false);
     }
   };

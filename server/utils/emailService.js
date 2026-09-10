@@ -420,135 +420,148 @@ const templates = {
 </body>
 </html>`,
 
-  invoiceReceipt: (booking) => `<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  invoiceReceipt: (booking) => {
+    const issueDate   = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
+    const serviceDate = new Date(booking.schedule?.date || Date.now()).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
+    const amount      = booking.payment?.amount ?? "0.00";
+    const isFlat      = booking.payment?.billingType === "flat";
+    return `<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Invoice ${booking.bookingId} — Cleaniq Services</title>
-  <style>
-    @media only screen and (max-width:600px){
-      .card{width:100%!important}
-      .pad{padding:24px 20px!important}
-      .hide-mobile{display:none!important}
-    }
-  </style>
 </head>
-<body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,'Helvetica Neue',sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 16px;">
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,'Helvetica Neue',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:32px 16px;">
 <tr><td align="center">
-<table class="card" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;background:#fff;border-radius:4px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.08);">
+<table width="640" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border-radius:6px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.09);">
 
   <!-- HEADER -->
-  <tr><td style="background:#0a2018;padding:36px 48px 28px;" class="pad">
+  <tr><td style="background:#0A5C43;padding:32px 44px 26px;">
     <table width="100%" cellpadding="0" cellspacing="0"><tr>
       <td valign="middle">
-        <p style="margin:0;font-size:24px;font-weight:900;color:#14A66B;letter-spacing:-0.5px;line-height:1;">Cleaniq Services</p>
-        <p style="margin:4px 0 0;font-size:11px;color:#6EE7B7;font-weight:700;text-transform:uppercase;letter-spacing:2px;">Professional Cleaning</p>
+        <p style="margin:0;font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.5px;line-height:1;">Cleaniq Services</p>
+        <p style="margin:5px 0 0;font-size:9px;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:2px;">Professional Cleaning Services</p>
       </td>
       <td valign="middle" align="right">
-        <p style="margin:0;font-size:40px;font-weight:900;color:#fff;letter-spacing:-2px;line-height:1;">INVOICE</p>
-        <p style="margin:6px 0 0;font-size:13px;color:#94a3b8;font-weight:600;"># ${booking.bookingId}</p>
-        <table cellpadding="0" cellspacing="0" align="right" style="margin-top:12px;">
-          <tr><td style="background:#ecfdf5;border:2px solid #6EE7B7;border-radius:20px;padding:5px 18px;">
-            <span style="font-size:12px;font-weight:900;color:#059669;text-transform:uppercase;letter-spacing:1px;">&#10003; PAID</span>
-          </td></tr>
-        </table>
+        <p style="margin:0;font-size:34px;font-weight:900;color:#ffffff;letter-spacing:-1px;line-height:1;">INVOICE</p>
+        <p style="margin:6px 0 0;font-size:13px;font-weight:700;color:#6EE7B7;">${booking.bookingId}</p>
+        <span style="display:inline-block;margin-top:10px;background:#6EE7B7;color:#064e3b;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;padding:4px 14px;border-radius:999px;">&#10003; PAID IN FULL</span>
+      </td>
+    </tr></table>
+  </td></tr>
+
+  <!-- META BAR -->
+  <tr><td style="background:#f0fdf4;border-top:3px solid #0A5C43;">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="padding:11px 18px;border-right:1px solid #bbf7d0;width:25%;">
+        <p style="margin:0 0 3px;font-size:7px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;">Invoice #</p>
+        <p style="margin:0;font-size:11px;font-weight:700;color:#0f172a;">${booking.bookingId}</p>
+      </td>
+      <td style="padding:11px 18px;border-right:1px solid #bbf7d0;width:25%;">
+        <p style="margin:0 0 3px;font-size:7px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;">Issue Date</p>
+        <p style="margin:0;font-size:11px;font-weight:700;color:#0f172a;">${issueDate}</p>
+      </td>
+      <td style="padding:11px 18px;border-right:1px solid #bbf7d0;width:25%;">
+        <p style="margin:0 0 3px;font-size:7px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;">Service Date</p>
+        <p style="margin:0;font-size:11px;font-weight:700;color:#0f172a;">${serviceDate}</p>
+      </td>
+      <td style="padding:11px 18px;width:25%;">
+        <p style="margin:0 0 3px;font-size:7px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;">Status</p>
+        <p style="margin:0;font-size:11px;font-weight:800;color:#16a34a;">&#10003; Paid</p>
       </td>
     </tr></table>
   </td></tr>
 
   <!-- BILLING INFO -->
-  <tr><td style="padding:36px 48px 0;" class="pad">
+  <tr><td style="padding:28px 44px 24px;">
     <table width="100%" cellpadding="0" cellspacing="0"><tr>
-      <td valign="top" width="50%" style="padding-right:20px;">
-        <p style="margin:0 0 8px;font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;">Billed To</p>
-        <p style="margin:0;font-size:18px;font-weight:800;color:#0F172A;">${booking.customer.firstName} ${booking.customer.lastName}</p>
-        <p style="margin:5px 0 0;font-size:14px;color:#64748b;">${booking.customer.email}</p>
-        ${booking.customer.phone ? `<p style="margin:3px 0 0;font-size:14px;color:#64748b;">${booking.customer.phone}</p>` : ""}
-        ${booking.details?.address ? `<p style="margin:5px 0 0;font-size:14px;color:#64748b;">${booking.details.address}${booking.details.postcode ? ", " + booking.details.postcode : ""}</p>` : ""}
+      <td valign="top" width="50%" style="padding-right:16px;">
+        <p style="margin:0 0 8px;font-size:8px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;border-bottom:2px solid #d1fae5;padding-bottom:5px;">Billed To</p>
+        <p style="margin:0;font-size:15px;font-weight:800;color:#0f172a;">${booking.customer.firstName} ${booking.customer.lastName}</p>
+        <p style="margin:3px 0 0;font-size:12px;color:#64748b;">${booking.customer.email}</p>
+        ${booking.customer.phone ? `<p style="margin:2px 0 0;font-size:12px;color:#64748b;">${booking.customer.phone}</p>` : ""}
+        ${booking.details?.address ? `<p style="margin:4px 0 0;font-size:12px;color:#64748b;line-height:1.5;">${booking.details.address}${booking.details.postcode ? ", " + booking.details.postcode : ""}</p>` : ""}
       </td>
-      <td valign="top" align="right">
-        <p style="margin:0 0 8px;font-size:10px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;">Invoice Details</p>
-        <table cellpadding="3" cellspacing="0" align="right">
-          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Issue Date:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</td></tr>
-          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Service Date:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${new Date(booking.schedule?.date || Date.now()).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}</td></tr>
-          <tr><td style="font-size:13px;color:#64748b;text-align:right;">Time Slot:</td><td style="font-size:13px;font-weight:700;color:#0F172A;padding-left:14px;">${booking.schedule?.timeSlot || "N/A"}</td></tr>
-        </table>
+      <td valign="top" width="50%" align="right" style="padding-left:16px;">
+        <p style="margin:0 0 8px;font-size:8px;font-weight:800;color:#0A5C43;text-transform:uppercase;letter-spacing:1.2px;border-bottom:2px solid #d1fae5;padding-bottom:5px;">From</p>
+        <p style="margin:0;font-size:15px;font-weight:800;color:#0f172a;">Cleaniq Services Ltd</p>
+        <p style="margin:3px 0 0;font-size:12px;color:#64748b;">info@cleaniqservices.com</p>
+        <p style="margin:2px 0 0;font-size:12px;color:#64748b;">+44 7752 476368</p>
+        <p style="margin:2px 0 0;font-size:12px;color:#64748b;">cleaniqservices.com</p>
       </td>
     </tr></table>
   </td></tr>
 
-  <!-- DIVIDER -->
-  <tr><td style="padding:28px 48px 0;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top:2px solid #f1f5f9;font-size:0;">&nbsp;</td></tr></table></td></tr>
-
   <!-- LINE ITEMS -->
-  <tr><td style="padding:0 48px;" class="pad">
-    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+  <tr><td style="padding:0 44px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;">
       <thead>
-        <tr style="background:#0F172A;">
-          <th style="padding:14px 16px;text-align:left;font-size:11px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">Service Description</th>
-          <th style="padding:14px 16px;text-align:center;font-size:11px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">${booking.payment?.billingType === "flat" ? "Type" : "Duration"}</th>
-          <th style="padding:14px 16px;text-align:right;font-size:11px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">Amount</th>
+        <tr style="background:#0f172a;">
+          <th style="padding:12px 16px;font-size:8px;font-weight:800;color:#6ee7b7;text-transform:uppercase;letter-spacing:1px;text-align:left;">Service Description</th>
+          <th style="padding:12px 16px;font-size:8px;font-weight:800;color:#6ee7b7;text-transform:uppercase;letter-spacing:1px;text-align:center;width:100px;">${isFlat ? "Type" : "Duration"}</th>
+          <th style="padding:12px 16px;font-size:8px;font-weight:800;color:#6ee7b7;text-transform:uppercase;letter-spacing:1px;text-align:right;width:110px;">Amount</th>
         </tr>
       </thead>
       <tbody>
-        <tr style="border-bottom:1px solid #f1f5f9;">
-          <td style="padding:20px 16px;">
-            <p style="margin:0;font-size:15px;font-weight:700;color:#0F172A;">${booking.service}</p>
-            ${booking.details?.frequency ? `<p style="margin:4px 0 0;font-size:13px;color:#64748b;">Frequency: ${booking.details.frequency}</p>` : ""}
-            ${booking.details?.address ? `<p style="margin:4px 0 0;font-size:13px;color:#64748b;">&#128205; ${booking.details.address}${booking.details.postcode && !booking.details.address.toLowerCase().includes(booking.details.postcode.toLowerCase()) ? ", " + booking.details.postcode : ""}</p>` : ""}
+        <tr style="background:#ffffff;">
+          <td style="padding:16px;font-size:13px;font-weight:700;color:#0f172a;border-bottom:1px solid #f1f5f9;">
+            ${booking.service}
+            ${booking.details?.frequency ? `<br><span style="font-size:11px;color:#64748b;font-weight:500;">Frequency: ${booking.details.frequency}</span>` : ""}
+            ${booking.details?.address ? `<br><span style="font-size:11px;color:#64748b;font-weight:500;">&#128205; ${booking.details.address}${booking.details.postcode ? ", " + booking.details.postcode : ""}</span>` : ""}
           </td>
-          <td style="padding:20px 16px;text-align:center;font-size:14px;color:#334155;font-weight:600;">${booking.payment?.billingType === "flat" ? "Flat Rate" : `${booking.details?.duration || "N/A"} hrs`}</td>
-          <td style="padding:20px 16px;text-align:right;font-size:16px;font-weight:800;color:#0F172A;">&#163;${booking.payment.amount}</td>
+          <td style="padding:16px;font-size:13px;color:#334155;font-weight:600;text-align:center;border-bottom:1px solid #f1f5f9;">${isFlat ? "Flat Rate" : `${booking.details?.duration || "N/A"} hrs`}</td>
+          <td style="padding:16px;font-size:14px;font-weight:800;color:#0f172a;text-align:right;border-bottom:1px solid #f1f5f9;">&#163;${amount}</td>
         </tr>
       </tbody>
     </table>
   </td></tr>
 
-  <!-- TOTALS -->
-  <tr><td style="padding:0 48px 32px;" class="pad">
-    <table width="100%" cellpadding="0" cellspacing="0">
-      <tr><td style="padding:12px 16px;text-align:right;font-size:14px;color:#64748b;">Subtotal</td><td style="padding:12px 16px;text-align:right;font-size:14px;font-weight:700;color:#334155;white-space:nowrap;">&#163;${booking.payment.amount}</td></tr>
-      <tr><td style="padding:4px 16px 16px;text-align:right;font-size:14px;color:#64748b;border-bottom:1px solid #e2e8f0;">VAT (0%)</td><td style="padding:4px 16px 16px;text-align:right;font-size:14px;font-weight:700;color:#334155;border-bottom:1px solid #e2e8f0;">&#163;0.00</td></tr>
-    </table>
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:4px;">
-      <tr><td style="background:#0a2018;padding:22px 24px;">
-        <table width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td style="font-size:15px;font-weight:800;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">Total Paid</td>
-          <td style="text-align:right;font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1;">&#163;${booking.payment.amount}</td>
-        </tr></table>
-      </td></tr>
-    </table>
+  <!-- TOTAL -->
+  <tr><td style="padding:16px 44px 28px;">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td></td>
+      <td style="width:220px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#0A5C43;border-radius:12px;overflow:hidden;">
+          <tr>
+            <td style="padding:14px 18px;font-size:10px;font-weight:800;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1px;">Total Paid</td>
+            <td style="padding:14px 18px;font-size:22px;font-weight:900;color:#ffffff;text-align:right;">&#163;${amount}</td>
+          </tr>
+        </table>
+      </td>
+    </tr></table>
   </td></tr>
 
-  <!-- THANK YOU -->
-  <tr><td style="padding:0 48px 32px;" class="pad">
+  <!-- THANK YOU + REVIEW -->
+  <tr><td style="padding:0 44px 28px;">
     <table width="100%" cellpadding="0" cellspacing="0"><tr>
-      <td style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:28px;text-align:center;">
-        <p style="margin:0;font-size:17px;font-weight:800;color:#065f46;">Thank you for choosing Cleaniq Services! &#127775;</p>
-        <p style="margin:8px 0 16px;font-size:14px;color:#059669;">We hope you&#39;re delighted with your clean. We&#39;d love a review!</p>
-        <a href="https://g.page/r/CTGJLR1Z7dySEBM/review" style="display:inline-block;background:#059669;color:#fff;padding:13px 32px;border-radius:8px;text-decoration:none;font-weight:800;font-size:14px;">Leave a Review &#11088;</a>
+      <td style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:24px;text-align:center;">
+        <p style="margin:0;font-size:16px;font-weight:800;color:#065f46;">Thank you for choosing Cleaniq Services! &#127775;</p>
+        <p style="margin:8px 0 16px;font-size:13px;color:#059669;">We hope you&#39;re delighted with your clean. We&#39;d love a review!</p>
+        <a href="https://g.page/r/CTGJLR1Z7dySEBM/review" style="display:inline-block;background:#059669;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:800;font-size:13px;">Leave a Review &#11088;</a>
       </td>
     </tr></table>
   </td></tr>
 
   <!-- DOWNLOAD BUTTON -->
-  <tr><td style="padding:0 48px 40px;text-align:center;" class="pad">
-    <a href="https://api.cleaniqservices.com/api/bookings/${booking._id}/invoice" style="display:inline-block;background:#0F172A;color:#6EE7B7;padding:18px 44px;border-radius:10px;text-decoration:none;font-weight:800;font-size:15px;letter-spacing:0.5px;">&#11015; Download PDF Receipt</a>
+  <tr><td style="padding:0 44px 32px;text-align:center;">
+    <a href="https://api.cleaniqservices.com/api/bookings/${booking._id}/invoice" style="display:inline-block;background:#0f172a;color:#6EE7B7;padding:16px 40px;border-radius:10px;text-decoration:none;font-weight:800;font-size:14px;letter-spacing:0.5px;">&#11015; Download PDF Receipt</a>
   </td></tr>
 
   <!-- FOOTER -->
-  <tr><td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:24px 48px;text-align:center;">
-    <p style="margin:0;font-size:13px;font-weight:600;color:#64748b;">Cleaniq Services Limited</p>
-    <p style="margin:4px 0 0;font-size:12px;color:#94a3b8;">cleaniqservices.com &middot; support@cleaniqservices.com</p>
-    <p style="margin:8px 0 0;font-size:11px;color:#cbd5e1;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+  <tr><td style="background:#0A5C43;padding:20px 44px;text-align:center;">
+    <p style="margin:0;font-size:13px;font-weight:800;color:#ffffff;">Thank you for choosing Cleaniq Services</p>
+    <p style="margin:4px 0 0;font-size:11px;color:rgba(255,255,255,0.6);">We&#39;re committed to delivering a spotless clean every time.</p>
+  </td></tr>
+  <tr><td style="background:#0f172a;padding:16px 44px;text-align:center;">
+    <p style="margin:0;font-size:11px;color:#64748b;font-weight:600;">Cleaniq Services Limited</p>
+    <p style="margin:4px 0 0;font-size:10px;color:#475569;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7752 476368</p>
+    <p style="margin:6px 0 0;font-size:9px;color:#334155;">&copy; ${new Date().getFullYear()} Cleaniq Services. All rights reserved.</p>
   </td></tr>
 
 </table>
 </td></tr></table>
-</body></html>`,
+</body></html>`;
+  },
 
   invoiceAwaitingPayment: (booking) => `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">

@@ -47,6 +47,25 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// GET /api/email-logs/:id/pdf — download email as PDF
+router.get("/:id/pdf", async (req, res) => {
+  try {
+    const log = await EmailLog.findById(req.params.id);
+    if (!log || !log.html) return res.status(404).json({ message: "Email not found or has no HTML content" });
+
+    const { htmlToPdfBuffer } = require("../utils/pdf");
+    const pdf = await htmlToPdfBuffer(log.html, log.subject || "Cleaniq Email");
+
+    const safeName = (log.subject || "email").replace(/[^a-z0-9]+/gi, "-");
+    res.setHeader("Content-Disposition", `attachment; filename="${safeName}.pdf"`);
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(pdf);
+  } catch (err) {
+    console.error("Email PDF export error:", err.message);
+    res.status(500).json({ message: "Failed to generate PDF" });
+  }
+});
+
 // DELETE /api/email-logs/:id — delete a single log
 router.delete("/:id", async (req, res) => {
   try {
@@ -54,6 +73,25 @@ router.delete("/:id", async (req, res) => {
     res.json({ message: "Email log deleted." });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/email-logs/html-to-pdf — convert arbitrary HTML to a PDF download (used by InvoiceBuilder)
+router.post("/html-to-pdf", async (req, res) => {
+  try {
+    const { html, filename } = req.body;
+    if (!html) return res.status(400).json({ message: "html is required" });
+
+    const { htmlToPdfBuffer } = require("../utils/pdf");
+    const pdf = await htmlToPdfBuffer(html, filename || "Cleaniq Invoice");
+
+    const safeName = (filename || "invoice").replace(/[^a-z0-9.\-_]/gi, "-");
+    res.setHeader("Content-Disposition", `attachment; filename="${safeName}"`);
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(pdf);
+  } catch (err) {
+    console.error("HTML-to-PDF error:", err.message);
+    res.status(500).json({ message: "Failed to generate PDF" });
   }
 });
 
