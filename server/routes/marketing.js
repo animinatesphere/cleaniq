@@ -139,6 +139,18 @@ router.post('/templates', async (req, res) => {
   }
 });
 
+router.put('/templates/:id', async (req, res) => {
+  try {
+    const { name, subject, body } = req.body;
+    if (!name || !subject || !body) return res.status(400).json({ message: 'name, subject and body are required' });
+    const t = await CampaignTemplate.findByIdAndUpdate(req.params.id, { name, subject, body }, { new: true });
+    if (!t) return res.status(404).json({ message: 'Template not found' });
+    res.json(t);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.delete('/templates/:id', async (req, res) => {
   try {
     await CampaignTemplate.findByIdAndDelete(req.params.id);

@@ -120,6 +120,10 @@ export default function Campaigns() {
   const [newTpl, setNewTpl]               = useState({ name: "", subject: "", body: "" });
   const [savingNewTpl, setSavingNewTpl]   = useState(false);
 
+  // Edit existing template
+  const [editingTpl, setEditingTpl]       = useState(null); // { _id, name, subject, body }
+  const [savingEditTpl, setSavingEditTpl] = useState(false);
+
   const showToast = (msg, type = "success") => { setToast({ msg, type }); setTimeout(() => setToast(null), 3500); };
 
   const fetchHistory = useCallback(async () => {
@@ -214,6 +218,22 @@ export default function Campaigns() {
       setTemplates(prev => [res.data, ...prev]); setNewTpl({ name: "", subject: "", body: "" }); showToast("Template saved");
     } catch { showToast("Failed to save template", "error"); }
     finally { setSavingNewTpl(false); }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingTpl?.name?.trim() || !editingTpl?.subject?.trim() || !editingTpl?.body?.trim()) {
+      showToast("Name, subject and message are all required", "error"); return;
+    }
+    setSavingEditTpl(true);
+    try {
+      const res = await axios.put(`${API}/marketing/templates/${editingTpl._id}`, {
+        name: editingTpl.name, subject: editingTpl.subject, body: editingTpl.body,
+      });
+      setTemplates(prev => prev.map(t => t._id === editingTpl._id ? res.data : t));
+      setEditingTpl(null);
+      showToast("Template updated");
+    } catch { showToast("Failed to update template", "error"); }
+    finally { setSavingEditTpl(false); }
   };
 
   const handleDeleteTemplate = async (id) => {
@@ -661,29 +681,86 @@ export default function Campaigns() {
               </div>
             ) : (
               <div className="divide-y divide-white/[0.04]">
-                {templates.map(t => (
-                  <div key={t._id} className="px-6 py-5 flex items-start gap-4 group hover:bg-white/[0.03] transition-colors">
-                    <div className="w-10 h-10 shrink-0 rounded-xl bg-emerald-500/15 flex items-center justify-center mt-0.5">
-                      <FileText size={17} className="text-emerald-400" />
+                {templates.map(t => {
+                  const isEditing = editingTpl?._id === t._id;
+                  return (
+                    <div key={t._id} className={`transition-colors ${isEditing ? "bg-white/[0.04]" : "hover:bg-white/[0.03]"}`}>
+                      {isEditing ? (
+                        /* ── Inline edit form ── */
+                        <div className="px-6 py-5 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-bold text-white">Editing template</p>
+                            <button onClick={() => setEditingTpl(null)} className="w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
+                              <X size={14} />
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className={labelCls}>Template Name</label>
+                              <input value={editingTpl.name} onChange={e => setEditingTpl(p => ({ ...p, name: e.target.value }))} className={inputCls} />
+                            </div>
+                            <div>
+                              <label className={labelCls}>Subject Line</label>
+                              <input value={editingTpl.subject} onChange={e => setEditingTpl(p => ({ ...p, subject: e.target.value }))} className={inputCls} />
+                            </div>
+                          </div>
+                          <div>
+                            <label className={labelCls}>Message Body</label>
+                            <textarea rows={10} value={editingTpl.body}
+                              onChange={e => setEditingTpl(p => ({ ...p, body: e.target.value }))}
+                              className="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/20 text-base outline-none focus:border-emerald-500/60 transition-colors resize-y leading-relaxed" />
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              <span className="text-sm text-white/30 self-center font-medium">Insert:</span>
+                              {["[Name]", "[Your name]", "[Business address]", "[Unsubscribe]"].map(p => (
+                                <button key={p} type="button" onClick={() => setEditingTpl(prev => ({ ...prev, body: prev.body + p }))}
+                                  className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-sm font-mono text-white/60 hover:bg-emerald-500/15 hover:text-emerald-400 hover:border-emerald-500/30 transition-colors">
+                                  {p}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex gap-3 pt-1">
+                            <button disabled={savingEditTpl} onClick={handleSaveEdit}
+                              className="flex items-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-bold rounded-xl transition-colors disabled:opacity-50">
+                              <Save size={14} /> {savingEditTpl ? "Saving…" : "Save Changes"}
+                            </button>
+                            <button onClick={() => setEditingTpl(null)}
+                              className="px-5 py-3 text-sm font-semibold text-white/50 hover:text-white bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors">
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        /* ── Normal card row ── */
+                        <div className="px-6 py-5 flex items-start gap-4 group">
+                          <div className="w-10 h-10 shrink-0 rounded-xl bg-emerald-500/15 flex items-center justify-center mt-0.5">
+                            <FileText size={17} className="text-emerald-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-base font-bold text-white">{t.name}</p>
+                            <p className="text-sm text-white/40 truncate mt-0.5">{t.subject}</p>
+                            <p className="text-sm text-white/30 mt-1.5 line-clamp-2">{t.body.slice(0, 150)}{t.body.length > 150 ? "…" : ""}</p>
+                            <p className="text-xs text-white/25 mt-2">Saved {fmtDate(t.createdAt)}</p>
+                          </div>
+                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                            <button onClick={() => loadTemplate(t)}
+                              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/25 rounded-xl hover:bg-emerald-500/25 transition-colors whitespace-nowrap">
+                              <Send size={13} /> Use
+                            </button>
+                            <button onClick={() => setEditingTpl({ _id: t._id, name: t.name, subject: t.subject, body: t.body })}
+                              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold text-white/60 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 hover:text-white transition-colors whitespace-nowrap">
+                              <FileText size={13} /> Edit
+                            </button>
+                            <button onClick={() => handleDeleteTemplate(t._id)}
+                              className="w-9 h-9 flex items-center justify-center rounded-xl text-white/30 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-base font-bold text-white">{t.name}</p>
-                      <p className="text-sm text-white/40 truncate mt-0.5">{t.subject}</p>
-                      <p className="text-sm text-white/30 mt-1.5 line-clamp-2">{t.body.slice(0, 150)}{t.body.length > 150 ? "…" : ""}</p>
-                      <p className="text-xs text-white/25 mt-2">Saved {fmtDate(t.createdAt)}</p>
-                    </div>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                      <button onClick={() => loadTemplate(t)}
-                        className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/25 rounded-xl hover:bg-emerald-500/25 transition-colors whitespace-nowrap">
-                        <Send size={13} /> Use in campaign
-                      </button>
-                      <button onClick={() => handleDeleteTemplate(t._id)}
-                        className="w-9 h-9 flex items-center justify-center rounded-xl text-white/30 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
