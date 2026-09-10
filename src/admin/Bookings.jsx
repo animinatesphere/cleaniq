@@ -61,14 +61,30 @@ const fmtTimeRange = (b) => {
     (b?.schedule?.timeSlot?.includes(":") ? b.schedule.timeSlot : null);
   const dur = b?.details?.duration;
   if (!start || !dur) return start || "";
-  const [h, m] = String(start).split(":").map(Number);
+  // Parse both 24h ("14:30") and 12h ("2:30 PM") formats
+  const parseMinutes = (t) => {
+    const s = String(t).trim();
+    const m12 = s.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (m12) {
+      let h = parseInt(m12[1], 10);
+      const mn = parseInt(m12[2], 10);
+      const pm = m12[3].toUpperCase() === "PM";
+      if (pm && h !== 12) h += 12;
+      if (!pm && h === 12) h = 0;
+      return h * 60 + mn;
+    }
+    const m24 = s.match(/^(\d{1,2}):(\d{2})$/);
+    if (m24) return parseInt(m24[1], 10) * 60 + parseInt(m24[2], 10);
+    return null;
+  };
+  const totalMin = parseMinutes(start);
+  if (totalMin === null) return start;
   const fmt = (min) => {
     const hr = Math.floor(min / 60) % 24;
     const mn = min % 60;
     return `${hr % 12 || 12}:${String(mn).padStart(2, "0")} ${hr >= 12 ? "PM" : "AM"}`;
   };
-  const s = h * 60 + m;
-  return `${fmt(s)} — ${fmt(s + Number(dur) * 60)}`;
+  return `${fmt(totalMin)} — ${fmt(totalMin + Number(dur) * 60)}`;
 };
 
 const admTok = () => localStorage.getItem("adminToken") || "";

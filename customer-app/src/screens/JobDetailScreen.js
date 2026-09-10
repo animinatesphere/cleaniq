@@ -92,12 +92,21 @@ const fmtDate = (d) => d
   ? new Date(d).toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", year:"numeric" })
   : null;
 
+const fmt24to12 = (t) => {
+  if (!t) return "";
+  const m24 = String(t).match(/^(\d{1,2}):(\d{2})$/);
+  if (m24) {
+    const h = parseInt(m24[1], 10), mn = parseInt(m24[2], 10);
+    return `${h % 12 || 12}:${String(mn).padStart(2,"0")} ${h >= 12 ? "PM" : "AM"}`;
+  }
+  return t;
+};
 const slotLabel = (s) => ({
   Morning:  "Morning · 8:00 AM – 12:00 PM",
   Afternoon:"Afternoon · 12:00 PM – 4:00 PM",
   Evening:  "Evening · 4:00 PM – 8:00 PM",
   Flexible: "Flexible time",
-}[s] || s || "Not specified");
+}[s] || (s?.includes(":") ? fmt24to12(s) : s) || "Not specified");
 
 /* ─── Live progress step component ─────────────────────────────────────────── */
 const ProgressStep = ({ label, sub, done, active, isLast, time }) => (
