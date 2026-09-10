@@ -1298,9 +1298,50 @@ router.put("/:id", async (req, res) => {
     ) {
       setImmediate(async () => {
         try {
+          // When status moves to Pending and payment is required, send the
+          // payment required email with a fresh Stripe checkout link.
+          if (newStatus === "Pending" && !updatedBooking.noPaymentRequired) {
+            let paymentUrl = null;
+            try {
+              const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+              const amount = updatedBooking.payment?.amount || updatedBooking.totalAmount || updatedBooking.price || 0;
+              const stripeSession = await stripe.checkout.sessions.create({
+                payment_method_types: ["card"],
+                mode: "payment",
+                customer_email: updatedBooking.customer.email,
+                payment_intent_data: {
+                  capture_method: "manual",
+                  metadata: { bookingId: updatedBooking._id.toString(), bookingRef: updatedBooking.bookingId, company: "Cleaniq Services" },
+                },
+                line_items: [{
+                  price_data: {
+                    currency: (updatedBooking.payment?.currency || "GBP").toLowerCase(),
+                    product_data: { name: `Cleaniq - ${updatedBooking.service}`, description: `Booking Reference: ${updatedBooking.bookingId}` },
+                    unit_amount: Math.round(amount * 100),
+                  },
+                  quantity: 1,
+                }],
+                metadata: { bookingId: updatedBooking._id.toString(), company: "Cleaniq Services" },
+                success_url: `https://cleaniqservices.com/account/dashboard?payment=success&bookingId=${updatedBooking._id}`,
+                cancel_url: `https://cleaniqservices.com/`,
+              });
+              paymentUrl = stripeSession.url;
+              // Store the link so resend can reuse it
+              updatedBooking.meta = updatedBooking.meta || {};
+              updatedBooking.meta.lastPaymentLinkUrl = paymentUrl;
+              await updatedBooking.save();
+            } catch (stripeErr) {
+              console.error("⚠️ Stripe session error on Pending status change:", stripeErr.message);
+            }
+            const subject = `Payment Required: Cleaniq Booking ${updatedBooking.bookingId}`;
+            console.log(`📧 Pending → sending payment required email to ${updatedBooking.customer.email}`);
+            const ok = await sendEmail({ to: updatedBooking.customer.email, subject, html: templates.paymentRequired(updatedBooking, paymentUrl) });
+            console.log(`📧 Payment required email ${ok ? "✅ sent" : "❌ failed"} → ${updatedBooking.customer.email}`);
+            return;
+          }
+
           const subjectMap = {
             Confirmed: `Booking Confirmed ✅ — ${updatedBooking.bookingId}`,
-            Pending: `Booking Received — ${updatedBooking.bookingId}`,
             Assigned: `Cleaner Assigned — ${updatedBooking.bookingId}`,
             Arrived: `Your Cleaner Has Arrived — ${updatedBooking.bookingId}`,
             "In Progress": `Cleaning In Progress 🧹 — ${updatedBooking.bookingId}`,
