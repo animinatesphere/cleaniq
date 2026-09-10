@@ -101,7 +101,7 @@ export default function Campaigns() {
   // Composer
   const [form, setForm]                   = useState({ name: "", subject: "", body: "" });
   const [recipientMode, setRecipientMode] = useState("filter");
-  const [filterMode, setFilterMode]       = useState("inactive");
+  const [filterMode, setFilterMode]       = useState("booked");
   const [filterDays, setFilterDays]       = useState(30);
   const [selectedEmails, setSelectedEmails] = useState(new Set());
   const [customerSearch, setCustomerSearch] = useState("");
@@ -155,10 +155,14 @@ export default function Campaigns() {
   }, [campaigns, fetchHistory]);
 
   const filteredByActivity = useMemo(() => {
-    if (filterMode === "all") return customerActivity;
-    if (filterMode === "never") return customerActivity.filter(c => !c.lastBookingDate && c.bookingCount === 0);
-    const cutoff = Date.now() - filterDays * 86400000;
-    return customerActivity.filter(c => !c.lastBookingDate || new Date(c.lastBookingDate).getTime() < cutoff);
+    if (filterMode === "all")     return customerActivity;
+    if (filterMode === "booked")  return customerActivity.filter(c => c.bookingCount > 0);
+    if (filterMode === "never")   return customerActivity.filter(c => !c.lastBookingDate && c.bookingCount === 0);
+    if (filterMode === "inactive") {
+      const cutoff = Date.now() - filterDays * 86400000;
+      return customerActivity.filter(c => c.bookingCount > 0 && (!c.lastBookingDate || new Date(c.lastBookingDate).getTime() < cutoff));
+    }
+    return customerActivity;
   }, [customerActivity, filterMode, filterDays]);
 
   const targetEmails = useMemo(() => {
@@ -360,11 +364,12 @@ export default function Campaigns() {
             {/* Smart Filter */}
             {recipientMode === "filter" && (
               <div className="p-6 space-y-5">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[
-                    { id: "inactive", label: "Inactive",      desc: "Haven't booked recently" },
+                    { id: "booked",   label: "All Booked",    desc: `${customerActivity.filter(c => c.bookingCount > 0).length} customers` },
+                    { id: "inactive", label: "Inactive",      desc: "Booked but not recently" },
                     { id: "never",    label: "Never Booked",  desc: "No bookings at all" },
-                    { id: "all",      label: "All Customers", desc: `${customerActivity.length} total` },
+                    { id: "all",      label: "Everyone",      desc: `${customerActivity.length} total` },
                   ].map(f => (
                     <button key={f.id} type="button" onClick={() => setFilterMode(f.id)}
                       className={`p-4 rounded-xl border text-left transition-all ${filterMode === f.id ? "border-emerald-500/50 bg-emerald-500/10" : "border-white/10 bg-white/[0.02] hover:bg-white/5"}`}>
