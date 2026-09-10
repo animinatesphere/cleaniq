@@ -1194,21 +1194,21 @@ const templates = {
           <tr>
             <td style="background:#fffbeb;border:2px solid #fde68a;border-radius:10px;padding:22px;text-align:center;">
               <p style="margin:0 0 4px;font-size:10px;font-weight:700;color:#92400e;letter-spacing:2px;text-transform:uppercase;">Total Amount Due</p>
-              <p style="margin:0;font-size:38px;font-weight:800;color:#b45309;">&#163;${booking.payment.amount}</p>
+              <p style="margin:0;font-size:38px;font-weight:800;color:#b45309;">&#163;${booking.payment?.amount || booking.totalAmount || booking.price || "0.00"}</p>
             </td>
           </tr>
         </table>
 
         <!-- ===== OPTION 1: Pay Online ===== -->
         <p style="margin:0 0 8px;font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:2px;text-transform:uppercase;">Option 1 &mdash; Pay Online (Recommended)</p>
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px;">
+        ${checkoutLink ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px;">
           <tr>
             <td align="center" style="padding:4px 0 16px;">
               <a href="${checkoutLink}" style="display:inline-block;background-color:#0A5C43;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:16px 44px;border-radius:8px;letter-spacing:0.2px;">Pay Now Securely</a>
             </td>
           </tr>
         </table>
-        <p style="margin:0 0 32px;font-size:12px;color:#94a3b8;text-align:center;">Secure card payment powered by Stripe. Your card details are never stored.</p>
+        <p style="margin:0 0 32px;font-size:12px;color:#94a3b8;text-align:center;">Secure card payment powered by Stripe. Your card details are never stored.</p>` : `<p style="margin:0 0 32px;font-size:13px;color:#475569;text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;">Please call or WhatsApp us on <strong>+44 7752 476368</strong> and we will send you a secure payment link.</p>`}
 
         <!-- Divider -->
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">

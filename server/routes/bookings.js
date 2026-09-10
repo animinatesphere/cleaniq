@@ -1509,7 +1509,7 @@ router.post("/:id/resend", async (req, res) => {
 
     switch (emailType) {
       case "confirmation": {
-        const paymentPending = booking.payment?.status === "Pending" && !booking.noPaymentRequired;
+        const paymentPending = (booking.status === "Pending" || booking.payment?.status === "Pending") && !booking.noPaymentRequired;
         if (paymentPending) {
           try {
             const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
@@ -1523,9 +1523,9 @@ router.post("/:id/resend", async (req, res) => {
               },
               line_items: [{
                 price_data: {
-                  currency: (booking.payment.currency || "GBP").toLowerCase(),
+                  currency: (booking.payment?.currency || "GBP").toLowerCase(),
                   product_data: { name: `Cleaniq - ${booking.service}`, description: `Booking Reference: ${booking.bookingId}` },
-                  unit_amount: Math.round(booking.payment.amount * 100),
+                  unit_amount: Math.round((booking.payment?.amount || booking.totalAmount || booking.price || 0) * 100),
                 },
                 quantity: 1,
               }],
