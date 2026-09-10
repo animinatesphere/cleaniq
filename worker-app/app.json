@@ -46,7 +46,9 @@
         "expo-notifications",
         {
           "icon": "./assets/icon.png",
-          "color": "#0A5C43"
+          "color": "#0A5C43",
+          "defaultChannel": "cleaniq-jobs",
+          "sounds": []
         }
       ],
       [

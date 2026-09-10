@@ -159,30 +159,47 @@ const AppNavigation = () => {
     useState(true);
 
   useEffect(() => {
-    // Request permission for push notifications and custom sound alerts safely on first launch
+    // Request permission and create Android notification channel on first launch
     const registerForNotifications = async () => {
       try {
         if (!Notifications || !Notifications.getPermissionsAsync) {
-          console.log(
-            "Skipping notifications: expo-notifications not loaded in current client.",
-          );
+          console.log("Skipping notifications: expo-notifications not loaded.");
           return;
         }
-        const { status: existingStatus } =
-          await Notifications.getPermissionsAsync();
+
+        // Android 8+ requires a notification channel — must exist before any notification fires
+        if (Platform.OS === "android") {
+          await Notifications.setNotificationChannelAsync("cleaniq-jobs", {
+            name: "New Jobs",
+            description: "Alerts when a new cleaning job is available",
+            importance: Notifications.AndroidImportance.MAX,
+            sound: "default",
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: "#0A5C43",
+            lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+            bypassDnd: false,
+          });
+          await Notifications.setNotificationChannelAsync("cleaniq-general", {
+            name: "General Updates",
+            description: "Booking updates and general notifications",
+            importance: Notifications.AndroidImportance.HIGH,
+            sound: "default",
+          });
+        }
+
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
         let finalStatus = existingStatus;
         if (existingStatus !== "granted") {
           const { status } = await Notifications.requestPermissionsAsync();
           finalStatus = status;
         }
         if (finalStatus !== "granted") {
-          console.log("Notification alerts permission rejected!");
+          console.log("🔕 Notification permission rejected");
+        } else {
+          console.log("✅ Notification permission granted");
         }
       } catch (err) {
-        console.log(
-          "Notification configuration skipped inside Expo Go:",
-          err.message,
-        );
+        console.log("Notification setup error:", err.message);
       }
     };
     registerForNotifications();
@@ -202,7 +219,7 @@ const AppNavigation = () => {
     })();
   }, []);
 
-  // Register push token for chat notifications
+  // Register Expo push token and save to server whenever worker logs in
   useEffect(() => {
     if (!userToken || !workerInfo?.id) return;
     (async () => {
@@ -210,17 +227,45 @@ const AppNavigation = () => {
         if (!Notifications?.getPermissionsAsync) return;
         const { status } = await Notifications.getPermissionsAsync();
         if (status !== "granted") return;
-        const { data: pushToken } = await Notifications.getExpoPushTokenAsync({});
+
+        // projectId is required in Expo SDK 49+ — without it the token is never generated
+        const { data: pushToken } = await Notifications.getExpoPushTokenAsync({
+          projectId: "182cc56f-a629-4a07-8235-06fd4e07c6fb",
+        });
+
         if (pushToken) {
+          console.log("📲 Expo push token:", pushToken);
           const axiosMod = require("axios").default;
           await axiosMod.post(`${API_URL}/workers/push-token`, {
             workerId: workerInfo.id || workerInfo._id,
             token: pushToken,
           });
+          console.log("✅ Push token saved to server");
         }
-      } catch {}
+      } catch (err) {
+        console.log("Push token registration error:", err.message);
+      }
     })();
   }, [userToken, workerInfo?.id]);
+
+  // Handle notification taps — navigate to the relevant screen
+  useEffect(() => {
+    if (!Notifications?.addNotificationResponseReceivedListener) return;
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      try {
+        const data = response.notification.request.content.data || {};
+        const nav = navigationRef.current;
+        if (!nav) return;
+        if (data.type === "new_job" || data.type === "job_assigned") {
+          // Navigate to the home/jobs feed so worker can see the new job
+          nav.navigate("MainTabs", { screen: "HomeTab" });
+        } else if (data.bookingId || data.jobId) {
+          nav.navigate("AcceptedBookingDetail", { bookingId: data.bookingId || data.jobId });
+        }
+      } catch {}
+    });
+    return () => sub.remove();
+  }, []);
 
   // Start notification polling when user logs in, stop when logs out
   useEffect(() => {

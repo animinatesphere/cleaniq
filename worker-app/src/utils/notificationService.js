@@ -100,7 +100,7 @@ class NotificationService {
   }
 
   /**
-   * Show local notification with sound (like messenger)
+   * Show local notification with sound
    * @param {Object} notification - Notification object from backend
    */
   async showNotificationWithSound(notification) {
@@ -110,29 +110,33 @@ class NotificationService {
         return;
       }
 
-      // Schedule local notification
+      const isNewJob = notification.type === "new_job" || notification.type === "job_assigned";
+      const channelId = isNewJob ? "cleaniq-jobs" : "cleaniq-general";
+
       await this.Notifications.scheduleNotificationAsync({
         content: {
-          title: notification.title || "New Notification",
+          title: notification.title || "Cleaniq Services",
           body: notification.message || "",
+          sound: "default",
+          badge: 1,
           data: {
             notificationId: notification._id,
             type: notification.type,
+            bookingId: notification.bookingId,
           },
-          // iOS specific
-          sound: true,
-          badge: 1,
-          // Android specific
+          // Android channel — must match the channel created in App.js
           android: {
-            sound: true,
-            priority: "high",
+            channelId,
+            sound: "default",
+            priority: "max",
             vibrate: [0, 250, 250, 250],
+            color: "#0A5C43",
           },
         },
         trigger: null, // Show immediately
       });
 
-      console.log("Local notification scheduled");
+      console.log(`🔔 Local notification shown [${channelId}]: ${notification.title}`);
     } catch (error) {
       console.error("Error showing notification:", error);
     }
