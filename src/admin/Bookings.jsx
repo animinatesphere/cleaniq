@@ -6408,10 +6408,10 @@ ${extrasRows}
             <p className="text-xs text-white/40 mb-5">Booking <span className="text-white/70 font-bold">{resendModal.bookingRef}</span> &middot; {resendModal.email}</p>
             <div className="space-y-2 mb-5">
               {[
+                { type: "awaiting-payment",label: "Awaiting Payment",        desc: "Payment pending reminder" },
                 { type: "confirmation",    label: "Booking Confirmation",    desc: "Initial booking confirmation" },
                 { type: "status-update",   label: "Current Status Update",   desc: `Current status: ${resendModal.status}` },
                 { type: "invoice",         label: "Invoice / Receipt",       desc: "Post-completion invoice" },
-                { type: "awaiting-payment",label: "Awaiting Payment",        desc: "Payment pending reminder" },
                 { type: "review-request",  label: "Review Request",          desc: "Ask customer for a review" },
               ].map(({ type, label, desc }) => (
                 <button
