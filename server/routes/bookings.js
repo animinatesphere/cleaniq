@@ -15,6 +15,7 @@ const { buildBookingDateTime } = require("../utils/bookingDateTime");
 const adminAuth = require("../middleware/adminAuth");
 const sms = require("../utils/smsService");
 const { sendWorkersPush } = require("../utils/pushNotifications");
+const Notification = require("../models/Notification");
 
 // Generate a PDF invoice attachment; returns [] if Puppeteer is unavailable
 async function buildInvoiceAttachment(booking) {
@@ -792,23 +793,40 @@ router.post("/", async (req, res) => {
       }
     });
 
-    // Push: notify workers in region about the new available job
+    // Push + in-app notification: notify workers about the new available job
     if (newBooking.status === "Confirmed" || newBooking.noPaymentRequired) {
       setImmediate(async () => {
         try {
           const dateStr = newBooking.schedule?.date
             ? new Date(newBooking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
             : "TBC";
+          const notifTitle = "New Job Available!";
+          const notifBody  = `${newBooking.service} · ${dateStr}`;
           const workers = await Worker.find({
             $or: [{ region: newBooking.region }, { region: null }, { region: { $exists: false } }],
-            expoPushToken: { $exists: true, $ne: "" },
             status: "Active",
-          }).select("expoPushToken").lean();
-          await sendWorkersPush(workers.map(w => w.expoPushToken), {
-            title: "New Job Available!",
-            body: `${newBooking.service} · ${dateStr}`,
-            data: { type: "new_job", bookingId: newBooking.bookingId },
-          });
+          }).select("_id expoPushToken").lean();
+
+          // Write a Notification record for each worker — the app polls this every 3s
+          await Notification.insertMany(
+            workers.map(w => ({
+              workerId: w._id,
+              title: notifTitle,
+              message: notifBody,
+              type: "job",
+            })),
+            { ordered: false }
+          ).catch(() => {});
+
+          // Also fire Expo push (best-effort — works when FCM is configured)
+          const tokens = workers.map(w => w.expoPushToken).filter(Boolean);
+          if (tokens.length) {
+            await sendWorkersPush(tokens, {
+              title: notifTitle,
+              body: notifBody,
+              data: { type: "new_job", bookingId: newBooking.bookingId },
+            });
+          }
         } catch (err) {
           console.error("Worker push notification error:", err.message);
         }
@@ -1269,15 +1287,31 @@ router.put("/:id", async (req, res) => {
           const dateStr = updatedBooking.schedule?.date
             ? new Date(updatedBooking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
             : "TBC";
-          const workers = await Worker.find({
-            status: "Active",
-            expoPushToken: { $exists: true, $ne: "" },
-          }).select("expoPushToken").lean();
-          await sendWorkersPush(workers.map(w => w.expoPushToken), {
-            title: "New Job Available!",
-            body: `${updatedBooking.service} · ${dateStr}`,
-            data: { type: "new_job", bookingId: updatedBooking.bookingId },
-          });
+          const notifTitle = "New Job Available!";
+          const notifBody  = `${updatedBooking.service} · ${dateStr}`;
+          const workers = await Worker.find({ status: "Active" }).select("_id expoPushToken").lean();
+
+          // Write a Notification record for each active worker — app polls this every 3s
+          await Notification.insertMany(
+            workers.map(w => ({
+              workerId: w._id,
+              title: notifTitle,
+              message: notifBody,
+              type: "job",
+            })),
+            { ordered: false }
+          ).catch(() => {});
+
+          // Also fire Expo push (best-effort)
+          const tokens = workers.map(w => w.expoPushToken).filter(Boolean);
+          if (tokens.length) {
+            await sendWorkersPush(tokens, {
+              title: notifTitle,
+              body: notifBody,
+              data: { type: "new_job", bookingId: updatedBooking.bookingId },
+            });
+          }
+          console.log(`📲 Notified ${workers.length} workers: New Job Available (${updatedBooking.bookingId})`);
         } catch (err) {
           console.error("Worker push (confirm) error:", err.message);
         }
