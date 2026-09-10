@@ -21,11 +21,23 @@ async function isEnabled(type) {
 // Handlers per task type
 const handlers = {
   booking_reminder_24h: async (task) => {
-    const { email, firstName, service, date, bookingRef, amount } = task.payload;
+    const { email, firstName, service, date, time, bookingRef, amount, bookingDateTime } = task.payload;
+    // Guard: if appointment is now less than 4 hours away this reminder is stale — skip it
+    if (bookingDateTime) {
+      const apptMs = new Date(bookingDateTime).getTime();
+      if (apptMs - Date.now() < 4 * 60 * 60 * 1000) return;
+    }
+    // Determine "today" vs "tomorrow" based on UK date at fire time
+    let when = "tomorrow";
+    if (bookingDateTime) {
+      const apptUKDate = new Date(bookingDateTime).toLocaleDateString("en-GB", { timeZone: "Europe/London" });
+      const nowUKDate  = new Date().toLocaleDateString("en-GB", { timeZone: "Europe/London" });
+      if (apptUKDate === nowUKDate) when = "today";
+    }
     await sendEmail({
       to: email,
-      subject: `Reminder: Your ${service} clean is tomorrow`,
-      html: automationTemplates.bookingReminder24h({ firstName, service, date, bookingRef, amount }),
+      subject: `Reminder: Your ${service} clean is ${when}`,
+      html: automationTemplates.bookingReminder24h({ firstName, service, date, time, bookingRef, amount, when }),
     });
     // Also send SMS reminder
     if (task.payload.bookingId) {
@@ -39,11 +51,24 @@ const handlers = {
   },
 
   booking_reminder_3h: async (task) => {
-    const { email, firstName, service, date, bookingRef } = task.payload;
+    const { email, firstName, service, date, time, bookingRef, bookingDateTime } = task.payload;
+    // Guard: if appointment has already passed, skip
+    if (bookingDateTime && new Date(bookingDateTime).getTime() < Date.now()) return;
     await sendEmail({
       to: email,
       subject: `Your cleaner arrives in approximately 3 hours`,
-      html: automationTemplates.bookingReminder3h({ firstName, service, date, bookingRef }),
+      html: automationTemplates.bookingReminder3h({ firstName, service, date, time, bookingRef }),
+    });
+  },
+
+  booking_reminder_1h: async (task) => {
+    const { email, firstName, service, date, time, bookingRef, bookingDateTime } = task.payload;
+    // Guard: if appointment has already passed, skip
+    if (bookingDateTime && new Date(bookingDateTime).getTime() < Date.now()) return;
+    await sendEmail({
+      to: email,
+      subject: `Your cleaner arrives in 1 hour! ⏰`,
+      html: automationTemplates.bookingReminder1h({ firstName, service, date, time, bookingRef }),
     });
   },
 

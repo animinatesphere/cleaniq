@@ -242,19 +242,26 @@ router.post("/public", async (req, res) => {
               day: "numeric",
               month: "long",
             }),
+            time: bookingDate.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }),
+            bookingDateTime: bookingDate.toISOString(),
             amount: newBooking.payment?.amount,
           };
-          const ms24h  = 24 * 60 * 60 * 1000;
-          const ms3h   =  3 * 60 * 60 * 1000;
+          const ms24h    = 24 * 60 * 60 * 1000;
+          const ms3h     =  3 * 60 * 60 * 1000;
+          const ms1h     =  1 * 60 * 60 * 1000;
           const MIN_LEAD = 15 * 60 * 1000; // skip if trigger is < 15 min away
-          const now    = Date.now();
-          const t24h   = bookingDate.getTime() - ms24h;
-          const t3h    = bookingDate.getTime() - ms3h;
+          const now      = Date.now();
+          const t24h     = bookingDate.getTime() - ms24h;
+          const t3h      = bookingDate.getTime() - ms3h;
+          const t1h      = bookingDate.getTime() - ms1h;
           if (t24h > now + MIN_LEAD) {
             await scheduleTask("booking_reminder_24h", new Date(t24h), payload);
           }
           if (t3h > now + MIN_LEAD) {
             await scheduleTask("booking_reminder_3h", new Date(t3h), payload);
+          }
+          if (t1h > now + MIN_LEAD) {
+            await scheduleTask("booking_reminder_1h", new Date(t1h), payload);
           }
         }
       } catch (schedErr) {
@@ -732,19 +739,26 @@ router.post("/", async (req, res) => {
             day: "numeric",
             month: "long",
           }),
+          time: bookingDate.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }),
+          bookingDateTime: bookingDate.toISOString(),
           amount: newBooking.payment?.amount,
         };
-        const ms24h  = 24 * 60 * 60 * 1000;
-        const ms3h   =  3 * 60 * 60 * 1000;
+        const ms24h    = 24 * 60 * 60 * 1000;
+        const ms3h     =  3 * 60 * 60 * 1000;
+        const ms1h     =  1 * 60 * 60 * 1000;
         const MIN_LEAD = 15 * 60 * 1000; // skip if trigger is < 15 min away
-        const now    = Date.now();
-        const t24h   = bookingDate.getTime() - ms24h;
-        const t3h    = bookingDate.getTime() - ms3h;
+        const now      = Date.now();
+        const t24h     = bookingDate.getTime() - ms24h;
+        const t3h      = bookingDate.getTime() - ms3h;
+        const t1h      = bookingDate.getTime() - ms1h;
         if (t24h > now + MIN_LEAD) {
           await scheduleTask("booking_reminder_24h", new Date(t24h), payload);
         }
         if (t3h > now + MIN_LEAD) {
           await scheduleTask("booking_reminder_3h", new Date(t3h), payload);
+        }
+        if (t1h > now + MIN_LEAD) {
+          await scheduleTask("booking_reminder_1h", new Date(t1h), payload);
         }
       }
     } catch (schedErr) {

@@ -2435,19 +2435,19 @@ const templates = {
 
 // ─── Automation Templates ───────────────────────────────────────────────────
 const automationTemplates = {
-  bookingReminder24h: ({ firstName, service, date, bookingRef, amount }) => `
+  bookingReminder24h: ({ firstName, service, date, time, bookingRef, amount, when = "tomorrow" }) => `
     <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
       <div style="background:#0F172A;padding:36px;text-align:center;">
         <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
-        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">Your clean is tomorrow 📅</h1>
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">Your clean is ${when} 📅</h1>
       </div>
       <div style="padding:40px;color:#1e293b;line-height:1.7;">
         <h2 style="margin-top:0;font-size:20px;">Hi ${firstName},</h2>
-        <p>Just a friendly reminder that your <strong>${service}</strong> is scheduled for <strong>tomorrow, ${date}</strong>.</p>
+        <p>Just a friendly reminder that your <strong>${service}</strong> is scheduled for <strong>${when}, ${date}</strong>${time ? ` at <strong>${time}</strong>` : ""}.</p>
         <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:20px;margin:24px 0;">
           <p style="margin:4px 0;font-size:14px;"><strong>Booking Ref:</strong> ${bookingRef}</p>
           <p style="margin:4px 0;font-size:14px;"><strong>Service:</strong> ${service}</p>
-          <p style="margin:4px 0;font-size:14px;"><strong>Date:</strong> ${date}</p>
+          <p style="margin:4px 0;font-size:14px;"><strong>Date:</strong> ${date}${time ? ` at ${time}` : ""}</p>
           ${amount ? `<p style="margin:4px 0;font-size:14px;"><strong>Amount:</strong> £${amount}</p>` : ""}
         </div>
         <p style="font-size:14px;color:#475569;">Please ensure access to the property and any special instructions have been passed on to our team.</p>
@@ -2461,7 +2461,7 @@ const automationTemplates = {
     </div>
   `,
 
-  bookingReminder3h: ({ firstName, service, date, bookingRef }) => `
+  bookingReminder3h: ({ firstName, service, date, time, bookingRef }) => `
     <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
       <div style="background:#0A5C43;padding:36px;text-align:center;">
         <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
@@ -2470,13 +2470,39 @@ const automationTemplates = {
       </div>
       <div style="padding:40px;color:#1e293b;line-height:1.7;">
         <h2 style="margin-top:0;font-size:20px;">Hi ${firstName},</h2>
-        <p>Your <strong>${service}</strong> team is on the way and will arrive in approximately <strong>3 hours</strong>.</p>
+        <p>Your <strong>${service}</strong> team is on the way and will arrive in approximately <strong>3 hours</strong>${time ? ` (at <strong>${time}</strong>)` : ""}.</p>
         <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:16px;padding:20px;margin:24px 0;">
           <p style="margin:4px 0;font-size:14px;"><strong>Booking Ref:</strong> ${bookingRef}</p>
           <p style="margin:4px 0;font-size:14px;"><strong>Service:</strong> ${service}</p>
-          <p style="margin:4px 0;font-size:14px;"><strong>Date:</strong> ${date}</p>
+          <p style="margin:4px 0;font-size:14px;"><strong>Date:</strong> ${date}${time ? ` at ${time}` : ""}</p>
         </div>
         <p style="font-size:14px;color:#475569;">Please make sure our team can access the property. If you need to reach us, reply to this email or call us.</p>
+      </div>
+      <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
+      </div>
+    </div>
+  `,
+
+  bookingReminder1h: ({ firstName, service, date, time, bookingRef }) => `
+    <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;">
+      <div style="background:#0A5C43;padding:36px;text-align:center;">
+        <img src="https://cleaniqservices.com/preview.jpg" style="width:90px;border-radius:12px;margin-bottom:16px;" />
+        <h1 style="color:#6EE7B7;margin:0;font-size:24px;">Your cleaner arrives in 1 hour! ⏰</h1>
+        <p style="color:#d1fae5;margin-top:8px;font-size:14px;">Almost time — get ready for a spotless home</p>
+      </div>
+      <div style="padding:40px;color:#1e293b;line-height:1.7;">
+        <h2 style="margin-top:0;font-size:20px;">Hi ${firstName},</h2>
+        <p>Just a heads-up — your <strong>${service}</strong> team will be with you in approximately <strong>1 hour</strong>${time ? ` (at <strong>${time}</strong>)` : ""}.</p>
+        <div style="background:#f0fdf4;border:2px solid #6ee7b7;border-radius:16px;padding:20px;margin:24px 0;">
+          <p style="margin:4px 0;font-size:14px;"><strong>Booking Ref:</strong> ${bookingRef}</p>
+          <p style="margin:4px 0;font-size:14px;"><strong>Service:</strong> ${service}</p>
+          <p style="margin:4px 0;font-size:14px;"><strong>Date:</strong> ${date}${time ? ` at ${time}` : ""}</p>
+        </div>
+        <p style="font-size:14px;color:#475569;">Please ensure our team has access to the property. If anything has changed, contact us immediately.</p>
+        <div style="text-align:center;margin-top:32px;">
+          <a href="https://cleaniqservices.com" style="background:#0A5C43;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:800;font-size:14px;display:inline-block;">Cleaniq Services</a>
+        </div>
       </div>
       <div style="background:#f8fafc;padding:18px;text-align:center;border-top:1px solid #e2e8f0;">
         <p style="margin:0;font-size:11px;color:#94a3b8;">&copy; 2026 Cleaniq Services. All rights reserved.</p>
