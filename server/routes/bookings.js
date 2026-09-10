@@ -311,23 +311,26 @@ router.get("/availability/:date/:serviceType", async (req, res) => {
 router.get("/:id/invoice", async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id);
-    if (!booking) return res.status(404).send("<h1>Booking not found</h1>");
+    if (!booking) return res.status(404).send("<!DOCTYPE html><html><body style='font-family:Arial;text-align:center;padding:60px'><h2>Invoice not found</h2></body></html>");
 
-    const { htmlToPdfBuffer } = require("../utils/pdf");
-    const pdf = await htmlToPdfBuffer(
-      templates.invoiceReceipt(booking),
-      `Cleaniq Services - Invoice ${booking.bookingId}`,
-    );
+    const { buildBookingInvoiceHtml } = require("../utils/invoiceHtml");
+    const html = buildBookingInvoiceHtml(booking, { includeDownloadButton: false });
 
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="Cleaniq-Invoice-${booking.bookingId}.pdf"`,
-    );
-    res.setHeader("Content-Type", "application/pdf");
-    res.send(pdf);
+    // Try PDF first; fall back to HTML-with-print-button so it never breaks
+    try {
+      const { htmlToPdfBuffer } = require("../utils/pdf");
+      const pdf = await htmlToPdfBuffer(html, `Cleaniq Services - Invoice ${booking.bookingId}`);
+      res.setHeader("Content-Disposition", `attachment; filename="Cleaniq-Invoice-${booking.bookingId}.pdf"`);
+      res.setHeader("Content-Type", "application/pdf");
+      return res.send(pdf);
+    } catch (pdfErr) {
+      console.warn("PDF generation failed, serving HTML fallback:", pdfErr.message);
+      res.setHeader("Content-Type", "text/html");
+      return res.send(html);
+    }
   } catch (err) {
-    console.error("Error generating invoice download:", err.message);
-    res.status(500).send("<h1>Something went wrong</h1>");
+    console.error("Error generating invoice:", err.message);
+    res.status(500).send("<!DOCTYPE html><html><body style='font-family:Arial;text-align:center;padding:60px'><h2>Something went wrong</h2><p>Please contact info@cleaniqservices.com</p></body></html>");
   }
 });
 
@@ -1255,12 +1258,14 @@ router.put("/:id", async (req, res) => {
     // ── Status-change customer email — fires for every status switch ─────────
     // Completed and Completed-Unpaid are excluded here because they already
     // send a dedicated invoice email in the blocks above.
+    // Pass skipStatusEmail:true in the request body to suppress this email.
     const statusEmailExcluded = ["Completed", "Completed - Unpaid"];
     if (
       prevStatus !== newStatus &&
       newStatus &&
       !statusEmailExcluded.includes(newStatus) &&
-      updatedBooking.customer?.email
+      updatedBooking.customer?.email &&
+      !req.body.skipStatusEmail
     ) {
       setImmediate(async () => {
         try {
@@ -1461,14 +1466,48 @@ router.post("/:id/resend", async (req, res) => {
     const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    const ok = await sendEmail({
-      to: booking.customer.email,
-      subject: `Your Cleaniq Booking Details — ${booking.bookingId}`,
-      html: templates.bookingConfirmation(booking),
-    });
+    const { emailType = "confirmation" } = req.body;
+    let subject, html;
 
+    const subjectMap = {
+      Confirmed:        `Booking Confirmed ✅ — ${booking.bookingId}`,
+      Pending:          `Booking Received — ${booking.bookingId}`,
+      Assigned:         `Cleaner Assigned — ${booking.bookingId}`,
+      Arrived:          `Your Cleaner Has Arrived — ${booking.bookingId}`,
+      "In Progress":    `Cleaning In Progress 🧹 — ${booking.bookingId}`,
+      Cancelled:        `Booking Cancelled — ${booking.bookingId}`,
+    };
+
+    switch (emailType) {
+      case "confirmation":
+        subject = `Your Booking is Confirmed — ${booking.bookingId} | Cleaniq Services`;
+        html    = templates.bookingConfirmation(booking);
+        break;
+      case "status-update":
+        subject = subjectMap[booking.status] || `Booking Update — ${booking.bookingId} | Cleaniq Services`;
+        html    = buildBookingStatusUpdateEmail(booking);
+        break;
+      case "invoice":
+        subject = `🧾 Invoice — ${booking.bookingId} | Cleaniq Services`;
+        html    = templates.invoiceReceipt(booking);
+        break;
+      case "awaiting-payment":
+        subject = `Payment Awaited — ${booking.bookingId} | Cleaniq Services`;
+        html    = templates.invoiceAwaitingPayment(booking);
+        break;
+      case "review-request": {
+        const reviewUrl = `https://cleaniqservices.com/review?booking=${booking.bookingId}&customer=${encodeURIComponent((booking.customer.firstName || "") + " " + (booking.customer.lastName || ""))}`;
+        subject = `How did we do? Leave us a review ⭐ — Cleaniq Services`;
+        html    = templates.reviewRequest(booking, reviewUrl);
+        break;
+      }
+      default:
+        return res.status(400).json({ message: "Unknown emailType" });
+    }
+
+    const ok = await sendEmail({ to: booking.customer.email, subject, html });
     if (!ok) return res.status(500).json({ message: "Failed to send email" });
-    res.json({ message: "Email resent successfully" });
+    res.json({ message: "Email sent successfully" });
   } catch (err) {
     console.error("Error resending booking email:", err);
     res.status(500).json({ message: err.message });

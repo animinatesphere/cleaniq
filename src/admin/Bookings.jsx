@@ -1170,6 +1170,9 @@ const Bookings = () => {
   const [showAdditionalHoursModal, setShowAdditionalHoursModal] =
     useState(false);
   const [drawer, setDrawer] = useState(null);
+  const [statusChangeModal, setStatusChangeModal] = useState(null); // { bookingId, newStatus, sendEmail }
+  const [resendModal, setResendModal] = useState(null); // { bookingId, bookingRef, email }
+  const [resendingEmail, setResendingEmail] = useState(false);
 
   useEffect(() => {
     if (statusMessage.text) {
@@ -1783,25 +1786,47 @@ const Bookings = () => {
     }
   };
 
-  const handleQuickStatusChange = async (bookingId, newStatus) => {
+  const handleQuickStatusChange = async (bookingId, newStatus, sendEmail = true) => {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/bookings/${bookingId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${admTok()}` },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({ status: newStatus, skipStatusEmail: !sendEmail }),
         },
       );
       if (res.ok) {
         setStatusMessage({
           type: "success",
-          text: `Status updated to ${newStatus}`,
+          text: `Status updated to ${newStatus}${!sendEmail ? " (no email sent)" : ""}`,
         });
         fetchBookings();
+        if (selectedBooking?._id === bookingId) {
+          const updated = await res.json();
+          setSelectedBooking(updated);
+        }
       }
     } catch {
       setStatusMessage({ type: "error", text: "Failed to update status" });
+    }
+  };
+
+  const handleResendEmail = async (bookingId, emailType) => {
+    setResendingEmail(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/bookings/${bookingId}/resend`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${admTok()}` },
+        body: JSON.stringify({ emailType }),
+      });
+      const data = await res.json();
+      setStatusMessage({ type: res.ok ? "success" : "error", text: data.message });
+    } catch {
+      setStatusMessage({ type: "error", text: "Failed to send email" });
+    } finally {
+      setResendingEmail(false);
+      setResendModal(null);
     }
   };
 
@@ -2663,7 +2688,7 @@ ${extrasRows}
                       <select
                         value={b.status}
                         onChange={(e) =>
-                          handleQuickStatusChange(b._id, e.target.value)
+                          setStatusChangeModal({ bookingId: b._id, newStatus: e.target.value, sendEmail: true })
                         }
                         className={`px-2.5 py-1.5 rounded-full text-[10px] font-black border uppercase tracking-wide cursor-pointer appearance-none ${getStatusColor(b.status)}`}
                         style={STATUS_OPTION_COLORS[b.status] || { background: "#1e293b", color: "#94a3b8" }}
@@ -4186,13 +4211,16 @@ ${extrasRows}
                     <Calendar size={13} /> Reschedule
                   </button>
                   <button
-                    onClick={resendConfirmation}
-                    disabled={resendingConfirmation}
-                    title="Resend booking confirmation email to customer"
-                    className="py-3 px-4 rounded-xl bg-blue-500/15 border border-blue-500/25 text-blue-400 text-xs font-black uppercase tracking-widest hover:bg-blue-500/25 transition-all flex items-center gap-2 disabled:opacity-50"
+                    onClick={() => setResendModal({
+                      bookingId: selectedBooking._id,
+                      bookingRef: selectedBooking.bookingId,
+                      email: selectedBooking.customer?.email || "",
+                      status: selectedBooking.status,
+                    })}
+                    title="Resend emails to customer"
+                    className="py-3 px-4 rounded-xl bg-blue-500/15 border border-blue-500/25 text-blue-400 text-xs font-black uppercase tracking-widest hover:bg-blue-500/25 transition-all flex items-center gap-2"
                   >
-                    <Mail size={13} />
-                    {resendingConfirmation ? "Sending…" : "Resend"}
+                    <Mail size={13} /> Emails
                   </button>
                   <button
                     onClick={() => setIsEditing(true)}
@@ -6331,6 +6359,82 @@ ${extrasRows}
         onViewAll={drawer?.onViewAll}
         accentColor={drawer?.accentColor || "emerald"}
       />
+
+      {/* ── Status Change Confirmation Modal ─────────────────────────── */}
+      {statusChangeModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setStatusChangeModal(null)} />
+          <div className="relative w-full max-w-sm bg-[#0B2D22] rounded-2xl shadow-2xl border border-white/10 p-7">
+            <h3 className="text-lg font-black text-white mb-1">Change Status</h3>
+            <p className="text-sm text-white/50 mb-5">
+              Update to <span className="text-emerald-400 font-bold">{statusChangeModal.newStatus}</span>?
+            </p>
+            <button
+              onClick={() => setStatusChangeModal(m => ({ ...m, sendEmail: !m.sendEmail }))}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/8 transition-all mb-5 text-left"
+            >
+              <div className={`w-9 h-5 rounded-full transition-colors flex items-center px-0.5 ${statusChangeModal.sendEmail ? "bg-emerald-500" : "bg-white/15"}`}>
+                <div className={`w-4 h-4 rounded-full bg-white shadow transition-transform ${statusChangeModal.sendEmail ? "translate-x-4" : "translate-x-0"}`} />
+              </div>
+              <div>
+                <p className="text-xs font-black text-white">Send email notification</p>
+                <p className="text-[10px] text-white/40">{statusChangeModal.sendEmail ? "Customer will receive an update email" : "No email will be sent"}</p>
+              </div>
+            </button>
+            <div className="flex gap-3">
+              <button onClick={() => setStatusChangeModal(null)} className="flex-1 py-2.5 rounded-xl bg-white/6 text-white/60 font-black text-sm hover:bg-white/10 transition-all border border-white/10">
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleQuickStatusChange(statusChangeModal.bookingId, statusChangeModal.newStatus, statusChangeModal.sendEmail);
+                  setStatusChangeModal(null);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-500 text-white font-black text-sm hover:bg-emerald-400 transition-all"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Resend Email Modal ────────────────────────────────────────── */}
+      {resendModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setResendModal(null)} />
+          <div className="relative w-full max-w-sm bg-[#0B2D22] rounded-2xl shadow-2xl border border-white/10 p-7">
+            <h3 className="text-lg font-black text-white mb-1">Resend Email</h3>
+            <p className="text-xs text-white/40 mb-5">Booking <span className="text-white/70 font-bold">{resendModal.bookingRef}</span> &middot; {resendModal.email}</p>
+            <div className="space-y-2 mb-5">
+              {[
+                { type: "confirmation",    label: "Booking Confirmation",    desc: "Initial booking confirmation" },
+                { type: "status-update",   label: "Current Status Update",   desc: `Current status: ${resendModal.status}` },
+                { type: "invoice",         label: "Invoice / Receipt",       desc: "Post-completion invoice" },
+                { type: "awaiting-payment",label: "Awaiting Payment",        desc: "Payment pending reminder" },
+                { type: "review-request",  label: "Review Request",          desc: "Ask customer for a review" },
+              ].map(({ type, label, desc }) => (
+                <button
+                  key={type}
+                  disabled={resendingEmail}
+                  onClick={() => handleResendEmail(resendModal.bookingId, type)}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/30 transition-all text-left disabled:opacity-50"
+                >
+                  <div>
+                    <p className="text-xs font-bold text-white">{label}</p>
+                    <p className="text-[10px] text-white/40">{desc}</p>
+                  </div>
+                  <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider">{resendingEmail ? "..." : "Send"}</span>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setResendModal(null)} className="w-full py-2.5 rounded-xl bg-white/6 text-white/60 font-black text-sm hover:bg-white/10 transition-all border border-white/10">
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
