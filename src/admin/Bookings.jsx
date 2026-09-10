@@ -4241,6 +4241,14 @@ ${extrasRows}
                   </button>
                   */}
                   <button
+                    onClick={resendConfirmation}
+                    disabled={resendingConfirmation}
+                    title="Resend booking confirmation email"
+                    className="py-3 px-4 rounded-xl bg-blue-500/15 border border-blue-500/25 text-blue-400 text-xs font-black uppercase tracking-widest hover:bg-blue-500/25 transition-all flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Mail size={13} /> {resendingConfirmation ? "Sending…" : "Resend"}
+                  </button>
+                  <button
                     onClick={() => setIsEditing(true)}
                     className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-black uppercase tracking-widest shadow-sm shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all"
                   >
