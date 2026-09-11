@@ -230,7 +230,7 @@ const AppNavigation = () => {
 
         // projectId is required in Expo SDK 49+ — without it the token is never generated
         const { data: pushToken } = await Notifications.getExpoPushTokenAsync({
-          projectId: "182cc56f-a629-4a07-8235-06fd4e07c6fb",
+          projectId: "b9f0b0a1-f183-4e8c-8db2-585dd515be49",
         });
 
         if (pushToken) {
