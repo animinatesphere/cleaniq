@@ -320,8 +320,8 @@ export default function PostJobScreen({ navigation }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to post job");
       Alert.alert(
-        "Job Submitted!",
-        `Job ${data.jobId} has been submitted and is currently under review.`,
+        "Booking Created!",
+        `Your booking (${data.bookingId}) has been created and is Pending review. Our team will confirm it within 24 hours.`,
         [{ text:"Got it", onPress:()=>navigation.goBack() }],
       );
     } catch (err) {
@@ -638,12 +638,28 @@ export default function PostJobScreen({ navigation }) {
           </View>
         )}
 
-        {timeSlot ? (
-          <View style={s.selectedTimeBadge}>
-            <CheckCircle2 size={15} color={G.primary} />
-            <Text style={s.selectedTimeTxt}>Arrival at {fmt24to12(timeSlot)}</Text>
-          </View>
-        ) : null}
+        {timeSlot ? (() => {
+          const dur = duration > 0 ? duration : (parseFloat(customDur) || 0);
+          if (dur > 0) {
+            const [h, m] = timeSlot.split(":").map(Number);
+            const endMins = h * 60 + m + dur * 60;
+            const endH = Math.floor(endMins / 60) % 24;
+            const endM = endMins % 60;
+            const endSlot = `${String(endH).padStart(2,"0")}:${String(endM).padStart(2,"0")}`;
+            return (
+              <View style={s.selectedTimeBadge}>
+                <CheckCircle2 size={15} color={G.primary} />
+                <Text style={s.selectedTimeTxt}>{fmt24to12(timeSlot)} – {fmt24to12(endSlot)} · {dur} hr{dur !== 1 ? "s" : ""}</Text>
+              </View>
+            );
+          }
+          return (
+            <View style={s.selectedTimeBadge}>
+              <CheckCircle2 size={15} color={G.primary} />
+              <Text style={s.selectedTimeTxt}>Arrival at {fmt24to12(timeSlot)}</Text>
+            </View>
+          );
+        })() : null}
       </View>
 
       {/* Duration */}
@@ -662,12 +678,28 @@ export default function PostJobScreen({ navigation }) {
             <Text style={s.durHmuted}>hr</Text>
           </View>
         </View>
-        {(duration>0||customDur) && (
-          <View style={s.durSelected}>
-            <CheckCircle2 size={14} color={G.primary}/>
-            <Text style={s.durSelectedTxt}>{duration>0?duration:customDur} hour{((duration>1)||(parseFloat(customDur)>1))?"s":""} selected</Text>
-          </View>
-        )}
+        {(duration>0||customDur) && (() => {
+          const dur = duration > 0 ? duration : (parseFloat(customDur) || 0);
+          if (timeSlot && dur > 0) {
+            const [h, m] = timeSlot.split(":").map(Number);
+            const endMins = h * 60 + m + dur * 60;
+            const endH = Math.floor(endMins / 60) % 24;
+            const endM = endMins % 60;
+            const endSlot = `${String(endH).padStart(2,"0")}:${String(endM).padStart(2,"0")}`;
+            return (
+              <View style={s.durSelected}>
+                <CheckCircle2 size={14} color={G.primary}/>
+                <Text style={s.durSelectedTxt}>{fmt24to12(timeSlot)} – {fmt24to12(endSlot)} · {dur} hr{dur !== 1 ? "s" : ""}</Text>
+              </View>
+            );
+          }
+          return (
+            <View style={s.durSelected}>
+              <CheckCircle2 size={14} color={G.primary}/>
+              <Text style={s.durSelectedTxt}>{dur} hour{dur !== 1 ? "s" : ""} selected</Text>
+            </View>
+          );
+        })()}
       </View>
 
       {/* Price */}

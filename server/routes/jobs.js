@@ -149,23 +149,59 @@ const verifyCustomerAny = (req, res, next) => {
   }
 };
 
-// POST /api/jobs — company posts a new job
+// POST /api/jobs — company posts a new job → goes straight to Bookings as Pending
 router.post("/", verifyCompany, async (req, res) => {
   try {
     const company = await Customer.findById(req.customer.id);
     if (!company) return res.status(404).json({ message: "Account not found" });
 
+    const companyName = company.companyName || `${company.firstName} ${company.lastName}`;
     const jobId = "JOB-" + nanoid(8).toUpperCase();
-    const job = await Job.create({
-      jobId,
-      company: {
-        id:    company._id,
-        name:  company.companyName || `${company.firstName} ${company.lastName}`,
-        email: company.email,
-        phone: company.phone,
+    const bookingId = "BK-C" + Math.floor(100000 + Math.random() * 900000);
+
+    // Create a Booking directly as Pending — admin will see it in the bookings list
+    const booking = await Booking.create({
+      bookingId,
+      customer: {
+        firstName: company.firstName || companyName,
+        lastName:  company.lastName  || "",
+        email:     company.email,
+        phone:     company.phone || req.body.contact?.phone || "",
       },
       service:  req.body.service,
-      contact:  req.body.contact  || {},
+      details:  {
+        ...(req.body.details || {}),
+        contactName:  req.body.contact?.name  || "",
+        contactPhone: req.body.contact?.phone || "",
+        contactEmail: req.body.contact?.email || "",
+        notes: req.body.notes || "",
+      },
+      property: req.body.property || {},
+      schedule: {
+        date:          req.body.schedule?.date,
+        timeSlot:      req.body.schedule?.timeSlot || req.body.schedule?.preferredTime || "",
+        preferredTime: req.body.schedule?.preferredTime || req.body.schedule?.timeSlot || "",
+      },
+      region:   req.body.region || "",
+      payment:  req.body.payment?.amount
+        ? { amount: parseFloat(req.body.payment.amount), currency: req.body.payment.currency || "GBP", status: "Pending" }
+        : undefined,
+      status: "Pending",
+      noPaymentRequired: !req.body.payment?.amount,
+      meta: {
+        isCompanyJob: true,
+        companyId:    company._id,
+        companyName,
+        jobId,
+      },
+    });
+
+    // Also keep a Job record linked to the booking for history
+    const job = await Job.create({
+      jobId,
+      company: { id: company._id, name: companyName, email: company.email, phone: company.phone },
+      service:  req.body.service,
+      contact:  req.body.contact || {},
       details:  req.body.details,
       property: req.body.property,
       schedule: req.body.schedule,
@@ -174,25 +210,66 @@ router.post("/", verifyCompany, async (req, res) => {
       payment:  req.body.payment?.amount
         ? { amount: parseFloat(req.body.payment.amount), currency: req.body.payment.currency || "GBP" }
         : undefined,
+      status: "approved",
+      linkedBookingId: booking._id,
     });
 
-    // Emails: confirmation to company + notification to admin
+    // Emails
     setImmediate(async () => {
       try {
+        // Company gets a "booking created" email
         await sendEmail({
           to: company.email,
-          subject: `Job Request Received – ${job.jobId}`,
-          html: jobSubmittedEmail(job),
+          subject: `Booking Received – ${bookingId} | Cleaniq Services`,
+          html: `<div style="font-family:'Segoe UI',sans-serif;max-width:600px;margin:auto;border:1px solid #e2e8f0;border-radius:24px;overflow:hidden;background:#fff;">
+  <div style="background:#083D2E;padding:36px;text-align:center;">
+    <h1 style="color:#6EE7B7;margin:0;font-size:26px;">Booking Received</h1>
+    <p style="color:#94a3b8;margin-top:8px;">We have your job request and will confirm soon</p>
+  </div>
+  <div style="padding:36px;color:#1e293b;">
+    <p>Hi <strong>${companyName}</strong>,</p>
+    <p>Your job has been submitted and is currently <strong>Pending</strong> review. Our team will confirm it within 24 hours.</p>
+    <div style="background:#f8fafc;border-radius:16px;padding:24px;margin:24px 0;border:1px solid #e2e8f0;">
+      <p style="margin:0 0 4px;font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Booking Reference</p>
+      <p style="margin:0 0 20px;font-size:22px;font-weight:900;color:#0F6B4C;">${bookingId}</p>
+      <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse:collapse;background:#fff;border-radius:10px;border:1px solid #e2e8f0;">
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-size:13px;font-weight:700;color:#64748b;">Service</td><td align="right" style="font-size:13px;font-weight:700;">${req.body.service}</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-size:13px;font-weight:700;color:#64748b;">Address</td><td align="right" style="font-size:13px;font-weight:700;">${req.body.property?.address || "—"}, ${req.body.property?.postcode || ""}</td></tr>
+        <tr><td style="font-size:13px;font-weight:700;color:#64748b;">Date &amp; Time</td><td align="right" style="font-size:13px;font-weight:700;">${req.body.schedule?.date ? new Date(req.body.schedule.date).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) : "—"} · ${req.body.schedule?.timeSlot || "—"}</td></tr>
+      </table>
+    </div>
+    <p style="color:#64748b;font-size:14px;">Questions? Call or WhatsApp us on <strong>+44 7752 476368</strong>.</p>
+  </div>
+</div>`,
         });
+
+        // Admin gets a highlighted "COMPANY JOB" alert
         await sendEmail({
           to: ADMIN_EMAIL,
-          subject: `[New Job] ${job.jobId} – ${job.service} – ${job.company.name}`,
-          html: `<p><strong>New job submitted:</strong> ${job.jobId}</p><p>Company: ${job.company.name}</p><p>Service: ${job.service}</p><p>Date: ${job.schedule?.date ? new Date(job.schedule.date).toDateString() : "—"}</p><p>Address: ${job.property?.address || "—"}</p>`,
+          subject: `🏢 [COMPANY JOB] ${bookingId} – ${req.body.service} – ${companyName}`,
+          html: `<div style="font-family:'Segoe UI',sans-serif;max-width:600px;margin:auto;border:3px solid #0F6B4C;border-radius:16px;overflow:hidden;background:#fff;">
+  <div style="background:#0F6B4C;padding:24px 32px;">
+    <h2 style="color:#fff;margin:0;font-size:22px;">🏢 Company Job — Pending Your Review</h2>
+    <p style="color:#6EE7B7;margin:8px 0 0;font-size:14px;">This booking was submitted directly by a company account and is waiting in the admin Bookings list as <strong>Pending</strong>.</p>
+  </div>
+  <div style="padding:32px;color:#1e293b;">
+    <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse:collapse;border:1px solid #e2e8f0;border-radius:10px;">
+      <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-weight:700;color:#64748b;font-size:13px;">Booking ID</td><td style="font-weight:900;color:#0F6B4C;">${bookingId}</td></tr>
+      <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-weight:700;color:#64748b;font-size:13px;">Company</td><td style="font-weight:700;">${companyName}</td></tr>
+      <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-weight:700;color:#64748b;font-size:13px;">Contact</td><td style="font-weight:700;">${req.body.contact?.name || "—"} · ${req.body.contact?.phone || "—"}</td></tr>
+      <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-weight:700;color:#64748b;font-size:13px;">Service</td><td style="font-weight:700;">${req.body.service}</td></tr>
+      <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-weight:700;color:#64748b;font-size:13px;">Address</td><td style="font-weight:700;">${req.body.property?.address || "—"}, ${req.body.property?.postcode || ""}</td></tr>
+      <tr style="border-bottom:1px solid #f1f5f9;"><td style="font-weight:700;color:#64748b;font-size:13px;">Date &amp; Time</td><td style="font-weight:700;">${req.body.schedule?.date ? new Date(req.body.schedule.date).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) : "—"} · ${req.body.schedule?.timeSlot || "—"}</td></tr>
+      ${req.body.payment?.amount ? `<tr><td style="font-weight:700;color:#64748b;font-size:13px;">Quoted Price</td><td style="font-weight:900;color:#0F6B4C;">£${req.body.payment.amount}</td></tr>` : ""}
+    </table>
+    ${req.body.notes ? `<div style="margin-top:16px;background:#f8fafc;border-radius:12px;padding:16px;border:1px solid #e2e8f0;"><p style="margin:0;font-size:12px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;">Notes</p><p style="margin:8px 0 0;font-size:14px;color:#334155;">${req.body.notes}</p></div>` : ""}
+  </div>
+</div>`,
         });
       } catch (e) { console.error("Job submit email error:", e.message); }
     });
 
-    res.status(201).json(job);
+    res.status(201).json({ ...booking.toObject(), jobId });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
