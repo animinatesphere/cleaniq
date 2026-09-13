@@ -243,6 +243,21 @@ const Customers = () => {
     a.click(); URL.revokeObjectURL(url);
   };
 
+  const getSegment = (c) => {
+    const daysSinceCreated = c.createdAt ? Math.floor((Date.now() - new Date(c.createdAt)) / 86400000) : 999;
+    const daysSinceBooking = c.lastBookingDate ? Math.floor((Date.now() - new Date(c.lastBookingDate)) / 86400000) : null;
+    if ((c.totalSpent || 0) >= 500 || (c.totalBookings || 0) >= 5) return "vip";
+    if (daysSinceCreated <= 30) return "new";
+    if ((c.totalBookings || 0) > 0 && daysSinceBooking !== null && daysSinceBooking >= 90) return "at-risk";
+    return null;
+  };
+
+  const SEGMENT_META = {
+    "vip":     { label: "VIP",      cls: "bg-amber-500/15 text-amber-400 border-amber-400/30" },
+    "new":     { label: "New",      cls: "bg-blue-500/15 text-blue-400 border-blue-400/30" },
+    "at-risk": { label: "At Risk",  cls: "bg-rose-500/15 text-rose-400 border-rose-400/30" },
+  };
+
   const filtered = useMemo(() => {
     let list = customers;
     if (search.trim()) {
@@ -256,8 +271,12 @@ const Customers = () => {
     if (statusFilter !== "all") {
       if (statusFilter === "active")   list = list.filter(c => c.lastLoginAt);
       if (statusFilter === "inactive") list = list.filter(c => !c.lastLoginAt);
+      if (statusFilter === "vip")      list = list.filter(c => getSegment(c) === "vip");
+      if (statusFilter === "at-risk")  list = list.filter(c => getSegment(c) === "at-risk");
+      if (statusFilter === "new")      list = list.filter(c => getSegment(c) === "new");
     }
     return list;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customers, search, statusFilter]);
 
   const stats = useMemo(() => ({
@@ -265,6 +284,9 @@ const Customers = () => {
     active:    customers.filter(c => c.lastLoginAt).length,
     newToday:  customers.filter(c => c.createdAt && new Date(c.createdAt) > new Date(Date.now() - 86400000)).length,
     totalSpent:customers.reduce((s, c) => s + (c.totalSpent || 0), 0),
+    vip:       customers.filter(c => getSegment(c) === "vip").length,
+    atRisk:    customers.filter(c => getSegment(c) === "at-risk").length,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [customers]);
 
   const openCustomer = (c) => {
@@ -443,17 +465,22 @@ const Customers = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-5">
               {[
-                { label:"Total",     value: stats.total,                            color:"text-white",       drawerTitle:"All Customers",     drawerSub:`${stats.total} total`,                               drawerItems:customers,                                                                                                      accent:"emerald" },
-                { label:"Active",    value: stats.active,                           color:"text-emerald-400", drawerTitle:"Active Customers",  drawerSub:`${stats.active} with login activity`,                drawerItems:customers.filter(c => c.lastLoginAt),                                                                          accent:"emerald" },
-                { label:"New today", value: stats.newToday,                         color:"text-blue-400",    drawerTitle:"New Today",         drawerSub:`${stats.newToday} registered in the last 24h`,      drawerItems:customers.filter(c => c.createdAt && new Date(c.createdAt) > new Date(Date.now() - 86400000)),                  accent:"blue"    },
-                { label:"Revenue",   value:`£${stats.totalSpent.toLocaleString()}`, color:"text-white",       drawerTitle:"Revenue Breakdown", drawerSub:`£${stats.totalSpent.toLocaleString()} total spent`,  drawerItems:[...customers].sort((a,b) => (b.totalSpent||0) - (a.totalSpent||0)),                                           accent:"emerald" },
+                { label:"Total",    value: stats.total,                             color:"text-white",       filter:"all",      drawerItems:customers },
+                { label:"Active",   value: stats.active,                            color:"text-emerald-400", filter:"active",   drawerItems:customers.filter(c => c.lastLoginAt) },
+                { label:"New",      value: stats.newToday,                          color:"text-blue-400",    filter:"new",      drawerItems:customers.filter(c => c.createdAt && new Date(c.createdAt) > new Date(Date.now() - 86400000)) },
+                { label:"Revenue",  value:`£${stats.totalSpent.toLocaleString()}`,  color:"text-white",       filter:null,       drawerItems:[...customers].sort((a,b) => (b.totalSpent||0) - (a.totalSpent||0)) },
+                { label:"VIP",      value: stats.vip,                               color:"text-amber-400",   filter:"vip",      drawerItems:customers.filter(c => getSegment(c) === "vip") },
+                { label:"At Risk",  value: stats.atRisk,                            color:"text-rose-400",    filter:"at-risk",  drawerItems:customers.filter(c => getSegment(c) === "at-risk") },
               ].map(s => (
                 <div
                   key={s.label}
-                  onClick={() => setDrawer({ title: s.drawerTitle, subtitle: s.drawerSub, items: s.drawerItems, accentColor: s.accent, renderItem: customerDrawerItem })}
-                  className="bg-[#071D16] border border-white/10 rounded-xl px-3 py-3 cursor-pointer"
+                  onClick={() => s.filter
+                    ? setStatusFilter(s.filter)
+                    : setDrawer({ title: s.label, subtitle: `${s.drawerItems.length} customers`, items: s.drawerItems, accentColor: "emerald", renderItem: customerDrawerItem })
+                  }
+                  className={`bg-[#071D16] border rounded-xl px-3 py-3 cursor-pointer transition-all hover:border-white/20 ${statusFilter === s.filter ? "border-emerald-500/40 bg-emerald-500/5" : "border-white/10"}`}
                 >
                   <p className="text-[10px] font-medium text-white/40 uppercase tracking-wide mb-1">{s.label}</p>
                   <p className={`text-lg font-bold tabular-nums ${s.color}`}>{s.value}</p>
@@ -477,9 +504,12 @@ const Customers = () => {
                 onChange={e => setStatusFilter(e.target.value)}
                 className="h-9 px-3 text-sm bg-[#071D16] border border-white/10 text-white rounded-xl focus:outline-none cursor-pointer"
               >
-                <option value="all">All</option>
-                <option value="active">Active</option>
+                <option value="all">All customers</option>
+                <option value="active">Active (logged in)</option>
                 <option value="inactive">Never logged in</option>
+                <option value="vip">VIP (£500+ or 5+ bookings)</option>
+                <option value="at-risk">At Risk (90+ days inactive)</option>
+                <option value="new">New (joined this month)</option>
               </select>
             </div>
           </div>
@@ -541,7 +571,12 @@ const Customers = () => {
                             {(c.firstName?.[0] || "?").toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-medium text-white">{c.firstName} {c.lastName}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-white">{c.firstName} {c.lastName}</p>
+                              {(() => { const seg = getSegment(c); const meta = SEGMENT_META[seg]; return meta ? (
+                                <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border ${meta.cls}`}>{meta.label}</span>
+                              ) : null; })()}
+                            </div>
                             <p className="text-xs text-white/40 mt-0.5">{c.email}</p>
                           </div>
                         </div>
@@ -592,7 +627,12 @@ const Customers = () => {
                   {(selected.firstName?.[0] || "?").toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-semibold text-white">{selected.firstName} {selected.lastName}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-white">{selected.firstName} {selected.lastName}</p>
+                    {(() => { const seg = getSegment(selected); const meta = SEGMENT_META[seg]; return meta ? (
+                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border ${meta.cls}`}>{meta.label}</span>
+                    ) : null; })()}
+                  </div>
                   <p className="text-xs text-white/40">Joined {fmtDate(selected.createdAt)}</p>
                 </div>
               </div>
