@@ -37,7 +37,7 @@ const AdminSidebar = ({
       {/* ── Logo / Brand ─────────────────────────────── */}
       <div className={`shrink-0 flex items-center gap-3 px-5 py-5 border-b border-white/[0.07] ${isCollapsed ? "lg:justify-center lg:px-0" : ""}`}>
         <div className="w-9 h-9 rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 shadow-lg shadow-black/30">
-          <img src={logo} alt="Cleaniq" className="w-full h-full object-cover" />
+          <img src={logo} alt="Cleaniq Services" className="w-full h-full object-cover" />
         </div>
 
         <div className={`flex-1 min-w-0 ${isCollapsed ? "lg:hidden" : ""}`}>

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useRegion } from "../context/RegionContext";
@@ -252,7 +252,7 @@ const Home = () => {
               <div className="flex w-full items-center gap-2 sm:gap-3 sm:justify-center">
                 {/* App Store */}
                 <a
-                  href="https://apps.apple.com/app/cleaniq-services/id6787302038"
+                  href="https://apps.apple.com/app/Cleaniq Services-services/id6787302038"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Download Cleaniq Services on the App Store"
@@ -992,7 +992,7 @@ const Home = () => {
     <div className="text-center mb-16">
       <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-4">Before & After</h2>
       <h3 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter">
-        The Cleaniq difference.
+        The Cleaniq Services difference.
       </h3>
     </div>
 

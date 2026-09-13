@@ -68,7 +68,7 @@ const About = () => {
             </p>
             <p>
               Founded with a simple mission to make cleanliness a lifestyle,
-              Cleaniq combines professionalism with environmental responsibility
+              Cleaniq Services combines professionalism with environmental responsibility
               to deliver spotless results without compromise. Our commitment to
               excellence is matched by our use of sustainable products and
               methods designed to protect both people and the environment.
@@ -76,7 +76,7 @@ const About = () => {
             <p>
               Every client engagement is handled with precision, respect, and
               reliability. Be it a one-time deep clean, regular home care, or
-              ongoing office maintenance, Cleaniq makes every space feel
+              ongoing office maintenance, Cleaniq Services makes every space feel
               refreshed, organized, and truly cared for.
             </p>
           </motion.div>
@@ -120,7 +120,7 @@ const About = () => {
               Our Vision.
             </h2>
             <p className="text-lg text-white/80 font-medium leading-relaxed">
-              Our vision is to establish Cleaniq as Manchester’s most trusted
+              Our vision is to establish Cleaniq Services as Manchester’s most trusted
               and recognizable household name in eco-friendly cleaning, defined
               by innovation, reliability, and superior service.
             </p>
@@ -197,7 +197,7 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-20 items-center">
           <div>
             <h2 className="text-2xl md:text-5xl font-extrabold mb-8 md:12 tracking-tighter">
-              The Cleaniq Advantage?
+              The Cleaniq Services Advantage?
             </h2>
             <div className="space-y-6">
               {[
@@ -220,10 +220,10 @@ const About = () => {
           </div>
           <div className="bg-white/10 backdrop-blur-xl p-6 md:p-12 rounded-4xl md:rounded-[60px] border border-white/20">
             <h2 className="text-2xl font-bold mb-8 tracking-tight">
-              The Cleaniq Standard.
+              The Cleaniq Services Standard.
             </h2>
             <p className="text-xl text-white/80 leading-relaxed font-medium">
-              We’ve redefined what clean means. At Cleaniq, every service
+              We’ve redefined what clean means. At Cleaniq Services, every service
               upholds our standard of precision, care, and sustainability —
               ensuring your environment feels as good as it looks.
             </p>

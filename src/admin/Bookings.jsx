@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Search,
@@ -3453,7 +3453,7 @@ ${extrasRows}
                           className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
                         >
                           <option value="">Not specified</option>
-                          <option value="Cleaniq">Cleaniq</option>
+                          <option value="Cleaniq">Cleaniq Services</option>
                           <option value="Customer">Customer</option>
                         </select>
                       </div>
@@ -4977,7 +4977,7 @@ ${extrasRows}
                             }
                             className="w-full p-4 rounded-2xl bg-white/5 border-2 border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm font-medium"
                           >
-                            <option value="Cleaniq">Cleaniq provides</option>
+                            <option value="Cleaniq">Cleaniq Services provides</option>
                             <option value="Customer">Customer provides</option>
                           </select>
                         </div>

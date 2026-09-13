@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import {
   Calendar,
@@ -141,7 +141,7 @@ const Blog = () => {
               {/* Subtitle */}
               <p className="text-lg md:text-xl text-slate-600 mb-10 leading-relaxed max-w-3xl mx-auto">
                 Discover expert advice, proven strategies, and insider tips from
-                Cleaniq professionals to maintain a spotless and healthy home.
+                Cleaniq Services professionals to maintain a spotless and healthy home.
               </p>
 
               {/* Search Bar */}

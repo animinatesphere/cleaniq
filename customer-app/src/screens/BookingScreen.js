@@ -109,7 +109,7 @@ const PARKING_OPTIONS = ["On-site parking", "Street parking", "Paid parking near
 const ACCESS_OPTIONS  = ["I will be home", "Key in lockbox", "Key under mat", "Concierge"];
 const SUPPLY_OPTIONS  = [
   { id: "Customer", label: "I'll provide supplies",   sub: "You supply cleaning products",  Icon: ShoppingBag },
-  { id: "Cleaniq",  label: "Cleaniq brings supplies", sub: "+ £10 added to your total",     Icon: Package     },
+  { id: "Cleaniq",  label: "Cleaniq Services brings supplies", sub: "+ £10 added to your total",     Icon: Package     },
 ];
 const TIME_SLOTS = [
   "08:00","08:30","09:00","09:30","10:00","10:30",

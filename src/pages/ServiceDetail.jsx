@@ -137,13 +137,13 @@ const EOT_EXTENDED = {
     {
       name: "Priya M.",
       location: "Didsbury, Manchester",
-      text: "Used Cleaniq for my end of tenancy clean after four years in the flat. Got my full deposit back within 24 hours of checkout. The oven and bathroom looked brand new.",
+      text: "Used Cleaniq Services for my end of tenancy clean after four years in the flat. Got my full deposit back within 24 hours of checkout. The oven and bathroom looked brand new.",
       rating: 5,
     },
     {
       name: "James O.",
       location: "Salford, Manchester",
-      text: "The letting agent commented it was one of the cleanest handbacks they had seen. 100% recommend Cleaniq for your move-out clean in Manchester.",
+      text: "The letting agent commented it was one of the cleanest handbacks they had seen. 100% recommend Cleaniq Services for your move-out clean in Manchester.",
       rating: 5,
     },
     {
@@ -171,7 +171,7 @@ const EOT_EXTENDED = {
 };
 
 const DEEP_EXTENDED = {
-  intro: `Whether your home needs a post-party refresh, a seasonal spring clean, or a thorough reset after months of regular use — Cleaniq's deep cleaning service in Manchester goes further than any standard domestic clean. We reach the places your regular cleaner doesn't.`,
+  intro: `Whether your home needs a post-party refresh, a seasonal spring clean, or a thorough reset after months of regular use — Cleaniq Services' deep cleaning service in Manchester goes further than any standard domestic clean. We reach the places your regular cleaner doesn't.`,
 
   whyChoosePoints: [
     {
@@ -192,7 +192,7 @@ const DEEP_EXTENDED = {
     {
       icon: <BadgeCheck size={22} />,
       title: "Vetted & Insured Cleaners",
-      body: "Every Cleaniq cleaner is background-checked, fully insured, and trained in our detailed deep cleaning protocol.",
+      body: "Every Cleaniq Services cleaner is background-checked, fully insured, and trained in our detailed deep cleaning protocol.",
     },
   ],
 
@@ -254,7 +254,7 @@ const DEEP_EXTENDED = {
     heading: "Why a Professional Deep Clean Makes a Difference",
     body: [
       "Regular cleaning maintains a home — but it rarely reaches the accumulated grime in hidden areas: inside oven cavities, behind appliances, along grout lines, and underneath furniture. Over time, these areas harbour bacteria, allergens, and odours that a standard weekly clean simply cannot address.",
-      "A professional deep clean from Cleaniq resets your property to a hygienic baseline. Our Manchester cleaners follow a structured, room-by-room protocol using eco-friendly, non-toxic products that are powerful enough to cut through grease and limescale — without harsh chemicals that affect your family or pets.",
+      "A professional deep clean from Cleaniq Services resets your property to a hygienic baseline. Our Manchester cleaners follow a structured, room-by-room protocol using eco-friendly, non-toxic products that are powerful enough to cut through grease and limescale — without harsh chemicals that affect your family or pets.",
       "Whether you're preparing for guests, recovering from a renovation, moving into a new property, or simply want a fresh start — a one-off deep clean is the most effective way to restore your home to its best condition.",
     ],
   },
@@ -296,13 +296,13 @@ const DEEP_EXTENDED = {
     {
       name: "Daniel K.",
       location: "Fallowfield, Manchester",
-      text: "Moved into a new flat that hadn't been properly cleaned in years. Cleaniq transformed it in a single visit. Can't recommend them enough.",
+      text: "Moved into a new flat that hadn't been properly cleaned in years. Cleaniq Services transformed it in a single visit. Can't recommend them enough.",
       rating: 5,
     },
     {
       name: "Anna M.",
       location: "Didsbury, Manchester",
-      text: "Used Cleaniq before hosting a family gathering. The team was professional, thorough, and the house has never looked better.",
+      text: "Used Cleaniq Services before hosting a family gathering. The team was professional, thorough, and the house has never looked better.",
       rating: 5,
     },
   ],
@@ -324,7 +324,7 @@ const DEEP_EXTENDED = {
 };
 
 const AIRBNB_EXTENDED = {
-  intro: `Running a successful Airbnb or short-let property in Manchester depends on one thing above all else — consistent, guest-ready cleanliness. Cleaniq's specialist Airbnb cleaning team delivers fast, reliable turnovers that protect your ratings and keep your calendar full.`,
+  intro: `Running a successful Airbnb or short-let property in Manchester depends on one thing above all else — consistent, guest-ready cleanliness. Cleaniq Services' specialist Airbnb cleaning team delivers fast, reliable turnovers that protect your ratings and keep your calendar full.`,
 
   whyChoosePoints: [
     {
@@ -352,7 +352,7 @@ const AIRBNB_EXTENDED = {
   checklist: {
     heading: "Airbnb Turnover Cleaning Checklist — Manchester",
     intro:
-      "Every Cleaniq Airbnb turnover covers the full property to hotel standard. Here is exactly what is completed on every visit:",
+      "Every Cleaniq Services Airbnb turnover covers the full property to hotel standard. Here is exactly what is completed on every visit:",
     rooms: [
       {
         room: "Kitchen",
@@ -408,7 +408,7 @@ const AIRBNB_EXTENDED = {
     heading: "Why Professional Airbnb Cleaning Protects Your Listing",
     body: [
       "On platforms like Airbnb and Vrbo, cleanliness is the single most-reviewed category by guests. A single low cleanliness score can suppress your listing in search results, reduce booking rates, and damage a reputation built over months or years.",
-      "Professional short-let cleaning is not simply about tidiness — it is about consistency. Every guest expects the same standard, every time. Cleaniq's Airbnb cleaning team in Manchester follows a fixed turnover protocol so your property meets the same high standard whether it is your first guest or your five-hundredth.",
+      "Professional short-let cleaning is not simply about tidiness — it is about consistency. Every guest expects the same standard, every time. Cleaniq Services' Airbnb cleaning team in Manchester follows a fixed turnover protocol so your property meets the same high standard whether it is your first guest or your five-hundredth.",
       "Beyond cleanliness, our turnover team also checks for unreported damage, missing inventory, and maintenance issues — giving you the information you need to protect your property and resolve any disputes with your hosting platform.",
     ],
   },
@@ -440,13 +440,13 @@ const AIRBNB_EXTENDED = {
     {
       name: "Marcus L.",
       location: "Manchester City Centre",
-      text: "I manage four Airbnb apartments and Cleaniq handles all of them. Reliable, consistent, and my guests always comment on the cleanliness. Five stars every time.",
+      text: "I manage four Airbnb apartments and Cleaniq Services handles all of them. Reliable, consistent, and my guests always comment on the cleanliness. Five stars every time.",
       rating: 5,
     },
     {
       name: "Fatima O.",
       location: "Salford, Manchester",
-      text: "As a Superhost, cleanliness is everything. Cleaniq has never let me down — same-day turnaround, always guest-ready.",
+      text: "As a Superhost, cleanliness is everything. Cleaniq Services has never let me down — same-day turnaround, always guest-ready.",
       rating: 5,
     },
     {
@@ -474,7 +474,7 @@ const AIRBNB_EXTENDED = {
 };
 
 const OFFICE_EXTENDED = {
-  intro: `A clean workplace is not just about appearances — it directly affects staff wellbeing, productivity, and the impression you make on every client who walks through your door. Cleaniq delivers reliable, professional office cleaning across Manchester on a schedule that works around your business.`,
+  intro: `A clean workplace is not just about appearances — it directly affects staff wellbeing, productivity, and the impression you make on every client who walks through your door. Cleaniq Services delivers reliable, professional office cleaning across Manchester on a schedule that works around your business.`,
 
   whyChoosePoints: [
     {
@@ -490,7 +490,7 @@ const OFFICE_EXTENDED = {
     {
       icon: <ShieldCheck size={22} />,
       title: "Fully Insured & Vetted",
-      body: "All Cleaniq commercial cleaners carry full public liability insurance and are background-checked for your peace of mind.",
+      body: "All Cleaniq Services commercial cleaners carry full public liability insurance and are background-checked for your peace of mind.",
     },
     {
       icon: <Sparkles size={22} />,
@@ -558,7 +558,7 @@ const OFFICE_EXTENDED = {
     body: [
       "The cleanliness of your workplace sends a message — to your staff, your clients, and anyone who visits your premises. A consistently clean office communicates professionalism, attention to detail, and respect for the people who work there.",
       "Beyond perception, workplace hygiene has a measurable impact on staff health and productivity. Studies consistently show that cleaner work environments reduce sick days and improve focus. Regular professional cleaning — particularly of high-contact surfaces like door handles, keyboards, and shared kitchen areas — significantly reduces the spread of illness.",
-      "Cleaniq's commercial cleaning team in Manchester works to a fixed, audited checklist — not a loose routine. Every visit meets the same standard, and our supervisors perform quality checks to ensure your expectations are consistently met.",
+      "Cleaniq Services' commercial cleaning team in Manchester works to a fixed, audited checklist — not a loose routine. Every visit meets the same standard, and our supervisors perform quality checks to ensure your expectations are consistently met.",
     ],
   },
 
@@ -573,7 +573,7 @@ const OFFICE_EXTENDED = {
     },
     {
       q: "Are your cleaners insured?",
-      a: "All Cleaniq commercial cleaners carry full public liability insurance and are background-checked. Certificates are available on request.",
+      a: "All Cleaniq Services commercial cleaners carry full public liability insurance and are background-checked. Certificates are available on request.",
     },
     {
       q: "Can you provide a tailored cleaning specification?",
@@ -589,13 +589,13 @@ const OFFICE_EXTENDED = {
     {
       name: "Claire B.",
       location: "Salford Quays, Manchester",
-      text: "We have used Cleaniq for our office for over a year. Consistent, reliable, and the team are always professional. Our clients regularly comment on how clean the space is.",
+      text: "We have used Cleaniq Services for our office for over a year. Consistent, reliable, and the team are always professional. Our clients regularly comment on how clean the space is.",
       rating: 5,
     },
     {
       name: "Ahmed R.",
       location: "Manchester City Centre",
-      text: "Switched to Cleaniq after our previous contractor kept missing areas. Night-and-day difference. Proper quality control makes all the difference.",
+      text: "Switched to Cleaniq Services after our previous contractor kept missing areas. Night-and-day difference. Proper quality control makes all the difference.",
       rating: 5,
     },
     {
@@ -623,7 +623,7 @@ const OFFICE_EXTENDED = {
 };
 
 const POST_CONSTRUCTION_EXTENDED = {
-  intro: `Building work, renovation, and refurbishment leave behind fine dust, debris, paint residue, and construction grime that standard cleaning cannot tackle. Cleaniq's post-construction cleaning team in Manchester provides a thorough, professional builders clean that prepares your property for immediate occupation or handover.`,
+  intro: `Building work, renovation, and refurbishment leave behind fine dust, debris, paint residue, and construction grime that standard cleaning cannot tackle. Cleaniq Services' post-construction cleaning team in Manchester provides a thorough, professional builders clean that prepares your property for immediate occupation or handover.`,
 
   whyChoosePoints: [
     {
@@ -702,8 +702,8 @@ const POST_CONSTRUCTION_EXTENDED = {
     heading: "Why a Professional Post-Construction Clean is Essential",
     body: [
       "Construction dust is not ordinary household dust. Fine plaster, cement, and drywall particles are abrasive — damaging to surfaces, harmful when inhaled, and impossible to remove effectively without industrial-grade equipment. Attempting to clean a post-build property with a domestic vacuum simply redistributes the dust rather than removing it.",
-      "A professional builders clean from Cleaniq uses HEPA-filter industrial vacuums that capture particles down to 0.3 microns — ensuring that fine construction dust is fully removed rather than recirculated into the air. This protects both the occupants and the surfaces of your newly completed property.",
-      "For developers and contractors, a professional post-construction clean is also a contractual and reputational requirement. Properties handed over with visible dust, paint residue, or construction debris create a poor first impression and can result in snagging disputes. A professional handover clean from Cleaniq ensures your project is completed to the standard your clients expect.",
+      "A professional builders clean from Cleaniq Services uses HEPA-filter industrial vacuums that capture particles down to 0.3 microns — ensuring that fine construction dust is fully removed rather than recirculated into the air. This protects both the occupants and the surfaces of your newly completed property.",
+      "For developers and contractors, a professional post-construction clean is also a contractual and reputational requirement. Properties handed over with visible dust, paint residue, or construction debris create a poor first impression and can result in snagging disputes. A professional handover clean from Cleaniq Services ensures your project is completed to the standard your clients expect.",
     ],
   },
 
@@ -734,19 +734,19 @@ const POST_CONSTRUCTION_EXTENDED = {
     {
       name: "Paul D.",
       location: "Ancoats, Manchester",
-      text: "Used Cleaniq after a full apartment renovation. The dust was everywhere. They came in with industrial equipment and the place was immaculate within a day. Outstanding.",
+      text: "Used Cleaniq Services after a full apartment renovation. The dust was everywhere. They came in with industrial equipment and the place was immaculate within a day. Outstanding.",
       rating: 5,
     },
     {
       name: "Lisa K.",
       location: "Salford, Manchester",
-      text: "We are a small development company and Cleaniq handle all our post-build cleans. Professional, reliable, and the handover standard is always excellent.",
+      text: "We are a small development company and Cleaniq Services handle all our post-build cleans. Professional, reliable, and the handover standard is always excellent.",
       rating: 5,
     },
     {
       name: "James T.",
       location: "Stockport, Manchester",
-      text: "After our kitchen extension, the dust was unbelievable. Cleaniq removed every trace of it — including from inside the new cupboards. Brilliant service.",
+      text: "After our kitchen extension, the dust was unbelievable. Cleaniq Services removed every trace of it — including from inside the new cupboards. Brilliant service.",
       rating: 5,
     },
   ],
@@ -768,7 +768,7 @@ const POST_CONSTRUCTION_EXTENDED = {
 };
 
 const GENERAL_EXTENDED = {
-  intro: `Sometimes you just need a clean, fresh home without the fuss. Cleaniq's general cleaning service in Manchester gives you a thorough, professional tidy-up of your entire home — every week, fortnight, or as a one-off when life gets busy. Trusted local cleaners, eco-friendly products, and a finish you'll actually notice.`,
+  intro: `Sometimes you just need a clean, fresh home without the fuss. Cleaniq Services' general cleaning service in Manchester gives you a thorough, professional tidy-up of your entire home — every week, fortnight, or as a one-off when life gets busy. Trusted local cleaners, eco-friendly products, and a finish you'll actually notice.`,
 
   whyChoosePoints: [
     {
@@ -848,7 +848,7 @@ const GENERAL_EXTENDED = {
     heading: "Why Regular Professional Cleaning Makes a Difference",
     body: [
       "A consistent cleaning routine does more than keep your home looking good — it reduces allergens, bacteria, and dust build-up that can affect your family's health over time. Professional cleaners are trained to reach the spots that get missed in a quick home tidy: behind appliances, inside cupboard hinges, along skirting boards, and in bathroom grout lines.",
-      "Many of our customers find that booking a regular fortnightly clean removes the mental load of keeping on top of housework — freeing up time for the things that matter. Whether you work long hours, have young children, or simply want your home maintained to a high standard, a regular Cleaniq general clean is the simplest way to stay on top of it.",
+      "Many of our customers find that booking a regular fortnightly clean removes the mental load of keeping on top of housework — freeing up time for the things that matter. Whether you work long hours, have young children, or simply want your home maintained to a high standard, a regular Cleaniq Services general clean is the simplest way to stay on top of it.",
       "Our eco-friendly cleaning products mean no harsh chemical smells left in your home and no risk to children or pets. We bring everything we need, show up on time, and leave your home genuinely clean — not just surface-wiped.",
     ],
   },
@@ -881,7 +881,7 @@ const GENERAL_EXTENDED = {
       name: "Sarah M.",
       location: "Didsbury, Manchester",
       rating: 5,
-      text: "I've had Cleaniq coming fortnightly for 6 months now. The house is always spotless when I get home and the team are so professional and friendly. Highly recommend.",
+      text: "I've had Cleaniq Services coming fortnightly for 6 months now. The house is always spotless when I get home and the team are so professional and friendly. Highly recommend.",
     },
     {
       name: "James T.",
@@ -927,7 +927,7 @@ const SERVICES_MAP = {
   },
   "deep-cleaning-manchester": {
     title: "Deep Cleaning Services Manchester | Cleaniq Services",
-    meta: "One-off deep cleaning for homes and offices in Manchester. Thorough, eco-friendly, and affordable. Book expert deep cleaners online today with Cleaniq.",
+    meta: "One-off deep cleaning for homes and offices in Manchester. Thorough, eco-friendly, and affordable. Book expert deep cleaners online today with Cleaniq Services.",
     heading: "Deep Cleaning Services in Manchester",
     tagline: "Thorough, Eco-Friendly, Meticulous Refresh Cleans.",
     description:
@@ -956,7 +956,7 @@ const SERVICES_MAP = {
     extended: "AIRBNB",
   },
   "office-cleaning-manchester": {
-    title: "Office Cleaning Manchester | Commercial Cleaners | Cleaniq",
+    title: "Office Cleaning Manchester | Commercial Cleaners | Cleaniq Services",
     meta: "Professional office and commercial cleaning services in Manchester. Flexible schedules, eco-friendly products. Get a free quote from Cleaniq Services today.",
     heading: "Office & Commercial Cleaning in Manchester",
     tagline: "Flexible Schedules, Spotless Workplaces, Consistent Quality.",
@@ -986,7 +986,7 @@ const SERVICES_MAP = {
     extended: "POST",
   },
   "general-cleaning-manchester": {
-    title: "General Cleaning Manchester | Professional Home Cleaners | Cleaniq",
+    title: "General Cleaning Manchester | Professional Home Cleaners | Cleaniq Services",
     meta: "Reliable general cleaning services in Manchester. Regular home cleans, flexible scheduling, and eco-friendly products. Book trusted local cleaners with Cleaniq Services.",
     heading: "General Cleaning Services in Manchester",
     tagline: "Reliable, Regular, Refreshingly Clean.",
@@ -1370,9 +1370,9 @@ const ServiceDetail = () => {
                 <>
                   <Divider />
                   <section>
-                    <SectionLabel>Why Cleaniq</SectionLabel>
+                    <SectionLabel>Why Cleaniq Services</SectionLabel>
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">
-                      Why Choose Cleaniq for {service.heading}?
+                      Why Choose Cleaniq Services for {service.heading}?
                     </h2>
                     <div className="grid sm:grid-cols-2 gap-5">
                       {ext.whyChoosePoints.map((pt, i) => (

@@ -37,6 +37,24 @@
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
+
+  /* Tailwind Preflight sets color:inherit on inputs, which picks up the near-white
+     body foreground and makes typed text invisible on light-background forms.
+     Utility classes like text-slate-900 still override this where needed. */
+  input:not([class*="text-white"]):not([class*="booking-input"]),
+  textarea:not([class*="text-white"]) {
+    color: #0f172a;
+  }
+
+  /* Prevent Chrome autofill from overriding text and background colour */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: #0f172a !important;
+    -webkit-box-shadow: 0 0 0 1000px #f8fafc inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
 }
 
 @layer components {

@@ -298,7 +298,7 @@ const CityLanding = () => {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-4">
-              Why Choose Cleaniq
+              Why Choose Cleaniq Services
             </h2>
             <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark tracking-tighter mb-6">
               Trusted by {cityInfo.name} residents.

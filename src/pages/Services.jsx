@@ -263,7 +263,7 @@ const Services = () => {
   return (
     <div className="pt-42 pb-20 bg-slate-50 min-h-screen overflow-x-hidden">
       <Helmet>
-        <title>Services | Cleaniq — Manchester Cleaning Services</title>
+        <title>Services | Cleaniq Services — Manchester Cleaning Services</title>
         <meta
           name="description"
           content="Professional residential and commercial cleaning services in Manchester: deep clean, end-of-tenancy, Airbnb turnovers and office janitorial services."
@@ -271,7 +271,7 @@ const Services = () => {
         <link rel="canonical" href="https://www.cleaniqservices.com/services" />
         <meta
           property="og:title"
-          content={"Services | Cleaniq — Manchester Cleaning Services"}
+          content={"Services | Cleaniq Services — Manchester Cleaning Services"}
         />
         <meta
           property="og:description"

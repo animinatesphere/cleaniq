@@ -558,7 +558,7 @@ const Workers = () => {
             </h3>
             <p className="text-white/40 font-medium text-sm mb-8">
               Share these temporary credentials with the worker so they can log
-              into the CleanIQ App.
+              into the Cleaniq Services app.
             </p>
 
             <div className="bg-white/[0.03] p-6 rounded-2xl border border-white/10 text-left space-y-4 mb-8">

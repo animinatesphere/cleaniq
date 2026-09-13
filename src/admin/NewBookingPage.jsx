@@ -1185,7 +1185,7 @@ const NewBookingPage = () => {
                           }
                           className={inputCls(false)}
                         >
-                          <option value="Cleaniq">Cleaniq</option>
+                          <option value="Cleaniq">Cleaniq Services</option>
                           <option value="Customer">Customer</option>
                         </select>
                       </Field>

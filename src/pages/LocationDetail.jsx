@@ -33,7 +33,7 @@ const LOCATIONS_MAP = {
   },
   "chorlton": {
     name: "Chorlton",
-    title: "Cleaning Services Chorlton | Domestic & Commercial | Cleaniq",
+    title: "Cleaning Services Chorlton | Domestic & Commercial | Cleaniq Services",
     meta: "Reliable eco-friendly cleaners in Chorlton. Expert end of tenancy, Airbnb, and deep cleaning services. Get a free quote from Cleaniq Services.",
     tagline: "Premium House & Office Cleaning in Chorlton",
     description: "Cleaniq Services offers top-tier cleaning solutions for homes and offices across Chorlton. Our locally vetted and insured professionals deliver meticulous, eco-friendly cleaning, ensuring your space is pristine and healthy.",
@@ -84,7 +84,7 @@ const LOCATIONS_MAP = {
       },
       {
         q: "Are your Manchester City Centre cleaners vetted and insured?",
-        a: "Yes. Every Cleaniq cleaner serving Manchester City Centre is background-checked, fully insured, and trained to our quality standard. We never send unvetted staff into your home or business.",
+        a: "Yes. Every Cleaniq Services cleaner serving Manchester City Centre is background-checked, fully insured, and trained to our quality standard. We never send unvetted staff into your home or business.",
       },
       {
         q: "Do you clean Airbnb and short-let apartments in Manchester City Centre?",

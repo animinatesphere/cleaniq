@@ -31,7 +31,7 @@ const AdminBlog = () => {
     title: "",
     description: "",
     content: "",
-    author: "Cleaniq Team",
+    author: "Cleaniq Services Team",
     published: false,
     image: null,
   });
@@ -135,7 +135,7 @@ const AdminBlog = () => {
         title: "",
         description: "",
         content: "",
-        author: "Cleaniq Team",
+        author: "Cleaniq Services Team",
         published: false,
         image: null,
       });
@@ -197,7 +197,7 @@ const AdminBlog = () => {
       title: "",
       description: "",
       content: "",
-      author: "Cleaniq Team",
+      author: "Cleaniq Services Team",
       published: false,
       image: null,
     });

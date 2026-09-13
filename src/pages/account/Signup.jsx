@@ -119,7 +119,7 @@ export default function CustomerSignup() {
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
             <img
               src={logoImg}
-              alt="Cleaniq logo"
+              alt="Cleaniq Services logo"
               className="h-16 w-auto object-contain rounded-2xl shadow-md border border-slate-100"
             />
           </Link>

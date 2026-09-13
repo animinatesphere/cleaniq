@@ -399,7 +399,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
             activeOpacity={0.8}
           >
             <Phone size={16} color={C.primary} />
-            <Text style={styles.contactBtnTxt}>Call Cleaniq</Text>
+            <Text style={styles.contactBtnTxt}>Call Cleaniq Services</Text>
           </TouchableOpacity>
 
           {/* Reschedule */}

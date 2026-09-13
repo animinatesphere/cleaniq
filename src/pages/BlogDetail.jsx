@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
@@ -209,7 +209,7 @@ const BlogDetail = () => {
               },
               {
                 "@type": "Question",
-                name: "How do I book a cleaning service with Cleaniq?",
+                name: "How do I book a cleaning service with Cleaniq Services?",
                 acceptedAnswer: {
                   "@type": "Answer",
                   text: "You can book online in 60 seconds at cleaniqservices.com/booking — simply choose your service, pick a date and time, and a vetted professional will be assigned to you.",
@@ -217,10 +217,10 @@ const BlogDetail = () => {
               },
               {
                 "@type": "Question",
-                name: "Are Cleaniq cleaners background checked?",
+                name: "Are Cleaniq Services cleaners background checked?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Yes, every Cleaniq cleaner undergoes a rigorous vetting process including face-to-face interviews, DBS background checks, and practical skills assessments before joining our platform.",
+                  text: "Yes, every Cleaniq Services cleaner undergoes a rigorous vetting process including face-to-face interviews, DBS background checks, and practical skills assessments before joining our platform.",
                 },
               },
             ],
@@ -385,7 +385,7 @@ const BlogDetail = () => {
               <p className="text-white/90 mb-6 text-lg leading-relaxed">
                 Apply the tips from this article or let our expert team handle
                 the cleaning for you. Book your service today and experience the
-                Cleaniq difference.
+                Cleaniq Services difference.
               </p>
               <Link
                 to="/booking"
@@ -542,7 +542,7 @@ const BlogDetail = () => {
               <span>← Back to All Articles</span>
             </Link>
             <p className="text-slate-600 font-bold text-sm mt-4">
-              Explore more insights and tips from the Cleaniq blog.
+              Explore more insights and tips from the Cleaniq Services blog.
             </p>
           </motion.div>
         </div>

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 const Bury = () => (
   <div className="pt-32 pb-20 min-h-screen bg-white">
     <Helmet>
-      <title>Cleaning Services Bury | Domestic & Commercial — Cleaniq</title>
+      <title>Cleaning Services Bury | Domestic & Commercial — Cleaniq Services</title>
       <meta
         name="description"
         content="Bury cleaning services: end-of-tenancy, deep cleans, regular domestic cleaning and office services. Request a free quote today."
