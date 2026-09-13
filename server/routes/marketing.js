@@ -22,64 +22,125 @@ function personalise(text, email, customerMap) {
 // Build the campaign email HTML with per-recipient unsubscribe link
 function campaignEmailHtml(subject, bodyText, recipientEmail) {
   const unsubUrl = `https://api.cleaniqservices.com/api/unsubscribe?email=${encodeURIComponent(recipientEmail || '')}`;
-  // Convert plain text to safe HTML with line breaks and unsubscribe link
   const bodyHtml = bodyText
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+    .replace(/\n\n/g, '</p><p style="margin:0 0 18px;font-size:15px;line-height:1.85;color:#374151;font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;">')
     .replace(/\n/g, '<br>')
-    .replace(/\[Unsubscribe\]/gi, `<a href="${unsubUrl}" style="color:#94a3b8;text-decoration:underline;">unsubscribe</a>`);
+    .replace(/\[Unsubscribe\]/gi, `<a href="${unsubUrl}" style="color:#10b981;text-decoration:underline;">unsubscribe here</a>`);
 
   return `<!DOCTYPE html>
-<html>
-  <body style="margin:0;padding:0;background-color:#f1f5f9;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:32px 0;">
-      <tr><td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:600px;background-color:#ffffff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
-          <tr>
-            <td style="background-color:#0f172a;padding:36px 40px;text-align:center;">
-              <img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Services" style="height:48px;width:auto;margin-bottom:14px;" />
-              <p style="margin:0;font-size:11px;font-weight:bold;letter-spacing:2px;color:#6ee7b7;text-transform:uppercase;font-family:Arial,Helvetica,sans-serif;">Cleaniq Services</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:40px 40px 0;">
-              <h1 style="margin:0;font-size:22px;color:#0f172a;font-family:Arial,Helvetica,sans-serif;">${subject}</h1>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:20px 40px 0;">
-              <p style="margin:0;font-size:14px;line-height:1.9;color:#334155;font-family:Arial,Helvetica,sans-serif;">${bodyHtml}</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:36px 40px;text-align:center;">
-              <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
-                <tr>
-                  <td style="border-radius:6px;background-color:#005B41;">
-                    <a href="https://cleaniqservices.com/booking" style="display:inline-block;padding:14px 36px;font-size:14px;font-weight:bold;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Book a Cleaning</a>
-                  </td>
-                </tr>
-              </table>
-              <p style="margin:16px 0 0;font-size:12px;color:#94a3b8;font-family:Arial,Helvetica,sans-serif;">Or reply to this email — it goes straight to our team.</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="background-color:#f8fafc;border-top:1px solid #e2e8f0;padding:24px 40px;text-align:center;">
-              <p style="margin:0;font-size:13px;font-weight:bold;color:#0f172a;font-family:Arial,Helvetica,sans-serif;">Cleaniq Services Limited</p>
-              <p style="margin:6px 0 0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;">info@cleaniqservices.com &nbsp;&middot;&nbsp; cleaniqservices.com &nbsp;&middot;&nbsp; +44 7752 476368</p>
-              <p style="margin:6px 0 0;font-size:12px;color:#64748b;font-family:Arial,Helvetica,sans-serif;">Greater Manchester, UK</p>
-              <p style="margin:10px 0 0;font-size:11px;color:#94a3b8;font-family:Arial,Helvetica,sans-serif;">
-                You received this because you're a Cleaniq customer or contacted us about our services.
-                &nbsp;&middot;&nbsp;
-                <a href="${unsubUrl}" style="color:#94a3b8;text-decoration:underline;">Unsubscribe</a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td></tr>
-    </table>
-  </body>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${subject}</title></head>
+<body style="margin:0;padding:0;background-color:#f3f4f6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <!--[if mso]><table width="100%"><tr><td><![endif]-->
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3f4f6;padding:40px 16px;">
+    <tr><td align="center">
+
+      <!-- Card -->
+      <table width="580" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+        <!-- Header bar -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#064e3b 0%,#065f46 100%);padding:0 40px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding:28px 0 24px;">
+                  <p style="margin:0;font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                    ✦ Cleaniq<span style="color:#6ee7b7;">.</span>
+                  </p>
+                  <p style="margin:4px 0 0;font-size:11px;font-weight:600;letter-spacing:2px;color:#6ee7b7;text-transform:uppercase;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">Professional Cleaning Services</p>
+                </td>
+                <td align="right" style="padding:28px 0 24px;">
+                  <span style="display:inline-block;padding:6px 14px;background:rgba(110,231,183,0.15);border:1px solid rgba(110,231,183,0.3);border-radius:20px;font-size:11px;font-weight:700;color:#6ee7b7;letter-spacing:1px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">MANCHESTER, UK</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Subject line accent -->
+        <tr>
+          <td style="padding:0 40px;">
+            <table width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-bottom:3px solid #10b981;padding:28px 0 0;">
+              <h1 style="margin:0;font-size:24px;font-weight:800;color:#111827;line-height:1.3;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">${subject}</h1>
+            </td></tr></table>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:28px 40px 8px;">
+            <p style="margin:0 0 18px;font-size:15px;line-height:1.85;color:#374151;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">${bodyHtml}</p>
+          </td>
+        </tr>
+
+        <!-- CTA -->
+        <tr>
+          <td style="padding:24px 40px 36px;">
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="background-color:#10b981;border-radius:8px;">
+                  <a href="https://cleaniqservices.com/booking" style="display:inline-block;padding:15px 36px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;letter-spacing:0.3px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">Book a Cleaning →</a>
+                </td>
+                <td style="padding-left:16px;">
+                  <a href="https://cleaniqservices.com" style="font-size:13px;color:#6b7280;text-decoration:none;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">or visit our website</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Trust bar -->
+        <tr>
+          <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 40px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="center">
+                  <p style="margin:0;font-size:12px;color:#9ca3af;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                    ⭐ Fully insured &nbsp;&middot;&nbsp; ⏱ Reliable scheduling &nbsp;&middot;&nbsp; 🏆 Greater Manchester's trusted cleaners
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color:#111827;padding:24px 40px;border-radius:0 0 12px 12px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <p style="margin:0;font-size:13px;font-weight:700;color:#f9fafb;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">Cleaniq Services Limited</p>
+                  <p style="margin:6px 0 0;font-size:12px;color:#9ca3af;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                    <a href="mailto:info@cleaniqservices.com" style="color:#10b981;text-decoration:none;">info@cleaniqservices.com</a>
+                    &nbsp;&middot;&nbsp; +44 7752 476368 &nbsp;&middot;&nbsp; Greater Manchester, UK
+                  </p>
+                </td>
+                <td align="right" valign="top">
+                  <a href="https://cleaniqservices.com" style="font-size:12px;color:#6b7280;text-decoration:none;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">cleaniqservices.com</a>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" style="padding-top:14px;border-top:1px solid #1f2937;margin-top:14px;">
+                  <p style="margin:0;font-size:11px;color:#6b7280;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                    You received this because you're a Cleaniq customer or enquired about our services.
+                    &nbsp;&middot;&nbsp;
+                    <a href="${unsubUrl}" style="color:#6b7280;text-decoration:underline;">Unsubscribe</a>
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+  <!--[if mso]></td></tr></table><![endif]-->
+</body>
 </html>`;
 }
 

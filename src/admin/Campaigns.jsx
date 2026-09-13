@@ -273,11 +273,21 @@ export default function Campaigns() {
   const totalSent       = campaigns.reduce((s, c) => s + (c.sentCount || c.recipientCount || 0), 0);
   const activeCampaigns = campaigns.filter(c => c.status === "sending" || c.status === "queued").length;
 
-  const previewBody = form.body
+  const previewBodyText = form.body
     .replace(/\[Name\]/gi, "Sarah")
     .replace(/\[Your name\]/gi, "Cleaniq Team")
-    .replace(/\[Unsubscribe\]/gi, "[unsubscribe link]")
+    .replace(/\[Unsubscribe\]/gi, '<span style="color:#10b981;text-decoration:underline;">unsubscribe here</span>')
     .replace(/\[Business address\]/gi, "Greater Manchester, UK");
+
+  const previewBodyHtml = previewBodyText
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/&lt;span/g, "<span").replace(/&gt;(.*?)&lt;\/span&gt;/g, ">$1</span>")
+    .replace(/\n\n/g, '</p><p style="margin:0 0 14px;font-size:14px;line-height:1.8;color:#374151;">')
+    .replace(/\n/g, "<br>");
+
+  // Kept for backward compat
+  const previewBody = previewBodyText;
 
   const inputCls = "w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/25 text-base outline-none focus:border-emerald-500/60 transition-colors";
   const labelCls = "block text-xs font-bold text-white/50 mb-2 uppercase tracking-wider";
@@ -525,11 +535,57 @@ export default function Campaigns() {
 
             {showPreview && form.body && (
               <div className="border border-white/10 rounded-xl overflow-hidden">
-                <div className="px-5 py-3 border-b border-white/7 bg-[#071D16]">
-                  <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Preview — sample name: Sarah</p>
-                  {form.subject && <p className="text-base font-semibold text-white mt-1.5">{form.subject}</p>}
+                <div className="px-5 py-3 border-b border-white/7 bg-[#071D16] flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Email Preview — sample name: Sarah</p>
+                    {form.subject && <p className="text-sm font-semibold text-white mt-1">Subject: {form.subject}</p>}
+                  </div>
+                  <span className="text-[10px] font-bold text-white/25 uppercase tracking-wider">Rendered HTML</span>
                 </div>
-                <div className="px-5 py-5 bg-[#071D16] text-base text-white/80 whitespace-pre-wrap leading-relaxed max-h-72 overflow-y-auto">{previewBody}</div>
+                <div className="bg-[#f3f4f6] max-h-[480px] overflow-y-auto p-4">
+                  <div style={{
+                    maxWidth: 520, margin: "0 auto", background: "#fff", borderRadius: 10,
+                    overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+                  }}>
+                    {/* Header */}
+                    <div style={{ background: "linear-gradient(135deg,#064e3b,#065f46)", padding: "22px 32px" }}>
+                      <p style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "#fff", fontFamily: "sans-serif" }}>
+                        ✦ Cleaniq<span style={{ color: "#6ee7b7" }}>.</span>
+                      </p>
+                      <p style={{ margin: "4px 0 0", fontSize: 10, fontWeight: 700, letterSpacing: 2, color: "#6ee7b7", textTransform: "uppercase", fontFamily: "sans-serif" }}>
+                        Professional Cleaning Services
+                      </p>
+                    </div>
+                    {/* Subject */}
+                    <div style={{ padding: "22px 32px 0", borderBottom: "3px solid #10b981" }}>
+                      <p style={{ margin: "0 0 16px", fontSize: 20, fontWeight: 800, color: "#111827", fontFamily: "sans-serif" }}>{form.subject || "Your subject line"}</p>
+                    </div>
+                    {/* Body */}
+                    <div style={{ padding: "22px 32px 8px" }}>
+                      <p style={{ margin: 0, fontSize: 14, lineHeight: 1.85, color: "#374151", fontFamily: "sans-serif" }}
+                        dangerouslySetInnerHTML={{ __html: previewBodyHtml }} />
+                    </div>
+                    {/* CTA */}
+                    <div style={{ padding: "16px 32px 28px" }}>
+                      <a href="#" style={{ display: "inline-block", padding: "12px 28px", background: "#10b981", borderRadius: 7, color: "#fff", fontWeight: 700, fontSize: 13, textDecoration: "none", fontFamily: "sans-serif" }}>
+                        Book a Cleaning →
+                      </a>
+                    </div>
+                    {/* Trust */}
+                    <div style={{ background: "#f9fafb", borderTop: "1px solid #e5e7eb", padding: "14px 32px", textAlign: "center" }}>
+                      <p style={{ margin: 0, fontSize: 11, color: "#9ca3af", fontFamily: "sans-serif" }}>⭐ Fully insured &nbsp;·&nbsp; ⏱ Reliable scheduling &nbsp;·&nbsp; 🏆 Manchester's trusted cleaners</p>
+                    </div>
+                    {/* Footer */}
+                    <div style={{ background: "#111827", padding: "18px 32px", borderRadius: "0 0 10px 10px" }}>
+                      <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#f9fafb", fontFamily: "sans-serif" }}>Cleaniq Services Limited</p>
+                      <p style={{ margin: "5px 0 0", fontSize: 11, color: "#9ca3af", fontFamily: "sans-serif" }}>info@cleaniqservices.com · +44 7752 476368 · Greater Manchester, UK</p>
+                      <p style={{ margin: "10px 0 0", paddingTop: 10, borderTop: "1px solid #1f2937", fontSize: 10, color: "#6b7280", fontFamily: "sans-serif" }}>
+                        You received this because you're a Cleaniq customer. &nbsp;·&nbsp;
+                        <span style={{ color: "#6b7280", textDecoration: "underline" }}>Unsubscribe</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
