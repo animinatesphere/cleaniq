@@ -5,7 +5,10 @@ const { nanoid } = require("nanoid");
 const Job = require("../models/Job");
 const Booking = require("../models/Booking");
 const Customer = require("../models/Customer");
+const Worker = require("../models/Worker");
+const Notification = require("../models/Notification");
 const { sendEmail } = require("../utils/emailService");
+const { sendWorkersPush } = require("../utils/pushNotifications");
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "cleaniqservices@gmail.com";
 
@@ -491,6 +494,30 @@ router.put("/:id/approve", async (req, res) => {
     job.status = "approved";
     job.linkedBookingId = booking._id;
     await job.save();
+
+    // Push-notify all active workers about the new company job
+    setImmediate(async () => {
+      try {
+        const dateStr = booking.schedule?.date
+          ? new Date(booking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
+          : "TBC";
+        const notifTitle = "New Company Job Available!";
+        const notifBody  = `${booking.service} · ${dateStr}`;
+        const workers = await Worker.find({ status: "Active" }).select("_id expoPushToken").lean();
+        await Notification.insertMany(
+          workers.map(w => ({ workerId: w._id, title: notifTitle, message: notifBody, type: "job" })),
+          { ordered: false }
+        ).catch(() => {});
+        const tokens = workers.map(w => w.expoPushToken).filter(Boolean);
+        if (tokens.length) {
+          await sendWorkersPush(tokens, {
+            title: notifTitle,
+            body: notifBody,
+            data: { type: "new_job", bookingId: booking.bookingId },
+          });
+        }
+      } catch (e) { console.error("Company job worker push error:", e.message); }
+    });
 
     // Email company
     setImmediate(async () => {

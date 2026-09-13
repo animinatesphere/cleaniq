@@ -71,7 +71,7 @@ const StripePayment = ({
         country: currency.toUpperCase() === "GBP" ? "GB" : "NG",
         currency: currency.toLowerCase(),
         total: {
-          label: `Cleaniq - ${customerInfo.serviceType}`,
+          label: `Cleaniq Services - ${customerInfo.serviceType}`,
           amount: Math.round(amount * 100),
         },
         requestPayerName: true,

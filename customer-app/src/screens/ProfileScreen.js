@@ -551,7 +551,7 @@ const ProfileScreen = ({ navigation }) => {
                   <View style={styles.cardNotice}>
                     <Shield size={13} color={C.primary} />
                     <Text style={styles.cardNoticeTxt}>
-                      Card details are stored only on this device and never shared. Payments are processed securely via Stripe.
+                      This card is saved on your device only and is not transmitted to our servers. App bookings are paid via a secure link sent to your email.
                     </Text>
                   </View>
                   <View style={styles.editActions}>
