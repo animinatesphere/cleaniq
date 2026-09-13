@@ -70,10 +70,23 @@ const LIFECYCLE = [
 ];
 
 const ROOM_KEYS = ["Bedroom","Bathroom","Kitchen","Living Room","Utility Room","Reception Room","Conservatory","Cloakroom"];
-const TIME_SLOTS_CO = ["Morning", "Afternoon", "Evening", "Flexible"];
 const MONTH_NAMES   = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAY_LABELS    = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const RESCHEDULE_STATUSES = ["pending_review", "approved", "assigned"];
+
+// 8:00 AM–10:00 PM in 30-min steps
+const TIME_CHIPS = (() => {
+  const chips = [];
+  for (let h = 8; h <= 22; h++) {
+    for (const m of [0, 30]) {
+      if (h === 22 && m === 30) break;
+      const suffix = h < 12 ? "AM" : "PM";
+      const h12    = h === 0 ? 12 : h > 12 ? h - 12 : h;
+      chips.push(`${h12}:${m === 0 ? "00" : "30"} ${suffix}`);
+    }
+  }
+  return chips;
+})();
 
 const buildCal = (year, month) => {
   const days = []; const start = new Date(year, month, 1).getDay();
@@ -196,16 +209,14 @@ export default function JobDetailScreen({ navigation, route }) {
 
   const handleReschedule = async () => {
     if (!selDate) return Alert.alert("No date selected", "Please pick a date.");
-    if (!selSlot) return Alert.alert("No time slot", "Please pick a time slot.");
-    if (selSlot !== "Flexible" && !prefTime.trim())
-      return Alert.alert("Preferred time required", `Please enter a preferred time for the ${selSlot} slot (e.g. 9:30 AM).`);
+    if (!selSlot) return Alert.alert("No time selected", "Please pick a start time.");
     setRescheduling(true);
     try {
       const token = await AsyncStorage.getItem("customerToken");
       const res = await fetch(`${API_URL}/jobs/${jobId}/reschedule`, {
         method: "PUT",
         headers: { "Content-Type":"application/json", Authorization:`Bearer ${token}` },
-        body: JSON.stringify({ date: ds(selDate), timeSlot: selSlot, preferredTime: prefTime.trim() || selSlot }),
+        body: JSON.stringify({ date: ds(selDate), timeSlot: selSlot, preferredTime: selSlot }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Reschedule failed");
@@ -586,36 +597,18 @@ export default function JobDetailScreen({ navigation, route }) {
               })}
             </View>
 
-            {/* Time slots */}
-            <Text style={s.slotLabel}>Time Slot</Text>
-            <View style={s.slotGrid}>
-              {TIME_SLOTS_CO.map(t => (
-                <TouchableOpacity key={t} style={[s.slotChip, selSlot===t && s.slotChipOn]}
-                  onPress={() => { setSelSlot(t); setPrefTime(""); }} activeOpacity={0.8}>
-                  <Text style={[s.slotChipTxt, selSlot===t && s.slotChipTxtOn]}>{t}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Preferred time input — shown when a named slot is picked */}
-            {selSlot !== "" && selSlot !== "Flexible" && (
-              <View style={s.prefTimeWrap}>
-                <Text style={s.prefTimeLabel}>
-                  Preferred time within {selSlot} <Text style={{ color:G.error }}>*</Text>
-                </Text>
-                <TextInput
-                  style={s.prefTimeInput}
-                  placeholder={
-                    selSlot === "Morning"   ? "e.g. 9:00 AM"  :
-                    selSlot === "Afternoon" ? "e.g. 2:00 PM"  : "e.g. 5:30 PM"
-                  }
-                  placeholderTextColor={G.muted}
-                  value={prefTime}
-                  onChangeText={setPrefTime}
-                  returnKeyType="done"
-                />
+            {/* Time chips */}
+            <Text style={s.slotLabel}>Preferred Start Time</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -4 }} contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 4 }}>
+              <View style={s.timeChipsRow}>
+                {TIME_CHIPS.map(t => (
+                  <TouchableOpacity key={t} style={[s.slotChip, selSlot===t && s.slotChipOn]}
+                    onPress={() => { setSelSlot(t); setPrefTime(t); }} activeOpacity={0.8}>
+                    <Text style={[s.slotChipTxt, selSlot===t && s.slotChipTxtOn]}>{t}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
-            )}
+            </ScrollView>
 
             {/* Actions */}
             <View style={s.modalActions}>
@@ -623,9 +616,9 @@ export default function JobDetailScreen({ navigation, route }) {
                 <Text style={s.modalCancelTxt}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[s.modalConfirm, (!selDate || !selSlot || (selSlot !== "Flexible" && !prefTime.trim()) || rescheduling) && { opacity:0.5 }]}
+                style={[s.modalConfirm, (!selDate || !selSlot || rescheduling) && { opacity:0.5 }]}
                 onPress={handleReschedule}
-                disabled={!selDate || !selSlot || (selSlot !== "Flexible" && !prefTime.trim()) || rescheduling}
+                disabled={!selDate || !selSlot || rescheduling}
               >
                 {rescheduling
                   ? <ActivityIndicator size="small" color="#fff" />
@@ -753,16 +746,11 @@ const s = StyleSheet.create({
 
   // Slot picker
   slotLabel:{ fontSize:12, fontWeight:"800", color:G.muted, textTransform:"uppercase", letterSpacing:0.6, marginBottom:10 },
-  slotGrid:{ flexDirection:"row", flexWrap:"wrap", gap:8, marginBottom:22 },
-  slotChip:{ paddingHorizontal:18, paddingVertical:10, borderRadius:999, backgroundColor:G.bg, borderWidth:1.5, borderColor:G.border },
+  timeChipsRow:{ flexDirection:"row", gap:8, marginBottom:18 },
+  slotChip:{ paddingHorizontal:14, paddingVertical:9, borderRadius:999, backgroundColor:G.bg, borderWidth:1.5, borderColor:G.border },
   slotChipOn:{ backgroundColor:G.primary, borderColor:G.primary },
   slotChipTxt:{ fontSize:13, fontWeight:"700", color:G.med },
   slotChipTxtOn:{ color:"#fff" },
-
-  // Preferred time
-  prefTimeWrap:{ marginBottom:18 },
-  prefTimeLabel:{ fontSize:12, fontWeight:"700", color:G.med, marginBottom:8 },
-  prefTimeInput:{ backgroundColor:G.bg, borderRadius:12, paddingHorizontal:16, paddingVertical:12, fontSize:15, fontWeight:"600", color:G.dark, borderWidth:1.5, borderColor:G.border },
 
   // Modal actions
   modalActions:{ flexDirection:"row", gap:10 },
