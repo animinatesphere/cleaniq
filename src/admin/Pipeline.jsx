@@ -3,7 +3,7 @@ import axios from "axios";
 import {
   Plus, X, ChevronRight, RefreshCw, MoreHorizontal,
   Mail, Phone, Briefcase, Calendar, User, ArrowRight,
-  Trash2, Edit2, CheckCircle, Tag,
+  Trash2, Edit2, CheckCircle, Tag, Search,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -292,6 +292,9 @@ export default function Pipeline() {
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState(null);
   const [syncCount, setSyncCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [draggingLeadId, setDraggingLeadId] = useState(null);
+  const [dragOverStage, setDragOverStage] = useState(null);
   const [movingId, setMovingId] = useState(null);
   const [selectedLead, setSelectedLead] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -405,7 +408,34 @@ export default function Pipeline() {
     }
   };
 
-  const byStage = (stage) => leads.filter(l => (l.stage || "New") === stage);
+  const filteredLeads = searchQuery.trim()
+    ? leads.filter(l => {
+        const q = searchQuery.toLowerCase();
+        return l.name?.toLowerCase().includes(q) || l.email?.toLowerCase().includes(q) || l.serviceInterest?.toLowerCase().includes(q);
+      })
+    : leads;
+
+  const byStage = (stage) => filteredLeads.filter(l => (l.stage || "New") === stage);
+
+  const handleDragStart = (e, lead) => {
+    setDraggingLeadId(lead._id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+  const handleDragOver = (e, stage) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverStage(stage);
+  };
+  const handleDrop = async (e, stage) => {
+    e.preventDefault();
+    setDragOverStage(null);
+    setDraggingLeadId(null);
+    const lead = leads.find(l => l._id === draggingLeadId);
+    if (lead && (lead.stage || "New") !== stage) {
+      await moveToStage(lead, stage);
+    }
+  };
+  const handleDragEnd = () => { setDraggingLeadId(null); setDragOverStage(null); };
   const total = leads.length;
   const booked = leads.filter(l => l.stage === "Booked").length;
   const convRate = total > 0 ? Math.round((booked / total) * 100) : 0;
@@ -441,14 +471,25 @@ export default function Pipeline() {
             )}
           </p>
         </div>
-        <button
-          onClick={() => fetchLeads(true)}
-          disabled={syncing}
-          className="flex items-center gap-2 text-xs font-semibold text-white/40 hover:text-white px-3 py-2 rounded-xl hover:bg-white/10 transition-colors shrink-0"
-        >
-          <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
-          {syncing ? "Syncing…" : "Sync Now"}
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+            <input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search leads…"
+              className="pl-9 pr-4 py-2 text-sm bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/25 outline-none focus:border-emerald-500/50 w-48"
+            />
+          </div>
+          <button
+            onClick={() => fetchLeads(true)}
+            disabled={syncing}
+            className="flex items-center gap-2 text-xs font-semibold text-white/40 hover:text-white px-3 py-2 rounded-xl hover:bg-white/10 transition-colors shrink-0"
+          >
+            <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
+            {syncing ? "Syncing…" : "Sync Now"}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -472,7 +513,13 @@ export default function Pipeline() {
           const hasMore = cards.length > visibleCount;
           const isExpanded = (colPages[stage] || 1) > 1;
           return (
-            <div key={stage} className="shrink-0 w-72 bg-[#071D16] rounded-xl p-3">
+            <div
+              key={stage}
+              className={`shrink-0 w-72 rounded-xl p-3 transition-colors ${dragOverStage === stage ? "bg-emerald-500/10 ring-1 ring-emerald-500/30" : "bg-[#071D16]"}`}
+              onDragOver={e => handleDragOver(e, stage)}
+              onDrop={e => handleDrop(e, stage)}
+              onDragLeave={() => setDragOverStage(null)}
+            >
               <div className={`flex items-center justify-between px-3 py-2 rounded-xl mb-3 ${STAGE_HEADER[stage]}`}>
                 <span className="text-xs font-bold uppercase tracking-widest">{stage}</span>
                 <span className="text-xs font-black">{cards.length}</span>
@@ -523,8 +570,11 @@ export default function Pipeline() {
                 {visibleCards.map(lead => (
                   <div
                     key={lead._id}
+                    draggable
+                    onDragStart={e => handleDragStart(e, lead)}
+                    onDragEnd={handleDragEnd}
                     onClick={() => setSelectedLead(lead)}
-                    className={`bg-[#0B2D22] border border-white/7 border-l-4 ${STAGE_STYLES[stage]?.border} rounded-xl p-4 relative cursor-pointer hover:border-white/20 transition-all group`}
+                    className={`bg-[#0B2D22] border border-white/7 border-l-4 ${STAGE_STYLES[stage]?.border} rounded-xl p-4 relative cursor-grab active:cursor-grabbing hover:border-white/20 transition-all group ${draggingLeadId === lead._id ? "opacity-40" : ""}`}
                   >
                     {movingId === lead._id && (
                       <div className="absolute inset-0 bg-[#0B2D22]/70 rounded-xl flex items-center justify-center z-10">

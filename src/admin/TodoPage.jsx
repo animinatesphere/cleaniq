@@ -7,6 +7,8 @@ import {
   Flag,
   X,
   GripVertical,
+  Calendar,
+  AlertCircle,
 } from "lucide-react";
 
 const PRIORITIES = [
@@ -31,9 +33,28 @@ const saveTodos = (todos) => {
 
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
+const isOverdue = (dueDate) => {
+  if (!dueDate) return false;
+  return new Date(dueDate) < new Date() && new Date(dueDate).toDateString() !== new Date().toDateString();
+};
+
+const fmtDue = (dueDate) => {
+  if (!dueDate) return null;
+  const d = new Date(dueDate);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const due   = new Date(d); due.setHours(0, 0, 0, 0);
+  const diff = Math.round((due - today) / 86400000);
+  if (diff < 0)  return { label: `${Math.abs(diff)}d overdue`, cls: "text-rose-400" };
+  if (diff === 0) return { label: "Due today",               cls: "text-amber-400" };
+  if (diff === 1) return { label: "Due tomorrow",            cls: "text-amber-300" };
+  return { label: `Due ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`, cls: "text-white/40" };
+};
+
 export default function TodoPage() {
   const [todos, setTodos] = useState(loadTodos);
   const [text, setText] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [assignee, setAssignee] = useState("");
   const [priority, setPriority] = useState("medium");
   const [filter, setFilter] = useState("all");
   const inputRef = useRef(null);
@@ -46,10 +67,12 @@ export default function TodoPage() {
     const trimmed = text.trim();
     if (!trimmed) return;
     setTodos((prev) => [
-      { id: uid(), text: trimmed, priority, done: false, createdAt: Date.now() },
+      { id: uid(), text: trimmed, priority, done: false, createdAt: Date.now(), dueDate: dueDate || null, assignee: assignee.trim() || null },
       ...prev,
     ]);
     setText("");
+    setDueDate("");
+    setAssignee("");
     inputRef.current?.focus();
   };
 
@@ -64,11 +87,24 @@ export default function TodoPage() {
   const clearDone = () =>
     setTodos((prev) => prev.filter((t) => !t.done));
 
-  const displayed = todos.filter((t) => {
-    if (filter === "active") return !t.done;
-    if (filter === "done") return t.done;
-    return true;
-  });
+  const displayed = todos
+    .filter((t) => {
+      if (filter === "active")  return !t.done;
+      if (filter === "done")    return t.done;
+      if (filter === "overdue") return !t.done && isOverdue(t.dueDate);
+      return true;
+    })
+    .sort((a, b) => {
+      const pa = PRIORITIES.findIndex(p => p.key === a.priority);
+      const pb = PRIORITIES.findIndex(p => p.key === b.priority);
+      if (pa !== pb) return pa - pb;
+      if (a.dueDate && b.dueDate) return new Date(a.dueDate) - new Date(b.dueDate);
+      if (a.dueDate) return -1;
+      if (b.dueDate) return 1;
+      return b.createdAt - a.createdAt;
+    });
+
+  const overdueCount = todos.filter(t => !t.done && isOverdue(t.dueDate)).length;
 
   const doneCount   = todos.filter((t) => t.done).length;
   const activeCount = todos.filter((t) => !t.done).length;
@@ -127,23 +163,48 @@ export default function TodoPage() {
             </button>
           ))}
         </div>
+        {/* Due date + assignee */}
+        <div className="flex gap-2">
+          <div className="flex items-center gap-2 flex-1 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
+            <Calendar size={13} className="text-white/30 shrink-0" />
+            <input
+              type="date"
+              value={dueDate}
+              onChange={e => setDueDate(e.target.value)}
+              className="flex-1 bg-transparent text-white text-xs focus:outline-none"
+              placeholder="Due date"
+            />
+          </div>
+          <input
+            type="text"
+            value={assignee}
+            onChange={e => setAssignee(e.target.value)}
+            placeholder="Assign to…"
+            className="flex-1 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/25 text-xs focus:outline-none focus:border-emerald-500/50"
+          />
+        </div>
       </div>
 
       {/* Filters */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 flex-wrap">
           {[
-            { key: "all",    label: "All",    count: todos.length },
-            { key: "active", label: "Active", count: activeCount },
-            { key: "done",   label: "Done",   count: doneCount   },
+            { key: "all",     label: "All",     count: todos.length },
+            { key: "active",  label: "Active",  count: activeCount  },
+            { key: "done",    label: "Done",    count: doneCount    },
+            { key: "overdue", label: "Overdue", count: overdueCount, danger: true },
           ].map((f) => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                 filter === f.key
-                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/40"
-                  : "bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white/60"
+                  ? f.danger
+                    ? "bg-rose-500/20 text-rose-300 border-rose-400/40"
+                    : "bg-emerald-500/20 text-emerald-300 border-emerald-400/40"
+                  : f.danger && f.count > 0
+                    ? "bg-rose-500/10 text-rose-400/70 border-rose-400/20 hover:bg-rose-500/20"
+                    : "bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white/60"
               }`}
             >
               {f.label} {f.count > 0 && <span className="opacity-60">({f.count})</span>}
@@ -165,10 +226,10 @@ export default function TodoPage() {
         {displayed.length === 0 && (
           <div className="text-center py-16">
             <div className="text-4xl mb-3">
-              {filter === "done" ? "🎉" : "📝"}
+              {filter === "done" ? "🎉" : filter === "overdue" ? "✅" : "📝"}
             </div>
             <p className="text-white/30 font-semibold text-sm">
-              {filter === "done" ? "Nothing completed yet" : "No tasks here"}
+              {filter === "done" ? "Nothing completed yet" : filter === "overdue" ? "No overdue tasks" : "No tasks here"}
             </p>
             {filter === "all" && (
               <p className="text-white/20 text-xs mt-1">Add your first task above</p>
@@ -201,10 +262,21 @@ export default function TodoPage() {
                 <p className={`text-sm font-medium leading-snug ${todo.done ? "line-through text-white/30" : "text-white/85"}`}>
                   {todo.text}
                 </p>
-                <div className="flex items-center gap-2 mt-1.5">
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                   <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${pMeta.bg} ${pMeta.color}`}>
                     {pMeta.label}
                   </span>
+                  {todo.assignee && (
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border bg-white/5 text-white/50 border-white/10">
+                      @{todo.assignee}
+                    </span>
+                  )}
+                  {todo.dueDate && (() => { const due = fmtDue(todo.dueDate); return due ? (
+                    <span className={`text-[9px] font-bold flex items-center gap-0.5 ${due.cls}`}>
+                      {isOverdue(todo.dueDate) && <AlertCircle size={9} />}
+                      {due.label}
+                    </span>
+                  ) : null; })()}
                   <span className="text-[10px] text-white/20">
                     {new Date(todo.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                   </span>
