@@ -27,8 +27,10 @@ const Blog = () => {
   const BASE_URL = API_URL.endsWith("/api") ? API_URL.slice(0, -4) : API_URL;
 
   const getImageUrl = (imagePath) => {
-    if (imagePath.startsWith("http")) return imagePath;
-    return `${BASE_URL}${imagePath}`;
+    if (!imagePath) return "";
+    if (imagePath.startsWith("http") || imagePath.startsWith("data:")) return imagePath;
+    const cleanPath = imagePath.replace(/^\/api/, "");
+    return `${BASE_URL}${cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`}`;
   };
 
   useEffect(() => {
@@ -88,7 +90,7 @@ const Blog = () => {
         </title>
         <meta
           name="description"
-          content="Read our latest blog posts about cleaning tips, industry insights, and service updates from Cleaniq. Expert advice for a cleaner home."
+          content="Read our latest blog posts about cleaning tips, industry insights, and service updates from Cleaniq Services. Expert advice for a cleaner home."
         />
         <link rel="canonical" href="https://www.cleaniqservices.com/blog" />
         <meta property="og:title" content="Blog — Cleaniq Services" />

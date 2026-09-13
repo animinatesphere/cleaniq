@@ -22,6 +22,7 @@ const expenseSchema = new mongoose.Schema({
     default: "Bank Transfer",
   },
   notes: { type: String, default: "" },
+  receiptUrl: { type: String, default: null },
   createdByAdmin: { type: String, default: null },
   createdAt: { type: Date, default: Date.now },
 });

@@ -322,7 +322,7 @@ const LocationDetail = () => {
 
             <div className="bg-white border border-slate-200 rounded-[36px] p-8 md:p-10 shadow-sm space-y-6">
               <h2 className="text-2xl font-black text-primary-dark">
-                About Our {locationData.name} Services
+                About Our {locationData.name} Cleaning Services
               </h2>
               <p className="text-slate-600 font-medium leading-relaxed">
                 {locationData.description}

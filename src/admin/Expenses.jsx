@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Receipt,
   Plus,
@@ -11,6 +11,8 @@ import {
   Calendar,
   TrendingDown,
   Download,
+  Paperclip,
+  ExternalLink,
 } from "lucide-react";
 import StatDetailDrawer from "./StatDetailDrawer";
 
@@ -72,6 +74,8 @@ const Expenses = () => {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const [drawer, setDrawer] = useState(null);
+  const [receiptFile, setReceiptFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   const fetchExpenses = () => {
     setLoading(true);
@@ -104,11 +108,13 @@ const Expenses = () => {
   const openAdd = () => {
     setEditingId(null);
     setForm(emptyForm());
+    setReceiptFile(null);
     setShowModal(true);
   };
 
   const openEdit = (expense) => {
     setEditingId(expense._id);
+    setReceiptFile(null);
     setForm({
       description: expense.description,
       category: expense.category,
@@ -130,11 +136,19 @@ const Expenses = () => {
       const url = editingId
         ? `${API}/expenses/${editingId}`
         : `${API}/expenses`;
-      const res = await fetch(url, {
-        method: editingId ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, amount: Number(form.amount) }),
-      });
+      let res;
+      if (receiptFile) {
+        const fd = new FormData();
+        Object.entries({ ...form, amount: Number(form.amount) }).forEach(([k, v]) => fd.append(k, v));
+        fd.append("receipt", receiptFile);
+        res = await fetch(url, { method: editingId ? "PUT" : "POST", body: fd });
+      } else {
+        res = await fetch(url, {
+          method: editingId ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...form, amount: Number(form.amount) }),
+        });
+      }
       if (!res.ok) throw new Error("Failed to save expense");
       setShowModal(false);
       setToast({
@@ -399,7 +413,20 @@ const Expenses = () => {
                 filtered.map((e) => (
                   <tr key={e._id} className="hover:bg-white/[0.04] transition-colors border-b border-white/[0.04]">
                     <td className="px-6 py-4 text-sm font-semibold text-white/80">
-                      {e.description}
+                      <div className="flex items-center gap-2">
+                        {e.description}
+                        {e.receiptUrl && (
+                          <a
+                            href={e.receiptUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="shrink-0 text-emerald-400 hover:text-emerald-300 transition-colors"
+                            title="View receipt"
+                          >
+                            <Paperclip size={13} />
+                          </a>
+                        )}
+                      </div>
                       {e.notes && (
                         <p className="text-[11px] text-white/40 font-medium mt-0.5">
                           {e.notes}
@@ -556,6 +583,35 @@ const Expenses = () => {
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:border-emerald-500/50 focus:outline-none font-medium text-sm h-20 resize-none"
                 />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">
+                  Receipt (optional)
+                </label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,application/pdf"
+                  className="hidden"
+                  onChange={(e) => setReceiptFile(e.target.files[0] || null)}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 w-full px-4 py-3 rounded-xl bg-white/5 border border-dashed border-white/15 text-white/40 hover:text-white/70 hover:border-white/30 text-sm font-semibold transition-all"
+                >
+                  <Paperclip size={14} />
+                  {receiptFile ? receiptFile.name : "Attach receipt (PDF, JPG, PNG)"}
+                </button>
+                {receiptFile && (
+                  <button
+                    type="button"
+                    onClick={() => { setReceiptFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                    className="mt-1.5 text-[11px] text-rose-400 font-semibold hover:underline"
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
               <button
                 onClick={handleSave}

@@ -518,7 +518,7 @@ const Home = () => {
                   path: "/pages/airbnb-cleaning-manchester",
                 },
                 {
-                  name: " Office Cleaning",
+                  name: "Office Cleaning",
                   path: "/pages/office-cleaning-manchester",
                 },
                 {

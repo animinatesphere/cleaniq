@@ -166,7 +166,7 @@ export default function CustomerDashboard() {
     <div className="min-h-screen bg-[#F8FAFC] pt-32 pb-20">
       <Helmet>
         <title>My Dashboard — Cleaniq Services</title>
-        <meta name="description" content="Manage your Cleaniq bookings, cancel orders and chat with admin from your personal dashboard." />
+        <meta name="description" content="Manage your Cleaniq Services bookings, cancel orders and chat with admin from your personal dashboard." />
       </Helmet>
 
       {/* ---- SUCCESS TOAST ---- */}

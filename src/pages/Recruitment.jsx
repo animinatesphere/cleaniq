@@ -118,13 +118,13 @@ const Recruitment = () => {
   return (
     <div className="pt-32 pb-20 px-6 min-h-screen bg-white mt-12">
       <Helmet>
-        <title>Join Cleaniq — Careers & Recruitment</title>
+        <title>Join Cleaniq Services — Careers & Recruitment</title>
         <meta
           name="description"
           content="Apply to join Cleaniq Services. We're hiring vetted cleaning professionals in Manchester. Competitive pay and flexible schedules."
         />
         <link rel="canonical" href="https://www.cleaniqservices.com/recruitment" />
-        <meta property="og:title" content="Join Cleaniq — Careers & Recruitment" />
+        <meta property="og:title" content="Join Cleaniq Services — Careers & Recruitment" />
       </Helmet>
 
       {isSubmitting && <LoadingOverlay message="Sending your application..." />}

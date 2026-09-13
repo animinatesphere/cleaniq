@@ -62,6 +62,17 @@ const AdminPayments = () => {
     }
   };
 
+  // Delete payout record
+  const handleDeletePayout = async (withdrawalId) => {
+    if (!window.confirm("Delete this payout record permanently? This cannot be undone.")) return;
+    try {
+      await axios.delete(`${API_URL}/payments/admin/withdrawals/${withdrawalId}`);
+      setWithdrawals((prev) => prev.filter((w) => w._id !== withdrawalId));
+    } catch (error) {
+      alert("❌ Error deleting payout: " + (error.response?.data?.error || error.message));
+    }
+  };
+
   // Reject payout
   const handleRejectPayout = async (withdrawalId) => {
     const reason = prompt("Enter reason for rejection:");
@@ -369,6 +380,12 @@ const AdminPayments = () => {
                         </p>
                       </div>
                     )}
+                    <button
+                      className="ml-auto bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 rounded-xl px-4 py-2 text-sm font-semibold transition-colors"
+                      onClick={() => handleDeletePayout(payout._id)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               )}

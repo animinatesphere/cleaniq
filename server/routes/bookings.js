@@ -49,11 +49,9 @@ router.post("/public", async (req, res) => {
         const rateSetting = await SystemSetting.findOne({
           key: "defaultWorkerRate",
         });
-        if (rateSetting) {
-          booking.workerRate = rateSetting.value;
-        }
+        booking.workerRate = rateSetting ? rateSetting.value : 13;
       } catch (settingsErr) {
-        // noop - not critical for booking creation
+        booking.workerRate = 13; // standard rate fallback
       }
     }
 
@@ -458,17 +456,10 @@ router.post("/", async (req, res) => {
     // Apply global default workerRate if not provided
     if (booking.workerRate == null) {
       try {
-        const rateSetting = await SystemSetting.findOne({
-          key: "defaultWorkerRate",
-        });
-        if (rateSetting) {
-          booking.workerRate = rateSetting.value;
-        }
+        const rateSetting = await SystemSetting.findOne({ key: "defaultWorkerRate" });
+        booking.workerRate = rateSetting ? rateSetting.value : 13;
       } catch (settingsErr) {
-        console.warn(
-          "⚠️ Could not load default worker settings:",
-          settingsErr.message,
-        );
+        booking.workerRate = 13; // standard rate fallback
       }
     }
 
@@ -1228,6 +1219,19 @@ router.put("/:id", async (req, res) => {
           "⚠️ Worker wallet update failed for Completed-Unpaid:",
           walletErr.message,
         );
+      }
+    }
+
+    // ── Update linked Job status when company booking is confirmed ──────────
+    if (prevStatus !== "Confirmed" && newStatus === "Confirmed" && updatedBooking.meta?.isCompanyJob) {
+      try {
+        const Job = require("../models/Job");
+        await Job.findOneAndUpdate(
+          { linkedBookingId: updatedBooking._id },
+          { status: "approved" }
+        );
+      } catch (jobErr) {
+        console.error("Failed to update linked job status:", jobErr.message);
       }
     }
 

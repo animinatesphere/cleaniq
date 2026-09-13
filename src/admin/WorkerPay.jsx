@@ -303,7 +303,7 @@ const WorkerPay = () => {
               onChange={(e) =>
                 setDefaults((d) => ({ ...d, defaultWorkerRate: e.target.value }))
               }
-              placeholder="e.g. 15.00"
+              placeholder="e.g. 13.00"
               className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 font-black text-lg focus:outline-none focus:border-emerald-500/50 transition-all"
             />
           </div>

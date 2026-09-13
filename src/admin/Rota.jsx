@@ -34,7 +34,11 @@ const startOfWeek = (date) => {
   return d;
 };
 
-const isRealBooking = (b) => b.status !== "Blackout" && b.status !== "Cancelled" && b.customer?.firstName !== "ADMIN_BLOCK";
+const isRealBooking = (b) =>
+  b.status !== "Blackout" &&
+  b.status !== "Cancelled" &&
+  b.status !== "Completed" &&
+  b.customer?.firstName !== "ADMIN_BLOCK";
 const initials = (f, l) => `${f?.[0] || ""}${l?.[0] || ""}`.toUpperCase() || "?";
 const hoursOf  = (b) => Number(b.workerDuration || b.details?.duration || 0);
 

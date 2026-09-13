@@ -21,6 +21,9 @@ const SVC_PHOTOS = {
   deep:        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=75",
   airbnb:      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=75",
   construct:   "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&q=75",
+  carpet:      "https://images.unsplash.com/photo-1558618047-f4d7753f5ec5?w=400&q=75",
+  oven:        "https://images.unsplash.com/photo-1556909211-36987daf7b4d?w=400&q=75",
+  general:     "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&q=75",
   default:     "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400&q=75",
 };
 
@@ -31,6 +34,9 @@ const CAT_PHOTOS = {
   deep:        "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200&q=70",
   airbnb:      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=200&q=70",
   construct:   "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=200&q=70",
+  carpet:      "https://images.unsplash.com/photo-1558618047-f4d7753f5ec5?w=200&q=70",
+  oven:        "https://images.unsplash.com/photo-1556909211-36987daf7b4d?w=200&q=70",
+  general:     "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=200&q=70",
   default:     "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200&q=70",
 };
 
@@ -42,7 +48,23 @@ const getPhotoKey = (name = "") => {
   if (n.includes("deep")    || n.includes("thorough"))   return "deep";
   if (n.includes("airbnb")  || n.includes("short"))      return "airbnb";
   if (n.includes("construct") || n.includes("build"))    return "construct";
+  if (n.includes("carpet")  || n.includes("rug"))        return "carpet";
+  if (n.includes("oven")    || n.includes("cooker"))     return "oven";
+  if (n.includes("general") || n.includes("regular"))    return "general";
   return "default";
+};
+
+const SVC_ORDER = ["residential", "office", "airbnb", "general", "carpet", "oven", "tenancy", "deep", "construct"];
+const sortServices = (svcs) =>
+  [...svcs].sort((a, b) => {
+    const ia = SVC_ORDER.indexOf(getPhotoKey(a.name));
+    const ib = SVC_ORDER.indexOf(getPhotoKey(b.name));
+    return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+  });
+
+const isFlatRate = (name = "") => {
+  const n = name.toLowerCase();
+  return n.includes("carpet") || n.includes("rug") || n.includes("oven") || n.includes("cooker");
 };
 
 // ── Availability helpers ──────────────────────────────────────────────────────
@@ -113,7 +135,7 @@ const HomeScreen = ({ navigation }) => {
       ]);
 
       const base = (sRes || []).filter((s) => s.category === "Base");
-      setServices(base);
+      setServices(sortServices(base));
 
       const ranges = buildRanges(bRes || []);
       setNextSlot(nextAvailableSlot(ranges));
@@ -316,7 +338,9 @@ const HomeScreen = ({ navigation }) => {
               const key   = getPhotoKey(svc.name);
               const photo = svc.image || SVC_PHOTOS[key];
               const price = svc.rate
-                ? `£${Number(svc.rate).toFixed(2)}/hr`
+                ? isFlatRate(svc.name)
+                  ? `From £${Number(svc.rate).toFixed(2)}`
+                  : `£${Number(svc.rate).toFixed(2)}/hr`
                 : "Quote on request";
               const shortDesc = svc.description
                 ? svc.description.slice(0, 55) + (svc.description.length > 55 ? "…" : "")

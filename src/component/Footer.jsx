@@ -199,7 +199,7 @@ const Footer = () => {
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
                 Our cleaners are fully vetted, background-checked, and trained
-                to Cleaniq service institutional standards.
+                to Cleaniq Services institutional standards.
               </p>
               <Link
                 to="/booking"

@@ -46,8 +46,10 @@ const BlogDetail = () => {
   const postId = extractIdFromSlug(slug);
 
   const getImageUrl = (imagePath) => {
-    if (imagePath.startsWith("http")) return imagePath;
-    return `${BASE_URL}${imagePath}`;
+    if (!imagePath) return "";
+    if (imagePath.startsWith("http") || imagePath.startsWith("data:")) return imagePath;
+    const cleanPath = imagePath.replace(/^\/api/, "");
+    return `${BASE_URL}${cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`}`;
   };
 
   const fetchPost = useCallback(async () => {
@@ -178,7 +180,7 @@ const BlogDetail = () => {
   return (
     <>
       <Helmet>
-        <title>{post.title} — Cleaniq Blog</title>
+        <title>{post.title} — Cleaniq Services Blog</title>
         <meta name="description" content={post.description} />
         <link
           rel="canonical"

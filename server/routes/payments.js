@@ -853,6 +853,18 @@ router.put("/admin/withdrawals/:withdrawalId/reject", async (req, res) => {
   }
 });
 
+// ADMIN: Delete withdrawal record
+router.delete("/admin/withdrawals/:withdrawalId", async (req, res) => {
+  try {
+    const withdrawal = await Withdrawal.findByIdAndDelete(req.params.withdrawalId);
+    if (!withdrawal) return res.status(404).json({ error: "Withdrawal not found" });
+    res.json({ message: "Withdrawal deleted" });
+  } catch (error) {
+    console.error("Error deleting withdrawal:", error);
+    res.status(500).json({ error: "Failed to delete withdrawal" });
+  }
+});
+
 // CAPTURE AUTHORIZED PAYMENT when booking is completed
 // Called when admin or system marks booking as completed
 router.post("/capture/:bookingId", async (req, res) => {

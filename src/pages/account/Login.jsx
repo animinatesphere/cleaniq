@@ -40,7 +40,7 @@ export default function CustomerLogin() {
         <title>My Account — Cleaniq Services</title>
         <meta
           name="description"
-          content="Login to your Cleaniq account to view bookings, chat with admin, and manage your cleaning services."
+          content="Login to your Cleaniq Services account to view bookings, chat with admin, and manage your cleaning services."
         />
       </Helmet>
 

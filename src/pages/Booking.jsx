@@ -255,7 +255,7 @@ const Booking = () => {
 
   const dynamicServiceOptions = React.useMemo(() => {
     const bases = servicesList.filter((s) => s.category === "Base");
-    const keys = ["residential", "commercial", "move", "airbnb", "tenancy"];
+    const keys = ["residential", "commercial", "airbnb", "general", "carpet", "oven", "tenancy", "move", "postconstruction"];
 
     const optionAssets = {
       residential: {
@@ -326,7 +326,63 @@ const Booking = () => {
         ],
         icon: <Truck />,
         defaultId: "End of Tenancy",
-        defaultTitle: "End of Tenancy",
+        defaultTitle: "End of Tenancy Cleaning",
+      },
+      general: {
+        tag: "Regular home cleaning",
+        bullets: [
+          "Full room clean — kitchen, bathrooms, bedrooms.",
+          "Vacuuming & mopping all floors.",
+          "Surface dusting & sanitizing.",
+          "Trash removal & tidying.",
+          "Weekly, fortnightly, or one-off.",
+          "Eco-friendly products.",
+        ],
+        icon: <HomeIcon />,
+        defaultId: "General Cleaning",
+        defaultTitle: "General Cleaning",
+      },
+      carpet: {
+        tag: "Specialist carpet care",
+        bullets: [
+          "Hot water extraction (steam cleaning).",
+          "Stain & odour treatment.",
+          "Drying optimisation.",
+          "All carpet types covered.",
+          "Flat-rate pricing.",
+          "Pet hair removal.",
+        ],
+        icon: <Wind />,
+        defaultId: "Carpet Cleaning",
+        defaultTitle: "Carpet Cleaning",
+      },
+      oven: {
+        tag: "Specialist oven cleaning",
+        bullets: [
+          "Full oven interior deep clean.",
+          "Hob, grill & extractor cleaning.",
+          "Eco-friendly dip-tank treatment.",
+          "Racks, shelves & door glass.",
+          "Flat-rate pricing — no hourly charge.",
+          "Leaves no chemical residue.",
+        ],
+        icon: <Sparkles />,
+        defaultId: "Oven Cleaning",
+        defaultTitle: "Oven Cleaning",
+      },
+      postconstruction: {
+        tag: "Post-build specialists",
+        bullets: [
+          "HEPA vacuuming of fine dust.",
+          "Paint spot & adhesive removal.",
+          "Window & frame cleaning.",
+          "Debris clearance.",
+          "Ready-to-live handover clean.",
+          "Flexible scheduling.",
+        ],
+        icon: <Zap />,
+        defaultId: "Post-Construction Cleaning",
+        defaultTitle: "Post-Construction Cleaning",
       },
     };
 
@@ -346,6 +402,14 @@ const Booking = () => {
         cleanName.includes("business")
       )
         return "commercial";
+      if (cleanName.includes("carpet") || cleanName.includes("rug"))
+        return "carpet";
+      if (cleanName.includes("oven") || cleanName.includes("cooker"))
+        return "oven";
+      if (cleanName.includes("construct") || cleanName.includes("builder") || cleanName.includes("postconstruct"))
+        return "postconstruction";
+      if (cleanName.includes("general") || cleanName.includes("regular") && !cleanName.includes("residential"))
+        return "general";
       if (cleanName.includes("deep") || cleanName.includes("thorough"))
         return "move";
       if (

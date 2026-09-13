@@ -210,7 +210,7 @@ router.post("/", verifyCompany, async (req, res) => {
       payment:  req.body.payment?.amount
         ? { amount: parseFloat(req.body.payment.amount), currency: req.body.payment.currency || "GBP" }
         : undefined,
-      status: "approved",
+      status: "pending_review",
       linkedBookingId: booking._id,
     });
 

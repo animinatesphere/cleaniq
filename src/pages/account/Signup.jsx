@@ -101,7 +101,7 @@ export default function CustomerSignup() {
         <title>Create Account — Cleaniq Services</title>
         <meta
           name="description"
-          content="Sign up for a Cleaniq account to track your bookings, chat with admin and manage your cleaning schedule."
+          content="Sign up for a Cleaniq Services account to track your bookings, chat with admin and manage your cleaning schedule."
         />
       </Helmet>
 
@@ -156,7 +156,7 @@ export default function CustomerSignup() {
                     onChange={(e) =>
                       setForm({ ...form, firstName: e.target.value })
                     }
-                    className="w-full pl-10 pr-4 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all"
+                    className="w-full pl-10 pr-4 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
                 <div className="relative group">
@@ -173,7 +173,7 @@ export default function CustomerSignup() {
                     onChange={(e) =>
                       setForm({ ...form, lastName: e.target.value })
                     }
-                    className="w-full pl-10 pr-4 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all"
+                    className="w-full pl-10 pr-4 py-4 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
               </div>
@@ -190,7 +190,7 @@ export default function CustomerSignup() {
                   required
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full pl-12 pr-5 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all"
+                  className="w-full pl-12 pr-5 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all text-slate-900 placeholder:text-slate-400"
                 />
               </div>
 
@@ -205,7 +205,7 @@ export default function CustomerSignup() {
                   placeholder="Phone number (optional)"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  className="w-full pl-12 pr-5 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all"
+                  className="w-full pl-12 pr-5 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all text-slate-900 placeholder:text-slate-400"
                 />
               </div>
 
@@ -223,7 +223,7 @@ export default function CustomerSignup() {
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
                   }
-                  className="w-full pl-12 pr-14 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all"
+                  className="w-full pl-12 pr-14 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all text-slate-900 placeholder:text-slate-400"
                 />
                 <button
                   type="button"
@@ -262,7 +262,7 @@ export default function CustomerSignup() {
                   onChange={(e) =>
                     setForm({ ...form, confirm: e.target.value })
                   }
-                  className="w-full pl-12 pr-5 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all"
+                  className="w-full pl-12 pr-5 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all text-slate-900 placeholder:text-slate-400"
                 />
               </div>
 
