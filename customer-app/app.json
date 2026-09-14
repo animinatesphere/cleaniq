@@ -41,7 +41,7 @@
       [
         "expo-updates",
         {
-          "username": "hexcode-dan"
+          "username": "hexmane99s-team"
         }
       ]
     ],
@@ -50,12 +50,12 @@
     },
     "extra": {
       "eas": {
-        "projectId": "3b274192-4aec-474b-b5c1-4c5a05438455"
+        "projectId": "6e8d9497-1c90-41ce-8276-32f0cf142458"
       }
     },
-    "owner": "hexcode-dan",
+    "owner": "hexmane99",
     "updates": {
-      "url": "https://u.expo.dev/3b274192-4aec-474b-b5c1-4c5a05438455"
+      "url": "https://u.expo.dev/6e8d9497-1c90-41ce-8276-32f0cf142458"
     }
   }
 }
