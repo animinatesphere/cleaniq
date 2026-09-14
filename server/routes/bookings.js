@@ -1257,21 +1257,22 @@ router.put("/:id", async (req, res) => {
               day: "numeric",
               month: "long",
             }),
+            time: bookingDate.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }),
+            bookingDateTime: bookingDate.toISOString(),
             amount: updatedBooking.payment?.amount,
           };
-          const ms24h = 24 * 60 * 60 * 1000;
-          const ms3h = 3 * 60 * 60 * 1000;
-          const soon = Date.now() + 2 * 60 * 1000;
-          await scheduleTask(
-            "booking_reminder_24h",
-            new Date(Math.max(bookingDate.getTime() - ms24h, soon)),
-            payload,
-          );
-          await scheduleTask(
-            "booking_reminder_3h",
-            new Date(Math.max(bookingDate.getTime() - ms3h, soon)),
-            payload,
-          );
+          const ms24h    = 24 * 60 * 60 * 1000;
+          const ms3h     =  3 * 60 * 60 * 1000;
+          const MIN_LEAD = 15 * 60 * 1000;
+          const now      = Date.now();
+          const t24h     = bookingDate.getTime() - ms24h;
+          const t3h      = bookingDate.getTime() - ms3h;
+          if (t24h > now + MIN_LEAD) {
+            await scheduleTask("booking_reminder_24h", new Date(t24h), payload);
+          }
+          if (t3h > now + MIN_LEAD) {
+            await scheduleTask("booking_reminder_3h", new Date(t3h), payload);
+          }
           console.log(
             `⚙️ Reminders scheduled for manually-confirmed booking ${updatedBooking.bookingId}`,
           );

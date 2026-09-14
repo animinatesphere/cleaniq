@@ -215,13 +215,22 @@ router.post('/', async (req, res) => {
           firstName: newBooking.customer?.firstName,
           service: newBooking.service,
           date: bookingDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }),
+          time: bookingDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' }),
+          bookingDateTime: bookingDate.toISOString(),
           amount: newBooking.payment?.amount,
         };
-        const ms24h = 24 * 60 * 60 * 1000;
-        const ms3h  =  3 * 60 * 60 * 1000;
-        const soon  = Date.now() + 2 * 60 * 1000;
-        await scheduleTask('booking_reminder_24h', new Date(Math.max(bookingDate.getTime() - ms24h, soon)), payload);
-        await scheduleTask('booking_reminder_3h',  new Date(Math.max(bookingDate.getTime() - ms3h,  soon)), payload);
+        const ms24h    = 24 * 60 * 60 * 1000;
+        const ms3h     =  3 * 60 * 60 * 1000;
+        const MIN_LEAD = 15 * 60 * 1000;
+        const now      = Date.now();
+        const t24h     = bookingDate.getTime() - ms24h;
+        const t3h      = bookingDate.getTime() - ms3h;
+        if (t24h > now + MIN_LEAD) {
+          await scheduleTask('booking_reminder_24h', new Date(t24h), payload);
+        }
+        if (t3h > now + MIN_LEAD) {
+          await scheduleTask('booking_reminder_3h', new Date(t3h), payload);
+        }
       }
     } catch (schedErr) {
       console.error('⚠️ Failed to schedule booking reminders:', schedErr.message);
