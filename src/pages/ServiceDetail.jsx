@@ -1127,7 +1127,7 @@ const ServiceDetail = () => {
     const fetchPrice = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/services?region=UK`,
+          `${import.meta.env.VITE_API_URL}/services?region=UK&booking=1`,
         );
         const data = await res.json();
 
@@ -1282,9 +1282,11 @@ const ServiceDetail = () => {
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
                   Book your clean
                 </p>
-                <p className="text-2xl font-bold text-slate-900 mb-1">
-                  {servicePrice ?? "From £30 /hr"}
-                </p>
+                {servicePrice && (
+                  <p className="text-2xl font-bold text-slate-900 mb-1">
+                    {servicePrice}
+                  </p>
+                )}
                 <p className="text-xs text-slate-400 mb-5">
                   No hidden fees · Insured cleaners
                 </p>
@@ -1537,12 +1539,11 @@ const ServiceDetail = () => {
                     <p className="text-teal-400 text-xs font-bold tracking-widest uppercase mb-1">
                       Book your clean
                     </p>
-                    <p className="text-2xl font-bold text-slate-900 mb-1">
-                      From £20 /hr
-                    </p>
-                    {/* <p className="text-2xl font-bold text-slate-900 mb-1">
-                      {servicePrice ?? "From £20 /hr"}
-                    </p> */}
+                    {servicePrice && (
+                      <p className="text-2xl font-bold text-white mb-1">
+                        {servicePrice}
+                      </p>
+                    )}
                     <p className="text-slate-400 text-xs mt-1">
                       No hidden fees · Fully insured
                     </p>
