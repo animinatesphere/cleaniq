@@ -19,44 +19,14 @@ function personalise(text, email, customerMap) {
     .replace(/\[Business address\]/gi, 'Greater Manchester, UK');
 }
 
-// Build a plain-text-style campaign email — no branding, no logo, just the message.
-// Plain-looking emails land in inbox instead of Promotions.
-function campaignEmailHtml(subject, bodyText, recipientEmail) {
+// Build a true plain-text campaign message — no HTML at all.
+// Sending text-only via Resend means Gmail sees it as a personal email
+// and delivers it to inbox rather than Promotions.
+function campaignText(bodyText, recipientEmail) {
   const unsubUrl = `https://api.cleaniqservices.com/api/unsubscribe?email=${encodeURIComponent(recipientEmail || '')}`;
-  const bodyHtml = bodyText
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\n\n/g, '</p><p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#111827;">')
-    .replace(/\n/g, '<br>')
-    .replace(/\[Unsubscribe\]/gi, `<a href="${unsubUrl}" style="color:#6b7280;text-decoration:underline;">unsubscribe here</a>`);
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${subject}</title></head>
-<body style="margin:0;padding:0;background-color:#ffffff;font-family:Arial,Helvetica,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;padding:40px 16px;">
-    <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
-        <tr>
-          <td style="padding:0 0 28px;">
-            <p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#111827;">${bodyHtml}</p>
-          </td>
-        </tr>
-        <tr>
-          <td style="border-top:1px solid #e5e7eb;padding-top:20px;">
-            <p style="margin:0;font-size:12px;color:#9ca3af;">
-              You're receiving this because you're a Cleaniq Services customer or enquired about our services.
-              &nbsp;&middot;&nbsp;
-              <a href="${unsubUrl}" style="color:#9ca3af;text-decoration:underline;">Unsubscribe</a>
-            </p>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
+  const body = bodyText
+    .replace(/\[Unsubscribe\]/gi, `Unsubscribe: ${unsubUrl}`);
+  return `${body}\n\n--\nYou received this because you are a Cleaniq Services customer or enquired about our services.\nTo unsubscribe: ${unsubUrl}`;
 }
 
 // ─── Customer Activity ──────────────────────────────────────────────────────
@@ -164,7 +134,7 @@ router.post('/send', async (req, res) => {
     const results = await Promise.allSettled(
       emails.map(email => {
         const body = personalise(message, email, customerMap);
-        return sendEmail({ to: email, subject, html: campaignEmailHtml(subject, body, email), isCampaign: true });
+        return sendEmail({ to: email, subject, text: campaignText(body, email), isCampaign: true });
       })
     );
     const successCount = results.filter(r => r.status === 'fulfilled' && r.value).length;
@@ -222,7 +192,7 @@ router.post('/campaign', async (req, res) => {
     const to = validEmails[i++];
     try {
       const personalBody = personalise(body, to, customerMap);
-      await sendEmail({ to, subject, html: campaignEmailHtml(subject, personalBody, to), isCampaign: true });
+      await sendEmail({ to, subject, text: campaignText(personalBody, to), isCampaign: true });
       await Campaign.findByIdAndUpdate(campaign._id, { $inc: { sentCount: 1 }, status: 'sending' });
       console.log(`📧 Campaign [${i}/${validEmails.length}] → ${to}`);
     } catch (err) {

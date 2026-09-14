@@ -30,11 +30,11 @@ const wrapEmail = (body) => {
 </html>`;
 };
 
-const sendEmail = async ({ to, subject, html, attachments, from: fromOverride, isCampaign = false }) => {
+const sendEmail = async ({ to, subject, html, text: plainText, attachments, from: fromOverride, isCampaign = false }) => {
   try {
     if (!resend) {
       console.error("❌ EMAIL ERROR: RESEND_API_KEY is missing in .env");
-      logEmail({ to, subject, html, success: false });
+      logEmail({ to, subject, html: html || plainText, success: false });
       return false;
     }
 
@@ -48,34 +48,30 @@ const sendEmail = async ({ to, subject, html, attachments, from: fromOverride, i
       }
     } catch {}
 
-    const wrappedHtml = wrapEmail(html);
     console.log(`📧 Resend: Attempting to send email to: ${to}...`);
 
-    // Campaign emails use a real reply-to address and no List-Unsubscribe-Post header
-    // (the unsubscribe link is embedded in the email body instead).
-    // This avoids Gmail's automatic Promotions tab categorisation.
     const fromAddress = fromOverride ||
       (isCampaign
         ? "Cleaniq Services <info@cleaniqservices.com>"
         : "Cleaniq Services <noreply@cleaniqservices.com>");
 
-    const payload = {
-      from: fromAddress,
-      to,
-      subject,
-      html: wrappedHtml,
-    };
+    const payload = { from: fromAddress, to, subject };
 
-    // Only add List-Unsubscribe headers on transactional emails.
-    // Campaign emails embed the unsubscribe link in the body — adding the
-    // List-Unsubscribe-Post header tells Gmail explicitly "this is bulk mail"
-    // and moves it to Promotions.
-    if (!isCampaign) {
-      const unsubUrl = `https://api.cleaniqservices.com/api/unsubscribe?email=${encodeURIComponent(to)}`;
-      payload.headers = {
-        "List-Unsubscribe": `<${unsubUrl}>`,
-        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-      };
+    // Campaign emails with plain text: send text-only so Gmail treats them as
+    // personal messages and delivers to inbox rather than Promotions.
+    if (isCampaign && plainText) {
+      payload.text = plainText;
+    } else {
+      payload.html = wrapEmail(html || "");
+      // Only add List-Unsubscribe headers on transactional emails — these
+      // headers explicitly signal bulk mail to Gmail and trigger Promotions.
+      if (!isCampaign) {
+        const unsubUrl = `https://api.cleaniqservices.com/api/unsubscribe?email=${encodeURIComponent(to)}`;
+        payload.headers = {
+          "List-Unsubscribe": `<${unsubUrl}>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        };
+      }
     }
 
     if (attachments && attachments.length > 0)
@@ -84,16 +80,16 @@ const sendEmail = async ({ to, subject, html, attachments, from: fromOverride, i
 
     if (error) {
       console.error("❌ RESEND ERROR DETAILS:", JSON.stringify(error, null, 2));
-      logEmail({ to, subject, html, success: false });
+      logEmail({ to, subject, html: html || plainText, success: false });
       return false;
     }
 
     console.log("✅ Email sent successfully! ID:", data.id);
-    logEmail({ to, subject, html: wrappedHtml, success: true });
+    logEmail({ to, subject, html: payload.html || `<pre>${plainText}</pre>`, success: true });
     return true;
   } catch (error) {
     console.error("❌ CRITICAL EMAIL ERROR:", error);
-    logEmail({ to, subject, html, success: false });
+    logEmail({ to, subject, html: html || plainText, success: false });
     return false;
   }
 };
