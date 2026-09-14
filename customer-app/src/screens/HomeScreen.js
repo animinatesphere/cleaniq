@@ -21,8 +21,8 @@ const SVC_PHOTOS = {
   deep:        "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=75",
   airbnb:      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=75",
   construct:   "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&q=75",
-  carpet:      "https://images.unsplash.com/photo-1558618047-f4d7753f5ec5?w=400&q=75",
-  oven:        "https://images.unsplash.com/photo-1556909211-36987daf7b4d?w=400&q=75",
+  carpet:      "https://images.unsplash.com/photo-1580256081112-e49377338b7f?w=500&auto=format&fit=crop&q=60",
+  oven:        "https://plus.unsplash.com/premium_photo-1679500355493-2a1ce67cb938?w=500&auto=format&fit=crop&q=60",
   general:     "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&q=75",
   default:     "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400&q=75",
 };
@@ -34,8 +34,8 @@ const CAT_PHOTOS = {
   deep:        "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200&q=70",
   airbnb:      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=200&q=70",
   construct:   "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=200&q=70",
-  carpet:      "https://images.unsplash.com/photo-1558618047-f4d7753f5ec5?w=200&q=70",
-  oven:        "https://images.unsplash.com/photo-1556909211-36987daf7b4d?w=200&q=70",
+  carpet:      "https://images.unsplash.com/photo-1580256081112-e49377338b7f?w=300&auto=format&fit=crop&q=60",
+  oven:        "https://plus.unsplash.com/premium_photo-1679500355493-2a1ce67cb938?w=300&auto=format&fit=crop&q=60",
   general:     "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=200&q=70",
   default:     "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200&q=70",
 };

@@ -83,6 +83,12 @@ const Services = () => {
       cleanName.includes("builders")
     )
       return "construction";
+    if (cleanName.includes("carpet") || cleanName.includes("rug"))
+      return "carpet";
+    if (cleanName.includes("oven") || cleanName.includes("cooker"))
+      return "oven";
+    if (cleanName.includes("general") || cleanName.includes("regular"))
+      return "general";
     return "residential";
   };
 
@@ -193,6 +199,54 @@ const Services = () => {
         "Specialist post-construction and renovation cleaning to clear dust, debris and residue, leaving your property spotless and ready to use.",
       defaultRateUK: "From £26.90/hr",
       defaultRateNG: "From ₦28,000",
+    },
+    carpet: {
+      icon: <HomeIcon className="text-secondary" size={40} />,
+      image:
+        "https://images.unsplash.com/photo-1580256081112-e49377338b7f?w=800&auto=format&fit=crop&q=60",
+      features: [
+        "Hot water extraction deep clean.",
+        "Stain & odour treatment.",
+        "Allergen removal.",
+        "Drying & finishing.",
+      ],
+      tag: "Carpet & rug specialist",
+      defaultName: "Carpet Cleaning",
+      defaultDesc: "Professional carpet cleaning to remove stains, odours, and allergens.",
+      defaultRateUK: "From £80 flat rate",
+      defaultRateNG: "From ₦20,000",
+    },
+    oven: {
+      icon: <ShieldCheck className="text-secondary" size={40} />,
+      image:
+        "https://plus.unsplash.com/premium_photo-1679500355493-2a1ce67cb938?w=800&auto=format&fit=crop&q=60",
+      features: [
+        "Full oven interior degrease.",
+        "Racks, trays & door glass.",
+        "Hob & extractor clean.",
+        "Safe non-caustic products.",
+      ],
+      tag: "Oven cleaning specialist",
+      defaultName: "Oven Cleaning",
+      defaultDesc: "Professional oven cleaning — grease-free, sparkling results.",
+      defaultRateUK: "From £60 flat rate",
+      defaultRateNG: "From ₦15,000",
+    },
+    general: {
+      icon: <HomeIcon className="text-secondary" size={40} />,
+      image:
+        "https://images.unsplash.com/photo-1563453392212-326f5e854473?q=80&w=2000&auto=format&fit=crop",
+      features: [
+        "Full room clean — kitchen, bathrooms, living areas.",
+        "Vacuuming & mopping.",
+        "Surface dusting & sanitisation.",
+        "Flexible weekly or fortnightly schedule.",
+      ],
+      tag: "Regular home cleaning",
+      defaultName: "General Cleaning",
+      defaultDesc: "Reliable regular cleaning for a consistently spotless home.",
+      defaultRateUK: "From £17.90/hr",
+      defaultRateNG: "From ₦15,000",
     },
   };
 

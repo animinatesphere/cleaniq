@@ -1143,7 +1143,7 @@ const ServiceDetail = () => {
           );
         });
 
-        if (match) {
+        if (match && match.rate != null) {
           setServicePrice(
             `From £${match.rate}${match.type === "hourly" ? "/hr" : ""}`,
           );
