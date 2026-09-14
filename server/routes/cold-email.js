@@ -991,7 +991,7 @@ h1{color:#0f172a;font-size:22px;font-weight:800;margin-bottom:12px}p{color:#6474
       },
       { upsert: true },
     );
-    await ColdContact.findOneAndUpdate({ email }, { status: "suppressed" });
+    await ColdContact.findOneAndDelete({ email });
 
     if (decoded.campaignId) {
       const contact = await ColdContact.findOne({ email });
