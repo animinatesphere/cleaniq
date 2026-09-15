@@ -19,14 +19,13 @@ function personalise(text, email, customerMap) {
     .replace(/\[Business address\]/gi, 'Greater Manchester, UK');
 }
 
-// Build a true plain-text campaign message — no HTML at all.
-// Sending text-only via Resend means Gmail sees it as a personal email
-// and delivers it to inbox rather than Promotions.
+// Build a true plain-text campaign message — no HTML, no footer boilerplate.
+// Any marketing footer (especially the word "unsubscribe") triggers Gmail's
+// Promotions classifier even in plain text. Send only what the admin wrote.
 function campaignText(bodyText, recipientEmail) {
   const unsubUrl = `https://api.cleaniqservices.com/api/unsubscribe?email=${encodeURIComponent(recipientEmail || '')}`;
-  const body = bodyText
-    .replace(/\[Unsubscribe\]/gi, `Unsubscribe: ${unsubUrl}`);
-  return `${body}\n\n--\nYou received this because you are a Cleaniq Services customer or enquired about our services.\nTo unsubscribe: ${unsubUrl}`;
+  return bodyText
+    .replace(/\[Unsubscribe\]/gi, unsubUrl);
 }
 
 // ─── Customer Activity ──────────────────────────────────────────────────────
