@@ -1,12 +1,16 @@
 const express = require("express");
 const router = express.Router();
+const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
 const Expense = require("../models/Expense");
 const { moveToTrash } = require("../utils/trash");
 
+const receiptsDir = path.join(__dirname, "../uploads/receipts");
+fs.mkdirSync(receiptsDir, { recursive: true });
+
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, "../uploads/receipts")),
+  destination: (req, file, cb) => cb(null, receiptsDir),
   filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_")}`),
 });
 const upload = multer({
