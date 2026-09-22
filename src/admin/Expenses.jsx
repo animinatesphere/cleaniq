@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
+import * as XLSX from "xlsx";
 import {
   Receipt,
   Plus,
@@ -246,26 +247,52 @@ const Expenses = () => {
     ? Object.entries(stats.byCategory).sort((a, b) => b[1] - a[1])[0]
     : null;
 
-  const exportCSV = () => {
+  const exportExcel = () => {
     const rows = [
-      ["Description", "Category", "Date", "Payment Method", "Amount (£)", "Notes"],
+      [
+        "Expense",
+        "Frequency",
+        "Amount (£)",
+        "Monthly Equivalent (£)",
+        "Annual Equivalent (£)",
+        "Notes",
+      ],
       ...filtered.map((e) => [
-        `"${(e.description || "").replace(/"/g, '""')}"`,
-        `"${(e.category || "").replace(/"/g, '""')}"`,
-        e.date ? new Date(e.date).toLocaleDateString("en-GB") : "",
-        `"${(e.paymentMethod || "").replace(/"/g, '""')}"`,
-        Number(e.amount || 0).toFixed(2),
-        `"${(e.notes || "").replace(/"/g, '""')}"`,
+        e.description || "",
+        "One time Payment",
+        Number(e.amount || 0),
+        Number(e.amount || 0),
+        Number(e.amount || 0) * 12,
+        [
+          e.category,
+          e.date ? `Date: ${new Date(e.date).toLocaleDateString("en-GB")}` : "",
+          e.paymentMethod ? `Payment: ${e.paymentMethod}` : "",
+          e.notes || "",
+        ].filter(Boolean).join(" | "),
       ]),
     ];
-    const csv = rows.map((r) => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `expenses-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    const firstDataRow = 2;
+    const lastDataRow = rows.length;
+    const summaryRows = [
+      [],
+      ["Current Total", "", "", `=SUM(D${firstDataRow}:D${lastDataRow})`, `=SUM(E${firstDataRow}:E${lastDataRow})`, ""],
+      [],
+      ["Advertising Total", "", "", `=SUMIF(F${firstDataRow}:F${lastDataRow},"*Advertising*",D${firstDataRow}:D${lastDataRow})`, `=SUMIF(F${firstDataRow}:F${lastDataRow},"*Advertising*",E${firstDataRow}:E${lastDataRow})`, ""],
+    ];
+    XLSX.utils.sheet_add_aoa(worksheet, summaryRows, { origin: -1 });
+    worksheet["!cols"] = [
+      { wch: 30 },
+      { wch: 20 },
+      { wch: 16 },
+      { wch: 24 },
+      { wch: 24 },
+      { wch: 60 },
+    ];
+    worksheet["!autofilter"] = { ref: `A1:F${lastDataRow}` };
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Business Costs");
+    XLSX.writeFile(workbook, `Business_Costs_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   return (
@@ -288,11 +315,11 @@ const Expenses = () => {
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
           </button>
           <button
-            onClick={exportCSV}
+            onClick={exportExcel}
             title="Download CSV"
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:bg-emerald-500/15 hover:text-emerald-400 hover:border-emerald-500/30 font-semibold text-sm transition-all"
           >
-            <Download size={15} /> Export CSV
+            <Download size={15} /> Export Excel
           </button>
           <button
             onClick={openAdd}
