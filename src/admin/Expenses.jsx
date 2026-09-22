@@ -126,6 +126,51 @@ const Expenses = () => {
     setShowModal(true);
   };
 
+  const openDetails = (expense) => {
+    setDrawer({
+      title: expense.description || "Expense details",
+      subtitle: `£${Number(expense.amount || 0).toLocaleString("en-GB", { minimumFractionDigits: 2 })}`,
+      items: [expense],
+      accentColor: "emerald",
+      renderItem: (item) => (
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-white/35 font-bold">Category</p>
+              <p className="text-sm text-white/80 font-semibold mt-1">{item.category}</p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-white/35 font-bold">Payment</p>
+              <p className="text-sm text-white/80 font-semibold mt-1">{item.paymentMethod}</p>
+            </div>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-white/35 font-bold">Date</p>
+            <p className="text-sm text-white/80 font-semibold mt-1">
+              {new Date(item.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+            </p>
+          </div>
+          {item.notes && (
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-white/35 font-bold">Notes</p>
+              <p className="text-sm text-white/65 mt-1 whitespace-pre-wrap">{item.notes}</p>
+            </div>
+          )}
+          {item.receiptUrl && (
+            <a
+              href={item.receiptUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 hover:text-emerald-300"
+            >
+              <Paperclip size={14} /> View receipt <ExternalLink size={13} />
+            </a>
+          )}
+        </div>
+      ),
+    });
+  };
+
   const handleSave = async () => {
     if (!form.description.trim() || !form.amount || Number(form.amount) <= 0) {
       setToast({ msg: "Add a description and a valid amount", type: "error" });
@@ -411,7 +456,15 @@ const Expenses = () => {
                 </tr>
               ) : (
                 filtered.map((e) => (
-                  <tr key={e._id} className="hover:bg-white/[0.04] transition-colors border-b border-white/[0.04]">
+                  <tr
+                    key={e._id}
+                    onClick={() => openDetails(e)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") openDetails(e);
+                    }}
+                    tabIndex="0"
+                    className="hover:bg-white/[0.04] focus:bg-white/[0.06] focus:outline-none cursor-pointer transition-colors border-b border-white/[0.04]"
+                  >
                     <td className="px-6 py-4 text-sm font-semibold text-white/80">
                       <div className="flex items-center gap-2">
                         {e.description}
@@ -420,6 +473,7 @@ const Expenses = () => {
                             href={e.receiptUrl}
                             target="_blank"
                             rel="noreferrer"
+                            onClick={(event) => event.stopPropagation()}
                             className="shrink-0 text-emerald-400 hover:text-emerald-300 transition-colors"
                             title="View receipt"
                           >
@@ -456,13 +510,13 @@ const Expenses = () => {
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-1.5">
                         <button
-                          onClick={() => openEdit(e)}
+                          onClick={(event) => { event.stopPropagation(); openEdit(e); }}
                           className="p-2 rounded-xl bg-white/5 text-white/40 hover:bg-emerald-500/10 hover:text-emerald-400 transition-all"
                         >
                           <Edit3 size={15} />
                         </button>
                         <button
-                          onClick={() => handleDelete(e)}
+                          onClick={(event) => { event.stopPropagation(); handleDelete(e); }}
                           className="p-2 rounded-xl bg-white/5 text-white/40 hover:bg-rose-500/15 hover:text-rose-400 transition-all"
                         >
                           <Trash2 size={15} />
