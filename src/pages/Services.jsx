@@ -20,7 +20,7 @@ import me2 from "../assets/image1.jpeg";
 import me3 from "../assets/Cleaniq services/4th Post.jpg";
 import airbnbImg from "../assets/airbnb_cleaning_service.png";
 import moveOutImg from "../assets/end_of_tenancy.png";
-import deep from "../assets/anton-y-bjqTUUw2Q-unsplash.jpg";
+import deep from "../assets/deep-clean.jpg";
 const cleanKey = (str) =>
   (str || "")
     .toLowerCase()
