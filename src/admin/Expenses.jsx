@@ -17,6 +17,12 @@ import {
 import StatDetailDrawer from "./StatDetailDrawer";
 
 const API = import.meta.env.VITE_API_URL;
+const getReceiptUrl = (receiptUrl) => (
+  receiptUrl?.startsWith("http")
+    ? receiptUrl
+    : `${API.replace(/\/api\/?$/, "")}${receiptUrl?.startsWith("/") ? "" : "/"}${receiptUrl}`
+);
+const isImageReceipt = (receiptUrl) => /\.(jpe?g|png|gif|webp)(?:\?|$)/i.test(receiptUrl || "");
 
 const CATEGORIES = [
   "Supplies & Equipment",
@@ -157,14 +163,30 @@ const Expenses = () => {
             </div>
           )}
           {item.receiptUrl && (
-            <a
-              href={item.receiptUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 hover:text-emerald-300"
-            >
-              <Paperclip size={14} /> View receipt <ExternalLink size={13} />
-            </a>
+            <div className="space-y-3">
+              <p className="text-[10px] uppercase tracking-wider text-white/35 font-bold">Receipt</p>
+              {isImageReceipt(item.receiptUrl) ? (
+                <img
+                  src={getReceiptUrl(item.receiptUrl)}
+                  alt={`${item.description} receipt`}
+                  className="w-full max-h-80 rounded-xl border border-white/10 object-contain bg-black/20"
+                />
+              ) : (
+                <iframe
+                  src={getReceiptUrl(item.receiptUrl)}
+                  title={`${item.description} receipt`}
+                  className="w-full h-80 rounded-xl border border-white/10 bg-white"
+                />
+              )}
+              <a
+                href={getReceiptUrl(item.receiptUrl)}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 hover:text-emerald-300"
+              >
+                <Paperclip size={14} /> Open receipt <ExternalLink size={13} />
+              </a>
+            </div>
           )}
         </div>
       ),
@@ -470,7 +492,7 @@ const Expenses = () => {
                         {e.description}
                         {e.receiptUrl && (
                           <a
-                            href={e.receiptUrl}
+                            href={getReceiptUrl(e.receiptUrl)}
                             target="_blank"
                             rel="noreferrer"
                             onClick={(event) => event.stopPropagation()}
