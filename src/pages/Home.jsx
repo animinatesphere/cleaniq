@@ -3,17 +3,17 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useRegion } from "../context/RegionContext";
 import { Helmet } from "react-helmet-async";
-import air1 from "../assets/josue-michel-FhsFUo-Wfc0-unsplash.jpg";
-import air2 from "../assets/vitaly-gariev-2NcTLdFHpH8-unsplash.jpg";
+import air1 from "../assets/cleaning.jpg";
+import air2 from "../assets/deep-cleaning.jpg";
 import residentialImg from "../assets/residential.jpg";
 import officeImg from "../assets/office.jpg";
-import deepcleanImg from "../assets/anton-y-bjqTUUw2Q-unsplash.jpg";
+import deepcleanImg from "../assets/deep-clean.jpg";
 import airbnbImg from "../assets/airbnb.jpg";
-import strip1 from "../assets/strip1.jpg";
-import strip2 from "../assets/strip2.jpg";
-import strip3 from "../assets/strip3.jpg";
-import strip4 from "../assets/strip4.jpg";
-import strip5 from "../assets/strip5.jpg";
+import strip1 from "../assets/cleaning-sitting.jpg";
+import strip2 from "../assets/oven-cleaning.jpg";
+import strip3 from "../assets/toilet-cleaning.jpg";
+import strip4 from "../assets/office-clean.jpg";
+import strip5 from "../assets/room-cleaning.jpg";
 import {
   Star,
   ShieldCheck,
