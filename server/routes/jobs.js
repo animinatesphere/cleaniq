@@ -63,7 +63,7 @@ const jobApprovedEmail = (job, booking) => `
   </div>
   <div style="padding:36px;color:#1e293b;">
     <p style="font-size:16px;">Hi <strong>${job.company?.name || "there"}</strong>,</p>
-    <p>Great news! Your job request has been <strong style="color:#0F6B4C;">approved</strong> and a booking has been created. We're now finding the best available cleaner for your job.</p>
+    <p>Great news! Your job request has been <strong style="color:#0F6B4C;">approved</strong> and your booking is now confirmed. We're now finding the best available cleaner for your job.</p>
     <div style="background:#E4F7EE;border-radius:16px;padding:20px 24px;margin:20px 0;border:1px solid #0F6B4C30;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
         <div>
@@ -458,38 +458,54 @@ router.get("/", async (req, res) => {
   }
 });
 
-// PUT /api/jobs/:id/approve — admin approves and creates a booking
+// PUT /api/jobs/:id/approve — admin approves the existing pending booking
 router.put("/:id/approve", async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
     if (!job) return res.status(404).json({ message: "Job not found" });
 
-    const bookingId = "BK" + nanoid(8).toUpperCase();
-    const booking = await Booking.create({
-      bookingId,
-      customer: {
-        firstName: job.contact?.name  || job.company.name,
-        lastName:  "",
-        email:     job.contact?.email || job.company.email,
-        phone:     job.contact?.phone || job.company.phone,
-      },
-      service:  job.service,
-      details: {
-        ...job.details,
-        address:  [job.property?.address, job.property?.postcode].filter(Boolean).join(", "),
-        postcode: job.property?.postcode || "",
-      },
-      property: job.property,
-      schedule: job.schedule,
-      region:   job.region,
-      status:   "Confirmed",
-      leadSource: "Company Job",
-      noPaymentRequired: !job.payment?.amount,
-      payment: job.payment?.amount
-        ? { amount: job.payment.amount, currency: job.payment.currency || "GBP", status: "Pending", billingType: "flat" }
-        : undefined,
-      meta: { jobId: job._id },
-    });
+    // Company submission already creates a Pending booking. Confirm that record
+    // instead of creating a second booking during admin approval.
+    let booking = job.linkedBookingId
+      ? await Booking.findById(job.linkedBookingId)
+      : null;
+
+    if (job.status === "approved" && booking) {
+      return res.json({ job, booking, alreadyApproved: true });
+    }
+
+    if (!booking) {
+      const bookingId = "BK" + nanoid(8).toUpperCase();
+      booking = await Booking.create({
+        bookingId,
+        customer: {
+          firstName: job.contact?.name  || job.company.name,
+          lastName:  "",
+          email:     job.contact?.email || job.company.email,
+          phone:     job.contact?.phone || job.company.phone,
+        },
+        service:  job.service,
+        details: {
+          ...job.details,
+          address:  [job.property?.address, job.property?.postcode].filter(Boolean).join(", "),
+          postcode: job.property?.postcode || "",
+        },
+        property: job.property,
+        schedule: job.schedule,
+        region:   job.region,
+        status:   "Pending",
+        leadSource: "Company Job",
+        noPaymentRequired: !job.payment?.amount,
+        payment: job.payment?.amount
+          ? { amount: job.payment.amount, currency: job.payment.currency || "GBP", status: "Pending", billingType: "flat" }
+          : undefined,
+        meta: { isCompanyJob: true, jobId: job._id },
+      });
+    }
+
+    booking.status = "Confirmed";
+    booking.meta = { ...(booking.meta || {}), isCompanyJob: true, jobId: job._id };
+    await booking.save();
 
     job.status = "approved";
     job.linkedBookingId = booking._id;
