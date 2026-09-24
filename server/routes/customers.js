@@ -7,6 +7,8 @@ const Lead = require("../models/Lead");
 const { moveToTrash } = require("../utils/trash");
 const { sendEmail } = require("../utils/emailService");
 
+const generateTemporaryPassword = () => `Cq!${Math.random().toString(36).slice(2, 10)}${Math.floor(100 + Math.random() * 900)}`;
+
 // Get all customers - registered users + guest customers from bookings
 router.get("/", async (req, res) => {
   try {
@@ -94,6 +96,26 @@ router.get("/", async (req, res) => {
     });
 
     res.json(allCustomers);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/customers/:email/reset-password — admin-generated temporary password
+router.post("/:email/reset-password", async (req, res) => {
+  try {
+    const customer = await Customer.findOne({ email: decodeURIComponent(req.params.email).toLowerCase() });
+    if (!customer) return res.status(404).json({ message: "Customer account not found." });
+
+    const temporaryPassword = generateTemporaryPassword();
+    customer.passwordHash = await bcrypt.hash(temporaryPassword, 12);
+    await customer.save();
+    await sendEmail({
+      to: customer.email,
+      subject: "Your Cleaniq password has been reset",
+      html: `<p>Hi ${customer.firstName},</p><p>Your password was reset by Cleaniq support.</p><p><strong>Temporary password:</strong> ${temporaryPassword}</p><p>Please log in and change it immediately.</p>`,
+    });
+    res.json({ message: "Password reset and emailed to the customer.", temporaryPassword });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

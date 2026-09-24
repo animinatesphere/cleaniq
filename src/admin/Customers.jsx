@@ -3,7 +3,7 @@ import {
   Search, Download, X, Edit3, Save, CheckCircle2, XCircle,
   Trash2, Mail, Phone, MapPin, ShoppingBag, LogIn, LogOut,
   Calendar, Clock, RefreshCw, User, Activity,
-  CreditCard, Globe, AlertTriangle, UserPlus, Eye, EyeOff, Building2,
+  CreditCard, Globe, AlertTriangle, UserPlus, Eye, EyeOff, Building2, KeyRound,
 } from "lucide-react";
 import StatDetailDrawer from "./StatDetailDrawer";
 
@@ -94,6 +94,8 @@ const Customers = () => {
   const [creatingCompany,     setCreatingCompany]     = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState("overview");
   const [drawer, setDrawer] = useState(null);
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [temporaryPassword, setTemporaryPassword] = useState("");
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -167,6 +169,22 @@ const Customers = () => {
       showToast("Failed to delete customer", "error");
     } finally {
       setShowDeleteConfirm(null);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!selected?.email) return;
+    setResettingPassword(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/customers/${encodeURIComponent(selected.email)}/reset-password`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to reset password");
+      setTemporaryPassword(data.temporaryPassword || "");
+      showToast("Password reset and emailed to customer");
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      setResettingPassword(false);
     }
   };
 
@@ -875,6 +893,17 @@ const Customers = () => {
 
             {!isEditing && (
               <div className="px-6 py-4 border-t border-white/10 shrink-0">
+                <div className="flex items-center gap-3 mb-3">
+                  <Btn variant="outline" size="sm" onClick={handleResetPassword} disabled={resettingPassword}>
+                    <KeyRound size={12}/> {resettingPassword ? "Resetting…" : "Reset password"}
+                  </Btn>
+                  {temporaryPassword && (
+                    <span className="text-xs text-amber-300 font-mono select-all">
+                      Temporary: {temporaryPassword}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-white/35 mb-3">Passwords are securely hashed. Resetting creates a new temporary password and emails it to the customer.</p>
                 <Btn variant="outline" size="sm" className="text-rose-400 border-rose-500/25 hover:bg-rose-500/15 hover:border-rose-500/40"
                   onClick={() => setShowDeleteConfirm(selected.email)}>
                   <Trash2 size={12}/> Delete account

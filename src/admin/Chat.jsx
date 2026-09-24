@@ -15,6 +15,33 @@ const Chat = () => {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const messageEndRef = useRef(null);
+  const knownMessageKeys = useRef(new Set());
+  const hasLoadedThreads = useRef(false);
+
+  const playIncomingMessageSound = () => {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const context = new AudioContext();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(740, context.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(1040, context.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.0001, context.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.12, context.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.2);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      const startSound = () => {
+        oscillator.start();
+        oscillator.stop(context.currentTime + 0.2);
+        oscillator.addEventListener("ended", () => context.close());
+      };
+      if (context.state === "suspended") context.resume().then(startSound).catch(() => context.close());
+      else startSound();
+    } catch {}
+  };
 
   const fetchThreads = async (showLoading = false) => {
     if (showLoading) setLoadingThreads(true);
@@ -25,6 +52,15 @@ const Chat = () => {
       const response = await fetch(endpoint);
       const data = await response.json();
       setThreads(data);
+      const incomingSender = activeTab === "cleaners" ? "Worker" : "Customer";
+      const newIncoming = data.filter((thread) => {
+        const key = `${activeTab}:${thread._id}:${thread.lastMessageTime}`;
+        const isNew = !knownMessageKeys.current.has(key);
+        knownMessageKeys.current.add(key);
+        return hasLoadedThreads.current && isNew && thread.lastSender === incomingSender;
+      });
+      if (newIncoming.length > 0) playIncomingMessageSound();
+      hasLoadedThreads.current = true;
     } catch (error) {
       console.error('Error fetching threads:', error);
     } finally {
@@ -54,6 +90,8 @@ const Chat = () => {
     setMessages([]);
     setInputText('');
     setSearchQuery('');
+    knownMessageKeys.current = new Set();
+    hasLoadedThreads.current = false;
     fetchThreads(true);
   }, [activeTab]);
 

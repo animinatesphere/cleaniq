@@ -87,6 +87,11 @@ const fmtTimeRange = (b) => {
   return `${fmt(totalMin)} — ${fmt(totalMin + Number(dur) * 60)}`;
 };
 
+const getBookingAddress = (booking) =>
+  booking?.details?.address ||
+  [booking?.property?.address, booking?.property?.postcode].filter(Boolean).join(", ") ||
+  "Not provided";
+
 const admTok = () => localStorage.getItem("adminToken") || "";
 
 export const AdminCalendar = ({ bookings, onToggleDate, onToggleTimeSlot }) => {
@@ -1965,7 +1970,7 @@ const Bookings = () => {
 <div style="text-align:right"><p style="margin:0 0 4px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Job Date</p>
 <p style="margin:0;font-weight:700;font-size:14px;">${b.schedule?.date ? new Date(b.schedule.date).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" }) : "—"}</p>
 <p style="margin:2px 0 0;font-size:12px;color:#64748b;">${b.schedule?.timeSlot || ""}</p>
-<p style="margin:2px 0 0;font-size:12px;color:#64748b;">${b.details?.address || ""}</p></div>
+<p style="margin:2px 0 0;font-size:12px;color:#64748b;">${getBookingAddress(b) === "Not provided" ? "" : getBookingAddress(b)}</p></div>
 </div>
 <table style="width:100%;border-collapse:collapse;">
 <thead><tr style="background:#f8fafc;"><th style="padding:10px 24px;text-align:left;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Description</th><th style="padding:10px 24px;text-align:right;font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Amount</th></tr></thead>
@@ -2019,7 +2024,7 @@ ${extrasRows}
         b.payment?.amount,
         b.payment?.currency,
         b.status,
-        b.details?.address?.replace(/,/g, " "),
+        getBookingAddress(b) === "Not provided" ? "" : getBookingAddress(b).replace(/,/g, " "),
         b.leadSource || "Organic",
         b.suppliesProvidedBy || "",
         b.createdByAdmin || "Customer (website)",
@@ -2657,6 +2662,11 @@ ${extrasRows}
                                 Recurring {b._recurringCount}
                               </span>
                             )}
+                            {b.meta?.isCompanyJob && (
+                              <span className="text-[9px] font-black bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded-full uppercase tracking-wide border border-sky-500/25">
+                                Company
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -2669,6 +2679,11 @@ ${extrasRows}
                         {getPropertyData(b)["Bedroom"] || 0} Bed ·{" "}
                         {b.details?.duration || 0}h
                       </p>
+                      {b.meta?.isCompanyJob && (
+                        <span className="inline-block mt-1 mr-1 text-[9px] font-black uppercase text-sky-300 bg-sky-500/15 border border-sky-500/25 px-1.5 py-0.5 rounded-full">
+                          Company Job
+                        </span>
+                      )}
                       <span className="inline-block mt-1 text-[9px] font-black uppercase text-white/30 bg-white/[0.05] border border-white/10 px-1.5 py-0.5 rounded-full">
                         {b.leadSource || "Organic"}
                       </span>
@@ -4006,7 +4021,7 @@ ${extrasRows}
                             Full Address
                           </h4>
                           <p className="font-bold text-white/85 leading-tight">
-                            {selectedBooking.details?.address}
+                            {getBookingAddress(selectedBooking)}
                           </p>
                         </div>
                       </div>

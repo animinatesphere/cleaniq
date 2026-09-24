@@ -76,6 +76,28 @@ export const CustomerAuthProvider = ({ children }) => {
     return data.customer;
   };
 
+  const forgotPassword = async (email) => {
+    const res = await fetch(`${API}/customer-auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to send reset code');
+    return data;
+  };
+
+  const resetPassword = async ({ email, code, newPassword }) => {
+    const res = await fetch(`${API}/customer-auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code, newPassword })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to reset password');
+    return data;
+  };
+
   const logout = () => {
     localStorage.removeItem('ciq_customer_token');
     localStorage.removeItem('ciq_customer_data');
@@ -97,7 +119,7 @@ export const CustomerAuthProvider = ({ children }) => {
   };
 
   return (
-    <CustomerAuthContext.Provider value={{ customer, loading, register, login, logout, getToken, authFetch, sendOtp, verifyOtp }}>
+    <CustomerAuthContext.Provider value={{ customer, loading, register, login, logout, getToken, authFetch, sendOtp, verifyOtp, forgotPassword, resetPassword }}>
       {children}
     </CustomerAuthContext.Provider>
   );
