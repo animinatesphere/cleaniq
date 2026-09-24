@@ -2528,7 +2528,11 @@ const templates = {
 </html>
   `;
   },
+
+
 };
+Object.assign(templates, require("./cleaniqEmailTemplates"));   // ← ADD THIS LINE
+
 
 // ─── Automation Templates ───────────────────────────────────────────────────
 const automationTemplates = {
