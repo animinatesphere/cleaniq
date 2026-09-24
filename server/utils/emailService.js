@@ -323,7 +323,7 @@ function buildBookingStatusUpdateEmail(booking) {
     "</div>"
   );
 }
-
+ buildBookingStatusUpdateEmail = require("./cleaniqStatusEmail");
 // Templates
 const templates = {
   bookingConfirmation: (booking) => `<!DOCTYPE html>
