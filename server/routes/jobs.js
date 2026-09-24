@@ -177,6 +177,8 @@ router.post("/", verifyCompany, async (req, res) => {
         contactName:  req.body.contact?.name  || "",
         contactPhone: req.body.contact?.phone || "",
         contactEmail: req.body.contact?.email || "",
+        address: [req.body.property?.address, req.body.property?.postcode].filter(Boolean).join(", "),
+        postcode: req.body.property?.postcode || "",
         notes: req.body.notes || "",
       },
       property: req.body.property || {},

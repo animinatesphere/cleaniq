@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { useCustomerAuth } from "../../context/CustomerAuthContext";
 import logoImg from "../../assets/logo DP.jpg";
 
 export default function CustomerLogin() {
-  const { login } = useCustomerAuth();
+  const { login, forgotPassword, resetPassword } = useCustomerAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get("returnTo") || "/account/dashboard";
@@ -16,6 +16,11 @@ export default function CustomerLogin() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [resetStep, setResetStep] = useState(null);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,6 +37,50 @@ export default function CustomerLogin() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSendResetCode = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      await forgotPassword(resetEmail.trim().toLowerCase());
+      setResetStep("code");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (newPassword.length < 6) return setError("Password must be at least 6 characters.");
+    if (newPassword !== confirmPassword) return setError("Passwords do not match.");
+    setLoading(true);
+    try {
+      await resetPassword({ email: resetEmail.trim().toLowerCase(), code: resetCode, newPassword });
+      setResetStep("done");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startReset = () => {
+    setError("");
+    setResetEmail(form.email);
+    setResetStep("email");
+  };
+
+  const finishReset = () => {
+    setResetStep(null);
+    setResetCode("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setError("");
   };
 
   return (
@@ -80,7 +129,40 @@ export default function CustomerLogin() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {resetStep === "email" && (
+            <form onSubmit={handleSendResetCode} className="space-y-4">
+              <button type="button" onClick={finishReset} className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-primary">
+                <ArrowLeft size={16} /> Back to login
+              </button>
+              <h2 className="text-xl font-black text-primary-dark">Forgot password?</h2>
+              <p className="text-sm text-slate-400 font-medium">Enter your email and we will send you a reset code.</p>
+              <input type="email" required autoFocus placeholder="Email address" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} className="w-full px-5 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm" />
+              <button type="submit" disabled={loading} className="w-full py-5 bg-primary text-white font-black rounded-2xl text-sm disabled:opacity-60">{loading ? "Sending..." : "Send reset code"}</button>
+            </form>
+          )}
+
+          {resetStep === "code" && (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <button type="button" onClick={() => setResetStep("email")} className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-primary"><ArrowLeft size={16} /> Change email</button>
+              <h2 className="text-xl font-black text-primary-dark">Reset your password</h2>
+              <p className="text-sm text-slate-400 font-medium">Enter the 6-digit code sent to {resetEmail}, then choose a new password.</p>
+              <input inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required placeholder="6-digit code" value={resetCode} onChange={(e) => setResetCode(e.target.value.replace(/\D/g, ""))} className="w-full px-5 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-black tracking-[0.3em] text-center" />
+              <input type="password" minLength={6} required placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full px-5 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm" />
+              <input type="password" minLength={6} required placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full px-5 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm" />
+              <button type="submit" disabled={loading} className="w-full py-5 bg-primary text-white font-black rounded-2xl text-sm disabled:opacity-60">{loading ? "Updating..." : "Set new password"}</button>
+            </form>
+          )}
+
+          {resetStep === "done" && (
+            <div className="text-center space-y-4">
+              <CheckCircle2 size={42} className="mx-auto text-emerald-500" />
+              <h2 className="text-xl font-black text-primary-dark">Password updated</h2>
+              <p className="text-sm text-slate-400 font-medium">You can now log in with your new password.</p>
+              <button type="button" onClick={finishReset} className="w-full py-5 bg-primary text-white font-black rounded-2xl text-sm">Back to login</button>
+            </div>
+          )}
+
+          {resetStep === null && <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative group">
               <Mail
                 className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors"
@@ -128,7 +210,9 @@ export default function CustomerLogin() {
             >
               {loading ? "Logging in..." : "Log In"}
             </button>
+            <button type="button" onClick={startReset} className="w-full text-sm font-bold text-primary hover:underline">Forgot password?</button>
           </form>
+          }
 
           <p className="text-center text-sm font-bold text-slate-400 mt-6">
             Don't have an account?{" "}
