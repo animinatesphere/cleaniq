@@ -2861,7 +2861,6 @@ const automationTemplates = {
     </div>
   `,
 };
-Object.assign(automationTemplates, require("./cleaniqAutomationTemplates"));
 // ─── Transactional worker-event emails sent to the customer ──────────────────
 
 const workerEventEmails = {
