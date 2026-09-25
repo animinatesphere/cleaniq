@@ -75,7 +75,7 @@ const layout = ({
   headerBg = BRAND.green,
   subColor = "#d1fae5",
   logoSrc = LOGO,
-  logoWidth = 70,
+  logoWidth = 120,
   eyebrow = "",
   heading = "",
   sub = "",
@@ -107,7 +107,7 @@ const layout = ({
     <!-- HEADER -->
     <tr>
       <td class="em-hpad" align="center" bgcolor="${headerBg}" style="background-color:${headerBg};padding:40px 48px;text-align:center;border-radius:16px 16px 0 0;">
-        ${logoSrc ? `<img src="${logoSrc}" alt="Cleaniq Services" width="${logoWidth}" style="display:block;width:${logoWidth}px;max-width:100%;height:auto;border:0;border-radius:10px;margin:0 auto 18px;" />` : ""}
+        ${logoSrc ? `<img src="${logoSrc}" alt="Cleaniq Services" width="${logoWidth}" style="display:block;width:${logoWidth}px;max-width:100%;max-height:72px;height:auto;object-fit:contain;border:0;border-radius:10px;margin:0 auto 18px;" />` : ""}
         ${eyebrow ? `<p style="margin:0;font-family:${FONT};color:${BRAND.mint};font-size:11px;line-height:16px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">${esc(eyebrow)}</p>` : ""}
         <h1 style="margin:8px 0 0;font-family:${FONT};color:#ffffff;font-size:26px;line-height:32px;font-weight:800;">${esc(heading)}</h1>
         ${sub ? `<p style="margin:10px 0 0;font-family:${FONT};color:${subColor};font-size:14px;line-height:20px;">${esc(sub)}</p>` : ""}
@@ -216,6 +216,185 @@ const mono = (text) =>
 
 const redesigned = {
   /* ---------- CUSTOMER-FACING ---------- */
+
+  bookingConfirmation: (booking) => {
+    const d = booking.details || {};
+    const s = booking.schedule || {};
+    return layout({
+      title: "Booking Confirmed",
+      preheader: `Your booking ${booking.bookingId} is confirmed.`,
+      eyebrow: "Booking Confirmed",
+      heading: "Your clean is all set",
+      sub: "Thank you for choosing Cleaniq Services",
+      badge: "Confirmed",
+      body: `
+        ${hello(booking.customer?.firstName || "there")}
+        ${p("Your appointment is confirmed. Here are the details you’ll need for your clean:")}
+        ${refBadge("Booking reference", esc(booking.bookingId))}
+        ${sectionTitle("Your appointment")}
+        ${kv([
+          ["Service", booking.service],
+          ["Date", fmtDate(s.date)],
+          ["Time", timeLabel(s)],
+          ["Frequency", d.frequency],
+          ["Duration", d.duration ? `${d.duration} hours` : ""],
+          ["Address", fullAddress(d)],
+        ])}
+        ${amountBox("Total paid", `&pound;${esc(booking.payment?.amount ?? "0.00")}`)}
+        ${sectionTitle("What happens next")}
+        ${steps([
+          "Your appointment is locked in for the date and time above.",
+          "We’ll match the best available professional to your booking.",
+          "You’ll receive a reminder before the appointment.",
+        ])}
+        ${button("https://cleaniqservices.com/account/dashboard", "View My Booking")}
+        ${small("Need to make a change? Reply to this email or contact our team.")}
+      `,
+    });
+  },
+
+  devModeBookingSuccess: (booking) => {
+    const d = booking.details || {};
+    const s = booking.schedule || {};
+    return layout({
+      title: "Booking Confirmed",
+      preheader: `Your booking ${booking.bookingId} is confirmed.`,
+      eyebrow: "Booking Confirmed",
+      heading: "Your clean is all set",
+      sub: "Your cleaning appointment has been confirmed",
+      badge: "Confirmed",
+      body: `
+        ${hello(booking.customer?.firstName || "there")}
+        ${p("Your cleaning booking has been confirmed. We’re looking forward to making your home sparkle.")}
+        ${refBadge("Booking reference", esc(booking.bookingId))}
+        ${sectionTitle("Appointment details")}
+        ${kv([
+          ["Service", booking.service],
+          ["Date", fmtDate(s.date)],
+          ["Time slot", timeLabel(s)],
+          ["Address", fullAddress(d)],
+        ])}
+        ${amountBox("Amount", `&pound;${esc(booking.payment?.amount ?? "0.00")}`)}
+        ${button("https://cleaniqservices.com/account/dashboard", "View My Booking")}
+      `,
+    });
+  },
+
+  paymentSuccessCustomer: (booking) => {
+    const d = booking.details || {};
+    const s = booking.schedule || {};
+    return layout({
+      title: "Payment Confirmed",
+      preheader: `Payment received for booking ${booking.bookingId}.`,
+      eyebrow: "Payment Received",
+      heading: "You’re all booked in",
+      sub: "Your payment has been received and your booking is active",
+      badge: "Paid",
+      body: `
+        ${hello(booking.customer?.firstName || "there")}
+        ${p("Your payment has been received and your booking is confirmed. We’ll take it from here.")}
+        ${refBadge("Booking reference", esc(booking.bookingId))}
+        ${sectionTitle("Appointment details")}
+        ${kv([
+          ["Service", booking.service],
+          ["Date", fmtDate(s.date)],
+          ["Time", timeLabel(s)],
+          ["Address", fullAddress(d)],
+        ])}
+        ${amountBox("Amount paid", `&pound;${esc(booking.payment?.amount ?? "0.00")}`)}
+        ${p("Our team will be in touch with any final details. Get ready for a spotless clean!", "text-align:center;")}
+        ${button("https://cleaniqservices.com/account/bookings", "Track My Booking")}
+      `,
+    });
+  },
+
+  paymentRequired: (booking, checkoutLink) => {
+    const d = booking.details || {};
+    const s = booking.schedule || {};
+    return layout({
+      title: "Payment Required",
+      preheader: `Complete payment for booking ${booking.bookingId}.`,
+      eyebrow: "Action Required",
+      heading: "Complete your payment",
+      sub: "Your booking is reserved — secure it now",
+      badge: "Payment due",
+      body: `
+        ${hello(booking.customer?.firstName || "there")}
+        ${p("Your appointment has been reserved. Complete payment below to confirm and secure your booking.")}
+        ${refBadge("Booking reference", esc(booking.bookingId))}
+        ${sectionTitle("Appointment details")}
+        ${kv([
+          ["Service", booking.service],
+          ["Date", fmtDate(s.date)],
+          ["Time", timeLabel(s)],
+          ["Duration", d.duration ? `${d.duration} hours` : ""],
+          ["Address", fullAddress(d)],
+        ])}
+        ${amountBox("Total amount due", `&pound;${esc(booking.payment?.amount ?? booking.totalAmount ?? booking.price ?? "0.00")}`, { bg: "#fffbeb", border: "#fde68a", labelColor: "#92400e", color: "#b45309" })}
+        ${checkoutLink ? `${sectionTitle("Pay online")}${button(checkoutLink, "Pay Securely Now")}${small("Secure card payment powered by Stripe. Your card details are never stored.")}` : ""}
+        ${sectionTitle("Or pay by bank transfer")}
+        ${kv([
+          ["Bank", BANK.bank],
+          ["Account name", BANK.name],
+          ["Sort code", BANK.sort],
+          ["Account number", BANK.acc],
+          ["Reference", raw(`<strong>${esc(booking.bookingId)}</strong>`)],
+        ], { labelWidth: "40%" })}
+        ${p("Once payment is received, your booking will be officially confirmed and you’ll receive a confirmation email.", "font-size:13px;color:#64748b;text-align:center;")}
+        ${button("https://cleaniqservices.com/account/bookings", "View My Bookings", { bg: BRAND.dark, color: BRAND.mint })}
+      `,
+    });
+  },
+
+  reviewRequest: (booking, reviewUrl) =>
+    layout({
+      title: "How Was Your Clean",
+      preheader: "We’d love to hear how your Cleaniq clean went.",
+      eyebrow: "Service Complete",
+      heading: "How did we do?",
+      sub: "Your feedback helps us keep improving",
+      badge: "Feedback",
+      body: `
+        ${hello(booking.customer?.firstName || "there")}
+        ${p(`Thank you for choosing Cleaniq Services for your <strong>${esc(booking.service || "cleaning service")}</strong>. We hope you’re delighted with the result.`, "text-align:center;")}
+        ${refBadge("Booking reference", esc(booking.bookingId))}
+        ${box(`<p style="margin:0 0 8px;font-size:11px;font-weight:700;color:#166534;letter-spacing:2px;text-transform:uppercase;">Share your experience</p><p style="margin:0;font-size:28px;line-height:36px;letter-spacing:4px;">&#11088;&#11088;&#11088;&#11088;&#11088;</p>`, { bg: "#f0fdf4", border: "#bbf7d0", align: "center" })}
+        ${p("It only takes 30 seconds, and your review helps other customers find a professional cleaning service they can trust.", "text-align:center;font-size:14px;")}
+        ${button(reviewUrl || "https://g.page/r/CTGJLR1Z7dySEBM/review", "Leave a Google Review")}
+      `,
+    }),
+
+  paymentLinkEmail: (booking, items, totalAmount, payUrl, note) => {
+    const itemRows = (items || []).map((item, index) => `
+      <tr>
+        <td style="padding:13px 14px;background:${index % 2 ? "#f8fafc" : "#ffffff"};border-bottom:1px solid #f1f5f9;font-size:14px;color:#0f172a;font-weight:600;">${esc(item.name || "Service")}</td>
+        <td align="center" style="padding:13px 8px;background:${index % 2 ? "#f8fafc" : "#ffffff"};border-bottom:1px solid #f1f5f9;font-size:14px;color:#64748b;">${esc(item.qty || 1)}</td>
+        <td align="right" style="padding:13px 14px;background:${index % 2 ? "#f8fafc" : "#ffffff"};border-bottom:1px solid #f1f5f9;font-size:14px;color:#0f172a;font-weight:700;">&pound;${((item.amount || 0) * (item.qty || 1)).toFixed(2)}</td>
+      </tr>`).join("");
+    return layout({
+      title: "Payment Request",
+      preheader: `Payment request for booking ${booking.bookingId}.`,
+      eyebrow: "Payment Request",
+      heading: "Complete your payment",
+      sub: "Secure payment for your Cleaniq service",
+      badge: "Action required",
+      body: `
+        ${hello(booking.customer?.firstName || "there")}
+        ${p("A payment has been prepared for your booking. Review the items below and pay securely online.")}
+        ${refBadge("Booking reference", esc(booking.bookingId))}
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e2e8f0;border-collapse:separate;border-radius:10px;overflow:hidden;margin-bottom:24px;">
+          <tr><td bgcolor="#0f172a" style="background:#0f172a;padding:12px 14px;font-size:11px;font-weight:700;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">Service / item</td><td align="center" bgcolor="#0f172a" style="background:#0f172a;padding:12px 8px;font-size:11px;font-weight:700;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">Qty</td><td align="right" bgcolor="#0f172a" style="background:#0f172a;padding:12px 14px;font-size:11px;font-weight:700;color:#6EE7B7;text-transform:uppercase;letter-spacing:1px;">Amount</td></tr>
+          ${itemRows}
+        </table>
+        ${amountBox("Total due", `&pound;${Number(totalAmount || 0).toFixed(2)}`, { bg: "#fffbeb", border: "#fde68a", labelColor: "#92400e", color: "#b45309" })}
+        ${note ? box(`<p style="margin:0 0 5px;font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:1px;">Note from Cleaniq</p><p style="margin:0;font-size:13px;line-height:22px;color:#78350f;">${nl2br(note)}</p>`, { bg: "#fffbeb", border: "#fde68a", bar: "#f59e0b" }) : ""}
+        ${payUrl ? button(payUrl, "Pay Securely Now") : ""}
+        ${small("Powered by Stripe — secure and encrypted")}
+        ${sectionTitle("Prefer bank transfer?")}
+        ${kv([["Bank", BANK.bank], ["Account name", BANK.name], ["Sort code", BANK.sort], ["Account number", BANK.acc], ["Reference", raw(`<strong>${esc(booking.bookingId)}</strong>`)]] , { labelWidth: "40%" })}
+      `,
+    });
+  },
 
   adminBookingCreatedEmail1: (booking) => {
     const d = booking.details || {};
@@ -836,6 +1015,47 @@ const redesigned = {
       `,
     });
   },
+};
+
+// Remaining legacy names are kept as overrides so existing routes receive the
+// redesigned layout without changing their call signatures.
+redesigned.adminBookingCreatedEmail2 = redesigned.bookingConfirmation;
+redesigned.invoiceAwaitingPayment = (booking) => {
+  const d = booking.details || {};
+  const s = booking.schedule || {};
+  return layout({
+    title: `Invoice ${booking.bookingId}`,
+    preheader: `Invoice ${booking.bookingId} is awaiting payment.`,
+    eyebrow: "Invoice",
+    heading: "Payment is due",
+    sub: "Your booking is reserved — complete payment to confirm it",
+    badge: "Awaiting payment",
+    body: `
+      ${hello(booking.customer?.firstName || "there")}
+      ${p("Your booking has been reserved. Please review the invoice below and complete payment so we can confirm your appointment.")}
+      ${refBadge("Booking reference", esc(booking.bookingId))}
+      ${sectionTitle("Invoice details")}
+      ${kv([
+        ["Service", booking.service],
+        ["Date", fmtDate(s.date)],
+        ["Time", timeLabel(s)],
+        ["Duration", d.duration ? `${d.duration} hours` : ""],
+        ["Address", fullAddress(d)],
+      ])}
+      ${amountBox("Amount due", `&pound;${esc(booking.payment?.amount ?? "0.00")}`, { bg: "#fffbeb", border: "#fde68a", labelColor: "#92400e", color: "#b45309" })}
+      ${sectionTitle("Bank transfer details")}
+      ${kv([
+        ["Bank", BANK.bank],
+        ["Account name", BANK.name],
+        ["Sort code", BANK.sort],
+        ["Account number", BANK.acc],
+        ["Payment reference", raw(`<strong>${esc(booking.bookingId)}</strong>`)],
+      ], { labelWidth: "42%" })}
+      ${box(`<p style="margin:0;font-size:13px;line-height:22px;color:#92400e;"><strong>Important:</strong> use your booking reference as the payment reference so we can match your transfer.</p>`, { bg: "#fffbeb", border: "#fde68a", bar: "#f59e0b" })}
+      ${button(`https://api.cleaniqservices.com/api/bookings/${esc(booking._id)}/confirm-payment-sent`, "I’ve sent the payment", { bg: BRAND.green })}
+      ${small("Click once you’ve made the transfer. We’ll verify it and confirm your booking.")}
+    `,
+  });
 };
 
 module.exports = redesigned;
