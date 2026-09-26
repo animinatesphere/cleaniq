@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const SystemSetting = require('../models/SystemSetting');
+const adminAuth = require('../middleware/adminAuth');
 
 // Public endpoint — no auth needed, mobile app reads this to decide whether to show prices
 router.get('/show-prices', async (req, res) => {
@@ -13,7 +14,7 @@ router.get('/show-prices', async (req, res) => {
 });
 
 // GET all settings
-router.get('/', async (req, res) => {
+router.get('/', adminAuth, async (req, res) => {
   try {
     const settings = await SystemSetting.find();
     res.json(settings);
@@ -23,7 +24,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST or update a setting
-router.post('/', async (req, res) => {
+router.post('/', adminAuth, async (req, res) => {
   try {
     const { key, value } = req.body;
     if (!key) {

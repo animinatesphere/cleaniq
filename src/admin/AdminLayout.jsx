@@ -6,6 +6,33 @@ import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
 import Login from "./Login";
 
+// Attach the admin token to every admin API request. Installed during render, not in an
+// effect: React runs child effects before parent effects, so child pages' first requests
+// would otherwise go out without the token.
+let restoreFetch = null;
+function installAdminFetchAuth() {
+  if (restoreFetch) return;
+  const API = import.meta.env.VITE_API_URL;
+  const orig = window.fetch;
+  window.fetch = (url, opts) => {
+    opts = opts || {};
+    if (typeof url === "string" && url.startsWith(API)) {
+      const token = localStorage.getItem("adminToken") || "";
+      if (token) {
+        opts = {
+          ...opts,
+          headers: { Authorization: `Bearer ${token}`, ...(opts.headers || {}) },
+        };
+      }
+    }
+    return orig.call(window, url, opts);
+  };
+  restoreFetch = () => {
+    window.fetch = orig;
+    restoreFetch = null;
+  };
+}
+
 const AdminLayout = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
     !!localStorage.getItem("adminToken"),
@@ -46,24 +73,10 @@ const AdminLayout = () => {
     setIsAuthenticated(false);
   };
 
-  // Automatically attach Authorization header to all admin API requests
+  installAdminFetchAuth();
   useEffect(() => {
-    const API = import.meta.env.VITE_API_URL;
-    const orig = window.fetch;
-    window.fetch = (url, opts) => {
-      opts = opts || {};
-      if (typeof url === "string" && url.startsWith(API)) {
-        const token = localStorage.getItem("adminToken") || "";
-        if (token) {
-          opts = {
-            ...opts,
-            headers: { Authorization: `Bearer ${token}`, ...(opts.headers || {}) },
-          };
-        }
-      }
-      return orig.call(window, url, opts);
-    };
-    return () => { window.fetch = orig; };
+    installAdminFetchAuth(); // re-install after a StrictMode remount
+    return () => restoreFetch?.();
   }, []);
 
   // Keep <html> data-admin-theme in sync so CSS overrides apply before React paints
