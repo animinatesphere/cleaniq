@@ -16,7 +16,6 @@
     "@stripe/stripe-js": "^3.5.0",
     "@tailwindcss/vite": "^4.2.4",
     "axios": "^1.17.0",
-    "designer-skill-mcp": "^0.10.0",
     "framer-motion": "^12.38.0",
     "gsap": "^3.15.0",
     "html2pdf.js": "^0.14.0",
