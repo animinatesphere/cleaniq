@@ -3,11 +3,11 @@
 //   AI_PROVIDER=gemini
 //   GEMINI_API_KEY=...
 //   AI_MODEL=gemini-3.8-flash            (optional)
-//   AI_FALLBACK_MODEL=gemini-3.5-flash   (optional; used when the main model is overloaded)
+//   AI_FALLBACK_MODEL=gemini-3.7-flash,gemini-3.5-flash   (optional; tried in order when the main model is busy)
 //   AI_THINKING_LEVEL=LOW                (optional; LOW | MEDIUM | HIGH — lower is faster)
 const PROVIDER = (process.env.AI_PROVIDER || "gemini").toLowerCase();
 const DEFAULT_MODELS = { gemini: "gemini-3.8-flash" };
-const DEFAULT_FALLBACK_MODELS = { gemini: "gemini-3.5-flash" };
+const DEFAULT_FALLBACK_MODELS = { gemini: "gemini-3.7-flash,gemini-3.5-flash" };
 const TIMEOUT_MS = 30000;
 const RETRY_DELAYS_MS = [1500, 4000];
 
@@ -75,10 +75,14 @@ async function callModel({ client, models, contents, system, tools, retryDelays 
       );
       return { response, model };
     } catch (err) {
-      const last = i === models.length - 1;
-      if (!isRetryable(err) || last) throw err;
-      console.warn(`[ai] ${model} failed (${err.status || "timeout"}); retrying${models[i + 1] !== model ? ` with ${models[i + 1]}` : ""}`);
-      if (i < retryDelays.length) await sleep(retryDelays[i]);
+      if (!isRetryable(err) || i === models.length - 1) throw err;
+      // 429 = this model's quota is used up: retrying it only burns more quota, so move to the next model.
+      let next = i + 1;
+      if (err.status === 429) while (next < models.length - 1 && models[next] === model) next++;
+      if (models[next] === model && err.status === 429) throw err;
+      console.warn(`[ai] ${model} failed (${err.status || "timeout"}); retrying${models[next] !== model ? ` with ${models[next]}` : ""}`);
+      if (models[next] === model && i < retryDelays.length) await sleep(retryDelays[i]);
+      i = next - 1;
     }
   }
   throw new Error("No AI model available");
@@ -103,8 +107,9 @@ async function generateReply({ system, history, tools, runTool, client, retryDel
   if (!contents.length) return null;
 
   const primary = process.env.AI_MODEL || DEFAULT_MODELS.gemini;
-  const fallback = process.env.AI_FALLBACK_MODEL || DEFAULT_FALLBACK_MODELS.gemini;
-  let models = [...retryDelays.map(() => primary), primary, ...(fallback && fallback !== primary ? [fallback] : [])];
+  const fallbacks = (process.env.AI_FALLBACK_MODEL || DEFAULT_FALLBACK_MODELS.gemini)
+    .split(",").map((m) => m.trim()).filter((m) => m && m !== primary);
+  let models = [...retryDelays.map(() => primary), primary, ...fallbacks];
 
   const started = Date.now();
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
