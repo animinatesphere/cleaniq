@@ -48,6 +48,7 @@ export const LEAD_SOURCES = [
   "Google",
   "Referral",
   "Organic",
+  "WhatsApp AI",
 ];
 
 // Module-level utility — used by both AdminCalendar and the main Bookings component.

@@ -437,394 +437,400 @@ router.delete("/all/delete", async (req, res) => {
 
 // POST a new booking
 // POST a new booking
-router.post("/", async (req, res) => {
-  try {
-    const booking = new Booking(req.body);
-    // If postcode is provided separately and not already in address, append it
-    if (req.body.details?.postcode && req.body.details?.address) {
-      const postcode = (req.body.details.postcode || "").trim();
-      const address = (req.body.details.address || "").trim();
-      if (postcode && !address.toLowerCase().includes(postcode.toLowerCase())) {
-        req.body.details.address = `${address}, ${postcode}`;
-      }
+// Creates a booking exactly as the admin "New booking" form does (save, lead, Stripe link,
+// emails, SMS, worker notifications). Shared by POST /api/bookings and the AI receptionist.
+async function createBooking(body) {
+  const booking = new Booking(body);
+  // If postcode is provided separately and not already in address, append it
+  if (body.details?.postcode && body.details?.address) {
+    const postcode = (body.details.postcode || "").trim();
+    const address = (body.details.address || "").trim();
+    if (postcode && !address.toLowerCase().includes(postcode.toLowerCase())) {
+      body.details.address = `${address}, ${postcode}`;
     }
-    // Explicitly set Mixed fields to bypass potential strict schema stripping
-    booking.set("details", req.body.details);
-    booking.set("property", req.body.property);
-    booking.set("meta", req.body.meta);
+  }
+  // Explicitly set Mixed fields to bypass potential strict schema stripping
+  booking.set("details", body.details);
+  booking.set("property", body.property);
+  booking.set("meta", body.meta);
 
-    // Apply global default workerRate if not provided
-    if (booking.workerRate == null) {
-      try {
-        const rateSetting = await SystemSetting.findOne({ key: "defaultWorkerRate" });
-        booking.workerRate = rateSetting ? rateSetting.value : 13;
-      } catch (settingsErr) {
-        booking.workerRate = 13; // standard rate fallback
-      }
-    }
-
-    const newBooking = await booking.save();
-
-    // Capture the customer as a lead (name/email/phone) so they're
-    // available for future email marketing campaigns.
+  // Apply global default workerRate if not provided
+  if (booking.workerRate == null) {
     try {
-      const email = (newBooking.customer?.email || "").trim().toLowerCase();
-      if (email) {
-        const existingLead = await Lead.findOne({ email });
-        if (!existingLead) {
-          await Lead.create({
-            name: `${newBooking.customer?.firstName || ""} ${newBooking.customer?.lastName || ""}`.trim(),
-            email,
-            phone: newBooking.customer?.phone || "",
-            source: "Booking",
-            acknowledged: true,
-          });
-        }
-      }
-    } catch (leadErr) {
-      console.error("⚠️ Failed to capture booking lead:", leadErr.message);
+      const rateSetting = await SystemSetting.findOne({ key: "defaultWorkerRate" });
+      booking.workerRate = rateSetting ? rateSetting.value : 13;
+    } catch (settingsErr) {
+      booking.workerRate = 13; // standard rate fallback
     }
+  }
 
-    // ── Recurring series generation ──────────────────────────────────────────
-    // When frequency is not "Once", stamp a recurringGroup on the first booking
-    // and create all future instances silently (no emails, no payment links).
-    const recurFreq = newBooking.details?.frequency;
-    if (recurFreq && recurFreq !== "Once") {
-      const groupId = `RG-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+  const newBooking = await booking.save();
 
-      // Tag the first booking with the group ID
-      await Booking.findByIdAndUpdate(newBooking._id, {
-        $set: { meta: { recurringGroup: groupId } },
-      });
-      newBooking.meta = { recurringGroup: groupId };
-
-      const RECUR_SCHEDULES = {
-        Weekly: { type: "days", step: 7, total: 12 },
-        Fortnightly: { type: "days", step: 14, total: 12 },
-        "Bi-weekly": { type: "days", step: 14, total: 12 },
-        Monthly: { type: "months", step: 1, total: 12 },
-        Quarterly: { type: "months", step: 3, total: 4 },
-        Yearly: { type: "months", step: 12, total: 2 },
-      };
-      const rule = RECUR_SCHEDULES[recurFreq];
-
-      if (rule) {
-        const baseDate = new Date(newBooking.schedule.date);
-        const baseData = newBooking.toObject();
-        for (let i = 1; i < rule.total; i++) {
-          const instanceDate = new Date(baseDate);
-          if (rule.type === "days") {
-            instanceDate.setDate(instanceDate.getDate() + rule.step * i);
-          } else {
-            instanceDate.setMonth(instanceDate.getMonth() + rule.step * i);
-          }
-          try {
-            await Booking.create({
-              ...baseData,
-              _id: undefined,
-              bookingId: `BK-R${Math.floor(100000 + Math.random() * 900000)}`,
-              schedule: { ...baseData.schedule, date: instanceDate },
-              status: "Confirmed",
-              skipConfirmationEmail: true,
-              noPaymentRequired: true,
-              payment: {
-                ...baseData.payment,
-                status: "Pending",
-                stripePaymentIntentId: null,
-              },
-              meta: { recurringGroup: groupId },
-              assignedWorker: null,
-              assignedWorkerName: null,
-              rejectedBy: [],
-              checklist: [],
-              jobAcceptedTime: null,
-              jobArrivedTime: null,
-              jobStartTime: null,
-              jobEndTime: null,
-              jobDurationActual: 0,
-              createdAt: new Date(),
-            });
-          } catch (recurErr) {
-            console.error(
-              `⚠️ Recurring instance ${i} failed:`,
-              recurErr.message,
-            );
-          }
-        }
-        console.log(
-          `📅 Created ${rule.total}-booking ${recurFreq} series → group ${groupId}`,
-        );
+  // Capture the customer as a lead (name/email/phone) so they're
+  // available for future email marketing campaigns.
+  try {
+    const email = (newBooking.customer?.email || "").trim().toLowerCase();
+    if (email) {
+      const existingLead = await Lead.findOne({ email });
+      if (!existingLead) {
+        await Lead.create({
+          name: `${newBooking.customer?.firstName || ""} ${newBooking.customer?.lastName || ""}`.trim(),
+          email,
+          phone: newBooking.customer?.phone || "",
+          source: "Booking",
+          acknowledged: true,
+        });
       }
     }
-    // ── End recurring ────────────────────────────────────────────────────────
+  } catch (leadErr) {
+    console.error("⚠️ Failed to capture booking lead:", leadErr.message);
+  }
 
-    // ✅ Skip all emails for DEV MODE bookings (testing only)
-    const isDevMode =
-      newBooking.payment && newBooking.payment.method === "Dev Mode";
+  // ── Recurring series generation ──────────────────────────────────────────
+  // When frequency is not "Once", stamp a recurringGroup on the first booking
+  // and create all future instances silently (no emails, no payment links).
+  const recurFreq = newBooking.details?.frequency;
+  if (recurFreq && recurFreq !== "Once") {
+    const groupId = `RG-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 
-    // Check if payment was already completed via Stripe (not pending payment)
-    const isPaymentCompleted =
-      newBooking.payment &&
-      (newBooking.payment.status === "Completed" ||
-        newBooking.payment.status === "Confirmed" ||
-        newBooking.payment.method === "Card");
+    // Tag the first booking with the group ID
+    await Booking.findByIdAndUpdate(newBooking._id, {
+      $set: { meta: { recurringGroup: groupId } },
+    });
+    newBooking.meta = { recurringGroup: groupId };
 
-    // Flat-rate bookings never get an automatic email at creation time —
-    // the admin sends an invoice manually (via CRM actions) whenever it's
-    // ready, for both flat-rate and hourly jobs. Admin/staff alerts below
-    // still fire as normal.
-    const isFlatRate = newBooking.payment?.billingType === "flat";
+    const RECUR_SCHEDULES = {
+      Weekly: { type: "days", step: 7, total: 12 },
+      Fortnightly: { type: "days", step: 14, total: 12 },
+      "Bi-weekly": { type: "days", step: 14, total: 12 },
+      Monthly: { type: "months", step: 1, total: 12 },
+      Quarterly: { type: "months", step: 3, total: 4 },
+      Yearly: { type: "months", step: 12, total: 2 },
+    };
+    const rule = RECUR_SCHEDULES[recurFreq];
 
-    if (!isDevMode) {
-      // If payment is pending AND not yet paid via Stripe, send payment email with Stripe link
-      if (isFlatRate) {
-        console.log(
-          `🔇 Flat-rate booking ${newBooking.bookingId} created — no automatic customer email sent. Send the invoice manually via CRM actions.`,
-        );
-      } else if (
-        !newBooking.noPaymentRequired &&
-        newBooking.payment &&
-        newBooking.payment.status === "Pending" &&
-        !isPaymentCompleted
-      ) {
+    if (rule) {
+      const baseDate = new Date(newBooking.schedule.date);
+      const baseData = newBooking.toObject();
+      for (let i = 1; i < rule.total; i++) {
+        const instanceDate = new Date(baseDate);
+        if (rule.type === "days") {
+          instanceDate.setDate(instanceDate.getDate() + rule.step * i);
+        } else {
+          instanceDate.setMonth(instanceDate.getMonth() + rule.step * i);
+        }
         try {
-          // Generate Stripe Checkout Link with manual capture
-          const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-          const session = await stripe.checkout.sessions.create({
-            payment_method_types: ["card"],
-            mode: "payment",
-            customer_email: newBooking.customer.email,
-            payment_intent_data: {
-              capture_method: "manual", // Authorize but don't capture - money held in pending
-              metadata: {
-                bookingId: newBooking._id.toString(),
-                bookingRef: newBooking.bookingId,
-                company: "Cleaniq Services",
-              },
+          await Booking.create({
+            ...baseData,
+            _id: undefined,
+            bookingId: `BK-R${Math.floor(100000 + Math.random() * 900000)}`,
+            schedule: { ...baseData.schedule, date: instanceDate },
+            status: "Confirmed",
+            skipConfirmationEmail: true,
+            noPaymentRequired: true,
+            payment: {
+              ...baseData.payment,
+              status: "Pending",
+              stripePaymentIntentId: null,
             },
-            line_items: [
-              {
-                price_data: {
-                  currency: (
-                    newBooking.payment.currency || "GBP"
-                  ).toLowerCase(),
-                  product_data: {
-                    name: `Cleaniq - ${newBooking.service}`,
-                    description: `Booking Reference: ${newBooking.bookingId}`,
-                  },
-                  unit_amount: Math.round(newBooking.payment.amount * 100),
-                },
-                quantity: 1,
-              },
-            ],
+            meta: { recurringGroup: groupId },
+            assignedWorker: null,
+            assignedWorkerName: null,
+            rejectedBy: [],
+            checklist: [],
+            jobAcceptedTime: null,
+            jobArrivedTime: null,
+            jobStartTime: null,
+            jobEndTime: null,
+            jobDurationActual: 0,
+            createdAt: new Date(),
+          });
+        } catch (recurErr) {
+          console.error(
+            `⚠️ Recurring instance ${i} failed:`,
+            recurErr.message,
+          );
+        }
+      }
+      console.log(
+        `📅 Created ${rule.total}-booking ${recurFreq} series → group ${groupId}`,
+      );
+    }
+  }
+  // ── End recurring ────────────────────────────────────────────────────────
+
+  // ✅ Skip all emails for DEV MODE bookings (testing only)
+  const isDevMode =
+    newBooking.payment && newBooking.payment.method === "Dev Mode";
+
+  // Check if payment was already completed via Stripe (not pending payment)
+  const isPaymentCompleted =
+    newBooking.payment &&
+    (newBooking.payment.status === "Completed" ||
+      newBooking.payment.status === "Confirmed" ||
+      newBooking.payment.method === "Card");
+
+  // Flat-rate bookings never get an automatic email at creation time —
+  // the admin sends an invoice manually (via CRM actions) whenever it's
+  // ready, for both flat-rate and hourly jobs. Admin/staff alerts below
+  // still fire as normal.
+  const isFlatRate = newBooking.payment?.billingType === "flat";
+
+  if (!isDevMode) {
+    // If payment is pending AND not yet paid via Stripe, send payment email with Stripe link
+    if (isFlatRate) {
+      console.log(
+        `🔇 Flat-rate booking ${newBooking.bookingId} created — no automatic customer email sent. Send the invoice manually via CRM actions.`,
+      );
+    } else if (
+      !newBooking.noPaymentRequired &&
+      newBooking.payment &&
+      newBooking.payment.status === "Pending" &&
+      !isPaymentCompleted
+    ) {
+      try {
+        // Generate Stripe Checkout Link with manual capture
+        const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          mode: "payment",
+          customer_email: newBooking.customer.email,
+          payment_intent_data: {
+            capture_method: "manual", // Authorize but don't capture - money held in pending
             metadata: {
               bookingId: newBooking._id.toString(),
+              bookingRef: newBooking.bookingId,
               company: "Cleaniq Services",
             },
-            success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/payment/success?bookingId=${newBooking._id}`,
-            cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/`,
-          });
+          },
+          line_items: [
+            {
+              price_data: {
+                currency: (
+                  newBooking.payment.currency || "GBP"
+                ).toLowerCase(),
+                product_data: {
+                  name: `Cleaniq - ${newBooking.service}`,
+                  description: `Booking Reference: ${newBooking.bookingId}`,
+                },
+                unit_amount: Math.round(newBooking.payment.amount * 100),
+              },
+              quantity: 1,
+            },
+          ],
+          metadata: {
+            bookingId: newBooking._id.toString(),
+            company: "Cleaniq Services",
+          },
+          success_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/payment/success?bookingId=${newBooking._id}`,
+          cancel_url: `${process.env.FRONTEND_URL || "https://cleaniqservices.com"}/`,
+        });
 
-          // Send Payment Required Email to Customer
+        // Send Payment Required Email to Customer
+        await sendEmail({
+          to: newBooking.customer.email,
+          subject: `Payment Required: Cleaniq Booking ${newBooking.bookingId}`,
+          html: templates.paymentRequired(newBooking, session.url),
+        });
+
+        console.log(
+          `✅ Payment email sent to ${newBooking.customer.email} with checkout link`,
+        );
+      } catch (paymentEmailErr) {
+        console.error(
+          "❌ Failed to send payment email:",
+          paymentEmailErr.message,
+        );
+        // Fallback: send plain confirmation so the customer always gets something
+        if (!newBooking.skipConfirmationEmail) {
           await sendEmail({
             to: newBooking.customer.email,
-            subject: `Payment Required: Cleaniq Booking ${newBooking.bookingId}`,
-            html: templates.paymentRequired(newBooking, session.url),
-          });
-
-          console.log(
-            `✅ Payment email sent to ${newBooking.customer.email} with checkout link`,
-          );
-        } catch (paymentEmailErr) {
-          console.error(
-            "❌ Failed to send payment email:",
-            paymentEmailErr.message,
-          );
-          // Fallback: send plain confirmation so the customer always gets something
-          if (!newBooking.skipConfirmationEmail) {
-            await sendEmail({
-              to: newBooking.customer.email,
-              subject: `✓ Booking Received - ${newBooking.bookingId}`,
-              html: templates.adminBookingCreatedEmail2(newBooking),
-            }).catch(() => {});
-          }
+            subject: `✓ Booking Received - ${newBooking.bookingId}`,
+            html: templates.adminBookingCreatedEmail2(newBooking),
+          }).catch(() => {});
         }
-      } else if (!newBooking.skipConfirmationEmail) {
-        // Send Success Confirmation Email (payment already completed or admin booking).
-        // Bookings created via "Create Booking (No Payment)" use a separate
-        // template with no Stripe link / bank transfer details, since the
-        // admin has already taken payment outside the system.
-        await sendEmail({
-          to: newBooking.customer.email,
-          subject: `✓ Booking Successful - ${newBooking.bookingId}`,
-          html: newBooking.noPaymentRequired
-            ? templates.adminBookingCreatedEmail2(newBooking)
-            : templates.adminBookingCreatedEmail1(newBooking),
-        });
-        console.log(
-          `✅ Email sent to ${newBooking.customer.email} - Booking confirmation`,
-        );
-      } else {
-        console.log(
-          `🔇 Confirmation email skipped for booking ${newBooking.bookingId} (admin opted out)`,
-        );
       }
-
-      // Send Alert Email to Admin
+    } else if (!newBooking.skipConfirmationEmail) {
+      // Send Success Confirmation Email (payment already completed or admin booking).
+      // Bookings created via "Create Booking (No Payment)" use a separate
+      // template with no Stripe link / bank transfer details, since the
+      // admin has already taken payment outside the system.
       await sendEmail({
-        to: process.env.EMAIL_USER || "admin@cleaniqservices.com",
-        subject: `🚨 New Booking: ${newBooking.bookingId}`,
-        html: templates.adminNewBookingAlert(newBooking),
+        to: newBooking.customer.email,
+        subject: `✓ Booking Successful - ${newBooking.bookingId}`,
+        html: newBooking.noPaymentRequired
+          ? templates.adminBookingCreatedEmail2(newBooking)
+          : templates.adminBookingCreatedEmail1(newBooking),
       });
-
-      // Notify all active Staff members of a new available clean job in their feed
-      try {
-        const activeStaff = await Worker.find({
-          status: "Active",
-          appAccessGranted: true,
-        });
-        if (activeStaff && activeStaff.length > 0) {
-          console.log(
-            `📧 Notifying ${activeStaff.length} active staff members about booking ${newBooking.bookingId}...`,
-          );
-          for (const staff of activeStaff) {
-            await sendEmail({
-              to: staff.email,
-              subject: `🧹 New Job Alert: ${newBooking.service} is available!`,
-              html: templates.staffNewJobAlert(newBooking),
-            });
-          }
-        }
-      } catch (staffEmailErr) {
-        console.error(
-          "❌ Failed to email staff new job notification:",
-          staffEmailErr,
-        );
-      }
+      console.log(
+        `✅ Email sent to ${newBooking.customer.email} - Booking confirmation`,
+      );
     } else {
-      // DEV MODE: Send dev mode success confirmation email to customer (without payment section)
-      try {
-        await sendEmail({
-          to: newBooking.customer.email,
-          subject: `✓ Booking Confirmed - ${newBooking.bookingId}`,
-          html: templates.devModeBookingSuccess(newBooking),
-        });
-        console.log(
-          `🧪 [DEV MODE] Booking ${newBooking.bookingId} created - Success email sent to customer`,
-        );
-      } catch (devEmailErr) {
-        console.error(
-          `❌ Failed to send dev mode confirmation email:`,
-          devEmailErr.message,
-        );
-      }
-    }
-
-    // Schedule booking reminders for confirmed bookings (payment done or noPaymentRequired)
-    try {
-      const isConfirmed =
-        newBooking.noPaymentRequired ||
-        ["Confirmed", "Authorized"].includes(newBooking.status);
-      const bookingDate = newBooking.schedule?.date
-        ? buildBookingDateTime(
-            newBooking.schedule.date,
-            newBooking.schedule.timeSlot,
-            newBooking.schedule?.preferredTime,
-          )
-        : null;
-      if (isConfirmed && bookingDate && bookingDate > new Date()) {
-        const payload = {
-          bookingId: newBooking._id.toString(),
-          bookingRef: newBooking.bookingId,
-          email: newBooking.customer?.email,
-          firstName: newBooking.customer?.firstName,
-          service: newBooking.service,
-          date: bookingDate.toLocaleDateString("en-GB", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-          }),
-          time: bookingDate.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }),
-          bookingDateTime: bookingDate.toISOString(),
-          amount: newBooking.payment?.amount,
-        };
-        const ms24h    = 24 * 60 * 60 * 1000;
-        const ms3h     =  3 * 60 * 60 * 1000;
-        const ms1h     =  1 * 60 * 60 * 1000;
-        const MIN_LEAD = 15 * 60 * 1000; // skip if trigger is < 15 min away
-        const now      = Date.now();
-        const t24h     = bookingDate.getTime() - ms24h;
-        const t3h      = bookingDate.getTime() - ms3h;
-        const t1h      = bookingDate.getTime() - ms1h;
-        if (t24h > now + MIN_LEAD) {
-          await scheduleTask("booking_reminder_24h", new Date(t24h), payload);
-        }
-        if (t3h > now + MIN_LEAD) {
-          await scheduleTask("booking_reminder_3h", new Date(t3h), payload);
-        }
-        if (t1h > now + MIN_LEAD) {
-          await scheduleTask("booking_reminder_1h", new Date(t1h), payload);
-        }
-      }
-    } catch (schedErr) {
-      console.error(
-        "⚠️ Failed to schedule booking reminders:",
-        schedErr.message,
+      console.log(
+        `🔇 Confirmation email skipped for booking ${newBooking.bookingId} (admin opted out)`,
       );
     }
 
-    // SMS: confirm new booking (fire-and-forget)
-    setImmediate(async () => {
-      try {
-        if (newBooking.status === "Confirmed") {
-          await sms.triggerBookingConfirmed(newBooking);
-        }
-      } catch (smsErr) {
-        console.error("SMS create trigger error:", smsErr.message);
-      }
+    // Send Alert Email to Admin
+    await sendEmail({
+      to: process.env.EMAIL_USER || "admin@cleaniqservices.com",
+      subject: `🚨 New Booking: ${newBooking.bookingId}`,
+      html: templates.adminNewBookingAlert(newBooking),
     });
 
-    // Push + in-app notification: notify workers about the new available job
-    if (newBooking.status === "Confirmed" || newBooking.noPaymentRequired) {
-      setImmediate(async () => {
-        try {
-          const dateStr = newBooking.schedule?.date
-            ? new Date(newBooking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
-            : "TBC";
-          const notifTitle = "New Job Available!";
-          const notifBody  = `${newBooking.service} · ${dateStr}`;
-          const workers = await Worker.find({
-            $or: [{ region: newBooking.region }, { region: null }, { region: { $exists: false } }],
-            status: "Active",
-          }).select("_id expoPushToken").lean();
-
-          // Write a Notification record for each worker — the app polls this every 3s
-          await Notification.insertMany(
-            workers.map(w => ({
-              workerId: w._id,
-              title: notifTitle,
-              message: notifBody,
-              type: "job",
-            })),
-            { ordered: false }
-          ).catch(() => {});
-
-          // Also fire Expo push (best-effort — works when FCM is configured)
-          const tokens = workers.map(w => w.expoPushToken).filter(Boolean);
-          if (tokens.length) {
-            await sendWorkersPush(tokens, {
-              title: notifTitle,
-              body: notifBody,
-              data: { type: "new_job", bookingId: newBooking.bookingId },
-            });
-          }
-        } catch (err) {
-          console.error("Worker push notification error:", err.message);
-        }
+    // Notify all active Staff members of a new available clean job in their feed
+    try {
+      const activeStaff = await Worker.find({
+        status: "Active",
+        appAccessGranted: true,
       });
+      if (activeStaff && activeStaff.length > 0) {
+        console.log(
+          `📧 Notifying ${activeStaff.length} active staff members about booking ${newBooking.bookingId}...`,
+        );
+        for (const staff of activeStaff) {
+          await sendEmail({
+            to: staff.email,
+            subject: `🧹 New Job Alert: ${newBooking.service} is available!`,
+            html: templates.staffNewJobAlert(newBooking),
+          });
+        }
+      }
+    } catch (staffEmailErr) {
+      console.error(
+        "❌ Failed to email staff new job notification:",
+        staffEmailErr,
+      );
     }
+  } else {
+    // DEV MODE: Send dev mode success confirmation email to customer (without payment section)
+    try {
+      await sendEmail({
+        to: newBooking.customer.email,
+        subject: `✓ Booking Confirmed - ${newBooking.bookingId}`,
+        html: templates.devModeBookingSuccess(newBooking),
+      });
+      console.log(
+        `🧪 [DEV MODE] Booking ${newBooking.bookingId} created - Success email sent to customer`,
+      );
+    } catch (devEmailErr) {
+      console.error(
+        `❌ Failed to send dev mode confirmation email:`,
+        devEmailErr.message,
+      );
+    }
+  }
 
-    res.status(201).json(newBooking);
+  // Schedule booking reminders for confirmed bookings (payment done or noPaymentRequired)
+  try {
+    const isConfirmed =
+      newBooking.noPaymentRequired ||
+      ["Confirmed", "Authorized"].includes(newBooking.status);
+    const bookingDate = newBooking.schedule?.date
+      ? buildBookingDateTime(
+          newBooking.schedule.date,
+          newBooking.schedule.timeSlot,
+          newBooking.schedule?.preferredTime,
+        )
+      : null;
+    if (isConfirmed && bookingDate && bookingDate > new Date()) {
+      const payload = {
+        bookingId: newBooking._id.toString(),
+        bookingRef: newBooking.bookingId,
+        email: newBooking.customer?.email,
+        firstName: newBooking.customer?.firstName,
+        service: newBooking.service,
+        date: bookingDate.toLocaleDateString("en-GB", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        }),
+        time: bookingDate.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }),
+        bookingDateTime: bookingDate.toISOString(),
+        amount: newBooking.payment?.amount,
+      };
+      const ms24h    = 24 * 60 * 60 * 1000;
+      const ms3h     =  3 * 60 * 60 * 1000;
+      const ms1h     =  1 * 60 * 60 * 1000;
+      const MIN_LEAD = 15 * 60 * 1000; // skip if trigger is < 15 min away
+      const now      = Date.now();
+      const t24h     = bookingDate.getTime() - ms24h;
+      const t3h      = bookingDate.getTime() - ms3h;
+      const t1h      = bookingDate.getTime() - ms1h;
+      if (t24h > now + MIN_LEAD) {
+        await scheduleTask("booking_reminder_24h", new Date(t24h), payload);
+      }
+      if (t3h > now + MIN_LEAD) {
+        await scheduleTask("booking_reminder_3h", new Date(t3h), payload);
+      }
+      if (t1h > now + MIN_LEAD) {
+        await scheduleTask("booking_reminder_1h", new Date(t1h), payload);
+      }
+    }
+  } catch (schedErr) {
+    console.error(
+      "⚠️ Failed to schedule booking reminders:",
+      schedErr.message,
+    );
+  }
+
+  // SMS: confirm new booking (fire-and-forget)
+  setImmediate(async () => {
+    try {
+      if (newBooking.status === "Confirmed") {
+        await sms.triggerBookingConfirmed(newBooking);
+      }
+    } catch (smsErr) {
+      console.error("SMS create trigger error:", smsErr.message);
+    }
+  });
+
+  // Push + in-app notification: notify workers about the new available job
+  if (newBooking.status === "Confirmed" || newBooking.noPaymentRequired) {
+    setImmediate(async () => {
+      try {
+        const dateStr = newBooking.schedule?.date
+          ? new Date(newBooking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
+          : "TBC";
+        const notifTitle = "New Job Available!";
+        const notifBody  = `${newBooking.service} · ${dateStr}`;
+        const workers = await Worker.find({
+          $or: [{ region: newBooking.region }, { region: null }, { region: { $exists: false } }],
+          status: "Active",
+        }).select("_id expoPushToken").lean();
+
+        // Write a Notification record for each worker — the app polls this every 3s
+        await Notification.insertMany(
+          workers.map(w => ({
+            workerId: w._id,
+            title: notifTitle,
+            message: notifBody,
+            type: "job",
+          })),
+          { ordered: false }
+        ).catch(() => {});
+
+        // Also fire Expo push (best-effort — works when FCM is configured)
+        const tokens = workers.map(w => w.expoPushToken).filter(Boolean);
+        if (tokens.length) {
+          await sendWorkersPush(tokens, {
+            title: notifTitle,
+            body: notifBody,
+            data: { type: "new_job", bookingId: newBooking.bookingId },
+          });
+        }
+      } catch (err) {
+        console.error("Worker push notification error:", err.message);
+      }
+    });
+  }
+
+  return newBooking;
+}
+
+router.post("/", async (req, res) => {
+  try {
+    res.status(201).json(await createBooking(req.body));
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -2052,3 +2058,4 @@ router.post("/:id/send-payment-link", async (req, res) => {
 });
 
 module.exports = router;
+module.exports.createBooking = createBooking;
