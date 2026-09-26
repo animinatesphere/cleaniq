@@ -33,6 +33,7 @@ test("sends the system instructions and returns trimmed text", async () => {
   assert.equal(reply, "Hi there!");
   assert.equal(capture.req.config.systemInstruction, "RULES");
   assert.equal(capture.req.model, "gemini-3.8-flash");
+  assert.deepEqual(capture.req.config.thinkingConfig, { thinkingLevel: "LOW" });
 });
 
 test("returns null when the provider gives no text (e.g. blocked)", async () => {
