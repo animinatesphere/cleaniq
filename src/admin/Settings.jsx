@@ -29,6 +29,7 @@ const PERMISSION_OPTIONS = [
   { key: 'customers', label: 'Customers' },
   { key: 'blog', label: 'Blog' },
   { key: 'chat', label: 'Chat Support' },
+  { key: 'ai-receptionist', label: 'AI Receptionist' },
 ];
 
 const Settings = () => {

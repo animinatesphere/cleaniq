@@ -40,6 +40,7 @@ import {
   Trash2,
   CheckSquare,
   UserCog,
+  Bot,
 } from "lucide-react";
 
 export const fullMenuGroups = [
@@ -76,6 +77,18 @@ export const fullMenuGroups = [
         path: "/admin/todo",
         key: "todo",
         icon: <CheckSquare size={20} />,
+      },
+    ],
+  },
+  {
+    label: "AI Receptionist",
+    groupIcon: <Bot size={14} />,
+    items: [
+      {
+        name: "AI Receptionist",
+        path: "/admin/ai",
+        key: "ai-receptionist",
+        icon: <Bot size={20} />,
       },
     ],
   },

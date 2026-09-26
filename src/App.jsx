@@ -81,6 +81,10 @@ import ColdEmail from "./admin/ColdEmail/index.jsx";
 import CampaignDetail from "./admin/ColdEmail/CampaignDetail.jsx";
 import TodoPage from "./admin/TodoPage";
 import DevPanel from "./admin/DevPanel";
+import AiReceptionistLayout from "./admin/AiReceptionist";
+import AiOverview from "./admin/AiReceptionist/Overview";
+import AiKnowledge from "./admin/AiReceptionist/Knowledge";
+import AiSettingsPage from "./admin/AiReceptionist/AiSettings";
 
 function App() {
   const location = useLocation();
@@ -180,6 +184,11 @@ function App() {
               <Route path="cold-email" element={<ColdEmail />} />
               <Route path="cold-email/:campaignId" element={<CampaignDetail />} />
               <Route path="todo" element={<TodoPage />} />
+              <Route path="ai" element={<AiReceptionistLayout />}>
+                <Route index element={<AiOverview />} />
+                <Route path="knowledge" element={<AiKnowledge />} />
+                <Route path="settings" element={<AiSettingsPage />} />
+              </Route>
             </Route>
           </Routes>
         </main>
