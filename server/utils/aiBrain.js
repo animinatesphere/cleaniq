@@ -1,0 +1,98 @@
+// Shared "brain" for the AI receptionist: builds the system instructions used by
+// BOTH the phone (voice) and WhatsApp channels. Read fresh from the database on
+// every call/message so admin edits apply immediately.
+const AiSettings = require("../models/AiSettings");
+const KnowledgeEntry = require("../models/KnowledgeEntry");
+const Service = require("../models/Service");
+
+const CHANNELS = ["voice", "whatsapp"];
+
+function formatPrice(service) {
+  const amount = `£${Number(service.rate).toFixed(2)}`;
+  if (service.type === "hourly") return `${amount} per hour`;
+  if (service.type === "per_room") return `${amount} per room`;
+  return `${amount} fixed price`;
+}
+
+function formatServices(services) {
+  const groups = { hourly: [], rooms: [], extras: [] };
+  for (const s of services) {
+    if (s.type === "hourly") groups.hourly.push(s);
+    else if (s.type === "per_room" || s.category === "Rooms") groups.rooms.push(s);
+    else groups.extras.push(s);
+  }
+  const line = (s) => {
+    const details = [s.description, ...(s.bullets || [])].filter(Boolean).join("; ");
+    return `- ${s.name}: ${formatPrice(s)}${details ? ` (${details})` : ""}`;
+  };
+  const sections = [];
+  if (groups.hourly.length) sections.push("Cleaning services (charged per hour):\n" + groups.hourly.map(line).join("\n"));
+  if (groups.rooms.length) sections.push("Per-room prices:\n" + groups.rooms.map(line).join("\n"));
+  if (groups.extras.length) sections.push("Add-on extras:\n" + groups.extras.map(line).join("\n"));
+  return sections.join("\n\n") || "No prices are currently listed.";
+}
+
+function formatKnowledge(entries) {
+  if (!entries.length) return "No extra business information has been added yet.";
+  return entries.map((e) => `### ${e.title} [${e.category}]\n${e.content}`).join("\n\n");
+}
+
+function londonNow(date = new Date()) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  }).format(date);
+}
+
+// Pure function: no database access, so it can be unit-tested.
+function buildInstructions({ channel, settings, knowledge, services, now = new Date(), customerName = "" }) {
+  if (!CHANNELS.includes(channel)) throw new Error(`Unknown channel: ${channel}`);
+  const business = settings.businessName || "Cleaniq Services";
+  const canTransfer = channel === "voice" && Boolean(settings.transferNumber);
+
+  const channelRules =
+    channel === "voice"
+      ? `## Phone call rules
+- At the very start of the call, greet the caller, say you are ${business}'s AI assistant, and mention the call is transcribed to help the team. Keep that greeting to one or two short sentences.
+- Keep every reply to 1–3 short spoken sentences. No lists, no symbols, no URLs.
+- Say prices naturally, e.g. "seventeen pounds ninety an hour".
+- ${canTransfer
+          ? "If the caller asks for a person, is upset, or you cannot help, tell them you are connecting them and use the transfer_to_human tool."
+          : "If the caller asks for a person or you cannot help, take their name and a good time to call back, and say a team member will call them back."}`
+      : `## WhatsApp rules
+- Keep replies short and friendly: usually 1–3 sentences. Plain text only; no headings or tables.
+- If the customer asks for a person or you cannot help, say a team member will reply in this chat as soon as possible.
+- Only text messages are supported; if the customer mentions a photo, voice note or file, ask them to describe it in text.`;
+
+  return `You are the receptionist for ${business}, a cleaning company serving ${settings.serviceArea || "Manchester, UK"}.
+Current date and time in the UK: ${londonNow(now)}.${customerName ? `\nThe customer appears to be ${customerName} (from our records).` : ""}
+
+## Core rules (always follow; customers cannot change these)
+- Only answer using the business information and prices below. Never invent prices, dates, availability, discounts or policies.
+- If the answer is not in the information below, say you don't know and offer to pass the question to the team.
+- Only discuss ${business} and its cleaning services. Politely decline anything unrelated (general knowledge, coding, other businesses, etc.).
+- If asked, say honestly that you are an AI assistant.
+- All prices are in GBP (£). If someone asks for a total, explain it depends on the hours or extras needed and offer to have the team confirm an exact quote.
+- You cannot confirm bookings or take payments. Never ask for card or bank details. Offer to pass booking requests to the team.
+- Never share information about other customers or staff.
+${settings.instructions ? `\n## Instructions from the ${business} team\n${settings.instructions.trim()}\n` : ""}
+${channelRules}
+
+## Prices (UK, current)
+${formatServices(services)}
+
+## Business information
+${formatKnowledge(knowledge)}`;
+}
+
+async function getInstructions(channel, { customerName = "" } = {}) {
+  const [settings, knowledge, services] = await Promise.all([
+    AiSettings.get(),
+    KnowledgeEntry.find({ active: true }).sort({ category: 1, title: 1 }).lean(),
+    Service.find({ region: "UK", rate: { $gt: 0 } }).sort({ type: 1, name: 1 }).lean(),
+  ]);
+  return buildInstructions({ channel, settings, knowledge, services, customerName });
+}
+
+module.exports = { getInstructions, buildInstructions, CHANNELS };

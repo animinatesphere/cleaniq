@@ -146,6 +146,7 @@ const guidesRoutes = require("./routes/guides");
 const coldEmailRoutes = require("./routes/cold-email");
 const devpanelRoutes  = require("./routes/devpanel");
 const couponRoutes    = require("./routes/coupons");
+const aiReceptionistRoutes = require("./routes/aiReceptionist");
 
 // ── Maintenance mode gate (devpanel routes bypass it) ─────────────
 app.use((req, res, next) => {
@@ -227,6 +228,7 @@ app.use("/api/guides", guidesRoutes);
 app.use("/api/cold-email", coldEmailRoutes);
 app.use("/api/devpanel", devpanelRoutes);
 app.use("/api/coupons", couponRoutes);
+app.use("/api/ai-receptionist", aiReceptionistRoutes);
 
 // Stripe webhook endpoint (raw body required)
 const { scheduleTask } = require("./utils/automationEngine");
