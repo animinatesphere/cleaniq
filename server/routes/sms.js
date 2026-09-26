@@ -4,6 +4,7 @@ const multer = require("multer");
 const SmsLog = require("../models/SmsLog");
 const SmsContact = require("../models/SmsContact");
 const SystemSetting = require("../models/SystemSetting");
+const adminAuth = require("../middleware/adminAuth");
 const { sendSms, DEFAULT_TEMPLATES, normalizePhone } = require("../utils/smsService");
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -18,6 +19,9 @@ const SMS_TRIGGERS = [
 ];
 
 // GET /api/sms/config — return all trigger states + Twilio credentials status
+// Every SMS route is admin-only: they expose Twilio config and can send messages at our cost.
+router.use(adminAuth);
+
 router.get("/config", async (req, res) => {
   try {
     const keys = [

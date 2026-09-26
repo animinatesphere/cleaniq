@@ -42,7 +42,7 @@ const StaffPay = () => {
 
   const fetchDefaultRate = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_URL}/settings`);
+      const res = await axios.get(`${API_URL}/settings`, { headers: authHeaders() });
       const settings = res.data || [];
       const found = settings.find(s => s.key === "defaultWorkerRate");
       setDefaultRate(found ? String(found.value) : "13");
@@ -60,7 +60,7 @@ const StaffPay = () => {
       await axios.post(`${API_URL}/settings`, {
         key: "defaultWorkerRate",
         value: parseFloat(defaultRate) || 13,
-      });
+      }, { headers: authHeaders() });
       flash("success", `Standard rate updated to £${parseFloat(defaultRate).toFixed(2)}/hr`);
       setEditingRate(false);
     } catch {

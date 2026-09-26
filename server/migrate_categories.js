@@ -1,7 +1,9 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const mongoose = require('mongoose');
 const Service = require('./models/Service');
 
-mongoose.connect('mongodb+srv://admin:admin@cluster0.p78z71f.mongodb.net/cleaniq?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     const services = await Service.find({});
     const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '').trim();

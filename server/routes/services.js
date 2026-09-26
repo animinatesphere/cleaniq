@@ -3,6 +3,7 @@ const router = express.Router();
 const Service = require("../models/Service");
 const SystemSetting = require("../models/SystemSetting");
 const { moveToTrash } = require("../utils/trash");
+const adminAuth = require("../middleware/adminAuth");
 
 // Get all services for a region
 router.get("/", async (req, res) => {
@@ -48,7 +49,7 @@ router.get("/", async (req, res) => {
 });
 
 // Create or update a service
-router.post("/", async (req, res) => {
+router.post("/", adminAuth, async (req, res) => {
   try {
     const { _id, name, region, rate, type, category, description, bullets } =
       req.body;
@@ -100,7 +101,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update a service by ID
-router.put("/:id", async (req, res) => {
+router.put("/:id", adminAuth, async (req, res) => {
   try {
     const {
       name,
@@ -168,7 +169,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Cleanup: remove duplicate services (keep newest per name+region)
-router.post("/cleanup-duplicates", async (req, res) => {
+router.post("/cleanup-duplicates", adminAuth, async (req, res) => {
   try {
     const all = await Service.find({}).sort({ updatedAt: -1 });
     const seen = new Set();
@@ -197,7 +198,7 @@ router.post("/cleanup-duplicates", async (req, res) => {
 });
 
 // Migrate Categories (One-time use)
-router.post("/migrate-categories", async (req, res) => {
+router.post("/migrate-categories", adminAuth, async (req, res) => {
   try {
     const services = await Service.find({});
     const clean = (str) =>
@@ -239,7 +240,7 @@ router.post("/migrate-categories", async (req, res) => {
 });
 
 // Delete a service
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", adminAuth, async (req, res) => {
   try {
     // Safety check to prevent 500 CastError on invalid ObjectIds
     if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
