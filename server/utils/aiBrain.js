@@ -15,11 +15,11 @@ function formatPrice(service) {
 }
 
 function formatServices(services) {
-  const groups = { hourly: [], rooms: [], extras: [] };
+  // Rooms are informational only (not charged) on both the website and the admin form.
+  const groups = { hourly: [], extras: [] };
   for (const s of services) {
     if (s.type === "hourly") groups.hourly.push(s);
-    else if (s.type === "per_room" || s.category === "Rooms") groups.rooms.push(s);
-    else groups.extras.push(s);
+    else if (s.type !== "per_room" && s.category !== "Rooms") groups.extras.push(s);
   }
   const line = (s) => {
     const details = [s.description, ...(s.bullets || [])].filter(Boolean).join("; ");
@@ -27,9 +27,10 @@ function formatServices(services) {
   };
   const sections = [];
   if (groups.hourly.length) sections.push("Cleaning services (charged per hour):\n" + groups.hourly.map(line).join("\n"));
-  if (groups.rooms.length) sections.push("Per-room prices:\n" + groups.rooms.map(line).join("\n"));
   if (groups.extras.length) sections.push("Add-on extras:\n" + groups.extras.map(line).join("\n"));
-  return sections.join("\n\n") || "No prices are currently listed.";
+  if (!sections.length) return "No prices are currently listed.";
+  sections.push("Price = hourly rate × hours + extras. Rooms (bedrooms, bathrooms, etc.) are not charged separately.");
+  return sections.join("\n\n");
 }
 
 function formatKnowledge(entries) {
@@ -46,7 +47,17 @@ function londonNow(date = new Date()) {
 }
 
 // Pure function: no database access, so it can be unit-tested.
-function buildInstructions({ channel, settings, knowledge, services, now = new Date(), customerName = "" }) {
+const BOOKING_RULES = `## Quotes and bookings (use the tools; never do maths yourself)
+- For any total, call get_quote with the service, hours and extras. Quote exactly the total it returns.
+- Hours: if the business information gives typical hours for the property, suggest them; otherwise ask the customer how many hours they want (1–50). Say the team may adjust hours after seeing the property.
+- Before offering a date, call check_availability. Time slots: Morning (8am–12pm), Afternoon (12pm–4pm), Evening (4pm–8pm), or Flexible with a preferred time. Work out dates like "next Tuesday" from today's UK date and use YYYY-MM-DD.
+- To book, collect: first and last name, email, full address and postcode, service, hours, extras, date and time slot, number of bedrooms and bathrooms, pets, and any access notes. Their phone number is already known from this chat.
+- Ask for a few details at a time, not everything at once.
+- Before booking, send one short summary (service, hours, extras, date and slot, address, total) and ask them to confirm. Only after an explicit yes, call create_booking with customerConfirmed true.
+- Only say a booking is made if create_booking returned a bookingRef. Then give the reference and explain the next step it returned (payment link by email).
+- If a tool returns an error, fix the detail with the customer or offer to pass the request to the team.`;
+
+function buildInstructions({ channel, settings, knowledge, services, now = new Date(), customerName = "", canBook = false }) {
   if (!CHANNELS.includes(channel)) throw new Error(`Unknown channel: ${channel}`);
   const business = settings.businessName || "Cleaniq Services";
   const canTransfer = channel === "voice" && Boolean(settings.transferNumber);
@@ -74,11 +85,11 @@ Current date and time in the UK: ${londonNow(now)}.${customerName ? `\nThe custo
 - Only discuss ${business} and its cleaning services. Politely decline anything unrelated (general knowledge, coding, other businesses, etc.).
 - If asked, say honestly that you are an AI assistant.
 - All prices are in GBP (£). If someone asks for a total, explain it depends on the hours or extras needed and offer to have the team confirm an exact quote.
-- You cannot confirm bookings or take payments. Never ask for card or bank details. Offer to pass booking requests to the team.
+- ${canBook ? "You can quote and create bookings using the tools, following the rules below." : "You cannot confirm bookings. Offer to pass booking requests to the team."} Never ask for card or bank details.
 - Never share information about other customers or staff.
 ${settings.instructions ? `\n## Instructions from the ${business} team\n${settings.instructions.trim()}\n` : ""}
 ${channelRules}
-
+${canBook ? `\n${BOOKING_RULES}\n` : ""}
 ## Prices (UK, current)
 ${formatServices(services)}
 
@@ -86,13 +97,13 @@ ${formatServices(services)}
 ${formatKnowledge(knowledge)}`;
 }
 
-async function getInstructions(channel, { customerName = "" } = {}) {
+async function getInstructions(channel, { customerName = "", canBook = false } = {}) {
   const [settings, knowledge, services] = await Promise.all([
     AiSettings.get(),
     KnowledgeEntry.find({ active: true }).sort({ category: 1, title: 1 }).lean(),
     Service.find({ region: "UK", rate: { $gt: 0 } }).sort({ type: 1, name: 1 }).lean(),
   ]);
-  return buildInstructions({ channel, settings, knowledge, services, customerName });
+  return buildInstructions({ channel, settings, knowledge, services, customerName, canBook });
 }
 
 module.exports = { getInstructions, buildInstructions, CHANNELS };

@@ -6,6 +6,7 @@ const AiMessage = require("../models/AiMessage");
 const SystemSetting = require("../models/SystemSetting");
 const { getInstructions } = require("./aiBrain");
 const { generateReply } = require("./aiProvider");
+const { declarations: bookingTools, makeToolRunner } = require("./aiTools");
 const { toE164UK, findCustomerByPhone } = require("./phone");
 
 const HISTORY_LIMIT = 20;
@@ -107,8 +108,13 @@ async function replyOnce(conversationId, { ai = generateReply, send = sendWhatsA
 
   let reply = null;
   try {
-    const system = await getInstructions("whatsapp", { customerName: conversation.name });
-    reply = await ai({ system, history });
+    const system = await getInstructions("whatsapp", { customerName: conversation.name, canBook: true });
+    reply = await ai({
+      system,
+      history,
+      tools: bookingTools,
+      runTool: makeToolRunner({ phone: conversation.phone, conversationId: String(conversation._id) }),
+    });
   } catch (err) {
     console.error(`[whatsapp] AI failed for ${conversation.phone}:`, err.message);
   }

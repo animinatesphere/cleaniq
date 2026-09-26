@@ -17,11 +17,21 @@ const services = [
 const knowledge = [{ title: "Opening hours", category: "Hours", content: "Mon–Sat 8am–6pm." }];
 const now = new Date("2026-09-26T10:00:00Z");
 
-test("includes live prices in pounds, grouped by type", () => {
+test("includes live prices in pounds; rooms are not listed as a charge", () => {
   const p = buildInstructions({ channel: "whatsapp", settings, knowledge, services, now });
   assert.match(p, /Deep Clean: £24\.90 per hour \(Thorough deep clean\)/);
   assert.match(p, /Single Oven Cleaning: £15\.00 fixed price/);
-  assert.match(p, /Bedroom: £12\.00 per room/);
+  assert.doesNotMatch(p, /Bedroom: £/);
+  assert.match(p, /Rooms \(bedrooms, bathrooms, etc\.\) are not charged separately/);
+});
+
+test("booking rules only when the channel can book", () => {
+  const withTools = buildInstructions({ channel: "whatsapp", settings, knowledge, services, now, canBook: true });
+  assert.match(withTools, /call get_quote/);
+  assert.match(withTools, /create_booking with customerConfirmed true/);
+  const without = buildInstructions({ channel: "voice", settings, knowledge, services, now });
+  assert.doesNotMatch(without, /create_booking/);
+  assert.match(without, /You cannot confirm bookings/);
 });
 
 test("includes knowledge, staff instructions and UK time", () => {

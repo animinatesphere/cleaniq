@@ -87,3 +87,28 @@ test("gives up after the backup model also fails", async () => {
   );
   assert.equal(calls.length, 4);
 });
+
+test("tool loop: runs the tool, returns the model's turn unchanged, then gives the final text", async () => {
+  const requests = [];
+  const modelTurn = { role: "model", parts: [{ functionCall: { id: "c1", name: "get_quote", args: { service: "Deep Clean", hours: 3 } }, thoughtSignature: "SIG" }] };
+  const replies = [
+    { functionCalls: [{ id: "c1", name: "get_quote", args: { service: "Deep Clean", hours: 3 } }], candidates: [{ content: modelTurn }] },
+    { text: "That comes to £74.70." },
+  ];
+  const client = { models: { generateContent: async (req) => { requests.push(structuredClone(req)); return replies.shift(); } } };
+  const toolCalls = [];
+  const reply = await generateReply({
+    system: "RULES",
+    history: [{ role: "customer", text: "Quote for a 3h deep clean" }],
+    tools: [{ name: "get_quote" }],
+    runTool: async (name, args) => { toolCalls.push([name, args]); return { total: 74.7 }; },
+    client,
+    retryDelays: [0, 0],
+  });
+  assert.equal(reply, "That comes to £74.70.");
+  assert.deepEqual(toolCalls, [["get_quote", { service: "Deep Clean", hours: 3 }]]);
+  assert.deepEqual(requests[0].config.tools, [{ functionDeclarations: [{ name: "get_quote" }] }]);
+  const second = requests[1].contents;
+  assert.deepEqual(second[1], modelTurn); // thought signature preserved
+  assert.deepEqual(second[2], { role: "user", parts: [{ functionResponse: { id: "c1", name: "get_quote", response: { total: 74.7 } } }] });
+});

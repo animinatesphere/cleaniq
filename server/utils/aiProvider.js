@@ -51,32 +51,14 @@ function withTimeout(promise, ms) {
   ]).finally(() => clearTimeout(timer));
 }
 
-/**
- * @param {object} args
- * @param {string} args.system   instructions from aiBrain.getInstructions()
- * @param {{role: "customer"|"ai"|"staff", text: string}[]} args.history  oldest first, ending with the customer's message
- * @param {object} [args.client] injected client for tests
- * @param {number[]} [args.retryDelays] override retry waits (tests)
- * @returns {Promise<string|null>} reply text, or null if the provider returned nothing usable
- * Retries the main model on temporary errors, then tries the fallback model once.
- */
-async function generateReply({ system, history, client, retryDelays = RETRY_DELAYS_MS }) {
-  if (PROVIDER !== "gemini") {
-    throw new Error(`AI_PROVIDER "${PROVIDER}" is not supported yet (supported: gemini)`);
-  }
-  const contents = toGeminiContents(history);
-  if (!contents.length) return null;
+const MAX_TOOL_ROUNDS = 5;
 
-  const primary = process.env.AI_MODEL || DEFAULT_MODELS.gemini;
-  const fallback = process.env.AI_FALLBACK_MODEL || DEFAULT_FALLBACK_MODELS.gemini;
-  const attempts = [...retryDelays.map(() => primary), primary, ...(fallback && fallback !== primary ? [fallback] : [])];
-
-  const started = Date.now();
-  let response;
-  for (let i = 0; i < attempts.length; i++) {
-    const model = attempts[i];
+// One model call with retries. Tries `models` in order (main model, retries, then fallback).
+async function callModel({ client, models, contents, system, tools, retryDelays }) {
+  for (let i = 0; i < models.length; i++) {
+    const model = models[i];
     try {
-      response = await withTimeout(
+      const response = await withTimeout(
         (client || getGemini()).models.generateContent({
           model,
           contents,
@@ -86,27 +68,81 @@ async function generateReply({ system, history, client, retryDelays = RETRY_DELA
             temperature: 0.4,
             // Receptionist replies are short lookups; low thinking keeps them fast (default is medium).
             thinkingConfig: { thinkingLevel: (process.env.AI_THINKING_LEVEL || "LOW").toUpperCase() },
+            ...(tools?.length ? { tools: [{ functionDeclarations: tools }] } : {}),
           },
         }),
         TIMEOUT_MS,
       );
-      if (model !== primary) console.warn(`[ai] answered by fallback model ${model}`);
-      break;
+      return { response, model };
     } catch (err) {
-      const last = i === attempts.length - 1;
+      const last = i === models.length - 1;
       if (!isRetryable(err) || last) throw err;
-      console.warn(`[ai] ${model} failed (${err.status || "timeout"}); retrying${attempts[i + 1] !== model ? ` with ${attempts[i + 1]}` : ""}`);
+      console.warn(`[ai] ${model} failed (${err.status || "timeout"}); retrying${models[i + 1] !== model ? ` with ${models[i + 1]}` : ""}`);
       if (i < retryDelays.length) await sleep(retryDelays[i]);
     }
   }
-  const text = (response.text || "").trim();
-  if (!text) {
-    const reason = response.promptFeedback?.blockReason || response.candidates?.[0]?.finishReason || "unknown";
-    console.warn(`[ai] empty reply from ${PROVIDER} (reason: ${reason})`);
-    return null;
+  throw new Error("No AI model available");
+}
+
+/**
+ * @param {object} args
+ * @param {string} args.system   instructions from aiBrain.getInstructions()
+ * @param {{role: "customer"|"ai"|"staff", text: string}[]} args.history  oldest first, ending with the customer's message
+ * @param {object[]} [args.tools]   function declarations the model may call (see aiTools.js)
+ * @param {(name: string, args: object) => Promise<object>} [args.runTool]  executes a tool call
+ * @param {object} [args.client] injected client for tests
+ * @param {number[]} [args.retryDelays] override retry waits (tests)
+ * @returns {Promise<string|null>} reply text, or null if the provider returned nothing usable
+ * Retries the main model on temporary errors, then tries the fallback model once.
+ */
+async function generateReply({ system, history, tools, runTool, client, retryDelays = RETRY_DELAYS_MS }) {
+  if (PROVIDER !== "gemini") {
+    throw new Error(`AI_PROVIDER "${PROVIDER}" is not supported yet (supported: gemini)`);
   }
-  console.log(`[ai] ${PROVIDER} replied in ${Date.now() - started}ms`);
-  return text;
+  const contents = toGeminiContents(history);
+  if (!contents.length) return null;
+
+  const primary = process.env.AI_MODEL || DEFAULT_MODELS.gemini;
+  const fallback = process.env.AI_FALLBACK_MODEL || DEFAULT_FALLBACK_MODELS.gemini;
+  let models = [...retryDelays.map(() => primary), primary, ...(fallback && fallback !== primary ? [fallback] : [])];
+
+  const started = Date.now();
+  for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
+    const { response, model } = await callModel({ client, models, contents, system, tools, retryDelays });
+    if (round === 0 && model !== primary) console.warn(`[ai] answered by fallback model ${model}`);
+    // Stay on the model that answered: its thought signatures only make sense to itself.
+    models = [...retryDelays.map(() => model), model];
+
+    const calls = tools?.length && runTool ? response.functionCalls || [] : [];
+    if (!calls.length) {
+      const text = (response.text || "").trim();
+      if (!text) {
+        const reason = response.promptFeedback?.blockReason || response.candidates?.[0]?.finishReason || "unknown";
+        console.warn(`[ai] empty reply from ${PROVIDER} (reason: ${reason})`);
+        return null;
+      }
+      console.log(`[ai] ${PROVIDER} replied in ${Date.now() - started}ms${round ? ` after ${round} tool round(s)` : ""}`);
+      return text;
+    }
+
+    // Send the model's turn back unchanged (it carries Gemini 3 thought signatures), then the results.
+    contents.push(response.candidates[0].content);
+    const results = await Promise.all(
+      calls.map(async (call) => {
+        const result = await runTool(call.name, call.args || {});
+        console.log(`[ai] tool ${call.name} → ${result?.error ? `error: ${result.error}` : "ok"}`);
+        return result;
+      }),
+    );
+    contents.push({
+      role: "user",
+      parts: calls.map((call, i) => ({
+        functionResponse: { ...(call.id ? { id: call.id } : {}), name: call.name, response: results[i] || {} },
+      })),
+    });
+  }
+  console.warn(`[ai] gave up after ${MAX_TOOL_ROUNDS} tool rounds`);
+  return null;
 }
 
 module.exports = { generateReply, toGeminiContents, PROVIDER };
