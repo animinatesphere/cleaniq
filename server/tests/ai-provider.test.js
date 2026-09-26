@@ -65,11 +65,19 @@ test("retries the main model when it is overloaded", async () => {
   assert.deepEqual(calls, ["gemini-3.8-flash", "gemini-3.8-flash"]);
 });
 
-test("falls back to the backup model when the main one stays overloaded", async () => {
+test("falls back to the backup models in order when the main one stays overloaded", async () => {
   const calls = [];
-  const reply = await generateReply({ ...base, client: flakyClient([overloaded(), overloaded(), overloaded()], calls) });
+  const reply = await generateReply({ ...base, client: flakyClient([overloaded(), overloaded(), overloaded(), overloaded()], calls) });
   assert.equal(reply, "ok from gemini-3.5-flash");
-  assert.deepEqual(calls, ["gemini-3.8-flash", "gemini-3.8-flash", "gemini-3.8-flash", "gemini-3.5-flash"]);
+  assert.deepEqual(calls, ["gemini-3.8-flash", "gemini-3.8-flash", "gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.5-flash"]);
+});
+
+test("quota exhausted (429) skips straight to the next model", async () => {
+  const calls = [];
+  const quota = () => Object.assign(new Error("quota"), { status: 429 });
+  const reply = await generateReply({ ...base, client: flakyClient([quota(), quota()], calls) });
+  assert.equal(reply, "ok from gemini-3.5-flash");
+  assert.deepEqual(calls, ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.5-flash"]);
 });
 
 test("does not retry a bad request", async () => {
@@ -82,10 +90,10 @@ test("does not retry a bad request", async () => {
 test("gives up after the backup model also fails", async () => {
   const calls = [];
   await assert.rejects(
-    generateReply({ ...base, client: flakyClient([overloaded(), overloaded(), overloaded(), overloaded()], calls) }),
+    generateReply({ ...base, client: flakyClient([overloaded(), overloaded(), overloaded(), overloaded(), overloaded()], calls) }),
     /high demand/,
   );
-  assert.equal(calls.length, 4);
+  assert.equal(calls.length, 5);
 });
 
 test("tool loop: runs the tool, returns the model's turn unchanged, then gives the final text", async () => {
