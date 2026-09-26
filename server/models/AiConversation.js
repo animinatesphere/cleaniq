@@ -13,6 +13,7 @@ const aiConversationSchema = new mongoose.Schema(
     lastMessageAt: { type: Date, default: Date.now },
     lastMessagePreview: { type: String, default: "" },
     unreadCount: { type: Number, default: 0 },
+    needsAttention: { type: Boolean, default: false }, // AI failed or hit its limit; staff should look
   },
   { timestamps: true },
 );

@@ -11,6 +11,7 @@ const { toE164UK, findCustomerByPhone } = require("./phone");
 const HISTORY_LIMIT = 20;
 const MAX_AI_REPLIES_PER_HOUR = 30; // per conversation — protects the AI quota from spam/loops
 const HANDOFF_TEXT = "Thanks for your message! A member of our team will reply here as soon as possible.";
+const AI_ERROR_TEXT = "Sorry, I'm having a technical issue right now. Please try again in a few minutes, or a member of our team will reply here soon.";
 const TEXT_ONLY_TEXT = "Sorry, I can only read text messages at the moment. Could you type your question?";
 
 // Same lookup as the SMS service: admin-entered SystemSetting first, then .env.
@@ -93,7 +94,7 @@ async function replyOnce(conversationId, { ai = generateReply, send = sendWhatsA
   });
   if (recentAiReplies >= MAX_AI_REPLIES_PER_HOUR) {
     console.warn(`[whatsapp] AI reply limit reached for ${conversation.phone}; handing to staff`);
-    await AiConversation.updateOne({ _id: conversation._id }, { $set: { status: "human" } });
+    await AiConversation.updateOne({ _id: conversation._id }, { $set: { status: "human", needsAttention: true } });
     await sendAndRecord(conversation, "ai", HANDOFF_TEXT, { send });
     return;
   }
@@ -112,9 +113,10 @@ async function replyOnce(conversationId, { ai = generateReply, send = sendWhatsA
     console.error(`[whatsapp] AI failed for ${conversation.phone}:`, err.message);
   }
   if (!reply) {
-    // AI unavailable or refused: tell the customer a person will answer, and flag it for staff.
-    await AiConversation.updateOne({ _id: conversation._id }, { $set: { status: "human" } });
-    await sendAndRecord(conversation, "ai", HANDOFF_TEXT, { send });
+    // AI unavailable or gave nothing: apologise and flag the chat for staff, but keep the AI on
+    // so the customer's next message is answered once the provider recovers.
+    await AiConversation.updateOne({ _id: conversation._id }, { $set: { needsAttention: true } });
+    await sendAndRecord(conversation, "ai", AI_ERROR_TEXT, { send });
     return;
   }
   await sendAndRecord(conversation, "ai", reply, { send });
