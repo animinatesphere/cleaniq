@@ -43,3 +43,46 @@ test("returns null when the provider gives no text (e.g. blocked)", async () => 
   });
   assert.equal(reply, null);
 });
+
+const flakyClient = (failures, calls) => ({
+  models: {
+    generateContent: async (req) => {
+      calls.push(req.model);
+      const err = failures.shift();
+      if (err) throw err;
+      return { text: `ok from ${req.model}` };
+    },
+  },
+});
+const overloaded = () => Object.assign(new Error("high demand"), { status: 503 });
+const base = { system: "RULES", history: [{ role: "customer", text: "Hi" }], retryDelays: [0, 0] };
+
+test("retries the main model when it is overloaded", async () => {
+  const calls = [];
+  const reply = await generateReply({ ...base, client: flakyClient([overloaded()], calls) });
+  assert.equal(reply, "ok from gemini-3.8-flash");
+  assert.deepEqual(calls, ["gemini-3.8-flash", "gemini-3.8-flash"]);
+});
+
+test("falls back to the backup model when the main one stays overloaded", async () => {
+  const calls = [];
+  const reply = await generateReply({ ...base, client: flakyClient([overloaded(), overloaded(), overloaded()], calls) });
+  assert.equal(reply, "ok from gemini-3.5-flash");
+  assert.deepEqual(calls, ["gemini-3.8-flash", "gemini-3.8-flash", "gemini-3.8-flash", "gemini-3.5-flash"]);
+});
+
+test("does not retry a bad request", async () => {
+  const calls = [];
+  const bad = Object.assign(new Error("invalid"), { status: 400 });
+  await assert.rejects(generateReply({ ...base, client: flakyClient([bad], calls) }), /invalid/);
+  assert.deepEqual(calls, ["gemini-3.8-flash"]);
+});
+
+test("gives up after the backup model also fails", async () => {
+  const calls = [];
+  await assert.rejects(
+    generateReply({ ...base, client: flakyClient([overloaded(), overloaded(), overloaded(), overloaded()], calls) }),
+    /high demand/,
+  );
+  assert.equal(calls.length, 4);
+});
