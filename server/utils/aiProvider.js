@@ -4,10 +4,11 @@
 //   GEMINI_API_KEY=...
 //   AI_MODEL=gemini-3.8-flash            (optional)
 //   AI_FALLBACK_MODEL=gemini-3.5-flash   (optional; used when the main model is overloaded)
+//   AI_THINKING_LEVEL=LOW                (optional; LOW | MEDIUM | HIGH — lower is faster)
 const PROVIDER = (process.env.AI_PROVIDER || "gemini").toLowerCase();
 const DEFAULT_MODELS = { gemini: "gemini-3.8-flash" };
 const DEFAULT_FALLBACK_MODELS = { gemini: "gemini-3.5-flash" };
-const TIMEOUT_MS = 20000;
+const TIMEOUT_MS = 30000;
 const RETRY_DELAYS_MS = [1500, 4000];
 
 // Overloaded / rate-limited / server errors and timeouts are worth retrying; bad requests are not.
@@ -79,7 +80,13 @@ async function generateReply({ system, history, client, retryDelays = RETRY_DELA
         (client || getGemini()).models.generateContent({
           model,
           contents,
-          config: { systemInstruction: system, maxOutputTokens: 2048, temperature: 0.4 },
+          config: {
+            systemInstruction: system,
+            maxOutputTokens: 2048,
+            temperature: 0.4,
+            // Receptionist replies are short lookups; low thinking keeps them fast (default is medium).
+            thinkingConfig: { thinkingLevel: (process.env.AI_THINKING_LEVEL || "LOW").toUpperCase() },
+          },
         }),
         TIMEOUT_MS,
       );
