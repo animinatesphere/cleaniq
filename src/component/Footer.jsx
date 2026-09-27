@@ -174,14 +174,14 @@ const Footer = () => {
                   {region?.contact?.phone}
                 </span>
               </li>
-              <li className="flex items-start gap-3 text-slate-400 group cursor-pointer">
+              {/* <li className="flex items-start gap-3 text-slate-400 group cursor-pointer">
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-secondary/20 group-hover:text-secondary transition-colors mt-1">
                   <MapPin size={16} />
                 </div>
                 <span className="text-sm font-semibold group-hover:text-white transition-colors leading-relaxed">
                   {region?.contact?.address}
                 </span>
-              </li>
+              </li> */}
             </ul>
           </div>
 

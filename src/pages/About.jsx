@@ -241,7 +241,7 @@ const About = () => {
                 Get in Touch.
               </h2>
               <div className="space-y-8">
-                <div className="flex items-center gap-6">
+                {/* <div className="flex items-center gap-6">
                   <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-secondary">
                     <MapPin size={24} />
                   </div>
@@ -253,7 +253,7 @@ const About = () => {
                       20 Swan St, Manchester, M4 5JW
                     </p>
                   </div>
-                </div>
+                </div> */}
                 <div className="flex items-center gap-6">
                   <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-secondary">
                     <Phone size={24} />

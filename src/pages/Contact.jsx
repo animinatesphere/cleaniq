@@ -110,12 +110,12 @@ const Contact = () => {
                 value: "info@cleaniqservices.com",
                 href: "mailto:info@cleaniqservices.com",
               },
-              {
-                icon: <MapPin size={20} />,
-                label: "Head Office",
-                value: "20 Swan St, Manchester M4 5JW",
-                href: null,
-              },
+              // {
+              //   icon: <MapPin size={20} />,
+              //   label: "Head Office",
+              //   value: "20 Swan St, Manchester M4 5JW",
+              //   href: null,
+              // },
             ].map((item) => (
               <div key={item.label} className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm flex gap-4 items-start">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
