@@ -73,3 +73,32 @@ test("Haiku 4.5 gets no adaptive thinking, effort or fallbacks", () => {
   assert.equal(claudeRequestOptions("claude-sonnet-5").fallbacks, undefined);
   assert.deepEqual(claudeRequestOptions("claude-sonnet-5").thinking, { type: "adaptive" });
 });
+
+test("after a customer's yes, Haiku is required to call the booking tool on the first round only", async () => {
+  process.env.AI_MODEL = "claude-haiku-4-5";
+  try {
+    const requests = [];
+    const client = fakeClaude([
+      { stop_reason: "tool_use", content: [{ type: "tool_use", id: "b1", name: "create_booking", input: { customerConfirmed: true } }] },
+      { stop_reason: "end_turn", content: [{ type: "text", text: "Booked! Ref BK-1234." }] },
+    ], requests);
+    const reply = await generateReplyClaude({
+      system: "S", history, client, forceTool: "create_booking",
+      tools: [{ name: "create_booking" }], runTool: async () => ({ bookingRef: "BK-1234" }),
+    });
+    assert.equal(reply, "Booked! Ref BK-1234.");
+    assert.deepEqual(requests[0].tool_choice, { type: "tool", name: "create_booking" });
+    assert.equal(requests[1].tool_choice, undefined);
+    assert.equal(requests[0].thinking, undefined);
+  } finally {
+    delete process.env.AI_MODEL;
+  }
+});
+
+test("models with thinking on are not forced (the API would reject it)", async () => {
+  const requests = [];
+  const client = fakeClaude([{ stop_reason: "end_turn", content: [{ type: "text", text: "ok" }] }], requests);
+  await generateReplyClaude({ system: "S", history, client, forceTool: "create_booking", tools: [{ name: "create_booking" }], runTool: async () => ({}) });
+  assert.equal(requests[0].tool_choice, undefined);
+  assert.deepEqual(requests[0].thinking, { type: "adaptive" });
+});
