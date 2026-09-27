@@ -42,6 +42,9 @@ test("booking rules only when the channel can book", () => {
   assert.match(withTools, /call reschedule_booking with customerConfirmed true/);
   assert.match(withTools, /Example of the booking pattern/);
   assert.match(withTools, /Never offer Morning, Afternoon or Evening/);
+  assert.match(withTools, /Written quotes: follow the same steps as our Quote Builder/);
+  assert.match(withTools, /call send_quote with customerConfirmed false/);
+  assert.match(withTools, /Reply YES to have the quote emailed to you/);
   assert.match(withTools, /what time they'd like the cleaner to arrive/);
   assert.match(withTools, /Cleaning supplies & equipment: £10\.00 per visit if we bring them/);
   // the short-reply rule must not fight the booking list

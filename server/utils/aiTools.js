@@ -350,6 +350,138 @@ async function rescheduleAiBooking(args, ctx) {
   };
 }
 
+// ── Written quotes (same payload and maths as the admin Quote Builder's handleSend) ──────────
+const QUOTE_FREQUENCIES = ["once", "weekly", "biweekly", "monthly", "quarterly", "yearly"];
+// Quote Builder defaults
+const QUOTE_DEFAULTS = {
+  vatRate: 20,
+  validDays: 30,
+  paymentTerms: "Net 30",
+  notes: "This quote is valid for 30 days from the date of issue. All services are subject to our terms and conditions available at cleaniqservices.com/terms.",
+};
+const MAX_AI_QUOTES_PER_PHONE_PER_DAY = 3;
+
+function buildQuoteItems(services, args, suppliesFee) {
+  const hourly = services.filter((s) => s.type === "hourly");
+  const extraOptions = services.filter((s) => s.type !== "hourly" && s.type !== "per_room" && s.category !== "Rooms");
+  const items = [];
+  for (const line of args.services || []) {
+    const base = hourly.find((s) => clean(s.name) === clean(line.service));
+    if (!base) {
+      return { error: `We don't have a set price for "${line.service}". Quotable services: ${hourly.map((s) => s.name).join(", ")}. For anything else, offer to have the team prepare a custom quote.` };
+    }
+    const hours = Number(line.hours);
+    if (!Number.isFinite(hours) || hours < 1 || hours > 50) return { error: `Hours for ${base.name} must be between 1 and 50.` };
+    items.push({ service: base.name, customService: "", description: String(line.description || "").trim(), billingType: "hourly", qty: hours, unitPrice: base.rate });
+  }
+  for (const ex of args.extras || []) {
+    const match = extraOptions.find((s) => clean(s.name) === clean(ex.name));
+    if (!match) return { error: `Unknown extra "${ex.name}". Available extras: ${extraOptions.map((s) => s.name).join(", ")}` };
+    items.push({ service: match.name, customService: "", description: "", billingType: "flat", qty: Math.max(1, Math.round(Number(ex.qty) || 1)), unitPrice: match.rate });
+  }
+  if (args.suppliesProvidedBy === "Cleaniq" && suppliesFee > 0) {
+    items.push({ service: SUPPLIES_LINE, customService: "", description: "Supplied by Cleaniq", billingType: "flat", qty: 1, unitPrice: suppliesFee });
+  }
+  if (!items.some((i) => i.billingType === "hourly")) return { error: "Add at least one cleaning service with hours." };
+  return { items: items.map((i) => ({ ...i, subtotal: money(Number(i.unitPrice) * Number(i.qty)) })) };
+}
+
+async function sendAiQuote(args, ctx) {
+  const problems = [];
+  if (!args.customerName || String(args.customerName).trim().length < 2) problems.push("their name (or company name)");
+  if (!EMAIL_RE.test(args.email || "")) problems.push("a valid email address to send the quote to");
+  if (!args.address || String(args.address).trim().length < 5) problems.push("the property address");
+  if (!(args.services || []).length) problems.push("the service(s) and hours");
+  if (!["Cleaniq", "Customer"].includes(args.suppliesProvidedBy)) problems.push("who provides the cleaning supplies and equipment");
+  if (problems.length) return { error: `Cannot prepare the quote yet. Still needed: ${problems.join("; ")}.` };
+
+  const settings = await AiSettings.get();
+  const built = buildQuoteItems(await loadUkServices(), args, settings.suppliesFee);
+  if (built.error) return built;
+
+  let serviceDate = null;
+  let serviceTimeSlot = null;
+  let when = null;
+  if (args.serviceDate) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(args.serviceDate)) return { error: "Preferred date must be YYYY-MM-DD." };
+    serviceDate = args.serviceDate;
+    if (args.time) {
+      const hours = built.items.filter((i) => i.billingType === "hourly").reduce((sum, i) => sum + Number(i.qty), 0);
+      const slot = await resolveSchedule({ date: args.serviceDate, time: args.time, hours });
+      if (slot.error) return slot;
+      serviceTimeSlot = slot.schedule.preferredTime; // "HH:MM": what accepted quotes turn into bookings
+      when = `${args.serviceDate} ${slot.label}`;
+    }
+  }
+
+  // Same maths as QuoteBuilder.jsx (no discount or deposit from the AI).
+  const subtotal = money(built.items.reduce((sum, i) => sum + i.subtotal, 0));
+  const includeVat = settings.quoteIncludeVat !== false;
+  const vat = includeVat ? money(subtotal * (QUOTE_DEFAULTS.vatRate / 100)) : 0;
+  const grandTotal = money(subtotal + vat);
+  const frequency = QUOTE_FREQUENCIES.includes(args.frequency) ? args.frequency : "once";
+  const customerName = String(args.customerName).trim();
+  const company = String(args.companyName || "").trim();
+
+  const payload = {
+    companyName: company || customerName,
+    contactName: company ? customerName : "",
+    email: String(args.email).trim().toLowerCase(),
+    phone: ctx.phone,
+    address: String(args.address).trim(),
+    frequency,
+    serviceDate,
+    serviceTimeSlot,
+    vatRate: QUOTE_DEFAULTS.vatRate,
+    validDays: QUOTE_DEFAULTS.validDays,
+    includeVat,
+    sendCopy: true,
+    paymentTerms: QUOTE_DEFAULTS.paymentTerms,
+    depositRequired: false,
+    depositPercent: 0,
+    discount: 0,
+    notes: [QUOTE_DEFAULTS.notes, args.notes ? `Customer notes: ${String(args.notes).trim()}` : ""].filter(Boolean).join("\n"),
+    quoteRef: `CLQ-${Date.now().toString().slice(-6)}`,
+    date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" }),
+    items: built.items,
+    subtotal,
+    discountAmount: 0,
+    subtotalAfterDiscount: subtotal,
+    vat,
+    grandTotal,
+    depositAmount: 0,
+    balanceDue: grandTotal,
+  };
+  const figures = {
+    lines: built.items.map((i) => `${i.service}: ${i.billingType === "hourly" ? `${i.qty}h × £${i.unitPrice.toFixed(2)}` : `${i.qty} × £${i.unitPrice.toFixed(2)}`} = £${i.subtotal.toFixed(2)}`),
+    subtotal,
+    vat,
+    grandTotal,
+    vatIncluded: includeVat,
+    frequency,
+    perVisit: frequency !== "once",
+    when,
+  };
+
+  if (!args.customerConfirmed) {
+    return { preview: true, ...figures, nextStep: "Show the customer these figures and ask them to reply YES to have the quote emailed." };
+  }
+  const recent = await (require("../models/Quote")).countDocuments({ phone: ctx.phone, createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } });
+  if (recent >= MAX_AI_QUOTES_PER_PHONE_PER_DAY) {
+    return { error: "Several quotes were already sent from this chat today. Offer to have the team follow up instead." };
+  }
+  if (ctx.dryRun) return { dryRun: true, message: "TEST MODE: quote not emailed.", quoteRef: payload.quoteRef, ...figures };
+
+  const { sendQuote } = require("../routes/quotes");
+  const quote = await sendQuote(payload);
+  console.log(`[ai-tools] quote ${quote.quoteRef} emailed to ${payload.email} from WhatsApp ${ctx.phone} (£${grandTotal})`);
+  return {
+    quoteRef: quote.quoteRef,
+    ...figures,
+    nextStep: `The quote has been emailed to ${payload.email}. It is valid for ${QUOTE_DEFAULTS.validDays} days and can be accepted with the button in the email.`,
+  };
+}
+
 // ── Declarations for the model ──────────────────────────────────────────────────────────
 const extrasSchema = {
   type: "array",
@@ -422,6 +554,41 @@ const declarations = [
     },
   },
   {
+    name: "send_quote",
+    description:
+      "Prepare and email a written quote exactly like staff do in the Quote Builder. Call with customerConfirmed false first to get the exact figures (including VAT) for the summary; call with customerConfirmed true only after the customer replied yes.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        customerName: { type: "string", description: "Customer's full name" },
+        companyName: { type: "string", description: "Only if the quote is for a business" },
+        email: { type: "string" },
+        address: { type: "string", description: "Property address with postcode" },
+        services: {
+          type: "array",
+          description: "One entry per cleaning service, names exactly as under 'Cleaning services'",
+          items: {
+            type: "object",
+            properties: {
+              service: { type: "string" },
+              hours: { type: "number" },
+              description: { type: "string", description: "What needs cleaning, in the customer's words (shown on the quote)" },
+            },
+            required: ["service", "hours"],
+          },
+        },
+        extras: extrasSchema,
+        suppliesProvidedBy: { type: "string", enum: ["Cleaniq", "Customer"] },
+        frequency: { type: "string", enum: QUOTE_FREQUENCIES, description: "once, weekly, biweekly (fortnightly), monthly, quarterly or yearly" },
+        serviceDate: { type: "string", description: "Optional preferred date, YYYY-MM-DD" },
+        time: { type: "string", description: "Optional preferred arrival time, HH:MM" },
+        notes: { type: "string" },
+        customerConfirmed: { type: "boolean" },
+      },
+      required: ["customerName", "email", "address", "services", "suppliesProvidedBy", "customerConfirmed"],
+    },
+  },
+  {
     name: "find_my_bookings",
     description: "List this customer's upcoming bookings (matched by the phone number of this chat). Use when they ask about, change or reschedule a booking.",
     parametersJsonSchema: { type: "object", properties: {} },
@@ -449,7 +616,9 @@ function confirmationTool(history) {
   if (!last || last.role !== "customer" || !YES_RE.test(last.text || "") || (last.text || "").length > 80) return null;
   const previous = [...history.slice(0, -1)].reverse().find((m) => m.role !== "customer");
   if (!previous || !/reply yes/i.test(previous.text || "")) return null;
-  return /\bmove\b|reschedul/i.test(previous.text) ? "reschedule_booking" : "create_booking";
+  if (/\bmove\b|reschedul/i.test(previous.text)) return "reschedule_booking";
+  if (/reply yes to (have |get )?(the |your |a )?(written )?quote|reply yes to (send|email)[^.\n]*quote/i.test(previous.text)) return "send_quote";
+  return "create_booking";
 }
 
 /** Returns a runner bound to one conversation. ctx: { phone, conversationId, dryRun } */
@@ -464,6 +633,7 @@ function makeToolRunner(ctx) {
       if (name === "create_booking") return await createAiBooking(args, ctx);
       if (name === "find_my_bookings") return await findMyBookings(ctx);
       if (name === "reschedule_booking") return await rescheduleAiBooking(args, ctx);
+      if (name === "send_quote") return await sendAiQuote(args, ctx);
       return { error: `Unknown tool ${name}` };
     } catch (err) {
       console.error(`[ai-tools] ${name} failed:`, err);
@@ -483,5 +653,6 @@ module.exports = {
   normaliseTime,
   formatWindow,
   confirmationTool,
+  sendAiQuote,
   SPECIFIC_TIMES,
 };
