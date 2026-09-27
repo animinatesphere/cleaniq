@@ -13,6 +13,8 @@ const aiSettingsSchema = new mongoose.Schema(
     transferNumber: { type: String, default: "", trim: true },
     // Added to AI bookings when Cleaniq brings the cleaning supplies and equipment (per visit).
     suppliesFee: { type: Number, default: 10, min: 0 },
+    // Emailed quotes follow the Quote Builder defaults: VAT 20% on unless switched off here.
+    quoteIncludeVat: { type: Boolean, default: true },
     voiceEnabled: { type: Boolean, default: false },
     whatsappEnabled: { type: Boolean, default: false },
   },

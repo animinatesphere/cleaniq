@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Save, MessageCircle, PhoneCall } from "lucide-react";
+import { Save, MessageCircle, PhoneCall, FileText } from "lucide-react";
 import { aiApi } from "./api";
 
 const inputCls =
@@ -44,6 +44,7 @@ export default function AiSettingsPage() {
           serviceArea: s.serviceArea || "",
           transferNumber: s.transferNumber || "",
           suppliesFee: s.suppliesFee ?? 10,
+          quoteIncludeVat: s.quoteIncludeVat ?? true,
           instructions: s.instructions || "",
           voiceEnabled: Boolean(s.voiceEnabled),
           whatsappEnabled: Boolean(s.whatsappEnabled),
@@ -137,6 +138,14 @@ export default function AiSettingsPage() {
           />
           <p className="text-xs text-white/30 mt-1.5">Added to AI bookings when Cleaniq brings the supplies. Use 0 for no charge.</p>
         </div>
+
+        <Toggle
+          checked={form.quoteIncludeVat}
+          onChange={set("quoteIncludeVat")}
+          icon={FileText}
+          label="Add VAT (20%) to emailed quotes"
+          hint="Same as “Include VAT on quote” in the Quote Builder. Prices quoted in chat and bookings don't include VAT."
+        />
 
         <div>
           <label className={labelCls}>Area served</label>

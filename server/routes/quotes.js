@@ -20,155 +20,157 @@ const FREQUENCY_LABELS = {
  * POST /api/quotes/send
  * Send a customized quote to a company email and persist it
  */
+// Sends a quote exactly as the admin Quote Builder does (email, Quote record, lead capture,
+// admin copy, follow-up automations). Shared by POST /send and the AI receptionist.
+async function sendQuote(body) {
+  const {
+    companyName,
+    contactName,
+    email,
+    phone,
+    address,
+    frequency,
+    quoteRef,
+    date,
+    items,
+    subtotal,
+    discountAmount,
+    subtotalAfterDiscount,
+    vat,
+    grandTotal,
+    validDays,
+    vatRate,
+    includeVat,
+    sendCopy,
+    paymentTerms,
+    depositRequired,
+    depositPercent,
+    depositAmount,
+    balanceDue,
+    discount,
+    notes,
+    serviceDate,
+    serviceTimeSlot,
+  } = body;
+
+  // Validation
+  if (!email || !companyName || !items || items.length === 0) {
+    throw Object.assign(new Error("Missing required fields: email, companyName, or items"), { status: 400 });
+  }
+
+  const quoteData = {
+    companyName,
+    contactName,
+    email,
+    phone,
+    address,
+    frequency,
+    quoteRef,
+    date,
+    items,
+    subtotal,
+    discountAmount,
+    subtotalAfterDiscount,
+    vat,
+    grandTotal,
+    validDays,
+    vatRate,
+    includeVat,
+    paymentTerms,
+    depositRequired,
+    depositPercent,
+    depositAmount,
+    balanceDue,
+    discount,
+    notes,
+    serviceDate,
+    serviceTimeSlot,
+  };
+
+  // Generate quote email HTML
+  const quoteHtml = generateQuoteEmail(quoteData);
+
+  // Send email to company
+  const emailSent = await sendEmail({
+    to: email,
+    subject: `Professional Cleaning Service Quote ${quoteRef}`,
+    html: quoteHtml,
+  });
+
+  if (!emailSent) {
+    throw Object.assign(new Error("Failed to send email. Please try again."), { status: 500 });
+  }
+
+  // Persist quote record
+  const quoteRecord = await Quote.create({
+    ...quoteData,
+    status: "sent",
+  });
+
+  // Capture the recipient as a lead (name/email/phone) so they're
+  // available for future email marketing campaigns.
+  try {
+    const leadEmail = (email || "").trim().toLowerCase();
+    if (leadEmail) {
+      const existingLead = await Lead.findOne({ email: leadEmail });
+      if (!existingLead) {
+        await Lead.create({
+          name: contactName || companyName || "",
+          email: leadEmail,
+          phone: phone || "",
+          source: "Quote",
+          acknowledged: true,
+        });
+      }
+    }
+  } catch (leadErr) {
+    console.error("⚠️ Failed to capture quote lead:", leadErr.message);
+  }
+
+  // Send copy to admin if requested
+  if (sendCopy) {
+    await sendEmail({
+      to: process.env.EMAIL_USER || "info@cleaniqservices.com",
+      subject: `Quote Sent - ${companyName} | ${quoteRef}`,
+      html: generateAdminNotificationEmail(quoteRecord),
+    });
+  }
+
+  // Schedule quote follow-up automations
+  try {
+    const now = new Date();
+    const firstName = contactName || companyName || "there";
+    const serviceLabel = items?.[0]?.description || "cleaning service";
+    const totalAmount = grandTotal || subtotal;
+    const payload = {
+      quoteId: quoteRecord._id.toString(),
+      quoteRef,
+      email,
+      firstName,
+      service: serviceLabel,
+      amount: totalAmount,
+    };
+    await scheduleTask("quote_followup_24h", new Date(now.getTime() + 24 * 60 * 60 * 1000), payload);
+    await scheduleTask("quote_followup_3d",  new Date(now.getTime() + 3  * 24 * 60 * 60 * 1000), payload);
+    await scheduleTask("lost_lead_7d",       new Date(now.getTime() + 7  * 24 * 60 * 60 * 1000), payload);
+  } catch (schedErr) {
+    console.error("⚠️ Failed to schedule quote automations:", schedErr.message);
+  }
+
+  return quoteRecord;
+}
+
 router.post("/send", async (req, res) => {
   try {
-    const {
-      companyName,
-      contactName,
-      email,
-      phone,
-      address,
-      frequency,
-      quoteRef,
-      date,
-      items,
-      subtotal,
-      discountAmount,
-      subtotalAfterDiscount,
-      vat,
-      grandTotal,
-      validDays,
-      vatRate,
-      includeVat,
-      sendCopy,
-      paymentTerms,
-      depositRequired,
-      depositPercent,
-      depositAmount,
-      balanceDue,
-      discount,
-      notes,
-      serviceDate,
-      serviceTimeSlot,
-    } = req.body;
-
-    // Validation
-    if (!email || !companyName || !items || items.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing required fields: email, companyName, or items",
-      });
-    }
-
-    const quoteData = {
-      companyName,
-      contactName,
-      email,
-      phone,
-      address,
-      frequency,
-      quoteRef,
-      date,
-      items,
-      subtotal,
-      discountAmount,
-      subtotalAfterDiscount,
-      vat,
-      grandTotal,
-      validDays,
-      vatRate,
-      includeVat,
-      paymentTerms,
-      depositRequired,
-      depositPercent,
-      depositAmount,
-      balanceDue,
-      discount,
-      notes,
-      serviceDate,
-      serviceTimeSlot,
-    };
-
-    // Generate quote email HTML
-    const quoteHtml = generateQuoteEmail(quoteData);
-
-    // Send email to company
-    const emailSent = await sendEmail({
-      to: email,
-      subject: `Professional Cleaning Service Quote ${quoteRef}`,
-      html: quoteHtml,
-    });
-
-    if (!emailSent) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to send email. Please try again.",
-      });
-    }
-
-    // Persist quote record
-    const quoteRecord = await Quote.create({
-      ...quoteData,
-      status: "sent",
-    });
-
-    // Capture the recipient as a lead (name/email/phone) so they're
-    // available for future email marketing campaigns.
-    try {
-      const leadEmail = (email || "").trim().toLowerCase();
-      if (leadEmail) {
-        const existingLead = await Lead.findOne({ email: leadEmail });
-        if (!existingLead) {
-          await Lead.create({
-            name: contactName || companyName || "",
-            email: leadEmail,
-            phone: phone || "",
-            source: "Quote",
-            acknowledged: true,
-          });
-        }
-      }
-    } catch (leadErr) {
-      console.error("⚠️ Failed to capture quote lead:", leadErr.message);
-    }
-
-    // Send copy to admin if requested
-    if (sendCopy) {
-      await sendEmail({
-        to: process.env.EMAIL_USER || "info@cleaniqservices.com",
-        subject: `Quote Sent - ${companyName} | ${quoteRef}`,
-        html: generateAdminNotificationEmail(quoteRecord),
-      });
-    }
-
-    // Schedule quote follow-up automations
-    try {
-      const now = new Date();
-      const firstName = contactName || companyName || "there";
-      const serviceLabel = items?.[0]?.description || "cleaning service";
-      const totalAmount = grandTotal || subtotal;
-      const payload = {
-        quoteId: quoteRecord._id.toString(),
-        quoteRef,
-        email,
-        firstName,
-        service: serviceLabel,
-        amount: totalAmount,
-      };
-      await scheduleTask("quote_followup_24h", new Date(now.getTime() + 24 * 60 * 60 * 1000), payload);
-      await scheduleTask("quote_followup_3d",  new Date(now.getTime() + 3  * 24 * 60 * 60 * 1000), payload);
-      await scheduleTask("lost_lead_7d",       new Date(now.getTime() + 7  * 24 * 60 * 60 * 1000), payload);
-    } catch (schedErr) {
-      console.error("⚠️ Failed to schedule quote automations:", schedErr.message);
-    }
-
+    const quoteRecord = await sendQuote(req.body);
     res.status(200).json({
       success: true,
-      message: `Quote sent successfully to ${email}`,
-      quoteRef,
+      message: `Quote sent successfully to ${req.body.email}`,
+      quoteRef: req.body.quoteRef,
       data: quoteRecord,
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, message: error.message });
     console.error("Quote send error:", error);
     res.status(500).json({
       success: false,
@@ -1138,3 +1140,4 @@ function calculateNextSendDate(frequency) {
 }
 
 module.exports = router;
+module.exports.sendQuote = sendQuote;
