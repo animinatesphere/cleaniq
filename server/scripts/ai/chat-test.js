@@ -14,7 +14,7 @@ const readline = require("readline");
 const mongoose = require("mongoose");
 const { getInstructions, CHANNELS } = require("../../utils/aiBrain");
 const { generateReply, PROVIDER } = require("../../utils/aiProvider");
-const { declarations, makeToolRunner } = require("../../utils/aiTools");
+const { declarations, makeToolRunner, confirmationTool } = require("../../utils/aiTools");
 
 const live = process.argv.includes("--live");
 const channel = process.argv.slice(2).find((a) => !a.startsWith("--")) || "whatsapp";
@@ -46,7 +46,7 @@ if (!CHANNELS.includes(channel)) {
       const reply = await generateReply({
         system,
         history: history.slice(-20),
-        ...(canBook ? { tools: declarations, runTool } : {}),
+        ...(canBook ? { tools: declarations, runTool, forceTool: confirmationTool(history.slice(-20)) } : {}),
       });
       const shown = reply || "(no reply — the real system would send a hand-off message here)";
       if (reply) history.push({ role: "ai", text: reply });

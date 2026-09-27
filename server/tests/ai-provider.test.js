@@ -120,3 +120,16 @@ test("tool loop: runs the tool, returns the model's turn unchanged, then gives t
   assert.deepEqual(second[1], modelTurn); // thought signature preserved
   assert.deepEqual(second[2], { role: "user", parts: [{ functionResponse: { id: "c1", name: "get_quote", response: { total: 74.7 } } }] });
 });
+
+test("forceTool adds a 'customer just confirmed' note to the instructions", async () => {
+  const capture = {};
+  await generateReply({
+    system: "RULES",
+    history: [{ role: "customer", text: "yes" }],
+    tools: [{ name: "create_booking" }],
+    runTool: async () => ({}),
+    forceTool: "create_booking",
+    client: fakeClient({ text: "ok" }, capture),
+  });
+  assert.match(capture.req.config.systemInstruction, /^RULES\n\nThe customer has just confirmed with yes\. Call create_booking now/);
+});

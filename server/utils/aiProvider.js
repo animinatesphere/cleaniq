@@ -101,8 +101,9 @@ async function callModel({ client, models, contents, system, tools, retryDelays 
  * @returns {Promise<string|null>} reply text, or null if the provider returned nothing usable
  * Retries the main model on temporary errors, then tries the fallback model once.
  */
-async function generateReply({ system, history, tools, runTool, client, retryDelays = RETRY_DELAYS_MS }) {
-  if (PROVIDER === "anthropic") return generateReplyClaude({ system, history, tools, runTool, client });
+async function generateReply({ system, history, tools, runTool, forceTool, client, retryDelays = RETRY_DELAYS_MS }) {
+  if (forceTool) system += `\n\nThe customer has just confirmed with yes. Call ${forceTool} now with customerConfirmed true, using the details from this conversation. Do not reply with text first.`;
+  if (PROVIDER === "anthropic") return generateReplyClaude({ system, history, tools, runTool, forceTool, client });
   if (PROVIDER !== "gemini") {
     throw new Error(`AI_PROVIDER "${PROVIDER}" is not supported (supported: gemini, anthropic)`);
   }
@@ -196,13 +197,17 @@ function claudeRequestOptions(model) {
   return options;
 }
 
-async function generateReplyClaude({ system, history, tools, runTool, client }) {
+async function generateReplyClaude({ system, history, tools, runTool, forceTool, client }) {
   const messages = toClaudeMessages(history);
   if (!messages.length) return null;
   const model = process.env.AI_MODEL || DEFAULT_MODELS.anthropic;
   const claudeTools = tools?.length && runTool
     ? tools.map((t) => ({ name: t.name, description: t.description, input_schema: t.parametersJsonSchema }))
     : null;
+
+  const options = claudeRequestOptions(model);
+  // Forcing a specific tool isn't allowed while thinking is on; those models get the system note only.
+  const canForce = claudeTools && forceTool && !options.thinking && claudeTools.some((t) => t.name === forceTool);
 
   const started = Date.now();
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
@@ -212,7 +217,8 @@ async function generateReplyClaude({ system, history, tools, runTool, client }) 
       system,
       messages,
       ...(claudeTools ? { tools: claudeTools } : {}),
-      ...claudeRequestOptions(model),
+      ...(canForce && round === 0 ? { tool_choice: { type: "tool", name: forceTool } } : {}),
+      ...options,
     });
 
     if (response.stop_reason === "refusal") {

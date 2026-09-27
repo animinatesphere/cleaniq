@@ -56,3 +56,16 @@ test("rejects unknown services and bad hours with a helpful message", () => {
   assert.match(calculateQuote(services, { service: "Deep Clean", hours: 0 }).error, /between 1 and 50/);
   assert.match(calculateQuote(services, { service: "Deep Clean", hours: 51 }).error, /between 1 and 50/);
 });
+
+test("recognises when the customer confirms a booking or reschedule", () => {
+  const { confirmationTool } = require("../utils/aiTools");
+  const summary = { role: "ai", text: "Here's your booking:\nDeep Clean, 3 hours\nTotal: £92.55\nReply YES to book it." };
+  const move = { role: "ai", text: "Move BK-1234 to Tuesday 30 September, 10am–1pm? Reply YES" };
+  assert.equal(confirmationTool([summary, { role: "customer", text: "Yes" }]), "create_booking");
+  assert.equal(confirmationTool([summary, { role: "customer", text: "yes please book it" }]), "create_booking");
+  assert.equal(confirmationTool([summary, { role: "customer", text: "ok go ahead" }]), "create_booking");
+  assert.equal(confirmationTool([move, { role: "customer", text: "yes" }]), "reschedule_booking");
+  assert.equal(confirmationTool([summary, { role: "customer", text: "no, change it to 4 hours" }]), null);
+  assert.equal(confirmationTool([summary, { role: "customer", text: "yes but can you also add oven cleaning and move it to 10am on Friday instead please" }]), null);
+  assert.equal(confirmationTool([{ role: "ai", text: "Would you like a quote?" }, { role: "customer", text: "yes" }]), null);
+});

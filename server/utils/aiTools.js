@@ -441,6 +441,17 @@ const declarations = [
   },
 ];
 
+// When our last message asked the customer to reply YES and they did, the booking/reschedule
+// tool must run now; small models sometimes answer in text instead of calling it.
+const YES_RE = /^\s*(yes|yeah|yep|yup|ya|y|confirm(ed)?|go ahead|book it|please book|ok(ay)?|sure|correct|that'?s (right|correct|fine)|do it|perfect)\b/i;
+function confirmationTool(history) {
+  const last = history[history.length - 1];
+  if (!last || last.role !== "customer" || !YES_RE.test(last.text || "") || (last.text || "").length > 80) return null;
+  const previous = [...history.slice(0, -1)].reverse().find((m) => m.role !== "customer");
+  if (!previous || !/reply yes/i.test(previous.text || "")) return null;
+  return /\bmove\b|reschedul/i.test(previous.text) ? "reschedule_booking" : "create_booking";
+}
+
 /** Returns a runner bound to one conversation. ctx: { phone, conversationId, dryRun } */
 function makeToolRunner(ctx) {
   return async function runTool(name, args = {}) {
@@ -471,5 +482,6 @@ module.exports = {
   rescheduleAiBooking,
   normaliseTime,
   formatWindow,
+  confirmationTool,
   SPECIFIC_TIMES,
 };
