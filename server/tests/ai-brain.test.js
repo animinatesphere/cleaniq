@@ -36,10 +36,14 @@ test("booking rules only when the channel can book", () => {
   const withTools = buildInstructions({ channel: "whatsapp", settings, knowledge, services, now, canBook: true });
   assert.match(withTools, /call get_quote/);
   assert.match(withTools, /create_booking with customerConfirmed true/);
-  assert.match(withTools, /ask for ALL missing required details in ONE message/);
-  assert.match(withTools, /Do not ask for bedrooms, bathrooms, pets or access notes/);
-  assert.match(withTools, /Never ask one question per message/);
-  assert.match(withTools, /Example of the pattern to follow/);
+  assert.match(withTools, /send ONE numbered list asking only for what is still missing, in this order/);
+  assert.match(withTools, /Cleaning supplies and equipment: shall we bring them \(£10\.00 per visit\)/);
+  assert.match(withTools, /call find_my_bookings/);
+  assert.match(withTools, /call reschedule_booking with customerConfirmed true/);
+  assert.match(withTools, /Example of the booking pattern/);
+  assert.match(withTools, /Never offer Morning, Afternoon or Evening/);
+  assert.match(withTools, /what time they'd like the cleaner to arrive/);
+  assert.match(withTools, /Cleaning supplies & equipment: £10\.00 per visit if we bring them/);
   // the short-reply rule must not fight the booking list
   assert.match(withTools, /Exception: when collecting booking details or sending a booking summary, use a short numbered list/);
   const without = buildInstructions({ channel: "voice", settings, knowledge, services, now });

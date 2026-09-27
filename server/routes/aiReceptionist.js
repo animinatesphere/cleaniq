@@ -62,6 +62,13 @@ router.put("/settings", async (req, res) => {
     for (const field of ["voiceEnabled", "whatsappEnabled"]) {
       if (typeof req.body[field] === "boolean") update[field] = req.body[field];
     }
+    if (req.body.suppliesFee !== undefined) {
+      const fee = Number(req.body.suppliesFee);
+      if (!Number.isFinite(fee) || fee < 0 || fee > 500) {
+        return res.status(400).json({ message: "Supplies fee must be a number between 0 and 500" });
+      }
+      update.suppliesFee = Math.round(fee * 100) / 100;
+    }
     if (typeof req.body.transferNumber === "string") {
       const raw = req.body.transferNumber.trim();
       const normalised = toE164UK(raw);
