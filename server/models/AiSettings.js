@@ -11,6 +11,8 @@ const aiSettingsSchema = new mongoose.Schema(
     instructions: { type: String, default: "" },
     // UK number (E.164, e.g. +447700900123) that phone calls are transferred to.
     transferNumber: { type: String, default: "", trim: true },
+    // Added to AI bookings when Cleaniq brings the cleaning supplies and equipment (per visit).
+    suppliesFee: { type: Number, default: 10, min: 0 },
     voiceEnabled: { type: Boolean, default: false },
     whatsappEnabled: { type: Boolean, default: false },
   },

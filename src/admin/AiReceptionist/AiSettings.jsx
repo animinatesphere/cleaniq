@@ -43,6 +43,7 @@ export default function AiSettingsPage() {
           businessName: s.businessName || "",
           serviceArea: s.serviceArea || "",
           transferNumber: s.transferNumber || "",
+          suppliesFee: s.suppliesFee ?? 10,
           instructions: s.instructions || "",
           voiceEnabled: Boolean(s.voiceEnabled),
           whatsappEnabled: Boolean(s.whatsappEnabled),
@@ -122,6 +123,19 @@ export default function AiSettingsPage() {
               className={inputCls}
             />
           </div>
+        </div>
+
+        <div>
+          <label className={labelCls}>Supplies &amp; equipment fee (£ per visit)</label>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={form.suppliesFee}
+            onChange={(e) => set("suppliesFee")(e.target.value)}
+            className={inputCls}
+          />
+          <p className="text-xs text-white/30 mt-1.5">Added to AI bookings when Cleaniq brings the supplies. Use 0 for no charge.</p>
         </div>
 
         <div>
