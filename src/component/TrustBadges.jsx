@@ -54,8 +54,8 @@ const badges = [
         />
       </svg>
     ),
-    title: "4.9/5 · Excellent",
-    subtitle: "Average score out of 286,000 cleaning sessions",
+    title: "5.0★ on Google",
+    subtitle: "Rated 5 stars from 19 Google reviews",
   },
   {
     icon: (

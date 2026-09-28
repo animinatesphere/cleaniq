@@ -83,10 +83,7 @@ const Home = () => {
   return (
     <div className="overflow-x-hidden bg-white">
       <Helmet>
-        <title>
-          Professional Cleaning Services in Manchester | Domestic, Office &
-          Airbnb Cleaning
-        </title>
+        <title>House Cleaning Manchester | Eco-Friendly Cleaners | Cleaniq</title>
         <meta
           name="description"
           content="Premium eco-friendly cleaning services in Manchester — end of tenancy, deep cleaning, Airbnb turnovers, office and post-construction cleaning. Book online in 60 seconds."
@@ -95,7 +92,7 @@ const Home = () => {
         <meta
           property="og:title"
           content={
-            "Professional Cleaning Services in Manchester | Domestic, Office & Airbnb Cleaning"
+            "House Cleaning Manchester | Eco-Friendly Cleaners | Cleaniq"
           }
         />
         <meta
@@ -221,9 +218,9 @@ const Home = () => {
             <p className="text-base md:text-xl text-slate-600 mb-6 md:mb-10 max-w-lg leading-relaxed font-medium">
               We provide the most reliable{" "}
               {region.id === "UK"
-                ? "End of Tenancy Cleaning "
+                ? "End of Tenancy Cleaning. "
                 : "professional maid and janitorial services"}
-              . Whether you need a regular weekly clean or specialized Airbnb
+              Whether you need a regular weekly clean or specialized Airbnb
               cleaning, our vetted pros handle the meticulous care of your
               space.
             </p>
@@ -319,7 +316,7 @@ const Home = () => {
                     ))}
                   </div>
                   <p className="text-[10px] font-black text-primary-dark uppercase tracking-widest">
-                    4.9/5 from 2k+ users.
+                    5.0★ on Google · 19 reviews
                   </p>
                 </div>
               </div>
@@ -375,9 +372,9 @@ const Home = () => {
                 : "Nigerian homes & offices"}
             </h3>
             <p className="text-lg text-slate-500 font-medium">
-              Whether it's a{" "}
+              Whether it's{" "}
               {region.id === "UK"
-                ? "end of tenancy clean"
+                ? "an end-of-tenancy clean"
                 : "regular maintenance"}{" "}
               or a deep seasonal refresh, we have the right pros for you.
               {region.id === "NG" && (
@@ -540,15 +537,15 @@ const Home = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-6 mb-10">
                 <div className="flex-1 p-6 rounded-3xl bg-slate-50 border border-slate-100">
-                  <p className="text-3xl font-black text-primary mb-1">500+</p>
+                  <p className="text-3xl font-black text-primary mb-1">5.0★</p>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                    Active Pros
+                    Google rating · 19 reviews
                   </p>
                 </div>
                 <div className="flex-1 p-6 rounded-3xl bg-slate-50 border border-slate-100">
-                  <p className="text-3xl font-black text-primary mb-1">98%</p>
+                  <p className="text-3xl font-black text-primary mb-1">48hr</p>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                    Satisfaction Rate
+                    Re-clean guarantee
                   </p>
                 </div>
               </div>
@@ -672,7 +669,7 @@ const Home = () => {
               },
               {
                 q: "Do I need to provide cleaning supplies?",
-                a: "Most clients prefer us to use their own supplies, but we`re happy eco-friendly cleaning products for a small additional fee.",
+                a: "Many clients prefer us to use their own supplies, but we're happy to bring eco-friendly cleaning products and equipment for £10 per visit.",
               },
             ].map((faq, i) => (
               <details
@@ -1006,7 +1003,7 @@ const Home = () => {
             Ready to experience a cleaner home?
           </h2>
           <p className="text-xl text-slate-600 mb-12 font-medium">
-            Join 2,000+ happy customers today.
+            Join our happy customers across Manchester today.
           </p>
           <Link
             to="/booking"

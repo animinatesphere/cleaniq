@@ -307,8 +307,8 @@ const CityLanding = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { number: "500+", label: "Active Professionals" },
-              { number: "98%", label: "Satisfaction Rate" },
+              { number: "5.0★", label: "Google Rating (19 Reviews)" },
+              { number: "48hr", label: "Re-clean Guarantee" },
               { number: "24/7", label: "Customer Support" },
               { number: "100%", label: "Background Checked" },
             ].map((stat, idx) => (

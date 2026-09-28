@@ -390,6 +390,9 @@ async function sendAiQuote(args, ctx) {
   const problems = [];
   if (!args.customerName || String(args.customerName).trim().length < 2) problems.push("their name (or company name)");
   if (!EMAIL_RE.test(args.email || "")) problems.push("a valid email address to send the quote to");
+  const quotePhone = toE164UK(args.phone) || (args.phone ? "" : null);
+  if (quotePhone === "") problems.push("a valid phone number");
+  if (quotePhone === null) problems.push("their phone number");
   if (!args.address || String(args.address).trim().length < 5) problems.push("the property address");
   if (!(args.services || []).length) problems.push("the service(s) and hours");
   if (!["Cleaniq", "Customer"].includes(args.suppliesProvidedBy)) problems.push("who provides the cleaning supplies and equipment");
@@ -427,7 +430,7 @@ async function sendAiQuote(args, ctx) {
     companyName: company || customerName,
     contactName: company ? customerName : "",
     email: String(args.email).trim().toLowerCase(),
-    phone: ctx.phone,
+    phone: quotePhone,
     address: String(args.address).trim(),
     frequency,
     serviceDate,
@@ -466,7 +469,7 @@ async function sendAiQuote(args, ctx) {
   if (!args.customerConfirmed) {
     return { preview: true, ...figures, nextStep: "Show the customer these figures and ask them to reply YES to have the quote emailed." };
   }
-  const recent = await (require("../models/Quote")).countDocuments({ phone: ctx.phone, createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } });
+  const recent = await (require("../models/Quote")).countDocuments({ phone: { $in: [ctx.phone, quotePhone] }, createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } });
   if (recent >= MAX_AI_QUOTES_PER_PHONE_PER_DAY) {
     return { error: "Several quotes were already sent from this chat today. Offer to have the team follow up instead." };
   }
@@ -562,6 +565,7 @@ const declarations = [
       properties: {
         customerName: { type: "string", description: "Customer's full name" },
         companyName: { type: "string", description: "Only if the quote is for a business" },
+        phone: { type: "string", description: "Customer's phone number as they gave it" },
         email: { type: "string" },
         address: { type: "string", description: "Property address with postcode" },
         services: {
@@ -585,7 +589,7 @@ const declarations = [
         notes: { type: "string" },
         customerConfirmed: { type: "boolean" },
       },
-      required: ["customerName", "email", "address", "services", "suppliesProvidedBy", "customerConfirmed"],
+      required: ["customerName", "email", "phone", "address", "services", "suppliesProvidedBy", "customerConfirmed"],
     },
   },
   {
