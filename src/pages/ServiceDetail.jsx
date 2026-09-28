@@ -1208,12 +1208,6 @@ const ServiceDetail = () => {
                   addressCountry: "GB",
                 },
               },
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: "4.9",
-                reviewCount: "2000",
-                bestRating: "5",
-              },
             })}
           </script>
         </Helmet>
@@ -1262,9 +1256,9 @@ const ServiceDetail = () => {
                     ))}
                   </div>
                   <span className="text-sm text-slate-300">
-                    4.9 ·{" "}
+                    5.0 ·{" "}
                     <span className="text-white font-semibold">
-                      2,000+ cleans
+                      19 Google reviews
                     </span>
                   </span>
                 </div>
@@ -1316,8 +1310,7 @@ const ServiceDetail = () => {
         <div className="bg-[#0A1520] text-white">
           <div className="px-4 sm:px-6 lg:px-10 xl:px-16 py-4 flex flex-wrap gap-6 sm:gap-10 items-center">
             {[
-              { value: "2,000+", label: "Cleans completed" },
-              { value: "4.9★", label: "Average rating" },
+              { value: "5.0★", label: "Google rating (19 reviews)" },
               { value: "48hr", label: "Re-clean guarantee" },
               { value: "100%", label: "Deposit protection goal" },
             ].map(({ value, label }) => (
@@ -1561,7 +1554,7 @@ const ServiceDetail = () => {
                         },
                         {
                           icon: <Star size={15} />,
-                          text: "4.9★ from 2,000+ cleans",
+                          text: "5.0★ from 19 Google reviews",
                         },
                       ].map(({ icon, text }) => (
                         <div

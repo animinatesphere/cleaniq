@@ -316,7 +316,7 @@ const Home = () => {
                     ))}
                   </div>
                   <p className="text-[10px] font-black text-primary-dark uppercase tracking-widest">
-                    4.9/5 from 2k+ users.
+                    5.0★ on Google · 19 reviews
                   </p>
                 </div>
               </div>
@@ -537,15 +537,15 @@ const Home = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-6 mb-10">
                 <div className="flex-1 p-6 rounded-3xl bg-slate-50 border border-slate-100">
-                  <p className="text-3xl font-black text-primary mb-1">500+</p>
+                  <p className="text-3xl font-black text-primary mb-1">5.0★</p>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                    Active Pros
+                    Google rating · 19 reviews
                   </p>
                 </div>
                 <div className="flex-1 p-6 rounded-3xl bg-slate-50 border border-slate-100">
-                  <p className="text-3xl font-black text-primary mb-1">98%</p>
+                  <p className="text-3xl font-black text-primary mb-1">48hr</p>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                    Satisfaction Rate
+                    Re-clean guarantee
                   </p>
                 </div>
               </div>
@@ -1003,7 +1003,7 @@ const Home = () => {
             Ready to experience a cleaner home?
           </h2>
           <p className="text-xl text-slate-600 mb-12 font-medium">
-            Join 2,000+ happy customers today.
+            Join our happy customers across Manchester today.
           </p>
           <Link
             to="/booking"
