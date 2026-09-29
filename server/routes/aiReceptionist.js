@@ -6,6 +6,7 @@ const AiSettings = require("../models/AiSettings");
 const KnowledgeEntry = require("../models/KnowledgeEntry");
 const AiConversation = require("../models/AiConversation");
 const AiCall = require("../models/AiCall");
+const AiMessage = require("../models/AiMessage");
 const { getInstructions, CHANNELS } = require("../utils/aiBrain");
 const { toE164UK } = require("../utils/phone");
 
@@ -16,15 +17,16 @@ router.get("/overview", async (req, res) => {
   try {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
-    const [settings, knowledgeCount, conversations, needsHuman, callsToday, callsTotal, transferredToday] =
+    const [settings, knowledgeCount, conversations, needsHuman, callsToday, callsTotal, transferredToday, conversationsTotal] =
       await Promise.all([
         AiSettings.get(),
         KnowledgeEntry.countDocuments({ active: true }),
         AiConversation.countDocuments({ status: { $ne: "closed" } }),
-        AiConversation.countDocuments({ status: "human" }),
+        AiConversation.countDocuments({ $or: [{ status: "human" }, { needsAttention: true }] }),
         AiCall.countDocuments({ startedAt: { $gte: startOfToday } }),
         AiCall.countDocuments(),
         AiCall.countDocuments({ startedAt: { $gte: startOfToday }, transferred: true }),
+        AiConversation.countDocuments(),
       ]);
     res.json({
       voiceEnabled: settings.voiceEnabled,
@@ -36,6 +38,7 @@ router.get("/overview", async (req, res) => {
       callsToday,
       callsTotal,
       transferredToday,
+      conversationsTotal,
     });
   } catch (err) {
     console.error("[ai-receptionist] overview failed:", err);
@@ -146,6 +149,106 @@ router.get("/prompt-preview", async (req, res) => {
   } catch (err) {
     console.error("[ai-receptionist] prompt preview failed:", err);
     res.status(500).json({ message: "Failed to build preview" });
+  }
+});
+
+// ── Conversations (WhatsApp) ──────────────────────────────────────
+const WINDOW_MS = 24 * 60 * 60 * 1000; // WhatsApp free-form reply window after the customer's last message
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const windowInfo = (c) => {
+  const last = c.lastCustomerMessageAt ? new Date(c.lastCustomerMessageAt).getTime() : 0;
+  const closesAt = last ? new Date(last + WINDOW_MS) : null;
+  return { replyWindowOpen: Boolean(last && Date.now() < last + WINDOW_MS), replyWindowClosesAt: closesAt };
+};
+
+router.get("/conversations", async (req, res) => {
+  try {
+    const filter = {};
+    if (["ai", "human", "closed"].includes(req.query.status)) filter.status = req.query.status;
+    if (req.query.attention === "1") filter.needsAttention = true;
+    const q = String(req.query.q || "").trim();
+    if (q) filter.$or = [{ phone: { $regex: escapeRegex(q) } }, { name: { $regex: escapeRegex(q), $options: "i" } }];
+    const conversations = await AiConversation.find(filter).sort({ lastMessageAt: -1 }).limit(200).lean();
+    res.json(conversations.map((c) => ({ ...c, ...windowInfo(c) })));
+  } catch (err) {
+    console.error("[ai-receptionist] list conversations failed:", err);
+    res.status(500).json({ message: "Failed to load conversations" });
+  }
+});
+
+router.get("/conversations/:id", async (req, res) => {
+  try {
+    const conversation = await AiConversation.findByIdAndUpdate(req.params.id, { $set: { unreadCount: 0 } }, { new: true }).lean();
+    if (!conversation) return res.status(404).json({ message: "Conversation not found" });
+    const messages = await AiMessage.find({ conversation: conversation._id }).sort({ createdAt: 1 }).limit(500).lean();
+    res.json({ conversation: { ...conversation, ...windowInfo(conversation) }, messages });
+  } catch (err) {
+    console.error("[ai-receptionist] get conversation failed:", err);
+    res.status(500).json({ message: "Failed to load conversation" });
+  }
+});
+
+// Take over (human), hand back to the AI (ai), or archive (closed).
+router.post("/conversations/:id/status", async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!["ai", "human", "closed"].includes(status)) return res.status(400).json({ message: "Invalid status" });
+    const update = { status };
+    if (status === "ai") update.needsAttention = false;
+    const conversation = await AiConversation.findByIdAndUpdate(req.params.id, { $set: update }, { new: true }).lean();
+    if (!conversation) return res.status(404).json({ message: "Conversation not found" });
+    console.log(`[ai-receptionist] ${conversation.phone} set to ${status} by ${req.admin.username || req.admin._id}`);
+    res.json({ ...conversation, ...windowInfo(conversation) });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Staff reply from the admin. WhatsApp only allows free text within 24h of the customer's last message.
+router.post("/conversations/:id/reply", async (req, res) => {
+  try {
+    const text = String(req.body.text || "").trim();
+    if (!text) return res.status(400).json({ message: "Message is empty" });
+    if (text.length > 1600) return res.status(400).json({ message: "Message is too long (max 1600 characters)" });
+    const conversation = await AiConversation.findById(req.params.id);
+    if (!conversation) return res.status(404).json({ message: "Conversation not found" });
+    if (!windowInfo(conversation).replyWindowOpen) {
+      return res.status(400).json({
+        message: "WhatsApp's 24-hour reply window has closed. The customer must message you first before you can reply.",
+      });
+    }
+    // Replying as staff means a person is handling this chat now.
+    if (conversation.status === "ai") await AiConversation.updateOne({ _id: conversation._id }, { $set: { status: "human" } });
+    const { sendAndRecord } = require("../utils/whatsapp");
+    const message = await sendAndRecord(conversation, "staff", text, { staff: req.admin._id });
+    if (message.deliveryStatus === "failed") {
+      return res.status(502).json({ message: `WhatsApp didn't accept the message: ${message.error}`, sent: message });
+    }
+    res.status(201).json(message);
+  } catch (err) {
+    console.error("[ai-receptionist] staff reply failed:", err);
+    res.status(500).json({ message: "Failed to send reply" });
+  }
+});
+
+// ── Calls ─────────────────────────────────────────────────────────
+router.get("/calls", async (req, res) => {
+  try {
+    const calls = await AiCall.find().sort({ startedAt: -1 }).limit(200).select("-transcript").lean();
+    res.json(calls);
+  } catch (err) {
+    console.error("[ai-receptionist] list calls failed:", err);
+    res.status(500).json({ message: "Failed to load calls" });
+  }
+});
+
+router.get("/calls/:id", async (req, res) => {
+  try {
+    const call = await AiCall.findById(req.params.id).lean();
+    if (!call) return res.status(404).json({ message: "Call not found" });
+    res.json(call);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
 

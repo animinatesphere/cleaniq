@@ -1,0 +1,96 @@
+// Twilio Voice webhooks for the AI receptionist.
+// In Twilio, set the phone number's "A call comes in" webhook (HTTP POST) to:
+//   https://<your API domain>/api/voice/incoming
+const express = require("express");
+const twilio = require("twilio");
+const router = express.Router();
+const AiSettings = require("../models/AiSettings");
+const AiCall = require("../models/AiCall");
+const { getTwilioCredentials } = require("../utils/whatsapp");
+const { issueCallToken, greetingFor, RELAY_PATH } = require("../utils/voice");
+
+const publicBase = (req) =>
+  (process.env.PUBLIC_API_URL ? process.env.PUBLIC_API_URL : `${req.protocol}://${req.get("host")}`).replace(/\/+$/, "");
+
+const xml = (s) =>
+  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+
+const twiml = (res, body) => res.type("text/xml").send(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`);
+
+const dialTeam = (number) => `<Dial>${xml(number)}</Dial>`;
+const sorryMessage =
+  '<Say language="en-GB">Sorry, we can\'t take your call right now. Please message us on WhatsApp on this number, or try again later. Goodbye.</Say><Hangup/>';
+
+// Same check as the WhatsApp webhook: the request really came from our Twilio account.
+async function verifyTwilio(req, res) {
+  const { token } = await getTwilioCredentials();
+  if (!token) {
+    console.error("[voice] webhook rejected: Twilio auth token not configured");
+    res.status(503).send("Not configured");
+    return false;
+  }
+  const url = publicBase(req) + req.originalUrl;
+  if (!twilio.validateRequest(token, req.get("X-Twilio-Signature") || "", url, req.body || {})) {
+    console.warn(`[voice] webhook rejected: bad signature (url used: ${url})`);
+    res.status(403).send("Invalid signature");
+    return false;
+  }
+  return true;
+}
+
+router.post("/incoming", async (req, res) => {
+  try {
+    if (!(await verifyTwilio(req, res))) return;
+    const settings = await AiSettings.get();
+    const callSid = req.body.CallSid;
+    console.log(`[voice] incoming call ${callSid} from ${req.body.From}`);
+
+    if (!settings.voiceEnabled) {
+      return twiml(res, settings.transferNumber ? dialTeam(settings.transferNumber) : sorryMessage);
+    }
+
+    const base = publicBase(req);
+    const relayUrl = base.replace(/^http/, "ws") + RELAY_PATH;
+    const token = issueCallToken(callSid);
+    twiml(
+      res,
+      `<Connect action="${xml(base + "/api/voice/after")}">` +
+        `<ConversationRelay url="${xml(relayUrl)}" language="en-GB" welcomeGreeting="${xml(greetingFor(settings))}">` +
+        `<Parameter name="token" value="${token}"/>` +
+        `</ConversationRelay></Connect>`,
+    );
+  } catch (err) {
+    console.error("[voice] incoming call failed:", err);
+    twiml(res, sorryMessage);
+  }
+});
+
+// Twilio calls this when the AI session ends (we sent "end", or it failed).
+router.post("/after", async (req, res) => {
+  try {
+    if (!(await verifyTwilio(req, res))) return;
+    const settings = await AiSettings.get();
+    let handoff = {};
+    try {
+      handoff = JSON.parse(req.body.HandoffData || "{}");
+    } catch {
+      handoff = {};
+    }
+    const failed = Boolean(req.body.ErrorCode) || /fail/i.test(req.body.SessionStatus || "");
+    if (failed) console.error(`[voice] session for ${req.body.CallSid} failed: ${req.body.ErrorCode} ${req.body.ErrorMessage || ""}`);
+
+    // Transfer when the AI asked for it, or when the AI session broke (a person is better than silence).
+    if ((handoff.reason === "transfer" || failed) && settings.transferNumber) {
+      if (failed) {
+        await AiCall.updateOne({ twilioCallSid: req.body.CallSid }, { $set: { transferred: true, endReason: "ai session failed; transferred" } });
+      }
+      return twiml(res, dialTeam(settings.transferNumber));
+    }
+    twiml(res, failed ? sorryMessage : "<Hangup/>");
+  } catch (err) {
+    console.error("[voice] after-session handling failed:", err);
+    twiml(res, "<Hangup/>");
+  }
+});
+
+module.exports = router;

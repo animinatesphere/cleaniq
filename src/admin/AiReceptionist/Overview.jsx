@@ -52,8 +52,8 @@ export default function AiOverview() {
   const checklist = [
     { done: data.knowledgeCount > 0, label: "Add business information (hours, areas, policies)", to: "/admin/ai/knowledge" },
     { done: data.transferNumberSet, label: "Set the phone number calls transfer to", to: "/admin/ai/settings" },
-    { done: false, label: "Connect WhatsApp (Meta WhatsApp Cloud API)", note: "Next step" },
-    { done: false, label: "Connect the phone line (Twilio)", note: "Later step" },
+    { done: data.conversationsTotal > 0, label: "Connect WhatsApp (Twilio)", to: "/admin/ai/conversations" },
+    { done: data.callsTotal > 0, label: "Connect the phone line (Twilio)", to: "/admin/ai/calls" },
   ];
 
   return (
@@ -65,7 +65,7 @@ export default function AiOverview() {
           label="Need a human"
           value={data.needsHuman}
           tone={data.needsHuman ? "text-amber-400" : "text-white"}
-          sub="Chats staff have taken over"
+          sub="Taken over, or flagged by the AI"
         />
         <StatCard icon={PhoneCall} label="Calls today" value={data.callsToday} sub={<ChannelBadge on={data.voiceEnabled} />} />
         <StatCard icon={BookOpen} label="Knowledge entries" value={data.knowledgeCount} sub="Active entries the AI can use" />
