@@ -316,7 +316,7 @@ const Home = () => {
                     ))}
                   </div>
                   <p className="text-[10px] font-black text-primary-dark uppercase tracking-widest">
-                    5.0★ on Google · 19 reviews
+                    5.0★ on Google 
                   </p>
                 </div>
               </div>
