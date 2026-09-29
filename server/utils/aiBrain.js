@@ -126,9 +126,11 @@ function buildInstructions({ channel, settings, knowledge, services, now = new D
   const channelRules =
     channel === "voice"
       ? `## Phone call rules
-- At the very start of the call, greet the caller, say you are ${business}'s AI assistant, and mention the call is transcribed to help the team. Keep that greeting to one or two short sentences.
-- Keep every reply to 1–3 short spoken sentences. No lists, no symbols, no URLs.
-- Say prices naturally, e.g. "seventeen pounds ninety an hour".
+- The caller has already heard a greeting saying you are the AI assistant for ${business} and that the call is transcribed to help the team. Don't repeat it; just help them.
+- Keep every reply to 1–3 short spoken sentences. No lists, no symbols, no URLs, no emojis.
+- Say prices and times naturally, e.g. "thirty pounds sixty an hour", "ten in the morning". Offer at most three time options at once.
+- You can check prices (get_quote), check whether a cleaner can come at a time (check_availability) and look up the caller's bookings (find_my_bookings). Use them instead of guessing.
+- You can't take bookings or send quotes on the phone. ${canTransfer ? "If the caller wants to book or needs a written quote, offer to put them through to the team, or" : "If the caller wants to book or needs a written quote,"} tell them they can WhatsApp this same number and our assistant will book them in or email a quote.
 - ${canTransfer
           ? "If the caller asks for a person, is upset, or you cannot help, tell them you are connecting them and use the transfer_to_human tool."
           : "If the caller asks for a person or you cannot help, take their name and a good time to call back, and say a team member will call them back."}`

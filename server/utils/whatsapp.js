@@ -51,8 +51,14 @@ async function sendWhatsApp(to, body) {
 }
 
 // Saves our outgoing message and sends it. Never throws: a failed send is recorded on the message.
-async function sendAndRecord(conversation, role, text, { send = sendWhatsApp } = {}) {
-  const message = await AiMessage.create({ conversation: conversation._id, role, text });
+async function sendAndRecord(conversation, role, text, { send = sendWhatsApp, tools, staff } = {}) {
+  const message = await AiMessage.create({
+    conversation: conversation._id,
+    role,
+    text,
+    ...(tools?.length ? { tools } : {}),
+    ...(staff ? { staff } : {}),
+  });
   try {
     await send(conversation.phone, text);
     message.deliveryStatus = "sent";
@@ -124,13 +130,18 @@ async function replyOnce(conversationId, { ai = generateReply, send = sendWhatsA
   if (!history.length || history[history.length - 1].role !== "customer") return;
 
   let reply = null;
+  const toolEvents = [];
   try {
     const system = await getInstructions("whatsapp", { customerName: conversation.name, canBook: true });
     reply = await ai({
       system,
       history,
       tools: bookingTools,
-      runTool: makeToolRunner({ phone: conversation.phone, conversationId: String(conversation._id) }),
+      runTool: makeToolRunner({
+        phone: conversation.phone,
+        conversationId: String(conversation._id),
+        onTool: (event) => toolEvents.push(event),
+      }),
       forceTool: confirmationTool(history),
     });
   } catch (err) {
@@ -140,10 +151,10 @@ async function replyOnce(conversationId, { ai = generateReply, send = sendWhatsA
     // AI unavailable or gave nothing: apologise and flag the chat for staff, but keep the AI on
     // so the customer's next message is answered once the provider recovers.
     await AiConversation.updateOne({ _id: conversation._id }, { $set: { needsAttention: true } });
-    await sendAndRecord(conversation, "ai", AI_ERROR_TEXT, { send });
+    await sendAndRecord(conversation, "ai", AI_ERROR_TEXT, { send, tools: toolEvents });
     return;
   }
-  await sendAndRecord(conversation, "ai", reply, { send });
+  await sendAndRecord(conversation, "ai", reply, { send, tools: toolEvents });
 }
 
 /**

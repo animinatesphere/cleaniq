@@ -66,7 +66,8 @@ test("includes knowledge, staff instructions and UK time", () => {
 
 test("voice prompt discloses AI + transcription and uses the transfer tool when a number is set", () => {
   const p = buildInstructions({ channel: "voice", settings, knowledge, services, now });
-  assert.match(p, /AI assistant, and mention the call is transcribed/);
+  assert.match(p, /already heard a greeting saying you are the AI assistant for Cleaniq Services and that the call is transcribed/);
+  assert.match(p, /check_availability/);
   assert.match(p, /transfer_to_human/);
   assert.match(p, /1–3 short spoken sentences/);
 });

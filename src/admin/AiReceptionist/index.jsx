@@ -3,8 +3,8 @@ import { Bot, LayoutDashboard, MessageCircle, PhoneCall, BookOpen, SlidersHorizo
 
 const TABS = [
   { to: "/admin/ai", label: "Overview", icon: LayoutDashboard, end: true },
-  { label: "WhatsApp Inbox", icon: MessageCircle, soon: true },
-  { label: "Call Log", icon: PhoneCall, soon: true },
+  { to: "/admin/ai/conversations", label: "Conversations", icon: MessageCircle },
+  { to: "/admin/ai/calls", label: "Calls", icon: PhoneCall },
   { to: "/admin/ai/knowledge", label: "Knowledge", icon: BookOpen },
   { to: "/admin/ai/settings", label: "AI Settings", icon: SlidersHorizontal },
 ];

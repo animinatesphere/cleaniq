@@ -148,6 +148,7 @@ const devpanelRoutes  = require("./routes/devpanel");
 const couponRoutes    = require("./routes/coupons");
 const aiReceptionistRoutes = require("./routes/aiReceptionist");
 const whatsappRoutes = require("./routes/whatsapp");
+const voiceRoutes = require("./routes/voice");
 
 // ── Maintenance mode gate (devpanel routes bypass it) ─────────────
 app.use((req, res, next) => {
@@ -231,6 +232,7 @@ app.use("/api/devpanel", devpanelRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/ai-receptionist", aiReceptionistRoutes);
 app.use("/api/whatsapp", whatsappRoutes);
+app.use("/api/voice", voiceRoutes);
 
 // Stripe webhook endpoint (raw body required)
 const { scheduleTask } = require("./utils/automationEngine");
@@ -556,6 +558,8 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || "Internal server error" });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
+// Phone calls: Twilio ConversationRelay connects over a WebSocket on the same port.
+require("./utils/voice").attachVoiceRelay(server);

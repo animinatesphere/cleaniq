@@ -85,6 +85,8 @@ import AiReceptionistLayout from "./admin/AiReceptionist";
 import AiOverview from "./admin/AiReceptionist/Overview";
 import AiKnowledge from "./admin/AiReceptionist/Knowledge";
 import AiSettingsPage from "./admin/AiReceptionist/AiSettings";
+import AiConversations from "./admin/AiReceptionist/Conversations";
+import AiCalls from "./admin/AiReceptionist/Calls";
 
 function App() {
   const location = useLocation();
@@ -188,6 +190,8 @@ function App() {
                 <Route index element={<AiOverview />} />
                 <Route path="knowledge" element={<AiKnowledge />} />
                 <Route path="settings" element={<AiSettingsPage />} />
+                <Route path="conversations" element={<AiConversations />} />
+                <Route path="calls" element={<AiCalls />} />
               </Route>
             </Route>
           </Routes>

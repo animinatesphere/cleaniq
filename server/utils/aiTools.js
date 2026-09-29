@@ -625,9 +625,43 @@ function confirmationTool(history) {
   return "create_booking";
 }
 
-/** Returns a runner bound to one conversation. ctx: { phone, conversationId, dryRun } */
+// One-line summary of a tool call for the Conversations page.
+function describeToolResult(name, args = {}, r = {}) {
+  if (!r || r.error) return { name, ok: false, detail: `${name}: ${r?.error || "failed"}` };
+  const money = (n) => (typeof n === "number" ? `£${n.toFixed(2)}` : "");
+  switch (name) {
+    case "get_quote":
+      return { name, ok: true, detail: `Price check: ${r.service}, ${r.hours}h → ${money(r.total)}` };
+    case "check_availability":
+      return {
+        name,
+        ok: true,
+        detail: r.requestedTime
+          ? `Availability ${r.date} ${r.requestedTime.time}: ${r.requestedTime.free ? "free" : "taken"}`
+          : `Availability ${r.date}: ${r.availableStartTimes?.length ?? 0} free start times`,
+      };
+    case "create_booking":
+      return { name, ok: true, detail: `${r.dryRun ? "TEST booking (not saved)" : `Booking ${r.bookingRef} created`} · ${money(r.total)} · ${r.when || ""}` };
+    case "send_quote":
+      return {
+        name,
+        ok: true,
+        detail: r.preview ? `Quote preview · ${money(r.grandTotal)}` : `${r.dryRun ? "TEST quote (not sent)" : `Quote ${r.quoteRef} emailed`} · ${money(r.grandTotal)}`,
+      };
+    case "find_my_bookings":
+      return { name, ok: true, detail: `Looked up bookings: ${r.bookings?.length ?? 0} upcoming` };
+    case "reschedule_booking":
+      return { name, ok: true, detail: `${r.dryRun ? "TEST reschedule" : `Booking ${r.bookingRef} moved`} to ${r.newWhen}` };
+    case "transfer_to_human":
+      return { name, ok: true, detail: "Caller transferred to the team" };
+    default:
+      return { name, ok: true, detail: name };
+  }
+}
+
+/** Returns a runner bound to one conversation. ctx: { phone, conversationId, dryRun, onTool } */
 function makeToolRunner(ctx) {
-  return async function runTool(name, args = {}) {
+  const run = async (name, args) => {
     try {
       if (name === "get_quote") {
         const settings = await AiSettings.get();
@@ -644,6 +678,11 @@ function makeToolRunner(ctx) {
       return { error: "The booking system had a problem. Offer to pass the request to the team." };
     }
   };
+  return async function runTool(name, args = {}) {
+    const result = await run(name, args);
+    if (ctx.onTool) ctx.onTool(describeToolResult(name, args, result));
+    return result;
+  };
 }
 
 module.exports = {
@@ -658,5 +697,6 @@ module.exports = {
   formatWindow,
   confirmationTool,
   sendAiQuote,
+  describeToolResult,
   SPECIFIC_TIMES,
 };
