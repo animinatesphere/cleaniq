@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
+import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import {
   MapPin,
   CheckCircle2,
@@ -219,13 +220,13 @@ const LocationDetail = () => {
   return (
     <div className="pt-36 pb-24 bg-slate-50 min-h-screen">
       <Helmet>
-        <title>{locationData.title}</title>
+        <title>{`Cleaners in ${locationData.name} | Cleaning Services | Cleaniq`}</title>
         <meta name="description" content={locationData.meta} />
         <link
           rel="canonical"
           href={`https://www.cleaniqservices.com/locations/${area}`}
         />
-        <meta property="og:title" content={locationData.title} />
+        <meta property="og:title" content={`Cleaners in ${locationData.name} | Cleaning Services | Cleaniq`} />
         <meta property="og:description" content={locationData.meta} />
         {locationData.faqs && (
           <script type="application/ld+json">{JSON.stringify({
@@ -286,7 +287,7 @@ const LocationDetail = () => {
             </div>
 
             <h1 className="text-3xl md:text-5xl font-extrabold text-primary-dark tracking-tight leading-tight">
-              Professional Cleaning Services in <span className="text-primary">{locationData.name}</span>
+              Professional Cleaners in <span className="text-primary">{locationData.name}</span>
             </h1>
 
             <p className="text-sm md:text-base font-extrabold text-slate-500 uppercase tracking-wider">
@@ -350,6 +351,24 @@ const LocationDetail = () => {
                       {svc}
                     </span>
                   </div>
+                ))}
+              </div>
+
+              <h3 className="text-lg font-bold text-primary-dark mt-10 mb-4">
+                Cleaning services in {locationData.name}
+              </h3>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {SERVICE_PAGES.map((p) => (
+                  <Link
+                    key={p.slug}
+                    to={servicePagePath(p.slug)}
+                    className="flex items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-slate-100 hover:border-primary/30 hover:shadow-sm transition-all"
+                  >
+                    <span className="text-primary-dark font-bold text-sm">
+                      {p.name} in {locationData.name}
+                    </span>
+                    <span className="text-primary text-sm font-black" aria-hidden="true">→</span>
+                  </Link>
                 ))}
               </div>
             </div>
