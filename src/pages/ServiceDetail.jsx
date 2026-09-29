@@ -4,6 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import { GOOGLE_RATING, GOOGLE_REVIEW_COUNT, GOOGLE_REVIEWS, GOOGLE_REVIEWS_URL } from "../utils/googleReviews";
 import { whatsappLink } from "../utils/contact";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
+import { AREAS } from "../utils/areas";
 import {
   ShieldCheck,
   Calendar,
@@ -771,7 +772,7 @@ const GENERAL_EXTENDED = {
     },
     {
       q: "Do you bring your own cleaning products and equipment?",
-      a: "Yes. We bring all necessary eco-friendly cleaning products and equipment unless you prefer us to use your own supplies — just let us know when booking.",
+      a: "You choose: use your own supplies, or we bring eco-friendly cleaning products and equipment for £10 per visit. Just let us know when booking.",
     },
     {
       q: "What Manchester areas do you cover for general cleaning?",
@@ -793,8 +794,59 @@ const GENERAL_EXTENDED = {
 };
 
 const SERVICES_MAP = {
+  "regular-house-cleaning-manchester": {
+    title: "Regular House Cleaning Manchester | House Cleaners Near You",
+    areaNoun: "House cleaners",
+    meta: "Weekly, fortnightly or monthly house cleaning in Manchester. Vetted local house cleaners near you, eco-friendly products and a 48-hour re-clean guarantee. Book online.",
+    heading: "Regular House Cleaning in Manchester",
+    tagline: "Weekly, Fortnightly or Monthly — Your Home, Always Ready.",
+    description:
+      "Keep on top of your home without giving up your weekends. Book a regular house clean every week, fortnight or month and a vetted Cleaniq cleaner will keep your kitchen, bathrooms, bedrooms and living areas fresh on every visit.",
+    points: [
+      "Weekly, fortnightly or monthly visits",
+      "Kitchen, bathrooms, bedrooms and living areas every visit",
+      "Vetted local cleaners and a 48-hour re-clean guarantee",
+      "Use your own supplies, or we bring eco-friendly products for £10",
+    ],
+    extended: "REGULAR",
+  },
+  "oven-cleaning-manchester": {
+    title: "Oven Cleaning Manchester | Oven Cleaners Near You | Cleaniq",
+    areaNoun: "Oven cleaners",
+    meta: "Professional oven cleaning in Manchester for single, double and range ovens. Local oven cleaners near you, live prices and a 48-hour re-clean guarantee. Book online.",
+    heading: "Oven Cleaning in Manchester",
+    tagline: "Single, Double & Range Ovens — Cleaned Inside and Out.",
+    description:
+      "Burnt-on grease and carbon are hard to shift at home. Our oven cleaners take care of the racks, trays, door glass and interior, so your oven is clean and ready to cook with again.",
+    points: [
+      "Single, double and range ovens",
+      "Racks, trays and door glass included",
+      "Fixed prices — see the live price list below",
+      "Book on its own, or add it to any home clean",
+    ],
+    priceKeywords: ["oven"],
+    extended: "OVEN",
+  },
+  "carpet-cleaning-manchester": {
+    title: "Carpet Cleaning Manchester | Carpet Cleaners Near You",
+    areaNoun: "Carpet cleaners",
+    meta: "Professional carpet cleaning in Manchester for rooms, rugs, stairs and upholstery. Local carpet cleaners near you with live prices. Book online with Cleaniq Services.",
+    heading: "Carpet Cleaning in Manchester",
+    tagline: "Fresher Carpets, Stairs & Upholstery.",
+    description:
+      "Carpets hold on to dust, spills and everyday dirt that vacuuming alone won't lift. Our carpet cleaners pre-treat marks and high-traffic areas and deep clean the fibres, leaving your carpets fresher and brighter.",
+    points: [
+      "Rooms, stairs, landings and upholstery",
+      "Stains and high-traffic areas pre-treated",
+      "Fixed prices — see the live price list below",
+      "Ideal alongside an end of tenancy or deep clean",
+    ],
+    priceKeywords: ["carpet", "stairs", "upholstery"],
+    extended: "CARPET",
+  },
   "end-of-tenancy-cleaning-manchester": {
-    title: "End of Tenancy Cleaning Manchester | Cleaniq Services",
+    title: "End of Tenancy Cleaning Manchester | Cleaners Near You",
+    areaNoun: "End of tenancy cleaners",
     meta: "Professional end of tenancy cleaning in Manchester. Fully guaranteed, eco-friendly, and landlord-approved. Book vetted cleaners online in 60 seconds. Call +44 7752 476368.",
     heading: "End of Tenancy Cleaning in Manchester",
     tagline: "Landlord-Approved. Deposit-Protecting. Fully Guaranteed.",
@@ -809,7 +861,8 @@ const SERVICES_MAP = {
     extended: "EOT",
   },
   "deep-cleaning-manchester": {
-    title: "Deep Cleaning Services Manchester | Cleaniq Services",
+    title: "Deep Cleaning Manchester | Deep Cleaners Near You",
+    areaNoun: "Deep cleaners",
     meta: "One-off deep cleaning for homes and offices in Manchester. Thorough, eco-friendly, and affordable. Book expert deep cleaners online today with Cleaniq Services.",
     heading: "Deep Cleaning Services in Manchester",
     tagline: "Thorough, Eco-Friendly, Meticulous Refresh Cleans.",
@@ -824,7 +877,8 @@ const SERVICES_MAP = {
     extended: "DEEP",
   },
   "airbnb-cleaning-manchester": {
-    title: "Airbnb Cleaning Manchester | Short-Let Property Cleaners",
+    title: "Airbnb Cleaning Manchester | Short-Let Cleaners Near You",
+    areaNoun: "Airbnb cleaners",
     meta: "Reliable Airbnb and short-let cleaning in Manchester. Fast turnarounds, guest-ready results. Book professional Airbnb cleaners with Cleaniq Services.",
     heading: "Airbnb & Short-Let Cleaning in Manchester",
     tagline: "Fast Turnarounds, Guest-Ready Results, 5-Star Reviews.",
@@ -839,7 +893,8 @@ const SERVICES_MAP = {
     extended: "AIRBNB",
   },
   "office-cleaning-manchester": {
-    title: "Office Cleaning Manchester | Commercial Cleaners | Cleaniq Services",
+    title: "Office Cleaning Manchester | Office Cleaners Near You",
+    areaNoun: "Office cleaners",
     meta: "Professional office and commercial cleaning services in Manchester. Flexible schedules, eco-friendly products. Get a free quote from Cleaniq Services today.",
     heading: "Office & Commercial Cleaning in Manchester",
     tagline: "Flexible Schedules, Spotless Workplaces, Consistent Quality.",
@@ -854,7 +909,8 @@ const SERVICES_MAP = {
     extended: "OFFICE",
   },
   "post-construction-cleaning-manchester": {
-    title: "Post-Construction Cleaning Manchester | Cleaniq Services",
+    title: "Post-Construction Cleaning Manchester | Cleaners Near You",
+    areaNoun: "After-builders cleaners",
     meta: "Expert post-construction and builders cleaning in Manchester. Dust removal, debris clearance, and final handover cleans. Book Cleaniq Services today.",
     heading: "Post-Construction Cleaning in Manchester",
     tagline: "Industrial Dust Removal, Paint Spot Cleaning, Final Handover.",
@@ -869,14 +925,15 @@ const SERVICES_MAP = {
     extended: "POST",
   },
   "general-cleaning-manchester": {
-    title: "General Cleaning Manchester | Professional Home Cleaners | Cleaniq Services",
-    meta: "Reliable general cleaning services in Manchester. Regular home cleans, flexible scheduling, and eco-friendly products. Book trusted local cleaners with Cleaniq Services.",
+    title: "General Cleaning Manchester | Home Cleaners Near You",
+    areaNoun: "Home cleaners",
+    meta: "One-off general cleaning in Manchester. A thorough whole-home clean from vetted home cleaners near you, eco-friendly products and a 48-hour re-clean guarantee.",
     heading: "General Cleaning Services in Manchester",
-    tagline: "Reliable, Regular, Refreshingly Clean.",
+    tagline: "A Thorough Whole-Home Clean, Whenever You Need It.",
     description:
-      "Keep your home consistently spotless with our dependable general cleaning service. Whether you need a one-off clean or a regular weekly or fortnightly schedule, our professional cleaners handle every room thoroughly — leaving your home fresh, tidy, and hygienically clean.",
+      "Need your home cleaned properly, without committing to a schedule? Our general cleaning service is a one-off, whole-home clean from local cleaners — kitchens, bathrooms, bedrooms and living areas left fresh and tidy. Prefer a clean every week or fortnight? See our regular house cleaning.",
     points: [
-      "Flexible one-off, weekly, or fortnightly scheduling options",
+      "One-off cleans booked around you — no contract",
       "Full room cleaning — kitchens, bathrooms, living areas, bedrooms",
       "Eco-friendly, non-toxic cleaning products safe for families & pets",
       "Vetted, insured, and background-checked professional cleaners",
@@ -990,6 +1047,330 @@ const MobileCTABar = ({ isEOT }) => (
     </Link>
   </div>
 );
+const REGULAR_EXTENDED = {
+  intro: `Searching for reliable house cleaners near you in Manchester? Cleaniq Services' regular house cleaning keeps your home consistently clean on a schedule that suits you — every week, every fortnight or once a month. Every visit follows the same checklist, so your kitchen, bathrooms, bedrooms and living areas are looked after every time, and you can add extras such as oven cleaning whenever you need them.`,
+
+  whyChoosePoints: [
+    {
+      icon: <BadgeCheck size={22} />,
+      title: "Vetted Local House Cleaners",
+      body: "Every Cleaniq cleaner has a face-to-face interview, background checks and a practical skills assessment before cleaning a customer's home.",
+    },
+    {
+      icon: <Calendar size={22} />,
+      title: "A Schedule That Suits You",
+      body: "Choose weekly, fortnightly or monthly visits when you book, and pick the day and arrival time that works for you.",
+    },
+    {
+      icon: <ShieldCheck size={22} />,
+      title: "48-Hour Re-Clean Guarantee",
+      body: "If anything isn't right after a visit, tell us within 48 hours and we'll send a cleaner back to re-clean it for free.",
+    },
+    {
+      icon: <Sparkles size={22} />,
+      title: "Supplies Your Way",
+      body: "Use your own cleaning products, or we'll bring eco-friendly products and equipment for £10 per visit.",
+    },
+  ],
+
+  checklist: {
+    heading: "Regular House Cleaning Checklist — Manchester",
+    intro: "What our house cleaners look after on every regular visit:",
+    rooms: [
+      {
+        room: "Kitchen",
+        tasks: [
+          "Wipe worktops, splashbacks and cupboard fronts",
+          "Clean the outside of the oven, hob, microwave and fridge",
+          "Clean and polish the sink and taps",
+          "Wipe handles and light switches",
+          "Sweep and mop the floor",
+          "Empty and reline bins",
+        ],
+      },
+      {
+        room: "Bathrooms & Toilets",
+        tasks: [
+          "Clean and disinfect toilets",
+          "Clean the bath, shower, basin and taps",
+          "Wipe tiles, mirrors and glass",
+          "Mop the floor",
+        ],
+      },
+      {
+        room: "Bedrooms & Living Areas",
+        tasks: [
+          "Dust surfaces, shelves and furniture",
+          "Vacuum carpets, rugs and upholstery",
+          "Clean mirrors and glass",
+          "Make beds (change linen if left out)",
+          "Tidy and straighten cushions and throws",
+        ],
+      },
+      {
+        room: "Floors & Finishing Touches",
+        tasks: [
+          "Vacuum stairs, landings and hallways",
+          "Mop hard floors throughout",
+          "Wipe skirting boards, door handles and switches",
+          "Empty bins in every room",
+        ],
+      },
+    ],
+  },
+
+  whyMatters: {
+    heading: "Why a Regular Cleaner Makes Life Easier",
+    body: [
+      "Dust, grease and limescale build up quickly in a busy home. A regular clean deals with them little and often, so they never become a big job — and your home feels ready for visitors every day of the week.",
+      "Most of our regular customers tell us the biggest difference is time: no more spending evenings and weekends catching up on housework. Booking a weekly or fortnightly house cleaner hands that job to someone who does it every day.",
+      "Because every visit follows the same checklist, nothing gets forgotten. And if you ever need more, you can add extras like oven cleaning or a one-off deep clean when you book.",
+    ],
+  },
+
+  faqs: [
+    {
+      q: "How much does regular house cleaning cost in Manchester?",
+      a: "Regular house cleaning is charged by the hour. The current rate is shown at the top of this page and comes straight from our booking system. You choose how many hours each visit lasts when you book.",
+    },
+    {
+      q: "How often can I book a regular cleaner?",
+      a: "Weekly, fortnightly or monthly. Choose the frequency, day and arrival time when you book, and your future visits are scheduled for you.",
+    },
+    {
+      q: "Do I need to be home while the house cleaner is there?",
+      a: "No. Many customers leave a key or entry code — just add access notes when you book.",
+    },
+    {
+      q: "Do your cleaners bring cleaning products?",
+      a: "You choose: use your own supplies, or we bring eco-friendly cleaning products and equipment for £10 per visit.",
+    },
+    {
+      q: "What if I'm not happy with a clean?",
+      a: "Tell us within 48 hours and we'll send a cleaner back to re-clean anything that wasn't right, free of charge.",
+    },
+    {
+      q: "Where do you have house cleaners near me?",
+      a: "We clean homes across Manchester and Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan.",
+    },
+  ],
+
+  manchesterAreas: AREAS.map((a) => a.name),
+
+  seoFooter: `Cleaniq Services provides regular house cleaning across Manchester and Greater Manchester. Looking for a house cleaner near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book weekly, fortnightly or monthly cleaning from vetted local cleaners online, or call +44 7752 476368.`,
+};
+
+const OVEN_EXTENDED = {
+  intro: `Looking for oven cleaning near you in Manchester? Cleaniq Services' oven cleaners clean single, double and range ovens inside and out — racks, trays, door glass and the oven interior — so your kitchen looks and smells fresh again. Book an oven clean on its own, or add it to a regular, deep or end of tenancy clean.`,
+
+  whyChoosePoints: [
+    {
+      icon: <Sparkles size={22} />,
+      title: "Inside and Out",
+      body: "Racks, trays, door glass and the oven interior are all cleaned, not just the parts you can see.",
+    },
+    {
+      icon: <BadgeCheck size={22} />,
+      title: "Fixed, Upfront Prices",
+      body: "Every oven size has a fixed price, shown live on this page from our booking system — no surprises.",
+    },
+    {
+      icon: <Calendar size={22} />,
+      title: "On Its Own or With a Clean",
+      body: "Book an oven clean by itself, or add it as an extra to any home, deep or end of tenancy clean.",
+    },
+    {
+      icon: <ShieldCheck size={22} />,
+      title: "48-Hour Re-Clean Guarantee",
+      body: "If anything isn't right, tell us within 48 hours and we'll come back and put it right for free.",
+    },
+  ],
+
+  checklist: {
+    heading: "Oven Cleaning Checklist — Manchester",
+    intro: "What our oven cleaners cover on every oven clean:",
+    rooms: [
+      {
+        room: "Inside the Oven",
+        tasks: [
+          "Remove racks, trays and shelf supports",
+          "Clean the oven walls, base and roof",
+          "Remove grease and carbon build-up",
+          "Wipe out and dry the oven cavity",
+        ],
+      },
+      {
+        room: "Door & Glass",
+        tasks: [
+          "Clean the inner and outer door glass",
+          "Wipe the door seal and hinges",
+          "Clean the door frame",
+        ],
+      },
+      {
+        room: "Racks & Trays",
+        tasks: [
+          "Soak and degrease racks and shelves",
+          "Clean baking trays and grill pans",
+          "Refit everything once clean",
+        ],
+      },
+      {
+        room: "Outside & Finishing",
+        tasks: [
+          "Wipe control knobs, handles and the oven front",
+          "Leave the surrounding area clean and tidy",
+        ],
+      },
+    ],
+  },
+
+  whyMatters: {
+    heading: "Why Get Your Oven Professionally Cleaned",
+    body: [
+      "Grease and food spills bake on every time you cook. Over time they build up into a layer that smokes, smells and is very hard to remove with everyday products.",
+      "A professional oven clean removes that build-up properly — including the door glass and racks — so cooking smells come from your food, not last month's roast.",
+      "If you're moving out, a clean oven matters: landlords and letting agents usually check it at the end of a tenancy. Add an oven clean to your end of tenancy clean to cover it.",
+    ],
+  },
+
+  faqs: [
+    {
+      q: "How much does oven cleaning cost in Manchester?",
+      a: "Each oven size has a fixed price. The price list on this page comes straight from our booking system, so it always shows today's prices.",
+    },
+    {
+      q: "Which ovens do you clean?",
+      a: "Single ovens, double ovens and range ovens. Choose the right size when you book so the price matches your oven.",
+    },
+    {
+      q: "Can I add oven cleaning to another clean?",
+      a: "Yes. Add oven cleaning as an extra when you book a regular, deep or end of tenancy clean, or book it on its own.",
+    },
+    {
+      q: "Do I need to be home for an oven clean?",
+      a: "No. Many customers leave a key or entry code — just add access notes when you book.",
+    },
+    {
+      q: "What if I'm not happy with the result?",
+      a: "Tell us within 48 hours and we'll send a cleaner back to put it right, free of charge.",
+    },
+    {
+      q: "Do you have oven cleaners near me?",
+      a: "Our oven cleaners cover Manchester and Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan.",
+    },
+  ],
+
+  manchesterAreas: AREAS.map((a) => a.name),
+
+  seoFooter: `Cleaniq Services provides professional oven cleaning across Manchester and Greater Manchester. Looking for oven cleaners near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book single, double or range oven cleaning online at a fixed price, or call +44 7752 476368.`,
+};
+
+const CARPET_EXTENDED = {
+  intro: `Looking for carpet cleaning near you in Manchester? Cleaniq Services' carpet cleaners deep clean carpets, stairs, landings and upholstery, pre-treating marks and high-traffic areas to lift the dirt that vacuuming leaves behind. Book carpet cleaning on its own, or add it to an end of tenancy or deep clean.`,
+
+  whyChoosePoints: [
+    {
+      icon: <Sparkles size={22} />,
+      title: "Deeper Than Vacuuming",
+      body: "We pre-treat marks and high-traffic areas, then deep clean the carpet fibres to lift ground-in dirt.",
+    },
+    {
+      icon: <BadgeCheck size={22} />,
+      title: "Fixed, Upfront Prices",
+      body: "Carpets, stairs and upholstery each have a fixed price, shown live on this page from our booking system.",
+    },
+    {
+      icon: <HomeIcon size={22} />,
+      title: "Perfect for Moving Day",
+      body: "Add carpet cleaning to your end of tenancy clean so the whole property is handed back fresh.",
+    },
+    {
+      icon: <ShieldCheck size={22} />,
+      title: "48-Hour Re-Clean Guarantee",
+      body: "If anything isn't right, tell us within 48 hours and we'll come back and put it right for free.",
+    },
+  ],
+
+  checklist: {
+    heading: "Carpet Cleaning Checklist — Manchester",
+    intro: "What our carpet cleaners do on every carpet clean:",
+    rooms: [
+      {
+        room: "Preparation",
+        tasks: [
+          "Move small items off the carpet",
+          "Thoroughly vacuum to lift loose dirt and dust",
+          "Check the carpet type and any problem areas",
+        ],
+      },
+      {
+        room: "Deep Clean",
+        tasks: [
+          "Pre-treat marks, spills and high-traffic areas",
+          "Deep clean the carpet fibres",
+          "Remove as much moisture as possible",
+        ],
+      },
+      {
+        room: "Stairs & Landings",
+        tasks: [
+          "Clean each stair tread and riser",
+          "Pay extra attention to edges and corners",
+        ],
+      },
+      {
+        room: "Finishing",
+        tasks: [
+          "Groom the carpet pile",
+          "Put small items back",
+          "Give advice on drying and aftercare",
+        ],
+      },
+    ],
+  },
+
+  whyMatters: {
+    heading: "Why Professional Carpet Cleaning Is Worth It",
+    body: [
+      "Carpets trap dust, crumbs and everyday dirt deep in the fibres. Regular vacuuming lifts the surface, but the ground-in dirt that dulls carpets over time needs a deeper clean.",
+      "Professional carpet cleaning refreshes the whole carpet, brightening colours and tackling marks on busy walkways, stairs and landings.",
+      "It's especially worth it when you move: a fresh carpet helps a property feel cared for when it's handed back to a landlord or shown to new tenants.",
+    ],
+  },
+
+  faqs: [
+    {
+      q: "How much does carpet cleaning cost in Manchester?",
+      a: "Carpets, stairs and upholstery each have a fixed price. The price list on this page comes straight from our booking system, so it always shows today's prices.",
+    },
+    {
+      q: "How long do carpets take to dry?",
+      a: "It depends on the carpet, the room temperature and ventilation. Opening windows and keeping the heating on helps carpets dry faster.",
+    },
+    {
+      q: "Will every stain come out?",
+      a: "We pre-treat marks and do everything we can, but some old or set-in stains may not come out completely. We'll let you know if a stain is likely to stay.",
+    },
+    {
+      q: "Can I add carpet cleaning to an end of tenancy clean?",
+      a: "Yes. Add carpet cleaning as an extra when you book your end of tenancy, deep or regular clean, or book it on its own.",
+    },
+    {
+      q: "What if I'm not happy with the result?",
+      a: "Tell us within 48 hours and we'll send a cleaner back to put it right, free of charge.",
+    },
+    {
+      q: "Do you have carpet cleaners near me?",
+      a: "Our carpet cleaners cover Manchester and Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Didsbury, Chorlton, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan.",
+    },
+  ],
+
+  manchesterAreas: AREAS.map((a) => a.name),
+
+  seoFooter: `Cleaniq Services provides professional carpet cleaning across Manchester and Greater Manchester. Looking for carpet cleaners near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book carpet, stair and upholstery cleaning online at a fixed price, or call +44 7752 476368.`,
+};
+
 const EXTENDED_MAP = {
   EOT: EOT_EXTENDED,
   DEEP: DEEP_EXTENDED,
@@ -997,15 +1378,42 @@ const EXTENDED_MAP = {
   OFFICE: OFFICE_EXTENDED,
   POST: POST_CONSTRUCTION_EXTENDED,
   GENERAL: GENERAL_EXTENDED,
+  REGULAR: REGULAR_EXTENDED,
+  OVEN: OVEN_EXTENDED,
+  CARPET: CARPET_EXTENDED,
 };
 // Live prices: find the service in the price list that belongs to a page slug.
 const slugify = (name) =>
   String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-const matchServiceForSlug = (slug, services) =>
-  services.find((s) => {
+// Prefers the main (Base) service, so "Book" never preselects an add-on extra.
+const matchServiceForSlug = (slug, services) => {
+  const matches = services.filter((s) => {
     const nameSlug = slugify(s.name);
     return slug.includes(nameSlug) || nameSlug.includes(slug.split("-")[0]);
-  }) || null;
+  });
+  return matches.find((s) => s.category === "Base") || matches[0] || null;
+};
+const formatPrice = (s) => `£${Number(s.rate).toFixed(2)}${s.type === "hourly" ? " per hour" : ""}`;
+const priceListFor = (keywords, services) => {
+  if (!keywords?.length) return [];
+  const seen = new Set();
+  return services
+    .filter((s) => Number(s.rate) > 0 && keywords.some((k) => s.name.toLowerCase().includes(k)))
+    .filter((s) => {
+      const key = slugify(s.name);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => Number(a.rate) - Number(b.rate));
+};
+// "From" price for a service page: the cheapest of its main service and its price-list options.
+const fromPriceForPage = (slug, services) => {
+  const main = matchServiceForSlug(slug, services);
+  const options = priceListFor(SERVICES_MAP[slug]?.priceKeywords, services.filter((s) => s !== main));
+  const cheapest = [main, ...options].filter((s) => s && s.rate != null).sort((a, b) => Number(a.rate) - Number(b.rate))[0];
+  return formatFromPrice(cheapest);
+};
 const formatFromPrice = (s) =>
   s && s.rate != null
     ? `From £${Number(s.rate).toFixed(2)}${s.type === "hourly" ? "/hr" : ""}`
@@ -1019,7 +1427,7 @@ const ServiceDetail = () => {
   const ext = service?.extended ? EXTENDED_MAP[service.extended] : null;
   const [liveServices, setLiveServices] = React.useState([]);
   const liveMatch = matchServiceForSlug(serviceSlug, liveServices);
-  const servicePrice = formatFromPrice(liveMatch);
+  const servicePrice = fromPriceForPage(serviceSlug, liveServices);
   const serviceName = liveMatch?.name || "";
   const pageInfo = SERVICE_PAGES.find((p) => p.slug === serviceSlug);
   const bookingLink = serviceName ? `/booking?service=${encodeURIComponent(serviceName)}` : "/booking";
@@ -1027,6 +1435,9 @@ const ServiceDetail = () => {
     `Hi Cleaniq! I'd like a quote for ${pageInfo ? pageInfo.name.toLowerCase() : "a clean"}.`,
   );
   const relatedServices = SERVICE_PAGES.filter((p) => p.slug !== serviceSlug);
+  // The page's main service is priced in the hero, so the list shows the specific options.
+  const priceList = priceListFor(service?.priceKeywords, liveServices.filter((s) => s !== liveMatch));
+  const areaNoun = service?.areaNoun || "Cleaners";
 
   useEffect(() => {
     let active = true;
@@ -1295,6 +1706,30 @@ const ServiceDetail = () => {
 
                   <Divider />
 
+                  {priceList.length > 0 && (
+                    <>
+                      <section>
+                        <SectionLabel>Prices</SectionLabel>
+                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
+                          {service.heading} Prices
+                        </h2>
+                        <p className="text-sm text-slate-500 mb-5">
+                          Fixed prices, updated automatically from our booking system.
+                        </p>
+                        <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden">
+                          {priceList.map((p) => (
+                            <div key={p._id || p.name} className="flex items-center justify-between gap-4 px-5 py-3.5 bg-white">
+                              <span className="text-sm font-semibold text-slate-800">{p.name}</span>
+                              <span className="text-sm font-bold text-teal-700 whitespace-nowrap">{formatPrice(p)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+
+                      <Divider />
+                    </>
+                  )}
+
                   {/* Checklist */}
                   <section>
                     <SectionLabel>Room-by-room checklist</SectionLabel>
@@ -1337,16 +1772,20 @@ const ServiceDetail = () => {
                   <section>
                     <SectionLabel>Coverage</SectionLabel>
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">
-                      Manchester Areas We Cover
+                      {areaNoun} Near You
                     </h2>
+                    <p className="text-sm text-slate-500 mb-4">
+                      Our {areaNoun.toLowerCase()} work across Manchester and Greater Manchester, including:
+                    </p>
                     <div className="flex flex-wrap gap-2">
-                      {ext.manchesterAreas.map((area) => (
-                        <span
-                          key={area}
-                          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full"
+                      {AREAS.map((area) => (
+                        <Link
+                          key={area.slug}
+                          to={`/locations/${area.slug}`}
+                          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:border-teal-400 hover:text-teal-700 transition-colors"
                         >
-                          <MapPin size={10} className="text-teal-500" /> {area}
-                        </span>
+                          <MapPin size={10} className="text-teal-500" /> {areaNoun} in {area.name}
+                        </Link>
                       ))}
                     </div>
                   </section>
@@ -1440,10 +1879,8 @@ const ServiceDetail = () => {
                               <ArrowRight size={14} className="text-slate-300 group-hover:text-teal-600 transition-colors shrink-0" />
                             </p>
                             <p className="text-slate-500 text-xs mt-1 leading-relaxed">{p.blurb}</p>
-                            {formatFromPrice(matchServiceForSlug(p.slug, liveServices)) && (
-                              <p className="text-teal-700 text-sm font-bold mt-2">
-                                {formatFromPrice(matchServiceForSlug(p.slug, liveServices))}
-                              </p>
+                            {fromPriceForPage(p.slug, liveServices) && (
+                              <p className="text-teal-700 text-sm font-bold mt-2">{fromPriceForPage(p.slug, liveServices)}</p>
                             )}
                           </div>
                         </Link>
@@ -1594,13 +2031,14 @@ const ServiceDetail = () => {
                             Areas covered
                           </p>
                           <div className="flex flex-wrap gap-1.5">
-                            {ext.manchesterAreas.map((area) => (
-                              <span
-                                key={area}
-                                className="text-[11px] font-medium text-slate-500 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded"
+                            {AREAS.map((area) => (
+                              <Link
+                                key={area.slug}
+                                to={`/locations/${area.slug}`}
+                                className="text-[11px] font-medium text-slate-500 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded hover:text-teal-700"
                               >
-                                {area}
-                              </span>
+                                {area.name}
+                              </Link>
                             ))}
                           </div>
                         </div>

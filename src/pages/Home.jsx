@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { generateBlogSlug } from "../utils/slugGenerator";
 import GoogleReviewsSection from "../component/GoogleReviewsSection";
+import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { uploadUrl } from "../utils/uploads";
 
 const getImageUrl = uploadUrl;
@@ -467,28 +468,7 @@ const Home = () => {
               Our Specialized Manchester Cleaning Hubs
             </h4>
             <div className="flex flex-wrap justify-center gap-4">
-              {[
-                {
-                  name: "End of Tenancy Cleaning",
-                  path: "/pages/end-of-tenancy-cleaning-manchester",
-                },
-                {
-                  name: "Deep Cleaning Services",
-                  path: "/pages/deep-cleaning-manchester",
-                },
-                {
-                  name: "Airbnb Turnovers",
-                  path: "/pages/airbnb-cleaning-manchester",
-                },
-                {
-                  name: "Office Cleaning",
-                  path: "/pages/office-cleaning-manchester",
-                },
-                {
-                  name: "Post-Construction Cleaning",
-                  path: "/pages/post-construction-cleaning-manchester",
-                },
-              ].map((link, i) => (
+              {SERVICE_PAGES.map((p) => ({ name: p.name, path: servicePagePath(p.slug) })).map((link, i) => (
                 <Link
                   key={i}
                   to={link.path}

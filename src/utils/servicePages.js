@@ -1,7 +1,13 @@
 // The service pages (src/pages/ServiceDetail.jsx) and which Services-page cards they belong to.
-// Photos are from Unsplash (free to use under the Unsplash License).
+// Photos are from Unsplash (free to use under the Unsplash License) or our own assets.
+import ovenSmall from "../assets/service-oven-600.webp";
+import ovenLarge from "../assets/service-oven-1200.webp";
+import regularSmall from "../assets/service-regular-600.webp";
+import regularLarge from "../assets/service-regular-1200.webp";
+
 const unsplash = (id) => (width) =>
   `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${width}&q=70`;
+const local = (small, large) => (width) => (width > 600 ? large : small);
 
 export const SERVICE_PAGES = [
   {
@@ -45,12 +51,36 @@ export const SERVICE_PAGES = [
     layoutKeys: ["construction"],
   },
   {
+    slug: "regular-house-cleaning-manchester",
+    image: local(regularSmall, regularLarge),
+    imageAlt: "House cleaner mopping a bright living room floor",
+    name: "Regular House Cleaning",
+    blurb: "Weekly, fortnightly or monthly visits from local house cleaners.",
+    layoutKeys: ["residential"],
+  },
+  {
     slug: "general-cleaning-manchester",
+    image: unsplash("1628177142898-93e36e4e3a50"),
+    imageAlt: "Cleaner in gloves spraying a surface",
+    name: "General Cleaning",
+    blurb: "A one-off whole-home clean whenever you need it.",
+    layoutKeys: ["general"],
+  },
+  {
+    slug: "oven-cleaning-manchester",
+    image: local(ovenSmall, ovenLarge),
+    imageAlt: "Spotless range oven in a clean kitchen",
+    name: "Oven Cleaning",
+    blurb: "Single, double and range ovens cleaned inside and out.",
+    layoutKeys: ["oven"],
+  },
+  {
+    slug: "carpet-cleaning-manchester",
     image: unsplash("1527515637462-cff94eecc1ac"),
-    imageAlt: "Cordless vacuum cleaning a carpet",
-    name: "Regular & General Cleaning",
-    blurb: "Weekly, fortnightly or one-off home cleans.",
-    layoutKeys: ["residential", "general"],
+    imageAlt: "Carpet being cleaned with a vacuum",
+    name: "Carpet Cleaning",
+    blurb: "Deep carpet, rug and stair cleaning to lift dirt and stains.",
+    layoutKeys: ["carpet"],
   },
 ];
 
