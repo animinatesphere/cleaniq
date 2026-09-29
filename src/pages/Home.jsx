@@ -203,7 +203,7 @@ const Home = () => {
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-primary-dark leading-[1.1] mb-4 md:mb-8 tracking-tighter">
               {region.id === "UK"
-                ? "House Cleaning & Cleaners in"
+                ? "House Cleaning Services"
                 : "Top-Rated End of Tenancy Cleaning  in"}
               <br />
               <span className="text-primary bg-clip-text">
