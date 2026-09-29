@@ -25,13 +25,9 @@ import {
 } from "lucide-react";
 import { generateBlogSlug } from "../utils/slugGenerator";
 import GoogleReviewsSection from "../component/GoogleReviewsSection";
+import { uploadUrl } from "../utils/uploads";
 
-const getImageUrl = (imagePath) => {
-  if (!imagePath) return "";
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-  const baseUrl = apiUrl.replace("/api", "");
-  return `${baseUrl}${imagePath.startsWith("/") ? imagePath : "/" + imagePath}`;
-};
+const getImageUrl = uploadUrl;
 
 const calculateReadTime = (content) => {
   if (!content) return 5;

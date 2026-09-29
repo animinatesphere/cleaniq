@@ -7,9 +7,9 @@ import {
   PlusCircle, RefreshCw, X, Banknote, Home, Layers,
 } from "lucide-react";
 import DomesticPropertyReport from "./DomesticPropertyReport";
+import { uploadUrl } from "../utils/uploads";
 
 const API    = import.meta.env.VITE_API_URL;
-const SERVER = API?.replace("/api", "");
 
 const fmt = (date) =>
   date ? new Date(date).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : null;
@@ -89,7 +89,7 @@ const Timeline = ({ booking }) => {
 };
 
 const PhotoCard = ({ photo, label, badge }) => {
-  const url = photo?.url?.startsWith("http") ? photo.url : `${SERVER}/${photo?.url}`;
+  const url = uploadUrl(photo?.url);
   return (
     <a href={url} target="_blank" rel="noreferrer" className="group relative block rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/20 hover:shadow-md transition-all">
       <img src={url} alt={label} className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300" onError={e => { e.target.style.display = "none"; }} />
@@ -232,7 +232,7 @@ const ExtraTimeRequestCard = ({ booking, onUpdated }) => {
             <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Evidence ({evidencePhotos.length})</p>
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
               {evidencePhotos.map((p, i) => {
-                const url = p.url?.startsWith("http") ? p.url : `${SERVER}/${p.url}`;
+                const url = uploadUrl(p.url);
                 return (
                   <a key={i} href={url} target="_blank" rel="noreferrer" className="group relative aspect-square rounded-xl overflow-hidden border border-amber-500/25">
                     <img src={url} alt={`Evidence ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
