@@ -27,6 +27,7 @@ import { generateBlogSlug } from "../utils/slugGenerator";
 import GoogleReviewsSection from "../component/GoogleReviewsSection";
 import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import { uploadUrl } from "../utils/uploads";
+import { AREAS } from "../utils/areas";
 
 const getImageUrl = uploadUrl;
 
@@ -35,6 +36,33 @@ const calculateReadTime = (content) => {
   const wordCount = content.trim().split(/\s+/).length;
   return Math.max(5, Math.ceil(wordCount / 200));
 };
+
+const HOME_FAQS = [
+  {
+    q: "Do you have cleaners near me?",
+    a: `Our cleaners cover Manchester and Greater Manchester, including ${AREAS.map((a) => a.name).join(", ")}. If your area isn't listed, message us on WhatsApp and we'll check.`,
+  },
+  {
+    q: "Do you offer end of tenancy cleaning in Manchester City Centre?",
+    a: "Yes, Cleaniq Services provides professional end of tenancy cleaning across Manchester City Centre from our Swan Street office, helping tenants secure their full deposits.",
+  },
+  {
+    q: "How do you vet your cleaners?",
+    a: "Every cleaner goes through a multi-stage vetting process, including a face-to-face interview, background checks and a practical skills assessment.",
+  },
+  {
+    q: "What if I'm not satisfied with the clean?",
+    a: "We offer a 48-hour re-clean guarantee. If any part of the clean isn't up to standard, we'll send a cleaner back to re-clean it for free.",
+  },
+  {
+    q: "Do I need to provide cleaning supplies?",
+    a: "Many clients prefer us to use their own supplies, but our cleaners can bring eco-friendly cleaning products and equipment for £10 per visit.",
+  },
+  {
+    q: "How do I book a cleaner in Manchester?",
+    a: "Book online in a few steps, message us on WhatsApp or call +44 7752 476368. We confirm every booking by email.",
+  },
+];
 
 const Home = () => {
   const { region } = useRegion();
@@ -81,21 +109,21 @@ const Home = () => {
   return (
     <div className="overflow-x-hidden bg-white">
       <Helmet>
-        <title>House Cleaning Manchester | Eco-Friendly Cleaners | Cleaniq</title>
+        <title>Cleaners in Manchester | House Cleaning Near You | Cleaniq</title>
         <meta
           name="description"
-          content="Premium eco-friendly cleaning services in Manchester — end of tenancy, deep cleaning, Airbnb turnovers, office and post-construction cleaning. Book online in 60 seconds."
+          content="Looking for cleaners near you? Cleaniq's vetted local cleaners offer house, end of tenancy, deep, oven, carpet and office cleaning across Manchester and Greater Manchester. Rated 5.0 on Google."
         />
         <link rel="canonical" href="https://www.cleaniqservices.com/" />
         <meta
           property="og:title"
           content={
-            "House Cleaning Manchester | Eco-Friendly Cleaners | Cleaniq"
+            "Cleaners in Manchester | House Cleaning Near You | Cleaniq"
           }
         />
         <meta
           property="og:description"
-          content="Reliable, eco-conscious cleaning for homes and offices in Manchester. Background checked professionals and satisfaction guaranteed."
+          content="Vetted, eco-friendly cleaners near you in Manchester. House, end of tenancy, deep, oven and carpet cleaning with a 48-hour re-clean guarantee."
         />
         <meta
           property="og:image"
@@ -145,40 +173,11 @@ const Home = () => {
         {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "FAQPage",
-          mainEntity: [
-            {
-              "@type": "Question",
-              name: "Do you offer end of tenancy cleaning in Manchester City Centre?",
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: "Yes, Cleaniq Services provides professional end of tenancy cleaning across Manchester City Centre from our Swan Street office, helping tenants secure their full deposits.",
-              },
-            },
-            {
-              "@type": "Question",
-              name: "How do you vet your cleaners?",
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: "Every cleaner undergoes a rigorous multi-stage vetting process, including face-to-face interviews, background checks, and practical skills assessments.",
-              },
-            },
-            {
-              "@type": "Question",
-              name: "What if I'm not satisfied with the clean?",
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: "We offer a 48-hour satisfaction guarantee. If any part of the clean isn't up to our high standards, we'll send someone back to re-clean for free.",
-              },
-            },
-            {
-              "@type": "Question",
-              name: "Do I need to provide cleaning supplies?",
-              acceptedAnswer: {
-                "@type": "Answer",
-                text: "Most clients prefer us to use their own supplies, but we're happy to provide eco-friendly cleaning products for a small additional fee.",
-              },
-            },
-          ],
+          mainEntity: HOME_FAQS.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
         })}
       </script>
       {/* Hero Section */}
@@ -204,7 +203,7 @@ const Home = () => {
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-primary-dark leading-[1.1] mb-4 md:mb-8 tracking-tighter">
               {region.id === "UK"
-                ? " House Cleaning Services in"
+                ? "House Cleaning & Cleaners in"
                 : "Top-Rated End of Tenancy Cleaning  in"}
               <br />
               <span className="text-primary bg-clip-text">
@@ -214,13 +213,9 @@ const Home = () => {
             </h1>
 
             <p className="text-base md:text-xl text-slate-600 mb-6 md:mb-10 max-w-lg leading-relaxed font-medium">
-              We provide the most reliable{" "}
               {region.id === "UK"
-                ? "End of Tenancy Cleaning. "
-                : "professional maid and janitorial services"}
-              Whether you need a regular weekly clean or specialized Airbnb
-              cleaning, our vetted pros handle the meticulous care of your
-              space.
+                ? "Looking for reliable cleaners near you? Our vetted local cleaners handle regular house cleaning, end of tenancy, deep, oven and carpet cleaning across Greater Manchester."
+                : "We provide reliable professional maid and janitorial services. Whether you need a regular weekly clean or specialised Airbnb cleaning, our vetted pros take care of your space."}
             </p>
 
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-stretch sm:items-center">
@@ -364,17 +359,14 @@ const Home = () => {
               Our Services
             </h2>
             <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark tracking-tighter mb-6">
-              Tailored cleaning for{" "}
               {region.id === "UK"
-                ? "Manchester living"
-                : "Nigerian homes & offices"}
+                ? "Cleaning services near you in Manchester."
+                : "Tailored cleaning for Nigerian homes & offices."}
             </h3>
             <p className="text-lg text-slate-500 font-medium">
-              Whether it's{" "}
               {region.id === "UK"
-                ? "an end-of-tenancy clean"
-                : "regular maintenance"}{" "}
-              or a deep seasonal refresh, we have the right pros for you.
+                ? "From regular house cleaning to end of tenancy and deep cleans, our local cleaners have the right cleaning service for your home or business."
+                : "Whether it's regular maintenance or a deep seasonal refresh, we have the right pros for you."}
               {region.id === "NG" && (
                 <span className="block mt-2 text-primary font-bold text-sm">
                   Proudly paying above the Nigerian living wage.
@@ -548,7 +540,7 @@ const Home = () => {
             The Process
           </h2>
           <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark mb-16 md:mb-20 tracking-tighter">
-            Reliable domestic cleaning in 3 simple steps.
+            Book a cleaner near you in 3 simple steps.
           </h3>
 
           <div className="grid md:grid-cols-3 gap-12 relative">
@@ -562,8 +554,8 @@ const Home = () => {
               },
               {
                 step: "02",
-                title: "Pro Arrives",
-                desc: "A background-checked professional arrives at your door.",
+                title: "Your Cleaner Arrives",
+                desc: "A vetted, background-checked local cleaner arrives at your door.",
               },
               {
                 step: "03",
@@ -622,6 +614,56 @@ const Home = () => {
 
       {/* dkdk */}
 
+      {/* Local cleaners content */}
+      <section className="py-24 md:py-32 bg-slate-50/70">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div>
+            <h2 className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-4">
+              Local cleaners
+            </h2>
+            <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark tracking-tighter mb-8">
+              Cleaners in Manchester you can trust.
+            </h3>
+            <div className="space-y-5 text-lg text-slate-600 font-medium leading-relaxed">
+              <p>
+                Searching for "cleaners near me" can turn up a long list, so we keep it simple: vetted local
+                cleaners, clear prices and a 48-hour re-clean guarantee on every job.
+              </p>
+              <p>
+                Our cleaners live and work across Greater Manchester, from the city centre, Salford and Trafford to
+                Stockport, Bolton and Wigan, so there's usually a cleaner near you. Book a regular house cleaner for
+                weekly or fortnightly visits, or a one-off deep clean, end of tenancy clean, oven clean or carpet
+                clean when you need it.
+              </p>
+              <p>
+                Use your own cleaning products, or our cleaners bring eco-friendly products and equipment for £10.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 mt-10">
+              <Link to="/booking" className="btn-primary py-4 px-8 group">
+                Book a cleaner
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link to="/about" className="btn-outline py-4 px-8 font-black uppercase tracking-widest text-sm">
+                About our cleaners
+              </Link>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {AREAS.slice(0, 8).map((a) => (
+              <Link
+                key={a.slug}
+                to={`/locations/${a.slug}`}
+                className="flex items-center gap-3 p-4 md:p-5 rounded-2xl bg-white border border-slate-100 hover:border-primary/30 hover:shadow-md transition-all text-sm font-bold text-primary-dark"
+              >
+                <ShieldCheck size={18} className="text-primary shrink-0" />
+                Cleaners in {a.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Google Reviews */}
       <GoogleReviewsSection />
 
@@ -633,29 +675,12 @@ const Home = () => {
               FAQ
             </h2>
             <h3 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter">
-              Common questions.
+              Questions about our cleaners.
             </h3>
           </div>
 
           <div className="space-y-4">
-            {[
-              {
-                q: "Do you offer end of tenancy cleaning in Manchester City Centre?",
-                a: "Yes, Cleaniq Services provides professional end of tenancy cleaning across Manchester City Centre from our Swan Street office, helping tenants secure their full deposits.",
-              },
-              {
-                q: "How do you vet your cleaners?",
-                a: "Every cleaner undergoes a rigorous multi-stage vetting process, including face-to-face interviews, background checks, and practical skills assessments.",
-              },
-              {
-                q: "What if I'm not satisfied with the clean?",
-                a: "We offer a 48-hour satisfaction guarantee. If any part of the clean isn't up to our high standards, we'll send someone back to re-clean for free.",
-              },
-              {
-                q: "Do I need to provide cleaning supplies?",
-                a: "Many clients prefer us to use their own supplies, but we're happy to bring eco-friendly cleaning products and equipment for £10 per visit.",
-              },
-            ].map((faq, i) => (
+            {HOME_FAQS.map((faq, i) => (
               <details
                 key={i}
                 className="group p-6 rounded-[32px] bg-white border border-slate-100 shadow-sm transition-all hover:shadow-md cursor-pointer"
@@ -736,11 +761,11 @@ const Home = () => {
               Our Coverage
             </h2>
             <h3 className="text-2xl md:text-5xl font-extrabold text-primary-dark tracking-tighter mb-6">
-              Cleaniq services in Manchester.
+              Cleaners near you across Greater Manchester.
             </h3>
             <p className="text-lg text-slate-600 font-medium">
-              Professional cleaning services available across greater manchester
-              . Select a service category to explore availability near you.
+              Our cleaners work across Manchester and the surrounding towns. Choose a service, then your area, to
+              find cleaners near you.
             </p>
           </div>
 
@@ -775,18 +800,7 @@ const Home = () => {
             transition={{ duration: 0.3 }}
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
           >
-            {[
-              { city: "Manchester City", slug: "manchester-city" },
-              { city: "Salford", slug: "salford" },
-              { city: "Bolton", slug: "bolton" },
-              { city: "Bury", slug: "bury" },
-              { city: "Oldham", slug: "oldham" },
-              { city: "Rochdale", slug: "rochdale" },
-              { city: "Stockport", slug: "stockport" },
-              { city: "Tameside", slug: "tameside" },
-              { city: "Trafford", slug: "trafford" },
-              { city: "Wigan", slug: "wigan" },
-            ].map((location) => {
+            {AREAS.map((a) => ({ city: a.name, slug: a.slug })).map((location) => {
               const serviceLabelMap = {
                 OfficeCleaning: "Office cleaning",
                 DeepCleaning: "Deep cleaning",
@@ -810,7 +824,7 @@ const Home = () => {
                       {serviceName}
                     </p>
                     <p className="text-xs text-slate-500 font-bold mt-2 group-hover:text-slate-600 transition-colors">
-                      Book Today →
+                      Cleaners in {location.city} →
                     </p>
                   </Link>
                 </motion.div>
@@ -821,7 +835,7 @@ const Home = () => {
           {/* CTA */}
           <div className="text-center mt-16">
             <p className="text-slate-600 font-medium mb-6">
-              Don't see your city? We're expanding rapidly.
+              Don't see your area? Message us — we may still have cleaners near you.
             </p>
             <Link
               to="/booking"
@@ -984,10 +998,10 @@ const Home = () => {
       <section className="py-24 bg-secondary/10 relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
           <h2 className="text-2xl md:text-5xl lg:text-6xl font-extrabold text-primary-dark tracking-tighter mb-8">
-            Ready to experience a cleaner home?
+            Looking for cleaners near you?
           </h2>
           <p className="text-xl text-slate-600 mb-12 font-medium">
-            Join our happy customers across Manchester today.
+            Book a vetted local cleaner anywhere in Greater Manchester today.
           </p>
           <Link
             to="/booking"
