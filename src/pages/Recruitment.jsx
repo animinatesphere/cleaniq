@@ -17,9 +17,19 @@ import {
   Smartphone,
   Plus,
   ArrowRight,
+  MapPin,
+  Heart,
+  GraduationCap,
+  Baby,
+  Briefcase,
+  Clock,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import sprayPhoto from "../assets/join-cleaner-spray.webp";
+import roomPhoto from "../assets/room-cleaning.jpg";
+import bathroomPhoto from "../assets/toilet-cleaning.jpg";
+import officePhoto from "../assets/office-clean.jpg";
+import ovenPhoto from "../assets/oven-cleaning.jpg";
 import { SERVICE_PAGES } from "../utils/servicePages";
 import { AREAS } from "../utils/areas";
 
@@ -32,6 +42,27 @@ const MAX_HOURS = 40;
 // Unsplash photo (free to use under the Unsplash License).
 const WINDOW_PHOTO =
   "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=640&h=760&q=70";
+
+const unsplash = (id, w, h) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&h=${h}&q=70`;
+const GLOVES_PHOTO = unsplash("1585421514738-01798e348b17", 800, 600);
+
+// "A day on the job" gallery.
+const WORK_PHOTOS = [
+  { src: roomPhoto, label: "Homes", alt: "Cleaner tidying and cleaning a bedroom" },
+  { src: ovenPhoto, label: "Kitchens & ovens", alt: "Cleaner cleaning an oven" },
+  { src: bathroomPhoto, label: "Bathrooms", alt: "Cleaner cleaning a bathroom" },
+  { src: officePhoto, label: "Offices", alt: "Cleaner cleaning an office" },
+  { src: unsplash("1502672260266-1c1ef2d93688", 600, 450), label: "Rentals & Airbnbs", alt: "A bright, tidy rental flat living room" },
+  { src: unsplash("1631889993959-41b4e9c6e3c5", 600, 450), label: "End of tenancy", alt: "A spotless bathroom ready for new tenants" },
+];
+
+// Who the cleaner job suits.
+const SUITS = [
+  { icon: <GraduationCap size={22} />, title: "Students", desc: "Pick up cleaning shifts around lectures and exams." },
+  { icon: <Baby size={22} />, title: "Parents", desc: "Take cleaner jobs near you that fit around the school run." },
+  { icon: <Briefcase size={22} />, title: "Experienced cleaners", desc: "Put your cleaning skills to work with a steady flow of jobs." },
+  { icon: <Clock size={22} />, title: "Extra income", desc: "Add a few hours of cleaning a week alongside another job." },
+];
 
 const money = (n) => `£${Math.round(n).toLocaleString("en-GB")}`;
 
@@ -117,6 +148,14 @@ const FAQS = [
   {
     q: "Where are the jobs?",
     a: "Across Manchester and Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan.",
+  },
+  {
+    q: "Are there cleaner jobs near me?",
+    a: `Most likely. We have cleaning jobs across Greater Manchester, including ${AREAS.map((a) => a.name).join(", ")}, and we try to give you jobs near where you live.`,
+  },
+  {
+    q: "Can I work part-time?",
+    a: "Yes. You choose your hours, from a few hours a week to full time, so cleaning can fit around study, family or another job.",
   },
   {
     q: "What do I need to apply?",
@@ -299,13 +338,13 @@ const Recruitment = () => {
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
-        <title>Cleaning Jobs in Manchester | Join Cleaniq Services</title>
+        <title>Cleaning Jobs in Manchester | Cleaner Jobs Near You | Cleaniq</title>
         <meta
           name="description"
-          content={`Find cleaning jobs in Manchester with Cleaniq Services. £${HOURLY_RATE}/hr, choose your hours, and manage your jobs in our app. Apply in two minutes.`}
+          content={`Looking for cleaner jobs near you? Join Cleaniq's cleaners in Manchester and Greater Manchester. £${HOURLY_RATE}/hr, choose your hours, manage jobs in our app. Apply in two minutes.`}
         />
         <link rel="canonical" href="https://www.cleaniqservices.com/recruitment" />
-        <meta property="og:title" content="Cleaning Jobs in Manchester | Join Cleaniq Services" />
+        <meta property="og:title" content="Cleaning Jobs in Manchester | Cleaner Jobs Near You | Cleaniq" />
         {isUK && <script type="application/ld+json">{jobPostingJsonLd()}</script>}
       </Helmet>
 
@@ -323,7 +362,7 @@ const Recruitment = () => {
             </h1>
             <p className="text-lg text-slate-600 max-w-xl font-medium leading-relaxed mb-10">
               {isUK
-                ? "Clean homes and offices across Greater Manchester, choose the hours that suit you, and manage everything from our app."
+                ? "Looking for cleaner jobs near you? Join our team of cleaners, clean homes and offices across Greater Manchester, choose the hours that suit you, and manage everything from our app."
                 : "Join Nigeria's premier cleaning network. High pay, flexible hours, and professional growth."}
             </p>
             <div className="grid grid-cols-2 gap-4 max-w-lg">
@@ -397,13 +436,81 @@ const Recruitment = () => {
         </div>
       </section>
 
+      {/* A day on the job: photos */}
+      {isUK && (
+        <section className="py-20 md:py-28 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center max-w-3xl mx-auto mb-12">
+              <h2 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter mb-5">
+                A day as a Cleaniq cleaner
+              </h2>
+              <p className="text-lg text-slate-500 font-medium leading-relaxed">
+                No two days are the same. Our cleaners work in homes, kitchens, bathrooms, offices and rental properties
+                across Manchester.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+              {WORK_PHOTOS.map((ph) => (
+                <figure key={ph.label} className="relative rounded-[28px] overflow-hidden aspect-[4/3] group">
+                  <img
+                    src={ph.src}
+                    alt={ph.alt}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <figcaption className="absolute left-3 bottom-3 md:left-4 md:bottom-4 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur text-xs md:text-sm font-black text-primary-dark">
+                    {ph.label}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Who the job suits */}
+      {isUK && (
+        <section className="py-20 md:py-28 px-6 bg-primary/[0.04]">
+          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <img
+              src={GLOVES_PHOTO}
+              alt="Cleaner's gloved hands making a heart shape"
+              loading="lazy"
+              decoding="async"
+              className="w-full aspect-[4/3] object-cover rounded-[40px] shadow-xl"
+            />
+            <div>
+              <h2 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter mb-5">
+                Flexible cleaner jobs that fit your life
+              </h2>
+              <p className="text-lg text-slate-600 font-medium leading-relaxed mb-8">
+                Whether you want a few hours of cleaning a week or a full-time cleaner job near you, you choose when you
+                work. Here's who our cleaning jobs suit best:
+              </p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {SUITS.map((x) => (
+                  <div key={x.title} className="p-5 rounded-3xl bg-white border border-slate-100 shadow-sm">
+                    <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4">
+                      {x.icon}
+                    </div>
+                    <h3 className="font-black text-primary-dark mb-1">{x.title}</h3>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">{x.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Jobs across Greater Manchester (SEO + what the work is) */}
       {isUK && (
         <section className="py-20 md:py-28 px-6">
           <div className="max-w-7xl mx-auto">
             <div className="max-w-3xl mb-12">
               <h2 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter mb-6">
-                Cleaning jobs across Greater Manchester
+                Cleaning jobs near you across Greater Manchester
               </h2>
               <p className="text-lg text-slate-600 font-medium leading-relaxed mb-4">
                 Cleaniq Services looks after homes, rental properties and workplaces across Manchester. As a Cleaniq
@@ -439,7 +546,9 @@ const Recruitment = () => {
 
             <div className="grid lg:grid-cols-2 gap-10">
               <div className="p-8 md:p-10 rounded-[32px] bg-primary text-white">
-                <h3 className="text-2xl font-black tracking-tight mb-6">What we look for</h3>
+                <h3 className="text-2xl font-black tracking-tight mb-6 flex items-center gap-3">
+                  <Heart size={24} className="text-secondary" /> What we look for in our cleaners
+                </h3>
                 <ul className="space-y-4">
                   {LOOKING_FOR.map((item) => (
                     <li key={item} className="flex gap-3 font-medium text-white/90">
@@ -450,12 +559,12 @@ const Recruitment = () => {
                 </ul>
               </div>
               <div className="p-8 md:p-10 rounded-[32px] bg-slate-50 border border-slate-100">
-                <h3 className="text-2xl font-black text-primary-dark tracking-tight mb-3">Where you'll work</h3>
+                <h3 className="text-2xl font-black text-primary-dark tracking-tight mb-3">Cleaner jobs near you</h3>
                 <p className="text-slate-500 font-medium mb-6">Jobs are spread across Manchester and Greater Manchester, including:</p>
                 <div className="flex flex-wrap gap-2">
                   {AREAS.map((a) => (
-                    <span key={a.slug} className="px-4 py-2 rounded-xl bg-white border border-slate-100 text-sm font-bold text-primary-dark">
-                      {a.name}
+                    <span key={a.slug} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-slate-100 text-sm font-bold text-primary-dark">
+                      <MapPin size={13} className="text-primary" /> Cleaning jobs in {a.name}
                     </span>
                   ))}
                 </div>
