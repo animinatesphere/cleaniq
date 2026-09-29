@@ -1,6 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { pathForLayoutKey } from "../utils/servicePages";
 import { motion } from "framer-motion";
 import {
   CheckCircle2,
@@ -414,8 +415,16 @@ const Services = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
-              className={`flex flex-col lg:flex-row gap-8 lg:gap-16 items-center p-5 md:p-12 rounded-[32px] md:rounded-[60px] glass overflow-hidden relative shadow-xl shadow-primary/5 ${i % 2 !== 0 ? "lg:flex-row-reverse" : ""}`}
+              className={`flex flex-col lg:flex-row gap-8 lg:gap-16 items-center p-5 md:p-12 rounded-[32px] md:rounded-[60px] glass overflow-hidden relative shadow-xl shadow-primary/5 ${pathForLayoutKey(service.id) ? "cursor-pointer hover:shadow-2xl transition-shadow" : ""} ${i % 2 !== 0 ? "lg:flex-row-reverse" : ""}`}
             >
+              {/* The whole card opens the service page; Book Service sits above this link. */}
+              {pathForLayoutKey(service.id) && (
+                <Link
+                  to={pathForLayoutKey(service.id)}
+                  aria-label={`${service.title}: see prices, what's included and reviews`}
+                  className="absolute inset-0 z-10 rounded-[32px] md:rounded-[60px]"
+                />
+              )}
               <div className="lg:w-1/2 w-full aspect-video md:aspect-4/3 rounded-[32px] md:rounded-[48px] relative overflow-hidden group shadow-2xl">
                 <img
                   src={service.image}
@@ -472,7 +481,7 @@ const Services = () => {
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 md:6">
                     <Link
                       to={`/booking?service=${encodeURIComponent(service.dbName)}`}
-                      className="btn-primary w-full sm:w-auto text-center py-4"
+                      className="btn-primary w-full sm:w-auto text-center py-4 relative z-20"
                     >
                       Book Service
                     </Link>
