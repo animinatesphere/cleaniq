@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { WHATSAPP_NUMBER } from '../utils/contact';
 
-const WHATSAPP_NUMBER = '447752476368';
 const WHATSAPP_MESSAGE = encodeURIComponent('Hi Cleaniq! I would like to enquire about your cleaning services.');
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
 

@@ -1,6 +1,9 @@
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, Link } from "react-router-dom";
+import { GOOGLE_RATING, GOOGLE_REVIEW_COUNT, GOOGLE_REVIEWS, GOOGLE_REVIEWS_URL } from "../utils/googleReviews";
+import { whatsappLink } from "../utils/contact";
+import { SERVICE_PAGES, servicePagePath } from "../utils/servicePages";
 import {
   ShieldCheck,
   Calendar,
@@ -133,26 +136,6 @@ const EOT_EXTENDED = {
     },
   ],
 
-  testimonials: [
-    {
-      name: "Priya M.",
-      location: "Didsbury, Manchester",
-      text: "Used Cleaniq Services for my end of tenancy clean after four years in the flat. Got my full deposit back within 24 hours of checkout. The oven and bathroom looked brand new.",
-      rating: 5,
-    },
-    {
-      name: "James O.",
-      location: "Salford, Manchester",
-      text: "The letting agent commented it was one of the cleanest handbacks they had seen. 100% recommend Cleaniq Services for your move-out clean in Manchester.",
-      rating: 5,
-    },
-    {
-      name: "Sophie H.",
-      location: "Chorlton, Manchester",
-      text: "Booked same-day. They arrived on time, were thorough, and my landlord was thrilled. Full deposit returned, no deductions.",
-      rating: 5,
-    },
-  ],
 
   manchesterAreas: [
     "Manchester City",
@@ -161,7 +144,7 @@ const EOT_EXTENDED = {
     "Bury",
     "Oldham",
     "Rochdale",
-    "   Stockport",
+    "Stockport",
     "Tameside",
     "Trafford",
     "Wigan",
@@ -286,26 +269,6 @@ const DEEP_EXTENDED = {
     },
   ],
 
-  testimonials: [
-    {
-      name: "Rachel T.",
-      location: "Chorlton, Manchester",
-      text: "Absolutely incredible. The kitchen alone took two hours but it looks brand new. I had no idea how much grime had built up. Worth every penny.",
-      rating: 5,
-    },
-    {
-      name: "Daniel K.",
-      location: "Fallowfield, Manchester",
-      text: "Moved into a new flat that hadn't been properly cleaned in years. Cleaniq Services transformed it in a single visit. Can't recommend them enough.",
-      rating: 5,
-    },
-    {
-      name: "Anna M.",
-      location: "Didsbury, Manchester",
-      text: "Used Cleaniq Services before hosting a family gathering. The team was professional, thorough, and the house has never looked better.",
-      rating: 5,
-    },
-  ],
 
   manchesterAreas: [
     "Manchester City",
@@ -314,7 +277,7 @@ const DEEP_EXTENDED = {
     "Bury",
     "Oldham",
     "Rochdale",
-    "   Stockport",
+    "Stockport",
     "Tameside",
     "Trafford",
     "Wigan",
@@ -436,26 +399,6 @@ const AIRBNB_EXTENDED = {
     },
   ],
 
-  testimonials: [
-    {
-      name: "Marcus L.",
-      location: "Manchester City Centre",
-      text: "I manage four Airbnb apartments and Cleaniq Services handles all of them. Reliable, consistent, and my guests always comment on the cleanliness. Five stars every time.",
-      rating: 5,
-    },
-    {
-      name: "Fatima O.",
-      location: "Salford, Manchester",
-      text: "As a Superhost, cleanliness is everything. Cleaniq Services has never let me down — same-day turnaround, always guest-ready.",
-      rating: 5,
-    },
-    {
-      name: "Tom W.",
-      location: "Chorlton, Manchester",
-      text: "Professional, thorough, and they even flag maintenance issues I wasn't aware of. Exactly what you need as a short-let host.",
-      rating: 5,
-    },
-  ],
 
   manchesterAreas: [
     "Manchester City",
@@ -464,7 +407,7 @@ const AIRBNB_EXTENDED = {
     "Bury",
     "Oldham",
     "Rochdale",
-    "   Stockport",
+    "Stockport",
     "Tameside",
     "Trafford",
     "Wigan",
@@ -585,26 +528,6 @@ const OFFICE_EXTENDED = {
     },
   ],
 
-  testimonials: [
-    {
-      name: "Claire B.",
-      location: "Salford Quays, Manchester",
-      text: "We have used Cleaniq Services for our office for over a year. Consistent, reliable, and the team are always professional. Our clients regularly comment on how clean the space is.",
-      rating: 5,
-    },
-    {
-      name: "Ahmed R.",
-      location: "Manchester City Centre",
-      text: "Switched to Cleaniq Services after our previous contractor kept missing areas. Night-and-day difference. Proper quality control makes all the difference.",
-      rating: 5,
-    },
-    {
-      name: "Sarah J.",
-      location: "Stockport, Manchester",
-      text: "Flexible, professional, and genuinely thorough. Our team arrives to a clean office every single morning. Exactly what we needed.",
-      rating: 5,
-    },
-  ],
 
   manchesterAreas: [
     "Manchester City",
@@ -613,7 +536,7 @@ const OFFICE_EXTENDED = {
     "Bury",
     "Oldham",
     "Rochdale",
-    "   Stockport",
+    "Stockport",
     "Tameside",
     "Trafford",
     "Wigan",
@@ -730,26 +653,6 @@ const POST_CONSTRUCTION_EXTENDED = {
     },
   ],
 
-  testimonials: [
-    {
-      name: "Paul D.",
-      location: "Ancoats, Manchester",
-      text: "Used Cleaniq Services after a full apartment renovation. The dust was everywhere. They came in with industrial equipment and the place was immaculate within a day. Outstanding.",
-      rating: 5,
-    },
-    {
-      name: "Lisa K.",
-      location: "Salford, Manchester",
-      text: "We are a small development company and Cleaniq Services handle all our post-build cleans. Professional, reliable, and the handover standard is always excellent.",
-      rating: 5,
-    },
-    {
-      name: "James T.",
-      location: "Stockport, Manchester",
-      text: "After our kitchen extension, the dust was unbelievable. Cleaniq Services removed every trace of it — including from inside the new cupboards. Brilliant service.",
-      rating: 5,
-    },
-  ],
 
   manchesterAreas: [
     "Manchester City",
@@ -758,7 +661,7 @@ const POST_CONSTRUCTION_EXTENDED = {
     "Bury",
     "Oldham",
     "Rochdale",
-    "   Stockport",
+    "Stockport",
     "Tameside",
     "Trafford",
     "Wigan",
@@ -876,31 +779,11 @@ const GENERAL_EXTENDED = {
     },
   ],
 
-  testimonials: [
-    {
-      name: "Sarah M.",
-      location: "Didsbury, Manchester",
-      rating: 5,
-      text: "I've had Cleaniq Services coming fortnightly for 6 months now. The house is always spotless when I get home and the team are so professional and friendly. Highly recommend.",
-    },
-    {
-      name: "James T.",
-      location: "Salford",
-      rating: 5,
-      text: "Booked a one-off general clean before my parents visited. Absolutely brilliant — every room was immaculate. Will definitely be booking again.",
-    },
-    {
-      name: "Priya K.",
-      location: "Chorlton, Manchester",
-      rating: 5,
-      text: "Reliable, thorough, and the eco products mean no chemical smell in my flat. Really happy with the quality. Worth every penny.",
-    },
-  ],
 
   image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1200&q=80",
   imageAlt: "Professional cleaner tidying a bright, clean living room in Manchester",
 
-  areas: [
+  manchesterAreas: [
     "Manchester City Centre", "Salford", "Didsbury", "Chorlton", "Stretford",
     "Ancoats", "Hulme", "Fallowfield", "Withington", "Stockport",
     "Trafford", "Wythenshawe",
@@ -1115,46 +998,44 @@ const EXTENDED_MAP = {
   POST: POST_CONSTRUCTION_EXTENDED,
   GENERAL: GENERAL_EXTENDED,
 };
+// Live prices: find the service in the price list that belongs to a page slug.
+const slugify = (name) =>
+  String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+const matchServiceForSlug = (slug, services) =>
+  services.find((s) => {
+    const nameSlug = slugify(s.name);
+    return slug.includes(nameSlug) || nameSlug.includes(slug.split("-")[0]);
+  }) || null;
+const formatFromPrice = (s) =>
+  s && s.rate != null
+    ? `From £${Number(s.rate).toFixed(2)}${s.type === "hourly" ? "/hr" : ""}`
+    : null;
+
 /* ─── MAIN PAGE ─────────────────────────────────────────────────── */
 const ServiceDetail = () => {
   const { serviceSlug } = useParams();
   const service = SERVICES_MAP[serviceSlug];
   const isEOT = serviceSlug === "end-of-tenancy-cleaning-manchester";
   const ext = service?.extended ? EXTENDED_MAP[service.extended] : null;
-  const [servicePrice, setServicePrice] = React.useState(null);
+  const [liveServices, setLiveServices] = React.useState([]);
+  const liveMatch = matchServiceForSlug(serviceSlug, liveServices);
+  const servicePrice = formatFromPrice(liveMatch);
+  const serviceName = liveMatch?.name || "";
+  const pageInfo = SERVICE_PAGES.find((p) => p.slug === serviceSlug);
+  const bookingLink = serviceName ? `/booking?service=${encodeURIComponent(serviceName)}` : "/booking";
+  const quoteLink = whatsappLink(
+    `Hi Cleaniq! I'd like a quote for ${pageInfo ? pageInfo.name.toLowerCase() : "a clean"}.`,
+  );
+  const relatedServices = SERVICE_PAGES.filter((p) => p.slug !== serviceSlug);
 
   useEffect(() => {
-    const fetchPrice = async () => {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/services?region=UK&booking=1`,
-        );
-        const data = await res.json();
-
-        // Match by slug — normalize name to slug for comparison
-        const match = data.find((s) => {
-          const nameSlug = s.name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "");
-          return (
-            serviceSlug.includes(nameSlug) ||
-            nameSlug.includes(serviceSlug.split("-")[0])
-          );
-        });
-
-        if (match && match.rate != null) {
-          setServicePrice(
-            `From £${match.rate}${match.type === "hourly" ? "/hr" : ""}`,
-          );
-        }
-      } catch (err) {
-        console.error("Failed to fetch price", err);
-      }
-    };
-
-    fetchPrice();
-  }, [serviceSlug]);
+    let active = true;
+    fetch(`${import.meta.env.VITE_API_URL}/services?region=UK&booking=1`)
+      .then((res) => res.json())
+      .then((data) => { if (active && Array.isArray(data)) setLiveServices(data); })
+      .catch((err) => console.error("Failed to fetch prices", err));
+    return () => { active = false; };
+  }, []);
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [serviceSlug]);
@@ -1213,7 +1094,16 @@ const ServiceDetail = () => {
         </Helmet>
 
         {/* ══ HERO ═══════════════════════════════════════════════════ */}
-        <div className="bg-primary text-white pt-28 sm:pt-32 md:pt-36 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-10 xl:px-16">
+        <div
+          className="bg-primary bg-cover bg-center text-white pt-28 sm:pt-32 md:pt-36 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-10 xl:px-16"
+          style={
+            pageInfo
+              ? {
+                  backgroundImage: `linear-gradient(rgba(6, 24, 20, 0.86), rgba(6, 24, 20, 0.78)), url(${pageInfo.image(1600)})`,
+                }
+              : undefined
+          }
+        >
           {/* Breadcrumb */}
           <nav className="flex items-center flex-wrap gap-x-2 gap-y-1  mt-2 text-xs text-slate-400 mb-8 tracking-wide">
             <Link
@@ -1285,11 +1175,26 @@ const ServiceDetail = () => {
                   No hidden fees · Insured cleaners
                 </p>
                 <Link
-                  to="/booking"
+                  to={bookingLink}
                   className="flex items-center justify-center gap-2 w-full py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors"
                 >
                   Book in 60 Seconds <ArrowRight size={16} />
                 </Link>
+                <a
+
+                  href={quoteLink}
+
+                  target="_blank"
+
+                  rel="noopener noreferrer"
+
+                  className="flex items-center justify-center gap-2 w-full py-3 mt-2.5 rounded-lg border border-[#00B5A4] text-[#00B5A4] font-bold text-sm hover:bg-teal-50 transition-colors"
+
+                >
+
+                  Get a quote on WhatsApp
+
+                </a>
                 {isEOT && (
                   <a
                     href="tel:+447752476368"
@@ -1471,11 +1376,17 @@ const ServiceDetail = () => {
                   {/* Testimonials */}
                   <section>
                     <SectionLabel>Customer reviews</SectionLabel>
-                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">
-                      What Our Manchester Customers Say
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
+                      What Our Customers Say
                     </h2>
+                    <p className="text-sm text-slate-500 mb-6">
+                      {GOOGLE_RATING}★ on Google from {GOOGLE_REVIEW_COUNT} reviews ·{" "}
+                      <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="text-teal-700 font-semibold hover:underline">
+                        Read all reviews on Google
+                      </a>
+                    </p>
                     <div className="grid sm:grid-cols-3 gap-4 sm:gap-5">
-                      {ext.testimonials.map((t, i) => (
+                      {GOOGLE_REVIEWS.map((t, i) => (
                         <div
                           key={i}
                           className="p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3"
@@ -1489,10 +1400,53 @@ const ServiceDetail = () => {
                               {t.name}
                             </p>
                             <p className="text-slate-400 text-xs">
-                              {t.location}
+                              Google review
                             </p>
                           </div>
                         </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <Divider />
+
+                  {/* Related services */}
+                  <section>
+                    <SectionLabel>More from Cleaniq Services</SectionLabel>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6">
+                      Related cleaning services
+                    </h2>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      {relatedServices.map((p) => (
+                        <Link
+                          key={p.slug}
+                          to={servicePagePath(p.slug)}
+                          className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-teal-400 hover:shadow-md transition-all"
+                        >
+                          <div className="aspect-[3/2] overflow-hidden bg-slate-100">
+                            <img
+                              src={p.image(600)}
+                              srcSet={`${p.image(400)} 400w, ${p.image(600)} 600w, ${p.image(900)} 900w`}
+                              sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 90vw"
+                              alt={p.imageAlt}
+                              loading="lazy"
+                              decoding="async"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          </div>
+                          <div className="p-4">
+                            <p className="font-bold text-slate-900 text-sm flex items-center justify-between gap-2">
+                              {p.name}
+                              <ArrowRight size={14} className="text-slate-300 group-hover:text-teal-600 transition-colors shrink-0" />
+                            </p>
+                            <p className="text-slate-500 text-xs mt-1 leading-relaxed">{p.blurb}</p>
+                            {formatFromPrice(matchServiceForSlug(p.slug, liveServices)) && (
+                              <p className="text-teal-700 text-sm font-bold mt-2">
+                                {formatFromPrice(matchServiceForSlug(p.slug, liveServices))}
+                              </p>
+                            )}
+                          </div>
+                        </Link>
                       ))}
                     </div>
                   </section>
@@ -1568,11 +1522,26 @@ const ServiceDetail = () => {
                     </div>
                     <div className="pt-2">
                       <Link
-                        to="/booking"
+                        to={bookingLink}
                         className="flex items-center justify-center gap-2 w-full py-3.5 rounded-lg bg-[#00B5A4] text-white font-bold text-sm hover:bg-teal-600 transition-colors"
                       >
                         Book in 60 Seconds <ArrowRight size={15} />
                       </Link>
+                      <a
+
+                        href={quoteLink}
+
+                        target="_blank"
+
+                        rel="noopener noreferrer"
+
+                        className="flex items-center justify-center gap-2 w-full py-3 mt-2.5 rounded-lg border border-[#00B5A4] text-[#00B5A4] font-bold text-sm hover:bg-teal-50 transition-colors"
+
+                      >
+
+                        Get a quote on WhatsApp
+
+                      </a>
                       {isEOT && (
                         <a
                           href="tel:+447752476368"

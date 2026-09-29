@@ -1,6 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import { pathForLayoutKey } from "../utils/servicePages";
 import { motion } from "framer-motion";
 import {
   CheckCircle2,
@@ -441,7 +442,13 @@ const Services = () => {
                     {service.tag}
                   </div>
                   <h2 className="text-2xl md:text-4xl font-bold text-primary-dark mb-4 md:6 tracking-tight">
-                    {service.title}.
+                    {pathForLayoutKey(service.id) ? (
+                      <Link to={pathForLayoutKey(service.id)} className="hover:text-primary transition-colors">
+                        {service.title}.
+                      </Link>
+                    ) : (
+                      <>{service.title}.</>
+                    )}
                   </h2>
                   <p className="text-slate-600 leading-relaxed mb-6 md:8 text-sm md:text-base font-medium">
                     {service.description}
@@ -476,6 +483,14 @@ const Services = () => {
                     >
                       Book Service
                     </Link>
+                    {pathForLayoutKey(service.id) && (
+                      <Link
+                        to={pathForLayoutKey(service.id)}
+                        className="w-full sm:w-auto text-center py-4 px-6 rounded-2xl border-2 border-primary/20 text-primary font-bold hover:border-primary transition-colors"
+                      >
+                        See details
+                      </Link>
+                    )}
                     <span className="text-primary font-black text-xl md:text-2xl text-center">
                       {service.pricing}
                     </span>

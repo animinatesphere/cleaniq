@@ -395,6 +395,7 @@ const Home = () => {
             {[
               {
                 title: "End of Tenancy Cleaning",
+                path: "/pages/end-of-tenancy-cleaning-manchester",
                 desc: "Comprehensive move-out cleaning to ensure you get your deposit back.",
                 icon: <HomeIcon size={32} />,
                 keyword: "Move-out specialists",
@@ -402,6 +403,7 @@ const Home = () => {
               },
               {
                 title: "Office Cleaning",
+                path: "/pages/office-cleaning-manchester",
                 desc: "Professional janitorial services for your workspace.",
                 icon: <Briefcase size={32} />,
                 keyword: "Expert office cleaning",
@@ -409,6 +411,7 @@ const Home = () => {
               },
               {
                 title: "Deep Clean",
+                path: "/pages/deep-cleaning-manchester",
                 desc: "Specialized deep cleaning services for a total refresh.",
                 icon: <Zap size={32} />,
                 keyword: "Deep cleaning",
@@ -416,6 +419,7 @@ const Home = () => {
               },
               {
                 title: "Airbnb Cleaning",
+                path: "/pages/airbnb-cleaning-manchester",
                 desc: "Professional turnover services for your short-let rental.",
                 icon: <Star size={32} />,
                 keyword: "Short-let specialist",
@@ -456,10 +460,10 @@ const Home = () => {
                     {service.desc}
                   </p>
                   <Link
-                    to="/booking"
+                    to={service.path}
                     className="inline-flex items-center gap-2 font-black text-primary hover:gap-4 transition-all"
                   >
-                    Book Now <ArrowRight size={18} />
+                    See details <ArrowRight size={18} />
                   </Link>
                 </div>
               </motion.div>
