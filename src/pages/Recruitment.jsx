@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import LoadingOverlay from "../component/LoadingOverlay";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,14 +11,195 @@ import {
   Phone,
   FileText,
   ShieldCheck,
-  Building,
-  Award,
   AlertCircle,
+  PoundSterling,
+  CalendarClock,
+  Smartphone,
+  Plus,
+  ArrowRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import sprayPhoto from "../assets/join-cleaner-spray.webp";
+import { SERVICE_PAGES } from "../utils/servicePages";
+import { AREAS } from "../utils/areas";
+
+// What cleaners are paid per hour (before tax). Change here if the rate changes.
+const HOURLY_RATE = 15;
+const WEEKS_PER_MONTH = 52 / 12;
+const MIN_HOURS = 5;
+const MAX_HOURS = 40;
+
+// Unsplash photo (free to use under the Unsplash License).
+const WINDOW_PHOTO =
+  "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=640&h=760&q=70";
+
+const money = (n) => `£${Math.round(n).toLocaleString("en-GB")}`;
+
+const BENEFITS = [
+  {
+    icon: <PoundSterling size={24} />,
+    title: `£${HOURLY_RATE} an hour`,
+    desc: "Clear hourly pay for every job you complete, before tax.",
+  },
+  {
+    icon: <CalendarClock size={24} />,
+    title: "Choose your hours",
+    desc: "Work the days and times that suit you, from a few hours a week to full time.",
+  },
+  {
+    icon: <Smartphone size={24} />,
+    title: "Everything in one app",
+    desc: "See your jobs, schedule and earnings in the Cleaniq worker app.",
+  },
+];
+
+const STEPS = [
+  { title: "Apply online", desc: "Fill in your details and upload your CV. It takes about two minutes." },
+  { title: "We review your CV", desc: "Our team gets back to you within 24–72 hours." },
+  { title: "Interview and checks", desc: "A face-to-face interview, background checks and a practical skills assessment." },
+  { title: "Set up your profile", desc: "We send you login details for the worker app so you can complete your profile." },
+  { title: "Start cleaning", desc: "Pick up jobs across Manchester and track your earnings in the app." },
+];
+
+const LOOKING_FOR = [
+  "Reliable and on time for every booking",
+  "Careful, thorough and proud of your work",
+  "Friendly and respectful in customers' homes and workplaces",
+  "The right to work in the UK",
+  "Happy to have an interview and background checks",
+];
+
+// Google for Jobs listing (https://developers.google.com/search/docs/appearance/structured-data/job-posting)
+function jobPostingJsonLd() {
+  const today = new Date();
+  const validThrough = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    title: "Cleaner (Domestic & Commercial)",
+    description:
+      `<p>Cleaniq Services is hiring cleaners across Manchester and Greater Manchester. Clean homes, offices, Airbnbs and end-of-tenancy properties, choose the hours that suit you, and manage your jobs in the Cleaniq worker app.</p><p>Pay: £${HOURLY_RATE} per hour before tax.</p><p>To apply, send your details and CV. We review every application within 24–72 hours. Successful applicants have an interview, background checks and a practical skills assessment.</p>`,
+    datePosted: today.toISOString().slice(0, 10),
+    validThrough: validThrough.toISOString().slice(0, 10),
+    directApply: true,
+    hiringOrganization: {
+      "@type": "Organization",
+      name: "Cleaniq Services",
+      sameAs: "https://www.cleaniqservices.com",
+      logo: "https://www.cleaniqservices.com/preview.jpg",
+    },
+    jobLocation: {
+      "@type": "Place",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Manchester",
+        addressRegion: "Greater Manchester",
+        addressCountry: "GB",
+      },
+    },
+    baseSalary: {
+      "@type": "MonetaryAmount",
+      currency: "GBP",
+      value: { "@type": "QuantitativeValue", value: HOURLY_RATE, unitText: "HOUR" },
+    },
+  });
+}
+
+const FAQS = [
+  {
+    q: "What kind of cleaning jobs are there?",
+    a: "Regular and one-off home cleaning, deep cleans, end-of-tenancy cleans, Airbnb and short-let turnovers, office cleaning and post-construction cleaning.",
+  },
+  {
+    q: "How much can I earn?",
+    a: `You're paid £${HOURLY_RATE} an hour before tax. Use the calculator at the top of the page to estimate your weekly and monthly earnings. What you actually earn depends on the hours and jobs you take on.`,
+  },
+  {
+    q: "Where are the jobs?",
+    a: "Across Manchester and Greater Manchester, including Manchester City Centre, Salford, Trafford, Stockport, Bolton, Bury, Oldham, Rochdale, Tameside and Wigan.",
+  },
+  {
+    q: "What do I need to apply?",
+    a: "Your name, email, phone number and CV. If your CV is shortlisted, you'll have an interview, background checks and a practical skills assessment before your first job.",
+  },
+  {
+    q: "How long until I hear back?",
+    a: "We review every application and contact you within 24–72 hours.",
+  },
+  {
+    q: "How do I manage my jobs?",
+    a: "Once you're approved, you get login details for the Cleaniq worker app, where you can see your jobs, your schedule and what you've earned.",
+  },
+];
+
+function EarningsCalculator() {
+  const [hours, setHours] = useState(25);
+  const weekly = hours * HOURLY_RATE;
+  const monthly = weekly * WEEKS_PER_MONTH;
+  const fill = ((hours - MIN_HOURS) / (MAX_HOURS - MIN_HOURS)) * 100;
+
+  return (
+    <div className="bg-white rounded-[32px] p-6 md:p-8 shadow-2xl shadow-primary/10 border border-slate-100">
+      <div className="flex items-baseline justify-between mb-4">
+        <label htmlFor="hours" className="text-sm font-black text-primary-dark">
+          Your availability
+        </label>
+        <p className="text-sm font-bold text-primary-dark">
+          <span className="text-2xl font-black text-primary">{hours}</span> hrs per week
+        </p>
+      </div>
+      <input
+        id="hours"
+        type="range"
+        min={MIN_HOURS}
+        max={MAX_HOURS}
+        step={1}
+        value={hours}
+        onChange={(e) => setHours(Number(e.target.value))}
+        className="w-full h-3 rounded-full appearance-none cursor-pointer accent-primary"
+        style={{ background: `linear-gradient(to right, var(--color-primary, #0A5C43) ${fill}%, #e2e8f0 ${fill}%)` }}
+        aria-valuetext={`${hours} hours per week`}
+      />
+      <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1.5">
+        <span>{MIN_HOURS} hrs</span>
+        <span>{MAX_HOURS} hrs</span>
+      </div>
+
+      <div className="mt-6 grid grid-cols-3 gap-2 p-4 rounded-2xl border-2 border-primary/15 bg-primary/[0.03]" aria-live="polite">
+        <div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pay</p>
+          <p className="text-xl md:text-2xl font-black text-primary-dark">
+            £{HOURLY_RATE}
+            <span className="text-xs font-bold text-slate-400">/hr</span>
+          </p>
+        </div>
+        <div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Per week</p>
+          <p className="text-xl md:text-2xl font-black text-primary-dark">{money(weekly)}</p>
+        </div>
+        <div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Per month</p>
+          <p className="text-xl md:text-2xl font-black text-primary">{money(monthly)}</p>
+        </div>
+      </div>
+
+      <a
+        href="#apply"
+        className="mt-6 btn-primary w-full py-4 text-base flex items-center justify-center gap-2 shadow-xl shadow-primary/20"
+      >
+        Apply now <ArrowRight size={18} />
+      </a>
+      <p className="text-[11px] text-slate-400 mt-3 leading-relaxed">
+        Estimate before tax, based on £{HOURLY_RATE}/hr and 52 weeks a year. Actual earnings depend on the hours and
+        jobs you take on.
+      </p>
+    </div>
+  );
+}
 
 const Recruitment = () => {
   const { region } = useRegion();
+  const isUK = region.id === "UK";
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
@@ -116,177 +297,318 @@ const Recruitment = () => {
   }
 
   return (
-    <div className="pt-32 pb-20 px-6 min-h-screen bg-white mt-12">
+    <div className="min-h-screen bg-white">
       <Helmet>
-        <title>Join Cleaniq Services — Careers & Recruitment</title>
+        <title>Cleaning Jobs in Manchester | Join Cleaniq Services</title>
         <meta
           name="description"
-          content="Apply to join Cleaniq Services. We're hiring vetted cleaning professionals in Manchester. Competitive pay and flexible schedules."
+          content={`Find cleaning jobs in Manchester with Cleaniq Services. £${HOURLY_RATE}/hr, choose your hours, and manage your jobs in our app. Apply in two minutes.`}
         />
         <link rel="canonical" href="https://www.cleaniqservices.com/recruitment" />
-        <meta property="og:title" content="Join Cleaniq Services — Careers & Recruitment" />
+        <meta property="og:title" content="Cleaning Jobs in Manchester | Join Cleaniq Services" />
+        {isUK && <script type="application/ld+json">{jobPostingJsonLd()}</script>}
       </Helmet>
 
       {isSubmitting && <LoadingOverlay message="Sending your application..." />}
 
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-6">
-            Join our elite team.
-          </div>
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-primary-dark mb-6 tracking-tighter leading-tight">
-            Help us redefine <br />
-            <span className="text-primary italic">professionalism.</span>
-          </h1>
-          <p className="text-lg text-slate-500 max-w-xl mx-auto font-medium leading-relaxed">
-            {region.id === "UK"
-              ? "We're hiring dedicated pros in Manchester. Send us your CV and we'll be in touch."
-              : "Join Nigeria's premier cleaning network. High pay, flexible hours, and professional growth."}
-          </p>
-        </motion.div>
-
-        {/* Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-slate-50 rounded-[32px] md:rounded-[48px] p-6 md:p-12 border border-slate-100 shadow-sm relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]" />
-
-          <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
-                <FileText size={24} />
-              </div>
-              <h3 className="text-2xl font-black text-primary-dark tracking-tight">
-                Your Details.
-              </h3>
+      {/* Hero: photos + earnings calculator */}
+      <section className="bg-primary/[0.06] pt-36 md:pt-44 pb-16 md:pb-24 px-6">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-[1fr_440px] gap-10 lg:gap-16 items-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-6 shadow-sm">
+              Now hiring{isUK ? " in Manchester" : ""}
             </div>
-
-            <div className="grid sm:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
-                  <User size={10} /> Full Name
-                </label>
-                <input
-                  required
-                  type="text"
-                  placeholder="John Doe"
-                  className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
-                  <Mail size={10} /> Email Address
-                </label>
-                <input
-                  required
-                  type="email"
-                  placeholder="john@example.com"
-                  className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
-                <Phone size={10} /> Phone Number
-              </label>
-              <input
-                required
-                type="tel"
-                placeholder={region.id === "UK" ? "+44 7..." : "+234 8..."}
-                className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            <h1 className="text-4xl md:text-6xl font-black text-primary-dark mb-6 tracking-tighter leading-[1.05]">
+              {isUK ? "Find cleaning jobs in Manchester." : "Join our cleaning team."}
+            </h1>
+            <p className="text-lg text-slate-600 max-w-xl font-medium leading-relaxed mb-10">
+              {isUK
+                ? "Clean homes and offices across Greater Manchester, choose the hours that suit you, and manage everything from our app."
+                : "Join Nigeria's premier cleaning network. High pay, flexible hours, and professional growth."}
+            </p>
+            <div className="grid grid-cols-2 gap-4 max-w-lg">
+              <img
+                src={sprayPhoto}
+                alt="Cleaner spraying and wiping a surface"
+                className="w-full aspect-[5/6] object-cover rounded-3xl border border-white shadow-lg"
+                width="640"
+                height="760"
+              />
+              <img
+                src={WINDOW_PHOTO}
+                alt="Cleaner in gloves wiping down a window"
+                className="w-full aspect-[5/6] object-cover rounded-3xl border border-white shadow-lg mt-8"
+                width="640"
+                height="760"
+                loading="lazy"
               />
             </div>
+          </motion.div>
 
-            {/* CV Upload */}
-            <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                Upload CV
-              </label>
-              <div className="relative group">
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  onChange={(e) => setFormData({ ...formData, cv: e.target.files[0] })}
-                />
-                <div
-                  className={`p-8 md:p-10 border-2 border-dashed rounded-4xl flex flex-col items-center justify-center gap-4 transition-all ${
-                    formData.cv
-                      ? "border-primary bg-primary/5"
-                      : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"
-                  }`}
-                >
-                  <div
-                    className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${
-                      formData.cv
-                        ? "bg-white text-primary"
-                        : "bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary"
-                    }`}
-                  >
-                    {formData.cv ? <CheckCircle2 size={32} /> : <Upload size={32} />}
-                  </div>
-                  <div className="text-center">
-                    <p className="font-black text-primary-dark">
-                      {formData.cv ? formData.cv.name : "Tap to upload your CV"}
-                    </p>
-                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
-                      PDF or Word Doc (Max 5MB)
-                    </p>
-                  </div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            {isUK ? (
+              <EarningsCalculator />
+            ) : (
+              <a href="#apply" className="btn-primary w-full py-5 text-lg flex items-center justify-center gap-2">
+                Apply now <ArrowRight size={18} />
+              </a>
+            )}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Why join */}
+      <section className="py-20 md:py-28 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl md:text-5xl font-black text-primary-dark text-center tracking-tighter mb-14">
+            Why clean with Cleaniq?
+          </h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {BENEFITS.map((b) => (
+              <div key={b.title} className="p-8 rounded-[32px] bg-slate-50 border border-slate-100">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6">
+                  {b.icon}
                 </div>
+                <h3 className="text-xl font-black text-primary-dark mb-3 tracking-tight">{b.title}</h3>
+                <p className="text-slate-500 font-medium leading-relaxed">{b.desc}</p>
               </div>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            <div className="p-6 rounded-3xl bg-primary/5 border border-primary/10 flex gap-4">
-              <ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
-              <p className="text-sm text-slate-600 font-medium leading-relaxed">
-                We'll review your CV and contact you within <strong>24–72 hours</strong>. If successful, we'll send you login details and ask you to complete your profile before your first job.
+      {/* How it works */}
+      <section className="py-20 md:py-28 px-6 bg-slate-50/60">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl md:text-5xl font-black text-primary-dark text-center tracking-tighter mb-14">
+            How it works
+          </h2>
+          <ol className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            {STEPS.map((s, i) => (
+              <li key={s.title} className="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm">
+                <span className="w-10 h-10 rounded-full bg-primary text-white font-black flex items-center justify-center mb-5">
+                  {i + 1}
+                </span>
+                <h3 className="text-lg font-black text-primary-dark mb-2 tracking-tight">{s.title}</h3>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">{s.desc}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Jobs across Greater Manchester (SEO + what the work is) */}
+      {isUK && (
+        <section className="py-20 md:py-28 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="max-w-3xl mb-12">
+              <h2 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter mb-6">
+                Cleaning jobs across Greater Manchester
+              </h2>
+              <p className="text-lg text-slate-600 font-medium leading-relaxed mb-4">
+                Cleaniq Services looks after homes, rental properties and workplaces across Manchester. As a Cleaniq
+                cleaner you'll take on a mix of jobs close to where you live, from regular weekly cleans for families to
+                end-of-tenancy cleans that help tenants get their deposit back.
+              </p>
+              <p className="text-lg text-slate-600 font-medium leading-relaxed">
+                You'll see every job's address, time and details in the Cleaniq worker app before you start, so you
+                always know what's next.
               </p>
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="btn-primary w-full py-5 text-base shadow-2xl shadow-primary/20 disabled:opacity-70"
-            >
-              Submit Application
-            </button>
-          </form>
-        </motion.div>
-
-        {/* Benefits */}
-        <div className="mt-20 grid md:grid-cols-3 gap-8">
-          {[
-            { icon: <Building size={24} />, title: "Flexible Hours.", desc: "Choose when and where you want to work." },
-            { icon: <Award size={24} />, title: "Premium Pay.", desc: "Industry-leading rates for top-tier professionals." },
-            { icon: <ShieldCheck size={24} />, title: "Vetted Quality.", desc: "Join a network of the highest rated pros." },
-          ].map((benefit, i) => (
-            <div key={i} className="text-center p-8">
-              <div className="w-14 h-14 rounded-2xl bg-primary/5 text-primary flex items-center justify-center mx-auto mb-6">
-                {benefit.icon}
-              </div>
-              <h4 className="text-xl font-black text-primary-dark mb-3 tracking-tight">{benefit.title}</h4>
-              <p className="text-slate-500 font-medium text-sm leading-relaxed">{benefit.desc}</p>
+            <h3 className="text-xl font-black text-primary-dark mb-6">The work you'll do</h3>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
+              {SERVICE_PAGES.map((p) => (
+                <div key={p.slug} className="rounded-3xl overflow-hidden bg-slate-50 border border-slate-100">
+                  <div className="aspect-[16/9] overflow-hidden">
+                    <img
+                      src={p.image(600)}
+                      alt={p.imageAlt}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-5">
+                    <h4 className="text-lg font-black text-primary-dark mb-1">{p.name}</h4>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">{p.blurb}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+
+            <div className="grid lg:grid-cols-2 gap-10">
+              <div className="p-8 md:p-10 rounded-[32px] bg-primary text-white">
+                <h3 className="text-2xl font-black tracking-tight mb-6">What we look for</h3>
+                <ul className="space-y-4">
+                  {LOOKING_FOR.map((item) => (
+                    <li key={item} className="flex gap-3 font-medium text-white/90">
+                      <CheckCircle2 size={20} className="text-secondary shrink-0 mt-0.5" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="p-8 md:p-10 rounded-[32px] bg-slate-50 border border-slate-100">
+                <h3 className="text-2xl font-black text-primary-dark tracking-tight mb-3">Where you'll work</h3>
+                <p className="text-slate-500 font-medium mb-6">Jobs are spread across Manchester and Greater Manchester, including:</p>
+                <div className="flex flex-wrap gap-2">
+                  {AREAS.map((a) => (
+                    <span key={a.slug} className="px-4 py-2 rounded-xl bg-white border border-slate-100 text-sm font-bold text-primary-dark">
+                      {a.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Application form */}
+      <section id="apply" className="py-20 md:py-28 px-6 scroll-mt-28">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-5xl font-black text-primary-dark tracking-tighter mb-4">Apply in two minutes</h2>
+            <p className="text-lg text-slate-500 font-medium">Send us your details and CV and we'll be in touch.</p>
+          </div>
+
+          <div className="bg-slate-50 rounded-[32px] md:rounded-[48px] p-6 md:p-12 border border-slate-100 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]" />
+
+            <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
+                  <FileText size={24} />
+                </div>
+                <h3 className="text-2xl font-black text-primary-dark tracking-tight">Your Details.</h3>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                    <User size={10} /> Full Name
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="John Doe"
+                    className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                    <Mail size={10} /> Email Address
+                  </label>
+                  <input
+                    required
+                    type="email"
+                    placeholder="john@example.com"
+                    className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                  <Phone size={10} /> Phone Number
+                </label>
+                <input
+                  required
+                  type="tel"
+                  placeholder={isUK ? "+44 7..." : "+234 8..."}
+                  className="w-full p-5 rounded-3xl bg-white border border-slate-100 focus:border-primary outline-none transition-all shadow-sm font-bold"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
+              </div>
+
+              {/* CV Upload */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Upload CV</label>
+                <div className="relative group">
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    onChange={(e) => setFormData({ ...formData, cv: e.target.files[0] })}
+                  />
+                  <div
+                    className={`p-8 md:p-10 border-2 border-dashed rounded-4xl flex flex-col items-center justify-center gap-4 transition-all ${
+                      formData.cv
+                        ? "border-primary bg-primary/5"
+                        : "border-slate-200 bg-white group-hover:border-primary group-hover:bg-primary/5"
+                    }`}
+                  >
+                    <div
+                      className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all ${
+                        formData.cv
+                          ? "bg-white text-primary"
+                          : "bg-slate-50 text-slate-300 group-hover:bg-white group-hover:text-primary"
+                      }`}
+                    >
+                      {formData.cv ? <CheckCircle2 size={32} /> : <Upload size={32} />}
+                    </div>
+                    <div className="text-center">
+                      <p className="font-black text-primary-dark">
+                        {formData.cv ? formData.cv.name : "Tap to upload your CV"}
+                      </p>
+                      <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
+                        PDF or Word Doc (Max 5MB)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-3xl bg-primary/5 border border-primary/10 flex gap-4">
+                <ShieldCheck className="text-primary shrink-0 mt-0.5" size={20} />
+                <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                  We'll review your CV and contact you within <strong>24–72 hours</strong>. If successful, we'll send you login details and ask you to complete your profile before your first job.
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="btn-primary w-full py-5 text-base shadow-2xl shadow-primary/20 disabled:opacity-70"
+              >
+                Submit Application
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* FAQ */}
+      {isUK && (
+        <section className="pb-24 md:pb-32 px-6">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-black text-primary-dark text-center tracking-tighter mb-12">
+              Questions from cleaners
+            </h2>
+            <div className="space-y-4">
+              {FAQS.map((faq) => (
+                <details
+                  key={faq.q}
+                  className="group p-6 rounded-[32px] bg-white border border-slate-100 shadow-sm transition-all hover:shadow-md cursor-pointer"
+                >
+                  <summary className="list-none flex items-center justify-between gap-4 text-lg font-black text-primary-dark">
+                    {faq.q}
+                    <Plus className="text-primary group-open:rotate-45 transition-transform shrink-0" />
+                  </summary>
+                  <p className="mt-4 text-slate-500 font-medium leading-relaxed">{faq.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <AnimatePresence>
         {notification && (
@@ -298,9 +620,7 @@ const Recruitment = () => {
           >
             <div
               className={`p-6 rounded-[32px] border-2 shadow-2xl flex items-center gap-4 bg-white ${
-                notification.type === "error"
-                  ? "border-rose-100 text-rose-600"
-                  : "border-emerald-100 text-emerald-600"
+                notification.type === "error" ? "border-rose-100 text-rose-600" : "border-emerald-100 text-emerald-600"
               }`}
             >
               <div
