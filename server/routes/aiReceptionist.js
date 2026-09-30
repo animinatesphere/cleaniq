@@ -62,6 +62,13 @@ router.put("/settings", async (req, res) => {
     for (const field of ["businessName", "serviceArea", "instructions"]) {
       if (typeof req.body[field] === "string") update[field] = req.body[field];
     }
+    if (typeof req.body.assistantName === "string") {
+      const name = req.body.assistantName.trim();
+      if (!/^[A-Za-z][A-Za-z' -]{0,29}$/.test(name)) {
+        return res.status(400).json({ message: "Receptionist name must be a first name (letters only, up to 30)" });
+      }
+      update.assistantName = name;
+    }
     for (const field of ["voiceEnabled", "whatsappEnabled", "quoteIncludeVat"]) {
       if (typeof req.body[field] === "boolean") update[field] = req.body[field];
     }

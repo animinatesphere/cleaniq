@@ -139,6 +139,7 @@ async function replyOnce(conversationId, { ai = generateReply, send = sendWhatsA
       tools: bookingTools,
       runTool: makeToolRunner({
         phone: conversation.phone,
+        channel: "whatsapp",
         conversationId: String(conversation._id),
         onTool: (event) => toolEvents.push(event),
       }),

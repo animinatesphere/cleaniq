@@ -14,7 +14,7 @@ const RELAY_PATH = "/api/voice/relay";
 const TOKEN_TTL_MS = 2 * 60 * 1000;
 const SETUP_TIMEOUT_MS = 15 * 1000;
 const MAX_TURNS_PER_CALL = 40; // protects AI credit from very long or looping calls
-const VOICE_TOOL_NAMES = ["get_quote", "check_availability", "find_my_bookings"];
+const VOICE_TOOL_NAMES = ["get_quote", "check_availability", "find_my_bookings", "save_enquiry"];
 
 const TRANSFER_TOOL = {
   name: "transfer_to_human",
@@ -51,7 +51,8 @@ const speakingTimeMs = (text) => Math.min(10000, 1200 + String(text).length * 65
 
 function greetingFor(settings) {
   const business = settings.businessName || "Cleaniq Services";
-  return `Hello, you're through to ${business}. I'm the AI assistant, and this call is transcribed to help our team. How can I help you today?`;
+  const name = settings.assistantName || "Sophie";
+  return `Hello, thank you for calling ${business}, you're speaking with ${name}. Calls are transcribed to help our team. How can I help you today?`;
 }
 
 /**
@@ -144,6 +145,7 @@ function handleRelaySession(ws, deps = {}) {
     let transferRequested = false;
     const baseRunner = makeToolRunner({
       phone: state.call?.phone || "",
+      channel: "voice",
       conversationId: state.call ? String(state.call._id) : null,
       onTool: (e) => toolEvents.push(e),
     });

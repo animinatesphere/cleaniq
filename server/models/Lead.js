@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 const leadSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, lowercase: true },
+  // Optional: phone enquiries taken by the AI receptionist may only have a phone number.
+  email: { type: String, default: "", lowercase: true, trim: true },
   phone: { type: String, default: "" },
   message: { type: String, default: "" },
   serviceInterest: { type: String, default: "" },

@@ -102,7 +102,7 @@ test("voice AI on → ConversationRelay in British English with greeting and a o
   const { body, token } = await incomingToken("CA3");
   assert.match(body, /<Connect action="http:\/\/127\.0\.0\.1:\d+\/api\/voice\/after">/);
   assert.match(body, /<ConversationRelay url="ws:\/\/127\.0\.0\.1:\d+\/api\/voice\/relay" language="en-GB"/);
-  assert.match(body, /welcomeGreeting="Hello, you&apos;re through to Cleaniq Services\. I&apos;m the AI assistant, and this call is transcribed/);
+  assert.match(body, /welcomeGreeting="Hello, thank you for calling Cleaniq Services, you&apos;re speaking with Sophie\. Calls are transcribed/);
   assert.ok(token);
 });
 
@@ -139,7 +139,7 @@ test("caller speaks → AI replies (using a tool) → transcript and tool action
     return c.transcript.length === 3 ? c : null;
   });
   assert.equal(call.phone, "+447700900123");
-  assert.match(call.transcript[0].text, /I'm the AI assistant/);
+  assert.match(call.transcript[0].text, /you're speaking with Sophie/);
   assert.equal(call.transcript[1].role, "customer");
   assert.equal(call.transcript[2].tools[0].detail, "Price check: Deep Clean, 3h → £92.55");
 
