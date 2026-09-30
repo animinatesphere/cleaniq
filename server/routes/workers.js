@@ -529,6 +529,8 @@ router.post("/jobs/:id/start", async (req, res) => {
     await syncCompanyJob(booking, {
       jobStartTime: booking.jobStartTime,
     });
+    // Regular clean not charged yet (cleaner skipped "I've arrived"): charge it now.
+    await chargeVisitOnArrival(booking);
 
     // Notify customer
     await notifyCustomer(booking, {
@@ -579,6 +581,8 @@ router.post("/jobs/:id/complete", async (req, res) => {
     await syncCompanyJob(booking, {
       jobEndTime: booking.jobEndTime,
     });
+    // Regular clean not charged yet (arrival/start were skipped): charge it now.
+    await chargeVisitOnArrival(booking);
 
     // Update worker wallet and create Withdrawal
     if (booking.assignedWorker) {

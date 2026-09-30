@@ -27,7 +27,7 @@ function formatDate(d) {
 }
 
 export default function CustomerDashboard() {
-  const { customer, logout, authFetch } = useCustomerAuth();
+  const { customer, loading: authLoading, logout, authFetch } = useCustomerAuth();
   const { region } = useRegion();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -49,7 +49,9 @@ export default function CustomerDashboard() {
   const chatEndRef = useRef(null);
 
   // Redirect if not logged in — preserve payment params so the toast shows after login
+  // Wait for the saved session to load, or a page refresh sends logged-in customers to login.
   useEffect(() => {
+    if (authLoading) return;
     if (!customer) {
       const paymentParam = searchParams.get('payment');
       const bookingIdParam = searchParams.get('bookingId');
@@ -59,7 +61,7 @@ export default function CustomerDashboard() {
       }
       navigate(`/account/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
-  }, [customer, navigate]);
+  }, [customer, authLoading, navigate]);
 
   // Show payment success toast when redirected from Stripe
   useEffect(() => {

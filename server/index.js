@@ -311,9 +311,16 @@ app.post(
     try {
       if (
         event.type === "checkout.session.completed" &&
-        (await require("./utils/subscriptions").handleCheckoutCompleted(event.data.object))
+        ["subscription_first", "visit_payment"].includes(event.data.object?.metadata?.type)
       ) {
-        // Regular-clean payment link (first visit from the app, or a failed visit paid later)
+        // Regular-clean payment link (first visit from the app, or a failed visit paid later).
+        // On error answer 500 so Stripe retries, instead of leaving it unprocessed.
+        try {
+          await require("./utils/subscriptions").handleCheckoutCompleted(event.data.object);
+        } catch (subErr) {
+          console.error("❌ Regular clean payment webhook failed:", subErr.message);
+          return res.status(500).send("Regular clean payment not processed yet");
+        }
       } else if (event.type === "checkout.session.completed") {
         const session = event.data.object;
         const bookingId = session.metadata && session.metadata.bookingId;

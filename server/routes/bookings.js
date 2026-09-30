@@ -854,8 +854,9 @@ router.put("/:id", async (req, res) => {
 
     // Keep the company's job (customer app) in step with admin status changes.
     if (newStatus && newStatus !== prevStatus) await syncCompanyJob(updatedBooking);
-    // Regular clean marked Arrived by admin: charge the visit like the worker app does.
-    if (newStatus === "Arrived" && prevStatus !== "Arrived") {
+    // Regular clean marked Arrived/In Progress/Completed by admin: charge the visit like the
+    // worker app does (no-op if it's already been charged).
+    if (["Arrived", "In Progress", "Completed", "Completed - Unpaid"].includes(newStatus) && newStatus !== prevStatus) {
       await require("../utils/subscriptions").chargeVisitOnArrival(updatedBooking);
     }
 
