@@ -3,7 +3,7 @@ const router = express.Router();
 const Worker = require("../models/Worker");
 const Booking = require("../models/Booking");
 const Notification = require("../models/Notification");
-const Job = require("../models/Job");
+const { syncCompanyJob } = require("../utils/companyJobs");
 const { moveToTrash } = require("../utils/trash");
 const jwt = require("jsonwebtoken");
 const { sendEmail, templates, workerEventEmails } = require("../utils/emailService");
@@ -141,14 +141,12 @@ router.get("/jobs", async (req, res) => {
     ];
 
     // Region filter
-    if (region) {
-      andClauses.push({
-        $or: [
-          { region },
-          { region: null },
-          { region: { $exists: false } },
-        ],
-      });
+    // Workers are "UK" or "NG". Some bookings carry an area ("North West") or "" instead,
+    // so UK workers see anything not marked NG.
+    if (region === "NG") {
+      andClauses.push({ $or: [{ region: "NG" }, { region: null }, { region: "" }] });
+    } else if (region) {
+      andClauses.push({ region: { $ne: "NG" } });
     }
 
     // Visibility filter: skip when ?all=1 (admin view sees every job regardless of restriction)
@@ -247,14 +245,11 @@ router.post("/jobs/:id/accept", async (req, res) => {
 
     await booking.save();
 
-    if (booking.meta?.jobId) {
-      await Job.findByIdAndUpdate(booking.meta.jobId, {
-        status: "assigned",
-        assignedWorker: workerId,
-        assignedWorkerName: workerName,
-        jobAcceptedTime: booking.jobAcceptedTime,
-      }).catch(() => {});
-    }
+    await syncCompanyJob(booking, {
+      assignedWorker: workerId,
+      assignedWorkerName: workerName,
+      jobAcceptedTime: booking.jobAcceptedTime,
+    });
 
     // Create notification
     await Notification.create({
@@ -334,14 +329,11 @@ router.put("/jobs/:id/assign", async (req, res) => {
     booking.jobAcceptedTime = booking.jobAcceptedTime || new Date();
     await booking.save();
 
-    if (booking.meta?.jobId) {
-      await Job.findByIdAndUpdate(booking.meta.jobId, {
-        status: "assigned",
-        assignedWorker: worker._id,
-        assignedWorkerName: `${worker.firstName} ${worker.lastName}`,
-        jobAcceptedTime: booking.jobAcceptedTime,
-      }).catch(() => {});
-    }
+    await syncCompanyJob(booking, {
+      assignedWorker: worker._id,
+      assignedWorkerName: `${worker.firstName} ${worker.lastName}`,
+      jobAcceptedTime: booking.jobAcceptedTime,
+    });
 
     await Notification.create({
       workerId: worker._id,
@@ -387,6 +379,7 @@ router.post("/jobs/:id/cancel", async (req, res) => {
     booking.jobDurationActual = 0;
 
     await booking.save();
+    await syncCompanyJob(booking, { assignedWorker: null, assignedWorkerName: null, jobAcceptedTime: null, jobArrivedTime: null, jobStartTime: null });
 
     // Send email log to Admin
     await sendEmail({
@@ -472,11 +465,9 @@ router.post("/jobs/:id/arrive", async (req, res) => {
     booking.jobArrivedTime = new Date();
     await booking.save();
 
-    if (booking.meta?.jobId) {
-      await Job.findByIdAndUpdate(booking.meta.jobId, {
-        jobArrivedTime: booking.jobArrivedTime,
-      }).catch(() => {});
-    }
+    await syncCompanyJob(booking, {
+      jobArrivedTime: booking.jobArrivedTime,
+    });
 
     // Notify customer
     await notifyCustomer(booking, {
@@ -522,12 +513,9 @@ router.post("/jobs/:id/start", async (req, res) => {
     booking.jobStartTime = new Date();
     await booking.save();
 
-    if (booking.meta?.jobId) {
-      await Job.findByIdAndUpdate(booking.meta.jobId, {
-        status: "in_progress",
-        jobStartTime: booking.jobStartTime,
-      }).catch(() => {});
-    }
+    await syncCompanyJob(booking, {
+      jobStartTime: booking.jobStartTime,
+    });
 
     // Notify customer
     await notifyCustomer(booking, {
@@ -575,12 +563,9 @@ router.post("/jobs/:id/complete", async (req, res) => {
 
     await booking.save();
 
-    if (booking.meta?.jobId) {
-      await Job.findByIdAndUpdate(booking.meta.jobId, {
-        status: "completed",
-        jobEndTime: booking.jobEndTime,
-      }).catch(() => {});
-    }
+    await syncCompanyJob(booking, {
+      jobEndTime: booking.jobEndTime,
+    });
 
     // Update worker wallet and create Withdrawal
     if (booking.assignedWorker) {

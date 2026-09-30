@@ -21,7 +21,7 @@ const TABS = [
 const STATUS_META = {
   pending_review: { label: "Pending Review", color: C.warning,   bg: C.warningBg  },
   approved:       { label: "Approved",        color: C.info,      bg: C.infoBg     },
-  assigned:       { label: "Worker Assigned", color: C.purple,    bg: C.purpleBg   },
+  assigned:       { label: "Cleaner Assigned", color: C.purple,    bg: C.purpleBg   },
   in_progress:    { label: "In Progress",     color: C.primary,   bg: C.primaryLight },
   completed:      { label: "Completed",       color: C.success,   bg: C.successBg  },
   cancelled:      { label: "Cancelled",       color: C.textMuted, bg: C.surfaceAlt },

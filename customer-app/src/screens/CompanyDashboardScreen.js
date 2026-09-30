@@ -54,7 +54,7 @@ const shHero = Platform.select({
 const STATUS_META = {
   pending_review: { label:"Pending Review",  color:G.warning,  bg:G.warningBg  },
   approved:       { label:"Approved",         color:G.info,     bg:G.infoBg     },
-  assigned:       { label:"Worker Assigned",  color:G.purple,   bg:G.purpleBg   },
+  assigned:       { label:"Cleaner Assigned",  color:G.purple,   bg:G.purpleBg   },
   in_progress:    { label:"In Progress",      color:G.primary,  bg:G.primaryLight },
   completed:      { label:"Completed",        color:G.success,  bg:G.successBg  },
   cancelled:      { label:"Cancelled",        color:G.muted,    bg:"#F8FAFC"    },
