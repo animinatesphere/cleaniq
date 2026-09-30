@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useCustomerAuth } from '../../context/CustomerAuthContext';
 import { useRegion } from '../../context/RegionContext';
+import RegularCleans from './RegularCleans';
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -272,6 +273,7 @@ export default function CustomerDashboard() {
         <div className="flex gap-2 mb-6 bg-white p-2 rounded-2xl border border-slate-100 shadow-sm w-fit">
           {[
             { id: 'bookings', label: 'My Bookings', icon: <Calendar size={14} /> },
+            { id: 'regular', label: 'Regular cleans', icon: <RefreshCw size={14} /> },
             { id: 'chat', label: 'Messages', icon: <MessageCircle size={14} /> },
           ].map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
@@ -280,6 +282,8 @@ export default function CustomerDashboard() {
             </button>
           ))}
         </div>
+
+        {tab === 'regular' && <RegularCleans authFetch={authFetch} onChanged={fetchBookings} />}
 
         {/* ---- BOOKINGS TAB ---- */}
         {tab === 'bookings' && (

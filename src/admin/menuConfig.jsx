@@ -127,6 +127,12 @@ export const fullMenuGroups = [
         icon: <Calendar size={20} />,
       },
       {
+        name: "Regular Cleans",
+        path: "/admin/subscriptions",
+        key: "subscriptions",
+        icon: <Repeat size={20} />,
+      },
+      {
         name: "Calendar",
         path: "/admin/calendar",
         key: "calendar",

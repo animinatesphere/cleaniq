@@ -243,6 +243,10 @@ const Booking = () => {
   }, [customer]);
 
   const [totalPrice, setTotalPrice] = useState(0);
+  // Regular cleans: price of each later visit (before any first-clean coupon) and the
+  // customer's agreement to have later visits charged to their saved card.
+  const [visitPrice, setVisitPrice] = useState(0);
+  const [regularConsent, setRegularConsent] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(null); // { code, discountPercent }
   const [couponError, setCouponError] = useState("");
@@ -629,6 +633,7 @@ const Booking = () => {
     if (!formData.serviceType) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTotalPrice(0);
+      setVisitPrice(0);
       return;
     }
 
@@ -658,6 +663,7 @@ const Booking = () => {
 
     const discount = couponApplied ? (total * couponApplied.discountPercent) / 100 : 0;
     setTotalPrice(Math.round((total - discount) * 100) / 100);
+    setVisitPrice(Math.round(total * 100) / 100);
   }, [formData, region, dynamicRates, couponApplied]);
 
   // auth modal is derived from step/customer/isSubmitted
@@ -758,6 +764,10 @@ const Booking = () => {
     setStep((s) => Math.max(s - 1, 1));
   };
 
+  const isRegular = ["Weekly", "Fortnightly"].includes(formData.frequency);
+  const regularEvery =
+    formData.frequency === "Weekly" ? "every week" : formData.frequency === "Fortnightly" ? "every two weeks" : "";
+
   const steps = [
     { id: 1, title: "Location" },
     { id: 2, title: "Home & Hours" },
@@ -807,6 +817,9 @@ const Booking = () => {
       },
       leadSource: formData.leadSource || "Organic",
       suppliesProvidedBy: formData.suppliesProvidedBy || "Cleaniq",
+      // Regular clean: the first clean has been charged and the card saved; the server
+      // checks the payment with Stripe and books the following visits.
+      ...(isRegular ? { subscribe: true, subscription: { visitPrice } } : {}),
       payment: {
         amount: totalPrice,
         currency: "GBP",
@@ -816,7 +829,7 @@ const Booking = () => {
         // yet — the actual capture happens when the job is marked
         // Completed, via the existing capture-on-complete logic.
         stripePaymentIntentId: paymentIntent.id,
-        status: "Authorized",
+        status: isRegular ? "Completed" : "Authorized",
         authorizedAt: new Date().toISOString(),
       },
       region: region.id,
@@ -968,8 +981,10 @@ const Booking = () => {
           <h1 className="text-3xl md:text-4xl font-extrabold text-black mb-4 tracking-tighter">
             Confirmed!
           </h1>
-          <p className="text-slate-500 font-bold mb-10">
-            Check your email for confirmation.
+          <p className="text-slate-500 font-bold mb-10 max-w-md mx-auto">
+            {isRegular
+              ? `Your regular clean is set up ${regularEvery}. Your first clean is paid; each following clean is charged when your cleaner arrives. Check your email for the details.`
+              : "Check your email for confirmation."}
           </p>
           <Link
             to="/"
@@ -1317,18 +1332,38 @@ const Booking = () => {
                             </p>
                           </div>
                           <div className="grid grid-cols-3 gap-2">
-                            {["Once", "Weekly", "Fortnightly"].map((f) => (
+                            {[
+                              { value: "Once", label: "One-off" },
+                              { value: "Weekly", label: "Weekly" },
+                              { value: "Fortnightly", label: "Fortnightly" },
+                            ].map((f) => (
                               <button
-                                key={f}
+                                key={f.value}
                                 onClick={() =>
-                                  setFormData({ ...formData, frequency: f })
+                                  setFormData({ ...formData, frequency: f.value })
                                 }
-                                className={`py-4 rounded-2xl border font-black text-xs transition-all ${formData.frequency === f ? "border-[#10B981] bg-[#10B981] text-white shadow-md" : "border-slate-200 bg-white text-slate-600 hover:border-[#10B981]/30"}`}
+                                className={`relative py-4 rounded-2xl border font-black text-xs transition-all ${formData.frequency === f.value ? "border-[#10B981] bg-[#10B981] text-white shadow-md" : "border-slate-200 bg-white text-slate-600 hover:border-[#10B981]/30"}`}
                               >
-                                {f}
+                                {f.label}
+                                {f.value === "Weekly" && (
+                                  <span className="absolute -top-2 right-2 px-1.5 py-0.5 rounded-md bg-amber-300 text-[8px] font-black text-amber-900 uppercase">
+                                    Popular
+                                  </span>
+                                )}
                               </button>
                             ))}
                           </div>
+                          {isRegular && (
+                            <div className="mt-3 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 p-4 text-xs text-slate-600 font-semibold leading-relaxed">
+                              <p className="font-black text-[#0F6B4C] mb-1">Regular cleaning, {regularEvery}</p>
+                              <ul className="list-disc pl-4 space-y-0.5">
+                                <li>Same day and time {regularEvery}</li>
+                                <li>Pay for your first clean today</li>
+                                <li>Each following clean is charged on the day, when your cleaner arrives</li>
+                                <li>Pause or cancel free with 24 hours&apos; notice</li>
+                              </ul>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1982,15 +2017,59 @@ const Booking = () => {
                               </div>
                             ) : (
                               <div className="space-y-4">
-                                <Elements stripe={stripePromise}>
-                                  <StripePayment
-                                    amount={totalPrice}
-                                    currency="GBP"
-                                    customerInfo={formData}
-                                    onPaymentSuccess={handlePaymentSuccess}
-                                    deferCapture
-                                  />
-                                </Elements>
+                                {isRegular && (
+                                  <div className="rounded-2xl bg-white border border-[#10B981]/25 p-5 space-y-3">
+                                    <p className="text-[10px] font-black text-[#10B981] uppercase tracking-widest">
+                                      Your regular clean · {formData.frequency}
+                                    </p>
+                                    <div className="flex justify-between text-sm font-bold text-slate-700">
+                                      <span>First clean, paid today</span>
+                                      <span className="tabular-nums">£{totalPrice.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm font-bold text-slate-700">
+                                      <span>Each following clean</span>
+                                      <span className="tabular-nums">£{visitPrice.toFixed(2)}</span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
+                                      Following cleans are charged to this card on the day, when your cleaner arrives.
+                                      Pause or cancel any time from your account: free with 24 hours&apos; notice, otherwise
+                                      the late-notice charges in our{" "}
+                                      <Link to="/terms" target="_blank" className="underline">
+                                        Terms
+                                      </Link>{" "}
+                                      apply.
+                                    </p>
+                                    <label className="flex items-start gap-3 cursor-pointer">
+                                      <input
+                                        type="checkbox"
+                                        checked={regularConsent}
+                                        onChange={(e) => setRegularConsent(e.target.checked)}
+                                        className="mt-0.5 w-4 h-4 accent-[#10B981] shrink-0"
+                                      />
+                                      <span className="text-xs font-bold text-slate-700 leading-relaxed">
+                                        I agree that Cleaniq Services can save my card and charge £{visitPrice.toFixed(2)} for each
+                                        following clean on the day of the clean, until I pause or cancel.
+                                      </span>
+                                    </label>
+                                  </div>
+                                )}
+                                {isRegular && !regularConsent ? (
+                                  <p className="text-xs font-bold text-slate-400 text-center py-4">
+                                    Tick the box above to continue to payment.
+                                  </p>
+                                ) : (
+                                  <Elements stripe={stripePromise}>
+                                    <StripePayment
+                                      key={isRegular ? "regular" : "one-off"}
+                                      amount={totalPrice}
+                                      currency="GBP"
+                                      customerInfo={formData}
+                                      onPaymentSuccess={handlePaymentSuccess}
+                                      deferCapture={!isRegular}
+                                      saveCard={isRegular}
+                                    />
+                                  </Elements>
+                                )}
 
                                 {/* Dev Mode: Skip Payment Button - confirmed working,
                                     removed from view. Uncomment + wrap in

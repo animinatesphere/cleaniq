@@ -17,6 +17,8 @@ const StripePayment = ({
   customerInfo,
   bookingId,
   deferCapture,
+  // Regular cleans: charge now and save the card for the following cleans.
+  saveCard,
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -45,6 +47,9 @@ const StripePayment = ({
               service: customerInfo.serviceType,
               bookingId: bookingId || undefined,
               deferCapture: deferCapture || undefined,
+              saveCard: saveCard || undefined,
+              customerEmail: saveCard ? customerInfo.email : undefined,
+              customerPhone: saveCard ? customerInfo.phone : undefined,
             }),
           },
         );
@@ -62,7 +67,7 @@ const StripePayment = ({
     if (amount > 0) {
       createPaymentIntent();
     }
-  }, [amount, currency]);
+  }, [amount, currency, saveCard]);
 
   // Handle Payment Request (Apple Pay / Google Pay)
   useEffect(() => {
@@ -86,7 +91,7 @@ const StripePayment = ({
       });
 
       pr.on("paymentmethod", async (ev) => {
-        const { error: confirmError } = await stripe.confirmCardPayment(
+        const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(
           clientSecret,
           { payment_method: ev.paymentMethod.id },
           { handleActions: false },
@@ -95,10 +100,21 @@ const StripePayment = ({
         if (confirmError) {
           ev.complete("fail");
           setError(`Payment failed: ${confirmError.message}`);
-        } else {
-          ev.complete("success");
-          onPaymentSuccess(ev.paymentMethod);
+          return;
         }
+        ev.complete("success");
+        // The bank may still ask the customer to approve (3D Secure). Pass on the
+        // PaymentIntent (not the card), so the booking can be charged/captured later.
+        if (paymentIntent.status === "requires_action") {
+          const { error: actionError, paymentIntent: confirmed } = await stripe.confirmCardPayment(clientSecret);
+          if (actionError) {
+            setError(`Payment failed: ${actionError.message}`);
+            return;
+          }
+          onPaymentSuccess(confirmed);
+          return;
+        }
+        onPaymentSuccess(paymentIntent);
       });
     }
   }, [stripe, amount, clientSecret]);

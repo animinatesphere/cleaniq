@@ -15,7 +15,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-const LAST_UPDATED = "31 May 2026";
+const LAST_UPDATED = "30 September 2026";
 
 const sections = [
   {
@@ -71,7 +71,8 @@ const sections = [
       "Cleaniq Services reserves the right to cancel a booking and issue a full refund if we are unable to fulfil the service for any reason, including but not limited to staff unavailability or access issues.",
       "Once a cleaning service has been completed and marked as 'Completed', no refunds will be issued except where a valid complaint is raised within 24 hours of service completion.",
       "If you wish to reschedule a booking, you may cancel the existing booking via your dashboard and rebook at your convenience.",
-      " 24 hours’ notice prior to your scheduled cleaning time is free with no cancellation fee. 8–24 hours’ notice will incur a £10 charge. Less than 2 hours’ notice, or failure to provide access, will result in forfeiture of 80% of the payment made.",
+      "24 hours’ notice or more before your scheduled cleaning time is free, with no cancellation fee. 2–24 hours’ notice will incur a £10 charge. Less than 2 hours’ notice, or failure to provide access, will result in forfeiture of 80% of the price of that clean.",
+      "Regular cleans (weekly, fortnightly or monthly): your first clean is paid when you book, and your card is saved securely with Stripe. Each following clean is charged to that card on the day, when your cleaner arrives. You can pause or cancel your regular clean at any time from your account. Pausing or cancelling is free with 24 hours’ notice before your next clean; with less notice, the late-notice charges above apply to that next clean and are taken from your saved card.",
     ],
   },
   {
@@ -212,8 +213,8 @@ const TermsAndConditions = () => {
           {[
             {
               icon: <RefreshCw size={20} />,
-              title: "Full Refunds",
-              desc: "Cancel any time and receive a full refund to your card.",
+              title: "Free Cancellation",
+              desc: "Cancel free of charge with 24 hours' notice.",
             },
             {
               icon: <Lock size={20} />,

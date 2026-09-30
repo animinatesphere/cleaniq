@@ -18,6 +18,7 @@ const PERMISSION_OPTIONS = [
   { key: 'leads', label: 'Leads' },
   { key: 'checklist', label: 'Checklist' },
   { key: 'recurring', label: 'Recurring' },
+  { key: 'subscriptions', label: 'Regular Cleans' },
   { key: 'email-history', label: 'Email History' },
   { key: 'invoice-builder', label: 'Invoice Builder' },
   { key: 'staff-pay', label: 'Staff Pay' },
