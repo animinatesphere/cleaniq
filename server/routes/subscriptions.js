@@ -10,6 +10,7 @@ const {
   resumeSubscription,
   cancelSubscription,
   nextVisitFor,
+  cancellationQuote,
 } = require("../utils/subscriptions");
 
 const ACTIONS = { pause: pauseSubscription, resume: resumeSubscription, cancel: cancelSubscription };
@@ -38,14 +39,26 @@ router.get("/my", verifyCustomer, async (req, res) => {
   }
 });
 
+// What pausing/cancelling right now would cost (shown before the customer confirms).
+router.get("/my/:id/cancellation-fee", verifyCustomer, async (req, res) => {
+  try {
+    const sub = await Subscription.findOne({ _id: req.params.id, ...mine(req) });
+    if (!sub) return res.status(404).json({ message: "Regular clean not found" });
+    const q = await cancellationQuote(sub);
+    res.json({ fee: q.fee, rule: q.rule || "", hoursUntilNextVisit: q.hoursUntilNextVisit ?? null, nextVisitStart: q.nextVisit?.start || null });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.post("/my/:id/:action", verifyCustomer, async (req, res) => {
   const act = ACTIONS[req.params.action];
   if (!act) return res.status(404).json({ message: "Unknown action" });
   try {
     const sub = await Subscription.findOne({ _id: req.params.id, ...mine(req) });
     if (!sub) return res.status(404).json({ message: "Regular clean not found" });
-    const result = await act(sub, "customer");
-    res.json((await withNextVisit([result.sub]))[0]);
+    const result = await act(sub, "customer", { chargeFee: true });
+    res.json({ ...(await withNextVisit([result.sub]))[0], feeCharged: result.fee || null });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

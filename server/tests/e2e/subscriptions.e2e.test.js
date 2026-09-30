@@ -278,3 +278,74 @@ test("one-off bookings are unchanged (no subscription, no saved-card charges)", 
   assert.equal(b.payment.status, "Authorized");
   assert.ok(!b.payment.chargeOnArrival);
 });
+
+test("late-notice fees on pause/cancel: 24h+ free, 2–24h £10, under 2h 80%; admin actions free", async () => {
+  // A regular clean whose NEXT visit starts at a chosen time from "now".
+  const makeSub = async (email) => {
+    intents[`pi_${email}`] = { id: `pi_${email}`, status: "succeeded", amount: 4100, customer: "cus_1", payment_method: "pm_9" };
+    const r = await call("POST", "/customer-bookings", websiteBooking({
+      customer: { firstName: "Fee", lastName: "Test", email, phone: "07700900666" },
+      payment: { amount: 41, currency: "GBP", method: "Stripe", stripePaymentIntentId: `pi_${email}` },
+    }));
+    const s = await Subscription.findOne({ subscriptionRef: r.data.subscription.subscriptionRef });
+    const next = (await visitsOf(s)).find((v) => v.payment.status === "Pending");
+    return { s, next };
+  };
+  const startOf = (b) => require("../../utils/bookingDateTime").buildBookingDateTime(b.schedule.date, b.schedule.timeSlot, b.schedule.preferredTime);
+  const nowBefore = (b, hours) => new Date(startOf(b).getTime() - hours * 3600000);
+
+  const a = await makeSub("fee-a@test.com");
+  assert.equal((await subs.cancellationQuote(a.s, nowBefore(a.next, 30))).fee, 0);
+  assert.equal((await subs.cancellationQuote(a.s, nowBefore(a.next, 10))).fee, 10);
+  assert.equal((await subs.cancellationQuote(a.s, nowBefore(a.next, 5))).fee, 10);
+  assert.equal((await subs.cancellationQuote(a.s, nowBefore(a.next, 1))).fee, 32.8, "80% of £41");
+
+  // Customer pauses with 5h notice: £10 charged to the saved card, that visit cancelled.
+  const before = stripeCalls.length;
+  const paused = await subs.pauseSubscription(a.s, "customer", { now: nowBefore(a.next, 5), chargeFee: true });
+  assert.equal(paused.fee.amount, 10);
+  assert.equal(paused.fee.status, "Paid");
+  const feeCall = stripeCalls[before];
+  assert.equal(feeCall[1].amount, 1000);
+  assert.equal(feeCall[1].payment_method, "pm_9");
+  assert.equal(feeCall[1].metadata.type, "cancellation_fee");
+  assert.equal(feeCall[2].idempotencyKey, `cancel-fee-${a.next._id}`);
+  const nextAfter = await Booking.findById(a.next._id).lean();
+  assert.equal(nextAfter.status, "Cancelled", "the clean in 5 hours is cancelled too");
+  assert.equal(nextAfter.meta.cancellationFee.amount, 10);
+
+  // Cancelling while paused: no upcoming visits, no fee.
+  const c1 = await subs.cancelSubscription(paused.sub, "customer", { chargeFee: true });
+  assert.equal(c1.fee, null);
+
+  // Admin cancels with 1h notice: free.
+  const b = await makeSub("fee-b@test.com");
+  const n = stripeCalls.length;
+  const adminCancel = await subs.cancelSubscription(b.s, "staff1", { now: nowBefore(b.next, 1) });
+  assert.equal(adminCancel.fee, null);
+  assert.equal(stripeCalls.length, n, "no charge for admin cancellations");
+
+  // Fee can't be charged (card declined): cancellation still happens, admin alerted.
+  const c = await makeSub("fee-c@test.com");
+  nextCharge = () => ({ error: { code: "card_declined", message: "Your card was declined." } });
+  emails.length = 0;
+  const declined = await subs.cancelSubscription(c.s, "customer", { now: nowBefore(c.next, 3), chargeFee: true });
+  nextCharge = () => ({ status: "succeeded" });
+  assert.equal(declined.sub.status, "cancelled");
+  assert.equal(declined.fee.status, "Failed");
+  await new Promise((res) => setTimeout(res, 20));
+  assert.ok(emails.some((e) => /Cancellation fee not collected/.test(e.subject)));
+});
+
+test("customer sees the fee before confirming", async () => {
+  intents.pi_prev = { id: "pi_prev", status: "succeeded", amount: 4100, customer: "cus_1", payment_method: "pm_1" };
+  const r = await call("POST", "/customer-bookings", websiteBooking({
+    customer: { firstName: "Pre", lastName: "View", email: "preview@test.com", phone: "07700900777" },
+    payment: { amount: 41, currency: "GBP", method: "Stripe", stripePaymentIntentId: "pi_prev" },
+  }));
+  const s = await Subscription.findOne({ subscriptionRef: r.data.subscription.subscriptionRef });
+  const q = await call("GET", `/subscriptions/my/${s._id}/cancellation-fee`, null, customerToken("preview@test.com"));
+  assert.equal(q.status, 200);
+  assert.equal(q.data.fee, 0, "next unpaid visit is over a week away");
+  assert.ok(q.data.nextVisitStart);
+});

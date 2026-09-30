@@ -9,6 +9,7 @@ const Booking = require("../models/Booking");
 const Service = require("../models/Service");
 const Subscription = require("../models/Subscription");
 const Notification = require("../models/Notification");
+const { buildBookingDateTime } = require("./bookingDateTime");
 
 let stripeClient = null;
 const stripe = () => stripeClient || (stripeClient = require("stripe")(process.env.STRIPE_SECRET_KEY));
@@ -42,6 +43,7 @@ const startOfTomorrow = (now = new Date()) => {
   d.setDate(d.getDate() + 1);
   return d;
 };
+const DAY_MS = 86400000;
 const pence = (gbp) => Math.round(Number(gbp || 0) * 100);
 const ukDate = (d) =>
   new Date(d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/London" });
@@ -286,14 +288,79 @@ async function markVisitPaymentFailed(booking, reason) {
   return { failed: true, reason, paymentLinkUrl: url };
 }
 
-// Cancels this subscription's visits from tomorrow on that haven't started or been paid.
-async function cancelFutureVisits(sub, reason, now = new Date()) {
+const visitStart = (b) => buildBookingDateTime(b.schedule?.date, b.schedule?.timeSlot, b.schedule?.preferredTime);
+const CANCELLABLE_STATUSES = ["Pending", "Confirmed", "Assigned"];
+
+// Visits that haven't started or been paid yet, soonest first.
+async function upcomingVisits(sub, now = new Date()) {
+  const dayStart = new Date(now);
+  dayStart.setHours(0, 0, 0, 0);
   const visits = await Booking.find({
     "meta.subscriptionId": sub._id,
-    "schedule.date": { $gte: startOfTomorrow(now) },
-    status: { $in: ["Pending", "Confirmed", "Assigned"] },
+    "schedule.date": { $gte: new Date(dayStart.getTime() - DAY_MS) },
+    status: { $in: CANCELLABLE_STATUSES },
     "payment.status": { $nin: ["Completed", "Paid"] },
-  }).select("_id bookingId assignedWorker schedule service").lean();
+  }).lean();
+  return visits.filter((v) => visitStart(v) > now).sort((a, b) => visitStart(a) - visitStart(b));
+}
+
+// Late-notice fee from the Terms: 24h+ free, 2–24h £10, under 2h 80% of that clean's price.
+const LATE_FEE_FLAT = 10;
+function cancellationFeeFor(visit, now = new Date()) {
+  const hours = (visitStart(visit) - now) / 3600000;
+  if (hours >= 24) return { fee: 0, hours };
+  if (hours >= 2) return { fee: LATE_FEE_FLAT, hours, rule: "less than 24 hours' notice" };
+  return { fee: Math.round(Number(visit.payment?.amount || 0) * 0.8 * 100) / 100, hours, rule: "less than 2 hours' notice (80% of the clean)" };
+}
+
+// What pausing/cancelling now would cost the customer (for the confirm screen and the action).
+async function cancellationQuote(sub, now = new Date()) {
+  if (sub.status !== "active") return { fee: 0 };
+  const [next] = await upcomingVisits(sub, now);
+  if (!next) return { fee: 0 };
+  const { fee, hours, rule } = cancellationFeeFor(next, now);
+  return {
+    fee,
+    rule: rule || "",
+    hoursUntilNextVisit: Math.round(hours * 10) / 10,
+    nextVisit: { _id: next._id, bookingId: next.bookingId, start: visitStart(next) },
+  };
+}
+
+async function chargeCancellationFee(sub, quote) {
+  const visitId = quote.nextVisit._id;
+  const record = { amount: quote.fee, reason: quote.rule, bookingId: quote.nextVisit.bookingId, at: new Date() };
+  try {
+    const pi = await stripe().paymentIntents.create(
+      {
+        amount: pence(quote.fee),
+        currency: (sub.currency || "GBP").toLowerCase(),
+        customer: sub.stripeCustomerId,
+        payment_method: sub.stripePaymentMethodId,
+        off_session: true,
+        confirm: true,
+        description: `Cleaniq late cancellation fee – ${quote.nextVisit.bookingId}`,
+        metadata: { type: "cancellation_fee", subscriptionRef: sub.subscriptionRef, bookingRef: quote.nextVisit.bookingId, company: "Cleaniq Services" },
+      },
+      { idempotencyKey: `cancel-fee-${visitId}` },
+    );
+    Object.assign(record, { status: pi.status === "succeeded" ? "Paid" : "Failed", paymentIntentId: pi.id });
+  } catch (err) {
+    Object.assign(record, { status: "Failed", error: err.message });
+    const { sendEmail } = require("./emailService");
+    sendEmail({
+      to: ADMIN_EMAIL(),
+      subject: `⚠️ Cancellation fee not collected – ${sub.subscriptionRef}`,
+      html: `<p>${sub.customer?.firstName || ""} ${sub.customer?.lastName || ""} (${sub.customer?.email || ""}) cancelled/paused with ${quote.rule} before ${quote.nextVisit.bookingId}. The £${quote.fee.toFixed(2)} fee couldn't be charged: ${err.message}</p>`,
+    }).catch(() => {});
+  }
+  await Booking.updateOne({ _id: visitId }, { $set: { "meta.cancellationFee": record } });
+  return record;
+}
+
+// Cancels this subscription's visits that haven't started or been paid yet.
+async function cancelFutureVisits(sub, reason, now = new Date()) {
+  const visits = await upcomingVisits(sub, now);
   if (!visits.length) return 0;
   await Booking.updateMany(
     { _id: { $in: visits.map((v) => v._id) } },
@@ -306,14 +373,22 @@ async function cancelFutureVisits(sub, reason, now = new Date()) {
   return visits.length;
 }
 
-async function pauseSubscription(sub, by, { now = new Date() } = {}) {
-  if (sub.status !== "active") throw new Error("Only an active regular clean can be paused");
-  const cancelled = await cancelFutureVisits(sub, "Regular clean paused", now);
-  sub.status = "paused";
-  sub.pausedAt = now;
+// Customers pay the late-notice fee; admin actions are free (chargeFee false).
+async function stopSubscription(sub, next, by, { now, chargeFee }) {
+  const quote = chargeFee ? await cancellationQuote(sub, now) : { fee: 0 };
+  const fee = quote.fee > 0 ? await chargeCancellationFee(sub, quote) : null;
+  const cancelled = await cancelFutureVisits(sub, next === "paused" ? "Regular clean paused" : "Regular clean cancelled", now);
+  sub.status = next;
+  if (next === "paused") sub.pausedAt = now;
+  else Object.assign(sub, { cancelledAt: now, cancelledBy: by });
   await sub.save();
-  console.log(`[subscriptions] ${sub.subscriptionRef} paused by ${by}; ${cancelled} visits cancelled`);
-  return { sub, cancelled };
+  console.log(`[subscriptions] ${sub.subscriptionRef} ${next} by ${by}; ${cancelled} visits cancelled${fee ? `; fee £${fee.amount} ${fee.status}` : ""}`);
+  return { sub, cancelled, fee };
+}
+
+async function pauseSubscription(sub, by, { now = new Date(), chargeFee = false } = {}) {
+  if (sub.status !== "active") throw new Error("Only an active regular clean can be paused");
+  return stopSubscription(sub, "paused", by, { now, chargeFee });
 }
 
 async function resumeSubscription(sub, by, { now = new Date() } = {}) {
@@ -329,15 +404,10 @@ async function resumeSubscription(sub, by, { now = new Date() } = {}) {
   return { sub, created };
 }
 
-async function cancelSubscription(sub, by, { now = new Date() } = {}) {
+async function cancelSubscription(sub, by, { now = new Date(), chargeFee = false } = {}) {
   if (sub.status === "cancelled") return { sub, cancelled: 0 };
-  const cancelled = await cancelFutureVisits(sub, "Regular clean cancelled", now);
-  sub.status = "cancelled";
-  sub.cancelledAt = now;
-  sub.cancelledBy = by;
-  await sub.save();
-  console.log(`[subscriptions] ${sub.subscriptionRef} cancelled by ${by}; ${cancelled} visits cancelled`);
-  return { sub, cancelled };
+  // A paused subscription has no upcoming visits, so no fee.
+  return stopSubscription(sub, "cancelled", by, { now, chargeFee: chargeFee && sub.status === "active" });
 }
 
 async function nextVisitFor(sub, now = new Date()) {
@@ -432,6 +502,7 @@ module.exports = {
   resumeSubscription,
   cancelSubscription,
   nextVisitFor,
+  cancellationQuote,
   handleCheckoutCompleted,
   startSubscriptionScheduler,
   setStripeForTests,
