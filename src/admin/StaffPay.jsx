@@ -173,7 +173,7 @@ const StaffPay = () => {
             </div>
             <div>
               <p className="text-sm font-bold text-white">Standard Worker Rate</p>
-              <p className="text-xs text-white/40 mt-0.5">Default applied to all new bookings</p>
+              <p className="text-xs text-white/40 mt-0.5">Used for new bookings when their service has no rate set below</p>
             </div>
           </div>
 
@@ -350,7 +350,7 @@ const StaffPay = () => {
                         ) : (
                           <button
                             onClick={() => startEdit(service)}
-                            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold opacity-0 group-hover:opacity-100 hover:bg-emerald-500 hover:text-white hover:border-transparent transition-all"
+                            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold hover:bg-emerald-500 hover:text-white hover:border-transparent transition-all"
                           >
                             <Edit3 size={12} />
                             Set Rate

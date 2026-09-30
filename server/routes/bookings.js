@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Booking = require("../models/Booking");
 const Worker = require("../models/Worker");
-const SystemSetting = require("../models/SystemSetting");
 const Lead = require("../models/Lead");
 const {
   sendEmail,
@@ -16,6 +15,7 @@ const adminAuth = require("../middleware/adminAuth");
 const sms = require("../utils/smsService");
 const { sendWorkersPush } = require("../utils/pushNotifications");
 const { syncCompanyJob } = require("../utils/companyJobs");
+const { workerRateFor } = require("../utils/workerRate");
 const Notification = require("../models/Notification");
 
 // Generate a PDF invoice attachment; returns [] if Puppeteer is unavailable
@@ -44,17 +44,8 @@ router.post("/public", async (req, res) => {
     booking.set("property", req.body.property);
     booking.set("meta", req.body.meta);
 
-    // Apply global default workerRate if not provided
-    if (booking.workerRate == null) {
-      try {
-        const rateSetting = await SystemSetting.findOne({
-          key: "defaultWorkerRate",
-        });
-        booking.workerRate = rateSetting ? rateSetting.value : 13;
-      } catch (settingsErr) {
-        booking.workerRate = 13; // standard rate fallback
-      }
-    }
+    // Cleaner's hourly pay: the service's Staff Pay rate, else the standard rate
+    if (booking.workerRate == null) booking.workerRate = await workerRateFor(booking.service);
 
     // Prevent accidental admin-only flags from client
     booking.createdByAdmin = null;
@@ -455,15 +446,8 @@ async function createBooking(body) {
   booking.set("property", body.property);
   booking.set("meta", body.meta);
 
-  // Apply global default workerRate if not provided
-  if (booking.workerRate == null) {
-    try {
-      const rateSetting = await SystemSetting.findOne({ key: "defaultWorkerRate" });
-      booking.workerRate = rateSetting ? rateSetting.value : 13;
-    } catch (settingsErr) {
-      booking.workerRate = 13; // standard rate fallback
-    }
-  }
+  // Cleaner's hourly pay: the service's Staff Pay rate, else the standard rate
+  if (booking.workerRate == null) booking.workerRate = await workerRateFor(booking.service);
 
   const newBooking = await booking.save();
 

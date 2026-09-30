@@ -139,11 +139,12 @@ router.put("/:id", adminAuth, async (req, res) => {
     );
     if (!service) return res.status(404).json({ message: "Service not found" });
 
-    // Sync updated rate to pending/assigned bookings so workers see the new rate instantly
-    if (workerHourlyRate !== undefined || workerPaymentRate !== undefined) {
+    // Sync the hourly pay rate to open bookings so workers see it instantly. Booking pay is
+    // workerRate × hours for every service type, so only a real hourly rate is copied (never £0).
+    if (workerHourlyRate !== undefined && service.workerHourlyRate > 0) {
       try {
         const Booking = require("../models/Booking");
-        const newRate = service.type === "hourly" ? service.workerHourlyRate : service.workerPaymentRate;
+        const newRate = service.workerHourlyRate;
         
         const updateResult = await Booking.updateMany(
           { 
