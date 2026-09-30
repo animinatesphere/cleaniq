@@ -42,7 +42,8 @@ import { buildBookedRanges, overlapsExistingRange } from "../utils/timeOverlap";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
+// repeatEveryDays (7 weekly, 14 fortnightly): later regular-clean dates are highlighted too.
+const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [], repeatEveryDays = 0 }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
   const startDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
@@ -83,6 +84,13 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
       date.getMonth() === sel.getMonth() &&
       date.getFullYear() === sel.getFullYear()
     );
+  };
+  const isRepeat = (date) => {
+    if (!date || !selectedDate || !repeatEveryDays) return false;
+    const [y, m, d] = String(selectedDate).split("-").map(Number);
+    const first = new Date(y, m - 1, d);
+    const diffDays = Math.round((date - first) / 86400000);
+    return diffDays > 0 && diffDays % repeatEveryDays === 0;
   };
   const isPast = (date) => {
     if (!date) return false;
@@ -133,6 +141,7 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
           const booked = isBooked(date);
           const past = isPast(date);
           const disabled = booked || past;
+          const repeat = isRepeat(date);
           return (
             <div key={i} className="aspect-square">
               {date ? (
@@ -143,7 +152,7 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [] }) => {
                       `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
                     )
                   }
-                  className={`w-full h-full rounded-xl text-center flex items-center justify-center relative font-black text-sm transition-all ${isSelected(date) ? "bg-[#10B981] text-white shadow-lg" : booked ? "bg-rose-50 text-rose-500 cursor-not-allowed" : past ? "bg-slate-100 text-slate-300 cursor-not-allowed" : "bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-[#10B981]"}`}
+                  className={`w-full h-full rounded-xl text-center flex items-center justify-center relative font-black text-sm transition-all ${isSelected(date) ? "bg-[#10B981] text-white shadow-lg" : repeat ? "bg-[#10B981]/15 text-[#0F6B4C] ring-2 ring-[#10B981]/60" : booked ? "bg-rose-50 text-rose-500 cursor-not-allowed" : past ? "bg-slate-100 text-slate-300 cursor-not-allowed" : "bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-[#10B981]"}`}
                 >
                   <span className="text-xs md:text-sm font-black">
                     {date.getDate()}
@@ -1627,7 +1636,28 @@ const Booking = () => {
                               })
                             }
                             bookedDates={bookedDates}
+                            repeatEveryDays={formData.frequency === "Weekly" ? 7 : formData.frequency === "Fortnightly" ? 14 : 0}
                           />
+                          {isRegular && formData.date && (() => {
+                            const [y, m, d] = formData.date.split("-").map(Number);
+                            const first = new Date(y, m - 1, d);
+                            const weekday = first.toLocaleDateString("en-GB", { weekday: "long" });
+                            return (
+                              <p className="text-center text-sm font-semibold text-slate-600 -mt-2">
+                                First clean on{" "}
+                                <span className="font-black text-black">
+                                  {first.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+                                </span>
+                                , then{" "}
+                                <span className="font-black text-black">
+                                  {formData.frequency === "Weekly" ? `every ${weekday}` : `every other ${weekday}`}
+                                </span>
+                                .
+                                <br />
+                                <span className="text-xs text-slate-400">You can change a date later from your account.</span>
+                              </p>
+                            );
+                          })()}
                           {formData.date && (
                             <div className="space-y-4">
                               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
