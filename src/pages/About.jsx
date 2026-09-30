@@ -467,7 +467,7 @@ const About = () => {
                   <Phone size={22} />
                 </span>
                 <span>
-                  <span className="block text-xs text-white/50 font-bold uppercase tracking-widest mb-1">Call or WhatsApp</span>
+                  <span className="block text-xs text-white/50 font-bold uppercase tracking-widest mb-1">Call us</span>
                   <span className="text-lg font-bold">+44 7752 476368</span>
                 </span>
               </a>
