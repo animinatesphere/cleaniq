@@ -14,6 +14,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
 
+// Customer-facing wording for booking statuses (stored values stay the same).
+const STATUS_LABEL = {
+  Assigned: "Cleaner Assigned",
+  Arrived: "Cleaner Arrived",
+  Cleaning: "In Progress",
+  Authorized: "Payment Authorised",
+  "Completed - Unpaid": "Completed – Payment Due",
+};
+
 const STATUS_MAP = {
   Completed:     { color: C.success,  bg: C.successBg,  icon: CheckCircle2 },
   Cancelled:     { color: C.error,    bg: C.errorBg,    icon: XCircle },
@@ -255,7 +264,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
         {/* Status pill */}
         <View style={[styles.statusPill, { backgroundColor: statusMeta.bg }]}>
           <StatusIcon size={14} color={statusMeta.color} strokeWidth={2.5} />
-          <Text style={[styles.statusPillTxt, { color: statusMeta.color }]}>{booking.status}</Text>
+          <Text style={[styles.statusPillTxt, { color: statusMeta.color }]}>{STATUS_LABEL[booking.status] || booking.status}</Text>
         </View>
       </LinearGradient>
 

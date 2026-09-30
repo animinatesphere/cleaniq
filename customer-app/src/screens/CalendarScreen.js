@@ -39,7 +39,7 @@ const sh = Platform.select({
 const STATUS_META = {
   pending_review: { label:"Pending Review",  color:G.warning,  bg:G.warningBg,   dot:"#F59E0B" },
   approved:       { label:"Approved",         color:G.info,     bg:G.infoBg,      dot:"#3B82F6" },
-  assigned:       { label:"Worker Assigned",  color:G.purple,   bg:G.purpleBg,    dot:"#7C3AED" },
+  assigned:       { label:"Cleaner Assigned",  color:G.purple,   bg:G.purpleBg,    dot:"#7C3AED" },
   in_progress:    { label:"In Progress",      color:G.primary,  bg:G.primaryLight,dot:"#0F6B4C" },
   completed:      { label:"Completed",        color:G.success,  bg:G.successBg,   dot:"#10B981" },
   cancelled:      { label:"Cancelled",        color:G.muted,    bg:"#F8FAFC",     dot:"#94A3B8" },

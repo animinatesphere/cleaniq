@@ -494,7 +494,7 @@ const HomeScreen = ({ navigation, route }) => {
                     {w.expectedPayoutDate ? new Date(w.expectedPayoutDate).toLocaleDateString("en-GB") : "TBC"} · {w.payoutType}
                   </Text>
                 </View>
-                <Badge label={w.status}
+                <Badge label={w.status ? w.status[0].toUpperCase() + w.status.slice(1) : ""}
                   color={w.status==="approved"?"#059669":"#D97706"}
                   bg={w.status==="approved"?"#DCFCE7":"#FEF3C7"}
                   border={w.status==="approved"?"#A7F3D0":"#FDE68A"}/>

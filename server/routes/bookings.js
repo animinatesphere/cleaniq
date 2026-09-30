@@ -15,6 +15,7 @@ const { buildBookingDateTime } = require("../utils/bookingDateTime");
 const adminAuth = require("../middleware/adminAuth");
 const sms = require("../utils/smsService");
 const { sendWorkersPush } = require("../utils/pushNotifications");
+const { syncCompanyJob } = require("../utils/companyJobs");
 const Notification = require("../models/Notification");
 
 // Generate a PDF invoice attachment; returns [] if Puppeteer is unavailable
@@ -866,6 +867,9 @@ router.put("/:id", async (req, res) => {
       req.body,
       { new: true },
     );
+
+    // Keep the company's job (customer app) in step with admin status changes.
+    if (newStatus && newStatus !== prevStatus) await syncCompanyJob(updatedBooking);
 
     // Send Invoice Email and update worker wallet if status just changed to Completed
     if (!wasCompleted && isNowCompleted) {

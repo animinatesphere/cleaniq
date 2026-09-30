@@ -52,7 +52,7 @@ const shGreen = Platform.select({
 const STATUS = {
   pending_review: { label:"Pending Review",  color:G.warning,  bg:G.warningBg, desc:"Our team is reviewing your job request."             },
   approved:       { label:"Approved",         color:G.info,     bg:G.infoBg,   desc:"Approved! We're finding the perfect cleaner for you." },
-  assigned:       { label:"Worker Assigned",  color:G.purple,   bg:G.purpleBg, desc:"A cleaner has been assigned to your job."             },
+  assigned:       { label:"Cleaner Assigned",  color:G.purple,   bg:G.purpleBg, desc:"A cleaner has been assigned to your job."             },
   in_progress:    { label:"In Progress",      color:G.primary,  bg:G.primaryLight, desc:"Cleaning is currently underway at the property."  },
   completed:      { label:"Completed",        color:G.success,  bg:G.successBg,desc:"Your job has been completed successfully."            },
   cancelled:      { label:"Cancelled",        color:G.muted,    bg:"#F8FAFC",  desc:"This job was cancelled."                             },
