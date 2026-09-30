@@ -60,7 +60,7 @@ const HOME_FAQS = [
   },
   {
     q: "How do I book a cleaner in Manchester?",
-    a: "Book online in a few steps, message us on WhatsApp or call +44 7846 726428. We confirm every booking by email.",
+    a: "Book online in a few steps, message us on WhatsApp or call +44 7846 726428 or +44 7752 476368. We confirm every booking by email.",
   },
 ];
 
@@ -139,7 +139,7 @@ const Home = () => {
             image: "https://www.cleaniqservices.com/preview.jpg",
             "@id": "https://www.cleaniqservices.com",
             url: "https://www.cleaniqservices.com",
-            telephone: "+447846726428",
+            telephone: "+447752476368",
             address: {
               "@type": "PostalAddress",
               streetAddress: "First Floor, Swan Buildings, 20 Swan St",

@@ -83,7 +83,7 @@ const LOCATIONS_MAP = {
       },
       {
         q: "How quickly can you book a cleaner in Manchester City Centre?",
-        a: "We offer same-day and next-day bookings across Manchester City Centre, including Deansgate, Ancoats, Northern Quarter, and Piccadilly. Book online in under 60 seconds or call +44 7846 726428.",
+        a: "We offer same-day and next-day bookings across Manchester City Centre, including Deansgate, Ancoats, Northern Quarter, and Piccadilly. Book online in under 60 seconds or call +44 7846 726428 or +44 7752 476368.",
       },
       {
         q: "What cleaning services do you provide in Manchester City Centre?",
@@ -300,7 +300,7 @@ const LocationDetail = () => {
               "@type": "LocalBusiness",
               "name": "Cleaniq Services",
               "url": "https://www.cleaniqservices.com",
-              "telephone": "+447846726428",
+              "telephone": "+447752476368",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "20 Swan St",
@@ -466,6 +466,9 @@ const LocationDetail = () => {
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Need Help?</p>
               <a href="tel:+447846726428" className="text-lg font-black text-primary-dark hover:text-primary transition-colors block">
                 +44 7846 726428
+              </a>
+              <a href="tel:+447752476368" className="text-lg font-black text-primary-dark hover:text-primary transition-colors block mt-1">
+                +44 7752 476368
               </a>
             </div>
           </div>
