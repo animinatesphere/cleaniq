@@ -76,6 +76,15 @@ const EXTRA_TIME_REASONS = [
 ];
 import axios from "axios";
 
+// Job photos are served from the API's origin, e.g. https://api.cleaniqservices.com/uploads/x.jpg.
+// Only strip a trailing "/api": replace("/api") would hit the "//api." in the domain and break the link.
+const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
+const photoUrl = (url) => {
+  if (!url) return "";
+  if (/^(https?:|data:|file:)/.test(url)) return url;
+  return `${API_ORIGIN}/${url.replace(/^\/+/, "")}`;
+};
+
 const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   const { bookingId } = route.params;
   const { workerInfo } = useContext(AuthContext);
@@ -128,9 +137,8 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
       const res = await axios.get(`${API_URL}/workers/jobs/${bookingId}`);
       setBooking(res.data);
       // Always sync photo arrays from server — clears stale local URIs on every fetch
-      const BASE = API_URL.replace("/api", "");
-      setBeforePhotos((res.data.photos || []).filter(p => p.photoType === "before").map(p => `${BASE}/${p.url}`));
-      setAfterPhotos((res.data.photos || []).filter(p => p.photoType === "after").map(p => `${BASE}/${p.url}`));
+      setBeforePhotos((res.data.photos || []).filter(p => p.photoType === "before").map(p => photoUrl(p.url)));
+      setAfterPhotos((res.data.photos || []).filter(p => p.photoType === "after").map(p => photoUrl(p.url)));
     } catch (error) {
       console.error("Error fetching booking:", error);
       Alert.alert("Error", "Failed to load booking details");
