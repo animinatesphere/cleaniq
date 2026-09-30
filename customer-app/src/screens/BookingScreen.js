@@ -604,6 +604,16 @@ const BookingScreen = ({ navigation, route }) => {
 
   // ── Calendar ─────────────────────────────────────────────────────────────────
   const calDays = buildCalendar(calYear, calMonth);
+  // Regular cleans: after the first date is picked, the following cleans are highlighted too.
+  const isRepeatDay = (d) => {
+    if (!isRegular || !form.date || !d) return false;
+    const first = new Date(form.date); first.setHours(0, 0, 0, 0);
+    const day = new Date(d); day.setHours(0, 0, 0, 0);
+    if (day <= first) return false;
+    if (form.frequency === "Monthly") return day.getDate() === first.getDate();
+    const step = form.frequency === "Weekly" ? 7 : 14;
+    return Math.round((day - first) / 86400000) % step === 0;
+  };
   const isPast  = (d) => { if (!d) return false; const t = new Date(); t.setHours(0,0,0,0); return d < t; };
 
   // Hide time slots that have already passed on today's date (30-min buffer)
@@ -902,12 +912,14 @@ const BookingScreen = ({ navigation, route }) => {
                   const past = isPast(d);
                   const sel  = form.date && dateStr(d) === dateStr(form.date);
                   const now  = dateStr(d) === dateStr(new Date());
+                  const repeat = !sel && isRepeatDay(d);
                   return (
                     <TouchableOpacity
                       key={dateStr(d)}
                       style={[
                         styles.calCell,
                         now  && styles.calCellNow,
+                        repeat && styles.calCellRepeat,
                         sel  && styles.calCellSel,
                         past && styles.calCellPast,
                       ]}
@@ -933,6 +945,7 @@ const BookingScreen = ({ navigation, route }) => {
                       <Text style={[
                         styles.calCellTxt,
                         now  && styles.calCellTxtNow,
+                        repeat && styles.calCellTxtRepeat,
                         sel  && styles.calCellTxtSel,
                         past && styles.calCellTxtPast,
                       ]}>
@@ -943,6 +956,23 @@ const BookingScreen = ({ navigation, route }) => {
                 })}
               </View>
             </View>
+            {isRegular && !!form.date && (
+              <Text style={styles.repeatCaption}>
+                First clean on{" "}
+                <Text style={styles.repeatCaptionStrong}>
+                  {new Date(form.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+                </Text>
+                , then{" "}
+                <Text style={styles.repeatCaptionStrong}>
+                  {form.frequency === "Weekly"
+                    ? `every ${new Date(form.date).toLocaleDateString("en-GB", { weekday: "long" })}`
+                    : form.frequency === "Fortnightly"
+                    ? `every other ${new Date(form.date).toLocaleDateString("en-GB", { weekday: "long" })}`
+                    : "the same date every month"}
+                </Text>
+                .{"\n"}You can change a date later.
+              </Text>
+            )}
 
             <SectionLabel
               title="Start time"
@@ -1539,6 +1569,10 @@ const styles = StyleSheet.create({
   consentTxt:    { flex: 1, fontSize: 12, fontWeight: "700", color: "#334155", lineHeight: 17 },
   regularPayBtn: { flexDirection: "row", alignItems: "center", gap: 8, alignSelf: "center", marginTop: 14, backgroundColor: "#fff", paddingHorizontal: 18, paddingVertical: 10, borderRadius: 12 },
   regularPayTxt: { fontSize: 14, fontWeight: "800", color: "#0F6B4C" },
+  calCellRepeat:       { backgroundColor: "#E8F5EE", borderWidth: 2, borderColor: "#0F6B4C88" },
+  calCellTxtRepeat:    { color: "#0F6B4C", fontWeight: "800" },
+  repeatCaption:       { textAlign: "center", fontSize: 13, color: "#475569", marginTop: 10, marginBottom: 4, lineHeight: 19 },
+  repeatCaptionStrong: { fontWeight: "800", color: "#0F172A" },
 });
 
 export default BookingScreen;
