@@ -6,8 +6,9 @@ const aiSettingsSchema = new mongoose.Schema(
   {
     key: { type: String, default: "default", unique: true },
     businessName: { type: String, default: "Cleaniq Services", trim: true },
-    // The receptionist's first name, used in greetings ("you're speaking with Brenda").
-    assistantName: { type: String, default: "Brenda", trim: true, maxlength: 30 },
+    // Receptionist first names, comma-separated. One is picked at random for each phone call,
+    // and each WhatsApp customer keeps the one they were given.
+    assistantName: { type: String, default: "John, Mark, James, David", trim: true, maxlength: 200 },
     serviceArea: { type: String, default: "Manchester and Greater Manchester, UK", trim: true },
     // Extra instructions / personality written by staff. Added to the built-in safety rules.
     instructions: { type: String, default: "" },

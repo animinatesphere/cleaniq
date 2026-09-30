@@ -66,9 +66,9 @@ test("includes knowledge, staff instructions and UK time", () => {
 
 test("voice prompt: named receptionist, transcription notice, honest if asked, saves enquiries, transfers", () => {
   const p = buildInstructions({ channel: "voice", settings, knowledge, services, now });
-  assert.match(p, /^You are Brenda, the receptionist for Cleaniq Services/);
-  assert.match(p, /already heard a greeting from you \(Brenda at Cleaniq Services\) saying the call is transcribed/);
-  assert.match(p, /Introduce yourself as "Brenda from Cleaniq Services"\. Never call yourself an AI, an assistant, a bot/);
+  assert.match(p, /^You are John, the receptionist for Cleaniq Services/);
+  assert.match(p, /already heard a greeting from you \(John at Cleaniq Services\) saying the call is transcribed/);
+  assert.match(p, /Introduce yourself as "John from Cleaniq Services"\. Never call yourself an AI, an assistant, a bot/);
   assert.doesNotMatch(p, /virtual receptionist|AI assistant/);
   assert.match(p, /enquiry saved with save_enquiry so the team can call back/);
   assert.match(p, /one or two questions at a time/);
@@ -108,5 +108,18 @@ test("WhatsApp prompt uses the admin's receptionist name and ends enquiries in a
   assert.match(p, /^You are Amy, the receptionist/);
   assert.match(p, /a booking made, a quote emailed, or an enquiry saved with save_enquiry/);
   assert.match(p, /48-hour re-clean guarantee/);
-  assert.doesNotMatch(p, /Brenda/);
+  assert.doesNotMatch(p, /John/);
+});
+
+test("receptionist names: parsed from AI Settings, one picked per call, invalid lists rejected", () => {
+  const { agentNames, pickAgentName } = require("../utils/aiBrain");
+  assert.deepEqual(agentNames({ assistantName: " John ,Mark,  James " }), ["John", "Mark", "James"]);
+  assert.deepEqual(agentNames({}), ["John", "Mark", "James", "David"]);
+  assert.equal(pickAgentName({ assistantName: "John, Mark" }, () => 0), "John");
+  assert.equal(pickAgentName({ assistantName: "John, Mark" }, () => 0.99), "Mark");
+  assert.equal(agentNames({ assistantName: "John, <script>" }, { strict: true }), null);
+  assert.equal(agentNames({ assistantName: "" }, { strict: true }), null);
+  assert.deepEqual(agentNames({ assistantName: "John, John, Mark" }, { strict: true }), ["John", "Mark"]);
+  const p = buildInstructions({ channel: "voice", settings, knowledge, services, now, agentName: "Mark" });
+  assert.match(p, /^You are Mark, the receptionist/);
 });

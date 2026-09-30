@@ -5,7 +5,7 @@ const crypto = require("crypto");
 const { WebSocketServer } = require("ws");
 const AiSettings = require("../models/AiSettings");
 const AiCall = require("../models/AiCall");
-const { getInstructions } = require("./aiBrain");
+const { getInstructions, agentNames } = require("./aiBrain");
 const { generateReply } = require("./aiProvider");
 const { declarations, makeToolRunner, describeToolResult } = require("./aiTools");
 const { toE164UK, findCustomerByPhone } = require("./phone");
@@ -29,29 +29,30 @@ const TRANSFER_TOOL = {
 // ── One-time call secrets ─────────────────────────────────────────────────────────────
 // Issued by the signature-checked /incoming webhook and passed back by Twilio in the setup
 // message, so only calls that really came through our Twilio number can open a session.
-const callTokens = new Map(); // token -> { callSid, expires }
+const callTokens = new Map(); // token -> { callSid, expires, agentName }
 
-function issueCallToken(callSid) {
+function issueCallToken(callSid, { agentName = "" } = {}) {
   const now = Date.now();
   for (const [t, v] of callTokens) if (v.expires < now) callTokens.delete(t);
   const token = crypto.randomBytes(24).toString("hex");
-  callTokens.set(token, { callSid, expires: now + TOKEN_TTL_MS });
+  callTokens.set(token, { callSid, expires: now + TOKEN_TTL_MS, agentName });
   return token;
 }
 
+// Returns the token's details if it's valid for this call (single use), otherwise null.
 function consumeCallToken(token, callSid) {
   const entry = token && callTokens.get(token);
-  if (!entry) return false;
+  if (!entry) return null;
   callTokens.delete(token);
-  return entry.expires >= Date.now() && entry.callSid === callSid;
+  return entry.expires >= Date.now() && entry.callSid === callSid ? entry : null;
 }
 
 // Rough time Twilio needs to speak a reply, so a transfer doesn't cut it off mid-sentence.
 const speakingTimeMs = (text) => Math.min(10000, 1200 + String(text).length * 65);
 
-function greetingFor(settings) {
+function greetingFor(settings, agentName = "") {
   const business = settings.businessName || "Cleaniq Services";
-  const name = settings.assistantName || "Brenda";
+  const name = agentName || agentNames(settings)[0];
   return `Hello, thank you for calling ${business}, you're speaking with ${name}. Calls are transcribed to help our team. How can I help you today?`;
 }
 
@@ -96,7 +97,8 @@ function handleRelaySession(ws, deps = {}) {
   };
 
   async function onSetup(msg) {
-    if (!consumeCallToken(msg.customParameters?.token, msg.callSid)) {
+    const callToken = consumeCallToken(msg.customParameters?.token, msg.callSid);
+    if (!callToken) {
       console.warn(`[voice] rejected session for call ${msg.callSid || "?"}: bad or missing call token`);
       ws.close(1008, "Unauthorized");
       return;
@@ -114,13 +116,14 @@ function handleRelaySession(ws, deps = {}) {
           phone,
           customer: customer?._id || null,
           customerName: customer ? `${customer.firstName} ${customer.lastName}`.trim() : "",
+          agentName: callToken.agentName || agentNames(settings)[0],
           startedAt: new Date(),
         },
       },
       { upsert: true, new: true },
     );
     state.settings = settings;
-    await addTurn("ai", greetingFor(settings)); // spoken by Twilio from welcomeGreeting
+    await addTurn("ai", greetingFor(settings, state.call.agentName)); // spoken by Twilio from welcomeGreeting
     console.log(`[voice] call ${msg.callSid} from ${phone} connected`);
   }
 
@@ -163,7 +166,7 @@ function handleRelaySession(ws, deps = {}) {
 
     let reply = null;
     try {
-      const system = await getInstructions("voice", { customerName: state.call?.customerName || "" });
+      const system = await getInstructions("voice", { customerName: state.call?.customerName || "", agentName: state.call?.agentName || "" });
       reply = await ai({ system, history: state.history.slice(-30), tools, runTool });
     } catch (err) {
       console.error(`[voice] AI failed on call ${state.call?.twilioCallSid}:`, err.message);

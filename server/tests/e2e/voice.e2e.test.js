@@ -102,7 +102,8 @@ test("voice AI on → ConversationRelay in British English with greeting and a o
   const { body, token } = await incomingToken("CA3");
   assert.match(body, /<Connect action="http:\/\/127\.0\.0\.1:\d+\/api\/voice\/after">/);
   assert.match(body, /<ConversationRelay url="ws:\/\/127\.0\.0\.1:\d+\/api\/voice\/relay" language="en-GB"/);
-  assert.match(body, /welcomeGreeting="Hello, thank you for calling Cleaniq Services, you&apos;re speaking with Brenda\. Calls are transcribed/);
+  assert.match(body, / ttsProvider="Google" voice="en-GB-Neural2-B"/); // British male voice
+  assert.match(body, /welcomeGreeting="Hello, thank you for calling Cleaniq Services, you&apos;re speaking with (John|Mark|James|David)\. Calls are transcribed/);
   assert.ok(token);
 });
 
@@ -118,7 +119,9 @@ test("a session with a wrong or reused token is closed", async () => {
 });
 
 test("caller speaks → AI replies (using a tool) → transcript and tool action are saved", async () => {
-  fakeAi = async ({ history, tools, runTool }) => {
+  let systemPrompt = "";
+  fakeAi = async ({ system, history, tools, runTool }) => {
+    systemPrompt = system;
     assert.ok(tools.some((t) => t.name === "get_quote"));
     assert.ok(tools.some((t) => t.name === "transfer_to_human"));
     assert.ok(!tools.some((t) => t.name === "create_booking")); // no booking by phone
@@ -126,7 +129,8 @@ test("caller speaks → AI replies (using a tool) → transcript and tool action
     const q = await runTool("get_quote", { service: "Deep Clean", hours: 3 });
     return `That would be ${q.total} pounds.`;
   };
-  const { token } = await incomingToken("CA6");
+  const { body, token } = await incomingToken("CA6");
+  const spoken = body.match(/you&apos;re speaking with (\w+)\./)[1];
   const s = await openSession(token, "CA6");
   await waitFor(() => AiCall.exists({ twilioCallSid: "CA6" }));
   s.ws.send(JSON.stringify({ type: "prompt", voicePrompt: "How much is a deep clean", last: false }));
@@ -139,7 +143,10 @@ test("caller speaks → AI replies (using a tool) → transcript and tool action
     return c.transcript.length === 3 ? c : null;
   });
   assert.equal(call.phone, "+447700900123");
-  assert.match(call.transcript[0].text, /you're speaking with Brenda/);
+  // The name Twilio spoke is the one in the transcript, on the call record and in the AI's instructions.
+  assert.equal(call.agentName, spoken);
+  assert.match(call.transcript[0].text, new RegExp(`you're speaking with ${spoken}\\.`));
+  assert.match(systemPrompt, new RegExp(`^You are ${spoken}, the receptionist`));
   assert.equal(call.transcript[1].role, "customer");
   assert.equal(call.transcript[2].tools[0].detail, "Price check: Deep Clean, 3h → £92.55");
 

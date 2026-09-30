@@ -41,7 +41,7 @@ export default function AiSettingsPage() {
       .then((s) =>
         setForm({
           businessName: s.businessName || "",
-          assistantName: s.assistantName || "Brenda",
+          assistantName: s.assistantName || "John, Mark, James, David",
           serviceArea: s.serviceArea || "",
           transferNumber: s.transferNumber || "",
           suppliesFee: s.suppliesFee ?? 10,
@@ -116,14 +116,15 @@ export default function AiSettingsPage() {
             <input value={form.businessName} onChange={(e) => set("businessName")(e.target.value)} className={inputCls} />
           </div>
           <div>
-            <label className={labelCls}>Receptionist name</label>
+            <label className={labelCls}>Receptionist names</label>
             <input
               value={form.assistantName}
               onChange={(e) => set("assistantName")(e.target.value)}
-              placeholder="Brenda"
-              maxLength={30}
+              placeholder="John, Mark, James, David"
+              maxLength={200}
               className={inputCls}
             />
+            <p className="text-[11px] text-white/35 mt-1.5">Separate with commas. Each call gets one at random; each WhatsApp customer keeps theirs.</p>
           </div>
           <div>
             <label className={labelCls}>Transfer calls to</label>

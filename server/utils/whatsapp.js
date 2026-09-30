@@ -4,7 +4,7 @@ const AiSettings = require("../models/AiSettings");
 const AiConversation = require("../models/AiConversation");
 const AiMessage = require("../models/AiMessage");
 const SystemSetting = require("../models/SystemSetting");
-const { getInstructions } = require("./aiBrain");
+const { getInstructions, pickAgentName } = require("./aiBrain");
 const { generateReply } = require("./aiProvider");
 const { declarations: bookingTools, makeToolRunner, confirmationTool } = require("./aiTools");
 const { toE164UK, findCustomerByPhone } = require("./phone");
@@ -132,7 +132,12 @@ async function replyOnce(conversationId, { ai = generateReply, send = sendWhatsA
   let reply = null;
   const toolEvents = [];
   try {
-    const system = await getInstructions("whatsapp", { customerName: conversation.name, canBook: true });
+    if (!conversation.agentName) {
+      const settings = await AiSettings.get();
+      conversation.agentName = pickAgentName(settings);
+      await AiConversation.updateOne({ _id: conversation._id }, { $set: { agentName: conversation.agentName } });
+    }
+    const system = await getInstructions("whatsapp", { customerName: conversation.name, canBook: true, agentName: conversation.agentName });
     reply = await ai({
       system,
       history,

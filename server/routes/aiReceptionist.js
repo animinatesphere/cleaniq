@@ -1,5 +1,6 @@
 // Admin API for the AI Receptionist dashboard. Every route requires an admin login.
 const express = require("express");
+const { agentNames } = require("../utils/aiBrain");
 const router = express.Router();
 const adminAuth = require("../middleware/adminAuth");
 const AiSettings = require("../models/AiSettings");
@@ -63,11 +64,11 @@ router.put("/settings", async (req, res) => {
       if (typeof req.body[field] === "string") update[field] = req.body[field];
     }
     if (typeof req.body.assistantName === "string") {
-      const name = req.body.assistantName.trim();
-      if (!/^[A-Za-z][A-Za-z' -]{0,29}$/.test(name)) {
-        return res.status(400).json({ message: "Receptionist name must be a first name (letters only, up to 30)" });
+      const names = agentNames({ assistantName: req.body.assistantName }, { strict: true });
+      if (!names) {
+        return res.status(400).json({ message: "Receptionist names must be first names separated by commas, e.g. John, Mark (up to 10)" });
       }
-      update.assistantName = name;
+      update.assistantName = names.join(", ");
     }
     for (const field of ["voiceEnabled", "whatsappEnabled", "quoteIncludeVat"]) {
       if (typeof req.body[field] === "boolean") update[field] = req.body[field];
