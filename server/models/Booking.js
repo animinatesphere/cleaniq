@@ -28,6 +28,13 @@ const bookingSchema = new mongoose.Schema({
     stripePaymentIntentId: String, // Store Stripe PaymentIntent ID for "authorize then capture"
     authorizedAt: Date, // When payment was authorized
     capturedAt: Date, // When payment was captured (money deducted)
+    // Regular cleans: later visits are charged to the saved card when the cleaner arrives.
+    chargeOnArrival: { type: Boolean, default: false },
+    stripeCustomerId: String,
+    stripePaymentMethodId: String,
+    failedAt: Date,
+    failureReason: String,
+    paymentLinkUrl: String, // sent to the customer when an automatic charge fails
   },
   region: String,
   leadSource: { type: String, default: "Organic" }, // Bark, Checkatrade, MyJobQuote, MyBuilder, Instagram, Facebook, TikTok, Google, Referral, Organic

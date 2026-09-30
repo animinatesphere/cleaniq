@@ -14,6 +14,7 @@ import LoginScreen from "./src/screens/LoginScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import BookingsScreen from "./src/screens/BookingsScreen";
 import BookingScreen from "./src/screens/BookingScreen";
+import RegularCleansScreen from "./src/screens/RegularCleansScreen";
 import BookingDetailScreen from "./src/screens/BookingDetailScreen";
 import ChatScreen from "./src/screens/ChatScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
@@ -195,6 +196,7 @@ const AppNavigation = () => {
         <Stack.Screen name="Main"          component={userToken && customerInfo?.role === "company" ? CompanyTabs : MainTabs} />
         <Stack.Screen name="Login"         component={LoginScreen} />
         <Stack.Screen name="Booking"       component={BookingScreen} />
+        <Stack.Screen name="RegularCleans" component={RegularCleansScreen} />
         <Stack.Screen name="BookingDetail" component={BookingDetailScreen} />
         <Stack.Screen name="Chat"          component={ChatScreen} />
         <Stack.Screen name="PostJob"       component={PostJobScreen} />

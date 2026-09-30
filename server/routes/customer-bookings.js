@@ -11,6 +11,7 @@ const { sendEmail, templates } = require('../utils/emailService');
 const { sendCapiEvent } = require('../utils/metaCapi');;
 const { scheduleTask } = require('../utils/automationEngine');
 const { buildBookingDateTime } = require('../utils/bookingDateTime');
+const subscriptions = require('../utils/subscriptions');
 
 // POST /api/customer-bookings — public endpoint for customer self-service booking creation.
 // The Stripe PaymentIntent is already authorized client-side before this is called,
@@ -24,7 +25,16 @@ router.post('/', async (req, res) => {
 
     if (booking.workerRate == null) booking.workerRate = await workerRateFor(booking.service);
 
+    // Regular clean (Wecasa-style subscription): first visit paid now, card saved, later visits
+    // charged when the cleaner arrives. The client can't mark it paid; Stripe is checked below.
+    const wantsSubscription =
+      req.body.subscribe === true && subscriptions.isSubscriptionFrequency(req.body.details?.frequency);
+    const paidOnWebsite = wantsSubscription && Boolean(req.body.payment?.stripePaymentIntentId);
+    if (paidOnWebsite) booking.payment.status = 'Processing';
+
     const newBooking = await booking.save();
+    let subscription = null;
+    let checkoutUrl = '';
 
     // Capture customer as a lead for marketing
     try {
@@ -54,7 +64,25 @@ router.post('/', async (req, res) => {
 
     // Recurring series generation
     const recurFreq = newBooking.details?.frequency;
-    if (recurFreq && recurFreq !== 'Once') {
+    if (wantsSubscription) {
+      try {
+        subscription = await subscriptions.createSubscription(newBooking, {
+          visitPrice: req.body.subscription?.visitPrice,
+          source: paidOnWebsite ? 'Website' : 'App',
+        });
+        if (paidOnWebsite) {
+          await subscriptions.activateSubscription(subscription, req.body.payment.stripePaymentIntentId);
+          newBooking.payment.status = 'Completed';
+        }
+      } catch (subErr) {
+        console.error(`❌ Regular clean setup failed for ${newBooking.bookingId}:`, subErr.message);
+        sendEmail({
+          to: process.env.EMAIL_USER || 'admin@cleaniqservices.com',
+          subject: `⚠️ Regular clean setup needs checking – ${newBooking.bookingId}`,
+          html: `<p>Booking ${newBooking.bookingId} (${newBooking.customer?.email}) asked for a ${recurFreq} regular clean but setup failed: ${subErr.message}</p><p>Check the payment in Stripe before the next visit.</p>`,
+        }).catch(() => {});
+      }
+    } else if (recurFreq && recurFreq !== 'Once') {
       const groupId = `RG-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
       await Booking.findByIdAndUpdate(newBooking._id, { $set: { meta: { recurringGroup: groupId } } });
       newBooking.meta = { recurringGroup: groupId };
@@ -109,7 +137,44 @@ router.post('/', async (req, res) => {
     const isInvoicePending =
       newBooking.payment?.method === 'Invoice' && newBooking.payment?.status === 'Pending';
 
-    if (isInvoicePending) {
+    if (isInvoicePending && subscription) {
+      // App regular clean: pay the first visit now (not a hold) and save the card for later visits
+      try {
+        const customerId = await subscriptions.getOrCreateStripeCustomer({
+          email: newBooking.customer.email,
+          name: `${newBooking.customer.firstName || ''} ${newBooking.customer.lastName || ''}`.trim(),
+          phone: newBooking.customer.phone,
+        });
+        const meta = { bookingId: newBooking._id.toString(), subscriptionId: subscription._id.toString(), type: 'subscription_first', company: 'Cleaniq Services' };
+        const session = await subscriptions.stripe().checkout.sessions.create({
+          mode: 'payment',
+          customer: customerId,
+          payment_intent_data: { setup_future_usage: 'off_session', metadata: meta },
+          line_items: [{
+            price_data: {
+              currency: (newBooking.payment?.currency || 'GBP').toLowerCase(),
+              product_data: {
+                name: `Cleaniq - ${newBooking.service} (first clean)`,
+                description: `${subscription.frequency} regular clean ${subscription.subscriptionRef}. Later cleans £${subscription.pricePerVisit.toFixed(2)} each, charged when your cleaner arrives.`,
+              },
+              unit_amount: Math.round(newBooking.payment.amount * 100),
+            },
+            quantity: 1,
+          }],
+          metadata: meta,
+          success_url: `${process.env.FRONTEND_URL || 'https://cleaniqservices.com'}/payment/success?bookingId=${newBooking._id}`,
+          cancel_url: `${process.env.FRONTEND_URL || 'https://cleaniqservices.com'}/`,
+        });
+        checkoutUrl = session.url;
+        await sendEmail({
+          to: newBooking.customer.email,
+          subject: `Payment Required: Cleaniq Booking ${newBooking.bookingId}`,
+          html: templates.paymentRequired(newBooking, session.url),
+        });
+      } catch (payErr) {
+        console.error('❌ Failed to create regular clean payment link:', payErr.message);
+      }
+    } else if (isInvoicePending) {
       // App booking: create Stripe checkout and send payment link
       try {
         const session = await stripe.checkout.sessions.create({
@@ -242,7 +307,17 @@ router.post('/', async (req, res) => {
       }
     });
 
-    res.status(201).json(newBooking);
+    const out = newBooking.toObject();
+    if (subscription) {
+      out.subscription = {
+        subscriptionRef: subscription.subscriptionRef,
+        status: subscription.status,
+        frequency: subscription.frequency,
+        pricePerVisit: subscription.pricePerVisit,
+      };
+    }
+    if (checkoutUrl) out.checkoutUrl = checkoutUrl;
+    res.status(201).json(out);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

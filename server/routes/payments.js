@@ -7,7 +7,7 @@ const Withdrawal = require("../models/Withdrawal");
 const { sendEmail, templates } = require("../utils/emailService");
 
 router.post("/create-intent", async (req, res) => {
-  const { amount, currency, customerName, service, bookingId, deferCapture } =
+  const { amount, currency, customerName, service, bookingId, deferCapture, saveCard, customerEmail, customerPhone } =
     req.body;
 
   try {
@@ -20,13 +20,24 @@ router.post("/create-intent", async (req, res) => {
     // bookings on the website), the card is only authorized here — the hold
     // is captured for real later, when the job is marked Completed. Admin
     // payment links keep the existing immediate-capture behaviour.
+    // Regular cleans (saveCard): charge the first visit now and save the card with a Stripe
+    // customer, so later visits can be charged when the cleaner arrives.
+    let savedCard = {};
+    if (saveCard) {
+      if (!customerEmail) return res.status(400).json({ message: "Email is needed to set up a regular clean." });
+      const { getOrCreateStripeCustomer } = require("../utils/subscriptions");
+      const customer = await getOrCreateStripeCustomer({ email: customerEmail, name: customerName, phone: customerPhone });
+      savedCard = { customer, setup_future_usage: "off_session" };
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100), // Stripe uses cents/pence
       currency: currency.toLowerCase(),
       automatic_payment_methods: {
         enabled: true,
       },
-      ...(deferCapture ? { capture_method: "manual" } : {}),
+      ...(deferCapture && !saveCard ? { capture_method: "manual" } : {}),
+      ...savedCard,
       metadata: Object.assign(
         {
           company: "Cleaniq Services",

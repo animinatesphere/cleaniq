@@ -40,6 +40,7 @@ import Workers from "./admin/Workers";
 import Chat from "./admin/Chat";
 import AdminBlog from "./admin/Blog";
 import StaffPay from "./admin/StaffPay";
+import Subscriptions from "./admin/Subscriptions";
 import AdminWithdrawals from "./admin/AdminWithdrawals";
 import AdminPayments from "./admin/AdminPayments";
 import QuoteBuilder from "./admin/QuoteBuilder";
@@ -157,6 +158,7 @@ function App() {
               <Route path="settings" element={<Settings />} />
               <Route path="chat" element={<Chat />} />
               <Route path="staff-pay" element={<StaffPay />} />
+              <Route path="subscriptions" element={<Subscriptions />} />
               <Route path="withdrawals" element={<AdminWithdrawals />} />
               <Route path="payments" element={<AdminPayments />} />
               <Route path="automations" element={<Automations />} />

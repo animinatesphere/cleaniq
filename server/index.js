@@ -98,6 +98,7 @@ mongoose
     console.log("✅ Connected to MongoDB");
     const { startAutomationEngine } = require("./utils/automationEngine");
     startAutomationEngine();
+    require("./utils/subscriptions").startSubscriptionScheduler();
   })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
@@ -233,6 +234,7 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/ai-receptionist", aiReceptionistRoutes);
 app.use("/api/whatsapp", whatsappRoutes);
 app.use("/api/voice", voiceRoutes);
+app.use("/api/subscriptions", require("./routes/subscriptions"));
 
 // Stripe webhook endpoint (raw body required)
 const { scheduleTask } = require("./utils/automationEngine");
@@ -307,7 +309,12 @@ app.post(
 
     // Handle the event
     try {
-      if (event.type === "checkout.session.completed") {
+      if (
+        event.type === "checkout.session.completed" &&
+        (await require("./utils/subscriptions").handleCheckoutCompleted(event.data.object))
+      ) {
+        // Regular-clean payment link (first visit from the app, or a failed visit paid later)
+      } else if (event.type === "checkout.session.completed") {
         const session = event.data.object;
         const bookingId = session.metadata && session.metadata.bookingId;
         const isAdditionalHours =
