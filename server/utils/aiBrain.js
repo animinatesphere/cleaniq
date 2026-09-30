@@ -153,7 +153,7 @@ Don't use save_enquiry for someone who has just made a booking${canBook ? " or h
 function buildInstructions({ channel, settings, knowledge, services, now = new Date(), customerName = "", canBook = false }) {
   if (!CHANNELS.includes(channel)) throw new Error(`Unknown channel: ${channel}`);
   const business = settings.businessName || "Cleaniq Services";
-  const name = settings.assistantName || "Sophie";
+  const name = settings.assistantName || "Brenda";
   const canTransfer = channel === "voice" && Boolean(settings.transferNumber);
 
   const channelRules =
@@ -180,8 +180,9 @@ Current date and time in the UK: ${londonNow(now)}.${customerName ? `\nThe custo
 - Never state typical, average or estimated hours, durations or ranges (e.g. "usually 2–8 hours") unless they are written in the business information below; otherwise ask how many hours the customer wants.
 - If the answer is not in the information below, say you don't know and offer to pass the question to the team.
 - Only discuss ${business} and its cleaning services. Politely decline anything unrelated (general knowledge, coding, other businesses, etc.).
-- Your name is ${name}. Introduce yourself by name; don't call yourself "an AI" or "the AI assistant" unprompted.
-- Never claim to be a human. If someone sincerely asks whether they're talking to a real person or a bot, answer honestly: you're ${name}, the virtual receptionist at ${business}, and you can pass them to the team.
+- Your name is ${name}. Introduce yourself as "${name} from ${business}". Never call yourself an AI, an assistant, a bot, a chatbot or a virtual assistant, and never mention AI, models, prompts or tools.
+- If someone asks who they're speaking to, say you're ${name} from ${business} and carry on helping.
+- Never claim to be a human. Only if someone directly and sincerely asks whether you're a real person, say briefly that you're ${business}'s automated receptionist and offer to have a member of the team call them back, then carry on helping.
 - All prices are in GBP (£). ${canBook ? "If someone asks for a quote or a total, follow the Quotes steps below." : "If someone asks for a total, explain it depends on the hours or extras needed and offer to have the team confirm an exact quote."}
 - ${canBook ? "You can quote and create bookings using the tools, following the rules below." : "You cannot confirm bookings. Offer to pass booking requests to the team."} Never ask for card or bank details.
 - Never share information about other customers or staff.
