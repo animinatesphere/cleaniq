@@ -249,7 +249,7 @@ router.post("/", verifyCompany, async (req, res) => {
         <tr><td style="font-size:13px;font-weight:700;color:#64748b;">Date &amp; Time</td><td align="right" style="font-size:13px;font-weight:700;">${req.body.schedule?.date ? new Date(req.body.schedule.date).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"}) : "—"} · ${req.body.schedule?.timeSlot || "—"}</td></tr>
       </table>
     </div>
-    <p style="color:#64748b;font-size:14px;">Questions? Call or WhatsApp us on <strong>+44 7752 476368</strong>.</p>
+    <p style="color:#64748b;font-size:14px;">Questions? Call or WhatsApp us on <strong>+44 7846 726428</strong>.</p>
   </div>
 </div>`,
         });
