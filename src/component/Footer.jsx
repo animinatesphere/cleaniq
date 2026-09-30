@@ -170,9 +170,12 @@ const Footer = () => {
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-secondary/20 group-hover:text-secondary transition-colors">
                   <Phone size={16} />
                 </div>
-                <span className="text-sm font-semibold group-hover:text-white transition-colors">
+                <a
+                  href={`tel:${(region?.contact?.phone || "").replace(/\s+/g, "")}`}
+                  className="text-sm font-semibold group-hover:text-white transition-colors"
+                >
                   {region?.contact?.phone}
-                </span>
+                </a>
               </li>
               {/* <li className="flex items-start gap-3 text-slate-400 group cursor-pointer">
                 <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-secondary/20 group-hover:text-secondary transition-colors mt-1">

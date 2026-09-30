@@ -12,7 +12,7 @@ export const regions = {
     paymentGateways: ["stripe"],
     basePrice: 20,
     contact: {
-      phone: "+44 7752 476368",
+      phone: "+44 7846 726428",
       email: "info@cleaniqservices.com",
       address: "20 Swan St, Manchester, M4 5JW",
     },

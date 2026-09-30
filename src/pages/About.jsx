@@ -110,7 +110,7 @@ const FAQS = [
   },
   {
     q: "How do I book a cleaner?",
-    a: "Book online in a few steps, message us on WhatsApp, or call +44 7752 476368. We confirm every booking by email.",
+    a: "Book online in a few steps, message us on WhatsApp, or call +44 7846 726428. We confirm every booking by email.",
   },
 ];
 
@@ -453,13 +453,13 @@ const About = () => {
               </div>
             </div>
             <div className="space-y-5">
-              <a href="tel:+447752476368" className="flex items-center gap-5 p-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+              <a href="tel:+447846726428" className="flex items-center gap-5 p-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
                 <span className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-secondary shrink-0">
                   <Phone size={22} />
                 </span>
                 <span>
-                  <span className="block text-xs text-white/50 font-bold uppercase tracking-widest mb-1">Call or WhatsApp</span>
-                  <span className="text-lg font-bold">+44 7752 476368</span>
+                  <span className="block text-xs text-white/50 font-bold uppercase tracking-widest mb-1">Call us</span>
+                  <span className="text-lg font-bold">+44 7846 726428</span>
                 </span>
               </a>
               <a href="mailto:info@cleaniqservices.com" className="flex items-center gap-5 p-5 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">

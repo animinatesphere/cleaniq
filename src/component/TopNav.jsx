@@ -15,11 +15,11 @@ const TopNav = () => {
               <span className="text-[8px] md:text-[10px] font-bold  tracking-[0.15em] md:tracking-[0.25em]">info@cleaniqservices.com</span>
             </a>
             
-            <a href="tel:+447752476368" className="flex items-center gap-2 hover:text-secondary transition-colors cursor-pointer group">
+            <a href="tel:+447846726428" className="flex items-center gap-2 hover:text-secondary transition-colors cursor-pointer group">
               <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-secondary/10 transition-colors">
                 <Phone size={12} className="text-secondary group-hover:scale-110 transition-transform md:w-3.5 md:h-3.5" />
               </div>
-              <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.25em]">+44 7752 476368</span>
+              <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.25em]">+44 7846 726428</span>
             </a>
 
             <a href="https://maps.app.goo.gl/UHcabzmFuj11wuLo9" target="_blank" rel="noopener noreferrer" className="hidden sm:flex items-center gap-2 hover:text-secondary transition-colors cursor-pointer group">

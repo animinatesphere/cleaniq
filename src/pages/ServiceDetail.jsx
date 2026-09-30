@@ -151,7 +151,7 @@ const EOT_EXTENDED = {
     "Wigan",
   ],
 
-  seoFooter: `Cleaniq Services provides professional end of tenancy cleaning, move-out cleaning, vacate cleaning, checkout cleaning, and end of lease cleaning across Manchester. Whether you need a tenancy end clean in Manchester City Centre, Didsbury, Chorlton, Salford, Withington, Fallowfield, or Stockport — our vetted and insured tenancy cleaners are ready to help you secure your full deposit refund. Book your Manchester end of tenancy cleaning service online in 60 seconds or call +44 7752 476368.`,
+  seoFooter: `Cleaniq Services provides professional end of tenancy cleaning, move-out cleaning, vacate cleaning, checkout cleaning, and end of lease cleaning across Manchester. Whether you need a tenancy end clean in Manchester City Centre, Didsbury, Chorlton, Salford, Withington, Fallowfield, or Stockport — our vetted and insured tenancy cleaners are ready to help you secure your full deposit refund. Book your Manchester end of tenancy cleaning service online in 60 seconds or call +44 7846 726428.`,
 };
 
 const DEEP_EXTENDED = {
@@ -284,7 +284,7 @@ const DEEP_EXTENDED = {
     "Wigan",
   ],
 
-  seoFooter: `Cleaniq Services provides professional deep cleaning, one-off cleaning, and thorough refresh cleans across Manchester. Whether you need a deep clean in Manchester City Centre, Didsbury, Chorlton, Salford, Fallowfield, Withington, or Stockport — our vetted and insured cleaners deliver a guaranteed result. Book your Manchester deep cleaning service online in 60 seconds or call +44 7752 476368.`,
+  seoFooter: `Cleaniq Services provides professional deep cleaning, one-off cleaning, and thorough refresh cleans across Manchester. Whether you need a deep clean in Manchester City Centre, Didsbury, Chorlton, Salford, Fallowfield, Withington, or Stockport — our vetted and insured cleaners deliver a guaranteed result. Book your Manchester deep cleaning service online in 60 seconds or call +44 7846 726428.`,
 };
 
 const AIRBNB_EXTENDED = {
@@ -414,7 +414,7 @@ const AIRBNB_EXTENDED = {
     "Wigan",
   ],
 
-  seoFooter: `Cleaniq Services provides professional Airbnb cleaning, short-let property cleaning, and holiday let turnovers across Manchester. Whether you need a same-day Airbnb clean in Manchester City Centre, Salford, Didsbury, Chorlton, or Stockport — our experienced turnover team delivers a guest-ready finish every time. Book your Manchester Airbnb cleaning service online or call +44 7752 476368.`,
+  seoFooter: `Cleaniq Services provides professional Airbnb cleaning, short-let property cleaning, and holiday let turnovers across Manchester. Whether you need a same-day Airbnb clean in Manchester City Centre, Salford, Didsbury, Chorlton, or Stockport — our experienced turnover team delivers a guest-ready finish every time. Book your Manchester Airbnb cleaning service online or call +44 7846 726428.`,
 };
 
 const OFFICE_EXTENDED = {
@@ -543,7 +543,7 @@ const OFFICE_EXTENDED = {
     "Wigan",
   ],
 
-  seoFooter: `Cleaniq Services provides professional office cleaning, commercial cleaning, and workplace janitorial services across Manchester. Whether you need daily office cleaning in Manchester City Centre, Salford Quays, Stockport, Trafford Park, or Didsbury — our vetted and insured commercial cleaning team delivers consistent, audited results. Book a free site assessment or call +44 7752 476368.`,
+  seoFooter: `Cleaniq Services provides professional office cleaning, commercial cleaning, and workplace janitorial services across Manchester. Whether you need daily office cleaning in Manchester City Centre, Salford Quays, Stockport, Trafford Park, or Didsbury — our vetted and insured commercial cleaning team delivers consistent, audited results. Book a free site assessment or call +44 7846 726428.`,
 };
 
 const POST_CONSTRUCTION_EXTENDED = {
@@ -668,7 +668,7 @@ const POST_CONSTRUCTION_EXTENDED = {
     "Wigan",
   ],
 
-  seoFooter: `Cleaniq Services provides professional post-construction cleaning, builders cleans, and renovation cleaning across Manchester. Whether you need a post-build clean in Manchester City Centre, Salford, Ancoats, Stockport, or Didsbury — our industrial-equipped team delivers a handover-ready finish. Book your Manchester post-construction cleaning service online or call +44 7752 476368.`,
+  seoFooter: `Cleaniq Services provides professional post-construction cleaning, builders cleans, and renovation cleaning across Manchester. Whether you need a post-build clean in Manchester City Centre, Salford, Ancoats, Stockport, or Didsbury — our industrial-equipped team delivers a handover-ready finish. Book your Manchester post-construction cleaning service online or call +44 7846 726428.`,
 };
 
 const GENERAL_EXTENDED = {
@@ -790,7 +790,7 @@ const GENERAL_EXTENDED = {
     "Trafford", "Wythenshawe",
   ],
 
-  seoFooter: `Cleaniq Services provides reliable general cleaning for homes and apartments across Manchester. Whether you need a regular weekly or fortnightly clean in Manchester City Centre, Didsbury, Chorlton, Salford, or Stockport — our vetted, eco-friendly cleaning team delivers a consistently high standard on every visit. Book your Manchester general cleaning service online or call +44 7752 476368.`,
+  seoFooter: `Cleaniq Services provides reliable general cleaning for homes and apartments across Manchester. Whether you need a regular weekly or fortnightly clean in Manchester City Centre, Didsbury, Chorlton, Salford, or Stockport — our vetted, eco-friendly cleaning team delivers a consistently high standard on every visit. Book your Manchester general cleaning service online or call +44 7846 726428.`,
 };
 
 const SERVICES_MAP = {
@@ -847,7 +847,7 @@ const SERVICES_MAP = {
   "end-of-tenancy-cleaning-manchester": {
     title: "End of Tenancy Cleaning Manchester | Cleaners Near You",
     areaNoun: "End of tenancy cleaners",
-    meta: "Professional end of tenancy cleaning in Manchester. Fully guaranteed, eco-friendly, and landlord-approved. Book vetted cleaners online in 60 seconds. Call +44 7752 476368.",
+    meta: "Professional end of tenancy cleaning in Manchester. Fully guaranteed, eco-friendly, and landlord-approved. Book vetted cleaners online in 60 seconds. Call +44 7846 726428.",
     heading: "End of Tenancy Cleaning in Manchester",
     tagline: "Landlord-Approved. Deposit-Protecting. Fully Guaranteed.",
     description:
@@ -1033,7 +1033,7 @@ const MobileCTABar = ({ isEOT }) => (
   <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 px-4 py-3 flex gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
     {isEOT && (
       <a
-        href="tel:+447752476368"
+        href="tel:+447846726428"
         className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border-2 border-[#00B5A4] text-[#00B5A4] font-bold text-sm"
       >
         <Phone size={15} /> Call
@@ -1157,7 +1157,7 @@ const REGULAR_EXTENDED = {
 
   manchesterAreas: AREAS.map((a) => a.name),
 
-  seoFooter: `Cleaniq Services provides regular house cleaning across Manchester and Greater Manchester. Looking for a house cleaner near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book weekly, fortnightly or monthly cleaning from vetted local cleaners online, or call +44 7752 476368.`,
+  seoFooter: `Cleaniq Services provides regular house cleaning across Manchester and Greater Manchester. Looking for a house cleaner near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book weekly, fortnightly or monthly cleaning from vetted local cleaners online, or call +44 7846 726428.`,
 };
 
 const OVEN_EXTENDED = {
@@ -1263,7 +1263,7 @@ const OVEN_EXTENDED = {
 
   manchesterAreas: AREAS.map((a) => a.name),
 
-  seoFooter: `Cleaniq Services provides professional oven cleaning across Manchester and Greater Manchester. Looking for oven cleaners near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book single, double or range oven cleaning online at a fixed price, or call +44 7752 476368.`,
+  seoFooter: `Cleaniq Services provides professional oven cleaning across Manchester and Greater Manchester. Looking for oven cleaners near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book single, double or range oven cleaning online at a fixed price, or call +44 7846 726428.`,
 };
 
 const CARPET_EXTENDED = {
@@ -1368,7 +1368,7 @@ const CARPET_EXTENDED = {
 
   manchesterAreas: AREAS.map((a) => a.name),
 
-  seoFooter: `Cleaniq Services provides professional carpet cleaning across Manchester and Greater Manchester. Looking for carpet cleaners near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book carpet, stair and upholstery cleaning online at a fixed price, or call +44 7752 476368.`,
+  seoFooter: `Cleaniq Services provides professional carpet cleaning across Manchester and Greater Manchester. Looking for carpet cleaners near you in Salford, Didsbury, Chorlton, Stockport, Trafford or Manchester City Centre? Book carpet, stair and upholstery cleaning online at a fixed price, or call +44 7846 726428.`,
 };
 
 const EXTENDED_MAP = {
@@ -1493,7 +1493,7 @@ const ServiceDetail = () => {
                 "@type": "LocalBusiness",
                 "@id": "https://www.cleaniqservices.com#localbusiness",
                 name: "Cleaniq Services",
-                telephone: "+447752476368",
+                telephone: "+447846726428",
                 address: {
                   "@type": "PostalAddress",
                   addressLocality: "Manchester",
@@ -1608,10 +1608,10 @@ const ServiceDetail = () => {
                 </a>
                 {isEOT && (
                   <a
-                    href="tel:+447752476368"
+                    href="tel:+447846726428"
                     className="flex items-center justify-center gap-2 w-full py-3 mt-3 rounded-lg border border-slate-200 text-slate-600 font-semibold text-sm hover:border-teal-400 hover:text-teal-700 transition-colors"
                   >
-                    <Phone size={14} /> +44 7752 476368
+                    <Phone size={14} /> +44 7846 726428
                   </a>
                 )}
                 <p className="text-center text-[11px] text-slate-400 mt-3">
@@ -1981,10 +1981,10 @@ const ServiceDetail = () => {
                       </a>
                       {isEOT && (
                         <a
-                          href="tel:+447752476368"
+                          href="tel:+447846726428"
                           className="flex items-center justify-center gap-2 w-full py-3 mt-2.5 rounded-lg border border-slate-200 text-slate-600 font-semibold text-sm hover:border-teal-400 hover:text-teal-700 transition-colors"
                         >
-                          <Phone size={14} /> +44 7752 476368
+                          <Phone size={14} /> +44 7846 726428
                         </a>
                       )}
                     </div>
