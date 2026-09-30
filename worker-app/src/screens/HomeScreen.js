@@ -109,7 +109,7 @@ const HomeScreen = ({ navigation, route }) => {
     try {
       if (!workerInfo?.id) return;
       const [avRes, myRes] = await Promise.all([
-        axios.get(`${API_URL}/workers/jobs`, { params:{ region:workerInfo.region } }),
+        axios.get(`${API_URL}/workers/jobs`, { params:{ region:workerInfo.region, workerId:workerInfo.id } }),
         axios.get(`${API_URL}/workers/jobs/my-jobs/${workerInfo.id}`),
       ]);
       const available = (avRes.data||[]).filter(j=>!j.rejectedBy?.includes(workerInfo.id));

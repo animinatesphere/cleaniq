@@ -33,7 +33,7 @@ test.before(async () => {
   const admin = await Admin.collection.insertOne({ username: "staff1", password: "x", role: "superadmin" });
   adminToken = jwt.sign({ id: admin.insertedId.toString() }, process.env.JWT_SECRET, { algorithm: "HS256" });
   worker = (await Worker.collection.insertOne({
-    firstName: "Sam", lastName: "Cole", email: "sam@test", region: "UK", status: "Active",
+    workerId: "W-SAM", firstName: "Sam", lastName: "Cole", email: "sam@test", region: "UK", status: "Active",
   })).insertedId.toString();
 
   const app = express();
@@ -133,4 +133,25 @@ test("rejecting a job rejects its pending booking", async () => {
   const job = await Job.findOne({ jobId: r.data.jobId });
   await call("PUT", `/jobs/${job._id}/reject`, { reason: "Outside our area" });
   assert.equal((await Booking.findOne({ bookingId: r.data.bookingId })).status, "Rejected");
+});
+
+test("job visibility: a job limited to one worker is only offered to (and acceptable by) that worker", async () => {
+  const other = (await Worker.collection.insertOne({ workerId: "W-KIM", firstName: "Kim", lastName: "Poe", email: "kim@test", region: "UK", status: "Active" })).insertedId.toString();
+  const booking = await Booking.create({ bookingId: "BK-VIS1", service: "Deep Clean", status: "Confirmed", region: "UK" });
+  await call("PUT", `/workers/jobs/${booking._id}/visibility`, { visibleToWorkers: [worker] });
+  const feed = async (qs) => (await call("GET", `/workers/jobs?${qs}`)).data.map((b) => b.bookingId);
+
+  assert.ok((await feed(`region=UK&workerId=${worker}`)).includes("BK-VIS1"), "chosen worker sees it");
+  assert.ok(!(await feed(`region=UK&workerId=${other}`)).includes("BK-VIS1"), "other worker doesn't");
+  assert.ok(!(await feed("region=UK")).includes("BK-VIS1"), "no worker given → hidden (old app versions)");
+  assert.ok((await feed("all=1")).includes("BK-VIS1"), "admin view still sees it");
+
+  const denied = await call("POST", `/workers/jobs/${booking._id}/accept`, { workerId: other, workerName: "Kim Poe" });
+  assert.equal(denied.status, 403);
+  const ok = await call("POST", `/workers/jobs/${booking._id}/accept`, { workerId: worker, workerName: "Sam Cole" });
+  assert.equal(ok.status, 200);
+
+  await call("PUT", `/workers/jobs/${booking._id}/visibility`, { visibleToWorkers: [] });
+  await Booking.updateOne({ _id: booking._id }, { $set: { status: "Confirmed", assignedWorker: null } });
+  assert.ok((await feed(`region=UK&workerId=${other}`)).includes("BK-VIS1"), "open to all again");
 });
