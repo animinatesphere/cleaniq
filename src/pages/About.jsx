@@ -110,7 +110,7 @@ const FAQS = [
   },
   {
     q: "How do I book a cleaner?",
-    a: "Book online in a few steps, message us on WhatsApp, or call +44 7846 726428 or +44 7752 476368. We confirm every booking by email.",
+    a: "Book online in a few steps, message us on WhatsApp (+44 7846 726428), or call +44 7846 726428 or +44 7752 476368. We confirm every booking by email.",
   },
 ];
 
