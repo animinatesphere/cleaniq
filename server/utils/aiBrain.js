@@ -6,6 +6,25 @@ const KnowledgeEntry = require("../models/KnowledgeEntry");
 const Service = require("../models/Service");
 
 const CHANNELS = ["voice", "whatsapp"];
+const DEFAULT_AGENT_NAMES = ["John", "Mark", "James", "David"];
+const NAME_RE = /^[A-Za-z][A-Za-z' -]{0,29}$/;
+
+// The receptionist's names from AI Settings ("John, Mark, James"). With strict, returns null
+// for invalid input instead of falling back to the defaults.
+function agentNames(settings, { strict = false } = {}) {
+  const names = String(settings?.assistantName || "")
+    .split(",")
+    .map((n) => n.trim().replace(/\s+/g, " "))
+    .filter(Boolean);
+  const valid = names.length > 0 && names.length <= 10 && names.every((n) => NAME_RE.test(n));
+  if (strict) return valid ? [...new Set(names)] : null;
+  return valid ? names : DEFAULT_AGENT_NAMES;
+}
+
+function pickAgentName(settings, random = Math.random) {
+  const names = agentNames(settings);
+  return names[Math.floor(random() * names.length)] || names[0];
+}
 
 function formatPrice(service) {
   const amount = `£${Number(service.rate).toFixed(2)}`;
@@ -150,10 +169,10 @@ Style: friendly, confident and helpful, like a good receptionist, never pushy. I
 Don't use save_enquiry for someone who has just made a booking${canBook ? " or had a quote emailed" : ""}, for spam, or for job applicants (tell cleaners who want work to apply at cleaniqservices.com/recruitment).`;
 }
 
-function buildInstructions({ channel, settings, knowledge, services, now = new Date(), customerName = "", canBook = false }) {
+function buildInstructions({ channel, settings, knowledge, services, now = new Date(), customerName = "", canBook = false, agentName = "" }) {
   if (!CHANNELS.includes(channel)) throw new Error(`Unknown channel: ${channel}`);
   const business = settings.businessName || "Cleaniq Services";
-  const name = settings.assistantName || "Brenda";
+  const name = agentName || agentNames(settings)[0];
   const canTransfer = channel === "voice" && Boolean(settings.transferNumber);
 
   const channelRules =
@@ -198,13 +217,13 @@ ${formatServices(services)}${Number(settings.suppliesFee ?? 10) > 0 ? `\nCleanin
 ${formatKnowledge(knowledge)}`;
 }
 
-async function getInstructions(channel, { customerName = "", canBook = false } = {}) {
+async function getInstructions(channel, { customerName = "", canBook = false, agentName = "" } = {}) {
   const [settings, knowledge, services] = await Promise.all([
     AiSettings.get(),
     KnowledgeEntry.find({ active: true }).sort({ category: 1, title: 1 }).lean(),
     Service.find({ region: "UK", rate: { $gt: 0 } }).sort({ type: 1, name: 1 }).lean(),
   ]);
-  return buildInstructions({ channel, settings, knowledge, services, customerName, canBook });
+  return buildInstructions({ channel, settings, knowledge, services, customerName, canBook, agentName });
 }
 
-module.exports = { getInstructions, buildInstructions, enquiryRules, CHANNELS };
+module.exports = { getInstructions, buildInstructions, enquiryRules, agentNames, pickAgentName, CHANNELS };

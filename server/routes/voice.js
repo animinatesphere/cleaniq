@@ -8,12 +8,20 @@ const AiSettings = require("../models/AiSettings");
 const AiCall = require("../models/AiCall");
 const { getTwilioCredentials } = require("../utils/whatsapp");
 const { issueCallToken, greetingFor, RELAY_PATH } = require("../utils/voice");
+const { pickAgentName } = require("../utils/aiBrain");
 
 const publicBase = (req) =>
   (process.env.PUBLIC_API_URL ? process.env.PUBLIC_API_URL : `${req.protocol}://${req.get("host")}`).replace(/\/+$/, "");
 
 const xml = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+
+// Text-to-speech voice for calls: a British male voice to match the receptionist's names.
+function ttsAttributes() {
+  const voice = process.env.TWILIO_TTS_VOICE ?? "en-GB-Neural2-B";
+  if (!voice) return "";
+  return ` ttsProvider="${xml(process.env.TWILIO_TTS_PROVIDER || "Google")}" voice="${xml(voice)}"`;
+}
 
 const twiml = (res, body) => res.type("text/xml").send(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`);
 
@@ -51,11 +59,12 @@ router.post("/incoming", async (req, res) => {
 
     const base = publicBase(req);
     const relayUrl = base.replace(/^http/, "ws") + RELAY_PATH;
-    const token = issueCallToken(callSid);
+    const agentName = pickAgentName(settings);
+    const token = issueCallToken(callSid, { agentName });
     twiml(
       res,
       `<Connect action="${xml(base + "/api/voice/after")}">` +
-        `<ConversationRelay url="${xml(relayUrl)}" language="en-GB" welcomeGreeting="${xml(greetingFor(settings))}">` +
+        `<ConversationRelay url="${xml(relayUrl)}" language="en-GB"${ttsAttributes()} welcomeGreeting="${xml(greetingFor(settings, agentName))}">` +
         `<Parameter name="token" value="${token}"/>` +
         `</ConversationRelay></Connect>`,
     );

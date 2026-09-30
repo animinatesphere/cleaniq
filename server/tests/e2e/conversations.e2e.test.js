@@ -128,3 +128,16 @@ test("staff can't reply once WhatsApp's 24-hour window has closed", async () => 
   assert.equal(r.status, 400);
   assert.match(r.data.message, /24-hour reply window has closed/);
 });
+
+test("each WhatsApp customer is given one receptionist name and keeps it", async () => {
+  await AiSettings.updateOne({ key: "default" }, { $set: { whatsappEnabled: true, assistantName: "John, Mark, James" } });
+  const prompts = [];
+  const deps = { ai: async ({ system }) => { prompts.push(system); return "Hello!"; }, send: async () => {} };
+  const from = "whatsapp:+447700900777";
+  await handleIncoming(incoming("SM-N1", "Hi", from), deps);
+  await handleIncoming(incoming("SM-N2", "Are you still there?", from), deps);
+  const conv = await AiConversation.findOne({ phone: "+447700900777" }).lean();
+  assert.ok(["John", "Mark", "James"].includes(conv.agentName));
+  assert.equal(prompts.length, 2);
+  for (const p of prompts) assert.match(p, new RegExp(`^You are ${conv.agentName}, the receptionist`));
+});

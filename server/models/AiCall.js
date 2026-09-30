@@ -8,6 +8,7 @@ const aiCallSchema = new mongoose.Schema(
     phone: { type: String, default: "", trim: true }, // caller, E.164
     customer: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", default: null },
     customerName: { type: String, default: "" },
+    agentName: { type: String, default: "" }, // receptionist name used on this call
     startedAt: { type: Date, default: Date.now },
     endedAt: { type: Date, default: null },
     transferred: { type: Boolean, default: false },
