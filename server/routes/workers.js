@@ -3,6 +3,7 @@ const router = express.Router();
 const Worker = require("../models/Worker");
 const Booking = require("../models/Booking");
 const Notification = require("../models/Notification");
+const mongoose = require("mongoose");
 const { syncCompanyJob } = require("../utils/companyJobs");
 const { moveToTrash } = require("../utils/trash");
 const jwt = require("jsonwebtoken");
@@ -152,15 +153,16 @@ router.get("/jobs", async (req, res) => {
     // Visibility filter: skip when ?all=1 (admin view sees every job regardless of restriction)
     // Otherwise show if visibleToWorkers is empty/missing (open to all)
     // OR if this specific worker is in the list
-    if (!all && workerId) {
-      andClauses.push({
-        $or: [
-          { visibleToWorkers: { $exists: false } },
-          { visibleToWorkers: null },
-          { visibleToWorkers: { $size: 0 } },
-          { visibleToWorkers: workerId },
-        ],
-      });
+    // Without a workerId only open jobs are returned, so a restricted job never leaks to
+    // every worker (older app versions called this without one).
+    if (!all) {
+      const openToAll = [
+        { visibleToWorkers: { $exists: false } },
+        { visibleToWorkers: null },
+        { visibleToWorkers: { $size: 0 } },
+      ];
+      const forThisWorker = workerId && mongoose.isValidObjectId(workerId) ? [{ visibleToWorkers: workerId }] : [];
+      andClauses.push({ $or: [...openToAll, ...forThisWorker] });
     }
 
     const jobs = await Booking.find({ $and: andClauses }).sort({ createdAt: -1 });
@@ -235,6 +237,12 @@ router.post("/jobs/:id/accept", async (req, res) => {
       return res
         .status(400)
         .json({ error: "Job has already been accepted by someone else" });
+    }
+
+    // Admin can limit a job to chosen workers (Job Visibility page).
+    const allowed = (booking.visibleToWorkers || []).map(String);
+    if (allowed.length && !allowed.includes(String(workerId))) {
+      return res.status(403).json({ error: "This job isn't available to you" });
     }
 
     // Update booking
