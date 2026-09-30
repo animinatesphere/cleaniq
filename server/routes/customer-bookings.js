@@ -3,7 +3,7 @@ const router = express.Router();
 const Booking = require('../models/Booking');
 const Lead = require('../models/Lead');
 const Worker = require('../models/Worker');
-const SystemSetting = require('../models/SystemSetting');
+const { workerRateFor } = require('../utils/workerRate');
 const { verifyCustomer } = require('./customer-auth');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const sms = require('../utils/smsService');
@@ -22,12 +22,7 @@ router.post('/', async (req, res) => {
     booking.set('property', req.body.property);
     booking.set('meta', req.body.meta);
 
-    if (booking.workerRate == null) {
-      try {
-        const rateSetting = await SystemSetting.findOne({ key: 'defaultWorkerRate' });
-        if (rateSetting) booking.workerRate = rateSetting.value;
-      } catch {}
-    }
+    if (booking.workerRate == null) booking.workerRate = await workerRateFor(booking.service);
 
     const newBooking = await booking.save();
 

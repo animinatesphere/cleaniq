@@ -9,6 +9,7 @@ const Worker = require("../models/Worker");
 const Notification = require("../models/Notification");
 const { sendEmail } = require("../utils/emailService");
 const { syncCompanyJob, notifyWorkersNewJob } = require("../utils/companyJobs");
+const { workerRateFor } = require("../utils/workerRate");
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "cleaniqservices@gmail.com";
 
@@ -195,6 +196,7 @@ router.post("/", verifyCompany, async (req, res) => {
         : undefined,
       status: "Pending",
       noPaymentRequired: !req.body.payment?.amount,
+      workerRate: await workerRateFor(req.body.service),
       meta: {
         isCompanyJob: true,
         companyId:    company._id,
