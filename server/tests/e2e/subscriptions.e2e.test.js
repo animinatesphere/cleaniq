@@ -349,3 +349,27 @@ test("customer sees the fee before confirming", async () => {
   assert.equal(q.data.fee, 0, "next unpaid visit is over a week away");
   assert.ok(q.data.nextVisitStart);
 });
+
+test("safety nets: no duplicate visits, and a visit is still charged if the cleaner skips 'I've arrived'", async () => {
+  intents.pi_safe = { id: "pi_safe", status: "succeeded", amount: 4100, customer: "cus_1", payment_method: "pm_5" };
+  const r = await call("POST", "/customer-bookings", websiteBooking({
+    customer: { firstName: "Sam", lastName: "Safe", email: "safe@test.com", phone: "07700900888" },
+    payment: { amount: 41, currency: "GBP", method: "Stripe", stripePaymentIntentId: "pi_safe" },
+  }));
+  const s = await Subscription.findOne({ subscriptionRef: r.data.subscription.subscriptionRef });
+  const count = (await visitsOf(s)).length;
+  // Simulate two top-ups racing: rewind and top up again.
+  await Subscription.updateOne({ _id: s._id }, { $set: { lastVisitDate: s.startDate } });
+  assert.equal(await subs.topUpVisits(await Subscription.findById(s._id)), 0);
+  assert.equal((await visitsOf(s)).length, count, "no duplicates");
+
+  // Cleaner goes straight to Start: charged there. Then Complete doesn't charge again.
+  const visit = (await visitsOf(s))[1];
+  const before = stripeCalls.filter((c) => c[0] === "paymentIntents.create").length;
+  await call("POST", `/workers/jobs/${visit._id}/start`);
+  assert.equal((await Booking.findById(visit._id)).payment.status, "Completed");
+  await call("POST", `/workers/jobs/${visit._id}/complete`);
+  const after = stripeCalls.filter((c) => c[0] === "paymentIntents.create").length;
+  assert.equal(after - before, 1, "charged exactly once");
+  assert.equal((await Booking.findById(visit._id)).payment.status, "Completed", "complete didn't undo the payment");
+});

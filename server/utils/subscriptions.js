@@ -170,6 +170,8 @@ async function topUpVisits(sub, { now = new Date() } = {}) {
     if (next > horizon) break;
     cursor = next;
     if (next < earliest) continue;
+    // Never book the same visit twice (e.g. two top-ups running at once).
+    if (await Booking.exists({ "meta.subscriptionId": sub._id, "schedule.date": next, status: { $ne: "Cancelled" } })) continue;
     const t = sub.template || {};
     const bookingId = await uniqueRef("BK-S", (ref) => Booking.exists({ bookingId: ref }));
     await Booking.create({
@@ -200,6 +202,13 @@ async function topUpVisits(sub, { now = new Date() } = {}) {
   return created;
 }
 
+// Mirror a DB payment update onto the in-memory booking the caller is still using, so a later
+// booking.save() or email in the same request sees the new status.
+function applyPayment(booking, fields) {
+  if (!booking.payment) return;
+  for (const [k, v] of Object.entries(fields)) booking.payment[k] = v;
+}
+
 // Charges a regular-clean visit to the saved card. Called when the cleaner arrives.
 // Never throws: the clean goes ahead either way.
 async function chargeVisitOnArrival(booking) {
@@ -223,10 +232,12 @@ async function chargeVisitOnArrival(booking) {
       { idempotencyKey: `visit-charge-${booking._id}` },
     );
     if (pi.status !== "succeeded") return markVisitPaymentFailed(booking, `Payment ${pi.status}`);
+    const paid = { status: "Completed", capturedAt: new Date(), stripePaymentIntentId: pi.id };
     await Booking.updateOne(
       { _id: booking._id },
-      { $set: { "payment.status": "Completed", "payment.capturedAt": new Date(), "payment.stripePaymentIntentId": pi.id } },
+      { $set: { "payment.status": paid.status, "payment.capturedAt": paid.capturedAt, "payment.stripePaymentIntentId": pi.id } },
     );
+    applyPayment(booking, paid);
     console.log(`[subscriptions] charged £${p.amount} for ${booking.bookingId} on arrival`);
     return { charged: true, paymentIntentId: pi.id };
   } catch (err) {
@@ -262,10 +273,12 @@ async function markVisitPaymentFailed(booking, reason) {
   } catch (e) {
     console.error(`[subscriptions] couldn't create payment link for ${booking.bookingId}:`, e.message);
   }
+  const failed = { status: "Failed", failedAt: new Date(), failureReason: reason, paymentLinkUrl: url };
   await Booking.updateOne(
     { _id: booking._id },
-    { $set: { "payment.status": "Failed", "payment.failedAt": new Date(), "payment.failureReason": reason, "payment.paymentLinkUrl": url } },
+    { $set: { "payment.status": failed.status, "payment.failedAt": failed.failedAt, "payment.failureReason": reason, "payment.paymentLinkUrl": url } },
   );
+  applyPayment(booking, failed);
   console.warn(`[subscriptions] charge failed for ${booking.bookingId}: ${reason}`);
   const { sendEmail } = require("./emailService");
   const amount = `£${Number(p.amount || 0).toFixed(2)}`;

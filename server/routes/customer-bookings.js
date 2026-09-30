@@ -365,6 +365,7 @@ router.put('/:id/cancel', verifyCustomer, async (req, res) => {
     }
 
     booking.status = 'Cancelled';
+    if (booking.payment) booking.payment.chargeOnArrival = false; // regular-clean visit: never charge it
     await booking.save();
 
     // SMS: booking cancelled (fire-and-forget)
