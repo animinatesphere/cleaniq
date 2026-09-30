@@ -4,6 +4,9 @@ const serviceSchema = new mongoose.Schema({
   name: { type: String, required: true },
   region: { type: String, enum: ["UK", "NG"], required: true },
   rate: { type: Number, required: true },
+  // Optional hourly prices for regular cleans (admin → Services). Empty = use the normal rate.
+  weeklyRate: { type: Number, default: null },
+  fortnightlyRate: { type: Number, default: null },
   type: { type: String, enum: ["hourly", "flat"], required: true },
   category: {
     type: String,

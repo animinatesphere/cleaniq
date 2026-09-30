@@ -263,6 +263,8 @@ const Booking = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
   const [dynamicRates, setDynamicRates] = useState({});
+  // Weekly/fortnightly hourly prices set in admin → Services, keyed like dynamicRates.
+  const [regularRates, setRegularRates] = useState({});
   const [servicesList, setServicesList] = useState([]);
   const [, setLoadingRates] = useState(true);
 
@@ -588,9 +590,12 @@ const Booking = () => {
 
         setServicesList(data);
         const ratesObj = {};
+        const regularObj = {};
+        const regularFor = (service) => ({ Weekly: Number(service.weeklyRate) || 0, Fortnightly: Number(service.fortnightlyRate) || 0 });
         // Exact-match lookup first
         data.forEach((service) => {
           ratesObj[cleanKey(service.name)] = service.rate;
+          regularObj[cleanKey(service.name)] = regularFor(service);
         });
 
         // Fuzzy alias: cover renamed services so booking prices don't fall back to £0
@@ -608,10 +613,14 @@ const Booking = () => {
             const sk = cleanKey(s.name);
             return sk.includes(dk) || dk.includes(sk);
           });
-          if (match) ratesObj[dk] = match.rate;
+          if (match) {
+            ratesObj[dk] = match.rate;
+            regularObj[dk] = regularFor(match);
+          }
         });
 
         setDynamicRates(ratesObj);
+        setRegularRates(regularObj);
       } catch (error) {
         console.error("Error fetching rates:", error);
       } finally {
@@ -649,7 +658,11 @@ const Booking = () => {
     let total = 0;
 
     // Base Service Rate (Multiplied by Duration for all regions - Price/Hr)
-    const rawBaseRate = dynamicRates[cleanKey(formData.serviceType)] || 20;
+    // Weekly/fortnightly cleans use their own price when admin has set one.
+    const rawBaseRate =
+      regularRates[cleanKey(formData.serviceType)]?.[formData.frequency] ||
+      dynamicRates[cleanKey(formData.serviceType)] ||
+      20;
     const baseRate = parseFloat(rawBaseRate) || 20;
     total += baseRate * formData.duration;
 
@@ -673,7 +686,7 @@ const Booking = () => {
     const discount = couponApplied ? (total * couponApplied.discountPercent) / 100 : 0;
     setTotalPrice(Math.round((total - discount) * 100) / 100);
     setVisitPrice(Math.round(total * 100) / 100);
-  }, [formData, region, dynamicRates, couponApplied]);
+  }, [formData, region, dynamicRates, regularRates, couponApplied]);
 
   // auth modal is derived from step/customer/isSubmitted
 
@@ -1354,6 +1367,15 @@ const Booking = () => {
                                 className={`relative py-4 rounded-2xl border font-black text-xs transition-all ${formData.frequency === f.value ? "border-[#10B981] bg-[#10B981] text-white shadow-md" : "border-slate-200 bg-white text-slate-600 hover:border-[#10B981]/30"}`}
                               >
                                 {f.label}
+                                {formData.serviceType && (() => {
+                                  const key = cleanKey(formData.serviceType);
+                                  const r = regularRates[key]?.[f.value] || dynamicRates[key];
+                                  return r ? (
+                                    <span className={`block mt-1 text-[10px] font-bold ${formData.frequency === f.value ? "text-white/90" : "text-slate-400"}`}>
+                                      {region.symbol}{Number(r).toFixed(2)}/hr
+                                    </span>
+                                  ) : null;
+                                })()}
                                 {f.value === "Weekly" && (
                                   <span className="absolute -top-2 right-2 px-1.5 py-0.5 rounded-md bg-amber-300 text-[8px] font-black text-amber-900 uppercase">
                                     Popular
@@ -2201,6 +2223,7 @@ const Booking = () => {
                             {formData.serviceType &&
                               (() => {
                                 const rawRate =
+                                  regularRates[cleanKey(formData.serviceType)]?.[formData.frequency] ||
                                   dynamicRates[
                                     cleanKey(formData.serviceType)
                                   ] ||
@@ -2226,7 +2249,7 @@ const Booking = () => {
                                 return (
                                   (parseFloat(rawRate) || 20) *
                                   formData.duration
-                                );
+                                ).toFixed(2);
                               })()}
                           </span>
                         </div>
@@ -2279,7 +2302,7 @@ const Booking = () => {
                   )}
                   <p className="text-2xl font-black text-black">
                     {region.symbol}
-                    {totalPrice}
+                    {Number(totalPrice || 0).toFixed(2)}
                   </p>
                 </div>
               </div>

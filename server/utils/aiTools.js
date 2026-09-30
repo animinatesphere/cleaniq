@@ -5,6 +5,7 @@ const Booking = require("../models/Booking");
 const Service = require("../models/Service");
 const AiSettings = require("../models/AiSettings");
 const { toE164UK } = require("./phone");
+const { rateForFrequency } = require("./pricing");
 const Lead = require("../models/Lead");
 
 const FREQUENCIES = ["Once", "Weekly", "Fortnightly", "Monthly", "Quarterly", "Yearly"];
@@ -52,7 +53,7 @@ async function loadUkServices() {
   return Service.find({ region: "UK", rate: { $gt: 0 } }).lean();
 }
 
-function calculateQuote(services, { service, hours, extras = [], suppliesProvidedBy }, suppliesFee = 10) {
+function calculateQuote(services, { service, hours, extras = [], suppliesProvidedBy, frequency }, suppliesFee = 10) {
   const hourly = services.filter((s) => s.type === "hourly");
   const base = hourly.find((s) => clean(s.name) === clean(service));
   if (!base) {
@@ -74,9 +75,11 @@ function calculateQuote(services, { service, hours, extras = [], suppliesProvide
   if (suppliesProvidedBy === "Cleaniq" && suppliesFee > 0) {
     lines.push({ name: SUPPLIES_LINE, unitPrice: suppliesFee, qty: 1, subtotal: money(suppliesFee) });
   }
-  const labour = money(base.rate * h);
+  // Weekly/fortnightly cleans use their own hourly price when admin has set one.
+  const hourlyRate = rateForFrequency(base, frequency);
+  const labour = money(hourlyRate * h);
   const total = money(labour + lines.reduce((sum, l) => sum + l.subtotal, 0));
-  return { service: base.name, hourlyRate: base.rate, hours: h, labour, extras: lines, total, currency: "GBP" };
+  return { service: base.name, hourlyRate, hours: h, labour, extras: lines, total, currency: "GBP" };
 }
 
 // ── Availability (mirrors the admin form's slot + specific-time rules) ────────────────────
@@ -373,7 +376,9 @@ function buildQuoteItems(services, args, suppliesFee) {
     }
     const hours = Number(line.hours);
     if (!Number.isFinite(hours) || hours < 1 || hours > 50) return { error: `Hours for ${base.name} must be between 1 and 50.` };
-    items.push({ service: base.name, customService: "", description: String(line.description || "").trim(), billingType: "hourly", qty: hours, unitPrice: base.rate });
+    // Quote frequencies are lower-case ("weekly"); regular cleans use their own price if set.
+    const freq = String(args.frequency || "").replace(/^./, (c) => c.toUpperCase());
+    items.push({ service: base.name, customService: "", description: String(line.description || "").trim(), billingType: "hourly", qty: hours, unitPrice: rateForFrequency(base, freq) });
   }
   for (const ex of args.extras || []) {
     const match = extraOptions.find((s) => clean(s.name) === clean(ex.name));
@@ -579,6 +584,7 @@ const declarations = [
         hours: { type: "number", description: "Number of hours (1–50)." },
         extras: extrasSchema,
         suppliesProvidedBy: { type: "string", enum: ["Cleaniq", "Customer"], description: "Who brings the cleaning supplies and equipment." },
+        frequency: { type: "string", enum: ["Once", "Weekly", "Fortnightly", "Monthly"], description: "How often. Weekly and fortnightly cleans can have a lower hourly price." },
       },
       required: ["service", "hours"],
     },

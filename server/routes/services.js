@@ -4,6 +4,7 @@ const Service = require("../models/Service");
 const SystemSetting = require("../models/SystemSetting");
 const { moveToTrash } = require("../utils/trash");
 const adminAuth = require("../middleware/adminAuth");
+const { parseOptionalRate } = require("../utils/pricing");
 
 // Get all services for a region
 router.get("/", async (req, res) => {
@@ -35,6 +36,8 @@ router.get("/", async (req, res) => {
         return res.json(uniqueServices.map((s) => {
           const obj = s.toObject();
           delete obj.rate;
+          delete obj.weeklyRate;
+          delete obj.fortnightlyRate;
           delete obj.workerHourlyRate;
           delete obj.workerPaymentRate;
           return obj;
@@ -53,6 +56,12 @@ router.post("/", adminAuth, async (req, res) => {
   try {
     const { _id, name, region, rate, type, category, description, bullets } =
       req.body;
+    const weeklyRate = parseOptionalRate(req.body.weeklyRate);
+    const fortnightlyRate = parseOptionalRate(req.body.fortnightlyRate);
+    const regularRates = {
+      ...(weeklyRate !== undefined ? { weeklyRate } : {}),
+      ...(fortnightlyRate !== undefined ? { fortnightlyRate } : {}),
+    };
     const trimmedName = name?.trim();
     const bulletList = Array.isArray(bullets)
       ? bullets.filter((b) => b && b.trim())
@@ -69,6 +78,7 @@ router.post("/", adminAuth, async (req, res) => {
         category,
         description,
         region,
+        ...regularRates,
         updatedAt: Date.now(),
       };
       if (bulletList !== undefined) updateFields.bullets = bulletList;
@@ -84,6 +94,7 @@ router.post("/", adminAuth, async (req, res) => {
         type,
         category,
         description,
+        ...regularRates,
         updatedAt: Date.now(),
       };
       if (bulletList !== undefined) updateFields.bullets = bulletList;
@@ -131,6 +142,10 @@ router.put("/:id", adminAuth, async (req, res) => {
       updateFields.workerHourlyRate = workerHourlyRate;
     if (workerPaymentRate !== undefined)
       updateFields.workerPaymentRate = workerPaymentRate;
+    const weeklyRate = parseOptionalRate(req.body.weeklyRate);
+    const fortnightlyRate = parseOptionalRate(req.body.fortnightlyRate);
+    if (weeklyRate !== undefined) updateFields.weeklyRate = weeklyRate;
+    if (fortnightlyRate !== undefined) updateFields.fortnightlyRate = fortnightlyRate;
 
     const service = await Service.findByIdAndUpdate(
       req.params.id,

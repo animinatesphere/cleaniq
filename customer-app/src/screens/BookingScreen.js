@@ -251,6 +251,8 @@ const BookingScreen = ({ navigation, route }) => {
   const [submitted,      setSubmitted]      = useState(false);
   const [bookingRef,     setBookingRef]     = useState("");
   const [rates,          setRates]          = useState({});
+  // Weekly/fortnightly hourly prices set in admin → Services, by service name.
+  const [regularRates,   setRegularRates]   = useState({});
   const [liveServices,   setLiveServices]   = useState([]);
   const [liveExtras,     setLiveExtras]     = useState([]);
   const [liveRooms,      setLiveRooms]      = useState([]);
@@ -324,6 +326,11 @@ const BookingScreen = ({ navigation, route }) => {
       const rateMap = {};
       all.forEach((s) => { if (s.name && s.rate) rateMap[s.name] = s.rate; });
       setRates(rateMap);
+      const regularMap = {};
+      all.forEach((s) => {
+        if (s.name) regularMap[s.name] = { Weekly: Number(s.weeklyRate) || 0, Fortnightly: Number(s.fortnightlyRate) || 0 };
+      });
+      setRegularRates(regularMap);
 
       // Build live base services list (category === "Base")
       const bases = all.filter((s) => s.category === "Base" || (!s.category && s.type !== "per_item" && s.type !== "fixed"));
@@ -381,7 +388,9 @@ const BookingScreen = ({ navigation, route }) => {
 
   const set    = (key, val) => setForm((f) => ({ ...f, [key]: val }));
   const top    = () => scrollRef.current?.scrollTo({ y: 0, animated: true });
-  const rawTotal = calcTotal(form, rates, extraPrices);
+  // Weekly/fortnightly cleans use their own price when admin has set one.
+  const regularRate = regularRates[form.serviceType]?.[form.frequency] || 0;
+  const rawTotal = calcTotal(form, regularRate ? { ...rates, [form.serviceType]: regularRate } : rates, extraPrices);
   const discount = couponApplied ? Math.round((rawTotal * couponApplied.discountPercent) / 100 * 100) / 100 : 0;
   const total  = Math.round((rawTotal - discount) * 100) / 100;
   // Regular cleans: first clean paid now (card saved), each following clean charged when the
@@ -397,7 +406,7 @@ const BookingScreen = ({ navigation, route }) => {
     ? [...new Set([...liveRooms, "Living Room"])]
     : BASE_ROOMS;
   const selSvc = displayServices.find((s) => s.id === form.serviceType);
-  const baseRate = rates[form.serviceType] || selSvc?.rate || 17.90;
+  const baseRate = regularRate || rates[form.serviceType] || selSvc?.rate || 17.90;
 
   // ── Validation ──────────────────────────────────────────────────────────────
   const validate = () => {
@@ -744,6 +753,10 @@ const BookingScreen = ({ navigation, route }) => {
                       <View style={styles.freqBadge}><Text style={styles.freqBadgeTxt}>POPULAR</Text></View>
                     )}
                     <Text style={[styles.freqTxt, on && styles.freqTxtOn]}>{f.label}</Text>
+                    {!!form.serviceType && (() => {
+                      const r = regularRates[form.serviceType]?.[f.value] || rates[form.serviceType];
+                      return r ? <Text style={[styles.freqPrice, on && styles.freqPriceOn]}>£{Number(r).toFixed(2)}/hr</Text> : null;
+                    })()}
                   </TouchableOpacity>
                 );
               })}
@@ -1626,6 +1639,8 @@ const styles = StyleSheet.create({
   regularInfoTitle: { fontSize: 13, fontWeight: "900", color: "#0F6B4C", marginBottom: 4 },
   regularInfoItem:  { fontSize: 12, fontWeight: "600", color: "#475569", lineHeight: 18 },
   consentHint:      { fontSize: 11, fontWeight: "700", color: "#94A3B8", textAlign: "center", marginTop: 10 },
+  freqPrice:        { fontSize: 10, fontWeight: "700", color: "#94A3B8", marginTop: 3 },
+  freqPriceOn:      { color: "#ffffffE6" },
 });
 
 export default BookingScreen;
