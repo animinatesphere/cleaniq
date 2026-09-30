@@ -64,9 +64,13 @@ test("includes knowledge, staff instructions and UK time", () => {
   assert.match(p, /at 11:00/); // 10:00 UTC = 11:00 BST
 });
 
-test("voice prompt discloses AI + transcription and uses the transfer tool when a number is set", () => {
+test("voice prompt: named receptionist, transcription notice, honest if asked, saves enquiries, transfers", () => {
   const p = buildInstructions({ channel: "voice", settings, knowledge, services, now });
-  assert.match(p, /already heard a greeting saying you are the AI assistant for Cleaniq Services and that the call is transcribed/);
+  assert.match(p, /^You are Sophie, the receptionist for Cleaniq Services/);
+  assert.match(p, /already heard a greeting from you \(Sophie at Cleaniq Services\) saying the call is transcribed/);
+  assert.match(p, /Never claim to be a human\. If someone sincerely asks .* answer honestly: you're Sophie, the virtual receptionist/);
+  assert.match(p, /enquiry saved with save_enquiry so the team can call back/);
+  assert.match(p, /one or two questions at a time/);
   assert.match(p, /check_availability/);
   assert.match(p, /transfer_to_human/);
   assert.match(p, /1–3 short spoken sentences/);
@@ -96,4 +100,12 @@ test("normalises UK phone numbers to E.164", () => {
   assert.equal(toE164UK("0161 496 0000"), "+441614960000");
   assert.equal(toE164UK("hello"), "");
   assert.equal(toE164UK(""), "");
+});
+
+test("WhatsApp prompt uses the admin's receptionist name and ends enquiries in a booking, quote or saved enquiry", () => {
+  const p = buildInstructions({ channel: "whatsapp", settings: { ...settings, assistantName: "Amy" }, knowledge, services, now, canBook: true });
+  assert.match(p, /^You are Amy, the receptionist/);
+  assert.match(p, /a booking made, a quote emailed, or an enquiry saved with save_enquiry/);
+  assert.match(p, /48-hour re-clean guarantee/);
+  assert.doesNotMatch(p, /Sophie/);
 });

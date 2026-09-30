@@ -5,6 +5,7 @@ const Booking = require("../models/Booking");
 const Service = require("../models/Service");
 const AiSettings = require("../models/AiSettings");
 const { toE164UK } = require("./phone");
+const Lead = require("../models/Lead");
 
 const FREQUENCIES = ["Once", "Weekly", "Fortnightly", "Monthly", "Quarterly", "Yearly"];
 // How many bookings the recurring series creates (same as the admin form's note).
@@ -485,6 +486,73 @@ async function sendAiQuote(args, ctx) {
   };
 }
 
+// ── Enquiries (leads) ────────────────────────────────────────────────────────────────────
+const ENQUIRY_SOURCE = { voice: "AI Phone", whatsapp: "AI WhatsApp" };
+const tidy = (v, max = 500) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, max);
+
+function enquiryMessage(a) {
+  return [
+    a.service && `Service: ${a.service}`,
+    a.details && `Details: ${a.details}`,
+    a.postcode && `Area/postcode: ${a.postcode}`,
+    a.preferredDate && `When: ${a.preferredDate}`,
+    a.callbackTime && `Best time to call: ${a.callbackTime}`,
+  ].filter(Boolean).join("\n");
+}
+
+// Saves the enquiry to Leads (one per phone number per day: later calls update it) and
+// emails the team. ctx: { phone, channel, conversationId, dryRun }
+async function saveEnquiry(args, ctx) {
+  const a = {
+    name: tidy(args.name, 80),
+    email: tidy(args.email, 120).toLowerCase(),
+    phone: toE164UK(tidy(args.phone, 30)) || ctx.phone || "",
+    postcode: tidy(args.postcode, 80),
+    service: tidy(args.service, 120),
+    details: tidy(args.details, 800),
+    preferredDate: tidy(args.preferredDate, 80),
+    callbackTime: tidy(args.callbackTime, 80),
+  };
+  if (!a.name) return { error: "Ask for the customer's name first." };
+  if (!a.service && !a.details) return { error: "Ask what they need cleaned first." };
+  if (a.email && !EMAIL_RE.test(a.email)) return { error: "That email address doesn't look right. Check it with the customer." };
+  if (!a.phone && !a.email) return { error: "Ask for a phone number or email so the team can reply." };
+
+  const source = ENQUIRY_SOURCE[ctx.channel] || "AI Receptionist";
+  const message = enquiryMessage(a);
+  if (ctx.dryRun) return { saved: true, dryRun: true, nextStep: "TEST: enquiry not saved." };
+
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const existing = a.phone
+    ? await Lead.findOne({ phone: a.phone, source, createdAt: { $gte: since } })
+    : null;
+  const fields = { name: a.name, phone: a.phone, message, serviceInterest: a.service, ...(a.email ? { email: a.email } : {}) };
+  const lead = existing
+    ? await Lead.findByIdAndUpdate(existing._id, { $set: fields }, { new: true })
+    : await Lead.create({ ...fields, source, stage: "New" });
+
+  setImmediate(async () => {
+    try {
+      const { sendEmail } = require("./emailService");
+      const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+      const rows = [["Name", a.name], ["Phone", a.phone], ["Email", a.email], ["Service", a.service], ["Details", a.details],
+        ["Area/postcode", a.postcode], ["When", a.preferredDate], ["Best time to call", a.callbackTime]]
+        .filter(([, v]) => v)
+        .map(([k, v]) => `<tr><td style="padding:6px 12px;color:#64748b;font-weight:700">${k}</td><td style="padding:6px 12px">${esc(v)}</td></tr>`)
+        .join("");
+      await sendEmail({
+        to: process.env.EMAIL_USER || "info@cleaniqservices.com",
+        subject: `${existing ? "Updated" : "New"} enquiry (${source}): ${a.name}${a.service ? ` – ${a.service}` : ""}`,
+        html: `<div style="font-family:sans-serif;max-width:560px"><h2 style="color:#0F6B4C">New enquiry from the ${source === "AI Phone" ? "phone line" : "WhatsApp chat"}</h2><table style="border-collapse:collapse">${rows}</table><p style="color:#64748b">It's in Admin → Leads. Call them back to quote and book.</p></div>`,
+      });
+    } catch (e) {
+      console.error("[ai-tools] enquiry email failed:", e.message);
+    }
+  });
+  console.log(`[ai-tools] enquiry ${existing ? "updated" : "saved"} for ${a.name} (${a.phone || a.email}) from ${source}`);
+  return { saved: true, leadId: String(lead._id), nextStep: "The team has the enquiry and will be in touch soon." };
+}
+
 // ── Declarations for the model ──────────────────────────────────────────────────────────
 const extrasSchema = {
   type: "array",
@@ -593,6 +661,24 @@ const declarations = [
     },
   },
   {
+    name: "save_enquiry",
+    description: "Save this customer's enquiry for the team to follow up (call back, quote, book). Use when someone is interested but isn't booking or getting a quote emailed now. Call again with all details if they add more.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "Customer's name" },
+        phone: { type: "string", description: "Best phone number, only if different from this chat/call's number" },
+        email: { type: "string" },
+        postcode: { type: "string", description: "Postcode or area" },
+        service: { type: "string", description: "Service they're interested in, e.g. End of Tenancy Cleaning" },
+        details: { type: "string", description: "Property size, what needs cleaning, questions, anything else useful" },
+        preferredDate: { type: "string", description: "When they'd like the clean, in their words" },
+        callbackTime: { type: "string", description: "Best time for the team to call back" },
+      },
+      required: ["name"],
+    },
+  },
+  {
     name: "find_my_bookings",
     description: "List this customer's upcoming bookings (matched by the phone number of this chat). Use when they ask about, change or reschedule a booking.",
     parametersJsonSchema: { type: "object", properties: {} },
@@ -652,6 +738,8 @@ function describeToolResult(name, args = {}, r = {}) {
       return { name, ok: true, detail: `Looked up bookings: ${r.bookings?.length ?? 0} upcoming` };
     case "reschedule_booking":
       return { name, ok: true, detail: `${r.dryRun ? "TEST reschedule" : `Booking ${r.bookingRef} moved`} to ${r.newWhen}` };
+    case "save_enquiry":
+      return { name, ok: true, detail: r.dryRun ? "TEST enquiry (not saved)" : `Enquiry saved: ${args.name || ""}${args.service ? ` · ${args.service}` : ""}` };
     case "transfer_to_human":
       return { name, ok: true, detail: "Caller transferred to the team" };
     default:
@@ -672,6 +760,7 @@ function makeToolRunner(ctx) {
       if (name === "find_my_bookings") return await findMyBookings(ctx);
       if (name === "reschedule_booking") return await rescheduleAiBooking(args, ctx);
       if (name === "send_quote") return await sendAiQuote(args, ctx);
+      if (name === "save_enquiry") return await saveEnquiry(args, ctx);
       return { error: `Unknown tool ${name}` };
     } catch (err) {
       console.error(`[ai-tools] ${name} failed:`, err);
@@ -697,6 +786,7 @@ module.exports = {
   formatWindow,
   confirmationTool,
   sendAiQuote,
+  saveEnquiry,
   describeToolResult,
   SPECIFIC_TIMES,
 };

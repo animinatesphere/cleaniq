@@ -104,12 +104,14 @@ function LeadDrawer({ lead, onClose, onEmail, onDelete }) {
               <span className="text-sm font-semibold text-white">{lead.name}</span>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Mail size={14} className="text-white/40 flex-shrink-0" />
-              <a href={`mailto:${lead.email}`} className="text-sm text-blue-400 hover:underline truncate">
-                {lead.email}
-              </a>
-            </div>
+            {lead.email && (
+              <div className="flex items-center gap-3">
+                <Mail size={14} className="text-white/40 flex-shrink-0" />
+                <a href={`mailto:${lead.email}`} className="text-sm text-blue-400 hover:underline truncate">
+                  {lead.email}
+                </a>
+              </div>
+            )}
 
             {lead.phone && (
               <div className="flex items-center gap-3">
