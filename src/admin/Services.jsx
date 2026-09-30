@@ -303,7 +303,7 @@ const ServicesManagement = () => {
               )}
 
               {service.type === 'hourly' && (
-                <p className="text-[10px] font-semibold text-white/40 mt-4 -mb-2">One-off price (per hour)</p>
+                <p className="text-[10px] font-semibold text-white/40 mt-4 -mb-2">One-off £/hr</p>
               )}
               <div className="flex gap-2 mt-4">
                 <div className="relative flex-1">
@@ -325,8 +325,8 @@ const ServicesManagement = () => {
               {service.type === 'hourly' && (
                 <div className="grid grid-cols-2 gap-2 mt-3">
                   {[
-                    { field: 'weeklyRate', label: 'Weekly price (per hour)' },
-                    { field: 'fortnightlyRate', label: 'Fortnightly price (per hour)' },
+                    { field: 'weeklyRate', label: 'Weekly £/hr' },
+                    { field: 'fortnightlyRate', label: 'Fortnightly £/hr' },
                   ].map(({ field, label }) => (
                     <label key={field} className="block">
                       <span className="text-[10px] font-semibold text-white/40">{label}</span>
@@ -338,7 +338,7 @@ const ServicesManagement = () => {
                           min="0"
                           value={service[field] ?? ''}
                           onChange={(e) => handleRegularRateChange(service._id, field, e.target.value)}
-                          placeholder="Same as one-off"
+                          placeholder="One-off"
                           className="w-full pl-7 pr-3 py-2.5 bg-white/5 rounded-xl border border-white/10 font-bold text-white text-sm placeholder:text-white/20 placeholder:font-medium focus:outline-none focus:border-emerald-500/50 transition-all"
                         />
                       </div>
