@@ -41,7 +41,7 @@ export default function AiSettingsPage() {
       .then((s) =>
         setForm({
           businessName: s.businessName || "",
-          assistantName: s.assistantName || "Sophie",
+          assistantName: s.assistantName || "Brenda",
           serviceArea: s.serviceArea || "",
           transferNumber: s.transferNumber || "",
           suppliesFee: s.suppliesFee ?? 10,
@@ -120,7 +120,7 @@ export default function AiSettingsPage() {
             <input
               value={form.assistantName}
               onChange={(e) => set("assistantName")(e.target.value)}
-              placeholder="Sophie"
+              placeholder="Brenda"
               maxLength={30}
               className={inputCls}
             />

@@ -1,13 +1,27 @@
 import { Mail, Phone, MapPin } from 'lucide-react'
-import React from 'react'
+import { useEffect, useRef } from 'react'
 
 const TopNav = () => {
+  // The navbar sits right under this bar; share its real height so they never overlap.
+  const barRef = useRef(null)
+  useEffect(() => {
+    const el = barRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const root = document.documentElement
+    const observer = new ResizeObserver(() => root.style.setProperty('--topnav-h', `${el.offsetHeight}px`))
+    observer.observe(el)
+    return () => {
+      observer.disconnect()
+      root.style.removeProperty('--topnav-h')
+    }
+  }, [])
+
   return (
-    <div className="bg-black text-white/90 py-2 md:h-[52px] flex items-center border-b border-white/5 fixed top-0 w-full z-60 font-sans">
+    <div ref={barRef} className="bg-black text-white/90 py-2 md:h-[52px] flex items-center border-b border-white/5 fixed top-0 w-full z-60 font-sans">
       <div className="max-w-7xl mx-auto px-4 md:px-8 w-full">
         <div className="flex flex-col md:flex-row justify-between items-center gap-2 md:gap-0">
           {/* Left Side: Contact Info */}
-          <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 md:gap-10">
+          <div className="flex flex-wrap md:flex-nowrap justify-center md:justify-start items-center gap-4 md:gap-5 lg:gap-10">
             <a href="mailto:info@cleaniqservices.com" className="flex items-center gap-2 hover:text-secondary transition-colors cursor-pointer group">
               <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-secondary/10 transition-colors">
                 <Mail size={12} className="text-secondary group-hover:scale-110 transition-transform md:w-3.5 md:h-3.5" />
@@ -15,20 +29,25 @@ const TopNav = () => {
               <span className="text-[8px] md:text-[10px] font-bold  tracking-[0.15em] md:tracking-[0.25em]">info@cleaniqservices.com</span>
             </a>
             
-            <a href="tel:+447846726428" className="flex items-center gap-2 hover:text-secondary transition-colors cursor-pointer group">
+            {/* Both call numbers stacked, so the bar keeps its height and never covers the logo */}
+            <div className="flex items-center gap-2 group">
               <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-secondary/10 transition-colors">
-                <Phone size={12} className="text-secondary group-hover:scale-110 transition-transform md:w-3.5 md:h-3.5" />
+                <Phone size={12} className="text-secondary md:w-3.5 md:h-3.5" />
               </div>
-              <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.25em]">+44 7846 726428</span>
-            </a>
-            <a href="tel:+447752476368" className="flex items-center gap-2 hover:text-secondary transition-colors cursor-pointer group">
-              <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-secondary/10 transition-colors">
-                <Phone size={12} className="text-secondary group-hover:scale-110 transition-transform md:w-3.5 md:h-3.5" />
+              <div className="flex flex-col leading-tight">
+                {["+44 7846 726428", "+44 7752 476368"].map((n) => (
+                  <a
+                    key={n}
+                    href={`tel:${n.replace(/\s+/g, "")}`}
+                    className="text-[8px] md:text-[10px] font-bold tracking-[0.15em] md:tracking-[0.25em] hover:text-secondary transition-colors"
+                  >
+                    {n}
+                  </a>
+                ))}
               </div>
-              <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.25em]">+44 7752 476368</span>
-            </a>
+            </div>
 
-            <a href="https://maps.app.goo.gl/UHcabzmFuj11wuLo9" target="_blank" rel="noopener noreferrer" className="hidden sm:flex items-center gap-2 hover:text-secondary transition-colors cursor-pointer group">
+            <a href="https://maps.app.goo.gl/UHcabzmFuj11wuLo9" target="_blank" rel="noopener noreferrer" className="hidden lg:flex items-center gap-2 hover:text-secondary transition-colors cursor-pointer group">
               <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-secondary/10 transition-colors">
                 <MapPin size={12} className="text-secondary group-hover:scale-110 transition-transform md:w-3.5 md:h-3.5" />
               </div>
@@ -37,7 +56,7 @@ const TopNav = () => {
           </div>
 
           {/* Right Side: Social Media */}
-          <div className="flex items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-4 md:gap-2 lg:gap-6">
             <a href="https://www.facebook.com/profile.php?id=61580606194883" target="_blank" rel="noopener noreferrer" className="hover:text-secondary transition-all hover:scale-110 opacity-70 hover:opacity-100 p-1.5 md:p-2 rounded-lg hover:bg-white/5">
               <svg width="14" height="14" className="md:w-4 md:h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
             </a>

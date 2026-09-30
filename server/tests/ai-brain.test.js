@@ -66,9 +66,10 @@ test("includes knowledge, staff instructions and UK time", () => {
 
 test("voice prompt: named receptionist, transcription notice, honest if asked, saves enquiries, transfers", () => {
   const p = buildInstructions({ channel: "voice", settings, knowledge, services, now });
-  assert.match(p, /^You are Sophie, the receptionist for Cleaniq Services/);
-  assert.match(p, /already heard a greeting from you \(Sophie at Cleaniq Services\) saying the call is transcribed/);
-  assert.match(p, /Never claim to be a human\. If someone sincerely asks .* answer honestly: you're Sophie, the virtual receptionist/);
+  assert.match(p, /^You are Brenda, the receptionist for Cleaniq Services/);
+  assert.match(p, /already heard a greeting from you \(Brenda at Cleaniq Services\) saying the call is transcribed/);
+  assert.match(p, /Introduce yourself as "Brenda from Cleaniq Services"\. Never call yourself an AI, an assistant, a bot/);
+  assert.doesNotMatch(p, /virtual receptionist|AI assistant/);
   assert.match(p, /enquiry saved with save_enquiry so the team can call back/);
   assert.match(p, /one or two questions at a time/);
   assert.match(p, /check_availability/);
@@ -107,5 +108,5 @@ test("WhatsApp prompt uses the admin's receptionist name and ends enquiries in a
   assert.match(p, /^You are Amy, the receptionist/);
   assert.match(p, /a booking made, a quote emailed, or an enquiry saved with save_enquiry/);
   assert.match(p, /48-hour re-clean guarantee/);
-  assert.doesNotMatch(p, /Sophie/);
+  assert.doesNotMatch(p, /Brenda/);
 });

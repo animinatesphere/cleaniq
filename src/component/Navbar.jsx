@@ -46,7 +46,7 @@ const Navbar = () => {
       className={`fixed w-full z-50 transition-all duration-500 ${
         isScrolled
           ? "top-0 glass-dark py-2 sm:py-2.5 md:py-3 shadow-2xl shadow-black/30"
-          : `${isAccountPage ? "top-0" : "top-[80px] sm:top-[72px] md:top-[52px]"} bg-primary py-3 sm:py-3.5 md:py-4`
+          : `${isAccountPage ? "top-0" : "top-[var(--topnav-h,80px)] sm:top-[var(--topnav-h,72px)] md:top-[var(--topnav-h,52px)]"} bg-primary py-3 sm:py-3.5 md:py-4`
       }`}
     >
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 flex justify-between items-center">
