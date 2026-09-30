@@ -5,6 +5,7 @@ const Booking = require("../models/Booking");
 const Notification = require("../models/Notification");
 const mongoose = require("mongoose");
 const { syncCompanyJob } = require("../utils/companyJobs");
+const { chargeVisitOnArrival } = require("../utils/subscriptions");
 const { moveToTrash } = require("../utils/trash");
 const jwt = require("jsonwebtoken");
 const { sendEmail, templates, workerEventEmails } = require("../utils/emailService");
@@ -477,6 +478,10 @@ router.post("/jobs/:id/arrive", async (req, res) => {
       jobArrivedTime: booking.jobArrivedTime,
     });
 
+    // Regular clean: charge this visit to the saved card now. The clean goes ahead even if it
+    // fails (customer gets a payment link, admin an alert).
+    const visitPayment = await chargeVisitOnArrival(booking);
+
     // Notify customer
     await notifyCustomer(booking, {
       title: "Your Cleaner Has Arrived!",
@@ -503,7 +508,7 @@ router.post("/jobs/:id/arrive", async (req, res) => {
       }).catch(() => {});
     }
 
-    res.json({ message: "Arrived at customer location", booking });
+    res.json({ message: "Arrived at customer location", booking, visitPayment });
   } catch (error) {
     console.error("Error marking arrival:", error);
     res.status(500).json({ error: "Internal server error marking arrival" });
