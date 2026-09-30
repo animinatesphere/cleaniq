@@ -11,6 +11,7 @@ import {
   Alert,
   Platform,
   Dimensions,
+  Linking,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -378,6 +379,12 @@ const BookingScreen = ({ navigation, route }) => {
   const rawTotal = calcTotal(form, rates, extraPrices);
   const discount = couponApplied ? Math.round((rawTotal * couponApplied.discountPercent) / 100 * 100) / 100 : 0;
   const total  = Math.round((rawTotal - discount) * 100) / 100;
+  // Regular cleans: first clean paid now (card saved), each following clean charged when the
+  // cleaner arrives. The customer must agree before booking.
+  const isRegular = ["Weekly", "Fortnightly", "Monthly"].includes(form.frequency);
+  const visitPrice = Math.round(rawTotal * 100) / 100;
+  const [regularConsent, setRegularConsent] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState("");
   const displayServices = liveServices.length > 0 ? liveServices : SERVICES;
   const displayExtras   = liveExtras.length   > 0 ? liveExtras   : EXTRAS;
   const BASE_ROOMS      = ["Bedrooms", "Bathrooms", "Kitchens", "Living Room"];
@@ -443,6 +450,10 @@ const BookingScreen = ({ navigation, route }) => {
 
   // ── Submit ──────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
+    if (isRegular && !regularConsent) {
+      Alert.alert("One more step", "Please tick the box to agree to your following cleans being charged to your card.");
+      return;
+    }
     const token = await AsyncStorage.getItem("customerToken");
     if (!token) {
       // Guest — save form, send to login then auto-complete after
@@ -489,6 +500,7 @@ const BookingScreen = ({ navigation, route }) => {
         status:  "Awaiting Payment",
         region:  "UK",
         meta:    { source: "Customer App" },
+        ...(isRegular ? { subscribe: true, subscription: { visitPrice } } : {}),
       };
 
       const res = await fetch(`${API_URL}/customer-bookings`, {
@@ -514,6 +526,11 @@ const BookingScreen = ({ navigation, route }) => {
       await AsyncStorage.removeItem("@cleaniq_pending_booking");
       setBookingRef(resData.bookingId || resData._id || payload.bookingId);
       setSubmitted(true);
+      // Regular clean: open the secure Stripe page to pay the first clean and save the card.
+      if (resData.checkoutUrl) {
+        setCheckoutUrl(resData.checkoutUrl);
+        Linking.openURL(resData.checkoutUrl).catch(() => {});
+      }
     } catch (err) {
       Alert.alert("Booking failed", "Something went wrong. Please try again.");
     } finally {
@@ -532,10 +549,18 @@ const BookingScreen = ({ navigation, route }) => {
           <Text style={styles.successTitle}>Booking Received!</Text>
           <Text style={styles.successRef}>Reference: {bookingRef}</Text>
           <Text style={styles.successNote}>
-            A payment link has been sent to{"\n"}
-            <Text style={{ fontWeight: "800" }}>{email}</Text>
-            {"\n"}Your booking will be confirmed once payment is complete.
+            {isRegular
+              ? "Pay for your first clean on the secure page that opened. Your card is saved and each following clean is charged when your cleaner arrives.\n"
+              : "A payment link has been sent to\n"}
+            {!isRegular && <Text style={{ fontWeight: "800" }}>{email}</Text>}
+            {!isRegular && "\nYour booking will be confirmed once payment is complete."}
           </Text>
+          {!!checkoutUrl && (
+            <TouchableOpacity onPress={() => Linking.openURL(checkoutUrl).catch(() => {})} style={styles.regularPayBtn}>
+              <CreditCard size={16} color="#0F6B4C" />
+              <Text style={styles.regularPayTxt}>Pay first clean</Text>
+            </TouchableOpacity>
+          )}
         </LinearGradient>
         <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.successBody}>
           <View style={[styles.successCard, cardShadow]}>
@@ -1056,6 +1081,33 @@ const BookingScreen = ({ navigation, route }) => {
                 {!!couponError && <Text style={styles.couponErrorTxt}>{couponError}</Text>}
               </View>
 
+              {isRegular && (
+                <View style={styles.regularBox}>
+                  <Text style={styles.regularTitle}>Your regular clean · {form.frequency}</Text>
+                  <View style={styles.regularRow}>
+                    <Text style={styles.regularLbl}>First clean, paid today</Text>
+                    <Text style={styles.regularAmt}>£{total.toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.regularRow}>
+                    <Text style={styles.regularLbl}>Each following clean</Text>
+                    <Text style={styles.regularAmt}>£{visitPrice.toFixed(2)}</Text>
+                  </View>
+                  <Text style={styles.regularNote}>
+                    Following cleans are charged to your card on the day, when your cleaner arrives. Pause or cancel
+                    any time in Bookings → Regular cleans: free with 24 hours' notice, otherwise a late-notice charge applies.
+                  </Text>
+                  <TouchableOpacity style={styles.consentRow} onPress={() => setRegularConsent((v) => !v)} activeOpacity={0.8}>
+                    <View style={[styles.consentBox, regularConsent && styles.consentBoxOn]}>
+                      {regularConsent && <CheckCircle2 size={14} color="#fff" />}
+                    </View>
+                    <Text style={styles.consentTxt}>
+                      I agree that Cleaniq Services can save my card and charge £{visitPrice.toFixed(2)} for each following clean
+                      on the day of the clean, until I pause or cancel.
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
               <View style={styles.summaryFooter}>
                 <Text style={styles.summaryTotalLbl}>Total due</Text>
                 <View>
@@ -1475,6 +1527,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3, shadowRadius: 14, elevation: 6,
   },
   doneBtnTxt: { fontSize: 15, fontWeight: "800", color: "#fff" },
+  regularBox:    { marginTop: 14, padding: 14, borderRadius: 16, backgroundColor: "#E8F5EE", borderWidth: 1, borderColor: "#0F6B4C22" },
+  regularTitle:  { fontSize: 11, fontWeight: "900", color: "#0F6B4C", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 },
+  regularRow:    { flexDirection: "row", justifyContent: "space-between", marginBottom: 4 },
+  regularLbl:    { fontSize: 13, fontWeight: "700", color: "#334155" },
+  regularAmt:    { fontSize: 13, fontWeight: "800", color: "#0F172A" },
+  regularNote:   { fontSize: 11, color: "#64748B", lineHeight: 16, marginTop: 6 },
+  consentRow:    { flexDirection: "row", alignItems: "flex-start", marginTop: 10, gap: 10 },
+  consentBox:    { width: 20, height: 20, borderRadius: 6, borderWidth: 2, borderColor: "#0F6B4C", alignItems: "center", justifyContent: "center", marginTop: 1 },
+  consentBoxOn:  { backgroundColor: "#0F6B4C" },
+  consentTxt:    { flex: 1, fontSize: 12, fontWeight: "700", color: "#334155", lineHeight: 17 },
+  regularPayBtn: { flexDirection: "row", alignItems: "center", gap: 8, alignSelf: "center", marginTop: 14, backgroundColor: "#fff", paddingHorizontal: 18, paddingVertical: 10, borderRadius: 12 },
+  regularPayTxt: { fontSize: 14, fontWeight: "800", color: "#0F6B4C" },
 });
 
 export default BookingScreen;

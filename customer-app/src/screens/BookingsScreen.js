@@ -6,7 +6,7 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import {
   CalendarDays, Clock, MapPin, ChevronRight,
-  ClipboardList, Plus,
+  ClipboardList, Plus, Repeat,
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
@@ -156,6 +156,14 @@ const BookingsScreen = ({ navigation }) => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Bookings</Text>
         <TouchableOpacity
+          style={styles.regularBtn}
+          onPress={() => navigation.navigate("RegularCleans")}
+          activeOpacity={0.85}
+        >
+          <Repeat size={15} color={C.primary} />
+          <Text style={styles.regularBtnTxt}>Regular</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
           style={styles.newBookingBtn}
           onPress={() => navigation.navigate("Booking")}
           activeOpacity={0.85}
@@ -290,6 +298,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24, paddingVertical: 13,
   },
   emptyBtnTxt: { fontSize: 14, fontWeight: "800", color: "#fff" },
+  regularBtn:    { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: C.primaryLight, marginLeft: "auto", marginRight: 8 },
+  regularBtnTxt: { fontSize: 13, fontWeight: "800", color: C.primary },
 });
 
 export default BookingsScreen;

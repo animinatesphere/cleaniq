@@ -143,7 +143,7 @@ async function activateSubscription(sub, paymentIntentId, { now = new Date() } =
         "payment.stripeCustomerId": customerId,
         "payment.stripePaymentMethodId": paymentMethodId,
         "payment.chargeOnArrival": false,
-        status: first.status === "Pending" ? "Confirmed" : first.status,
+        status: ["Pending", "Awaiting Payment"].includes(first.status) ? "Confirmed" : first.status,
       },
     },
   );

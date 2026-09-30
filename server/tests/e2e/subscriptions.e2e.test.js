@@ -244,7 +244,7 @@ test("app: regular clean gets a payment link that saves the card; paying it acti
     customer: { firstName: "Ann", lastName: "App", email: "ann@test.com", phone: "07700900444" },
     details: { address: "2 Elm St", frequency: "Fortnightly", duration: 3, extras: [] },
     payment: { amount: 61.5, currency: "GBP", method: "Invoice", status: "Pending" },
-    status: "Pending",
+    status: "Awaiting Payment",
   }));
   assert.equal(r.status, 201);
   assert.equal(r.data.subscription.status, "pending_payment");
