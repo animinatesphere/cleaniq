@@ -63,7 +63,7 @@ const Contact = () => {
         <title>Contact Us | Cleaniq Services Manchester</title>
         <meta
           name="description"
-          content="Contact Cleaniq Services in Manchester for a free cleaning quote. We offer end of tenancy, deep cleaning, Airbnb, and office cleaning. Call +44 7752 476368 or email us today."
+          content="Contact Cleaniq Services in Manchester for a free cleaning quote. We offer end of tenancy, deep cleaning, Airbnb, and office cleaning. Call +44 7846 726428 or email us today."
         />
         <link rel="canonical" href="https://www.cleaniqservices.com/pages/contact" />
         <meta property="og:title" content="Contact Us | Cleaniq Services Manchester" />
@@ -101,8 +101,8 @@ const Contact = () => {
               {
                 icon: <Phone size={20} />,
                 label: "Phone Support",
-                value: "+44 7752 476368",
-                href: "tel:+447752476368",
+                value: "+44 7846 726428",
+                href: "tel:+447846726428",
               },
               {
                 icon: <Mail size={20} />,
