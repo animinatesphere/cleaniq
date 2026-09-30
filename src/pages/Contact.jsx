@@ -106,7 +106,7 @@ const Contact = () => {
               },
               {
                 icon: <Phone size={20} />,
-                label: "Phone & WhatsApp",
+                label: "Phone Support (Line 2)",
                 value: "+44 7752 476368",
                 href: "tel:+447752476368",
               },
