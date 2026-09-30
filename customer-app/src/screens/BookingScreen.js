@@ -105,7 +105,12 @@ const extraIcon = (name = "") => {
   return Package;
 };
 
-const FREQUENCIES    = ["Once", "Weekly", "Fortnightly", "Monthly"];
+// Same choices as the website booking page.
+const FREQUENCIES    = [
+  { value: "Once",        label: "One-off" },
+  { value: "Weekly",      label: "Weekly", popular: true },
+  { value: "Fortnightly", label: "Fortnightly" },
+];
 const PARKING_OPTIONS = ["On-site parking", "Street parking", "Paid parking nearby", "No parking"];
 const ACCESS_OPTIONS  = ["I will be home", "Key in lockbox", "Key under mat", "Concierge"];
 const SUPPLY_OPTIONS  = [
@@ -725,11 +730,39 @@ const BookingScreen = ({ navigation, route }) => {
             </View>
 
             <SectionLabel title="How often?" />
-            <View style={styles.pillWrap}>
-              {FREQUENCIES.map((f) => (
-                <OptionPill key={f} label={f} selected={form.frequency === f} onPress={() => set("frequency", f)} />
-              ))}
+            <View style={styles.freqRow}>
+              {FREQUENCIES.map((f) => {
+                const on = form.frequency === f.value;
+                return (
+                  <TouchableOpacity
+                    key={f.value}
+                    style={[styles.freqBtn, on && styles.freqBtnOn]}
+                    onPress={() => set("frequency", f.value)}
+                    activeOpacity={0.85}
+                  >
+                    {f.popular && (
+                      <View style={styles.freqBadge}><Text style={styles.freqBadgeTxt}>POPULAR</Text></View>
+                    )}
+                    <Text style={[styles.freqTxt, on && styles.freqTxtOn]}>{f.label}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
+            {isRegular && (
+              <View style={styles.regularInfo}>
+                <Text style={styles.regularInfoTitle}>
+                  Regular cleaning, {form.frequency === "Weekly" ? "every week" : "every two weeks"}
+                </Text>
+                {[
+                  `Same day and time ${form.frequency === "Weekly" ? "every week" : "every two weeks"}`,
+                  "Pay for your first clean today",
+                  "Each following clean is charged on the day, when your cleaner arrives",
+                  "Pause or cancel free with 24 hours' notice",
+                ].map((t) => (
+                  <Text key={t} style={styles.regularInfoItem}>•  {t}</Text>
+                ))}
+              </View>
+            )}
           </View>
         )}
 
@@ -1135,6 +1168,9 @@ const BookingScreen = ({ navigation, route }) => {
                       on the day of the clean, until I pause or cancel.
                     </Text>
                   </TouchableOpacity>
+                  {!regularConsent && (
+                    <Text style={styles.consentHint}>Tick the box above to continue to payment.</Text>
+                  )}
                 </View>
               )}
 
@@ -1152,7 +1188,9 @@ const BookingScreen = ({ navigation, route }) => {
               <View style={styles.summaryNote}>
                 <CreditCard size={13} color={C.textMuted} />
                 <Text style={styles.summaryNoteTxt}>
-                  Secure payment link sent to {email} after booking.
+                  {isRegular
+                    ? "You'll pay for your first clean on a secure Stripe page after tapping the button."
+                    : `Secure payment link sent to ${email} after booking.`}
                 </Text>
               </View>
             </View>
@@ -1173,11 +1211,11 @@ const BookingScreen = ({ navigation, route }) => {
         <TouchableOpacity
           style={[styles.footerNext, submitting && { opacity: 0.65 }, step === 0 && { flex: 1 }]}
           onPress={nextStep}
-          disabled={submitting}
+          disabled={submitting || (step === 3 && isRegular && !regularConsent)}
           activeOpacity={0.88}
         >
           <LinearGradient
-            colors={["#0F6B4C", "#0a5233"]}
+            colors={step === 3 && isRegular && !regularConsent ? ["#94A3B8", "#94A3B8"] : ["#0F6B4C", "#0a5233"]}
             style={styles.footerNextGrad}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -1187,7 +1225,11 @@ const BookingScreen = ({ navigation, route }) => {
             ) : (
               <>
                 <Text style={styles.footerNextTxt}>
-                  {step === 3 ? `Confirm Booking  £${total.toFixed(2)}` : "Continue"}
+                  {step === 3
+                    ? isRegular
+                      ? regularConsent ? `Pay first clean  £${total.toFixed(2)}` : "Tick the box to continue"
+                      : `Confirm Booking  £${total.toFixed(2)}`
+                    : "Continue"}
                 </Text>
                 <ChevronRight size={18} color="#fff" />
               </>
@@ -1573,6 +1615,17 @@ const styles = StyleSheet.create({
   calCellTxtRepeat:    { color: "#0F6B4C", fontWeight: "800" },
   repeatCaption:       { textAlign: "center", fontSize: 13, color: "#475569", marginTop: 10, marginBottom: 4, lineHeight: 19 },
   repeatCaptionStrong: { fontWeight: "800", color: "#0F172A" },
+  freqRow:          { flexDirection: "row", gap: 8, marginTop: 4 },
+  freqBtn:          { flex: 1, paddingVertical: 16, borderRadius: 16, borderWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#fff", alignItems: "center" },
+  freqBtnOn:        { backgroundColor: "#10B981", borderColor: "#10B981" },
+  freqTxt:          { fontSize: 13, fontWeight: "900", color: "#475569" },
+  freqTxtOn:        { color: "#fff" },
+  freqBadge:        { position: "absolute", top: -9, right: 6, backgroundColor: "#FCD34D", borderRadius: 6, paddingHorizontal: 5, paddingVertical: 1 },
+  freqBadgeTxt:     { fontSize: 8, fontWeight: "900", color: "#78350F" },
+  regularInfo:      { marginTop: 12, padding: 14, borderRadius: 16, backgroundColor: "#10B9811A", borderWidth: 1, borderColor: "#10B98133" },
+  regularInfoTitle: { fontSize: 13, fontWeight: "900", color: "#0F6B4C", marginBottom: 4 },
+  regularInfoItem:  { fontSize: 12, fontWeight: "600", color: "#475569", lineHeight: 18 },
+  consentHint:      { fontSize: 11, fontWeight: "700", color: "#94A3B8", textAlign: "center", marginTop: 10 },
 });
 
 export default BookingScreen;
