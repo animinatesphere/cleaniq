@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, Switch, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Screen, ScreenHeader, BigTitle, Loading, usePreferences, G, styles as s } from "./common";
 import KeyboardSafeView from "../../components/KeyboardSafeView";
+import { tc, themed } from "../../theme/dark";
 
 // Messages → Settings: the intro sent automatically to a new customer when you accept their job.
 // {name} and {date} are filled in for you.
@@ -24,7 +25,7 @@ export default function AutoMessagesScreen({ navigation }) {
             <Switch
               value={prefs.autoIntro.enabled}
               onValueChange={(v) => save({ autoIntro: { enabled: v, text } })}
-              trackColor={{ true: G.green, false: "#E5E7EB" }}
+              trackColor={{ true: tc(G.green, "bg"), false: tc("#E5E7EB", "bg") }}
               thumbColor="#fff"
             />
             <Text style={st.label}>Introduce yourself to new customers</Text>
@@ -44,7 +45,7 @@ export default function AutoMessagesScreen({ navigation }) {
             disabled={!prefs.autoIntro.enabled || saving}
             onPress={async () => setSaved(await save({ autoIntro: { enabled: true, text } }))}
           >
-            {saving ? <ActivityIndicator color="#fff" /> : <Text style={st.btnTxt}>Save message</Text>}
+            {saving ? <ActivityIndicator color={tc("#fff")} /> : <Text style={st.btnTxt}>Save message</Text>}
           </TouchableOpacity>
         </ScrollView>
       </KeyboardSafeView>
@@ -52,7 +53,7 @@ export default function AutoMessagesScreen({ navigation }) {
   );
 }
 
-const st = StyleSheet.create({
+const st = themed(StyleSheet.create({
   h3: { fontSize: 17, fontWeight: "900", color: G.text, marginTop: 8, marginBottom: 12 },
   row: { flexDirection: "row", alignItems: "center", gap: 16, marginBottom: 14 },
   label: { flex: 1, fontSize: 16, color: G.text },
@@ -60,4 +61,4 @@ const st = StyleSheet.create({
   hint: { marginLeft: 64, fontSize: 12, color: G.sub, marginTop: 8, marginBottom: 16, lineHeight: 17 },
   btn: { backgroundColor: G.green, borderRadius: 16, paddingVertical: 15, alignItems: "center", marginTop: 4 },
   btnTxt: { color: "#fff", fontSize: 16, fontWeight: "900" },
-});
+}));

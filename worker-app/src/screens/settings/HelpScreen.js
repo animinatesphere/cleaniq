@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, ScrollView, StyleSheet, Linking } from "react-native";
 import { Phone, MessageCircle, Mail, HelpCircle, FileText } from "lucide-react-native";
 import { Screen, ScreenHeader, BigTitle, MenuRow, G } from "./common";
+import { themed } from "../../theme/dark";
 
 // Contact us / Help centre.
 export default function HelpScreen({ navigation }) {
@@ -21,6 +22,6 @@ export default function HelpScreen({ navigation }) {
   );
 }
 
-const st = StyleSheet.create({
+const st = themed(StyleSheet.create({
   h2: { fontSize: 20, fontWeight: "900", color: G.text, marginTop: 28 },
-});
+}));

@@ -31,6 +31,7 @@ import {
   neuInset,
   neuCircle,
 } from "../theme/neumorphic";
+import { tc, tcs, themed, ts } from "../theme/dark";
 
 // ── Design tokens ──────────────────────────────────────────
 const C = {
@@ -190,7 +191,7 @@ const ScheduleScreen = ({ navigation }) => {
           </Text>
           {isAvailable && (
             <View style={styles.availableBadge}>
-              <Check size={8} color="#FFFFFF" />
+              <Check size={8} color={tc("#FFFFFF")} />
             </View>
           )}
         </TouchableOpacity>,
@@ -202,7 +203,7 @@ const ScheduleScreen = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={C.green} />
+        <ActivityIndicator size="large" color={tc(C.green)} />
       </View>
     );
   }
@@ -224,7 +225,7 @@ const ScheduleScreen = ({ navigation }) => {
         }
       >
         {/* Left accent */}
-        <View style={[styles.jobAccent, { backgroundColor: statusColor }]} />
+        <View style={[styles.jobAccent, ts({ backgroundColor: statusColor })]} />
 
         <View style={styles.jobCardInner}>
           {/* Top row */}
@@ -249,7 +250,7 @@ const ScheduleScreen = ({ navigation }) => {
                 {job.service || job.serviceType || "Cleaning Service"}
               </Text>
               <View style={styles.metaRow}>
-                <Clock size={12} color={C.textSub} />
+                <Clock size={12} color={tc(C.textSub)} />
                 <Text style={styles.metaText}>{timeSlot}</Text>
               </View>
             </View>
@@ -258,10 +259,10 @@ const ScheduleScreen = ({ navigation }) => {
             <View
               style={[
                 styles.statusPill,
-                { backgroundColor: statusColor + "20" },
+                ts({ backgroundColor: statusColor + "20" }),
               ]}
             >
-              <Text style={[styles.statusPillText, { color: statusColor }]}>
+              <Text style={[styles.statusPillText, ts({ color: statusColor })]}>
                 {job.status}
               </Text>
             </View>
@@ -270,7 +271,7 @@ const ScheduleScreen = ({ navigation }) => {
           {/* Location row */}
           <View style={styles.locationRow}>
             <View style={styles.locationIconWrap}>
-              <MapPin size={13} color={C.green} />
+              <MapPin size={13} color={tc(C.green)} />
             </View>
             <Text style={styles.locationText} numberOfLines={1}>
               {address || "Location pending"}
@@ -294,7 +295,7 @@ const ScheduleScreen = ({ navigation }) => {
             </View>
             <View style={styles.detailsBtn}>
               <Text style={styles.detailsBtnText}>Details</Text>
-              <ChevronRight size={13} color={C.green} />
+              <ChevronRight size={13} color={tc(C.green)} />
             </View>
           </View>
         </View>
@@ -307,7 +308,7 @@ const ScheduleScreen = ({ navigation }) => {
       {/* ── Header ── */}
       <View style={styles.header}>
         <View style={styles.headerIconWrap}>
-          <Calendar size={18} color={C.greenDark} />
+          <Calendar size={18} color={tc(C.greenDark)} />
         </View>
         <Text style={styles.headerTitle}>My Schedule</Text>
         <View style={{ width: 38 }} />
@@ -342,8 +343,8 @@ const ScheduleScreen = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[C.green]}
-            tintColor={C.green}
+            colors={tcs([C.green], "bg")}
+            tintColor={tc(C.green)}
           />
         }
       >
@@ -351,7 +352,7 @@ const ScheduleScreen = ({ navigation }) => {
           schedule.length === 0 ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIconWrap}>
-                <Calendar size={36} color={C.green} />
+                <Calendar size={36} color={tc(C.green)} />
               </View>
               <Text style={styles.emptyTitle}>No scheduled jobs</Text>
               <Text style={styles.emptySub}>
@@ -380,7 +381,7 @@ const ScheduleScreen = ({ navigation }) => {
                     )
                   }
                 >
-                  <ChevronLeft size={20} color={C.greenDark} />
+                  <ChevronLeft size={20} color={tc(C.greenDark)} />
                 </TouchableOpacity>
                 <Text style={styles.monthTitle}>
                   {currentMonth.toLocaleDateString("en-GB", {
@@ -399,7 +400,7 @@ const ScheduleScreen = ({ navigation }) => {
                     )
                   }
                 >
-                  <ChevronRight size={20} color={C.greenDark} />
+                  <ChevronRight size={20} color={tc(C.greenDark)} />
                 </TouchableOpacity>
               </View>
 
@@ -419,7 +420,7 @@ const ScheduleScreen = ({ navigation }) => {
               <View style={styles.legend}>
                 <View style={styles.legendItem}>
                   <View
-                    style={[styles.legendSwatch, { backgroundColor: C.green }]}
+                    style={[styles.legendSwatch, ts({ backgroundColor: C.green })]}
                   />
                   <Text style={styles.legendText}>Available</Text>
                 </View>
@@ -427,11 +428,11 @@ const ScheduleScreen = ({ navigation }) => {
                   <View
                     style={[
                       styles.legendSwatch,
-                      {
+                      ts({
                         backgroundColor: C.greenPale,
                         borderWidth: 1,
                         borderColor: C.greenDim,
-                      },
+                      }),
                     ]}
                   />
                   <Text style={styles.legendText}>Not set</Text>
@@ -440,11 +441,11 @@ const ScheduleScreen = ({ navigation }) => {
                   <View
                     style={[
                       styles.legendSwatch,
-                      {
+                      ts({
                         backgroundColor: C.greenPale,
                         borderWidth: 2,
                         borderColor: C.green,
-                      },
+                      }),
                     ]}
                   />
                   <Text style={styles.legendText}>Today</Text>
@@ -467,7 +468,7 @@ const ScheduleScreen = ({ navigation }) => {
 // ─────────────────────────────────────────────────────────────
 // STYLES
 // ─────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: NEU_BG,
@@ -835,6 +836,6 @@ const styles = StyleSheet.create({
     color: C.textMute,
     textAlign: "center",
   },
-});
+}));
 
 export default ScheduleScreen;

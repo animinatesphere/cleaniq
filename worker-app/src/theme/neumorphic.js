@@ -1,34 +1,29 @@
-// Shared neumorphic surface tokens used across the worker-app.
-export const NEU_BG = "#E7ECF3";
+// Shared surface tokens used across the worker-app: white pages, white cards with a hairline
+// border and a soft shadow (Wecasa-style).
+export const NEU_BG = "#FFFFFF";
 
 export const neuRaised = {
-  backgroundColor: "#EEF2F8",
+  backgroundColor: "#FFFFFF",
   borderWidth: 1,
-  borderTopColor: "rgba(255,255,255,0.85)",
-  borderLeftColor: "rgba(255,255,255,0.85)",
-  borderRightColor: "rgba(163,177,198,0.45)",
-  borderBottomColor: "rgba(163,177,198,0.45)",
-  shadowColor: "#A3B1C6",
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.5,
+  borderColor: "#EEF1F4",
+  shadowColor: "#0F172A",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.06,
   shadowRadius: 10,
-  elevation: 5,
+  elevation: 2,
 };
 
 export const neuRaisedSm = {
   ...neuRaised,
-  shadowOffset: { width: 0, height: 3 },
+  shadowOffset: { width: 0, height: 2 },
   shadowRadius: 6,
-  elevation: 3,
+  elevation: 1,
 };
 
 export const neuInset = {
-  backgroundColor: "#DDE3EC",
+  backgroundColor: "#F4F6F8",
   borderWidth: 1,
-  borderTopColor: "rgba(163,177,198,0.5)",
-  borderLeftColor: "rgba(163,177,198,0.5)",
-  borderRightColor: "rgba(255,255,255,0.8)",
-  borderBottomColor: "rgba(255,255,255,0.8)",
+  borderColor: "#EEF1F4",
 };
 
 export const neuCircle = {

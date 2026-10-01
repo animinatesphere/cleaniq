@@ -1,6 +1,7 @@
 import React from "react";
 import { TouchableOpacity, Text, View, StyleSheet } from "react-native";
 import { C, cardShadow } from "../theme/flat";
+import { themed } from "../theme/dark";
 
 // Solid pill button (default) or outline variant — matches the reference
 // design's "Get Started" / "Book Now" buttons.
@@ -41,7 +42,7 @@ const Button = ({
   </TouchableOpacity>
 );
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   base: {
     borderRadius: 999,
     paddingVertical: 15,
@@ -75,6 +76,6 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: 0.5,
   },
-});
+}));
 
 export default Button;

@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react-native";
 import axios from "axios";
 import { AuthContext, API_URL } from "../../context/AuthContext";
 import { Screen, ScreenHeader, Loading, G } from "./common";
+import { tc, themed } from "../../theme/dark";
 
 // My appointments: Upcoming / Delivered, with cancelled visits flagged.
 const DONE = ["Completed", "Completed - Unpaid"];
@@ -58,7 +59,7 @@ export default function MyAppointmentsScreen({ navigation }) {
                   <Text style={st.name}>{b.customer?.firstName} {(b.customer?.lastName || "").slice(0, 1)}</Text>
                   <Text style={st.sub}>{b.service}{area(b) ? ` - ${area(b)}` : ""}</Text>
                 </View>
-                <ChevronRight size={20} color={G.text} />
+                <ChevronRight size={20} color={tc(G.text)} />
               </TouchableOpacity>
             );
           }}
@@ -68,7 +69,7 @@ export default function MyAppointmentsScreen({ navigation }) {
   );
 }
 
-const st = StyleSheet.create({
+const st = themed(StyleSheet.create({
   tabs: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: G.line },
   tab: { flex: 1, alignItems: "center", paddingVertical: 12, borderBottomWidth: 3, borderBottomColor: "transparent" },
   tabOn: { borderBottomColor: G.green },
@@ -82,4 +83,4 @@ const st = StyleSheet.create({
   name: { fontSize: 16, fontWeight: "900", color: G.text },
   sub: { fontSize: 14, color: "#374151", marginTop: 3 },
   empty: { textAlign: "center", color: G.mute, marginTop: 40, fontSize: 15 },
-});
+}));

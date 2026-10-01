@@ -15,6 +15,7 @@ import {
   Package, Layers,
 } from "lucide-react-native";
 import axios from "axios";
+import { tc, themed, ts } from "../theme/dark";
 
 const { width: SW } = Dimensions.get("window");
 
@@ -219,7 +220,7 @@ const HomeScreen = ({ navigation, route }) => {
   // ── ACTIVITY TAB ───────────────────────────────────────────────────────────
   const ActivityTab = () => (
     <ScrollView showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary}/>}>
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={tc(C.primary)}/>}>
 
       {/* ── Hero balance card ──────────────────────────────────────────── */}
       <View style={S.hero}>
@@ -234,7 +235,7 @@ const HomeScreen = ({ navigation, route }) => {
         {/* Balance */}
         <Text style={S.heroBalLabel}>Available Balance</Text>
         {walletLoading
-          ? <ActivityIndicator color="#fff" style={{marginVertical:10}}/>
+          ? <ActivityIndicator color={tc("#fff")} style={{marginVertical:10}}/>
           : <Text style={S.heroBalAmt}>£{(wallet.balance||wallet.onHold||0).toFixed(2)}</Text>
         }
 
@@ -265,8 +266,8 @@ const HomeScreen = ({ navigation, route }) => {
           { Icon:TrendingUp,val:`£${(activityStats.totalEarnings||0).toFixed(0)}`, lbl:"Earnings", c:"#7C3AED", bg:"#EDE9FE" },
         ].map(({Icon,val,lbl,c,bg})=>(
           <View key={lbl} style={S.statCard}>
-            <View style={[S.statIconWrap,{backgroundColor:bg}]}>
-              <Icon size={14} color={c} strokeWidth={2}/>
+            <View style={[S.statIconWrap,ts({backgroundColor:bg})]}>
+              <Icon size={14} color={tc(c)} strokeWidth={2}/>
             </View>
             <Text style={S.statVal}>{val}</Text>
             <Text style={S.statLbl}>{lbl}</Text>
@@ -277,7 +278,7 @@ const HomeScreen = ({ navigation, route }) => {
       {/* ── Active jobs ────────────────────────────────────────────────── */}
       <View style={S.sectionBar}>
         <Text style={S.sectionTitle}>Active Jobs</Text>
-        {activeJobs.length>0 && <Badge label={`${activeJobs.length}`} color="#059669" bg="#DCFCE7" border="#A7F3D0"/>}
+        {activeJobs.length>0 && <Badge label={`${activeJobs.length}`} color={tc("#059669")} bg="#DCFCE7" border="#A7F3D0"/>}
       </View>
 
       {activeJobs.length===0
@@ -291,7 +292,7 @@ const HomeScreen = ({ navigation, route }) => {
   // ── HISTORY TAB ────────────────────────────────────────────────────────────
   const HistoryTab = () => (
     <ScrollView showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary}/>}>
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={tc(C.primary)}/>}>
 
       {/* Summary banner */}
       {completedJobs.length > 0 && (
@@ -329,19 +330,19 @@ const HomeScreen = ({ navigation, route }) => {
   // ── OFFERS TAB ─────────────────────────────────────────────────────────────
   const OffersTab = () => (
     <ScrollView showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary}/>}>
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={tc(C.primary)}/>}>
 
       <View style={S.sectionBar}>
         <Text style={S.sectionTitle}>Available Jobs</Text>
-        {availableJobs.length>0 && <Badge label={`${availableJobs.length} new`} color="#2563EB" bg="#DBEAFE" border="#BFDBFE"/>}
+        {availableJobs.length>0 && <Badge label={`${availableJobs.length} new`} color={tc("#2563EB")} bg="#DBEAFE" border="#BFDBFE"/>}
       </View>
 
       <View style={S.searchWrap}>
-        <Search size={14} color={C.mutedFg} strokeWidth={2}/>
+        <Search size={14} color={tc(C.mutedFg)} strokeWidth={2}/>
         <TextInput
           style={S.searchInput}
           placeholder="Search service or location..."
-          placeholderTextColor={C.mutedFg}
+          placeholderTextColor={tc(C.mutedFg)}
           value={offersSearch}
           onChangeText={setOffersSearch}
         />
@@ -360,19 +361,19 @@ const HomeScreen = ({ navigation, route }) => {
               return (
                 <View key={id} style={S.offerCard}>
                   {/* Coloured header band */}
-                  <View style={[S.offerBand,{backgroundColor:svc.bg}]}>
+                  <View style={[S.offerBand,ts({backgroundColor:svc.bg})]}>
                     <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
-                      <View style={[S.offerBandIcon,{backgroundColor:svc.color+"22",borderColor:svc.color+"44"}]}>
-                        <svc.Icon size={16} color={svc.color} strokeWidth={1.8}/>
+                      <View style={[S.offerBandIcon,ts({backgroundColor:svc.color+"22",borderColor:svc.color+"44"})]}>
+                        <svc.Icon size={16} color={tc(svc.color)} strokeWidth={1.8}/>
                       </View>
                       <View>
-                        <Text style={[S.offerBandTitle,{color:svc.color}]}>{job.service||"Cleaning Service"}</Text>
+                        <Text style={[S.offerBandTitle,ts({color:svc.color})]}>{job.service||"Cleaning Service"}</Text>
                         <Text style={S.offerBandSub}>{job.details?.duration||job.workerDuration||job.duration||0} hrs · £{job.workerRate}/hr</Text>
                       </View>
                     </View>
                     <View style={S.offerPayBubble}>
                       <Text style={S.offerPayBubbleLbl}>Payout</Text>
-                      <Text style={[S.offerPayBubbleAmt,{color:svc.color}]}>£{pay}</Text>
+                      <Text style={[S.offerPayBubbleAmt,ts({color:svc.color})]}>£{pay}</Text>
                     </View>
                   </View>
 
@@ -380,29 +381,29 @@ const HomeScreen = ({ navigation, route }) => {
                   <View style={S.offerBody}>
                     <View style={S.offerMetaRow}>
                       <View style={S.metaChip}>
-                        <Calendar size={11} color={C.mutedFg} strokeWidth={2}/>
+                        <Calendar size={11} color={tc(C.mutedFg)} strokeWidth={2}/>
                         <Text style={S.metaChipTxt}>{fmtDate(job.schedule?.date)}</Text>
                       </View>
                       <View style={S.metaChip}>
-                        <Clock size={11} color={C.mutedFg} strokeWidth={2}/>
+                        <Clock size={11} color={tc(C.mutedFg)} strokeWidth={2}/>
                         <Text style={S.metaChipTxt}>{fmtTime(job.schedule)}</Text>
                       </View>
                     </View>
                     <View style={[S.metaChip,{alignSelf:"flex-start",marginTop:6}]}>
-                      <MapPin size={11} color={C.mutedFg} strokeWidth={2}/>
+                      <MapPin size={11} color={tc(C.mutedFg)} strokeWidth={2}/>
                       <Text style={S.metaChipTxt} numberOfLines={2}>{fmtAddr(job)}</Text>
                     </View>
                     {/* Travel time and pay for this cleaner (from offer matching) */}
                     {(job.offer?.travelMinutes != null || job.offer?.pay?.firstRate > 0) && (
                       <View style={[S.offerMetaRow,{marginTop:6}]}>
                         {job.offer?.travelMinutes != null && (
-                          <View style={[S.metaChip,{backgroundColor:"#E8F5EE"}]}>
-                            <Text style={[S.metaChipTxt,{color:"#0F6B4C",fontWeight:"800"}]}>≈ {job.offer.travelMinutes} min away</Text>
+                          <View style={[S.metaChip,ts({backgroundColor:"#E8F5EE"})]}>
+                            <Text style={[S.metaChipTxt,ts({color:"#0F6B4C",fontWeight:"800"})]}>≈ {job.offer.travelMinutes} min away</Text>
                           </View>
                         )}
                         {job.offer?.pay?.firstRate > 0 && (
-                          <View style={[S.metaChip,{backgroundColor:"#E8F5EE"}]}>
-                            <Text style={[S.metaChipTxt,{color:"#0F6B4C",fontWeight:"800"}]}>
+                          <View style={[S.metaChip,ts({backgroundColor:"#E8F5EE"})]}>
+                            <Text style={[S.metaChipTxt,ts({color:"#0F6B4C",fontWeight:"800"})]}>
                               £{Number(job.offer.pay.firstRate).toFixed(2)}/h
                               {job.offer.pay.followingRate && job.offer.pay.followingRate !== job.offer.pay.firstRate ? ` then £${Number(job.offer.pay.followingRate).toFixed(2)}/h` : ""}
                               {job.offer.pay.frequency && job.offer.pay.frequency !== "Once" ? " · Regular" : ""}
@@ -425,10 +426,10 @@ const HomeScreen = ({ navigation, route }) => {
                       onPress={()=>handleQuickAccept(job)}
                       disabled={actionLoading===id}>
                       {actionLoading===id
-                        ? <ActivityIndicator size="small" color="#fff"/>
+                        ? <ActivityIndicator size="small" color={tc("#fff")}/>
                         : <View style={{flexDirection:"row",alignItems:"center",gap:4}}>
                             <Text style={S.btnPrimaryTxt}>Accept Job</Text>
-                            <ArrowUpRight size={13} color="#fff" strokeWidth={2.5}/>
+                            <ArrowUpRight size={13} color={tc("#fff")} strokeWidth={2.5}/>
                           </View>
                       }
                     </TouchableOpacity>
@@ -446,7 +447,7 @@ const HomeScreen = ({ navigation, route }) => {
   // ── PAYMENTS TAB ───────────────────────────────────────────────────────────
   const PaymentsTab = () => (
     <ScrollView showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary}/>}>
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={tc(C.primary)}/>}>
 
       <View style={S.subTabBar}>
         {[
@@ -457,13 +458,13 @@ const HomeScreen = ({ navigation, route }) => {
           <TouchableOpacity key={key}
             style={[S.subTab,paymentTab===key&&S.subTabActive]}
             onPress={()=>setPaymentTab(key)}>
-            <Icon size={13} color={paymentTab===key?C.text:C.mutedFg} strokeWidth={2}/>
+            <Icon size={13} color={tc(paymentTab===key?C.text:C.mutedFg)} strokeWidth={2}/>
             <Text style={[S.subTabTxt,paymentTab===key&&S.subTabTxtActive]}>{label}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {paymentLoading && <ActivityIndicator size="large" color={C.primary} style={{marginTop:40}}/>}
+      {paymentLoading && <ActivityIndicator size="large" color={tc(C.primary)} style={{marginTop:40}}/>}
 
       {!paymentLoading && paymentTab==="upcoming" && (
         <View style={S.payList}>
@@ -504,8 +505,8 @@ const HomeScreen = ({ navigation, route }) => {
             ? <Empty icon={ArrowUpRight} title="No pending withdrawals" sub="Your payouts will appear here"/>
             : withdrawalHistory.filter(w=>["upcoming","pending","approved"].includes(w.status)).map((w,i)=>(
               <View key={i} style={S.payRow}>
-                <View style={[S.wdIconBox,{backgroundColor:w.status==="approved"?"#DCFCE7":"#FEF3C7"}]}>
-                  <Banknote size={16} color={w.status==="approved"?"#059669":"#D97706"} strokeWidth={1.8}/>
+                <View style={[S.wdIconBox,ts({backgroundColor:w.status==="approved"?"#DCFCE7":"#FEF3C7"})]}>
+                  <Banknote size={16} color={tc(w.status==="approved"?"#059669":"#D97706")} strokeWidth={1.8}/>
                 </View>
                 <View style={{flex:1,marginLeft:12}}>
                   <Text style={S.payRowTitle}>£{w.amount?.toFixed(2)||"0.00"}</Text>
@@ -514,7 +515,7 @@ const HomeScreen = ({ navigation, route }) => {
                   </Text>
                 </View>
                 <Badge label={w.status ? w.status[0].toUpperCase() + w.status.slice(1) : ""}
-                  color={w.status==="approved"?"#059669":"#D97706"}
+                  color={tc(w.status==="approved"?"#059669":"#D97706")}
                   bg={w.status==="approved"?"#DCFCE7":"#FEF3C7"}
                   border={w.status==="approved"?"#A7F3D0":"#FDE68A"}/>
               </View>
@@ -535,8 +536,8 @@ const HomeScreen = ({ navigation, route }) => {
                 </View>
                 {receivedPayments.payments?.map((p,i)=>(
                   <View key={i} style={S.payRow}>
-                    <View style={[S.wdIconBox,{backgroundColor:"#DCFCE7"}]}>
-                      <CheckCircle size={16} color="#059669" strokeWidth={1.8}/>
+                    <View style={[S.wdIconBox,ts({backgroundColor:"#DCFCE7"})]}>
+                      <CheckCircle size={16} color={tc("#059669")} strokeWidth={1.8}/>
                     </View>
                     <View style={{flex:1,marginLeft:12}}>
                       <Text style={S.payRowTitle}>Transferred</Text>
@@ -561,7 +562,7 @@ const HomeScreen = ({ navigation, route }) => {
   return (
     <SafeAreaView style={S.root}>
       {loading && (
-        <View style={S.loading}><ActivityIndicator size="large" color={C.primary} /></View>
+        <View style={S.loading}><ActivityIndicator size="large" color={tc(C.primary)} /></View>
       )}
       {!loading && (
       <View style={{flex:1}}>
@@ -578,7 +579,7 @@ const HomeScreen = ({ navigation, route }) => {
         </View>
         <View style={{flexDirection:"row",gap:8}}>
           <TouchableOpacity style={S.iconBtn} onPress={()=>navigation.navigate("NotificationTab")}>
-            <Bell size={17} color={C.text} strokeWidth={2}/>
+            <Bell size={17} color={tc(C.text)} strokeWidth={2}/>
             {unreadCount>0 && (
               <View style={S.notifDot}>
                 <Text style={S.notifDotTxt}>{unreadCount>9?"9+":unreadCount}</Text>
@@ -612,7 +613,7 @@ const HomeScreen = ({ navigation, route }) => {
         ))}
       </View>
 
-      <View style={{flex:1,backgroundColor:C.bg}}>
+      <View style={ts({flex:1,backgroundColor:C.bg})}>
         {activeTab==="activity"  && ActivityTab()}
         {activeTab==="history"   && HistoryTab()}
         {activeTab==="offers"    && OffersTab()}
@@ -625,7 +626,7 @@ const HomeScreen = ({ navigation, route }) => {
 };
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const S = StyleSheet.create({
+const S = themed(StyleSheet.create({
   root:    { flex:1, backgroundColor:C.card },
   loading: { flex:1, justifyContent:"center", alignItems:"center", backgroundColor:C.bg },
 
@@ -885,7 +886,7 @@ const S = StyleSheet.create({
   payRowSub:   { fontSize:11, color:C.mutedFg, marginTop:2 },
   payRowAmt:   { fontSize:16, fontWeight:"800", color:C.text },
   wdIconBox:   { width:38, height:38, borderRadius:R, alignItems:"center", justifyContent:"center" },
-});
+}));
 
 // ── Stable module-level micro-components ─────────────────────────────────────
 // Defined outside HomeScreen so their references never change across re-renders,
@@ -893,16 +894,16 @@ const S = StyleSheet.create({
 // the "removeChild: node is not a child" crash on React Native Web).
 
 const Badge = ({ label, color=C.mutedFg, bg=C.muted, border=C.border }) => (
-  <View style={[S.badge,{backgroundColor:bg,borderColor:border}]}>
-    <Text style={[S.badgeTxt,{color}]}>{label}</Text>
+  <View style={[S.badge,ts({backgroundColor:bg,borderColor:border})]}>
+    <Text style={[S.badgeTxt,ts({color})]}>{label}</Text>
   </View>
 );
 
 const SvcIcon = ({ name, size=40 }) => {
   const { Icon, color, bg } = svcConfig(name);
   return (
-    <View style={[S.svcIcon,{width:size,height:size,borderRadius:size/4,backgroundColor:bg,borderColor:color+"33"}]}>
-      <Icon size={size*0.42} color={color} strokeWidth={1.8} />
+    <View style={[S.svcIcon,ts({width:size,height:size,borderRadius:size/4,backgroundColor:bg,borderColor:color+"33"})]}>
+      <Icon size={size*0.42} color={tc(color)} strokeWidth={1.8} />
     </View>
   );
 };
@@ -911,7 +912,7 @@ const Avatar = ({ first="?", last="" }) => {
   const initials = `${first[0]||""}${last[0]||""}`.toUpperCase();
   const bg = avatarColor(first);
   return (
-    <View style={[S.avatar,{backgroundColor:bg}]}>
+    <View style={[S.avatar,ts({backgroundColor:bg})]}>
       <Text style={S.avatarTxt}>{initials}</Text>
     </View>
   );
@@ -919,7 +920,7 @@ const Avatar = ({ first="?", last="" }) => {
 
 const Empty = ({ icon:Icon, title, sub }) => (
   <View style={S.empty}>
-    <View style={S.emptyBox}><Icon size={24} color={C.mutedFg} strokeWidth={1.5}/></View>
+    <View style={S.emptyBox}><Icon size={24} color={tc(C.mutedFg)} strokeWidth={1.5}/></View>
     <Text style={S.emptyTitle}>{title}</Text>
     <Text style={S.emptySub}>{sub}</Text>
   </View>
@@ -935,15 +936,15 @@ const JobCard = ({ job, showActions=true, navigation, onCancel, onArrive, action
       onPress={()=>navigation.navigate("AcceptedBookingDetail",{ bookingId:job._id })}
       activeOpacity={0.72}
     >
-      <View style={[S.jobAccent,{ backgroundColor: bg, borderBottomColor: color+"22" }]}>
+      <View style={[S.jobAccent,ts({ backgroundColor: bg, borderBottomColor: color+"22" })]}>
         <View style={S.jobAccentInner}>
-          <View style={[S.jobSvcBadge,{backgroundColor:color+"18",borderColor:color+"33"}]}>
-            <Icon size={14} color={color} strokeWidth={2}/>
-            <Text style={[S.jobSvcTxt,{color}]}>{svcConfig(job.service).label}</Text>
+          <View style={[S.jobSvcBadge,ts({backgroundColor:color+"18",borderColor:color+"33"})]}>
+            <Icon size={14} color={tc(color)} strokeWidth={2}/>
+            <Text style={[S.jobSvcTxt,ts({color})]}>{svcConfig(job.service).label}</Text>
           </View>
-          <View style={[S.statusPill,{backgroundColor:sm.bg,borderColor:sm.border}]}>
-            <View style={[S.statusDot,{backgroundColor:sm.color}]}/>
-            <Text style={[S.statusTxt,{color:sm.color}]}>{job.status}</Text>
+          <View style={[S.statusPill,ts({backgroundColor:sm.bg,borderColor:sm.border})]}>
+            <View style={[S.statusDot,ts({backgroundColor:sm.color})]}/>
+            <Text style={[S.statusTxt,ts({color:sm.color})]}>{job.status}</Text>
           </View>
         </View>
       </View>
@@ -962,16 +963,16 @@ const JobCard = ({ job, showActions=true, navigation, onCancel, onArrive, action
 
         <View style={S.jobMeta}>
           <View style={S.metaChip}>
-            <Calendar size={11} color={C.mutedFg} strokeWidth={2}/>
+            <Calendar size={11} color={tc(C.mutedFg)} strokeWidth={2}/>
             <Text style={S.metaChipTxt}>{fmtDate(job.schedule?.date)}</Text>
           </View>
           <View style={S.metaChip}>
-            <Clock size={11} color={C.mutedFg} strokeWidth={2}/>
+            <Clock size={11} color={tc(C.mutedFg)} strokeWidth={2}/>
             <Text style={S.metaChipTxt}>{fmtTime(job.schedule)}</Text>
           </View>
         </View>
         <View style={[S.metaChip,{alignSelf:"flex-start",marginTop:4}]}>
-          <MapPin size={11} color={C.mutedFg} strokeWidth={2}/>
+          <MapPin size={11} color={tc(C.mutedFg)} strokeWidth={2}/>
           <Text style={S.metaChipTxt} numberOfLines={1}>{fmtAddr(job)}</Text>
         </View>
 
@@ -983,18 +984,18 @@ const JobCard = ({ job, showActions=true, navigation, onCancel, onArrive, action
           {showActions && ["pending","assigned"].includes(job.status?.toLowerCase()) ? (
             <View style={{flexDirection:"row",gap:8}}>
               <TouchableOpacity style={S.btnGhost} onPress={()=>onCancel(job._id)} disabled={actionLoading===job._id}>
-                <Trash2 size={14} color="#EF4444"/>
+                <Trash2 size={14} color={tc("#EF4444")}/>
               </TouchableOpacity>
               <TouchableOpacity style={S.btnPrimary} onPress={()=>onArrive(job._id)} disabled={actionLoading===job._id}>
                 {actionLoading===job._id
-                  ? <ActivityIndicator size="small" color="#fff"/>
+                  ? <ActivityIndicator size="small" color={tc("#fff")}/>
                   : <Text style={S.btnPrimaryTxt}>I've Arrived</Text>}
               </TouchableOpacity>
             </View>
           ) : (
             <TouchableOpacity style={S.btnOutline} onPress={()=>navigation.navigate("AcceptedBookingDetail",{bookingId:job._id})}>
               <Text style={S.btnOutlineTxt}>Details</Text>
-              <ChevronRight size={12} color={C.text} strokeWidth={2.5}/>
+              <ChevronRight size={12} color={tc(C.text)} strokeWidth={2.5}/>
             </TouchableOpacity>
           )}
         </View>

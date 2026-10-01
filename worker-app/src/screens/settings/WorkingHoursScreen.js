@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, Switch, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Minus, Plus } from "lucide-react-native";
 import { Screen, ScreenHeader, BigTitle, Loading, usePreferences, G, styles as s } from "./common";
+import { tc, themed, ts } from "../../theme/dark";
 
 // "When would you like to work?" — offers only arrive for jobs inside these hours.
 const ORDER = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
@@ -28,9 +29,9 @@ export default function WorkingHoursScreen({ navigation }) {
   };
   const Stepper = ({ day, field }) => (
     <View style={st.stepper}>
-      <TouchableOpacity style={st.stepBtn} onPress={() => change(day, field, -30)}><Minus size={16} color={G.text} /></TouchableOpacity>
+      <TouchableOpacity style={st.stepBtn} onPress={() => change(day, field, -30)}><Minus size={16} color={tc(G.text)} /></TouchableOpacity>
       <Text style={st.time}>{hours[day][field]}</Text>
-      <TouchableOpacity style={[st.stepBtn, st.stepBtnDark]} onPress={() => change(day, field, 30)}><Plus size={16} color="#fff" /></TouchableOpacity>
+      <TouchableOpacity style={[st.stepBtn, st.stepBtnDark]} onPress={() => change(day, field, 30)}><Plus size={16} color={tc("#fff")} /></TouchableOpacity>
     </View>
   );
 
@@ -45,11 +46,11 @@ export default function WorkingHoursScreen({ navigation }) {
             <View key={day} style={st.day}>
               <View style={st.dayTop}>
                 <Text style={st.dayName}>{label(day)}</Text>
-                <Text style={[st.range, !d.on && { color: G.mute }]}>{d.on ? `${d.start} – ${d.end}` : "Not working"}</Text>
+                <Text style={[st.range, !d.on && ts({ color: G.mute })]}>{d.on ? `${d.start} – ${d.end}` : "Not working"}</Text>
                 <Switch
                   value={d.on}
                   onValueChange={(v) => { setSaved(false); setHours((h) => ({ ...h, [day]: { ...h[day], on: v } })); }}
-                  trackColor={{ true: G.green, false: "#E5E7EB" }}
+                  trackColor={{ true: tc(G.green, "bg"), false: tc("#E5E7EB", "bg") }}
                   thumbColor="#fff"
                 />
               </View>
@@ -67,14 +68,14 @@ export default function WorkingHoursScreen({ navigation }) {
         {!!error && <Text style={s.error}>{error}</Text>}
         {saved && <Text style={s.saved}>Saved. Your offers now follow these hours.</Text>}
         <TouchableOpacity style={st.saveBtn} disabled={saving} onPress={async () => setSaved(await save({ workingHours: hours }))}>
-          {saving ? <ActivityIndicator color="#fff" /> : <Text style={st.saveTxt}>Save working hours</Text>}
+          {saving ? <ActivityIndicator color={tc("#fff")} /> : <Text style={st.saveTxt}>Save working hours</Text>}
         </TouchableOpacity>
       </View>
     </Screen>
   );
 }
 
-const st = StyleSheet.create({
+const st = themed(StyleSheet.create({
   day: { paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: G.line },
   dayTop: { flexDirection: "row", alignItems: "center", gap: 10 },
   dayName: { width: 110, fontSize: 17, fontWeight: "900", color: G.text },
@@ -88,4 +89,4 @@ const st = StyleSheet.create({
   footer: { position: "absolute", left: 0, right: 0, bottom: 0, padding: 16, paddingBottom: 28, backgroundColor: "#fff", borderTopWidth: 1, borderTopColor: G.line },
   saveBtn: { backgroundColor: G.green, borderRadius: 16, paddingVertical: 16, alignItems: "center" },
   saveTxt: { color: "#fff", fontSize: 16, fontWeight: "900" },
-});
+}));

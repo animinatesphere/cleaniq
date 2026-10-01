@@ -18,13 +18,14 @@ import Card from "../components/Card";
 import { C } from "../theme/flat";
 import { getResponsivePadding, isBigScreen } from "../utils/responsive";
 import { NEU_BG, neuRaised, neuInset, neuGreenRaised } from "../theme/neumorphic";
+import { tc, themed } from "../theme/dark";
 
 const Field = ({ icon, ...props }) => (
   <View style={styles.inputWrapper}>
     {icon}
     <TextInput
       style={styles.input}
-      placeholderTextColor={C.textMuted}
+      placeholderTextColor={tc(C.textMuted)}
       {...props}
     />
   </View>
@@ -119,13 +120,13 @@ const CompleteProfileScreen = () => {
           <Card style={styles.card}>
             <Text style={styles.sectionLabel}>Your Address</Text>
             <Field
-              icon={<MapPin size={18} color={C.textMuted} />}
+              icon={<MapPin size={18} color={tc(C.textMuted)} />}
               placeholder="Street address"
               value={address}
               onChangeText={setAddress}
             />
             <Field
-              icon={<Hash size={18} color={C.textMuted} />}
+              icon={<Hash size={18} color={tc(C.textMuted)} />}
               placeholder="Postcode"
               value={postcode}
               onChangeText={setPostcode}
@@ -136,26 +137,26 @@ const CompleteProfileScreen = () => {
               Bank Details (for getting paid)
             </Text>
             <Field
-              icon={<Landmark size={18} color={C.textMuted} />}
+              icon={<Landmark size={18} color={tc(C.textMuted)} />}
               placeholder="Bank name"
               value={bankName}
               onChangeText={setBankName}
             />
             <Field
-              icon={<User size={18} color={C.textMuted} />}
+              icon={<User size={18} color={tc(C.textMuted)} />}
               placeholder="Account holder name"
               value={accountName}
               onChangeText={setAccountName}
             />
             <Field
-              icon={<CreditCard size={18} color={C.textMuted} />}
+              icon={<CreditCard size={18} color={tc(C.textMuted)} />}
               placeholder="Account number"
               value={accountNumber}
               onChangeText={setAccountNumber}
               keyboardType="number-pad"
             />
             <Field
-              icon={<Landmark size={18} color={C.textMuted} />}
+              icon={<Landmark size={18} color={tc(C.textMuted)} />}
               placeholder="Sort code"
               value={sortCode}
               onChangeText={setSortCode}
@@ -169,7 +170,7 @@ const CompleteProfileScreen = () => {
               activeOpacity={0.85}
             >
               {saving ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={tc("#FFFFFF")} />
               ) : (
                 <Text style={styles.saveBtnText}>Save & Continue</Text>
               )}
@@ -181,7 +182,7 @@ const CompleteProfileScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   container: { flex: 1, backgroundColor: NEU_BG },
   scrollContent: {
     flexGrow: 1,
@@ -246,6 +247,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "800",
   },
-});
+}));
 
 export default CompleteProfileScreen;

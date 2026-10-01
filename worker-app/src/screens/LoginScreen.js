@@ -8,6 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as LocalAuthentication from "expo-local-authentication";
 import { AuthContext } from "../context/AuthContext";
 import { Mail, Lock, Fingerprint, Eye, EyeOff, AlertCircle } from "lucide-react-native";
+import { tc, themed, ts } from "../theme/dark";
 
 // ── Shadcn/ui tokens (matches HomeScreen) ─────────────────────────────────────
 const C = {
@@ -102,7 +103,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={S.root}>
-      <StatusBar barStyle="dark-content" backgroundColor={C.bg} />
+      <StatusBar barStyle="dark-content" backgroundColor={tc(C.bg, "bg")} />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <ScrollView
           contentContainerStyle={S.scroll}
@@ -135,7 +136,7 @@ const LoginScreen = ({ navigation }) => {
             {/* Error banner */}
             {!!errorMsg && (
               <View style={S.errorBanner}>
-                <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                <AlertCircle size={15} color={tc("#DC2626")} strokeWidth={2} />
                 <Text style={S.errorBannerTxt}>{errorMsg}</Text>
               </View>
             )}
@@ -144,11 +145,11 @@ const LoginScreen = ({ navigation }) => {
             <View style={S.field}>
               <Text style={S.label}>Email address</Text>
               <View style={inputStyle("email")}>
-                <Mail size={15} color={C.mutedFg} strokeWidth={2} />
+                <Mail size={15} color={tc(C.mutedFg)} strokeWidth={2} />
                 <TextInput
                   style={S.textInput}
                   placeholder="you@cleaniq.com"
-                  placeholderTextColor={C.mutedFg}
+                  placeholderTextColor={tc(C.mutedFg)}
                   value={email}
                   onChangeText={(v) => { setEmail(v); setErrorMsg(""); }}
                   autoCapitalize="none"
@@ -164,11 +165,11 @@ const LoginScreen = ({ navigation }) => {
             <View style={S.field}>
               <Text style={S.label}>Password</Text>
               <View style={inputStyle("password")}>
-                <Lock size={15} color={C.mutedFg} strokeWidth={2} />
+                <Lock size={15} color={tc(C.mutedFg)} strokeWidth={2} />
                 <TextInput
                   style={S.textInput}
                   placeholder="Enter your password"
-                  placeholderTextColor={C.mutedFg}
+                  placeholderTextColor={tc(C.mutedFg)}
                   value={password}
                   onChangeText={(v) => { setPassword(v); setErrorMsg(""); }}
                   secureTextEntry={!showPassword}
@@ -177,8 +178,8 @@ const LoginScreen = ({ navigation }) => {
                 />
                 <TouchableOpacity onPress={() => setShowPassword(v => !v)} style={S.eyeBtn}>
                   {showPassword
-                    ? <EyeOff size={15} color={C.mutedFg} strokeWidth={2} />
-                    : <Eye size={15} color={C.mutedFg} strokeWidth={2} />
+                    ? <EyeOff size={15} color={tc(C.mutedFg)} strokeWidth={2} />
+                    : <Eye size={15} color={tc(C.mutedFg)} strokeWidth={2} />
                   }
                 </TouchableOpacity>
               </View>
@@ -193,7 +194,7 @@ const LoginScreen = ({ navigation }) => {
                 activeOpacity={0.85}
               >
                 {isLoggingIn
-                  ? <ActivityIndicator color="#fff" size="small" />
+                  ? <ActivityIndicator color={tc("#fff")} size="small" />
                   : <Text style={S.btnPrimaryTxt}>Sign in</Text>
                 }
               </TouchableOpacity>
@@ -205,7 +206,7 @@ const LoginScreen = ({ navigation }) => {
                   disabled={isLoggingIn}
                   activeOpacity={0.75}
                 >
-                  <Fingerprint size={19} color={C.text} strokeWidth={1.75} />
+                  <Fingerprint size={19} color={tc(C.text)} strokeWidth={1.75} />
                 </TouchableOpacity>
               )}
             </View>
@@ -220,9 +221,9 @@ const LoginScreen = ({ navigation }) => {
               <Text style={[S.helpText, { marginBottom: 8 }]}>Want to join our team?</Text>
               <TouchableOpacity
                 onPress={() => navigation.navigate("Apply")}
-                style={{ paddingVertical: 10, paddingHorizontal: 20, backgroundColor: "#064E3B", borderRadius: 8 }}
+                style={ts({ paddingVertical: 10, paddingHorizontal: 20, backgroundColor: "#064E3B", borderRadius: 8 })}
               >
-                <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>Apply for a Cleaning Role</Text>
+                <Text style={ts({ color: "#fff", fontWeight: "700", fontSize: 13 })}>Apply for a Cleaning Role</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -237,7 +238,7 @@ const LoginScreen = ({ navigation }) => {
 };
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const S = StyleSheet.create({
+const S = themed(StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
   scroll: {
     flexGrow: 1,
@@ -314,6 +315,6 @@ const S = StyleSheet.create({
   // Footer
   helpText:   { fontSize: 12, color: C.mutedFg, textAlign: "center", lineHeight: 18 },
   footerNote: { fontSize: 11, color: C.ring, textAlign: "center", marginTop: 28 },
-});
+}));
 
 export default LoginScreen;

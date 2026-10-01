@@ -34,6 +34,7 @@ import {
   Info,
 } from "lucide-react-native";
 import axios from "axios";
+import { tc, tcs, themed, ts } from "../theme/dark";
 
 const JobsFeedScreen = ({ navigation }) => {
   const { workerInfo, logout } = useContext(AuthContext);
@@ -260,7 +261,7 @@ const JobsFeedScreen = ({ navigation }) => {
     if (remainingMs <= 0) {
       return (
         <View style={styles.timerContainerFinished}>
-          <AlertCircle size={16} color="#EF4444" />
+          <AlertCircle size={16} color={tc("#EF4444")} />
           <Text style={styles.timerTextFinished}>
             Time Finished - Tap Done to Complete
           </Text>
@@ -280,7 +281,7 @@ const JobsFeedScreen = ({ navigation }) => {
       <View style={styles.timerWrapper}>
         <View style={styles.timerHeader}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Clock size={16} color="#0A5C43" />
+            <Clock size={16} color={tc("#0A5C43")} />
             <Text style={styles.timerTitle}>Active Timer</Text>
           </View>
           <Text style={styles.timerCount}>
@@ -412,17 +413,17 @@ const JobsFeedScreen = ({ navigation }) => {
 
       <View style={styles.cardBody}>
         <View style={styles.infoRow}>
-          <Calendar size={16} color="#64748B" />
+          <Calendar size={16} color={tc("#64748B")} />
           <Text style={styles.infoText}>{formatDate(item.schedule?.date)}</Text>
         </View>
         <View style={styles.infoRow}>
-          <Clock size={16} color="#64748B" />
+          <Clock size={16} color={tc("#64748B")} />
           <Text style={styles.infoText}>
             {getDisplayTime(item.schedule)}
           </Text>
         </View>
         <View style={styles.infoRow}>
-          <MapPin size={16} color="#64748B" />
+          <MapPin size={16} color={tc("#64748B")} />
           <Text style={styles.infoText} numberOfLines={1}>
             {item.property?.postcode ||
               item.property?.city ||
@@ -438,11 +439,11 @@ const JobsFeedScreen = ({ navigation }) => {
         disabled={actionLoading === (item._id || item.bookingId)}
       >
         {actionLoading === (item._id || item.bookingId) ? (
-          <ActivityIndicator color="#0A5C43" size="small" />
+          <ActivityIndicator color={tc("#0A5C43")} size="small" />
         ) : (
           <>
             <Text style={styles.acceptButtonText}>Accept Job</Text>
-            <ChevronRight size={18} color="#0A5C43" />
+            <ChevronRight size={18} color={tc("#0A5C43")} />
           </>
         )}
       </TouchableOpacity>
@@ -458,38 +459,38 @@ const JobsFeedScreen = ({ navigation }) => {
 
     return (
       <View
-        style={[styles.jobCard, { borderColor: "#0A5C43", borderWidth: 1 }]}
+        style={[styles.jobCard, ts({ borderColor: "#0A5C43", borderWidth: 1 })]}
       >
         <View style={styles.cardHeader}>
-          <View style={[styles.serviceBadge, { backgroundColor: "#E6F4F1" }]}>
-            <Text style={[styles.serviceText, { color: "#0A5C43" }]}>
+          <View style={[styles.serviceBadge, ts({ backgroundColor: "#E6F4F1" })]}>
+            <Text style={[styles.serviceText, ts({ color: "#0A5C43" })]}>
               {item.service}
             </Text>
           </View>
           <View
             style={[
               styles.assignedBadge,
-              isArrived && { backgroundColor: "#FEF3C7" },
-              isCleaning && { backgroundColor: "#DBEAFE" },
-              isCompleted && { backgroundColor: "#D1FAE5" },
+              isArrived && ts({ backgroundColor: "#FEF3C7" }),
+              isCleaning && ts({ backgroundColor: "#DBEAFE" }),
+              isCompleted && ts({ backgroundColor: "#D1FAE5" }),
             ]}
           >
             {isCompleted ? (
-              <CheckCircle size={14} color="#10B981" />
+              <CheckCircle size={14} color={tc("#10B981")} />
             ) : (
               <CheckCircle
                 size={14}
                 color={
-                  isArrived ? "#D97706" : isCleaning ? "#2563EB" : "#0A5C43"
+                  tc(isArrived ? "#D97706" : isCleaning ? "#2563EB" : "#0A5C43")
                 }
               />
             )}
             <Text
               style={[
                 styles.assignedText,
-                isArrived && { color: "#D97706" },
-                isCleaning && { color: "#2563EB" },
-                isCompleted && { color: "#10B981" },
+                isArrived && ts({ color: "#D97706" }),
+                isCleaning && ts({ color: "#2563EB" }),
+                isCompleted && ts({ color: "#10B981" }),
               ]}
             >
               {item.status || "Assigned"}
@@ -500,14 +501,14 @@ const JobsFeedScreen = ({ navigation }) => {
         {/* Customer Details Revealed */}
         <View style={styles.customerDetailsBox}>
           <View style={styles.infoRow}>
-            <User size={16} color="#0A5C43" />
+            <User size={16} color={tc("#0A5C43")} />
             <Text style={styles.customerNameText}>
               {item.customer?.firstName} {item.customer?.lastName}
             </Text>
           </View>
 
           <View style={[styles.infoRow, { alignItems: "flex-start" }]}>
-            <MapPin size={16} color="#64748B" style={{ marginTop: 2 }} />
+            <MapPin size={16} color={tc("#64748B")} style={{ marginTop: 2 }} />
             <Text style={styles.fullAddressText}>
               {item.details?.address ||
                item.property?.address ||
@@ -519,13 +520,13 @@ const JobsFeedScreen = ({ navigation }) => {
 
         <View style={styles.cardBody}>
           <View style={styles.infoRow}>
-            <Calendar size={16} color="#64748B" />
+            <Calendar size={16} color={tc("#64748B")} />
             <Text style={styles.infoText}>
               {formatDate(item.schedule?.date)}
             </Text>
           </View>
           <View style={styles.infoRow}>
-            <Clock size={16} color="#64748B" />
+            <Clock size={16} color={tc("#64748B")} />
             <Text style={styles.infoText}>
               {getDisplayTime(item.schedule)} (
               {item.details?.duration || 2} hrs booked)
@@ -546,9 +547,9 @@ const JobsFeedScreen = ({ navigation }) => {
             onPress={() => navigation.navigate("AcceptedBookingDetail", { bookingId: jobId })}
             activeOpacity={0.8}
           >
-            <Info size={15} color="#0A5C43" />
+            <Info size={15} color={tc("#0A5C43")} />
             <Text style={styles.viewDetailTxt}>View Full Job Details</Text>
-            <ChevronRight size={14} color="#0A5C43" />
+            <ChevronRight size={14} color={tc("#0A5C43")} />
           </TouchableOpacity>
 
           {isAssigned && (
@@ -558,7 +559,7 @@ const JobsFeedScreen = ({ navigation }) => {
                 onPress={() => handleCancelJob(item._id)}
                 disabled={actionLoading === item._id}
               >
-                <Trash2 size={16} color="#EF4444" />
+                <Trash2 size={16} color={tc("#EF4444")} />
                 <Text style={styles.cancelBtnText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -566,7 +567,7 @@ const JobsFeedScreen = ({ navigation }) => {
                 onPress={() => handleArriveJob(item._id)}
                 disabled={actionLoading === item._id}
               >
-                <MapPin size={16} color="#FFFFFF" />
+                <MapPin size={16} color={tc("#FFFFFF")} />
                 <Text style={styles.primaryBtnText}>Reach Customer</Text>
               </TouchableOpacity>
             </View>
@@ -582,7 +583,7 @@ const JobsFeedScreen = ({ navigation }) => {
               onPress={() => handleStartJob(item._id)}
               disabled={actionLoading === item._id}
             >
-              <Play size={16} color="#FFFFFF" />
+              <Play size={16} color={tc("#FFFFFF")} />
               <Text style={styles.primaryBtnText}>Start Cleaning</Text>
             </TouchableOpacity>
           )}
@@ -597,14 +598,14 @@ const JobsFeedScreen = ({ navigation }) => {
               onPress={() => handleCompleteJob(item._id)}
               disabled={actionLoading === item._id}
             >
-              <Check size={16} color="#FFFFFF" />
+              <Check size={16} color={tc("#FFFFFF")} />
               <Text style={styles.primaryBtnText}>Mark as Done</Text>
             </TouchableOpacity>
           )}
 
           {isCompleted && (
             <View style={styles.completedMessageBox}>
-              <CheckCircle size={18} color="#10B981" />
+              <CheckCircle size={18} color={tc("#10B981")} />
               <Text style={styles.completedMessageText}>
                 Cleaning finished successfully!
               </Text>
@@ -632,16 +633,16 @@ const JobsFeedScreen = ({ navigation }) => {
                 onPress={() => setShowGuide(true)}
                 style={styles.chatHeaderButton}
               >
-                <HelpCircle size={20} color="#FFFFFF" />
+                <HelpCircle size={20} color={tc("#FFFFFF")} />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => navigation.navigate("Chat")}
                 style={styles.chatHeaderButton}
               >
-                <MessageSquare size={20} color="#FFFFFF" />
+                <MessageSquare size={20} color={tc("#FFFFFF")} />
               </TouchableOpacity>
               <TouchableOpacity onPress={logout} style={styles.logoutButton}>
-                <LogOut size={20} color="#FFFFFF" />
+                <LogOut size={20} color={tc("#FFFFFF")} />
               </TouchableOpacity>
             </View>
           </View>
@@ -678,7 +679,7 @@ const JobsFeedScreen = ({ navigation }) => {
           <View
             style={[
               styles.statusDot,
-              { backgroundColor: isOnline ? "#10B981" : "#EF4444" },
+              ts({ backgroundColor: isOnline ? "#10B981" : "#EF4444" }),
             ]}
           />
           <Text style={styles.dutyText}>
@@ -688,7 +689,7 @@ const JobsFeedScreen = ({ navigation }) => {
         <TouchableOpacity
           style={[
             styles.dutyToggle,
-            { backgroundColor: isOnline ? "#10B981" : "#64748B" },
+            ts({ backgroundColor: isOnline ? "#10B981" : "#64748B" }),
           ]}
           onPress={() => setIsOnline(!isOnline)}
         >
@@ -736,7 +737,7 @@ const JobsFeedScreen = ({ navigation }) => {
         {loading && !refreshing ? (
           <ActivityIndicator
             size="large"
-            color="#0A5C43"
+            color={tc("#0A5C43")}
             style={{ marginTop: 40 }}
           />
         ) : activeTab === "available" && !isOnline ? (
@@ -779,7 +780,7 @@ const JobsFeedScreen = ({ navigation }) => {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                colors={["#0A5C43"]}
+                colors={tcs(["#0A5C43"], "bg")}
               />
             }
             ListEmptyComponent={
@@ -936,8 +937,8 @@ const JobsFeedScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F8FAFC" },
+const styles = themed(StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
   header: {
     backgroundColor: "#0A5C43",
     paddingBottom: 40,
@@ -1540,6 +1541,6 @@ const styles = StyleSheet.create({
   },
   emptyText: { fontSize: 16, fontWeight: "700", color: "#64748B" },
   emptySubtext: { fontSize: 13, color: "#94A3B8", marginTop: 4 },
-});
+}));
 
 export default JobsFeedScreen;

@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, Activi
 import { Car, Bike, Bus, X, MapPin } from "lucide-react-native";
 import { Screen, ScreenHeader, BigTitle, Loading, usePreferences, G, styles as s } from "./common";
 import KeyboardSafeView from "../../components/KeyboardSafeView";
+import { tc, themed, ts } from "../../theme/dark";
 
 // "What is your travel area?" — offers come from within this distance of home, plus any extra
 // postcode districts; blocked districts never send offers.
@@ -64,17 +65,17 @@ export default function TravelAreaScreen({ navigation }) {
               <View style={st.chips}>
                 {MODES.map(({ id, label, Icon }) => (
                   <TouchableOpacity key={id} style={[st.chip, t.mode === id && st.chipOn]} onPress={() => update({ mode: id })}>
-                    <Icon size={18} color={t.mode === id ? "#fff" : G.text} />
-                    <Text style={[st.chipTxt, t.mode === id && { color: "#fff" }]}>{label}</Text>
+                    <Icon size={18} color={tc(t.mode === id ? "#fff" : G.text)} />
+                    <Text style={[st.chipTxt, t.mode === id && ts({ color: "#fff" })]}>{label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
   
               <Text style={st.h2}>Your home postcode</Text>
               <View style={st.inputRow}>
-                <TextInput style={st.input} value={home} onChangeText={setHome} autoCapitalize="characters" placeholder="e.g. BL0 0HL" placeholderTextColor={G.mute} />
+                <TextInput style={st.input} value={home} onChangeText={setHome} autoCapitalize="characters" placeholder="e.g. BL0 0HL" placeholderTextColor={tc(G.mute)} />
                 <TouchableOpacity style={st.smallBtn} disabled={saving} onPress={() => update({ homePostcode: home }, "Home postcode saved")}>
-                  {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={st.smallBtnTxt}>Save</Text>}
+                  {saving ? <ActivityIndicator color={tc("#fff")} size="small" /> : <Text style={st.smallBtnTxt}>Save</Text>}
                 </TouchableOpacity>
               </View>
   
@@ -82,14 +83,14 @@ export default function TravelAreaScreen({ navigation }) {
               <View style={st.chips}>
                 {DISTANCES.map((mi) => (
                   <TouchableOpacity key={mi} style={[st.chip, Number(t.radiusMiles) === mi && st.chipOn]} onPress={() => update({ radiusMiles: mi })}>
-                    <Text style={[st.chipTxt, Number(t.radiusMiles) === mi && { color: "#fff" }]}>{mi} mi</Text>
+                    <Text style={[st.chipTxt, Number(t.radiusMiles) === mi && ts({ color: "#fff" })]}>{mi} mi</Text>
                   </TouchableOpacity>
                 ))}
               </View>
   
               <View style={st.area}>
                 <View style={[st.circle, { width: 70 + Number(t.radiusMiles) * 6, height: 70 + Number(t.radiusMiles) * 6, borderRadius: (70 + Number(t.radiusMiles) * 6) / 2 }]}>
-                  <MapPin size={22} color={G.green} />
+                  <MapPin size={22} color={tc(G.green)} />
                   <Text style={st.circleTxt}>{t.homePostcode || "Home"}</Text>
                 </View>
                 <Text style={st.areaTxt}>
@@ -107,7 +108,7 @@ export default function TravelAreaScreen({ navigation }) {
                   : "Add postcode areas you never want offers from, e.g. WN1."}
               </Text>
               <View style={st.inputRow}>
-                <TextInput style={st.input} value={entry} onChangeText={setEntry} autoCapitalize="characters" placeholder="Postcode or area, e.g. M14" placeholderTextColor={G.mute} onSubmitEditing={addToList} />
+                <TextInput style={st.input} value={entry} onChangeText={setEntry} autoCapitalize="characters" placeholder="Postcode or area, e.g. M14" placeholderTextColor={tc(G.mute)} onSubmitEditing={addToList} />
                 <TouchableOpacity style={st.smallBtn} disabled={saving} onPress={addToList}>
                   <Text style={st.smallBtnTxt}>{tab === "add" ? "Add" : "Block"}</Text>
                 </TouchableOpacity>
@@ -117,10 +118,10 @@ export default function TravelAreaScreen({ navigation }) {
               ) : (
                 (t[listKey] || []).map((pc) => (
                   <View key={pc} style={st.pcRow}>
-                    <MapPin size={16} color={tab === "add" ? G.green : "#B91C1C"} />
+                    <MapPin size={16} color={tc(tab === "add" ? G.green : "#B91C1C")} />
                     <Text style={st.pcTxt}>{pc}</Text>
                     <TouchableOpacity onPress={() => update({ [listKey]: t[listKey].filter((x) => x !== pc) }, `${pc} removed`)}>
-                      <X size={18} color={G.sub} />
+                      <X size={18} color={tc(G.sub)} />
                     </TouchableOpacity>
                   </View>
                 ))
@@ -133,7 +134,7 @@ export default function TravelAreaScreen({ navigation }) {
   );
 }
 
-const st = StyleSheet.create({
+const st = themed(StyleSheet.create({
   tabs: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: G.line },
   tab: { flex: 1, alignItems: "center", paddingVertical: 12, borderBottomWidth: 3, borderBottomColor: "transparent" },
   tabOn: { borderBottomColor: G.green },
@@ -156,4 +157,4 @@ const st = StyleSheet.create({
   empty: { fontSize: 14, color: G.mute, marginTop: 16 },
   pcRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: G.line },
   pcTxt: { flex: 1, fontSize: 16, fontWeight: "800", color: G.text },
-});
+}));

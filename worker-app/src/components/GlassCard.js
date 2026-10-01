@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { BlurView } from "expo-blur";
 import { colors, blur, radii } from "../theme/glass";
+import { themed } from "../theme/dark";
 
 // Frosted-glass card. Falls back to a translucent solid fill on Android
 // where heavy blur can be expensive — still reads as "glass" visually.
@@ -29,7 +30,7 @@ const GlassCard = ({ children, style, radius = radii.lg, intensity = blur.intens
   );
 };
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   container: {
     overflow: "hidden",
     borderWidth: 1,
@@ -45,6 +46,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-});
+}));
 
 export default GlassCard;

@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import { API_URL } from "../context/AuthContext";
+import { tc, themed, ts } from "../theme/dark";
 
 const C = {
   bg: "#F4F4F5", card: "#FFFFFF", border: "#E4E4E7",
@@ -30,7 +31,7 @@ const DocPicker = ({ label, required, file, onPick }) => (
   <View style={S.field}>
     <Text style={S.label}>{label}{required ? " *" : ""}</Text>
     <TouchableOpacity style={[S.docBtn, file && S.docBtnDone]} onPress={onPick}>
-      <Text style={[S.docBtnTxt, file && { color: C.primary }]}>
+      <Text style={[S.docBtnTxt, file && ts({ color: C.primary })]}>
         {file ? `✓ ${file.name}` : "Tap to upload (PDF or image)"}
       </Text>
     </TouchableOpacity>
@@ -120,26 +121,26 @@ export default function ApplyScreen({ navigation }) {
 
         <View style={S.field}>
           <Text style={S.label}>Full Name *</Text>
-          <TextInput style={S.input} placeholder="e.g. Jane Smith" placeholderTextColor={C.mutedFg}
+          <TextInput style={S.input} placeholder="e.g. Jane Smith" placeholderTextColor={tc(C.mutedFg)}
             value={form.fullName} onChangeText={set("fullName")} />
         </View>
 
         <View style={S.field}>
           <Text style={S.label}>Email Address *</Text>
-          <TextInput style={S.input} placeholder="jane@example.com" placeholderTextColor={C.mutedFg}
+          <TextInput style={S.input} placeholder="jane@example.com" placeholderTextColor={tc(C.mutedFg)}
             value={form.email} onChangeText={set("email")}
             keyboardType="email-address" autoCapitalize="none" />
         </View>
 
         <View style={S.field}>
           <Text style={S.label}>Phone Number *</Text>
-          <TextInput style={S.input} placeholder="+44 7700 000000" placeholderTextColor={C.mutedFg}
+          <TextInput style={S.input} placeholder="+44 7700 000000" placeholderTextColor={tc(C.mutedFg)}
             value={form.phone} onChangeText={set("phone")} keyboardType="phone-pad" />
         </View>
 
         <View style={S.field}>
           <Text style={S.label}>City</Text>
-          <TextInput style={S.input} placeholder="e.g. London" placeholderTextColor={C.mutedFg}
+          <TextInput style={S.input} placeholder="e.g. London" placeholderTextColor={tc(C.mutedFg)}
             value={form.city} onChangeText={set("city")} />
         </View>
 
@@ -147,7 +148,7 @@ export default function ApplyScreen({ navigation }) {
           <Text style={S.label}>Cleaning Experience</Text>
           <TextInput style={[S.input, { height: 80, textAlignVertical: "top" }]}
             placeholder="Describe your cleaning experience (optional)"
-            placeholderTextColor={C.mutedFg} multiline
+            placeholderTextColor={tc(C.mutedFg)} multiline
             value={form.experience} onChangeText={set("experience")} />
         </View>
       </View>
@@ -163,7 +164,7 @@ export default function ApplyScreen({ navigation }) {
 
         <View style={S.field}>
           <Text style={S.label}>Share Code (from gov.uk/prove-right-to-work)</Text>
-          <TextInput style={S.input} placeholder="e.g. W2X-23M-K5P" placeholderTextColor={C.mutedFg}
+          <TextInput style={S.input} placeholder="e.g. W2X-23M-K5P" placeholderTextColor={tc(C.mutedFg)}
             autoCapitalize="characters"
             value={form.rightToWorkCode} onChangeText={set("rightToWorkCode")} />
         </View>
@@ -191,7 +192,7 @@ export default function ApplyScreen({ navigation }) {
           <Text style={S.label}>Additional Notes</Text>
           <TextInput style={[S.input, { height: 70, textAlignVertical: "top" }]}
             placeholder="Anything else you'd like us to know (optional)"
-            placeholderTextColor={C.mutedFg} multiline
+            placeholderTextColor={tc(C.mutedFg)} multiline
             value={form.additionalNotes} onChangeText={set("additionalNotes")} />
         </View>
       </View>
@@ -199,7 +200,7 @@ export default function ApplyScreen({ navigation }) {
       <TouchableOpacity style={[S.submitBtn, loading && { opacity: 0.7 }]}
         onPress={handleSubmit} disabled={loading}>
         {loading
-          ? <ActivityIndicator color="#fff" />
+          ? <ActivityIndicator color={tc("#fff")} />
           : <Text style={S.submitBtnTxt}>Submit Application</Text>}
       </TouchableOpacity>
 
@@ -210,7 +211,7 @@ export default function ApplyScreen({ navigation }) {
   );
 }
 
-const S = StyleSheet.create({
+const S = themed(StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
   content: { padding: 20, paddingBottom: 60 },
   header: { alignItems: "center", marginBottom: 24 },
@@ -269,4 +270,4 @@ const S = StyleSheet.create({
     paddingHorizontal: 28, paddingVertical: 14,
   },
   backBtnTxt: { color: "#fff", fontWeight: "700", fontSize: 15 },
-});
+}));

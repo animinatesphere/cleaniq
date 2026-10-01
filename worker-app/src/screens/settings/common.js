@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform, Activ
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import axios from "axios";
 import { AuthContext, API_URL } from "../../context/AuthContext";
+import { tc, themed } from "../../theme/dark";
 
 export const G = {
   green: "#0F6B4C",
@@ -21,7 +22,7 @@ export function ScreenHeader({ title, navigation, right }) {
   return (
     <View style={styles.header}>
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-        <ChevronLeft size={24} color={G.text} />
+        <ChevronLeft size={24} color={tc(G.text)} />
       </TouchableOpacity>
       <Text style={styles.headerTitle} numberOfLines={1}>{title}</Text>
       <View style={{ width: 32, alignItems: "flex-end" }}>{right}</View>
@@ -45,12 +46,12 @@ export function BigTitle({ children, sub }) {
 export function MenuRow({ icon: Icon, label, sub, onPress, last }) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={[styles.menuRow, last && { borderBottomWidth: 0 }]}>
-      {Icon && <Icon size={20} color={G.green} />}
+      {Icon && <Icon size={20} color={tc(G.green)} />}
       <View style={{ flex: 1 }}>
         <Text style={styles.menuLabel}>{label}</Text>
         {!!sub && <Text style={styles.menuSub}>{sub}</Text>}
       </View>
-      <ChevronRight size={20} color={G.text} />
+      <ChevronRight size={20} color={tc(G.text)} />
     </TouchableOpacity>
   );
 }
@@ -60,7 +61,7 @@ export function SectionLabel({ children }) {
 }
 
 export function Loading() {
-  return <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}><ActivityIndicator size="large" color={G.green} /></View>;
+  return <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}><ActivityIndicator size="large" color={tc(G.green)} /></View>;
 }
 
 // Loads and saves the cleaner's offer settings (GET/PUT /workers/:id/preferences).
@@ -99,7 +100,7 @@ export function usePreferences() {
   return { data, prefs: data?.preferences, error, saving, save, reload: load, workerId: id };
 }
 
-export const styles = StyleSheet.create({
+export const styles = themed(StyleSheet.create({
   screen: { flex: 1, backgroundColor: G.bg },
   header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: Platform.OS === "android" ? 40 : 8, paddingBottom: 10 },
   back: { width: 32 },
@@ -112,4 +113,4 @@ export const styles = StyleSheet.create({
   sectionLabel: { fontSize: 13, fontWeight: "800", color: G.mute, letterSpacing: 1, textTransform: "uppercase", marginTop: 26, marginBottom: 2 },
   error: { color: "#B91C1C", fontSize: 13, fontWeight: "600", marginBottom: 10 },
   saved: { color: G.green, fontSize: 13, fontWeight: "700", marginBottom: 10 },
-});
+}));
