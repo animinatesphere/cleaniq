@@ -294,6 +294,14 @@ const BookingDetailScreen = ({ route, navigation }) => {
   const extras = extrasFromArr.length > 0 ? extrasFromArr : extrasFromObj;
 
   const timeline = buildTimeline(booking);
+  const canChat = !!booking.assignedWorker && !["Cancelled"].includes(booking.status);
+  const openChat = () => navigation.navigate("Chat", {
+    bookingId: booking.bookingId,
+    bookingRef: booking.bookingId,
+    workerName: booking.assignedWorkerName || "Your Cleaner",
+    service: booking.service,
+    date: booking.schedule?.date,
+  });
 
   return (
     <SafeAreaView style={styles.root}>
@@ -347,6 +355,22 @@ const BookingDetailScreen = ({ route, navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
+        )}
+
+        {/* Message the cleaner — as soon as one is assigned */}
+        {canChat && (
+          <TouchableOpacity style={styles.messageCard} onPress={openChat} activeOpacity={0.85}>
+            <View style={styles.messageAvatar}>
+              <Text style={styles.messageAvatarTxt}>
+                {(booking.assignedWorkerName || "C").split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+              </Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.messageTitle}>Message {cleanerFirst || "your cleaner"}</Text>
+              <Text style={styles.messageSub}>Share access details, parking or anything they should know</Text>
+            </View>
+            <View style={styles.messageBtn}><MessageCircle size={18} color="#fff" /></View>
+          </TouchableOpacity>
         )}
 
         {/* Timeline */}
@@ -466,11 +490,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
           {booking.assignedWorker && !["Completed", "Cancelled"].includes(booking.status) && (
             <TouchableOpacity
               style={styles.chatBtn}
-              onPress={() => navigation.navigate("Chat", {
-                bookingId: booking.bookingId,
-                workerName: booking.assignedWorkerName || "Your Cleaner",
-                bookingRef: booking.bookingId,
-              })}
+              onPress={openChat}
               activeOpacity={0.85}
             >
               <MessageCircle size={18} color="#fff" />
@@ -781,6 +801,12 @@ const styles = StyleSheet.create({
   cancelledTxt:         { fontSize: 14, fontWeight: "700", color: C.error },
   payNowBtn:            { alignSelf: "flex-start", marginTop: 8, backgroundColor: C.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
   payNowTxt:            { color: "#fff", fontWeight: "800", fontSize: 13 },
+  messageCard:      { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "#fff", borderRadius: 18, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: "#CFE3D8" },
+  messageAvatar:    { width: 44, height: 44, borderRadius: 22, backgroundColor: "#0F6B4C", alignItems: "center", justifyContent: "center" },
+  messageAvatarTxt: { color: "#fff", fontWeight: "900", fontSize: 15 },
+  messageTitle:     { fontSize: 15, fontWeight: "800", color: "#0F172A" },
+  messageSub:       { fontSize: 12, color: "#64748B", marginTop: 2 },
+  messageBtn:       { width: 40, height: 40, borderRadius: 20, backgroundColor: "#0F6B4C", alignItems: "center", justifyContent: "center" },
 });
 
 export default BookingDetailScreen;

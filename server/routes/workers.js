@@ -10,12 +10,13 @@ const { moveToTrash } = require("../utils/trash");
 const jwt = require("jsonwebtoken");
 const { sendEmail, templates, workerEventEmails } = require("../utils/emailService");
 const Customer = require("../models/Customer");
-const { sendCustomerPush } = require("../utils/pushNotifications");
+const { sendCustomerPush, sendWorkersPush } = require("../utils/pushNotifications");
 
-const notifyCustomer = async (booking, { title, body }) => {
+const notifyCustomer = async (booking, { title, body, type = "status" }) => {
   try {
     const customer = await Customer.findOne({ email: (booking.customer?.email || "").toLowerCase() });
-    if (customer?.expoPushToken) await sendCustomerPush(customer.expoPushToken, { title, body, data: { bookingId: booking.bookingId } });
+    // bookingMongoId lets the app open this booking's details when the notification is tapped
+    if (customer?.expoPushToken) await sendCustomerPush(customer.expoPushToken, { title, body, data: { type, bookingId: booking.bookingId, bookingMongoId: String(booking._id) } });
   } catch (err) { console.error("Customer push error:", err.message); }
 };
 
@@ -344,12 +345,25 @@ router.put("/jobs/:id/assign", async (req, res) => {
       jobAcceptedTime: booking.jobAcceptedTime,
     });
 
+    const shiftMsg = `You've been scheduled for ${booking.service} on ${new Date(booking.schedule?.date).toLocaleDateString("en-GB")} (${booking.schedule?.timeSlot || ""}). Check your schedule.`;
     await Notification.create({
       workerId: worker._id,
       title: "New Shift Assigned",
-      message: `You've been scheduled for ${booking.service} on ${new Date(booking.schedule?.date).toLocaleDateString("en-GB")} (${booking.schedule?.timeSlot || ""}). Check your schedule.`,
+      message: shiftMsg,
       type: "info",
     });
+    if (worker.expoPushToken) {
+      sendWorkersPush([worker.expoPushToken], {
+        title: "New job assigned to you",
+        body: shiftMsg,
+        data: { type: "job_assigned", bookingId: booking.bookingId },
+      }).catch(() => {});
+    }
+    notifyCustomer(booking, {
+      title: "Cleaner Assigned!",
+      body: `${worker.firstName} will be cleaning for you on ${new Date(booking.schedule?.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}.`,
+      type: "status",
+    }).catch(() => {});
 
     try {
       await sendEmail({

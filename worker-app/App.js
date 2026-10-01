@@ -66,8 +66,12 @@ if (global.ErrorUtils) {
 try {
   if (Notifications && Notifications.setNotificationHandler) {
     Notifications.setNotificationHandler({
+      // Banner + sound even while the app is open (shouldShowBanner/List replace
+      // shouldShowAlert in recent expo-notifications).
       handleNotification: async () => ({
         shouldShowAlert: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
         shouldPlaySound: true,
         shouldSetBadge: true,
       }),
@@ -185,6 +189,15 @@ const AppNavigation = () => {
             importance: Notifications.AndroidImportance.HIGH,
             sound: "default",
           });
+          // Chat messages from customers and admin are sent on "default".
+          await Notifications.setNotificationChannelAsync("default", {
+            name: "Messages",
+            description: "Messages from customers and the Cleaniq team",
+            importance: Notifications.AndroidImportance.MAX,
+            sound: "default",
+            vibrationPattern: [0, 250, 250, 250],
+            lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+          });
         }
 
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -256,7 +269,11 @@ const AppNavigation = () => {
         const data = response.notification.request.content.data || {};
         const nav = navigationRef.current;
         if (!nav) return;
-        if (data.type === "new_job" || data.type === "job_assigned") {
+        if (data.type === "chat" && data.bookingId) {
+          nav.navigate("ChatWithCustomer", { bookingId: data.bookingId, customerName: data.senderName || "Customer" });
+        } else if (data.type === "admin_chat") {
+          nav.navigate("MainTabs", { screen: "MessagesTab" });
+        } else if (data.type === "new_job" || data.type === "job_assigned") {
           // Navigate to the home/jobs feed so worker can see the new job
           nav.navigate("MainTabs", { screen: "HomeTab" });
         } else if (data.bookingId || data.jobId) {

@@ -110,6 +110,15 @@ const extraIcon = (name = "") => {
 const REGULAR_FREQUENCIES = ["Weekly", "Fortnightly", "Monthly", "Quarterly"];
 const FREQUENCY_LABEL = { Once: "One-off", Weekly: "Weekly", Fortnightly: "Fortnightly", Monthly: "Monthly", Quarterly: "Every 3 months" };
 const REGULAR_EVERY   = { Weekly: "every week", Fortnightly: "every two weeks", Monthly: "every month", Quarterly: "every 3 months" };
+// Until admin prices any regular option for a service, these are offered at the one-off price
+// (same rule as the server's utils/pricing.js).
+const defaultFrequencies = (name = "") => {
+  const n = String(name).toLowerCase();
+  if (n.includes("regular")) return ["Weekly", "Fortnightly"];
+  if (n.includes("deep")) return ["Monthly", "Quarterly"];
+  return [];
+};
+
 const PARKING_OPTIONS = ["On-site parking", "Street parking", "Paid parking nearby", "No parking"];
 const ACCESS_OPTIONS  = ["I will be home", "Key in lockbox", "Key under mat", "Concierge"];
 const SUPPLY_OPTIONS  = [
@@ -399,7 +408,8 @@ const BookingScreen = ({ navigation, route }) => {
   const total  = Math.round((rawTotal - discount) * 100) / 100;
   // Regular cleans: first clean paid now (card saved), each following clean charged when the
   // cleaner arrives. The customer must agree before booking.
-  const offeredFrequencies = ["Once", ...REGULAR_FREQUENCIES.filter((f) => regularRates[form.serviceType]?.[f] > 0)];
+  const pricedFrequencies = REGULAR_FREQUENCIES.filter((f) => regularRates[form.serviceType]?.[f] > 0);
+  const offeredFrequencies = ["Once", ...(pricedFrequencies.length ? pricedFrequencies : defaultFrequencies(form.serviceType))];
   const isRegular = form.frequency !== "Once" && offeredFrequencies.includes(form.frequency);
   // Switching to a service that isn't offered at the chosen frequency goes back to one-off.
   const frequencyOffered = offeredFrequencies.includes(form.frequency);

@@ -3,6 +3,7 @@ const router = express.Router();
 const Message = require('../models/Message');
 const Worker = require('../models/Worker');
 const { sendEmail, templates } = require('../utils/emailService');
+const { sendCustomerPush } = require('../utils/pushNotifications');
 
 // GET chat thread with specific worker
 router.get('/worker/:workerId', async (req, res) => {
@@ -42,6 +43,13 @@ router.post('/', async (req, res) => {
         if (senderType === 'Admin') {
           // Send support email notification to Staff member
           console.log(`💬 Admin message sent to staff ${staff.firstName} ${staff.lastName}. Sending notification...`);
+          if (staff.expoPushToken) {
+            sendCustomerPush(staff.expoPushToken, {
+              title: 'Message from Cleaniq',
+              body: String(text).length > 80 ? String(text).slice(0, 77) + '…' : String(text),
+              data: { type: 'admin_chat' },
+            }).catch(() => {});
+          }
           await sendEmail({
             to: staff.email,
             subject: `💬 New message from Cleaniq Admin`,

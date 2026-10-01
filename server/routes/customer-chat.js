@@ -210,7 +210,12 @@ router.post("/worker-messages/:bookingId", verifyCustomer, async (req, res) => {
           await sendCustomerPush(worker.expoPushToken, {
             title: `Message from ${req.customer.firstName}`,
             body: text.trim().length > 60 ? text.trim().slice(0, 57) + "…" : text.trim(),
-            data: { bookingId: req.params.bookingId, type: "chat" },
+            data: {
+              bookingId: req.params.bookingId,
+              bookingMongoId: String(booking._id),
+              type: "chat",
+              senderName: `${req.customer.firstName || ""} ${req.customer.lastName || ""}`.trim(),
+            },
           });
         }
       }

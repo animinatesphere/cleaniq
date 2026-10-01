@@ -41,6 +41,11 @@ test("only priced frequencies are offered; one-off always", () => {
   assert.deepEqual(offeredFrequencies({ rate: 20.9, weeklyRate: 17.9, fortnightlyRate: 18.9 }), ["Once", "Weekly", "Fortnightly"]);
   assert.deepEqual(offeredFrequencies({ rate: 30.85, monthlyRate: 28, quarterlyRate: 29 }), ["Once", "Monthly", "Quarterly"]);
   assert.deepEqual(offeredFrequencies({ rate: 25 }), ["Once"]);
+  // Defaults until admin prices any regular option:
+  assert.deepEqual(offeredFrequencies({ name: "Regular House Cleaning", rate: 20.9 }), ["Once", "Weekly", "Fortnightly"]);
+  assert.deepEqual(offeredFrequencies({ name: "Deep Cleaning", rate: 30.85 }), ["Once", "Monthly", "Quarterly"]);
+  assert.deepEqual(offeredFrequencies({ name: "Office Cleaning", rate: 20.8 }), ["Once"]);
+  assert.deepEqual(offeredFrequencies({ name: "Deep Cleaning", rate: 30.85, monthlyRate: 28 }), ["Once", "Monthly"], "admin prices win");
   assert.equal(rateForFrequency({ rate: 30.85, quarterlyRate: 29 }, "Quarterly"), 29);
   assert.equal(rateForFrequency({ rate: 30.85, monthlyRate: 28 }, "Monthly"), 28);
 });

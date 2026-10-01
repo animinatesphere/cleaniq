@@ -1,95 +1,146 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   View, Text, StyleSheet, SafeAreaView, FlatList,
   TextInput, TouchableOpacity, ActivityIndicator,
   KeyboardAvoidingView, Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { ChevronLeft, Send, MessageCircle } from "lucide-react-native";
+import { ChevronLeft, Send, MessageCircle, CheckCheck, Check, ShieldCheck, Phone } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Linking } from "react-native";
 import { API_URL } from "../context/AuthContext";
-import { C, cardShadow } from "../theme/flat";
+import { C } from "../theme/flat";
+
+// Customer ↔ cleaner chat for one booking. Messages refresh every 3 seconds; the other side
+// gets a push notification (with sound) for each message.
+const QUICK_REPLIES = [
+  "Hi! See you soon 👋",
+  "The key is in the key safe",
+  "Please ring the doorbell",
+  "I'm running a few minutes late",
+  "Thank you so much!",
+];
 
 const fmtTime = (d) =>
   d ? new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "";
 
+const dayLabel = (d) => {
+  const day = new Date(d); day.setHours(0, 0, 0, 0);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const diff = Math.round((today - day) / 86400000);
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+  return new Date(d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+};
+
 const ChatScreen = ({ route, navigation }) => {
-  const { bookingId, workerName, bookingRef } = route.params;
+  const { bookingId, workerName, bookingRef, service, date } = route.params || {};
   const [messages, setMessages] = useState([]);
   const [text,     setText]     = useState("");
   const [loading,  setLoading]  = useState(true);
   const [sending,  setSending]  = useState(false);
+  const [error,    setError]    = useState("");
   const listRef  = useRef(null);
   const tokenRef = useRef(null);
+  const firstName = (workerName || "Your cleaner").split(" ")[0];
 
-  const workerInitials = (workerName || "W")
+  const initials = (workerName || "C")
     .split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
-
-  useEffect(() => {
-    (async () => { tokenRef.current = await AsyncStorage.getItem("customerToken"); })();
-  }, []);
 
   const headers = () =>
     tokenRef.current ? { Authorization: `Bearer ${tokenRef.current}` } : {};
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch(
-        `${API_URL}/customer-chat/worker-messages/${bookingId}`,
-        { headers: headers() },
-      );
-      setMessages((await res.json()) || []);
-      setTimeout(() => listRef.current?.scrollToEnd({ animated: false }), 80);
-    } catch {}
-    finally { setLoading(false); }
+      if (!tokenRef.current) tokenRef.current = await AsyncStorage.getItem("customerToken");
+      const res = await fetch(`${API_URL}/customer-chat/worker-messages/${bookingId}`, { headers: headers() });
+      const data = await res.json();
+      if (!res.ok || !Array.isArray(data)) {
+        setError(data?.message || "Chat isn't available for this booking yet.");
+        return;
+      }
+      setError("");
+      setMessages((prev) => (prev.length === data.length && prev[prev.length - 1]?._id === data[data.length - 1]?._id
+        && prev[prev.length - 1]?.isRead === data[data.length - 1]?.isRead ? prev : data));
+    } catch {
+      setError("Can't reach Cleaniq. Check your connection.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchMessages();
     const iv = setInterval(fetchMessages, 3000);
     return () => clearInterval(iv);
-  }, [bookingId]);
+  }, [bookingId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSend = async () => {
-    const msg = text.trim();
-    if (!msg) return;
+  const send = async (raw) => {
+    const msg = String(raw ?? text).trim();
+    if (!msg || sending) return;
     setText("");
     setSending(true);
+    const temp = { _id: `temp-${Date.now()}`, senderType: "Customer", text: msg, createdAt: new Date().toISOString(), pending: true };
+    setMessages((prev) => [...prev, temp]);
     try {
-      const res = await fetch(
-        `${API_URL}/customer-chat/worker-messages/${bookingId}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", ...headers() },
-          body: JSON.stringify({ text: msg }),
-        },
-      );
-      const newMsg = await res.json();
-      setMessages((prev) => [...prev, newMsg]);
-      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 80);
+      const res = await fetch(`${API_URL}/customer-chat/worker-messages/${bookingId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...headers() },
+        body: JSON.stringify({ text: msg }),
+      });
+      const saved = await res.json();
+      if (!res.ok) throw new Error(saved?.message || "Not sent");
+      setMessages((prev) => prev.map((m) => (m._id === temp._id ? saved : m)));
     } catch {
-      setText(msg);
+      setMessages((prev) => prev.map((m) => (m._id === temp._id ? { ...m, pending: false, failed: true } : m)));
     } finally {
       setSending(false);
     }
   };
 
+  // Messages with "Today"/"Yesterday" dividers, newest at the bottom.
+  const rows = useMemo(() => {
+    const out = [];
+    let lastDay = "";
+    messages.forEach((m, i) => {
+      const day = dayLabel(m.createdAt);
+      if (day !== lastDay) { out.push({ _id: `day-${day}-${i}`, divider: day }); lastDay = day; }
+      const next = messages[i + 1];
+      out.push({ ...m, lastInGroup: !next || next.senderType !== m.senderType });
+    });
+    return out;
+  }, [messages]);
+  const lastMine = [...messages].reverse().find((m) => m.senderType === "Customer");
+
   const renderItem = ({ item }) => {
-    const isMe = item.senderType === "Customer";
+    if (item.divider) {
+      return <View style={styles.dividerWrap}><Text style={styles.divider}>{item.divider}</Text></View>;
+    }
+    const mine = item.senderType === "Customer";
     return (
-      <View style={[styles.row, isMe ? styles.myRow : styles.theirRow]}>
-        {!isMe && (
-          <View style={styles.avatar}>
-            <Text style={styles.avatarTxt}>{workerInitials}</Text>
-          </View>
+      <View style={[styles.row, mine ? styles.rowMine : styles.rowTheirs, !item.lastInGroup && { marginBottom: 3 }]}>
+        {!mine && (
+          item.lastInGroup
+            ? <View style={styles.avatar}><Text style={styles.avatarTxt}>{initials}</Text></View>
+            : <View style={styles.avatarSpacer} />
         )}
-        <View style={[styles.bubble, isMe ? styles.myBubble : styles.theirBubble]}>
-          <Text style={[styles.bubbleTxt, isMe ? styles.myTxt : styles.theirTxt]}>
-            {item.text}
-          </Text>
-          <Text style={[styles.bubbleTime, isMe ? styles.myTime : styles.theirTime]}>
-            {fmtTime(item.createdAt)}
-          </Text>
+        <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs,
+          item.lastInGroup && (mine ? styles.tailMine : styles.tailTheirs), item.failed && styles.bubbleFailed]}>
+          <Text style={[styles.msg, mine ? styles.msgMine : styles.msgTheirs]}>{item.text}</Text>
+          <View style={styles.meta}>
+            <Text style={[styles.time, mine ? styles.timeMine : styles.timeTheirs]}>
+              {item.failed ? "Not sent · tap to retry" : item.pending ? "Sending…" : fmtTime(item.createdAt)}
+            </Text>
+            {mine && !item.pending && !item.failed && (
+              item.isRead ? <CheckCheck size={13} color="#A7F3D0" /> : <Check size={13} color="#A7F3D0" />
+            )}
+          </View>
+          {item.failed && (
+            <TouchableOpacity style={StyleSheet.absoluteFill} onPress={() => {
+              setMessages((prev) => prev.filter((m) => m._id !== item._id));
+              send(item.text);
+            }} />
+          )}
         </View>
       </View>
     );
@@ -97,74 +148,92 @@ const ChatScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.root}>
-      {/* Header */}
       <LinearGradient colors={["#0F6B4C", "#083d2b"]} style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <ChevronLeft size={20} color="#fff" />
         </TouchableOpacity>
         <View style={styles.headerAvatar}>
-          <Text style={styles.headerAvatarTxt}>{workerInitials}</Text>
+          <Text style={styles.headerAvatarTxt}>{initials}</Text>
+          <View style={styles.onlineDot} />
         </View>
-        <View style={styles.headerInfo}>
-          <Text style={styles.headerName}>{workerName || "Your Cleaner"}</Text>
-          <Text style={styles.headerSub}>Booking #{(bookingRef || bookingId).slice(-6)}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.headerName} numberOfLines={1}>{workerName || "Your Cleaner"}</Text>
+          <Text style={styles.headerSub} numberOfLines={1}>
+            {[service, date ? new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null, `#${String(bookingRef || bookingId || "").slice(-6)}`]
+              .filter(Boolean).join(" · ")}
+          </Text>
         </View>
-        <View style={styles.headerDot} />
+        <TouchableOpacity style={styles.callBtn} onPress={() => Linking.openURL("tel:+447846726428")}>
+          <Phone size={16} color="#fff" />
+        </TouchableOpacity>
       </LinearGradient>
 
-      {/* Messages */}
-      {loading ? (
-        <View style={styles.loadingWrap}>
-          <ActivityIndicator size="large" color={C.primary} />
-        </View>
-      ) : (
-        <FlatList
-          ref={listRef}
-          data={messages}
-          keyExtractor={(item) => item._id || String(Math.random())}
-          renderItem={renderItem}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
-          ListEmptyComponent={
-            <View style={styles.empty}>
-              <View style={styles.emptyIcon}>
-                <MessageCircle size={32} color={C.primary} strokeWidth={1.5} />
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={0}>
+        {loading ? (
+          <View style={styles.center}><ActivityIndicator size="large" color={C.primary} /></View>
+        ) : (
+          <FlatList
+            ref={listRef}
+            data={rows}
+            keyExtractor={(item) => String(item._id)}
+            renderItem={renderItem}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+            onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
+            ListHeaderComponent={
+              <View style={styles.safety}>
+                <ShieldCheck size={14} color={C.primary} />
+                <Text style={styles.safetyTxt}>
+                  Chat with {firstName} about this clean. Payments and changes to your booking go through Cleaniq.
+                </Text>
               </View>
-              <Text style={styles.emptyTitle}>Start the conversation</Text>
-              <Text style={styles.emptySub}>
-                Chat directly with {workerName?.split(" ")[0] || "your cleaner"} about the job
-              </Text>
-            </View>
-          }
-        />
-      )}
+            }
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <View style={styles.emptyIcon}><MessageCircle size={30} color={C.primary} strokeWidth={1.6} /></View>
+                <Text style={styles.emptyTitle}>Say hello to {firstName}</Text>
+                <Text style={styles.emptySub}>Share access details, parking or anything {firstName} should know.</Text>
+              </View>
+            }
+          />
+        )}
 
-      {/* Input */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.inputWrap}
-      >
-        <View style={styles.inputRow}>
+        {!!error && <Text style={styles.error}>{error}</Text>}
+        {lastMine?.isRead && <Text style={styles.seen}>Seen by {firstName}</Text>}
+
+        {messages.length < 3 && !error && (
+          <FlatList
+            horizontal
+            data={QUICK_REPLIES}
+            keyExtractor={(q) => q}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.quickRow}
+            renderItem={({ item }) => (
+              <TouchableOpacity style={styles.quick} onPress={() => send(item)} activeOpacity={0.8}>
+                <Text style={styles.quickTxt}>{item}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
+
+        <View style={styles.composer}>
           <TextInput
             style={styles.input}
-            placeholder="Type a message..."
+            placeholder={`Message ${firstName}…`}
             placeholderTextColor={C.textMuted}
             value={text}
             onChangeText={setText}
             multiline
             maxLength={500}
-            editable={!sending}
+            editable={!error}
           />
           <TouchableOpacity
-            style={[styles.sendBtn, !text.trim() && styles.sendBtnOff]}
-            onPress={handleSend}
-            disabled={!text.trim() || sending}
-            activeOpacity={0.8}
+            style={[styles.sendBtn, (!text.trim() || !!error) && styles.sendBtnOff]}
+            onPress={() => send()}
+            disabled={!text.trim() || sending || !!error}
+            activeOpacity={0.85}
           >
-            {sending
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <Send size={17} color="#fff" />}
+            {sending ? <ActivityIndicator size="small" color="#fff" /> : <Send size={18} color="#fff" />}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -173,114 +242,58 @@ const ChatScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg },
+  root: { flex: 1, backgroundColor: "#EEF4F1" },
+  header: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14, paddingTop: Platform.OS === "android" ? 36 : 10, paddingBottom: 14 },
+  backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
+  headerAvatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: "#14A66B", alignItems: "center", justifyContent: "center" },
+  headerAvatarTxt: { color: "#fff", fontWeight: "900", fontSize: 15 },
+  onlineDot: { position: "absolute", right: 0, bottom: 1, width: 11, height: 11, borderRadius: 6, backgroundColor: "#4ADE80", borderWidth: 2, borderColor: "#0F6B4C" },
+  headerName: { color: "#fff", fontSize: 16, fontWeight: "800" },
+  headerSub: { color: "rgba(255,255,255,0.7)", fontSize: 12, marginTop: 1 },
+  callBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
 
-  // Header
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === "android" ? 36 : 8,
-    paddingBottom: 14,
-    gap: 10,
-  },
-  backBtn: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    alignItems: "center", justifyContent: "center",
-  },
-  headerAvatar: {
-    width: 38, height: 38, borderRadius: 19,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center", justifyContent: "center",
-    borderWidth: 2, borderColor: "rgba(255,255,255,0.3)",
-  },
-  headerAvatarTxt: { fontSize: 14, fontWeight: "900", color: "#fff" },
-  headerInfo:      { flex: 1 },
-  headerName:      { fontSize: 15, fontWeight: "800", color: "#fff" },
-  headerSub:       { fontSize: 11, color: "rgba(255,255,255,0.65)", marginTop: 1 },
-  headerDot: {
-    width: 9, height: 9, borderRadius: 5,
-    backgroundColor: C.success,
-    shadowColor: C.success, shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1, shadowRadius: 4,
-  },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  list: { paddingHorizontal: 12, paddingTop: 10, paddingBottom: 8, flexGrow: 1 },
+  safety: { flexDirection: "row", gap: 8, alignItems: "flex-start", alignSelf: "center", maxWidth: 320, backgroundColor: "#FFFBEB", borderRadius: 12, padding: 10, marginBottom: 10 },
+  safetyTxt: { flex: 1, fontSize: 11, color: "#78716C", lineHeight: 15 },
+  dividerWrap: { alignItems: "center", marginVertical: 10 },
+  divider: { fontSize: 11, fontWeight: "700", color: "#64748B", backgroundColor: "#DDE7E2", paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10, overflow: "hidden" },
 
-  // List
-  loadingWrap: { flex: 1, alignItems: "center", justifyContent: "center" },
-  list: { padding: 16, gap: 6, flexGrow: 1 },
+  row: { flexDirection: "row", alignItems: "flex-end", marginBottom: 10 },
+  rowMine: { justifyContent: "flex-end" },
+  rowTheirs: { justifyContent: "flex-start" },
+  avatar: { width: 28, height: 28, borderRadius: 14, backgroundColor: "#0F6B4C", alignItems: "center", justifyContent: "center", marginRight: 6 },
+  avatarSpacer: { width: 34 },
+  avatarTxt: { color: "#fff", fontSize: 11, fontWeight: "900" },
+  bubble: { maxWidth: "78%", paddingHorizontal: 13, paddingTop: 9, paddingBottom: 6, borderRadius: 18 },
+  bubbleMine: { backgroundColor: "#0F6B4C" },
+  bubbleTheirs: { backgroundColor: "#fff", shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+  tailMine: { borderBottomRightRadius: 5 },
+  tailTheirs: { borderBottomLeftRadius: 5 },
+  bubbleFailed: { backgroundColor: "#B91C1C" },
+  msg: { fontSize: 15, lineHeight: 20 },
+  msgMine: { color: "#fff" },
+  msgTheirs: { color: "#0F172A" },
+  meta: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 4, marginTop: 3 },
+  time: { fontSize: 10 },
+  timeMine: { color: "rgba(255,255,255,0.7)" },
+  timeTheirs: { color: "#94A3B8" },
 
-  // Empty
-  empty: { flex: 1, alignItems: "center", justifyContent: "center", paddingTop: 80, paddingHorizontal: 32 },
-  emptyIcon: {
-    width: 68, height: 68, borderRadius: 34,
-    backgroundColor: C.primaryLight,
-    alignItems: "center", justifyContent: "center",
-    marginBottom: 16,
-  },
-  emptyTitle: { fontSize: 16, fontWeight: "800", color: C.textDark, marginBottom: 6 },
-  emptySub:   { fontSize: 13, color: C.textMuted, textAlign: "center", lineHeight: 19 },
+  empty: { alignItems: "center", paddingTop: 40, paddingHorizontal: 30 },
+  emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: "#DCFCE7", alignItems: "center", justifyContent: "center", marginBottom: 12 },
+  emptyTitle: { fontSize: 17, fontWeight: "800", color: "#0F172A", marginBottom: 4 },
+  emptySub: { fontSize: 13, color: "#64748B", textAlign: "center", lineHeight: 19 },
+  error: { textAlign: "center", fontSize: 12, color: "#B91C1C", paddingHorizontal: 16, paddingBottom: 6 },
+  seen: { textAlign: "right", fontSize: 11, color: "#64748B", paddingHorizontal: 16, paddingBottom: 4 },
 
-  // Bubbles
-  row:      { flexDirection: "row", marginBottom: 4, maxWidth: "82%" },
-  myRow:    { alignSelf: "flex-end", justifyContent: "flex-end" },
-  theirRow: { alignSelf: "flex-start" },
-  avatar: {
-    width: 30, height: 30, borderRadius: 15,
-    backgroundColor: C.primaryLight,
-    alignItems: "center", justifyContent: "center",
-    marginRight: 8, alignSelf: "flex-end",
-    borderWidth: 1, borderColor: "#BBE8D5",
-  },
-  avatarTxt: { fontSize: 10, fontWeight: "800", color: C.primary },
-  bubble: { borderRadius: 20, paddingHorizontal: 15, paddingVertical: 10 },
-  myBubble: {
-    backgroundColor: C.primary,
-    borderBottomRightRadius: 5,
-    shadowColor: C.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2, shadowRadius: 6, elevation: 3,
-  },
-  theirBubble: {
-    backgroundColor: "#fff",
-    borderBottomLeftRadius: 5,
-    borderWidth: 1, borderColor: C.border,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
-  },
-  bubbleTxt:  { fontSize: 14, lineHeight: 20, fontWeight: "500" },
-  myTxt:      { color: "#fff" },
-  theirTxt:   { color: C.textDark },
-  bubbleTime: { fontSize: 10, marginTop: 4, alignSelf: "flex-end" },
-  myTime:     { color: "rgba(255,255,255,0.6)" },
-  theirTime:  { color: C.textMuted },
+  quickRow: { paddingHorizontal: 12, paddingBottom: 8, gap: 8 },
+  quick: { backgroundColor: "#fff", borderRadius: 16, borderWidth: 1, borderColor: "#CFE3D8", paddingHorizontal: 12, paddingVertical: 7 },
+  quickTxt: { fontSize: 13, color: "#0F6B4C", fontWeight: "700" },
 
-  // Input
-  inputWrap: {
-    backgroundColor: "#fff",
-    borderTopWidth: 1, borderTopColor: C.border,
-    paddingHorizontal: 16, paddingVertical: 12,
-  },
-  inputRow:  { flexDirection: "row", alignItems: "flex-end", gap: 10 },
-  input: {
-    flex: 1,
-    backgroundColor: C.surfaceAlt,
-    borderRadius: 22,
-    paddingHorizontal: 16, paddingVertical: 10,
-    fontSize: 14, color: C.textDark,
-    borderWidth: 1, borderColor: C.border,
-    maxHeight: 100, minHeight: 44,
-  },
-  sendBtn: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: C.primary,
-    alignItems: "center", justifyContent: "center",
-    shadowColor: C.primary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3, shadowRadius: 6, elevation: 4,
-  },
-  sendBtnOff: { backgroundColor: C.border, shadowOpacity: 0, elevation: 0 },
+  composer: { flexDirection: "row", alignItems: "flex-end", gap: 8, paddingHorizontal: 12, paddingTop: 8, paddingBottom: Platform.OS === "ios" ? 8 : 12, backgroundColor: "#fff", borderTopWidth: 1, borderTopColor: "#E2E8F0" },
+  input: { flex: 1, minHeight: 42, maxHeight: 120, backgroundColor: "#F1F5F9", borderRadius: 21, paddingHorizontal: 16, paddingTop: 11, paddingBottom: 11, fontSize: 15, color: "#0F172A" },
+  sendBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: "#0F6B4C", alignItems: "center", justifyContent: "center" },
+  sendBtnOff: { backgroundColor: "#94A3B8" },
 });
 
 export default ChatScreen;
