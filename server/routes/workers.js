@@ -1087,19 +1087,40 @@ router.get("/:id/conversations", async (req, res) => {
       ],
     }).select("bookingId customer service status createdAt");
 
-    const conversations = workerBookings.map((booking) => ({
-      _id: booking._id, // ← actual MongoDB _id for React key
-      bookingId: booking.bookingId,
-      customerId: booking.customer?._id || booking.customerId,
-      customerName:
-        `${booking.customer?.firstName || "Customer"} ${booking.customer?.lastName || ""}`.trim(),
-      customerEmail: booking.customer?.email,
-      service: booking.service,
-      status: booking.status,
-      lastMessage: `Booking: ${booking.service || "Cleaning"}`,
-      lastMessageTime: booking.createdAt,
-      unreadCount: 0,
-    }));
+    // Real last message and unread count (customer → cleaner) for each booking's chat.
+    const refs = workerBookings.map((b) => b.bookingId).filter(Boolean);
+    const stats = await WorkerCustomerMessage.aggregate([
+      { $match: { bookingId: { $in: refs } } },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: "$bookingId",
+          lastMessage: { $first: "$text" },
+          lastSender: { $first: "$senderType" },
+          lastMessageTime: { $first: "$createdAt" },
+          unreadCount: { $sum: { $cond: [{ $and: [{ $eq: ["$senderType", "Customer"] }, { $eq: ["$isRead", false] }] }, 1, 0] } },
+        },
+      },
+    ]);
+    const byRef = Object.fromEntries(stats.map((x) => [x._id, x]));
+
+    const conversations = workerBookings.map((booking) => {
+      const m = byRef[booking.bookingId];
+      return {
+        _id: booking._id, // ← actual MongoDB _id for React key
+        bookingId: booking.bookingId,
+        customerId: booking.customer?._id || booking.customerId,
+        customerName:
+          `${booking.customer?.firstName || "Customer"} ${booking.customer?.lastName || ""}`.trim(),
+        customerEmail: booking.customer?.email,
+        service: booking.service,
+        status: booking.status,
+        lastMessage: m ? `${m.lastSender === "Worker" ? "You: " : ""}${m.lastMessage}` : `Booking: ${booking.service || "Cleaning"}`,
+        lastMessageTime: m?.lastMessageTime || booking.createdAt,
+        hasMessages: Boolean(m),
+        unreadCount: m?.unreadCount || 0,
+      };
+    });
 
     // Sort by most recent
     conversations.sort(

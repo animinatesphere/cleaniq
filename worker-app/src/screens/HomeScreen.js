@@ -392,6 +392,25 @@ const HomeScreen = ({ navigation, route }) => {
                       <MapPin size={11} color={C.mutedFg} strokeWidth={2}/>
                       <Text style={S.metaChipTxt} numberOfLines={2}>{fmtAddr(job)}</Text>
                     </View>
+                    {/* Travel time and pay for this cleaner (from offer matching) */}
+                    {(job.offer?.travelMinutes != null || job.offer?.pay?.firstRate > 0) && (
+                      <View style={[S.offerMetaRow,{marginTop:6}]}>
+                        {job.offer?.travelMinutes != null && (
+                          <View style={[S.metaChip,{backgroundColor:"#E8F5EE"}]}>
+                            <Text style={[S.metaChipTxt,{color:"#0F6B4C",fontWeight:"800"}]}>≈ {job.offer.travelMinutes} min away</Text>
+                          </View>
+                        )}
+                        {job.offer?.pay?.firstRate > 0 && (
+                          <View style={[S.metaChip,{backgroundColor:"#E8F5EE"}]}>
+                            <Text style={[S.metaChipTxt,{color:"#0F6B4C",fontWeight:"800"}]}>
+                              £{Number(job.offer.pay.firstRate).toFixed(2)}/h
+                              {job.offer.pay.followingRate && job.offer.pay.followingRate !== job.offer.pay.firstRate ? ` then £${Number(job.offer.pay.followingRate).toFixed(2)}/h` : ""}
+                              {job.offer.pay.frequency && job.offer.pay.frequency !== "Once" ? " · Regular" : ""}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    )}
                   </View>
 
                   {/* Action buttons */}

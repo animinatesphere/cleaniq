@@ -39,6 +39,17 @@ import MyAccountScreen from "./src/screens/MyAccountScreen";
 import OfferDetailScreen from "./src/screens/OfferDetailScreen";
 import AcceptedBookingDetailScreen from "./src/screens/AcceptedBookingDetailScreen";
 import ChatWithCustomerScreen from "./src/screens/ChatWithCustomerScreen";
+// Wecasa-style account screens (offer settings, jobs, benefits, help)
+import ServicesSettingsScreen from "./src/screens/settings/ServicesSettingsScreen";
+import WorkingHoursScreen from "./src/screens/settings/WorkingHoursScreen";
+import TravelAreaScreen from "./src/screens/settings/TravelAreaScreen";
+import PersonalPreferencesScreen from "./src/screens/settings/PersonalPreferencesScreen";
+import AutoMessagesScreen from "./src/screens/settings/AutoMessagesScreen";
+import MyAppointmentsScreen from "./src/screens/settings/MyAppointmentsScreen";
+import MyOffersScreen from "./src/screens/settings/MyOffersScreen";
+import TipsScreen from "./src/screens/settings/TipsScreen";
+import SponsorScreen from "./src/screens/settings/SponsorScreen";
+import HelpScreen from "./src/screens/settings/HelpScreen";
 import ChatScreen from "./src/screens/ChatScreen";
 import ApplyScreen from "./src/screens/ApplyScreen";
 import notificationService from "./src/utils/notificationService";
@@ -360,6 +371,16 @@ const AppNavigation = () => {
           // User is signed in
           <>
             <Stack.Screen name="MainTabs" component={TabNavigator} />
+            <Stack.Screen name="ServicesSettings" component={ServicesSettingsScreen} />
+            <Stack.Screen name="WorkingHours" component={WorkingHoursScreen} />
+            <Stack.Screen name="TravelArea" component={TravelAreaScreen} />
+            <Stack.Screen name="PersonalPreferences" component={PersonalPreferencesScreen} />
+            <Stack.Screen name="AutoMessages" component={AutoMessagesScreen} />
+            <Stack.Screen name="MyAppointments" component={MyAppointmentsScreen} />
+            <Stack.Screen name="MyOffers" component={MyOffersScreen} />
+            <Stack.Screen name="Tips" component={TipsScreen} />
+            <Stack.Screen name="Sponsor" component={SponsorScreen} />
+            <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Group screenOptions={{ presentation: "modal" }}>
               <Stack.Screen name="OfferDetail" component={OfferDetailScreen} />
               <Stack.Screen

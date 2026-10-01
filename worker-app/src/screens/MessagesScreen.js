@@ -11,7 +11,8 @@ import {
   TextInput,
 } from "react-native";
 import { AuthContext, API_URL } from "../context/AuthContext";
-import { MessageSquare, Search, ChevronRight } from "lucide-react-native";
+import { MessageSquare, Search, ChevronRight, Settings, BadgeCheck } from "lucide-react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 import {
   NEU_BG,
@@ -68,6 +69,13 @@ const MessagesScreen = ({ navigation }) => {
   useEffect(() => {
     fetchConversations();
   }, [workerInfo?.id]);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchConversations();
+      const iv = setInterval(fetchConversations, 15000);
+      return () => clearInterval(iv);
+    }, [workerInfo?.id]), // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -82,9 +90,9 @@ const MessagesScreen = ({ navigation }) => {
     );
   }
 
-  const filteredConversations = conversations.filter((conv) =>
-    conv.customerName?.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredConversations = conversations
+    .filter((conv) => conv.customerName?.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => (b.hasMessages === a.hasMessages ? new Date(b.lastMessageTime) - new Date(a.lastMessageTime) : b.hasMessages ? 1 : -1));
 
   const unreadTotal = conversations.filter((c) => c.unreadCount > 0).length;
 
@@ -96,13 +104,14 @@ const MessagesScreen = ({ navigation }) => {
           <MessageSquare size={18} color={C.greenDark} />
         </View>
         <Text style={styles.headerTitle}>Messages</Text>
-        {unreadTotal > 0 ? (
+        {unreadTotal > 0 && (
           <View style={styles.headerBadge}>
             <Text style={styles.headerBadgeText}>{unreadTotal}</Text>
           </View>
-        ) : (
-          <View style={{ width: 32 }} />
         )}
+        <TouchableOpacity onPress={() => navigation.navigate("AutoMessages")} style={styles.gearBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Settings size={22} color={C.greenDark} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.headerDivider} />
@@ -134,6 +143,19 @@ const MessagesScreen = ({ navigation }) => {
           />
         }
       >
+        {/* Cleaniq team (support chat with admin) — always at the top */}
+        <TouchableOpacity style={styles.supportRow} onPress={() => navigation.navigate("Chat")} activeOpacity={0.75}>
+          <View style={styles.supportAvatar}><Text style={styles.supportAvatarTxt}>C</Text></View>
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Text style={styles.supportName}>Cleaniq</Text>
+              <BadgeCheck size={16} color={C.green} />
+            </View>
+            <Text style={styles.supportSub}>Questions about jobs, pay or the app</Text>
+          </View>
+          <ChevronRight size={18} color={C.textMute} />
+        </TouchableOpacity>
+
         {filteredConversations.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconWrap}>
@@ -158,7 +180,8 @@ const MessagesScreen = ({ navigation }) => {
                   key={String(conversation._id || conversation.bookingId)}
                   style={[styles.card, hasUnread && styles.cardUnread]}
                   onPress={() =>
-                    navigation.navigate("Chat", {
+                    // Chat with this booking's customer (was opening the Cleaniq support chat)
+                    navigation.navigate("ChatWithCustomer", {
                       bookingId: conversation.bookingId,
                       customerName: conversation.customerName,
                     })
@@ -505,6 +528,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
+  gearBtn: { marginLeft: "auto", padding: 4 },
+  supportRow: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "#fff", marginHorizontal: 16, marginTop: 12, marginBottom: 4, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: "#EEF1F4" },
+  supportAvatar: { width: 46, height: 46, borderRadius: 23, backgroundColor: "#0F6B4C", alignItems: "center", justifyContent: "center" },
+  supportAvatarTxt: { color: "#fff", fontWeight: "900", fontSize: 18 },
+  supportName: { fontSize: 16, fontWeight: "900", color: "#111827" },
+  supportSub: { fontSize: 13, color: "#6B7280", marginTop: 2 },
 });
 
 export default MessagesScreen;

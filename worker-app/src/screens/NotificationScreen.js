@@ -158,12 +158,34 @@ const NotificationScreen = ({ navigation }) => {
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
+  // Group into "Today" / "Earlier" like Wecasa; tapping a job notification opens that offer.
+  const ago = (d) => {
+    const mins = Math.max(1, Math.round((Date.now() - new Date(d)) / 60000));
+    if (mins < 60) return `${mins}m`;
+    if (mins < 60 * 24) return `${Math.round(mins / 60)}h`;
+    return `${Math.round(mins / 1440)}d`;
+  };
+  const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+  const grouped = [];
+  const todayItems = notifications.filter((n) => new Date(n.createdAt) >= startOfToday);
+  const earlierItems = notifications.filter((n) => new Date(n.createdAt) < startOfToday);
+  if (todayItems.length) grouped.push({ _id: "hdr-today", header: "Today" }, ...todayItems);
+  if (earlierItems.length) grouped.push({ _id: "hdr-earlier", header: "Earlier" }, ...earlierItems);
+
+  const openNotification = (item) => {
+    markAsRead(item._id);
+    if (item.type === "job" && item.bookingId) {
+      navigation.navigate("OfferDetail", { offerId: item.bookingId });
+    }
+  };
+
   const renderItem = ({ item }) => {
+    if (item.header) return <Text style={styles.groupHeader}>{item.header}</Text>;
     const { icon, bg } = getIconConfig(item.type);
     return (
       <TouchableOpacity
         style={[styles.card, !item.isRead && styles.cardUnread]}
-        onPress={() => markAsRead(item._id)}
+        onPress={() => openNotification(item)}
         activeOpacity={0.75}
       >
         {/* Left accent bar for unread */}
@@ -185,7 +207,8 @@ const NotificationScreen = ({ navigation }) => {
             {item.message}
           </Text>
           <Text style={styles.cardTime}>
-            {new Date(item.createdAt).toLocaleString()}
+            {ago(item.createdAt)} ago · {new Date(item.createdAt).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
+            {item.type === "job" && item.bookingId ? "  ·  Tap to view offer" : ""}
           </Text>
         </View>
       </TouchableOpacity>
@@ -257,7 +280,7 @@ const NotificationScreen = ({ navigation }) => {
         </View>
       ) : (
         <FlatList
-          data={notifications}
+          data={grouped}
           keyExtractor={(item) => item._id}
           renderItem={renderItem}
           ListHeaderComponent={renderHeader}
@@ -496,6 +519,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
+  groupHeader: { fontSize: 18, fontWeight: "900", color: "#111827", marginTop: 14, marginBottom: 8, marginLeft: 2 },
 });
 
 export default NotificationScreen;

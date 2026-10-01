@@ -74,7 +74,7 @@ const StaffPay = () => {
     setEditingId(service._id);
     setEditMap(prev => ({
       ...prev,
-      [service._id]: { workerHourlyRate: service.workerHourlyRate ?? 0 },
+      [service._id]: { workerHourlyRate: service.workerHourlyRate ?? 0, workerFollowingRate: service.workerFollowingRate ?? "" },
     }));
   };
 
@@ -82,9 +82,11 @@ const StaffPay = () => {
     setSavingId(serviceId);
     try {
       const newRate = parseFloat(editMap[serviceId]?.workerHourlyRate) || 0;
+      // Regular cleans: pay from the 2nd visit on ("" = same as the first-session rate).
+      const following = editMap[serviceId]?.workerFollowingRate;
       const res = await axios.put(
         `${API_URL}/services/${serviceId}`,
-        { workerHourlyRate: newRate },
+        { workerHourlyRate: newRate, workerFollowingRate: following === "" || following == null ? "" : parseFloat(following) || "" },
         { headers: authHeaders() },
       );
       setServices(prev => prev.map(s => s._id === serviceId ? res.data : s));
@@ -303,7 +305,7 @@ const StaffPay = () => {
                                 value={editVal}
                                 onChange={e => setEditMap(prev => ({
                                   ...prev,
-                                  [service._id]: { workerHourlyRate: e.target.value },
+                                  [service._id]: { ...prev[service._id], workerHourlyRate: e.target.value },
                                 }))}
                                 className="w-20 px-2 py-1 rounded-lg bg-[#071D16] border border-emerald-500/40 text-white font-black text-sm text-center focus:outline-none"
                                 autoFocus
@@ -315,6 +317,30 @@ const StaffPay = () => {
                               {workerRate > 0 ? `£${workerRate.toFixed(2)}/hr` : "Not set"}
                             </p>
                           )}
+                          {service.type === "hourly" && (isEditing ? (
+                            <div className="mt-2">
+                              <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-0.5">Following sessions</p>
+                              <div className="flex items-center gap-1">
+                                <span className="text-white/40 text-xs">£</span>
+                                <input
+                                  type="number"
+                                  step="0.50"
+                                  min="0"
+                                  placeholder="Same"
+                                  value={editMap[service._id]?.workerFollowingRate ?? ""}
+                                  onChange={e => setEditMap(prev => ({
+                                    ...prev,
+                                    [service._id]: { ...prev[service._id], workerFollowingRate: e.target.value },
+                                  }))}
+                                  className="w-20 px-2 py-1 rounded-lg bg-[#071D16] border border-emerald-500/40 text-white font-black text-sm text-center placeholder:text-white/25 focus:outline-none"
+                                />
+                                <span className="text-white/30 text-xs">/hr</span>
+                              </div>
+                              <p className="text-[10px] text-white/30 mt-1">Regular cleans, from the 2nd visit. Empty = same as above.</p>
+                            </div>
+                          ) : service.workerFollowingRate > 0 && (
+                            <p className="text-[11px] text-white/45 mt-0.5">then £{Number(service.workerFollowingRate).toFixed(2)}/hr from the 2nd regular visit</p>
+                          ))}
                         </div>
                         {!isEditing && margin > 0 && (
                           <div className="flex-1">
