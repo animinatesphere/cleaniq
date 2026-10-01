@@ -20,6 +20,7 @@ import {
   neuInset,
   neuCircle,
 } from "../theme/neumorphic";
+import { tc, tcs, themed } from "../theme/dark";
 
 // ── Design tokens ──────────────────────────────────────────
 const C = {
@@ -85,7 +86,7 @@ const MessagesScreen = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={C.green} />
+        <ActivityIndicator size="large" color={tc(C.green)} />
       </View>
     );
   }
@@ -101,7 +102,7 @@ const MessagesScreen = ({ navigation }) => {
       {/* ── Header ── */}
       <View style={styles.header}>
         <View style={styles.headerIconWrap}>
-          <MessageSquare size={18} color={C.greenDark} />
+          <MessageSquare size={18} color={tc(C.greenDark)} />
         </View>
         <Text style={styles.headerTitle}>Messages</Text>
         {unreadTotal > 0 && (
@@ -110,7 +111,7 @@ const MessagesScreen = ({ navigation }) => {
           </View>
         )}
         <TouchableOpacity onPress={() => navigation.navigate("AutoMessages")} style={styles.gearBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Settings size={22} color={C.greenDark} />
+          <Settings size={22} color={tc(C.greenDark)} />
         </TouchableOpacity>
       </View>
 
@@ -119,11 +120,11 @@ const MessagesScreen = ({ navigation }) => {
       {/* ── Search ── */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Search size={16} color={C.green} />
+          <Search size={16} color={tc(C.green)} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search conversations..."
-            placeholderTextColor={C.textMute}
+            placeholderTextColor={tc(C.textMute)}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -138,8 +139,8 @@ const MessagesScreen = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[C.green]}
-            tintColor={C.green}
+            colors={tcs([C.green], "bg")}
+            tintColor={tc(C.green)}
           />
         }
       >
@@ -149,17 +150,17 @@ const MessagesScreen = ({ navigation }) => {
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
               <Text style={styles.supportName}>Cleaniq</Text>
-              <BadgeCheck size={16} color={C.green} />
+              <BadgeCheck size={16} color={tc(C.green)} />
             </View>
             <Text style={styles.supportSub}>Questions about jobs, pay or the app</Text>
           </View>
-          <ChevronRight size={18} color={C.textMute} />
+          <ChevronRight size={18} color={tc(C.textMute)} />
         </TouchableOpacity>
 
         {filteredConversations.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconWrap}>
-              <MessageSquare size={36} color={C.green} />
+              <MessageSquare size={36} color={tc(C.green)} />
             </View>
             <Text style={styles.emptyTitle}>No messages yet</Text>
             <Text style={styles.emptySub}>
@@ -259,7 +260,7 @@ const MessagesScreen = ({ navigation }) => {
 
                   <ChevronRight
                     size={16}
-                    color={C.textMute}
+                    color={tc(C.textMute)}
                     style={{ marginLeft: 4 }}
                   />
                 </TouchableOpacity>
@@ -277,7 +278,7 @@ const MessagesScreen = ({ navigation }) => {
 // ─────────────────────────────────────────────────────────────
 // STYLES
 // ─────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: NEU_BG,
@@ -534,6 +535,6 @@ const styles = StyleSheet.create({
   supportAvatarTxt: { color: "#fff", fontWeight: "900", fontSize: 18 },
   supportName: { fontSize: 16, fontWeight: "900", color: "#111827" },
   supportSub: { fontSize: 13, color: "#6B7280", marginTop: 2 },
-});
+}));
 
 export default MessagesScreen;

@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
@@ -26,6 +26,8 @@ try {
 
 import { C } from "./src/theme/flat";
 import { NEU_BG } from "./src/theme/neumorphic";
+import { tc } from "./src/theme/dark";
+import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import { AuthProvider, AuthContext, API_URL } from "./src/context/AuthContext";
 import { NotificationProvider } from "./src/context/NotificationContext";
 import OnboardingScreen from "./src/screens/OnboardingScreen";
@@ -50,6 +52,9 @@ import MyOffersScreen from "./src/screens/settings/MyOffersScreen";
 import TipsScreen from "./src/screens/settings/TipsScreen";
 import SponsorScreen from "./src/screens/settings/SponsorScreen";
 import HelpScreen from "./src/screens/settings/HelpScreen";
+import PersonalInfoScreen from "./src/screens/settings/PersonalInfoScreen";
+import DocumentsScreen from "./src/screens/settings/DocumentsScreen";
+import AppearanceScreen from "./src/screens/settings/AppearanceScreen";
 import ChatScreen from "./src/screens/ChatScreen";
 import ApplyScreen from "./src/screens/ApplyScreen";
 import notificationService from "./src/utils/notificationService";
@@ -98,6 +103,9 @@ try {
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+// Where the user was, so switching light/dark (which redraws every screen) keeps their place.
+let savedNavState;
+
 // Tab Navigator Component
 const TabNavigator = () => {
   return (
@@ -106,15 +114,16 @@ const TabNavigator = () => {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarActiveTintColor: "#FFFFFF",
-        tabBarInactiveTintColor: C.textMuted,
+        tabBarInactiveTintColor: tc(C.textMuted),
         tabBarStyle: {
-          backgroundColor: NEU_BG,
-          borderTopWidth: 0,
+          backgroundColor: tc(NEU_BG, "bg"),
           paddingTop: 10,
           height: 70,
-          shadowColor: "#A3B1C6",
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.4,
+          borderTopWidth: 1,
+          borderTopColor: tc("#EEF1F4", "border"),
+          shadowColor: "#0F172A",
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.05,
           shadowRadius: 12,
           elevation: 12,
         },
@@ -167,7 +176,7 @@ const TabNavigator = () => {
   );
 };
 
-const AppNavigation = () => {
+const AppNavigation = ({ dark }) => {
   const { isLoading, userToken, workerInfo } = useContext(AuthContext);
   const [hasOnboarded, setHasOnboarded] = useState(false);
   const [isOnboardingCheckLoading, setIsOnboardingCheckLoading] =
@@ -324,7 +333,7 @@ const AppNavigation = () => {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#FFFFFF",
+          backgroundColor: tc("#FFFFFF", "bg"),
         }}
       >
         {ActivityIndicator ? (
@@ -347,6 +356,12 @@ const AppNavigation = () => {
     return <CompleteProfileScreen />;
   }
 
+  const base = dark ? DarkTheme : DefaultTheme;
+  const navTheme = {
+    ...base,
+    colors: { ...base.colors, background: tc("#FFFFFF", "bg"), card: tc("#FFFFFF", "bg"), border: tc("#EEF1F4", "border"), primary: "#0F6B4C" },
+  };
+
   // Lets tapping "View Job" in the new-job-alert email open this exact job
   // inside the app instead of just opening the website.
   const linking = {
@@ -360,7 +375,13 @@ const AppNavigation = () => {
   };
 
   return (
-    <NavigationContainer ref={navigationRef} linking={linking}>
+    <NavigationContainer
+      ref={navigationRef}
+      linking={savedNavState ? undefined : linking}
+      initialState={savedNavState}
+      onStateChange={(state) => { savedNavState = state; }}
+      theme={navTheme}
+    >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {userToken == null ? (
           <>
@@ -381,6 +402,9 @@ const AppNavigation = () => {
             <Stack.Screen name="Tips" component={TipsScreen} />
             <Stack.Screen name="Sponsor" component={SponsorScreen} />
             <Stack.Screen name="Help" component={HelpScreen} />
+            <Stack.Screen name="PersonalInfo" component={PersonalInfoScreen} />
+            <Stack.Screen name="Documents" component={DocumentsScreen} />
+            <Stack.Screen name="Appearance" component={AppearanceScreen} />
             <Stack.Group screenOptions={{ presentation: "modal" }}>
               <Stack.Screen name="OfferDetail" component={OfferDetailScreen} />
               <Stack.Screen
@@ -402,19 +426,23 @@ const AppNavigation = () => {
 
 const NavigationWrapper = () => {
   const { workerInfo } = useContext(AuthContext);
+  const { dark } = useTheme();
 
   return (
     <NotificationProvider workerInfo={workerInfo}>
-      <StatusBar style="auto" />
-      <AppNavigation />
+      <StatusBar style={dark ? "light" : "dark"} />
+      {/* Re-mounted when the theme changes so every screen picks up the new colours. */}
+      <AppNavigation key={dark ? "dark" : "light"} dark={dark} />
     </NotificationProvider>
   );
 };
 
 export default function App() {
   return (
-    <AuthProvider>
-      <NavigationWrapper />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <NavigationWrapper />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

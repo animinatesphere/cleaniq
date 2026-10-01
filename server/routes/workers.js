@@ -13,6 +13,7 @@ const { moveToTrash } = require("../utils/trash");
 const jwt = require("jsonwebtoken");
 const { sendEmail, templates, workerEventEmails } = require("../utils/emailService");
 const Customer = require("../models/Customer");
+const Applicant = require("../models/Applicant");
 const { sendCustomerPush, sendWorkersPush } = require("../utils/pushNotifications");
 
 const notifyCustomer = async (booking, { title, body, type = "status" }) => {
@@ -1201,6 +1202,51 @@ router.delete("/:id", async (req, res) => {
 });
 
 // PUT update worker profile (bank details, personal info)
+// GET the cleaner's own details for "Personal information" (no bank details or passwords).
+router.get("/:id/profile", async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: "Invalid worker" });
+    const w = await Worker.findById(req.params.id)
+      .select("workerId firstName lastName email phone address postcode region role status rating jobsCompleted createdAt")
+      .lean();
+    if (!w) return res.status(404).json({ error: "Worker not found" });
+    res.json(w);
+  } catch (error) {
+    res.status(500).json({ error: "Couldn't load your details" });
+  }
+});
+
+// GET the documents the cleaner sent with their application (matched by email).
+// Paths are relative to the API host, e.g. "uploads/cv-123.pdf".
+const DOCUMENTS = [
+  { key: "idPath", label: "Photo ID", hint: "Passport or driving licence" },
+  { key: "rightToWorkPath", label: "Right to work", hint: "Share code document" },
+  { key: "dbsCheckPath", label: "DBS certificate", hint: "Background check" },
+  { key: "cvPath", label: "CV", hint: "Your work history" },
+];
+router.get("/:id/documents", async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: "Invalid worker" });
+    const w = await Worker.findById(req.params.id).select("email").lean();
+    if (!w) return res.status(404).json({ error: "Worker not found" });
+    const email = String(w.email || "").trim();
+    const emailRe = new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+    const applicant = email ? await Applicant.findOne({ email: emailRe }).sort({ createdAt: -1 }).lean() : null;
+    res.json({
+      submittedAt: applicant?.createdAt || null,
+      rightToWorkCode: applicant?.rightToWorkCode || "",
+      documents: DOCUMENTS.map((d) => ({
+        key: d.key,
+        label: d.label,
+        hint: d.hint,
+        path: applicant?.[d.key] ? String(applicant[d.key]).replace(/\\/g, "/").replace(/^\/+/, "") : null,
+      })),
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Couldn't load your documents" });
+  }
+});
+
 router.put("/:id/profile", async (req, res) => {
   try {
     const { id } = req.params;

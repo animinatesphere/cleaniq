@@ -20,6 +20,7 @@ import {
   ChevronLeft,
 } from "lucide-react-native";
 import axios from "axios";
+import { tc, tcs, themed, ts } from "../theme/dark";
 
 // ── Design tokens ──────────────────────────────────────────
 const C = {
@@ -99,21 +100,21 @@ const NotificationsScreen = ({ navigation }) => {
     switch (type) {
       case "success":
         return {
-          icon: <CheckCircle size={20} color={C.green} />,
+          icon: <CheckCircle size={20} color={tc(C.green)} />,
           bg: C.greenPale,
         };
       case "warning":
         return {
-          icon: <AlertTriangle size={20} color={C.amber} />,
+          icon: <AlertTriangle size={20} color={tc(C.amber)} />,
           bg: C.amberDim,
         };
       case "job":
         return {
-          icon: <Briefcase size={20} color={C.indigo} />,
+          icon: <Briefcase size={20} color={tc(C.indigo)} />,
           bg: C.indigoDim,
         };
       default:
-        return { icon: <Info size={20} color={C.blue} />, bg: C.blueDim };
+        return { icon: <Info size={20} color={tc(C.blue)} />, bg: C.blueDim };
     }
   };
 
@@ -129,7 +130,7 @@ const NotificationsScreen = ({ navigation }) => {
       </View>
     ) : (
       <View style={styles.allReadBanner}>
-        <CheckCircle size={14} color={C.green} />
+        <CheckCircle size={14} color={tc(C.green)} />
         <Text style={styles.allReadText}>All caught up</Text>
       </View>
     );
@@ -144,7 +145,7 @@ const NotificationsScreen = ({ navigation }) => {
       >
         {!item.isRead && <View style={styles.accentBar} />}
 
-        <View style={[styles.iconWrap, { backgroundColor: bg }]}>{icon}</View>
+        <View style={[styles.iconWrap, ts({ backgroundColor: bg })]}>{icon}</View>
 
         <View style={styles.cardContent}>
           <View style={styles.cardTitleRow}>
@@ -175,7 +176,7 @@ const NotificationsScreen = ({ navigation }) => {
           style={styles.backBtn}
           onPress={() => navigation.goBack()}
         >
-          <ChevronLeft size={20} color={C.greenDark} />
+          <ChevronLeft size={20} color={tc(C.greenDark)} />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Notifications</Text>
@@ -194,12 +195,12 @@ const NotificationsScreen = ({ navigation }) => {
       {/* ── Content ── */}
       {loading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={C.green} />
+          <ActivityIndicator size="large" color={tc(C.green)} />
         </View>
       ) : notifications.length === 0 ? (
         <View style={styles.emptyContainer}>
           <View style={styles.emptyIconWrap}>
-            <Bell size={36} color={C.green} />
+            <Bell size={36} color={tc(C.green)} />
           </View>
           <Text style={styles.emptyTitle}>No notifications yet</Text>
           <Text style={styles.emptySub}>
@@ -218,8 +219,8 @@ const NotificationsScreen = ({ navigation }) => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={[C.green]}
-              tintColor={C.green}
+              colors={tcs([C.green], "bg")}
+              tintColor={tc(C.green)}
             />
           }
         />
@@ -231,7 +232,7 @@ const NotificationsScreen = ({ navigation }) => {
 // ─────────────────────────────────────────────────────────────
 // STYLES
 // ─────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: C.bg,
@@ -444,6 +445,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
-});
+}));
 
 export default NotificationsScreen;

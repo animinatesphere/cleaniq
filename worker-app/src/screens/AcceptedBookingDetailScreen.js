@@ -74,6 +74,7 @@ const EXTRA_TIME_REASONS = [
   "More rooms than specified at booking",
 ];
 import axios from "axios";
+import { tc, themed, ts } from "../theme/dark";
 
 // Job photos are served from the API's origin, e.g. https://api.cleaniqservices.com/uploads/x.jpg.
 // Only strip a trailing "/api": replace("/api") would hit the "//api." in the domain and break the link.
@@ -656,7 +657,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0F6B4C" />
+        <ActivityIndicator size="large" color={tc("#0F6B4C")} />
         <Text style={styles.loadingText}>Loading booking...</Text>
       </View>
     );
@@ -680,23 +681,23 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0A5C43" />
+      <StatusBar barStyle="light-content" backgroundColor={tc("#0A5C43", "bg")} />
 
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <ChevronLeft size={22} color="#fff" />
+          <ChevronLeft size={22} color={tc("#fff")} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle} numberOfLines={1}>
             {booking.service || "Job Details"}
           </Text>
-          <View style={[styles.statusPill, { backgroundColor: statusCfg.color }]}>
+          <View style={[styles.statusPill, ts({ backgroundColor: statusCfg.color })]}>
             <Text style={styles.statusPillText}>{statusCfg.label}</Text>
           </View>
         </View>
         <TouchableOpacity style={styles.backBtn} onPress={handleMessage}>
-          <MessageSquare size={18} color="#fff" />
+          <MessageSquare size={18} color={tc("#fff")} />
         </TouchableOpacity>
       </View>
 
@@ -706,7 +707,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         <View style={styles.heroCard}>
           <View style={styles.heroLeft}>
             <View style={styles.heroIconWrap}>
-              <Sparkles size={24} color="#0A5C43" />
+              <Sparkles size={24} color={tc("#0A5C43")} />
             </View>
             <View style={styles.heroInfo}>
               <Text style={styles.heroService}>{booking.service || "Cleaning Service"}</Text>
@@ -729,21 +730,21 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {/* ── Schedule Strip ── */}
         <View style={styles.scheduleStrip}>
           <View style={styles.scheduleItem}>
-            <Calendar size={14} color="#0A5C43" />
+            <Calendar size={14} color={tc("#0A5C43")} />
             <Text style={styles.scheduleItemTxt}>
               {bookingDate.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
             </Text>
           </View>
           <View style={styles.scheduleDot} />
           <View style={styles.scheduleItem}>
-            <Clock size={14} color="#F59E0B" />
+            <Clock size={14} color={tc("#F59E0B")} />
             <Text style={styles.scheduleItemTxt}>{getDisplayTime(booking.schedule)}</Text>
           </View>
           {booking.details?.frequency && (
             <>
               <View style={styles.scheduleDot} />
               <View style={styles.scheduleItem}>
-                <Repeat size={14} color="#8B5CF6" />
+                <Repeat size={14} color={tc("#8B5CF6")} />
                 <Text style={styles.scheduleItemTxt}>{booking.details.frequency}</Text>
               </View>
             </>
@@ -756,7 +757,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             <TouchableOpacity
               style={[
                 styles.mainActionBtn,
-                { backgroundColor: statusCfg.nextColor },
+                ts({ backgroundColor: statusCfg.nextColor }),
                 statusCfg.next === "start" && !isJobTomorrowOrLater() && styles.mainActionBtnDisabled,
               ]}
               onPress={() => {
@@ -767,12 +768,12 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
               activeOpacity={0.85}
             >
               {actionLoading === statusCfg.next ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={tc("#fff")} />
               ) : (
                 <>
-                  {statusCfg.next === "arrive" && <Flag size={20} color="#fff" />}
-                  {statusCfg.next === "start" && <Play size={20} color="#fff" />}
-                  {statusCfg.next === "complete" && <CheckCircle size={20} color="#fff" />}
+                  {statusCfg.next === "arrive" && <Flag size={20} color={tc("#fff")} />}
+                  {statusCfg.next === "start" && <Play size={20} color={tc("#fff")} />}
+                  {statusCfg.next === "complete" && <CheckCircle size={20} color={tc("#fff")} />}
                   <Text style={styles.mainActionTxt}>
                     {statusCfg.next === "start" && !isJobTomorrowOrLater() ? "Available Tomorrow" : statusCfg.nextLabel}
                   </Text>
@@ -786,21 +787,21 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {booking.status === "Arrived" && (
           <TouchableOpacity style={styles.extraTimeBtn} onPress={() => setShowExtraTimeModal(true)} activeOpacity={0.85}>
             <View style={styles.extraTimeBtnIcon}>
-              <Timer size={18} color="#B45309" />
+              <Timer size={18} color={tc("#B45309")} />
             </View>
             <View style={styles.extraTimeBtnBody}>
               <Text style={styles.extraTimeBtnTitle}>Property needs more time?</Text>
               <Text style={styles.extraTimeBtnSub}>Request extra time from admin</Text>
             </View>
-            <ChevronRight size={16} color="#B45309" />
+            <ChevronRight size={16} color={tc("#B45309")} />
           </TouchableOpacity>
         )}
 
         {/* ── Quick Actions ── */}
         <View style={styles.quickRow}>
           <TouchableOpacity style={styles.quickCard} onPress={handleMessage}>
-            <View style={[styles.quickIcon, { backgroundColor: "#DBEAFE" }]}>
-              <MessageSquare size={18} color="#1D4ED8" />
+            <View style={[styles.quickIcon, ts({ backgroundColor: "#DBEAFE" })]}>
+              <MessageSquare size={18} color={tc("#1D4ED8")} />
             </View>
             <Text style={styles.quickTxt}>Message</Text>
           </TouchableOpacity>
@@ -810,8 +811,8 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             const fullAddr = addr + (postcode && !addr.includes(postcode) ? ", " + postcode : "");
             Linking.openURL(`https://www.google.com/maps/search/${encodeURIComponent(fullAddr || addr)}`);
           }}>
-            <View style={[styles.quickIcon, { backgroundColor: "#FEF3C7" }]}>
-              <Navigation size={18} color="#F59E0B" />
+            <View style={[styles.quickIcon, ts({ backgroundColor: "#FEF3C7" })]}>
+              <Navigation size={18} color={tc("#F59E0B")} />
             </View>
             <Text style={styles.quickTxt}>Directions</Text>
           </TouchableOpacity>
@@ -821,7 +822,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         <View style={styles.card}>
           <View style={styles.locationShareRow}>
             <View style={[styles.locationShareIconWrap, sharingLocation && styles.locationShareIconActive]}>
-              <MapPin size={18} color={sharingLocation ? "#fff" : "#0A5C43"} />
+              <MapPin size={18} color={tc(sharingLocation ? "#fff" : "#0A5C43")} />
             </View>
             <View style={styles.locationShareBody}>
               <Text style={styles.locationShareTitle}>
@@ -837,7 +838,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
               disabled={locationLoading}
             >
               {locationLoading ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color={tc("#fff")} />
               ) : (
                 <Text style={styles.locationToggleTxt}>{sharingLocation ? "Stop" : "Share"}</Text>
               )}
@@ -847,7 +848,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 
         {/* ── Location ── */}
         <View style={styles.sectionHeader}>
-          <MapPin size={14} color="#0A5C43" />
+          <MapPin size={14} color={tc("#0A5C43")} />
           <Text style={styles.sectionTitle}>Location</Text>
         </View>
         <View style={styles.card}>
@@ -864,7 +865,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {rooms.length > 0 && (
           <>
             <View style={styles.sectionHeader}>
-              <Home size={14} color="#0A5C43" />
+              <Home size={14} color={tc("#0A5C43")} />
               <Text style={styles.sectionTitle}>Rooms to Clean</Text>
             </View>
             <View style={[styles.card, { flexDirection: "row", flexWrap: "wrap", gap: 8 }]}>
@@ -881,13 +882,13 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {services.length > 0 && (
           <>
             <View style={styles.sectionHeader}>
-              <Sparkles size={14} color="#F59E0B" />
+              <Sparkles size={14} color={tc("#F59E0B")} />
               <Text style={styles.sectionTitle}>Extra Services</Text>
             </View>
             <View style={[styles.card, { flexDirection: "row", flexWrap: "wrap", gap: 8 }]}>
               {services.map((s, i) => (
                 <View key={i} style={[styles.chip, styles.chipGold]}>
-                  <Text style={[styles.chipTxt, { color: "#92400E" }]}>{s}</Text>
+                  <Text style={[styles.chipTxt, ts({ color: "#92400E" })]}>{s}</Text>
                 </View>
               ))}
             </View>
@@ -898,7 +899,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {(parking || entry || pet || (instructions && instructions !== "None")) && (
           <>
             <View style={styles.sectionHeader}>
-              <FileText size={14} color="#0A5C43" />
+              <FileText size={14} color={tc("#0A5C43")} />
               <Text style={styles.sectionTitle}>Property Info</Text>
             </View>
             <View style={styles.card}>
@@ -906,19 +907,19 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 <View style={styles.infoChipRow}>
                   {parking && (
                     <View style={styles.infoChip}>
-                      <Car size={13} color="#0A5C43" />
+                      <Car size={13} color={tc("#0A5C43")} />
                       <Text style={styles.infoChipTxt}>{parking}</Text>
                     </View>
                   )}
                   {entry && (
                     <View style={styles.infoChip}>
-                      <Key size={13} color="#0A5C43" />
+                      <Key size={13} color={tc("#0A5C43")} />
                       <Text style={styles.infoChipTxt}>{entry}</Text>
                     </View>
                   )}
                   {pet && (
                     <View style={styles.infoChip}>
-                      <PawPrint size={13} color="#0A5C43" />
+                      <PawPrint size={13} color={tc("#0A5C43")} />
                       <Text style={styles.infoChipTxt}>{pet}</Text>
                     </View>
                   )}
@@ -940,7 +941,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
           return (
             <>
               <View style={styles.sectionHeader}>
-                <CheckCircle2 size={14} color="#0A5C43" />
+                <CheckCircle2 size={14} color={tc("#0A5C43")} />
                 <Text style={styles.sectionTitle}>Cleaning Checklist</Text>
                 <View style={styles.checklistBadge}>
                   <Text style={styles.checklistBadgeTxt}>{doneCount}/{tasks.length}</Text>
@@ -963,20 +964,20 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                             if (editingText.trim()) setTasks(prev => prev.map((t, idx) => idx === i ? editingText.trim() : t));
                             setEditingIndex(null); setEditingText("");
                           }}>
-                            <Check size={15} color="#0A5C43" strokeWidth={2.5} />
+                            <Check size={15} color={tc("#0A5C43")} strokeWidth={2.5} />
                           </TouchableOpacity>
                           <TouchableOpacity style={styles.checkIconBtn} onPress={() => { setEditingIndex(null); setEditingText(""); }}>
-                            <X size={15} color="#6B7280" strokeWidth={2.5} />
+                            <X size={15} color={tc("#6B7280")} strokeWidth={2.5} />
                           </TouchableOpacity>
                         </>
                       ) : (
                         <>
                           <TouchableOpacity style={[styles.checkCircle, done && styles.checkCircleDone]} onPress={() => toggleTask(i)} activeOpacity={0.7}>
-                            {done && <CheckCircle2 size={13} color="#fff" strokeWidth={2.5} />}
+                            {done && <CheckCircle2 size={13} color={tc("#fff")} strokeWidth={2.5} />}
                           </TouchableOpacity>
                           <Text style={[styles.checkTxt, done && styles.checkTxtDone]} onPress={() => toggleTask(i)}>{task}</Text>
                           <TouchableOpacity style={styles.checkIconBtn} onPress={() => { setEditingIndex(i); setEditingText(task); }}>
-                            <Pencil size={13} color="#9CA3AF" strokeWidth={2} />
+                            <Pencil size={13} color={tc("#9CA3AF")} strokeWidth={2} />
                           </TouchableOpacity>
                           <TouchableOpacity style={styles.checkIconBtn} onPress={() => {
                             Alert.alert("Remove task?", task, [
@@ -987,7 +988,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                               }},
                             ]);
                           }}>
-                            <Trash2 size={13} color="#EF4444" strokeWidth={2} />
+                            <Trash2 size={13} color={tc("#EF4444")} strokeWidth={2} />
                           </TouchableOpacity>
                         </>
                       )}
@@ -996,17 +997,17 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 })}
                 {addingTask ? (
                   <View style={[styles.checkRow, { borderBottomWidth: 0 }]}>
-                    <TextInput style={styles.checkEditInput} value={newTaskText} onChangeText={setNewTaskText} placeholder="New task..." placeholderTextColor="#9CA3AF" autoFocus multiline />
+                    <TextInput style={styles.checkEditInput} value={newTaskText} onChangeText={setNewTaskText} placeholder="New task..." placeholderTextColor={tc("#9CA3AF")} autoFocus multiline />
                     <TouchableOpacity style={styles.checkIconBtn} onPress={() => { if (newTaskText.trim()) setTasks(prev => [...prev, newTaskText.trim()]); setNewTaskText(""); setAddingTask(false); }}>
-                      <Check size={15} color="#0A5C43" strokeWidth={2.5} />
+                      <Check size={15} color={tc("#0A5C43")} strokeWidth={2.5} />
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.checkIconBtn} onPress={() => { setNewTaskText(""); setAddingTask(false); }}>
-                      <X size={15} color="#6B7280" strokeWidth={2.5} />
+                      <X size={15} color={tc("#6B7280")} strokeWidth={2.5} />
                     </TouchableOpacity>
                   </View>
                 ) : (
                   <TouchableOpacity style={styles.addTaskBtn} onPress={() => setAddingTask(true)}>
-                    <Plus size={14} color="#0A5C43" strokeWidth={2.5} />
+                    <Plus size={14} color={tc("#0A5C43")} strokeWidth={2.5} />
                     <Text style={styles.addTaskTxt}>Add task</Text>
                   </TouchableOpacity>
                 )}
@@ -1019,19 +1020,19 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {["Arrived", "In Progress", "Cleaning", "Completed"].includes(booking.status) && (
           <>
             <View style={styles.sectionHeader}>
-              <Camera size={14} color="#0A5C43" />
+              <Camera size={14} color={tc("#0A5C43")} />
               <Text style={styles.sectionTitle}>Before & After Photos</Text>
             </View>
 
             {/* Before Photos */}
             <View style={styles.card}>
               <View style={styles.photoLabelRow}>
-                <View style={[styles.photoBadge, { backgroundColor: "#FEF3C7" }]}>
-                  <Text style={[styles.photoBadgeTxt, { color: "#92400E" }]}>BEFORE</Text>
+                <View style={[styles.photoBadge, ts({ backgroundColor: "#FEF3C7" })]}>
+                  <Text style={[styles.photoBadgeTxt, ts({ color: "#92400E" })]}>BEFORE</Text>
                 </View>
                 {beforePhotos.length > 0 && (
                   <View style={styles.photoTakenTag}>
-                    <CheckCircle2 size={11} color="#0A5C43" strokeWidth={2.5} />
+                    <CheckCircle2 size={11} color={tc("#0A5C43")} strokeWidth={2.5} />
                     <Text style={styles.photoTakenTxt}>{beforePhotos.length} photo{beforePhotos.length > 1 ? "s" : ""} added</Text>
                   </View>
                 )}
@@ -1050,7 +1051,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
               {booking.status !== "Completed" && (
                 photoUploading === "before" ? (
                   <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14 }}>
-                    <ActivityIndicator size="small" color="#0A5C43" />
+                    <ActivityIndicator size="small" color={tc("#0A5C43")} />
                     <Text style={styles.photoUploadTxt}>Uploading photo...</Text>
                   </View>
                 ) : (
@@ -1058,15 +1059,15 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                     style={[styles.photoAddMoreBtn, beforePhotos.length === 0 && { paddingVertical: 22 }]}
                     onPress={() => takePhoto("before")}
                   >
-                    <Camera size={beforePhotos.length === 0 ? 22 : 15} color="#92400E" />
-                    <Text style={[styles.photoAddMoreTxt, { color: "#92400E" }]}>
+                    <Camera size={beforePhotos.length === 0 ? 22 : 15} color={tc("#92400E")} />
+                    <Text style={[styles.photoAddMoreTxt, ts({ color: "#92400E" })]}>
                       {beforePhotos.length === 0 ? "Tap to add BEFORE photo" : "+ Add Another Before Photo"}
                     </Text>
                   </TouchableOpacity>
                 )
               )}
               {beforePhotos.length === 0 && booking.status !== "Completed" && (
-                <Text style={{ fontSize: 11, color: "#9CA3AF", textAlign: "center", marginTop: 6 }}>
+                <Text style={ts({ fontSize: 11, color: "#9CA3AF", textAlign: "center", marginTop: 6 })}>
                   Required before you start cleaning
                 </Text>
               )}
@@ -1076,12 +1077,12 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             {["In Progress", "Cleaning", "Completed"].includes(booking.status) && (
               <View style={styles.card}>
                 <View style={styles.photoLabelRow}>
-                  <View style={[styles.photoBadge, { backgroundColor: "#DCFCE7" }]}>
-                    <Text style={[styles.photoBadgeTxt, { color: "#166534" }]}>AFTER</Text>
+                  <View style={[styles.photoBadge, ts({ backgroundColor: "#DCFCE7" })]}>
+                    <Text style={[styles.photoBadgeTxt, ts({ color: "#166534" })]}>AFTER</Text>
                   </View>
                   {afterPhotos.length > 0 && (
                     <View style={styles.photoTakenTag}>
-                      <CheckCircle2 size={11} color="#0A5C43" strokeWidth={2.5} />
+                      <CheckCircle2 size={11} color={tc("#0A5C43")} strokeWidth={2.5} />
                       <Text style={styles.photoTakenTxt}>{afterPhotos.length} photo{afterPhotos.length > 1 ? "s" : ""} added</Text>
                     </View>
                   )}
@@ -1100,23 +1101,23 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 {booking.status !== "Completed" && (
                   photoUploading === "after" ? (
                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14 }}>
-                      <ActivityIndicator size="small" color="#0A5C43" />
+                      <ActivityIndicator size="small" color={tc("#0A5C43")} />
                       <Text style={styles.photoUploadTxt}>Uploading photo...</Text>
                     </View>
                   ) : (
                     <TouchableOpacity
-                      style={[styles.photoAddMoreBtn, { backgroundColor: "#DCFCE7", borderColor: "#86EFAC" }, afterPhotos.length === 0 && { paddingVertical: 22 }]}
+                      style={[styles.photoAddMoreBtn, ts({ backgroundColor: "#DCFCE7", borderColor: "#86EFAC" }), afterPhotos.length === 0 && { paddingVertical: 22 }]}
                       onPress={() => takePhoto("after")}
                     >
-                      <Camera size={afterPhotos.length === 0 ? 22 : 15} color="#166534" />
-                      <Text style={[styles.photoAddMoreTxt, { color: "#166534" }]}>
+                      <Camera size={afterPhotos.length === 0 ? 22 : 15} color={tc("#166534")} />
+                      <Text style={[styles.photoAddMoreTxt, ts({ color: "#166534" })]}>
                         {afterPhotos.length === 0 ? "Tap to add AFTER photo" : "+ Add Another After Photo"}
                       </Text>
                     </TouchableOpacity>
                   )
                 )}
                 {afterPhotos.length === 0 && booking.status !== "Completed" && (
-                  <Text style={{ fontSize: 11, color: "#9CA3AF", textAlign: "center", marginTop: 6 }}>
+                  <Text style={ts({ fontSize: 11, color: "#9CA3AF", textAlign: "center", marginTop: 6 })}>
                     Required before marking the job complete
                   </Text>
                 )}
@@ -1142,8 +1143,8 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
           </View>
           <View style={styles.payDivider} />
           <View style={styles.payRow}>
-            <Text style={[styles.payLbl, { fontWeight: "700", color: "#111827" }]}>Estimated Total</Text>
-            <Text style={[styles.payVal, { color: "#0A5C43", fontSize: 18 }]}>
+            <Text style={[styles.payLbl, ts({ fontWeight: "700", color: "#111827" })]}>Estimated Total</Text>
+            <Text style={[styles.payVal, ts({ color: "#0A5C43", fontSize: 18 })]}>
               £{((booking.workerRate || 0) * (booking.details?.duration || booking.workerDuration || booking.duration || 0)).toFixed(2)}
             </Text>
           </View>
@@ -1152,7 +1153,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
         {/* ── Completed Banner ── */}
         {booking.status === "Completed" && (
           <View style={styles.completedBanner}>
-            <CheckCircle size={22} color="#0A5C43" />
+            <CheckCircle size={22} color={tc("#0A5C43")} />
             <Text style={styles.completedTxt}>Service Completed — Well done! 🎉</Text>
           </View>
         )}
@@ -1170,7 +1171,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 <Text style={styles.sheetSub}>Photos + reasons → sent to admin</Text>
               </View>
               <TouchableOpacity onPress={() => setShowExtraTimeModal(false)} style={styles.sheetClose}>
-                <X size={20} color="#4B7A5A" />
+                <X size={20} color={tc("#4B7A5A")} />
               </TouchableOpacity>
             </View>
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
@@ -1181,12 +1182,12 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                   <View key={i} style={styles.thumbWrap}>
                     <Image source={{ uri: p.uri }} style={styles.thumb} resizeMode="cover" />
                     <TouchableOpacity style={styles.thumbRemove} onPress={() => setExtraTimePhotos(prev => prev.filter((_, idx) => idx !== i))}>
-                      <X size={12} color="#fff" strokeWidth={3} />
+                      <X size={12} color={tc("#fff")} strokeWidth={3} />
                     </TouchableOpacity>
                   </View>
                 ))}
                 <TouchableOpacity style={styles.thumbAdd} onPress={pickExtraTimePhoto}>
-                  <Camera size={22} color="#0A5C43" />
+                  <Camera size={22} color={tc("#0A5C43")} />
                   <Text style={styles.thumbAddTxt}>Add</Text>
                 </TouchableOpacity>
               </View>
@@ -1199,7 +1200,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                   return (
                     <TouchableOpacity key={reason} onPress={() => setExtraTimeReasons(prev => selected ? prev.filter(r => r !== reason) : [...prev, reason])} style={[styles.reasonRow, selected && styles.reasonRowSel]} activeOpacity={0.7}>
                       <View style={[styles.reasonCheck, selected && styles.reasonCheckSel]}>
-                        {selected && <Check size={12} color="#fff" strokeWidth={3} />}
+                        {selected && <Check size={12} color={tc("#fff")} strokeWidth={3} />}
                       </View>
                       <Text style={[styles.reasonTxt, selected && styles.reasonTxtSel]}>{reason}</Text>
                     </TouchableOpacity>
@@ -1223,28 +1224,28 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                   </View>
                   <Text style={styles.hoursSumOp}>+</Text>
                   <View style={styles.hoursSumItem}>
-                    <Text style={[styles.hoursSumVal, { color: "#B45309" }]}>{extraHours}h</Text>
+                    <Text style={[styles.hoursSumVal, ts({ color: "#B45309" })]}>{extraHours}h</Text>
                     <Text style={styles.hoursSumLbl}>Extra</Text>
                   </View>
                   <Text style={styles.hoursSumOp}>=</Text>
                   <View style={styles.hoursSumItem}>
-                    <Text style={[styles.hoursSumVal, { color: "#0A5C43" }]}>{parseFloat(booking.details.duration) + extraHours}h</Text>
+                    <Text style={[styles.hoursSumVal, ts({ color: "#0A5C43" })]}>{parseFloat(booking.details.duration) + extraHours}h</Text>
                     <Text style={styles.hoursSumLbl}>New Total</Text>
                   </View>
                 </View>
               ) : null}
 
               <Text style={[styles.sheetSectionLbl, { marginTop: 20 }]}>📝 Step 4 — Any Extra Notes?</Text>
-              <TextInput style={styles.reportInput} placeholder="e.g. Kitchen oven has heavy grease build-up, bathroom tiles need scrubbing..." placeholderTextColor="#9CA3AF" value={extraNotes} onChangeText={setExtraNotes} multiline textAlignVertical="top" />
+              <TextInput style={styles.reportInput} placeholder="e.g. Kitchen oven has heavy grease build-up, bathroom tiles need scrubbing..." placeholderTextColor={tc("#9CA3AF")} value={extraNotes} onChangeText={setExtraNotes} multiline textAlignVertical="top" />
 
               <TouchableOpacity
-                style={[styles.submitBtn, { backgroundColor: "#B45309", marginTop: 20 }, (submittingExtraTime || extraTimeReasons.length === 0) && { opacity: 0.55 }]}
+                style={[styles.submitBtn, ts({ backgroundColor: "#B45309", marginTop: 20 }), (submittingExtraTime || extraTimeReasons.length === 0) && { opacity: 0.55 }]}
                 onPress={handleSubmitExtraTimeRequest}
                 disabled={submittingExtraTime || extraTimeReasons.length === 0}
               >
-                {submittingExtraTime ? <ActivityIndicator color="#fff" /> : (
+                {submittingExtraTime ? <ActivityIndicator color={tc("#fff")} /> : (
                   <>
-                    <Timer size={18} color="#fff" />
+                    <Timer size={18} color={tc("#fff")} />
                     <Text style={styles.submitBtnTxt}>Send Request to Admin</Text>
                   </>
                 )}
@@ -1266,18 +1267,18 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                 <Text style={styles.sheetSub}>Submit photos & report before finishing</Text>
               </View>
               <TouchableOpacity onPress={() => setShowCompletionModal(false)} style={styles.sheetClose}>
-                <X size={20} color="#4B7A5A" />
+                <X size={20} color={tc("#4B7A5A")} />
               </TouchableOpacity>
             </View>
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
               <Text style={styles.sheetSectionLbl}>📸 Job Photos</Text>
               <View style={styles.photoStatusRow}>
                 <View style={[styles.photoStatusChip, beforePhotos.length > 0 ? styles.photoStatusDone : styles.photoStatusWarn]}>
-                  {beforePhotos.length > 0 ? <CheckCircle2 size={14} color="#0A5C43" strokeWidth={2.5} /> : <AlertCircle size={14} color="#B45309" />}
+                  {beforePhotos.length > 0 ? <CheckCircle2 size={14} color={tc("#0A5C43")} strokeWidth={2.5} /> : <AlertCircle size={14} color={tc("#B45309")} />}
                   <Text style={beforePhotos.length > 0 ? styles.photoStatusTxtDone : styles.photoStatusTxtWarn}>Before {beforePhotos.length > 0 ? `${beforePhotos.length} photo${beforePhotos.length > 1 ? "s" : ""} ✓` : "missing"}</Text>
                 </View>
                 <View style={[styles.photoStatusChip, afterPhotos.length > 0 ? styles.photoStatusDone : styles.photoStatusWarn]}>
-                  {afterPhotos.length > 0 ? <CheckCircle2 size={14} color="#0A5C43" strokeWidth={2.5} /> : <AlertCircle size={14} color="#B45309" />}
+                  {afterPhotos.length > 0 ? <CheckCircle2 size={14} color={tc("#0A5C43")} strokeWidth={2.5} /> : <AlertCircle size={14} color={tc("#B45309")} />}
                   <Text style={afterPhotos.length > 0 ? styles.photoStatusTxtDone : styles.photoStatusTxtWarn}>After {afterPhotos.length > 0 ? `${afterPhotos.length} photo${afterPhotos.length > 1 ? "s" : ""} ✓` : "missing — required"}</Text>
                 </View>
               </View>
@@ -1289,28 +1290,28 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
                   <View key={i} style={styles.thumbWrap}>
                     <Image source={{ uri: p.uri }} style={styles.thumb} resizeMode="cover" />
                     <TouchableOpacity style={styles.thumbRemove} onPress={() => setDamagePhotos(prev => prev.filter((_, idx) => idx !== i))}>
-                      <X size={12} color="#fff" strokeWidth={3} />
+                      <X size={12} color={tc("#fff")} strokeWidth={3} />
                     </TouchableOpacity>
                   </View>
                 ))}
                 <TouchableOpacity style={styles.thumbAdd} onPress={pickDamagePhoto}>
-                  <Camera size={22} color="#0A5C43" />
+                  <Camera size={22} color={tc("#0A5C43")} />
                   <Text style={styles.thumbAddTxt}>Add</Text>
                 </TouchableOpacity>
               </View>
 
               <Text style={styles.sheetSectionLbl}>📝 Written Report (optional)</Text>
               <Text style={styles.sheetHint}>Note any issues, access problems, or extra work done.</Text>
-              <TextInput style={styles.reportInput} placeholder="e.g. Found mould behind washing machine. Notified customer. Extra 20 min spent on oven..." placeholderTextColor="#9CA3AF" value={workerReport} onChangeText={setWorkerReport} multiline textAlignVertical="top" />
+              <TextInput style={styles.reportInput} placeholder="e.g. Found mould behind washing machine. Notified customer. Extra 20 min spent on oven..." placeholderTextColor={tc("#9CA3AF")} value={workerReport} onChangeText={setWorkerReport} multiline textAlignVertical="top" />
 
               <TouchableOpacity
                 style={[styles.submitBtn, (afterPhotos.length === 0 || submittingCompletion) && { opacity: 0.6 }]}
                 onPress={handleCompleteWithSubmission}
                 disabled={afterPhotos.length === 0 || submittingCompletion}
               >
-                {submittingCompletion ? <ActivityIndicator color="#fff" /> : (
+                {submittingCompletion ? <ActivityIndicator color={tc("#fff")} /> : (
                   <>
-                    <CheckCircle size={18} color="#fff" />
+                    <CheckCircle size={18} color={tc("#fff")} />
                     <Text style={styles.submitBtnTxt}>Submit & Complete Job</Text>
                   </>
                 )}
@@ -1327,8 +1328,8 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 const SCREEN_W = Dimensions.get("window").width;
 const PHOTO_TILE = (SCREEN_W - 64 - 6) / 2; // card padding 32px each side + 6px gap
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F4F6F5" },
+const styles = themed(StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F4F6F5" },
   loadingText: { marginTop: 12, color: "#4B7A5A", fontSize: 14 },
 
@@ -1725,6 +1726,6 @@ const styles = StyleSheet.create({
   hoursSumVal: { fontSize: 22, fontWeight: "900", color: "#111827" },
   hoursSumLbl: { fontSize: 10, color: "#4B7A5A", fontWeight: "700", marginTop: 3, textTransform: "uppercase" },
   hoursSumOp: { fontSize: 22, fontWeight: "700", color: "#D1D5DB" },
-});
+}));
 
 export default AcceptedBookingDetailScreen;

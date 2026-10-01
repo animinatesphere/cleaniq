@@ -178,3 +178,24 @@ test("cleaners never receive the customer's phone or email; admin's all-jobs lis
   const admin = (await call("GET", "/jobs?all=1")).data;
   assert.ok(Array.isArray(admin));
 });
+
+test("Personal information and My documents for the cleaner", async () => {
+  const Applicant = require("../../models/Applicant");
+  const profile = await call("GET", `/${worker._id}/profile`);
+  assert.equal(profile.status, 200);
+  assert.equal(profile.data.firstName, "Kelvin");
+  assert.equal(profile.data.bankDetails, undefined);
+  assert.equal(profile.data.tempPassword, undefined);
+
+  let docs = (await call("GET", `/${worker._id}/documents`)).data;
+  assert.equal(docs.documents.length, 4);
+  assert.ok(docs.documents.every((d) => d.path === null));
+
+  await Applicant.create({ fullName: "Kelvin Obi", email: "K@Test.com", idPath: "uploads\\idDocument-1.jpg", dbsCheckPath: "uploads/dbsCheck-2.pdf", rightToWorkCode: "W12 345 678" });
+  docs = (await call("GET", `/${worker._id}/documents`)).data;
+  const by = Object.fromEntries(docs.documents.map((d) => [d.key, d.path]));
+  assert.equal(by.idPath, "uploads/idDocument-1.jpg");
+  assert.equal(by.dbsCheckPath, "uploads/dbsCheck-2.pdf");
+  assert.equal(by.cvPath, null);
+  assert.equal(docs.rightToWorkCode, "W12 345 678");
+});

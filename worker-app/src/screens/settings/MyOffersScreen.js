@@ -6,6 +6,7 @@ import axios from "axios";
 import { API_URL } from "../../context/AuthContext";
 import { Screen, ScreenHeader, Loading, usePreferences, G } from "./common";
 import { servicePhoto } from "../../utils/servicePhoto";
+import { tc, themed, ts } from "../../theme/dark";
 
 // My offers: recent jobs that suited you, and whether they're still available.
 const BADGE = {
@@ -45,7 +46,7 @@ export default function MyOffersScreen({ navigation }) {
                 <View style={{ flex: 1 }}>
                   <View style={st.top}>
                     <Text style={st.title} numberOfLines={1}>{o.service}</Text>
-                    <Text numberOfLines={1} style={[st.badge, { backgroundColor: badge.bg, color: badge.fg }]}>{o.status}</Text>
+                    <Text numberOfLines={1} style={[st.badge, ts({ backgroundColor: badge.bg, color: badge.fg })]}>{o.status}</Text>
                   </View>
                   <Text style={st.sub}>£{Number(o.pay?.total || 0).toFixed(2)} · {o.customerName}</Text>
                   <Text style={st.meta}>
@@ -53,7 +54,7 @@ export default function MyOffersScreen({ navigation }) {
                     {o.travelMinutes != null ? ` · ≈${o.travelMinutes} min` : ""}
                   </Text>
                 </View>
-                <ChevronRight size={20} color={G.text} />
+                <ChevronRight size={20} color={tc(G.text)} />
               </TouchableOpacity>
             );
           }}
@@ -63,7 +64,7 @@ export default function MyOffersScreen({ navigation }) {
   );
 }
 
-const st = StyleSheet.create({
+const st = themed(StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 14, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: G.line },
   thumb: { width: 64, height: 64, borderRadius: 14, backgroundColor: G.soft },
   top: { flexDirection: "row", alignItems: "center", gap: 8 },
@@ -72,4 +73,4 @@ const st = StyleSheet.create({
   sub: { fontSize: 15, color: G.text, marginTop: 3, fontWeight: "600" },
   meta: { fontSize: 13, color: G.mute, marginTop: 2 },
   empty: { textAlign: "center", color: G.mute, marginTop: 40, fontSize: 15, lineHeight: 21 },
-});
+}));

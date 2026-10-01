@@ -2,30 +2,31 @@ import React from "react";
 import { View, TextInput, StyleSheet } from "react-native";
 import { Search, SlidersHorizontal } from "lucide-react-native";
 import { C, cardShadow } from "../theme/flat";
+import { tc, themed } from "../theme/dark";
 
 // Light pill search field with a soft drop shadow + optional filter button,
 // matching the reference design's home-screen search bar.
 const SearchBar = ({ value, onChangeText, placeholder, onFilterPress }) => (
   <View style={styles.row}>
     <View style={[styles.field, cardShadow]}>
-      <Search size={18} color={C.textMuted} />
+      <Search size={18} color={tc(C.textMuted)} />
       <TextInput
         style={styles.input}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder || "Search for service..."}
-        placeholderTextColor={C.textMuted}
+        placeholderTextColor={tc(C.textMuted)}
       />
     </View>
     {onFilterPress && (
       <View style={[styles.filterBtn, cardShadow]}>
-        <SlidersHorizontal size={18} color={C.primary} onPress={onFilterPress} />
+        <SlidersHorizontal size={18} color={tc(C.primary)} onPress={onFilterPress} />
       </View>
     )}
   </View>
 );
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -56,6 +57,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-});
+}));
 
 export default SearchBar;

@@ -40,6 +40,8 @@ import {
   PlayCircle,
   Users,
   MessageCircle,
+  Moon,
+  FileText,
 } from "lucide-react-native";
 import { MenuRow, SectionLabel } from "./settings/common";
 import axios from "axios";
@@ -51,6 +53,7 @@ import {
   neuCircle,
   neuGreenRaised,
 } from "../theme/neumorphic";
+import { tc, themed, ts } from "../theme/dark";
 
 const MyAccountScreen = ({ navigation }) => {
   const { workerInfo, logout, updateWorkerInfo } = useContext(AuthContext);
@@ -275,16 +278,16 @@ const MyAccountScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <User size={24} color="#1A2E22" />
+        <User size={24} color={tc("#1A2E22")} />
         <Text style={styles.headerTitle}>My Account</Text>
         <TouchableOpacity
           onPress={() => setIsEditing(!isEditing)}
           style={styles.editButton}
         >
           {isEditing ? (
-            <X size={20} color="#EF4444" />
+            <X size={20} color={tc("#EF4444")} />
           ) : (
-            <Edit2 size={20} color="#0F6B4C" />
+            <Edit2 size={20} color={tc("#0F6B4C")} />
           )}
         </TouchableOpacity>
       </View>
@@ -298,7 +301,7 @@ const MyAccountScreen = ({ navigation }) => {
               {workerInfo?.lastName?.charAt(0)}
             </Text>
             <View style={styles.verifiedBadge}>
-              <ShieldCheck size={14} color="#FFFFFF" />
+              <ShieldCheck size={14} color={tc("#FFFFFF")} />
             </View>
           </View>
           <Text style={styles.profileName}>
@@ -312,9 +315,9 @@ const MyAccountScreen = ({ navigation }) => {
           <View style={styles.statsContainer}>
             <View style={styles.statBox}>
               <View
-                style={[styles.statIconCircle, { backgroundColor: "#EAF5EE" }]}
+                style={[styles.statIconCircle, ts({ backgroundColor: "#EAF5EE" })]}
               >
-                <Briefcase size={20} color="#0F6B4C" />
+                <Briefcase size={20} color={tc("#0F6B4C")} />
               </View>
               <Text style={styles.statValue}>
                 {workerInfo?.jobsCompleted || 0}
@@ -324,9 +327,9 @@ const MyAccountScreen = ({ navigation }) => {
             <View style={styles.statDivider} />
             <View style={styles.statBox}>
               <View
-                style={[styles.statIconCircle, { backgroundColor: "#EAF5EE" }]}
+                style={[styles.statIconCircle, ts({ backgroundColor: "#EAF5EE" })]}
               >
-                <TrendingUp size={20} color="#0F6B4C" />
+                <TrendingUp size={20} color={tc("#0F6B4C")} />
               </View>
               <Text style={styles.statValue}>
                 {workerInfo?.rating ? workerInfo.rating.toFixed(1) : "5.0"}
@@ -342,8 +345,12 @@ const MyAccountScreen = ({ navigation }) => {
             <SectionLabel>Settings</SectionLabel>
             <MenuRow icon={Briefcase} label="Services" sub="Choose the cleaning you take on" onPress={() => navigation.navigate("ServicesSettings")} />
             <MenuRow icon={Clock} label="Working hours" sub="When you'd like to receive offers" onPress={() => navigation.navigate("WorkingHours")} />
-            <MenuRow icon={MapPin} label="Travel area" sub="How far you'll travel from home" onPress={() => navigation.navigate("TravelArea")} />
-            <MenuRow icon={PawPrint} label="Personal preferences" sub="e.g. homes with pets" onPress={() => navigation.navigate("PersonalPreferences")} last />
+            <MenuRow icon={PawPrint} label="Personal preferences" sub="e.g. homes with pets" onPress={() => navigation.navigate("PersonalPreferences")} />
+            <MenuRow icon={Moon} label="Appearance" sub="Light or dark mode" onPress={() => navigation.navigate("Appearance")} last />
+
+            <SectionLabel>My profile</SectionLabel>
+            <MenuRow icon={User} label="Personal information" sub="Your name, contact details and address" onPress={() => navigation.navigate("PersonalInfo")} />
+            <MenuRow icon={FileText} label="My documents" sub="ID, right to work, DBS and CV" onPress={() => navigation.navigate("Documents")} last />
 
             <SectionLabel>My jobs</SectionLabel>
             <MenuRow icon={CalendarDays} label="My appointments" onPress={() => navigation.navigate("MyAppointments")} />
@@ -438,7 +445,7 @@ const MyAccountScreen = ({ navigation }) => {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={tc("#FFFFFF")} />
               ) : (
                 <Text style={styles.saveButtonText}>Save Changes</Text>
               )}
@@ -450,7 +457,7 @@ const MyAccountScreen = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Contact Info</Text>
               <View style={styles.infoCard}>
                 <View style={styles.infoRow}>
-                  <Mail size={18} color="#0F6B4C" />
+                  <Mail size={18} color={tc("#0F6B4C")} />
                   <View style={styles.infoTextContainer}>
                     <Text style={styles.infoLabel}>Email</Text>
                     <Text style={styles.infoValue}>{workerInfo?.email}</Text>
@@ -458,7 +465,7 @@ const MyAccountScreen = ({ navigation }) => {
                 </View>
                 <View style={styles.infoDivider} />
                 <View style={styles.infoRow}>
-                  <Phone size={18} color="#0F6B4C" />
+                  <Phone size={18} color={tc("#0F6B4C")} />
                   <View style={styles.infoTextContainer}>
                     <Text style={styles.infoLabel}>Phone</Text>
                     <Text style={styles.infoValue}>
@@ -473,7 +480,7 @@ const MyAccountScreen = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Bank Details</Text>
               <View style={styles.infoCard}>
                 <View style={styles.infoRow}>
-                  <CreditCard size={18} color="#0F6B4C" />
+                  <CreditCard size={18} color={tc("#0F6B4C")} />
                   <View style={styles.infoTextContainer}>
                     <Text style={styles.infoLabel}>Bank Name</Text>
                     <Text style={styles.infoValue}>
@@ -521,14 +528,14 @@ const MyAccountScreen = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Wallet & Payments</Text>
               {walletLoading ? (
                 <View style={styles.loadingBox}>
-                  <ActivityIndicator color="#0F6B4C" />
+                  <ActivityIndicator color={tc("#0F6B4C")} />
                 </View>
               ) : (
                 <>
                   <View style={styles.walletCard}>
                     <View style={styles.walletHeader}>
                       <View style={styles.walletIconBox}>
-                        <Wallet size={24} color="#0F6B4C" />
+                        <Wallet size={24} color={tc("#0F6B4C")} />
                       </View>
                       <View>
                         <Text style={styles.walletLabel}>
@@ -587,7 +594,7 @@ const MyAccountScreen = ({ navigation }) => {
                   </View>
 
                   <View style={styles.walletNote}>
-                    <AlertCircle size={16} color="#0F6B4C" />
+                    <AlertCircle size={16} color={tc("#0F6B4C")} />
                     <Text style={styles.walletNoteText}>
                       To request a withdrawal, go to your Dashboard
                     </Text>
@@ -604,24 +611,24 @@ const MyAccountScreen = ({ navigation }) => {
                             <View
                               style={[
                                 styles.historyStatusBadge,
-                                {
+                                ts({
                                   backgroundColor:
                                     withdrawal.status === "completed"
                                       ? "#EAF5EE"
                                       : withdrawal.status === "pending"
                                         ? "#FEF3C7"
                                         : "#FEE2E2",
-                                },
+                                }),
                               ]}
                             >
                               {withdrawal.status === "completed" && (
-                                <Check size={14} color="#0F6B4C" />
+                                <Check size={14} color={tc("#0F6B4C")} />
                               )}
                               {withdrawal.status === "pending" && (
-                                <AlertCircle size={14} color="#F59E0B" />
+                                <AlertCircle size={14} color={tc("#F59E0B")} />
                               )}
                               {withdrawal.status === "failed" && (
-                                <X size={14} color="#EF4444" />
+                                <X size={14} color={tc("#EF4444")} />
                               )}
                             </View>
                             <View>
@@ -638,14 +645,14 @@ const MyAccountScreen = ({ navigation }) => {
                           <Text
                             style={[
                               styles.historyStatus,
-                              {
+                              ts({
                                 color:
                                   withdrawal.status === "completed"
                                     ? "#0F6B4C"
                                     : withdrawal.status === "pending"
                                       ? "#F59E0B"
                                       : "#EF4444",
-                              },
+                              }),
                             ]}
                           >
                             {withdrawal.status.charAt(0).toUpperCase() +
@@ -668,7 +675,7 @@ const MyAccountScreen = ({ navigation }) => {
                     Manage notification preferences
                   </Text>
                 </View>
-                <ChevronRight size={20} color="#9CA3AF" />
+                <ChevronRight size={20} color={tc("#9CA3AF")} />
               </TouchableOpacity>
             </View>
           </View>
@@ -677,7 +684,7 @@ const MyAccountScreen = ({ navigation }) => {
         {/* Logout Button */}
         {!isEditing && (
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <LogOut size={18} color="#EF4444" />
+            <LogOut size={18} color={tc("#EF4444")} />
             <Text style={styles.logoutButtonText}>Log Out</Text>
           </TouchableOpacity>
         )}
@@ -690,10 +697,10 @@ const MyAccountScreen = ({ navigation }) => {
             disabled={deletingAccount}
           >
             {deletingAccount ? (
-              <ActivityIndicator size="small" color="#9CA3AF" />
+              <ActivityIndicator size="small" color={tc("#9CA3AF")} />
             ) : (
               <>
-                <Trash2 size={16} color="#9CA3AF" />
+                <Trash2 size={16} color={tc("#9CA3AF")} />
                 <Text style={styles.deleteAccountText}>Delete Account</Text>
               </>
             )}
@@ -715,7 +722,7 @@ const MyAccountScreen = ({ navigation }) => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Request Withdrawal</Text>
               <TouchableOpacity onPress={() => setShowWithdrawModal(false)}>
-                <X size={24} color="#1A2E22" />
+                <X size={24} color={tc("#1A2E22")} />
               </TouchableOpacity>
             </View>
 
@@ -733,14 +740,14 @@ const MyAccountScreen = ({ navigation }) => {
               <View style={styles.modalSection}>
                 <Text style={styles.modalLabel}>Withdrawal Amount</Text>
                 <View style={styles.withdrawInputContainer}>
-                  <DollarSign size={20} color="#0F6B4C" />
+                  <DollarSign size={20} color={tc("#0F6B4C")} />
                   <TextInput
                     style={styles.withdrawInput}
                     placeholder="Enter amount"
                     value={withdrawAmount}
                     onChangeText={setWithdrawAmount}
                     keyboardType="decimal-pad"
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={tc("#9CA3AF")}
                   />
                 </View>
                 <Text style={styles.modalHint}>
@@ -766,7 +773,7 @@ const MyAccountScreen = ({ navigation }) => {
               </View>
 
               <View style={styles.modalInfoBox}>
-                <AlertCircle size={16} color="#F59E0B" />
+                <AlertCircle size={16} color={tc("#F59E0B")} />
                 <Text style={styles.modalInfoText}>
                   The amount will be deducted from your wallet and sent to your
                   bank account. Admin approval may take 24-48 hours.
@@ -788,7 +795,7 @@ const MyAccountScreen = ({ navigation }) => {
                 disabled={withdrawLoading || !withdrawAmount}
               >
                 {withdrawLoading ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <ActivityIndicator color={tc("#FFFFFF")} size="small" />
                 ) : (
                   <Text style={styles.modalConfirmText}>
                     Confirm Withdrawal
@@ -803,7 +810,7 @@ const MyAccountScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   container: { flex: 1, backgroundColor: NEU_BG },
   header: {
     flexDirection: "row",
@@ -1260,6 +1267,6 @@ const styles = StyleSheet.create({
   },
   modalConfirmText: { fontSize: 15, fontWeight: "700", color: "#FFFFFF" },
   wcMenus: { marginHorizontal: 20, marginTop: 8, marginBottom: 10, backgroundColor: "#FFFFFF", borderRadius: 20, paddingHorizontal: 16, paddingBottom: 6 },
-});
+}));
 
 export default MyAccountScreen;

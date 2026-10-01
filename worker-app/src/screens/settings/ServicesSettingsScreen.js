@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, ScrollView, Switch, StyleSheet } from "react-native";
 import { Info } from "lucide-react-native";
 import { Screen, ScreenHeader, BigTitle, Loading, usePreferences, G, styles as s } from "./common";
+import { tc, themed } from "../../theme/dark";
 
 // "What services do you offer?" — only switched-on services send you offers.
 const isRegularService = (svc) =>
@@ -40,7 +41,7 @@ export default function ServicesSettingsScreen({ navigation }) {
       <Switch
         value={chosen.includes(svc.name)}
         onValueChange={(v) => toggle(svc.name, v)}
-        trackColor={{ true: G.green, false: "#E5E7EB" }}
+        trackColor={{ true: tc(G.green, "bg"), false: tc("#E5E7EB", "bg") }}
         thumbColor="#fff"
       />
     </View>
@@ -52,7 +53,7 @@ export default function ServicesSettingsScreen({ navigation }) {
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
         <BigTitle>What services do you offer?</BigTitle>
         <View style={st.info}>
-          <Info size={18} color={G.green} />
+          <Info size={18} color={tc(G.green)} />
           <Text style={st.infoTxt}>You only get offers for the services switched on here. Pay is set by Cleaniq.</Text>
         </View>
         {!!error && <Text style={s.error}>{error}</Text>}
@@ -70,7 +71,7 @@ export default function ServicesSettingsScreen({ navigation }) {
   );
 }
 
-const st = StyleSheet.create({
+const st = themed(StyleSheet.create({
   info: { flexDirection: "row", gap: 10, alignItems: "center", backgroundColor: G.greenPale, borderRadius: 16, padding: 14, marginBottom: 10 },
   infoTxt: { flex: 1, fontSize: 14, color: G.text, lineHeight: 20 },
   group: { fontSize: 22, fontWeight: "900", color: G.text, marginTop: 18, marginBottom: 4 },
@@ -81,4 +82,4 @@ const st = StyleSheet.create({
   popular: { backgroundColor: "#FDE68A", color: "#78350F", fontSize: 11, fontWeight: "900", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, overflow: "hidden" },
   desc: { fontSize: 13, color: G.sub, marginTop: 4, lineHeight: 18 },
   divider: { height: 8, backgroundColor: G.soft, marginHorizontal: -20, marginTop: 16 },
-});
+}));

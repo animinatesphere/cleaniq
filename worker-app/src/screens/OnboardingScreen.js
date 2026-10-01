@@ -13,6 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ArrowRight } from "lucide-react-native";
 import { C } from "../theme/flat";
+import { tc, tcs, themed } from "../theme/dark";
 
 const { width, height } = Dimensions.get("window");
 
@@ -109,7 +110,7 @@ const OnboardingScreen = ({ onFinished }) => {
             resizeMode="cover"
           >
             <LinearGradient
-              colors={["transparent", "rgba(10,30,22,0.4)", C.primaryDark]}
+              colors={tcs(["transparent", "rgba(10,30,22,0.4)", C.primaryDark], "bg")}
               locations={[0, 0.55, 1]}
               style={styles.gradient}
             />
@@ -144,7 +145,7 @@ const OnboardingScreen = ({ onFinished }) => {
             <Text style={styles.ctaText}>
               {currentSlide === SLIDES.length - 1 ? "Get Started" : "Next"}
             </Text>
-            <ArrowRight size={18} color={C.primaryDark} strokeWidth={2.5} />
+            <ArrowRight size={18} color={tc(C.primaryDark)} strokeWidth={2.5} />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -152,7 +153,7 @@ const OnboardingScreen = ({ onFinished }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   container: { flex: 1, backgroundColor: C.primaryDark },
   slide: {
     width,
@@ -226,6 +227,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: C.primaryDark,
   },
-});
+}));
 
 export default OnboardingScreen;

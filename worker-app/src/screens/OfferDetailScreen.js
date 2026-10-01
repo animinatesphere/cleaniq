@@ -44,6 +44,7 @@ import {
   neuCircle,
   neuGreenRaised,
 } from "../theme/neumorphic";
+import { tc, themed, ts } from "../theme/dark";
 
 const OfferDetailScreen = ({ route, navigation }) => {
   const { offerId } = route.params;
@@ -237,7 +238,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0F6B4C" />
+        <ActivityIndicator size="large" color={tc("#0F6B4C")} />
         <Text style={styles.loadingText}>Loading job details...</Text>
       </View>
     );
@@ -257,7 +258,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0F6B4C" />
+      <StatusBar barStyle="light-content" backgroundColor={tc("#0F6B4C", "bg")} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -265,7 +266,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
           onPress={() => navigation.goBack()}
           style={styles.backBtn}
         >
-          <ChevronLeft size={22} color="#fff" />
+          <ChevronLeft size={22} color={tc("#fff")} />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
           {offer.offer?.customerName ? `Offer for ${offer.offer.customerName}` : "Job Proposal"}
@@ -278,7 +279,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
         <View style={styles.heroCard}>
           <View style={styles.heroTop}>
             <View style={styles.serviceIconBox}>
-              <Briefcase size={28} color="#fff" />
+              <Briefcase size={28} color={tc("#fff")} />
             </View>
             <View style={styles.heroInfo}>
               <Text style={styles.heroService}>
@@ -315,7 +316,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
               <View style={styles.payDivider} />
               <View style={styles.payItem}>
                 <Text style={styles.payLabel}>Estimated</Text>
-                <Text style={[styles.payValue, { color: "#A7F3D0" }]}>
+                <Text style={[styles.payValue, ts({ color: "#A7F3D0" })]}>
                   £
                   {(
                     (offer.workerRate || 0) *
@@ -329,7 +330,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
             </View>
           ) : (
             <View style={[styles.payBanner, { justifyContent: "center" }]}>
-              <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 12 }}>
+              <Text style={ts({ color: "rgba(255,255,255,0.7)", fontSize: 12 })}>
                 Rate pending — Admin will confirm pay
               </Text>
             </View>
@@ -349,9 +350,9 @@ const OfferDetailScreen = ({ route, navigation }) => {
           return (
             <View style={styles.wcCard}>
               {status && (
-                <View style={[styles.wcStatus, { backgroundColor: status.bg }]}>
-                  <AlertCircle size={16} color={status.fg} />
-                  <Text style={[styles.wcStatusTxt, { color: status.fg }]}>{status.text}</Text>
+                <View style={[styles.wcStatus, ts({ backgroundColor: status.bg })]}>
+                  <AlertCircle size={16} color={tc(status.fg)} />
+                  <Text style={[styles.wcStatusTxt, ts({ color: status.fg })]}>{status.text}</Text>
                 </View>
               )}
               <View style={styles.wcTags}>
@@ -384,7 +385,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
               )}
               {o.travelMinutes != null && (
                 <View style={styles.wcTravel}>
-                  <Navigation size={14} color="#0F6B4C" />
+                  <Navigation size={14} color={tc("#0F6B4C")} />
                   <Text style={styles.wcTravelTxt}>
                     ≈ {o.travelMinutes} min by {o.travelMode === "bike" ? "bike" : o.travelMode === "transit" ? "public transport" : "car"}
                     {o.distanceMiles != null ? ` · ${o.distanceMiles} mi from home` : ""}
@@ -400,7 +401,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
           <Text style={styles.sectionTitle}>📅 Schedule</Text>
           <View style={styles.scheduleRow}>
             <View style={styles.scheduleCard}>
-              <Calendar size={18} color="#0F6B4C" />
+              <Calendar size={18} color={tc("#0F6B4C")} />
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.scheduleLabel}>Date</Text>
                 <Text style={styles.scheduleValue}>
@@ -414,7 +415,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
               </View>
             </View>
             <View style={styles.scheduleCard}>
-              <Clock size={18} color="#F59E0B" />
+              <Clock size={18} color={tc("#F59E0B")} />
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.scheduleLabel}>Time</Text>
                 <Text style={styles.scheduleValue}>
@@ -425,7 +426,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
           </View>
           {offer.details?.frequency && (
             <View style={[styles.scheduleCard, { marginTop: 10 }]}>
-              <Repeat size={18} color="#8B5CF6" />
+              <Repeat size={18} color={tc("#8B5CF6")} />
               <View style={{ marginLeft: 10 }}>
                 <Text style={styles.scheduleLabel}>Frequency</Text>
                 <Text style={styles.scheduleValue}>
@@ -440,7 +441,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📍 Location</Text>
           <View style={styles.locationCard}>
-            <MapPin size={20} color="#0F6B4C" />
+            <MapPin size={20} color={tc("#0F6B4C")} />
             <Text style={styles.locationText}>
               {(() => {
                 const addr = offer.details?.address || "";
@@ -463,7 +464,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
             <View style={styles.tagsWrap}>
               {rooms.map((r, i) => (
                 <View key={i} style={styles.roomTag}>
-                  <Home size={12} color="#0F6B4C" />
+                  <Home size={12} color={tc("#0F6B4C")} />
                   <Text style={styles.roomTagText}>{r}</Text>
                 </View>
               ))}
@@ -478,7 +479,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
             <View style={styles.tagsWrap}>
               {services.map((s, i) => (
                 <View key={i} style={[styles.roomTag, styles.serviceTag]}>
-                  <Text style={[styles.roomTagText, { color: "#92400E" }]}>
+                  <Text style={[styles.roomTagText, ts({ color: "#92400E" })]}>
                     {s}
                   </Text>
                 </View>
@@ -493,26 +494,26 @@ const OfferDetailScreen = ({ route, navigation }) => {
           <View style={styles.infoGrid}>
             {parking && (
               <View style={styles.infoChip}>
-                <Car size={14} color="#3A5A44" />
+                <Car size={14} color={tc("#3A5A44")} />
                 <Text style={styles.infoChipText}>{parking}</Text>
               </View>
             )}
             {entry && (
               <View style={styles.infoChip}>
-                <Key size={14} color="#3A5A44" />
+                <Key size={14} color={tc("#3A5A44")} />
                 <Text style={styles.infoChipText}>{entry}</Text>
               </View>
             )}
             {pet && (
               <View style={styles.infoChip}>
-                <PawPrint size={14} color="#3A5A44" />
+                <PawPrint size={14} color={tc("#3A5A44")} />
                 <Text style={styles.infoChipText}>{pet}</Text>
               </View>
             )}
           </View>
           {instructions && instructions !== "None" && (
             <View style={styles.instructionBox}>
-              <FileText size={14} color="#0F6B4C" />
+              <FileText size={14} color={tc("#0F6B4C")} />
               <Text style={styles.instructionText}>{instructions}</Text>
             </View>
           )}
@@ -553,10 +554,10 @@ const OfferDetailScreen = ({ route, navigation }) => {
             disabled={actionLoading !== null}
           >
             {actionLoading === "accept" ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={tc("#fff")} />
             ) : (
               <>
-                <CheckCircle size={18} color="#fff" />
+                <CheckCircle size={18} color={tc("#fff")} />
                 <Text style={styles.acceptBtnText}>Accept This Job</Text>
               </>
             )}
@@ -567,7 +568,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
             onPress={() => setShowSuggestTime(true)}
             disabled={actionLoading !== null}
           >
-            <Clock size={16} color="#0F6B4C" />
+            <Clock size={16} color={tc("#0F6B4C")} />
             <Text style={styles.suggestBtnText}>Suggest Another Time</Text>
           </TouchableOpacity>
 
@@ -577,7 +578,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
             disabled={actionLoading !== null}
           >
             {actionLoading === "reject" ? (
-              <ActivityIndicator color="#EF4444" />
+              <ActivityIndicator color={tc("#EF4444")} />
             ) : (
               <Text style={styles.rejectBtnText}>✕ Turn Down Proposal</Text>
             )}
@@ -600,7 +601,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Suggest Another Time</Text>
               <TouchableOpacity onPress={() => setShowSuggestTime(false)}>
-                <X size={22} color="#6B7280" />
+                <X size={22} color={tc("#6B7280")} />
               </TouchableOpacity>
             </View>
             <Text style={styles.modalSub}>
@@ -609,7 +610,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
             <TextInput
               style={styles.timeInput}
               placeholder="Enter your preferred time..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={tc("#9CA3AF")}
               value={suggestedTime}
               onChangeText={setSuggestedTime}
               multiline
@@ -620,7 +621,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
               disabled={actionLoading === "suggest"}
             >
               {actionLoading === "suggest" ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={tc("#fff")} />
               ) : (
                 <Text style={styles.sendBtnText}>Send Suggestion</Text>
               )}
@@ -640,7 +641,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
           <View style={styles.successCard}>
             <View style={styles.successIconRing}>
               <View style={styles.successIconCircle}>
-                <CheckCircle size={36} color="#fff" />
+                <CheckCircle size={36} color={tc("#fff")} />
               </View>
             </View>
             <Text style={styles.successTitle}>Job Accepted!</Text>
@@ -651,7 +652,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
             <View style={styles.successSummary}>
               <View style={styles.successSummaryRow}>
-                <Calendar size={14} color="#0F6B4C" />
+                <Calendar size={14} color={tc("#0F6B4C")} />
                 <Text style={styles.successSummaryText}>
                   {offerDate.toLocaleDateString("en-GB", {
                     weekday: "short",
@@ -661,7 +662,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
                 </Text>
               </View>
               <View style={styles.successSummaryRow}>
-                <Clock size={14} color="#0F6B4C" />
+                <Clock size={14} color={tc("#0F6B4C")} />
                 <Text style={styles.successSummaryText}>
                   {getDisplayTime(offer.schedule)}
                 </Text>
@@ -693,7 +694,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   container: { flex: 1, backgroundColor: NEU_BG },
   loadingContainer: {
     flex: 1,
@@ -714,9 +715,10 @@ const styles = StyleSheet.create({
     paddingTop: 18,
   },
   backBtn: {
-    ...neuCircle,
     width: 40,
     height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.18)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -1074,6 +1076,6 @@ const styles = StyleSheet.create({
   wcNote: { fontSize: 12, color: "#64748B", marginTop: 2, lineHeight: 17 },
   wcTravel: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 12, backgroundColor: "#E8F5EE", alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
   wcTravelTxt: { fontSize: 12, fontWeight: "800", color: "#0F6B4C" },
-});
+}));
 
 export default OfferDetailScreen;

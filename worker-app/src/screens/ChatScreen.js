@@ -23,6 +23,7 @@ import {
   neuGreenRaised,
 } from "../theme/neumorphic";
 import KeyboardSafeView from "../components/KeyboardSafeView";
+import { tc, themed } from "../theme/dark";
 
 // ── Design tokens ──────────────────────────────────────────
 const C = {
@@ -165,12 +166,12 @@ const ChatScreen = ({ navigation }) => {
             style={styles.backBtn}
             onPress={() => navigation.goBack()}
           >
-            <ChevronLeft size={20} color={C.greenDark} />
+            <ChevronLeft size={20} color={tc(C.greenDark)} />
           </TouchableOpacity>
 
           <View style={styles.headerCenter}>
             <View style={styles.headerAvatarWrap}>
-              <MessageSquare size={16} color={C.greenDark} />
+              <MessageSquare size={16} color={tc(C.greenDark)} />
             </View>
             <View>
               <Text style={styles.headerTitle}>Support & Admin Chat</Text>
@@ -187,14 +188,13 @@ const ChatScreen = ({ navigation }) => {
         {/* ── Keyboard avoiding wrapper ── */}
         <KeyboardSafeView
           style={{ flex: 1 }}
-          iosOffset={90}
           onKeyboardShow={() => flatListRef.current?.scrollToEnd({ animated: true })}
         >
           {/* ── Chat body ── */}
           <View style={styles.chatBody}>
             {loading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={C.green} />
+                <ActivityIndicator size="large" color={tc(C.green)} />
                 <Text style={styles.loadingText}>
                   Syncing Support Thread...
                 </Text>
@@ -210,7 +210,7 @@ const ChatScreen = ({ navigation }) => {
                 ListEmptyComponent={
                   <View style={styles.emptyContainer}>
                     <View style={styles.emptyIconWrap}>
-                      <MessageSquare size={34} color={C.green} />
+                      <MessageSquare size={34} color={tc(C.green)} />
                     </View>
                     <Text style={styles.emptyTitle}>Direct Line to Admin</Text>
                     <Text style={styles.emptyText}>
@@ -228,7 +228,7 @@ const ChatScreen = ({ navigation }) => {
             <TextInput
               style={styles.textInput}
               placeholder="Type your message..."
-              placeholderTextColor={C.textMute}
+              placeholderTextColor={tc(C.textMute)}
               value={text}
               onChangeText={setText}
               multiline
@@ -240,9 +240,9 @@ const ChatScreen = ({ navigation }) => {
               disabled={!text.trim() || sending}
             >
               {sending ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
+                <ActivityIndicator size="small" color={tc("#FFFFFF")} />
               ) : (
-                <Send size={17} color="#FFFFFF" />
+                <Send size={17} color={tc("#FFFFFF")} />
               )}
             </TouchableOpacity>
           </View>
@@ -255,7 +255,7 @@ const ChatScreen = ({ navigation }) => {
 // ─────────────────────────────────────────────────────────────
 // STYLES
 // ─────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: NEU_BG,
@@ -486,6 +486,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 19,
   },
-});
+}));
 
 export default ChatScreen;
