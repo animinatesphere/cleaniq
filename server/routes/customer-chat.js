@@ -5,6 +5,7 @@ const WorkerCustomerMessage = require("../models/WorkerCustomerMessage");
 const Booking = require("../models/Booking");
 const Worker = require("../models/Worker");
 const { verifyCustomer } = require("./customer-auth");
+const adminAuth = require("../middleware/adminAuth");
 const { sendCustomerPush } = require("../utils/pushNotifications");
 
 // Helper: verify customer owns the booking
@@ -141,6 +142,60 @@ router.get("/admin/thread/:bookingId", async (req, res) => {
     })
       .sort({ createdAt: 1 })
       .limit(200);
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/customer-chat/admin/cleaner-threads — every cleaner↔customer conversation, newest first
+// (admin reads them in Chat Support; read-only, nothing is marked as read)
+router.get("/admin/cleaner-threads", adminAuth, async (req, res) => {
+  try {
+    const threads = await WorkerCustomerMessage.aggregate([
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: "$bookingId",
+          lastMessage: { $first: "$text" },
+          lastMessageTime: { $first: "$createdAt" },
+          lastSender: { $first: "$senderType" },
+          workerId: { $first: "$workerId" },
+          customerEmail: { $first: "$customerEmail" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { lastMessageTime: -1 } },
+      { $limit: 300 },
+    ]);
+    const bookings = await Booking.find({ bookingId: { $in: threads.map((t) => t._id) } })
+      .select("bookingId service schedule.date status customer assignedWorkerName")
+      .lean();
+    const workers = await Worker.find({ _id: { $in: threads.map((t) => t.workerId) } })
+      .select("firstName lastName")
+      .lean();
+    const bookingBy = new Map(bookings.map((b) => [b.bookingId, b]));
+    const workerBy = new Map(workers.map((w) => [String(w._id), w]));
+    res.json(threads.map((t) => {
+      const w = workerBy.get(String(t.workerId));
+      return {
+        ...t,
+        booking: bookingBy.get(t._id) || null,
+        workerName: w ? `${w.firstName || ""} ${w.lastName || ""}`.trim() : bookingBy.get(t._id)?.assignedWorkerName || "Cleaner",
+      };
+    }));
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/customer-chat/admin/cleaner-thread/:bookingId — the full cleaner↔customer conversation
+router.get("/admin/cleaner-thread/:bookingId", adminAuth, async (req, res) => {
+  try {
+    const messages = await WorkerCustomerMessage.find({ bookingId: req.params.bookingId })
+      .sort({ createdAt: 1 })
+      .limit(1000)
+      .lean();
     res.json(messages);
   } catch (err) {
     res.status(500).json({ message: err.message });

@@ -184,7 +184,7 @@ const ChatScreen = ({ route, navigation }) => {
               <View style={styles.safety}>
                 <ShieldCheck size={14} color={C.primary} />
                 <Text style={styles.safetyTxt}>
-                  Chat with {firstName} about this clean. Payments and changes to your booking go through Cleaniq.
+                  Chat with {firstName} about this clean. Payments and changes to your booking go through Cleaniq. Cleaniq can read this chat to keep everyone safe.
                 </Text>
               </View>
             }
