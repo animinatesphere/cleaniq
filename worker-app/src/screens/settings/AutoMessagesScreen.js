@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Switch, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, KeyboardAvoidingView, Switch, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Screen, ScreenHeader, BigTitle, Loading, usePreferences, G, styles as s } from "./common";
 
 // Messages → Settings: the intro sent automatically to a new customer when you accept their job.
@@ -14,37 +14,39 @@ export default function AutoMessagesScreen({ navigation }) {
   return (
     <Screen>
       <ScreenHeader title="Settings" navigation={navigation} />
-      <ScrollView contentContainerStyle={{ padding: 20 }} keyboardShouldPersistTaps="handled">
-        <BigTitle sub="These messages are sent automatically on your behalf.">Automatic messages</BigTitle>
-        {!!error && <Text style={s.error}>{error}</Text>}
-        <Text style={st.h3}>Introduction</Text>
-        <View style={st.row}>
-          <Switch
-            value={prefs.autoIntro.enabled}
-            onValueChange={(v) => save({ autoIntro: { enabled: v, text } })}
-            trackColor={{ true: G.green, false: "#E5E7EB" }}
-            thumbColor="#fff"
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <ScrollView contentContainerStyle={{ padding: 20 }} keyboardShouldPersistTaps="handled">
+          <BigTitle sub="These messages are sent automatically on your behalf.">Automatic messages</BigTitle>
+          {!!error && <Text style={s.error}>{error}</Text>}
+          <Text style={st.h3}>Introduction</Text>
+          <View style={st.row}>
+            <Switch
+              value={prefs.autoIntro.enabled}
+              onValueChange={(v) => save({ autoIntro: { enabled: v, text } })}
+              trackColor={{ true: G.green, false: "#E5E7EB" }}
+              thumbColor="#fff"
+            />
+            <Text style={st.label}>Introduce yourself to new customers</Text>
+          </View>
+          <TextInput
+            style={[st.bubble, !prefs.autoIntro.enabled && { opacity: 0.5 }]}
+            value={text}
+            onChangeText={(v) => { setText(v); setSaved(false); }}
+            multiline
+            maxLength={500}
+            editable={prefs.autoIntro.enabled}
           />
-          <Text style={st.label}>Introduce yourself to new customers</Text>
-        </View>
-        <TextInput
-          style={[st.bubble, !prefs.autoIntro.enabled && { opacity: 0.5 }]}
-          value={text}
-          onChangeText={(v) => { setText(v); setSaved(false); }}
-          multiline
-          maxLength={500}
-          editable={prefs.autoIntro.enabled}
-        />
-        <Text style={st.hint}>{"{name}"} becomes your first name and {"{date}"} the date and time of the clean.</Text>
-        {saved && <Text style={s.saved}>Saved</Text>}
-        <TouchableOpacity
-          style={[st.btn, (!prefs.autoIntro.enabled || saving) && { opacity: 0.5 }]}
-          disabled={!prefs.autoIntro.enabled || saving}
-          onPress={async () => setSaved(await save({ autoIntro: { enabled: true, text } }))}
-        >
-          {saving ? <ActivityIndicator color="#fff" /> : <Text style={st.btnTxt}>Save message</Text>}
-        </TouchableOpacity>
-      </ScrollView>
+          <Text style={st.hint}>{"{name}"} becomes your first name and {"{date}"} the date and time of the clean.</Text>
+          {saved && <Text style={s.saved}>Saved</Text>}
+          <TouchableOpacity
+            style={[st.btn, (!prefs.autoIntro.enabled || saving) && { opacity: 0.5 }]}
+            disabled={!prefs.autoIntro.enabled || saving}
+            onPress={async () => setSaved(await save({ autoIntro: { enabled: true, text } }))}
+          >
+            {saving ? <ActivityIndicator color="#fff" /> : <Text style={st.btnTxt}>Save message</Text>}
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }

@@ -61,7 +61,6 @@ import {
   Check,
   X,
   Timer,
-  Phone,
 } from "lucide-react-native";
 
 const EXTRA_TIME_REASONS = [
@@ -696,8 +695,8 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             <Text style={styles.statusPillText}>{statusCfg.label}</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.backBtn} onPress={() => cust.phone && Linking.openURL(`tel:${cust.phone}`)}>
-          <Phone size={18} color="#fff" />
+        <TouchableOpacity style={styles.backBtn} onPress={handleMessage}>
+          <MessageSquare size={18} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -799,12 +798,6 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
 
         {/* ── Quick Actions ── */}
         <View style={styles.quickRow}>
-          <TouchableOpacity style={styles.quickCard} onPress={() => cust.phone && Linking.openURL(`tel:${cust.phone}`)}>
-            <View style={[styles.quickIcon, { backgroundColor: "#DCFCE7" }]}>
-              <Phone size={18} color="#0A5C43" />
-            </View>
-            <Text style={styles.quickTxt}>Call</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.quickCard} onPress={handleMessage}>
             <View style={[styles.quickIcon, { backgroundColor: "#DBEAFE" }]}>
               <MessageSquare size={18} color="#1D4ED8" />

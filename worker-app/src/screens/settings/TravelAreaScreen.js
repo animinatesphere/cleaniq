@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, KeyboardAvoidingView, TouchableOpacity, TextInput, StyleSheet, ActivityIndicator } from "react-native";
 import { Car, Bike, Bus, X, MapPin } from "lucide-react-native";
 import { Screen, ScreenHeader, BigTitle, Loading, usePreferences, G, styles as s } from "./common";
 
@@ -52,80 +52,82 @@ export default function TravelAreaScreen({ navigation }) {
           </TouchableOpacity>
         ))}
       </View>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
-        {!!error && <Text style={s.error}>{error}</Text>}
-        {!!note && <Text style={s.saved}>{note}</Text>}
-
-        {tab === "area" ? (
-          <>
-            <Text style={st.h2}>Your means of transport</Text>
-            <View style={st.chips}>
-              {MODES.map(({ id, label, Icon }) => (
-                <TouchableOpacity key={id} style={[st.chip, t.mode === id && st.chipOn]} onPress={() => update({ mode: id })}>
-                  <Icon size={18} color={t.mode === id ? "#fff" : G.text} />
-                  <Text style={[st.chipTxt, t.mode === id && { color: "#fff" }]}>{label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={st.h2}>Your home postcode</Text>
-            <View style={st.inputRow}>
-              <TextInput style={st.input} value={home} onChangeText={setHome} autoCapitalize="characters" placeholder="e.g. BL0 0HL" placeholderTextColor={G.mute} />
-              <TouchableOpacity style={st.smallBtn} disabled={saving} onPress={() => update({ homePostcode: home }, "Home postcode saved")}>
-                {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={st.smallBtnTxt}>Save</Text>}
-              </TouchableOpacity>
-            </View>
-
-            <Text style={st.h2}>Distance from your home</Text>
-            <View style={st.chips}>
-              {DISTANCES.map((mi) => (
-                <TouchableOpacity key={mi} style={[st.chip, Number(t.radiusMiles) === mi && st.chipOn]} onPress={() => update({ radiusMiles: mi })}>
-                  <Text style={[st.chipTxt, Number(t.radiusMiles) === mi && { color: "#fff" }]}>{mi} mi</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <View style={st.area}>
-              <View style={[st.circle, { width: 70 + Number(t.radiusMiles) * 6, height: 70 + Number(t.radiusMiles) * 6, borderRadius: (70 + Number(t.radiusMiles) * 6) / 2 }]}>
-                <MapPin size={22} color={G.green} />
-                <Text style={st.circleTxt}>{t.homePostcode || "Home"}</Text>
-              </View>
-              <Text style={st.areaTxt}>
-                Offers within {t.radiusMiles} miles of {t.homePostcode || "your home"}
-                {(t.addPostcodes || []).length ? `, plus ${t.addPostcodes.join(", ")}` : ""}
-                {(t.removePostcodes || []).length ? `, never ${t.removePostcodes.join(", ")}` : ""}.
-              </Text>
-            </View>
-          </>
-        ) : (
-          <>
-            <Text style={st.help}>
-              {tab === "add"
-                ? "Add postcode areas you're happy to travel to even if they're further than your distance, e.g. M14."
-                : "Add postcode areas you never want offers from, e.g. WN1."}
-            </Text>
-            <View style={st.inputRow}>
-              <TextInput style={st.input} value={entry} onChangeText={setEntry} autoCapitalize="characters" placeholder="Postcode or area, e.g. M14" placeholderTextColor={G.mute} onSubmitEditing={addToList} />
-              <TouchableOpacity style={st.smallBtn} disabled={saving} onPress={addToList}>
-                <Text style={st.smallBtnTxt}>{tab === "add" ? "Add" : "Block"}</Text>
-              </TouchableOpacity>
-            </View>
-            {(t[listKey] || []).length === 0 ? (
-              <Text style={st.empty}>{tab === "add" ? "No extra areas yet." : "No blocked areas."}</Text>
-            ) : (
-              (t[listKey] || []).map((pc) => (
-                <View key={pc} style={st.pcRow}>
-                  <MapPin size={16} color={tab === "add" ? G.green : "#B91C1C"} />
-                  <Text style={st.pcTxt}>{pc}</Text>
-                  <TouchableOpacity onPress={() => update({ [listKey]: t[listKey].filter((x) => x !== pc) }, `${pc} removed`)}>
-                    <X size={18} color={G.sub} />
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
+          {!!error && <Text style={s.error}>{error}</Text>}
+          {!!note && <Text style={s.saved}>{note}</Text>}
+  
+          {tab === "area" ? (
+            <>
+              <Text style={st.h2}>Your means of transport</Text>
+              <View style={st.chips}>
+                {MODES.map(({ id, label, Icon }) => (
+                  <TouchableOpacity key={id} style={[st.chip, t.mode === id && st.chipOn]} onPress={() => update({ mode: id })}>
+                    <Icon size={18} color={t.mode === id ? "#fff" : G.text} />
+                    <Text style={[st.chipTxt, t.mode === id && { color: "#fff" }]}>{label}</Text>
                   </TouchableOpacity>
+                ))}
+              </View>
+  
+              <Text style={st.h2}>Your home postcode</Text>
+              <View style={st.inputRow}>
+                <TextInput style={st.input} value={home} onChangeText={setHome} autoCapitalize="characters" placeholder="e.g. BL0 0HL" placeholderTextColor={G.mute} />
+                <TouchableOpacity style={st.smallBtn} disabled={saving} onPress={() => update({ homePostcode: home }, "Home postcode saved")}>
+                  {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={st.smallBtnTxt}>Save</Text>}
+                </TouchableOpacity>
+              </View>
+  
+              <Text style={st.h2}>Distance from your home</Text>
+              <View style={st.chips}>
+                {DISTANCES.map((mi) => (
+                  <TouchableOpacity key={mi} style={[st.chip, Number(t.radiusMiles) === mi && st.chipOn]} onPress={() => update({ radiusMiles: mi })}>
+                    <Text style={[st.chipTxt, Number(t.radiusMiles) === mi && { color: "#fff" }]}>{mi} mi</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+  
+              <View style={st.area}>
+                <View style={[st.circle, { width: 70 + Number(t.radiusMiles) * 6, height: 70 + Number(t.radiusMiles) * 6, borderRadius: (70 + Number(t.radiusMiles) * 6) / 2 }]}>
+                  <MapPin size={22} color={G.green} />
+                  <Text style={st.circleTxt}>{t.homePostcode || "Home"}</Text>
                 </View>
-              ))
-            )}
-          </>
-        )}
-      </ScrollView>
+                <Text style={st.areaTxt}>
+                  Offers within {t.radiusMiles} miles of {t.homePostcode || "your home"}
+                  {(t.addPostcodes || []).length ? `, plus ${t.addPostcodes.join(", ")}` : ""}
+                  {(t.removePostcodes || []).length ? `, never ${t.removePostcodes.join(", ")}` : ""}.
+                </Text>
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={st.help}>
+                {tab === "add"
+                  ? "Add postcode areas you're happy to travel to even if they're further than your distance, e.g. M14."
+                  : "Add postcode areas you never want offers from, e.g. WN1."}
+              </Text>
+              <View style={st.inputRow}>
+                <TextInput style={st.input} value={entry} onChangeText={setEntry} autoCapitalize="characters" placeholder="Postcode or area, e.g. M14" placeholderTextColor={G.mute} onSubmitEditing={addToList} />
+                <TouchableOpacity style={st.smallBtn} disabled={saving} onPress={addToList}>
+                  <Text style={st.smallBtnTxt}>{tab === "add" ? "Add" : "Block"}</Text>
+                </TouchableOpacity>
+              </View>
+              {(t[listKey] || []).length === 0 ? (
+                <Text style={st.empty}>{tab === "add" ? "No extra areas yet." : "No blocked areas."}</Text>
+              ) : (
+                (t[listKey] || []).map((pc) => (
+                  <View key={pc} style={st.pcRow}>
+                    <MapPin size={16} color={tab === "add" ? G.green : "#B91C1C"} />
+                    <Text style={st.pcTxt}>{pc}</Text>
+                    <TouchableOpacity onPress={() => update({ [listKey]: t[listKey].filter((x) => x !== pc) }, `${pc} removed`)}>
+                      <X size={18} color={G.sub} />
+                    </TouchableOpacity>
+                  </View>
+                ))
+              )}
+            </>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }

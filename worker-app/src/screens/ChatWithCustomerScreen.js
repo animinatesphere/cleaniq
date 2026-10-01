@@ -143,7 +143,7 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
         </View>
       </LinearGradient>
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         {loading ? (
           <View style={styles.center}><ActivityIndicator size="large" color="#0F6B4C" /></View>
         ) : (

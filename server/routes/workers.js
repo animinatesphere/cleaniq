@@ -62,6 +62,31 @@ const findBookingByIdOrBookingId = async (id) => {
   }
 };
 
+// Cleaners never get a customer's phone number or email: they talk through the in-app chat.
+function withoutCustomerContact(body) {
+  const strip = (v) => {
+    if (Array.isArray(v)) return v.forEach(strip);
+    if (!v || typeof v !== "object") return;
+    if (v.customer && typeof v.customer === "object") {
+      delete v.customer.phone;
+      delete v.customer.email;
+    }
+    Object.values(v).forEach(strip);
+  };
+  const copy = body === undefined ? body : JSON.parse(JSON.stringify(body));
+  strip(copy);
+  return copy;
+}
+const hideCustomerContact = (req, res, next) => {
+  const json = res.json.bind(res);
+  res.json = (body) => json(withoutCustomerContact(body));
+  next();
+};
+// Admin pages use ?all=1, assign and visibility, which keep the full details.
+router.use("/jobs", (req, res, next) =>
+  req.query.all || /\/(assign|visibility)\/?$/.test(req.path) ? next() : hideCustomerContact(req, res, next));
+router.use("/:id/schedule", hideCustomerContact);
+
 // Mobile App Login Endpoint
 router.post("/login", async (req, res) => {
   try {

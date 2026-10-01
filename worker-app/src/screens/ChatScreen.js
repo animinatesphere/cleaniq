@@ -185,9 +185,9 @@ const ChatScreen = ({ navigation }) => {
 
         {/* ── Keyboard avoiding wrapper ── */}
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior="padding"
           style={{ flex: 1 }}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 110}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
         >
           {/* ── Chat body ── */}
           <View style={styles.chatBody}>
