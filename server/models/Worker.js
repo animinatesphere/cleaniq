@@ -59,6 +59,9 @@ const workerSchema = new mongoose.Schema({
     activeBookingId: { type: String, default: null }, // which job this location is being shared for
   },
   expoPushToken: { type: String, default: "" },
+  // Offer settings chosen in the app (services, working hours, travel area, pets, intro message).
+  // See utils/offerMatching.js for the shape and defaults.
+  preferences: { type: mongoose.Schema.Types.Mixed, default: undefined },
   createdAt: { type: Date, default: Date.now },
   meta: mongoose.Schema.Types.Mixed,
 });

@@ -104,7 +104,7 @@ router.post("/:bookingId", async (req, res) => {
         await sendCustomerPush(customer.expoPushToken, {
           title: `Message from ${workerName.split(" ")[0]}`,
           body: text.trim().length > 60 ? text.trim().slice(0, 57) + "…" : text.trim(),
-          data: { bookingId, type: "chat" },
+          data: { bookingId, bookingMongoId: String(booking._id), type: "chat", senderName: workerName },
         });
       }
     } catch {}

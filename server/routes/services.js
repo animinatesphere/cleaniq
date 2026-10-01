@@ -151,6 +151,8 @@ router.put("/:id", adminAuth, async (req, res) => {
     if (workerPaymentRate !== undefined)
       updateFields.workerPaymentRate = workerPaymentRate;
     Object.assign(updateFields, regularRatesFrom(req.body));
+    const followingPay = parseOptionalRate(req.body.workerFollowingRate);
+    if (followingPay !== undefined) updateFields.workerFollowingRate = followingPay;
 
     const service = await Service.findByIdAndUpdate(
       req.params.id,

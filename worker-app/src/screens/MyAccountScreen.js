@@ -33,7 +33,15 @@ import {
   AlertCircle,
   Check,
   Trash2,
+  Clock,
+  PawPrint,
+  CalendarDays,
+  Inbox,
+  PlayCircle,
+  Users,
+  MessageCircle,
 } from "lucide-react-native";
+import { MenuRow, SectionLabel } from "./settings/common";
 import axios from "axios";
 import {
   NEU_BG,
@@ -325,6 +333,28 @@ const MyAccountScreen = ({ navigation }) => {
               </Text>
               <Text style={styles.statLabel}>Rating</Text>
             </View>
+          </View>
+        )}
+
+        {/* Wecasa-style menus (added; everything below is unchanged) */}
+        {!isEditing && (
+          <View style={styles.wcMenus}>
+            <SectionLabel>Settings</SectionLabel>
+            <MenuRow icon={Briefcase} label="Services" sub="Choose the cleaning you take on" onPress={() => navigation.navigate("ServicesSettings")} />
+            <MenuRow icon={Clock} label="Working hours" sub="When you'd like to receive offers" onPress={() => navigation.navigate("WorkingHours")} />
+            <MenuRow icon={MapPin} label="Travel area" sub="How far you'll travel from home" onPress={() => navigation.navigate("TravelArea")} />
+            <MenuRow icon={PawPrint} label="Personal preferences" sub="e.g. homes with pets" onPress={() => navigation.navigate("PersonalPreferences")} last />
+
+            <SectionLabel>My jobs</SectionLabel>
+            <MenuRow icon={CalendarDays} label="My appointments" onPress={() => navigation.navigate("MyAppointments")} />
+            <MenuRow icon={Inbox} label="My offers" onPress={() => navigation.navigate("MyOffers")} last />
+
+            <SectionLabel>My benefits</SectionLabel>
+            <MenuRow icon={PlayCircle} label="Tips and advice" onPress={() => navigation.navigate("Tips")} />
+            <MenuRow icon={Users} label="Sponsor a cleaner" onPress={() => navigation.navigate("Sponsor")} last />
+
+            <SectionLabel>Cleaniq</SectionLabel>
+            <MenuRow icon={MessageCircle} label="Contact us & help centre" onPress={() => navigation.navigate("Help")} last />
           </View>
         )}
 
@@ -1229,6 +1259,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalConfirmText: { fontSize: 15, fontWeight: "700", color: "#FFFFFF" },
+  wcMenus: { marginHorizontal: 20, marginTop: 8, marginBottom: 10, backgroundColor: "#FFFFFF", borderRadius: 20, paddingHorizontal: 16, paddingBottom: 6 },
 });
 
 export default MyAccountScreen;

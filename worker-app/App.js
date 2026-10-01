@@ -39,6 +39,17 @@ import MyAccountScreen from "./src/screens/MyAccountScreen";
 import OfferDetailScreen from "./src/screens/OfferDetailScreen";
 import AcceptedBookingDetailScreen from "./src/screens/AcceptedBookingDetailScreen";
 import ChatWithCustomerScreen from "./src/screens/ChatWithCustomerScreen";
+// Wecasa-style account screens (offer settings, jobs, benefits, help)
+import ServicesSettingsScreen from "./src/screens/settings/ServicesSettingsScreen";
+import WorkingHoursScreen from "./src/screens/settings/WorkingHoursScreen";
+import TravelAreaScreen from "./src/screens/settings/TravelAreaScreen";
+import PersonalPreferencesScreen from "./src/screens/settings/PersonalPreferencesScreen";
+import AutoMessagesScreen from "./src/screens/settings/AutoMessagesScreen";
+import MyAppointmentsScreen from "./src/screens/settings/MyAppointmentsScreen";
+import MyOffersScreen from "./src/screens/settings/MyOffersScreen";
+import TipsScreen from "./src/screens/settings/TipsScreen";
+import SponsorScreen from "./src/screens/settings/SponsorScreen";
+import HelpScreen from "./src/screens/settings/HelpScreen";
 import ChatScreen from "./src/screens/ChatScreen";
 import ApplyScreen from "./src/screens/ApplyScreen";
 import notificationService from "./src/utils/notificationService";
@@ -66,8 +77,12 @@ if (global.ErrorUtils) {
 try {
   if (Notifications && Notifications.setNotificationHandler) {
     Notifications.setNotificationHandler({
+      // Banner + sound even while the app is open (shouldShowBanner/List replace
+      // shouldShowAlert in recent expo-notifications).
       handleNotification: async () => ({
         shouldShowAlert: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
         shouldPlaySound: true,
         shouldSetBadge: true,
       }),
@@ -185,6 +200,15 @@ const AppNavigation = () => {
             importance: Notifications.AndroidImportance.HIGH,
             sound: "default",
           });
+          // Chat messages from customers and admin are sent on "default".
+          await Notifications.setNotificationChannelAsync("default", {
+            name: "Messages",
+            description: "Messages from customers and the Cleaniq team",
+            importance: Notifications.AndroidImportance.MAX,
+            sound: "default",
+            vibrationPattern: [0, 250, 250, 250],
+            lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+          });
         }
 
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -256,7 +280,11 @@ const AppNavigation = () => {
         const data = response.notification.request.content.data || {};
         const nav = navigationRef.current;
         if (!nav) return;
-        if (data.type === "new_job" || data.type === "job_assigned") {
+        if (data.type === "chat" && data.bookingId) {
+          nav.navigate("ChatWithCustomer", { bookingId: data.bookingId, customerName: data.senderName || "Customer" });
+        } else if (data.type === "admin_chat") {
+          nav.navigate("MainTabs", { screen: "MessagesTab" });
+        } else if (data.type === "new_job" || data.type === "job_assigned") {
           // Navigate to the home/jobs feed so worker can see the new job
           nav.navigate("MainTabs", { screen: "HomeTab" });
         } else if (data.bookingId || data.jobId) {
@@ -343,6 +371,16 @@ const AppNavigation = () => {
           // User is signed in
           <>
             <Stack.Screen name="MainTabs" component={TabNavigator} />
+            <Stack.Screen name="ServicesSettings" component={ServicesSettingsScreen} />
+            <Stack.Screen name="WorkingHours" component={WorkingHoursScreen} />
+            <Stack.Screen name="TravelArea" component={TravelAreaScreen} />
+            <Stack.Screen name="PersonalPreferences" component={PersonalPreferencesScreen} />
+            <Stack.Screen name="AutoMessages" component={AutoMessagesScreen} />
+            <Stack.Screen name="MyAppointments" component={MyAppointmentsScreen} />
+            <Stack.Screen name="MyOffers" component={MyOffersScreen} />
+            <Stack.Screen name="Tips" component={TipsScreen} />
+            <Stack.Screen name="Sponsor" component={SponsorScreen} />
+            <Stack.Screen name="Help" component={HelpScreen} />
             <Stack.Group screenOptions={{ presentation: "modal" }}>
               <Stack.Screen name="OfferDetail" component={OfferDetailScreen} />
               <Stack.Screen

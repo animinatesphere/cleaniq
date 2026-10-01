@@ -10,6 +10,7 @@ const { MongoMemoryServer } = require("mongodb-memory-server-core");
 const mongoose = require("mongoose");
 
 process.env.JWT_SECRET = process.env.JWT_SECRET || "test-secret";
+require("../../utils/geo").setGeoFetcherForTests(async (url, body) => (body ? { result: [] } : { result: null }));
 delete process.env.TWILIO_WHATSAPP_FROM; // any real send fails fast instead of reaching Twilio
 
 const Admin = require("../../models/Admin");

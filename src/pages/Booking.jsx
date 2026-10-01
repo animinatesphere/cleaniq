@@ -185,6 +185,15 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [], repeatEv
 const REGULAR_FREQUENCIES = ["Weekly", "Fortnightly", "Monthly", "Quarterly"];
 const FREQUENCY_LABEL = { Once: "One-off", Weekly: "Weekly", Fortnightly: "Fortnightly", Monthly: "Monthly", Quarterly: "Every 3 months" };
 const REGULAR_EVERY = { Weekly: "every week", Fortnightly: "every two weeks", Monthly: "every month", Quarterly: "every 3 months" };
+// Until admin prices any regular option for a service, these are offered at the one-off price
+// (same rule as the server's utils/pricing.js).
+const defaultFrequencies = (name = "") => {
+  const n = String(name).toLowerCase();
+  if (n.includes("regular")) return ["Weekly", "Fortnightly"];
+  if (n.includes("deep")) return ["Monthly", "Quarterly"];
+  return [];
+};
+
 
 const cleanKey = (str) =>
   (str || "")
@@ -801,9 +810,10 @@ const Booking = () => {
   };
 
   // Only the frequencies admin has priced for this service are offered; one-off always is.
+  const pricedFrequencies = REGULAR_FREQUENCIES.filter((f) => regularRates[cleanKey(formData.serviceType)]?.[f] > 0);
   const offeredFrequencies = [
     "Once",
-    ...REGULAR_FREQUENCIES.filter((f) => regularRates[cleanKey(formData.serviceType)]?.[f] > 0),
+    ...(pricedFrequencies.length ? pricedFrequencies : defaultFrequencies(formData.serviceType)),
   ];
   const isRegular = formData.frequency !== "Once" && offeredFrequencies.includes(formData.frequency);
   const regularEvery = REGULAR_EVERY[formData.frequency] || "";

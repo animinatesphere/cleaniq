@@ -346,7 +346,7 @@ const ServicesManagement = () => {
                       </div>
                     </label>
                   ))}
-                  <p className="col-span-2 text-[10px] text-white/30">Customers can only choose the options you price here (one-off is always offered). Press save to apply.</p>
+                  <p className="col-span-2 text-[10px] text-white/30">Customers can only choose the options you price here (one-off is always offered). If all four are empty, Regular cleaning offers weekly/fortnightly and Deep cleaning monthly/every 3 months at the one-off price. Press save to apply.</p>
                 </div>
               )}
             </div>

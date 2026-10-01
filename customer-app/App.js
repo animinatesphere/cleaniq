@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { View, ActivityIndicator, Platform } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, createNavigationContainerRef } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
@@ -30,6 +30,21 @@ import { C } from "./src/theme/flat";
 // Instead, lazy-require it only in real builds where it actually works.
 const isExpoGo = Constants.appOwnership === "expo";
 
+// Lets a tapped notification open the right screen (chat or booking details).
+const navigationRef = createNavigationContainerRef();
+const handledResponseIds = new Set();
+function openFromNotification(data = {}) {
+  if (!navigationRef.isReady()) return false;
+  if (data.type === "chat" && data.bookingId) {
+    navigationRef.navigate("Chat", { bookingId: data.bookingId, bookingRef: data.bookingId, workerName: data.senderName || "Your Cleaner" });
+  } else if (data.bookingMongoId) {
+    navigationRef.navigate("BookingDetail", { bookingId: data.bookingMongoId });
+  } else {
+    return false;
+  }
+  return true;
+}
+
 function getNotifications() {
   if (isExpoGo) return null;
   return require("expo-notifications");
@@ -38,10 +53,14 @@ function getNotifications() {
 // Set the notification handler once at startup (real builds only).
 if (!isExpoGo) {
   getNotifications().setNotificationHandler({
+    // Show a banner with sound even while the app is open (shouldShowBanner/List replace
+    // shouldShowAlert in recent expo-notifications).
     handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge:  true,
+      shouldShowAlert:  true,
+      shouldShowBanner: true,
+      shouldShowList:   true,
+      shouldPlaySound:  true,
+      shouldSetBadge:   true,
     }),
   });
 }
@@ -116,9 +135,11 @@ const registerForPushNotificationsAsync = async () => {
     const { data } = await Notifications.getExpoPushTokenAsync(opts);
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync("default", {
-        name: "default",
+        name: "Bookings and messages",
         importance: Notifications.AndroidImportance.MAX,
+        sound: "default",
         vibrationPattern: [0, 250, 250, 250],
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility?.PUBLIC,
       });
     }
     return data;
@@ -163,7 +184,20 @@ const AppNavigation = () => {
     })();
 
     notifListener.current    = Notifications.addNotificationReceivedListener(() => {});
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {});
+    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+      openFromNotification(response?.notification?.request?.content?.data);
+    });
+    // App opened by tapping a notification while it was closed
+    Notifications.getLastNotificationResponseAsync?.()
+      .then((response) => {
+        const data = response?.notification?.request?.content?.data;
+        const id = response?.notification?.request?.identifier;
+        if (!data || !id || handledResponseIds.has(id)) return;
+        handledResponseIds.add(id);
+        const tryOpen = (n = 0) => { if (!openFromNotification(data) && n < 20) setTimeout(() => tryOpen(n + 1), 250); };
+        tryOpen();
+      })
+      .catch(() => {});
 
     return () => {
       // expo-notifications 55: subscriptions have .remove() (removeNotificationSubscription no longer exists)
@@ -190,7 +224,7 @@ const AppNavigation = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <StatusBar style="light" />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {/* Main tabs are always accessible — no auth required to browse */}

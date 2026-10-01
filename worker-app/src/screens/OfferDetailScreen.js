@@ -32,6 +32,8 @@ import {
   FileText,
   Repeat,
   Timer,
+  AlertCircle,
+  Navigation,
 } from "lucide-react-native";
 import axios from "axios";
 import {
@@ -61,7 +63,8 @@ const OfferDetailScreen = ({ route, navigation }) => {
 
   const fetchOfferDetails = async () => {
     try {
-      const offerRes = await axios.get(`${API_URL}/workers/jobs/${offerId}`);
+      // workerId → the server adds availability, travel estimate and pay for this cleaner
+      const offerRes = await axios.get(`${API_URL}/workers/jobs/${offerId}`, { params: { workerId: workerInfo?.id } });
       setOffer(offerRes.data);
       if (offerRes.data.customer) {
         // customer is embedded
@@ -264,7 +267,9 @@ const OfferDetailScreen = ({ route, navigation }) => {
         >
           <ChevronLeft size={22} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Job Proposal</Text>
+        <Text style={styles.headerTitle} numberOfLines={1}>
+          {offer.offer?.customerName ? `Offer for ${offer.offer.customerName}` : "Job Proposal"}
+        </Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -330,6 +335,65 @@ const OfferDetailScreen = ({ route, navigation }) => {
             </View>
           )}
         </View>
+
+        {/* Offer status + pay and travel, Wecasa-style */}
+        {(() => {
+          const o = offer.offer || {};
+          const pay = o.pay || {};
+          const freqLabel = { Weekly: "1 time/week", Fortnightly: "1 time/fortnight", "Bi-weekly": "1 time/fortnight", Monthly: "1 time/month", Quarterly: "1 time/3 months" }[pay.frequency];
+          const status = {
+            taken: { text: "This offer has already been accepted by another cleaner.", bg: "#FDECEC", fg: "#B91C1C" },
+            unavailable: { text: "This offer is no longer available.", bg: "#FDECEC", fg: "#B91C1C" },
+            mine: { text: "You've accepted this job. See it in your schedule.", bg: "#E8F5EE", fg: "#0F6B4C" },
+          }[o.availability];
+          return (
+            <View style={styles.wcCard}>
+              {status && (
+                <View style={[styles.wcStatus, { backgroundColor: status.bg }]}>
+                  <AlertCircle size={16} color={status.fg} />
+                  <Text style={[styles.wcStatusTxt, { color: status.fg }]}>{status.text}</Text>
+                </View>
+              )}
+              <View style={styles.wcTags}>
+                <Text style={styles.wcTag}>{pay.frequency && pay.frequency !== "Once" ? "Regular" : "One-off"}</Text>
+                {!!freqLabel && <Text style={styles.wcTag}>{freqLabel}</Text>}
+                {!!pay.hours && <Text style={styles.wcTag}>{pay.hours}h/session</Text>}
+              </View>
+              {pay.firstRate > 0 && (
+                <>
+                  <View style={styles.wcRow}>
+                    <Text style={styles.wcRowLbl}>{pay.followingRate ? "First session" : "Your pay"}</Text>
+                    <Text style={styles.wcRowVal}>£{Number(pay.firstRate).toFixed(2)}/h</Text>
+                  </View>
+                  {!!pay.followingRate && (
+                    <View style={styles.wcRow}>
+                      <Text style={styles.wcRowLbl}>Following sessions</Text>
+                      <Text style={styles.wcRowVal}>£{Number(pay.followingRate).toFixed(2)}/h</Text>
+                    </View>
+                  )}
+                  {!!pay.followingRate && pay.followingRate !== pay.firstRate && (
+                    <Text style={styles.wcNote}>Your rate changes to £{Number(pay.followingRate).toFixed(2)}/h from the second session.</Text>
+                  )}
+                  <View style={[styles.wcRow, { marginTop: 6 }]}>
+                    <Text style={styles.wcRowLbl}>{pay.monthlyEstimate ? "That's about" : "This job pays"}</Text>
+                    <Text style={styles.wcRowValBig}>
+                      £{Number(pay.monthlyEstimate || pay.total || 0).toFixed(2)}{pay.monthlyEstimate ? "/month" : ""}
+                    </Text>
+                  </View>
+                </>
+              )}
+              {o.travelMinutes != null && (
+                <View style={styles.wcTravel}>
+                  <Navigation size={14} color="#0F6B4C" />
+                  <Text style={styles.wcTravelTxt}>
+                    ≈ {o.travelMinutes} min by {o.travelMode === "bike" ? "bike" : o.travelMode === "transit" ? "public transport" : "car"}
+                    {o.distanceMiles != null ? ` · ${o.distanceMiles} mi from home` : ""}
+                  </Text>
+                </View>
+              )}
+            </View>
+          );
+        })()}
 
         {/* Schedule */}
         <View style={styles.section}>
@@ -480,7 +544,8 @@ const OfferDetailScreen = ({ route, navigation }) => {
           })}
         </Text>
 
-        {/* Action Buttons */}
+        {/* Action Buttons — only while the offer is still open */}
+        {(offer.offer?.availability || "open") === "open" && (
         <View style={styles.actionsContainer}>
           <TouchableOpacity
             style={styles.acceptBtn}
@@ -518,6 +583,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
             )}
           </TouchableOpacity>
         </View>
+        )}
 
         <View style={{ height: 32 }} />
       </ScrollView>
@@ -996,6 +1062,18 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#6B7280",
   },
+  wcCard: { backgroundColor: "#fff", marginHorizontal: 16, marginTop: 14, borderRadius: 18, padding: 16, shadowColor: "#0F172A", shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
+  wcStatus: { flexDirection: "row", alignItems: "center", gap: 8, padding: 12, borderRadius: 12, marginBottom: 12 },
+  wcStatusTxt: { flex: 1, fontSize: 13, fontWeight: "700", lineHeight: 18 },
+  wcTags: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 12 },
+  wcTag: { backgroundColor: "#F1F5F9", color: "#0F172A", fontWeight: "800", fontSize: 12, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, overflow: "hidden" },
+  wcRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 4 },
+  wcRowLbl: { fontSize: 14, fontWeight: "700", color: "#334155" },
+  wcRowVal: { fontSize: 15, fontWeight: "900", color: "#0F172A" },
+  wcRowValBig: { fontSize: 16, fontWeight: "900", color: "#0F6B4C" },
+  wcNote: { fontSize: 12, color: "#64748B", marginTop: 2, lineHeight: 17 },
+  wcTravel: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 12, backgroundColor: "#E8F5EE", alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
+  wcTravelTxt: { fontSize: 12, fontWeight: "800", color: "#0F6B4C" },
 });
 
 export default OfferDetailScreen;
