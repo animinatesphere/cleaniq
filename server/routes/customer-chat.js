@@ -204,6 +204,72 @@ router.get("/admin/cleaner-thread/:bookingId", adminAuth, async (req, res) => {
 
 // ===== WORKER-CUSTOMER MESSAGING ENDPOINTS =====
 
+// GET /api/customer-chat/my/conversations — the customer's chats with their cleaners (Messages tab):
+// every booking that has messages or an assigned cleaner, newest activity first.
+router.get("/my/conversations", verifyCustomer, async (req, res) => {
+  try {
+    const email = String(req.customer.email || "").trim();
+    if (!email) return res.json([]);
+    const emailRe = new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+    const bookings = await Booking.find({
+      "customer.email": emailRe,
+      assignedWorker: { $ne: null },
+      status: { $nin: ["Pending", "Awaiting Payment", "Rejected"] },
+    })
+      .select("bookingId service schedule.date status assignedWorker assignedWorkerName")
+      .sort({ "schedule.date": -1 })
+      .limit(100)
+      .lean();
+    if (!bookings.length) return res.json([]);
+
+    const ids = bookings.map((b) => b.bookingId);
+    const stats = await WorkerCustomerMessage.aggregate([
+      { $match: { bookingId: { $in: ids } } },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: "$bookingId",
+          lastMessage: { $first: "$text" },
+          lastMessageTime: { $first: "$createdAt" },
+          lastSender: { $first: "$senderType" },
+          unreadCount: { $sum: { $cond: [{ $and: [{ $eq: ["$senderType", "Worker"] }, { $eq: ["$isRead", false] }] }, 1, 0] } },
+        },
+      },
+    ]);
+    const statBy = new Map(stats.map((s) => [s._id, s]));
+    const workers = await Worker.find({ _id: { $in: bookings.map((b) => b.assignedWorker) } })
+      .select("firstName lastName")
+      .lean();
+    const workerBy = new Map(workers.map((w) => [String(w._id), w]));
+    const active = ["Assigned", "Arrived", "In Progress", "Confirmed", "Authorized", "Accepted"];
+
+    const list = bookings
+      .map((b) => {
+        const s = statBy.get(b.bookingId);
+        const w = workerBy.get(String(b.assignedWorker));
+        return {
+          bookingId: b.bookingId,
+          bookingMongoId: String(b._id),
+          service: b.service,
+          date: b.schedule?.date || null,
+          status: b.status,
+          workerName: (w ? `${w.firstName || ""} ${w.lastName || ""}`.trim() : "") || b.assignedWorkerName || "Your cleaner",
+          lastMessage: s?.lastMessage || "",
+          lastMessageTime: s?.lastMessageTime || null,
+          lastSender: s?.lastSender || null,
+          unreadCount: s?.unreadCount || 0,
+          hasMessages: !!s,
+        };
+      })
+      // Old bookings with no chat aren't worth listing.
+      .filter((c) => c.hasMessages || active.includes(c.status));
+    list.sort((a, b) => new Date(b.lastMessageTime || b.date || 0) - new Date(a.lastMessageTime || a.date || 0));
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // GET /api/customer-chat/worker-messages/:bookingId - customer views messages from worker
 router.get("/worker-messages/:bookingId", verifyCustomer, async (req, res) => {
   try {

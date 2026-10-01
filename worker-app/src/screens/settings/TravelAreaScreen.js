@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, KeyboardAvoidingView, TouchableOpacity, TextInput, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, ActivityIndicator } from "react-native";
 import { Car, Bike, Bus, X, MapPin } from "lucide-react-native";
 import { Screen, ScreenHeader, BigTitle, Loading, usePreferences, G, styles as s } from "./common";
+import KeyboardSafeView from "../../components/KeyboardSafeView";
 
 // "What is your travel area?" — offers come from within this distance of home, plus any extra
 // postcode districts; blocked districts never send offers.
@@ -52,7 +53,7 @@ export default function TravelAreaScreen({ navigation }) {
           </TouchableOpacity>
         ))}
       </View>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+      <KeyboardSafeView style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
           {!!error && <Text style={s.error}>{error}</Text>}
           {!!note && <Text style={s.saved}>{note}</Text>}
@@ -127,7 +128,7 @@ export default function TravelAreaScreen({ navigation }) {
             </>
           )}
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardSafeView>
     </Screen>
   );
 }

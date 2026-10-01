@@ -6,7 +6,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
-import { Home, CalendarDays, User, Briefcase, LayoutDashboard } from "lucide-react-native";
+import { Home, CalendarDays, User, Briefcase, LayoutDashboard, MessageCircle } from "lucide-react-native";
 import CalendarScreen from "./src/screens/CalendarScreen";
 import { AuthProvider, AuthContext, API_URL } from "./src/context/AuthContext";
 import OnboardingScreen from "./src/screens/OnboardingScreen";
@@ -17,6 +17,7 @@ import BookingScreen from "./src/screens/BookingScreen";
 import RegularCleansScreen from "./src/screens/RegularCleansScreen";
 import BookingDetailScreen from "./src/screens/BookingDetailScreen";
 import ChatScreen from "./src/screens/ChatScreen";
+import MessagesScreen from "./src/screens/MessagesScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import CompanyDashboardScreen from "./src/screens/CompanyDashboardScreen";
 import CompanyJobsScreen from "./src/screens/CompanyJobsScreen";
@@ -100,9 +101,10 @@ const tabScreenOptions = ({ route, iconMap }) => ({
 });
 
 const MainTabs = () => (
-  <Tab.Navigator screenOptions={(p) => tabScreenOptions({ ...p, iconMap: { Home, Bookings: CalendarDays, Calendar: CalendarDays, Profile: User } })}>
+  <Tab.Navigator screenOptions={(p) => tabScreenOptions({ ...p, iconMap: { Home, Bookings: CalendarDays, Messages: MessageCircle, Calendar: CalendarDays, Profile: User } })}>
     <Tab.Screen name="Home"     component={HomeScreen}     options={{ title: "Home" }} />
     <Tab.Screen name="Bookings" component={BookingsScreen} options={{ title: "Bookings" }} />
+    <Tab.Screen name="Messages" component={MessagesScreen} options={{ title: "Messages" }} />
     <Tab.Screen name="Calendar" component={CalendarScreen} options={{ title: "Calendar" }} />
     <Tab.Screen name="Profile"  component={ProfileScreen}  options={{ title: "Profile" }} />
   </Tab.Navigator>

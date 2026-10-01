@@ -22,6 +22,7 @@ import {
   neuCircle,
   neuGreenRaised,
 } from "../theme/neumorphic";
+import KeyboardSafeView from "../components/KeyboardSafeView";
 
 // ── Design tokens ──────────────────────────────────────────
 const C = {
@@ -184,10 +185,10 @@ const ChatScreen = ({ navigation }) => {
         <View style={styles.headerDivider} />
 
         {/* ── Keyboard avoiding wrapper ── */}
-        <KeyboardAvoidingView
-          behavior="padding"
+        <KeyboardSafeView
           style={{ flex: 1 }}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+          iosOffset={90}
+          onKeyboardShow={() => flatListRef.current?.scrollToEnd({ animated: true })}
         >
           {/* ── Chat body ── */}
           <View style={styles.chatBody}>
@@ -245,7 +246,7 @@ const ChatScreen = ({ navigation }) => {
               )}
             </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
+        </KeyboardSafeView>
       </View>
     </SafeAreaView>
   );

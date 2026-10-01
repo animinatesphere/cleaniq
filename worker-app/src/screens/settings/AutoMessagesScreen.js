@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, KeyboardAvoidingView, Switch, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, Switch, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Screen, ScreenHeader, BigTitle, Loading, usePreferences, G, styles as s } from "./common";
+import KeyboardSafeView from "../../components/KeyboardSafeView";
 
 // Messages → Settings: the intro sent automatically to a new customer when you accept their job.
 // {name} and {date} are filled in for you.
@@ -14,7 +15,7 @@ export default function AutoMessagesScreen({ navigation }) {
   return (
     <Screen>
       <ScreenHeader title="Settings" navigation={navigation} />
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+      <KeyboardSafeView style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ padding: 20 }} keyboardShouldPersistTaps="handled">
           <BigTitle sub="These messages are sent automatically on your behalf.">Automatic messages</BigTitle>
           {!!error && <Text style={s.error}>{error}</Text>}
@@ -46,7 +47,7 @@ export default function AutoMessagesScreen({ navigation }) {
             {saving ? <ActivityIndicator color="#fff" /> : <Text style={st.btnTxt}>Save message</Text>}
           </TouchableOpacity>
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardSafeView>
     </Screen>
   );
 }
