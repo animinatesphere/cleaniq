@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
   TouchableOpacity, Alert, ActivityIndicator, Linking, Platform,
@@ -37,10 +38,49 @@ const STATUS_MAP = {
 
 const PAYMENT_STATUS_MAP = {
   Pending:    { color: "#F59E0B", bg: C.warningBg, label: "Payment Pending" },
-  Authorized: { color: "#06B6D4", bg: "#ECFEFF",   label: "Payment Authorized" },
-  Completed:  { color: C.success, bg: C.successBg, label: "Payment Complete" },
+  Processing: { color: "#06B6D4", bg: "#ECFEFF",   label: "Payment Processing" },
+  Authorized: { color: "#06B6D4", bg: "#ECFEFF",   label: "Payment Authorised" },
+  Completed:  { color: C.success, bg: C.successBg, label: "Paid" },
+  Paid:       { color: C.success, bg: C.successBg, label: "Paid" },
+  Failed:     { color: C.error,   bg: C.errorBg,   label: "Payment Needed" },
   Refunded:   { color: C.error,   bg: C.errorBg,   label: "Refunded" },
 };
+
+const fmtWhen = (d) =>
+  d ? new Date(d).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "";
+
+const DONE_STATUSES = ["Completed", "Completed - Unpaid"];
+// How far along the job is, so the progress steps follow what the cleaner does.
+const STAGE = { Pending: 0, "Awaiting Payment": 0, Confirmed: 1, Authorized: 1, Accepted: 1, Assigned: 2, Arrived: 3, "In Progress": 4, Cleaning: 4, Completed: 5, "Completed - Unpaid": 5 };
+
+function buildTimeline(b) {
+  const stage = Math.max(
+    STAGE[b.status] ?? 0,
+    b.jobEndTime ? 5 : b.jobStartTime ? 4 : b.jobArrivedTime ? 3 : b.assignedWorker ? 2 : 0,
+  );
+  const first = (b.assignedWorkerName || "").split(" ")[0];
+  const start = b.schedule?.preferredTime || b.schedule?.timeSlot || "";
+  const paidAt = b.payment?.authorizedAt || b.payment?.capturedAt;
+  const confirmedAt = paidAt && (!b.jobAcceptedTime || new Date(paidAt) <= new Date(b.jobAcceptedTime)) ? paidAt : null;
+  const waiting = [
+    "",
+    "Waiting for confirmation.",
+    "We're finding you a cleaner.",
+    `${first || "Your cleaner"} will arrive on ${b.schedule?.date ? new Date(b.schedule.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) : "the day"}${/^\d{1,2}:\d{2}$/.test(start) ? ` at ${start}` : ""}.`,
+    "Cleaning will start shortly.",
+    "Your clean is under way.",
+  ];
+  const steps = [
+    { label: "Booking received", time: b.createdAt, sub: "We've got your booking." },
+    // Regular-clean visits are paid when the cleaner arrives, so only show a payment time that fits the order.
+    { label: "Booking confirmed", time: confirmedAt, sub: "Your clean is confirmed. We're finding you a cleaner." },
+    { label: first ? `${first} is your cleaner` : "Cleaner assigned", time: b.jobAcceptedTime, sub: first ? `${first} has accepted your job.` : "A cleaner has accepted your job." },
+    { label: "Cleaner arrived", time: b.jobArrivedTime, sub: `${first || "Your cleaner"} is at your property.` },
+    { label: "Cleaning in progress", time: b.jobStartTime, sub: `${first || "Your cleaner"} has started cleaning.` },
+    { label: "Cleaning complete", time: b.jobEndTime, sub: "All done. Thanks for choosing Cleaniq!" },
+  ];
+  return steps.map((st, i) => ({ ...st, waiting: waiting[i], done: i <= stage, current: i === Math.min(stage + 1, steps.length - 1) && stage < 5 }));
+}
 
 const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "TBC";
@@ -106,24 +146,30 @@ const BookingDetailScreen = ({ route, navigation }) => {
     } catch {} finally { setRefreshing(false); }
   };
 
-  // Auto-refresh booking data every 30 seconds when active
+  // Refresh when the screen opens, then every 15 seconds while the job is active,
+  // so the progress follows the cleaner (assigned → arrived → cleaning → complete).
+  useFocusEffect(useCallback(() => { fetchBooking(); }, [bookingId])); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!bookingId) return;
-    const active = !["Completed", "Cancelled"].includes(booking?.status);
+    const active = ![...DONE_STATUSES, "Cancelled"].includes(booking?.status);
     if (!active) return;
-    const iv = setInterval(fetchBooking, 30000);
+    const iv = setInterval(fetchBooking, 15000);
     return () => clearInterval(iv);
-  }, [bookingId, booking?.status]);
+  }, [bookingId, booking?.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Poll worker location for active bookings
   useEffect(() => {
-    if (!bookingId || !booking) return;
-    const active = !["Completed", "Cancelled"].includes(booking.status);
+    if (!bookingId || !booking?.assignedWorker) return;
+    const active = ![...DONE_STATUSES, "Cancelled"].includes(booking.status);
     if (!active) return;
     let iv;
     const poll = async () => {
       try {
-        const r = await fetch(`${API_URL}/workers/jobs/${bookingId}/worker-location`);
+        const token = await AsyncStorage.getItem("customerToken");
+        const r = await fetch(`${API_URL}/workers/jobs/${bookingId}/worker-location`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!r.ok) { setWorkerLoc(null); return; }
         const data = await r.json();
         setWorkerLoc(data);
         // Reverse geocode address when location is shared
@@ -146,7 +192,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
     poll();
     iv = setInterval(poll, 20000);
     return () => clearInterval(iv);
-  }, [bookingId, booking?.status]);
+  }, [bookingId, booking?.status, booking?.assignedWorker]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCancel = () => {
     Alert.alert(
@@ -225,7 +271,19 @@ const BookingDetailScreen = ({ route, navigation }) => {
   const statusMeta   = STATUS_MAP[booking.status]   || { color: C.textMuted, bg: C.surfaceAlt, icon: Clock };
   const paymentMeta  = PAYMENT_STATUS_MAP[booking.payment?.status] || { color: C.textMuted, bg: C.surfaceAlt, label: booking.payment?.status || "—" };
   const canCancel    = ["Confirmed", "Pending", "Assigned"].includes(booking.status);
-  const isActive     = !["Completed", "Cancelled"].includes(booking.status);
+  const isActive     = ![...DONE_STATUSES, "Cancelled"].includes(booking.status);
+  const isCancelled  = booking.status === "Cancelled";
+  const cleanerFirst = (booking.assignedWorkerName || "").split(" ")[0];
+  const headline = {
+    Assigned: cleanerFirst ? `${cleanerFirst} is your cleaner` : "Cleaner assigned",
+    Arrived: `${cleanerFirst || "Your cleaner"} has arrived`,
+    "In Progress": `${cleanerFirst || "Your cleaner"} is cleaning now`,
+    Completed: "Cleaning complete",
+    "Completed - Unpaid": "Cleaning complete",
+    Cancelled: "This booking was cancelled",
+  }[booking.status];
+  const payStatus    = booking.payment?.status;
+  const chargeLater  = booking.payment?.chargeOnArrival && !["Completed", "Paid"].includes(payStatus) && payStatus !== "Failed";
   const StatusIcon   = statusMeta.icon;
 
   // Support old root-level object format {name: qty} and new details.extras array [{name, qty}]
@@ -235,13 +293,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
   const extrasFromObj = Object.entries(extrasObj).filter(([, v]) => v > 0);
   const extras = extrasFromArr.length > 0 ? extrasFromArr : extrasFromObj;
 
-  const timeline = [
-    { label: "Booking Confirmed",   done: true },
-    { label: "Worker Assigned",      done: !!booking.assignedWorker },
-    { label: "Worker Arrived",       done: !!booking.jobArrivedTime },
-    { label: "Cleaning Started",     done: !!booking.jobStartTime },
-    { label: "Cleaning Complete",    done: booking.status === "Completed" },
-  ];
+  const timeline = buildTimeline(booking);
 
   return (
     <SafeAreaView style={styles.root}>
@@ -266,6 +318,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
           <StatusIcon size={14} color={statusMeta.color} strokeWidth={2.5} />
           <Text style={[styles.statusPillTxt, { color: statusMeta.color }]}>{STATUS_LABEL[booking.status] || booking.status}</Text>
         </View>
+        {!!headline && <Text style={styles.headline}>{headline}</Text>}
       </LinearGradient>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -273,32 +326,24 @@ const BookingDetailScreen = ({ route, navigation }) => {
         {/* Worker live location */}
         {workerLoc?.sharing && isActive && (
           <View style={styles.liveTrackCard}>
-            {/* Static map thumbnail */}
-            <View style={styles.liveMapThumb}>
-              <Image
-                source={{ uri: `https://maps.googleapis.com/maps/api/staticmap?center=${workerLoc.lat},${workerLoc.lng}&zoom=15&size=600x240&markers=color:green|label:W|${workerLoc.lat},${workerLoc.lng}&scale=2` }}
-                style={styles.liveMapImg}
-                resizeMode="cover"
-              />
-              <View style={styles.liveMapOverlay}>
-                <View style={styles.liveTrackDot}><Radio size={11} color="#fff" /></View>
-                <Text style={styles.liveMapLiveTxt}>LIVE</Text>
-              </View>
+            <View style={styles.liveTrackHead}>
+              <View style={styles.liveTrackDot}><Radio size={11} color="#fff" /></View>
+              <Text style={styles.liveMapLiveTxt}>LIVE</Text>
             </View>
             <View style={styles.liveTrackInfo}>
-              <Text style={styles.liveTrackTitle}>{workerLoc.workerName} has arrived</Text>
-              {workerAddress ? (
-                <Text style={styles.liveTrackAddr}>{workerAddress}</Text>
-              ) : (
-                <Text style={styles.liveTrackAddr}>Locating address...</Text>
-              )}
+              <Text style={styles.liveTrackTitle}>
+                {booking.status === "Assigned"
+                  ? `${workerLoc.workerName || cleanerFirst || "Your cleaner"} is on the way`
+                  : `${workerLoc.workerName || cleanerFirst || "Your cleaner"} is at your property`}
+              </Text>
+              <Text style={styles.liveTrackAddr}>{workerAddress || "Locating…"}</Text>
               <TouchableOpacity
                 style={styles.liveMapBtn}
                 onPress={() => Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${workerLoc.lat},${workerLoc.lng}`)}
                 activeOpacity={0.8}
               >
                 <MapPin size={12} color={C.primary} />
-                <Text style={styles.liveMapBtnTxt}>Open in Google Maps</Text>
+                <Text style={styles.liveMapBtnTxt}>See on map</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -306,21 +351,34 @@ const BookingDetailScreen = ({ route, navigation }) => {
 
         {/* Timeline */}
         <SectionCard title="Progress">
-          {timeline.map((step, i) => (
-            <View key={step.label} style={styles.timelineRow}>
-              <View style={styles.timelineLeft}>
-                <View style={[styles.timelineDot, step.done && styles.timelineDotDone]}>
-                  {step.done && <CheckCircle2 size={10} color="#fff" strokeWidth={3} />}
-                </View>
-                {i < timeline.length - 1 && (
-                  <View style={[styles.timelineLine, step.done && styles.timelineLineDone]} />
-                )}
-              </View>
-              <Text style={[styles.timelineLabel, step.done && styles.timelineLabelDone]}>
-                {step.label}
-              </Text>
+          {isCancelled ? (
+            <View style={styles.cancelledBox}>
+              <XCircle size={18} color={C.error} />
+              <Text style={styles.cancelledTxt}>This booking was cancelled.</Text>
             </View>
-          ))}
+          ) : (
+            timeline.map((step, i) => (
+              <View key={step.label} style={styles.timelineRow}>
+                <View style={styles.timelineLeft}>
+                  <View style={[styles.timelineDot, step.done && styles.timelineDotDone, step.current && styles.timelineDotCurrent]}>
+                    {step.done && <CheckCircle2 size={10} color="#fff" strokeWidth={3} />}
+                  </View>
+                  {i < timeline.length - 1 && (
+                    <View style={[styles.timelineLine, step.done && styles.timelineLineDone]} />
+                  )}
+                </View>
+                <View style={styles.timelineBody}>
+                  <Text style={[styles.timelineLabel, step.done && styles.timelineLabelDone, step.current && styles.timelineLabelCurrent]}>
+                    {step.label}
+                  </Text>
+                  {step.done && !!step.time && <Text style={styles.timelineTime}>{fmtWhen(step.time)}</Text>}
+                  {(step.current || (step.done && i === timeline.filter((t) => t.done).length - 1)) && (
+                    <Text style={styles.timelineSub}>{step.current ? step.waiting : step.sub}</Text>
+                  )}
+                </View>
+              </View>
+            ))
+          )}
         </SectionCard>
 
         {/* Booking info */}
@@ -371,7 +429,28 @@ const BookingDetailScreen = ({ route, navigation }) => {
             <Text style={styles.priceLbl}>Method</Text>
             <Text style={styles.priceMetaTxt}>{booking.payment?.method || "Invoice"}</Text>
           </View>
-          {booking.payment?.status === "Pending" && (
+          {chargeLater && (
+            <View style={styles.payNotice}>
+              <CreditCard size={14} color={C.info} />
+              <Text style={styles.payNoticeTxt}>
+                £{Number(booking.payment?.amount || 0).toFixed(2)} will be charged to your saved card on the day, when your cleaner arrives.
+              </Text>
+            </View>
+          )}
+          {payStatus === "Failed" && (
+            <View style={[styles.payNotice, { backgroundColor: C.errorBg }]}>
+              <AlertTriangle size={14} color={C.error} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.payNoticeTxt}>We couldn't charge your saved card for this clean. Please pay to settle it.</Text>
+                {!!booking.payment?.paymentLinkUrl && (
+                  <TouchableOpacity style={styles.payNowBtn} onPress={() => Linking.openURL(booking.payment.paymentLinkUrl)}>
+                    <Text style={styles.payNowTxt}>Pay now</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          )}
+          {payStatus === "Pending" && !booking.payment?.chargeOnArrival && (
             <View style={styles.payNotice}>
               <AlertTriangle size={14} color={C.warning} />
               <Text style={styles.payNoticeTxt}>
@@ -404,7 +483,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
           {/* Contact */}
           <TouchableOpacity
             style={styles.contactBtn}
-            onPress={() => Linking.openURL("tel:+447752476368")}
+            onPress={() => Linking.openURL("tel:+447846726428")}
             activeOpacity={0.8}
           >
             <Phone size={16} color={C.primary} />
@@ -691,6 +770,17 @@ const styles = StyleSheet.create({
   modalCancelTxt: { fontSize: 14, fontWeight: "700", color: C.textMed },
   modalConfirm: { flex: 2, height: 50, borderRadius: 14, backgroundColor: C.primary, alignItems: "center", justifyContent: "center" },
   modalConfirmTxt: { fontSize: 14, fontWeight: "800", color: "#fff" },
+  headline:             { color: "#fff", fontSize: 15, fontWeight: "800", textAlign: "center", marginTop: 8 },
+  liveTrackHead:        { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 14, paddingTop: 12 },
+  timelineBody:         { flex: 1, paddingBottom: 14 },
+  timelineTime:         { fontSize: 11, color: C.textMuted, marginTop: 2 },
+  timelineSub:          { fontSize: 12, color: C.textMed, marginTop: 3, lineHeight: 17 },
+  timelineDotCurrent:   { borderColor: C.primary, borderWidth: 2, backgroundColor: "#E8F5EE" },
+  timelineLabelCurrent: { color: C.primary, fontWeight: "800" },
+  cancelledBox:         { flexDirection: "row", alignItems: "center", gap: 10, padding: 12, borderRadius: 12, backgroundColor: C.errorBg },
+  cancelledTxt:         { fontSize: 14, fontWeight: "700", color: C.error },
+  payNowBtn:            { alignSelf: "flex-start", marginTop: 8, backgroundColor: C.primary, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
+  payNowTxt:            { color: "#fff", fontWeight: "800", fontSize: 13 },
 });
 
 export default BookingDetailScreen;

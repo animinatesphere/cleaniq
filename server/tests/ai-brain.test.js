@@ -123,3 +123,13 @@ test("receptionist names: parsed from AI Settings, one picked per call, invalid 
   const p = buildInstructions({ channel: "voice", settings, knowledge, services, now, agentName: "Mark" });
   assert.match(p, /^You are Mark, the receptionist/);
 });
+
+test("price list says which services can be regular and at what price", () => {
+  const svc = [
+    { name: "Regular House Cleaning", type: "hourly", rate: 20.9, weeklyRate: 17.9, fortnightlyRate: 18.9 },
+    { name: "Office Cleaning", type: "hourly", rate: 20.8 },
+  ];
+  const p = buildInstructions({ channel: "whatsapp", settings, knowledge, services: svc, now });
+  assert.match(p, /Regular House Cleaning: £20\.90 per hour; that's the one-off price; also weekly £17\.90 per hour, fortnightly £18\.90 per hour/);
+  assert.match(p, /Office Cleaning: £20\.80 per hour; one-off only/);
+});

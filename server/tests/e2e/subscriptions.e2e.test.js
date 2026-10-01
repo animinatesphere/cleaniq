@@ -57,7 +57,10 @@ const inDays = (n) => { const d = new Date(Date.now() + n * DAY); d.setHours(10,
 test.before(async () => {
   mongod = await MongoMemoryServer.create();
   await mongoose.connect(mongod.getUri() + "cleaniq");
-  await Service.create({ name: "Regular House Cleaning", region: "UK", rate: 20.5, type: "hourly", category: "Base" });
+  // Regular cleans are offered weekly/fortnightly only when admin has priced them.
+  await Service.create({ name: "Regular House Cleaning", region: "UK", rate: 20.5, type: "hourly", category: "Base", weeklyRate: 20.5, fortnightlyRate: 20.5 });
+  await Service.create({ name: "Deep Cleaning", region: "UK", rate: 30.85, type: "hourly", category: "Base", monthlyRate: 28, quarterlyRate: 29 });
+  await Service.create({ name: "Office Cleaning", region: "UK", rate: 20.8, type: "hourly", category: "Base" });
   const admin = await Admin.collection.insertOne({ username: "staff1", password: "x", role: "superadmin" });
   adminToken = jwt.sign({ id: admin.insertedId.toString() }, process.env.JWT_SECRET, { algorithm: "HS256" });
   const app = express();
@@ -394,5 +397,35 @@ test("weekly price from admin: accepted as the per-visit price (not raised to th
     payment: { amount: 1, currency: "GBP", method: "Stripe", stripePaymentIntentId: "pi_wk2" },
   }));
   assert.equal((await Subscription.findOne({ subscriptionRef: r2.data.subscription.subscriptionRef })).pricePerVisit, 35.8);
-  await Service.updateOne({ name: "Regular House Cleaning" }, { $set: { weeklyRate: null } });
+  await Service.updateOne({ name: "Regular House Cleaning" }, { $set: { weeklyRate: 20.5 } });
+});
+
+
+test("Deep Cleaning every 3 months: visits 3 months apart at the quarterly price; office cleaning can't be regular", async () => {
+  intents.pi_q = { id: "pi_q", status: "succeeded", amount: 8700, customer: "cus_1", payment_method: "pm_1" };
+  const r = await call("POST", "/customer-bookings", websiteBooking({
+    customer: { firstName: "Quinn", lastName: "Q", email: "quarterly@test.com", phone: "07700900111" },
+    service: "Deep Cleaning",
+    details: { address: "9 Elm St", frequency: "Quarterly", duration: 3, extras: [] },
+    subscription: { visitPrice: 87 },
+    payment: { amount: 87, currency: "GBP", method: "Stripe", stripePaymentIntentId: "pi_q" },
+  }));
+  const s = await Subscription.findOne({ subscriptionRef: r.data.subscription.subscriptionRef });
+  assert.equal(s.frequency, "Quarterly");
+  assert.equal(s.pricePerVisit, 87, "3h × £29");
+  const v = await visitsOf(s);
+  assert.ok(v.length >= 2);
+  const months = (a, b) => (new Date(b).getFullYear() - new Date(a).getFullYear()) * 12 + new Date(b).getMonth() - new Date(a).getMonth();
+  assert.equal(months(v[0].schedule.date, v[1].schedule.date), 3);
+
+  emails.length = 0;
+  intents.pi_off = { id: "pi_off", status: "succeeded", amount: 4160, customer: "cus_1", payment_method: "pm_1" };
+  const o = await call("POST", "/customer-bookings", websiteBooking({
+    customer: { firstName: "Olive", lastName: "O", email: "office@test.com", phone: "07700900112" },
+    service: "Office Cleaning",
+    payment: { amount: 41.6, currency: "GBP", method: "Stripe", stripePaymentIntentId: "pi_off" },
+  }));
+  assert.equal(o.data.subscription, undefined, "not offered weekly → no subscription");
+  await new Promise((res) => setTimeout(res, 20));
+  assert.ok(emails.some((e) => /Regular clean setup needs checking/.test(e.subject)));
 });

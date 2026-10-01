@@ -7,6 +7,8 @@ const serviceSchema = new mongoose.Schema({
   // Optional hourly prices for regular cleans (admin → Services). Empty = use the normal rate.
   weeklyRate: { type: Number, default: null },
   fortnightlyRate: { type: Number, default: null },
+  monthlyRate: { type: Number, default: null },
+  quarterlyRate: { type: Number, default: null }, // every 3 months
   type: { type: String, enum: ["hourly", "flat"], required: true },
   category: {
     type: String,

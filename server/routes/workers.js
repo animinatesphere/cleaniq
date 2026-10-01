@@ -1207,11 +1207,31 @@ router.put("/:id/location", async (req, res) => {
 
 // GET a booking's assigned worker's current shared location - used by
 // admin (and later the customer app) to show where the worker is.
+// A cleaner's live location is only for the booking's own customer or an admin.
+async function canSeeWorkerLocation(req, booking) {
+  const auth = req.headers.authorization || "";
+  if (!auth.startsWith("Bearer ")) return false;
+  const token = auth.slice(7);
+  try {
+    const { JWT_SECRET: CUSTOMER_SECRET } = require("./customer-auth");
+    const c = jwt.verify(token, CUSTOMER_SECRET);
+    if (c?.email && String(c.email).toLowerCase() === String(booking.customer?.email || "").toLowerCase()) return true;
+  } catch { /* not a customer token */ }
+  try {
+    const a = jwt.verify(token, process.env.ADMIN_JWT_SECRET || process.env.JWT_SECRET, { algorithms: ["HS256"] });
+    if (a?.id && (await require("../models/Admin").exists({ _id: a.id }))) return true;
+  } catch { /* not an admin token */ }
+  return false;
+}
+
 router.get("/jobs/:id/worker-location", async (req, res) => {
   try {
     const booking = await findBookingByIdOrBookingId(req.params.id);
     if (!booking) {
       return res.status(404).json({ error: "Booking not found" });
+    }
+    if (!(await canSeeWorkerLocation(req, booking))) {
+      return res.status(401).json({ error: "Log in to see your cleaner's location" });
     }
     if (!booking.assignedWorker) {
       return res.status(404).json({ error: "No worker assigned to this job" });

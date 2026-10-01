@@ -1,6 +1,19 @@
-// Hourly price for a service by how often it's booked. Weekly and fortnightly cleans can have
-// their own price set in admin (Services page); if not set, the normal (one-off) price is used.
-const FREQUENCY_FIELD = { Weekly: "weeklyRate", Fortnightly: "fortnightlyRate", "Bi-weekly": "fortnightlyRate" };
+// Hourly price for a service by how often it's booked. Regular frequencies have their own price set
+// in admin (Services page). A frequency is only offered to customers for a service when its price is
+// set (One-off is always offered); if a price is missing the normal (one-off) price is used.
+const FREQUENCY_FIELD = {
+  Weekly: "weeklyRate",
+  Fortnightly: "fortnightlyRate",
+  "Bi-weekly": "fortnightlyRate",
+  Monthly: "monthlyRate",
+  Quarterly: "quarterlyRate",
+};
+const REGULAR_FREQUENCIES = ["Weekly", "Fortnightly", "Monthly", "Quarterly"];
+
+// Frequencies a customer can book for this service: One-off plus every regular one with a price.
+function offeredFrequencies(service) {
+  return ["Once", ...REGULAR_FREQUENCIES.filter((f) => Number(service?.[FREQUENCY_FIELD[f]]) > 0)];
+}
 
 function rateForFrequency(service, frequency) {
   if (!service) return 0;
@@ -18,4 +31,4 @@ function parseOptionalRate(value) {
   return n > 0 ? Math.round(n * 100) / 100 : null;
 }
 
-module.exports = { rateForFrequency, parseOptionalRate };
+module.exports = { rateForFrequency, parseOptionalRate, offeredFrequencies, FREQUENCY_FIELD, REGULAR_FREQUENCIES };

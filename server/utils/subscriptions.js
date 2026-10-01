@@ -10,7 +10,7 @@ const Service = require("../models/Service");
 const Subscription = require("../models/Subscription");
 const Notification = require("../models/Notification");
 const { buildBookingDateTime } = require("./bookingDateTime");
-const { rateForFrequency } = require("./pricing");
+const { rateForFrequency, offeredFrequencies } = require("./pricing");
 
 let stripeClient = null;
 const stripe = () => stripeClient || (stripeClient = require("stripe")(process.env.STRIPE_SECRET_KEY));
@@ -23,11 +23,12 @@ const FREQUENCIES = {
   Fortnightly: { days: 14 },
   "Bi-weekly": { days: 14 },
   Monthly: { months: 1 },
+  Quarterly: { months: 3 },
 };
 const normaliseFrequency = (f) => (f === "Bi-weekly" ? "Fortnightly" : f);
 const isSubscriptionFrequency = (f) => Boolean(FREQUENCIES[f]);
 // Keep visits booked this far ahead, so cleaners can see and accept them.
-const HORIZON_DAYS = { Weekly: 56, Fortnightly: 56, Monthly: 93 };
+const HORIZON_DAYS = { Weekly: 56, Fortnightly: 56, Monthly: 93, Quarterly: 190 };
 const FRONTEND = () => process.env.FRONTEND_URL || "https://cleaniqservices.com";
 const ADMIN_EMAIL = () => process.env.EMAIL_USER || "info@cleaniqservices.com";
 
@@ -61,10 +62,14 @@ async function uniqueRef(prefix, exists) {
 
 // Lowest believable price for one visit (service rate × hours), so a tampered client price can't
 // set up cheap future charges. Extras and supplies only ever add to it.
-async function minimumVisitPrice(serviceName, hours, frequency) {
-  if (!serviceName) return 0;
+async function findService(serviceName) {
+  if (!serviceName) return null;
   const matches = await Service.find({ name: new RegExp(`^${escapeRegex(String(serviceName).trim())}$`, "i") }).lean();
-  const s = matches.find((x) => x.category === "Base") || matches[0];
+  return matches.find((x) => x.category === "Base") || matches[0] || null;
+}
+
+async function minimumVisitPrice(serviceName, hours, frequency) {
+  const s = await findService(serviceName);
   if (!s) return 0;
   const rate = rateForFrequency(s, frequency);
   return s.type === "hourly" ? rate * Number(hours || 0) : rate;
@@ -98,6 +103,11 @@ function templateFrom(booking) {
 async function createSubscription(firstBooking, { visitPrice, source = "Website", status = "pending_payment" } = {}) {
   const frequency = normaliseFrequency(firstBooking.details?.frequency);
   if (!isSubscriptionFrequency(frequency)) throw new Error(`Not a regular frequency: ${firstBooking.details?.frequency}`);
+  // Only frequencies admin has priced for this service are offered (e.g. Deep Cleaning: monthly / every 3 months).
+  const service = await findService(firstBooking.service);
+  if (service && !offeredFrequencies(service).includes(frequency)) {
+    throw new Error(`${firstBooking.service} isn't offered ${frequency.toLowerCase()}`);
+  }
   const floor = await minimumVisitPrice(firstBooking.service, firstBooking.details?.duration, frequency);
   const claimed = Number(visitPrice ?? firstBooking.payment?.amount ?? 0);
   const pricePerVisit = Math.round(Math.max(claimed, floor) * 100) / 100;
@@ -436,7 +446,11 @@ async function sendSetupEmail(sub) {
   const { sendEmail } = require("./emailService");
   const t = sub.template || {};
   const time = t.schedule?.preferredTime || t.schedule?.timeSlot || "";
-  const every = sub.frequency === "Weekly" ? `every ${ukWeekday(sub.startDate)}` : sub.frequency === "Fortnightly" ? `every other ${ukWeekday(sub.startDate)}` : "every month";
+  const every =
+    sub.frequency === "Weekly" ? `every ${ukWeekday(sub.startDate)}`
+    : sub.frequency === "Fortnightly" ? `every other ${ukWeekday(sub.startDate)}`
+    : sub.frequency === "Quarterly" ? "every 3 months"
+    : "every month";
   await sendEmail({
     to: sub.customer?.email,
     subject: `Your regular clean is set up – ${sub.subscriptionRef}`,

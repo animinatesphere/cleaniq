@@ -11,7 +11,7 @@ const subscriptionSchema = new mongoose.Schema(
       enum: ["pending_payment", "active", "paused", "cancelled"],
       default: "pending_payment",
     },
-    frequency: { type: String, enum: ["Weekly", "Fortnightly", "Monthly"], required: true },
+    frequency: { type: String, enum: ["Weekly", "Fortnightly", "Monthly", "Quarterly"], required: true },
     customer: {
       firstName: String,
       lastName: String,

@@ -166,8 +166,9 @@ const AppNavigation = () => {
     responseListener.current = Notifications.addNotificationResponseReceivedListener(() => {});
 
     return () => {
-      if (notifListener.current)    Notifications.removeNotificationSubscription(notifListener.current);
-      if (responseListener.current) Notifications.removeNotificationSubscription(responseListener.current);
+      // expo-notifications 55: subscriptions have .remove() (removeNotificationSubscription no longer exists)
+      notifListener.current?.remove?.();
+      responseListener.current?.remove?.();
     };
   }, [userToken]);
 
