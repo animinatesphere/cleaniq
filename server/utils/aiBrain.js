@@ -42,7 +42,11 @@ function formatServices(services) {
   }
   const line = (s) => {
     const details = [s.description, ...(s.bullets || [])].filter(Boolean).join("; ");
-    return `- ${s.name}: ${formatPrice(s)}${details ? ` (${details})` : ""}`;
+    const regular = [
+      s.weeklyRate > 0 && `weekly £${Number(s.weeklyRate).toFixed(2)} per hour`,
+      s.fortnightlyRate > 0 && `fortnightly £${Number(s.fortnightlyRate).toFixed(2)} per hour`,
+    ].filter(Boolean);
+    return `- ${s.name}: ${formatPrice(s)}${regular.length ? ` one-off; ${regular.join(", ")}` : ""}${details ? ` (${details})` : ""}`;
   };
   const sections = [];
   if (groups.hourly.length) sections.push("Cleaning services (charged per hour):\n" + groups.hourly.map(line).join("\n"));

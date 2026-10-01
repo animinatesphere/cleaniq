@@ -52,6 +52,11 @@ const ServicesManagement = () => {
     setServices(prev => prev.map(s => s._id === id ? { ...s, rate: parseFloat(newRate) || 0 } : s));
   };
 
+  // Weekly/fortnightly hourly prices for regular cleans ("" = use the one-off price).
+  const handleRegularRateChange = (id, field, value) => {
+    setServices(prev => prev.map(s => s._id === id ? { ...s, [field]: value } : s));
+  };
+
   const handleNameChange = (id, newName) => {
     // Keep originalCategory stable when renaming so the service stays in the right tab
     setServices(prev => prev.map(s => s._id === id ? { ...s, name: newName, originalCategory: s.originalCategory || s.category } : s));
@@ -297,6 +302,9 @@ const ServicesManagement = () => {
                 </div>
               )}
 
+              {service.type === 'hourly' && (
+                <p className="text-[10px] font-semibold text-white/40 mt-4 -mb-2">One-off £/hr</p>
+              )}
               <div className="flex gap-2 mt-4">
                 <div className="relative flex-1">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-white/40">{activeRegion === 'UK' ? '£' : '₦'}</span>
@@ -314,6 +322,31 @@ const ServicesManagement = () => {
                   <Save size={20}/>
                 </button>
               </div>
+              {service.type === 'hourly' && (
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  {[
+                    { field: 'weeklyRate', label: 'Weekly £/hr' },
+                    { field: 'fortnightlyRate', label: 'Fortnightly £/hr' },
+                  ].map(({ field, label }) => (
+                    <label key={field} className="block">
+                      <span className="text-[10px] font-semibold text-white/40">{label}</span>
+                      <div className="relative mt-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-white/40 text-sm">{activeRegion === 'UK' ? '£' : '₦'}</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={service[field] ?? ''}
+                          onChange={(e) => handleRegularRateChange(service._id, field, e.target.value)}
+                          placeholder="One-off"
+                          className="w-full pl-7 pr-3 py-2.5 bg-white/5 rounded-xl border border-white/10 font-bold text-white text-sm placeholder:text-white/20 placeholder:font-medium focus:outline-none focus:border-emerald-500/50 transition-all"
+                        />
+                      </div>
+                    </label>
+                  ))}
+                  <p className="col-span-2 text-[10px] text-white/30">Leave empty to charge the one-off price. Press save to apply.</p>
+                </div>
+              )}
             </div>
           ))}
         </div>

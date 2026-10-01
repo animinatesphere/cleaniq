@@ -373,3 +373,26 @@ test("safety nets: no duplicate visits, and a visit is still charged if the clea
   assert.equal(after - before, 1, "charged exactly once");
   assert.equal((await Booking.findById(visit._id)).payment.status, "Completed", "complete didn't undo the payment");
 });
+
+test("weekly price from admin: accepted as the per-visit price (not raised to the one-off price)", async () => {
+  await Service.updateOne({ name: "Regular House Cleaning" }, { $set: { weeklyRate: 17.9 } });
+  intents.pi_wk = { id: "pi_wk", status: "succeeded", amount: 3580, customer: "cus_1", payment_method: "pm_1" };
+  const r = await call("POST", "/customer-bookings", websiteBooking({
+    customer: { firstName: "Wes", lastName: "Weekly", email: "weekly@test.com", phone: "07700900999" },
+    subscription: { visitPrice: 35.8 },
+    payment: { amount: 35.8, currency: "GBP", method: "Stripe", stripePaymentIntentId: "pi_wk" },
+  }));
+  const s = await Subscription.findOne({ subscriptionRef: r.data.subscription.subscriptionRef });
+  assert.equal(s.status, "active");
+  assert.equal(s.pricePerVisit, 35.8, "2h × £17.90 weekly price");
+
+  // Still can't go below the weekly price.
+  intents.pi_wk2 = { id: "pi_wk2", status: "succeeded", amount: 100, customer: "cus_1", payment_method: "pm_1" };
+  const r2 = await call("POST", "/customer-bookings", websiteBooking({
+    customer: { firstName: "Low", lastName: "Ball", email: "low@test.com", phone: "07700900998" },
+    subscription: { visitPrice: 1 },
+    payment: { amount: 1, currency: "GBP", method: "Stripe", stripePaymentIntentId: "pi_wk2" },
+  }));
+  assert.equal((await Subscription.findOne({ subscriptionRef: r2.data.subscription.subscriptionRef })).pricePerVisit, 35.8);
+  await Service.updateOne({ name: "Regular House Cleaning" }, { $set: { weeklyRate: null } });
+});

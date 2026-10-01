@@ -81,3 +81,23 @@ test("saving a rate on a flat-price service syncs the hourly rate, never £0", a
   await put({ workerHourlyRate: 0 });
   assert.equal((await Booking.findOne({ bookingId: "BK-1" })).workerRate, 16, "clearing the rate leaves bookings alone");
 });
+
+test("admin saves weekly/fortnightly prices on a service (and can clear them)", async () => {
+  const svc = await Service.findOne({ name: "Regular House Cleaning" });
+  const put = (body) => fetch(`${base}/services/${svc._id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` },
+    body: JSON.stringify(body),
+  });
+  assert.equal((await put({ weeklyRate: "17.90", fortnightlyRate: 18.9 })).status, 200);
+  let s = await Service.findById(svc._id).lean();
+  assert.equal(s.weeklyRate, 17.9);
+  assert.equal(s.fortnightlyRate, 18.9);
+  assert.equal(s.rate, 20.5, "normal price untouched");
+  assert.equal((await put({ weeklyRate: "", fortnightlyRate: "abc" })).status, 400);
+  assert.equal((await put({ weeklyRate: "" })).status, 200);
+  s = await Service.findById(svc._id).lean();
+  assert.equal(s.weeklyRate, null);
+  const pub = await (await fetch(`${base}/services?booking=1`)).json();
+  assert.ok(pub.find((x) => x.name === "Regular House Cleaning" && x.fortnightlyRate === 18.9), "public list includes the prices");
+});

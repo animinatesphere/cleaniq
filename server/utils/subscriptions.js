@@ -10,6 +10,7 @@ const Service = require("../models/Service");
 const Subscription = require("../models/Subscription");
 const Notification = require("../models/Notification");
 const { buildBookingDateTime } = require("./bookingDateTime");
+const { rateForFrequency } = require("./pricing");
 
 let stripeClient = null;
 const stripe = () => stripeClient || (stripeClient = require("stripe")(process.env.STRIPE_SECRET_KEY));
@@ -60,12 +61,13 @@ async function uniqueRef(prefix, exists) {
 
 // Lowest believable price for one visit (service rate × hours), so a tampered client price can't
 // set up cheap future charges. Extras and supplies only ever add to it.
-async function minimumVisitPrice(serviceName, hours) {
+async function minimumVisitPrice(serviceName, hours, frequency) {
   if (!serviceName) return 0;
   const matches = await Service.find({ name: new RegExp(`^${escapeRegex(String(serviceName).trim())}$`, "i") }).lean();
   const s = matches.find((x) => x.category === "Base") || matches[0];
   if (!s) return 0;
-  return s.type === "hourly" ? Number(s.rate || 0) * Number(hours || 0) : Number(s.rate || 0);
+  const rate = rateForFrequency(s, frequency);
+  return s.type === "hourly" ? rate * Number(hours || 0) : rate;
 }
 
 async function getOrCreateStripeCustomer({ email, name, phone }) {
@@ -96,7 +98,7 @@ function templateFrom(booking) {
 async function createSubscription(firstBooking, { visitPrice, source = "Website", status = "pending_payment" } = {}) {
   const frequency = normaliseFrequency(firstBooking.details?.frequency);
   if (!isSubscriptionFrequency(frequency)) throw new Error(`Not a regular frequency: ${firstBooking.details?.frequency}`);
-  const floor = await minimumVisitPrice(firstBooking.service, firstBooking.details?.duration);
+  const floor = await minimumVisitPrice(firstBooking.service, firstBooking.details?.duration, frequency);
   const claimed = Number(visitPrice ?? firstBooking.payment?.amount ?? 0);
   const pricePerVisit = Math.round(Math.max(claimed, floor) * 100) / 100;
   const subscriptionRef = await uniqueRef("SUB-", (ref) => Subscription.exists({ subscriptionRef: ref }));
