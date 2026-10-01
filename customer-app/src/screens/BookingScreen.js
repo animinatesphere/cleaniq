@@ -105,12 +105,11 @@ const extraIcon = (name = "") => {
   return Package;
 };
 
-// Same choices as the website booking page.
-const FREQUENCIES    = [
-  { value: "Once",        label: "One-off" },
-  { value: "Weekly",      label: "Weekly", popular: true },
-  { value: "Fortnightly", label: "Fortnightly" },
-];
+// Same choices as the website: one-off always, plus the regular frequencies admin has priced
+// for the chosen service (e.g. Regular cleaning weekly/fortnightly, Deep cleaning monthly/every 3 months).
+const REGULAR_FREQUENCIES = ["Weekly", "Fortnightly", "Monthly", "Quarterly"];
+const FREQUENCY_LABEL = { Once: "One-off", Weekly: "Weekly", Fortnightly: "Fortnightly", Monthly: "Monthly", Quarterly: "Every 3 months" };
+const REGULAR_EVERY   = { Weekly: "every week", Fortnightly: "every two weeks", Monthly: "every month", Quarterly: "every 3 months" };
 const PARKING_OPTIONS = ["On-site parking", "Street parking", "Paid parking nearby", "No parking"];
 const ACCESS_OPTIONS  = ["I will be home", "Key in lockbox", "Key under mat", "Concierge"];
 const SUPPLY_OPTIONS  = [
@@ -328,7 +327,12 @@ const BookingScreen = ({ navigation, route }) => {
       setRates(rateMap);
       const regularMap = {};
       all.forEach((s) => {
-        if (s.name) regularMap[s.name] = { Weekly: Number(s.weeklyRate) || 0, Fortnightly: Number(s.fortnightlyRate) || 0 };
+        if (s.name) regularMap[s.name] = {
+          Weekly: Number(s.weeklyRate) || 0,
+          Fortnightly: Number(s.fortnightlyRate) || 0,
+          Monthly: Number(s.monthlyRate) || 0,
+          Quarterly: Number(s.quarterlyRate) || 0,
+        };
       });
       setRegularRates(regularMap);
 
@@ -395,7 +399,13 @@ const BookingScreen = ({ navigation, route }) => {
   const total  = Math.round((rawTotal - discount) * 100) / 100;
   // Regular cleans: first clean paid now (card saved), each following clean charged when the
   // cleaner arrives. The customer must agree before booking.
-  const isRegular = ["Weekly", "Fortnightly", "Monthly"].includes(form.frequency);
+  const offeredFrequencies = ["Once", ...REGULAR_FREQUENCIES.filter((f) => regularRates[form.serviceType]?.[f] > 0)];
+  const isRegular = form.frequency !== "Once" && offeredFrequencies.includes(form.frequency);
+  // Switching to a service that isn't offered at the chosen frequency goes back to one-off.
+  const frequencyOffered = offeredFrequencies.includes(form.frequency);
+  useEffect(() => {
+    if (!frequencyOffered && Object.keys(regularRates).length) setForm((f) => ({ ...f, frequency: "Once" }));
+  }, [frequencyOffered, regularRates]);
   const visitPrice = Math.round(rawTotal * 100) / 100;
   const [regularConsent, setRegularConsent] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState("");
@@ -624,7 +634,10 @@ const BookingScreen = ({ navigation, route }) => {
     const first = new Date(form.date); first.setHours(0, 0, 0, 0);
     const day = new Date(d); day.setHours(0, 0, 0, 0);
     if (day <= first) return false;
-    if (form.frequency === "Monthly") return day.getDate() === first.getDate();
+    if (form.frequency === "Monthly" || form.frequency === "Quarterly") {
+      const months = (day.getFullYear() - first.getFullYear()) * 12 + day.getMonth() - first.getMonth();
+      return day.getDate() === first.getDate() && months % (form.frequency === "Quarterly" ? 3 : 1) === 0;
+    }
     const step = form.frequency === "Weekly" ? 7 : 14;
     return Math.round((day - first) / 86400000) % step === 0;
   };
@@ -740,7 +753,7 @@ const BookingScreen = ({ navigation, route }) => {
 
             <SectionLabel title="How often?" />
             <View style={styles.freqRow}>
-              {FREQUENCIES.map((f) => {
+              {offeredFrequencies.map((value) => ({ value, label: FREQUENCY_LABEL[value], popular: value === "Weekly" })).map((f) => {
                 const on = form.frequency === f.value;
                 return (
                   <TouchableOpacity
@@ -764,10 +777,10 @@ const BookingScreen = ({ navigation, route }) => {
             {isRegular && (
               <View style={styles.regularInfo}>
                 <Text style={styles.regularInfoTitle}>
-                  Regular cleaning, {form.frequency === "Weekly" ? "every week" : "every two weeks"}
+                  Regular cleaning, {REGULAR_EVERY[form.frequency]}
                 </Text>
                 {[
-                  `Same day and time ${form.frequency === "Weekly" ? "every week" : "every two weeks"}`,
+                  `${["Weekly", "Fortnightly"].includes(form.frequency) ? "Same day and time" : "Same date and time"} ${REGULAR_EVERY[form.frequency]}`,
                   "Pay for your first clean today",
                   "Each following clean is charged on the day, when your cleaner arrives",
                   "Pause or cancel free with 24 hours' notice",
@@ -1014,6 +1027,8 @@ const BookingScreen = ({ navigation, route }) => {
                     ? `every ${new Date(form.date).toLocaleDateString("en-GB", { weekday: "long" })}`
                     : form.frequency === "Fortnightly"
                     ? `every other ${new Date(form.date).toLocaleDateString("en-GB", { weekday: "long" })}`
+                    : form.frequency === "Quarterly"
+                    ? "every 3 months"
                     : "the same date every month"}
                 </Text>
                 .{"\n"}You can change a date later.
@@ -1159,7 +1174,7 @@ const BookingScreen = ({ navigation, route }) => {
 
               {isRegular && (
                 <View style={styles.regularBox}>
-                  <Text style={styles.regularTitle}>Your regular clean · {form.frequency}</Text>
+                  <Text style={styles.regularTitle}>Your regular clean · {FREQUENCY_LABEL[form.frequency]}</Text>
                   <View style={styles.regularRow}>
                     <Text style={styles.regularLbl}>First clean, paid today</Text>
                     <Text style={styles.regularAmt}>£{total.toFixed(2)}</Text>
