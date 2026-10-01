@@ -63,3 +63,23 @@ test("admin sees each conversation with names and the full message history", asy
   // Reading doesn't mark anything as read for the cleaner or customer.
   assert.equal(await WorkerCustomerMessage.countDocuments({ isRead: true }), 0);
 });
+
+test("customer Messages tab lists only their own cleaner chats, with unread counts", async () => {
+  const { JWT_SECRET } = require("../../routes/customer-auth");
+  const tokenFor = (email) => jwt.sign({ id: new mongoose.Types.ObjectId().toString(), email, firstName: "Ann", lastName: "Skinner" }, JWT_SECRET);
+  const worker = await Worker.findOne({ workerId: "W-1" });
+  // An upcoming booking with a cleaner but no messages yet still shows, so they can say hello.
+  await Booking.create({ bookingId: "BK-CHAT2", service: "Regular House Cleaning", status: "Assigned", customer: { firstName: "Ann", lastName: "Skinner", email: "Ann@Test.com" }, assignedWorker: worker._id, assignedWorkerName: "Kelvin Obi" });
+  await Booking.create({ bookingId: "BK-OTHER", service: "Deep Cleaning", status: "Assigned", customer: { firstName: "Bob", lastName: "Jones", email: "bob@test.com" }, assignedWorker: worker._id });
+
+  const res = await fetch(`${base}/my/conversations`, { headers: { Authorization: `Bearer ${tokenFor("ann@test.com")}` } });
+  assert.equal(res.status, 200);
+  const list = await res.json();
+  assert.deepEqual(list.map((c) => c.bookingId), ["BK-CHAT1", "BK-CHAT2"]);
+  assert.equal(list[0].workerName, "Kelvin Obi");
+  assert.equal(list[0].lastMessage, "Thanks, on my way");
+  assert.equal(list[0].unreadCount, 2); // two cleaner messages not yet read
+  assert.equal(list[1].hasMessages, false);
+
+  assert.equal((await fetch(`${base}/my/conversations`)).status, 401);
+});

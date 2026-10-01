@@ -7,6 +7,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Send, ChevronLeft, MessageCircle, Check, CheckCheck, ShieldCheck } from "lucide-react-native";
 import axios from "axios";
 import { AuthContext, API_URL } from "../context/AuthContext";
+import KeyboardSafeView from "../components/KeyboardSafeView";
 
 // Cleaner ↔ customer chat for one booking (same design as the customer app's chat).
 // Refreshes every 3 seconds; the customer gets a push notification for each message.
@@ -143,7 +144,7 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
         </View>
       </LinearGradient>
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+      <KeyboardSafeView style={{ flex: 1 }} onKeyboardShow={() => listRef.current?.scrollToEnd({ animated: true })}>
         {loading ? (
           <View style={styles.center}><ActivityIndicator size="large" color="#0F6B4C" /></View>
         ) : (
@@ -206,7 +207,7 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
             {sending ? <ActivityIndicator size="small" color="#fff" /> : <Send size={18} color="#fff" />}
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardSafeView>
     </SafeAreaView>
   );
 };

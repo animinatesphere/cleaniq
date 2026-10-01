@@ -10,6 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Linking } from "react-native";
 import { API_URL } from "../context/AuthContext";
 import { C } from "../theme/flat";
+import KeyboardSafeView from "../components/KeyboardSafeView";
 
 // Customer ↔ cleaner chat for one booking. Messages refresh every 3 seconds; the other side
 // gets a push notification (with sound) for each message.
@@ -168,7 +169,7 @@ const ChatScreen = ({ route, navigation }) => {
         </TouchableOpacity>
       </LinearGradient>
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={0}>
+      <KeyboardSafeView style={{ flex: 1 }} onKeyboardShow={() => listRef.current?.scrollToEnd({ animated: true })}>
         {loading ? (
           <View style={styles.center}><ActivityIndicator size="large" color={C.primary} /></View>
         ) : (
@@ -236,7 +237,7 @@ const ChatScreen = ({ route, navigation }) => {
             {sending ? <ActivityIndicator size="small" color="#fff" /> : <Send size={18} color="#fff" />}
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardSafeView>
     </SafeAreaView>
   );
 };
