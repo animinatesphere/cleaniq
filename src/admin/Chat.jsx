@@ -48,11 +48,15 @@ const Chat = () => {
     try {
       const endpoint = activeTab === 'cleaners'
         ? `${import.meta.env.VITE_API_URL}/messages/active-threads`
+        : activeTab === 'pairs'
+        ? `${import.meta.env.VITE_API_URL}/customer-chat/admin/cleaner-threads`
         : `${import.meta.env.VITE_API_URL}/customer-chat/admin/threads`;
       const response = await fetch(endpoint);
       const data = await response.json();
-      setThreads(data);
-      const incomingSender = activeTab === "cleaners" ? "Worker" : "Customer";
+      setThreads(Array.isArray(data) ? data : []);
+      if (!Array.isArray(data)) return;
+      // Cleaner↔customer chats are read-only for admin, so no "new message" sound.
+      const incomingSender = activeTab === "cleaners" ? "Worker" : activeTab === "pairs" ? null : "Customer";
       const newIncoming = data.filter((thread) => {
         const key = `${activeTab}:${thread._id}:${thread.lastMessageTime}`;
         const isNew = !knownMessageKeys.current.has(key);
@@ -74,10 +78,12 @@ const Chat = () => {
     try {
       const endpoint = activeTab === 'cleaners'
         ? `${import.meta.env.VITE_API_URL}/messages/worker/${thread.worker?._id}`
+        : activeTab === 'pairs'
+        ? `${import.meta.env.VITE_API_URL}/customer-chat/admin/cleaner-thread/${encodeURIComponent(thread._id)}`
         : `${import.meta.env.VITE_API_URL}/customer-chat/admin/thread/${thread._id}`;
       const response = await fetch(endpoint);
       const data = await response.json();
-      setMessages(data);
+      setMessages(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching thread messages:', error);
     } finally {
@@ -168,6 +174,11 @@ const Chat = () => {
   };
 
   const filteredThreads = threads.filter(t => {
+    if (activeTab === 'pairs') {
+      const q = searchQuery.toLowerCase();
+      const hay = `${t.workerName || ''} ${t.booking?.customer?.firstName || ''} ${t.booking?.customer?.lastName || ''} ${t.customerEmail || ''} ${t._id || ''} ${t.booking?.service || ''}`.toLowerCase();
+      return hay.includes(q);
+    }
     if (activeTab === 'cleaners') {
       const fullName = `${t.worker?.firstName || ''} ${t.worker?.lastName || ''}`.toLowerCase();
       const email = t.worker?.email?.toLowerCase() || '';
@@ -214,6 +225,17 @@ const Chat = () => {
               >
                 Customers
               </button>
+              <button
+                onClick={() => setActiveTab('pairs')}
+                title="Conversations between cleaners and customers (read-only)"
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 ${
+                  activeTab === 'pairs'
+                    ? 'bg-[#0B2D22] text-white shadow-sm'
+                    : 'text-white/40 hover:text-white/70'
+                }`}
+              >
+                Job chats
+              </button>
             </div>
             <button
               onClick={() => fetchThreads(true)}
@@ -227,7 +249,7 @@ const Chat = () => {
             <Search size={18} className="text-white/40" />
             <input
               type="text"
-              placeholder={activeTab === 'cleaners' ? "Search cleaner name..." : "Search customer, booking, service..."}
+              placeholder={activeTab === 'cleaners' ? "Search cleaner name..." : activeTab === 'pairs' ? "Search cleaner, customer, booking..." : "Search customer, booking, service..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent border-none outline-none text-sm font-medium w-full text-white placeholder:text-white/20"
@@ -248,6 +270,8 @@ const Chat = () => {
               <p className="text-xs text-white/40 mt-1">
                 {activeTab === 'cleaners'
                   ? 'When cleaners message support from their app, threads will appear here.'
+                  : activeTab === 'pairs'
+                  ? 'When a cleaner and a customer message each other about a booking, the conversation appears here.'
                   : 'When customers message support from their account dashboard, threads will appear here.'
                 }
               </p>
@@ -259,14 +283,21 @@ const Chat = () => {
                 : selectedThread?._id === t._id;
               const isLastMessageFromUser = activeTab === 'cleaners'
                 ? t.lastSender === 'Worker'
+                : activeTab === 'pairs'
+                ? true
                 : t.lastSender === 'Customer';
+              const customerName = `${t.booking?.customer?.firstName || ''} ${t.booking?.customer?.lastName || ''}`.trim() || t.customerEmail;
 
               const initials = activeTab === 'cleaners'
                 ? `${t.worker?.firstName?.[0] || ''}${t.worker?.lastName?.[0] || ''}`
+                : activeTab === 'pairs'
+                ? `${t.workerName?.[0] || 'C'}${customerName?.[0] || ''}`.toUpperCase()
                 : `${t.booking?.customer?.firstName?.[0] || ''}${t.booking?.customer?.lastName?.[0] || ''}` || t.customerEmail?.[0]?.toUpperCase() || 'C';
 
               const displayName = activeTab === 'cleaners'
                 ? `${t.worker?.firstName} ${t.worker?.lastName}`
+                : activeTab === 'pairs'
+                ? `${t.workerName} ↔ ${customerName || 'Customer'}`
                 : `${t.booking?.customer?.firstName || ''} ${t.booking?.customer?.lastName || ''}`.trim() || t.customerEmail;
 
               return (
@@ -294,7 +325,7 @@ const Chat = () => {
                         {t.lastMessageTime ? new Date(t.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                       </span>
                     </div>
-                    {activeTab === 'customers' && (
+                    {activeTab !== 'cleaners' && (
                       <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${isActive ? 'text-white/70' : 'text-emerald-400'}`}>
                         {t.booking?.service} ({t._id})
                       </p>
@@ -302,7 +333,7 @@ const Chat = () => {
                     <p className={`text-xs truncate ${isActive ? 'text-white/80 font-bold' : 'text-white/40 font-medium'}`}>
                       {isLastMessageFromUser && (
                         <span className="font-extrabold text-[10px] mr-1 uppercase bg-emerald-500/15 text-emerald-400 px-1 py-0.5 rounded">
-                          {activeTab === 'cleaners' ? 'CLEANER' : 'CUSTOMER'}
+                          {activeTab === 'cleaners' ? 'CLEANER' : activeTab === 'pairs' ? (t.lastSender === 'Worker' ? 'CLEANER' : 'CUSTOMER') : 'CUSTOMER'}
                         </span>
                       )}
                       {t.lastMessage}
@@ -326,6 +357,8 @@ const Chat = () => {
                 <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 font-black text-lg">
                   {activeTab === 'cleaners'
                     ? selectedThread.worker?.firstName?.[0]
+                    : activeTab === 'pairs'
+                    ? (selectedThread.workerName?.[0] || 'C')
                     : (selectedThread.booking?.customer?.firstName?.[0] || selectedThread.customerEmail?.[0] || 'C')
                   }
                 </div>
@@ -333,6 +366,8 @@ const Chat = () => {
                   <h3 className="font-black text-white text-base leading-tight">
                     {activeTab === 'cleaners'
                       ? `${selectedThread.worker?.firstName} ${selectedThread.worker?.lastName}`
+                      : activeTab === 'pairs'
+                      ? `${selectedThread.workerName} ↔ ${`${selectedThread.booking?.customer?.firstName || ''} ${selectedThread.booking?.customer?.lastName || ''}`.trim() || selectedThread.customerEmail || 'Customer'}`
                       : `${selectedThread.booking?.customer?.firstName || ''} ${selectedThread.booking?.customer?.lastName || ''}`.trim() || selectedThread.customerEmail
                     }
                   </h3>
@@ -374,7 +409,8 @@ const Chat = () => {
                 </div>
               ) : (
                 messages.map((m) => {
-                  const isAdmin = m.senderType === 'Admin';
+                  // In cleaner↔customer chats the cleaner's messages sit on the right.
+                  const isAdmin = activeTab === 'pairs' ? m.senderType === 'Worker' : m.senderType === 'Admin';
 
                   return (
                     <div
@@ -386,12 +422,19 @@ const Chat = () => {
                           ? 'bg-emerald-500/20 text-white rounded-2xl'
                           : 'bg-white/[0.07] text-white/80 rounded-2xl'
                       }`}>
+                        {activeTab === 'pairs' && (
+                          <p className={`text-[10px] font-black uppercase tracking-wider mb-1 ${isAdmin ? 'text-emerald-300' : 'text-sky-300'}`}>
+                            {m.senderType === 'Worker' ? 'Cleaner' : 'Customer'} · {m.senderName}
+                          </p>
+                        )}
                         <p className="text-sm font-bold leading-relaxed">{m.text}</p>
                         <div className={`flex justify-end items-center gap-1 mt-1 text-[9px] font-bold uppercase tracking-wider ${
                           isAdmin ? 'text-white/70' : 'text-white/40'
                         }`}>
                           <Clock size={10} />
-                          {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {activeTab === 'pairs'
+                            ? new Date(m.createdAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+                            : new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                     </div>
@@ -401,6 +444,12 @@ const Chat = () => {
               <div ref={messageEndRef} />
             </div>
 
+            {activeTab === 'pairs' ? (
+              <div className="p-4 bg-[#071D16] border-t border-white/7 shrink-0 flex items-center gap-2 text-xs font-bold text-white/50">
+                <ShieldCheck size={14} className="text-emerald-400" />
+                Read-only record of the chat between the cleaner and the customer.
+              </div>
+            ) : (
             <form onSubmit={handleSendMessage} className="p-4 bg-[#071D16] border-t border-white/7 shrink-0 flex items-center gap-3">
               <input
                 type="text"
@@ -420,6 +469,7 @@ const Chat = () => {
                 <Send size={20} />
               </button>
             </form>
+            )}
           </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
@@ -430,6 +480,8 @@ const Chat = () => {
             <p className="text-white/40 font-medium max-w-sm mt-2 text-sm">
               {activeTab === 'cleaners'
                 ? 'Click on a cleaner in the thread list on the left to review messages and support them in real-time.'
+                : activeTab === 'pairs'
+                ? 'Click a conversation on the left to read what the cleaner and customer said to each other.'
                 : 'Click on a customer in the thread list on the left to review messages and support them in real-time.'
               }
             </p>

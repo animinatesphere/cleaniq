@@ -158,7 +158,7 @@ const ChatWithCustomerScreen = ({ route, navigation }) => {
             ListHeaderComponent={
               <View style={styles.safety}>
                 <ShieldCheck size={14} color="#0F6B4C" />
-                <Text style={styles.safetyTxt}>Keep chat about this job. Don't share bank details or take payments here.</Text>
+                <Text style={styles.safetyTxt}>Keep chat about this job. Don't share bank details or take payments here. Cleaniq can read this chat to keep everyone safe.</Text>
               </View>
             }
             ListEmptyComponent={
