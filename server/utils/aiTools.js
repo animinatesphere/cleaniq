@@ -584,7 +584,7 @@ const declarations = [
         hours: { type: "number", description: "Number of hours (1–50)." },
         extras: extrasSchema,
         suppliesProvidedBy: { type: "string", enum: ["Cleaniq", "Customer"], description: "Who brings the cleaning supplies and equipment." },
-        frequency: { type: "string", enum: ["Once", "Weekly", "Fortnightly", "Monthly"], description: "How often. Weekly and fortnightly cleans can have a lower hourly price." },
+        frequency: { type: "string", enum: ["Once", "Weekly", "Fortnightly", "Monthly", "Quarterly"], description: "How often (Quarterly = every 3 months). Regular cleans can have their own hourly price." },
       },
       required: ["service", "hours"],
     },

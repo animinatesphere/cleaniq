@@ -11,7 +11,7 @@ const STATUS = {
 };
 
 const money = (n) => `£${Number(n || 0).toFixed(2)}`;
-const every = (f) => (f === "Weekly" ? "Every week" : f === "Fortnightly" ? "Every two weeks" : "Every month");
+const every = (f) => ({ Weekly: "Every week", Fortnightly: "Every two weeks", Monthly: "Every month", Quarterly: "Every 3 months" }[f] || f);
 const when = (d) =>
   new Date(d).toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" });
 

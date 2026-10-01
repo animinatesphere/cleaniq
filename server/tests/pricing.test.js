@@ -35,3 +35,12 @@ test("AI quotes use the weekly price for a weekly clean", () => {
   assert.equal(q.total, 35.8);
   assert.equal(calculateQuote([regular], { service: "Regular House Cleaning", hours: 2 }).total, 41.8);
 });
+
+test("only priced frequencies are offered; one-off always", () => {
+  const { offeredFrequencies } = require("../utils/pricing");
+  assert.deepEqual(offeredFrequencies({ rate: 20.9, weeklyRate: 17.9, fortnightlyRate: 18.9 }), ["Once", "Weekly", "Fortnightly"]);
+  assert.deepEqual(offeredFrequencies({ rate: 30.85, monthlyRate: 28, quarterlyRate: 29 }), ["Once", "Monthly", "Quarterly"]);
+  assert.deepEqual(offeredFrequencies({ rate: 25 }), ["Once"]);
+  assert.equal(rateForFrequency({ rate: 30.85, quarterlyRate: 29 }, "Quarterly"), 29);
+  assert.equal(rateForFrequency({ rate: 30.85, monthlyRate: 28 }, "Monthly"), 28);
+});

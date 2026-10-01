@@ -42,8 +42,9 @@ import { buildBookedRanges, overlapsExistingRange } from "../utils/timeOverlap";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-// repeatEveryDays (7 weekly, 14 fortnightly): later regular-clean dates are highlighted too.
-const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [], repeatEveryDays = 0 }) => {
+// Regular cleans: later dates are highlighted too — every N days (7 weekly, 14 fortnightly)
+// or every N months on the same date (1 monthly, 3 every 3 months).
+const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [], repeatEveryDays = 0, repeatEveryMonths = 0 }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
   const startDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
@@ -86,11 +87,15 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [], repeatEv
     );
   };
   const isRepeat = (date) => {
-    if (!date || !selectedDate || !repeatEveryDays) return false;
+    if (!date || !selectedDate || (!repeatEveryDays && !repeatEveryMonths)) return false;
     const [y, m, d] = String(selectedDate).split("-").map(Number);
     const first = new Date(y, m - 1, d);
-    const diffDays = Math.round((date - first) / 86400000);
-    return diffDays > 0 && diffDays % repeatEveryDays === 0;
+    if (date <= first) return false;
+    if (repeatEveryMonths) {
+      const months = (date.getFullYear() - first.getFullYear()) * 12 + date.getMonth() - first.getMonth();
+      return date.getDate() === first.getDate() && months % repeatEveryMonths === 0;
+    }
+    return Math.round((date - first) / 86400000) % repeatEveryDays === 0;
   };
   const isPast = (date) => {
     if (!date) return false;
@@ -176,6 +181,10 @@ const CustomCalendar = ({ selectedDate, onDateSelect, bookedDates = [], repeatEv
     </div>
   );
 };
+
+const REGULAR_FREQUENCIES = ["Weekly", "Fortnightly", "Monthly", "Quarterly"];
+const FREQUENCY_LABEL = { Once: "One-off", Weekly: "Weekly", Fortnightly: "Fortnightly", Monthly: "Monthly", Quarterly: "Every 3 months" };
+const REGULAR_EVERY = { Weekly: "every week", Fortnightly: "every two weeks", Monthly: "every month", Quarterly: "every 3 months" };
 
 const cleanKey = (str) =>
   (str || "")
@@ -591,7 +600,12 @@ const Booking = () => {
         setServicesList(data);
         const ratesObj = {};
         const regularObj = {};
-        const regularFor = (service) => ({ Weekly: Number(service.weeklyRate) || 0, Fortnightly: Number(service.fortnightlyRate) || 0 });
+        const regularFor = (service) => ({
+          Weekly: Number(service.weeklyRate) || 0,
+          Fortnightly: Number(service.fortnightlyRate) || 0,
+          Monthly: Number(service.monthlyRate) || 0,
+          Quarterly: Number(service.quarterlyRate) || 0,
+        });
         // Exact-match lookup first
         data.forEach((service) => {
           ratesObj[cleanKey(service.name)] = service.rate;
@@ -786,9 +800,21 @@ const Booking = () => {
     setStep((s) => Math.max(s - 1, 1));
   };
 
-  const isRegular = ["Weekly", "Fortnightly"].includes(formData.frequency);
-  const regularEvery =
-    formData.frequency === "Weekly" ? "every week" : formData.frequency === "Fortnightly" ? "every two weeks" : "";
+  // Only the frequencies admin has priced for this service are offered; one-off always is.
+  const offeredFrequencies = [
+    "Once",
+    ...REGULAR_FREQUENCIES.filter((f) => regularRates[cleanKey(formData.serviceType)]?.[f] > 0),
+  ];
+  const isRegular = formData.frequency !== "Once" && offeredFrequencies.includes(formData.frequency);
+  const regularEvery = REGULAR_EVERY[formData.frequency] || "";
+  // Switching to a service that isn't offered at the chosen frequency goes back to one-off.
+  const frequencyOffered = offeredFrequencies.includes(formData.frequency);
+  useEffect(() => {
+    if (!frequencyOffered && Object.keys(regularRates).length) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData((f) => ({ ...f, frequency: "Once" }));
+    }
+  }, [frequencyOffered, regularRates]);
 
   const steps = [
     { id: 1, title: "Location" },
@@ -1353,12 +1379,11 @@ const Booking = () => {
                               Choose any duration from 2 to 50 hours
                             </p>
                           </div>
-                          <div className="grid grid-cols-3 gap-2">
-                            {[
-                              { value: "Once", label: "One-off" },
-                              { value: "Weekly", label: "Weekly" },
-                              { value: "Fortnightly", label: "Fortnightly" },
-                            ].map((f) => (
+                          <div
+                            className="grid gap-2"
+                            style={{ gridTemplateColumns: `repeat(${offeredFrequencies.length}, minmax(0, 1fr))` }}
+                          >
+                            {offeredFrequencies.map((value) => ({ value, label: FREQUENCY_LABEL[value] })).map((f) => (
                               <button
                                 key={f.value}
                                 onClick={() =>
@@ -1388,7 +1413,10 @@ const Booking = () => {
                             <div className="mt-3 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 p-4 text-xs text-slate-600 font-semibold leading-relaxed">
                               <p className="font-black text-[#0F6B4C] mb-1">Regular cleaning, {regularEvery}</p>
                               <ul className="list-disc pl-4 space-y-0.5">
-                                <li>Same day and time {regularEvery}</li>
+                                <li>
+                                  {["Weekly", "Fortnightly"].includes(formData.frequency) ? "Same day and time" : "Same date and time"}{" "}
+                                  {regularEvery}
+                                </li>
                                 <li>Pay for your first clean today</li>
                                 <li>Each following clean is charged on the day, when your cleaner arrives</li>
                                 <li>Pause or cancel free with 24 hours&apos; notice</li>
@@ -1658,7 +1686,8 @@ const Booking = () => {
                               })
                             }
                             bookedDates={bookedDates}
-                            repeatEveryDays={formData.frequency === "Weekly" ? 7 : formData.frequency === "Fortnightly" ? 14 : 0}
+                            repeatEveryDays={isRegular ? { Weekly: 7, Fortnightly: 14 }[formData.frequency] || 0 : 0}
+                            repeatEveryMonths={isRegular ? { Monthly: 1, Quarterly: 3 }[formData.frequency] || 0 : 0}
                           />
                           {isRegular && formData.date && (() => {
                             const [y, m, d] = formData.date.split("-").map(Number);
@@ -1672,7 +1701,12 @@ const Booking = () => {
                                 </span>
                                 , then{" "}
                                 <span className="font-black text-black">
-                                  {formData.frequency === "Weekly" ? `every ${weekday}` : `every other ${weekday}`}
+                                  {{
+                                    Weekly: `every ${weekday}`,
+                                    Fortnightly: `every other ${weekday}`,
+                                    Monthly: `on the ${d}${["th", "st", "nd", "rd"][(d % 100 > 10 && d % 100 < 14) || d % 10 > 3 ? 0 : d % 10]} of every month`,
+                                    Quarterly: "every 3 months",
+                                  }[formData.frequency]}
                                 </span>
                                 .
                                 <br />
@@ -2072,7 +2106,7 @@ const Booking = () => {
                                 {isRegular && (
                                   <div className="rounded-2xl bg-white border border-[#10B981]/25 p-5 space-y-3">
                                     <p className="text-[10px] font-black text-[#10B981] uppercase tracking-widest">
-                                      Your regular clean · {formData.frequency}
+                                      Your regular clean · {FREQUENCY_LABEL[formData.frequency]}
                                     </p>
                                     <div className="flex justify-between text-sm font-bold text-slate-700">
                                       <span>First clean, paid today</span>

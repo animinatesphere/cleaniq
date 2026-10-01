@@ -155,3 +155,21 @@ test("job visibility: a job limited to one worker is only offered to (and accept
   await Booking.updateOne({ _id: booking._id }, { $set: { status: "Confirmed", assignedWorker: null } });
   assert.ok((await feed(`region=UK&workerId=${other}`)).includes("BK-VIS1"), "open to all again");
 });
+
+test("cleaner's live location: only the booking's customer or an admin can see it", async () => {
+  const booking = await Booking.create({
+    bookingId: "BK-LOC1", service: "Deep Clean", status: "Assigned", region: "UK",
+    customer: { firstName: "Liv", email: "liv@test.com" }, assignedWorker: worker,
+  });
+  await Worker.updateOne({ _id: worker }, { $set: { location: { sharing: true, lat: 53.48, lng: -2.24, activeBookingId: String(booking._id) } } });
+  const cust = (email) => jwt.sign({ id: new mongoose.Types.ObjectId().toString(), email, role: "customer" }, process.env.JWT_SECRET);
+  const loc = (token) => call("GET", `/workers/jobs/${booking._id}/worker-location`, null, token);
+
+  assert.equal((await loc()).status, 401, "no login");
+  assert.equal((await loc(cust("someone@else.com"))).status, 401, "another customer");
+  const own = await loc(cust("LIV@test.com"));
+  assert.equal(own.status, 200);
+  assert.equal(own.data.sharing, true);
+  assert.equal(own.data.lat, 53.48);
+  assert.equal((await loc(adminToken)).status, 200, "admin");
+});

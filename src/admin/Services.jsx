@@ -327,6 +327,8 @@ const ServicesManagement = () => {
                   {[
                     { field: 'weeklyRate', label: 'Weekly £/hr' },
                     { field: 'fortnightlyRate', label: 'Fortnightly £/hr' },
+                    { field: 'monthlyRate', label: 'Monthly £/hr' },
+                    { field: 'quarterlyRate', label: 'Every 3 months £/hr' },
                   ].map(({ field, label }) => (
                     <label key={field} className="block">
                       <span className="text-[10px] font-semibold text-white/40">{label}</span>
@@ -338,13 +340,13 @@ const ServicesManagement = () => {
                           min="0"
                           value={service[field] ?? ''}
                           onChange={(e) => handleRegularRateChange(service._id, field, e.target.value)}
-                          placeholder="One-off"
+                          placeholder="Not offered"
                           className="w-full pl-7 pr-3 py-2.5 bg-white/5 rounded-xl border border-white/10 font-bold text-white text-sm placeholder:text-white/20 placeholder:font-medium focus:outline-none focus:border-emerald-500/50 transition-all"
                         />
                       </div>
                     </label>
                   ))}
-                  <p className="col-span-2 text-[10px] text-white/30">Leave empty to charge the one-off price. Press save to apply.</p>
+                  <p className="col-span-2 text-[10px] text-white/30">Customers can only choose the options you price here (one-off is always offered). Press save to apply.</p>
                 </div>
               )}
             </div>

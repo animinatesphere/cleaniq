@@ -45,8 +45,11 @@ function formatServices(services) {
     const regular = [
       s.weeklyRate > 0 && `weekly £${Number(s.weeklyRate).toFixed(2)} per hour`,
       s.fortnightlyRate > 0 && `fortnightly £${Number(s.fortnightlyRate).toFixed(2)} per hour`,
+      s.monthlyRate > 0 && `monthly £${Number(s.monthlyRate).toFixed(2)} per hour`,
+      s.quarterlyRate > 0 && `every 3 months £${Number(s.quarterlyRate).toFixed(2)} per hour`,
     ].filter(Boolean);
-    return `- ${s.name}: ${formatPrice(s)}${regular.length ? ` one-off; ${regular.join(", ")}` : ""}${details ? ` (${details})` : ""}`;
+    const often = s.type !== "hourly" ? "" : regular.length ? `; that's the one-off price; also ${regular.join(", ")}` : "; one-off only";
+    return `- ${s.name}: ${formatPrice(s)}${details ? ` (${details})` : ""}${often}`;
   };
   const sections = [];
   if (groups.hourly.length) sections.push("Cleaning services (charged per hour):\n" + groups.hourly.map(line).join("\n"));
