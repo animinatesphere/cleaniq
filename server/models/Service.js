@@ -23,6 +23,8 @@ const serviceSchema = new mongoose.Schema({
     default: 0,
     description: "Amount paid to worker per hour for hourly services",
   },
+  // Regular cleans: hourly pay from the second visit on (admin → Staff Pay). Empty = same as workerHourlyRate.
+  workerFollowingRate: { type: Number, default: null },
   // Worker payment rate - fixed amount paid to worker per service completion (flat services)
   workerPaymentRate: {
     type: Number,

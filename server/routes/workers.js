@@ -6,6 +6,9 @@ const Notification = require("../models/Notification");
 const mongoose = require("mongoose");
 const { syncCompanyJob } = require("../utils/companyJobs");
 const { chargeVisitOnArrival } = require("../utils/subscriptions");
+const { offersForWorker, prefsOf, payFor, checkMatch, introText, DAYS, TRAVEL_MODES } = require("../utils/offerMatching");
+const geo = require("../utils/geo");
+const WorkerCustomerMessage = require("../models/WorkerCustomerMessage");
 const { moveToTrash } = require("../utils/trash");
 const jwt = require("jsonwebtoken");
 const { sendEmail, templates, workerEventEmails } = require("../utils/emailService");
@@ -19,6 +22,37 @@ const notifyCustomer = async (booking, { title, body, type = "status" }) => {
     if (customer?.expoPushToken) await sendCustomerPush(customer.expoPushToken, { title, body, data: { type, bookingId: booking.bookingId, bookingMongoId: String(booking._id) } });
   } catch (err) { console.error("Customer push error:", err.message); }
 };
+
+// The cleaner's automatic intro message to a new client (Messages → Settings), sent once per booking.
+async function sendAutoIntro(booking, workerId) {
+  try {
+    const worker = await Worker.findById(workerId).lean();
+    if (!worker || !booking?.customer?.email) return;
+    const prefs = prefsOf(worker);
+    if (!prefs.autoIntro.enabled) return;
+    const ref = booking.bookingId;
+    if (await WorkerCustomerMessage.exists({ bookingId: ref, senderType: "Worker" })) return;
+    const text = introText(prefs.autoIntro.text, { workerName: worker.firstName, booking });
+    await WorkerCustomerMessage.create({
+      bookingId: ref,
+      workerId: worker._id,
+      customerEmail: booking.customer.email,
+      senderType: "Worker",
+      senderName: `${worker.firstName} ${worker.lastName}`.trim(),
+      text,
+    });
+    const customer = await Customer.findOne({ email: String(booking.customer.email).toLowerCase() });
+    if (customer?.expoPushToken) {
+      await sendCustomerPush(customer.expoPushToken, {
+        title: `Message from ${worker.firstName}`,
+        body: text.length > 80 ? text.slice(0, 77) + "…" : text,
+        data: { type: "chat", bookingId: ref, bookingMongoId: String(booking._id), senderName: `${worker.firstName} ${worker.lastName}`.trim() },
+      });
+    }
+  } catch (e) {
+    console.error("Auto intro message failed:", e.message);
+  }
+}
 
 const findBookingByIdOrBookingId = async (id) => {
   if (id.match(/^[0-9a-fA-F]{24}$/)) {
@@ -168,6 +202,12 @@ router.get("/jobs", async (req, res) => {
     }
 
     const jobs = await Booking.find({ $and: andClauses }).sort({ createdAt: -1 });
+    // A cleaner only sees offers that suit their services, hours, travel area and pets setting,
+    // each with distance, travel time and pay.
+    if (!all && workerId && mongoose.isValidObjectId(workerId)) {
+      const worker = await Worker.findById(workerId).lean();
+      if (worker) return res.json(await offersForWorker(worker, jobs));
+    }
     res.json(jobs);
   } catch (error) {
     console.error("Error fetching jobs:", error);
@@ -213,6 +253,37 @@ router.get("/jobs/:id", async (req, res) => {
 
     if (!job) {
       return res.status(404).json({ error: "Job not found" });
+    }
+    // Offer page for a cleaner (?workerId=…): whether they can still take it, distance and pay.
+    const { workerId } = req.query;
+    if (workerId && mongoose.isValidObjectId(workerId)) {
+      const worker = await Worker.findById(workerId).lean();
+      if (worker) {
+        const prefs = prefsOf(worker);
+        const pc = job.details?.postcode || job.property?.postcode || geo.findPostcode(job.details?.address);
+        const [jobPoint, homePoint] = await Promise.all([
+          pc ? geo.pointFor(pc) : null,
+          prefs.travel.home || (prefs.travel.homePostcode ? geo.pointFor(prefs.travel.homePostcode) : null),
+        ]);
+        const match = checkMatch(prefs, job, { jobPoint, homePoint });
+        const mine = job.assignedWorker && String(job.assignedWorker) === String(workerId);
+        const restricted = (job.visibleToWorkers || []).length && !(job.visibleToWorkers || []).map(String).includes(String(workerId));
+        const availability = mine ? "mine"
+          : job.assignedWorker ? "taken"
+          : restricted || !["Confirmed", "Authorized", "Accepted"].includes(job.status) ? "unavailable"
+          : "open";
+        return res.json({
+          ...job.toObject(),
+          offer: {
+            availability,
+            customerName: `${job.customer?.firstName || "Customer"} ${(job.customer?.lastName || "").slice(0, 1)}${job.customer?.lastName ? "." : ""}`.trim(),
+            distanceMiles: match.distanceMiles,
+            travelMinutes: match.travelMinutes,
+            travelMode: prefs.travel.mode,
+            pay: await payFor(job),
+          },
+        });
+      }
     }
     res.json(job);
   } catch (error) {
@@ -260,6 +331,7 @@ router.post("/jobs/:id/accept", async (req, res) => {
       assignedWorkerName: workerName,
       jobAcceptedTime: booking.jobAcceptedTime,
     });
+    sendAutoIntro(booking, workerId);
 
     // Create notification
     await Notification.create({
@@ -344,6 +416,7 @@ router.put("/jobs/:id/assign", async (req, res) => {
       assignedWorkerName: `${worker.firstName} ${worker.lastName}`,
       jobAcceptedTime: booking.jobAcceptedTime,
     });
+    sendAutoIntro(booking, worker._id);
 
     const shiftMsg = `You've been scheduled for ${booking.service} on ${new Date(booking.schedule?.date).toLocaleDateString("en-GB")} (${booking.schedule?.timeSlot || ""}). Check your schedule.`;
     await Notification.create({
@@ -1273,6 +1346,116 @@ router.get("/jobs/:id/worker-location", async (req, res) => {
   } catch (error) {
     console.error("Error fetching worker location:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ── Offer settings (Wecasa-style): services, working hours, travel area, pets, intro message ──
+router.get("/:id/preferences", async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: "Invalid worker" });
+    const worker = await Worker.findById(req.params.id).lean();
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+    const services = await require("../models/Service").find({ region: "UK", category: "Base" })
+      .select("name type workerHourlyRate workerFollowingRate weeklyRate fortnightlyRate monthlyRate quarterlyRate").lean();
+    res.json({ preferences: prefsOf(worker), services, days: DAYS, travelModes: TRAVEL_MODES });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put("/:id/preferences", async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: "Invalid worker" });
+    const worker = await Worker.findById(req.params.id);
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+    const current = prefsOf(worker);
+    const b = req.body || {};
+    const next = { ...current };
+    const hhmm = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+    if (Array.isArray(b.services)) next.services = b.services.map(String).slice(0, 50);
+    if (b.workingHours && typeof b.workingHours === "object") {
+      for (const day of DAYS) {
+        const d = b.workingHours[day];
+        if (!d) continue;
+        const start = hhmm.test(d.start) ? d.start : current.workingHours[day].start;
+        const end = hhmm.test(d.end) ? d.end : current.workingHours[day].end;
+        if (start >= end) return res.status(400).json({ error: `${day}: start time must be before end time` });
+        next.workingHours[day] = { on: d.on !== false, start, end };
+      }
+    }
+    if (b.travel && typeof b.travel === "object") {
+      const t = { ...current.travel };
+      if (TRAVEL_MODES.includes(b.travel.mode)) t.mode = b.travel.mode;
+      if (b.travel.radiusMiles !== undefined) {
+        const r = Number(b.travel.radiusMiles);
+        if (!(r >= 1 && r <= 50)) return res.status(400).json({ error: "Distance must be between 1 and 50 miles" });
+        t.radiusMiles = r;
+      }
+      const cleanList = (arr) => [...new Set((arr || []).map((p) => geo.districtOf(p)).filter(Boolean))].slice(0, 50);
+      if (Array.isArray(b.travel.addPostcodes)) t.addPostcodes = cleanList(b.travel.addPostcodes);
+      if (Array.isArray(b.travel.removePostcodes)) t.removePostcodes = cleanList(b.travel.removePostcodes);
+      if (typeof b.travel.homePostcode === "string") {
+        const pc = b.travel.homePostcode.trim().toUpperCase();
+        if (pc) {
+          const point = await geo.pointFor(pc);
+          if (!point) return res.status(400).json({ error: "We couldn't find that postcode" });
+          t.homePostcode = pc;
+          t.home = point;
+        } else {
+          t.homePostcode = "";
+          t.home = null;
+        }
+      } else if (!t.home && t.homePostcode) {
+        t.home = await geo.pointFor(t.homePostcode);
+      }
+      next.travel = t;
+    }
+    if (typeof b.refusePets === "boolean") next.refusePets = b.refusePets;
+    if (b.autoIntro && typeof b.autoIntro === "object") {
+      next.autoIntro = {
+        enabled: b.autoIntro.enabled !== false,
+        text: String(b.autoIntro.text || current.autoIntro.text).trim().slice(0, 500) || current.autoIntro.text,
+      };
+    }
+    worker.preferences = next;
+    worker.markModified("preferences");
+    await worker.save();
+    res.json({ preferences: prefsOf(worker) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// My offers: recent jobs that suited this cleaner, with whether they're still available.
+router.get("/:id/offers-history", async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: "Invalid worker" });
+    const worker = await Worker.findById(req.params.id).lean();
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+    const since = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+    const bookings = await Booking.find({
+      createdAt: { $gte: since },
+      status: { $nin: ["Pending", "Awaiting Payment"] },
+      $or: [{ visibleToWorkers: { $size: 0 } }, { visibleToWorkers: { $exists: false } }, { visibleToWorkers: worker._id }],
+    }).sort({ createdAt: -1 }).limit(150);
+    const offers = await offersForWorker(worker, bookings);
+    res.json(offers.slice(0, 60).map((b) => ({
+      _id: b._id,
+      bookingId: b.bookingId,
+      service: b.service,
+      customerName: `${b.customer?.firstName || "Customer"} ${(b.customer?.lastName || "").slice(0, 1)}`.trim(),
+      date: b.schedule?.date,
+      frequency: b.details?.frequency || "Once",
+      pay: b.offer.pay,
+      travelMinutes: b.offer.travelMinutes,
+      status: String(b.assignedWorker || "") === String(worker._id) ? "Accepted by you"
+        : b.assignedWorker || !["Confirmed", "Authorized", "Accepted"].includes(b.status) ? "Unavailable"
+        : "Available",
+      createdAt: b.createdAt,
+    })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

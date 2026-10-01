@@ -198,10 +198,13 @@ router.post("/public", async (req, res) => {
 
       // Notify active staff (best-effort)
       try {
-        const activeStaff = await Worker.find({
+        // Only cleaners the job suits (services, hours, travel area, pets).
+        const { workersForJob } = require("../utils/offerMatching");
+        const suited = new Set((await workersForJob(newBooking, await Worker.find({ status: "Active", appAccessGranted: true }).select("_id").lean())).map((w) => String(w._id)));
+        const activeStaff = (await Worker.find({
           status: "Active",
           appAccessGranted: true,
-        });
+        })).filter((w) => suited.has(String(w._id)));
         if (activeStaff && activeStaff.length > 0) {
           for (const staff of activeStaff) {
             await sendEmail({
@@ -779,10 +782,10 @@ async function createBooking(body) {
           : "TBC";
         const notifTitle = "New Job Available!";
         const notifBody  = `${newBooking.service} · ${dateStr}`;
-        const workers = await Worker.find({
+        const workers = await require("../utils/offerMatching").workersForJob(newBooking, await Worker.find({
           $or: [{ region: newBooking.region }, { region: null }, { region: { $exists: false } }],
           status: "Active",
-        }).select("_id expoPushToken").lean();
+        }).select("_id").lean());
 
         // Write a Notification record for each worker — the app polls this every 3s
         await Notification.insertMany(
@@ -791,6 +794,7 @@ async function createBooking(body) {
             title: notifTitle,
             message: notifBody,
             type: "job",
+            bookingId: newBooking.bookingId,
           })),
           { ordered: false }
         ).catch(() => {});
@@ -1293,7 +1297,7 @@ router.put("/:id", async (req, res) => {
             : "TBC";
           const notifTitle = "New Job Available!";
           const notifBody  = `${updatedBooking.service} · ${dateStr}`;
-          const workers = await Worker.find({ status: "Active" }).select("_id expoPushToken").lean();
+          const workers = await require("../utils/offerMatching").workersForJob(updatedBooking, await Worker.find({ status: "Active" }).select("_id").lean());
 
           // Write a Notification record for each active worker — app polls this every 3s
           await Notification.insertMany(
@@ -1302,6 +1306,7 @@ router.put("/:id", async (req, res) => {
               title: notifTitle,
               message: notifBody,
               type: "job",
+              bookingId: updatedBooking.bookingId,
             })),
             { ordered: false }
           ).catch(() => {});

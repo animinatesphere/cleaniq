@@ -11,6 +11,7 @@ const Subscription = require("../models/Subscription");
 const Notification = require("../models/Notification");
 const { buildBookingDateTime } = require("./bookingDateTime");
 const { rateForFrequency, offeredFrequencies } = require("./pricing");
+const { workerRateFor } = require("./workerRate");
 
 let stripeClient = null;
 const stripe = () => stripeClient || (stripeClient = require("stripe")(process.env.STRIPE_SECRET_KEY));
@@ -186,8 +187,11 @@ async function topUpVisits(sub, { now = new Date() } = {}) {
     if (await Booking.exists({ "meta.subscriptionId": sub._id, "schedule.date": next, status: { $ne: "Cancelled" } })) continue;
     const t = sub.template || {};
     const bookingId = await uniqueRef("BK-S", (ref) => Booking.exists({ bookingId: ref }));
+    // Later visits pay the cleaner the "following sessions" rate (admin → Staff Pay).
+    const workerRate = await workerRateFor(sub.service, { following: true });
     await Booking.create({
       ...t,
+      workerRate,
       bookingId,
       schedule: { ...(t.schedule || {}), date: next },
       status: "Confirmed",

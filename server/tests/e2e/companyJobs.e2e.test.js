@@ -17,6 +17,8 @@ emailService.sendEmail = async () => true;
 const Admin = require("../../models/Admin");
 const Booking = require("../../models/Booking");
 const Customer = require("../../models/Customer");
+// Instant fake postcode lookups (offer matching looks up job postcodes).
+require("../../utils/geo").setGeoFetcherForTests(async (url, body) => (body ? { result: [] } : { result: null }));
 const Job = require("../../models/Job");
 const Notification = require("../../models/Notification");
 const Worker = require("../../models/Worker");
