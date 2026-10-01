@@ -1,10 +1,11 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl, Image } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { ChevronRight, Sparkles, Repeat } from "lucide-react-native";
+import { ChevronRight } from "lucide-react-native";
 import axios from "axios";
 import { API_URL } from "../../context/AuthContext";
 import { Screen, ScreenHeader, Loading, usePreferences, G } from "./common";
+import { servicePhoto } from "../../utils/servicePhoto";
 
 // My offers: recent jobs that suited you, and whether they're still available.
 const BADGE = {
@@ -40,9 +41,7 @@ export default function MyOffersScreen({ navigation }) {
             const badge = BADGE[o.status] || BADGE.Unavailable;
             return (
               <TouchableOpacity style={st.row} onPress={() => navigation.navigate("OfferDetail", { offerId: o._id })}>
-                <View style={[st.thumb, { backgroundColor: regular ? "#0F6B4C" : "#FDE68A" }]}>
-                  {regular ? <Repeat size={26} color="#fff" /> : <Sparkles size={26} color="#78350F" />}
-                </View>
+                <Image source={{ uri: servicePhoto(o.service) }} style={st.thumb} />
                 <View style={{ flex: 1 }}>
                   <View style={st.top}>
                     <Text style={st.title} numberOfLines={1}>{o.service}</Text>
@@ -66,7 +65,7 @@ export default function MyOffersScreen({ navigation }) {
 
 const st = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 14, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: G.line },
-  thumb: { width: 64, height: 64, borderRadius: 16, alignItems: "center", justifyContent: "center" },
+  thumb: { width: 64, height: 64, borderRadius: 14, backgroundColor: G.soft },
   top: { flexDirection: "row", alignItems: "center", gap: 8 },
   title: { fontSize: 17, fontWeight: "900", color: G.text, flexShrink: 1 },
   badge: { flexShrink: 0, fontSize: 11, fontWeight: "900", paddingHorizontal: 7, paddingVertical: 3, borderRadius: 6, overflow: "hidden" },
