@@ -276,7 +276,7 @@ router.get("/jobs/:id", async (req, res) => {
           ...job.toObject(),
           offer: {
             availability,
-            customerName: `${job.customer?.firstName || "Customer"} ${(job.customer?.lastName || "").slice(0, 1)}${job.customer?.lastName ? "." : ""}`.trim(),
+            customerName: `${(job.customer?.firstName || "").trim() || "Customer"} ${(job.customer?.lastName || "").trim().slice(0, 1)}${(job.customer?.lastName || "").trim() ? "." : ""}`.trim(),
             distanceMiles: match.distanceMiles,
             travelMinutes: match.travelMinutes,
             travelMode: prefs.travel.mode,
@@ -1465,7 +1465,7 @@ router.get("/:id/offers-history", async (req, res) => {
       _id: b._id,
       bookingId: b.bookingId,
       service: b.service,
-      customerName: `${b.customer?.firstName || "Customer"} ${(b.customer?.lastName || "").slice(0, 1)}`.trim(),
+      customerName: `${(b.customer?.firstName || "").trim() || "Customer"} ${(b.customer?.lastName || "").trim().slice(0, 1)}`.trim(),
       date: b.schedule?.date,
       frequency: b.details?.frequency || "Once",
       pay: b.offer.pay,
