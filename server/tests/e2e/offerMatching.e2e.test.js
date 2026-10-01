@@ -158,3 +158,23 @@ test("new-job alerts only go to cleaners the job suits", async () => {
   await notifyWorkersNewJob(b);
   assert.equal(await Notification.countDocuments({ workerId: worker._id, bookingId: b.bookingId }), 1);
 });
+
+test("cleaners never receive the customer's phone or email; admin's all-jobs list still does", async () => {
+  const b = await job({ customer: { firstName: "Ann", lastName: "Skinner", email: "ann@test.com", phone: "07700900111" } });
+  const inFeed = (await feed()).find((x) => x.bookingId === b.bookingId);
+  assert.ok(inFeed);
+  assert.equal(inFeed.customer.phone, undefined);
+  assert.equal(inFeed.customer.email, undefined);
+  assert.equal(inFeed.customer.firstName, "Ann");
+  const detail = (await call("GET", `/jobs/${b._id}`)).data;
+  assert.equal(detail.customer.phone, undefined);
+  await call("POST", `/jobs/${b._id}/accept`, { workerId: String(worker._id), workerName: "Kelvin Obi" });
+  for (const path of [`/jobs/my-jobs/${worker._id}`, `/${worker._id}/schedule`]) {
+    const mine = (await call("GET", path)).data.find((x) => x.bookingId === b.bookingId);
+    assert.ok(mine, path);
+    assert.equal(mine.customer.phone, undefined, path);
+    assert.equal(mine.customer.email, undefined, path);
+  }
+  const admin = (await call("GET", "/jobs?all=1")).data;
+  assert.ok(Array.isArray(admin));
+});

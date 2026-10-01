@@ -120,7 +120,7 @@ const HomeScreen = ({ navigation, route }) => {
       setActivityStats({
         totalEarnings: done.reduce((s,j)=>s+(j.workerRate||0)*(j.details?.duration||j.workerDuration||j.duration||0),0),
         offersAccepted: done.length,
-        customersServed: new Set(done.map(j=>j.customer?.email).filter(Boolean)).size,
+        customersServed: new Set(done.map(j=>`${j.customer?.firstName||""} ${j.customer?.lastName||""} ${j.details?.postcode||""}`.trim()).filter(Boolean)).size,
       });
     } catch {}
     finally { setLoading(false); setRefreshing(false); }

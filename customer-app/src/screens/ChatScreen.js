@@ -168,7 +168,7 @@ const ChatScreen = ({ route, navigation }) => {
         </TouchableOpacity>
       </LinearGradient>
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={0}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={0}>
         {loading ? (
           <View style={styles.center}><ActivityIndicator size="large" color={C.primary} /></View>
         ) : (
