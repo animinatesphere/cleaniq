@@ -20,8 +20,11 @@ import {
   Download,
   Search,
   UserCheck,
+  Minus,
+  Home,
 } from "lucide-react";
 import logo from "../assets/logo DP.jpg";
+import { itemName, extrasOf, itemTotal, extrasHtml, gbp, PROPERTY_ROOMS, propertyLines } from "../utils/quoteItems";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -91,7 +94,16 @@ const emptyItem = () => ({
   billingType: "flat",
   qty: 1,
   unitPrice: "",
+  extras: [], // add-ons: [{ name, qty, unitPrice }]
 });
+
+// Price from admin for the quote's frequency (weekly/fortnightly/monthly/3-monthly), else the
+// service's normal rate.
+const FREQ_RATE_FIELD = { weekly: "weeklyRate", biweekly: "fortnightlyRate", monthly: "monthlyRate", quarterly: "quarterlyRate" };
+const priceFor = (svc, frequency) => {
+  const special = Number(svc?.[FREQ_RATE_FIELD[frequency]]);
+  return special > 0 ? special : Number(svc?.rate) || 0;
+};
 
 // ── Toast ──────────────────────────────────────────────────────────────────────
 const Toast = ({ msg, type, onClose }) => (
@@ -111,8 +123,31 @@ const Toast = ({ msg, type, onClose }) => (
 );
 
 // ── Line Item ──────────────────────────────────────────────────────────────────
-const LineItem = ({ item, index, onChange, onRemove, catalogue }) => {
-  const lineTotal = Number(item.unitPrice || 0) * Number(item.qty || 1);
+const LineItem = ({ item, index, onChange, onPatch, onRemove, catalogue, services = [], frequency }) => {
+  const lineTotal = itemTotal(item);
+  const mainServices = services.filter((s) => s.category === "Base");
+  const addOns = services.filter((s) => s.category === "Extras");
+  const pickService = (name) => {
+    const svc = mainServices.find((s) => s.name === name);
+    if (!svc) return onChange(index, "service", name);
+    onPatch(index, {
+      service: name,
+      billingType: svc.type === "hourly" ? "hourly" : "flat",
+      unitPrice: priceFor(svc, frequency) || "",
+      qty: svc.type === "hourly" && Number(item.qty) < 2 ? 3 : item.qty,
+    });
+  };
+  const extraQty = (name) => Number((item.extras || []).find((e) => e.name === name)?.qty || 0);
+  // delta: change the quantity by this much; unitPrice: set this add-on's price for the quote.
+  const setExtra = (svc, { delta = 0, unitPrice } = {}) =>
+    onPatch(index, (it) => {
+      const list = it.extras || [];
+      const current = list.find((e) => e.name === svc.name);
+      const qty = Math.max(0, Number(current?.qty || 0) + delta);
+      const price = unitPrice !== undefined ? unitPrice : current?.unitPrice ?? (Number(svc.rate) || 0);
+      const rest = list.filter((e) => e.name !== svc.name);
+      return { extras: qty > 0 ? [...rest, { name: svc.name, qty, unitPrice: price }] : rest };
+    });
   return (
     <div className="border border-white/7 rounded-2xl bg-[#0B2D22] overflow-hidden hover:border-emerald-500/30 transition-all">
       {/* Row header */}
@@ -142,10 +177,19 @@ const LineItem = ({ item, index, onChange, onRemove, catalogue }) => {
           <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">Service *</label>
           <select
             value={item.service}
-            onChange={(e) => onChange(index, "service", e.target.value)}
+            onChange={(e) => pickService(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-sm font-semibold text-white focus:outline-none focus:border-emerald-500/50 transition-all"
           >
             <option value="">— Select a service —</option>
+            {mainServices.length > 0 && (
+              <optgroup label="Our services (prices from admin)">
+                {mainServices.map((s) => (
+                  <option key={s._id || s.name} value={s.name}>
+                    {s.name} — £{priceFor(s, frequency).toFixed(2)}{s.type === "hourly" ? "/hr" : ""}
+                  </option>
+                ))}
+              </optgroup>
+            )}
             {Object.entries(catalogue).map(([cat, svcs]) => (
               <optgroup key={cat} label={cat}>
                 {svcs.map(s => <option key={s} value={s}>{s}</option>)}
@@ -239,6 +283,62 @@ const LineItem = ({ item, index, onChange, onRemove, catalogue }) => {
             </div>
           </div>
         </div>
+
+        {/* Add-ons — extras on top of this service, like the booking page */}
+        {addOns.length > 0 && (
+          <div className="pt-1">
+            <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-2">
+              Add-ons <span className="text-white/25 font-medium normal-case tracking-normal">(optional extras for this service)</span>
+            </label>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {addOns.map((svc) => {
+                const qty = extraQty(svc.name);
+                const current = (item.extras || []).find((e) => e.name === svc.name);
+                return (
+                  <div
+                    key={svc._id || svc.name}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all ${qty > 0 ? "border-emerald-500/40 bg-emerald-500/[0.07]" : "border-white/7 bg-white/[0.03]"}`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-white truncate">{svc.name}</p>
+                      {qty > 0 ? (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <span className="text-[10px] text-white/40">£</span>
+                          <input
+                            type="number" min="0" step="0.01"
+                            value={current?.unitPrice ?? ""}
+                            onChange={(e) => setExtra(svc, { unitPrice: e.target.value === "" ? "" : Number(e.target.value) })}
+                            className="w-16 px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[11px] font-bold text-white focus:outline-none"
+                            title="Price for this quote"
+                          />
+                          <span className="text-[10px] text-white/40">each</span>
+                        </div>
+                      ) : (
+                        <p className="text-[10px] font-semibold text-white/40">£{Number(svc.rate || 0).toFixed(2)}</p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setExtra(svc, { delta: -1 })}
+                      disabled={qty === 0}
+                      className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:bg-white/10 disabled:opacity-30"
+                    >
+                      <Minus size={13} />
+                    </button>
+                    <span className="w-5 text-center text-sm font-black text-white tabular-nums">{qty}</span>
+                    <button
+                      type="button"
+                      onClick={() => setExtra(svc, { delta: 1 })}
+                      className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400 hover:bg-emerald-500/25"
+                    >
+                      <Plus size={13} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -269,12 +369,13 @@ const PreviewModal = ({
               const rows = items.filter(i => i.service || i.customService).map(item => `
                 <tr>
                   <td style="padding:10px 16px;border-bottom:1px solid #e2e8f0;">
-                    <strong>${item.service === "__custom__" ? item.customService : item.service}</strong>
+                    <strong>${itemName(item)}</strong>
                     ${item.description ? `<br/><span style="font-size:11px;color:#64748b;">${item.description}</span>` : ""}
+                    ${extrasHtml(item)}
                   </td>
                   <td style="padding:10px 16px;border-bottom:1px solid #e2e8f0;text-align:center;">${item.qty}${item.billingType === "hourly" ? " hrs" : ""}</td>
                   <td style="padding:10px 16px;border-bottom:1px solid #e2e8f0;text-align:right;">£${Number(item.unitPrice||0).toFixed(2)}${item.billingType==="hourly"?"/hr":""}</td>
-                  <td style="padding:10px 16px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">£${(Number(item.unitPrice||0)*Number(item.qty||1)).toFixed(2)}</td>
+                  <td style="padding:10px 16px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">£${itemTotal(item).toFixed(2)}</td>
                 </tr>`).join("");
               const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Quote — ${data.companyName||"Client"}</title>
 <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;color:#1e293b;background:#fff;}
@@ -304,6 +405,7 @@ thead th:last-child,thead th:nth-child(2),thead th:nth-child(3){text-align:right
     <div><div class="label">Prepared For</div><div class="val">${data.companyName||"—"}</div>${data.contactName?`<div class="sub">Attn: ${data.contactName}</div>`:""}${data.email?`<div class="sub">${data.email}</div>`:""}${data.phone?`<div class="sub">${data.phone}</div>`:""}</div>
     <div style="text-align:right"><div class="label">Frequency</div><div class="val">${FREQUENCY_OPTIONS.find(f=>f.value===data.frequency)?.label||"One-time"}</div></div>
   </div>
+  ${propertyLines(data).length ? `<div style="margin-bottom:20px;font-size:12px;color:#475569;">${propertyLines(data).map(([k, v]) => `<div><strong>${k}:</strong> ${v}</div>`).join("")}</div>` : ""}
   <table>
     <thead><tr><th>Service &amp; Details</th><th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Total</th></tr></thead>
     <tbody>${rows}</tbody>
@@ -422,6 +524,11 @@ thead th:last-child,thead th:nth-child(2),thead th:nth-child(3){text-align:right
                             <Clock size={10} /> Billed hourly
                           </p>
                         )}
+                        {extrasOf(item).map((e) => (
+                          <p key={e.name} className="text-[11px] text-emerald-300/80 font-semibold mt-1">
+                            + {e.name} × {e.qty} — {gbp(Number(e.unitPrice || 0) * Number(e.qty))}
+                          </p>
+                        ))}
                       </td>
                       <td className="px-4 py-4 text-center font-semibold text-white/80">
                         {item.qty}
@@ -432,10 +539,7 @@ thead th:last-child,thead th:nth-child(2),thead th:nth-child(3){text-align:right
                         {item.billingType === "hourly" ? "/hr" : ""}
                       </td>
                       <td className="px-5 py-4 text-right font-bold text-white">
-                        £
-                        {(
-                          Number(item.unitPrice || 0) * item.qty
-                        ).toLocaleString("en-GB", { minimumFractionDigits: 2 })}
+                        {gbp(itemTotal(item))}
                       </td>
                     </tr>
                   ))}
@@ -621,10 +725,7 @@ export const QuoteDetailModal = ({ quote, onClose }) => {
                       {item.service || item.customService}
                     </p>
                     <p className="font-bold text-white text-sm whitespace-nowrap">
-                      £
-                      {(
-                        Number(item.unitPrice || 0) * Number(item.qty || 1)
-                      ).toFixed(2)}
+                      {gbp(itemTotal(item))}
                     </p>
                   </div>
                   {item.description && (
@@ -645,6 +746,11 @@ export const QuoteDetailModal = ({ quote, onClose }) => {
                       <>Qty {item.qty} × £{Number(item.unitPrice || 0).toFixed(2)}</>
                     )}
                   </p>
+                  {extrasOf(item).map((e) => (
+                    <p key={e.name} className="text-[11px] font-semibold text-emerald-300/80 mt-1">
+                      + {e.name} × {e.qty} — {gbp(Number(e.unitPrice || 0) * Number(e.qty))}
+                    </p>
+                  ))}
                 </div>
               ))}
             </div>
@@ -690,6 +796,15 @@ export const QuoteDetailModal = ({ quote, onClose }) => {
             )}
           </div>
 
+          {propertyLines(quote).length > 0 && (
+            <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 space-y-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2">Property & access</p>
+              {propertyLines(quote).map(([k, v]) => (
+                <p key={k} className="text-sm text-white/80"><span className="font-bold text-white/50">{k}:</span> {v}</p>
+              ))}
+            </div>
+          )}
+
           {quote.notes && (
             <div className="bg-amber-500/10 border border-amber-500/25 rounded-2xl p-5">
               <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400 mb-2">
@@ -726,6 +841,7 @@ const Toggle = ({ value, onChange, label }) => (
 // ── Main ───────────────────────────────────────────────────────────────────────
 const QuoteBuilder = () => {
   const [catalogue, setCatalogue] = useState(SERVICE_CATALOGUE);
+  const [apiServices, setApiServices] = useState([]); // admin services: Base = main services, Extras = add-ons
   const [items, setItems] = useState([emptyItem()]);
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState(null);
@@ -752,6 +868,13 @@ const QuoteBuilder = () => {
     frequency: "once",
     serviceDate: "",
     serviceTimeSlot: "Morning (8am-12pm)",
+    // Property & access, as on the booking page
+    property: {},
+    suppliesProvidedBy: "",
+    parking: "",
+    keyAccess: "",
+    hasPet: "",
+    specialInstructions: "",
     vatRate: 20,
     validDays: 30,
     includeVat: true,
@@ -780,9 +903,14 @@ const QuoteBuilder = () => {
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          // Merge API services into catalogue under "Custom Services" if not already present
+          setApiServices(data);
+          // Main services are listed with their admin prices; add-ons (Extras) and room
+          // prices never appear as a service of their own.
           const allExisting = Object.values(SERVICE_CATALOGUE).flat().map(s => s.toLowerCase());
-          const newApiServices = data.map(s => s.name).filter(n => !allExisting.includes(n.toLowerCase()));
+          const newApiServices = data
+            .filter((s) => !["Base", "Extras", "Rooms"].includes(s.category))
+            .map(s => s.name)
+            .filter(n => !allExisting.includes(n.toLowerCase()));
           if (newApiServices.length > 0) {
             setCatalogue(prev => ({ ...prev, "Custom Services": [...(prev["Custom Services"] || []), ...newApiServices] }));
           }
@@ -815,6 +943,12 @@ const QuoteBuilder = () => {
         depositPercent: draft.depositPercent || 0,
         discount: draft.discount || 0,
         notes: draft.notes || f.notes,
+        property: draft.property || {},
+        suppliesProvidedBy: draft.suppliesProvidedBy || "",
+        parking: draft.parking || "",
+        keyAccess: draft.keyAccess || "",
+        hasPet: draft.hasPet || "",
+        specialInstructions: draft.specialInstructions || "",
       }));
       setItems(
         (draft.items || []).map((i) => ({
@@ -824,6 +958,7 @@ const QuoteBuilder = () => {
           billingType: i.billingType || "flat",
           qty: i.qty || 1,
           unitPrice: i.unitPrice ?? "",
+          extras: i.extras || [],
         })),
       );
       setToast({
@@ -919,19 +1054,30 @@ const QuoteBuilder = () => {
     setCustomerDropdownOpen(false);
   };
 
-  const updateForm = (key, val) => setForm((f) => ({ ...f, [key]: val }));
+  const updateForm = (key, val) => {
+    setForm((f) => ({ ...f, [key]: val }));
+    // Weekly/fortnightly/monthly prices differ: re-price lines that use one of our services.
+    if (key === "frequency") {
+      setItems((prev) => prev.map((item) => {
+        const svc = apiServices.find((x) => x.category === "Base" && x.name === item.service);
+        return svc ? { ...item, unitPrice: priceFor(svc, val) || item.unitPrice } : item;
+      }));
+    }
+  };
+  const updateProperty = (key, delta) =>
+    setForm((f) => ({ ...f, property: { ...f.property, [key]: Math.max(0, Number(f.property?.[key] || 0) + delta) } }));
   const updateItem = (i, key, val) =>
     setItems((prev) =>
       prev.map((item, idx) => (idx === i ? { ...item, [key]: val } : item)),
     );
+  // patch: fields to change, or a function of the current item returning them.
+  const patchItem = (i, patch) =>
+    setItems((prev) => prev.map((item, idx) => (idx === i ? { ...item, ...(typeof patch === "function" ? patch(item) : patch) } : item)));
   const addItem = () => setItems((prev) => [...prev, emptyItem()]);
   const removeItem = (i) =>
     setItems((prev) => prev.filter((_, idx) => idx !== i));
 
-  const subtotal = items.reduce(
-    (s, i) => s + Number(i.unitPrice || 0) * Number(i.qty || 1),
-    0,
-  );
+  const subtotal = items.reduce((s, i) => s + itemTotal(i), 0);
   const discountAmount = subtotal * (Number(form.discount || 0) / 100);
   const subtotalAfterDiscount = subtotal - discountAmount;
   const vat = form.includeVat
@@ -951,13 +1097,14 @@ const QuoteBuilder = () => {
       .map(item => `
         <tr>
           <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;">
-            <strong>${item.service === "__custom__" ? item.customService : item.service}</strong>
+            <strong>${itemName(item)}</strong>
             ${item.description ? `<br/><span style="font-size:11px;color:#64748b;">${item.description}</span>` : ""}
             ${item.billingType === "hourly" ? `<br/><span style="font-size:10px;color:#7c3aed;font-weight:700;">Billed hourly</span>` : ""}
+            ${extrasHtml(item)}
           </td>
           <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;text-align:center;">${item.qty}${item.billingType === "hourly" ? " hrs" : ""}</td>
           <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;text-align:right;">£${Number(item.unitPrice || 0).toFixed(2)}${item.billingType === "hourly" ? "/hr" : ""}</td>
-          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">£${(Number(item.unitPrice || 0) * Number(item.qty || 1)).toFixed(2)}</td>
+          <td style="padding:12px 16px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">£${itemTotal(item).toFixed(2)}</td>
         </tr>`).join("");
 
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/>
@@ -1022,6 +1169,7 @@ tbody tr:nth-child(even){background:#f8fafc;}
       ${form.serviceDate ? `<div class="sub" style="margin-top:8px;">Service Date: ${new Date(form.serviceDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</div>` : ""}
     </div>
   </div>
+  ${propertyLines(form).length ? `<div class="section" style="font-size:12px;color:#475569;">${propertyLines(form).map(([k, v]) => `<div><strong>${k}:</strong> ${v}</div>`).join("")}</div>` : ""}
   ${form.frequency !== "once" ? `
   <div class="freq-block">
     <div>
@@ -1087,7 +1235,8 @@ tbody tr:nth-child(even){background:#f8fafc;}
         items: items.map((i) => ({
           ...i,
           service: i.service === "__custom__" ? i.customService : i.service,
-          subtotal: Number(i.unitPrice || 0) * Number(i.qty || 1),
+          extras: extrasOf(i).map((e) => ({ name: e.name, qty: Number(e.qty), unitPrice: Number(e.unitPrice) || 0 })),
+          subtotal: itemTotal(i),
         })),
         subtotal,
         discountAmount,
@@ -1113,6 +1262,12 @@ tbody tr:nth-child(even){background:#f8fafc;}
         email: "",
         phone: "",
         address: "",
+        property: {},
+        suppliesProvidedBy: "",
+        parking: "",
+        keyAccess: "",
+        hasPet: "",
+        specialInstructions: "",
       }));
     } catch {
       setToast({
@@ -1520,6 +1675,86 @@ tbody tr:nth-child(even){background:#f8fafc;}
             </div>
           </div>
 
+          {/* Property & access — same questions as the booking page */}
+          <div className="bg-[#0B2D22] border border-white/7 rounded-2xl overflow-hidden">
+            <div className="px-8 py-6 border-b border-white/7 bg-white/[0.03] flex items-center gap-3">
+              <Home size={18} className="text-emerald-500/50" />
+              <div>
+                <h3 className="text-base font-bold text-white">Property & Access</h3>
+                <p className="text-[11px] font-semibold text-white/40">Rooms, supplies and access, like the booking page (shown on the quote)</p>
+              </div>
+            </div>
+            <div className="p-8 space-y-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {PROPERTY_ROOMS.map(([key, label]) => (
+                  <div key={key} className="px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/7">
+                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1.5">{label}</p>
+                    <div className="flex items-center justify-between">
+                      <button type="button" onClick={() => updateProperty(key, -1)} className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:bg-white/10">
+                        <Minus size={13} />
+                      </button>
+                      <span className="text-sm font-black text-white tabular-nums">{Number(form.property?.[key] || 0)}</span>
+                      <button type="button" onClick={() => updateProperty(key, 1)} className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400 hover:bg-emerald-500/25">
+                        <Plus size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="grid sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="text-[11px] font-semibold text-white/40 mb-1.5 block">Who provides cleaning supplies?</label>
+                  <select value={form.suppliesProvidedBy} onChange={(e) => updateForm("suppliesProvidedBy", e.target.value)} className={inputCls}>
+                    <option value="">Not specified</option>
+                    <option value="Cleaniq">Cleaniq brings supplies</option>
+                    <option value="Customer">Customer provides supplies</option>
+                  </select>
+                  {form.suppliesProvidedBy === "Cleaniq" && apiServices.some((x) => x.category === "Extras" && /suppl/i.test(x.name)) && (
+                    <p className="text-[10px] text-amber-300/80 mt-1">To charge for supplies, add the supplies add-on to the service below.</p>
+                  )}
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-white/40 mb-1.5 block">Parking</label>
+                  <select value={form.parking} onChange={(e) => updateForm("parking", e.target.value)} className={inputCls}>
+                    <option value="">Not specified</option>
+                    <option value="Free parking on-site">Free parking on-site</option>
+                    <option value="Free street parking">Free street parking</option>
+                    <option value="Paid parking">Paid parking</option>
+                    <option value="No parking">No parking</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-white/40 mb-1.5 block">Access</label>
+                  <select value={form.keyAccess} onChange={(e) => updateForm("keyAccess", e.target.value)} className={inputCls}>
+                    <option value="">Not specified</option>
+                    <option value="Someone will be home">Someone will be home</option>
+                    <option value="Key in a key safe">Key in a key safe</option>
+                    <option value="Key with a neighbour or agent">Key with a neighbour or agent</option>
+                    <option value="Concierge / reception">Concierge / reception</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-white/40 mb-1.5 block">Pets at the property</label>
+                  <select value={form.hasPet} onChange={(e) => updateForm("hasPet", e.target.value)} className={inputCls}>
+                    <option value="">Not specified</option>
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-white/40 mb-1.5 block">Instructions for the cleaner</label>
+                <textarea
+                  rows={2}
+                  value={form.specialInstructions}
+                  onChange={(e) => updateForm("specialInstructions", e.target.value)}
+                  placeholder="e.g. Focus on the kitchen, alarm code given on the day…"
+                  className={`${inputCls} resize-none`}
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Line Items */}
           <div className="bg-[#0B2D22] border border-white/7 rounded-2xl overflow-hidden">
             <div className="px-8 py-6 border-b border-white/7 bg-white/[0.03] flex justify-between items-center">
@@ -1548,8 +1783,11 @@ tbody tr:nth-child(even){background:#f8fafc;}
                   item={item}
                   index={i}
                   onChange={updateItem}
+                  onPatch={patchItem}
                   onRemove={removeItem}
                   catalogue={catalogue}
+                  services={apiServices}
+                  frequency={form.frequency}
                 />
               ))}
             </div>
@@ -1632,12 +1870,13 @@ tbody tr:nth-child(even){background:#f8fafc;}
                         className="flex justify-between items-center text-xs"
                       >
                         <span className="text-white/60 font-semibold truncate flex-1 mr-2">
-                          {item.service === "__custom__"
-                            ? item.customService
-                            : item.service}
+                          {itemName(item)}
+                          {extrasOf(item).length > 0 && (
+                            <span className="text-emerald-300/70"> + {extrasOf(item).length} add-on{extrasOf(item).length === 1 ? "" : "s"}</span>
+                          )}
                         </span>
                         <span className="font-bold text-white">
-                          £{(Number(item.unitPrice || 0) * item.qty).toFixed(2)}
+                          {gbp(itemTotal(item))}
                         </span>
                       </div>
                     ))}

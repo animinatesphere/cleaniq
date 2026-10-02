@@ -3016,6 +3016,80 @@ ${extrasRows}
                         className="w-full p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
                       />
                     </div>
+                    {/* Service + hours. A service name like "End of Tenancy Cleaning, Single Fridge"
+                        can be fixed in one click: add-ons move into the add-ons list below. */}
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
+                        Service
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        <select
+                          value={editData.service || ""}
+                          onChange={(e) => setEditData({ ...editData, service: e.target.value })}
+                          className="flex-1 min-w-[220px] p-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold"
+                        >
+                          {editData.service &&
+                            !servicesList.some((s) => s.category === "Base" && s.name === editData.service) && (
+                              <option value={editData.service} style={{ background: "#0B2D22" }}>
+                                {editData.service} (current)
+                              </option>
+                            )}
+                          {servicesList
+                            .filter((s) => s.category === "Base")
+                            .map((s) => (
+                              <option key={s._id || s.name} value={s.name} style={{ background: "#0B2D22" }}>
+                                {s.name}
+                              </option>
+                            ))}
+                        </select>
+                        <div className="flex items-center gap-2 px-4 rounded-2xl bg-white/5 border border-white/10">
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.5"
+                            value={editData.details?.duration ?? ""}
+                            onChange={(e) =>
+                              setEditData({
+                                ...editData,
+                                details: { ...editData.details, duration: e.target.value === "" ? "" : Number(e.target.value) },
+                              })
+                            }
+                            className="w-16 bg-transparent text-white font-bold text-center focus:outline-none"
+                          />
+                          <span className="text-xs font-bold text-white/40">hours</span>
+                        </div>
+                      </div>
+                      {(() => {
+                        // Split add-ons out of a combined service name.
+                        const parts = String(editData.service || "").split(",").map((x) => x.trim()).filter(Boolean);
+                        if (parts.length < 2) return null;
+                        const norm = (x) => x.toLowerCase().replace(/[^a-z0-9]/g, "");
+                        const isExtra = (x) => extraServicesList.some((e) => norm(e.name) === norm(x)) ||
+                          servicesList.some((e) => e.category === "Extras" && norm(e.name) === norm(x));
+                        const extras = parts.filter(isExtra);
+                        const main = parts.filter((x) => !isExtra(x));
+                        if (!extras.length || !main.length) return null;
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const current = editData.details?.extras || [];
+                              const add = extras
+                                .filter((x) => !current.some((c) => norm(typeof c === "string" ? c : c.name || "").startsWith(norm(x))))
+                                .map((x) => `${x} (x1)`);
+                              setEditData({
+                                ...editData,
+                                service: main.join(", "),
+                                details: { ...editData.details, extras: [...add, ...current] },
+                              });
+                            }}
+                            className="mt-2 ml-1 text-xs font-bold text-amber-300 hover:text-amber-200 underline underline-offset-2"
+                          >
+                            Fix: make the service "{main.join(", ")}" and move {extras.join(", ")} to add-ons
+                          </button>
+                        );
+                      })()}
+                    </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold text-white/40 ml-4 uppercase">
                         Status

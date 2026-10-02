@@ -8,7 +8,12 @@ const quoteItemSchema = new mongoose.Schema(
     billingType: { type: String, enum: ["flat", "hourly"], default: "flat" },
     qty: { type: Number, default: 1 }, // visits, or hours when billingType is "hourly"
     unitPrice: { type: Number, default: 0 }, // flat unit price, or hourly rate when billingType is "hourly"
-    subtotal: { type: Number, default: 0 },
+    subtotal: { type: Number, default: 0 }, // main service + add-ons
+    // Add-ons on top of the service (e.g. Single Fridge × 1), like the booking page's extras.
+    extras: {
+      type: [{ name: String, qty: { type: Number, default: 1 }, unitPrice: { type: Number, default: 0 }, _id: false }],
+      default: [],
+    },
   },
   { _id: false },
 );
@@ -32,6 +37,13 @@ const quoteSchema = new mongoose.Schema({
   serviceDate: { type: String, default: null },
   serviceTimeSlot: { type: String, default: null },
   items: [quoteItemSchema],
+  // Property & access (as on the booking page)
+  property: { type: mongoose.Schema.Types.Mixed, default: {} }, // { bedrooms, bathrooms, kitchens, ... }
+  suppliesProvidedBy: { type: String, default: "" }, // "Cleaniq" | "Customer"
+  parking: { type: String, default: "" },
+  keyAccess: { type: String, default: "" },
+  hasPet: { type: String, default: "" },
+  specialInstructions: { type: String, default: "" },
   subtotal: { type: Number, default: 0 },
   discount: { type: Number, default: 0 },
   discountAmount: { type: Number, default: 0 },
