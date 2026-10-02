@@ -377,6 +377,47 @@ router.put('/:id/cancel', verifyCustomer, async (req, res) => {
   }
 });
 
+// POST /api/customer-bookings/:id/rate — the customer rates their cleaner (1–5 stars) after the clean.
+// They can change their rating later; the cleaner's average updates straight away.
+router.post('/:id/rate', verifyCustomer, async (req, res) => {
+  try {
+    const stars = Math.round(Number(req.body.stars));
+    if (!(stars >= 1 && stars <= 5)) return res.status(400).json({ message: 'Please choose 1 to 5 stars.' });
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return res.status(404).json({ message: 'Booking not found.' });
+    if ((booking.customer.email || '').toLowerCase() !== String(req.customer.email || '').toLowerCase()) {
+      return res.status(403).json({ message: 'You can only rate your own bookings.' });
+    }
+    if (!['Completed', 'Completed - Unpaid'].includes(booking.status) || !booking.assignedWorker) {
+      return res.status(400).json({ message: 'You can rate your cleaner once the clean is finished.' });
+    }
+    const first = !booking.cleanerRating?.stars;
+    booking.cleanerRating = { stars, comment: String(req.body.comment || '').trim().slice(0, 500), ratedAt: new Date() };
+    await booking.save();
+
+    // Keep the cleaner's stored rating in step (admin pages and older app versions read it).
+    const { workerStats } = require('../utils/workerStats');
+    const stats = await workerStats(booking.assignedWorker);
+    if (stats?.rating != null) await Worker.updateOne({ _id: booking.assignedWorker }, { rating: stats.rating });
+
+    if (first) {
+      try {
+        const Notification = require('../models/Notification');
+        await Notification.create({
+          workerId: booking.assignedWorker,
+          title: `${'★'.repeat(stars)} from ${booking.customer.firstName || 'your customer'}`,
+          message: `${booking.service} on ${booking.schedule?.date ? new Date(booking.schedule.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'your recent clean'}${booking.cleanerRating.comment ? `: "${booking.cleanerRating.comment}"` : ''}`,
+          type: 'success',
+          bookingId: booking.bookingId,
+        });
+      } catch {}
+    }
+    res.json({ cleanerRating: booking.cleanerRating, workerRating: stats?.rating ?? null });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // PUT /api/customer-bookings/:id/reschedule — customer reschedules date/time
 router.put('/:id/reschedule', verifyCustomer, async (req, res) => {
   try {

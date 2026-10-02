@@ -1,24 +1,19 @@
-// Keeps text inputs above the keyboard. Measures how much of this view the keyboard actually
-// covers (in window coordinates) and pads the bottom by exactly that much. This works where the
-// built-in KeyboardAvoidingView doesn't: Android edge-to-edge (the window no longer shrinks) and
-// iOS sheet modals (the screen starts lower than the top of the window).
+// Keeps text inputs above the keyboard. On Android the app draws edge-to-edge, so the window no
+// longer shrinks when the keyboard opens; instead we measure how much of this view the keyboard
+// covers and pad the bottom by exactly that much. iOS uses the built-in KeyboardAvoidingView.
 import React, { useEffect, useRef, useState } from "react";
-import { View, Keyboard, Platform, Dimensions, LayoutAnimation } from "react-native";
+import { View, Keyboard, KeyboardAvoidingView, Platform, Dimensions } from "react-native";
 
-export default function KeyboardSafeView({ style, children, onKeyboardShow }) {
+export default function KeyboardSafeView({ style, children, iosOffset = 0, onKeyboardShow }) {
   const ref = useRef(null);
   const [pad, setPad] = useState(0);
   const onShowRef = useRef(onKeyboardShow);
   onShowRef.current = onKeyboardShow;
 
   useEffect(() => {
-    if (Platform.OS === "web") return undefined;
-    const ios = Platform.OS === "ios";
-    const animate = (e) => {
-      if (ios) LayoutAnimation.configureNext(LayoutAnimation.create(e?.duration || 250, "keyboard", "opacity"));
-    };
+    if (Platform.OS !== "android") return undefined;
     let timer;
-    const show = Keyboard.addListener(ios ? "keyboardWillShow" : "keyboardDidShow", (e) => {
+    const show = Keyboard.addListener("keyboardDidShow", (e) => {
       const kbHeight = e?.endCoordinates?.height || 0;
       const screenH = Dimensions.get("screen").height;
       // Phones disagree on whether screenY counts the status bar, so take the higher of the two
@@ -33,22 +28,24 @@ export default function KeyboardSafeView({ style, children, onKeyboardShow }) {
           // How far the bottom of this view reaches below the top of the keyboard. If the phone
           // did shrink the window, the view already ends above the keyboard and this is 0.
           const overlap = Math.round(y + h - kbTop);
-          animate(e);
           setPad(overlap > 0 ? Math.min(overlap, kbHeight + 60) : 0);
           onShowRef.current?.();
         });
       };
       measure();
-      if (!ios) timer = setTimeout(measure, 150); // again once any window resize has settled
+      timer = setTimeout(measure, 150); // again once any window resize has settled
     });
-    const hide = Keyboard.addListener(ios ? "keyboardWillHide" : "keyboardDidHide", (e) => {
-      clearTimeout(timer);
-      animate(e);
-      setPad(0);
-    });
+    const hide = Keyboard.addListener("keyboardDidHide", () => { clearTimeout(timer); setPad(0); });
     return () => { clearTimeout(timer); show.remove(); hide.remove(); };
   }, []);
 
+  if (Platform.OS === "ios") {
+    return (
+      <KeyboardAvoidingView style={style} behavior="padding" keyboardVerticalOffset={iosOffset}>
+        {children}
+      </KeyboardAvoidingView>
+    );
+  }
   return (
     <View ref={ref} collapsable={false} style={[style, { paddingBottom: pad }]}>
       {children}

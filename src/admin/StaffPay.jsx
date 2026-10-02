@@ -5,6 +5,8 @@ import {
   RefreshCw, Settings, TrendingUp, Users, Check,
 } from "lucide-react";
 
+import TopRatedBonus from "./TopRatedBonus";
+
 const API_URL = import.meta.env.VITE_API_URL || "https://api.cleaniqservices.com/api";
 
 const authHeaders = () => {
@@ -223,6 +225,9 @@ const StaffPay = () => {
           )}
         </div>
       </div>
+
+      {/* Top-rated bonus */}
+      <TopRatedBonus onSaved={(text) => flash("success", text)} />
 
       {/* Info note */}
       <div className="flex items-start gap-3 px-4 py-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm">

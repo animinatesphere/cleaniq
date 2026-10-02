@@ -411,12 +411,10 @@ const AppNavigation = ({ dark }) => {
                 name="AcceptedBookingDetail"
                 component={AcceptedBookingDetailScreen}
               />
-              <Stack.Screen
-                name="ChatWithCustomer"
-                component={ChatWithCustomerScreen}
-              />
-              <Stack.Screen name="Chat" component={ChatScreen} />
             </Stack.Group>
+            {/* Chats open as normal pages (like the customer app) so the message box sits right above the keyboard. */}
+            <Stack.Screen name="ChatWithCustomer" component={ChatWithCustomerScreen} />
+            <Stack.Screen name="Chat" component={ChatScreen} />
           </>
         )}
       </Stack.Navigator>

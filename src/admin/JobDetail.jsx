@@ -7,6 +7,7 @@ import {
   PlusCircle, RefreshCw, X, Banknote, Home, Layers,
 } from "lucide-react";
 import DomesticPropertyReport from "./DomesticPropertyReport";
+import CleanerControls from "./CleanerControls";
 import { uploadUrl } from "../utils/uploads";
 
 const API    = import.meta.env.VITE_API_URL;
@@ -397,6 +398,12 @@ const JobDetail = () => {
     return () => { if (locationPollRef.current) clearInterval(locationPollRef.current); };
   }, [id]);
 
+  // Pay changed or cleaner removed from the booking.
+  const updateCleaner = (patch) => {
+    setBooking((b) => ({ ...b, ...patch }));
+    if (patch.assignedWorker === null) { setWorker(null); setLiveLocation(null); }
+  };
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="h-10 w-10 border-4 border-primary border-r-transparent rounded-full animate-spin" />
@@ -749,12 +756,6 @@ const JobDetail = () => {
                       <span className="text-sm font-bold text-white/70 group-hover:text-primary">{worker.phone}</span>
                     </a>
                   )}
-                  {booking.workerRate && (
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#071D16] border border-white/7">
-                      <Banknote size={14} className="text-white/30 shrink-0" />
-                      <span className="text-sm font-bold text-white/70">£{booking.workerRate}/hr</span>
-                    </div>
-                  )}
                   {booking.jobAcceptedTime && (
                     <p className="text-[11px] text-white/30 font-semibold px-1 flex items-center gap-1.5">
                       <CheckCircle2 size={11} className="text-emerald-500" />
@@ -769,13 +770,18 @@ const JobDetail = () => {
                 )}
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center py-8 gap-2">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
-                  <User size={22} className="text-white/25" />
+              <>
+                <div className="flex flex-col items-center justify-center py-8 gap-2">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
+                    <User size={22} className="text-white/25" />
+                  </div>
+                  <p className="text-sm font-bold text-white/30">Not yet assigned</p>
                 </div>
-                <p className="text-sm font-bold text-white/30">Not yet assigned</p>
-              </div>
+              </>
             )}
+            <div className="mt-4">
+              <CleanerControls booking={booking} onChange={updateCleaner} />
+            </div>
           </div>
 
           <div className="bg-[#0B2D22] rounded-3xl border border-white/7 p-6">

@@ -14,6 +14,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
+import RateCleanerCard from "../components/RateCleanerCard";
 
 // Customer-facing wording for booking statuses (stored values stay the same).
 const STATUS_LABEL = {
@@ -355,6 +356,14 @@ const BookingDetailScreen = ({ route, navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
+        )}
+
+        {/* Rate the cleaner once the clean is finished */}
+        {DONE_STATUSES.includes(booking.status) && !!booking.assignedWorker && (
+          <RateCleanerCard
+            booking={booking}
+            onRated={(cleanerRating) => setBooking((b) => ({ ...b, cleanerRating }))}
+          />
         )}
 
         {/* Message the cleaner — as soon as one is assigned */}

@@ -36,6 +36,7 @@ import {
 import AdminCRM from "./AdminCRM";
 import { buildBookedRanges, overlapsExistingRange } from "../utils/timeOverlap";
 import StatDetailDrawer from "./StatDetailDrawer";
+import CleanerControls from "./CleanerControls";
 
 export const LEAD_SOURCES = [
   "Bark",
@@ -3864,6 +3865,21 @@ ${extrasRows}
                       )}
                     </div>
                   )}
+
+                  {/* Cleaner pay for this booking + remove the cleaner */}
+                  <div className="bg-white/[0.03] rounded-2xl p-5 border border-white/7">
+                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">
+                      Cleaner
+                      {selectedBooking.assignedWorkerName ? ` · ${selectedBooking.assignedWorkerName}` : " · not assigned"}
+                    </p>
+                    <CleanerControls
+                      booking={selectedBooking}
+                      onChange={(patch) => {
+                        setSelectedBooking((prev) => ({ ...prev, ...patch }));
+                        fetchBookings();
+                      }}
+                    />
+                  </div>
 
                   {(selectedBooking.assignedWorker ||
                     selectedBooking.assignedWorkerName) && (

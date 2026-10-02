@@ -60,6 +60,13 @@ const bookingSchema = new mongoose.Schema({
   jobDurationActual: { type: Number, default: 0 }, // in minutes
   workerRate: { type: Number, default: null }, // per hour rate set by admin
   workerDuration: { type: Number, default: null }, // expected duration set by admin
+  workerRateBonus: { type: Number, default: 0 }, // top-rated bonus (£/hr) included in workerRate
+  // The customer's rating of their cleaner after the clean (1–5 stars).
+  cleanerRating: {
+    stars: { type: Number, min: 1, max: 5 },
+    comment: { type: String, default: "" },
+    ratedAt: Date,
+  },
   rejectedBy: [{ type: String }],
   visibleToWorkers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Worker" }],
   photos: [{

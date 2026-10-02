@@ -89,15 +89,20 @@ function checkMatch(prefs, booking, { jobPoint = null, homePoint = null } = {}) 
 // Visits per month by frequency, for the monthly estimate on regular offers.
 const VISITS_PER_MONTH = { Weekly: 52 / 12, Fortnightly: 26 / 12, "Bi-weekly": 26 / 12, Monthly: 1, Quarterly: 1 / 3 };
 
-async function payFor(booking, serviceCache = {}) {
+// bonus: the cleaner's top-rated bonus (£/hr) to show on an offer; by default whatever is
+// already on the booking (workerRate includes workerRateBonus).
+async function payFor(booking, serviceCache = {}, { bonus } = {}) {
   const hours = jobHours(booking);
   const name = String(booking.service || "");
   if (!(name in serviceCache)) serviceCache[name] = await Service.findOne({ name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") }).lean();
   const svc = serviceCache[name];
   const frequency = booking.details?.frequency;
   const regular = Boolean(VISITS_PER_MONTH[frequency]);
-  const rate = Number(booking.workerRate) || Number(svc?.workerHourlyRate) || 0;
-  const following = regular ? Number(svc?.workerFollowingRate) || Number(svc?.workerHourlyRate) || rate : null;
+  const onBooking = Number(booking.workerRateBonus) || 0;
+  const extra = bonus != null ? Number(bonus) || 0 : onBooking;
+  const baseRate = (Number(booking.workerRate) || 0) - onBooking || Number(svc?.workerHourlyRate) || 0;
+  const rate = baseRate + extra;
+  const following = regular ? (Number(svc?.workerFollowingRate) || Number(svc?.workerHourlyRate) || baseRate) + extra : null;
   // A later visit of a regular clean is already paid at the following-sessions rate.
   const isLaterVisit = Boolean(booking.payment?.chargeOnArrival);
   const firstRate = isLaterVisit ? following : rate;
@@ -105,6 +110,7 @@ async function payFor(booking, serviceCache = {}) {
     hours,
     firstRate,
     followingRate: following,
+    bonus: extra,
     total: Math.round(firstRate * hours * 100) / 100,
     frequency: regular ? frequency : "Once",
     monthlyEstimate: regular ? Math.round(following * hours * VISITS_PER_MONTH[frequency] * 100) / 100 : null,
@@ -117,13 +123,14 @@ async function offersForWorker(worker, bookings) {
   const homePoint = prefs.travel.home || (prefs.travel.homePostcode ? await geo.pointFor(prefs.travel.homePostcode) : null);
   const points = await geo.lookup(bookings.map(jobPostcode).filter(Boolean));
   const serviceCache = {};
+  const { bonus } = await require("./topRatedBonus").bonusFor(worker._id);
   const out = [];
   for (const b of bookings) {
     const jobPoint = points[geo.normalise(jobPostcode(b))] || null;
     const m = checkMatch(prefs, b, { jobPoint, homePoint });
     if (!m.ok) continue;
     const obj = b.toObject ? b.toObject() : b;
-    out.push({ ...obj, offer: { distanceMiles: m.distanceMiles, travelMinutes: m.travelMinutes, travelMode: prefs.travel.mode, pay: await payFor(b, serviceCache) } });
+    out.push({ ...obj, offer: { distanceMiles: m.distanceMiles, travelMinutes: m.travelMinutes, travelMode: prefs.travel.mode, pay: await payFor(b, serviceCache, { bonus: b.assignedWorker ? undefined : bonus }) } });
   }
   return out;
 }

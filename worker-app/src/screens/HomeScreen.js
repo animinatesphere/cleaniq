@@ -236,15 +236,21 @@ const HomeScreen = ({ navigation, route }) => {
         <Text style={S.heroBalLabel}>Available Balance</Text>
         {walletLoading
           ? <ActivityIndicator color={tc("#fff")} style={{marginVertical:10}}/>
-          : <Text style={S.heroBalAmt}>£{(wallet.balance||wallet.onHold||0).toFixed(2)}</Text>
+          : <Text style={S.heroBalAmt}>£{(wallet.balance||0).toFixed(2)}</Text>
         }
+        {!walletLoading && wallet.nextPayout && (
+          <Text style={S.heroNextPayout}>
+            Next payout £{Number(wallet.nextPayout.amount||0).toFixed(2)} on{" "}
+            {new Date(wallet.nextPayout.date).toLocaleDateString("en-GB",{ weekday:"short", day:"numeric", month:"short" })}
+          </Text>
+        )}
 
         {/* Stats strip */}
         <View style={S.heroStrip}>
           {[
             { label:"On Hold",      val:`£${(wallet.onHold||0).toFixed(2)}` },
             { label:"Withdrawn",    val:`£${(wallet.withdrawn||0).toFixed(2)}` },
-            { label:"Total Earned", val:`£${(wallet.totalEarned||activityStats.totalEarnings||0).toFixed(2)}` },
+            { label:"Total Earned", val:`£${(wallet.totalEarned||0).toFixed(2)}` },
           ].map((s,i,arr)=>(
             <React.Fragment key={s.label}>
               <View style={S.heroStripItem}>
@@ -260,10 +266,10 @@ const HomeScreen = ({ navigation, route }) => {
       {/* ── Quick stats row ────────────────────────────────────────────── */}
       <View style={S.statsRow}>
         {[
-          { Icon:Briefcase, val:activityStats.offersAccepted, lbl:"Completed", c:"#059669", bg:"#DCFCE7" },
+          { Icon:Briefcase, val:wallet.jobsDone ?? activityStats.offersAccepted, lbl:"Completed", c:"#059669", bg:"#DCFCE7" },
           { Icon:Users,     val:activityStats.customersServed,lbl:"Clients",   c:"#0891B2", bg:"#E0F2FE" },
-          { Icon:Star,      val:workerInfo?.rating?.toFixed(1)||"5.0", lbl:"Rating", c:"#D97706", bg:"#FEF3C7" },
-          { Icon:TrendingUp,val:`£${(activityStats.totalEarnings||0).toFixed(0)}`, lbl:"Earnings", c:"#7C3AED", bg:"#EDE9FE" },
+          { Icon:Star,      val:wallet.rating!=null ? Number(wallet.rating).toFixed(1) : "New", lbl:wallet.ratingCount ? `Rating (${wallet.ratingCount})` : "Rating", c:"#D97706", bg:"#FEF3C7" },
+          { Icon:TrendingUp,val:`£${(wallet.totalEarned||0).toFixed(0)}`, lbl:"Earnings", c:"#7C3AED", bg:"#EDE9FE" },
         ].map(({Icon,val,lbl,c,bg})=>(
           <View key={lbl} style={S.statCard}>
             <View style={[S.statIconWrap,ts({backgroundColor:bg})]}>
@@ -705,6 +711,7 @@ const S = themed(StyleSheet.create({
   heroGreeting: { fontSize:14, color:"rgba(255,255,255,0.55)", marginBottom:10 },
   heroBalLabel: { fontSize:11, color:"rgba(255,255,255,0.4)", textTransform:"uppercase", letterSpacing:1, marginBottom:6 },
   heroBalAmt: { fontSize:44, fontWeight:"800", color:"#fff", letterSpacing:-1.5, marginBottom:20 },
+  heroNextPayout: { fontSize:12, fontWeight:"700", color:"rgba(255,255,255,0.8)", marginTop:-14, marginBottom:14 },
   heroStrip: {
     flexDirection:"row",
     backgroundColor:"rgba(255,255,255,0.07)",
