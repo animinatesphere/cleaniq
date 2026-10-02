@@ -7,6 +7,29 @@ const Lead = require("../models/Lead");
 const { moveToTrash } = require("../utils/trash");
 const { scheduleTask } = require("../utils/automationEngine");
 
+// A quote line = main service + optional add-ons.
+const num = (v, d = 0) => (Number.isFinite(Number(v)) ? Number(v) : d);
+const extrasOf = (item) => (item.extras || []).filter((e) => e && e.name && num(e.qty) > 0);
+const itemTotal = (item) =>
+  num(item.unitPrice) * num(item.qty, 1) + extrasOf(item).reduce((s, e) => s + num(e.unitPrice) * num(e.qty), 0);
+const escHtml = (v) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const PROPERTY_ROOMS = [
+  ["bedrooms", "bedrooms"], ["bathrooms", "bathrooms"], ["kitchens", "kitchens"], ["receptionRooms", "reception rooms"],
+  ["cloakrooms", "cloakrooms"], ["utilityRooms", "utility rooms"], ["conservatories", "conservatories"],
+];
+function propertyLines(q) {
+  const p = q.property || {};
+  const rooms = PROPERTY_ROOMS.filter(([k]) => num(p[k]) > 0).map(([k, label]) => `${num(p[k])} ${label}`);
+  return [
+    rooms.length ? ["Property", rooms.join(", ")] : null,
+    q.suppliesProvidedBy ? ["Cleaning supplies", q.suppliesProvidedBy === "Customer" ? "Provided by you" : "Brought by Cleaniq"] : null,
+    q.parking ? ["Parking", q.parking] : null,
+    q.keyAccess ? ["Access", q.keyAccess] : null,
+    q.hasPet ? ["Pets", q.hasPet] : null,
+    q.specialInstructions ? ["Instructions", q.specialInstructions] : null,
+  ].filter(Boolean);
+}
+
 const FREQUENCY_LABELS = {
   once: "One-time",
   weekly: "Weekly",
@@ -51,6 +74,12 @@ async function sendQuote(body) {
     notes,
     serviceDate,
     serviceTimeSlot,
+    property,
+    suppliesProvidedBy,
+    parking,
+    keyAccess,
+    hasPet,
+    specialInstructions,
   } = body;
 
   // Validation
@@ -85,6 +114,12 @@ async function sendQuote(body) {
     notes,
     serviceDate,
     serviceTimeSlot,
+    property,
+    suppliesProvidedBy,
+    parking,
+    keyAccess,
+    hasPet,
+    specialInstructions,
   };
 
   // Generate quote email HTML
@@ -344,21 +379,21 @@ router.get("/:quoteRef/accept", async (req, res) => {
       quote.acceptedAt = new Date();
       quote.declinedAt = null;
       await quote.save();
-      const bookingsCreated = await generateBookingsFromQuote(quote);
+      const { count: bookingsCreated, dateNote } = await generateBookingsFromQuote(quote);
       await sendEmail({
         to: process.env.EMAIL_USER || "info@cleaniqservices.com",
         subject: `✅ Quote Accepted (after declining) - ${quote.companyName} | ${quote.quoteRef}`,
-        html: generateQuoteResponseAlert(quote, "accepted", bookingsCreated),
+        html: generateQuoteResponseAlert(quote, "accepted", bookingsCreated, dateNote),
       });
     } else if (quote.status !== "accepted") {
       quote.status = "accepted";
       quote.acceptedAt = new Date();
       await quote.save();
-      const bookingsCreated = await generateBookingsFromQuote(quote);
+      const { count: bookingsCreated, dateNote } = await generateBookingsFromQuote(quote);
       await sendEmail({
         to: process.env.EMAIL_USER || "info@cleaniqservices.com",
         subject: `✅ Quote Accepted - ${quote.companyName} | ${quote.quoteRef}`,
-        html: generateQuoteResponseAlert(quote, "accepted", bookingsCreated),
+        html: generateQuoteResponseAlert(quote, "accepted", bookingsCreated, dateNote),
       });
     }
 
@@ -622,8 +657,9 @@ function generateQuoteEmail(quote) {
         <p style="margin: 0; font-weight: bold; color: #0f172a; font-size: 14px;">${item.service || item.customService}</p>
         ${item.description ? `<p style="margin: 6px 0 0; font-size: 12px; color: #64748b; line-height: 1.5;">${item.description}</p>` : ""}
         <p style="margin: 6px 0 0; font-size: 11px; color: #94a3b8;">${pricingLabel}</p>
+        ${extrasOf(item).map((e) => `<p style="margin: 4px 0 0; font-size: 12px; color: #0f766e;">+ ${escHtml(e.name)} &times; ${num(e.qty)} &mdash; £${(num(e.unitPrice) * num(e.qty)).toFixed(2)}</p>`).join("")}
       </td>
-      <td style="padding: 16px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: bold; color: #0f172a; font-size: 14px; font-family: Arial, Helvetica, sans-serif; white-space: nowrap;">£${(Number(item.unitPrice || 0) * item.qty).toFixed(2)}</td>
+      <td style="padding: 16px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: bold; color: #0f172a; font-size: 14px; font-family: Arial, Helvetica, sans-serif; white-space: nowrap;">£${itemTotal(item).toFixed(2)}</td>
     </tr>`;
     })
     .join("");
@@ -687,6 +723,15 @@ function generateQuoteEmail(quote) {
                 <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #334155; font-family: Arial, Helvetica, sans-serif;">Thank you for the opportunity to quote for your cleaning requirements. Please find the full breakdown of services and pricing below.</p>
               </td>
             </tr>
+
+            ${propertyLines(quote).length ? `
+            <!-- PROPERTY & ACCESS -->
+            <tr>
+              <td style="padding: 28px 40px 0;">
+                <p style="margin: 0 0 8px; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-family: Arial, Helvetica, sans-serif;">Property &amp; Access</p>
+                ${propertyLines(quote).map(([k, v]) => `<p style="margin: 0 0 4px; font-size: 13px; color: #334155; font-family: Arial, Helvetica, sans-serif;"><strong>${k}:</strong> ${escHtml(v)}</p>`).join("")}
+              </td>
+            </tr>` : ""}
 
             <!-- SERVICES TABLE -->
             <tr>
@@ -980,7 +1025,7 @@ function generateOutcomePage({ type, quote }) {
 </html>`;
 }
 
-function generateQuoteResponseAlert(quote, outcome, bookingsCreated = 0) {
+function generateQuoteResponseAlert(quote, outcome, bookingsCreated = 0, dateNote = null) {
   const isAccepted = outcome === "accepted";
   return `
     <div style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background-color: #ffffff;">
@@ -1000,7 +1045,7 @@ function generateQuoteResponseAlert(quote, outcome, bookingsCreated = 0) {
           <tr><td style="padding: 0 20px ${bookingsCreated ? "4px" : "20px"}; font-size: 18px; font-weight: bold; color: ${isAccepted ? "#059669" : "#475569"};">£${Number(quote.grandTotal || 0).toFixed(2)}</td></tr>
           ${
             bookingsCreated
-              ? `<tr><td style="padding: 0 20px 20px; font-size: 13px; color: #059669; font-weight: bold;">📅 ${bookingsCreated} booking${bookingsCreated > 1 ? "s" : ""} added to the calendar automatically</td></tr>`
+              ? `<tr><td style="padding: 0 20px ${dateNote ? "8px" : "20px"}; font-size: 13px; color: #059669; font-weight: bold;">📅 ${bookingsCreated} booking${bookingsCreated > 1 ? "s" : ""} added to the calendar automatically</td></tr>${dateNote ? `<tr><td style="padding: 0 20px 20px; font-size: 13px; color: #b45309; font-weight: bold;">⚠️ ${dateNote}</td></tr>` : ""}`
               : ""
           }
         </table>
@@ -1019,7 +1064,7 @@ async function generateBookingsFromQuote(quote) {
   const existingCount = await Booking.countDocuments({
     bookingId: { $regex: `^Q-${quote.quoteRef}-` },
   });
-  if (existingCount > 0) return existingCount;
+  if (existingCount > 0) return { count: existingCount, dateNote: null };
 
   const OCCURRENCES_BY_FREQUENCY = {
     once: 1,
@@ -1055,12 +1100,63 @@ async function generateBookingsFromQuote(quote) {
     return d;
   };
 
-  const serviceLabel =
-    quote.items
-      .map((i) => i.service || i.customService)
-      .filter(Boolean)
-      .join(", ") || "Quoted Cleaning Service";
+  // First clean. A quote can be accepted days or weeks after it was sent: if its date has
+  // passed (or it never had one), the bookings start from the next future date instead of a
+  // past date — or an empty one, which showed as 1 Jan 1970. Admin is told to confirm it.
+  const tomorrow = new Date();
+  tomorrow.setHours(0, 0, 0, 0);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const fmt = (d) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  const quoted = quote.serviceDate ? new Date(quote.serviceDate) : null;
+  let start = quoted && !Number.isNaN(quoted.getTime()) ? quoted : null;
+  let dateNote = null;
+  if (!start) {
+    start = tomorrow;
+    dateNote = `The quote had no cleaning date, so ${fmt(start)} has been used — please confirm the date with the customer.`;
+  } else if (start < tomorrow) {
+    const original = start;
+    if (quote.frequency && quote.frequency !== "once") {
+      let i = 1;
+      while (addInterval(original, quote.frequency, i) < tomorrow && i < 500) i++;
+      start = addInterval(original, quote.frequency, i);
+    } else {
+      start = tomorrow;
+    }
+    dateNote = `The quoted date (${fmt(original)}) had passed when the quote was accepted, so the first clean is now ${fmt(start)} — please confirm it with the customer.`;
+  }
 
+  // Main services vs add-ons. Older quotes listed add-ons (e.g. "Single Fridge") as services of
+  // their own; those are recognised from the admin's Extras services and treated as add-ons.
+  const Service = require("../models/Service");
+  const extraNames = new Set(
+    (await Service.find({ category: { $in: ["Extras", "Rooms"] } }).select("name").lean()).map((x) => x.name.toLowerCase().trim()),
+  );
+  const items = (quote.items || []).filter((i) => i.service || i.customService);
+  const isAddOn = (i) => extraNames.has(String(i.service || i.customService).toLowerCase().trim());
+  const mainItems = items.filter((i) => !isAddOn(i));
+  const addOns = [
+    ...items.flatMap((i) => extrasOf(i)).map((e) => ({ name: e.name, qty: num(e.qty, 1) })),
+    ...items.filter(isAddOn).map((i) => ({ name: i.service || i.customService, qty: num(i.qty, 1) })),
+  ];
+  const serviceLabel =
+    (mainItems.length ? mainItems : items).map((i) => i.service || i.customService).filter(Boolean).join(", ") ||
+    "Quoted Cleaning Service";
+  const hourlyHours = mainItems.filter((i) => i.billingType === "hourly").reduce((s, i) => s + num(i.qty), 0);
+
+  const p = quote.property || {};
+  const roomNames = { bedrooms: "Bedroom", bathrooms: "Bathroom", kitchens: "Kitchen", receptionRooms: "Reception Room", cloakrooms: "Cloakroom", utilityRooms: "Utility Room", conservatories: "Conservatory" };
+  // Same "Name (xN)" lines the website booking form saves.
+  const extrasLines = [
+    ...addOns.map((e) => `${e.name} (x${e.qty})`),
+    ...Object.entries(roomNames).filter(([k]) => num(p[k]) > 0).map(([k, label]) => `${label} (x${num(p[k])})`),
+    ...(quote.parking ? [`Parking: ${quote.parking}`] : []),
+    ...(quote.keyAccess ? [`Entry: ${quote.keyAccess}`] : []),
+    ...(quote.hasPet ? [`Pet on premises: ${quote.hasPet}`] : []),
+    ...(quote.specialInstructions ? [`Instructions: ${quote.specialInstructions}`] : []),
+  ];
+
+  const { workerRateFor } = require("../utils/workerRate");
+  const workerRate = await workerRateFor(mainItems[0]?.service || serviceLabel);
   const [firstName, ...rest] = (quote.contactName || quote.companyName || "Customer").split(" ");
 
   const bookings = Array.from({ length: occurrenceCount }, (_, i) => ({
@@ -1078,20 +1174,23 @@ async function generateBookingsFromQuote(quote) {
         quote.frequency === "once"
           ? "Once"
           : FREQUENCY_LABELS[quote.frequency] || quote.frequency,
-      duration: 2,
-      notes: `Generated from accepted quote ${quote.quoteRef} (${quote.companyName})`,
+      duration: hourlyHours || 2,
+      extras: extrasLines,
+      notes: [`Generated from accepted quote ${quote.quoteRef} (${quote.companyName})`, i === 0 ? dateNote : null].filter(Boolean).join(". "),
     },
+    property: p,
+    suppliesProvidedBy: quote.suppliesProvidedBy || null,
     schedule: {
-      // If the quote has no service date the booking is still created so it
-      // appears on the admin calendar — the admin can set the date later.
-      date: quote.serviceDate ? addInterval(quote.serviceDate, quote.frequency, i) : null,
+      date: addInterval(start, quote.frequency, i),
       timeSlot: quote.serviceTimeSlot || "Morning (8am-12pm)",
     },
     payment: {
       amount: quote.grandTotal || 0,
       currency: "GBP",
       status: "Pending",
+      billingType: hourlyHours ? "hourly" : "flat",
     },
+    workerRate,
     region: "UK",
     leadSource: "Quote Accepted",
     // Accepting a quote doesn't mean payment has happened yet — stays
@@ -1109,7 +1208,7 @@ async function generateBookingsFromQuote(quote) {
     // Log but don't surface to the customer — the accept page still shows.
     console.error("⚠️ generateBookingsFromQuote insertMany error:", insertErr.message);
   }
-  return bookings.length;
+  return { count: bookings.length, dateNote };
 }
 
 function calculateNextSendDate(frequency) {
