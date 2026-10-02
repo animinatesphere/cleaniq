@@ -500,7 +500,7 @@ const redesigned = {
 
   staffAppInvite: (staff) => {
     const androidLink = "https://expo.dev/artifacts/eas/j8DzdUDFEfmfLUiK7QVUSG.apk";
-    const iosLink = "https://apps.apple.com/us/app/cleaniq-services/id6787302038"; // Cleaniq Service Pro on the App Store
+    const iosLink = "https://apps.apple.com/us/app/cleaniq-service-pro/id6784165706"; // Cleaniq Service Pro on the App Store
     const dl = (href, label, subText, bg) =>
       `<a href="${esc(href)}" target="_blank" style="display:block;background-color:${bg};color:#ffffff;padding:16px 12px;border-radius:10px;text-decoration:none;font-family:${FONT};font-weight:700;font-size:14px;line-height:20px;text-align:center;">${label}<br /><span style="font-size:12px;font-weight:400;color:#cbd5e1;">${subText}</span></a>`;
     return layout({
