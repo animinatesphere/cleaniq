@@ -40,10 +40,12 @@ import {
   PlayCircle,
   Users,
   MessageCircle,
+  Star,
   Moon,
   FileText,
 } from "lucide-react-native";
 import { MenuRow, SectionLabel } from "./settings/common";
+import useWorkerStats, { ratingLabel } from "../hooks/useWorkerStats";
 import axios from "axios";
 import {
   NEU_BG,
@@ -57,6 +59,7 @@ import { tc, themed, ts } from "../theme/dark";
 
 const MyAccountScreen = ({ navigation }) => {
   const { workerInfo, logout, updateWorkerInfo } = useContext(AuthContext);
+  const { stats: workerStats } = useWorkerStats();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [wallet, setWallet] = useState({
@@ -320,7 +323,7 @@ const MyAccountScreen = ({ navigation }) => {
                 <Briefcase size={20} color={tc("#0F6B4C")} />
               </View>
               <Text style={styles.statValue}>
-                {workerInfo?.jobsCompleted || 0}
+                {workerStats.jobsDone}
               </Text>
               <Text style={styles.statLabel}>Jobs Done</Text>
             </View>
@@ -329,12 +332,16 @@ const MyAccountScreen = ({ navigation }) => {
               <View
                 style={[styles.statIconCircle, ts({ backgroundColor: "#EAF5EE" })]}
               >
-                <TrendingUp size={20} color={tc("#0F6B4C")} />
+                <Star size={20} color={tc("#D97706")} fill={tc("#D97706")} />
               </View>
               <Text style={styles.statValue}>
-                {workerInfo?.rating ? workerInfo.rating.toFixed(1) : "5.0"}
+                {ratingLabel(workerStats)}
               </Text>
-              <Text style={styles.statLabel}>Rating</Text>
+              <Text style={styles.statLabel}>
+                {workerStats.ratingCount
+                  ? `Rating · ${workerStats.ratingCount} review${workerStats.ratingCount === 1 ? "" : "s"}`
+                  : "No ratings yet"}
+              </Text>
             </View>
           </View>
         )}

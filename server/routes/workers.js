@@ -14,6 +14,7 @@ const jwt = require("jsonwebtoken");
 const { sendEmail, templates, workerEventEmails } = require("../utils/emailService");
 const Customer = require("../models/Customer");
 const Applicant = require("../models/Applicant");
+const { applyBonus, bonusFor } = require("../utils/topRatedBonus");
 const { sendCustomerPush, sendWorkersPush } = require("../utils/pushNotifications");
 
 const notifyCustomer = async (booking, { title, body, type = "status" }) => {
@@ -306,7 +307,7 @@ router.get("/jobs/:id", async (req, res) => {
             distanceMiles: match.distanceMiles,
             travelMinutes: match.travelMinutes,
             travelMode: prefs.travel.mode,
-            pay: await payFor(job),
+            pay: await payFor(job, {}, mine ? {} : { bonus: (await bonusFor(workerId)).bonus }),
           },
         });
       }
@@ -349,6 +350,7 @@ router.post("/jobs/:id/accept", async (req, res) => {
     booking.assignedWorkerName = workerName;
     booking.status = "Assigned";
     booking.jobAcceptedTime = new Date();
+    await applyBonus(booking, workerId); // top-rated cleaners get the admin's bonus on top
 
     await booking.save();
 
@@ -429,7 +431,11 @@ router.put("/jobs/:id/assign", async (req, res) => {
       booking.workerDuration = Number(workerDuration);
     }
     if (workerRate != null && workerRate !== "") {
+      // A rate typed in by admin is what the cleaner gets, with no bonus added.
       booking.workerRate = Number(workerRate);
+      booking.workerRateBonus = 0;
+    } else {
+      await applyBonus(booking, worker._id); // top-rated cleaners get the admin's bonus on top
     }
     if (booking.status === "Confirmed" || booking.status === "Pending") {
       booking.status = "Assigned";
@@ -499,6 +505,7 @@ router.post("/jobs/:id/cancel", async (req, res) => {
     booking.jobStartTime = null;
     booking.jobEndTime = null;
     booking.jobDurationActual = 0;
+    await applyBonus(booking, null); // back to the job's base rate for the next cleaner
 
     await booking.save();
     await syncCompanyJob(booking, { assignedWorker: null, assignedWorkerName: null, jobAcceptedTime: null, jobArrivedTime: null, jobStartTime: null });
@@ -1202,6 +1209,49 @@ router.delete("/:id", async (req, res) => {
 });
 
 // PUT update worker profile (bank details, personal info)
+// GET every active cleaner's rating and whether they get the top-rated bonus (admin Staff Pay).
+router.get("/ratings", require("../middleware/adminAuth"), async (req, res) => {
+  try {
+    const { workerStats } = require("../utils/workerStats");
+    const { bonusSettings, qualifies } = require("../utils/topRatedBonus");
+    const settings = await bonusSettings();
+    const workers = await Worker.find({ status: "Active" }).select("firstName lastName workerId").lean();
+    const rows = await Promise.all(workers.map(async (w) => {
+      const st = await workerStats(w._id);
+      return {
+        _id: w._id,
+        name: `${w.firstName || ""} ${w.lastName || ""}`.trim(),
+        workerId: w.workerId,
+        rating: st.rating,
+        ratingCount: st.ratingCount,
+        jobsDone: st.jobsDone,
+        qualifies: qualifies({ ...settings, amount: settings.amount || 1 }, st.rating, st.ratingCount),
+      };
+    }));
+    rows.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0) || b.ratingCount - a.ratingCount);
+    res.json({ settings, workers: rows });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET the cleaner's numbers: jobs done, rating, earnings (see utils/workerStats.js).
+router.get("/:id/stats", async (req, res) => {
+  try {
+    const { workerStats } = require("../utils/workerStats");
+    const stats = await workerStats(req.params.id);
+    if (!stats) return res.status(400).json({ error: "Invalid worker" });
+    // Keep the stored copies in step for admin pages and older app versions.
+    await Worker.updateOne(
+      { _id: req.params.id },
+      { jobsCompleted: stats.jobsDone, ...(stats.rating != null ? { rating: stats.rating } : {}) },
+    );
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ error: "Couldn't load your stats" });
+  }
+});
+
 // GET the cleaner's own details for "Personal information" (no bank details or passwords).
 router.get("/:id/profile", async (req, res) => {
   try {

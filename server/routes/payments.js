@@ -118,93 +118,24 @@ router.post("/create-checkout-session", async (req, res) => {
 
 // ==================== WORKER WITHDRAWAL ENDPOINTS ====================
 
-// GET worker wallet balance
+// GET worker wallet balance — worked out from completed jobs and payout records each time
+// (see utils/workerStats.js), so it can't drift.
 router.get("/wallet/:workerId", async (req, res) => {
   try {
-    const workerId = req.params.workerId;
-    console.log(`💰 Fetching wallet for worker: ${workerId}`);
-
-    let worker = await Worker.findById(workerId);
-    if (!worker) {
-      console.warn(`⚠️ Worker not found: ${workerId}`);
-      return res.json({
-        totalEarned: 0,
-        balance: 0,
-        onHold: 0,
-        withdrawn: 0,
-      });
-    }
-
-    // Initialize wallet if it doesn't exist
-    if (!worker.wallet) {
-      worker.wallet = {
-        totalEarned: 0,
-        balance: 0,
-        onHold: 0,
-        withdrawn: 0,
-        lastUpdated: new Date(),
-      };
-      await worker.save();
-    }
-
-    // ALWAYS recalculate totalEarned from completed bookings
-    const Booking = require("../models/Booking");
-    const completedBookings = await Booking.find({
-      assignedWorker: workerId,
-      status: "Completed",
-    });
-
-    let totalEarned = 0;
-    if (completedBookings.length > 0) {
-      totalEarned = completedBookings.reduce((sum, booking) => {
-        const earnings =
-          (booking.workerRate || 0) *
-          (booking.details?.duration ||
-            booking.workerDuration ||
-            booking.duration ||
-            0);
-        return sum + earnings;
-      }, 0);
-      console.log(
-        `✅ Found ${completedBookings.length} completed bookings, total earnings: £${totalEarned.toFixed(
-          2,
-        )}`,
-      );
-    }
-
-    // Get onHold and withdrawn from wallet
-    const onHold = worker.wallet.onHold || 0;
-    const withdrawn = worker.wallet.withdrawn || 0;
-
-    // Calculate available balance
-    const balance = Math.max(0, totalEarned - onHold - withdrawn);
-
-    console.log(
-      `💼 Wallet Summary: totalEarned=£${totalEarned.toFixed(
-        2,
-      )}, onHold=£${onHold.toFixed(2)}, withdrawn=£${withdrawn.toFixed(
-        2,
-      )}, balance=£${balance.toFixed(2)}`,
+    const { workerStats } = require("../utils/workerStats");
+    const stats = await workerStats(req.params.workerId);
+    if (!stats) return res.json({ totalEarned: 0, balance: 0, onHold: 0, withdrawn: 0 });
+    // Store the figures on the worker too, for admin pages that read them.
+    await Worker.updateOne(
+      { _id: req.params.workerId },
+      { wallet: { totalEarned: stats.totalEarned, balance: stats.balance, onHold: stats.onHold, withdrawn: stats.withdrawn, lastUpdated: new Date() } },
     );
-
-    res.json({
-      totalEarned,
-      balance,
-      onHold,
-      withdrawn,
-      lastUpdated: new Date(),
-    });
+    res.json({ ...stats, lastUpdated: new Date() });
   } catch (error) {
-    console.error("❌ Error fetching wallet:", error);
-    res.json({
-      totalEarned: 0,
-      balance: 0,
-      onHold: 0,
-      withdrawn: 0,
-    });
+    console.error("Error fetching wallet:", error);
+    res.status(500).json({ error: "Couldn't load your earnings" });
   }
 });
-// ===== NEW SCHEDULED PAYOUT SYSTEM =====
 
 // GET upcoming payments for worker (earnings pending for next payout)
 router.get("/upcoming-payments/:workerId", async (req, res) => {
@@ -542,38 +473,10 @@ router.post("/withdraw/:workerId", async (req, res) => {
       };
     }
 
-    // RECALCULATE totalEarned from completed bookings (same as GET endpoint)
-    const Booking = require("../models/Booking");
-    const completedBookings = await Booking.find({
-      assignedWorker: workerId,
-      status: "Completed",
-    });
-
-    let totalEarned = 0;
-    if (completedBookings.length > 0) {
-      totalEarned = completedBookings.reduce((sum, booking) => {
-        const earnings =
-          (booking.workerRate || 0) *
-          (booking.details?.duration ||
-            booking.workerDuration ||
-            booking.duration ||
-            0);
-        return sum + earnings;
-      }, 0);
-    }
-
-    // Calculate available balance dynamically
-    const onHold = worker.wallet.onHold || 0;
-    const withdrawn = worker.wallet.withdrawn || 0;
-    const availableBalance = Math.max(0, totalEarned - onHold - worker.wallet.withdrawn);
-
-    console.log(
-      `💰 Withdrawal check: totalEarned=£${totalEarned.toFixed(
-        2,
-      )}, onHold=£${onHold.toFixed(2)}, withdrawn=£${withdrawn.toFixed(
-        2,
-      )}, available=£${availableBalance.toFixed(2)}, requested=£${amount}`,
-    );
+    // Available = earned − paid − payouts still waiting (same figures as the wallet).
+    const { workerStats } = require("../utils/workerStats");
+    const stats = await workerStats(workerId);
+    const availableBalance = stats?.balance || 0;
 
     if (availableBalance < amount) {
       return res.status(400).json({
@@ -603,16 +506,10 @@ router.post("/withdraw/:workerId", async (req, res) => {
 
     await withdrawal.save();
 
-    // Update wallet: move from available balance to onHold
-    worker.wallet.onHold += amount;
-    worker.wallet.lastUpdated = new Date();
+    // The new pending withdrawal now counts as on hold.
+    const after = await workerStats(workerId);
+    worker.wallet = { totalEarned: after.totalEarned, balance: after.balance, onHold: after.onHold, withdrawn: after.withdrawn, lastUpdated: new Date() };
     await worker.save();
-
-    console.log(
-      `✅ Withdrawal request created: £${amount} moved to onHold. New balance: £${(
-        totalEarned - worker.wallet.onHold - worker.wallet.withdrawn
-      ).toFixed(2)}`,
-    );
 
     // Send confirmation email to worker
     try {
