@@ -1,5 +1,10 @@
 const express = require('express');
 const router = express.Router();
+// Any change here (prices, AI settings, knowledge, tax) shows in the AI receptionist's next reply.
+router.use((req, res, next) => {
+  if (req.method !== "GET") res.on("finish", () => require("../utils/aiBrain").clearInstructionsCache());
+  next();
+});
 const SystemSetting = require('../models/SystemSetting');
 const adminAuth = require('../middleware/adminAuth');
 

@@ -205,3 +205,39 @@ test("prompts before a valid setup are ignored", async () => {
   assert.equal(called, false);
   ws.close();
 });
+
+test("replies are spoken sentence by sentence while the AI is still writing", async () => {
+  let releaseRest;
+  const rest = new Promise((r) => (releaseRest = r));
+  fakeAi = async ({ onText }) => {
+    onText("Sure, a deep clean is thirty pounds ");
+    onText("eighty-five an hour. ");
+    await rest; // the AI is still "writing" here
+    onText("Would you like me to check a time?");
+    return "Sure, a deep clean is thirty pounds eighty-five an hour. Would you like me to check a time?";
+  };
+  await setSettings({ voiceEnabled: true, transferNumber: "" });
+  const { token } = await incomingToken("CA-STREAM");
+  const s = await openSession(token, "CA-STREAM");
+  await waitFor(() => AiCall.exists({ twilioCallSid: "CA-STREAM" }));
+  s.ws.send(JSON.stringify({ type: "prompt", voicePrompt: "How much is a deep clean?", last: true }));
+
+  // The first sentence is sent before the reply has finished.
+  const first = await waitFor(() => s.received.find((m) => m.type === "text"));
+  assert.deepEqual(first, { type: "text", token: "Sure, a deep clean is thirty pounds eighty-five an hour. ", last: false });
+  releaseRest();
+  await waitFor(() => s.received.find((m) => m.type === "text" && m.last === true));
+  const texts = s.received.filter((m) => m.type === "text");
+  assert.equal(texts.map((m) => m.token).join(""), "Sure, a deep clean is thirty pounds eighty-five an hour. Would you like me to check a time?");
+  assert.equal(texts.at(-1).last, true);
+
+  const call = await waitFor(async () => {
+    const c = await AiCall.findOne({ twilioCallSid: "CA-STREAM" }).lean();
+    return c?.transcript?.length >= 3 ? c : null;
+  });
+  assert.deepEqual(call.transcript.slice(-2).map((t) => [t.role, t.text]), [
+    ["customer", "How much is a deep clean?"],
+    ["ai", "Sure, a deep clean is thirty pounds eighty-five an hour. Would you like me to check a time?"],
+  ]);
+  s.ws.close();
+});

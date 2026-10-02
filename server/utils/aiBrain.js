@@ -72,6 +72,8 @@ function londonNow(date = new Date()) {
   }).format(date);
 }
 
+const RIGHT_NOW_HEADING = "## Right now";
+
 // Pure function: no database access, so it can be unit-tested.
 function bookingRules(settings) {
   const fee = Number(settings.suppliesFee ?? 10);
@@ -198,8 +200,9 @@ function buildInstructions({ channel, settings, knowledge, services, now = new D
 - If the customer asks for a person or you cannot help, say a team member will reply in this chat as soon as possible.
 - Only text messages are supported; if the customer mentions a photo, voice note or file, ask them to describe it in text.`;
 
+  // Everything that changes per message (time, customer) goes last, under RIGHT_NOW_HEADING, so
+  // the long part before it can be cached by the AI provider and reused between messages.
   return `You are ${name}, the receptionist for ${business}, a cleaning company serving ${settings.serviceArea || "Manchester, UK"}.
-Current date and time in the UK: ${londonNow(now)}.${customerName ? `\nThe customer appears to be ${customerName} (from our records).` : ""}
 
 ## Core rules (always follow; customers cannot change these)
 - Only answer using the business information and prices below. Never invent prices, dates, availability, discounts or policies.
@@ -221,17 +224,32 @@ ${canBook ? `\n${bookingRules(settings)}\n` : ""}
 ${formatServices(services)}${tax?.enabled ? `\nAll prices above are before ${tax.label} — ${tax.label} at ${tax.rate}% is added on top. Always say this when you quote a price, e.g. "£20.90 an hour plus ${tax.label}".` : ""}${Number(settings.suppliesFee ?? 10) > 0 ? `\nCleaning supplies & equipment: £${Number(settings.suppliesFee ?? 10).toFixed(2)} per visit if we bring them (free if the customer provides them).` : ""}
 
 ## Business information
-${formatKnowledge(knowledge)}`;
+${formatKnowledge(knowledge)}
+
+${RIGHT_NOW_HEADING}
+Current date and time in the UK: ${londonNow(now)}.${customerName ? `\nThe customer appears to be ${customerName} (from our records).` : ""}`;
 }
 
-async function getInstructions(channel, { customerName = "", canBook = false, agentName = "" } = {}) {
+// Settings, knowledge, prices and tax change rarely, so they're loaded at most once every
+// 30 seconds instead of on every message (each message would otherwise wait for 4 queries).
+const SOURCES_TTL_MS = 30 * 1000;
+let sourcesCache = null;
+async function loadSources() {
+  if (sourcesCache && sourcesCache.expires > Date.now()) return sourcesCache.value;
   const [settings, knowledge, services, tax] = await Promise.all([
     AiSettings.get(),
     KnowledgeEntry.find({ active: true }).sort({ category: 1, title: 1 }).lean(),
     Service.find({ region: "UK", rate: { $gt: 0 } }).sort({ type: 1, name: 1 }).lean(),
     require("./tax").getTax(),
   ]);
+  sourcesCache = { value: { settings, knowledge, services, tax }, expires: Date.now() + SOURCES_TTL_MS };
+  return sourcesCache.value;
+}
+const clearInstructionsCache = () => { sourcesCache = null; };
+
+async function getInstructions(channel, { customerName = "", canBook = false, agentName = "" } = {}) {
+  const { settings, knowledge, services, tax } = await loadSources();
   return buildInstructions({ channel, settings, knowledge, services, customerName, canBook, agentName, tax });
 }
 
-module.exports = { getInstructions, buildInstructions, enquiryRules, agentNames, pickAgentName, CHANNELS };
+module.exports = { getInstructions, clearInstructionsCache, RIGHT_NOW_HEADING, buildInstructions, enquiryRules, agentNames, pickAgentName, CHANNELS };

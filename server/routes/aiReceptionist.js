@@ -2,6 +2,11 @@
 const express = require("express");
 const { agentNames } = require("../utils/aiBrain");
 const router = express.Router();
+// Any change here (prices, AI settings, knowledge, tax) shows in the AI receptionist's next reply.
+router.use((req, res, next) => {
+  if (req.method !== "GET") res.on("finish", () => require("../utils/aiBrain").clearInstructionsCache());
+  next();
+});
 const adminAuth = require("../middleware/adminAuth");
 const AiSettings = require("../models/AiSettings");
 const KnowledgeEntry = require("../models/KnowledgeEntry");

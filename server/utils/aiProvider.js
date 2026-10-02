@@ -101,9 +101,9 @@ async function callModel({ client, models, contents, system, tools, retryDelays 
  * @returns {Promise<string|null>} reply text, or null if the provider returned nothing usable
  * Retries the main model on temporary errors, then tries the fallback model once.
  */
-async function generateReply({ system, history, tools, runTool, forceTool, client, retryDelays = RETRY_DELAYS_MS }) {
+async function generateReply({ system, history, tools, runTool, forceTool, client, retryDelays = RETRY_DELAYS_MS, onText }) {
   if (forceTool) system += `\n\nThe customer has just confirmed with yes. Call ${forceTool} now with customerConfirmed true, using the details from this conversation. Do not reply with text first.`;
-  if (PROVIDER === "anthropic") return generateReplyClaude({ system, history, tools, runTool, forceTool, client });
+  if (PROVIDER === "anthropic") return generateReplyClaude({ system, history, tools, runTool, forceTool, client, onText });
   if (PROVIDER !== "gemini") {
     throw new Error(`AI_PROVIDER "${PROVIDER}" is not supported (supported: gemini, anthropic)`);
   }
@@ -197,7 +197,17 @@ function claudeRequestOptions(model) {
   return options;
 }
 
-async function generateReplyClaude({ system, history, tools, runTool, forceTool, client }) {
+// The instructions are cached by Anthropic up to the "## Right now" part (time, customer), which
+// changes every message, so each reply only pays for reading the long part once in a while.
+function cachedSystem(system) {
+  const cut = system.lastIndexOf("\n## Right now");
+  return cut > 0
+    ? [{ type: "text", text: system.slice(0, cut), cache_control: { type: "ephemeral" } }, { type: "text", text: system.slice(cut) }]
+    : [{ type: "text", text: system, cache_control: { type: "ephemeral" } }];
+}
+
+// onText(delta): called with each piece of text as it's written (phone calls speak it straight away).
+async function generateReplyClaude({ system, history, tools, runTool, forceTool, client, onText }) {
   const messages = toClaudeMessages(history);
   if (!messages.length) return null;
   const model = process.env.AI_MODEL || DEFAULT_MODELS.anthropic;
@@ -211,15 +221,24 @@ async function generateReplyClaude({ system, history, tools, runTool, forceTool,
 
   const started = Date.now();
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-    const response = await (client || getAnthropic()).beta.messages.create({
+    const params = {
       model,
       max_tokens: 8000,
-      system,
+      system: cachedSystem(system),
       messages,
       ...(claudeTools ? { tools: claudeTools } : {}),
       ...(canForce && round === 0 ? { tool_choice: { type: "tool", name: forceTool } } : {}),
       ...options,
-    });
+    };
+    const api = (client || getAnthropic()).beta.messages;
+    let response;
+    if (onText && api.stream) {
+      const stream = api.stream(params);
+      stream.on("text", (delta) => { try { onText(delta); } catch {} });
+      response = await stream.finalMessage();
+    } else {
+      response = await api.create(params);
+    }
 
     if (response.stop_reason === "refusal") {
       console.warn(`[ai] claude declined (${response.stop_details?.category || "no category"})`);
@@ -257,4 +276,4 @@ async function generateReplyClaude({ system, history, tools, runTool, forceTool,
   return null;
 }
 
-module.exports = { generateReply, generateReplyClaude, toGeminiContents, echoableContent, claudeRequestOptions, PROVIDER };
+module.exports = { generateReply, generateReplyClaude, toGeminiContents, echoableContent, claudeRequestOptions, cachedSystem, PROVIDER };
