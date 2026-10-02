@@ -233,10 +233,12 @@ const HomeScreen = ({ navigation, route }) => {
         <Text style={S.heroGreeting}>{greeting()}, {workerInfo?.firstName||"there"} 👋</Text>
 
         {/* Balance */}
-        <Text style={S.heroBalLabel}>Available Balance</Text>
+        {/* Every finished job is paid out automatically 8 days later, so the useful figure
+            is what's still to come: waiting payouts + anything not scheduled yet. */}
+        <Text style={S.heroBalLabel}>To be paid</Text>
         {walletLoading
           ? <ActivityIndicator color={tc("#fff")} style={{marginVertical:10}}/>
-          : <Text style={S.heroBalAmt}>£{(wallet.balance||0).toFixed(2)}</Text>
+          : <Text style={S.heroBalAmt}>£{Number(wallet.toBePaid ?? ((wallet.onHold||0)+(wallet.balance||0))).toFixed(2)}</Text>
         }
         {!walletLoading && wallet.nextPayout && (
           <Text style={S.heroNextPayout}>
@@ -248,8 +250,8 @@ const HomeScreen = ({ navigation, route }) => {
         {/* Stats strip */}
         <View style={S.heroStrip}>
           {[
-            { label:"On Hold",      val:`£${(wallet.onHold||0).toFixed(2)}` },
-            { label:"Withdrawn",    val:`£${(wallet.withdrawn||0).toFixed(2)}` },
+            { label:"This Month",   val:`£${(wallet.earnedThisMonth||0).toFixed(2)}` },
+            { label:"Paid Out",     val:`£${(wallet.withdrawn||0).toFixed(2)}` },
             { label:"Total Earned", val:`£${(wallet.totalEarned||0).toFixed(2)}` },
           ].map((s,i,arr)=>(
             <React.Fragment key={s.label}>
