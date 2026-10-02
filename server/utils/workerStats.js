@@ -1,6 +1,6 @@
 // A cleaner's numbers, always worked out from the records rather than running totals:
-//   jobs done   completed bookings assigned to them
-//   earned      each completed job's hours × the cleaner's rate for it
+//   jobs done   completed bookings assigned to them, plus jobs they've been paid for
+//   earned      each job's payout (or, until its payout is created, its hours × rate)
 //   on hold     payouts not yet paid (each completed job creates one, paid 8 days later;
 //               withdrawal requests too)
 //   withdrawn   payouts marked as paid
@@ -32,15 +32,24 @@ function ratingSummary(stars) {
 async function workerStats(workerId) {
   if (!mongoose.isValidObjectId(workerId)) return null;
   const id = new mongoose.Types.ObjectId(String(workerId));
-  const [done, rated, payouts] = await Promise.all([
+  const [done, rated, allPayouts] = await Promise.all([
     Booking.find({ assignedWorker: id, status: { $in: DONE } })
       .select("bookingId workerRate details.duration workerDuration duration jobEndTime updatedAt schedule.date")
       .lean(),
     Booking.find({ assignedWorker: id, "cleanerRating.stars": { $gte: 1 } }).select("cleanerRating").lean(),
-    Withdrawal.find({ workerId: id }).select("amount status expectedPayoutDate").lean(),
+    Withdrawal.find({ workerId: id }).select("amount status expectedPayoutDate completedJobs createdAt").lean(),
   ]);
 
-  const totalEarned = round2(done.reduce((sum, b) => sum + jobPay(b), 0));
+  // Payouts are the record of what a cleaner was owed for each job (a job's booking can later be
+  // reassigned or edited, but the payout stands). A failed payout puts the money back.
+  const payouts = allPayouts.filter((w) => w.status !== "failed");
+  const jobPayouts = payouts.filter((w) => (w.completedJobs || []).length);
+  const covered = new Set(jobPayouts.flatMap((w) => w.completedJobs.map((j) => j.bookingId)));
+  const uncovered = done.filter((b) => !covered.has(b.bookingId)); // finished, payout not created yet
+
+  const totalEarned = round2(
+    jobPayouts.reduce((s, w) => s + (w.amount || 0), 0) + uncovered.reduce((s, b) => s + jobPay(b), 0),
+  );
   const withdrawn = round2(payouts.filter((w) => w.status === "completed").reduce((s, w) => s + (w.amount || 0), 0));
   const waiting = payouts.filter((w) => WAITING.includes(w.status));
   const onHold = round2(waiting.reduce((s, w) => s + (w.amount || 0), 0));
@@ -57,17 +66,24 @@ async function workerStats(workerId) {
   const monthStart = new Date();
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
-  const earnedThisMonth = round2(done
-    .filter((b) => new Date(b.jobEndTime || b.schedule?.date || b.updatedAt) >= monthStart)
-    .reduce((sum, b) => sum + jobPay(b), 0));
+  const earnedThisMonth = round2(
+    jobPayouts
+      .flatMap((w) => w.completedJobs.map((j) => ({ amount: j.amount, when: j.completedDate || w.createdAt })))
+      .filter((j) => new Date(j.when) >= monthStart)
+      .reduce((s, j) => s + (Number(j.amount) || 0), 0) +
+    uncovered
+      .filter((b) => new Date(b.jobEndTime || b.schedule?.date || b.updatedAt) >= monthStart)
+      .reduce((s, b) => s + jobPay(b), 0),
+  );
 
   return {
-    jobsDone: done.length,
+    jobsDone: new Set([...done.map((b) => b.bookingId), ...covered]).size,
     totalEarned,
     earnedThisMonth,
     withdrawn,
     onHold,
     balance,
+    toBePaid: round2(onHold + balance), // everything earned and not yet paid out
     nextPayout,
     ...ratingSummary(rated.map((b) => b.cleanerRating.stars)),
   };

@@ -5,7 +5,7 @@ export const C = {
   primaryDark:   "#083d2b",
   primaryLight:  "#DCFCE7",
   primaryMid:    "#14A66B",
-  bg:            "#F8FAFC",
+  bg:            "#FFFFFF",
   surface:       "#FFFFFF",
   surfaceAlt:    "#F1F5F9",
   textDark:      "#0F172A",

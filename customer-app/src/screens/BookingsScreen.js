@@ -11,6 +11,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
+import { tc, themed, ts } from "../theme/dark";
 
 // Customer-facing wording for booking statuses (stored values stay the same).
 const STATUS_LABEL = {
@@ -48,24 +49,24 @@ const BookingCard = ({ booking, onPress }) => {
           <Text style={styles.cardService} numberOfLines={1}>{booking.service}</Text>
           <Text style={styles.cardRef}>{booking.bookingId || "—"}</Text>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: meta.bg }]}>
-          <Text style={[styles.statusTxt, { color: meta.color }]}>{STATUS_LABEL[booking.status] || booking.status}</Text>
+        <View style={[styles.statusBadge, ts({ backgroundColor: meta.bg })]}>
+          <Text style={[styles.statusTxt, ts({ color: meta.color })]}>{STATUS_LABEL[booking.status] || booking.status}</Text>
         </View>
       </View>
       <View style={styles.cardDivider} />
       <View style={styles.cardMeta}>
         <View style={styles.metaItem}>
-          <CalendarDays size={13} color={C.textMuted} />
+          <CalendarDays size={13} color={tc(C.textMuted)} />
           <Text style={styles.metaTxt}>{fmtDate(booking.schedule?.date)}</Text>
         </View>
         {booking.schedule?.time && (
           <View style={styles.metaItem}>
-            <Clock size={13} color={C.textMuted} />
+            <Clock size={13} color={tc(C.textMuted)} />
             <Text style={styles.metaTxt}>{booking.schedule.time}</Text>
           </View>
         )}
         <View style={styles.metaItem}>
-          <MapPin size={13} color={C.textMuted} />
+          <MapPin size={13} color={tc(C.textMuted)} />
           <Text style={styles.metaTxt} numberOfLines={1}>{booking.details?.address || "—"}</Text>
         </View>
       </View>
@@ -75,7 +76,7 @@ const BookingCard = ({ booking, onPress }) => {
         )}
         <View style={styles.seeDetails}>
           <Text style={styles.seeDetailsTxt}>View details</Text>
-          <ChevronRight size={14} color={C.primary} />
+          <ChevronRight size={14} color={tc(C.primary)} />
         </View>
       </View>
     </TouchableOpacity>
@@ -85,42 +86,42 @@ const BookingCard = ({ booking, onPress }) => {
 const EmptyState = ({ label, onBook }) => (
   <View style={styles.empty}>
     <View style={styles.emptyIcon}>
-      <ClipboardList size={30} color={C.textMuted} strokeWidth={1.5} />
+      <ClipboardList size={30} color={tc(C.textMuted)} strokeWidth={1.5} />
     </View>
     <Text style={styles.emptyTitle}>{label}</Text>
     <Text style={styles.emptySub}>Your bookings will appear here once you've booked a clean.</Text>
     <TouchableOpacity style={styles.emptyBtn} onPress={onBook} activeOpacity={0.85}>
-      <Plus size={16} color="#fff" />
+      <Plus size={16} color={tc("#fff")} />
       <Text style={styles.emptyBtnTxt}>Book a Clean</Text>
     </TouchableOpacity>
   </View>
 );
 
 const AuthGate = ({ navigation }) => (
-  <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB", alignItems: "center", justifyContent: "center", padding: 32 }}>
-    <ClipboardList size={48} color={C.textMuted} strokeWidth={1.2} />
-    <Text style={{ fontSize: 20, fontWeight: "800", color: "#111827", marginTop: 16, textAlign: "center" }}>Your bookings</Text>
-    <Text style={{ fontSize: 13, color: C.textMuted, marginTop: 8, textAlign: "center", lineHeight: 20 }}>
+  <SafeAreaView style={ts({ flex: 1, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", padding: 32 })}>
+    <ClipboardList size={48} color={tc(C.textMuted)} strokeWidth={1.2} />
+    <Text style={ts({ fontSize: 20, fontWeight: "800", color: "#111827", marginTop: 16, textAlign: "center" })}>Your bookings</Text>
+    <Text style={ts({ fontSize: 13, color: C.textMuted, marginTop: 8, textAlign: "center", lineHeight: 20 })}>
       Book a clean now — no account needed.{"\n"}Sign in to view and manage past bookings.
     </Text>
 
     {/* Primary: start booking without login */}
     <TouchableOpacity
       onPress={() => navigation.navigate("Booking")}
-      style={{ marginTop: 28, backgroundColor: C.primary, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 40, flexDirection: "row", alignItems: "center", gap: 8 }}
+      style={ts({ marginTop: 28, backgroundColor: C.primary, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 40, flexDirection: "row", alignItems: "center", gap: 8 })}
       activeOpacity={0.85}
     >
-      <Plus size={18} color="#fff" strokeWidth={2.5} />
-      <Text style={{ color: "#fff", fontWeight: "800", fontSize: 15 }}>Book a Clean</Text>
+      <Plus size={18} color={tc("#fff")} strokeWidth={2.5} />
+      <Text style={ts({ color: "#fff", fontWeight: "800", fontSize: 15 })}>Book a Clean</Text>
     </TouchableOpacity>
 
     {/* Secondary: login to see past bookings */}
     <TouchableOpacity
       onPress={() => navigation.navigate("Login")}
-      style={{ marginTop: 14, borderWidth: 1.5, borderColor: C.primary, borderRadius: 999, paddingVertical: 12, paddingHorizontal: 40 }}
+      style={ts({ marginTop: 14, borderWidth: 1.5, borderColor: C.primary, borderRadius: 999, paddingVertical: 12, paddingHorizontal: 40 })}
       activeOpacity={0.85}
     >
-      <Text style={{ color: C.primary, fontWeight: "800", fontSize: 14 }}>Log In to View My Bookings</Text>
+      <Text style={ts({ color: C.primary, fontWeight: "800", fontSize: 14 })}>Log In to View My Bookings</Text>
     </TouchableOpacity>
   </SafeAreaView>
 );
@@ -160,7 +161,7 @@ const BookingsScreen = ({ navigation }) => {
           onPress={() => navigation.navigate("RegularCleans")}
           activeOpacity={0.85}
         >
-          <Repeat size={15} color={C.primary} />
+          <Repeat size={15} color={tc(C.primary)} />
           <Text style={styles.regularBtnTxt}>Regular</Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -168,7 +169,7 @@ const BookingsScreen = ({ navigation }) => {
           onPress={() => navigation.navigate("Booking")}
           activeOpacity={0.85}
         >
-          <Plus size={16} color="#fff" />
+          <Plus size={16} color={tc("#fff")} />
           <Text style={styles.newBookingTxt}>New</Text>
         </TouchableOpacity>
       </View>
@@ -197,7 +198,7 @@ const BookingsScreen = ({ navigation }) => {
 
       {loading ? (
         <View style={styles.loadingWrap}>
-          <ActivityIndicator size="large" color={C.primary} />
+          <ActivityIndicator size="large" color={tc(C.primary)} />
         </View>
       ) : (
         <FlatList
@@ -225,7 +226,7 @@ const BookingsScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
 
   // Header
@@ -300,6 +301,6 @@ const styles = StyleSheet.create({
   emptyBtnTxt: { fontSize: 14, fontWeight: "800", color: "#fff" },
   regularBtn:    { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: C.primaryLight, marginLeft: "auto", marginRight: 8 },
   regularBtnTxt: { fontSize: 13, fontWeight: "800", color: C.primary },
-});
+}));
 
 export default BookingsScreen;

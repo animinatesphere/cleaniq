@@ -83,3 +83,26 @@ test("customer Messages tab lists only their own cleaner chats, with unread coun
 
   assert.equal((await fetch(`${base}/my/conversations`)).status, 401);
 });
+
+test("a company account sees and opens chats for its jobs, even under a site contact's email", async () => {
+  const { JWT_SECRET } = require("../../routes/customer-auth");
+  const Job = require("../../models/Job");
+  const companyId = new mongoose.Types.ObjectId();
+  const token = jwt.sign({ id: companyId.toString(), email: "office@acme.test", role: "company", firstName: "Acme", lastName: "Ltd" }, JWT_SECRET);
+  const worker = await Worker.findOne({ workerId: "W-1" });
+  const job = await Job.create({ jobId: "JOB-ACME1", company: { id: companyId, name: "Acme Ltd", email: "office@acme.test" }, service: "Office Cleaning" });
+  await Booking.create({ bookingId: "BK-ACME1", service: "Office Cleaning", status: "Assigned", customer: { firstName: "Site", lastName: "Manager", email: "site@acme.test" }, assignedWorker: worker._id, meta: { isCompanyJob: true, jobId: job._id } });
+  await WorkerCustomerMessage.create({ bookingId: "BK-ACME1", workerId: worker._id, customerEmail: "site@acme.test", senderType: "Worker", senderName: "Kelvin Obi", text: "Which entrance should I use?" });
+
+  const list = await (await fetch(`${base}/my/conversations`, { headers: { Authorization: `Bearer ${token}` } })).json();
+  assert.deepEqual(list.map((c) => c.bookingId), ["BK-ACME1"]);
+  assert.equal(list[0].lastMessage, "Which entrance should I use?");
+
+  const res = await fetch(`${base}/worker-messages/BK-ACME1`, { headers: { Authorization: `Bearer ${token}` } });
+  assert.equal(res.status, 200);
+  assert.equal((await res.json())[0].text, "Which entrance should I use?");
+
+  // Another company can't.
+  const other = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), email: "x@other.test", role: "company" }, JWT_SECRET);
+  assert.equal((await fetch(`${base}/worker-messages/BK-ACME1`, { headers: { Authorization: `Bearer ${other}` } })).status, 403);
+});

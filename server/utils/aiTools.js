@@ -425,8 +425,13 @@ async function sendAiQuote(args, ctx) {
 
   // Same maths as QuoteBuilder.jsx (no discount or deposit from the AI).
   const subtotal = money(built.items.reduce((sum, i) => sum + i.subtotal, 0));
-  const includeVat = settings.quoteIncludeVat !== false;
-  const vat = includeVat ? money(subtotal * (QUOTE_DEFAULTS.vatRate / 100)) : 0;
+  // Once admin has set Settings → Tax, quotes follow it; before that, the AI's own setting (20%).
+  const SystemSetting = require("../models/SystemSetting");
+  const taxSet = await SystemSetting.exists({ key: "tax" });
+  const tax = taxSet ? await require("./tax").getTax() : null;
+  const includeVat = tax ? tax.enabled : settings.quoteIncludeVat !== false;
+  const vatRate = tax ? tax.rate : QUOTE_DEFAULTS.vatRate;
+  const vat = includeVat ? money(subtotal * (vatRate / 100)) : 0;
   const grandTotal = money(subtotal + vat);
   const frequency = QUOTE_FREQUENCIES.includes(args.frequency) ? args.frequency : "once";
   const customerName = String(args.customerName).trim();
@@ -441,7 +446,7 @@ async function sendAiQuote(args, ctx) {
     frequency,
     serviceDate,
     serviceTimeSlot,
-    vatRate: QUOTE_DEFAULTS.vatRate,
+    vatRate,
     validDays: QUOTE_DEFAULTS.validDays,
     includeVat,
     sendCopy: true,

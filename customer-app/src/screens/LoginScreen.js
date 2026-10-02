@@ -20,6 +20,7 @@ import {
 } from "lucide-react-native";
 import { AuthContext } from "../context/AuthContext";
 import { C } from "../theme/flat";
+import { tc, tcs, themed, ts } from "../theme/dark";
 
 const { width, height } = Dimensions.get("window");
 
@@ -33,7 +34,7 @@ const Field = ({
     <TextInput
       style={styles.fieldInput}
       placeholder={placeholder}
-      placeholderTextColor={C.textMuted}
+      placeholderTextColor={tc(C.textMuted)}
       value={value}
       onChangeText={onChangeText}
       keyboardType={keyboardType}
@@ -292,13 +293,13 @@ const LoginScreen = ({ navigation, route }) => {
           resizeMode="cover"
         />
         <LinearGradient
-          colors={["rgba(8,61,43,0.55)", "rgba(8,61,43,0.95)"]}
+          colors={tcs(["rgba(8,61,43,0.55)", "rgba(8,61,43,0.95)"], "bg")}
           style={styles.heroOverlay}
         />
 
         {navigation.canGoBack() && (
           <TouchableOpacity style={styles.closeBtn} onPress={() => navigation.goBack()}>
-            <X size={18} color="rgba(255,255,255,0.85)" strokeWidth={2.5} />
+            <X size={18} color={tc("rgba(255,255,255,0.85)")} strokeWidth={2.5} />
           </TouchableOpacity>
         )}
 
@@ -325,7 +326,7 @@ const LoginScreen = ({ navigation, route }) => {
             <>
               {/* Back header */}
               <TouchableOpacity style={styles.backRow} onPress={resetForgotFlow}>
-                <ArrowLeft size={18} color={C.primary} strokeWidth={2.5} />
+                <ArrowLeft size={18} color={tc(C.primary)} strokeWidth={2.5} />
                 <Text style={styles.backText}>Back to login</Text>
               </TouchableOpacity>
 
@@ -333,7 +334,7 @@ const LoginScreen = ({ navigation, route }) => {
               {forgotPhase === "email" && (
                 <View style={styles.form}>
                   <View style={styles.forgotIconWrap}>
-                    <KeyRound size={32} color={C.primary} strokeWidth={1.8} />
+                    <KeyRound size={32} color={tc(C.primary)} strokeWidth={1.8} />
                   </View>
                   <Text style={styles.formTitle}>Forgot password?</Text>
                   <Text style={styles.formSub}>
@@ -342,13 +343,13 @@ const LoginScreen = ({ navigation, route }) => {
 
                   {!!forgotError && (
                     <View style={styles.errorBanner}>
-                      <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                      <AlertCircle size={15} color={tc("#DC2626")} strokeWidth={2} />
                       <Text style={styles.errorBannerTxt}>{forgotError}</Text>
                     </View>
                   )}
 
                   <Field
-                    icon={<Mail size={18} color={C.textMuted} />}
+                    icon={<Mail size={18} color={tc(C.textMuted)} />}
                     placeholder="Email address"
                     value={forgotEmail}
                     onChangeText={v => { setForgotEmail(v); setForgotError(""); }}
@@ -362,11 +363,11 @@ const LoginScreen = ({ navigation, route }) => {
                     activeOpacity={0.85}
                   >
                     {loading ? (
-                      <ActivityIndicator color="#fff" />
+                      <ActivityIndicator color={tc("#fff")} />
                     ) : (
                       <View style={styles.ctaInner}>
                         <Text style={styles.ctaText}>Send Reset Code</Text>
-                        <ChevronRight size={20} color="#fff" />
+                        <ChevronRight size={20} color={tc("#fff")} />
                       </View>
                     )}
                   </TouchableOpacity>
@@ -377,7 +378,7 @@ const LoginScreen = ({ navigation, route }) => {
               {forgotPhase === "otp" && (
                 <View style={styles.otpContainer}>
                   <View style={styles.otpIconWrap}>
-                    <ShieldCheck size={36} color={C.primary} strokeWidth={1.8} />
+                    <ShieldCheck size={36} color={tc(C.primary)} strokeWidth={1.8} />
                   </View>
                   <Text style={styles.otpTitle}>Enter reset code</Text>
                   <Text style={styles.otpSub}>
@@ -387,7 +388,7 @@ const LoginScreen = ({ navigation, route }) => {
 
                   {!!forgotError && (
                     <View style={[styles.errorBanner, { alignSelf: "stretch" }]}>
-                      <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                      <AlertCircle size={15} color={tc("#DC2626")} strokeWidth={2} />
                       <Text style={styles.errorBannerTxt}>{forgotError}</Text>
                     </View>
                   )}
@@ -401,21 +402,21 @@ const LoginScreen = ({ navigation, route }) => {
 
                   <View style={[styles.form, { alignSelf: "stretch", gap: 10, marginTop: 8 }]}>
                     <Field
-                      icon={<Lock size={18} color={C.textMuted} />}
+                      icon={<Lock size={18} color={tc(C.textMuted)} />}
                       placeholder="New password (min 6 characters)"
                       value={forgotNewPwd}
                       onChangeText={v => { setForgotNewPwd(v); setForgotError(""); }}
                       secureTextEntry={!showForgotPwd}
-                      rightIcon={showForgotPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
+                      rightIcon={showForgotPwd ? <EyeOff size={18} color={tc(C.textMuted)} /> : <Eye size={18} color={tc(C.textMuted)} />}
                       onRightPress={() => setShowForgotPwd(v => !v)}
                     />
                     <Field
-                      icon={<Lock size={18} color={C.textMuted} />}
+                      icon={<Lock size={18} color={tc(C.textMuted)} />}
                       placeholder="Confirm new password"
                       value={forgotConfirmPwd}
                       onChangeText={v => { setForgotConfirmPwd(v); setForgotError(""); }}
                       secureTextEntry={!showForgotConfirm}
-                      rightIcon={showForgotConfirm ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
+                      rightIcon={showForgotConfirm ? <EyeOff size={18} color={tc(C.textMuted)} /> : <Eye size={18} color={tc(C.textMuted)} />}
                       onRightPress={() => setShowForgotConfirm(v => !v)}
                     />
                   </View>
@@ -430,11 +431,11 @@ const LoginScreen = ({ navigation, route }) => {
                     activeOpacity={0.85}
                   >
                     {loading ? (
-                      <ActivityIndicator color="#fff" />
+                      <ActivityIndicator color={tc("#fff")} />
                     ) : (
                       <View style={styles.ctaInner}>
                         <Text style={styles.ctaText}>Reset Password</Text>
-                        <ChevronRight size={20} color="#fff" />
+                        <ChevronRight size={20} color={tc("#fff")} />
                       </View>
                     )}
                   </TouchableOpacity>
@@ -455,8 +456,8 @@ const LoginScreen = ({ navigation, route }) => {
               {/* ── STEP 3: Success ── */}
               {forgotPhase === "done" && (
                 <View style={styles.otpContainer}>
-                  <View style={[styles.otpIconWrap, { backgroundColor: "#D1FAE5" }]}>
-                    <CheckCircle2 size={36} color="#059669" strokeWidth={1.8} />
+                  <View style={[styles.otpIconWrap, ts({ backgroundColor: "#D1FAE5" })]}>
+                    <CheckCircle2 size={36} color={tc("#059669")} strokeWidth={1.8} />
                   </View>
                   <Text style={styles.otpTitle}>Password reset!</Text>
                   <Text style={[styles.otpSub, { marginBottom: 16 }]}>
@@ -469,7 +470,7 @@ const LoginScreen = ({ navigation, route }) => {
                   >
                     <View style={styles.ctaInner}>
                       <Text style={styles.ctaText}>Back to Log In</Text>
-                      <ChevronRight size={20} color="#fff" />
+                      <ChevronRight size={20} color={tc("#fff")} />
                     </View>
                   </TouchableOpacity>
                 </View>
@@ -510,25 +511,25 @@ const LoginScreen = ({ navigation, route }) => {
 
                   {!!loginError && (
                     <View style={styles.errorBanner}>
-                      <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                      <AlertCircle size={15} color={tc("#DC2626")} strokeWidth={2} />
                       <Text style={styles.errorBannerTxt}>{loginError}</Text>
                     </View>
                   )}
 
                   <Field
-                    icon={<Mail size={18} color={C.textMuted} />}
+                    icon={<Mail size={18} color={tc(C.textMuted)} />}
                     placeholder="Email address"
                     value={loginEmail}
                     onChangeText={v => { setLoginEmail(v); setLoginError(""); }}
                     keyboardType="email-address"
                   />
                   <Field
-                    icon={<Lock size={18} color={C.textMuted} />}
+                    icon={<Lock size={18} color={tc(C.textMuted)} />}
                     placeholder="Password"
                     value={loginPassword}
                     onChangeText={v => { setLoginPassword(v); setLoginError(""); }}
                     secureTextEntry={!showLoginPwd}
-                    rightIcon={showLoginPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
+                    rightIcon={showLoginPwd ? <EyeOff size={18} color={tc(C.textMuted)} /> : <Eye size={18} color={tc(C.textMuted)} />}
                     onRightPress={() => setShowLoginPwd(v => !v)}
                   />
 
@@ -546,11 +547,11 @@ const LoginScreen = ({ navigation, route }) => {
                     activeOpacity={0.85}
                   >
                     {loading ? (
-                      <ActivityIndicator color="#fff" />
+                      <ActivityIndicator color={tc("#fff")} />
                     ) : (
                       <View style={styles.ctaInner}>
                         <Text style={styles.ctaText}>Log In</Text>
-                        <ChevronRight size={20} color="#fff" />
+                        <ChevronRight size={20} color={tc("#fff")} />
                       </View>
                     )}
                   </TouchableOpacity>
@@ -574,7 +575,7 @@ const LoginScreen = ({ navigation, route }) => {
 
                   {!!signupError && (
                     <View style={styles.errorBanner}>
-                      <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                      <AlertCircle size={15} color={tc("#DC2626")} strokeWidth={2} />
                       <Text style={styles.errorBannerTxt}>{signupError}</Text>
                     </View>
                   )}
@@ -582,12 +583,12 @@ const LoginScreen = ({ navigation, route }) => {
                   <View style={styles.nameRow}>
                     <View style={[styles.fieldRow, styles.halfField]}>
                       <View style={styles.fieldIcon}>
-                        <User size={18} color={C.textMuted} />
+                        <User size={18} color={tc(C.textMuted)} />
                       </View>
                       <TextInput
                         style={styles.fieldInput}
                         placeholder="First name"
-                        placeholderTextColor={C.textMuted}
+                        placeholderTextColor={tc(C.textMuted)}
                         value={firstName}
                         onChangeText={setFirstName}
                         autoCapitalize="words"
@@ -598,7 +599,7 @@ const LoginScreen = ({ navigation, route }) => {
                       <TextInput
                         style={[styles.fieldInput, { paddingLeft: 14 }]}
                         placeholder="Last name"
-                        placeholderTextColor={C.textMuted}
+                        placeholderTextColor={tc(C.textMuted)}
                         value={lastName}
                         onChangeText={setLastName}
                         autoCapitalize="words"
@@ -608,14 +609,14 @@ const LoginScreen = ({ navigation, route }) => {
                   </View>
 
                   <Field
-                    icon={<Mail size={18} color={C.textMuted} />}
+                    icon={<Mail size={18} color={tc(C.textMuted)} />}
                     placeholder="Email address"
                     value={signupEmail}
                     onChangeText={setSignupEmail}
                     keyboardType="email-address"
                   />
                   <Field
-                    icon={<Phone size={18} color={C.textMuted} />}
+                    icon={<Phone size={18} color={tc(C.textMuted)} />}
                     placeholder="Phone number (optional)"
                     value={phone}
                     onChangeText={setPhone}
@@ -623,21 +624,21 @@ const LoginScreen = ({ navigation, route }) => {
                     autoCapitalize="none"
                   />
                   <Field
-                    icon={<Lock size={18} color={C.textMuted} />}
+                    icon={<Lock size={18} color={tc(C.textMuted)} />}
                     placeholder="Password (min 6 characters)"
                     value={signupPassword}
                     onChangeText={setSignupPassword}
                     secureTextEntry={!showSignupPwd}
-                    rightIcon={showSignupPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
+                    rightIcon={showSignupPwd ? <EyeOff size={18} color={tc(C.textMuted)} /> : <Eye size={18} color={tc(C.textMuted)} />}
                     onRightPress={() => setShowSignupPwd(v => !v)}
                   />
                   <Field
-                    icon={<Lock size={18} color={C.textMuted} />}
+                    icon={<Lock size={18} color={tc(C.textMuted)} />}
                     placeholder="Confirm password"
                     value={confirmPwd}
                     onChangeText={setConfirmPwd}
                     secureTextEntry={!showConfirmPwd}
-                    rightIcon={showConfirmPwd ? <EyeOff size={18} color={C.textMuted} /> : <Eye size={18} color={C.textMuted} />}
+                    rightIcon={showConfirmPwd ? <EyeOff size={18} color={tc(C.textMuted)} /> : <Eye size={18} color={tc(C.textMuted)} />}
                     onRightPress={() => setShowConfirmPwd(v => !v)}
                   />
 
@@ -648,11 +649,11 @@ const LoginScreen = ({ navigation, route }) => {
                     activeOpacity={0.85}
                   >
                     {loading ? (
-                      <ActivityIndicator color="#fff" />
+                      <ActivityIndicator color={tc("#fff")} />
                     ) : (
                       <View style={styles.ctaInner}>
                         <Text style={styles.ctaText}>Send Verification Code</Text>
-                        <ChevronRight size={20} color="#fff" />
+                        <ChevronRight size={20} color={tc("#fff")} />
                       </View>
                     )}
                   </TouchableOpacity>
@@ -676,7 +677,7 @@ const LoginScreen = ({ navigation, route }) => {
               {!isLogin && signupStep === "otp" && (
                 <View style={styles.otpContainer}>
                   <View style={styles.otpIconWrap}>
-                    <ShieldCheck size={36} color={C.primary} strokeWidth={1.8} />
+                    <ShieldCheck size={36} color={tc(C.primary)} strokeWidth={1.8} />
                   </View>
 
                   <Text style={styles.otpTitle}>Verify your email</Text>
@@ -687,7 +688,7 @@ const LoginScreen = ({ navigation, route }) => {
 
                   {!!signupError && (
                     <View style={[styles.errorBanner, { alignSelf: "stretch" }]}>
-                      <AlertCircle size={15} color="#DC2626" strokeWidth={2} />
+                      <AlertCircle size={15} color={tc("#DC2626")} strokeWidth={2} />
                       <Text style={styles.errorBannerTxt}>{signupError}</Text>
                     </View>
                   )}
@@ -709,11 +710,11 @@ const LoginScreen = ({ navigation, route }) => {
                     activeOpacity={0.85}
                   >
                     {loading ? (
-                      <ActivityIndicator color="#fff" />
+                      <ActivityIndicator color={tc("#fff")} />
                     ) : (
                       <View style={styles.ctaInner}>
                         <Text style={styles.ctaText}>Verify & Create Account</Text>
-                        <ChevronRight size={20} color="#fff" />
+                        <ChevronRight size={20} color={tc("#fff")} />
                       </View>
                     )}
                   </TouchableOpacity>
@@ -741,7 +742,7 @@ const LoginScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   root: { flex: 1, backgroundColor: "#083d2b" },
 
   hero: {
@@ -881,6 +882,6 @@ const styles = StyleSheet.create({
     backgroundColor: C.primaryLight,
     color: C.primary,
   },
-});
+}));
 
 export default LoginScreen;

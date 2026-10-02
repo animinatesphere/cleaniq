@@ -546,10 +546,13 @@ const MyAccountScreen = ({ navigation }) => {
                       </View>
                       <View>
                         <Text style={styles.walletLabel}>
-                          Available Balance
+                          To be paid
                         </Text>
                         <Text style={styles.walletAmount}>
-                          £{wallet.balance?.toFixed(2) || "0.00"}
+                          £{Number(wallet.toBePaid ?? ((wallet.onHold || 0) + (wallet.balance || 0))).toFixed(2)}
+                        </Text>
+                        <Text style={styles.walletLabel}>
+                          Paid out £{Number(wallet.withdrawn || 0).toFixed(2)} · Total earned £{Number(wallet.totalEarned || 0).toFixed(2)}
                         </Text>
                       </View>
                     </View>

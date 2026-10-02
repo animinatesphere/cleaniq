@@ -27,7 +27,8 @@ test("Claude tool loop: runs the tool, sends the assistant turn back unchanged, 
   assert.deepEqual(calls, [["get_quote", { service: "Deep Clean", hours: 3 }]]);
   const r0 = requests[0];
   assert.equal(r0.model, "claude-opus-5");
-  assert.equal(r0.system, "RULES");
+  // Instructions are sent as a cacheable block.
+  assert.deepEqual(r0.system, [{ type: "text", text: "RULES", cache_control: { type: "ephemeral" } }]);
   assert.deepEqual(r0.messages, [{ role: "user", content: "Quote for a 3h deep clean" }]); // leading AI greeting dropped
   assert.deepEqual(r0.tools, [{ name: "get_quote", description: "d", input_schema: { type: "object" } }]);
   assert.deepEqual(r0.thinking, { type: "adaptive" });
@@ -101,4 +102,37 @@ test("models with thinking on are not forced (the API would reject it)", async (
   await generateReplyClaude({ system: "S", history, client, forceTool: "create_booking", tools: [{ name: "create_booking" }], runTool: async () => ({}) });
   assert.equal(requests[0].tool_choice, undefined);
   assert.deepEqual(requests[0].thinking, { type: "adaptive" });
+});
+
+
+test("the long instructions are cached; the changing 'Right now' part is sent after the cache point", () => {
+  const { cachedSystem } = require("../utils/aiProvider");
+  const blocks = cachedSystem("RULES\nPRICES\n\n## Right now\nCurrent date and time: 1 Oct 10:00");
+  assert.equal(blocks.length, 2);
+  assert.equal(blocks[0].text, "RULES\nPRICES\n");
+  assert.deepEqual(blocks[0].cache_control, { type: "ephemeral" });
+  assert.match(blocks[1].text, /^\n## Right now/);
+  assert.equal(blocks[1].cache_control, undefined);
+});
+
+test("with onText, the reply is streamed piece by piece", async () => {
+  const pieces = [];
+  const final = { stop_reason: "end_turn", model: "claude-haiku-4-5", content: [{ type: "text", text: "Hello there. How can I help?" }] };
+  const client = {
+    beta: {
+      messages: {
+        create: async () => { throw new Error("should stream"); },
+        stream: () => {
+          const handlers = {};
+          return {
+            on: (ev, fn) => { handlers[ev] = fn; },
+            finalMessage: async () => { ["Hello ", "there. ", "How can I help?"].forEach((d) => handlers.text?.(d)); return final; },
+          };
+        },
+      },
+    },
+  };
+  const reply = await generateReplyClaude({ system: "S", history: [{ role: "customer", text: "hi" }], client, onText: (d) => pieces.push(d) });
+  assert.equal(reply, "Hello there. How can I help?");
+  assert.deepEqual(pieces, ["Hello ", "there. ", "How can I help?"]);
 });

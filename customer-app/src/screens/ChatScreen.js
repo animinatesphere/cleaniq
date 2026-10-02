@@ -11,6 +11,7 @@ import { Linking } from "react-native";
 import { API_URL } from "../context/AuthContext";
 import { C } from "../theme/flat";
 import KeyboardSafeView from "../components/KeyboardSafeView";
+import { tc, tcs, themed } from "../theme/dark";
 
 // Customer ↔ cleaner chat for one booking. Messages refresh every 3 seconds; the other side
 // gets a push notification (with sound) for each message.
@@ -133,7 +134,7 @@ const ChatScreen = ({ route, navigation }) => {
               {item.failed ? "Not sent · tap to retry" : item.pending ? "Sending…" : fmtTime(item.createdAt)}
             </Text>
             {mine && !item.pending && !item.failed && (
-              item.isRead ? <CheckCheck size={13} color="#A7F3D0" /> : <Check size={13} color="#A7F3D0" />
+              item.isRead ? <CheckCheck size={13} color={tc("#A7F3D0")} /> : <Check size={13} color={tc("#A7F3D0")} />
             )}
           </View>
           {item.failed && (
@@ -149,9 +150,9 @@ const ChatScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.root}>
-      <LinearGradient colors={["#0F6B4C", "#083d2b"]} style={styles.header}>
+      <LinearGradient colors={tcs(["#0F6B4C", "#083d2b"], "bg")} style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <ChevronLeft size={20} color="#fff" />
+          <ChevronLeft size={20} color={tc("#fff")} />
         </TouchableOpacity>
         <View style={styles.headerAvatar}>
           <Text style={styles.headerAvatarTxt}>{initials}</Text>
@@ -165,13 +166,13 @@ const ChatScreen = ({ route, navigation }) => {
           </Text>
         </View>
         <TouchableOpacity style={styles.callBtn} onPress={() => Linking.openURL("tel:+447846726428")}>
-          <Phone size={16} color="#fff" />
+          <Phone size={16} color={tc("#fff")} />
         </TouchableOpacity>
       </LinearGradient>
 
       <KeyboardSafeView style={{ flex: 1 }} onKeyboardShow={() => listRef.current?.scrollToEnd({ animated: true })}>
         {loading ? (
-          <View style={styles.center}><ActivityIndicator size="large" color={C.primary} /></View>
+          <View style={styles.center}><ActivityIndicator size="large" color={tc(C.primary)} /></View>
         ) : (
           <FlatList
             ref={listRef}
@@ -183,7 +184,7 @@ const ChatScreen = ({ route, navigation }) => {
             onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
             ListHeaderComponent={
               <View style={styles.safety}>
-                <ShieldCheck size={14} color={C.primary} />
+                <ShieldCheck size={14} color={tc(C.primary)} />
                 <Text style={styles.safetyTxt}>
                   Chat with {firstName} about this clean. Payments and changes to your booking go through Cleaniq. Cleaniq can read this chat to keep everyone safe.
                 </Text>
@@ -191,7 +192,7 @@ const ChatScreen = ({ route, navigation }) => {
             }
             ListEmptyComponent={
               <View style={styles.empty}>
-                <View style={styles.emptyIcon}><MessageCircle size={30} color={C.primary} strokeWidth={1.6} /></View>
+                <View style={styles.emptyIcon}><MessageCircle size={30} color={tc(C.primary)} strokeWidth={1.6} /></View>
                 <Text style={styles.emptyTitle}>Say hello to {firstName}</Text>
                 <Text style={styles.emptySub}>Share access details, parking or anything {firstName} should know.</Text>
               </View>
@@ -221,7 +222,7 @@ const ChatScreen = ({ route, navigation }) => {
           <TextInput
             style={styles.input}
             placeholder={`Message ${firstName}…`}
-            placeholderTextColor={C.textMuted}
+            placeholderTextColor={tc(C.textMuted)}
             value={text}
             onChangeText={setText}
             multiline
@@ -234,7 +235,7 @@ const ChatScreen = ({ route, navigation }) => {
             disabled={!text.trim() || sending || !!error}
             activeOpacity={0.85}
           >
-            {sending ? <ActivityIndicator size="small" color="#fff" /> : <Send size={18} color="#fff" />}
+            {sending ? <ActivityIndicator size="small" color={tc("#fff")} /> : <Send size={18} color={tc("#fff")} />}
           </TouchableOpacity>
         </View>
       </KeyboardSafeView>
@@ -242,8 +243,8 @@ const ChatScreen = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#EEF4F1" },
+const styles = themed(StyleSheet.create({
+  root: { flex: 1, backgroundColor: "#FFFFFF" },
   header: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14, paddingTop: Platform.OS === "android" ? 36 : 10, paddingBottom: 14 },
   backBtn: { width: 36, height: 36, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
   headerAvatar: { width: 42, height: 42, borderRadius: 21, backgroundColor: "#14A66B", alignItems: "center", justifyContent: "center" },
@@ -268,7 +269,7 @@ const styles = StyleSheet.create({
   avatarTxt: { color: "#fff", fontSize: 11, fontWeight: "900" },
   bubble: { maxWidth: "78%", paddingHorizontal: 13, paddingTop: 9, paddingBottom: 6, borderRadius: 18 },
   bubbleMine: { backgroundColor: "#0F6B4C" },
-  bubbleTheirs: { backgroundColor: "#fff", shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+  bubbleTheirs: { backgroundColor: "#F1F4F3", shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
   tailMine: { borderBottomRightRadius: 5 },
   tailTheirs: { borderBottomLeftRadius: 5 },
   bubbleFailed: { backgroundColor: "#B91C1C" },
@@ -295,6 +296,6 @@ const styles = StyleSheet.create({
   input: { flex: 1, minHeight: 42, maxHeight: 120, backgroundColor: "#F1F5F9", borderRadius: 21, paddingHorizontal: 16, paddingTop: 11, paddingBottom: 11, fontSize: 15, color: "#0F172A" },
   sendBtn: { width: 42, height: 42, borderRadius: 21, backgroundColor: "#0F6B4C", alignItems: "center", justifyContent: "center" },
   sendBtnOff: { backgroundColor: "#94A3B8" },
-});
+}));
 
 export default ChatScreen;

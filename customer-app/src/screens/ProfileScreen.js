@@ -35,6 +35,8 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
+import { tc, tcs, themed, ts } from "../theme/dark";
+import AppearancePicker from "../components/AppearancePicker";
 
 const { width } = Dimensions.get("window");
 
@@ -72,7 +74,7 @@ const Field = ({
     <View style={[styles.fieldRow, !editable && styles.fieldRowLocked]}>
       {IconComp && (
         <View style={styles.fieldIcon}>
-          <IconComp size={16} color={editable ? C.primary : C.textMuted} />
+          <IconComp size={16} color={tc(editable ? C.primary : C.textMuted)} />
         </View>
       )}
       <TextInput
@@ -84,7 +86,7 @@ const Field = ({
         autoCapitalize={autoCapitalize}
         secureTextEntry={secureTextEntry}
         placeholder={placeholder || ""}
-        placeholderTextColor={C.textMuted}
+        placeholderTextColor={tc(C.textMuted)}
         autoCorrect={false}
       />
       {rightIcon && (
@@ -122,16 +124,16 @@ const ProfileScreen = ({ navigation }) => {
 
   if (!userToken) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB", alignItems: "center", justifyContent: "center", padding: 32 }}>
-        <User size={48} color={C.textMuted} strokeWidth={1.2} />
-        <Text style={{ fontSize: 20, fontWeight: "800", color: "#111827", marginTop: 16, textAlign: "center" }}>Sign in to view your profile</Text>
-        <Text style={{ fontSize: 13, color: C.textMuted, marginTop: 8, textAlign: "center", lineHeight: 20 }}>Log in or create a free account to manage your profile and settings.</Text>
+      <SafeAreaView style={ts({ flex: 1, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", padding: 32 })}>
+        <User size={48} color={tc(C.textMuted)} strokeWidth={1.2} />
+        <Text style={ts({ fontSize: 20, fontWeight: "800", color: "#111827", marginTop: 16, textAlign: "center" })}>Sign in to view your profile</Text>
+        <Text style={ts({ fontSize: 13, color: C.textMuted, marginTop: 8, textAlign: "center", lineHeight: 20 })}>Log in or create a free account to manage your profile and settings.</Text>
         <TouchableOpacity
           onPress={() => navigation.navigate("Login")}
-          style={{ marginTop: 28, backgroundColor: C.primary, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 40 }}
+          style={ts({ marginTop: 28, backgroundColor: C.primary, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 40 })}
           activeOpacity={0.85}
         >
-          <Text style={{ color: "#fff", fontWeight: "800", fontSize: 15 }}>Log In / Sign Up</Text>
+          <Text style={ts({ color: "#fff", fontWeight: "800", fontSize: 15 })}>Log In / Sign Up</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -330,16 +332,16 @@ const ProfileScreen = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <LinearGradient colors={["#0F6B4C", "#083d2b"]} style={styles.header}>
+          <LinearGradient colors={tcs(["#0F6B4C", "#083d2b"], "bg")} style={styles.header}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-              <ChevronLeft size={20} color="#fff" />
+              <ChevronLeft size={20} color={tc("#fff")} />
             </TouchableOpacity>
             <View style={styles.avatarWrap}>
-              <LinearGradient colors={["rgba(255,255,255,0.25)", "rgba(255,255,255,0.1)"]} style={styles.avatarGrad}>
+              <LinearGradient colors={tcs(["rgba(255,255,255,0.25)", "rgba(255,255,255,0.1)"], "bg")} style={styles.avatarGrad}>
                 <Text style={styles.avatarTxt}>{initials}</Text>
               </LinearGradient>
               <View style={styles.avatarBadge}>
-                <Shield size={10} color={C.primary} />
+                <Shield size={10} color={tc(C.primary)} />
               </View>
             </View>
             <Text style={styles.headerName}>{customerInfo?.firstName} {customerInfo?.lastName}</Text>
@@ -407,8 +409,8 @@ const ProfileScreen = ({ navigation }) => {
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.saveBtn} onPress={savePersonalInfo} disabled={savingInfo}>
                     {savingInfo
-                      ? <ActivityIndicator size="small" color="#fff" />
-                      : <><Save size={15} color="#fff" /><Text style={styles.saveBtnTxt}>Save Changes</Text></>}
+                      ? <ActivityIndicator size="small" color={tc("#fff")} />
+                      : <><Save size={15} color={tc("#fff")} /><Text style={styles.saveBtnTxt}>Save Changes</Text></>}
                   </TouchableOpacity>
                 </View>
               )}
@@ -424,7 +426,7 @@ const ProfileScreen = ({ navigation }) => {
               {!editingAddr && !hasAddress ? (
                 <TouchableOpacity style={styles.emptyState} onPress={() => setEditingAddr(true)}>
                   <View style={styles.emptyIcon}>
-                    <MapPin size={22} color={C.textMuted} />
+                    <MapPin size={22} color={tc(C.textMuted)} />
                   </View>
                   <Text style={styles.emptyTxt}>No address saved yet</Text>
                   <Text style={styles.emptySubTxt}>Add your home address to skip typing it every booking</Text>
@@ -435,14 +437,14 @@ const ProfileScreen = ({ navigation }) => {
               ) : !editingAddr ? (
                 <View style={styles.savedAddressBox}>
                   <View style={styles.savedAddressIcon}>
-                    <MapPin size={18} color={C.primary} />
+                    <MapPin size={18} color={tc(C.primary)} />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.savedAddressLine}>{address}</Text>
                     <Text style={styles.savedAddressPostcode}>{postcode}</Text>
                   </View>
                   <View style={styles.savedAddressBadge}>
-                    <Check size={12} color="#10B981" strokeWidth={3} />
+                    <Check size={12} color={tc("#10B981")} strokeWidth={3} />
                     <Text style={styles.savedAddressBadgeTxt}>Saved</Text>
                   </View>
                 </View>
@@ -466,8 +468,8 @@ const ProfileScreen = ({ navigation }) => {
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.saveBtn} onPress={saveAddress} disabled={savingAddr}>
                       {savingAddr
-                        ? <ActivityIndicator size="small" color="#fff" />
-                        : <><Save size={15} color="#fff" /><Text style={styles.saveBtnTxt}>Save Address</Text></>}
+                        ? <ActivityIndicator size="small" color={tc("#fff")} />
+                        : <><Save size={15} color={tc("#fff")} /><Text style={styles.saveBtnTxt}>Save Address</Text></>}
                     </TouchableOpacity>
                   </View>
                 </>
@@ -484,7 +486,7 @@ const ProfileScreen = ({ navigation }) => {
               {/* Visual card */}
               {hasCard && !editingCard && (
                 <LinearGradient
-                  colors={["#1A1A2E", "#16213E", "#0F3460"]}
+                  colors={tcs(["#1A1A2E", "#16213E", "#0F3460"], "bg")}
                   style={styles.cardVisual}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
                 >
@@ -493,8 +495,8 @@ const ProfileScreen = ({ navigation }) => {
                     <Text style={styles.cardNumDisplay}>{displayNum}</Text>
                     <TouchableOpacity onPress={() => setShowCardNum((v) => !v)}>
                       {showCardNum
-                        ? <EyeOff size={16} color="rgba(255,255,255,0.5)" />
-                        : <Eye size={16} color="rgba(255,255,255,0.5)" />}
+                        ? <EyeOff size={16} color={tc("rgba(255,255,255,0.5)")} />
+                        : <Eye size={16} color={tc("rgba(255,255,255,0.5)")} />}
                     </TouchableOpacity>
                   </View>
                   <View style={styles.cardBottomRow}>
@@ -507,8 +509,8 @@ const ProfileScreen = ({ navigation }) => {
                       <Text style={styles.cardFieldVal}>{cardExpiry}</Text>
                     </View>
                     <View style={styles.cardBrand}>
-                      <View style={[styles.cardBrandCircle, { backgroundColor: "#EB001B", marginRight: -10 }]} />
-                      <View style={[styles.cardBrandCircle, { backgroundColor: "#F79E1B" }]} />
+                      <View style={[styles.cardBrandCircle, ts({ backgroundColor: "#EB001B", marginRight: -10 })]} />
+                      <View style={[styles.cardBrandCircle, ts({ backgroundColor: "#F79E1B" })]} />
                     </View>
                   </View>
                   <TouchableOpacity style={styles.removeCardBtn} onPress={removeCard}>
@@ -534,8 +536,8 @@ const ProfileScreen = ({ navigation }) => {
                     placeholder="1234 5678 9012 3456"
                     secureTextEntry={!showCardNum}
                     rightIcon={showCardNum
-                      ? <EyeOff size={16} color={C.textMuted} />
-                      : <Eye    size={16} color={C.textMuted} />}
+                      ? <EyeOff size={16} color={tc(C.textMuted)} />
+                      : <Eye    size={16} color={tc(C.textMuted)} />}
                     onRightPress={() => setShowCardNum((v) => !v)}
                   />
                   <Field
@@ -549,7 +551,7 @@ const ProfileScreen = ({ navigation }) => {
                     placeholder="MM/YY"
                   />
                   <View style={styles.cardNotice}>
-                    <Shield size={13} color={C.primary} />
+                    <Shield size={13} color={tc(C.primary)} />
                     <Text style={styles.cardNoticeTxt}>
                       This card is saved on your device only and is not transmitted to our servers. App bookings are paid via a secure link sent to your email.
                     </Text>
@@ -560,8 +562,8 @@ const ProfileScreen = ({ navigation }) => {
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.saveBtn} onPress={saveCard} disabled={savingCard}>
                       {savingCard
-                        ? <ActivityIndicator size="small" color="#fff" />
-                        : <><Save size={15} color="#fff" /><Text style={styles.saveBtnTxt}>Save Card</Text></>}
+                        ? <ActivityIndicator size="small" color={tc("#fff")} />
+                        : <><Save size={15} color={tc("#fff")} /><Text style={styles.saveBtnTxt}>Save Card</Text></>}
                     </TouchableOpacity>
                   </View>
                 </>
@@ -571,7 +573,7 @@ const ProfileScreen = ({ navigation }) => {
               {!hasCard && !editingCard && (
                 <TouchableOpacity style={styles.emptyState} onPress={() => setEditingCard(true)}>
                   <View style={styles.emptyIcon}>
-                    <CreditCard size={22} color={C.textMuted} />
+                    <CreditCard size={22} color={tc(C.textMuted)} />
                   </View>
                   <Text style={styles.emptyTxt}>No card saved yet</Text>
                   <Text style={styles.emptySubTxt}>Save a card so your payment details are ready at checkout</Text>
@@ -591,8 +593,8 @@ const ProfileScreen = ({ navigation }) => {
             >
               {!editingPwd ? (
                 <View style={styles.securityRow}>
-                  <View style={[styles.emptyIcon, { backgroundColor: C.primaryLight }]}>
-                    <Lock size={18} color={C.primary} />
+                  <View style={[styles.emptyIcon, ts({ backgroundColor: C.primaryLight })]}>
+                    <Lock size={18} color={tc(C.primary)} />
                   </View>
                   <View style={{ flex: 1, marginLeft: 14 }}>
                     <Text style={styles.securityLabel}>Password</Text>
@@ -607,8 +609,8 @@ const ProfileScreen = ({ navigation }) => {
                     editable secureTextEntry={!showCurrent}
                     autoCapitalize="none" placeholder="Enter current password"
                     rightIcon={showCurrent
-                      ? <EyeOff size={16} color={C.textMuted} />
-                      : <Eye    size={16} color={C.textMuted} />}
+                      ? <EyeOff size={16} color={tc(C.textMuted)} />
+                      : <Eye    size={16} color={tc(C.textMuted)} />}
                     onRightPress={() => setShowCurrent((v) => !v)}
                   />
                   <Field
@@ -617,8 +619,8 @@ const ProfileScreen = ({ navigation }) => {
                     editable secureTextEntry={!showNew}
                     autoCapitalize="none" placeholder="Min. 6 characters"
                     rightIcon={showNew
-                      ? <EyeOff size={16} color={C.textMuted} />
-                      : <Eye    size={16} color={C.textMuted} />}
+                      ? <EyeOff size={16} color={tc(C.textMuted)} />
+                      : <Eye    size={16} color={tc(C.textMuted)} />}
                     onRightPress={() => setShowNew((v) => !v)}
                   />
                   <Field
@@ -633,11 +635,16 @@ const ProfileScreen = ({ navigation }) => {
                     disabled={changingPwd}
                   >
                     {changingPwd
-                      ? <ActivityIndicator size="small" color="#fff" />
+                      ? <ActivityIndicator size="small" color={tc("#fff")} />
                       : <Text style={styles.saveBtnTxt}>Update Password</Text>}
                   </TouchableOpacity>
                 </>
               )}
+            </SectionCard>
+
+            {/* ── Appearance ────────────────────────────────────────────── */}
+            <SectionCard title="Appearance" subtitle="Light or dark mode">
+              <AppearancePicker />
             </SectionCard>
 
             {/* ── Logout ────────────────────────────────────────────────── */}
@@ -651,7 +658,7 @@ const ProfileScreen = ({ navigation }) => {
               }
               activeOpacity={0.85}
             >
-              <LogOut size={18} color="#EF4444" />
+              <LogOut size={18} color={tc("#EF4444")} />
               <Text style={styles.logoutTxt}>Log Out</Text>
             </TouchableOpacity>
 
@@ -663,8 +670,8 @@ const ProfileScreen = ({ navigation }) => {
               activeOpacity={0.85}
             >
               {deletingAccount
-                ? <ActivityIndicator size="small" color="#9CA3AF" />
-                : <><Trash2 size={16} color="#9CA3AF" /><Text style={styles.deleteAccountTxt}>Delete Account</Text></>}
+                ? <ActivityIndicator size="small" color={tc("#9CA3AF")} />
+                : <><Trash2 size={16} color={tc("#9CA3AF")} /><Text style={styles.deleteAccountTxt}>Delete Account</Text></>}
             </TouchableOpacity>
 
             <View style={{ height: 40 }} />
@@ -676,7 +683,7 @@ const ProfileScreen = ({ navigation }) => {
 };
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   root:   { flex: 1, backgroundColor: C.bg },
   scroll: { flex: 1 },
   scrollContent: { paddingBottom: 40 },
@@ -848,6 +855,6 @@ const styles = StyleSheet.create({
     borderRadius: 18, height: 48, borderWidth: 1, borderColor: "#E5E7EB",
   },
   deleteAccountTxt: { fontSize: 13, fontWeight: "600", color: "#9CA3AF" },
-});
+}));
 
 export default ProfileScreen;

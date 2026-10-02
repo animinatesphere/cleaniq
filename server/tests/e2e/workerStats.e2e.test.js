@@ -228,3 +228,29 @@ test("admin sets the cleaner's hourly pay on a booking (and its unpaid payout fo
   await Withdrawal.updateOne({ _id: p._id }, { status: "completed" });
   assert.equal((await call("PUT", `/workers/jobs/${done._id}/pay`, { workerRate: 20 }, adminToken)).status, 400);
 });
+
+test("earnings count what was actually paid per job, even if the booking later changed", async () => {
+  const w = await Worker.create({ workerId: "W-9", firstName: "Paid", lastName: "Before", email: "p@test.com", phone: "9", region: "UK", status: "Active" });
+  const pay = (amount, status, bookingId) => Withdrawal.create({
+    workerId: w._id, workerName: "Paid Before", amount, status, expectedPayoutDate: new Date(Date.now() + 8 * 86400000),
+    completedJobs: [{ bookingId, service: "Deep Cleaning", amount, completedDate: new Date() }],
+    bankDetails: { accountName: "P", accountNumber: "1", sortCode: "0" },
+  });
+  // Paid for two jobs that are no longer assigned to them, and one whose rate was edited afterwards.
+  await pay(26, "completed", "BK-GONE1");
+  await pay(28, "completed", "BK-GONE2");
+  await Booking.create({ bookingId: "BK-EDITED", service: "Deep Cleaning", status: "Completed", assignedWorker: w._id, workerRate: 13, details: { duration: 2 }, schedule: { date: new Date() } });
+  await pay(28, "completed", "BK-EDITED"); // paid at the old £14/hr
+  await Booking.create({ bookingId: "BK-WAIT", service: "Deep Cleaning", status: "Completed", assignedWorker: w._id, workerRate: 13, details: { duration: 3 }, schedule: { date: new Date() } });
+  await pay(39, "pending", "BK-WAIT");
+  // Just finished, payout not created yet.
+  await Booking.create({ bookingId: "BK-NEW", service: "Deep Cleaning", status: "Completed", assignedWorker: w._id, workerRate: 13, details: { duration: 1 }, schedule: { date: new Date() } });
+
+  const s = (await call("GET", `/workers/${w._id}/stats`)).data;
+  assert.equal(s.totalEarned, 26 + 28 + 28 + 39 + 13);
+  assert.equal(s.withdrawn, 82);
+  assert.equal(s.onHold, 39);
+  assert.equal(s.balance, 13);
+  assert.equal(s.toBePaid, 52); // £39 waiting + £13 not yet scheduled
+  assert.equal(s.jobsDone, 5);
+});

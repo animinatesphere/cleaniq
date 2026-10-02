@@ -8,6 +8,7 @@ import { ArrowLeft, Repeat, CalendarDays, PauseCircle, PlayCircle, XCircle } fro
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
+import { tc, themed, ts } from "../theme/dark";
 
 const money = (n) => `£${Number(n || 0).toFixed(2)}`;
 const every = (f) => ({ Weekly: "Every week", Fortnightly: "Every two weeks", Monthly: "Every month", Quarterly: "Every 3 months" }[f] || f);
@@ -80,13 +81,13 @@ export default function RegularCleansScreen({ navigation }) {
     <SafeAreaView style={styles.root}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
-          <ArrowLeft size={20} color={C.textDark} />
+          <ArrowLeft size={20} color={tc(C.textDark)} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Regular cleans</Text>
       </View>
 
       {subs === null ? (
-        <ActivityIndicator size="large" color={C.primary} style={{ marginTop: 60 }} />
+        <ActivityIndicator size="large" color={tc(C.primary)} style={{ marginTop: 60 }} />
       ) : (
         <ScrollView
           contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
@@ -94,7 +95,7 @@ export default function RegularCleansScreen({ navigation }) {
         >
           {subs.length === 0 && (
             <View style={[styles.card, cardShadow, { alignItems: "center", paddingVertical: 40 }]}>
-              <Repeat size={36} color={C.borderDark} />
+              <Repeat size={36} color={tc(C.borderDark)} />
               <Text style={styles.emptyTitle}>No regular cleans yet</Text>
               <Text style={styles.muted}>Choose Weekly, Fortnightly or Monthly when you book to set one up.</Text>
             </View>
@@ -109,13 +110,13 @@ export default function RegularCleansScreen({ navigation }) {
                     <Text style={styles.service}>{s.service}</Text>
                     <Text style={styles.muted}>{every(s.frequency)} · {money(s.pricePerVisit)} per clean</Text>
                   </View>
-                  <View style={[styles.badge, { backgroundColor: st.bg }]}>
-                    <Text style={[styles.badgeTxt, { color: st.color }]}>{st.label}</Text>
+                  <View style={[styles.badge, ts({ backgroundColor: st.bg })]}>
+                    <Text style={[styles.badgeTxt, ts({ color: st.color })]}>{st.label}</Text>
                   </View>
                 </View>
                 {s.status === "active" && s.nextVisit && (
                   <View style={styles.nextRow}>
-                    <CalendarDays size={15} color={C.primary} />
+                    <CalendarDays size={15} color={tc(C.primary)} />
                     <Text style={styles.nextTxt}>Next clean: {when(s.nextVisit.schedule.date)}</Text>
                   </View>
                 )}
@@ -124,21 +125,21 @@ export default function RegularCleansScreen({ navigation }) {
                 </Text>
                 <View style={styles.actions}>
                   {s.status === "active" && (
-                    <TouchableOpacity disabled={busy} onPress={() => ask(s, "pause")} style={[styles.btn, { borderColor: "#FCD34D" }]}>
-                      <PauseCircle size={15} color="#B45309" /><Text style={[styles.btnTxt, { color: "#B45309" }]}>Pause</Text>
+                    <TouchableOpacity disabled={busy} onPress={() => ask(s, "pause")} style={[styles.btn, ts({ borderColor: "#FCD34D" })]}>
+                      <PauseCircle size={15} color={tc("#B45309")} /><Text style={[styles.btnTxt, ts({ color: "#B45309" })]}>Pause</Text>
                     </TouchableOpacity>
                   )}
                   {s.status === "paused" && (
-                    <TouchableOpacity disabled={busy} onPress={() => ask(s, "resume")} style={[styles.btn, { backgroundColor: C.primary, borderColor: C.primary }]}>
-                      <PlayCircle size={15} color="#fff" /><Text style={[styles.btnTxt, { color: "#fff" }]}>Resume</Text>
+                    <TouchableOpacity disabled={busy} onPress={() => ask(s, "resume")} style={[styles.btn, ts({ backgroundColor: C.primary, borderColor: C.primary })]}>
+                      <PlayCircle size={15} color={tc("#fff")} /><Text style={[styles.btnTxt, ts({ color: "#fff" })]}>Resume</Text>
                     </TouchableOpacity>
                   )}
                   {s.status !== "cancelled" && (
-                    <TouchableOpacity disabled={busy} onPress={() => ask(s, "cancel")} style={[styles.btn, { borderColor: "#FCA5A5" }]}>
-                      <XCircle size={15} color={C.error} /><Text style={[styles.btnTxt, { color: C.error }]}>Cancel</Text>
+                    <TouchableOpacity disabled={busy} onPress={() => ask(s, "cancel")} style={[styles.btn, ts({ borderColor: "#FCA5A5" })]}>
+                      <XCircle size={15} color={tc(C.error)} /><Text style={[styles.btnTxt, ts({ color: C.error })]}>Cancel</Text>
                     </TouchableOpacity>
                   )}
-                  {busy && <ActivityIndicator size="small" color={C.primary} />}
+                  {busy && <ActivityIndicator size="small" color={tc(C.primary)} />}
                 </View>
               </View>
             );
@@ -149,7 +150,7 @@ export default function RegularCleansScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
   header: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8 },
   back: { width: 38, height: 38, borderRadius: 12, backgroundColor: C.surface, alignItems: "center", justifyContent: "center" },
@@ -166,4 +167,4 @@ const styles = StyleSheet.create({
   actions: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8, marginTop: 14 },
   btn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, borderWidth: 1 },
   btnTxt: { fontSize: 13, fontWeight: "800" },
-});
+}));

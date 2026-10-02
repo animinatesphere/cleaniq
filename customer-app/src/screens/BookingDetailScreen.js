@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
 import RateCleanerCard from "../components/RateCleanerCard";
+import { tc, tcs, themed, ts } from "../theme/dark";
 
 // Customer-facing wording for booking statuses (stored values stay the same).
 const STATUS_LABEL = {
@@ -102,7 +103,7 @@ const formatTimeRange = (startTime, duration) => {
 
 const InfoRow = ({ icon: Icon, label, value, valueStyle }) => (
   <View style={styles.infoRow}>
-    <View style={styles.infoIcon}><Icon size={15} color={C.primary} /></View>
+    <View style={styles.infoIcon}><Icon size={15} color={tc(C.primary)} /></View>
     <View style={styles.infoContent}>
       <Text style={styles.infoLabel}>{label}</Text>
       <Text style={[styles.infoValue, valueStyle]}>{value || "—"}</Text>
@@ -265,7 +266,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
 
   if (!booking) return (
     <SafeAreaView style={styles.root}>
-      <View style={styles.loadingWrap}><ActivityIndicator size="large" color={C.primary} /></View>
+      <View style={styles.loadingWrap}><ActivityIndicator size="large" color={tc(C.primary)} /></View>
     </SafeAreaView>
   );
 
@@ -307,10 +308,10 @@ const BookingDetailScreen = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.root}>
       {/* Header */}
-      <LinearGradient colors={["#0F6B4C", "#083d2b"]} style={styles.header}>
+      <LinearGradient colors={tcs(["#0F6B4C", "#083d2b"], "bg")} style={styles.header}>
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-            <ChevronLeft size={20} color="#fff" />
+            <ChevronLeft size={20} color={tc("#fff")} />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle} numberOfLines={1}>{booking.service}</Text>
@@ -318,14 +319,14 @@ const BookingDetailScreen = ({ route, navigation }) => {
           </View>
           <TouchableOpacity style={styles.refreshBtn} onPress={fetchBooking} disabled={refreshing}>
             {refreshing
-              ? <ActivityIndicator size="small" color="#fff" />
-              : <RefreshCw size={16} color="rgba(255,255,255,0.7)" />}
+              ? <ActivityIndicator size="small" color={tc("#fff")} />
+              : <RefreshCw size={16} color={tc("rgba(255,255,255,0.7)")} />}
           </TouchableOpacity>
         </View>
         {/* Status pill */}
-        <View style={[styles.statusPill, { backgroundColor: statusMeta.bg }]}>
-          <StatusIcon size={14} color={statusMeta.color} strokeWidth={2.5} />
-          <Text style={[styles.statusPillTxt, { color: statusMeta.color }]}>{STATUS_LABEL[booking.status] || booking.status}</Text>
+        <View style={[styles.statusPill, ts({ backgroundColor: statusMeta.bg })]}>
+          <StatusIcon size={14} color={tc(statusMeta.color)} strokeWidth={2.5} />
+          <Text style={[styles.statusPillTxt, ts({ color: statusMeta.color })]}>{STATUS_LABEL[booking.status] || booking.status}</Text>
         </View>
         {!!headline && <Text style={styles.headline}>{headline}</Text>}
       </LinearGradient>
@@ -336,7 +337,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
         {workerLoc?.sharing && isActive && (
           <View style={styles.liveTrackCard}>
             <View style={styles.liveTrackHead}>
-              <View style={styles.liveTrackDot}><Radio size={11} color="#fff" /></View>
+              <View style={styles.liveTrackDot}><Radio size={11} color={tc("#fff")} /></View>
               <Text style={styles.liveMapLiveTxt}>LIVE</Text>
             </View>
             <View style={styles.liveTrackInfo}>
@@ -351,7 +352,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
                 onPress={() => Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${workerLoc.lat},${workerLoc.lng}`)}
                 activeOpacity={0.8}
               >
-                <MapPin size={12} color={C.primary} />
+                <MapPin size={12} color={tc(C.primary)} />
                 <Text style={styles.liveMapBtnTxt}>See on map</Text>
               </TouchableOpacity>
             </View>
@@ -378,7 +379,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
               <Text style={styles.messageTitle}>Message {cleanerFirst || "your cleaner"}</Text>
               <Text style={styles.messageSub}>Share access details, parking or anything they should know</Text>
             </View>
-            <View style={styles.messageBtn}><MessageCircle size={18} color="#fff" /></View>
+            <View style={styles.messageBtn}><MessageCircle size={18} color={tc("#fff")} /></View>
           </TouchableOpacity>
         )}
 
@@ -386,7 +387,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
         <SectionCard title="Progress">
           {isCancelled ? (
             <View style={styles.cancelledBox}>
-              <XCircle size={18} color={C.error} />
+              <XCircle size={18} color={tc(C.error)} />
               <Text style={styles.cancelledTxt}>This booking was cancelled.</Text>
             </View>
           ) : (
@@ -394,7 +395,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
               <View key={step.label} style={styles.timelineRow}>
                 <View style={styles.timelineLeft}>
                   <View style={[styles.timelineDot, step.done && styles.timelineDotDone, step.current && styles.timelineDotCurrent]}>
-                    {step.done && <CheckCircle2 size={10} color="#fff" strokeWidth={3} />}
+                    {step.done && <CheckCircle2 size={10} color={tc("#fff")} strokeWidth={3} />}
                   </View>
                   {i < timeline.length - 1 && (
                     <View style={[styles.timelineLine, step.done && styles.timelineLineDone]} />
@@ -450,9 +451,9 @@ const BookingDetailScreen = ({ route, navigation }) => {
 
         {/* Payment */}
         <SectionCard title="Payment">
-          <View style={[styles.paymentBadge, { backgroundColor: paymentMeta.bg }]}>
-            <CreditCard size={14} color={paymentMeta.color} />
-            <Text style={[styles.paymentBadgeTxt, { color: paymentMeta.color }]}>{paymentMeta.label}</Text>
+          <View style={[styles.paymentBadge, ts({ backgroundColor: paymentMeta.bg })]}>
+            <CreditCard size={14} color={tc(paymentMeta.color)} />
+            <Text style={[styles.paymentBadgeTxt, ts({ color: paymentMeta.color })]}>{paymentMeta.label}</Text>
           </View>
           <View style={styles.priceRow}>
             <Text style={styles.priceLbl}>Total</Text>
@@ -464,15 +465,15 @@ const BookingDetailScreen = ({ route, navigation }) => {
           </View>
           {chargeLater && (
             <View style={styles.payNotice}>
-              <CreditCard size={14} color={C.info} />
+              <CreditCard size={14} color={tc(C.info)} />
               <Text style={styles.payNoticeTxt}>
                 £{Number(booking.payment?.amount || 0).toFixed(2)} will be charged to your saved card on the day, when your cleaner arrives.
               </Text>
             </View>
           )}
           {payStatus === "Failed" && (
-            <View style={[styles.payNotice, { backgroundColor: C.errorBg }]}>
-              <AlertTriangle size={14} color={C.error} />
+            <View style={[styles.payNotice, ts({ backgroundColor: C.errorBg })]}>
+              <AlertTriangle size={14} color={tc(C.error)} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.payNoticeTxt}>We couldn't charge your saved card for this clean. Please pay to settle it.</Text>
                 {!!booking.payment?.paymentLinkUrl && (
@@ -485,7 +486,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
           )}
           {payStatus === "Pending" && !booking.payment?.chargeOnArrival && (
             <View style={styles.payNotice}>
-              <AlertTriangle size={14} color={C.warning} />
+              <AlertTriangle size={14} color={tc(C.warning)} />
               <Text style={styles.payNoticeTxt}>
                 A payment link was emailed to you. Check your inbox to complete payment.
               </Text>
@@ -502,7 +503,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
               onPress={openChat}
               activeOpacity={0.85}
             >
-              <MessageCircle size={18} color="#fff" />
+              <MessageCircle size={18} color={tc("#fff")} />
               <Text style={styles.chatBtnTxt}>
                 Chat with {booking.assignedWorkerName?.split(" ")[0] || "Cleaner"}
               </Text>
@@ -515,7 +516,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
             onPress={() => Linking.openURL("tel:+447846726428")}
             activeOpacity={0.8}
           >
-            <Phone size={16} color={C.primary} />
+            <Phone size={16} color={tc(C.primary)} />
             <Text style={styles.contactBtnTxt}>Call Cleaniq Services</Text>
           </TouchableOpacity>
 
@@ -526,7 +527,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
               onPress={() => setShowReschedule(true)}
               activeOpacity={0.85}
             >
-              <CalendarDays size={16} color="#fff" />
+              <CalendarDays size={16} color={tc("#fff")} />
               <Text style={styles.rescheduleBtnTxt}>Reschedule</Text>
             </TouchableOpacity>
           )}
@@ -540,8 +541,8 @@ const BookingDetailScreen = ({ route, navigation }) => {
               activeOpacity={0.85}
             >
               {cancelling
-                ? <ActivityIndicator size="small" color={C.error} />
-                : <><XCircle size={16} color={C.error} /><Text style={styles.cancelBtnTxt}>Cancel Booking</Text></>}
+                ? <ActivityIndicator size="small" color={tc(C.error)} />
+                : <><XCircle size={16} color={tc(C.error)} /><Text style={styles.cancelBtnTxt}>Cancel Booking</Text></>}
             </TouchableOpacity>
           )}
         </View>
@@ -559,13 +560,13 @@ const BookingDetailScreen = ({ route, navigation }) => {
             {/* Mini calendar */}
             <View style={styles.miniCalNav}>
               <TouchableOpacity onPress={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(calYear-1); } else setCalMonth(calMonth-1); }}>
-                <ChevronLeft size={20} color={C.textMed} />
+                <ChevronLeft size={20} color={tc(C.textMed)} />
               </TouchableOpacity>
               <Text style={styles.miniCalMonthTxt}>
                 {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][calMonth]} {calYear}
               </Text>
               <TouchableOpacity onPress={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(calYear+1); } else setCalMonth(calMonth+1); }}>
-                <ChevronRight size={20} color={C.textMed} />
+                <ChevronRight size={20} color={tc(C.textMed)} />
               </TouchableOpacity>
             </View>
             <View style={styles.miniCalGrid}>
@@ -611,7 +612,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
               <TouchableOpacity style={[styles.modalConfirm, rescheduling && { opacity: 0.6 }]}
                 onPress={handleReschedule} disabled={rescheduling}>
                 {rescheduling
-                  ? <ActivityIndicator size="small" color="#fff" />
+                  ? <ActivityIndicator size="small" color={tc("#fff")} />
                   : <Text style={styles.modalConfirmTxt}>Confirm</Text>}
               </TouchableOpacity>
             </View>
@@ -622,7 +623,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   root:        { flex: 1, backgroundColor: C.bg },
   loadingWrap: { flex: 1, alignItems: "center", justifyContent: "center" },
 
@@ -816,6 +817,6 @@ const styles = StyleSheet.create({
   messageTitle:     { fontSize: 15, fontWeight: "800", color: "#0F172A" },
   messageSub:       { fontSize: 12, color: "#64748B", marginTop: 2 },
   messageBtn:       { width: 40, height: 40, borderRadius: 20, backgroundColor: "#0F6B4C", alignItems: "center", justifyContent: "center" },
-});
+}));
 
 export default BookingDetailScreen;

@@ -35,6 +35,9 @@ const bookingSchema = new mongoose.Schema({
     failedAt: Date,
     failureReason: String,
     paymentLinkUrl: String, // sent to the customer when an automatic charge fails
+    taxRate: Number, // % added on top (admin Settings → Tax), if any
+    taxAmount: Number, // included in amount
+    taxLabel: String, // e.g. "VAT"
   },
   region: String,
   leadSource: { type: String, default: "Organic" }, // Bark, Checkatrade, MyJobQuote, MyBuilder, Instagram, Facebook, TikTok, Google, Referral, Organic

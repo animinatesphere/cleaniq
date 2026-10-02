@@ -129,7 +129,8 @@ function handleRelaySession(ws, deps = {}) {
 
   async function respond(text) {
     if (state.ending) return;
-    await addTurn("customer", text);
+    // Saved in the background: the AI doesn't need to wait for the database.
+    const customerSaved = addTurn("customer", text).catch((err) => console.error("[voice] transcript save failed:", err.message));
     state.turns += 1;
     const settings = state.settings || (await AiSettings.get());
     const canTransfer = Boolean(settings.transferNumber);
@@ -164,13 +165,37 @@ function handleRelaySession(ws, deps = {}) {
     };
     const tools = [...declarations.filter((d) => VOICE_TOOL_NAMES.includes(d.name)), ...(canTransfer ? [TRANSFER_TOOL] : [])];
 
+    // Speak each sentence as soon as the AI has written it, instead of waiting for the whole
+    // reply: the caller hears the start of the answer within a second or so.
+    let pending = "";
+    let spoken = "";
+    const flush = (all) => {
+      const re = all ? /^[\s\S]+$/ : /^[\s\S]*?[.!?…:](?=\s)\s+/;
+      let m;
+      while (pending && (m = pending.match(re))) {
+        const chunk = m[0];
+        pending = pending.slice(chunk.length);
+        if (chunk.trim()) {
+          send({ type: "text", token: chunk, last: false });
+          spoken += chunk;
+        }
+        if (all) break;
+      }
+    };
+    const onText = (delta) => {
+      if (state.ending) return;
+      pending += delta;
+      flush(false);
+    };
+
     let reply = null;
     try {
       const system = await getInstructions("voice", { customerName: state.call?.customerName || "", agentName: state.call?.agentName || "" });
-      reply = await ai({ system, history: state.history.slice(-30), tools, runTool });
+      reply = await ai({ system, history: state.history.slice(-30), tools, runTool, onText });
     } catch (err) {
       console.error(`[voice] AI failed on call ${state.call?.twilioCallSid}:`, err.message);
     }
+    await customerSaved;
 
     if (!reply) {
       reply = canTransfer
@@ -183,7 +208,14 @@ function handleRelaySession(ws, deps = {}) {
       return;
     }
 
-    say(reply);
+    if (spoken || pending) {
+      // Already streamed: send what's left and close the turn.
+      flush(true);
+      send({ type: "text", token: "", last: true });
+      reply = spoken.trim() || reply;
+    } else {
+      say(reply);
+    }
     await addTurn("ai", reply, toolEvents);
     if (transferRequested) setTimeout(() => endCall({ transfer: true, reason: "transferred to the team" }), speakDelay(reply));
   }
