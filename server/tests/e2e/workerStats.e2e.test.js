@@ -172,3 +172,59 @@ test("top-rated bonus: admin sets extra £/hr; only cleaners with enough high ra
   assert.deepEqual(list.workers.map((w) => [w.name, w.qualifies]), [["Kelvin Obi", true], ["Mary Ade", false]]);
   assert.equal((await call("GET", "/workers/ratings")).status, 401);
 });
+
+test("admin removes the cleaner from a booking: name gone, back on the feed, cleaner told", async () => {
+  const Notification = require("../../models/Notification");
+  const job = await Booking.create({
+    bookingId: `BK-UN${++n}`, service: "Deep Cleaning", status: "Arrived", region: "UK",
+    customer: { firstName: "Tom", lastName: "Price", email: "tom@test.com" },
+    details: { postcode: "BL0 0HL", duration: 3 }, schedule: { date: new Date(Date.now() + 86400000), timeSlot: "10:00" },
+    workerRate: 15, workerRateBonus: 2, assignedWorker: worker._id, assignedWorkerName: "Kelvin Obi", jobAcceptedTime: new Date(), jobArrivedTime: new Date(),
+  });
+  assert.equal((await call("PUT", `/workers/jobs/${job._id}/unassign`)).status, 401); // admins only
+
+  const r = await call("PUT", `/workers/jobs/${job._id}/unassign`, {}, adminToken);
+  assert.equal(r.status, 200);
+  const saved = await Booking.findById(job._id);
+  assert.equal(saved.assignedWorker, null);
+  assert.equal(saved.assignedWorkerName, null);
+  assert.equal(saved.status, "Confirmed");
+  assert.equal(saved.jobArrivedTime, null);
+  assert.equal(saved.workerRate, 13); // bonus removed
+  assert.ok(await Notification.findOne({ workerId: worker._id, title: "Job removed by Cleaniq", bookingId: job.bookingId }));
+
+  // Nothing to remove now; and a finished clean can't be unassigned.
+  assert.equal((await call("PUT", `/workers/jobs/${job._id}/unassign`, {}, adminToken)).status, 400);
+  const done = await booking();
+  assert.equal((await call("PUT", `/workers/jobs/${done._id}/unassign`, {}, adminToken)).status, 400);
+});
+
+test("admin sets the cleaner's hourly pay on a booking (and its unpaid payout follows)", async () => {
+  const job = await Booking.create({
+    bookingId: `BK-PAY${++n}`, service: "Deep Cleaning", status: "Assigned", region: "UK",
+    customer: { firstName: "Tom", lastName: "Price", email: "tom@test.com" },
+    details: { postcode: "BL0 0HL", duration: 3 }, schedule: { date: new Date(Date.now() + 86400000) },
+    workerRate: 15, workerRateBonus: 2, assignedWorker: worker._id, assignedWorkerName: "Kelvin Obi",
+  });
+  assert.equal((await call("PUT", `/workers/jobs/${job._id}/pay`, { workerRate: 16 })).status, 401);
+  assert.equal((await call("PUT", `/workers/jobs/${job._id}/pay`, { workerRate: 0 }, adminToken)).status, 400);
+  const r = await call("PUT", `/workers/jobs/${job._id}/pay`, { workerRate: 16.5 }, adminToken);
+  assert.equal(r.status, 200);
+  let saved = await Booking.findById(job._id);
+  assert.equal(saved.workerRate, 16.5);
+  assert.equal(saved.workerRateBonus, 0); // admin's figure is used exactly
+
+  // Finished clean with a payout still waiting: the payout amount is corrected.
+  const done = await booking({ bookingId: `BK-PAYD${++n}` }); // 3h × £13 = £39
+  const p = await Withdrawal.create({
+    workerId: worker._id, workerName: "Kelvin Obi", amount: 39, status: "upcoming",
+    completedJobs: [{ bookingId: done.bookingId, service: done.service, amount: 39 }],
+    bankDetails: { accountName: "K Obi", accountNumber: "12345678", sortCode: "00-00-00" },
+  });
+  await call("PUT", `/workers/jobs/${done._id}/pay`, { workerRate: 14 }, adminToken);
+  assert.equal((await Withdrawal.findById(p._id)).amount, 42);
+
+  // Once it's been paid out, the pay can't be changed.
+  await Withdrawal.updateOne({ _id: p._id }, { status: "completed" });
+  assert.equal((await call("PUT", `/workers/jobs/${done._id}/pay`, { workerRate: 20 }, adminToken)).status, 400);
+});

@@ -86,7 +86,7 @@ const hideCustomerContact = (req, res, next) => {
 };
 // Admin pages use ?all=1, assign and visibility, which keep the full details.
 router.use("/jobs", (req, res, next) =>
-  req.query.all || /\/(assign|visibility)\/?$/.test(req.path) ? next() : hideCustomerContact(req, res, next));
+  req.query.all || /\/(assign|unassign|pay|visibility)\/?$/.test(req.path) ? next() : hideCustomerContact(req, res, next));
 router.use("/:id/schedule", hideCustomerContact);
 
 // Mobile App Login Endpoint
@@ -525,6 +525,112 @@ router.post("/jobs/:id/cancel", async (req, res) => {
   } catch (error) {
     console.error("Error cancelling job:", error);
     res.status(500).json({ error: "Internal server error cancelling job" });
+  }
+});
+
+// PUT admin removes the cleaner from a booking. The booking goes back on the job feed (if it
+// hadn't finished), the cleaner is told, and their name no longer shows on it.
+router.put("/jobs/:id/unassign", require("../middleware/adminAuth"), async (req, res) => {
+  try {
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+    if (["Completed", "Completed - Unpaid"].includes(booking.status)) {
+      return res.status(400).json({ error: "This clean is finished, so the cleaner can't be removed (their pay is based on it)." });
+    }
+    if (!booking.assignedWorker && !booking.assignedWorkerName) {
+      return res.status(400).json({ error: "No cleaner is assigned to this booking." });
+    }
+    const previousWorkerId = booking.assignedWorker;
+    const previousWorkerName = booking.assignedWorkerName || "The cleaner";
+
+    booking.assignedWorker = null;
+    booking.assignedWorkerName = null;
+    // Back to the job feed for other cleaners, unless it's cancelled or not yet confirmed.
+    if (["Assigned", "Accepted", "Arrived", "In Progress"].includes(booking.status)) booking.status = "Confirmed";
+    booking.jobAcceptedTime = null;
+    booking.jobArrivedTime = null;
+    booking.jobStartTime = null;
+    booking.jobEndTime = null;
+    booking.jobDurationActual = 0;
+    await applyBonus(booking, null); // back to the job's base rate for the next cleaner
+    await booking.save();
+    await syncCompanyJob(booking, { assignedWorker: null, assignedWorkerName: null, jobAcceptedTime: null, jobArrivedTime: null, jobStartTime: null });
+
+    if (previousWorkerId) {
+      const worker = await Worker.findById(previousWorkerId);
+      if (worker) {
+        // Stop sharing their location for this job.
+        if (worker.location?.activeBookingId === booking.bookingId) {
+          worker.location.sharing = false;
+          worker.location.activeBookingId = null;
+          await worker.save();
+        }
+        const when = booking.schedule?.date
+          ? new Date(booking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
+          : "";
+        const message = `${booking.service}${when ? ` on ${when}` : ""} is no longer assigned to you.`;
+        await Notification.create({ workerId: worker._id, title: "Job removed by Cleaniq", message, type: "job", bookingId: booking.bookingId }).catch(() => {});
+        if (worker.expoPushToken) {
+          sendWorkersPush([worker.expoPushToken], { title: "Job removed by Cleaniq", body: message, data: { type: "job_removed", bookingId: booking.bookingId } }).catch(() => {});
+        }
+      }
+    }
+    console.log(`Admin removed ${previousWorkerName} from ${booking.bookingId}`);
+    res.json({ message: `${previousWorkerName} has been removed from this booking.`, booking });
+  } catch (error) {
+    console.error("Error unassigning job:", error);
+    res.status(500).json({ error: "Couldn't remove the cleaner. Please try again." });
+  }
+});
+
+// PUT admin sets what the cleaner is paid per hour for this booking. The rate is used exactly
+// (no top-rated bonus on top). For a finished clean, its payout is updated too if it hasn't
+// been paid yet.
+router.put("/jobs/:id/pay", require("../middleware/adminAuth"), async (req, res) => {
+  try {
+    const rate = Math.round(Number(req.body.workerRate) * 100) / 100;
+    if (!(rate > 0) || rate > 200) return res.status(400).json({ error: "Enter an hourly rate between £0.01 and £200." });
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+
+    const done = ["Completed", "Completed - Unpaid"].includes(booking.status);
+    let payout = null;
+    if (done && booking.assignedWorker) {
+      const Withdrawal = require("../models/Withdrawal");
+      payout = await Withdrawal.findOne({ workerId: booking.assignedWorker, "completedJobs.bookingId": booking.bookingId });
+      if (payout && payout.status === "completed") {
+        return res.status(400).json({ error: "This clean has already been paid out, so its pay can't be changed." });
+      }
+    }
+
+    const oldRate = Number(booking.workerRate) || 0;
+    booking.workerRate = rate;
+    booking.workerRateBonus = 0;
+    await booking.save();
+
+    // Keep the waiting payout in step with the new pay.
+    if (payout && payout.status !== "failed") {
+      const { jobPay } = require("../utils/workerStats");
+      const amount = jobPay(booking);
+      const job = payout.completedJobs.find((j) => j.bookingId === booking.bookingId);
+      const diff = amount - (Number(job?.amount) || 0);
+      if (job) job.amount = amount;
+      payout.amount = Math.max(0, Math.round(((Number(payout.amount) || 0) + diff) * 100) / 100);
+      await payout.save();
+    }
+
+    if (booking.assignedWorker && rate !== oldRate) {
+      const worker = await Worker.findById(booking.assignedWorker).select("expoPushToken").lean();
+      const message = `Your pay for ${booking.service} (${booking.bookingId}) is now £${rate.toFixed(2)}/hr.`;
+      await Notification.create({ workerId: booking.assignedWorker, title: "Pay updated", message, type: "info", bookingId: booking.bookingId }).catch(() => {});
+      if (worker?.expoPushToken) {
+        sendWorkersPush([worker.expoPushToken], { title: "Pay updated", body: message, data: { type: "pay_updated", bookingId: booking.bookingId } }).catch(() => {});
+      }
+    }
+    res.json({ message: `Cleaner pay set to £${rate.toFixed(2)}/hr.`, booking });
+  } catch (error) {
+    console.error("Error setting worker pay:", error);
+    res.status(500).json({ error: "Couldn't save the pay. Please try again." });
   }
 });
 
