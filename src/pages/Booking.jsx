@@ -273,6 +273,15 @@ const Booking = () => {
   // Regular cleans: price of each later visit (before any first-clean coupon) and the
   // customer's agreement to have later visits charged to their saved card.
   const [visitPrice, setVisitPrice] = useState(0);
+  // Tax (e.g. VAT) set by admin in Settings → Tax, added on top of the price.
+  const [tax, setTax] = useState({ enabled: false, rate: 0, label: "VAT" });
+  const [taxAmount, setTaxAmount] = useState(0);
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/settings/tax`)
+      .then((r) => r.json())
+      .then((t) => t && setTax({ enabled: !!t.enabled, rate: Number(t.rate) || 0, label: t.label || "VAT" }))
+      .catch(() => {});
+  }, []);
   const [regularConsent, setRegularConsent] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(null); // { code, discountPercent }
@@ -707,9 +716,13 @@ const Booking = () => {
     // if (formData.frequency === "Fortnightly") total *= 0.95;
 
     const discount = couponApplied ? (total * couponApplied.discountPercent) / 100 : 0;
-    setTotalPrice(Math.round((total - discount) * 100) / 100);
-    setVisitPrice(Math.round(total * 100) / 100);
-  }, [formData, region, dynamicRates, regularRates, couponApplied]);
+    const net = Math.round((total - discount) * 100) / 100;
+    const rate = tax.enabled ? tax.rate : 0;
+    const addTax = (n) => Math.round(n * (100 + rate)) / 100;
+    setTaxAmount(Math.round(net * rate) / 100);
+    setTotalPrice(addTax(net));
+    setVisitPrice(addTax(Math.round(total * 100) / 100));
+  }, [formData, region, dynamicRates, regularRates, couponApplied, tax]);
 
   // auth modal is derived from step/customer/isSubmitted
 
@@ -880,6 +893,7 @@ const Booking = () => {
       ...(isRegular ? { subscribe: true, subscription: { visitPrice } } : {}),
       payment: {
         amount: totalPrice,
+        ...(tax.enabled ? { taxRate: tax.rate, taxAmount, taxLabel: tax.label } : {}),
         currency: "GBP",
         method: "Stripe",
         transactionId: paymentIntent.id,
@@ -2126,6 +2140,9 @@ const Booking = () => {
                                       <span>Each following clean</span>
                                       <span className="tabular-nums">£{visitPrice.toFixed(2)}</span>
                                     </div>
+                                    {tax.enabled && (
+                                      <p className="text-[11px] text-slate-500 font-semibold">Prices include {tax.label} at {tax.rate}%.</p>
+                                    )}
                                     <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
                                       Following cleans are charged to this card on the day, when your cleaner arrives.
                                       Pause or cancel any time from your account: free with 24 hours&apos; notice, otherwise
@@ -2348,6 +2365,11 @@ const Booking = () => {
                     {region.symbol}
                     {Number(totalPrice || 0).toFixed(2)}
                   </p>
+                  {tax.enabled && taxAmount > 0 && (
+                    <p className="text-[11px] font-bold text-slate-500">
+                      Includes {tax.label} ({tax.rate}%) {region.symbol}{taxAmount.toFixed(2)}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

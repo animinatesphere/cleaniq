@@ -176,7 +176,7 @@ Style: friendly, confident and helpful, like a good receptionist, never pushy. I
 Don't use save_enquiry for someone who has just made a booking${canBook ? " or had a quote emailed" : ""}, for spam, or for job applicants (tell cleaners who want work to apply at cleaniqservices.com/recruitment).`;
 }
 
-function buildInstructions({ channel, settings, knowledge, services, now = new Date(), customerName = "", canBook = false, agentName = "" }) {
+function buildInstructions({ channel, settings, knowledge, services, now = new Date(), customerName = "", canBook = false, agentName = "", tax = null }) {
   if (!CHANNELS.includes(channel)) throw new Error(`Unknown channel: ${channel}`);
   const business = settings.businessName || "Cleaniq Services";
   const name = agentName || agentNames(settings)[0];
@@ -218,19 +218,20 @@ ${channelRules}
 ${enquiryRules({ channel, business, canBook })}
 ${canBook ? `\n${bookingRules(settings)}\n` : ""}
 ## Prices (UK, current)
-${formatServices(services)}${Number(settings.suppliesFee ?? 10) > 0 ? `\nCleaning supplies & equipment: £${Number(settings.suppliesFee ?? 10).toFixed(2)} per visit if we bring them (free if the customer provides them).` : ""}
+${formatServices(services)}${tax?.enabled ? `\nAll prices above are before ${tax.label} — ${tax.label} at ${tax.rate}% is added on top. Always say this when you quote a price, e.g. "£20.90 an hour plus ${tax.label}".` : ""}${Number(settings.suppliesFee ?? 10) > 0 ? `\nCleaning supplies & equipment: £${Number(settings.suppliesFee ?? 10).toFixed(2)} per visit if we bring them (free if the customer provides them).` : ""}
 
 ## Business information
 ${formatKnowledge(knowledge)}`;
 }
 
 async function getInstructions(channel, { customerName = "", canBook = false, agentName = "" } = {}) {
-  const [settings, knowledge, services] = await Promise.all([
+  const [settings, knowledge, services, tax] = await Promise.all([
     AiSettings.get(),
     KnowledgeEntry.find({ active: true }).sort({ category: 1, title: 1 }).lean(),
     Service.find({ region: "UK", rate: { $gt: 0 } }).sort({ type: 1, name: 1 }).lean(),
+    require("./tax").getTax(),
   ]);
-  return buildInstructions({ channel, settings, knowledge, services, customerName, canBook, agentName });
+  return buildInstructions({ channel, settings, knowledge, services, customerName, canBook, agentName, tax });
 }
 
 module.exports = { getInstructions, buildInstructions, enquiryRules, agentNames, pickAgentName, CHANNELS };

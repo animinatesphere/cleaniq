@@ -1,3 +1,4 @@
+import TaxSettings from './TaxSettings';
 import React, { useState, useEffect } from 'react';
 import {
   Globe, Shield,
@@ -641,6 +642,8 @@ const Settings = () => {
                     <span className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${showPricesPublic ? 'left-8' : 'left-1'}`} />
                   </button>
                 </div>
+
+                <TaxSettings />
 
                 <p className="text-[11px] text-white/30 font-medium leading-relaxed">
                   This setting takes effect immediately. The app reads it from the server on each launch — no build or update required.

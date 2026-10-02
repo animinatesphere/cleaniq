@@ -73,7 +73,10 @@ async function minimumVisitPrice(serviceName, hours, frequency) {
   const s = await findService(serviceName);
   if (!s) return 0;
   const rate = rateForFrequency(s, frequency);
-  return s.type === "hourly" ? rate * Number(hours || 0) : rate;
+  const price = s.type === "hourly" ? rate * Number(hours || 0) : rate;
+  // Prices are shown with tax added when admin has tax switched on.
+  const { getTax, withTax } = require("./tax");
+  return withTax(price, await getTax());
 }
 
 async function getOrCreateStripeCustomer({ email, name, phone }) {
@@ -523,6 +526,7 @@ function startSubscriptionScheduler() {
 }
 
 module.exports = {
+  minimumVisitPrice,
   isSubscriptionFrequency,
   normaliseFrequency,
   getOrCreateStripeCustomer,

@@ -271,6 +271,14 @@ const BookingScreen = ({ navigation, route }) => {
   const [autoSubmit,     setAutoSubmit]     = useState(false);
   const [couponCode,     setCouponCode]     = useState("");
   const [couponApplied,  setCouponApplied]  = useState(null); // { code, discountPercent }
+  // Tax (e.g. VAT) set by admin in Settings → Tax, added on top of the price.
+  const [tax, setTax] = useState({ enabled: false, rate: 0, label: "VAT" });
+  useEffect(() => {
+    fetch(`${API_URL}/settings/tax`)
+      .then((r) => r.json())
+      .then((t) => t && setTax({ enabled: !!t.enabled, rate: Number(t.rate) || 0, label: t.label || "VAT" }))
+      .catch(() => {});
+  }, []);
   const [couponError,    setCouponError]    = useState("");
   const [couponLoading,  setCouponLoading]  = useState(false);
 
@@ -406,7 +414,11 @@ const BookingScreen = ({ navigation, route }) => {
   const regularRate = regularRates[form.serviceType]?.[form.frequency] || 0;
   const rawTotal = calcTotal(form, regularRate ? { ...rates, [form.serviceType]: regularRate } : rates, extraPrices);
   const discount = couponApplied ? Math.round((rawTotal * couponApplied.discountPercent) / 100 * 100) / 100 : 0;
-  const total  = Math.round((rawTotal - discount) * 100) / 100;
+  const taxRate = tax.enabled ? tax.rate : 0;
+  const addTax = (n) => Math.round(n * (100 + taxRate)) / 100;
+  const net    = Math.round((rawTotal - discount) * 100) / 100;
+  const taxAmount = Math.round(net * taxRate) / 100;
+  const total  = addTax(net);
   // Regular cleans: first clean paid now (card saved), each following clean charged when the
   // cleaner arrives. The customer must agree before booking.
   const pricedFrequencies = REGULAR_FREQUENCIES.filter((f) => regularRates[form.serviceType]?.[f] > 0);
@@ -417,7 +429,7 @@ const BookingScreen = ({ navigation, route }) => {
   useEffect(() => {
     if (!frequencyOffered && Object.keys(regularRates).length) setForm((f) => ({ ...f, frequency: "Once" }));
   }, [frequencyOffered, regularRates]);
-  const visitPrice = Math.round(rawTotal * 100) / 100;
+  const visitPrice = addTax(Math.round(rawTotal * 100) / 100);
   const [regularConsent, setRegularConsent] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState("");
   const displayServices = liveServices.length > 0 ? liveServices : SERVICES;
@@ -531,7 +543,10 @@ const BookingScreen = ({ navigation, route }) => {
         property: form.rooms,
         schedule: { date: dateStr(form.date), timeSlot: form.timeSlot, preferredTime: form.timeSlot },
         suppliesProvidedBy: form.suppliesProvidedBy,
-        payment: { amount: total, method: "Invoice", status: "Pending", billingType: "hourly" },
+        payment: {
+          amount: total, method: "Invoice", status: "Pending", billingType: "hourly",
+          ...(tax.enabled ? { taxRate: tax.rate, taxAmount, taxLabel: tax.label } : {}),
+        },
         status:  "Awaiting Payment",
         region:  "UK",
         meta:    { source: "Customer App" },
@@ -1222,6 +1237,11 @@ const BookingScreen = ({ navigation, route }) => {
                     </Text>
                   )}
                   <Text style={styles.summaryTotalAmt}>£{total.toFixed(2)}</Text>
+                  {tax.enabled && taxAmount > 0 && (
+                    <Text style={ts({ fontSize: 11, fontWeight: "700", color: C.textMuted, textAlign: "right" })}>
+                      Includes {tax.label} ({tax.rate}%) £{taxAmount.toFixed(2)}
+                    </Text>
+                  )}
                 </View>
               </View>
               <View style={styles.summaryNote}>

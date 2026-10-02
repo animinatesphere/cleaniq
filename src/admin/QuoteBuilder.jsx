@@ -918,6 +918,11 @@ const QuoteBuilder = () => {
       })
       .catch(() => {});
     loadHistory(10);
+    // When tax is switched on in Settings → Tax, new quotes start with that rate.
+    fetch(`${API}/settings/tax`)
+      .then((r) => r.json())
+      .then((t) => { if (t?.enabled) setForm((f) => ({ ...f, includeVat: true, vatRate: Number(t.rate) })); })
+      .catch(() => {});
   }, [loadHistory]);
 
   // If a quote was sent here for editing from Quote History, prefill the form.
