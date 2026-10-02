@@ -12,6 +12,7 @@ import {
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
+import { tc, themed, ts } from "../theme/dark";
 
 const { width: SW } = Dimensions.get("window");
 
@@ -21,7 +22,7 @@ const G = {
   primaryMid:   "#14A66B",
   primaryLight: "#E4F7EE",
   primaryDark:  "#083D2E",
-  bg:           "#F0F5F2",
+  bg:           "#FFFFFF",
   surface:      "#FFFFFF",
   surfaceAlt:   "#F5FAF7",
   dark:         "#0F172A",
@@ -116,7 +117,7 @@ export default function CompanyDashboardScreen({ navigation }) {
 
   if (loading) return (
     <SafeAreaView style={s.safe}>
-      <View style={s.center}><ActivityIndicator size="large" color={G.primary} /></View>
+      <View style={s.center}><ActivityIndicator size="large" color={tc(G.primary)} /></View>
     </SafeAreaView>
   );
 
@@ -126,7 +127,7 @@ export default function CompanyDashboardScreen({ navigation }) {
         contentContainerStyle={s.scroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} tintColor={G.primary}
+          <RefreshControl refreshing={refreshing} tintColor={tc(G.primary)}
             onRefresh={() => { setRefreshing(true); fetchJobs(); }} />
         }
       >
@@ -171,7 +172,7 @@ export default function CompanyDashboardScreen({ navigation }) {
               onPress={() => navigation.navigate("PostJob")}
               activeOpacity={0.88}
             >
-              <Plus size={16} color={G.primary} strokeWidth={2.8} />
+              <Plus size={16} color={tc(G.primary)} strokeWidth={2.8} />
               <Text style={s.heroCtaTxt}>Post a New Job</Text>
             </TouchableOpacity>
           </View>
@@ -180,7 +181,7 @@ export default function CompanyDashboardScreen({ navigation }) {
         {/* ══ NEXT JOB ══════════════════════════════════════════════════ */}
         {nextJob ? (
           <View style={s.px}>
-            <SectionLabel title="Next Upcoming Job" icon={<Calendar size={14} color={G.primary} />} />
+            <SectionLabel title="Next Upcoming Job" icon={<Calendar size={14} color={tc(G.primary)} />} />
             <TouchableOpacity
               style={s.nextCard}
               onPress={() => navigation.navigate("JobDetail", { jobId: nextJob._id })}
@@ -198,7 +199,7 @@ export default function CompanyDashboardScreen({ navigation }) {
                 <View style={s.nextDetails}>
                   {nextJob.schedule?.date && (
                     <View style={s.nextRow}>
-                      <Calendar size={13} color={G.primary} />
+                      <Calendar size={13} color={tc(G.primary)} />
                       <Text style={s.nextRowTxt}>
                         {new Date(nextJob.schedule.date+"T12:00:00").toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long" })}
                       </Text>
@@ -206,13 +207,13 @@ export default function CompanyDashboardScreen({ navigation }) {
                   )}
                   {(nextJob.schedule?.timeSlot) && (
                     <View style={s.nextRow}>
-                      <Clock size={13} color={G.primary} />
+                      <Clock size={13} color={tc(G.primary)} />
                       <Text style={s.nextRowTxt}>{nextJob.schedule.timeSlot} slot</Text>
                     </View>
                   )}
                   {nextJob.property?.address && (
                     <View style={s.nextRow}>
-                      <MapPin size={13} color={G.primary} />
+                      <MapPin size={13} color={tc(G.primary)} />
                       <Text style={s.nextRowTxt} numberOfLines={1}>{nextJob.property.address}</Text>
                     </View>
                   )}
@@ -221,14 +222,14 @@ export default function CompanyDashboardScreen({ navigation }) {
                       <View style={s.nextWorkerDot}>
                         <Text style={s.nextWorkerInit}>{nextJob.assignedWorkerName[0]?.toUpperCase()}</Text>
                       </View>
-                      <Text style={[s.nextRowTxt, { color:G.primary, fontWeight:"700" }]}>
+                      <Text style={[s.nextRowTxt, ts({ color:G.primary, fontWeight:"700" })]}>
                         {nextJob.assignedWorkerName}
                       </Text>
                     </View>
                   )}
                 </View>
               </View>
-              <ChevronRight size={18} color={G.primary} style={{ marginRight:14, marginTop:4 }} />
+              <ChevronRight size={18} color={tc(G.primary)} style={{ marginRight:14, marginTop:4 }} />
             </TouchableOpacity>
           </View>
         ) : (
@@ -237,7 +238,7 @@ export default function CompanyDashboardScreen({ navigation }) {
             <View style={[s.px, { marginBottom:0 }]}>
               <View style={s.emptyHero}>
                 <View style={s.emptyIconWrap}>
-                  <Briefcase size={32} color={G.primary} strokeWidth={1.5} />
+                  <Briefcase size={32} color={tc(G.primary)} strokeWidth={1.5} />
                 </View>
                 <Text style={s.emptyH}>No upcoming jobs</Text>
                 <Text style={s.emptyT}>
@@ -248,7 +249,7 @@ export default function CompanyDashboardScreen({ navigation }) {
                   onPress={() => navigation.navigate("PostJob")}
                   activeOpacity={0.85}
                 >
-                  <Plus size={16} color="#fff" strokeWidth={2.5} />
+                  <Plus size={16} color={tc("#fff")} strokeWidth={2.5} />
                   <Text style={s.emptyBtnTxt}>Post Your First Job</Text>
                 </TouchableOpacity>
               </View>
@@ -260,13 +261,13 @@ export default function CompanyDashboardScreen({ navigation }) {
         {total > 0 && (
           <View style={s.px}>
             <View style={s.statsGrid}>
-              <BigStat label="Pending Review" value={pending} color={G.warning} bg={G.warningBg} Icon={AlertCircle} />
-              <BigStat label="In Progress"    value={active}  color={G.info}    bg={G.infoBg}    Icon={Zap} />
-              <BigStat label="Completed"      value={done}    color={G.success} bg={G.successBg} Icon={CheckCircle2} />
+              <BigStat label="Pending Review" value={pending} color={tc(G.warning)} bg={G.warningBg} Icon={AlertCircle} />
+              <BigStat label="In Progress"    value={active}  color={tc(G.info)}    bg={G.infoBg}    Icon={Zap} />
+              <BigStat label="Completed"      value={done}    color={tc(G.success)} bg={G.successBg} Icon={CheckCircle2} />
               <BigStat
                 label="Success Rate"
                 value={total > 0 ? `${Math.round((done/total)*100)}%` : "—"}
-                color={G.purple}
+                color={tc(G.purple)}
                 bg={G.purpleBg}
                 Icon={TrendingUp}
               />
@@ -278,12 +279,12 @@ export default function CompanyDashboardScreen({ navigation }) {
         <View style={s.px}>
           <SectionLabel
             title="Recent Jobs"
-            icon={<Briefcase size={14} color={G.primary} />}
+            icon={<Briefcase size={14} color={tc(G.primary)} />}
             right={
               jobs.length > 5 ? (
                 <TouchableOpacity style={s.seeAllBtn} onPress={() => {}}>
                   <Text style={s.seeAllTxt}>See all</Text>
-                  <ArrowRight size={13} color={G.primary} />
+                  <ArrowRight size={13} color={tc(G.primary)} />
                 </TouchableOpacity>
               ) : null
             }
@@ -291,7 +292,7 @@ export default function CompanyDashboardScreen({ navigation }) {
 
           {recent.length === 0 ? (
             <View style={s.emptySmall}>
-              <Briefcase size={28} color={G.muted} strokeWidth={1.5} />
+              <Briefcase size={28} color={tc(G.muted)} strokeWidth={1.5} />
               <Text style={s.emptySmallTxt}>No jobs yet — tap "Post a New Job" above</Text>
             </View>
           ) : (
@@ -306,20 +307,20 @@ export default function CompanyDashboardScreen({ navigation }) {
                     activeOpacity={0.78}
                   >
                     {/* Colored left accent */}
-                    <View style={[s.jobAccent, { backgroundColor: m.color }]} />
+                    <View style={[s.jobAccent, ts({ backgroundColor: m.color })]} />
 
                     <View style={s.jobContent}>
                       <View style={s.jobTopRow}>
                         <Text style={s.jobService} numberOfLines={1}>{job.service}</Text>
-                        <View style={[s.jobBadge, { backgroundColor: m.bg }]}>
-                          <Text style={[s.jobBadgeTxt, { color: m.color }]} numberOfLines={1}>{m.label}</Text>
+                        <View style={[s.jobBadge, ts({ backgroundColor: m.bg })]}>
+                          <Text style={[s.jobBadgeTxt, ts({ color: m.color })]} numberOfLines={1}>{m.label}</Text>
                         </View>
                       </View>
                       <View style={s.jobBottomRow}>
                         <Text style={s.jobId}>{job.jobId}</Text>
                         {job.schedule?.date && (
                           <View style={s.jobDateRow}>
-                            <Calendar size={10} color={G.muted} />
+                            <Calendar size={10} color={tc(G.muted)} />
                             <Text style={s.jobDateTxt}>{fmtDate(job.schedule.date)}</Text>
                           </View>
                         )}
@@ -333,7 +334,7 @@ export default function CompanyDashboardScreen({ navigation }) {
                         )}
                       </View>
                     </View>
-                    <ChevronRight size={14} color={G.muted} style={{ flexShrink:0 }} />
+                    <ChevronRight size={14} color={tc(G.muted)} style={{ flexShrink:0 }} />
                   </TouchableOpacity>
                 );
               })}
@@ -354,39 +355,39 @@ const HeroStat = ({ value, label }) => (
     <Text style={hs.label}>{label}</Text>
   </View>
 );
-const hs = StyleSheet.create({
+const hs = themed(StyleSheet.create({
   val:   { fontSize:22, fontWeight:"900", color:"#fff", lineHeight:24 },
   label: { fontSize:10, fontWeight:"700", color:"rgba(255,255,255,0.55)", textTransform:"uppercase", letterSpacing:0.5 },
-});
+}));
 
 const BigStat = ({ label, value, color, bg, Icon }) => (
-  <View style={[bs.card, { backgroundColor:bg }]}>
-    <View style={[bs.iconBox, { backgroundColor:color+"22" }]}>
-      <Icon size={17} color={color} strokeWidth={2} />
+  <View style={[bs.card, ts({ backgroundColor:bg })]}>
+    <View style={[bs.iconBox, ts({ backgroundColor:color+"22" })]}>
+      <Icon size={17} color={tc(color)} strokeWidth={2} />
     </View>
-    <Text style={[bs.val, { color }]}>{value}</Text>
+    <Text style={[bs.val, ts({ color })]}>{value}</Text>
     <Text style={bs.label}>{label}</Text>
   </View>
 );
-const bs = StyleSheet.create({
+const bs = themed(StyleSheet.create({
   card:    { flex:1, minWidth:(SW-16*2-12)/2, borderRadius:18, padding:16, gap:5, ...sh },
   iconBox: { width:36, height:36, borderRadius:10, alignItems:"center", justifyContent:"center", marginBottom:2 },
   val:     { fontSize:26, fontWeight:"900", lineHeight:28 },
   label:   { fontSize:11, fontWeight:"600", color:G.med, lineHeight:14 },
-});
+}));
 
 const StatusBadge = ({ status }) => {
   const m = STATUS_META[status] || STATUS_META.pending_review;
   return (
-    <View style={[sbb.badge, { backgroundColor: m.bg }]}>
-      <Text style={[sbb.txt, { color: m.color }]} numberOfLines={1}>{m.label}</Text>
+    <View style={[sbb.badge, ts({ backgroundColor: m.bg })]}>
+      <Text style={[sbb.txt, ts({ color: m.color })]} numberOfLines={1}>{m.label}</Text>
     </View>
   );
 };
-const sbb = StyleSheet.create({
+const sbb = themed(StyleSheet.create({
   badge: { borderRadius:20, paddingHorizontal:8, paddingVertical:3, maxWidth:130 },
   txt:   { fontSize:10, fontWeight:"700" },
-});
+}));
 
 const SectionLabel = ({ title, icon, right }) => (
   <View style={sl.row}>
@@ -397,14 +398,14 @@ const SectionLabel = ({ title, icon, right }) => (
     {right}
   </View>
 );
-const sl = StyleSheet.create({
+const sl = themed(StyleSheet.create({
   row:   { flexDirection:"row", justifyContent:"space-between", alignItems:"center", marginBottom:12 },
   left:  { flexDirection:"row", alignItems:"center", gap:7 },
   title: { fontSize:16, fontWeight:"800", color:G.dark },
-});
+}));
 
 /* ─── Main styles ─────────────────────────────────────────────────────────────── */
-const s = StyleSheet.create({
+const s = themed(StyleSheet.create({
   safe:  { flex:1, backgroundColor:G.bg },
   center:{ flex:1, alignItems:"center", justifyContent:"center" },
   scroll:{ paddingBottom:20 },
@@ -473,4 +474,4 @@ const s = StyleSheet.create({
   emptyBtnTxt:  { color:"#fff", fontWeight:"800", fontSize:15 },
   emptySmall:   { flexDirection:"row", alignItems:"center", gap:10, backgroundColor:G.surface, borderRadius:16, padding:18, ...sh },
   emptySmallTxt:{ fontSize:14, color:G.muted, flex:1, lineHeight:19 },
-});
+}));

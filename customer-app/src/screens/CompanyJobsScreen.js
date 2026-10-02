@@ -8,6 +8,7 @@ import { Briefcase, ChevronRight } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
+import { tc, themed, ts } from "../theme/dark";
 
 const TABS = [
   { key: "all",           label: "All"       },
@@ -71,17 +72,17 @@ export default function CompanyJobsScreen({ navigation }) {
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={C.primary} />
+          <ActivityIndicator size="large" color={tc(C.primary)} />
         </View>
       ) : (
         <ScrollView
           contentContainerStyle={styles.scroll}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchJobs(); }} tintColor={C.primary} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchJobs(); }} tintColor={tc(C.primary)} />}
           showsVerticalScrollIndicator={false}
         >
           {filtered.length === 0 ? (
             <View style={styles.empty}>
-              <Briefcase size={40} color={C.textMuted} strokeWidth={1.5} />
+              <Briefcase size={40} color={tc(C.textMuted)} strokeWidth={1.5} />
               <Text style={styles.emptyTxt}>No jobs in this category</Text>
             </View>
           ) : (
@@ -107,10 +108,10 @@ export default function CompanyJobsScreen({ navigation }) {
                     )}
                   </View>
                   <View style={styles.cardRight}>
-                    <View style={[styles.badge, { backgroundColor: m.bg }]}>
-                      <Text style={[styles.badgeTxt, { color: m.color }]}>{m.label}</Text>
+                    <View style={[styles.badge, ts({ backgroundColor: m.bg })]}>
+                      <Text style={[styles.badgeTxt, ts({ color: m.color })]}>{m.label}</Text>
                     </View>
-                    <ChevronRight size={16} color={C.textMuted} style={{ marginTop: 8 }} />
+                    <ChevronRight size={16} color={tc(C.textMuted)} style={{ marginTop: 8 }} />
                   </View>
                 </TouchableOpacity>
               );
@@ -122,7 +123,7 @@ export default function CompanyJobsScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   safe:        { flex: 1, backgroundColor: C.bg },
   headerBar:   { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
   title:       { fontSize: 22, fontWeight: "800", color: C.textDark },
@@ -145,4 +146,4 @@ const styles = StyleSheet.create({
   badgeTxt:    { fontSize: 11, fontWeight: "700" },
   empty:       { alignItems: "center", paddingVertical: 60 },
   emptyTxt:    { fontSize: 15, color: C.textMuted, marginTop: 12 },
-});
+}));

@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { ChevronLeft, User, Mail, Phone, MessageSquare, CheckCircle2 } from "lucide-react-native";
 import { API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
+import { tc, tcs, themed } from "../theme/dark";
 
 const Field = ({ icon, placeholder, value, onChangeText, keyboardType = "default", multiline = false, numberOfLines = 1 }) => (
   <View style={[styles.field, multiline && styles.fieldMulti]}>
@@ -15,7 +16,7 @@ const Field = ({ icon, placeholder, value, onChangeText, keyboardType = "default
     <TextInput
       style={[styles.fieldInput, multiline && styles.fieldInputMulti]}
       placeholder={placeholder}
-      placeholderTextColor={C.textMuted}
+      placeholderTextColor={tc(C.textMuted)}
       value={value}
       onChangeText={onChangeText}
       keyboardType={keyboardType}
@@ -80,9 +81,9 @@ const QuoteScreen = ({ navigation }) => {
   if (done) {
     return (
       <SafeAreaView style={styles.root}>
-        <LinearGradient colors={["#0F6B4C", "#083d2b"]} style={styles.successHeader}>
+        <LinearGradient colors={tcs(["#0F6B4C", "#083d2b"], "bg")} style={styles.successHeader}>
           <View style={styles.successCircle}>
-            <CheckCircle2 size={52} color="#fff" strokeWidth={1.5} />
+            <CheckCircle2 size={52} color={tc("#fff")} strokeWidth={1.5} />
           </View>
           <Text style={styles.successTitle}>Quote Request Sent!</Text>
           <Text style={styles.successSub}>We'll review your request and get back to you within 2 hours.</Text>
@@ -116,9 +117,9 @@ const QuoteScreen = ({ navigation }) => {
     <SafeAreaView style={styles.root}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         {/* Header */}
-        <LinearGradient colors={["#0F6B4C", "#083d2b"]} style={styles.header}>
+        <LinearGradient colors={tcs(["#0F6B4C", "#083d2b"], "bg")} style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <ChevronLeft size={22} color="#fff" strokeWidth={2} />
+            <ChevronLeft size={22} color={tc("#fff")} strokeWidth={2} />
           </TouchableOpacity>
           <View style={{ flex: 1, alignItems: "center" }}>
             <Text style={styles.headerTitle}>Get a Free Quote</Text>
@@ -135,14 +136,14 @@ const QuoteScreen = ({ navigation }) => {
           <View style={[styles.card, cardShadow]}>
             <Text style={styles.sectionLabel}>Your Details</Text>
             <Field
-              icon={<User size={16} color={C.primary} strokeWidth={2} />}
+              icon={<User size={16} color={tc(C.primary)} strokeWidth={2} />}
               placeholder="Full name *"
               value={name}
               onChangeText={setName}
             />
             <View style={styles.divider} />
             <Field
-              icon={<Mail size={16} color={C.primary} strokeWidth={2} />}
+              icon={<Mail size={16} color={tc(C.primary)} strokeWidth={2} />}
               placeholder="Email address *"
               value={email}
               onChangeText={setEmail}
@@ -150,7 +151,7 @@ const QuoteScreen = ({ navigation }) => {
             />
             <View style={styles.divider} />
             <Field
-              icon={<Phone size={16} color={C.textMuted} strokeWidth={2} />}
+              icon={<Phone size={16} color={tc(C.textMuted)} strokeWidth={2} />}
               placeholder="Phone number (optional)"
               value={phone}
               onChangeText={setPhone}
@@ -161,7 +162,7 @@ const QuoteScreen = ({ navigation }) => {
           <View style={[styles.card, cardShadow]}>
             <Text style={styles.sectionLabel}>What do you need?</Text>
             <Field
-              icon={<MessageSquare size={16} color={C.primary} strokeWidth={2} />}
+              icon={<MessageSquare size={16} color={tc(C.primary)} strokeWidth={2} />}
               placeholder="Describe the property, service type, frequency, any extras…"
               value={message}
               onChangeText={setMessage}
@@ -179,7 +180,7 @@ const QuoteScreen = ({ navigation }) => {
             activeOpacity={0.85}
           >
             {sending
-              ? <ActivityIndicator size="small" color="#fff" />
+              ? <ActivityIndicator size="small" color={tc("#fff")} />
               : <Text style={styles.submitTxt}>Send Quote Request</Text>
             }
           </TouchableOpacity>
@@ -193,7 +194,7 @@ const QuoteScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   root:   { flex: 1, backgroundColor: C.bg },
   header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: Platform.OS === "android" ? 16 : 8, paddingBottom: 20 },
   backBtn: { width: 38, height: 38, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.15)", alignItems: "center", justifyContent: "center" },
@@ -238,6 +239,6 @@ const styles = StyleSheet.create({
 
   doneBtn: { backgroundColor: C.primary, borderRadius: 999, paddingVertical: 16, alignItems: "center" },
   doneBtnTxt: { color: "#fff", fontSize: 16, fontWeight: "800" },
-});
+}));
 
 export default QuoteScreen;

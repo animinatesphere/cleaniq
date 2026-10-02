@@ -6,6 +6,7 @@ import { Star } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
 import { C } from "../theme/flat";
+import { tc, themed } from "../theme/dark";
 
 const WORDS = ["", "Poor", "Not great", "OK", "Good", "Excellent"];
 const AMBER = "#F59E0B";
@@ -45,7 +46,7 @@ export default function RateCleanerCard({ booking, onRated }) {
     <View style={styles.starsRow}>
       {[1, 2, 3, 4, 5].map((n) => (
         <TouchableOpacity key={n} disabled={!onPick} onPress={() => onPick?.(n)} hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}>
-          <Star size={size} color={n <= value ? AMBER : "#CBD5E1"} fill={n <= value ? AMBER : "transparent"} strokeWidth={1.6} />
+          <Star size={size} color={tc(n <= value ? AMBER : "#CBD5E1")} fill={n <= value ? AMBER : "transparent"} strokeWidth={1.6} />
         </TouchableOpacity>
       ))}
     </View>
@@ -74,7 +75,7 @@ export default function RateCleanerCard({ booking, onRated }) {
         <TextInput
           style={styles.input}
           placeholder={stars >= 4 ? `What did ${first} do well? (optional)` : "What could be better? (optional)"}
-          placeholderTextColor={C.textMuted}
+          placeholderTextColor={tc(C.textMuted)}
           value={comment}
           onChangeText={setComment}
           multiline
@@ -83,13 +84,13 @@ export default function RateCleanerCard({ booking, onRated }) {
       )}
       {!!error && <Text style={styles.error}>{error}</Text>}
       <TouchableOpacity style={[styles.btn, !stars && styles.btnOff]} disabled={!stars || saving} onPress={submit} activeOpacity={0.85}>
-        {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnTxt}>{existing ? "Update rating" : "Send rating"}</Text>}
+        {saving ? <ActivityIndicator color={tc("#fff")} /> : <Text style={styles.btnTxt}>{existing ? "Update rating" : "Send rating"}</Text>}
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   card: { backgroundColor: "#fff", borderRadius: 18, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: "#FDE68A", alignItems: "center" },
   title: { fontSize: 16, fontWeight: "800", color: C.textDark, textAlign: "center" },
   sub: { fontSize: 12, color: C.textMed, marginTop: 3, textAlign: "center" },
@@ -102,4 +103,4 @@ const styles = StyleSheet.create({
   btnTxt: { color: "#fff", fontWeight: "800", fontSize: 15 },
   quote: { fontSize: 13, color: C.textMed, fontStyle: "italic", marginTop: 8, textAlign: "center" },
   change: { fontSize: 13, fontWeight: "700", color: C.primary, marginTop: 10 },
-});
+}));

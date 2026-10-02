@@ -12,6 +12,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import { C } from "../theme/flat";
+import { tc, themed, ts } from "../theme/dark";
 
 // ── Static photos mapped by service name keywords ─────────────────────────────
 const SVC_PHOTOS = {
@@ -159,7 +160,7 @@ const HomeScreen = ({ navigation }) => {
     <SafeAreaView style={S.root}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={tc(C.primary)} />}
         contentContainerStyle={S.scroll}
       >
 
@@ -171,7 +172,7 @@ const HomeScreen = ({ navigation }) => {
           </View>
           <View style={S.headerRight}>
             <TouchableOpacity style={S.iconCircle} onPress={() => navigation.navigate("Bookings")}>
-              <Bell size={19} color="#1A1A2E" strokeWidth={1.7} />
+              <Bell size={19} color={tc("#1A1A2E")} strokeWidth={1.7} />
             </TouchableOpacity>
             <TouchableOpacity style={S.avatarCircle} onPress={() => navigation.navigate("Profile")}>
               <Text style={S.avatarTxt}>{initials}</Text>
@@ -189,23 +190,23 @@ const HomeScreen = ({ navigation }) => {
           <View style={S.heroDark} />
           <View style={S.heroContent}>
             <View style={S.heroBadge}>
-              <CheckCircle size={11} color="#6EE7B7" strokeWidth={2.5} />
+              <CheckCircle size={11} color={tc("#6EE7B7")} strokeWidth={2.5} />
               <Text style={S.heroBadgeTxt}>Professional &amp; Vetted Staff</Text>
             </View>
             <Text style={S.heroTitle}>House Cleaning Services{"\n"}in Manchester.</Text>
             <Text style={S.heroSub}>Residential, commercial and specialist cleaning — booked in 60 seconds.</Text>
             <View style={{ flexDirection: "row", gap: 10 }}>
               <TouchableOpacity style={S.heroCta} onPress={goBook} activeOpacity={0.85}>
-                <CalendarDays size={14} color="#fff" strokeWidth={2} />
+                <CalendarDays size={14} color={tc("#fff")} strokeWidth={2} />
                 <Text style={S.heroCtaTxt}>Book Now</Text>
               </TouchableOpacity>
               {!userToken && (
                 <TouchableOpacity
-                  style={[S.heroCta, { backgroundColor: "rgba(255,255,255,0.15)", borderWidth: 1.5, borderColor: "rgba(255,255,255,0.4)" }]}
+                  style={[S.heroCta, ts({ backgroundColor: "rgba(255,255,255,0.15)", borderWidth: 1.5, borderColor: "rgba(255,255,255,0.4)" })]}
                   onPress={() => navigation.navigate("Quote")}
                   activeOpacity={0.85}
                 >
-                  <FileText size={14} color="#fff" strokeWidth={2} />
+                  <FileText size={14} color={tc("#fff")} strokeWidth={2} />
                   <Text style={S.heroCtaTxt}>Get a Quote</Text>
                 </TouchableOpacity>
               )}
@@ -229,17 +230,17 @@ const HomeScreen = ({ navigation }) => {
         {/* ── Search ─────────────────────────────────────────────── */}
         <View style={S.searchRow}>
           <View style={S.searchBox}>
-            <Search size={15} color="#9CA3AF" strokeWidth={2} />
+            <Search size={15} color={tc("#9CA3AF")} strokeWidth={2} />
             <TextInput
               style={S.searchInput}
               placeholder="Search For service..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={tc("#9CA3AF")}
               value={search}
               onChangeText={setSearch}
             />
           </View>
           <TouchableOpacity style={S.filterBtn}>
-            <SlidersHorizontal size={17} color="#374151" strokeWidth={1.8} />
+            <SlidersHorizontal size={17} color={tc("#374151")} strokeWidth={1.8} />
           </TouchableOpacity>
         </View>
 
@@ -297,7 +298,7 @@ const HomeScreen = ({ navigation }) => {
             </View>
             <Text style={S.promoTitle}>Smart Home{"\n"}Service</Text>
             <TouchableOpacity style={S.promoBtn} onPress={goBook}>
-              <CalendarDays size={12} color="#fff" />
+              <CalendarDays size={12} color={tc("#fff")} />
               <Text style={S.promoBtnTxt}>Book Now</Text>
             </TouchableOpacity>
           </View>
@@ -313,7 +314,7 @@ const HomeScreen = ({ navigation }) => {
         {nextSlot && (
           <View style={S.availRow}>
             <View style={S.availDot} />
-            <Clock size={13} color={C.primary} strokeWidth={2} />
+            <Clock size={13} color={tc(C.primary)} strokeWidth={2} />
             <Text style={S.availTxt}>Next available slot today: <Text style={S.availTime}>{nextSlot}</Text></Text>
           </View>
         )}
@@ -327,7 +328,7 @@ const HomeScreen = ({ navigation }) => {
         </View>
 
         {loading ? (
-          <ActivityIndicator size="small" color={C.primary} style={{ marginTop: 20 }} />
+          <ActivityIndicator size="small" color={tc(C.primary)} style={{ marginTop: 20 }} />
         ) : filtered.length === 0 ? (
           <Text style={S.emptyTxt}>
             {search ? "No services match your search." : "No services available."}
@@ -358,7 +359,7 @@ const HomeScreen = ({ navigation }) => {
                     <View style={S.svcTopRow}>
                       <Text style={S.svcName} numberOfLines={1}>{svc.name}</Text>
                       <View style={S.ratingPill}>
-                        <Star size={10} color="#F59E0B" fill="#F59E0B" strokeWidth={0} />
+                        <Star size={10} color={tc("#F59E0B")} fill="#F59E0B" strokeWidth={0} />
                         <Text style={S.ratingTxt}>4.9</Text>
                       </View>
                     </View>
@@ -369,7 +370,7 @@ const HomeScreen = ({ navigation }) => {
                       <Text style={S.svcPrice}>{price}</Text>
                       {nextSlot && (
                         <View style={S.slotTag}>
-                          <Clock size={9} color={C.primary} strokeWidth={2.5} />
+                          <Clock size={9} color={tc(C.primary)} strokeWidth={2.5} />
                           <Text style={S.slotTxt}>{nextSlot}</Text>
                         </View>
                       )}
@@ -382,7 +383,7 @@ const HomeScreen = ({ navigation }) => {
                         onPress={goBook}
                         activeOpacity={0.8}
                       >
-                        <Eye size={12} color="#374151" strokeWidth={2} />
+                        <Eye size={12} color={tc("#374151")} strokeWidth={2} />
                         <Text style={S.detailBtnTxt}>View Details</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -390,7 +391,7 @@ const HomeScreen = ({ navigation }) => {
                         onPress={goBook}
                         activeOpacity={0.85}
                       >
-                        <CalendarDays size={12} color="#fff" strokeWidth={2} />
+                        <CalendarDays size={12} color={tc("#fff")} strokeWidth={2} />
                         <Text style={S.bookBtnTxt}>Book Now</Text>
                       </TouchableOpacity>
                     </View>
@@ -409,7 +410,7 @@ const HomeScreen = ({ navigation }) => {
               <Text style={S.quoteBannerSub}>Get a free personalised quote — no account needed</Text>
             </View>
             <View style={S.quoteBannerBtn}>
-              <FileText size={16} color={C.primary} strokeWidth={2} />
+              <FileText size={16} color={tc(C.primary)} strokeWidth={2} />
             </View>
           </TouchableOpacity>
         )}
@@ -421,8 +422,8 @@ const HomeScreen = ({ navigation }) => {
 };
 
 // ── Styles ────────────────────────────────────────────────────────────────────
-const S = StyleSheet.create({
-  root:   { flex: 1, backgroundColor: "#F9FAFB" },
+const S = themed(StyleSheet.create({
+  root:   { flex: 1, backgroundColor: "#FFFFFF" },
   scroll: { paddingBottom: 20 },
 
   // Header
@@ -659,6 +660,6 @@ const S = StyleSheet.create({
   quoteBannerTitle: { fontSize: 14, fontWeight: "800", color: C.primaryDark },
   quoteBannerSub:   { fontSize: 12, color: C.primary, marginTop: 3, lineHeight: 17 },
   quoteBannerBtn:   { width: 40, height: 40, borderRadius: 12, backgroundColor: "#fff", alignItems: "center", justifyContent: "center", marginLeft: 12 },
-});
+}));
 
 export default HomeScreen;

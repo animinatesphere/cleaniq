@@ -49,6 +49,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
+import { tc, tcs, themed, ts } from "../theme/dark";
 
 const { width } = Dimensions.get("window");
 
@@ -183,7 +184,7 @@ const StepBar = ({ current }) => (
               active && styles.stepDotActive,
             ]}>
               {done
-                ? <Check size={12} color="#fff" strokeWidth={3} />
+                ? <Check size={12} color={tc("#fff")} strokeWidth={3} />
                 : <Text style={[styles.stepNum, active && styles.stepNumActive]}>{i + 1}</Text>
               }
             </View>
@@ -207,7 +208,7 @@ const OptionPill = ({ label, selected, onPress }) => (
     onPress={onPress}
     activeOpacity={0.8}
   >
-    {selected && <Check size={11} color={C.primary} strokeWidth={3} style={{ marginRight: 5 }} />}
+    {selected && <Check size={11} color={tc(C.primary)} strokeWidth={3} style={{ marginRight: 5 }} />}
     <Text style={[styles.optPillTxt, selected && styles.optPillTxtOn]}>{label}</Text>
   </TouchableOpacity>
 );
@@ -222,7 +223,7 @@ const RoomStepper = ({ label, value, onChange, min = 0, max = 10 }) => (
         onPress={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
       >
-        <Minus size={14} color={value <= min ? C.textMuted : C.primary} strokeWidth={2.5} />
+        <Minus size={14} color={tc(value <= min ? C.textMuted : C.primary)} strokeWidth={2.5} />
       </TouchableOpacity>
       <Text style={styles.roomVal}>{value}</Text>
       <TouchableOpacity
@@ -230,7 +231,7 @@ const RoomStepper = ({ label, value, onChange, min = 0, max = 10 }) => (
         onPress={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
       >
-        <Plus size={14} color={value >= max ? C.textMuted : C.primary} strokeWidth={2.5} />
+        <Plus size={14} color={tc(value >= max ? C.textMuted : C.primary)} strokeWidth={2.5} />
       </TouchableOpacity>
     </View>
   </View>
@@ -576,9 +577,9 @@ const BookingScreen = ({ navigation, route }) => {
   if (submitted) {
     return (
       <SafeAreaView style={styles.root}>
-        <LinearGradient colors={["#0F6B4C", "#083d2b"]} style={styles.successHeader}>
+        <LinearGradient colors={tcs(["#0F6B4C", "#083d2b"], "bg")} style={styles.successHeader}>
           <View style={styles.successCircle}>
-            <CheckCircle2 size={48} color="#fff" strokeWidth={1.6} />
+            <CheckCircle2 size={48} color={tc("#fff")} strokeWidth={1.6} />
           </View>
           <Text style={styles.successTitle}>Booking Received!</Text>
           <Text style={styles.successRef}>Reference: {bookingRef}</Text>
@@ -591,7 +592,7 @@ const BookingScreen = ({ navigation, route }) => {
           </Text>
           {!!checkoutUrl && (
             <TouchableOpacity onPress={() => Linking.openURL(checkoutUrl).catch(() => {})} style={styles.regularPayBtn}>
-              <CreditCard size={16} color="#0F6B4C" />
+              <CreditCard size={16} color={tc("#0F6B4C")} />
               <Text style={styles.regularPayTxt}>Pay first clean</Text>
             </TouchableOpacity>
           )}
@@ -600,8 +601,8 @@ const BookingScreen = ({ navigation, route }) => {
           <View style={[styles.successCard, cardShadow]}>
             <View style={styles.successCardHeader}>
               {selSvc && (
-                <View style={[styles.successSvcIcon, { backgroundColor: selSvc.bg }]}>
-                  <selSvc.Icon size={22} color={selSvc.color} strokeWidth={1.8} />
+                <View style={[styles.successSvcIcon, ts({ backgroundColor: selSvc.bg })]}>
+                  <selSvc.Icon size={22} color={tc(selSvc.color)} strokeWidth={1.8} />
                 </View>
               )}
               <View style={{ flex: 1, marginLeft: 14 }}>
@@ -611,15 +612,15 @@ const BookingScreen = ({ navigation, route }) => {
             </View>
             <View style={styles.successDivider} />
             <View style={styles.successDetail}>
-              <CalendarDays size={15} color={C.textMuted} />
+              <CalendarDays size={15} color={tc(C.textMuted)} />
               <Text style={styles.successDetailTxt}>{fmtDate(form.date)}</Text>
             </View>
             <View style={styles.successDetail}>
-              <Clock size={15} color={C.textMuted} />
+              <Clock size={15} color={tc(C.textMuted)} />
               <Text style={styles.successDetailTxt}>{form.timeSlot} — {form.duration} hrs</Text>
             </View>
             <View style={styles.successDetail}>
-              <MapPin size={15} color={C.textMuted} />
+              <MapPin size={15} color={tc(C.textMuted)} />
               <Text style={styles.successDetailTxt} numberOfLines={2}>{form.address}, {form.postcode}</Text>
             </View>
             <View style={styles.successDivider} />
@@ -667,13 +668,13 @@ const BookingScreen = ({ navigation, route }) => {
     <SafeAreaView style={styles.root}>
 
       {/* Header */}
-      <LinearGradient colors={["#0F6B4C", "#083d2b"]} style={styles.header}>
+      <LinearGradient colors={tcs(["#0F6B4C", "#083d2b"], "bg")} style={styles.header}>
         <View style={styles.headerRow}>
           <TouchableOpacity
             onPress={() => (step === 0 ? navigation.goBack() : prevStep())}
             style={styles.backBtn}
           >
-            <ChevronLeft size={20} color="#fff" />
+            <ChevronLeft size={20} color={tc("#fff")} />
           </TouchableOpacity>
           <View style={{ flex: 1, alignItems: "center" }}>
             <Text style={styles.headerTitle}>Book a Clean</Text>
@@ -709,21 +710,21 @@ const BookingScreen = ({ navigation, route }) => {
               return (
                 <TouchableOpacity
                   key={s.id}
-                  style={[styles.svcRow, sel && styles.svcRowOn, sel && { borderColor: s.color }]}
+                  style={[styles.svcRow, sel && styles.svcRowOn, sel && ts({ borderColor: s.color })]}
                   onPress={() => set("serviceType", s.id)}
                   activeOpacity={0.85}
                 >
-                  <View style={[styles.svcIconBox, { backgroundColor: s.bg }]}>
-                    <s.Icon size={22} color={s.color} strokeWidth={1.8} />
+                  <View style={[styles.svcIconBox, ts({ backgroundColor: s.bg })]}>
+                    <s.Icon size={22} color={tc(s.color)} strokeWidth={1.8} />
                   </View>
                   <View style={styles.svcMid}>
-                    <Text style={[styles.svcName, sel && { color: s.color }]}>{s.label}</Text>
+                    <Text style={[styles.svcName, sel && ts({ color: s.color })]}>{s.label}</Text>
                     <Text style={styles.svcSub}>{s.sub}</Text>
                   </View>
                   <View style={styles.svcRight}>
-                    <Text style={[styles.svcRate, sel && { color: s.color }]}>£{(rates[s.id] ?? s.rate).toFixed(2)}/hr</Text>
+                    <Text style={[styles.svcRate, sel && ts({ color: s.color })]}>£{(rates[s.id] ?? s.rate).toFixed(2)}/hr</Text>
                     {sel
-                      ? <View style={[styles.svcCheckBox, { backgroundColor: s.color }]}><Check size={11} color="#fff" strokeWidth={3} /></View>
+                      ? <View style={[styles.svcCheckBox, ts({ backgroundColor: s.color })]}><Check size={11} color={tc("#fff")} strokeWidth={3} /></View>
                       : <View style={styles.svcCheckEmpty} />
                     }
                   </View>
@@ -737,11 +738,11 @@ const BookingScreen = ({ navigation, route }) => {
             />
             <View style={[styles.inputCard, cardShadow]}>
               <View style={styles.inputRow}>
-                <MapPin size={16} color={C.primary} />
+                <MapPin size={16} color={tc(C.primary)} />
                 <TextInput
                   style={styles.inputField}
                   placeholder="Full address"
-                  placeholderTextColor={C.textMuted}
+                  placeholderTextColor={tc(C.textMuted)}
                   value={form.address}
                   onChangeText={(v) => set("address", v)}
                   autoCapitalize="words"
@@ -749,11 +750,11 @@ const BookingScreen = ({ navigation, route }) => {
               </View>
               <View style={styles.inputDivider} />
               <View style={styles.inputRow}>
-                <MapPin size={16} color={C.textMuted} />
+                <MapPin size={16} color={tc(C.textMuted)} />
                 <TextInput
                   style={styles.inputField}
                   placeholder="Postcode"
-                  placeholderTextColor={C.textMuted}
+                  placeholderTextColor={tc(C.textMuted)}
                   value={form.postcode}
                   onChangeText={(v) => set("postcode", v.toUpperCase())}
                   autoCapitalize="characters"
@@ -814,13 +815,13 @@ const BookingScreen = ({ navigation, route }) => {
                 onPress={() => set("duration", Math.max(2, form.duration - 1))}
                 disabled={form.duration <= 2}
               >
-                <Minus size={20} color={form.duration <= 2 ? C.textMuted : C.primary} strokeWidth={2.5} />
+                <Minus size={20} color={tc(form.duration <= 2 ? C.textMuted : C.primary)} strokeWidth={2.5} />
               </TouchableOpacity>
               <View style={styles.durationCenter}>
                 <Text style={styles.durationNum}>{form.duration}</Text>
                 <Text style={styles.durationUnit}>hours</Text>
                 <Text style={styles.durationEst}>
-                  Est. <Text style={{ color: C.primary, fontWeight: "800" }}>£{(baseRate * form.duration).toFixed(2)}</Text>
+                  Est. <Text style={ts({ color: C.primary, fontWeight: "800" })}>£{(baseRate * form.duration).toFixed(2)}</Text>
                 </Text>
               </View>
               <TouchableOpacity
@@ -828,7 +829,7 @@ const BookingScreen = ({ navigation, route }) => {
                 onPress={() => set("duration", Math.min(12, form.duration + 1))}
                 disabled={form.duration >= 12}
               >
-                <Plus size={20} color={form.duration >= 12 ? C.textMuted : C.primary} strokeWidth={2.5} />
+                <Plus size={20} color={tc(form.duration >= 12 ? C.textMuted : C.primary)} strokeWidth={2.5} />
               </TouchableOpacity>
             </View>
 
@@ -857,9 +858,9 @@ const BookingScreen = ({ navigation, route }) => {
                     onPress={() => set("hasPet", v === "Yes")}
                     activeOpacity={0.85}
                   >
-                    <PawPrint size={22} color={sel ? C.primary : C.textMuted} strokeWidth={1.8} />
-                    <Text style={[styles.petLabel, sel && { color: C.primary }]}>{v}</Text>
-                    {sel && <Check size={14} color={C.primary} strokeWidth={3} style={{ position: "absolute", top: 10, right: 10 }} />}
+                    <PawPrint size={22} color={tc(sel ? C.primary : C.textMuted)} strokeWidth={1.8} />
+                    <Text style={[styles.petLabel, sel && ts({ color: C.primary })]}>{v}</Text>
+                    {sel && <Check size={14} color={tc(C.primary)} strokeWidth={3} style={{ position: "absolute", top: 10, right: 10 }} />}
                   </TouchableOpacity>
                 );
               })}
@@ -895,14 +896,14 @@ const BookingScreen = ({ navigation, route }) => {
                   activeOpacity={0.85}
                 >
                   <View style={[styles.supplyIcon, sel && styles.supplyIconOn]}>
-                    <o.Icon size={20} color={sel ? C.primary : C.textMuted} />
+                    <o.Icon size={20} color={tc(sel ? C.primary : C.textMuted)} />
                   </View>
                   <View style={{ flex: 1, marginLeft: 14 }}>
-                    <Text style={[styles.supplyLabel, sel && { color: C.primary }]}>{o.label}</Text>
+                    <Text style={[styles.supplyLabel, sel && ts({ color: C.primary })]}>{o.label}</Text>
                     <Text style={styles.supplySub}>{o.sub}</Text>
                   </View>
                   <View style={[styles.supplyCheck, sel && styles.supplyCheckOn]}>
-                    {sel && <Check size={12} color={C.primary} strokeWidth={3} />}
+                    {sel && <Check size={12} color={tc(C.primary)} strokeWidth={3} />}
                   </View>
                 </TouchableOpacity>
               );
@@ -918,10 +919,10 @@ const BookingScreen = ({ navigation, route }) => {
                     {i > 0 && <View style={styles.extraDivider} />}
                     <View style={styles.extraRow}>
                       <View style={[styles.extraIconBox, on && styles.extraIconBoxOn]}>
-                        <ex.Icon size={16} color={on ? C.primary : C.textMuted} strokeWidth={1.8} />
+                        <ex.Icon size={16} color={tc(on ? C.primary : C.textMuted)} strokeWidth={1.8} />
                       </View>
                       <View style={styles.extraMid}>
-                        <Text style={[styles.extraName, on && { color: C.primary }]}>{ex.name}</Text>
+                        <Text style={[styles.extraName, on && ts({ color: C.primary })]}>{ex.name}</Text>
                         <Text style={styles.extraPrice}>+ £{ex.price.toFixed(2)}</Text>
                       </View>
                       <View style={styles.extraControls}>
@@ -934,14 +935,14 @@ const BookingScreen = ({ navigation, route }) => {
                           }}
                           disabled={!on}
                         >
-                          <Minus size={12} color={on ? C.primary : C.textMuted} strokeWidth={2.5} />
+                          <Minus size={12} color={tc(on ? C.primary : C.textMuted)} strokeWidth={2.5} />
                         </TouchableOpacity>
-                        <Text style={[styles.extraQty, on && { color: C.primary }]}>{qty}</Text>
+                        <Text style={[styles.extraQty, on && ts({ color: C.primary })]}>{qty}</Text>
                         <TouchableOpacity
                           style={styles.extraBtn}
                           onPress={() => set("extras", { ...form.extras, [ex.name]: qty + 1 })}
                         >
-                          <Plus size={12} color={C.primary} strokeWidth={2.5} />
+                          <Plus size={12} color={tc(C.primary)} strokeWidth={2.5} />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -962,14 +963,14 @@ const BookingScreen = ({ navigation, route }) => {
                   style={styles.calNavBtn}
                   onPress={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(calYear-1); } else setCalMonth(calMonth-1); }}
                 >
-                  <ChevronLeft size={18} color={C.textMed} />
+                  <ChevronLeft size={18} color={tc(C.textMed)} />
                 </TouchableOpacity>
                 <Text style={styles.calMonth}>{MONTH_NAMES[calMonth]} {calYear}</Text>
                 <TouchableOpacity
                   style={styles.calNavBtn}
                   onPress={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(calYear+1); } else setCalMonth(calMonth+1); }}
                 >
-                  <ChevronRight size={18} color={C.textMed} />
+                  <ChevronRight size={18} color={tc(C.textMed)} />
                 </TouchableOpacity>
               </View>
               <View style={styles.calDaysHeader}>
@@ -1057,7 +1058,7 @@ const BookingScreen = ({ navigation, route }) => {
             />
             {availLoading ? (
               <View style={styles.availLoader}>
-                <ActivityIndicator size="small" color={C.primary} />
+                <ActivityIndicator size="small" color={tc(C.primary)} />
                 <Text style={styles.availLoaderTxt}>Checking availability for this date...</Text>
               </View>
             ) : (
@@ -1066,9 +1067,9 @@ const BookingScreen = ({ navigation, route }) => {
                 if (visible.length === 0) {
                   return (
                     <View style={{ alignItems: "center", paddingVertical: 20, gap: 6 }}>
-                      <Clock size={28} color={C.textMuted} strokeWidth={1.5} />
-                      <Text style={{ fontSize: 13, fontWeight: "700", color: C.textMuted }}>No times available today</Text>
-                      <Text style={{ fontSize: 12, color: C.textLight, textAlign: "center" }}>All time slots for today have passed. Please choose a different date.</Text>
+                      <Clock size={28} color={tc(C.textMuted)} strokeWidth={1.5} />
+                      <Text style={ts({ fontSize: 13, fontWeight: "700", color: C.textMuted })}>No times available today</Text>
+                      <Text style={ts({ fontSize: 12, color: C.textLight, textAlign: "center" })}>All time slots for today have passed. Please choose a different date.</Text>
                     </View>
                   );
                 }
@@ -1089,7 +1090,7 @@ const BookingScreen = ({ navigation, route }) => {
                           disabled={booked}
                           activeOpacity={0.8}
                         >
-                          <Clock size={12} color={booked ? "#C0CACC" : sel ? "#fff" : C.textMuted} style={{ marginRight: 5 }} />
+                          <Clock size={12} color={tc(booked ? "#C0CACC" : sel ? "#fff" : C.textMuted)} style={{ marginRight: 5 }} />
                           <Text style={[styles.timeChipTxt, sel && styles.timeChipTxtOn, booked && styles.timeChipTxtBooked]}>
                             {t}
                           </Text>
@@ -1106,7 +1107,7 @@ const BookingScreen = ({ navigation, route }) => {
             <TextInput
               style={styles.textarea}
               placeholder="e.g. Focus on kitchen, skip spare room..."
-              placeholderTextColor={C.textMuted}
+              placeholderTextColor={tc(C.textMuted)}
               value={form.specialInstructions}
               onChangeText={(v) => set("specialInstructions", v)}
               multiline
@@ -1164,7 +1165,7 @@ const BookingScreen = ({ navigation, route }) => {
                       value={couponCode}
                       onChangeText={t => { setCouponCode(t.toUpperCase()); setCouponError(""); }}
                       placeholder="Enter code"
-                      placeholderTextColor={C.textMuted}
+                      placeholderTextColor={tc(C.textMuted)}
                       autoCapitalize="characters"
                     />
                     <TouchableOpacity
@@ -1173,7 +1174,7 @@ const BookingScreen = ({ navigation, route }) => {
                       disabled={!couponCode.trim() || couponLoading}
                     >
                       {couponLoading
-                        ? <ActivityIndicator size="small" color="#fff" />
+                        ? <ActivityIndicator size="small" color={tc("#fff")} />
                         : <Text style={styles.couponBtnTxt}>Apply</Text>
                       }
                     </TouchableOpacity>
@@ -1199,7 +1200,7 @@ const BookingScreen = ({ navigation, route }) => {
                   </Text>
                   <TouchableOpacity style={styles.consentRow} onPress={() => setRegularConsent((v) => !v)} activeOpacity={0.8}>
                     <View style={[styles.consentBox, regularConsent && styles.consentBoxOn]}>
-                      {regularConsent && <CheckCircle2 size={14} color="#fff" />}
+                      {regularConsent && <CheckCircle2 size={14} color={tc("#fff")} />}
                     </View>
                     <Text style={styles.consentTxt}>
                       I agree that Cleaniq Services can save my card and charge £{visitPrice.toFixed(2)} for each following clean
@@ -1216,7 +1217,7 @@ const BookingScreen = ({ navigation, route }) => {
                 <Text style={styles.summaryTotalLbl}>Total due</Text>
                 <View>
                   {couponApplied && (
-                    <Text style={{ fontSize: 11, fontWeight: "700", color: C.primary, textAlign: "right" }}>
+                    <Text style={ts({ fontSize: 11, fontWeight: "700", color: C.primary, textAlign: "right" })}>
                       {couponApplied.discountPercent}% discount applied
                     </Text>
                   )}
@@ -1224,7 +1225,7 @@ const BookingScreen = ({ navigation, route }) => {
                 </View>
               </View>
               <View style={styles.summaryNote}>
-                <CreditCard size={13} color={C.textMuted} />
+                <CreditCard size={13} color={tc(C.textMuted)} />
                 <Text style={styles.summaryNoteTxt}>
                   {isRegular
                     ? "You'll pay for your first clean on a secure Stripe page after tapping the button."
@@ -1242,7 +1243,7 @@ const BookingScreen = ({ navigation, route }) => {
       <View style={styles.footer}>
         {step > 0 && (
           <TouchableOpacity style={styles.footerBack} onPress={prevStep} activeOpacity={0.8}>
-            <ChevronLeft size={18} color={C.primary} />
+            <ChevronLeft size={18} color={tc(C.primary)} />
             <Text style={styles.footerBackTxt}>Back</Text>
           </TouchableOpacity>
         )}
@@ -1253,13 +1254,13 @@ const BookingScreen = ({ navigation, route }) => {
           activeOpacity={0.88}
         >
           <LinearGradient
-            colors={step === 3 && isRegular && !regularConsent ? ["#94A3B8", "#94A3B8"] : ["#0F6B4C", "#0a5233"]}
+            colors={tcs(step === 3 && isRegular && !regularConsent ? ["#94A3B8", "#94A3B8"] : ["#0F6B4C", "#0a5233"], "bg")}
             style={styles.footerNextGrad}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
             {submitting ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={tc("#fff")} />
             ) : (
               <>
                 <Text style={styles.footerNextTxt}>
@@ -1269,7 +1270,7 @@ const BookingScreen = ({ navigation, route }) => {
                       : `Confirm Booking  £${total.toFixed(2)}`
                     : "Continue"}
                 </Text>
-                <ChevronRight size={18} color="#fff" />
+                <ChevronRight size={18} color={tc("#fff")} />
               </>
             )}
           </LinearGradient>
@@ -1282,7 +1283,7 @@ const BookingScreen = ({ navigation, route }) => {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const CELL_W = (width - 76) / 7;
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
 
   // Header
@@ -1666,6 +1667,6 @@ const styles = StyleSheet.create({
   consentHint:      { fontSize: 11, fontWeight: "700", color: "#94A3B8", textAlign: "center", marginTop: 10 },
   freqPrice:        { fontSize: 10, fontWeight: "700", color: "#94A3B8", marginTop: 3 },
   freqPriceOn:      { color: "#ffffffE6" },
-});
+}));
 
 export default BookingScreen;

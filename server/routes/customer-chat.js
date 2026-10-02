@@ -8,24 +8,24 @@ const { verifyCustomer } = require("./customer-auth");
 const adminAuth = require("../middleware/adminAuth");
 const { sendCustomerPush } = require("../utils/pushNotifications");
 
-// Helper: verify customer owns the booking
-const verifyOwnership = async (bookingId, customerEmail) => {
+// Helper: verify the customer owns the booking. A company account also owns the bookings made
+// for its jobs, even when the booking is under the site contact's email.
+const verifyOwnership = async (bookingId, customerEmail, customer = null) => {
   const booking = await Booking.findOne({ bookingId });
   if (!booking) return null;
-  if (
-    (booking.customer.email || "").toLowerCase() !== customerEmail.toLowerCase()
-  )
-    return null;
-  return booking;
+  if ((booking.customer?.email || "").toLowerCase() === String(customerEmail || "").toLowerCase()) return booking;
+  if (customer?.role === "company" && booking.meta?.jobId) {
+    const Job = require("../models/Job");
+    const job = await Job.findById(booking.meta.jobId).select("company.id").lean().catch(() => null);
+    if (job && String(job.company?.id) === String(customer.id)) return booking;
+  }
+  return null;
 };
 
 // GET /api/customer-chat/:bookingId  — fetch thread for a booking
 router.get("/:bookingId", verifyCustomer, async (req, res) => {
   try {
-    const booking = await verifyOwnership(
-      req.params.bookingId,
-      req.customer.email,
-    );
+    const booking = await verifyOwnership(req.params.bookingId, req.customer.email, req.customer);
     if (!booking) return res.status(403).json({ message: "Access denied." });
 
     const messages = await CustomerMessage.find({
@@ -46,10 +46,7 @@ router.post("/:bookingId", verifyCustomer, async (req, res) => {
     if (!text || !text.trim())
       return res.status(400).json({ message: "Message text is required." });
 
-    const booking = await verifyOwnership(
-      req.params.bookingId,
-      req.customer.email,
-    );
+    const booking = await verifyOwnership(req.params.bookingId, req.customer.email, req.customer);
     if (!booking) return res.status(403).json({ message: "Access denied." });
 
     const msg = new CustomerMessage({
@@ -211,8 +208,14 @@ router.get("/my/conversations", verifyCustomer, async (req, res) => {
     const email = String(req.customer.email || "").trim();
     if (!email) return res.json([]);
     const emailRe = new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+    // A company also sees the bookings for its jobs (some are under the site contact's email).
+    let companyJobIds = [];
+    if (req.customer.role === "company" && req.customer.id) {
+      const Job = require("../models/Job");
+      companyJobIds = (await Job.find({ "company.id": req.customer.id }).select("_id").lean()).map((j) => j._id);
+    }
     const bookings = await Booking.find({
-      "customer.email": emailRe,
+      $or: [{ "customer.email": emailRe }, ...(companyJobIds.length ? [{ "meta.jobId": { $in: companyJobIds } }] : [])],
       assignedWorker: { $ne: null },
       status: { $nin: ["Pending", "Awaiting Payment", "Rejected"] },
     })
@@ -273,10 +276,7 @@ router.get("/my/conversations", verifyCustomer, async (req, res) => {
 // GET /api/customer-chat/worker-messages/:bookingId - customer views messages from worker
 router.get("/worker-messages/:bookingId", verifyCustomer, async (req, res) => {
   try {
-    const booking = await verifyOwnership(
-      req.params.bookingId,
-      req.customer.email,
-    );
+    const booking = await verifyOwnership(req.params.bookingId, req.customer.email, req.customer);
     if (!booking) return res.status(403).json({ message: "Access denied." });
 
     const messages = await WorkerCustomerMessage.find({
@@ -304,10 +304,7 @@ router.post("/worker-messages/:bookingId", verifyCustomer, async (req, res) => {
     if (!text || !text.trim())
       return res.status(400).json({ message: "Message text is required." });
 
-    const booking = await verifyOwnership(
-      req.params.bookingId,
-      req.customer.email,
-    );
+    const booking = await verifyOwnership(req.params.bookingId, req.customer.email, req.customer);
     if (!booking) return res.status(403).json({ message: "Access denied." });
 
     const message = new WorkerCustomerMessage({

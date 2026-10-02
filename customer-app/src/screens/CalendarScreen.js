@@ -7,6 +7,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock, Briefcase } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
+import { tc, themed, ts } from "../theme/dark";
 
 const { width: SW } = Dimensions.get("window");
 const CELL = Math.floor((SW - 40) / 7);
@@ -16,7 +17,7 @@ const G = {
   primary:      "#0F6B4C",
   primaryMid:   "#14A66B",
   primaryLight: "#E4F7EE",
-  bg:           "#F0F5F2",
+  bg:           "#FFFFFF",
   surface:      "#FFFFFF",
   surfaceAlt:   "#F5FAF7",
   dark:         "#0F172A",
@@ -118,7 +119,7 @@ export default function CalendarScreen({ navigation }) {
 
   if (loading) return (
     <SafeAreaView style={s.safe}>
-      <View style={s.center}><ActivityIndicator size="large" color={G.primary} /></View>
+      <View style={s.center}><ActivityIndicator size="large" color={tc(G.primary)} /></View>
     </SafeAreaView>
   );
 
@@ -132,7 +133,7 @@ export default function CalendarScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="always"
         refreshControl={
-          <RefreshControl refreshing={refreshing} tintColor={G.primary}
+          <RefreshControl refreshing={refreshing} tintColor={tc(G.primary)}
             onRefresh={() => { setRefreshing(true); fetchItems(); }} />
         }
         contentContainerStyle={s.scroll}
@@ -140,7 +141,7 @@ export default function CalendarScreen({ navigation }) {
 
         {/* ── Page title ──────────────────────────────────────────── */}
         <View style={s.pageHead}>
-          <Calendar size={20} color={G.primary} />
+          <Calendar size={20} color={tc(G.primary)} />
           <Text style={s.pageTitle}>My Calendar</Text>
         </View>
 
@@ -149,13 +150,13 @@ export default function CalendarScreen({ navigation }) {
           {/* Month nav */}
           <View style={s.nav}>
             <TouchableOpacity onPress={prevMonth} style={s.navBtn}>
-              <ChevronLeft size={18} color={G.dark} />
+              <ChevronLeft size={18} color={tc(G.dark)} />
             </TouchableOpacity>
             <Text style={s.monthTxt}>
               {month.toLocaleString("default",{ month:"long", year:"numeric" })}
             </Text>
             <TouchableOpacity onPress={nextMonth} style={s.navBtn}>
-              <ChevronRight size={18} color={G.dark} />
+              <ChevronRight size={18} color={tc(G.dark)} />
             </TouchableOpacity>
           </View>
 
@@ -205,7 +206,7 @@ export default function CalendarScreen({ navigation }) {
                       {dots.map((col, di) => (
                         <View
                           key={di}
-                          style={[s.dot, { backgroundColor: isSel ? "#fff" : col }]}
+                          style={[s.dot, ts({ backgroundColor: isSel ? "#fff" : col })]}
                         />
                       ))}
                     </View>
@@ -230,7 +231,7 @@ export default function CalendarScreen({ navigation }) {
 
           {selectedItems.length === 0 ? (
             <View style={s.noEvents}>
-              <Calendar size={28} color={G.muted} strokeWidth={1.5} />
+              <Calendar size={28} color={tc(G.muted)} strokeWidth={1.5} />
               <Text style={s.noEventsH}>Nothing scheduled</Text>
               <Text style={s.noEventsT}>No {isCompany ? "jobs" : "bookings"} on this date</Text>
             </View>
@@ -257,7 +258,7 @@ export default function CalendarScreen({ navigation }) {
         {/* ── Summary strip ────────────────────────────────────────── */}
         {items.length > 0 && (
           <View style={s.summaryStrip}>
-            <SumItem label={`Total ${isCompany ? "Jobs" : "Bookings"}`} value={items.length} color={G.primary} />
+            <SumItem label={`Total ${isCompany ? "Jobs" : "Bookings"}`} value={items.length} color={tc(G.primary)} />
             <View style={s.sumDivider} />
             <SumItem
               label="This Month"
@@ -265,7 +266,7 @@ export default function CalendarScreen({ navigation }) {
                 const d = new Date(isCompany ? it.schedule?.date : (it.schedule?.date || it.date));
                 return d.getFullYear() === y && d.getMonth() === m;
               }).length}
-              color={G.info}
+              color={tc(G.info)}
             />
             <View style={s.sumDivider} />
             <SumItem
@@ -274,7 +275,7 @@ export default function CalendarScreen({ navigation }) {
                 const d = new Date(isCompany ? it.schedule?.date : (it.schedule?.date || it.date));
                 return d >= today && !["cancelled","rejected","Cancelled"].includes(it.status);
               }).length}
-              color={G.success}
+              color={tc(G.success)}
             />
           </View>
         )}
@@ -299,25 +300,25 @@ function EventCard({ item, isCompany, onPress }) {
 
   return (
     <TouchableOpacity style={s.eventCard} onPress={onPress} activeOpacity={0.8}>
-      <View style={[s.eventBar, { backgroundColor: m.color }]} />
+      <View style={[s.eventBar, ts({ backgroundColor: m.color })]} />
       <View style={s.eventBody}>
         <View style={s.eventTop}>
           <Text style={s.eventService} numberOfLines={1}>{service}</Text>
-          <View style={[s.eventBadge, { backgroundColor: m.bg }]}>
-            <Text style={[s.eventBadgeTxt, { color: m.color }]}>{m.label}</Text>
+          <View style={[s.eventBadge, ts({ backgroundColor: m.bg })]}>
+            <Text style={[s.eventBadgeTxt, ts({ color: m.color })]}>{m.label}</Text>
           </View>
         </View>
         <Text style={s.eventRef}>{ref}</Text>
         <View style={s.eventMeta}>
           {address !== "—" && (
             <View style={s.eventRow}>
-              <MapPin size={11} color={G.muted} />
+              <MapPin size={11} color={tc(G.muted)} />
               <Text style={s.eventRowTxt} numberOfLines={1}>{address}</Text>
             </View>
           )}
           {(slot || dur) && (
             <View style={s.eventRow}>
-              <Clock size={11} color={G.muted} />
+              <Clock size={11} color={tc(G.muted)} />
               <Text style={s.eventRowTxt}>
                 {slot ? `${slot}` : ""}
                 {slot && dur ? " · " : ""}
@@ -335,7 +336,7 @@ function EventCard({ item, isCompany, onPress }) {
           </View>
         )}
       </View>
-      <ChevronRight size={14} color={G.muted} style={{ flexShrink:0, marginRight:4 }} />
+      <ChevronRight size={14} color={tc(G.muted)} style={{ flexShrink:0, marginRight:4 }} />
     </TouchableOpacity>
   );
 }
@@ -345,35 +346,35 @@ const LegendItem = ({ color, label, filled, ring, dot }) => (
   <View style={lg.row}>
     <View style={[
       lg.swatch,
-      filled && { backgroundColor: color },
-      ring   && { borderWidth:2, borderColor:color, backgroundColor:"transparent" },
+      filled && ts({ backgroundColor: color }),
+      ring   && ts({ borderWidth:2, borderColor:color, backgroundColor:"transparent" }),
       dot    && { position:"relative" },
     ]}>
-      {dot && <View style={[lg.innerDot, { backgroundColor: color }]} />}
+      {dot && <View style={[lg.innerDot, ts({ backgroundColor: color })]} />}
     </View>
     <Text style={lg.label}>{label}</Text>
   </View>
 );
-const lg = StyleSheet.create({
+const lg = themed(StyleSheet.create({
   row:      { flexDirection:"row", alignItems:"center", gap:5 },
   swatch:   { width:14, height:14, borderRadius:7, backgroundColor:G.border },
   innerDot: { width:6, height:6, borderRadius:3, position:"absolute", top:4, left:4 },
   label:    { fontSize:10, color:G.muted, fontWeight:"600" },
-});
+}));
 
 const SumItem = ({ label, value, color }) => (
   <View style={{ alignItems:"center", flex:1 }}>
-    <Text style={[sm.val, { color }]}>{value}</Text>
+    <Text style={[sm.val, ts({ color })]}>{value}</Text>
     <Text style={sm.label}>{label}</Text>
   </View>
 );
-const sm = StyleSheet.create({
+const sm = themed(StyleSheet.create({
   val:   { fontSize:22, fontWeight:"900" },
   label: { fontSize:10, color:G.muted, fontWeight:"600", marginTop:2 },
-});
+}));
 
 /* ── Styles ──────────────────────────────────────────────────────────────── */
-const s = StyleSheet.create({
+const s = themed(StyleSheet.create({
   safe:    { flex:1, backgroundColor:G.bg },
   center:  { flex:1, alignItems:"center", justifyContent:"center" },
   scroll:  { paddingHorizontal:16, paddingTop:16 },
@@ -440,4 +441,4 @@ const s = StyleSheet.create({
   /* Summary strip */
   summaryStrip:{ flexDirection:"row", backgroundColor:G.surface, borderRadius:18, padding:18, marginBottom:8, ...sh },
   sumDivider:  { width:1, backgroundColor:G.border, marginHorizontal:4 },
-});
+}));

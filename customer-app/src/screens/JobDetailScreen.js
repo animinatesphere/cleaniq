@@ -12,6 +12,7 @@ import {
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../context/AuthContext";
+import { tc, themed, ts } from "../theme/dark";
 
 const { width: SW } = Dimensions.get("window");
 
@@ -128,15 +129,15 @@ const ProgressStep = ({ label, sub, done, active, isLast, time }) => (
     <View style={ps.track}>
       <View style={[ps.dot, done && ps.dotDone, active && ps.dotActive]}>
         {done
-          ? <CheckCircle2 size={14} color="#fff" />
-          : <View style={[ps.inner, active && { backgroundColor: G.primary }]} />
+          ? <CheckCircle2 size={14} color={tc("#fff")} />
+          : <View style={[ps.inner, active && ts({ backgroundColor: G.primary })]} />
         }
       </View>
-      {!isLast && <View style={[ps.line, done && { backgroundColor: G.primaryMid }]} />}
+      {!isLast && <View style={[ps.line, done && ts({ backgroundColor: G.primaryMid })]} />}
     </View>
     {/* Content */}
     <View style={[ps.content, isLast && { paddingBottom: 0 }]}>
-      <Text style={[ps.label, done && { color: G.dark }, active && { color: G.primary }]}>{label}</Text>
+      <Text style={[ps.label, done && ts({ color: G.dark }), active && ts({ color: G.primary })]}>{label}</Text>
       <Text style={ps.sub}>{time ? `${sub} · ${time}` : sub}</Text>
       {active && !done && (
         <View style={ps.activePill}>
@@ -148,7 +149,7 @@ const ProgressStep = ({ label, sub, done, active, isLast, time }) => (
   </View>
 );
 
-const ps = StyleSheet.create({
+const ps = themed(StyleSheet.create({
   row:       { flexDirection:"row", gap:12 },
   track:     { alignItems:"center", width:28 },
   dot:       { width:28, height:28, borderRadius:14, borderWidth:2, borderColor:G.border, backgroundColor:G.surface, alignItems:"center", justifyContent:"center", zIndex:1 },
@@ -162,7 +163,7 @@ const ps = StyleSheet.create({
   activePill:{ flexDirection:"row", alignItems:"center", gap:5, marginTop:6, backgroundColor:G.primaryLight, borderRadius:8, paddingHorizontal:9, paddingVertical:5, alignSelf:"flex-start", borderWidth:1, borderColor:G.primary+"30" },
   activeDot: { width:6, height:6, borderRadius:3, backgroundColor:G.primary },
   activeTxt: { fontSize:11, fontWeight:"700", color:G.primary },
-});
+}));
 
 /* ─── Room tile ─────────────────────────────────────────────────────────────── */
 const RoomTile = ({ label, count }) => (
@@ -171,11 +172,11 @@ const RoomTile = ({ label, count }) => (
     <Text style={rt.label} numberOfLines={2}>{label}</Text>
   </View>
 );
-const rt = StyleSheet.create({
+const rt = themed(StyleSheet.create({
   tile:  { width:(SW-68)/4, backgroundColor:G.indigoBg, borderRadius:12, paddingVertical:12, paddingHorizontal:6, alignItems:"center", borderWidth:1.5, borderColor:G.indigo+"30" },
   count: { fontSize:16, fontWeight:"900", color:G.indigo },
   label: { fontSize:10, fontWeight:"700", color:G.med, textAlign:"center", marginTop:3, lineHeight:13 },
-});
+}));
 
 /* ══ Main screen ═══════════════════════════════════════════════════════════════ */
 export default function JobDetailScreen({ navigation, route }) {
@@ -230,7 +231,7 @@ export default function JobDetailScreen({ navigation, route }) {
 
   if (loading) return (
     <SafeAreaView style={s.safe}>
-      <View style={s.center}><ActivityIndicator size="large" color={G.primary} /></View>
+      <View style={s.center}><ActivityIndicator size="large" color={tc(G.primary)} /></View>
     </SafeAreaView>
   );
 
@@ -238,11 +239,11 @@ export default function JobDetailScreen({ navigation, route }) {
     <SafeAreaView style={s.safe}>
       <View style={s.topBar}>
         <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-          <ChevronLeft size={20} color={G.dark} />
+          <ChevronLeft size={20} color={tc(G.dark)} />
         </TouchableOpacity>
       </View>
       <View style={s.center}>
-        <AlertCircle size={44} color={G.error} strokeWidth={1.5} />
+        <AlertCircle size={44} color={tc(G.error)} strokeWidth={1.5} />
         <Text style={s.errH}>{error || "Job not found"}</Text>
         <Text style={s.errT}>Try going back and refreshing the list.</Text>
       </View>
@@ -263,7 +264,7 @@ export default function JobDetailScreen({ navigation, route }) {
       {/* Top bar */}
       <View style={s.topBar}>
         <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
-          <ChevronLeft size={20} color={G.dark} />
+          <ChevronLeft size={20} color={tc(G.dark)} />
         </TouchableOpacity>
         <View style={{ flex:1, alignItems:"center" }}>
           <Text style={s.topTitle}>Job Details</Text>
@@ -275,15 +276,15 @@ export default function JobDetailScreen({ navigation, route }) {
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
 
         {/* ── Status hero ─────────────────────────────────────────── */}
-        <View style={[s.hero, { backgroundColor: sm.bg, borderColor: sm.color+"30" }]}>
-          <View style={[s.heroDot, { backgroundColor: sm.color }]} />
+        <View style={[s.hero, ts({ backgroundColor: sm.bg, borderColor: sm.color+"30" })]}>
+          <View style={[s.heroDot, ts({ backgroundColor: sm.color })]} />
           <View style={{ flex:1 }}>
-            <Text style={[s.heroStatus, { color: sm.color }]}>{sm.label}</Text>
-            <Text style={[s.heroDesc, { color: sm.color }]} numberOfLines={2}>{sm.desc}</Text>
+            <Text style={[s.heroStatus, ts({ color: sm.color })]}>{sm.label}</Text>
+            <Text style={[s.heroDesc, ts({ color: sm.color })]} numberOfLines={2}>{sm.desc}</Text>
           </View>
           {job.rejectedReason && (
             <View style={s.heroReason}>
-              <AlertCircle size={14} color={G.error} />
+              <AlertCircle size={14} color={tc(G.error)} />
               <Text style={s.heroReasonTxt}>{job.rejectedReason}</Text>
             </View>
           )}
@@ -293,7 +294,7 @@ export default function JobDetailScreen({ navigation, route }) {
         <View style={s.card}>
           <View style={s.jobHead}>
             <View style={s.jobIconWrap}>
-              <Briefcase size={22} color={G.primary} strokeWidth={1.8} />
+              <Briefcase size={22} color={tc(G.primary)} strokeWidth={1.8} />
             </View>
             <View style={{ flex:1 }}>
               <Text style={s.jobService} numberOfLines={2}>{job.service}</Text>
@@ -351,20 +352,20 @@ export default function JobDetailScreen({ navigation, route }) {
                   </View>
                 )}
                 {job.status === "assigned" && (
-                  <View style={[s.liveTag, { backgroundColor:"#EFF6FF", borderColor:"#BFDBFE" }]}>
-                    <View style={[s.liveDot, { backgroundColor:G.info }]} />
-                    <Text style={[s.liveTxt, { color:G.info }]}>Heading to your property</Text>
+                  <View style={[s.liveTag, ts({ backgroundColor:"#EFF6FF", borderColor:"#BFDBFE" })]}>
+                    <View style={[s.liveDot, ts({ backgroundColor:G.info })]} />
+                    <Text style={[s.liveTxt, ts({ color:G.info })]}>Heading to your property</Text>
                   </View>
                 )}
               </View>
-              <CheckCircle2 size={22} color={G.primary} />
+              <CheckCircle2 size={22} color={tc(G.primary)} />
             </View>
 
             {/* Worker location / property address */}
             {(job.property?.address || job.property?.postcode) && (
               <View style={s.locationCard}>
                 <View style={s.locationHeader}>
-                  <MapPin size={15} color={G.primary} />
+                  <MapPin size={15} color={tc(G.primary)} />
                   <Text style={s.locationTitle}>
                     {job.status === "in_progress"
                       ? "Cleaner is currently at"
@@ -391,7 +392,7 @@ export default function JobDetailScreen({ navigation, route }) {
                 {/* Arrival/start times */}
                 {job.jobArrivedTime && (
                   <View style={s.locationTime}>
-                    <CheckCircle2 size={13} color={G.success} />
+                    <CheckCircle2 size={13} color={tc(G.success)} />
                     <Text style={s.locationTimeTxt}>
                       Arrived {new Date(job.jobArrivedTime).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}
                     </Text>
@@ -399,7 +400,7 @@ export default function JobDetailScreen({ navigation, route }) {
                 )}
                 {job.jobStartTime && (
                   <View style={s.locationTime}>
-                    <CheckCircle2 size={13} color={G.primary} />
+                    <CheckCircle2 size={13} color={tc(G.primary)} />
                     <Text style={s.locationTimeTxt}>
                       Started cleaning {new Date(job.jobStartTime).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}
                     </Text>
@@ -412,20 +413,20 @@ export default function JobDetailScreen({ navigation, route }) {
 
         {/* ── Contact at Property ─────────────────────────────────── */}
         {hasContact && (
-          <View style={[s.card, { borderWidth:1.5, borderColor:G.orange+"40" }]}>
+          <View style={[s.card, ts({ borderWidth:1.5, borderColor:G.orange+"40" })]}>
             <View style={s.contactHead}>
-              <View style={[s.iconWrap, { backgroundColor: G.orangeBg }]}>
-                <UserCheck size={17} color={G.orange} />
+              <View style={[s.iconWrap, ts({ backgroundColor: G.orangeBg })]}>
+                <UserCheck size={17} color={tc(G.orange)} />
               </View>
               <View style={{ flex:1 }}>
                 <Text style={s.secTitle}>Contact at Property</Text>
-                <Text style={[s.hint, { color:G.orange }]}>This is who the cleaner will ask for on arrival</Text>
+                <Text style={[s.hint, ts({ color:G.orange })]}>This is who the cleaner will ask for on arrival</Text>
               </View>
             </View>
             <View style={s.contactGrid}>
               {job.contact?.name && (
                 <View style={s.contactItem}>
-                  <User size={14} color={G.muted} />
+                  <User size={14} color={tc(G.muted)} />
                   <View>
                     <Text style={s.contactLbl}>Name</Text>
                     <Text style={s.contactVal}>{job.contact.name}</Text>
@@ -434,17 +435,17 @@ export default function JobDetailScreen({ navigation, route }) {
               )}
               {job.contact?.phone && (
                 <View style={s.contactItem}>
-                  <Phone size={14} color={G.muted} />
+                  <Phone size={14} color={tc(G.muted)} />
                   <View>
                     <Text style={s.contactLbl}>Phone</Text>
-                    <Text style={[s.contactVal, { color:G.primary }]}>{job.contact.phone}</Text>
+                    <Text style={[s.contactVal, ts({ color:G.primary })]}>{job.contact.phone}</Text>
                   </View>
                 </View>
               )}
               {job.contact?.email && (
                 <View style={s.contactItem}>
                   <Text style={s.contactLbl}>Email</Text>
-                  <Text style={[s.contactVal, { color:G.info }]}>{job.contact.email}</Text>
+                  <Text style={[s.contactVal, ts({ color:G.info })]}>{job.contact.email}</Text>
                 </View>
               )}
             </View>
@@ -455,19 +456,19 @@ export default function JobDetailScreen({ navigation, route }) {
         <View style={s.card}>
           <Text style={s.secTitle}>Location & Schedule</Text>
 
-          <IconRow icon={<MapPin size={16} color={G.primary} />} label="Address">
+          <IconRow icon={<MapPin size={16} color={tc(G.primary)} />} label="Address">
             <Text style={s.rowVal}>{[job.property?.address, job.property?.postcode].filter(Boolean).join(", ")}</Text>
             {job.region && <Text style={s.rowSub}>{job.region}</Text>}
           </IconRow>
 
           {job.schedule?.date && (
-            <IconRow icon={<Calendar size={16} color={G.primary} />} label="Scheduled Date">
+            <IconRow icon={<Calendar size={16} color={tc(G.primary)} />} label="Scheduled Date">
               <Text style={s.rowVal}>{fmtDate(job.schedule.date)}</Text>
             </IconRow>
           )}
 
           {(job.schedule?.timeSlot || job.schedule?.preferredTime) && (
-            <IconRow icon={<Clock size={16} color={G.primary} />} label="Time Slot">
+            <IconRow icon={<Clock size={16} color={tc(G.primary)} />} label="Time Slot">
               <Text style={s.rowVal}>{slotLabel(job.schedule?.timeSlot)}</Text>
               {job.schedule?.preferredTime && (
                 <Text style={s.rowSub}>Preferred: {job.schedule.preferredTime}</Text>
@@ -476,7 +477,7 @@ export default function JobDetailScreen({ navigation, route }) {
           )}
 
           {job.details?.duration && (
-            <IconRow icon={<Zap size={16} color={G.primary} />} label="Duration" last>
+            <IconRow icon={<Zap size={16} color={tc(G.primary)} />} label="Duration" last>
               <Text style={s.rowVal}>{job.details.duration} hour{job.details.duration !== 1 ? "s" : ""}</Text>
             </IconRow>
           )}
@@ -486,8 +487,8 @@ export default function JobDetailScreen({ navigation, route }) {
         {rooms.length > 0 && (
           <View style={s.card}>
             <View style={s.contactHead}>
-              <View style={[s.iconWrap, { backgroundColor:G.indigoBg }]}>
-                <Home size={17} color={G.indigo} />
+              <View style={[s.iconWrap, ts({ backgroundColor:G.indigoBg })]}>
+                <Home size={17} color={tc(G.indigo)} />
               </View>
               <Text style={s.secTitle}>Property Rooms</Text>
             </View>
@@ -500,7 +501,7 @@ export default function JobDetailScreen({ navigation, route }) {
               <View style={s.petRow}>
                 <Text style={s.petEmoji}>🐾</Text>
                 <View>
-                  <Text style={[s.rowVal, { color:G.warning }]}>Pet on Premises</Text>
+                  <Text style={[s.rowVal, ts({ color:G.warning })]}>Pet on Premises</Text>
                   <Text style={s.rowSub}>Cleaner is aware of this</Text>
                 </View>
               </View>
@@ -513,12 +514,12 @@ export default function JobDetailScreen({ navigation, route }) {
           <View style={s.card}>
             <Text style={s.secTitle}>Service Details</Text>
             {job.details?.frequency && (
-              <IconRow icon={<Repeat size={16} color={G.primary} />} label="Frequency">
+              <IconRow icon={<Repeat size={16} color={tc(G.primary)} />} label="Frequency">
                 <Text style={s.rowVal}>{job.details.frequency}</Text>
               </IconRow>
             )}
             {job.details?.suppliesProvidedBy && (
-              <IconRow icon={<ShoppingBag size={16} color={G.primary} />} label="Supplies" last>
+              <IconRow icon={<ShoppingBag size={16} color={tc(G.primary)} />} label="Supplies" last>
                 <Text style={s.rowVal}>Provided by {job.details.suppliesProvidedBy}</Text>
               </IconRow>
             )}
@@ -529,8 +530,8 @@ export default function JobDetailScreen({ navigation, route }) {
         {job.notes && (
           <View style={s.card}>
             <View style={s.contactHead}>
-              <View style={[s.iconWrap, { backgroundColor:G.surfaceAlt }]}>
-                <FileText size={17} color={G.muted} />
+              <View style={[s.iconWrap, ts({ backgroundColor:G.surfaceAlt })]}>
+                <FileText size={17} color={tc(G.muted)} />
               </View>
               <Text style={s.secTitle}>Notes & Instructions</Text>
             </View>
@@ -551,7 +552,7 @@ export default function JobDetailScreen({ navigation, route }) {
             }}
             activeOpacity={0.85}
           >
-            <CalendarDays size={18} color="#fff" strokeWidth={2} />
+            <CalendarDays size={18} color={tc("#fff")} strokeWidth={2} />
             <Text style={s.rescheduleBtnTxt}>Reschedule Job</Text>
           </TouchableOpacity>
         )}
@@ -572,12 +573,12 @@ export default function JobDetailScreen({ navigation, route }) {
               <TouchableOpacity onPress={() => {
                 if (calMonth === 0) { setCalMonth(11); setCalYear(y => y-1); }
                 else setCalMonth(m => m-1);
-              }} style={s.calNavBtn}><ChevronLeft size={16} color={G.med} /></TouchableOpacity>
+              }} style={s.calNavBtn}><ChevronLeft size={16} color={tc(G.med)} /></TouchableOpacity>
               <Text style={s.calMonthTxt}>{MONTH_NAMES[calMonth]} {calYear}</Text>
               <TouchableOpacity onPress={() => {
                 if (calMonth === 11) { setCalMonth(0); setCalYear(y => y+1); }
                 else setCalMonth(m => m+1);
-              }} style={s.calNavBtn}><ChevronRight size={16} color={G.med} /></TouchableOpacity>
+              }} style={s.calNavBtn}><ChevronRight size={16} color={tc(G.med)} /></TouchableOpacity>
             </View>
             <View style={s.calDaysRow}>
               {DAY_LABELS.map(d => <Text key={d} style={s.calDayLbl}>{d}</Text>)}
@@ -621,7 +622,7 @@ export default function JobDetailScreen({ navigation, route }) {
                 disabled={!selDate || !selSlot || rescheduling}
               >
                 {rescheduling
-                  ? <ActivityIndicator size="small" color="#fff" />
+                  ? <ActivityIndicator size="small" color={tc("#fff")} />
                   : <Text style={s.modalConfirmTxt}>Confirm Reschedule</Text>
                 }
               </TouchableOpacity>
@@ -635,7 +636,7 @@ export default function JobDetailScreen({ navigation, route }) {
 
 /* ─── IconRow helper ────────────────────────────────────────────────────────── */
 const IconRow = ({ icon, label, children, last }) => (
-  <View style={[ir.row, !last && { borderBottomWidth:1, borderBottomColor:G.border }]}>
+  <View style={[ir.row, !last && ts({ borderBottomWidth:1, borderBottomColor:G.border })]}>
     <View style={ir.iconWrap}>{icon}</View>
     <View style={{ flex:1 }}>
       <Text style={ir.label}>{label}</Text>
@@ -643,15 +644,15 @@ const IconRow = ({ icon, label, children, last }) => (
     </View>
   </View>
 );
-const ir = StyleSheet.create({
+const ir = themed(StyleSheet.create({
   row:     { flexDirection:"row", alignItems:"flex-start", paddingVertical:14, gap:12 },
   iconWrap:{ width:32, height:32, borderRadius:9, backgroundColor:G.primaryLight, alignItems:"center", justifyContent:"center", flexShrink:0 },
   label:   { fontSize:10, fontWeight:"700", color:G.muted, textTransform:"uppercase", letterSpacing:0.7, marginBottom:4 },
-});
+}));
 
 /* ─── Styles ────────────────────────────────────────────────────────────────── */
-const s = StyleSheet.create({
-  safe:    { flex:1, backgroundColor:G.bg },
+const s = themed(StyleSheet.create({
+  safe:    { flex:1, backgroundColor:"#FFFFFF" },
   center:  { flex:1, alignItems:"center", justifyContent:"center", padding:24 },
   errH:    { fontSize:17, fontWeight:"700", color:G.dark, marginTop:14 },
   errT:    { fontSize:14, color:G.muted, marginTop:6, textAlign:"center" },
@@ -758,4 +759,4 @@ const s = StyleSheet.create({
   modalCancelTxt:{ fontSize:14, fontWeight:"700", color:G.med },
   modalConfirm:{ flex:2, paddingVertical:14, borderRadius:14, backgroundColor:G.primary, alignItems:"center", ...shGreen },
   modalConfirmTxt:{ fontSize:14, fontWeight:"800", color:"#fff" },
-});
+}));

@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { View, ActivityIndicator, Platform } from "react-native";
-import { NavigationContainer, createNavigationContainerRef } from "@react-navigation/native";
+import { NavigationContainer, createNavigationContainerRef, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
@@ -9,6 +9,8 @@ import Constants from "expo-constants";
 import { Home, CalendarDays, User, Briefcase, LayoutDashboard, MessageCircle } from "lucide-react-native";
 import CalendarScreen from "./src/screens/CalendarScreen";
 import { AuthProvider, AuthContext, API_URL } from "./src/context/AuthContext";
+import { tc } from "./src/theme/dark";
+import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import OnboardingScreen from "./src/screens/OnboardingScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import HomeScreen from "./src/screens/HomeScreen";
@@ -94,9 +96,9 @@ const tabScreenOptions = ({ route, iconMap }) => ({
     const Icon = iconMap[route.name];
     return Icon ? <Icon size={22} color={color} strokeWidth={focused ? 2.2 : 1.8} /> : null;
   },
-  tabBarActiveTintColor:   C.primary,
-  tabBarInactiveTintColor: C.textMuted,
-  tabBarStyle,
+  tabBarActiveTintColor:   tc(C.primary),
+  tabBarInactiveTintColor: tc(C.textMuted),
+  tabBarStyle: { ...tabBarStyle, backgroundColor: tc("#FFFFFF", "bg") },
   tabBarLabelStyle: { fontSize: 11, fontWeight: "700", marginTop: 3 },
 });
 
@@ -111,9 +113,10 @@ const MainTabs = () => (
 );
 
 const CompanyTabs = () => (
-  <Tab.Navigator screenOptions={(p) => tabScreenOptions({ ...p, iconMap: { Dashboard: LayoutDashboard, Jobs: Briefcase, Calendar: CalendarDays, Profile: User } })}>
+  <Tab.Navigator screenOptions={(p) => tabScreenOptions({ ...p, iconMap: { Dashboard: LayoutDashboard, Jobs: Briefcase, Messages: MessageCircle, Calendar: CalendarDays, Profile: User } })}>
     <Tab.Screen name="Dashboard" component={CompanyDashboardScreen} options={{ title: "Dashboard" }} />
     <Tab.Screen name="Jobs"      component={CompanyJobsScreen}      options={{ title: "Jobs" }} />
+    <Tab.Screen name="Messages"  component={MessagesScreen}         options={{ title: "Messages" }} />
     <Tab.Screen name="Calendar"  component={CalendarScreen}         options={{ title: "Calendar" }} />
     <Tab.Screen name="Profile"   component={ProfileScreen}          options={{ title: "Profile" }} />
   </Tab.Navigator>
@@ -150,7 +153,10 @@ const registerForPushNotificationsAsync = async () => {
   }
 };
 
-const AppNavigation = () => {
+// Where the user was, so switching light/dark (which redraws every screen) keeps their place.
+let savedNavState;
+
+const AppNavigation = ({ dark }) => {
   const { isLoading, userToken, customerInfo } = useContext(AuthContext);
   const [hasOnboarded,    setHasOnboarded]    = useState(false);
   const [checkingOnboard, setCheckingOnboard] = useState(true);
@@ -210,7 +216,7 @@ const AppNavigation = () => {
 
   if (isLoading || checkingOnboard) {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: C.bg }}>
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: tc(C.bg, "bg") }}>
         <ActivityIndicator size="large" color={C.primary} />
       </View>
     );
@@ -225,8 +231,19 @@ const AppNavigation = () => {
     );
   }
 
+  const base = dark ? DarkTheme : DefaultTheme;
+  const navTheme = {
+    ...base,
+    colors: { ...base.colors, background: tc("#FFFFFF", "bg"), card: tc("#FFFFFF", "bg"), border: tc("#E2E8F0", "border"), primary: C.primary },
+  };
+
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer
+      ref={navigationRef}
+      initialState={savedNavState}
+      onStateChange={(state) => { savedNavState = state; }}
+      theme={navTheme}
+    >
       <StatusBar style="light" />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {/* Main tabs are always accessible — no auth required to browse */}
@@ -244,10 +261,18 @@ const AppNavigation = () => {
   );
 };
 
+// Re-mounted when the theme changes so every screen picks up the new colours.
+const ThemedApp = () => {
+  const { dark } = useTheme();
+  return <AppNavigation key={dark ? "dark" : "light"} dark={dark} />;
+};
+
 export default function App() {
   return (
-    <AuthProvider>
-      <AppNavigation />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ThemedApp />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

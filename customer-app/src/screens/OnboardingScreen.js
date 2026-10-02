@@ -14,6 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ArrowRight } from "lucide-react-native";
 import { C } from "../theme/flat";
+import { tc, tcs, themed } from "../theme/dark";
 
 const { width, height } = Dimensions.get("window");
 
@@ -107,7 +108,7 @@ const OnboardingScreen = ({ onFinished, onLogin }) => {
             resizeMode="cover"
           >
             <LinearGradient
-              colors={["transparent", "rgba(6,24,16,0.3)", C.primaryDark]}
+              colors={tcs(["transparent", "rgba(6,24,16,0.3)", C.primaryDark], "bg")}
               locations={[0, 0.45, 1]}
               style={styles.gradient}
             />
@@ -150,7 +151,7 @@ const OnboardingScreen = ({ onFinished, onLogin }) => {
             <View style={styles.lastCtaGroup}>
               <TouchableOpacity style={styles.ctaPrimary} onPress={finish} activeOpacity={0.88}>
                 <Text style={styles.ctaPrimaryText}>Get Started</Text>
-                <ArrowRight size={18} color={C.primaryDark} strokeWidth={2.5} />
+                <ArrowRight size={18} color={tc(C.primaryDark)} strokeWidth={2.5} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.ctaSecondary} onPress={goLogin} activeOpacity={0.85}>
                 <Text style={styles.ctaSecondaryText}>I already have an account</Text>
@@ -161,7 +162,7 @@ const OnboardingScreen = ({ onFinished, onLogin }) => {
             <View style={styles.ctaGroup}>
               <TouchableOpacity style={styles.ctaPrimary} onPress={handleNext} activeOpacity={0.88}>
                 <Text style={styles.ctaPrimaryText}>Next</Text>
-                <ArrowRight size={18} color={C.primaryDark} strokeWidth={2.5} />
+                <ArrowRight size={18} color={tc(C.primaryDark)} strokeWidth={2.5} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.loginLink} onPress={goLogin}>
                 <Text style={styles.loginLinkText}>
@@ -177,7 +178,7 @@ const OnboardingScreen = ({ onFinished, onLogin }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   container: { flex: 1, backgroundColor: C.primaryDark },
 
   slide: { width, height },
@@ -293,6 +294,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "800",
   },
-});
+}));
 
 export default OnboardingScreen;

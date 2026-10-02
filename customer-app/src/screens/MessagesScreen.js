@@ -9,6 +9,7 @@ import { MessageCircle, ChevronRight, LifeBuoy } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
 import { C, cardShadow } from "../theme/flat";
+import { tc, themed, ts } from "../theme/dark";
 
 const SUPPORT_WHATSAPP = "https://wa.me/447846726428";
 
@@ -27,7 +28,7 @@ const timeLabel = (iso) => {
 
 const AuthGate = ({ navigation }) => (
   <SafeAreaView style={[styles.root, { alignItems: "center", justifyContent: "center", padding: 32 }]}>
-    <MessageCircle size={48} color={C.textMuted} strokeWidth={1.2} />
+    <MessageCircle size={48} color={tc(C.textMuted)} strokeWidth={1.2} />
     <Text style={styles.gateTitle}>Your messages</Text>
     <Text style={styles.gateSub}>Log in to chat with your cleaner and see your message history.</Text>
     <TouchableOpacity style={styles.gateBtn} onPress={() => navigation.navigate("Login")} activeOpacity={0.85}>
@@ -91,30 +92,30 @@ const MessagesScreen = ({ navigation }) => {
       </View>
 
       {chats === null ? (
-        <View style={styles.center}><ActivityIndicator size="large" color={C.primary} /></View>
+        <View style={styles.center}><ActivityIndicator size="large" color={tc(C.primary)} /></View>
       ) : (
         <FlatList
           data={chats}
           keyExtractor={(c) => c.bookingId}
           contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={C.primary} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={tc(C.primary)} />}
           ListHeaderComponent={
             <>
               {!!error && <Text style={styles.error}>{error}</Text>}
               <TouchableOpacity style={styles.support} onPress={() => Linking.openURL(SUPPORT_WHATSAPP)} activeOpacity={0.8}>
-                <View style={styles.supportIcon}><LifeBuoy size={20} color={C.primary} /></View>
+                <View style={styles.supportIcon}><LifeBuoy size={20} color={tc(C.primary)} /></View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.supportTitle}>Cleaniq support</Text>
                   <Text style={styles.supportSub}>Questions about a booking or payment? Message us on WhatsApp.</Text>
                 </View>
-                <ChevronRight size={18} color={C.textMuted} />
+                <ChevronRight size={18} color={tc(C.textMuted)} />
               </TouchableOpacity>
               {chats.length > 0 && <Text style={styles.section}>Your cleaners</Text>}
             </>
           }
           ListEmptyComponent={
             <View style={styles.empty}>
-              <MessageCircle size={40} color={C.textMuted} strokeWidth={1.3} />
+              <MessageCircle size={40} color={tc(C.textMuted)} strokeWidth={1.3} />
               <Text style={styles.emptyTitle}>No messages yet</Text>
               <Text style={styles.emptySub}>Once a cleaner is assigned to your booking, you can chat with them here.</Text>
             </View>
@@ -131,7 +132,7 @@ const MessagesScreen = ({ navigation }) => {
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <View style={styles.rowTop}>
                     <Text style={styles.name} numberOfLines={1}>{c.workerName}</Text>
-                    <Text style={[styles.time, unread && { color: C.primary, fontWeight: "800" }]}>
+                    <Text style={[styles.time, unread && ts({ color: C.primary, fontWeight: "800" })]}>
                       {timeLabel(c.lastMessageTime)}
                     </Text>
                   </View>
@@ -154,7 +155,7 @@ const MessagesScreen = ({ navigation }) => {
 
 export default MessagesScreen;
 
-const styles = StyleSheet.create({
+const styles = themed(StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   header: {
@@ -199,4 +200,4 @@ const styles = StyleSheet.create({
   gateSub: { fontSize: 13, color: C.textMuted, marginTop: 8, textAlign: "center", lineHeight: 20 },
   gateBtn: { marginTop: 24, backgroundColor: C.primary, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 48 },
   gateBtnTxt: { color: "#fff", fontWeight: "800", fontSize: 15 },
-});
+}));

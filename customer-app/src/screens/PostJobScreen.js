@@ -13,6 +13,7 @@ import {
 } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext, API_URL } from "../context/AuthContext";
+import { tc, themed, ts } from "../theme/dark";
 
 const { width: SW } = Dimensions.get("window");
 const CAL_CELL = Math.floor((SW - 68) / 7);
@@ -22,7 +23,7 @@ const G = {
   primary:      "#0F6B4C",
   primaryMid:   "#14A66B",
   primaryLight: "#E4F7EE",
-  bg:           "#F0F5F2",
+  bg:           "#FFFFFF",
   surface:      "#FFFFFF",
   surfaceAlt:   "#F5FAF7",
   dark:         "#0F172A",
@@ -114,11 +115,11 @@ const MiniCalendar = ({ selected, onSelect, jobDates = [] }) => {
     <View>
       <View style={cc.nav}>
         <TouchableOpacity onPress={()=>setOff(o=>Math.max(0,o-1))} disabled={off===0} style={[cc.navBtn, off===0&&{opacity:0.3}]}>
-          <ChevronLeft size={17} color={G.dark} />
+          <ChevronLeft size={17} color={tc(G.dark)} />
         </TouchableOpacity>
         <Text style={cc.month}>{base.toLocaleString("default",{month:"long",year:"numeric"})}</Text>
         <TouchableOpacity onPress={()=>setOff(o=>o+1)} style={cc.navBtn}>
-          <ChevronRight size={17} color={G.dark} />
+          <ChevronRight size={17} color={tc(G.dark)} />
         </TouchableOpacity>
       </View>
       <View style={cc.dow}>
@@ -137,7 +138,7 @@ const MiniCalendar = ({ selected, onSelect, jobDates = [] }) => {
             <TouchableOpacity key={k} onPress={()=>!past&&onSelect(k)} disabled={past} activeOpacity={0.65}
               style={[cc.cell, isSel&&cc.cellSel, isToday&&!isSel&&cc.cellToday, past&&{opacity:0.25}]}>
               <Text style={[cc.day, isSel&&cc.daySel, isToday&&!isSel&&cc.dayToday]}>{d.getDate()}</Text>
-              {hasJob&&<View style={[cc.dot, isSel&&{backgroundColor:"rgba(255,255,255,0.65)"}]} />}
+              {hasJob&&<View style={[cc.dot, isSel&&ts({backgroundColor:"rgba(255,255,255,0.65)"})]} />}
             </TouchableOpacity>
           );
         })}
@@ -149,8 +150,8 @@ const MiniCalendar = ({ selected, onSelect, jobDates = [] }) => {
           {col:G.primary,dot:true,label:"Your job"},
         ].map((l,i)=>(
           <View key={i} style={cc.lgItem}>
-            <View style={[cc.lgDot, l.col&&{backgroundColor:l.col}, l.ring&&{borderWidth:2,borderColor:G.primary,backgroundColor:"transparent"}, l.dot&&{position:"relative"}]}>
-              {l.dot&&<View style={{width:4,height:4,borderRadius:2,backgroundColor:"#fff",position:"absolute",bottom:1,alignSelf:"center"}}/>}
+            <View style={[cc.lgDot, l.col&&ts({backgroundColor:l.col}), l.ring&&ts({borderWidth:2,borderColor:G.primary,backgroundColor:"transparent"}), l.dot&&{position:"relative"}]}>
+              {l.dot&&<View style={ts({width:4,height:4,borderRadius:2,backgroundColor:"#fff",position:"absolute",bottom:1,alignSelf:"center"})}/>}
             </View>
             <Text style={cc.lgTxt}>{l.label}</Text>
           </View>
@@ -333,7 +334,7 @@ export default function PostJobScreen({ navigation }) {
   const Step1 = () => {
     if (loadingServices) return (
       <View style={s.card}>
-        <ActivityIndicator size="large" color={G.primary} style={{ marginVertical: 40 }} />
+        <ActivityIndicator size="large" color={tc(G.primary)} style={{ marginVertical: 40 }} />
         <Text style={[s.cardSub, {textAlign:"center",marginBottom:16}]}>Loading services…</Text>
       </View>
     );
@@ -357,18 +358,18 @@ export default function PostJobScreen({ navigation }) {
                 key={sv._id || sv.name}
                 onPress={() => { setService(sv.name); setErrors(p=>({...p,service:undefined,otherDetail:undefined})); }}
                 activeOpacity={0.75}
-                style={[s.svcCard, active && { borderColor:col, backgroundColor:col+"12" }]}
+                style={[s.svcCard, active && ts({ borderColor:col, backgroundColor:col+"12" })]}
               >
-                <View style={[s.svcIcon, { backgroundColor: active ? col+"22" : G.surfaceAlt }]}>
-                  <Icon size={20} color={active ? col : G.muted} strokeWidth={active?2.2:1.7} />
+                <View style={[s.svcIcon, ts({ backgroundColor: active ? col+"22" : G.surfaceAlt })]}>
+                  <Icon size={20} color={tc(active ? col : G.muted)} strokeWidth={active?2.2:1.7} />
                 </View>
-                <Text style={[s.svcTitle, active&&{color:col}]} numberOfLines={2}>{sv.name}</Text>
+                <Text style={[s.svcTitle, active&&ts({color:col})]} numberOfLines={2}>{sv.name}</Text>
                 {sv.rate ? (
                   <Text style={s.svcTag}>£{sv.rate}/hr</Text>
                 ) : null}
                 {active && (
-                  <View style={[s.svcCheck, {backgroundColor:col}]}>
-                    <CheckCircle2 size={10} color="#fff" />
+                  <View style={[s.svcCheck, ts({backgroundColor:col})]}>
+                    <CheckCircle2 size={10} color={tc("#fff")} />
                   </View>
                 )}
               </TouchableOpacity>
@@ -382,16 +383,16 @@ export default function PostJobScreen({ navigation }) {
               <TouchableOpacity
                 onPress={() => { setService("Other"); setErrors(p=>({...p,service:undefined})); }}
                 activeOpacity={0.75}
-                style={[s.svcCard, active && { borderColor:"#6B7280", backgroundColor:"#6B728012" }]}
+                style={[s.svcCard, active && ts({ borderColor:"#6B7280", backgroundColor:"#6B728012" })]}
               >
-                <View style={[s.svcIcon, { backgroundColor: active ? "#6B728022" : G.surfaceAlt }]}>
-                  <Sparkles size={20} color={active ? "#6B7280" : G.muted} strokeWidth={active?2.2:1.7} />
+                <View style={[s.svcIcon, ts({ backgroundColor: active ? "#6B728022" : G.surfaceAlt })]}>
+                  <Sparkles size={20} color={tc(active ? "#6B7280" : G.muted)} strokeWidth={active?2.2:1.7} />
                 </View>
-                <Text style={[s.svcTitle, active&&{color:"#6B7280"}]} numberOfLines={2}>Other / Custom</Text>
+                <Text style={[s.svcTitle, active&&ts({color:"#6B7280"})]} numberOfLines={2}>Other / Custom</Text>
                 <Text style={s.svcTag}>Describe your need</Text>
                 {active && (
-                  <View style={[s.svcCheck, {backgroundColor:"#6B7280"}]}>
-                    <CheckCircle2 size={10} color="#fff" />
+                  <View style={[s.svcCheck, ts({backgroundColor:"#6B7280"})]}>
+                    <CheckCircle2 size={10} color={tc("#fff")} />
                   </View>
                 )}
               </TouchableOpacity>
@@ -406,9 +407,9 @@ export default function PostJobScreen({ navigation }) {
               value={otherDetail}
               onChangeText={v=>{ setOtherDetail(v); setErrors(p=>({...p,otherDetail:undefined})); }}
               placeholder="e.g. Warehouse floor cleaning, gym equipment wipe-down…"
-              placeholderTextColor={G.muted}
+              placeholderTextColor={tc(G.muted)}
               multiline
-              style={[s.notesInput, {minHeight:80, marginTop:4}, errors.otherDetail&&{borderColor:G.error,backgroundColor:G.errorBg}]}
+              style={[s.notesInput, {minHeight:80, marginTop:4}, errors.otherDetail&&ts({borderColor:G.error,backgroundColor:G.errorBg})]}
             />
             {errors.otherDetail ? <ErrMsg msg={errors.otherDetail} /> : null}
           </View>
@@ -422,7 +423,7 @@ export default function PostJobScreen({ navigation }) {
     <>
       <View style={s.card}>
         <View style={s.cardHead}>
-          <View style={s.cardHeadIcon}><MapPin size={16} color={G.primary} /></View>
+          <View style={s.cardHeadIcon}><MapPin size={16} color={tc(G.primary)} /></View>
           <View>
             <Text style={s.cardH}>Property Location</Text>
             <Text style={s.cardSub}>Where will the cleaning take place?</Text>
@@ -461,7 +462,7 @@ export default function PostJobScreen({ navigation }) {
 
       <View style={s.card}>
         <View style={s.cardHead}>
-          <View style={[s.cardHeadIcon,{backgroundColor:"#EFF6FF"}]}><User size={16} color={G.blue} /></View>
+          <View style={[s.cardHeadIcon,ts({backgroundColor:"#EFF6FF"})]}><User size={16} color={tc(G.blue)} /></View>
           <View style={{flex:1}}>
             <Text style={s.cardH}>Contact at Property</Text>
             <Text style={s.cardSub}>Who should our cleaner ask for on arrival?</Text>
@@ -476,22 +477,22 @@ export default function PostJobScreen({ navigation }) {
 
         <FLabel req>Full Name</FLabel>
         <View style={s.iconInput}>
-          <User size={16} color={G.muted} style={s.iconInputIcon} />
-          <TextInput value={cName} onChangeText={v=>{setCName(v);setErrors(p=>({...p,cName:undefined}));}} placeholder="e.g. Sarah Johnson" placeholderTextColor={G.muted} style={[s.iconInputField, errors.cName&&s.inputErr]} />
+          <User size={16} color={tc(G.muted)} style={s.iconInputIcon} />
+          <TextInput value={cName} onChangeText={v=>{setCName(v);setErrors(p=>({...p,cName:undefined}));}} placeholder="e.g. Sarah Johnson" placeholderTextColor={tc(G.muted)} style={[s.iconInputField, errors.cName&&s.inputErr]} />
         </View>
         {errors.cName?<ErrMsg msg={errors.cName}/>:null}
 
         <FLabel req>Phone Number</FLabel>
         <View style={s.iconInput}>
-          <Phone size={16} color={G.muted} style={s.iconInputIcon} />
-          <TextInput value={cPhone} onChangeText={v=>{setCPhone(v);setErrors(p=>({...p,cPhone:undefined}));}} placeholder="e.g. 07700 900123" placeholderTextColor={G.muted} keyboardType="phone-pad" style={[s.iconInputField, errors.cPhone&&s.inputErr]} />
+          <Phone size={16} color={tc(G.muted)} style={s.iconInputIcon} />
+          <TextInput value={cPhone} onChangeText={v=>{setCPhone(v);setErrors(p=>({...p,cPhone:undefined}));}} placeholder="e.g. 07700 900123" placeholderTextColor={tc(G.muted)} keyboardType="phone-pad" style={[s.iconInputField, errors.cPhone&&s.inputErr]} />
         </View>
         {errors.cPhone?<ErrMsg msg={errors.cPhone}/>:null}
 
         <FLabel>Email Address <Text style={s.optionalBadge}>(optional)</Text></FLabel>
         <View style={s.iconInput}>
-          <Mail size={16} color={G.muted} style={s.iconInputIcon} />
-          <TextInput value={cEmail} onChangeText={setCEmail} placeholder="e.g. sarah@example.com" placeholderTextColor={G.muted} keyboardType="email-address" autoCapitalize="none" style={s.iconInputField} />
+          <Mail size={16} color={tc(G.muted)} style={s.iconInputIcon} />
+          <TextInput value={cEmail} onChangeText={setCEmail} placeholder="e.g. sarah@example.com" placeholderTextColor={tc(G.muted)} keyboardType="email-address" autoCapitalize="none" style={s.iconInputField} />
         </View>
       </View>
     </>
@@ -503,7 +504,7 @@ export default function PostJobScreen({ navigation }) {
       {/* Rooms */}
       <View style={s.card}>
         <View style={s.cardHead}>
-          <View style={s.cardHeadIcon}><HomeIcon size={16} color={G.primary} /></View>
+          <View style={s.cardHeadIcon}><HomeIcon size={16} color={tc(G.primary)} /></View>
           <View>
             <Text style={s.cardH}>Property Details</Text>
             <Text style={s.cardSub}>Tap + or − to set the room count</Text>
@@ -515,11 +516,11 @@ export default function PostJobScreen({ navigation }) {
             <Text style={s.roomLabel}>{r}</Text>
             <View style={s.roomCtr}>
               <TouchableOpacity onPress={()=>setRooms(p=>({...p,[r]:Math.max(0,p[r]-1)}))} disabled={rooms[r]===0} style={[s.cntBtn, rooms[r]===0&&{opacity:0.3}]}>
-                <Minus size={15} color={G.primary} />
+                <Minus size={15} color={tc(G.primary)} />
               </TouchableOpacity>
               <Text style={s.cntNum}>{rooms[r]}</Text>
               <TouchableOpacity onPress={()=>setRooms(p=>({...p,[r]:p[r]+1}))} style={s.cntBtn}>
-                <Plus size={15} color={G.primary} />
+                <Plus size={15} color={tc(G.primary)} />
               </TouchableOpacity>
             </View>
           </View>
@@ -536,7 +537,7 @@ export default function PostJobScreen({ navigation }) {
       {extrasList.length > 0 && (
         <View style={s.card}>
           <View style={s.cardHead}>
-            <View style={[s.cardHeadIcon,{backgroundColor:"#FFF4ED"}]}><Package size={16} color={G.orange} /></View>
+            <View style={[s.cardHeadIcon,ts({backgroundColor:"#FFF4ED"})]}><Package size={16} color={tc(G.orange)} /></View>
             <View style={{flex:1}}>
               <Text style={s.cardH}>Add-on Services</Text>
               <Text style={s.cardSub}>Optional extras to include with your clean</Text>
@@ -550,21 +551,21 @@ export default function PostJobScreen({ navigation }) {
               <View key={ex._id || ex.name} style={[s.extraRow, active && s.extraRowOn]}>
                 <TouchableOpacity style={s.extraLeft} onPress={() => toggleExtra(ex.name)} activeOpacity={0.7}>
                   <View style={[s.extraCheck, active && s.extraCheckOn]}>
-                    {active && <CheckCircle2 size={14} color="#fff" />}
+                    {active && <CheckCircle2 size={14} color={tc("#fff")} />}
                   </View>
                   <View style={{flex:1}}>
-                    <Text style={[s.extraName, active&&{color:G.primary}]}>{ex.name}</Text>
+                    <Text style={[s.extraName, active&&ts({color:G.primary})]}>{ex.name}</Text>
                     {ex.rate ? <Text style={s.extraRate}>£{Number(ex.rate).toFixed(2)}</Text> : null}
                   </View>
                 </TouchableOpacity>
                 {active && (
                   <View style={s.extraQty}>
                     <TouchableOpacity onPress={() => setExtraQty(ex.name, qty - 1)} style={s.cntBtn}>
-                      <Minus size={13} color={G.primary} />
+                      <Minus size={13} color={tc(G.primary)} />
                     </TouchableOpacity>
                     <Text style={s.cntNum}>{qty}</Text>
                     <TouchableOpacity onPress={() => setExtraQty(ex.name, qty + 1)} style={s.cntBtn}>
-                      <Plus size={13} color={G.primary} />
+                      <Plus size={13} color={tc(G.primary)} />
                     </TouchableOpacity>
                   </View>
                 )}
@@ -582,7 +583,7 @@ export default function PostJobScreen({ navigation }) {
       {/* Calendar */}
       <View style={s.card}>
         <View style={s.cardHead}>
-          <View style={s.cardHeadIcon}><Calendar size={16} color={G.primary} /></View>
+          <View style={s.cardHeadIcon}><Calendar size={16} color={tc(G.primary)} /></View>
           <View style={{flex:1}}>
             <Text style={s.cardH}>Pick a Date</Text>
             <Text style={s.cardSub}>Green dots mark dates with existing jobs</Text>
@@ -596,7 +597,7 @@ export default function PostJobScreen({ navigation }) {
             <Text style={s.dateTxt}>
               {new Date(date+"T12:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
             </Text>
-            <CheckCircle2 size={16} color={G.primary}/>
+            <CheckCircle2 size={16} color={tc(G.primary)}/>
           </View>
         ) : null}
       </View>
@@ -604,7 +605,7 @@ export default function PostJobScreen({ navigation }) {
       {/* Time slots */}
       <View style={s.card}>
         <View style={s.cardHead}>
-          <View style={s.cardHeadIcon}><Clock size={16} color={G.primary} /></View>
+          <View style={s.cardHeadIcon}><Clock size={16} color={tc(G.primary)} /></View>
           <View style={{flex:1}}>
             <Text style={s.cardH}>Arrival Time</Text>
             <Text style={s.cardSub}>{date ? "Select your preferred start time" : "Select a date above first"}</Text>
@@ -614,7 +615,7 @@ export default function PostJobScreen({ navigation }) {
 
         {!date && (
           <View style={s.slotEmpty}>
-            <Calendar size={30} color={G.muted} strokeWidth={1.5}/>
+            <Calendar size={30} color={tc(G.muted)} strokeWidth={1.5}/>
             <Text style={s.slotEmptyH}>No date selected</Text>
             <Text style={s.slotEmptyT}>Pick a date on the calendar above to choose a time</Text>
           </View>
@@ -648,14 +649,14 @@ export default function PostJobScreen({ navigation }) {
             const endSlot = `${String(endH).padStart(2,"0")}:${String(endM).padStart(2,"0")}`;
             return (
               <View style={s.selectedTimeBadge}>
-                <CheckCircle2 size={15} color={G.primary} />
+                <CheckCircle2 size={15} color={tc(G.primary)} />
                 <Text style={s.selectedTimeTxt}>{fmt24to12(timeSlot)} – {fmt24to12(endSlot)} · {dur} hr{dur !== 1 ? "s" : ""}</Text>
               </View>
             );
           }
           return (
             <View style={s.selectedTimeBadge}>
-              <CheckCircle2 size={15} color={G.primary} />
+              <CheckCircle2 size={15} color={tc(G.primary)} />
               <Text style={s.selectedTimeTxt}>Arrival at {fmt24to12(timeSlot)}</Text>
             </View>
           );
@@ -674,7 +675,7 @@ export default function PostJobScreen({ navigation }) {
             </TouchableOpacity>
           ))}
           <View style={s.durCustomWrap}>
-            <TextInput value={customDur} onChangeText={v=>{ setCustomDur(v); setDuration(0); }} placeholder="…" placeholderTextColor={G.muted} keyboardType="numeric" style={s.durCustom} />
+            <TextInput value={customDur} onChangeText={v=>{ setCustomDur(v); setDuration(0); }} placeholder="…" placeholderTextColor={tc(G.muted)} keyboardType="numeric" style={s.durCustom} />
             <Text style={s.durHmuted}>hr</Text>
           </View>
         </View>
@@ -688,14 +689,14 @@ export default function PostJobScreen({ navigation }) {
             const endSlot = `${String(endH).padStart(2,"0")}:${String(endM).padStart(2,"0")}`;
             return (
               <View style={s.durSelected}>
-                <CheckCircle2 size={14} color={G.primary}/>
+                <CheckCircle2 size={14} color={tc(G.primary)}/>
                 <Text style={s.durSelectedTxt}>{fmt24to12(timeSlot)} – {fmt24to12(endSlot)} · {dur} hr{dur !== 1 ? "s" : ""}</Text>
               </View>
             );
           }
           return (
             <View style={s.durSelected}>
-              <CheckCircle2 size={14} color={G.primary}/>
+              <CheckCircle2 size={14} color={tc(G.primary)}/>
               <Text style={s.durSelectedTxt}>{dur} hour{dur !== 1 ? "s" : ""} selected</Text>
             </View>
           );
@@ -706,9 +707,9 @@ export default function PostJobScreen({ navigation }) {
       <View style={s.card}>
         <Text style={s.cardH}>Quoted Price</Text>
         <Text style={s.cardSub}>How much will you be paying for this job? (in £)</Text>
-        <View style={{ flexDirection:"row", alignItems:"center", borderWidth:1, borderColor:G.border, borderRadius:12, backgroundColor:G.surfaceAlt, paddingHorizontal:14, marginTop:8 }}>
-          <Text style={{ fontSize:18, fontWeight:"700", color:G.dark, marginRight:4 }}>£</Text>
-          <TextInput value={price} onChangeText={v=>{setPrice(v);setErrors(p=>({...p,price:undefined}));}} placeholder="0.00" placeholderTextColor={G.muted} keyboardType="decimal-pad" style={{ flex:1, fontSize:18, color:G.dark, paddingVertical:14 }} />
+        <View style={ts({ flexDirection:"row", alignItems:"center", borderWidth:1, borderColor:G.border, borderRadius:12, backgroundColor:G.surfaceAlt, paddingHorizontal:14, marginTop:8 })}>
+          <Text style={ts({ fontSize:18, fontWeight:"700", color:G.dark, marginRight:4 })}>£</Text>
+          <TextInput value={price} onChangeText={v=>{setPrice(v);setErrors(p=>({...p,price:undefined}));}} placeholder="0.00" placeholderTextColor={tc(G.muted)} keyboardType="decimal-pad" style={ts({ flex:1, fontSize:18, color:G.dark, paddingVertical:14 })} />
         </View>
       </View>
 
@@ -716,7 +717,7 @@ export default function PostJobScreen({ navigation }) {
       <View style={s.card}>
         <Text style={s.cardH}>Notes & Instructions</Text>
         <Text style={s.cardSub}>Access codes, areas to focus on, special requirements…</Text>
-        <TextInput value={notes} onChangeText={setNotes} placeholder="e.g. Gate code: 1234 · Please focus on kitchen & bathrooms" placeholderTextColor={G.muted} multiline style={s.notesInput} />
+        <TextInput value={notes} onChangeText={setNotes} placeholder="e.g. Gate code: 1234 · Please focus on kitchen & bathrooms" placeholderTextColor={tc(G.muted)} multiline style={s.notesInput} />
       </View>
     </>
   );
@@ -729,7 +730,7 @@ export default function PostJobScreen({ navigation }) {
 
         <View style={s.topBar}>
           <TouchableOpacity onPress={goBack} style={s.backBtn}>
-            <ChevronLeft size={20} color={G.dark} />
+            <ChevronLeft size={20} color={tc(G.dark)} />
           </TouchableOpacity>
           <View style={{flex:1,alignItems:"center"}}>
             <Text style={s.topTitle}>Post a Job</Text>
@@ -744,12 +745,12 @@ export default function PostJobScreen({ navigation }) {
             return (
               <View key={st.n} style={[s.stepItem, i<STEPS.length-1&&{flex:1}]}>
                 <View style={[s.stepCircle, done&&s.stepDone, active&&s.stepActive]}>
-                  {done ? <CheckCircle2 size={11} color="#fff"/> : <Text style={[s.stepN,(active||done)&&{color:"#fff"}]}>{st.n}</Text>}
+                  {done ? <CheckCircle2 size={11} color={tc("#fff")}/> : <Text style={[s.stepN,(active||done)&&ts({color:"#fff"})]}>{st.n}</Text>}
                 </View>
                 <View style={s.stepLabelWrap}>
-                  <Text style={[s.stepL, active&&{color:G.primary,fontWeight:"800"}, done&&{color:G.primaryMid}]}>{st.label}</Text>
+                  <Text style={[s.stepL, active&&ts({color:G.primary,fontWeight:"800"}), done&&ts({color:G.primaryMid})]}>{st.label}</Text>
                 </View>
-                {i<STEPS.length-1&&<View style={[s.stepLine,done&&{backgroundColor:G.primaryMid},active&&{backgroundColor:G.primaryLight}]}/>}
+                {i<STEPS.length-1&&<View style={[s.stepLine,done&&ts({backgroundColor:G.primaryMid}),active&&ts({backgroundColor:G.primaryLight})]}/>}
               </View>
             );
           })}
@@ -770,7 +771,7 @@ export default function PostJobScreen({ navigation }) {
 
         <View style={s.navBar}>
           <TouchableOpacity onPress={goBack} style={s.navBack}>
-            <ChevronLeft size={16} color={G.med}/>
+            <ChevronLeft size={16} color={tc(G.med)}/>
             <Text style={s.navBackTxt}>{step>1?"Back":"Cancel"}</Text>
           </TouchableOpacity>
           <View style={s.navDots}>
@@ -781,13 +782,13 @@ export default function PostJobScreen({ navigation }) {
           {step<4 ? (
             <TouchableOpacity onPress={goNext} style={s.navNext}>
               <Text style={s.navNextTxt}>Continue</Text>
-              <ChevronRight size={16} color="#fff"/>
+              <ChevronRight size={16} color={tc("#fff")}/>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={submit} disabled={saving} style={[s.navNext,saving&&{opacity:0.6}]}>
               {saving
-                ? <ActivityIndicator color="#fff" size="small"/>
-                : <><CheckCircle2 size={16} color="#fff"/><Text style={s.navNextTxt}>Submit Job</Text></>
+                ? <ActivityIndicator color={tc("#fff")} size="small"/>
+                : <><CheckCircle2 size={16} color={tc("#fff")}/><Text style={s.navNextTxt}>Submit Job</Text></>
               }
             </TouchableOpacity>
           )}
@@ -800,15 +801,15 @@ export default function PostJobScreen({ navigation }) {
 
 /* ─── Reusable components ────────────────────────────────────────────── */
 const FLabel = ({ children, req, style }) => (
-  <Text style={[{ fontSize:11, fontWeight:"700", color:G.med, textTransform:"uppercase", letterSpacing:0.7, marginBottom:7, marginTop:14 }, style]}>
-    {children}{req ? <Text style={{color:G.error}}> *</Text> : null}
+  <Text style={[ts({ fontSize:11, fontWeight:"700", color:G.med, textTransform:"uppercase", letterSpacing:0.7, marginBottom:7, marginTop:14 }), style]}>
+    {children}{req ? <Text style={ts({color:G.error})}> *</Text> : null}
   </Text>
 );
 const FInput = ({ value, onChange, placeholder, caps, keyboard, err }) => (
-  <TextInput value={value} onChangeText={onChange} placeholder={placeholder} placeholderTextColor={G.muted} autoCapitalize={caps} keyboardType={keyboard} style={[si.input, err&&si.inputErr]} />
+  <TextInput value={value} onChangeText={onChange} placeholder={placeholder} placeholderTextColor={tc(G.muted)} autoCapitalize={caps} keyboardType={keyboard} style={[si.input, err&&si.inputErr]} />
 );
 const ErrMsg = ({ msg }) => (
-  <Text style={{ fontSize:11, color:G.error, marginTop:5, fontWeight:"600" }}>{msg}</Text>
+  <Text style={ts({ fontSize:11, color:G.error, marginTop:5, fontWeight:"600" })}>{msg}</Text>
 );
 const ScrollChips = ({ data, selected, onSelect }) => (
   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -830,7 +831,7 @@ const TogglePair = ({ opts, selected, onSelect, compact }) => (
 );
 
 /* ─── Calendar styles ───────────────────────────────────────────────── */
-const cc = StyleSheet.create({
+const cc = themed(StyleSheet.create({
   nav:     { flexDirection:"row", alignItems:"center", justifyContent:"space-between", marginBottom:14 },
   navBtn:  { width:36, height:36, borderRadius:10, backgroundColor:G.surfaceAlt, alignItems:"center", justifyContent:"center", borderWidth:1, borderColor:G.border },
   month:   { fontSize:15, fontWeight:"800", color:G.dark },
@@ -848,10 +849,10 @@ const cc = StyleSheet.create({
   lgItem:  { flexDirection:"row", alignItems:"center", gap:5 },
   lgDot:   { width:11, height:11, borderRadius:6, backgroundColor:G.border, overflow:"hidden" },
   lgTxt:   { fontSize:11, color:G.muted, fontWeight:"600" },
-});
+}));
 
 /* ─── Shared input/chip styles ──────────────────────────────────────── */
-const si = StyleSheet.create({
+const si = themed(StyleSheet.create({
   input:      { backgroundColor:G.surfaceAlt, borderRadius:12, paddingHorizontal:14, paddingVertical:13, fontSize:15, color:G.dark, borderWidth:1.5, borderColor:G.border },
   inputErr:   { borderColor:G.error, backgroundColor:G.errorBg },
   chip:       { paddingHorizontal:12, paddingVertical:9, borderRadius:10, backgroundColor:G.surfaceAlt, borderWidth:1.5, borderColor:G.border, marginRight:7, marginTop:7 },
@@ -863,10 +864,10 @@ const si = StyleSheet.create({
   toggleOptOn:{ backgroundColor:G.primary },
   toggleTxt:  { fontSize:13, fontWeight:"700", color:G.med },
   toggleTxtOn:{ color:"#fff" },
-});
+}));
 
 /* ─── Main styles ───────────────────────────────────────────────────── */
-const s = StyleSheet.create({
+const s = themed(StyleSheet.create({
   safe:       { flex:1, backgroundColor:G.bg },
 
   topBar:     { flexDirection:"row", alignItems:"center", backgroundColor:G.surface, paddingHorizontal:16, paddingTop:Platform.OS==="android"?12:6, paddingBottom:12, borderBottomWidth:1, borderBottomColor:G.border, ...sh },
@@ -980,4 +981,4 @@ const s = StyleSheet.create({
   navDotOn:   { width:16, backgroundColor:G.primary },
   navNext:    { flexDirection:"row", alignItems:"center", gap:7, paddingHorizontal:22, paddingVertical:13, borderRadius:14, backgroundColor:G.primary, ...shGreen },
   navNextTxt: { fontSize:15, fontWeight:"800", color:"#fff" },
-});
+}));
