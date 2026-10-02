@@ -500,8 +500,7 @@ const redesigned = {
 
   staffAppInvite: (staff) => {
     const androidLink = "https://expo.dev/artifacts/eas/j8DzdUDFEfmfLUiK7QVUSG.apk";
-    // Plug in the TestFlight public link once it's live (App Store Connect → TestFlight → External Testing).
-    const iosLink = process.env.IOS_TESTFLIGHT_LINK || "https://testflight.apple.com/join/PLACEHOLDER";
+    const iosLink = "https://apps.apple.com/us/app/cleaniq-services/id6787302038"; // Cleaniq Service Pro on the App Store
     const dl = (href, label, subText, bg) =>
       `<a href="${esc(href)}" target="_blank" style="display:block;background-color:${bg};color:#ffffff;padding:16px 12px;border-radius:10px;text-decoration:none;font-family:${FONT};font-weight:700;font-size:14px;line-height:20px;text-align:center;">${label}<br /><span style="font-size:12px;font-weight:400;color:#cbd5e1;">${subText}</span></a>`;
     return layout({
@@ -516,7 +515,7 @@ const redesigned = {
 
         ${sectionTitle("Download Cleaniq Service Pro")}
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;"><tr>
-          <td class="stack" width="50%" valign="top" style="padding:0 6px 0 0;">${dl(iosLink, "iOS", "via TestFlight", BRAND.dark)}</td>
+          <td class="stack" width="50%" valign="top" style="padding:0 6px 0 0;">${dl(iosLink, "iPhone", "App Store", BRAND.dark)}</td>
           <td class="stack" width="50%" valign="top" style="padding:0 0 0 6px;">${dl(androidLink, "Android", "Direct APK", BRAND.green)}</td>
         </tr></table>
 

@@ -949,10 +949,7 @@ const templates = {
   staffAppInvite: (staff) => {
     const androidLink =
       "https://expo.dev/artifacts/eas/j8DzdUDFEfmfLUiK7QVUSG.apk";
-    // Plug in the TestFlight public link here once it's live (App Store Connect → TestFlight → External Testing).
-    const iosLink =
-      process.env.IOS_TESTFLIGHT_LINK ||
-      "https://testflight.apple.com/join/PLACEHOLDER";
+    const iosLink = "https://apps.apple.com/us/app/cleaniq-services/id6787302038"; // Cleaniq Service Pro on the App Store
 
     return `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; background-color: #f1f5f9; padding: 24px 0;">
@@ -976,7 +973,7 @@ const templates = {
             <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 420px; margin: 0 auto;">
               <tr>
                 <td style="padding: 0 6px 0 0; width: 50%;">
-                  <a href="${iosLink}" style="display: block; background-color: #0F172A; color: #ffffff; padding: 16px 12px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 13px; text-align: center;">📱 iOS<br/><span style="font-size:11px; font-weight: 600; color: #94a3b8;">via TestFlight</span></a>
+                  <a href="${iosLink}" style="display: block; background-color: #0F172A; color: #ffffff; padding: 16px 12px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 13px; text-align: center;">📱 iPhone<br/><span style="font-size:11px; font-weight: 600; color: #94a3b8;">App Store</span></a>
                 </td>
                 <td style="padding: 0 0 0 6px; width: 50%;">
                   <a href="${androidLink}" style="display: block; background-color: #0A5C43; color: #ffffff; padding: 16px 12px; border-radius: 16px; text-decoration: none; font-weight: 800; font-size: 13px; text-align: center;">🤖 Android<br/><span style="font-size:11px; font-weight: 600; color: #d1fae5;">Direct APK</span></a>
