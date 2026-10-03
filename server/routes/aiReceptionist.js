@@ -91,6 +91,11 @@ router.put("/settings", async (req, res) => {
       if (raw && !normalised) {
         return res.status(400).json({ message: "Transfer number must be a valid phone number, e.g. 07700 900123" });
       }
+      // Transferring to the receptionist's own number would just ring the receptionist again.
+      const aiNumbers = [process.env.TWILIO_VOICE_NUMBER, "+447846726428"].map((n) => toE164UK(n || "")).filter(Boolean);
+      if (normalised && aiNumbers.includes(normalised)) {
+        return res.status(400).json({ message: "That's the receptionist's own number. Enter the phone the team answers, e.g. a mobile." });
+      }
       update.transferNumber = normalised;
     }
     await AiSettings.get(); // make sure the document exists

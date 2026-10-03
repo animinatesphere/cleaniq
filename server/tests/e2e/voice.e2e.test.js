@@ -91,7 +91,7 @@ test("unsigned webhooks are rejected", async () => {
 test("voice AI off → call goes straight to the team (or a polite message)", async () => {
   await setSettings({ voiceEnabled: false, transferNumber: "+447911000111" });
   let body = await (await twilioPost("/api/voice/incoming", callParams("CA1"))).text();
-  assert.match(body, /<Dial>\+447911000111<\/Dial>/);
+  assert.match(body, /<Dial timeout="25">\+447911000111<\/Dial><Say language="en-GB">Sorry, the team couldn't get to the phone/);
   await setSettings({ transferNumber: "" });
   body = await (await twilioPost("/api/voice/incoming", callParams("CA2"))).text();
   assert.match(body, /<Say language="en-GB">Sorry, we can't take your call/);
@@ -170,7 +170,7 @@ test("transfer: AI hands over → session ends with transfer → /after dials th
   assert.equal(call.transcript.at(-1).tools[0].detail, "Caller transferred to the team");
 
   const after = await (await twilioPost("/api/voice/after", { CallSid: "CA7", HandoffData: end.handoffData, SessionStatus: "ended" })).text();
-  assert.match(after, /<Dial>\+447911000111<\/Dial>/);
+  assert.match(after, /<Dial timeout="25">\+447911000111<\/Dial><Say language="en-GB">Sorry, the team couldn't get to the phone/);
   s.ws.close();
 });
 
@@ -189,7 +189,7 @@ test("AI failure → apology and transfer; a failed session also transfers", asy
   s.ws.close();
 
   const after = await (await twilioPost("/api/voice/after", { CallSid: "CA9", SessionStatus: "failed", ErrorCode: "64105" })).text();
-  assert.match(after, /<Dial>\+447911000111<\/Dial>/);
+  assert.match(after, /<Dial timeout="25">\+447911000111<\/Dial><Say language="en-GB">Sorry, the team couldn't get to the phone/);
 });
 
 test("prompts before a valid setup are ignored", async () => {

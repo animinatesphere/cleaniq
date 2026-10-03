@@ -25,7 +25,11 @@ function ttsAttributes() {
 
 const twiml = (res, body) => res.type("text/xml").send(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`);
 
-const dialTeam = (number) => `<Dial>${xml(number)}</Dial>`;
+// Rings the team for about 25 seconds; if nobody picks up, the caller is told we'll call back
+// (the call is already logged with their number in Admin → AI Receptionist → Calls).
+const dialTeam = (number) =>
+  `<Dial timeout="25">${xml(number)}</Dial>` +
+  '<Say language="en-GB">Sorry, the team couldn\'t get to the phone just now. We have your number and will call you back as soon as possible. Goodbye.</Say><Hangup/>';
 const sorryMessage =
   '<Say language="en-GB">Sorry, we can\'t take your call right now. Please message us on WhatsApp on this number, or try again later. Goodbye.</Say><Hangup/>';
 

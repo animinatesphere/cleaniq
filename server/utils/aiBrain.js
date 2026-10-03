@@ -193,7 +193,7 @@ function buildInstructions({ channel, settings, knowledge, services, now = new D
 - You can check prices (get_quote), check whether a cleaner can come at a time (check_availability) and look up the caller's bookings (find_my_bookings). Use them instead of guessing.
 - You can't take bookings or send quotes on the phone. When a caller wants to book or get a quote, take their enquiry with save_enquiry so the team can call them back with a quote and get them booked in. ${canTransfer ? "If they'd rather speak to someone now, offer to put them through." : ""}
 - ${canTransfer
-          ? "If the caller asks for a person, is upset, or you cannot help, tell them you are connecting them and use the transfer_to_human tool."
+          ? "If the caller asks for a person, says it is urgent (for example a problem with a clean happening today, being locked out, damage or a complaint), is upset, or you cannot help, tell them you are connecting them to the team now and use the transfer_to_human tool straight away. Don't keep an urgent caller on the line with questions first."
           : "If the caller asks for a person or you cannot help, take their details with save_enquiry (including a good time to call back) and say a team member will call them back."}`
       : `## WhatsApp rules
 - Keep replies short and friendly: usually 1–3 sentences. Plain text only; no headings or tables. Exception: when collecting booking details or sending a booking summary, use a short numbered list.
