@@ -856,6 +856,12 @@ router.put("/:id", async (req, res) => {
       { new: true },
     );
 
+    // Date or time changed in the edit form: replace the "clean coming up" reminders.
+    const sched = (b) => `${b?.schedule?.date ? new Date(b.schedule.date).toISOString() : ""}|${b?.schedule?.timeSlot || ""}|${b?.schedule?.preferredTime || ""}`;
+    if (req.body.schedule && sched(existingBooking) !== sched(updatedBooking)) {
+      await require("../utils/automationEngine").rescheduleBookingReminders(updatedBooking).catch((e) => console.error("Reminder reschedule error:", e.message));
+    }
+
     // Keep the company's job (customer app) in step with admin status changes.
     if (newStatus && newStatus !== prevStatus) await syncCompanyJob(updatedBooking);
     // Regular clean marked Arrived/In Progress/Completed by admin: charge the visit like the
@@ -1479,6 +1485,7 @@ async function rescheduleBooking(booking, { date, timeSlot, preferredTime }) {
     preferredTime: preferredTime || "",
   };
   await booking.save();
+  await require("../utils/automationEngine").rescheduleBookingReminders(booking).catch((e) => console.error("Reminder reschedule error:", e.message));
 
   const newDateFmt = new Date(date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const customerEmail = booking.customer?.email;
