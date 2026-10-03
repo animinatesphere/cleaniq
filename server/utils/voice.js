@@ -19,7 +19,7 @@ const VOICE_TOOL_NAMES = ["get_quote", "check_availability", "find_my_bookings",
 const TRANSFER_TOOL = {
   name: "transfer_to_human",
   description:
-    "Put the caller through to a member of the team. Use when they ask for a person, want to book or get a written quote on the phone, are upset, or you can't help.",
+    "Put the caller through to a member of the team. Use when they ask for a person, say it's urgent, want to book or get a written quote on the phone, are upset, or you can't help.",
   parametersJsonSchema: {
     type: "object",
     properties: { reason: { type: "string", description: "Short reason, for the team" } },
