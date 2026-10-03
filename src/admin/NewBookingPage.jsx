@@ -224,6 +224,23 @@ const RoomCounter = ({ label, value, onChange }) => (
 /* ═══════════════════════════════════════════════════════════════════════════
    Main component
 ═══════════════════════════════════════════════════════════════════════════ */
+// Same frequency rules as the website and customer app: a service offers the regular options
+// admin has priced for it; until any are priced, Regular → weekly/fortnightly and Deep →
+// monthly/every 3 months at the one-off price. Everything else is one-off only.
+const REGULAR_FREQUENCIES = ["Weekly", "Fortnightly", "Monthly", "Quarterly"];
+const FREQUENCY_LABEL = { Once: "One-off", Weekly: "Weekly", Fortnightly: "Fortnightly", Monthly: "Monthly", Quarterly: "Every 3 months" };
+const FREQUENCY_FIELD = { Weekly: "weeklyRate", Fortnightly: "fortnightlyRate", Monthly: "monthlyRate", Quarterly: "quarterlyRate" };
+const defaultFrequencies = (name = "") => {
+  const n = String(name).toLowerCase();
+  if (n.includes("regular")) return ["Weekly", "Fortnightly"];
+  if (n.includes("deep")) return ["Monthly", "Quarterly"];
+  return [];
+};
+const offeredFrequenciesFor = (svc, name) => {
+  const priced = REGULAR_FREQUENCIES.filter((f) => Number(svc?.[FREQUENCY_FIELD[f]]) > 0);
+  return ["Once", ...(priced.length ? priced : defaultFrequencies(name))];
+};
+
 const NewBookingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -238,6 +255,21 @@ const NewBookingPage = () => {
   const [formErrors, setFormErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [createTotal, setCreateTotal] = useState(0);
+  // Tax (e.g. VAT) from Settings → Tax. On by default when switched on there; can be
+  // turned off for a booking.
+  const [tax, setTax] = useState({ enabled: false, rate: 0, label: "VAT" });
+  const [applyTax, setApplyTax] = useState(false);
+  const [taxAmount, setTaxAmount] = useState(0);
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/settings/tax`)
+      .then((r) => r.json())
+      .then((t) => {
+        if (!t) return;
+        setTax({ enabled: !!t.enabled, rate: Number(t.rate) || 0, label: t.label || "VAT" });
+        setApplyTax(!!t.enabled);
+      })
+      .catch(() => {});
+  }, []);
   const [flatAmount, setFlatAmount] = useState("");
   const [noPaymentRequired, setNoPaymentRequired] = useState(
     () => !!location.state?.noPaymentRequired,
@@ -548,27 +580,53 @@ const NewBookingPage = () => {
     );
   }, [servicesList, serviceOptions]);
 
+  // The chosen service (main services first) and the frequencies it offers.
+  const selectedService = useMemo(() => {
+    const matches = servicesList.filter((x) => clean(x.name) === clean(data.service || ""));
+    return matches.find((x) => x.category === "Base") || matches[0] || null;
+  }, [servicesList, data.service]);
+  const offeredFrequencies = useMemo(
+    () => offeredFrequenciesFor(selectedService, data.service),
+    [selectedService, data.service],
+  );
+
   /* ── Pricing ────────────────────────────────────────────────────────── */
   useEffect(() => {
+    const rate = applyTax && tax.rate > 0 ? tax.rate : 0;
+    const finish = (net) => {
+      const t = Math.round(net * rate) / 100;
+      setTaxAmount(t);
+      setCreateTotal(Math.round((net + t) * 100) / 100);
+    };
     if (data.payment?.billingType === "flat") {
       const raw = Math.round((parseFloat(flatAmount) || 0) * 100) / 100;
       const disc = couponApplied ? Math.round(raw * couponApplied.discountPercent) / 100 : 0;
-      setCreateTotal(Math.round((raw - disc) * 100) / 100);
+      finish(Math.round((raw - disc) * 100) / 100);
       return;
     }
     if (!data.service) {
       setCreateTotal(0);
+      setTaxAmount(0);
       return;
     }
     let total = 0;
-    const baseRate = dynamicRates[clean(data.service)] || 20;
+    // Weekly / fortnightly / monthly / every-3-months price from admin, else the one-off price.
+    const freqRate = Number(selectedService?.[FREQUENCY_FIELD[data.details.frequency]]) || 0;
+    const baseRate = freqRate || dynamicRates[clean(data.service)] || 20;
     total += baseRate * (data.details.duration || 1);
     (data.details.extras || []).forEach((ex) => {
       total += (dynamicRates[clean(ex.name || "")] || 0) * (ex.qty || 1);
     });
     const disc = couponApplied ? Math.round(total * couponApplied.discountPercent) / 100 : 0;
-    setCreateTotal(Math.round((total - disc) * 100) / 100);
-  }, [data, dynamicRates, flatAmount, couponApplied]);
+    finish(Math.round((total - disc) * 100) / 100);
+  }, [data, dynamicRates, flatAmount, couponApplied, applyTax, tax, selectedService]);
+
+  // A service that doesn't offer the chosen frequency goes back to one-off.
+  useEffect(() => {
+    if (data.service && servicesList.length && !offeredFrequencies.includes(data.details.frequency)) {
+      setData((d) => ({ ...d, details: { ...d.details, frequency: "Once" } }));
+    }
+  }, [data.service, data.details.frequency, offeredFrequencies, servicesList.length]);
 
   /* ── Field change ───────────────────────────────────────────────────── */
   const set = (path, value) => {
@@ -733,6 +791,7 @@ const NewBookingPage = () => {
         details: { ...data.details, extras: extrasWithRates },
         payment: {
           amount: createTotal,
+          ...(applyTax && taxAmount > 0 ? { taxRate: tax.rate, taxAmount, taxLabel: tax.label } : {}),
           currency: data.payment?.currency || "GBP",
           status: "Pending",
           billingType: data.payment?.billingType || "hourly",
@@ -1141,13 +1200,20 @@ const NewBookingPage = () => {
                           }
                           className={inputCls(formErrors["details.frequency"])}
                         >
-                          <option>Once</option>
-                          <option>Weekly</option>
-                          <option>Fortnightly</option>
-                          <option>Monthly</option>
-                          <option>Quarterly</option>
-                          <option>Yearly</option>
+                          {offeredFrequencies.map((f) => {
+                            const price = f === "Once"
+                              ? Number(selectedService?.rate) || 0
+                              : Number(selectedService?.[FREQUENCY_FIELD[f]]) || Number(selectedService?.rate) || 0;
+                            return (
+                              <option key={f} value={f}>
+                                {FREQUENCY_LABEL[f]}{price ? ` — £${price.toFixed(2)}${selectedService?.type === "hourly" ? "/hr" : ""}` : ""}
+                              </option>
+                            );
+                          })}
                         </select>
+                        {data.service && offeredFrequencies.length === 1 && (
+                          <p className="text-[11px] text-white/40 mt-1">{data.service} is one-off only.</p>
+                        )}
                         {data.details.frequency !== "Once" && (
                           <p className="text-[11px] text-[#10B981] mt-1 flex items-center gap-1">
                             <Repeat size={10} />{" "}
@@ -1156,7 +1222,7 @@ const NewBookingPage = () => {
                                 Weekly: "12 weekly",
                                 Fortnightly: "12 fortnightly",
                                 Monthly: "12 monthly",
-                                Quarterly: "4 quarterly",
+                                Quarterly: "4 every-3-months",
                                 Yearly: "2 yearly",
                               }[data.details.frequency]
                             }{" "}
@@ -1957,6 +2023,17 @@ const NewBookingPage = () => {
                 {couponError && <p className="text-rose-400 text-xs font-bold mt-1.5">{couponError}</p>}
               </div>
 
+              {/* Tax */}
+              {tax.rate > 0 && (
+                <label className="flex items-center justify-between gap-3 px-4 py-3 border-t border-white/[0.06] cursor-pointer">
+                  <span className="text-xs font-bold text-white/70">
+                    Add {tax.label} ({tax.rate}%)
+                    {!tax.enabled && <span className="block text-[10px] text-white/35 font-medium">Tax is off in Settings; tick to add it to this booking</span>}
+                  </span>
+                  <input type="checkbox" checked={applyTax} onChange={(e) => setApplyTax(e.target.checked)} className="w-4 h-4 accent-emerald-500" />
+                </label>
+              )}
+
               {/* Total */}
               <div
                 className={`px-4 py-4 border-t border-white/[0.06] ${noPaymentRequired ? "bg-emerald-500/10" : "bg-emerald-500"}`}
@@ -1978,6 +2055,11 @@ const NewBookingPage = () => {
                     >
                       £{createTotal.toFixed(2)}
                     </p>
+                    {applyTax && taxAmount > 0 && (
+                      <p className={`text-[10px] font-bold mt-0.5 ${noPaymentRequired ? "text-emerald-400/70" : "text-white/70"}`}>
+                        Includes {tax.label} ({tax.rate}%) £{taxAmount.toFixed(2)}
+                      </p>
+                    )}
                   </div>
                   {noPaymentRequired && (
                     <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-1 rounded-full">
