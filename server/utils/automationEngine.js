@@ -189,6 +189,28 @@ const handlers = {
   },
 };
 
+const BEFORE_CLEAN = ["booking_reminder_24h", "booking_reminder_3h", "booking_reminder_1h"];
+const AFTER_CLEAN = ["review_request_2h", "referral_offer_48h", "rebooking_discount_3d"];
+
+// Why a booking email shouldn't be sent any more, or null if it should.
+async function staleBookingReason(task) {
+  const isBefore = BEFORE_CLEAN.includes(task.type);
+  const isAfter = AFTER_CLEAN.includes(task.type);
+  const id = task.payload?.bookingId;
+  if ((!isBefore && !isAfter) || !id) return null;
+  const booking = await Booking.findById(id).select("status schedule.date").lean().catch(() => null);
+  if (!booking) return "Booking no longer exists";
+  if (["Cancelled", "Rejected"].includes(booking.status)) return `Booking is ${booking.status.toLowerCase()}`;
+  if (isBefore && ["Completed", "Completed - Unpaid"].includes(booking.status)) return "Booking is already completed";
+  // Rescheduled to another day: this reminder was for the old date.
+  const when = task.payload?.bookingDateTime || task.payload?.date;
+  if (isBefore && booking.schedule?.date && task.payload?.bookingDateTime) {
+    const uk = (d) => new Date(d).toLocaleDateString("en-GB", { timeZone: "Europe/London" });
+    if (uk(booking.schedule.date) !== uk(when)) return "Booking was moved to another date";
+  }
+  return null;
+}
+
 async function processDueTasks() {
   const now = new Date();
   const tasks = await ScheduledTask.find({
@@ -217,6 +239,17 @@ async function processDueTasks() {
         await task.save();
         continue;
       }
+    }
+
+    // Booking emails only go out while the booking is still going ahead: a cancelled booking
+    // (by the customer, in the app or by admin) never gets "your cleaner arrives soon".
+    const stale = await staleBookingReason(task);
+    if (stale) {
+      task.status = "cancelled";
+      task.error = stale;
+      task.executedAt = new Date();
+      await task.save();
+      continue;
     }
 
     task.attempts += 1;
@@ -302,4 +335,40 @@ async function runTaskNow(type, payload) {
   await handler({ type, payload, attempts: 1 });
 }
 
-module.exports = { startAutomationEngine, scheduleTask, runTaskNow };
+// Replace a booking's "your clean is coming up" reminders (24h, 3h, 1h before) — used when a
+// booking is moved. Old reminders are cancelled; new ones are only queued while it's going ahead.
+async function rescheduleBookingReminders(booking) {
+  const id = String(booking._id);
+  await ScheduledTask.updateMany(
+    { status: "pending", type: { $in: BEFORE_CLEAN }, "payload.bookingId": id },
+    { $set: { status: "cancelled", error: "Booking was moved", executedAt: new Date() } },
+  );
+  const goingAhead = booking.noPaymentRequired || ["Confirmed", "Authorized", "Accepted", "Assigned"].includes(booking.status);
+  if (!goingAhead || !booking.schedule?.date || !booking.customer?.email) return 0;
+  const { buildBookingDateTime } = require("./bookingDateTime");
+  const at = buildBookingDateTime(booking.schedule.date, booking.schedule.timeSlot, booking.schedule.preferredTime);
+  if (!at || at <= new Date()) return 0;
+  const payload = {
+    bookingId: id,
+    bookingRef: booking.bookingId,
+    email: booking.customer.email,
+    firstName: booking.customer.firstName,
+    service: booking.service,
+    date: at.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/London" }),
+    time: at.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }),
+    bookingDateTime: at.toISOString(),
+    amount: booking.payment?.amount,
+  };
+  const MIN_LEAD = 15 * 60 * 1000;
+  let n = 0;
+  for (const [type, hours] of [["booking_reminder_24h", 24], ["booking_reminder_3h", 3], ["booking_reminder_1h", 1]]) {
+    const runAt = at.getTime() - hours * 3600 * 1000;
+    if (runAt > Date.now() + MIN_LEAD) {
+      await ScheduledTask.create({ type, runAt: new Date(runAt), payload });
+      n++;
+    }
+  }
+  return n;
+}
+
+module.exports = { startAutomationEngine, scheduleTask, runTaskNow, rescheduleBookingReminders, processDueTasks, staleBookingReason };

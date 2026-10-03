@@ -7,6 +7,7 @@ const scheduledTaskSchema = new mongoose.Schema({
     enum: [
       "booking_reminder_24h",
       "booking_reminder_3h",
+      "booking_reminder_1h",
       "review_request_2h",
       "referral_offer_48h",
       "rebooking_discount_3d",
@@ -36,6 +37,8 @@ const scheduledTaskSchema = new mongoose.Schema({
     lastName: String,
     service: String,
     date: String,
+    time: String, // "10:00" (UK)
+    bookingDateTime: String, // ISO date-time of the clean, for the "still going ahead?" checks
     bookingRef: String,
     amount: Number,
   },

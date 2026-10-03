@@ -439,6 +439,7 @@ router.put('/:id/reschedule', verifyCustomer, async (req, res) => {
     booking.schedule.timeSlot = timeSlot;
     booking.schedule.preferredTime = timeSlot;
     await booking.save();
+    await require('../utils/automationEngine').rescheduleBookingReminders(booking).catch((e) => console.error('Reminder reschedule error:', e.message));
 
     const fmtDate = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
