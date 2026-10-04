@@ -15,6 +15,7 @@ const aiConversationSchema = new mongoose.Schema(
     lastMessagePreview: { type: String, default: "" },
     unreadCount: { type: Number, default: 0 },
     needsAttention: { type: Boolean, default: false }, // AI failed or hit its limit; staff should look
+    finishedAlertAt: { type: Date, default: null }, // last message covered by a "chat finished" email
   },
   { timestamps: true },
 );

@@ -26,8 +26,51 @@ async function isEnabled(type) {
   }
 }
 
+// Why a quote follow-up ("still thinking about it?", "following up", the 10% win-back) shouldn't
+// go out, or null if it should. Stops once the customer has answered — this quote accepted or
+// declined, or ANY quote to the same email accepted, or a booking made, since this one was sent
+// (an edited quote is sent as a new quote, so the old one's follow-ups must stop too).
+const QUOTE_FOLLOWUPS = ["quote_followup_24h", "quote_followup_3d", "lost_lead_7d"];
+async function quoteFollowupStopReason(task) {
+  if (!QUOTE_FOLLOWUPS.includes(task.type)) return null;
+  const Quote = require("../models/Quote");
+  const { quoteId, quoteRef, email } = task.payload || {};
+  const quote = quoteId
+    ? await Quote.findById(quoteId).lean().catch(() => null)
+    : quoteRef ? await Quote.findOne({ quoteRef }).lean().catch(() => null) : null;
+  if ((quoteId || quoteRef) && !quote) return "Quote was deleted";
+  if (quote && ["accepted", "booked"].includes(quote.status)) return "Quote was accepted";
+  if (quote?.status === "declined") return "Customer declined the quote";
+  if (!email) return null;
+  const since = quote?.createdAt || task.createdAt || new Date(0);
+  const re = new RegExp(`^${String(email).trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+  if (await Quote.exists({ email: re, status: { $in: ["accepted", "booked"] }, acceptedAt: { $gte: since } })) {
+    return "Customer accepted another quote";
+  }
+  if (await Booking.exists({ "customer.email": re, createdAt: { $gte: since }, status: { $nin: ["Cancelled", "Rejected"] } })) {
+    return "Customer has booked since";
+  }
+  return null;
+}
+
+// Stop every quote follow-up still waiting for this customer (called when a quote is accepted).
+async function cancelQuoteFollowups(email, reason = "Quote accepted") {
+  if (!email) return 0;
+  const re = new RegExp(`^${String(email).trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+  const r = await ScheduledTask.updateMany(
+    { status: "pending", type: { $in: QUOTE_FOLLOWUPS }, "payload.email": re },
+    { $set: { status: "cancelled", error: reason, executedAt: new Date() } },
+  );
+  return r.modifiedCount || 0;
+}
+
 // Handlers per task type
 const handlers = {
+  // The AI receptionist's WhatsApp chat has gone quiet: email the team (utils/aiFinishedAlerts.js).
+  ai_chat_finished: async (task) => {
+    await require("./aiFinishedAlerts").sendChatFinishedAlert(task);
+  },
+
   booking_reminder_24h: async (task) => {
     const { email, firstName, service, date, time, bookingRef, amount, bookingDateTime } = task.payload;
     // Guard: if appointment is now less than 4 hours away this reminder is stale — skip it
@@ -112,13 +155,7 @@ const handlers = {
 
   quote_followup_24h: async (task) => {
     const { email, firstName, service, quoteRef, amount } = task.payload;
-    // Cancel if they've since booked (quote converted to booking)
-    const { quoteId } = task.payload;
-    if (quoteId) {
-      const Quote = require("../models/Quote");
-      const quote = await Quote.findById(quoteId).catch(() => null);
-      if (quote?.status === "accepted" || quote?.status === "booked") return;
-    }
+    if (await quoteFollowupStopReason(task)) return;
     await sendEmail({
       to: email,
       subject: `Still thinking about it? Your Cleaniq quote is ready`,
@@ -128,11 +165,7 @@ const handlers = {
 
   quote_followup_3d: async (task) => {
     const { email, firstName, service, quoteRef, amount } = task.payload;
-    if (task.payload.quoteId) {
-      const Quote = require("../models/Quote");
-      const quote = await Quote.findById(task.payload.quoteId).catch(() => null);
-      if (quote?.status === "accepted" || quote?.status === "booked") return;
-    }
+    if (await quoteFollowupStopReason(task)) return;
     await sendEmail({
       to: email,
       subject: `Following up on your Cleaniq quote`,
@@ -142,11 +175,7 @@ const handlers = {
 
   lost_lead_7d: async (task) => {
     const { email, firstName, service, quoteRef } = task.payload;
-    if (task.payload.quoteId) {
-      const Quote = require("../models/Quote");
-      const quote = await Quote.findById(task.payload.quoteId).catch(() => null);
-      if (quote?.status === "accepted" || quote?.status === "booked") return;
-    }
+    if (await quoteFollowupStopReason(task)) return;
     await sendEmail({
       to: email,
       subject: `${firstName}, your 10% discount expires soon`,
@@ -254,7 +283,7 @@ async function processDueTasks() {
 
     // Booking emails only go out while the booking is still going ahead: a cancelled booking
     // (by the customer, in the app or by admin) never gets "your cleaner arrives soon".
-    const stale = await staleBookingReason(task);
+    const stale = (await staleBookingReason(task)) || (await quoteFollowupStopReason(task));
     if (stale) {
       task.status = "cancelled";
       task.error = stale;
@@ -382,4 +411,4 @@ async function rescheduleBookingReminders(booking) {
   return n;
 }
 
-module.exports = { startAutomationEngine, scheduleTask, runTaskNow, rescheduleBookingReminders, processDueTasks, staleBookingReason };
+module.exports = { startAutomationEngine, scheduleTask, runTaskNow, rescheduleBookingReminders, processDueTasks, staleBookingReason, quoteFollowupStopReason, cancelQuoteFollowups };

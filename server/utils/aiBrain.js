@@ -2,6 +2,7 @@
 // BOTH the phone (voice) and WhatsApp channels. Read fresh from the database on
 // every call/message so admin edits apply immediately.
 const AiSettings = require("../models/AiSettings");
+const { offeredFrequencies, rateForFrequency } = require("./pricing");
 const KnowledgeEntry = require("../models/KnowledgeEntry");
 const Service = require("../models/Service");
 
@@ -42,20 +43,18 @@ function formatServices(services) {
   }
   const line = (s) => {
     const details = [s.description, ...(s.bullets || [])].filter(Boolean).join("; ");
-    const regular = [
-      s.weeklyRate > 0 && `weekly £${Number(s.weeklyRate).toFixed(2)} per hour`,
-      s.fortnightlyRate > 0 && `fortnightly £${Number(s.fortnightlyRate).toFixed(2)} per hour`,
-      s.monthlyRate > 0 && `monthly £${Number(s.monthlyRate).toFixed(2)} per hour`,
-      s.quarterlyRate > 0 && `every 3 months £${Number(s.quarterlyRate).toFixed(2)} per hour`,
-    ].filter(Boolean);
-    const often = s.type !== "hourly" ? "" : regular.length ? `; that's the one-off price; also ${regular.join(", ")}` : "; one-off only";
+    // Same frequencies the admin form, website and app offer for this service.
+    const LABEL = { Weekly: "weekly", Fortnightly: "fortnightly", Monthly: "monthly", Quarterly: "every 3 months" };
+    const regular = offeredFrequencies(s).filter((f) => f !== "Once")
+      .map((f) => `${LABEL[f]} £${rateForFrequency(s, f).toFixed(2)} per hour`);
+    const often = s.type !== "hourly" ? "" : regular.length ? `; that's the one-off price; it can also be booked ${regular.join(", ")} (no other frequencies)` : "; one-off only";
     return `- ${s.name}: ${formatPrice(s)}${details ? ` (${details})` : ""}${often}`;
   };
   const sections = [];
   if (groups.hourly.length) sections.push("Cleaning services (charged per hour):\n" + groups.hourly.map(line).join("\n"));
   if (groups.extras.length) sections.push("Add-on extras:\n" + groups.extras.map(line).join("\n"));
   if (!sections.length) return "No prices are currently listed.";
-  sections.push("Price = hourly rate × hours + extras. Rooms (bedrooms, bathrooms, etc.) are not charged separately.");
+  sections.push("Price = hourly rate × hours + extras. Rooms (bedrooms, bathrooms, etc.) are not charged separately.\nExtras (fridge, oven, carpet…) are add-ons to a cleaning service, never a service on their own: always quote or book a cleaning service with hours and add the extras to it.\nOnly offer the frequencies listed for each service.");
   return sections.join("\n\n");
 }
 

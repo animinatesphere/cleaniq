@@ -72,6 +72,8 @@ async function sendAndRecord(conversation, role, text, { send = sendWhatsApp, to
     { _id: conversation._id },
     { $set: { lastMessageAt: new Date(), lastMessagePreview: text.slice(0, 120) } },
   );
+  // Email the team once the chat goes quiet after the receptionist's reply.
+  if (role === "ai") await require("./aiFinishedAlerts").scheduleChatFinishedAlert(conversation._id);
   return message;
 }
 

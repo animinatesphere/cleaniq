@@ -5,7 +5,19 @@ const Booking = require("../models/Booking");
 const Service = require("../models/Service");
 const AiSettings = require("../models/AiSettings");
 const { toE164UK } = require("./phone");
-const { rateForFrequency } = require("./pricing");
+const { rateForFrequency, offeredFrequencies } = require("./pricing");
+
+// Same rule as the admin form, website and app: a service is only offered at its own frequencies
+// (Regular: weekly/fortnightly, Deep: monthly/every 3 months, others one-off — or whatever admin priced).
+const FREQ_LABEL = { Once: "one-off", Weekly: "weekly", Fortnightly: "fortnightly", Monthly: "monthly", Quarterly: "every 3 months" };
+function frequencyProblem(base, frequency) {
+  const f = frequency || "Once";
+  const offered = offeredFrequencies(base);
+  if (offered.includes(f)) return null;
+  return `${base.name} isn't offered ${FREQ_LABEL[f] || String(f).toLowerCase()}. It can be booked: ${offered.map((x) => FREQ_LABEL[x] || x).join(", ")}.`;
+}
+// Quote Builder frequencies (lower case) → booking frequencies.
+const QUOTE_TO_FREQ = { once: "Once", weekly: "Weekly", biweekly: "Fortnightly", monthly: "Monthly", quarterly: "Quarterly", yearly: "Yearly" };
 const Lead = require("../models/Lead");
 
 const FREQUENCIES = ["Once", "Weekly", "Fortnightly", "Monthly", "Quarterly", "Yearly"];
@@ -53,7 +65,7 @@ async function loadUkServices() {
   return Service.find({ region: "UK", rate: { $gt: 0 } }).lean();
 }
 
-function calculateQuote(services, { service, hours, extras = [], suppliesProvidedBy, frequency }, suppliesFee = 10) {
+function calculateQuote(services, { service, hours, extras = [], suppliesProvidedBy, frequency }, suppliesFee = 10, tax = null) {
   const hourly = services.filter((s) => s.type === "hourly");
   const base = hourly.find((s) => clean(s.name) === clean(service));
   if (!base) {
@@ -61,6 +73,8 @@ function calculateQuote(services, { service, hours, extras = [], suppliesProvide
   }
   const h = Number(hours);
   if (!Number.isFinite(h) || h < 1 || h > 50) return { error: "Hours must be between 1 and 50." };
+  const freqError = frequencyProblem(base, frequency || "Once");
+  if (freqError) return { error: freqError };
 
   const extraOptions = services.filter((s) => s.type !== "hourly" && s.type !== "per_room" && s.category !== "Rooms");
   const lines = [];
@@ -78,8 +92,15 @@ function calculateQuote(services, { service, hours, extras = [], suppliesProvide
   // Weekly/fortnightly cleans use their own hourly price when admin has set one.
   const hourlyRate = rateForFrequency(base, frequency);
   const labour = money(hourlyRate * h);
-  const total = money(labour + lines.reduce((sum, l) => sum + l.subtotal, 0));
-  return { service: base.name, hourlyRate, hours: h, labour, extras: lines, total, currency: "GBP" };
+  const net = money(labour + lines.reduce((sum, l) => sum + l.subtotal, 0));
+  // Tax from admin Settings → Tax is added on top, exactly like the admin booking form.
+  const taxAmount = tax?.enabled ? money(net * tax.rate / 100) : 0;
+  const total = money(net + taxAmount);
+  return {
+    service: base.name, hourlyRate, hours: h, labour, extras: lines, currency: "GBP",
+    ...(taxAmount ? { subtotal: net, tax: { label: tax.label, rate: tax.rate, amount: taxAmount } } : {}),
+    total,
+  };
 }
 
 // ── Availability (mirrors the admin form's slot + specific-time rules) ────────────────────
@@ -241,7 +262,7 @@ async function createAiBooking(args, ctx) {
   if (when.error) return when;
 
   const settings = await AiSettings.get();
-  const quote = calculateQuote(await loadUkServices(), args, settings.suppliesFee);
+  const quote = calculateQuote(await loadUkServices(), args, settings.suppliesFee, await require("./tax").getTax());
   if (quote.error) return quote;
 
   const details = {
@@ -267,7 +288,10 @@ async function createAiBooking(args, ctx) {
     service: quote.service,
     details,
     schedule: when.schedule,
-    payment: { amount: quote.total, currency: "GBP", status: "Pending", billingType: "hourly" },
+    payment: {
+      amount: quote.total, currency: "GBP", status: "Pending", billingType: "hourly",
+      ...(quote.tax ? { taxRate: quote.tax.rate, taxAmount: quote.tax.amount, taxLabel: quote.tax.label } : {}),
+    },
     status: "Pending",
     leadSource: "WhatsApp AI",
     suppliesProvidedBy: args.suppliesProvidedBy,
@@ -377,19 +401,31 @@ function buildQuoteItems(services, args, suppliesFee) {
     const hours = Number(line.hours);
     if (!Number.isFinite(hours) || hours < 1 || hours > 50) return { error: `Hours for ${base.name} must be between 1 and 50.` };
     // Quote frequencies are lower-case ("weekly"); regular cleans use their own price if set.
-    const freq = String(args.frequency || "").replace(/^./, (c) => c.toUpperCase());
+    const freq = QUOTE_TO_FREQ[String(args.frequency || "once").toLowerCase()] || "Once";
+    const freqError = frequencyProblem(base, freq);
+    if (freqError) return { error: freqError };
     items.push({ service: base.name, customService: "", description: String(line.description || "").trim(), billingType: "hourly", qty: hours, unitPrice: rateForFrequency(base, freq) });
   }
+  if (!items.some((i) => i.billingType === "hourly")) return { error: "Add at least one cleaning service with hours." };
+  // Extras (fridge, oven…) and the supplies fee are add-ons on the main service, exactly like the
+  // admin Quote Builder — never a service of their own.
+  const addOns = [];
   for (const ex of args.extras || []) {
     const match = extraOptions.find((s) => clean(s.name) === clean(ex.name));
     if (!match) return { error: `Unknown extra "${ex.name}". Available extras: ${extraOptions.map((s) => s.name).join(", ")}` };
-    items.push({ service: match.name, customService: "", description: "", billingType: "flat", qty: Math.max(1, Math.round(Number(ex.qty) || 1)), unitPrice: match.rate });
+    addOns.push({ name: match.name, qty: Math.max(1, Math.round(Number(ex.qty) || 1)), unitPrice: match.rate });
   }
   if (args.suppliesProvidedBy === "Cleaniq" && suppliesFee > 0) {
-    items.push({ service: SUPPLIES_LINE, customService: "", description: "Supplied by Cleaniq", billingType: "flat", qty: 1, unitPrice: suppliesFee });
+    addOns.push({ name: SUPPLIES_LINE, qty: 1, unitPrice: suppliesFee });
   }
-  if (!items.some((i) => i.billingType === "hourly")) return { error: "Add at least one cleaning service with hours." };
-  return { items: items.map((i) => ({ ...i, subtotal: money(Number(i.unitPrice) * Number(i.qty)) })) };
+  items[0].extras = addOns;
+  return {
+    items: items.map((i) => ({
+      ...i,
+      extras: i.extras || [],
+      subtotal: money(Number(i.unitPrice) * Number(i.qty) + (i.extras || []).reduce((sum, e) => sum + e.unitPrice * e.qty, 0)),
+    })),
+  };
 }
 
 async function sendAiQuote(args, ctx) {
@@ -458,6 +494,18 @@ async function sendAiQuote(args, ctx) {
     quoteRef: `CLQ-${Date.now().toString().slice(-6)}`,
     date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" }),
     items: built.items,
+    // Property & access, the same fields as the admin Quote Builder.
+    property: {
+      bedrooms: Math.max(0, Math.round(Number(args.bedrooms) || 0)),
+      bathrooms: Math.max(0, Math.round(Number(args.bathrooms) || 0)),
+      kitchens: Math.max(0, Math.round(Number(args.kitchens) || 0)),
+      receptionRooms: Math.max(0, Math.round(Number(args.livingRooms) || 0)),
+    },
+    suppliesProvidedBy: args.suppliesProvidedBy || "",
+    parking: String(args.parking || "").trim(),
+    keyAccess: String(args.access || "").trim(),
+    hasPet: args.hasPet === true ? "Yes" : args.hasPet === false ? "No" : "",
+    specialInstructions: String(args.notes || "").trim(),
     subtotal,
     discountAmount: 0,
     subtotalAfterDiscount: subtotal,
@@ -467,7 +515,10 @@ async function sendAiQuote(args, ctx) {
     balanceDue: grandTotal,
   };
   const figures = {
-    lines: built.items.map((i) => `${i.service}: ${i.billingType === "hourly" ? `${i.qty}h × £${i.unitPrice.toFixed(2)}` : `${i.qty} × £${i.unitPrice.toFixed(2)}`} = £${i.subtotal.toFixed(2)}`),
+    lines: built.items.flatMap((i) => [
+      `${i.service}: ${i.billingType === "hourly" ? `${i.qty}h × £${i.unitPrice.toFixed(2)}` : `${i.qty} × £${i.unitPrice.toFixed(2)}`} = £${money(i.unitPrice * i.qty).toFixed(2)}`,
+      ...(i.extras || []).map((e) => `  + ${e.name}: ${e.qty} × £${Number(e.unitPrice).toFixed(2)} = £${money(e.unitPrice * e.qty).toFixed(2)}`),
+    ]),
     subtotal,
     vat,
     grandTotal,
@@ -618,7 +669,7 @@ const declarations = [
         email: { type: "string" },
         address: { type: "string", description: "Full address including house/flat number and town" },
         postcode: { type: "string", description: "Optional if the address already includes the postcode" },
-        frequency: { type: "string", enum: FREQUENCIES, description: "Once, or a regular series" },
+        frequency: { type: "string", enum: FREQUENCIES, description: "Once, or a regular series — only the frequencies offered for the service (see the price list)" },
         suppliesProvidedBy: { type: "string", enum: ["Cleaniq", "Customer"] },
         service: { type: "string" },
         hours: { type: "number" },
@@ -662,7 +713,14 @@ const declarations = [
         },
         extras: extrasSchema,
         suppliesProvidedBy: { type: "string", enum: ["Cleaniq", "Customer"] },
-        frequency: { type: "string", enum: QUOTE_FREQUENCIES, description: "once, weekly, biweekly (fortnightly), monthly, quarterly or yearly" },
+        frequency: { type: "string", enum: QUOTE_FREQUENCIES, description: "once, weekly, biweekly (fortnightly), monthly or quarterly (every 3 months) — only those offered for the service" },
+        bedrooms: { type: "integer" },
+        bathrooms: { type: "integer" },
+        kitchens: { type: "integer" },
+        livingRooms: { type: "integer", description: "Living / reception rooms" },
+        hasPet: { type: "boolean" },
+        parking: { type: "string", description: "e.g. Free parking on-site, Free street parking, Paid parking, No parking" },
+        access: { type: "string", description: "How the cleaner gets in, e.g. Someone will be home, Key in a key safe" },
         serviceDate: { type: "string", description: "Optional preferred date, YYYY-MM-DD" },
         time: { type: "string", description: "Optional preferred arrival time, HH:MM" },
         notes: { type: "string" },
@@ -764,7 +822,7 @@ function makeToolRunner(ctx) {
     try {
       if (name === "get_quote") {
         const settings = await AiSettings.get();
-        return calculateQuote(await loadUkServices(), args, settings.suppliesFee);
+        return calculateQuote(await loadUkServices(), args, settings.suppliesFee, await require("./tax").getTax());
       }
       if (name === "check_availability") return await getAvailability(args.date, { time: args.time, hours: args.hours });
       if (name === "create_booking") return await createAiBooking(args, ctx);
