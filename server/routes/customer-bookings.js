@@ -410,6 +410,9 @@ router.post('/:id/rate', verifyCustomer, async (req, res) => {
           type: 'success',
           bookingId: booking.bookingId,
         });
+        const { sendPushToUser } = require('../utils/pushNotifications');
+        sendPushToUser('worker', booking.assignedWorker, `${'★'.repeat(stars)} from ${booking.customer.firstName || 'your customer'}`,
+          `${booking.service}${booking.cleanerRating.comment ? `: "${booking.cleanerRating.comment}"` : ''}`, { type: 'rating', bookingId: booking.bookingId }).catch(() => {});
       } catch {}
     }
     res.json({ cleanerRating: booking.cleanerRating, workerRating: stats?.rating ?? null });

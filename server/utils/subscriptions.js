@@ -402,6 +402,10 @@ async function cancelFutureVisits(sub, reason, now = new Date()) {
     .filter((v) => v.assignedWorker)
     .map((v) => ({ workerId: v.assignedWorker, title: "Job cancelled", message: `${v.service} on ${ukDate(v.schedule.date)} (${v.bookingId}) was cancelled.`, type: "job" }));
   if (notices.length) await Notification.insertMany(notices, { ordered: false }).catch(() => {});
+  // Tell the cleaners on their phones too (not just in the app).
+  const { sendPushToUser } = require("./pushNotifications");
+  await Promise.all(notices.map((n) =>
+    sendPushToUser("worker", n.workerId, n.title, n.message, { type: "job_cancelled" }).catch(() => {})));
   return visits.length;
 }
 

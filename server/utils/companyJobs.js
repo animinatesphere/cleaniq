@@ -1,6 +1,7 @@
 // Company jobs (posted from the customer app) live as a Job the customer sees plus a
 // Booking that admin and workers use. These helpers keep the two in step.
 const Job = require("../models/Job");
+const { tokensOf } = require("./pushNotifications");
 const Worker = require("../models/Worker");
 const Notification = require("../models/Notification");
 const { sendWorkersPush } = require("./pushNotifications");
@@ -54,7 +55,7 @@ async function notifyWorkersNewJob(booking, title = "New Job Available!") {
       workers.map((w) => ({ workerId: w._id, title, message: body, type: "job", bookingId: booking.bookingId })),
       { ordered: false },
     ).catch(() => {});
-    const tokens = workers.map((w) => w.expoPushToken).filter(Boolean);
+    const tokens = workers.flatMap(tokensOf);
     if (tokens.length) {
       await sendWorkersPush(tokens, { title, body, data: { type: "new_job", bookingId: booking.bookingId } });
     }

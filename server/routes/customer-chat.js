@@ -1,4 +1,5 @@
 const express = require("express");
+const { tokensOf } = require("../utils/pushNotifications");
 const router = express.Router();
 const CustomerMessage = require("../models/CustomerMessage");
 const WorkerCustomerMessage = require("../models/WorkerCustomerMessage");
@@ -324,8 +325,8 @@ router.post("/worker-messages/:bookingId", verifyCustomer, async (req, res) => {
     try {
       if (booking.assignedWorker) {
         const worker = await Worker.findById(booking.assignedWorker);
-        if (worker?.expoPushToken) {
-          await sendCustomerPush(worker.expoPushToken, {
+        if (tokensOf(worker).length) {
+          await sendCustomerPush(tokensOf(worker), {
             title: `Message from ${req.customer.firstName}`,
             body: text.trim().length > 60 ? text.trim().slice(0, 57) + "…" : text.trim(),
             data: {

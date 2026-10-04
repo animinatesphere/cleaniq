@@ -1,4 +1,6 @@
 const express = require("express");
+const { tokensOf } = require("../utils/pushNotifications");
+const { addToken, removeTokenFromUser } = require("../utils/pushTokens");
 const router = express.Router();
 const Worker = require("../models/Worker");
 const Booking = require("../models/Booking");
@@ -21,7 +23,7 @@ const notifyCustomer = async (booking, { title, body, type = "status" }) => {
   try {
     const customer = await Customer.findOne({ email: (booking.customer?.email || "").toLowerCase() });
     // bookingMongoId lets the app open this booking's details when the notification is tapped
-    if (customer?.expoPushToken) await sendCustomerPush(customer.expoPushToken, { title, body, data: { type, bookingId: booking.bookingId, bookingMongoId: String(booking._id) } });
+    if (tokensOf(customer).length) await sendCustomerPush(tokensOf(customer), { title, body, data: { type, bookingId: booking.bookingId, bookingMongoId: String(booking._id) } });
   } catch (err) { console.error("Customer push error:", err.message); }
 };
 
@@ -44,8 +46,8 @@ async function sendAutoIntro(booking, workerId) {
       text,
     });
     const customer = await Customer.findOne({ email: String(booking.customer.email).toLowerCase() });
-    if (customer?.expoPushToken) {
-      await sendCustomerPush(customer.expoPushToken, {
+    if (tokensOf(customer).length) {
+      await sendCustomerPush(tokensOf(customer), {
         title: `Message from ${worker.firstName}`,
         body: text.length > 80 ? text.slice(0, 77) + "…" : text,
         data: { type: "chat", bookingId: ref, bookingMongoId: String(booking._id), senderName: `${worker.firstName} ${worker.lastName}`.trim() },
@@ -169,12 +171,52 @@ router.post("/login", async (req, res) => {
 });
 
 // Save worker push token for notifications
+// OLD route, kept for workers still on app versions before 1.5: no login check, token in the
+// body. Remove it once every worker is on the new app (see /me/push-token below).
 router.post("/push-token", async (req, res) => {
   try {
-    const { workerId, token } = req.body;
+    const { workerId, token, platform } = req.body;
     if (!workerId || !token) return res.status(400).json({ error: "workerId and token required" });
-    await Worker.findByIdAndUpdate(workerId, { expoPushToken: token });
+    if (!mongoose.isValidObjectId(workerId)) return res.status(400).json({ error: "Invalid worker" });
+    console.log(`[push] worker ${workerId} registered a token via the old route`);
+    const ok = await addToken(Worker, workerId, token, platform);
+    if (!ok) return res.status(400).json({ error: "Not a valid Expo push token" });
     res.json({ message: "Push token saved." });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// The worker from the app's login token (Authorization: Bearer …).
+const verifyWorkerToken = (req, res, next) => {
+  const auth = req.headers.authorization || "";
+  if (!auth.startsWith("Bearer ")) return res.status(401).json({ error: "Please log in again" });
+  try {
+    const decoded = jwt.verify(auth.slice(7), process.env.JWT_SECRET || "cleaniq_super_secret_mobile_key");
+    if (!decoded?.workerId || !mongoose.isValidObjectId(decoded.workerId)) throw new Error("bad token");
+    req.workerId = String(decoded.workerId);
+    next();
+  } catch {
+    return res.status(401).json({ error: "Please log in again" });
+  }
+};
+
+// POST /workers/me/push-token — this phone's push token for the logged-in worker.
+router.post("/me/push-token", verifyWorkerToken, async (req, res) => {
+  try {
+    const ok = await addToken(Worker, req.workerId, req.body.token, req.body.platform);
+    if (!ok) return res.status(400).json({ error: "Not a valid Expo push token" });
+    res.json({ message: "Push token saved." });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /workers/me/push-token — on logout, stop sending to this phone.
+router.delete("/me/push-token", verifyWorkerToken, async (req, res) => {
+  try {
+    if (req.body?.token) await removeTokenFromUser(Worker, req.workerId, req.body.token);
+    res.json({ message: "Push token removed." });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -483,8 +525,8 @@ router.put("/jobs/:id/assign", async (req, res) => {
       message: shiftMsg,
       type: "info",
     });
-    if (worker.expoPushToken) {
-      sendWorkersPush([worker.expoPushToken], {
+    if (tokensOf(worker).length) {
+      sendWorkersPush(tokensOf(worker), {
         title: "New job assigned to you",
         body: shiftMsg,
         data: { type: "job_assigned", bookingId: booking.bookingId },
@@ -596,8 +638,8 @@ router.put("/jobs/:id/unassign", require("../middleware/adminAuth"), async (req,
           : "";
         const message = `${booking.service}${when ? ` on ${when}` : ""} is no longer assigned to you.`;
         await Notification.create({ workerId: worker._id, title: "Job removed by Cleaniq", message, type: "job", bookingId: booking.bookingId }).catch(() => {});
-        if (worker.expoPushToken) {
-          sendWorkersPush([worker.expoPushToken], { title: "Job removed by Cleaniq", body: message, data: { type: "job_removed", bookingId: booking.bookingId } }).catch(() => {});
+        if (tokensOf(worker).length) {
+          sendWorkersPush(tokensOf(worker), { title: "Job removed by Cleaniq", body: message, data: { type: "job_removed", bookingId: booking.bookingId } }).catch(() => {});
         }
       }
     }
@@ -646,11 +688,11 @@ router.put("/jobs/:id/pay", require("../middleware/adminAuth"), async (req, res)
     }
 
     if (booking.assignedWorker && rate !== oldRate) {
-      const worker = await Worker.findById(booking.assignedWorker).select("expoPushToken").lean();
+      const worker = await Worker.findById(booking.assignedWorker).select("expoPushToken pushTokens").lean();
       const message = `Your pay for ${booking.service} (${booking.bookingId}) is now £${rate.toFixed(2)}/hr.`;
       await Notification.create({ workerId: booking.assignedWorker, title: "Pay updated", message, type: "info", bookingId: booking.bookingId }).catch(() => {});
-      if (worker?.expoPushToken) {
-        sendWorkersPush([worker.expoPushToken], { title: "Pay updated", body: message, data: { type: "pay_updated", bookingId: booking.bookingId } }).catch(() => {});
+      if (tokensOf(worker).length) {
+        sendWorkersPush(tokensOf(worker), { title: "Pay updated", body: message, data: { type: "pay_updated", bookingId: booking.bookingId } }).catch(() => {});
       }
     }
     res.json({ message: `Cleaner pay set to £${rate.toFixed(2)}/hr.`, booking });

@@ -1,4 +1,5 @@
 const express = require("express");
+const { tokensOf } = require("../utils/pushNotifications");
 const router = express.Router();
 const Booking = require("../models/Booking");
 const Worker = require("../models/Worker");
@@ -216,7 +217,7 @@ router.post("/public", async (req, res) => {
           const dateStr = newBooking.schedule?.date
             ? new Date(newBooking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
             : "TBC";
-          await sendWorkersPush(activeStaff.map(s => s.expoPushToken), {
+          await sendWorkersPush(activeStaff.flatMap(tokensOf), {
             title: "New Job Available!",
             body: `${newBooking.service} · ${dateStr}`,
             data: { type: "new_job", bookingId: newBooking.bookingId },
@@ -800,7 +801,7 @@ async function createBooking(body) {
         ).catch(() => {});
 
         // Also fire Expo push (best-effort — works when FCM is configured)
-        const tokens = workers.map(w => w.expoPushToken).filter(Boolean);
+        const tokens = workers.flatMap(tokensOf);
         if (tokens.length) {
           await sendWorkersPush(tokens, {
             title: notifTitle,
@@ -1318,7 +1319,7 @@ router.put("/:id", async (req, res) => {
           ).catch(() => {});
 
           // Also fire Expo push (best-effort)
-          const tokens = workers.map(w => w.expoPushToken).filter(Boolean);
+          const tokens = workers.flatMap(tokensOf);
           if (tokens.length) {
             await sendWorkersPush(tokens, {
               title: notifTitle,
@@ -1428,9 +1429,9 @@ router.put("/:id", async (req, res) => {
           await sms.triggerBookingCancelled(updatedBooking);
           if (updatedBooking.assignedWorker) {
             try {
-              const w = await Worker.findById(updatedBooking.assignedWorker).select("expoPushToken").lean();
-              if (w?.expoPushToken) {
-                await sendWorkersPush([w.expoPushToken], {
+              const w = await Worker.findById(updatedBooking.assignedWorker).select("expoPushToken pushTokens").lean();
+              if (tokensOf(w).length) {
+                await sendWorkersPush(tokensOf(w), {
                   title: "Booking Cancelled",
                   body: `${updatedBooking.service} on ${updatedBooking.schedule?.timeSlot || ""} has been cancelled.`,
                   data: { type: "cancelled", bookingId: updatedBooking.bookingId },
@@ -1536,10 +1537,10 @@ async function rescheduleBooking(booking, { date, timeSlot, preferredTime }) {
   if (booking.assignedWorker) {
     setImmediate(async () => {
       try {
-        const w = await Worker.findById(booking.assignedWorker).select("expoPushToken").lean();
-        if (w?.expoPushToken) {
+        const w = await Worker.findById(booking.assignedWorker).select("expoPushToken pushTokens").lean();
+        if (tokensOf(w).length) {
           const { sendWorkersPush: push } = require("../utils/pushNotifications");
-          await push([w.expoPushToken], {
+          await push(tokensOf(w), {
             title: "Booking Rescheduled",
             body: `${booking.service} · ${booking.schedule?.timeSlot || ""}`,
             data: { type: "reschedule", bookingId: booking.bookingId },
