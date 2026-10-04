@@ -1,4 +1,5 @@
 const express = require('express');
+const { tokensOf } = require("../utils/pushNotifications");
 const router = express.Router();
 const Message = require('../models/Message');
 const Worker = require('../models/Worker');
@@ -43,8 +44,8 @@ router.post('/', async (req, res) => {
         if (senderType === 'Admin') {
           // Send support email notification to Staff member
           console.log(`💬 Admin message sent to staff ${staff.firstName} ${staff.lastName}. Sending notification...`);
-          if (staff.expoPushToken) {
-            sendCustomerPush(staff.expoPushToken, {
+          if (tokensOf(staff).length) {
+            sendCustomerPush(tokensOf(staff), {
               title: 'Message from Cleaniq',
               body: String(text).length > 80 ? String(text).slice(0, 77) + '…' : String(text),
               data: { type: 'admin_chat' },

@@ -1,4 +1,5 @@
 const express = require("express");
+const { tokensOf } = require("../utils/pushNotifications");
 const router = express.Router();
 const WorkerCustomerMessage = require("../models/WorkerCustomerMessage");
 const Booking = require("../models/Booking");
@@ -100,8 +101,8 @@ router.post("/:bookingId", async (req, res) => {
     // Notify customer via push
     try {
       const customer = await Customer.findOne({ email: (booking.customer?.email || "").toLowerCase() });
-      if (customer?.expoPushToken) {
-        await sendCustomerPush(customer.expoPushToken, {
+      if (tokensOf(customer).length) {
+        await sendCustomerPush(tokensOf(customer), {
           title: `Message from ${workerName.split(" ")[0]}`,
           body: text.trim().length > 60 ? text.trim().slice(0, 57) + "…" : text.trim(),
           data: { bookingId, bookingMongoId: String(booking._id), type: "chat", senderName: workerName },

@@ -59,6 +59,11 @@ const workerSchema = new mongoose.Schema({
     activeBookingId: { type: String, default: null }, // which job this location is being shared for
   },
   expoPushToken: { type: String, default: "" },
+  // Every phone this person is logged in on (see utils/pushTokens.js).
+  pushTokens: {
+    type: [{ token: String, platform: { type: String, default: "" }, updatedAt: Date, _id: false }],
+    default: [],
+  },
   // Offer settings chosen in the app (services, working hours, travel area, pets, intro message).
   // See utils/offerMatching.js for the shape and defaults.
   preferences: { type: mongoose.Schema.Types.Mixed, default: undefined },
@@ -66,4 +71,5 @@ const workerSchema = new mongoose.Schema({
   meta: mongoose.Schema.Types.Mixed,
 });
 
+workerSchema.index({ "pushTokens.token": 1 });
 module.exports = mongoose.model("Worker", workerSchema);

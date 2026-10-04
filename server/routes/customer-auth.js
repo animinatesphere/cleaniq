@@ -230,10 +230,23 @@ router.get('/me', verifyCustomer, async (req, res) => {
 // POST /api/customer-auth/push-token
 router.post("/push-token", verifyCustomer, async (req, res) => {
   try {
-    const { token } = req.body;
+    const { token, platform } = req.body;
     if (!token) return res.status(400).json({ message: "token is required" });
-    await Customer.findByIdAndUpdate(req.customer.id, { expoPushToken: token });
+    const { addToken } = require("../utils/pushTokens");
+    const ok = await addToken(Customer, req.customer.id, token, platform);
+    if (!ok) return res.status(400).json({ message: "Not a valid Expo push token" });
     res.json({ message: "Push token saved." });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// DELETE /api/customer-auth/push-token — on logout, stop sending to this phone.
+router.delete("/push-token", verifyCustomer, async (req, res) => {
+  try {
+    const { removeTokenFromUser } = require("../utils/pushTokens");
+    if (req.body?.token) await removeTokenFromUser(Customer, req.customer.id, req.body.token);
+    res.json({ message: "Push token removed." });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

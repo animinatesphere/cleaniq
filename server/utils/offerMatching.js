@@ -3,6 +3,7 @@
 // districts) and whether they accept homes with pets. Offers are also enriched with the travel
 // estimate and the pay (first session / following sessions / monthly estimate).
 const Worker = require("../models/Worker");
+const { tokensOf } = require("./pushNotifications");
 const Service = require("../models/Service");
 const geo = require("./geo");
 const { buildBookingDateTime } = require("./bookingDateTime");
@@ -139,7 +140,7 @@ async function offersForWorker(worker, bookings) {
 async function workersForJob(booking, workers) {
   if (booking?.hiddenFromWorkers) return []; // switched off on the Job Visibility page
   const ids = workers.map((w) => w._id);
-  const full = await Worker.find({ _id: { $in: ids } }).select("_id expoPushToken preferences postcode").lean();
+  const full = await Worker.find({ _id: { $in: ids } }).select("_id expoPushToken pushTokens preferences postcode").lean();
   const jobPoint = jobPostcode(booking) ? await geo.pointFor(jobPostcode(booking)) : null;
   const keep = [];
   for (const w of full) {
