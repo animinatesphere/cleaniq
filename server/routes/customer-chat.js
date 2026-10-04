@@ -88,6 +88,8 @@ router.post("/:bookingId/admin-reply", async (req, res) => {
       text: text.trim(),
     });
     await msg.save();
+    const { pushToBookingCustomer } = require("../utils/pushNotifications");
+    pushToBookingCustomer(booking, "Message from Cleaniq", text.trim().length > 80 ? text.trim().slice(0, 77) + "…" : text.trim(), { type: "support" }).catch(() => {});
     res.status(201).json(msg);
   } catch (err) {
     res.status(500).json({ message: err.message });

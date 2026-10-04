@@ -9,6 +9,7 @@ import Constants from "expo-constants";
 import { Home, CalendarDays, User, Briefcase, LayoutDashboard, MessageCircle } from "lucide-react-native";
 import CalendarScreen from "./src/screens/CalendarScreen";
 import { AuthProvider, AuthContext, API_URL } from "./src/context/AuthContext";
+import { savePushToken } from "./src/utils/pushRegistration";
 import { tc } from "./src/theme/dark";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import OnboardingScreen from "./src/screens/OnboardingScreen";
@@ -133,11 +134,7 @@ const registerForPushNotificationsAsync = async () => {
       finalStatus = status;
     }
     if (finalStatus !== "granted") return null;
-    const projectId =
-      Constants.expoConfig?.extra?.eas?.projectId ??
-      Constants.easConfig?.projectId;
-    const opts = projectId ? { projectId } : {};
-    const { data } = await Notifications.getExpoPushTokenAsync(opts);
+    // Android: the channel must exist before any notification arrives (high importance = banner + sound).
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync("default", {
         name: "Bookings and messages",
@@ -147,8 +144,14 @@ const registerForPushNotificationsAsync = async () => {
         lockscreenVisibility: Notifications.AndroidNotificationVisibility?.PUBLIC,
       });
     }
+    const projectId =
+      Constants.expoConfig?.extra?.eas?.projectId ??
+      Constants.easConfig?.projectId;
+    const opts = projectId ? { projectId } : {};
+    const { data } = await Notifications.getExpoPushTokenAsync(opts);
     return data;
-  } catch {
+  } catch (err) {
+    console.log("Push registration failed:", err?.message);
     return null;
   }
 };
@@ -177,19 +180,12 @@ const AppNavigation = ({ dark }) => {
     const Notifications = getNotifications();
 
     (async () => {
-      const pushToken = await registerForPushNotificationsAsync();
-      if (pushToken) {
-        const token = await AsyncStorage.getItem("customerToken");
-        fetch(`${API_URL}/customer-auth/push-token`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({ token: pushToken }),
-        }).catch(() => {});
-      }
+      savePushToken(await registerForPushNotificationsAsync());
     })();
+    // If Apple/Google give this phone a new token, send the new Expo token to the server.
+    const tokenSub = Notifications.addPushTokenListener?.(async () => {
+      savePushToken(await registerForPushNotificationsAsync());
+    });
 
     notifListener.current    = Notifications.addNotificationReceivedListener(() => {});
     responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
@@ -211,6 +207,7 @@ const AppNavigation = ({ dark }) => {
       // expo-notifications 55: subscriptions have .remove() (removeNotificationSubscription no longer exists)
       notifListener.current?.remove?.();
       responseListener.current?.remove?.();
+      tokenSub?.remove?.();
     };
   }, [userToken]);
 

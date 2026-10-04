@@ -149,6 +149,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     setIsLoading(true);
+    // Stop notifications to this phone (needs the login token, so before it's removed).
+    await require("../utils/pushRegistration").removePushToken();
     await AsyncStorage.removeItem("customerToken");
     await AsyncStorage.removeItem("customerInfo");
     setUserToken(null);

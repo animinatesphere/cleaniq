@@ -127,10 +127,31 @@ async function sendPushToUser(kind, userId, title, body, data = {}, { channelId 
   return sendToTokens(tokensOf(user), { title, body, data, channelId: channelId || (kind === "worker" ? "cleaniq-general" : "default") });
 }
 
+// Push to the customer who owns a booking (customers are matched by email, like everywhere else).
+// data.bookingMongoId lets the app open that booking when the notification is tapped.
+async function pushToBookingCustomer(booking, title, body, data = {}) {
+  try {
+    const email = String(booking?.customer?.email || "").trim();
+    if (!email) return { sent: 0, failed: 0 };
+    const Customer = require("../models/Customer");
+    const re = new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+    const customer = await Customer.findOne({ email: re }).select("_id").lean();
+    if (!customer) return { sent: 0, failed: 0 };
+    return await sendPushToUser("customer", customer._id, title, body, {
+      bookingId: booking.bookingId,
+      bookingMongoId: booking._id ? String(booking._id) : undefined,
+      ...data,
+    });
+  } catch (err) {
+    console.error("[push] customer push failed:", err.message);
+    return { sent: 0, failed: 0 };
+  }
+}
+
 // Older helpers, kept so existing callers don't change.
 const sendCustomerPush = (tokenOrTokens, { title, body, data = {}, channelId = "default" }) =>
   sendToTokens([].concat(tokenOrTokens), { title, body, data, channelId });
 const sendWorkersPush = (tokens, { title, body, data = {}, channelId = "cleaniq-jobs" }) =>
   sendToTokens(tokens, { title, body, data, channelId });
 
-module.exports = { sendToTokens, sendPushToUser, sendCustomerPush, sendWorkersPush, tokensOf, removeToken, setExpoForTests };
+module.exports = { sendToTokens, sendPushToUser, pushToBookingCustomer, sendCustomerPush, sendWorkersPush, tokensOf, removeToken, setExpoForTests };

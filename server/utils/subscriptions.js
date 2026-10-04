@@ -312,6 +312,10 @@ async function markVisitPaymentFailed(booking, reason) {
         <p style="color:#64748b">The card you pay with will be used for your future cleans. Questions? Call or WhatsApp +44 7846 726428.</p></div>`,
     }).catch(() => {});
   }
+  if (url) {
+    require("./pushNotifications").pushToBookingCustomer(booking, "Payment needed for today's clean",
+      `We couldn't charge your saved card (${amount}). Check your email for a link to pay.`, { type: "payment" }).catch(() => {});
+  }
   sendEmail({
     to: ADMIN_EMAIL(),
     subject: `⚠️ Regular clean payment failed – ${booking.bookingId}`,

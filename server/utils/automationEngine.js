@@ -3,6 +3,14 @@ const SystemSetting = require("../models/SystemSetting");
 const Customer = require("../models/Customer");
 const Booking = require("../models/Booking");
 const { sendEmail, automationTemplates } = require("./emailService");
+// Phone notification for a booking reminder (task.payload.bookingId is the booking's _id).
+async function remindByPush(task, title, body) {
+  const { bookingId, bookingRef, email } = task.payload || {};
+  if (!email) return;
+  await require("./pushNotifications").pushToBookingCustomer(
+    { _id: bookingId, bookingId: bookingRef, customer: { email } }, title, body, { type: "reminder" },
+  ).catch(() => {});
+}
 const sms = require("./smsService");
 
 const GOOGLE_REVIEW_URL = "https://g.page/r/cleaniqservices/review";
@@ -39,6 +47,7 @@ const handlers = {
       subject: `Reminder: Your ${service} clean is ${when}`,
       html: automationTemplates.bookingReminder24h({ firstName, service, date, time, bookingRef, amount, when }),
     });
+    await remindByPush(task, `Your clean is ${when}`, `${service}${time ? ` at ${time}` : ""}. See you then!`);
     // Also send SMS reminder
     if (task.payload.bookingId) {
       try {
@@ -59,6 +68,7 @@ const handlers = {
       subject: `Your cleaner arrives in approximately 3 hours`,
       html: automationTemplates.bookingReminder3h({ firstName, service, date, time, bookingRef }),
     });
+    await remindByPush(task, "Your cleaner arrives in about 3 hours", `${service}${time ? ` at ${time}` : ""}.`);
   },
 
   booking_reminder_1h: async (task) => {
@@ -70,6 +80,7 @@ const handlers = {
       subject: `Your cleaner arrives in 1 hour! ⏰`,
       html: automationTemplates.bookingReminder1h({ firstName, service, date, time, bookingRef }),
     });
+    await remindByPush(task, "Your cleaner arrives in 1 hour ⏰", `${service}${time ? ` at ${time}` : ""}.`);
   },
 
   review_request_2h: async (task) => {
