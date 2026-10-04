@@ -377,6 +377,7 @@ router.get("/:quoteRef/accept", async (req, res) => {
       // resurrect a dead lead without telling the admin it changed.
       quote.status = "accepted";
       quote.acceptedAt = new Date();
+      await require("../utils/automationEngine").cancelQuoteFollowups(quote.email).catch(() => {});
       quote.declinedAt = null;
       await quote.save();
       const { count: bookingsCreated, dateNote } = await generateBookingsFromQuote(quote);
@@ -388,6 +389,7 @@ router.get("/:quoteRef/accept", async (req, res) => {
     } else if (quote.status !== "accepted") {
       quote.status = "accepted";
       quote.acceptedAt = new Date();
+      await require("../utils/automationEngine").cancelQuoteFollowups(quote.email).catch(() => {});
       await quote.save();
       const { count: bookingsCreated, dateNote } = await generateBookingsFromQuote(quote);
       await sendEmail({
@@ -421,6 +423,7 @@ router.get("/:quoteRef/decline", async (req, res) => {
     if (quote.status !== "declined") {
       quote.status = "declined";
       quote.declinedAt = new Date();
+      await require("../utils/automationEngine").cancelQuoteFollowups(quote.email, "Quote declined").catch(() => {});
       await quote.save();
       await sendEmail({
         to: process.env.EMAIL_USER || "info@cleaniqservices.com",

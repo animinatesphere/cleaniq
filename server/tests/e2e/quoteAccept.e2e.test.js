@@ -130,3 +130,36 @@ test("older quotes that listed an add-on as a service book it as an add-on", asy
   assert.equal(b.details.extras[0], "Single Fridge (x1)");
   assert.equal(b.details.duration, 3);
 });
+
+test("no quote follow-ups after the customer accepts (or accepts an edited copy, or books)", async () => {
+  const ScheduledTask = require("../../models/ScheduledTask");
+  const { processDueTasks } = require("../../utils/automationEngine");
+  const due = () => ScheduledTask.updateMany({ status: "pending" }, { runAt: new Date(Date.now() - 1000) });
+  const followups = (ref) => ScheduledTask.find({ "payload.quoteRef": ref }).lean();
+  const sentSubjects = () => emails.filter((m) => /Still thinking|Following up on your|discount expires/.test(m.subject)).map((m) => m.subject);
+
+  // 1. Accepted: its follow-ups are cancelled straight away.
+  await send({ email: "pat@test.com", serviceDate: day(9) });
+  const ref1 = `CLQ-T${n}`;
+  assert.equal((await followups(ref1)).length, 3);
+  await accept(ref1);
+  assert.ok((await followups(ref1)).every((t) => t.status === "cancelled"));
+
+  // 2. Admin edits a quote and sends it again (a new quote); the customer accepts the new one.
+  emails.length = 0;
+  await send({ email: "sam@test.com", serviceDate: day(9) });
+  const oldRef = `CLQ-T${n}`;
+  await send({ email: "sam@test.com", serviceDate: day(9) });
+  await accept(`CLQ-T${n}`);
+  await due();
+  await processDueTasks();
+  assert.deepEqual(sentSubjects(), []);
+  assert.ok((await followups(oldRef)).every((t) => t.status === "cancelled"));
+
+  // 3. Not accepted, no booking: the follow-up still goes out.
+  emails.length = 0;
+  await send({ email: "lee@test.com", serviceDate: day(9) });
+  await due();
+  await processDueTasks();
+  assert.ok(sentSubjects().length >= 1);
+});
