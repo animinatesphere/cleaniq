@@ -43,6 +43,13 @@
         {
           "username": "hexmane99s-team"
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#0F6B4C",
+          "defaultChannel": "default"
+        }
       ]
     ],
     "runtimeVersion": {
