@@ -3,7 +3,7 @@
     "name": "Cleaniq Services Pro",
     "slug": "worker-app",
     "scheme": "cleaniqworker",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "platforms": [
       "ios",
       "android",
