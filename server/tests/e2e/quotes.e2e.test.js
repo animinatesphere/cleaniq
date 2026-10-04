@@ -107,7 +107,7 @@ test("a preferred time that clashes with an existing booking is refused", async 
 test("after YES it's sent through the Quote Builder code: saved, emailed with admin copy, lead captured", async () => {
   const r = await run("send_quote", {
     ...args,
-    frequency: "weekly",
+    frequency: "monthly",
     companyName: "Oak Lettings Ltd",
     serviceDate: "2030-05-02",
     time: "1pm",
@@ -125,16 +125,24 @@ test("after YES it's sent through the Quote Builder code: saved, emailed with ad
   assert.equal(q.includeVat, true);
   assert.equal(q.paymentTerms, "Net 30");
   assert.equal(q.validDays, 30);
-  assert.equal(q.frequency, "weekly");
+  assert.equal(q.frequency, "monthly");
   assert.equal(q.serviceDate, "2030-05-02");
   assert.equal(q.serviceTimeSlot, "13:00");
   assert.equal(q.items[0].billingType, "hourly");
   assert.equal(q.items[0].qty, 3);
+  // Extras and supplies are add-ons on the service (like the admin Quote Builder), not services.
+  assert.equal(q.items.length, 1);
+  assert.deepEqual(q.items[0].extras.map((e) => e.name), ["Single Oven Cleaning", "Cleaning supplies & equipment"]);
   assert.equal(sentEmails.length, 2); // customer + admin copy
   assert.equal(sentEmails[0].to, "jane@example.com");
   assert.equal(await Lead.countDocuments({ email: "jane@example.com" }), 1);
   assert.match(r.nextStep, /emailed to jane@example.com/);
   assert.equal(r.when, "2030-05-02 1pm–4pm");
+});
+
+test("only the frequencies offered for a service: a deep clean can't be weekly", async () => {
+  const r = await run("send_quote", { ...args, frequency: "weekly" });
+  assert.match(r.error, /isn't offered weekly.*monthly, every 3 months/);
 });
 
 test("at most 3 AI quotes per phone per day", async () => {

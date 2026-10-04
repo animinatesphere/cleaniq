@@ -130,6 +130,6 @@ test("price list says which services can be regular and at what price", () => {
     { name: "Office Cleaning", type: "hourly", rate: 20.8 },
   ];
   const p = buildInstructions({ channel: "whatsapp", settings, knowledge, services: svc, now });
-  assert.match(p, /Regular House Cleaning: £20\.90 per hour; that's the one-off price; also weekly £17\.90 per hour, fortnightly £18\.90 per hour/);
+  assert.match(p, /Regular House Cleaning: £20\.90 per hour; that's the one-off price; it can also be booked weekly £17\.90 per hour, fortnightly £18\.90 per hour \(no other frequencies\)/);
   assert.match(p, /Office Cleaning: £20\.80 per hour; one-off only/);
 });
