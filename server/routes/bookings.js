@@ -1334,6 +1334,23 @@ router.put("/:id", async (req, res) => {
       });
     }
 
+    // ── Status-change phone notification (customer app) ─────────────────────
+    // Cleaner actions in the worker app notify the customer themselves; this covers changes admin
+    // makes here. Skipped when admin chose not to tell the customer (skipStatusEmail).
+    const STATUS_PUSH = {
+      Confirmed: ["Booking confirmed ✅", (b) => `Your ${b.service} is confirmed.`],
+      Assigned: ["Cleaner assigned", (b) => `${b.assignedWorkerName || "A cleaner"} will do your ${b.service}.`],
+      Arrived: ["Your cleaner has arrived", (b) => `${b.assignedWorkerName || "Your cleaner"} is at your property.`],
+      "In Progress": ["Cleaning has started", (b) => `Your ${b.service} is under way.`],
+      Completed: ["All done — spotless!", (b) => `Your ${b.service} is finished. Tap to see the details and rate your cleaner.`],
+      "Completed - Unpaid": ["Your clean is finished", (b) => `Your ${b.service} is done. Your invoice has been emailed to you.`],
+      Cancelled: ["Booking cancelled", (b) => `Your ${b.service} (${b.bookingId}) has been cancelled.`],
+    };
+    if (prevStatus !== newStatus && STATUS_PUSH[newStatus] && !req.body.skipStatusEmail) {
+      const [title, body] = STATUS_PUSH[newStatus];
+      require("../utils/pushNotifications").pushToBookingCustomer(updatedBooking, title, body(updatedBooking), { type: "status" }).catch(() => {});
+    }
+
     // ── Status-change customer email — fires for every status switch ─────────
     // Completed and Completed-Unpaid are excluded here because they already
     // send a dedicated invoice email in the blocks above.
@@ -1487,6 +1504,12 @@ async function rescheduleBooking(booking, { date, timeSlot, preferredTime }) {
   };
   await booking.save();
   await require("../utils/automationEngine").rescheduleBookingReminders(booking).catch((e) => console.error("Reminder reschedule error:", e.message));
+  require("../utils/pushNotifications").pushToBookingCustomer(
+    booking,
+    "Your booking has been moved",
+    `${booking.service} is now on ${new Date(date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}${preferredTime || timeSlot ? ` at ${preferredTime || timeSlot}` : ""}.`,
+    { type: "rescheduled" },
+  ).catch(() => {});
 
   const newDateFmt = new Date(date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const customerEmail = booking.customer?.email;

@@ -119,3 +119,37 @@ test("old worker route still works; new routes need the user's own login", async
   assert.equal((await call("DELETE", "/customer-auth/push-token", { token: T(7) }, customerToken)).status, 200);
   assert.ok(!(await Customer.findById(customer._id).lean()).pushTokens.some((t) => t.token === T(7)));
 });
+
+test("customers get phone notifications for admin replies, reminders and their booking (found by email)", async () => {
+  const Booking = require("../../models/Booking");
+  const ScheduledTask = require("../../models/ScheduledTask");
+  await addToken(Customer, customer._id, T(8), "ios");
+  const b = await Booking.create({
+    bookingId: "BK-PUSH1", service: "Deep Cleaning", status: "Confirmed",
+    customer: { firstName: "Ann", lastName: "Skinner", email: "ANN@test.com" },
+    schedule: { date: new Date(Date.now() + 5 * 3600e3), timeSlot: "15:00" },
+  });
+
+  sentBatches = [];
+  const r = await push.pushToBookingCustomer(b, "Booking confirmed ✅", "Your Deep Cleaning is confirmed.", { type: "status" });
+  assert.ok(r.sent >= 1); // every phone the customer is logged in on
+  const toT8 = sentBatches[0].find((m) => m.to === T(8));
+  assert.ok(toT8);
+  assert.equal(toT8.data.bookingMongoId, String(b._id)); // tap opens this booking
+
+  // Admin reply in Chat Support.
+  const app = express(); app.use(express.json()); app.use("/c", require("../../routes/customer-chat"));
+  const srv = app.listen(0);
+  sentBatches = [];
+  await fetch(`http://127.0.0.1:${srv.address().port}/c/BK-PUSH1/admin-reply`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "Your cleaner is booked for 3pm" }) });
+  srv.close();
+  await new Promise((r2) => setTimeout(r2, 200));
+  assert.equal(sentBatches.at(-1)?.[0]?.title, "Message from Cleaniq");
+
+  // 3-hour reminder sends a phone notification as well as the email.
+  require("../../utils/emailService").sendEmail = async () => true;
+  sentBatches = [];
+  await ScheduledTask.create({ type: "booking_reminder_3h", runAt: new Date(Date.now() - 1000), payload: { bookingId: String(b._id), bookingRef: b.bookingId, email: "ann@test.com", service: "Deep Cleaning", time: "15:00", bookingDateTime: new Date(Date.now() + 3 * 3600e3).toISOString() } });
+  await require("../../utils/automationEngine").processDueTasks();
+  assert.equal(sentBatches.at(-1)?.[0]?.title, "Your cleaner arrives in about 3 hours");
+});
