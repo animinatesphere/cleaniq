@@ -41,6 +41,7 @@ async function syncCompanyJob(booking, extra = {}) {
 // Tell every active worker a job is up for grabs (in-app notification + push).
 async function notifyWorkersNewJob(booking, title = "New Job Available!") {
   try {
+    if (booking.hiddenFromWorkers) return; // switched off on the Job Visibility page
     const dateStr = booking.schedule?.date
       ? new Date(booking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
       : "TBC";

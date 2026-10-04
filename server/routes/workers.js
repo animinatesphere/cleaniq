@@ -226,6 +226,8 @@ router.get("/jobs", async (req, res) => {
       ];
       const forThisWorker = workerId && mongoose.isValidObjectId(workerId) ? [{ visibleToWorkers: workerId }] : [];
       andClauses.push({ $or: [...openToAll, ...forThisWorker] });
+      // Switched off on the Job Visibility page: no cleaner sees it.
+      andClauses.push({ hiddenFromWorkers: { $ne: true } });
     }
 
     const jobs = await Booking.find({ $and: andClauses }).sort({ createdAt: -1 });
@@ -249,6 +251,26 @@ router.put("/jobs/:id/visibility", async (req, res) => {
     if (!booking) return res.status(404).json({ error: "Booking not found" });
     booking.visibleToWorkers = req.body.visibleToWorkers || [];
     await booking.save();
+    res.json(booking);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT admin switches a job on or off for cleaners. Off: it disappears from every cleaner's
+// feed and offers, and can't be accepted. Switching it back on alerts the cleaners it suits.
+router.put("/jobs/:id/hidden", require("../middleware/adminAuth"), async (req, res) => {
+  try {
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+    const hide = Boolean(req.body.hidden);
+    const was = Boolean(booking.hiddenFromWorkers);
+    booking.hiddenFromWorkers = hide;
+    await booking.save();
+    if (was && !hide && !booking.assignedWorker && ["Confirmed", "Authorized", "Accepted"].includes(booking.status)) {
+      const { notifyWorkersNewJob } = require("../utils/companyJobs");
+      notifyWorkersNewJob(booking).catch(() => {});
+    }
     res.json(booking);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -294,7 +316,8 @@ router.get("/jobs/:id", async (req, res) => {
         ]);
         const match = checkMatch(prefs, job, { jobPoint, homePoint });
         const mine = job.assignedWorker && String(job.assignedWorker) === String(workerId);
-        const restricted = (job.visibleToWorkers || []).length && !(job.visibleToWorkers || []).map(String).includes(String(workerId));
+        const restricted = job.hiddenFromWorkers ||
+          ((job.visibleToWorkers || []).length && !(job.visibleToWorkers || []).map(String).includes(String(workerId)));
         const availability = mine ? "mine"
           : job.assignedWorker ? "taken"
           : restricted || !["Confirmed", "Authorized", "Accepted"].includes(job.status) ? "unavailable"
@@ -339,7 +362,10 @@ router.post("/jobs/:id/accept", async (req, res) => {
         .json({ error: "Job has already been accepted by someone else" });
     }
 
-    // Admin can limit a job to chosen workers (Job Visibility page).
+    // Admin can switch a job off, or limit it to chosen workers (Job Visibility page).
+    if (booking.hiddenFromWorkers) {
+      return res.status(403).json({ error: "This job isn't available right now" });
+    }
     const allowed = (booking.visibleToWorkers || []).map(String);
     if (allowed.length && !allowed.includes(String(workerId))) {
       return res.status(403).json({ error: "This job isn't available to you" });
@@ -1686,6 +1712,7 @@ router.get("/:id/offers-history", async (req, res) => {
       createdAt: { $gte: since },
       status: { $nin: ["Pending", "Awaiting Payment"] },
       $or: [{ visibleToWorkers: { $size: 0 } }, { visibleToWorkers: { $exists: false } }, { visibleToWorkers: worker._id }],
+      hiddenFromWorkers: { $ne: true },
     }).sort({ createdAt: -1 }).limit(150);
     const offers = await offersForWorker(worker, bookings);
     res.json(offers.slice(0, 60).map((b) => ({

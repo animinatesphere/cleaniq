@@ -199,3 +199,24 @@ test("Personal information and My documents for the cleaner", async () => {
   assert.equal(by.cvPath, null);
   assert.equal(docs.rightToWorkCode, "W12 345 678");
 });
+
+test("admin switches a job off: gone from the feed, can't be accepted; back on: shows again", async () => {
+  const jwt = require("jsonwebtoken");
+  const Admin = require("../../models/Admin");
+  const admin = await Admin.collection.insertOne({ username: "vis-admin", password: "x", role: "superadmin" });
+  const token = jwt.sign({ id: admin.insertedId.toString() }, process.env.JWT_SECRET, { algorithm: "HS256" });
+  const b = await job();
+  const put = (hidden, auth = true) => fetch(`${base}/jobs/${b._id}/hidden`, {
+    method: "PUT", headers: { "Content-Type": "application/json", ...(auth ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ hidden }),
+  });
+  assert.ok((await feed()).some((x) => x.bookingId === b.bookingId));
+  assert.equal((await put(true, false)).status, 401); // admins only
+  assert.equal((await put(true)).status, 200);
+  assert.ok(!(await feed()).some((x) => x.bookingId === b.bookingId));
+  assert.equal((await call("GET", `/jobs/${b._id}?workerId=${worker._id}`)).data.offer.availability, "unavailable");
+  assert.equal((await call("POST", `/jobs/${b._id}/accept`, { workerId: String(worker._id), workerName: "Kelvin Obi" })).status, 403);
+  // Admin's own list still shows it.
+  assert.ok((await call("GET", "/jobs?all=1")).data.some((x) => x.bookingId === b.bookingId));
+  assert.equal((await put(false)).status, 200);
+  assert.ok((await feed()).some((x) => x.bookingId === b.bookingId));
+});
