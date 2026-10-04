@@ -137,6 +137,7 @@ async function offersForWorker(worker, bookings) {
 
 // New-job alerts: only the cleaners the job suits.
 async function workersForJob(booking, workers) {
+  if (booking?.hiddenFromWorkers) return []; // switched off on the Job Visibility page
   const ids = workers.map((w) => w._id);
   const full = await Worker.find({ _id: { $in: ids } }).select("_id expoPushToken preferences postcode").lean();
   const jobPoint = jobPostcode(booking) ? await geo.pointFor(jobPostcode(booking)) : null;

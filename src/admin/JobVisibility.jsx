@@ -80,6 +80,43 @@ export default function JobVisibility() {
     finally { setSaving(false); }
   };
 
+  // On/off switch: off = no worker sees the job at all.
+  const [togglingId, setTogglingId] = useState(null);
+  const toggleHidden = async (booking, e) => {
+    e?.stopPropagation();
+    const hidden = !booking.hiddenFromWorkers;
+    setTogglingId(booking._id);
+    setBookings(prev => prev.map(b => b._id === booking._id ? { ...b, hiddenFromWorkers: hidden } : b));
+    if (selected?._id === booking._id) setSelected(s => ({ ...s, hiddenFromWorkers: hidden }));
+    try {
+      const res = await fetch(`${API}/workers/jobs/${booking._id}/hidden`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hidden }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      // Put it back if the save failed.
+      setBookings(prev => prev.map(b => b._id === booking._id ? { ...b, hiddenFromWorkers: !hidden } : b));
+      if (selected?._id === booking._id) setSelected(s => ({ ...s, hiddenFromWorkers: !hidden }));
+    } finally {
+      setTogglingId(null);
+    }
+  };
+  const Switch = ({ booking }) => {
+    const on = !booking.hiddenFromWorkers;
+    return (
+      <button
+        onClick={(e) => toggleHidden(booking, e)}
+        disabled={togglingId === booking._id}
+        title={on ? "Workers can see this job — click to hide it" : "Hidden from all workers — click to show it"}
+        className={`relative shrink-0 w-12 h-6 rounded-full transition-all duration-300 disabled:opacity-60 ${on ? "bg-emerald-500" : "bg-white/15"}`}
+      >
+        <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${on ? "left-[26px]" : "left-0.5"}`} />
+      </button>
+    );
+  };
+
   const filtered = bookings.filter(b => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -125,7 +162,7 @@ export default function JobVisibility() {
           </h1>
           <p className="text-white/40 text-sm mt-1">
             Control which workers can see each available job in their feed.
-            By default every worker sees all open jobs.
+            By default every worker sees all open jobs. Use the switch to hide a job from everyone.
           </p>
         </div>
         <button
@@ -146,6 +183,10 @@ export default function JobVisibility() {
         <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-400">
           <Lock size={12} />
           Restricted to specific workers
+        </div>
+        <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg text-xs font-semibold text-white/50">
+          <EyeOff size={12} />
+          Switched off — hidden from all workers
         </div>
       </div>
 
@@ -172,6 +213,7 @@ export default function JobVisibility() {
         <div className="space-y-2">
           {filtered.map(b => {
             const restricted = isRestricted(b);
+            const hidden = !!b.hiddenFromWorkers;
             const addr = b.details?.address || b.property?.address || "";
             const time  = fmtTime(b.schedule);
             return (
@@ -179,6 +221,7 @@ export default function JobVisibility() {
                 key={b._id}
                 onClick={() => openPanel(b)}
                 className={`group flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all hover:border-white/25 hover:bg-white/[0.06]
+                  ${hidden ? "opacity-60" : ""}
                   ${restricted
                     ? "bg-amber-500/[0.04] border-amber-500/20"
                     : "bg-white/[0.03] border-white/[0.08]"
@@ -198,12 +241,17 @@ export default function JobVisibility() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                     <span className="text-emerald-400 text-xs font-bold">{b.bookingId}</span>
-                    {restricted && (
+                    {hidden && (
+                      <span className="bg-white/10 border border-white/15 text-white/60 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <EyeOff size={10} /> Hidden from workers
+                      </span>
+                    )}
+                    {restricted && !hidden && (
                       <span className="bg-amber-500/15 border border-amber-500/25 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
                         {b.visibleToWorkers.length} worker{b.visibleToWorkers.length !== 1 ? "s" : ""} only
                       </span>
                     )}
-                    {!restricted && (
+                    {!restricted && !hidden && (
                       <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
                         All workers
                       </span>
@@ -247,6 +295,10 @@ export default function JobVisibility() {
                   )}
                 </div>
 
+                <div className="flex flex-col items-center gap-1 shrink-0">
+                  <Switch booking={b} />
+                  <span className={`text-[9px] font-bold uppercase tracking-wider ${hidden ? "text-white/35" : "text-emerald-400"}`}>{hidden ? "Off" : "On"}</span>
+                </div>
                 <ChevronRight size={15} className="text-white/20 group-hover:text-white/40 shrink-0 transition-colors" />
               </div>
             );
@@ -287,6 +339,15 @@ export default function JobVisibility() {
 
             {/* Current mode + quick switch */}
             <div className="p-5 border-b border-white/[0.07] space-y-3 shrink-0">
+              <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/10">
+                <div>
+                  <p className="text-sm font-bold text-white">Show this job to workers</p>
+                  <p className="text-[11px] text-white/40">
+                    {selected.hiddenFromWorkers ? "Off — no worker can see or accept it" : "On — workers below can see it in their feed"}
+                  </p>
+                </div>
+                <Switch booking={selected} />
+              </div>
               <p className="text-xs font-bold text-white/50 uppercase tracking-wide">Visibility Mode</p>
               <div className="grid grid-cols-2 gap-2">
                 <button

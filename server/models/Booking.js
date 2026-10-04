@@ -72,6 +72,7 @@ const bookingSchema = new mongoose.Schema({
   },
   rejectedBy: [{ type: String }],
   visibleToWorkers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Worker" }],
+  hiddenFromWorkers: { type: Boolean, default: false }, // admin switched the job off: no cleaner sees it
   photos: [{
     photoType: { type: String, enum: ["before", "after", "damage", "other"] },
     url: String,
