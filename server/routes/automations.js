@@ -14,6 +14,7 @@ const AUTOMATION_TYPES = [
   { key: "quote_followup_24h",    label: "Quote Follow-up — 24 hours",          category: "quote"     },
   { key: "quote_followup_3d",     label: "Quote Follow-up — 3 days",            category: "quote"     },
   { key: "lost_lead_7d",          label: "Lost Lead Win-back — 7 days",         category: "quote"     },
+  { key: "ai_chat_finished",      label: "Email me when the AI finishes a WhatsApp chat", category: "ai" },
   { key: "followup_1w",           label: "Customer Follow-up — 1 week",         category: "followup"  },
   { key: "followup_2w",           label: "Customer Follow-up — 2 weeks",        category: "followup"  },
   { key: "followup_1m",           label: "Customer Follow-up — 1 month",        category: "followup"  },

@@ -250,7 +250,9 @@ function handleRelaySession(ws, deps = {}) {
     if (!state.call) return;
     const set = { endedAt: new Date() };
     if (!state.ending) set.endReason = "caller hung up";
-    AiCall.updateOne({ _id: state.call._id }, { $set: set }).catch((err) => console.error("[voice] saving call end failed:", err));
+    AiCall.updateOne({ _id: state.call._id }, { $set: set })
+      .then(() => require("./aiFinishedAlerts").sendCallFinishedAlert(state.call._id)) // email the team
+      .catch((err) => console.error("[voice] saving call end failed:", err));
   });
 
   return state;

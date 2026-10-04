@@ -8,6 +8,7 @@ const scheduledTaskSchema = new mongoose.Schema({
       "booking_reminder_24h",
       "booking_reminder_3h",
       "booking_reminder_1h",
+      "ai_chat_finished",
       "review_request_2h",
       "referral_offer_48h",
       "rebooking_discount_3d",
@@ -30,6 +31,7 @@ const scheduledTaskSchema = new mongoose.Schema({
   runAt: { type: Date, required: true, index: true },
   payload: {
     bookingId: String,
+    conversationId: String, // ai_chat_finished
     quoteId: String,
     quoteRef: String,
     email: String,

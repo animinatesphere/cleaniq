@@ -66,6 +66,11 @@ async function cancelQuoteFollowups(email, reason = "Quote accepted") {
 
 // Handlers per task type
 const handlers = {
+  // The AI receptionist's WhatsApp chat has gone quiet: email the team (utils/aiFinishedAlerts.js).
+  ai_chat_finished: async (task) => {
+    await require("./aiFinishedAlerts").sendChatFinishedAlert(task);
+  },
+
   booking_reminder_24h: async (task) => {
     const { email, firstName, service, date, time, bookingRef, amount, bookingDateTime } = task.payload;
     // Guard: if appointment is now less than 4 hours away this reminder is stale — skip it
