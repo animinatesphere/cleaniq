@@ -3,7 +3,7 @@
     "name": "Cleaniq Service",
     "slug": "cleaniq-customer",
     "scheme": "cleaniqcustomer",
-    "version": "1.8.0",
+    "version": "1.8.1",
     "platforms": [
       "ios",
       "android",
