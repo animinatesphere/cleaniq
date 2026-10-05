@@ -45,7 +45,11 @@ router.get("/my/:id/cancellation-fee", verifyCustomer, async (req, res) => {
     const sub = await Subscription.findOne({ _id: req.params.id, ...mine(req) });
     if (!sub) return res.status(404).json({ message: "Regular clean not found" });
     const q = await cancellationQuote(sub);
-    res.json({ fee: q.fee, rule: q.rule || "", hoursUntilNextVisit: q.hoursUntilNextVisit ?? null, nextVisitStart: q.nextVisit?.start || null });
+    res.json({
+      fee: q.fee, rule: q.rule || "", hoursUntilNextVisit: q.hoursUntilNextVisit ?? null, nextVisitStart: q.nextVisit?.start || null,
+      // Next clean already paid (48h ahead): the fee is kept from its refund rather than charged.
+      nextVisitPaid: Boolean(q.nextVisitPaid), refund: q.refund || 0,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

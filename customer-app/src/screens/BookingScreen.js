@@ -600,7 +600,7 @@ const BookingScreen = ({ navigation, route }) => {
           <Text style={styles.successRef}>Reference: {bookingRef}</Text>
           <Text style={styles.successNote}>
             {isRegular
-              ? "Pay for your first clean on the secure page that opened. Your card is saved and each following clean is charged when your cleaner arrives.\n"
+              ? "Pay for your first clean on the secure page that opened. Your card is saved and each following clean is charged 48 hours before it.\n"
               : "A payment link has been sent to\n"}
             {!isRegular && <Text style={{ fontWeight: "800" }}>{email}</Text>}
             {!isRegular && "\nYour booking will be confirmed once payment is complete."}
@@ -808,7 +808,7 @@ const BookingScreen = ({ navigation, route }) => {
                 {[
                   `${["Weekly", "Fortnightly"].includes(form.frequency) ? "Same day and time" : "Same date and time"} ${REGULAR_EVERY[form.frequency]}`,
                   "Pay for your first clean today",
-                  "Each following clean is charged on the day, when your cleaner arrives",
+                  "Each following clean is charged 48 hours before the clean",
                   "Pause or cancel free with 24 hours' notice",
                 ].map((t) => (
                   <Text key={t} style={styles.regularInfoItem}>•  {t}</Text>
@@ -1210,7 +1210,7 @@ const BookingScreen = ({ navigation, route }) => {
                     <Text style={styles.regularAmt}>£{visitPrice.toFixed(2)}</Text>
                   </View>
                   <Text style={styles.regularNote}>
-                    Following cleans are charged to your card on the day, when your cleaner arrives. Pause or cancel
+                    Following cleans are charged to your card 48 hours before each clean. Pause or cancel
                     any time in Bookings → Regular cleans: free with 24 hours' notice, otherwise a late-notice charge applies.
                   </Text>
                   <TouchableOpacity style={styles.consentRow} onPress={() => setRegularConsent((v) => !v)} activeOpacity={0.8}>
@@ -1219,7 +1219,7 @@ const BookingScreen = ({ navigation, route }) => {
                     </View>
                     <Text style={styles.consentTxt}>
                       I agree that Cleaniq Services can save my card and charge £{visitPrice.toFixed(2)} for each following clean
-                      on the day of the clean, until I pause or cancel.
+                      48 hours before the clean, until I pause or cancel.
                     </Text>
                   </TouchableOpacity>
                   {!regularConsent && (

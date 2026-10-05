@@ -108,7 +108,7 @@ router.post('/', async (req, res) => {
 // "we received your message" email. The team prices it in the Quote Builder.
 const QUOTE_OPTIONS = {
   property: ["Studio", "Flat", "House", "Townhouse", "Bungalow"],
-  carpet: ["With Carpet Cleaning (Save 60%) — £75", "Without Carpet Cleaning"],
+  carpet: ["With Carpet Cleaning (Save 60%)", "Without Carpet Cleaning"],
   // Same as the price list (Single/Double/Range Oven Cleaning; Single fridge, Fridge and freezer,
   // American fridge freezer) so the team can price them straight in the Quote Builder.
   oven: ["Single oven", "Double oven", "Range oven"],
@@ -129,33 +129,47 @@ function readQuoteRequest(body = {}) {
     email: clean(body.email, 150).toLowerCase(),
     phone: clean(body.phone, 30),
     postcode: clean(body.postcode, 10).toUpperCase(),
+    address: clean(body.address, 200),
+    hours: Number(body.hours),
     bedrooms: count(body.bedrooms, 8),
     bathrooms: count(body.bathrooms, 8),
     livingRooms: count(body.livingRooms, 6),
+    stairs: count(body.stairs, 6),
     property: clean(body.property, 30),
     date: clean(body.date, 10),
     notes: clean(body.notes, 2000),
     carpet: clean(body.carpet, 60),
+    carpets: 0,
+    ovenType: "",
+    fridgeType: "",
     extras: [],
   };
   if (!q.service) return { error: "Please choose a service." };
   if (!q.name) return { error: "Please enter your full name." };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(q.email)) return { error: "Please enter a valid email address." };
+  if (q.address.length < 5) return { error: "Please enter the full address of the property." };
   if (!/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/.test(q.postcode)) return { error: "Please enter a valid UK postcode." };
+  // Hours the customer wants, in half hours (prices are hourly).
+  if (!(q.hours >= 1 && q.hours <= 12 && Number.isInteger(q.hours * 2))) return { error: "Please choose how many hours you'd like." };
   if (q.property && !QUOTE_OPTIONS.property.includes(q.property)) return { error: "Please choose a property type from the list." };
   if (q.carpet && !QUOTE_OPTIONS.carpet.includes(q.carpet)) return { error: "Please choose with or without carpet cleaning." };
+  if (q.carpet === QUOTE_OPTIONS.carpet[0]) {
+    q.carpets = count(body.carpets, 20) || 0;
+    if (q.carpets < 1) return { error: "Please tell us how many carpets to clean." };
+  }
   if (q.date && (!/^\d{4}-\d{2}-\d{2}$/.test(q.date) || Number.isNaN(Date.parse(q.date)))) return { error: "Please choose a valid date." };
 
   const extras = body.extras || {};
   if (extras.oven) {
     if (!QUOTE_OPTIONS.oven.includes(extras.ovenType)) return { error: "Please confirm the type of oven." };
+    q.ovenType = extras.ovenType;
     q.extras.push(`Oven Cleaning (${extras.ovenType})`);
   }
   if (extras.fridge) {
     if (!QUOTE_OPTIONS.fridge.includes(extras.fridgeType)) return { error: "Please confirm the type of fridge." };
+    q.fridgeType = extras.fridgeType;
     q.extras.push(`Fridge Cleaning (${extras.fridgeType})`);
   }
-  if (extras.clearance) q.extras.push("Clearance");
   if (body.consent !== true) return { error: "Please tick the box to let us store your details so we can reply." };
   return { quote: q };
 }
@@ -167,13 +181,16 @@ function quoteRows(q) {
     ["Name", q.name],
     ["Email", q.email],
     ["Phone", q.phone],
+    ["Address", q.address],
     ["Postcode", q.postcode],
+    ["Hours", q.hours],
     ["Property type", q.property],
     ["Bedrooms", q.bedrooms],
     ["Bathrooms", q.bathrooms],
     ["Living / reception rooms", q.livingRooms],
+    ["Stairs / landings", q.stairs],
     ["Preferred date", ukDate],
-    ["Carpet cleaning", q.carpet],
+    ["Carpet cleaning", q.carpets ? `${q.carpet} — ${q.carpets} carpet${q.carpets === 1 ? "" : "s"}` : q.carpet],
     ["Additional services (20% off)", q.extras.join(", ")],
     ["Additional information", q.notes],
   ].filter(([, v]) => v !== null && v !== undefined && v !== "");
@@ -185,6 +202,17 @@ router.post('/quote-request', async (req, res) => {
   const { quote: q, error } = readQuoteRequest(req.body);
   if (error) return res.status(400).json({ message: error });
 
+  // Price it from the price list and email the quote straight away (the team still gets the
+  // request). If it can't be priced automatically, the team quotes it as before.
+  let instant = null;
+  try {
+    instant = await require('../utils/instantQuote').sendInstantQuote(q);
+  } catch (e) {
+    instant = { skipped: `Instant quote failed: ${e.message}` };
+    console.error('Instant quote error:', e.message);
+  }
+  const quoted = Boolean(instant?.quoteRef);
+
   const rows = quoteRows(q);
   const html = `
 <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #e2e8f0;border-radius:20px;overflow:hidden;background:#fff;">
@@ -195,7 +223,9 @@ router.post('/quote-request', async (req, res) => {
   <table style="width:100%;border-collapse:collapse;">
     ${rows.map(([k, v]) => `<tr><td style="padding:10px 32px;font-size:12px;font-weight:700;color:#64748b;border-bottom:1px solid #f1f5f9;width:40%;vertical-align:top;">${escHtml(k)}</td><td style="padding:10px 32px 10px 0;font-size:14px;color:#0F172A;border-bottom:1px solid #f1f5f9;white-space:pre-wrap;">${escHtml(v)}</td></tr>`).join("")}
   </table>
-  <p style="margin:20px 32px 28px;font-size:12px;color:#059669;font-weight:700;">Reply to this email to answer ${escHtml(q.name)}, or send a quote from Admin → Quotes.</p>
+  <p style="margin:20px 32px 28px;font-size:12px;font-weight:700;${quoted ? "color:#059669;" : "color:#b45309;"}">${quoted
+    ? `✅ Instant quote ${escHtml(instant.quoteRef)} (£${Number(instant.grandTotal).toFixed(2)}) was emailed to the customer. When they accept it, they pick a date and time and it becomes a booking.`
+    : `⚠️ No instant quote: ${escHtml(instant?.skipped || "unknown reason")}. Reply to this email to answer ${escHtml(q.name)}, or send a quote from Admin → Quotes.`}</p>
 </div>`;
 
   try {
@@ -204,23 +234,27 @@ router.post('/quote-request', async (req, res) => {
       email: q.email,
       phone: q.phone,
       serviceInterest: q.service,
-      message: rows.map(([k, v]) => `${k}: ${v}`).join("\n"),
+      message: rows.map(([k, v]) => `${k}: ${v}`).join("\n") + (quoted ? `\nInstant quote: ${instant.quoteRef} (£${instant.grandTotal})` : ''),
       source: 'Quote Form',
+      ...(quoted ? { stage: 'Quoted' } : {}),
     });
     await sendEmail({
       to: process.env.EMAIL_USER || 'info@cleaniqservices.com',
-      subject: `🧾 Quote request: ${q.service} — ${q.name} (${q.postcode})`,
+      subject: `🧾 Quote request: ${q.service} — ${q.name} (${q.postcode})${quoted ? ` · quote ${instant.quoteRef} sent` : ''}`,
       html,
       replyTo: q.email,
     });
-    try {
-      await sendEmail({ to: q.email, subject: 'We received your quote request — Cleaniq Services', html: templates.leadAcknowledgement(q.name) });
-      lead.acknowledged = true;
-      await lead.save();
-    } catch (ackErr) {
-      console.error('Quote acknowledgement email error:', ackErr.message);
+    // The quote email is their confirmation; otherwise send the usual "we received it".
+    if (!quoted) {
+      try {
+        await sendEmail({ to: q.email, subject: 'We received your quote request — Cleaniq Services', html: templates.leadAcknowledgement(q.name) });
+        lead.acknowledged = true;
+        await lead.save();
+      } catch (ackErr) {
+        console.error('Quote acknowledgement email error:', ackErr.message);
+      }
     }
-    res.json({ message: 'Quote request sent.' });
+    res.json({ message: 'Quote request sent.', instantQuote: quoted, ...(quoted ? { quoteRef: instant.quoteRef, total: instant.grandTotal } : {}) });
   } catch (err) {
     console.error('Quote request error:', err.message);
     res.status(500).json({ message: 'Failed to send your request. Please try again.' });

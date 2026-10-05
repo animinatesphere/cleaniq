@@ -74,7 +74,7 @@ function buildTimeline(b) {
   ];
   const steps = [
     { label: "Booking received", time: b.createdAt, sub: "We've got your booking." },
-    // Regular-clean visits are paid when the cleaner arrives, so only show a payment time that fits the order.
+    // Regular-clean visits are paid 48 hours before the clean, so only show a payment time that fits the order.
     { label: "Booking confirmed", time: confirmedAt, sub: "Your clean is confirmed. We're finding you a cleaner." },
     { label: first ? `${first} is your cleaner` : "Cleaner assigned", time: b.jobAcceptedTime, sub: first ? `${first} has accepted your job.` : "A cleaner has accepted your job." },
     { label: "Cleaner arrived", time: b.jobArrivedTime, sub: `${first || "Your cleaner"} is at your property.` },
@@ -220,10 +220,13 @@ const BookingDetailScreen = ({ route, navigation }) => {
                   body: JSON.stringify({}),
                 },
               );
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) throw new Error(data.message || "Could not cancel");
               setBooking((b) => ({ ...b, status: "Cancelled" }));
-              Alert.alert("Cancelled", "Your booking has been cancelled.");
+              // Regular-clean visits: the message says what's refunded (late-notice fee kept, if any).
+              Alert.alert("Cancelled", data.refund != null || data.fee != null ? data.message : "Your booking has been cancelled.");
             } catch (err) {
-              Alert.alert("Failed", "Could not cancel. Please call us.");
+              Alert.alert("Failed", err.message || "Could not cancel. Please call us.");
             } finally { setCancelling(false); }
           },
         },
@@ -467,7 +470,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
             <View style={styles.payNotice}>
               <CreditCard size={14} color={tc(C.info)} />
               <Text style={styles.payNoticeTxt}>
-                £{Number(booking.payment?.amount || 0).toFixed(2)} will be charged to your saved card on the day, when your cleaner arrives.
+                £{Number(booking.payment?.amount || 0).toFixed(2)} will be charged to your saved card 48 hours before this clean.
               </Text>
             </View>
           )}

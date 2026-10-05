@@ -1055,7 +1055,7 @@ const Booking = () => {
           </h1>
           <p className="text-slate-500 font-bold mb-10 max-w-md mx-auto">
             {isRegular
-              ? `Your regular clean is set up ${regularEvery}. Your first clean is paid; each following clean is charged when your cleaner arrives. Check your email for the details.`
+              ? `Your regular clean is set up ${regularEvery}. Your first clean is paid; each following clean is charged 48 hours before it. Check your email for the details.`
               : "Check your email for confirmation."}
           </p>
           <Link
@@ -1442,7 +1442,7 @@ const Booking = () => {
                                   {regularEvery}
                                 </li>
                                 <li>Pay for your first clean today</li>
-                                <li>Each following clean is charged on the day, when your cleaner arrives</li>
+                                <li>Each following clean is charged 48 hours before the clean</li>
                                 <li>Pause or cancel free with 24 hours&apos; notice</li>
                               </ul>
                             </div>
@@ -2144,7 +2144,7 @@ const Booking = () => {
                                       <p className="text-[11px] text-slate-500 font-semibold">Prices include {tax.label} at {tax.rate}%.</p>
                                     )}
                                     <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
-                                      Following cleans are charged to this card on the day, when your cleaner arrives.
+                                      Following cleans are charged to this card 48 hours before each clean.
                                       Pause or cancel any time from your account: free with 24 hours&apos; notice, otherwise
                                       the late-notice charges in our{" "}
                                       <Link to="/terms" target="_blank" className="underline">
@@ -2161,7 +2161,7 @@ const Booking = () => {
                                       />
                                       <span className="text-xs font-bold text-slate-700 leading-relaxed">
                                         I agree that Cleaniq Services can save my card and charge £{visitPrice.toFixed(2)} for each
-                                        following clean on the day of the clean, until I pause or cancel.
+                                        following clean 48 hours before the clean, until I pause or cancel.
                                       </span>
                                     </label>
                                   </div>

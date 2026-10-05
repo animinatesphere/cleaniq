@@ -28,6 +28,7 @@ test.before(async () => {
   ]);
   const app = express();
   app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
   app.use("/api/quotes", require("../../routes/quotes"));
   server = app.listen(0);
   base = `http://127.0.0.1:${server.address().port}/api/quotes`;
@@ -57,7 +58,16 @@ const send = (over = {}) => fetch(`${base}/send`, {
     ...over,
   }),
 }).then(async (r) => ({ status: r.status, data: await r.json() }));
-const accept = (ref) => fetch(`${base}/${ref}/accept`).then((r) => r.status);
+// The customer picks a date and arrival time on the accept page, then confirms (a form POST).
+// Each quote gets its own day, so earlier tests' bookings don't take the slot.
+const accept = (ref, date = day(20 + Number(String(ref).replace(/\D/g, "")) % 80), time = "10:00") =>
+  fetch(`${base}/${ref}/accept`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ date, time }).toString(),
+  }).then((r) => r.status);
+// Bookings straight from a quote's own date (quotes accepted before the date picker existed).
+const bookFromQuote = async (ref) => require("../../routes/quotes").generateBookingsFromQuote(await Quote.findOne({ quoteRef: ref }));
 
 test("a quote keeps its add-ons and property details, and the email shows them", async () => {
   const r = await send({ serviceDate: day(10) });
@@ -83,23 +93,23 @@ test("accepting creates a booking with the right service, add-ons, hours and dat
   assert.equal(b.details.duration, 4);
   assert.equal(b.workerRate, 14);
   assert.equal(b.suppliesProvidedBy, "Cleaniq");
-  assert.ok(sameDay(b.schedule.date, day(10)));
+  assert.ok(sameDay(b.schedule.date, day(20 + n % 80)));
+  assert.equal(b.schedule.preferredTime, "10:00");
 });
 
 test("a quote accepted after its date has passed gets the next future date, not 1970", async () => {
   await send({ serviceDate: day(-5) });
-  await accept(`CLQ-T${n}`);
+  await bookFromQuote(`CLQ-T${n}`);
   const b = await Booking.findOne({ bookingId: `Q-CLQ-T${n}-1` }).lean();
   assert.ok(b.schedule.date, "has a date");
   assert.ok(new Date(b.schedule.date).getFullYear() > 2000);
   assert.ok(sameDay(b.schedule.date, tomorrow()));
   assert.match(b.details.notes, /had passed/);
-  assert.ok(emails.some((m) => /Quote Accepted/.test(m.subject) && /had passed/.test(m.html)));
 });
 
 test("a weekly quote whose start passed keeps its weekday and moves forward", async () => {
   await send({ serviceDate: day(-10), frequency: "weekly" });
-  await accept(`CLQ-T${n}`);
+  await bookFromQuote(`CLQ-T${n}`);
   const first = await Booking.findOne({ bookingId: `Q-CLQ-T${n}-1` }).lean();
   const second = await Booking.findOne({ bookingId: `Q-CLQ-T${n}-2` }).lean();
   const start = new Date(first.schedule.date);
@@ -110,7 +120,7 @@ test("a weekly quote whose start passed keeps its weekday and moves forward", as
 
 test("a quote with no date still gets a real date and a note to confirm it", async () => {
   await send({ serviceDate: "" });
-  await accept(`CLQ-T${n}`);
+  await bookFromQuote(`CLQ-T${n}`);
   const b = await Booking.findOne({ bookingId: `Q-CLQ-T${n}-1` }).lean();
   assert.ok(sameDay(b.schedule.date, tomorrow()));
   assert.match(b.details.notes, /no cleaning date/);
@@ -162,4 +172,53 @@ test("no quote follow-ups after the customer accepts (or accepts an edited copy,
   await due();
   await processDueTasks();
   assert.ok(sentSubjects().length >= 1);
+});
+
+
+test("accept link: shows a date/time picker and accepts nothing on its own", async () => {
+  await send({ serviceDate: day(10) });
+  const ref = `CLQ-T${n}`;
+  const page = await fetch(`${base}/${ref}/accept`);
+  assert.equal(page.status, 200);
+  const html = await page.text();
+  assert.match(html, /When should we come\?/);
+  assert.match(html, /type="date"/);
+  assert.equal((await Quote.findOne({ quoteRef: ref })).status, "sent", "opening the link (or a link scanner) doesn't accept");
+  assert.equal(await Booking.countDocuments({ bookingId: { $regex: `^Q-${ref}-` } }), 0);
+});
+
+test("free times leave room for the job; the chosen date and arrival time go on the booking", async () => {
+  // Someone already booked 09:00–13:00 that day.
+  await Booking.create({ bookingId: "BK-BUSY", service: "Deep Cleaning", status: "Confirmed", details: { duration: 4 }, schedule: { date: new Date(`${day(12)}T00:00:00.000Z`), timeSlot: "09:00", preferredTime: "09:00" }, customer: { firstName: "Other" } });
+  await send({ serviceDate: "" });
+  const ref = `CLQ-T${n}`;
+  const t = await (await fetch(`${base}/${ref}/times?date=${day(12)}`)).json();
+  const values = t.times.map((x) => x.value);
+  assert.ok(!values.includes("09:00") && !values.includes("11:00"), "clashes are hidden");
+  assert.ok(values.includes("14:00"));
+  assert.match(t.times.find((x) => x.value === "14:00").label, /2/); // a window like "2pm – 6pm"
+
+  // A taken time is refused; a free one books it.
+  assert.equal(await accept(ref, day(12), "10:00"), 409);
+  assert.equal((await Quote.findOne({ quoteRef: ref })).status, "sent");
+  assert.equal(await accept(ref, day(12), "14:00"), 200);
+  const b = await Booking.findOne({ bookingId: `Q-${ref}-1` }).lean();
+  assert.ok(sameDay(b.schedule.date, day(12)));
+  assert.equal(b.schedule.preferredTime, "14:00");
+  assert.ok(!/no cleaning date|had passed/.test(b.details.notes || ""));
+  const q = await Quote.findOne({ quoteRef: ref }).lean();
+  assert.equal(q.status, "accepted");
+  assert.equal(q.serviceDate, day(12));
+
+  // Accepting twice doesn't book twice.
+  assert.equal(await accept(ref, day(13), "10:00"), 200);
+  assert.equal(await Booking.countDocuments({ bookingId: { $regex: `^Q-${ref}-` } }), 1);
+});
+
+test("dates in the past or today can't be chosen", async () => {
+  await send({ serviceDate: "" });
+  const ref = `CLQ-T${n}`;
+  assert.equal((await fetch(`${base}/${ref}/times?date=${day(0)}`)).status, 400);
+  assert.equal(await accept(ref, day(-1), "10:00"), 400);
+  assert.equal((await Quote.findOne({ quoteRef: ref })).status, "sent");
 });
