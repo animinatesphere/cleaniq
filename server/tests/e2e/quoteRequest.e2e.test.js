@@ -17,9 +17,9 @@ let mongod, server, base;
 const send = (body) => fetch(`${base}/contact/quote-request`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 const good = (extra = {}) => ({
   service: "End of Tenancy Cleaning", name: "Jo Bloggs", email: "Jo@Test.uk", phone: "07700000000", postcode: "m5 4wt",
-  bedrooms: "2", bathrooms: "1", livingRooms: "1", property: "Flat", date: "2030-06-03", notes: "Keys with the concierge",
-  carpet: "With Carpet Cleaning (Save 60%) — £75",
-  extras: { oven: true, ovenType: "Double oven", fridge: true, fridgeType: "Fridge freezer", clearance: false },
+  bedrooms: "2", bathrooms: "1", livingRooms: "1", stairs: "1", property: "Flat", date: "2030-06-03", notes: "Keys with the concierge",
+  carpet: "With Carpet Cleaning (Save 60%)",
+  extras: { oven: true, ovenType: "Double oven", fridge: true, fridgeType: "Fridge freezer" },
   consent: true, ...extra,
 });
 
@@ -49,7 +49,8 @@ test("a quote request is saved as a lead, sent to the team and confirmed to the 
   assert.equal(lead.acknowledged, true);
   assert.match(lead.message, /Postcode: M5 4WT/);
   assert.match(lead.message, /Oven Cleaning \(Double oven\), Fridge Cleaning \(Fridge freezer\)/);
-  assert.match(lead.message, /With Carpet Cleaning \(Save 60%\) — £75/);
+  assert.match(lead.message, /With Carpet Cleaning \(Save 60%\)/);
+  assert.match(lead.message, /Stairs \/ landings: 1/);
 
   const [team, customer] = emails;
   assert.match(team.subject, /Quote request: End of Tenancy Cleaning — Jo Bloggs \(M5 4WT\)/);

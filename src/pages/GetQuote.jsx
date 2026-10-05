@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   KeyRound, Brush, HardHat, Briefcase, BedDouble, Repeat, Flame, Layers, SprayCan,
-  House, Building, Building2, DoorOpen, Warehouse, Bath, Sofa, Refrigerator, PackageOpen,
+  House, Building, Building2, DoorOpen, Warehouse, Bath, Sofa, Refrigerator, Footprints,
   CalendarDays, User, Mail, Phone, MapPin, ShieldCheck, BadgeCheck, Clock, Star,
   Minus, Plus, Check, Send, Loader2, AlertCircle, CheckCircle2, Lock, MessageCircle, ArrowRight,
 } from "lucide-react";
@@ -13,7 +13,7 @@ import { PHONE_NUMBER, whatsappLink } from "../utils/contact";
 const API = import.meta.env.VITE_API_URL;
 
 // Keep these in step with QUOTE_OPTIONS in server/routes/contact.js.
-const CARPET_WITH = "With Carpet Cleaning (Save 60%) — £75";
+const CARPET_WITH = "With Carpet Cleaning (Save 60%)";
 const CARPET_WITHOUT = "Without Carpet Cleaning";
 const OVEN_TYPES = ["Single oven", "Double oven", "Range oven"];
 const FRIDGE_TYPES = ["Single fridge", "Fridge freezer", "American fridge freezer"];
@@ -46,9 +46,9 @@ const serviceIcon = (name) => {
 
 const EMPTY = {
   service: "", name: "", email: "", phone: "", postcode: "",
-  bedrooms: null, bathrooms: null, livingRooms: null, property: "",
+  bedrooms: null, bathrooms: null, livingRooms: null, stairs: null, property: "",
   date: "", notes: "", carpet: "",
-  extras: { oven: false, ovenType: "", fridge: false, fridgeType: "", clearance: false },
+  extras: { oven: false, ovenType: "", fridge: false, fridgeType: "" },
   consent: false, website: "",
 };
 
@@ -199,7 +199,6 @@ const GetQuote = () => {
     return [
       e.oven && `Oven${e.ovenType ? ` (${e.ovenType.toLowerCase()})` : ""}`,
       e.fridge && `Fridge${e.fridgeType ? ` (${e.fridgeType.toLowerCase()})` : ""}`,
-      e.clearance && "Clearance",
     ].filter(Boolean).join(", ");
   }, [form.extras]);
 
@@ -207,6 +206,7 @@ const GetQuote = () => {
     form.bedrooms !== null && `${form.bedrooms} bed`,
     form.bathrooms !== null && `${form.bathrooms} bath`,
     form.livingRooms !== null && `${form.livingRooms} living`,
+    form.stairs !== null && `${form.stairs} stairs`,
   ].filter(Boolean).join(" · ");
 
   const prettyDate = form.date
@@ -417,10 +417,11 @@ const GetQuote = () => {
                       </Choice>
                     ))}
                   </div>
-                  <div className="mt-5 grid gap-2.5 sm:grid-cols-3 sm:gap-3">
+                  <div className="mt-5 grid gap-2.5 sm:grid-cols-2 sm:gap-3">
                     <Stepper label="Bedrooms" icon={BedDouble} value={form.bedrooms} max={8} onChange={(v) => set("bedrooms", v)} />
                     <Stepper label="Bathrooms" icon={Bath} value={form.bathrooms} max={8} onChange={(v) => set("bathrooms", v)} />
                     <Stepper label="Living rooms" icon={Sofa} value={form.livingRooms} max={6} onChange={(v) => set("livingRooms", v)} />
+                    <Stepper label="Stairs / landings" icon={Footprints} value={form.stairs} max={6} onChange={(v) => set("stairs", v)} />
                   </div>
                 </Section>
 
@@ -429,10 +430,7 @@ const GetQuote = () => {
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Choice selected={form.carpet === CARPET_WITH} onClick={() => set("carpet", form.carpet === CARPET_WITH ? "" : CARPET_WITH)} className="p-4 sm:p-5">
                       <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-700">Save 60%</span>
-                      <span className="mt-3 flex items-end justify-between gap-3 pr-1">
-                        <span className="text-base font-black text-slate-900">With carpet cleaning</span>
-                        <span className="text-2xl font-black tracking-tight text-primary">£75</span>
-                      </span>
+                      <span className="mt-3 block text-base font-black text-slate-900">With carpet cleaning</span>
                     </Choice>
                     <Choice selected={form.carpet === CARPET_WITHOUT} onClick={() => set("carpet", form.carpet === CARPET_WITHOUT ? "" : CARPET_WITHOUT)} className="flex items-end p-4 sm:p-5">
                       <span className="text-base font-black text-slate-900">Without carpet cleaning</span>
@@ -445,7 +443,6 @@ const GetQuote = () => {
                   <div className="grid gap-3">
                     {extraCard("oven", "Oven Cleaning", Flame, "ovenType", OVEN_TYPES, "Type of oven")}
                     {extraCard("fridge", "Fridge Cleaning", Refrigerator, "fridgeType", FRIDGE_TYPES, "Type of fridge")}
-                    {extraCard("clearance", "Clearance", PackageOpen)}
                   </div>
                 </Section>
 
@@ -529,7 +526,7 @@ const GetQuote = () => {
                   <div className="mt-4 divide-y divide-white/10 border-y border-white/10">
                     <SummaryRow label="Property" value={form.property} />
                     <SummaryRow label="Rooms" value={rooms} />
-                    <SummaryRow label="Carpets" value={form.carpet === CARPET_WITH ? "Yes — £75" : form.carpet ? "No" : ""} />
+                    <SummaryRow label="Carpets" value={form.carpet === CARPET_WITH ? "Yes" : form.carpet ? "No" : ""} />
                     <SummaryRow label="Extras" value={extrasText} />
                     <SummaryRow label="Date" value={prettyDate} />
                     <SummaryRow label="Postcode" value={form.postcode.toUpperCase()} />

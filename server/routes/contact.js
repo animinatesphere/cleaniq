@@ -108,7 +108,7 @@ router.post('/', async (req, res) => {
 // "we received your message" email. The team prices it in the Quote Builder.
 const QUOTE_OPTIONS = {
   property: ["Studio", "Flat", "House", "Townhouse", "Bungalow"],
-  carpet: ["With Carpet Cleaning (Save 60%) — £75", "Without Carpet Cleaning"],
+  carpet: ["With Carpet Cleaning (Save 60%)", "Without Carpet Cleaning"],
   // Same as the price list (Single/Double/Range Oven Cleaning; Single fridge, Fridge and freezer,
   // American fridge freezer) so the team can price them straight in the Quote Builder.
   oven: ["Single oven", "Double oven", "Range oven"],
@@ -132,6 +132,7 @@ function readQuoteRequest(body = {}) {
     bedrooms: count(body.bedrooms, 8),
     bathrooms: count(body.bathrooms, 8),
     livingRooms: count(body.livingRooms, 6),
+    stairs: count(body.stairs, 6),
     property: clean(body.property, 30),
     date: clean(body.date, 10),
     notes: clean(body.notes, 2000),
@@ -155,7 +156,6 @@ function readQuoteRequest(body = {}) {
     if (!QUOTE_OPTIONS.fridge.includes(extras.fridgeType)) return { error: "Please confirm the type of fridge." };
     q.extras.push(`Fridge Cleaning (${extras.fridgeType})`);
   }
-  if (extras.clearance) q.extras.push("Clearance");
   if (body.consent !== true) return { error: "Please tick the box to let us store your details so we can reply." };
   return { quote: q };
 }
@@ -172,6 +172,7 @@ function quoteRows(q) {
     ["Bedrooms", q.bedrooms],
     ["Bathrooms", q.bathrooms],
     ["Living / reception rooms", q.livingRooms],
+    ["Stairs / landings", q.stairs],
     ["Preferred date", ukDate],
     ["Carpet cleaning", q.carpet],
     ["Additional services (20% off)", q.extras.join(", ")],
