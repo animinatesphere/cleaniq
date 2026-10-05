@@ -152,5 +152,5 @@ test("quotes ask the type of cleaning, hours, when, name, email, address and sup
   const p = buildInstructions({ channel: "whatsapp", settings, knowledge, services, now, canBook: true });
   assert.match(p, /1\. Type of cleaning .*\n  2\. How many hours\n  3\. When they'd like it: the date, and what time the cleaner should arrive\n  4\. Full name\n  5\. Email address/);
   assert.match(p, /Property address with postcode \(call check_postcode/);
-  assert.match(p, /CONFIRMATION STEP — never skip it: send ONE summary with the customer's name, email/);
+  assert.match(p, /CONFIRMATION STEP — never skip it: send ONE summary with the type of cleaning, hours, date and arrival time, the customer's name, email/);
 });
