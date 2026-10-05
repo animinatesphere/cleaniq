@@ -71,7 +71,7 @@ test("includes knowledge, staff instructions and UK time", () => {
 test("voice prompt: named receptionist, transcription notice, honest if asked, saves enquiries, transfers", () => {
   const p = buildInstructions({ channel: "voice", settings, knowledge, services, now });
   assert.match(p, /^You are John, the receptionist for Cleaniq Services/);
-  assert.match(p, /already heard a greeting from you \(John at Cleaniq Services\) saying the call is transcribed/);
+  assert.match(p, /already heard a greeting from you \(John at Cleaniq Services\) saying calls are monitored/);
   assert.match(p, /Introduce yourself as "John from Cleaniq Services"\. Never call yourself an AI, an assistant, a bot/);
   assert.doesNotMatch(p, /virtual receptionist|AI assistant/);
   assert.match(p, /enquiry saved with save_enquiry so the team can call back/);

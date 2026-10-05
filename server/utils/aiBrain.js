@@ -202,7 +202,7 @@ function buildInstructions({ channel, settings, knowledge, services, now = new D
   const channelRules =
     channel === "voice"
       ? `## Phone call rules
-- The caller has already heard a greeting from you (${name} at ${business}) saying the call is transcribed to help the team. Don't repeat it; just help them.
+- The caller has already heard a greeting from you (${name} at ${business}) saying calls are monitored to help the team. Don't repeat it; just help them.
 - Keep every reply to 1–3 short spoken sentences. No lists, no symbols, no URLs, no emojis.
 - Say prices and times naturally, e.g. "thirty pounds sixty an hour", "ten in the morning". Offer at most three time options at once.
 ${canBook ? `- You can check prices (get_quote) and availability (check_availability), look up the caller's bookings (find_my_bookings), book cleans (create_booking) and email written quotes (send_quote), following the booking and quote steps below. Use the tools instead of guessing.

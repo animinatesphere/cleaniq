@@ -54,7 +54,7 @@ const speakingTimeMs = (text) => Math.min(10000, 1200 + String(text).length * 65
 function greetingFor(settings, agentName = "") {
   const business = settings.businessName || "Cleaniq Services";
   const name = agentName || agentNames(settings)[0];
-  return `Hello, thank you for calling ${business}, you're speaking with ${name}. Calls are transcribed to help our team. How can I help you today?`;
+  return `Hello, thank you for calling ${business}, you're speaking with ${name}. Calls are monitored to help our team. How can I help you today?`;
 }
 
 /**

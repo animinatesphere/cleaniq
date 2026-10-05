@@ -103,7 +103,7 @@ test("voice AI on → ConversationRelay in British English with greeting and a o
   assert.match(body, /<Connect action="http:\/\/127\.0\.0\.1:\d+\/api\/voice\/after">/);
   assert.match(body, /<ConversationRelay url="ws:\/\/127\.0\.0\.1:\d+\/api\/voice\/relay" language="en-GB"/);
   assert.match(body, / ttsProvider="Google" voice="en-GB-Neural2-B"/); // British male voice
-  assert.match(body, /welcomeGreeting="Hello, thank you for calling Cleaniq Services, you&apos;re speaking with (John|Mark|James|David)\. Calls are transcribed/);
+  assert.match(body, /welcomeGreeting="Hello, thank you for calling Cleaniq Services, you&apos;re speaking with (John|Mark|James|David)\. Calls are monitored/);
   assert.ok(token);
 });
 
