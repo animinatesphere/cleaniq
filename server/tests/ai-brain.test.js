@@ -36,7 +36,11 @@ test("booking rules only when the channel can book", () => {
   const withTools = buildInstructions({ channel: "whatsapp", settings, knowledge, services, now, canBook: true });
   assert.match(withTools, /call get_quote/);
   assert.match(withTools, /create_booking with customerConfirmed true/);
-  assert.match(withTools, /send ONE numbered list asking only for what is still missing, in this order/);
+  assert.match(withTools, /on WhatsApp send ONE numbered list of only what's still missing/);
+  // Read-back before anything is booked or sent, especially address and email.
+  assert.match(withTools, /CONFIRMATION STEP — never skip it, never book before it/);
+  assert.match(withTools, /especially your address and email/);
+  assert.match(withTools, /How the cleaner gets in/);
   assert.match(withTools, /Cleaning supplies and equipment: shall we bring them \(£10\.00 per visit\)/);
   assert.match(withTools, /call find_my_bookings/);
   assert.match(withTools, /call reschedule_booking with customerConfirmed true/);
@@ -46,7 +50,7 @@ test("booking rules only when the channel can book", () => {
   assert.match(withTools, /Name, email, phone number and address are always needed for a quote/);
   assert.match(withTools, /If someone asks for a quote or a total, follow the Quotes steps below/);
   assert.match(withTools, /call send_quote with customerConfirmed false/);
-  assert.match(withTools, /Reply YES to have the quote emailed to you/);
+  assert.match(withTools, /Reply YES to have it emailed, or tell me what to change/);
   assert.match(withTools, /what time they'd like the cleaner to arrive/);
   assert.match(withTools, /Cleaning supplies & equipment: £10\.00 per visit if we bring them/);
   // the short-reply rule must not fight the booking list
@@ -132,4 +136,13 @@ test("price list says which services can be regular and at what price", () => {
   const p = buildInstructions({ channel: "whatsapp", settings, knowledge, services: svc, now });
   assert.match(p, /Regular House Cleaning: £20\.90 per hour; that's the one-off price; it can also be booked weekly £17\.90 per hour, fortnightly £18\.90 per hour \(no other frequencies\)/);
   assert.match(p, /Office Cleaning: £20\.80 per hour; one-off only/);
+});
+
+
+test("phone calls can book and quote, with the address and email read back first", () => {
+  const p = buildInstructions({ channel: "voice", settings, knowledge, services, now, canBook: true });
+  assert.match(p, /book cleans \(create_booking\) and email written quotes \(send_quote\)/);
+  assert.match(p, /spell the email address back letter by letter/);
+  assert.match(p, /postcode character by character/);
+  assert.match(p, /Never call create_booking or send_quote until the caller has said yes to the read-back/);
 });

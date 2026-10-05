@@ -251,7 +251,7 @@ async function createAiBooking(args, ctx) {
 
   const recent = await Booking.countDocuments({
     "customer.phone": ctx.phone,
-    leadSource: "WhatsApp AI",
+    leadSource: { $in: ["WhatsApp AI", "Phone AI"] },
     createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
   });
   if (recent >= MAX_AI_BOOKINGS_PER_PHONE_PER_DAY) {
@@ -270,7 +270,14 @@ async function createAiBooking(args, ctx) {
     postcode,
     frequency,
     duration: quote.hours,
-    extras: quote.extras.map((e) => ({ name: e.name, qty: e.qty, rate: e.unitPrice })),
+    extras: [
+      ...quote.extras.map((e) => ({ name: e.name, qty: e.qty, rate: e.unitPrice })),
+      // Same lines the website booking form saves, so admin and the cleaner see them the same way.
+      ...(args.parking ? [`Parking: ${String(args.parking).trim()}`] : []),
+      ...(args.access ? [`Entry: ${String(args.access).trim()}`] : []),
+      `Pet on premises: ${args.hasPet ? "Yes" : "No"}`,
+      ...(args.notes ? [`Instructions: ${String(args.notes).trim()}`] : []),
+    ],
     Bedroom: 0, Bathroom: 0, Kitchen: 0, "Living Room": 0,
     "Utility Room": 0, "Reception Room": 0, Conservatory: 0, Cloakroom: 0,
     hasPet: args.hasPet ? "Yes" : "No",
@@ -293,7 +300,7 @@ async function createAiBooking(args, ctx) {
       ...(quote.tax ? { taxRate: quote.tax.rate, taxAmount: quote.tax.amount, taxLabel: quote.tax.label } : {}),
     },
     status: "Pending",
-    leadSource: "WhatsApp AI",
+    leadSource: ctx.channel === "voice" ? "Phone AI" : "WhatsApp AI",
     suppliesProvidedBy: args.suppliesProvidedBy,
     notes: args.notes || "",
     noPaymentRequired: false,
@@ -678,9 +685,11 @@ const declarations = [
         kitchens: { type: "integer" },
         livingRooms: { type: "integer" },
         hasPet: { type: "boolean" },
+        parking: { type: "string", description: "e.g. Free parking on-site, Free street parking, Paid parking, No parking" },
+        access: { type: "string", description: "How the cleaner gets in, e.g. Someone will be home, Key in a key safe" },
         extras: extrasSchema,
         ...whenSchema,
-        notes: { type: "string", description: "Access instructions or special requests" },
+        notes: { type: "string", description: "Anything else the cleaner should know" },
         customerConfirmed: { type: "boolean", description: "True only if the customer explicitly said yes to the summary and total." },
       },
       required: ["firstName", "lastName", "email", "address", "suppliesProvidedBy", "service", "hours", "date", "time", "customerConfirmed"],
@@ -776,7 +785,9 @@ function confirmationTool(history) {
   const previous = [...history.slice(0, -1)].reverse().find((m) => m.role !== "customer");
   if (!previous || !/reply yes/i.test(previous.text || "")) return null;
   if (/\bmove\b|reschedul/i.test(previous.text)) return "reschedule_booking";
-  if (/reply yes to (have |get )?(the |your |a )?(written )?quote|reply yes to (send|email)[^.\n]*quote/i.test(previous.text)) return "send_quote";
+  // A quote summary mentions the quote ("…that's where the quote will go. Reply YES to have it
+  // emailed"); a booking summary doesn't.
+  if (/reply yes to (have |get )?(the |your |a )?(written )?quote|reply yes to (send|email)[^.\n]*quote|\bquote\b/i.test(previous.text)) return "send_quote";
   return "create_booking";
 }
 
@@ -796,12 +807,31 @@ function describeToolResult(name, args = {}, r = {}) {
           : `Availability ${r.date}: ${r.availableStartTimes?.length ?? 0} free start times`,
       };
     case "create_booking":
-      return { name, ok: true, detail: `${r.dryRun ? "TEST booking (not saved)" : `Booking ${r.bookingRef} created`} · ${money(r.total)} · ${r.when || ""}` };
+      return {
+        name,
+        ok: true,
+        detail: [
+          r.dryRun ? "TEST booking (not saved)" : `Booking ${r.bookingRef} created`,
+          `${args.firstName || ""} ${args.lastName || ""}`.trim(),
+          args.email,
+          args.address,
+          `${args.service || ""}${args.hours ? `, ${args.hours}h` : ""}${args.frequency && args.frequency !== "Once" ? `, ${args.frequency}` : ""}`,
+          r.when,
+          money(r.total),
+        ].filter(Boolean).join(" · "),
+      };
     case "send_quote":
       return {
         name,
         ok: true,
-        detail: r.preview ? `Quote preview · ${money(r.grandTotal)}` : `${r.dryRun ? "TEST quote (not sent)" : `Quote ${r.quoteRef} emailed`} · ${money(r.grandTotal)}`,
+        detail: [
+          r.preview ? "Quote preview" : r.dryRun ? "TEST quote (not sent)" : `Quote ${r.quoteRef} emailed`,
+          args.customerName,
+          args.email,
+          args.address,
+          (args.services || []).map((x) => `${x.service}${x.hours ? ` ${x.hours}h` : ""}`).join(", "),
+          money(r.grandTotal),
+        ].filter(Boolean).join(" · "),
       };
     case "find_my_bookings":
       return { name, ok: true, detail: `Looked up bookings: ${r.bookings?.length ?? 0} upcoming` };
