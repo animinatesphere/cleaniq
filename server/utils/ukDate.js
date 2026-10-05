@@ -46,6 +46,17 @@ function resolveUkDate(input, now = new Date()) {
     const [y, mo, d] = [+m[1], +m[2], +m[3]];
     return valid(y, mo, d) ? done(utc(y, mo, d)) : { error: `"${input}" isn't a real date.` };
   }
+  // "Thursday 8 October", "Thursday the 8th": read the date, and check the weekday matches it.
+  if ((m = raw.match(/^(?:on )?(sun|mon|tue|tues|wed|thu|thur|thurs|fri|sat)[a-z]* (?:the )?(\d.*|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]* \d.*)$/))) {
+    const r = resolveUkDate(m[2], now);
+    if (r.error) return r;
+    const said = WEEKDAYS.findIndex((w) => w.startsWith(m[1].slice(0, 3)));
+    const actual = new Date(`${r.iso}T00:00:00Z`).getUTCDay();
+    if (said !== actual) {
+      return { error: `${r.label.split(" ").slice(1).join(" ")} is a ${WEEKDAYS[actual][0].toUpperCase()}${WEEKDAYS[actual].slice(1)}, not a ${WEEKDAYS[said][0].toUpperCase()}${WEEKDAYS[said].slice(1)}. Check with the customer which they meant.` };
+    }
+    return r;
+  }
   if (/^(today|tonight)$/.test(raw)) return done(today);
   if (/^(tomorrow|tmrw|tmr)$/.test(raw)) return done(addDays(today, 1));
   if (/^(the )?day after tomorrow$/.test(raw)) return done(addDays(today, 2));
