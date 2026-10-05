@@ -363,42 +363,97 @@ router.get("/:quoteRef", async (req, res) => {
  * notifies the admin, and shows the company a proper confirmation page.
  * No authentication, since the recipient is a company contact, not an admin.
  */
+// Accepts a quote: marks it accepted, stops follow-ups, turns it into booking(s) and tells admin.
+async function acceptQuote(quote) {
+  if (quote.status === "accepted") return;
+  const reAccepted = quote.status === "declined";
+  quote.status = "accepted";
+  quote.acceptedAt = new Date();
+  if (reAccepted) quote.declinedAt = null;
+  await require("../utils/automationEngine").cancelQuoteFollowups(quote.email).catch(() => {});
+  await quote.save();
+  const { count: bookingsCreated, dateNote } = await generateBookingsFromQuote(quote);
+  await sendEmail({
+    to: process.env.EMAIL_USER || "info@cleaniqservices.com",
+    // They had declined before: say so, so a dead lead isn't silently resurrected.
+    subject: `✅ Quote Accepted${reAccepted ? " (after declining)" : ""} - ${quote.companyName} | ${quote.quoteRef}`,
+    html: generateQuoteResponseAlert(quote, "accepted", bookingsCreated, dateNote),
+  });
+}
+
+// Total cleaning hours on a quote (for free arrival times).
+const quoteHours = (quote) =>
+  (quote.items || []).filter((i) => i.billingType === "hourly").reduce((sum, i) => sum + num(i.qty), 0) || 2;
+
+const londonDate = (offsetDays = 0) => {
+  const d = new Date(Date.now() + offsetDays * 86400000);
+  return d.toLocaleDateString("en-CA", { timeZone: "Europe/London" }); // YYYY-MM-DD
+};
+
+/**
+ * GET /api/quotes/:quoteRef/accept
+ * Link from the quote email. Shows a page where the customer picks the date and arrival time
+ * for their clean (only free times are offered); the quote is accepted when they confirm.
+ * (Opening the link alone accepts nothing, so email link-scanners can't accept quotes.)
+ */
 router.get("/:quoteRef/accept", async (req, res) => {
-  const { quoteRef } = req.params;
   try {
-    const quote = await Quote.findOne({ quoteRef });
+    const quote = await Quote.findOne({ quoteRef: req.params.quoteRef });
+    if (!quote) return res.status(404).send(generateOutcomePage({ type: "notfound" }));
+    if (quote.status === "accepted") return res.send(generateOutcomePage({ type: "accept", quote }));
+    res.send(generateSchedulePage(quote));
+  } catch (error) {
+    console.error("Quote accept page error:", error);
+    res.status(500).send(generateOutcomePage({ type: "error" }));
+  }
+});
 
-    if (!quote) {
-      return res.status(404).send(generateOutcomePage({ type: "notfound" }));
+/**
+ * GET /api/quotes/:quoteRef/times?date=YYYY-MM-DD
+ * Free arrival times that day for this quote's hours (same rules as the admin booking form).
+ */
+router.get("/:quoteRef/times", async (req, res) => {
+  try {
+    const quote = await Quote.findOne({ quoteRef: req.params.quoteRef }).lean();
+    if (!quote) return res.status(404).json({ message: "Quote not found" });
+    const date = String(req.query.date || "");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date < londonDate(1) || date > londonDate(120)) {
+      return res.status(400).json({ message: "Please choose a date from tomorrow onwards." });
     }
+    const { getAvailability, formatWindow } = require("../utils/aiTools");
+    const hours = quoteHours(quote);
+    const a = await getAvailability(date, { hours });
+    if (a.error) return res.status(400).json({ message: a.error });
+    const times = (a.availableStartTimes || []).map((t) => t.split(" ")[0]);
+    res.json({ date, times: times.map((t) => ({ value: t, label: formatWindow(t, hours) })) });
+  } catch (error) {
+    res.status(500).json({ message: "Couldn't load times. Please try again." });
+  }
+});
 
-    if (quote.status === "declined") {
-      // They already declined — let them flip to accepted, but don't silently
-      // resurrect a dead lead without telling the admin it changed.
-      quote.status = "accepted";
-      quote.acceptedAt = new Date();
-      await require("../utils/automationEngine").cancelQuoteFollowups(quote.email).catch(() => {});
-      quote.declinedAt = null;
-      await quote.save();
-      const { count: bookingsCreated, dateNote } = await generateBookingsFromQuote(quote);
-      await sendEmail({
-        to: process.env.EMAIL_USER || "info@cleaniqservices.com",
-        subject: `✅ Quote Accepted (after declining) - ${quote.companyName} | ${quote.quoteRef}`,
-        html: generateQuoteResponseAlert(quote, "accepted", bookingsCreated, dateNote),
-      });
-    } else if (quote.status !== "accepted") {
-      quote.status = "accepted";
-      quote.acceptedAt = new Date();
-      await require("../utils/automationEngine").cancelQuoteFollowups(quote.email).catch(() => {});
-      await quote.save();
-      const { count: bookingsCreated, dateNote } = await generateBookingsFromQuote(quote);
-      await sendEmail({
-        to: process.env.EMAIL_USER || "info@cleaniqservices.com",
-        subject: `✅ Quote Accepted - ${quote.companyName} | ${quote.quoteRef}`,
-        html: generateQuoteResponseAlert(quote, "accepted", bookingsCreated, dateNote),
-      });
+/**
+ * POST /api/quotes/:quoteRef/accept  { date, time }
+ * The customer confirmed a date and arrival time: accept the quote and book it.
+ */
+router.post("/:quoteRef/accept", async (req, res) => {
+  try {
+    const quote = await Quote.findOne({ quoteRef: req.params.quoteRef });
+    if (!quote) return res.status(404).send(generateOutcomePage({ type: "notfound" }));
+    if (quote.status === "accepted") return res.send(generateOutcomePage({ type: "accept", quote }));
+
+    const date = String(req.body?.date || "");
+    const { getAvailability, normaliseTime } = require("../utils/aiTools");
+    const time = normaliseTime(req.body?.time);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date < londonDate(1) || date > londonDate(120) || !time) {
+      return res.status(400).send(generateSchedulePage(quote, { error: "Please choose a date (from tomorrow) and an arrival time." }));
     }
-
+    const a = await getAvailability(date, { time, hours: quoteHours(quote) });
+    if (a.error || !a.requestedTime?.free) {
+      return res.status(409).send(generateSchedulePage(quote, { error: "Sorry, that time has just been taken. Please choose another.", date }));
+    }
+    quote.serviceDate = date;
+    quote.serviceTimeSlot = time;
+    await acceptQuote(quote);
     res.send(generateOutcomePage({ type: "accept", quote }));
   } catch (error) {
     console.error("Quote accept error:", error);
@@ -933,6 +988,89 @@ function generateAdminNotificationEmail(quote) {
 // Public-facing outcome page shown when a company clicks Accept/Decline from
 // their quote email. Unauthenticated, so it's rendered server-side rather
 // than requiring a frontend route + build.
+// "Choose your date and time" page shown when the customer clicks Accept in the quote email.
+function generateSchedulePage(quote, { error = "", date = "" } = {}) {
+  const ref = escHtml(quote.quoteRef);
+  const name = escHtml(quote.contactName || quote.companyName || "there");
+  const hours = quoteHours(quote);
+  const preset = date || (quote.serviceDate && quote.serviceDate >= londonDate(1) ? quote.serviceDate : "");
+  const presetTime = /^\d{2}:\d{2}$/.test(quote.serviceTimeSlot || "") ? quote.serviceTimeSlot : "";
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Choose your cleaning date | Cleaniq Services</title>
+<style>
+  *{box-sizing:border-box} body{margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a}
+  .wrap{max-width:520px;margin:0 auto;padding:32px 16px}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden}
+  .top{background:#0f172a;padding:24px;text-align:center} .top img{height:40px}
+  .body{padding:28px 24px}
+  h1{font-size:22px;margin:0 0 8px} p{font-size:14px;line-height:1.6;color:#475569;margin:0 0 16px}
+  .total{display:flex;justify-content:space-between;background:#f8fafc;border-radius:10px;padding:14px 16px;font-size:14px;margin-bottom:20px}
+  .total b{font-size:18px;color:#036847}
+  label{display:block;font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:.6px;color:#64748b;margin:0 0 6px}
+  input[type=date]{width:100%;padding:14px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px;background:#fff;color:#0f172a;min-height:50px}
+  .times{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:8px}
+  .times label{margin:0;text-transform:none;letter-spacing:0;font-size:14px;color:#0f172a;font-weight:bold;border:2px solid #e2e8f0;border-radius:10px;padding:12px;text-align:center;cursor:pointer}
+  .times input{position:absolute;opacity:0;pointer-events:none}
+  .times input:checked+span{color:#036847} .times label:has(input:checked){border-color:#036847;background:#ecfdf5}
+  .msg{font-size:13px;color:#64748b;margin-top:10px;min-height:18px}
+  .err{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:12px 14px;font-size:13px;font-weight:bold;margin-bottom:16px}
+  button{width:100%;margin-top:22px;padding:16px;border:0;border-radius:10px;background:#036847;color:#fff;font-size:15px;font-weight:bold;cursor:pointer}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .decline{display:block;text-align:center;margin-top:16px;font-size:13px;color:#64748b}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <div class="top"><img src="https://cleaniqservices.com/preview.jpg" alt="Cleaniq Services" /></div>
+  <div class="body">
+    <h1>When should we come?</h1>
+    <p>Hi ${name}, choose the date and the time you'd like your cleaner to arrive, then confirm to accept your quote.</p>
+    <div class="total"><span>Quote ${ref} · ${hours} hours</span><b>£${Number(quote.grandTotal || 0).toFixed(2)}</b></div>
+    ${error ? `<div class="err">${escHtml(error)}</div>` : ""}
+    <form method="post" action="/api/quotes/${encodeURIComponent(quote.quoteRef)}/accept" id="f">
+      <label for="date">Date</label>
+      <input type="date" id="date" name="date" min="${londonDate(1)}" max="${londonDate(120)}" value="${escHtml(preset)}" required />
+      <div style="margin-top:20px"><label>Arrival time</label></div>
+      <div class="times" id="times"></div>
+      <div class="msg" id="msg">Choose a date to see the free times.</div>
+      <button type="submit" id="go" disabled>Confirm &amp; accept quote</button>
+    </form>
+    <a class="decline" href="/api/quotes/${encodeURIComponent(quote.quoteRef)}/decline">Not for me — decline this quote</a>
+  </div>
+</div></div>
+<script>
+(function(){
+  var ref=${JSON.stringify(quote.quoteRef)}, preset=${JSON.stringify(presetTime)};
+  var dateEl=document.getElementById("date"), box=document.getElementById("times"), msg=document.getElementById("msg"), go=document.getElementById("go");
+  function load(){
+    box.innerHTML=""; go.disabled=true;
+    if(!dateEl.value){ msg.textContent="Choose a date to see the free times."; return; }
+    msg.textContent="Loading free times…";
+    fetch("/api/quotes/"+encodeURIComponent(ref)+"/times?date="+dateEl.value).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});}).then(function(x){
+      if(!x.ok){ msg.textContent=x.d.message||"Couldn't load times."; return; }
+      if(!x.d.times.length){ msg.textContent="Sorry, that day is fully booked. Please choose another date."; return; }
+      msg.textContent="";
+      x.d.times.forEach(function(t){
+        var l=document.createElement("label"), i=document.createElement("input"), s=document.createElement("span");
+        i.type="radio"; i.name="time"; i.value=t.value; i.required=true; if(t.value===preset) i.checked=true;
+        i.onchange=function(){ go.disabled=false; };
+        s.textContent=t.label; l.appendChild(i); l.appendChild(s); box.appendChild(l);
+      });
+      go.disabled=!box.querySelector("input:checked");
+    }).catch(function(){ msg.textContent="Couldn't load times. Please try again."; });
+  }
+  dateEl.addEventListener("change", load);
+  document.getElementById("f").addEventListener("submit", function(){ go.disabled=true; go.textContent="Booking…"; });
+  if(dateEl.value) load();
+})();
+</script>
+</body>
+</html>`;
+}
+
 function generateOutcomePage({ type, quote }) {
   const config = {
     accept: {
@@ -941,7 +1079,11 @@ function generateOutcomePage({ type, quote }) {
       icon: "✓",
       heading: "Quote Accepted",
       message: `Thank you, ${quote?.contactName || quote?.companyName || "there"}! We've let our team know you'd like to go ahead with quote <strong>${quote?.quoteRef}</strong>.`,
-      steps: [
+      steps: quote?.serviceDate && /^\d{2}:\d{2}$/.test(quote?.serviceTimeSlot || "") ? [
+        `Your clean is booked for <strong>${escHtml(new Date(`${quote.serviceDate}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }))}</strong>, arriving at <strong>${escHtml(quote.serviceTimeSlot)}</strong>`,
+        "Our team will confirm it and send your payment link",
+        "You'll get a reminder before your clean",
+      ] : [
         "Our team will review and confirm scheduling within 1 business day",
         "You'll receive a booking confirmation with the visit date & time",
         `${quote?.depositRequired ? "We'll send a secure payment link for the deposit" : "No deposit needed — we'll invoice per your agreed payment terms"}`,
@@ -1186,6 +1328,8 @@ async function generateBookingsFromQuote(quote) {
     schedule: {
       date: addInterval(start, quote.frequency, i),
       timeSlot: quote.serviceTimeSlot || "Morning (8am-12pm)",
+      // A specific arrival time ("09:30", chosen on the accept page or by the AI).
+      preferredTime: /^\d{2}:\d{2}$/.test(quote.serviceTimeSlot || "") ? quote.serviceTimeSlot : "",
     },
     payment: {
       amount: quote.grandTotal || 0,
@@ -1243,3 +1387,4 @@ function calculateNextSendDate(frequency) {
 
 module.exports = router;
 module.exports.sendQuote = sendQuote;
+module.exports.generateBookingsFromQuote = generateBookingsFromQuote;

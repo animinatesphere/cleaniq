@@ -426,6 +426,15 @@ const QUOTE_DEFAULTS = {
 };
 const MAX_AI_QUOTES_PER_PHONE_PER_DAY = 3;
 
+// Tax on emailed quotes. Once admin has set Settings → Tax, quotes follow it; before that, the
+// AI's own setting (20%). Shared by AI quotes and the website's instant quotes.
+async function quoteTaxSettings(settings) {
+  const SystemSetting = require("../models/SystemSetting");
+  const tax = (await SystemSetting.exists({ key: "tax" })) ? await require("./tax").getTax() : null;
+  const s = settings || (await AiSettings.get());
+  return { includeVat: tax ? tax.enabled : s.quoteIncludeVat !== false, vatRate: tax ? tax.rate : QUOTE_DEFAULTS.vatRate };
+}
+
 function buildQuoteItems(services, args, suppliesFee) {
   const hourly = services.filter((s) => s.type === "hourly");
   const extraOptions = services.filter((s) => s.type !== "hourly" && s.type !== "per_room" && s.category !== "Rooms");
@@ -505,12 +514,7 @@ async function sendAiQuote(args, ctx) {
 
   // Same maths as QuoteBuilder.jsx (no discount or deposit from the AI).
   const subtotal = money(built.items.reduce((sum, i) => sum + i.subtotal, 0));
-  // Once admin has set Settings → Tax, quotes follow it; before that, the AI's own setting (20%).
-  const SystemSetting = require("../models/SystemSetting");
-  const taxSet = await SystemSetting.exists({ key: "tax" });
-  const tax = taxSet ? await require("./tax").getTax() : null;
-  const includeVat = tax ? tax.enabled : settings.quoteIncludeVat !== false;
-  const vatRate = tax ? tax.rate : QUOTE_DEFAULTS.vatRate;
+  const { includeVat, vatRate } = await quoteTaxSettings(settings);
   const vat = includeVat ? money(subtotal * (vatRate / 100)) : 0;
   const grandTotal = money(subtotal + vat);
   const frequency = QUOTE_FREQUENCIES.includes(args.frequency) ? args.frequency : "once";
@@ -997,6 +1001,9 @@ module.exports = {
   formatWindow,
   confirmationTool,
   sendAiQuote,
+  quoteTaxSettings,
+  loadUkServices,
+  QUOTE_DEFAULTS,
   saveEnquiry,
   describeToolResult,
   SPECIFIC_TIMES,

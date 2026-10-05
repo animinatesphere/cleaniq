@@ -17,6 +17,7 @@ const CARPET_WITH = "With Carpet Cleaning (Save 60%)";
 const CARPET_WITHOUT = "Without Carpet Cleaning";
 const OVEN_TYPES = ["Single oven", "Double oven", "Range oven"];
 const FRIDGE_TYPES = ["Single fridge", "Fridge freezer", "American fridge freezer"];
+const HOUR_CHOICES = [2, 3, 4, 5, 6, 7, 8, 10];
 const PROPERTY_TYPES = [
   { name: "Studio", icon: DoorOpen },
   { name: "Flat", icon: Building2 },
@@ -45,7 +46,7 @@ const serviceIcon = (name) => {
 };
 
 const EMPTY = {
-  service: "", name: "", email: "", phone: "", postcode: "",
+  service: "", name: "", email: "", phone: "", postcode: "", address: "", hours: "", carpets: null,
   bedrooms: null, bathrooms: null, livingRooms: null, stairs: null, property: "",
   date: "", notes: "", carpet: "",
   extras: { oven: false, ovenType: "", fridge: false, fridgeType: "" },
@@ -164,6 +165,7 @@ const GetQuote = () => {
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [errorMsg, setErrorMsg] = useState("");
   const [sentTo, setSentTo] = useState("");
+  const [instantQuote, setInstantQuote] = useState(false);
 
   useEffect(() => {
     fetch(`${API}/services?region=UK`)
@@ -187,6 +189,8 @@ const GetQuote = () => {
 
   const checks = [
     !!form.service,
+    !!form.hours,
+    form.address.trim().length >= 5,
     form.name.trim().length > 1,
     EMAIL_RE.test(form.email.trim()),
     POSTCODE_RE.test(form.postcode.trim()),
@@ -221,8 +225,11 @@ const GetQuote = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.service) return fail("Please choose a service.");
+    if (!form.hours) return fail("Please choose how many hours you'd like.");
+    if (form.carpet === CARPET_WITH && !(form.carpets > 0)) return fail("Please tell us how many carpets to clean.");
     if (form.extras.oven && !form.extras.ovenType) return fail("Please confirm the type of oven.");
     if (form.extras.fridge && !form.extras.fridgeType) return fail("Please confirm the type of fridge.");
+    if (form.address.trim().length < 5) return fail("Please enter the full address of the property.");
     if (!POSTCODE_RE.test(form.postcode.trim())) return fail("Please enter a valid UK postcode, e.g. M1 1AA.");
     if (!form.consent) return fail("Please tick the box so we can store your details and reply.");
     setStatus("loading");
@@ -234,6 +241,8 @@ const GetQuote = () => {
         body: JSON.stringify(form),
       });
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setInstantQuote(Boolean(data.instantQuote));
         setSentTo(form.email.trim());
         setStatus("success");
         setForm(EMPTY);
@@ -362,16 +371,26 @@ const GetQuote = () => {
               <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
                 <CheckCircle2 size={34} />
               </span>
-              <h2 className="mt-5 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">Thank you — request received!</h2>
+              <h2 className="mt-5 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+                {instantQuote ? "Your quote is in your inbox!" : "Thank you — request received!"}
+              </h2>
               <p className="mt-3 text-base font-medium text-slate-500">
-                We've sent a confirmation to <span className="font-bold text-slate-700 break-all">{sentTo}</span>.
+                {instantQuote ? "We've emailed your quote to " : "We've sent a confirmation to "}
+                <span className="font-bold text-slate-700 break-all">{sentTo}</span>.
               </p>
               <ol className="mx-auto mt-8 max-w-md space-y-3 text-left">
-                {[
-                  "Our team reviews your property details.",
-                  "We email your personalised quote — usually within a few hours.",
-                  "Happy with it? Book your clean in a couple of clicks.",
-                ].map((t, i) => (
+                {(instantQuote
+                  ? [
+                      "Open the email and check your quote.",
+                      "Click “Accept This Quote” and choose the date and time for your cleaner.",
+                      "That's it: your clean is booked and we'll send your payment link.",
+                    ]
+                  : [
+                      "Our team reviews your property details.",
+                      "We email your personalised quote — usually within a few hours.",
+                      "Happy with it? Accept it and pick your date and time.",
+                    ]
+                ).map((t, i) => (
                   <li key={t} className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-xs font-black text-white">{i + 1}</span>
                     <span className="text-sm font-semibold text-slate-700">{t}</span>
@@ -407,6 +426,14 @@ const GetQuote = () => {
 
                 {/* 2. Property */}
                 <Section n={2} title="About your property" hint="Roughly is fine — it helps us price it accurately.">
+                  <p className={fieldLabel}>How many hours would you like? *</p>
+                  <div className="mb-5 grid grid-cols-4 gap-2 sm:grid-cols-8">
+                    {HOUR_CHOICES.map((h) => (
+                      <Choice key={h} selected={Number(form.hours) === h} onClick={() => set("hours", h)} className="py-3 text-center">
+                        <span className="text-sm font-black text-slate-900">{h}h</span>
+                      </Choice>
+                    ))}
+                  </div>
                   <p className={fieldLabel}>Property type</p>
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
                     {PROPERTY_TYPES.map(({ name, icon: Icon }) => (
@@ -436,6 +463,11 @@ const GetQuote = () => {
                       <span className="text-base font-black text-slate-900">Without carpet cleaning</span>
                     </Choice>
                   </div>
+                  {form.carpet === CARPET_WITH && (
+                    <div className="mt-3 sm:max-w-sm">
+                      <Stepper label="How many carpets?" icon={Layers} value={form.carpets} max={20} onChange={(v) => set("carpets", v)} />
+                    </div>
+                  )}
                 </Section>
 
                 {/* 4. Extras */}
@@ -472,6 +504,9 @@ const GetQuote = () => {
                     <IconInput icon={User} label="Full name *" name="name" value={form.name} onChange={onChange} placeholder="John Smith" autoComplete="name" required />
                     <IconInput icon={Mail} label="Email address *" type="email" name="email" value={form.email} onChange={onChange} placeholder="you@example.com" autoComplete="email" inputMode="email" required />
                     <IconInput icon={Phone} label="Phone number" type="tel" name="phone" value={form.phone} onChange={onChange} placeholder="07700 900000" autoComplete="tel" inputMode="tel" />
+                    <div className="sm:col-span-2">
+                      <IconInput icon={House} label="Full address *" name="address" value={form.address} onChange={onChange} placeholder="House number, street, town" autoComplete="street-address" required />
+                    </div>
                     <IconInput icon={MapPin} label="Post code *" name="postcode" value={form.postcode} onChange={onChange} placeholder="M1 1AA" autoComplete="postal-code" className="uppercase" required />
                   </div>
 
@@ -526,7 +561,8 @@ const GetQuote = () => {
                   <div className="mt-4 divide-y divide-white/10 border-y border-white/10">
                     <SummaryRow label="Property" value={form.property} />
                     <SummaryRow label="Rooms" value={rooms} />
-                    <SummaryRow label="Carpets" value={form.carpet === CARPET_WITH ? "Yes" : form.carpet ? "No" : ""} />
+                    <SummaryRow label="Hours" value={form.hours ? `${form.hours} hours` : ""} />
+                    <SummaryRow label="Carpets" value={form.carpet === CARPET_WITH ? (form.carpets ? `${form.carpets} carpet${form.carpets === 1 ? "" : "s"}` : "Yes") : form.carpet ? "No" : ""} />
                     <SummaryRow label="Extras" value={extrasText} />
                     <SummaryRow label="Date" value={prettyDate} />
                     <SummaryRow label="Postcode" value={form.postcode.toUpperCase()} />
