@@ -81,9 +81,11 @@ test("VAT can be switched off in AI Settings", async () => {
   }
 });
 
-test("customer details are required: name, email, phone and address", async () => {
+test("customer details are required: name, email and address; the chat's number is used for the phone", async () => {
+  // No phone given: the chat/call number is used, so it isn't asked for again.
   let r = await run("send_quote", { ...args, phone: undefined });
-  assert.match(r.error, /their phone number/);
+  assert.equal(r.error, undefined);
+  assert.equal(r.preview, true);
   r = await run("send_quote", { ...args, phone: "12" });
   assert.match(r.error, /valid phone number/);
   r = await run("send_quote", { ...args, email: "nope", suppliesProvidedBy: undefined, customerName: "" });
@@ -160,4 +162,13 @@ test("chat test mode doesn't email or save", async () => {
   assert.equal(r.dryRun, true);
   assert.equal(await Quote.countDocuments(), before);
   assert.equal(sentEmails.length, emailsBefore);
+});
+
+
+test("dates in the customer's words are worked out by the server and read back", async () => {
+  const r = await run("check_availability", { date: "the 2nd of May 2030", time: "10am", hours: 2 });
+  assert.equal(r.date, "2030-05-02");
+  assert.equal(r.dateToReadBack, "Thursday 2 May 2030");
+  const bad = await run("check_availability", { date: "sometime soon" });
+  assert.match(bad.error, /couldn't work out the date/);
 });

@@ -23,6 +23,22 @@ function ttsAttributes() {
   return ` ttsProvider="${xml(process.env.TWILIO_TTS_PROVIDER || "Google")}" voice="${xml(voice)}"`;
 }
 
+// Speech recognition: words callers often say, so they're heard right (Twilio "hints").
+// Optional TWILIO_STT_PROVIDER / TWILIO_SPEECH_MODEL in .env pick a different recogniser.
+const SPEECH_HINTS = [
+  "Cleaniq", "end of tenancy", "deep clean", "regular clean", "house cleaning", "office cleaning", "Airbnb",
+  "after builders", "post construction", "oven cleaning", "carpet cleaning", "fridge", "freezer",
+  "one-off", "weekly", "fortnightly", "monthly", "every three months", "bedrooms", "bathrooms",
+  "postcode", "dot com", "dot co dot uk", "gmail", "hotmail", "outlook", "yahoo", "icloud",
+  "Manchester", "Salford", "Stockport", "Bolton", "Bury", "Rochdale", "Oldham", "Wigan", "Trafford",
+  "Tameside", "Ramsbottom", "Didsbury", "Chorlton", "Fallowfield", "Altrincham", "Sale", "Prestwich",
+].join(",");
+function speechAttributes() {
+  const provider = process.env.TWILIO_STT_PROVIDER ? ` transcriptionProvider="${xml(process.env.TWILIO_STT_PROVIDER)}"` : "";
+  const model = process.env.TWILIO_SPEECH_MODEL ? ` speechModel="${xml(process.env.TWILIO_SPEECH_MODEL)}"` : "";
+  return `${provider}${model} hints="${xml(SPEECH_HINTS)}"`;
+}
+
 const twiml = (res, body) => res.type("text/xml").send(`<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`);
 
 // Rings the team for about 25 seconds; if nobody picks up, the caller is told we'll call back
@@ -68,7 +84,7 @@ router.post("/incoming", async (req, res) => {
     twiml(
       res,
       `<Connect action="${xml(base + "/api/voice/after")}">` +
-        `<ConversationRelay url="${xml(relayUrl)}" language="en-GB"${ttsAttributes()} welcomeGreeting="${xml(greetingFor(settings, agentName))}">` +
+        `<ConversationRelay url="${xml(relayUrl)}" language="en-GB"${ttsAttributes()}${speechAttributes()} welcomeGreeting="${xml(greetingFor(settings, agentName))}">` +
         `<Parameter name="token" value="${token}"/>` +
         `</ConversationRelay></Connect>`,
     );

@@ -6,6 +6,7 @@ const Service = require("../models/Service");
 const AiSettings = require("../models/AiSettings");
 const { toE164UK } = require("./phone");
 const { rateForFrequency, offeredFrequencies } = require("./pricing");
+const { resolveUkDate } = require("./ukDate");
 
 // Same rule as the admin form, website and app: a service is only offered at its own frequencies
 // (Regular: weekly/fortnightly, Deep: monthly/every 3 months, others one-off — or whatever admin priced).
@@ -439,7 +440,8 @@ async function sendAiQuote(args, ctx) {
   const problems = [];
   if (!args.customerName || String(args.customerName).trim().length < 2) problems.push("their name (or company name)");
   if (!EMAIL_RE.test(args.email || "")) problems.push("a valid email address to send the quote to");
-  const quotePhone = toE164UK(args.phone) || (args.phone ? "" : null);
+  // The chat/call number is used unless the customer gave a different one.
+  const quotePhone = args.phone ? toE164UK(args.phone) || "" : toE164UK(ctx.phone) || null;
   if (quotePhone === "") problems.push("a valid phone number");
   if (quotePhone === null) problems.push("their phone number");
   if (!args.address || String(args.address).trim().length < 5) problems.push("the property address");
@@ -632,7 +634,7 @@ const extrasSchema = {
   },
 };
 const whenSchema = {
-  date: { type: "string", description: "YYYY-MM-DD (UK)" },
+  date: { type: "string", description: "The date exactly as the customer said it (e.g. \"next Friday\", \"28th October\", \"tomorrow\") or YYYY-MM-DD. Don't work dates out yourself." },
   time: { type: "string", description: "Arrival time as HH:MM, 08:00–20:00 on the hour or half hour (e.g. 8am → 08:00)." },
 };
 
@@ -658,7 +660,7 @@ const declarations = [
     parametersJsonSchema: {
       type: "object",
       properties: {
-        date: { type: "string", description: "YYYY-MM-DD (UK)" },
+        date: { type: "string", description: "The date as the customer said it (e.g. \"next Friday\", \"the 28th\") or YYYY-MM-DD" },
         time: { type: "string", description: "Arrival time to check, HH:MM" },
         hours: { type: "number", description: "Job length in hours" },
       },
@@ -704,7 +706,7 @@ const declarations = [
       properties: {
         customerName: { type: "string", description: "Customer's full name" },
         companyName: { type: "string", description: "Only if the quote is for a business" },
-        phone: { type: "string", description: "Customer's phone number as they gave it" },
+        phone: { type: "string", description: "Only if the customer wants a different number from this chat/call's" },
         email: { type: "string" },
         address: { type: "string", description: "Property address with postcode" },
         services: {
@@ -730,12 +732,12 @@ const declarations = [
         hasPet: { type: "boolean" },
         parking: { type: "string", description: "e.g. Free parking on-site, Free street parking, Paid parking, No parking" },
         access: { type: "string", description: "How the cleaner gets in, e.g. Someone will be home, Key in a key safe" },
-        serviceDate: { type: "string", description: "Optional preferred date, YYYY-MM-DD" },
+        serviceDate: { type: "string", description: "Optional preferred date, as the customer said it (e.g. \"next Friday\") or YYYY-MM-DD" },
         time: { type: "string", description: "Optional preferred arrival time, HH:MM" },
         notes: { type: "string" },
         customerConfirmed: { type: "boolean" },
       },
-      required: ["customerName", "email", "phone", "address", "services", "suppliesProvidedBy", "customerConfirmed"],
+      required: ["customerName", "email", "address", "services", "suppliesProvidedBy", "customerConfirmed"],
     },
   },
   {
@@ -866,8 +868,25 @@ function makeToolRunner(ctx) {
       return { error: "The booking system had a problem. Offer to pass the request to the team." };
     }
   };
-  return async function runTool(name, args = {}) {
+  return async function runTool(name, rawArgs = {}) {
+    // Dates: the customer's words ("next Friday", "the 28th") are turned into exact dates here,
+    // so the AI never has to work out calendar dates itself.
+    const args = { ...rawArgs };
+    let dateRead = null;
+    for (const field of ["date", "serviceDate"]) {
+      if (!args[field]) continue;
+      const r = resolveUkDate(args[field]);
+      if (r.error) {
+        const result = { error: `${r.error}` };
+        if (ctx.onTool) ctx.onTool(describeToolResult(name, args, result));
+        return result;
+      }
+      args[field] = r.iso;
+      dateRead = r.label;
+    }
     const result = await run(name, args);
+    // Tell the AI the exact day it worked out, to read back to the customer.
+    if (dateRead && result && !result.error && typeof result === "object") result.dateToReadBack = dateRead;
     if (ctx.onTool) ctx.onTool(describeToolResult(name, args, result));
     return result;
   };
