@@ -39,6 +39,25 @@ const isRealBooking = (b) =>
   b.status !== "Cancelled" &&
   b.status !== "Completed" &&
   b.customer?.firstName !== "ADMIN_BLOCK";
+// "09:00", "9:30 AM", "2pm" → minutes after midnight (null if unreadable).
+const toMinutes = (t) => {
+  const m = String(t || "").trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+  if (!m) return null;
+  let h = Number(m[1]) % 24;
+  const ap = (m[3] || "").toLowerCase();
+  if (ap === "pm" && h < 12) h += 12;
+  if (ap === "am" && h === 12) h = 0;
+  return h * 60 + Number(m[2] || 0);
+};
+const toHHMM = (mins) => {
+  const v = ((Math.round(mins) % 1440) + 1440) % 1440;
+  return `${String(Math.floor(v / 60)).padStart(2, "0")}:${String(v % 60).padStart(2, "0")}`;
+};
+const adminHeaders = () => {
+  const token = localStorage.getItem("adminToken") || "";
+  return { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+};
+
 const initials = (f, l) => `${f?.[0] || ""}${l?.[0] || ""}`.toUpperCase() || "?";
 const hoursOf  = (b) => Number(b.workerDuration || b.details?.duration || 0);
 
@@ -62,6 +81,9 @@ export default function Rota() {
   const [assignTarget, setAssignTarget] = useState(null);
   const [pickedWorker, setPickedWorker] = useState("");
   const [pickedHours,  setPickedHours]  = useState("");
+  const [splitMode,    setSplitMode]    = useState(false);
+  const [splitRows,    setSplitRows]    = useState([]);
+  const [shiftTarget,  setShiftTarget]  = useState(null);
 
   const [cellAssign,    setCellAssign]    = useState(null);
   const [pickedBooking, setPickedBooking] = useState("");
@@ -116,12 +138,12 @@ export default function Rota() {
 
   const unassigned = useMemo(() =>
     weekBookings
-      .filter(b => !b.assignedWorker && !b.assignedWorkerName)
+      .filter(b => !b.splitIntoShifts && !b.assignedWorker && !b.assignedWorkerName)
       .sort((a, b) => new Date(a.schedule.date) - new Date(b.schedule.date)),
     [weekBookings]);
 
   const assignedThisWeek = useMemo(() =>
-    weekBookings.filter(b => b.assignedWorker || b.assignedWorkerName),
+    weekBookings.filter(b => !b.splitIntoShifts && (b.assignedWorker || b.assignedWorkerName)),
     [weekBookings]);
 
   const totalHoursThisWeek = useMemo(() =>
@@ -148,6 +170,62 @@ export default function Rota() {
     setAssignTarget(booking);
     setPickedWorker("");
     setPickedHours(booking.details?.duration || "");
+    setSplitMode(false);
+    setSplitRows(defaultSplit(booking, 2));
+  };
+
+  // Default split: the job's hours shared equally, each shift starting when the previous one ends.
+  const defaultSplit = (booking, count) => {
+    const total = Number(booking.details?.duration) || 0;
+    const each = total ? Math.max(0.5, Math.round((total / count) * 2) / 2) : 2;
+    const start = toMinutes(booking.schedule?.timeSlot || booking.schedule?.preferredTime) ?? 9 * 60;
+    return Array.from({ length: count }, (_, i) => ({ workerId: "", start: toHHMM(start + i * each * 60), hours: each }));
+  };
+
+  const updateSplitRow = (i, field, value) =>
+    setSplitRows(rows => rows.map((r, j) => (j === i ? { ...r, [field]: value } : r)));
+
+  const splitTotal = splitRows.reduce((sum, r) => sum + (Number(r.hours) || 0), 0);
+  const splitReady = splitRows.length >= 2 && splitRows.every(r => r.workerId && r.start && Number(r.hours) > 0);
+
+  const handleSplit = async () => {
+    if (!splitReady) return;
+    setAssigning(true);
+    try {
+      const res = await fetch(`${API}/workers/jobs/${assignTarget._id}/shifts`, {
+        method: "PUT",
+        headers: adminHeaders(),
+        body: JSON.stringify({ shifts: splitRows.map(r => ({ workerId: r.workerId, start: r.start, hours: Number(r.hours) })) }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || data.message || "Failed to split the job");
+      showToast(`Split into ${splitRows.length} shifts — workers notified`);
+      setAssignTarget(null);
+      fetchData();
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleRemoveSplit = async () => {
+    if (!shiftTarget?.parentBooking) return;
+    if (!window.confirm("Remove the split? All shifts of this job are removed and it goes back to Unassigned.")) return;
+    setAssigning(true);
+    try {
+      const parentId = typeof shiftTarget.parentBooking === "object" ? shiftTarget.parentBooking._id : shiftTarget.parentBooking;
+      const res = await fetch(`${API}/workers/jobs/${parentId}/shifts`, { method: "DELETE", headers: adminHeaders() });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || data.message || "Failed to remove the split");
+      showToast("Split removed — job is unassigned again");
+      setShiftTarget(null);
+      fetchData();
+    } catch (err) {
+      showToast(err.message, "error");
+    } finally {
+      setAssigning(false);
+    }
   };
 
   const openCellAssign = (worker, day) => {
@@ -428,11 +506,15 @@ export default function Rota() {
                               {!isOver && shifts.map(s => (
                                 <div
                                   key={s._id}
-                                  className={`${color.bg} rounded-xl px-3 py-2 relative overflow-hidden border border-white/10 transition-all`}
-                                  title={s.details?.address}
+                                  onClick={s.isShift ? () => setShiftTarget(s) : undefined}
+                                  className={`${color.bg} rounded-xl px-3 py-2 relative overflow-hidden border border-white/10 transition-all ${s.isShift ? "cursor-pointer hover:border-white/30" : ""}`}
+                                  title={s.isShift ? `Shift ${s.shiftNumber} of ${s.meta?.shiftOf || "a split job"} — click for options` : s.details?.address}
                                 >
                                   <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-xl ${color.stripe}`} />
                                   <div className="pl-1.5">
+                                    {s.isShift && (
+                                      <p className={`text-[9px] font-black uppercase tracking-wider ${color.sub}`}>Shift {s.shiftNumber}</p>
+                                    )}
                                     <p className={`text-[11px] font-bold leading-snug truncate ${color.text}`}>{s.service}</p>
                                     <p className={`text-[10px] font-semibold flex items-center gap-1 mt-0.5 ${color.sub}`}>
                                       <Clock size={9} />{s.schedule?.timeSlot || "—"}
@@ -599,6 +681,19 @@ export default function Rota() {
                   </p>
                 )}
               </div>
+              <div className="flex rounded-xl bg-[#071D16] border border-white/10 p-1">
+                {[["One worker", false], ["Split into shifts", true]].map(([label, val]) => (
+                  <button
+                    key={label}
+                    onClick={() => setSplitMode(val)}
+                    className={`flex-1 py-2 rounded-lg text-xs font-bold transition-colors ${splitMode === val ? "bg-emerald-500 text-white" : "text-white/40 hover:text-white"}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {!splitMode ? (
+                <>
               <div>
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-wider block mb-2">Select Worker</label>
                 <select
@@ -633,6 +728,104 @@ export default function Rota() {
               >
                 {assigning ? <RefreshCw size={14} className="animate-spin" /> : <UserPlus size={14} />}
                 {assigning ? "Assigning…" : "Assign & Notify Worker"}
+              </button>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-2.5">
+                    {splitRows.map((r, i) => (
+                      <div key={i} className="p-3 rounded-xl bg-[#071D16] border border-white/10 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black text-white/40 uppercase tracking-wider">Shift {i + 1}</span>
+                          {splitRows.length > 2 && (
+                            <button onClick={() => setSplitRows(rows => rows.filter((_, j) => j !== i))} className="text-white/30 hover:text-rose-400" title="Remove this shift">
+                              <X size={14} />
+                            </button>
+                          )}
+                        </div>
+                        <select
+                          value={r.workerId}
+                          onChange={e => updateSplitRow(i, "workerId", e.target.value)}
+                          className="w-full p-2.5 rounded-xl border border-white/10 bg-[#071D16] text-white text-sm focus:outline-none focus:border-emerald-500/50"
+                        >
+                          <option value="">— Choose a worker —</option>
+                          {workers.map(w => (
+                            <option key={w._id} value={w._id}>{w.firstName} {w.lastName}</option>
+                          ))}
+                        </select>
+                        <div className="flex gap-2">
+                          <label className="flex-1">
+                            <span className="text-[9px] font-bold text-white/30 uppercase block mb-1">Start</span>
+                            <input type="time" value={r.start} onChange={e => updateSplitRow(i, "start", e.target.value)} className="w-full p-2.5 rounded-xl border border-white/10 bg-[#071D16] text-white text-sm focus:outline-none focus:border-emerald-500/50" />
+                          </label>
+                          <label className="flex-1">
+                            <span className="text-[9px] font-bold text-white/30 uppercase block mb-1">Hours</span>
+                            <input type="number" min="0.5" max="12" step="0.5" value={r.hours} onChange={e => updateSplitRow(i, "hours", e.target.value)} className="w-full font-bold p-2.5 rounded-xl border border-white/10 bg-[#071D16] text-white text-sm focus:outline-none focus:border-emerald-500/50" />
+                          </label>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    {splitRows.length < 6 ? (
+                      <button
+                        onClick={() => setSplitRows(rows => {
+                          const last = rows[rows.length - 1];
+                          const next = (toMinutes(last?.start) ?? 9 * 60) + (Number(last?.hours) || 0) * 60;
+                          return [...rows, { workerId: "", start: toHHMM(next), hours: last?.hours || 2 }];
+                        })}
+                        className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+                      >
+                        <Plus size={12} /> Add shift
+                      </button>
+                    ) : <span />}
+                    <span className={`text-[11px] font-bold ${
+                      assignTarget.details?.duration && splitTotal !== Number(assignTarget.details.duration) ? "text-amber-400" : "text-white/40"
+                    }`}>
+                      Total {splitTotal}h{assignTarget.details?.duration ? ` of ${assignTarget.details.duration}h booked` : ""}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-white/40">
+                    Each worker only sees their own shift and hours. The customer sees one booking with all cleaners' first names,
+                    is told when the first cleaner arrives, and gets the "all done" message when the last shift finishes.
+                  </p>
+                  <button
+                    onClick={handleSplit}
+                    disabled={!splitReady || assigning}
+                    className="w-full py-3.5 rounded-xl bg-emerald-500 text-white font-bold text-sm hover:bg-emerald-400 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                  >
+                    {assigning ? <RefreshCw size={14} className="animate-spin" /> : <Users size={14} />}
+                    {assigning ? "Saving…" : `Split & Notify ${splitRows.length} Workers`}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {shiftTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#0B2D22] border border-white/10 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between">
+              <h3 className="text-base font-bold text-white">Shift {shiftTarget.shiftNumber}</h3>
+              <button onClick={() => setShiftTarget(null)} className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white/40 hover:bg-white/20 transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="p-4 rounded-xl bg-[#071D16] border border-white/10 space-y-1">
+                <p className="text-sm font-bold text-white">{shiftTarget.service}</p>
+                <p className="text-[12px] text-white/40">{shiftTarget.assignedWorkerName} · {shiftTarget.schedule?.timeSlot} · {shiftTarget.workerDuration}h</p>
+                <p className="text-[12px] text-white/40">Part of booking {shiftTarget.meta?.shiftOf} · {shiftTarget.status}</p>
+              </div>
+              <p className="text-[11px] text-white/40">To change workers or times, remove the split and split the job again. This is only possible before any shift has started.</p>
+              <button
+                onClick={handleRemoveSplit}
+                disabled={assigning}
+                className="w-full py-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 font-bold text-sm hover:bg-rose-500/25 transition-colors disabled:opacity-60"
+              >
+                {assigning ? "Removing…" : "Remove split"}
               </button>
             </div>
           </div>

@@ -88,7 +88,7 @@ const hideCustomerContact = (req, res, next) => {
 };
 // Admin pages use ?all=1, assign and visibility, which keep the full details.
 router.use("/jobs", (req, res, next) =>
-  req.query.all || /\/(assign|unassign|pay|visibility)\/?$/.test(req.path) ? next() : hideCustomerContact(req, res, next));
+  req.query.all || /\/(assign|unassign|pay|visibility|shifts)\/?$/.test(req.path) ? next() : hideCustomerContact(req, res, next));
 router.use("/:id/schedule", hideCustomerContact);
 
 // Mobile App Login Endpoint
@@ -490,6 +490,10 @@ router.put("/jobs/:id/assign", async (req, res) => {
     const booking = await findBookingByIdOrBookingId(req.params.id);
     if (!booking) return res.status(404).json({ error: "Booking not found" });
 
+    if (booking.splitIntoShifts) {
+      return res.status(400).json({ error: "This job is split into shifts. Change the shifts on the Rota (or remove the split) instead." });
+    }
+
     const worker = await Worker.findById(workerId);
     if (!worker) return res.status(404).json({ error: "Worker not found" });
 
@@ -516,7 +520,7 @@ router.put("/jobs/:id/assign", async (req, res) => {
       assignedWorkerName: `${worker.firstName} ${worker.lastName}`,
       jobAcceptedTime: booking.jobAcceptedTime,
     });
-    sendAutoIntro(booking, worker._id);
+    if (!booking.isShift) sendAutoIntro(booking, worker._id); // shifts: the customer isn't messaged per cleaner
 
     const shiftMsg = `You've been scheduled for ${booking.service} on ${new Date(booking.schedule?.date).toLocaleDateString("en-GB")} (${booking.schedule?.timeSlot || ""}). Check your schedule.`;
     await Notification.create({
@@ -532,7 +536,7 @@ router.put("/jobs/:id/assign", async (req, res) => {
         data: { type: "job_assigned", bookingId: booking.bookingId },
       }).catch(() => {});
     }
-    notifyCustomer(booking, {
+    if (!booking.isShift) notifyCustomer(booking, {
       title: "Cleaner Assigned!",
       body: `${worker.firstName} will be cleaning for you on ${new Date(booking.schedule?.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}.`,
       type: "status",
@@ -596,6 +600,34 @@ router.post("/jobs/:id/cancel", async (req, res) => {
   }
 });
 
+// PUT admin splits a job into shifts for several workers (Rota). Body: { shifts: [{ workerId,
+// start: "09:00", hours, workerRate? }] }. See utils/shifts.js.
+router.put("/jobs/:id/shifts", require("../middleware/adminAuth"), async (req, res) => {
+  try {
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+    const r = await require("../utils/shifts").splitIntoShifts(booking, req.body.shifts);
+    if (r.error) return res.status(400).json({ error: r.error });
+    res.json({ message: `Split into ${r.shifts.length} shifts — each worker has been notified.`, booking, shifts: r.shifts });
+  } catch (error) {
+    console.error("Error splitting job:", error);
+    res.status(500).json({ error: "Couldn't split the job. Please try again." });
+  }
+});
+
+// DELETE admin undoes a split (only before any shift has started).
+router.delete("/jobs/:id/shifts", require("../middleware/adminAuth"), async (req, res) => {
+  try {
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+    const r = await require("../utils/shifts").removeShifts(booking);
+    if (r.error) return res.status(400).json({ error: r.error });
+    res.json({ message: "Split removed — it's one job again.", booking });
+  } catch (error) {
+    res.status(500).json({ error: "Couldn't remove the split. Please try again." });
+  }
+});
+
 // PUT admin removes the cleaner from a booking. The booking goes back on the job feed (if it
 // hadn't finished), the cleaner is told, and their name no longer shows on it.
 router.put("/jobs/:id/unassign", require("../middleware/adminAuth"), async (req, res) => {
@@ -604,6 +636,9 @@ router.put("/jobs/:id/unassign", require("../middleware/adminAuth"), async (req,
     if (!booking) return res.status(404).json({ error: "Booking not found" });
     if (["Completed", "Completed - Unpaid"].includes(booking.status)) {
       return res.status(400).json({ error: "This clean is finished, so the cleaner can't be removed (their pay is based on it)." });
+    }
+    if (booking.splitIntoShifts) {
+      return res.status(400).json({ error: "This job is split into shifts. Remove the split on the Rota instead." });
     }
     if (!booking.assignedWorker && !booking.assignedWorkerName) {
       return res.status(400).json({ error: "No cleaner is assigned to this booking." });
@@ -758,12 +793,8 @@ router.post("/jobs/:id/suggest-time", async (req, res) => {
 });
 
 // POST mark arrived at customer location
-router.post("/jobs/:id/arrive", async (req, res) => {
-  try {
-    const booking = await findBookingByIdOrBookingId(req.params.id);
-    if (!booking) {
-      return res.status(404).json({ error: "Booking not found" });
-    }
+// Arrive step, shared by the worker app route and admin status changes on shifts.
+async function arriveJob(booking) {
     booking.status = "Arrived";
     booking.jobArrivedTime = new Date();
     await booking.save();
@@ -772,12 +803,20 @@ router.post("/jobs/:id/arrive", async (req, res) => {
       jobArrivedTime: booking.jobArrivedTime,
     });
 
+    // A shift of a split job: the customer hears about the FIRST cleaner to arrive only, and the
+    // visit is charged on the main booking (which the customer sees).
+    let customerBooking = booking;
+    if (booking.isShift) {
+      const parent = await require("../utils/shifts").shiftArrived(booking);
+      customerBooking = parent;
+    }
+
     // Regular clean: charge this visit to the saved card now. The clean goes ahead even if it
     // fails (customer gets a payment link, admin an alert).
-    const visitPayment = await chargeVisitOnArrival(booking);
+    const visitPayment = customerBooking ? await chargeVisitOnArrival(customerBooking) : null;
 
     // Notify customer
-    await notifyCustomer(booking, {
+    if (customerBooking) await notifyCustomer(customerBooking, {
       title: "Your Cleaner Has Arrived!",
       body: `${booking.assignedWorkerName} is at your door. Open up and let the magic happen.`,
     });
@@ -794,15 +833,28 @@ router.post("/jobs/:id/arrive", async (req, res) => {
     });
 
     // Send arrival email to customer — includes location, worker name, tips
-    if (booking.customer?.email) {
+    if (customerBooking?.customer?.email) {
       sendEmail({
-        to: booking.customer.email,
+        to: customerBooking.customer.email,
         subject: `🚪 Your cleaner has arrived — ${booking.assignedWorkerName} is at your door!`,
-        html: workerEventEmails.workerArrived(booking),
+        // Name the cleaner who actually arrived (for a split job the main booking lists them all).
+        html: workerEventEmails.workerArrived(booking.isShift
+          ? { ...customerBooking.toObject(), assignedWorkerName: booking.assignedWorkerName }
+          : customerBooking),
       }).catch(() => {});
     }
 
-    res.json({ message: "Arrived at customer location", booking, visitPayment });
+  return { message: "Arrived at customer location", booking, visitPayment };
+}
+
+router.post("/jobs/:id/arrive", async (req, res) => {
+  try {
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+    const result = await arriveJob(booking);
+    res.json(result);
   } catch (error) {
     console.error("Error marking arrival:", error);
     res.status(500).json({ error: "Internal server error marking arrival" });
@@ -810,12 +862,8 @@ router.post("/jobs/:id/arrive", async (req, res) => {
 });
 
 // POST start clean (counting down duration)
-router.post("/jobs/:id/start", async (req, res) => {
-  try {
-    const booking = await findBookingByIdOrBookingId(req.params.id);
-    if (!booking) {
-      return res.status(404).json({ error: "Booking not found" });
-    }
+// Start step, shared by the worker app route and admin status changes on shifts.
+async function startJob(booking) {
     booking.status = "In Progress";
     booking.jobStartTime = new Date();
     await booking.save();
@@ -823,11 +871,13 @@ router.post("/jobs/:id/start", async (req, res) => {
     await syncCompanyJob(booking, {
       jobStartTime: booking.jobStartTime,
     });
+    // A shift: the main booking shows In Progress; the customer isn't messaged for each shift.
+    if (booking.isShift) await require("../utils/shifts").shiftStarted(booking);
     // Regular clean not charged yet (cleaner skipped "I've arrived"): charge it now.
-    await chargeVisitOnArrival(booking);
+    if (!booking.isShift) await chargeVisitOnArrival(booking);
 
     // Notify customer
-    await notifyCustomer(booking, {
+    if (!booking.isShift) await notifyCustomer(booking, {
       title: "Cleaning Has Started!",
       body: `${booking.assignedWorkerName} has started your ${booking.service}. Sit back and relax.`,
     });
@@ -843,20 +893,93 @@ router.post("/jobs/:id/start", async (req, res) => {
       ),
     });
 
-    res.json({ message: "Clean started successfully", booking });
+  return { message: "Clean started successfully", booking };
+}
+
+router.post("/jobs/:id/start", async (req, res) => {
+  try {
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+    const result = await startJob(booking);
+    res.json(result);
   } catch (error) {
     console.error("Error starting job:", error);
     res.status(500).json({ error: "Internal server error starting job" });
   }
 });
 
-// POST complete clean (job done)
-router.post("/jobs/:id/complete", async (req, res) => {
-  try {
-    const booking = await findBookingByIdOrBookingId(req.params.id);
-    if (!booking) {
-      return res.status(404).json({ error: "Booking not found" });
+// Captures the held card payment and tells the customer their clean is done (push + email).
+async function finishForCustomer(booking) {
+  // CAPTURE AUTHORIZED PAYMENT when the worker marks the job complete —
+  // mirrors the same capture-on-complete logic in bookings.js PUT /:id,
+  // since jobs are most commonly completed from the worker app, not the
+  // admin dashboard.
+  if (
+    booking.payment?.stripePaymentIntentId &&
+    booking.payment.status === "Authorized"
+  ) {
+    try {
+      const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+      const capturedPayment = await stripe.paymentIntents.capture(
+        booking.payment.stripePaymentIntentId,
+      );
+      booking.payment.status = "Completed";
+      booking.payment.capturedAt = new Date();
+      await booking.save();
+      console.log(
+        `💳 ✅ Payment captured for booking ${booking.bookingId} - Status: ${capturedPayment.status}`,
+      );
+
+      try {
+        await sendEmail({
+          to: booking.customer.email,
+          subject: `✓ Payment Captured: Cleaniq Booking ${booking.bookingId}`,
+          html: `
+            <h2>Payment Captured</h2>
+            <p>Hi ${booking.customer.firstName},</p>
+            <p>Your cleaning service has been completed successfully!</p>
+            <p><strong>Booking Reference:</strong> ${booking.bookingId}</p>
+            <p><strong>Service:</strong> ${booking.service}</p>
+            <p><strong>Amount Charged:</strong> ${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
+            <p>Your payment has been successfully processed. Thank you for choosing Cleaniq!</p>
+          `,
+        });
+      } catch (emailErr) {
+        console.error(
+          "⚠️ Failed to send payment capture email:",
+          emailErr,
+        );
+      }
+    } catch (captureErr) {
+      console.error(
+        `❌ Failed to capture payment for booking ${booking.bookingId}:`,
+        captureErr.message,
+      );
     }
+  }
+
+  // Notify customer
+  await notifyCustomer(booking, {
+    title: "All Done — Spotless!",
+    body: `Your ${booking.service} is complete. Check your inbox for the full summary. Thank you for choosing Cleaniq!`,
+  });
+
+  // Send job-complete email to customer with summary, duration, review CTA
+  if (booking.customer?.email) {
+    sendEmail({
+      to: booking.customer.email,
+      subject: `✨ Your clean is done! — ${booking.service} · ${booking.bookingId}`,
+      html: workerEventEmails.jobCompleted(booking),
+    }).catch(() => {});
+  }
+
+}
+
+// POST complete clean (job done)
+// Complete step, shared by the worker app route and admin status changes on shifts.
+async function completeJob(booking) {
     booking.status = "Completed";
     booking.jobEndTime = new Date();
 
@@ -948,67 +1071,16 @@ router.post("/jobs/:id/complete", async (req, res) => {
       }
     }
 
-    // CAPTURE AUTHORIZED PAYMENT when the worker marks the job complete —
-    // mirrors the same capture-on-complete logic in bookings.js PUT /:id,
-    // since jobs are most commonly completed from the worker app, not the
-    // admin dashboard.
-    if (
-      booking.payment?.stripePaymentIntentId &&
-      booking.payment.status === "Authorized"
-    ) {
-      try {
-        const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-        const capturedPayment = await stripe.paymentIntents.capture(
-          booking.payment.stripePaymentIntentId,
-        );
-        booking.payment.status = "Completed";
-        booking.payment.capturedAt = new Date();
-        await booking.save();
-        console.log(
-          `💳 ✅ Payment captured for booking ${booking.bookingId} - Status: ${capturedPayment.status}`,
-        );
-
-        try {
-          await sendEmail({
-            to: booking.customer.email,
-            subject: `✓ Payment Captured: Cleaniq Booking ${booking.bookingId}`,
-            html: `
-              <h2>Payment Captured</h2>
-              <p>Hi ${booking.customer.firstName},</p>
-              <p>Your cleaning service has been completed successfully!</p>
-              <p><strong>Booking Reference:</strong> ${booking.bookingId}</p>
-              <p><strong>Service:</strong> ${booking.service}</p>
-              <p><strong>Amount Charged:</strong> ${booking.payment.currency === "GBP" ? "£" : "₦"}${booking.payment.amount}</p>
-              <p>Your payment has been successfully processed. Thank you for choosing Cleaniq!</p>
-            `,
-          });
-        } catch (emailErr) {
-          console.error(
-            "⚠️ Failed to send payment capture email:",
-            emailErr,
-          );
-        }
-      } catch (captureErr) {
-        console.error(
-          `❌ Failed to capture payment for booking ${booking.bookingId}:`,
-          captureErr.message,
-        );
+    // Take the customer's payment and tell them it's done — for a normal job now; for a split
+    // job only when the LAST shift finishes (on the main booking the customer sees).
+    if (!booking.isShift) {
+      await finishForCustomer(booking);
+    } else {
+      const parent = await require("../utils/shifts").shiftCompleted(booking);
+      if (parent) {
+        await chargeVisitOnArrival(parent);
+        await finishForCustomer(parent);
       }
-    }
-
-    // Notify customer
-    await notifyCustomer(booking, {
-      title: "All Done — Spotless!",
-      body: `Your ${booking.service} is complete. Check your inbox for the full summary. Thank you for choosing Cleaniq!`,
-    });
-
-    // Send job-complete email to customer with summary, duration, review CTA
-    if (booking.customer?.email) {
-      sendEmail({
-        to: booking.customer.email,
-        subject: `✨ Your clean is done! — ${booking.service} · ${booking.bookingId}`,
-        html: workerEventEmails.jobCompleted(booking),
-      }).catch(() => {});
     }
 
     // Send email log to Admin
@@ -1022,7 +1094,17 @@ router.post("/jobs/:id/complete", async (req, res) => {
       ),
     });
 
-    res.json({ message: "Job completed successfully", booking });
+  return { message: "Job completed successfully", booking };
+}
+
+router.post("/jobs/:id/complete", async (req, res) => {
+  try {
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+    const result = await completeJob(booking);
+    res.json(result);
   } catch (error) {
     console.error("Error completing job:", error);
     res.status(500).json({ error: "Internal server error completing job" });
@@ -1833,5 +1915,16 @@ router.get("/:id/availability", async (req, res) => {
     res.json({});
   }
 });
+
+// Admin changed a shift's status in Bookings: run the same steps as the worker app, so the
+// customer and the main booking are handled the same way.
+router.shiftStatusChange = async (booking, status) => {
+  if (status === "Arrived") return arriveJob(booking);
+  if (status === "In Progress") return startJob(booking);
+  if (["Completed", "Completed - Unpaid"].includes(status)) return completeJob(booking);
+  booking.status = status;
+  await booking.save();
+  return { booking };
+};
 
 module.exports = router;

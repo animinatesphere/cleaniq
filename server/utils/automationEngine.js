@@ -383,6 +383,7 @@ async function rescheduleBookingReminders(booking) {
     { status: "pending", type: { $in: BEFORE_CLEAN }, "payload.bookingId": id },
     { $set: { status: "cancelled", error: "Booking was moved", executedAt: new Date() } },
   );
+  if (booking.isShift) return 0; // shifts of a split job: the customer's reminders belong to the main booking
   const goingAhead = booking.noPaymentRequired || ["Confirmed", "Authorized", "Accepted", "Assigned"].includes(booking.status);
   if (!goingAhead || !booking.schedule?.date || !booking.customer?.email) return 0;
   const { buildBookingDateTime } = require("./bookingDateTime");

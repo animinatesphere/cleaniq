@@ -2976,7 +2976,7 @@ const workerEventEmails = {
   workerArrived: (booking) => {
     const firstName = booking.customer?.firstName || "there";
     const workerName = booking.assignedWorkerName || "Your cleaner";
-    const initials = workerName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+    const initials = workerName.split(/\s+/).filter((n) => /^[a-z]/i.test(n)).map((n) => n[0]).join("").slice(0, 2).toUpperCase();
     const service = booking.service || "Cleaning Service";
     const ref = booking.bookingId || "";
     const address = [booking.details?.address, booking.details?.postcode].filter(Boolean).join(", ");
@@ -3142,7 +3142,7 @@ const workerEventEmails = {
   jobCompleted: (booking) => {
     const firstName = booking.customer?.firstName || "there";
     const workerName = booking.assignedWorkerName || "Your cleaner";
-    const initials = workerName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+    const initials = workerName.split(/\s+/).filter((n) => /^[a-z]/i.test(n)).map((n) => n[0]).join("").slice(0, 2).toUpperCase();
     const service = booking.service || "Cleaning Service";
     const ref = booking.bookingId || "";
     const address = [booking.details?.address, booking.details?.postcode].filter(Boolean).join(", ");

@@ -127,7 +127,8 @@ test("customers get phone notifications for admin replies, reminders and their b
   const b = await Booking.create({
     bookingId: "BK-PUSH1", service: "Deep Cleaning", status: "Confirmed",
     customer: { firstName: "Ann", lastName: "Skinner", email: "ANN@test.com" },
-    schedule: { date: new Date(Date.now() + 5 * 3600e3), timeSlot: "15:00" },
+    // Same moment as the reminder below, so the "moved to another day" check never trips in the evening.
+    schedule: { date: new Date(Date.now() + 3 * 3600e3), timeSlot: "15:00" },
   });
 
   sentBatches = [];
