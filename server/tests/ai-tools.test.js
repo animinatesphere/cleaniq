@@ -71,3 +71,23 @@ test("recognises when the customer confirms a booking or reschedule", () => {
   assert.equal(confirmationTool([summary, { role: "customer", text: "yes but can you also add oven cleaning and move it to 10am on Friday instead please" }]), null);
   assert.equal(confirmationTool([{ role: "ai", text: "Would you like a quote?" }, { role: "customer", text: "yes" }]), null);
 });
+
+test("a yes after the new quote summary sends the quote; after a booking summary it books", () => {
+  const { confirmationTool } = require("../utils/aiTools");
+  const quoteSummary = { role: "ai", text: "1. Name: Jane Smith\n2. Email: jane@example.com\nTotal: £111.06\nPlease check everything, especially your email address — that's where the quote will go. Reply YES to have it emailed, or tell me what to change." };
+  const bookingSummary = { role: "ai", text: "Please check your booking:\n1. Name: Jane Smith\n4. Address: 12 Oak Road, Manchester M14 5TQ\nTotal: £102.55\nPlease check everything, especially your address and email. Reply YES if it's all correct, or tell me what to change." };
+  assert.equal(confirmationTool([quoteSummary, { role: "customer", text: "yes" }]), "send_quote");
+  assert.equal(confirmationTool([bookingSummary, { role: "customer", text: "Yes please" }]), "create_booking");
+});
+
+test("the Calls/Conversations log records who, email, address and what was booked or quoted", () => {
+  const { describeToolResult } = require("../utils/aiTools");
+  const b = describeToolResult("create_booking",
+    { firstName: "Jane", lastName: "Smith", email: "jane@example.com", address: "12 Oak Road, Manchester M14 5TQ", service: "Deep Clean", hours: 3, frequency: "Monthly" },
+    { bookingRef: "BK-1234", total: 102.55, when: "2026-10-12 8am–11am" });
+  assert.equal(b.detail, "Booking BK-1234 created · Jane Smith · jane@example.com · 12 Oak Road, Manchester M14 5TQ · Deep Clean, 3h, Monthly · 2026-10-12 8am–11am · £102.55");
+  const q = describeToolResult("send_quote",
+    { customerName: "Jane Smith", email: "jane@example.com", address: "12 Oak Road, Manchester M14 5TQ", services: [{ service: "End of Tenancy Cleaning", hours: 4 }] },
+    { quoteRef: "CLQ-123456", grandTotal: 150 });
+  assert.equal(q.detail, "Quote CLQ-123456 emailed · Jane Smith · jane@example.com · 12 Oak Road, Manchester M14 5TQ · End of Tenancy Cleaning 4h · £150.00");
+});

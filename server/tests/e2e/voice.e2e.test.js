@@ -124,7 +124,7 @@ test("caller speaks → AI replies (using a tool) → transcript and tool action
     systemPrompt = system;
     assert.ok(tools.some((t) => t.name === "get_quote"));
     assert.ok(tools.some((t) => t.name === "transfer_to_human"));
-    assert.ok(!tools.some((t) => t.name === "create_booking")); // no booking by phone
+    assert.ok(tools.some((t) => t.name === "create_booking") && tools.some((t) => t.name === "send_quote")); // book and quote by phone too
     assert.equal(history.at(-1).text, "How much is a deep clean for three hours?");
     const q = await runTool("get_quote", { service: "Deep Clean", hours: 3 });
     return `That would be ${q.total} pounds.`;

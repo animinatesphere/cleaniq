@@ -14,7 +14,8 @@ const RELAY_PATH = "/api/voice/relay";
 const TOKEN_TTL_MS = 2 * 60 * 1000;
 const SETUP_TIMEOUT_MS = 15 * 1000;
 const MAX_TURNS_PER_CALL = 40; // protects AI credit from very long or looping calls
-const VOICE_TOOL_NAMES = ["get_quote", "check_availability", "find_my_bookings", "save_enquiry"];
+// Callers can book and get a written quote on the phone too (after the details are read back).
+const VOICE_TOOL_NAMES = ["get_quote", "check_availability", "find_my_bookings", "save_enquiry", "create_booking", "send_quote"];
 
 const TRANSFER_TOOL = {
   name: "transfer_to_human",
@@ -190,7 +191,7 @@ function handleRelaySession(ws, deps = {}) {
 
     let reply = null;
     try {
-      const system = await getInstructions("voice", { customerName: state.call?.customerName || "", agentName: state.call?.agentName || "" });
+      const system = await getInstructions("voice", { customerName: state.call?.customerName || "", agentName: state.call?.agentName || "", canBook: true });
       reply = await ai({ system, history: state.history.slice(-30), tools, runTool, onText });
     } catch (err) {
       console.error(`[voice] AI failed on call ${state.call?.twilioCallSid}:`, err.message);
