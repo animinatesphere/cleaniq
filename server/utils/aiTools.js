@@ -251,6 +251,12 @@ async function uniqueBookingId() {
   return `BK-${Date.now().toString().slice(-6)}`;
 }
 
+// On phone calls only the area is taken (postcodes and full addresses are easily misheard); the
+// team gets the full address afterwards by phone or text.
+const AREA_ONLY_NOTE = "full address to be confirmed by the team";
+const areaOnly = (ctx) => ctx?.channel === "voice";
+const areaAddress = (text) => `${String(text || "").trim().replace(/[.,\s]+$/, "")} (${AREA_ONLY_NOTE})`;
+
 async function createAiBooking(args, ctx) {
   const postcode = findPostcode(args.postcode) || findPostcode(args.address);
   const problems = [];
@@ -258,14 +264,20 @@ async function createAiBooking(args, ctx) {
   if (!NAME_RE.test(args.firstName || "") || args.firstName.trim().length < 2) problems.push("first name (letters only)");
   if (!NAME_RE.test(args.lastName || "") || args.lastName.trim().length < 2) problems.push("last name (letters only)");
   if (!EMAIL_RE.test(args.email || "")) problems.push("a valid email address");
-  if (!args.address || args.address.trim().length < 5) problems.push("the full address");
-  if (!postcode) problems.push("a valid UK postcode");
+  if (areaOnly(ctx)) {
+    if (!args.address || args.address.trim().length < 2) problems.push("the area of Manchester they're in (e.g. Salford)");
+  } else {
+    if (!args.address || args.address.trim().length < 5) problems.push("the full address");
+    if (!postcode) problems.push("a valid UK postcode");
+  }
   if (!["Cleaniq", "Customer"].includes(args.suppliesProvidedBy)) problems.push("who provides the cleaning supplies and equipment (Cleaniq or the customer)");
   if (!args.time) problems.push("what time the cleaner should arrive");
   const frequency = FREQUENCIES.includes(args.frequency) ? args.frequency : "Once";
   if (problems.length) return { error: `Cannot book yet. Still needed: ${problems.join("; ")}.` };
-  const pcCheck = await checkPostcode(postcode);
-  if (pcCheck.error) return pcCheck;
+  if (!areaOnly(ctx)) {
+    const pcCheck = await checkPostcode(postcode);
+    if (pcCheck.error) return pcCheck;
+  }
 
   const recent = await Booking.countDocuments({
     "customer.phone": ctx.phone,
@@ -284,7 +296,7 @@ async function createAiBooking(args, ctx) {
   if (quote.error) return quote;
 
   const details = {
-    address: args.address.trim(),
+    address: areaOnly(ctx) ? areaAddress(args.address) : args.address.trim(),
     postcode,
     frequency,
     duration: quote.hours,
@@ -341,7 +353,7 @@ async function createAiBooking(args, ctx) {
     total: quote.total,
     when: `${args.date} ${when.label}`,
     visits,
-    nextStep: `A confirmation email with a secure payment link has been sent to ${payload.customer.email}. The booking is confirmed once payment is completed.`,
+    nextStep: `A confirmation email with a secure payment link has been sent to ${payload.customer.email}. The booking is confirmed once payment is completed.${areaOnly(ctx) ? " Our team will call or text them shortly to take the full address." : ""}`,
   };
 }
 
@@ -461,12 +473,16 @@ async function sendAiQuote(args, ctx) {
   const quotePhone = args.phone ? toE164UK(args.phone) || "" : toE164UK(ctx.phone) || null;
   if (quotePhone === "") problems.push("a valid phone number");
   if (quotePhone === null) problems.push("their phone number");
-  if (!args.address || String(args.address).trim().length < 5) problems.push("the property address");
+  if (areaOnly(ctx)) {
+    if (!args.address || String(args.address).trim().length < 2) problems.push("the area of Manchester they're in (e.g. Salford)");
+  } else if (!args.address || String(args.address).trim().length < 5) problems.push("the property address");
   if (!(args.services || []).length) problems.push("the service(s) and hours");
   if (!["Cleaniq", "Customer"].includes(args.suppliesProvidedBy)) problems.push("who provides the cleaning supplies and equipment");
   if (problems.length) return { error: `Cannot prepare the quote yet. Still needed: ${problems.join("; ")}.` };
-  const pcCheck = await checkPostcode(args.address);
-  if (pcCheck.error) return pcCheck;
+  if (!areaOnly(ctx)) {
+    const pcCheck = await checkPostcode(args.address);
+    if (pcCheck.error) return pcCheck;
+  }
 
   const settings = await AiSettings.get();
   const built = buildQuoteItems(await loadUkServices(), args, settings.suppliesFee);
@@ -506,7 +522,7 @@ async function sendAiQuote(args, ctx) {
     contactName: company ? customerName : "",
     email: String(args.email).trim().toLowerCase(),
     phone: quotePhone,
-    address: String(args.address).trim(),
+    address: areaOnly(ctx) ? areaAddress(args.address) : String(args.address).trim(),
     frequency,
     serviceDate,
     serviceTimeSlot,
@@ -571,7 +587,7 @@ async function sendAiQuote(args, ctx) {
   return {
     quoteRef: quote.quoteRef,
     ...figures,
-    nextStep: `The quote has been emailed to ${payload.email}. It is valid for ${QUOTE_DEFAULTS.validDays} days and can be accepted with the button in the email.`,
+    nextStep: `The quote has been emailed to ${payload.email}. It is valid for ${QUOTE_DEFAULTS.validDays} days and can be accepted with the button in the email.${areaOnly(ctx) ? " Our team will call or text them to take the full address." : ""}`,
   };
 }
 
@@ -704,7 +720,7 @@ const declarations = [
         firstName: { type: "string" },
         lastName: { type: "string" },
         email: { type: "string" },
-        address: { type: "string", description: "Full address including house/flat number and town" },
+        address: { type: "string", description: "WhatsApp: full address including house/flat number and town. Phone calls: just the area, e.g. Salford" },
         postcode: { type: "string", description: "Optional if the address already includes the postcode" },
         frequency: { type: "string", enum: FREQUENCIES, description: "Once, or a regular series — only the frequencies offered for the service (see the price list)" },
         suppliesProvidedBy: { type: "string", enum: ["Cleaniq", "Customer"] },
@@ -736,7 +752,7 @@ const declarations = [
         companyName: { type: "string", description: "Only if the quote is for a business" },
         phone: { type: "string", description: "Only if the customer wants a different number from this chat/call's" },
         email: { type: "string" },
-        address: { type: "string", description: "Property address with postcode" },
+        address: { type: "string", description: "WhatsApp: property address with postcode. Phone calls: just the area, e.g. Salford" },
         services: {
           type: "array",
           description: "One entry per cleaning service, names exactly as under 'Cleaning services'",

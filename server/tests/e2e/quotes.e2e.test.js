@@ -186,3 +186,16 @@ test("a postcode that doesn't exist is caught before quoting, and check_postcode
   const ok = await run("check_postcode", { postcode: "m14 5tq" });
   assert.deepEqual(ok, { valid: true, postcode: "M14 5TQ", readBack: "M 1 4, 5 T Q" });
 });
+
+test("on a phone call just the area is enough; the team confirms the full address later", async () => {
+  const phoneRun = makeToolRunner({ phone: "+447700900888", channel: "voice" });
+  const r = await phoneRun("send_quote", { ...args, phone: undefined, address: "Salford", customerConfirmed: true });
+  assert.equal(r.error, undefined);
+  assert.match(r.nextStep, /team will call or text them to take the full address/);
+  const q = await Quote.findOne({ quoteRef: r.quoteRef }).lean();
+  assert.equal(q.address, "Salford (full address to be confirmed by the team)");
+
+  // WhatsApp still needs the full address (customers can type it).
+  const chat = await run("send_quote", { ...args, address: "Salford" });
+  assert.match(chat.error, /postcode/);
+});

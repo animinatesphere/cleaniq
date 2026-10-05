@@ -75,14 +75,15 @@ function londonNow(date = new Date()) {
 const RIGHT_NOW_HEADING = "## Right now";
 
 // Pure function: no database access, so it can be unit-tested.
-function bookingRules(settings) {
+function bookingRules(settings, channel = "whatsapp") {
+  const voice = channel === "voice";
   const fee = Number(settings.suppliesFee ?? 10);
   const feeText = fee > 0 ? `£${fee.toFixed(2)} per visit` : "at no extra cost";
   return `## Bookings: follow the same steps as our admin booking form (use the tools; never do maths yourself)
 Use everything the customer already said; never ask again for something they gave.
 
 Collect these, in this order (on WhatsApp send ONE numbered list of only what's still missing; on the phone ask one or two at a time):
-1. Full address with house/flat number, street, town and postcode (call check_postcode on it straight away)
+1. ${voice ? "The area of Manchester they're in (e.g. Salford) — on calls never ask for a postcode or full address" : "Full address with house/flat number, street, town and postcode (call check_postcode on it straight away)"}
 2. Which service, and one-off or regular — only the frequencies listed for that service in the price list
 3. How many hours
 4. Number of bedrooms and bathrooms, and any pets
@@ -101,8 +102,8 @@ Then:
 - Call check_availability with the date, their arrival time (e.g. 8am → "08:00") and the hours. If it's free, use the time window it returns (e.g. 8am–12pm for 4 hours). If it's taken, say so and offer a few of the free arrival times it returned.
 
 CONFIRMATION STEP — never skip it, never book before it:
-- Send ONE summary of EVERY detail: full name, email, phone, full address and postcode, service and hours, one-off or regular (a regular booking creates a series, e.g. 12 weekly visits; the total is per visit), bedrooms/bathrooms/pets, parking, access, supplies, extras, date and time window, notes, and the total.
-- Ask them to check it, especially the address and email: "Please check everything, especially your address and email. Reply YES if it's all correct, or tell me what to change."
+- Send ONE summary of EVERY detail: full name, email, phone, ${voice ? "area" : "full address and postcode"}, service and hours, one-off or regular (a regular booking creates a series, e.g. 12 weekly visits; the total is per visit), bedrooms/bathrooms/pets, parking, access, supplies, extras, date and time window, notes, and the total.
+- Ask them to check it, especially the ${voice ? "email" : "address and email"}: "Please check everything, especially your ${voice ? "email" : "address and email"}. Reply YES if it's all correct, or tell me what to change."
 - If they correct anything, update it and send the full summary again for a new YES. Only a clear yes to the latest summary counts.
 - After that yes, immediately call create_booking with customerConfirmed true and every detail (including parking, access and notes). Do not ask anything else first.
 - Only say a booking is made if create_booking returned a bookingRef. Then give the reference, date, time window, and the next step it returned (payment link by email to the address they confirmed).
@@ -115,13 +116,13 @@ CONFIRMATION STEP — never skip it, never book before it:
   3. When they'd like it: the date, and what time the cleaner should arrive
   4. Full name
   5. Email address (the quote goes there)
-  6. Property address with postcode (call check_postcode on it straight away)
+  6. ${voice ? "Which area of Manchester the property is in (e.g. Salford) — on calls never ask for a postcode or full address" : "Property address with postcode (call check_postcode on it straight away)"}
   7. Shall we bring cleaning supplies and equipment (${feeText}), or will you provide them?
 - Don't ask anything else for a quote. Their phone number is already known from this chat/call. Assume one-off unless they say regular. Only include extras, rooms, parking or access if the customer mentions them.
 - Pass the date and time to send_quote (serviceDate and time) so the quote shows when the clean is, and the accepted quote books that slot.
 - Name, email and address are always needed for a quote (the phone number is already known). Never skip them, and never give a total before you have them.
 - Then call send_quote with customerConfirmed false to get the exact figures.
-- CONFIRMATION STEP — never skip it: send ONE summary with the type of cleaning, hours, date and arrival time, the customer's name, email, phone, address and postcode, any property details, parking and access they gave, each priced line from send_quote (service, add-ons), subtotal, VAT if included and the total (for a regular service the total is per visit). Ask: "Please check everything, especially your email address — that's where the quote will go. Reply YES to have it emailed, or tell me what to change." If they correct anything, update it and confirm again.
+- CONFIRMATION STEP — never skip it: send ONE summary with the type of cleaning, hours, date and arrival time, the customer's name, email, phone, ${voice ? "area" : "address and postcode"}, any property details, parking and access they gave, each priced line from send_quote (service, add-ons), subtotal, VAT if included and the total (for a regular service the total is per visit). Ask: "Please check everything, especially your email address — that's where the quote will go. Reply YES to have it emailed, or tell me what to change." If they correct anything, update it and confirm again.
 - After that yes, immediately call send_quote with customerConfirmed true and every detail. Then give the quote reference and explain they'll get an email with the quote and an Accept button (valid 30 days); accepting it books the clean.
 - Only quote services that have a price in our list. For anything else (e.g. after-builders, window or pressure washing), say the team will prepare a custom quote and offer to pass on their details.
 
@@ -207,10 +208,10 @@ function buildInstructions({ channel, settings, knowledge, services, now = new D
 - Say prices and times naturally, e.g. "thirty pounds sixty an hour", "ten in the morning". Offer at most three time options at once.
 ${canBook ? `- You can check prices (get_quote) and availability (check_availability), look up the caller's bookings (find_my_bookings), book cleans (create_booking) and email written quotes (send_quote), following the booking and quote steps below. Use the tools instead of guessing.
 - On the phone, ask one or two questions at a time, never a long list. Keep a mental checklist and only ask for what's still missing.
+- Address on the phone: NEVER ask for a postcode or the full address — they're easily misheard on a call. Just ask which area they're in (e.g. Salford, Stockport, Didsbury, Bury). If they've already said the area, don't ask again; carry on. Pass the area as the address. Tell them our team will call or text them to take the full address.
 - Details are easy to mishear on a call, so before booking or sending a quote, read back the important details and get a clear yes:
   - spell the email address back letter by letter (e.g. "j, a, n, e, at example dot com"), and ask the caller to spell it if it's unusual. Write it exactly as spelled: never add dots, dashes or letters the caller didn't say ("kelvin c m 1 0 1" is kelvincm101);
-  - read the full address back, and the postcode character by character (e.g. "M14, 5 T Q");
-  - as soon as you hear a postcode, call check_postcode. If it says it isn't real, ask them to say it again slowly, letter by letter — UK postcodes end with a number and two letters (e.g. M5 4EE). Don't move on until it checks out;
+  - say back the area they're in (e.g. "Salford");
   - repeat their name, the date and arrival time, and the total.
   If anything is wrong, fix it and read it back again. Never call create_booking or send_quote until the caller has said yes to the read-back.
 - If the caller would rather not give everything on the phone, take their enquiry with save_enquiry so the team can call them back. ${canTransfer ? "If they'd rather speak to someone now, offer to put them through." : ""}` : `- You can check prices (get_quote), check whether a cleaner can come at a time (check_availability) and look up the caller's bookings (find_my_bookings). Use them instead of guessing.
@@ -244,7 +245,7 @@ ${settings.instructions ? `\n## Instructions from the ${business} team\n${settin
 ${channelRules}
 
 ${enquiryRules({ channel, business, canBook })}
-${canBook ? `\n${bookingRules(settings)}\n` : ""}
+${canBook ? `\n${bookingRules(settings, channel)}\n` : ""}
 ## Prices (UK, current)
 ${formatServices(services)}${tax?.enabled ? `\nAll prices above are before ${tax.label} — ${tax.label} at ${tax.rate}% is added on top. Always say this when you quote a price, e.g. "£20.90 an hour plus ${tax.label}".` : ""}${Number(settings.suppliesFee ?? 10) > 0 ? `\nCleaning supplies & equipment: £${Number(settings.suppliesFee ?? 10).toFixed(2)} per visit if we bring them (free if the customer provides them).` : ""}
 
