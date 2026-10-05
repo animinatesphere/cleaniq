@@ -30,7 +30,7 @@ const wrapEmail = (body) => {
 </html>`;
 };
 
-const sendEmail = async ({ to, subject, html, text: plainText, attachments, from: fromOverride, isCampaign = false }) => {
+const sendEmail = async ({ to, subject, html, text: plainText, attachments, from: fromOverride, replyTo, isCampaign = false }) => {
   try {
     if (!resend) {
       console.error("❌ EMAIL ERROR: RESEND_API_KEY is missing in .env");
@@ -76,6 +76,7 @@ const sendEmail = async ({ to, subject, html, text: plainText, attachments, from
 
     if (attachments && attachments.length > 0)
       payload.attachments = attachments;
+    if (replyTo) payload.reply_to = replyTo; // e.g. quote requests: "Reply" goes to the customer
     const { data, error } = await resend.emails.send(payload);
 
     if (error) {
