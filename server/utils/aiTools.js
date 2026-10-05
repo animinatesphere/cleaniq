@@ -6,6 +6,22 @@ const Service = require("../models/Service");
 const AiSettings = require("../models/AiSettings");
 const { toE164UK } = require("./phone");
 const { rateForFrequency, offeredFrequencies } = require("./pricing");
+const { resolveUkDate } = require("./ukDate");
+
+// Checks a postcode is real before it's used (UK postcodes end with a number and two letters,
+// e.g. M5 4EE). Returns an error for the AI to fix with the customer, or the tidy postcode.
+async function checkPostcode(text) {
+  const { postcodeStatus } = require("./geo");
+  const r = await postcodeStatus(text);
+  if (r.status === "invalid") {
+    return {
+      error: r.postcode
+        ? `${r.postcode} isn't a real UK postcode. Ask the customer to say it again slowly, letter by letter (UK postcodes end with a number and two letters, e.g. M5 4EE).`
+        : "That isn't a complete UK postcode. Ask for the full postcode — it ends with a number and two letters, e.g. M5 4EE.",
+    };
+  }
+  return { postcode: r.postcode, checked: r.status === "valid" };
+}
 
 // Same rule as the admin form, website and app: a service is only offered at its own frequencies
 // (Regular: weekly/fortnightly, Deep: monthly/every 3 months, others one-off — or whatever admin priced).
@@ -248,6 +264,8 @@ async function createAiBooking(args, ctx) {
   if (!args.time) problems.push("what time the cleaner should arrive");
   const frequency = FREQUENCIES.includes(args.frequency) ? args.frequency : "Once";
   if (problems.length) return { error: `Cannot book yet. Still needed: ${problems.join("; ")}.` };
+  const pcCheck = await checkPostcode(postcode);
+  if (pcCheck.error) return pcCheck;
 
   const recent = await Booking.countDocuments({
     "customer.phone": ctx.phone,
@@ -439,13 +457,16 @@ async function sendAiQuote(args, ctx) {
   const problems = [];
   if (!args.customerName || String(args.customerName).trim().length < 2) problems.push("their name (or company name)");
   if (!EMAIL_RE.test(args.email || "")) problems.push("a valid email address to send the quote to");
-  const quotePhone = toE164UK(args.phone) || (args.phone ? "" : null);
+  // The chat/call number is used unless the customer gave a different one.
+  const quotePhone = args.phone ? toE164UK(args.phone) || "" : toE164UK(ctx.phone) || null;
   if (quotePhone === "") problems.push("a valid phone number");
   if (quotePhone === null) problems.push("their phone number");
   if (!args.address || String(args.address).trim().length < 5) problems.push("the property address");
   if (!(args.services || []).length) problems.push("the service(s) and hours");
   if (!["Cleaniq", "Customer"].includes(args.suppliesProvidedBy)) problems.push("who provides the cleaning supplies and equipment");
   if (problems.length) return { error: `Cannot prepare the quote yet. Still needed: ${problems.join("; ")}.` };
+  const pcCheck = await checkPostcode(args.address);
+  if (pcCheck.error) return pcCheck;
 
   const settings = await AiSettings.get();
   const built = buildQuoteItems(await loadUkServices(), args, settings.suppliesFee);
@@ -632,11 +653,20 @@ const extrasSchema = {
   },
 };
 const whenSchema = {
-  date: { type: "string", description: "YYYY-MM-DD (UK)" },
+  date: { type: "string", description: "The date exactly as the customer said it (e.g. \"next Friday\", \"28th October\", \"tomorrow\") or YYYY-MM-DD. Don't work dates out yourself." },
   time: { type: "string", description: "Arrival time as HH:MM, 08:00–20:00 on the hour or half hour (e.g. 8am → 08:00)." },
 };
 
 const declarations = [
+  {
+    name: "check_postcode",
+    description: "Check a UK postcode is real as soon as the customer gives it, before asking anything else. If it isn't, ask them to say it again slowly, letter by letter.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: { postcode: { type: "string", description: "The postcode as heard, e.g. M5 4EE" } },
+      required: ["postcode"],
+    },
+  },
   {
     name: "get_quote",
     description: "Calculate the exact price using live prices, including extras and the supplies fee. Always use this for any total; never add up prices yourself.",
@@ -658,7 +688,7 @@ const declarations = [
     parametersJsonSchema: {
       type: "object",
       properties: {
-        date: { type: "string", description: "YYYY-MM-DD (UK)" },
+        date: { type: "string", description: "The date as the customer said it (e.g. \"next Friday\", \"the 28th\") or YYYY-MM-DD" },
         time: { type: "string", description: "Arrival time to check, HH:MM" },
         hours: { type: "number", description: "Job length in hours" },
       },
@@ -704,7 +734,7 @@ const declarations = [
       properties: {
         customerName: { type: "string", description: "Customer's full name" },
         companyName: { type: "string", description: "Only if the quote is for a business" },
-        phone: { type: "string", description: "Customer's phone number as they gave it" },
+        phone: { type: "string", description: "Only if the customer wants a different number from this chat/call's" },
         email: { type: "string" },
         address: { type: "string", description: "Property address with postcode" },
         services: {
@@ -730,12 +760,12 @@ const declarations = [
         hasPet: { type: "boolean" },
         parking: { type: "string", description: "e.g. Free parking on-site, Free street parking, Paid parking, No parking" },
         access: { type: "string", description: "How the cleaner gets in, e.g. Someone will be home, Key in a key safe" },
-        serviceDate: { type: "string", description: "Optional preferred date, YYYY-MM-DD" },
+        serviceDate: { type: "string", description: "Optional preferred date, as the customer said it (e.g. \"next Friday\") or YYYY-MM-DD" },
         time: { type: "string", description: "Optional preferred arrival time, HH:MM" },
         notes: { type: "string" },
         customerConfirmed: { type: "boolean" },
       },
-      required: ["customerName", "email", "phone", "address", "services", "suppliesProvidedBy", "customerConfirmed"],
+      required: ["customerName", "email", "address", "services", "suppliesProvidedBy", "customerConfirmed"],
     },
   },
   {
@@ -796,6 +826,8 @@ function describeToolResult(name, args = {}, r = {}) {
   if (!r || r.error) return { name, ok: false, detail: `${name}: ${r?.error || "failed"}` };
   const money = (n) => (typeof n === "number" ? `£${n.toFixed(2)}` : "");
   switch (name) {
+    case "check_postcode":
+      return { name, ok: true, detail: `Postcode checked: ${r.postcode}` };
     case "get_quote":
       return { name, ok: true, detail: `Price check: ${r.service}, ${r.hours}h → ${money(r.total)}` };
     case "check_availability":
@@ -854,6 +886,10 @@ function makeToolRunner(ctx) {
         const settings = await AiSettings.get();
         return calculateQuote(await loadUkServices(), args, settings.suppliesFee, await require("./tax").getTax());
       }
+      if (name === "check_postcode") {
+        const r = await checkPostcode(args.postcode);
+        return r.error ? r : { valid: true, postcode: r.postcode, readBack: r.postcode.split("").join(" ").replace(/ {3}/g, ", ") };
+      }
       if (name === "check_availability") return await getAvailability(args.date, { time: args.time, hours: args.hours });
       if (name === "create_booking") return await createAiBooking(args, ctx);
       if (name === "find_my_bookings") return await findMyBookings(ctx);
@@ -866,8 +902,25 @@ function makeToolRunner(ctx) {
       return { error: "The booking system had a problem. Offer to pass the request to the team." };
     }
   };
-  return async function runTool(name, args = {}) {
+  return async function runTool(name, rawArgs = {}) {
+    // Dates: the customer's words ("next Friday", "the 28th") are turned into exact dates here,
+    // so the AI never has to work out calendar dates itself.
+    const args = { ...rawArgs };
+    let dateRead = null;
+    for (const field of ["date", "serviceDate"]) {
+      if (!args[field]) continue;
+      const r = resolveUkDate(args[field]);
+      if (r.error) {
+        const result = { error: `${r.error}` };
+        if (ctx.onTool) ctx.onTool(describeToolResult(name, args, result));
+        return result;
+      }
+      args[field] = r.iso;
+      dateRead = r.label;
+    }
     const result = await run(name, args);
+    // Tell the AI the exact day it worked out, to read back to the customer.
+    if (dateRead && result && !result.error && typeof result === "object") result.dateToReadBack = dateRead;
     if (ctx.onTool) ctx.onTool(describeToolResult(name, args, result));
     return result;
   };

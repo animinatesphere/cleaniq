@@ -15,7 +15,7 @@ const TOKEN_TTL_MS = 2 * 60 * 1000;
 const SETUP_TIMEOUT_MS = 15 * 1000;
 const MAX_TURNS_PER_CALL = 40; // protects AI credit from very long or looping calls
 // Callers can book and get a written quote on the phone too (after the details are read back).
-const VOICE_TOOL_NAMES = ["get_quote", "check_availability", "find_my_bookings", "save_enquiry", "create_booking", "send_quote"];
+const VOICE_TOOL_NAMES = ["check_postcode", "get_quote", "check_availability", "find_my_bookings", "save_enquiry", "create_booking", "send_quote"];
 
 const TRANSFER_TOOL = {
   name: "transfer_to_human",
@@ -54,7 +54,7 @@ const speakingTimeMs = (text) => Math.min(10000, 1200 + String(text).length * 65
 function greetingFor(settings, agentName = "") {
   const business = settings.businessName || "Cleaniq Services";
   const name = agentName || agentNames(settings)[0];
-  return `Hello, thank you for calling ${business}, you're speaking with ${name}. Calls are transcribed to help our team. How can I help you today?`;
+  return `Hello, thank you for calling ${business}, you're speaking with ${name}. Calls are monitored to help our team. How can I help you today?`;
 }
 
 /**
