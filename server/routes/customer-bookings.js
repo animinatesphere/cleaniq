@@ -326,7 +326,8 @@ router.post('/', async (req, res) => {
 // GET /api/customer-bookings  — fetch all bookings for the logged-in customer (by email)
 router.get('/', verifyCustomer, async (req, res) => {
   try {
-    const bookings = await Booking.find({ 'customer.email': req.customer.email })
+    // Shifts of a split job are internal; the customer sees the one main booking.
+    const bookings = await Booking.find({ 'customer.email': req.customer.email, isShift: { $ne: true } })
       .sort({ createdAt: -1 })
       .lean();
     res.json(bookings);

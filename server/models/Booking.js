@@ -73,6 +73,12 @@ const bookingSchema = new mongoose.Schema({
   rejectedBy: [{ type: String }],
   visibleToWorkers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Worker" }],
   hiddenFromWorkers: { type: Boolean, default: false }, // admin switched the job off: no cleaner sees it
+  // A job split into shifts (Rota): each shift is its own booking for one worker, linked to the
+  // main booking. The customer only ever sees the main booking.
+  splitIntoShifts: { type: Boolean, default: false }, // on the main booking
+  isShift: { type: Boolean, default: false, index: true }, // on each shift
+  parentBooking: { type: mongoose.Schema.Types.ObjectId, ref: "Booking", default: null, index: true },
+  shiftNumber: { type: Number, default: null },
   photos: [{
     photoType: { type: String, enum: ["before", "after", "damage", "other"] },
     url: String,
@@ -82,5 +88,26 @@ const bookingSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   meta: mongoose.Schema.Types.Mixed,
 });
+
+// A split job (Rota) that gets cancelled — by admin, the customer or the AI — cancels its
+// unstarted shifts too, and each worker is told. Covers save() and findOneAndUpdate() paths.
+async function cancelShiftsOf(doc) {
+  if (!doc || !doc.splitIntoShifts || doc.status !== "Cancelled") return;
+  const Booking = mongoose.model("Booking");
+  const shifts = await Booking.find({ parentBooking: doc._id, isShift: true, status: { $in: ["Assigned", "Accepted", "Confirmed", "Pending"] } });
+  if (!shifts.length) return;
+  await Booking.updateMany({ _id: { $in: shifts.map((s) => s._id) } }, { $set: { status: "Cancelled" } });
+  try {
+    const { sendPushToUser } = require("../utils/pushNotifications");
+    const Notification = require("./Notification");
+    for (const s of shifts) {
+      const message = `${s.service} at ${s.schedule?.timeSlot || ""} (${s.bookingId}) has been cancelled.`;
+      await Notification.create({ workerId: s.assignedWorker, title: "Shift cancelled", message, type: "job", bookingId: s.bookingId }).catch(() => {});
+      sendPushToUser("worker", s.assignedWorker, "Shift cancelled", message, { type: "job_cancelled", bookingId: s.bookingId }).catch(() => {});
+    }
+  } catch {}
+}
+bookingSchema.post("save", (doc) => { cancelShiftsOf(doc).catch((e) => console.error("Shift cancel error:", e.message)); });
+bookingSchema.post("findOneAndUpdate", (doc) => { cancelShiftsOf(doc).catch((e) => console.error("Shift cancel error:", e.message)); });
 
 module.exports = mongoose.model("Booking", bookingSchema);

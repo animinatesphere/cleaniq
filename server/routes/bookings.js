@@ -833,6 +833,19 @@ router.put("/:id", async (req, res) => {
     if (!existingBooking)
       return res.status(404).json({ message: "Booking not found" });
 
+    // A shift of a split job (Rota): status changes run the same steps as the worker app, so the
+    // customer only hears about the first arrival and the finished job (on the main booking), and
+    // never gets emails, reminders or invoices from the shift itself.
+    // Other edits to a shift are saved quietly too (the customer never hears about shifts).
+    if (existingBooking.isShift) {
+      const { status, _id, isShift, parentBooking, shiftNumber, ...rest } = req.body;
+      if (Object.keys(rest).length) await Booking.updateOne({ _id: existingBooking._id }, { $set: rest });
+      const shift = await Booking.findById(existingBooking._id);
+      if (!status || status === existingBooking.status) return res.json(shift);
+      const result = await require("./workers").shiftStatusChange(shift, status);
+      return res.json(result.booking || shift);
+    }
+
     const wasCompleted =
       existingBooking.status === "Completed" ||
       existingBooking.status === "Completed - Unpaid";
@@ -1503,6 +1516,11 @@ async function rescheduleBooking(booking, { date, timeSlot, preferredTime }) {
     preferredTime: preferredTime || "",
   };
   await booking.save();
+  // A split job moves with all its shifts (each keeps its gap from the job's start time).
+  if (booking.splitIntoShifts) {
+    await require("../utils/shifts").moveShifts(booking, { oldSlot: oldPref || oldSlot, newSlot: preferredTime || timeSlot })
+      .catch((e) => console.error("Shift move error:", e.message));
+  }
   await require("../utils/automationEngine").rescheduleBookingReminders(booking).catch((e) => console.error("Reminder reschedule error:", e.message));
   require("../utils/pushNotifications").pushToBookingCustomer(
     booking,
@@ -1586,6 +1604,8 @@ router.put("/:id/reschedule", adminAuth, async (req, res) => {
 
     const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).json({ message: "Booking not found." });
+    if (booking.isShift)
+      return res.status(400).json({ message: "This is one shift of a split job. Reschedule the main booking, or change the split on the Rota." });
 
     await rescheduleBooking(booking, { date, timeSlot, preferredTime });
     res.json({ message: "Booking rescheduled.", booking });

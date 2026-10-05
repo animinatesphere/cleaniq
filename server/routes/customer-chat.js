@@ -220,6 +220,7 @@ router.get("/my/conversations", verifyCustomer, async (req, res) => {
     const bookings = await Booking.find({
       $or: [{ "customer.email": emailRe }, ...(companyJobIds.length ? [{ "meta.jobId": { $in: companyJobIds } }] : [])],
       assignedWorker: { $ne: null },
+      isShift: { $ne: true },
       status: { $nin: ["Pending", "Awaiting Payment", "Rejected"] },
     })
       .select("bookingId service schedule.date status assignedWorker assignedWorkerName")
