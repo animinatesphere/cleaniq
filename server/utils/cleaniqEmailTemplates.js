@@ -36,6 +36,9 @@ const esc = (v) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
+// Escapes everything, then lets simple formatting through (<strong>, <b>, <em>, <br>), so a
+// message like "Staff member <strong>Kelvin</strong> accepted" shows bold instead of the tags.
+const boldAllowed = (v) => esc(v).replace(/&lt;(\/?)(strong|b|em|br)\s*\/?&gt;/gi, "<$1$2>");
 const nl2br = (s) => esc(s).replace(/\r?\n/g, "<br />");
 const raw = (html) => ({ __raw: html }); // mark a value as already-safe HTML
 const val = (v) => (v && typeof v === "object" && "__raw" in v ? v.__raw : esc(v));
@@ -748,7 +751,7 @@ const redesigned = {
       heading: action,
       body: `
         ${h2("Event notice")}
-        ${p(esc(details), "color:#334155;font-weight:500;")}
+        ${p(boldAllowed(details), "color:#334155;font-weight:500;")}
         ${kv([
           ["Booking reference", booking.bookingId],
           ["Service", booking.service],
