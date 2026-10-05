@@ -143,7 +143,11 @@ test("phone calls can book and quote, with the address and email read back first
   const p = buildInstructions({ channel: "voice", settings, knowledge, services, now, canBook: true });
   assert.match(p, /book cleans \(create_booking\) and email written quotes \(send_quote\)/);
   assert.match(p, /spell the email address back letter by letter/);
-  assert.match(p, /postcode character by character/);
+  // On calls: just the area, never a postcode or full address (easily misheard).
+  assert.match(p, /NEVER ask for a postcode or the full address/);
+  assert.match(p, /which area they're in \(e\.g\. Salford/);
+  assert.match(p, /our team will call or text them to take the full address/);
+  assert.doesNotMatch(p, /call check_postcode on it straight away/);
   assert.match(p, /Never call create_booking or send_quote until the caller has said yes to the read-back/);
 });
 
