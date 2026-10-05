@@ -7,7 +7,7 @@
 //
 // Returns { quoteRef, grandTotal } or { skipped: reason } when the team should price it instead
 // (e.g. a service that isn't charged by the hour, or a price-list item that's missing).
-const { loadUkServices, quoteTaxSettings, QUOTE_DEFAULTS } = require("./aiTools");
+const { loadUkServices, quoteTaxSettings, QUOTE_DEFAULTS, SUPPLIES_LINE } = require("./aiTools");
 const { rateForFrequency } = require("./pricing");
 
 const CARPET_DISCOUNT = 60;
@@ -51,6 +51,12 @@ async function priceQuoteRequest(q) {
     extras.push(line);
   }
 
+  // Supplies brought by Cleaniq: the same fee as the AI receptionist's quotes (admin → AI settings).
+  if (q.supplies === "Cleaniq") {
+    const fee = Number((await require("../models/AiSettings").get()).suppliesFee) || 0;
+    if (fee > 0) extras.push({ name: SUPPLIES_LINE, qty: 1, unitPrice: fee });
+  }
+
   const unitPrice = rateForFrequency(base, "Once");
   const item = {
     service: base.name,
@@ -90,7 +96,7 @@ async function sendInstantQuote(request) {
     address,
     frequency: "once",
     serviceDate: q.date || null,
-    serviceTimeSlot: null,
+    serviceTimeSlot: q.time || null, // preferred arrival time; confirmed on the accept page
     vatRate,
     validDays: QUOTE_DEFAULTS.validDays,
     includeVat,
@@ -106,13 +112,16 @@ async function sendInstantQuote(request) {
     property: {
       bedrooms: q.bedrooms || 0,
       bathrooms: q.bathrooms || 0,
-      kitchens: 0,
+      kitchens: q.kitchens || 0,
       receptionRooms: q.livingRooms || 0,
+      utilityRooms: q.utilityRooms || 0,
+      conservatories: q.conservatories || 0,
+      cloakrooms: q.cloakrooms || 0,
     },
-    suppliesProvidedBy: "",
+    suppliesProvidedBy: q.supplies || "",
     parking: "",
     keyAccess: "",
-    hasPet: "",
+    hasPet: q.hasPet || "",
     specialInstructions: [q.property && `Property: ${q.property}`, q.notes].filter(Boolean).join(". "),
     subtotal,
     discountAmount: 0,

@@ -363,7 +363,50 @@ router.get("/:quoteRef", async (req, res) => {
  * notifies the admin, and shows the company a proper confirmation page.
  * No authentication, since the recipient is a company contact, not an admin.
  */
-// Accepts a quote: marks it accepted, stops follow-ups, turns it into booking(s) and tells admin.
+let stripeClient = null;
+const stripe = () => stripeClient || (stripeClient = require("stripe")(process.env.STRIPE_SECRET_KEY || ""));
+
+// The booking made from an accepted quote: email the customer the usual "Payment Required" email
+// with a secure Stripe link (card held, taken when the job is done — same as admin's payment
+// links). When they pay, the Stripe webhook confirms the booking and sends the confirmation.
+async function sendQuotePaymentLink(quote) {
+  const booking = await Booking.findOne({ bookingId: `Q-${quote.quoteRef}-1` });
+  if (!booking || !(Number(booking.payment?.amount) > 0) || !booking.customer?.email) return null;
+  const session = await stripe().checkout.sessions.create({
+    payment_method_types: ["card"],
+    line_items: [{
+      price_data: {
+        currency: "gbp",
+        product_data: { name: booking.service || "Cleaning Service", description: `Cleaniq Booking ${booking.bookingId}` },
+        unit_amount: Math.round(Number(booking.payment.amount) * 100),
+      },
+      quantity: 1,
+    }],
+    mode: "payment",
+    payment_intent_data: {
+      capture_method: "manual",
+      metadata: { bookingId: String(booking._id), bookingRef: booking.bookingId, company: "Cleaniq Services" },
+    },
+    success_url: `https://cleaniqservices.com/account/dashboard?payment=success&booking=${booking.bookingId}`,
+    cancel_url: "https://cleaniqservices.com/",
+    customer_email: booking.customer.email,
+    metadata: { bookingId: String(booking._id), bookingRef: booking.bookingId, type: "quote-payment-link" },
+  });
+  const { templates } = require("../utils/emailService");
+  await sendEmail({
+    to: booking.customer.email,
+    subject: `Payment Required: Cleaniq Booking ${booking.bookingId}`,
+    html: templates.paymentRequired(booking, session.url),
+  });
+  await Booking.updateOne(
+    { _id: booking._id },
+    { $set: { "meta.lastPaymentLinkUrl": session.url, "meta.paymentLinkSentAt": new Date() } },
+  );
+  return session.url;
+}
+
+// Accepts a quote: marks it accepted, stops follow-ups, turns it into booking(s), emails the
+// customer their payment link and tells admin.
 async function acceptQuote(quote) {
   if (quote.status === "accepted") return;
   const reAccepted = quote.status === "declined";
@@ -373,12 +416,22 @@ async function acceptQuote(quote) {
   await require("../utils/automationEngine").cancelQuoteFollowups(quote.email).catch(() => {});
   await quote.save();
   const { count: bookingsCreated, dateNote } = await generateBookingsFromQuote(quote);
+  let paymentLink = null;
+  try {
+    paymentLink = await sendQuotePaymentLink(quote);
+  } catch (e) {
+    console.error(`Quote ${quote.quoteRef}: payment link not sent:`, e.message);
+  }
+  const paymentNote = paymentLink
+    ? "💳 Payment link emailed to the customer automatically. The booking confirms itself when they pay."
+    : "⚠️ No payment link could be sent automatically — please send one from the booking.";
   await sendEmail({
     to: process.env.EMAIL_USER || "info@cleaniqservices.com",
     // They had declined before: say so, so a dead lead isn't silently resurrected.
     subject: `✅ Quote Accepted${reAccepted ? " (after declining)" : ""} - ${quote.companyName} | ${quote.quoteRef}`,
-    html: generateQuoteResponseAlert(quote, "accepted", bookingsCreated, dateNote),
+    html: generateQuoteResponseAlert(quote, "accepted", bookingsCreated, [dateNote, paymentNote].filter(Boolean).join(" ")),
   });
+  return { paymentLink };
 }
 
 // Total cleaning hours on a quote (for free arrival times).
@@ -1081,7 +1134,7 @@ function generateOutcomePage({ type, quote }) {
       message: `Thank you, ${quote?.contactName || quote?.companyName || "there"}! We've let our team know you'd like to go ahead with quote <strong>${quote?.quoteRef}</strong>.`,
       steps: quote?.serviceDate && /^\d{2}:\d{2}$/.test(quote?.serviceTimeSlot || "") ? [
         `Your clean is booked for <strong>${escHtml(new Date(`${quote.serviceDate}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }))}</strong>, arriving at <strong>${escHtml(quote.serviceTimeSlot)}</strong>`,
-        "Our team will confirm it and send your payment link",
+        "We've emailed you a secure payment link — your card is only charged once the clean is done",
         "You'll get a reminder before your clean",
       ] : [
         "Our team will review and confirm scheduling within 1 business day",
@@ -1388,3 +1441,4 @@ function calculateNextSendDate(frequency) {
 module.exports = router;
 module.exports.sendQuote = sendQuote;
 module.exports.generateBookingsFromQuote = generateBookingsFromQuote;
+module.exports.setStripeForTests = (fake) => { stripeClient = fake; };

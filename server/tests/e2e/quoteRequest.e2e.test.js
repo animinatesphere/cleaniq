@@ -19,7 +19,8 @@ let mongod, server, base;
 const send = (body) => fetch(`${base}/contact/quote-request`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 const good = (extra = {}) => ({
   service: "End of Tenancy Cleaning", name: "Jo Bloggs", email: "Jo@Test.uk", phone: "07700000000", postcode: "m5 4wt",
-  address: "Flat 4, 10 Quay St, Salford", hours: 3, carpets: "2",
+  address: "Flat 4, 10 Quay St, Salford", hours: 3, carpets: "2", supplies: "Customer", time: "08:30",
+  kitchens: "1", hasPet: "No",
   bedrooms: "2", bathrooms: "1", livingRooms: "1", stairs: "1", property: "Flat", date: "2030-06-03", notes: "Keys with the concierge",
   carpet: "With Carpet Cleaning (Save 60%)",
   extras: { oven: true, ovenType: "Double oven", fridge: true, fridgeType: "Fridge freezer" },
@@ -92,12 +93,25 @@ test("an instant quote is emailed from the price list: hours × rate, 60% off ca
   assert.equal(q.address, "Flat 4, 10 Quay St, Salford, M5 4WT");
   assert.equal(q.serviceDate, "2030-06-03");
   assert.equal(q.property.bedrooms, 2);
+  assert.equal(q.property.kitchens, 1);
+  assert.equal(q.serviceTimeSlot, "08:30", "preferred time pre-fills the accept page");
+  assert.equal(q.suppliesProvidedBy, "Customer");
+  assert.equal(q.hasPet, "No");
   // The customer gets the quote (with its Accept button), not a second "we received it" email.
   const toCustomer = emails.filter((e) => e.to === "price@test.uk");
   assert.equal(toCustomer.length, 1);
   assert.match(toCustomer[0].subject, /Quote/);
   assert.match(toCustomer[0].html, /accept/i);
   assert.equal((await Lead.findOne({ email: "price@test.uk", source: "Quote Form" })).stage, "Quoted");
+});
+
+test("supplies brought by Cleaniq add the supplies fee, like the receptionist's quotes", async () => {
+  const res = await send(good({ email: "supplies@test.uk", supplies: "Cleaniq", carpet: "", carpets: "", extras: {} }));
+  const q = await Quote.findOne({ quoteRef: (await res.json()).quoteRef }).lean();
+  const fee = Number((await require("../../models/AiSettings").get()).suppliesFee);
+  const supplies = q.items[0].extras.find((e) => e.name === "Cleaning supplies & equipment");
+  assert.equal(supplies?.unitPrice, fee);
+  assert.equal(q.suppliesProvidedBy, "Cleaniq");
 });
 
 test("services not priced by the hour go to the team instead (customer gets 'we received it')", async () => {
@@ -115,6 +129,7 @@ test("hours, full address and number of carpets are required", async () => {
   assert.match((await (await send(good({ hours: 0.7 }))).json()).message, /how many hours/);
   assert.match((await (await send(good({ address: "" }))).json()).message, /full address/);
   assert.match((await (await send(good({ carpets: "0" }))).json()).message, /how many carpets/);
+  assert.match((await (await send(good({ supplies: "" }))).json()).message, /cleaning supplies/);
 });
 
 test("oven and fridge cleaning need their type confirmed", async () => {
