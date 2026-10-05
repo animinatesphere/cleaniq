@@ -91,3 +91,31 @@ test("the Calls/Conversations log records who, email, address and what was booke
     { quoteRef: "CLQ-123456", grandTotal: 150 });
   assert.equal(q.detail, "Quote CLQ-123456 emailed · Jane Smith · jane@example.com · 12 Oak Road, Manchester M14 5TQ · End of Tenancy Cleaning 4h · £150.00");
 });
+
+test("a made-up booking reference is caught: the AI is asked again, then a safe reply", async () => {
+  const { guardInventedRefs, trackRefs, refsIn } = require("../utils/aiTools");
+  assert.deepEqual(refsIn("Your booking BK-1234567 is confirmed; quote CLQ-998877 too"), ["BK-1234567", "CLQ-998877"]);
+
+  // Real: the tool returned it.
+  const known = new Set();
+  const run = trackRefs(async () => ({ bookingRef: "BK-4821" }), known);
+  await run("create_booking", {});
+  assert.deepEqual(await guardInventedRefs("Booked! Your reference is BK-4821.", known, async () => "x"), { reply: "Booked! Your reference is BK-4821." });
+
+  // Made up, fixed on the retry (which calls the tool and gets a real reference).
+  const notes = [];
+  const fixed = await guardInventedRefs("Your booking is confirmed: BK-1234567.", known, async (note) => { notes.push(note); return "All booked — reference BK-4821."; });
+  assert.equal(fixed.reply, "All booked — reference BK-4821.");
+  assert.match(notes[0], /no tool created it — nothing has been booked or sent/);
+
+  // Still made up: safe reply, flagged for the team.
+  const stillBad = await guardInventedRefs("Confirmed: BK-1234567.", known, async () => "Confirmed: BK-7654321.");
+  assert.equal(stillBad.flagged, true);
+  assert.match(stillBad.reply, /A member of our team will confirm the details with you shortly/);
+});
+
+test("nothing is spoken with asterisks, bullets or arrows", () => {
+  const { speakable } = require("../utils/voice");
+  assert.equal(speakable("**Booking reference:** BK-1234\n- **Date:** Thursday"), "Booking reference: BK-1234\nDate: Thursday");
+  assert.equal(speakable("6 hours → £135.00"), "6 hours  to  £135.00");
+});

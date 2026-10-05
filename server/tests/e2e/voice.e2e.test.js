@@ -241,3 +241,32 @@ test("replies are spoken sentence by sentence while the AI is still writing", as
   ]);
   s.ws.close();
 });
+
+test("on a call, a 'yes' to the summary makes the AI book it, and a made-up reference is never spoken", async () => {
+  await setSettings({ voiceEnabled: true, transferNumber: "" });
+  let forced = null;
+  let calls = 0;
+  fakeAi = async ({ forceTool, onText }) => {
+    forced = forceTool;
+    calls += 1;
+    if (calls === 1) {
+      onText?.("Excellent! ");
+      onText?.("**Your booking is confirmed.** Reference BK-1234567. ");
+      return "Excellent! **Your booking is confirmed.** Reference BK-1234567.";
+    }
+    return "Sorry, one moment, I still need to finish the booking.";
+  };
+  const { token } = await incomingToken("CA-GUARD");
+  const s = await openSession(token, "CA-GUARD");
+  await waitFor(() => AiCall.exists({ twilioCallSid: "CA-GUARD" }));
+  // Pretend the AI's last turn was a booking summary.
+  await new Promise((r) => setTimeout(r, 50));
+  s.ws.send(JSON.stringify({ type: "prompt", voicePrompt: "Yes", last: true }));
+  await waitFor(() => s.received.find((m) => m.type === "text" && m.last === true));
+  const said = s.received.filter((m) => m.type === "text").map((m) => m.token).join("");
+  assert.doesNotMatch(said, /BK-1234567|\*/); // never spoken
+  assert.doesNotMatch(said, /booking is confirmed/i);
+  assert.match(said, /Excellent!/);
+  assert.equal(calls, 2); // asked again after the made-up reference
+  s.ws.close();
+});

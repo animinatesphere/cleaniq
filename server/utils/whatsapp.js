@@ -6,7 +6,7 @@ const AiMessage = require("../models/AiMessage");
 const SystemSetting = require("../models/SystemSetting");
 const { getInstructions, pickAgentName } = require("./aiBrain");
 const { generateReply } = require("./aiProvider");
-const { declarations: bookingTools, makeToolRunner, confirmationTool } = require("./aiTools");
+const { declarations: bookingTools, makeToolRunner, confirmationTool, refsIn, trackRefs, guardInventedRefs } = require("./aiTools");
 const { toE164UK, findCustomerByPhone } = require("./phone");
 
 const HISTORY_LIMIT = 20;
@@ -140,18 +140,21 @@ async function replyOnce(conversationId, { ai = generateReply, send = sendWhatsA
       await AiConversation.updateOne({ _id: conversation._id }, { $set: { agentName: conversation.agentName } });
     }
     const system = await getInstructions("whatsapp", { customerName: conversation.name, canBook: true, agentName: conversation.agentName });
-    reply = await ai({
-      system,
-      history,
-      tools: bookingTools,
-      runTool: makeToolRunner({
-        phone: conversation.phone,
-        channel: "whatsapp",
-        conversationId: String(conversation._id),
-        onTool: (event) => toolEvents.push(event),
-      }),
-      forceTool: confirmationTool(history),
-    });
+    // References already created in this chat (bookings, quotes) are real; anything else isn't.
+    const known = new Set(history.flatMap((m) => (m.tools || []).flatMap((t) => refsIn(t.detail))));
+    const runTool = trackRefs(makeToolRunner({
+      phone: conversation.phone,
+      channel: "whatsapp",
+      conversationId: String(conversation._id),
+      onTool: (event) => toolEvents.push(event),
+    }), known);
+    const ask = (note = "") => ai({ system: note ? `${system}\n\n${note}` : system, history, tools: bookingTools, runTool, forceTool: confirmationTool(history) });
+    reply = await ask();
+    if (reply) {
+      const checked = await guardInventedRefs(reply, known, ask);
+      reply = checked.reply;
+      if (checked.flagged) await AiConversation.updateOne({ _id: conversation._id }, { $set: { needsAttention: true } });
+    }
   } catch (err) {
     console.error(`[whatsapp] AI failed for ${conversation.phone}:`, err.message);
   }

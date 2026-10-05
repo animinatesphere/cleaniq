@@ -43,3 +43,10 @@ test("labels to read back, and clear errors", () => {
   assert.match(resolveUkDate("whenever suits", now).error, /couldn't work out the date/);
   assert.match(upcomingCalendar(3, now), /^Today Monday 5 October = 2026-10-05\nTomorrow Tuesday 6 October = 2026-10-06\nWednesday 7 October = 2026-10-07$/);
 });
+
+test("a weekday before the date is fine, and a mismatch is caught", () => {
+  assert.equal(d("Thursday 8 October"), "2026-10-08");
+  assert.equal(d("thursday the 8th"), "2026-10-08");
+  assert.equal(d("Friday, October 9"), "2026-10-09");
+  assert.match(resolveUkDate("Thursday 9 October", now).error, /9 October 2026 is a Friday, not a Thursday/);
+});

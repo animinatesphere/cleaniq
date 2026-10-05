@@ -926,7 +926,50 @@ function makeToolRunner(ctx) {
   };
 }
 
+// ── Never tell a customer something is booked or sent unless a tool really did it ───────
+// A reply that mentions a booking/quote reference the tools never returned means the AI made
+// it up (e.g. said "booked, BK-1234567" without calling create_booking).
+const REF_RE = /\b(?:BK|CLQ|Q|SUB)-[A-Z0-9][A-Z0-9-]{2,}\b/gi;
+const refsIn = (text) => (String(text || "").match(REF_RE) || []).map((r) => r.toUpperCase());
+function refsFromResult(r) {
+  const out = [];
+  if (r?.bookingRef) out.push(r.bookingRef);
+  if (r?.quoteRef) out.push(r.quoteRef);
+  for (const b of r?.bookings || []) if (b.bookingRef) out.push(b.bookingRef);
+  return out.map((x) => String(x).toUpperCase());
+}
+// Wraps a tool runner so every reference a tool returns is remembered in `known`.
+function trackRefs(runTool, known) {
+  return async (name, args) => {
+    const result = await runTool(name, args);
+    refsFromResult(result).forEach((ref) => known.add(ref));
+    return result;
+  };
+}
+const INVENTED_REF_NOTE =
+  "IMPORTANT: your last reply gave a booking or quote reference, but no tool created it — nothing has been booked or sent. Never give a reference you didn't get from a tool. If the customer has said yes to the latest summary, call create_booking or send_quote now with customerConfirmed true; otherwise ask for what's still needed.";
+const INVENTED_REF_FALLBACK =
+  "Sorry, I couldn't finish that just now. A member of our team will confirm the details with you shortly.";
+
+/**
+ * Checks a reply for made-up references. retry(note) asks the AI again with an extra note.
+ * @returns {Promise<{ reply: string, flagged?: boolean }>}
+ */
+async function guardInventedRefs(reply, known, retry) {
+  const invented = refsIn(reply).find((r) => !known.has(r));
+  if (!invented) return { reply };
+  console.warn(`[ai] reply mentioned ${invented}, which no tool returned; asking the AI again`);
+  let again = null;
+  try { again = await retry(INVENTED_REF_NOTE); } catch {}
+  if (again && !refsIn(again).some((r) => !known.has(r))) return { reply: again };
+  console.warn("[ai] still no real reference after retrying; sending the safe reply and flagging for the team");
+  return { reply: INVENTED_REF_FALLBACK, flagged: true };
+}
+
 module.exports = {
+  refsIn,
+  trackRefs,
+  guardInventedRefs,
   declarations,
   makeToolRunner,
   calculateQuote,

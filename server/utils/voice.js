@@ -7,7 +7,7 @@ const AiSettings = require("../models/AiSettings");
 const AiCall = require("../models/AiCall");
 const { getInstructions, agentNames } = require("./aiBrain");
 const { generateReply } = require("./aiProvider");
-const { declarations, makeToolRunner, describeToolResult } = require("./aiTools");
+const { declarations, makeToolRunner, describeToolResult, confirmationTool, trackRefs, guardInventedRefs } = require("./aiTools");
 const { toE164UK, findCustomerByPhone } = require("./phone");
 
 const RELAY_PATH = "/api/voice/relay";
@@ -48,6 +48,18 @@ function consumeCallToken(token, callSid) {
   return entry.expires >= Date.now() && entry.callSid === callSid ? entry : null;
 }
 
+// What the voice should actually say: no markdown (**bold**, bullets, headings), no symbols it
+// would read out ("asterisk"), arrows or emojis.
+function speakable(text) {
+  return String(text || "")
+    .replace(/\*\*|__|`/g, "")
+    .replace(/(^|\s)\*(\S)/g, "$1$2").replace(/(\S)\*(\s|$)/g, "$1$2")
+    .replace(/^\s*(?:[-*•]|#{1,6})\s+/gm, "")
+    .replace(/[→⇒]/g, " to ")
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+    .replace(/\n{2,}/g, "\n");
+}
+
 // Rough time Twilio needs to speak a reply, so a transfer doesn't cut it off mid-sentence.
 const speakingTimeMs = (text) => Math.min(10000, 1200 + String(text).length * 65);
 
@@ -64,7 +76,8 @@ function greetingFor(settings, agentName = "") {
 function handleRelaySession(ws, deps = {}) {
   const ai = deps.ai || generateReply;
   const speakDelay = deps.speakDelay || speakingTimeMs;
-  const state = { authorized: false, call: null, history: [], turns: 0, ending: false, partial: "", queue: Promise.resolve() };
+  // knownRefs: booking/quote references the tools really returned on this call.
+  const state = { authorized: false, call: null, history: [], turns: 0, ending: false, partial: "", queue: Promise.resolve(), knownRefs: new Set() };
 
   const send = (msg) => {
     if (ws.readyState === ws.OPEN) ws.send(JSON.stringify(msg));
@@ -154,7 +167,7 @@ function handleRelaySession(ws, deps = {}) {
       conversationId: state.call ? String(state.call._id) : null,
       onTool: (e) => toolEvents.push(e),
     });
-    const runTool = async (name, args) => {
+    const runTool = trackRefs(async (name, args) => {
       if (name === "transfer_to_human") {
         if (!canTransfer) return { error: "No transfer number is set. Offer a call back or WhatsApp instead." };
         transferRequested = true;
@@ -163,21 +176,27 @@ function handleRelaySession(ws, deps = {}) {
       }
       if (!VOICE_TOOL_NAMES.includes(name)) return { error: `${name} isn't available on phone calls.` };
       return baseRunner(name, args);
-    };
+    }, state.knownRefs);
     const tools = [...declarations.filter((d) => VOICE_TOOL_NAMES.includes(d.name)), ...(canTransfer ? [TRANSFER_TOOL] : [])];
 
     // Speak each sentence as soon as the AI has written it, instead of waiting for the whole
-    // reply: the caller hears the start of the answer within a second or so.
+    // reply: the caller hears the start of the answer within a second or so. A sentence that
+    // gives a reference or says something is booked/sent is held back (with everything after
+    // it) until the reply has been checked, so a made-up booking is never spoken.
     let pending = "";
     let spoken = "";
+    let holding = false;
+    const CLAIM_RE = /\b(?:BK|CLQ|Q|SUB)-[A-Z0-9]|\b(booked|booking (?:is|has been) (?:confirmed|made)|you're all set|(?:quote|it)(?: has been| is)? (?:sent|emailed) to)\b/i;
     const flush = (all) => {
       const re = all ? /^[\s\S]+$/ : /^[\s\S]*?[.!?…:](?=\s)\s+/;
       let m;
-      while (pending && (m = pending.match(re))) {
+      while (!holding && pending && (m = pending.match(re))) {
         const chunk = m[0];
+        if (!all && CLAIM_RE.test(chunk)) { holding = true; break; }
         pending = pending.slice(chunk.length);
-        if (chunk.trim()) {
-          send({ type: "text", token: chunk, last: false });
+        const words = speakable(chunk);
+        if (words.trim()) {
+          send({ type: "text", token: words, last: false });
           spoken += chunk;
         }
         if (all) break;
@@ -190,32 +209,50 @@ function handleRelaySession(ws, deps = {}) {
     };
 
     let reply = null;
+    let flagged = false;
     try {
       const system = await getInstructions("voice", { customerName: state.call?.customerName || "", agentName: state.call?.agentName || "", canBook: true });
-      reply = await ai({ system, history: state.history.slice(-30), tools, runTool, onText });
+      const history = state.history.slice(-30);
+      // A "yes" to a booking or quote summary makes the AI actually do it (same as WhatsApp).
+      const forceTool = confirmationTool(history);
+      reply = await ai({ system, history, tools, runTool, onText, forceTool });
+      if (reply) {
+        // Retries aren't streamed: the checked reply is spoken in one go below.
+        const checked = await guardInventedRefs(reply, state.knownRefs, (note) =>
+          ai({ system: `${system}\n\n${note}`, history, tools, runTool, forceTool }));
+        if (checked.reply !== reply) {
+          reply = checked.reply;
+          pending = "";
+          holding = true;
+          flagged = Boolean(checked.flagged);
+        }
+      }
     } catch (err) {
       console.error(`[voice] AI failed on call ${state.call?.twilioCallSid}:`, err.message);
     }
     await customerSaved;
+    if (flagged && state.call) AiCall.updateOne({ _id: state.call._id }, { $set: { endReason: "needs checking: AI gave a reference it didn't create" } }).catch(() => {});
 
     if (!reply) {
       reply = canTransfer
         ? "Sorry, I'm having a little trouble. Let me put you through to the team."
         : "Sorry, I'm having a little trouble right now. Please message us on WhatsApp on this number, or try again shortly.";
       transferRequested = canTransfer;
-      say(reply);
+      say(speakable(reply));
       await addTurn("ai", reply, toolEvents);
       setTimeout(() => endCall({ transfer: canTransfer, reason: "ai error" }), speakDelay(reply));
       return;
     }
 
-    if (spoken || pending) {
-      // Already streamed: send what's left and close the turn.
-      flush(true);
+    if (spoken) {
+      // Part already spoken: say the rest (the checked reply's remainder, or what was held back).
+      const rest = reply.startsWith(spoken) ? reply.slice(spoken.length) : holding && !pending ? reply : pending;
+      const words = speakable(rest);
+      if (words.trim()) send({ type: "text", token: words, last: false });
       send({ type: "text", token: "", last: true });
-      reply = spoken.trim() || reply;
+      if (!reply.startsWith(spoken)) reply = `${spoken.trim()} ${rest.trim()}`.trim();
     } else {
-      say(reply);
+      say(speakable(reply));
     }
     await addTurn("ai", reply, toolEvents);
     if (transferRequested) setTimeout(() => endCall({ transfer: true, reason: "transferred to the team" }), speakDelay(reply));
@@ -266,4 +303,5 @@ function attachVoiceRelay(server) {
   return wss;
 }
 
-module.exports = { attachVoiceRelay, handleRelaySession, issueCallToken, consumeCallToken, greetingFor, RELAY_PATH };
+module.exports = {
+  speakable, attachVoiceRelay, handleRelaySession, issueCallToken, consumeCallToken, greetingFor, RELAY_PATH };
