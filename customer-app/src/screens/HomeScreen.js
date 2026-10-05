@@ -200,16 +200,14 @@ const HomeScreen = ({ navigation }) => {
                 <CalendarDays size={14} color={tc("#fff")} strokeWidth={2} />
                 <Text style={S.heroCtaTxt}>Book Now</Text>
               </TouchableOpacity>
-              {!userToken && (
-                <TouchableOpacity
-                  style={[S.heroCta, ts({ backgroundColor: "rgba(255,255,255,0.15)", borderWidth: 1.5, borderColor: "rgba(255,255,255,0.4)" })]}
-                  onPress={() => navigation.navigate("Quote")}
-                  activeOpacity={0.85}
-                >
-                  <FileText size={14} color={tc("#fff")} strokeWidth={2} />
-                  <Text style={S.heroCtaTxt}>Get a Quote</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={[S.heroCta, ts({ backgroundColor: "rgba(255,255,255,0.15)", borderWidth: 1.5, borderColor: "rgba(255,255,255,0.4)" })]}
+                onPress={() => navigation.navigate("Quote")}
+                activeOpacity={0.85}
+              >
+                <FileText size={14} color={tc("#fff")} strokeWidth={2} />
+                <Text style={S.heroCtaTxt}>Get a Quote</Text>
+              </TouchableOpacity>
             </View>
           </View>
           {/* Trust stats */}
@@ -402,18 +400,16 @@ const HomeScreen = ({ navigation }) => {
           </View>
         )}
 
-        {/* ── Get Quote banner (non-logged-in only) ──────────── */}
-        {!userToken && (
-          <TouchableOpacity style={S.quoteBanner} onPress={() => navigation.navigate("Quote")} activeOpacity={0.88}>
-            <View style={S.quoteBannerLeft}>
-              <Text style={S.quoteBannerTitle}>Not sure what you need?</Text>
-              <Text style={S.quoteBannerSub}>Get a free personalised quote — no account needed</Text>
-            </View>
-            <View style={S.quoteBannerBtn}>
-              <FileText size={16} color={tc(C.primary)} strokeWidth={2} />
-            </View>
-          </TouchableOpacity>
-        )}
+        {/* ── Get Quote banner ──────────── */}
+        <TouchableOpacity style={S.quoteBanner} onPress={() => navigation.navigate("Quote")} activeOpacity={0.88}>
+          <View style={S.quoteBannerLeft}>
+            <Text style={S.quoteBannerTitle}>Get an instant quote</Text>
+            <Text style={S.quoteBannerSub}>Four quick steps — your quote is emailed straight away</Text>
+          </View>
+          <View style={S.quoteBannerBtn}>
+            <FileText size={16} color={tc(C.primary)} strokeWidth={2} />
+          </View>
+        </TouchableOpacity>
 
         <View style={{ height: 110 }} />
       </ScrollView>
