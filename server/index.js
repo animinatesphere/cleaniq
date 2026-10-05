@@ -79,8 +79,13 @@ app.use((req, res, next) => {
 
 // Middleware
 
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+// Stripe's webhook must receive the request exactly as sent (its signature check needs the raw
+// body), so it's skipped here; that route reads the raw body itself.
+const isStripeWebhook = (req) => req.originalUrl.startsWith("/webhooks/stripe");
+const jsonBody = express.json({ limit: "50mb" });
+const formBody = express.urlencoded({ limit: "50mb", extended: true });
+app.use((req, res, next) => (isStripeWebhook(req) ? next() : jsonBody(req, res, next)));
+app.use((req, res, next) => (isStripeWebhook(req) ? next() : formBody(req, res, next)));
 app.use("/uploads", (req, res, next) => {
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
@@ -375,6 +380,23 @@ app.post(
                   `⚠️ Additional hours payment was not applied for booking ${bookingId}`,
                 );
               }
+            } else if (
+              // Already handled (Stripe can send the same event again), or the booking has moved
+              // on (confirmed by hand, cleaner on the way, done…): just keep the payment record,
+              // don't change the status back or email the customer again.
+              (booking.payment?.stripePaymentIntentId === session.payment_intent &&
+                ["Authorized", "Completed"].includes(booking.payment?.status)) ||
+              !["Pending", "Awaiting Payment"].includes(booking.status)
+            ) {
+              if (booking.payment?.stripePaymentIntentId !== session.payment_intent ||
+                  !["Authorized", "Completed"].includes(booking.payment?.status)) {
+                booking.payment = booking.payment || {};
+                booking.payment.stripePaymentIntentId = session.payment_intent;
+                booking.payment.status = "Authorized";
+                booking.payment.authorizedAt = booking.payment.authorizedAt || new Date();
+                await booking.save();
+              }
+              console.log(`💳 Payment recorded for ${booking.bookingId} (status left as ${booking.status})`);
             } else {
               // Store payment intent for later capture
               booking.payment = booking.payment || {};
