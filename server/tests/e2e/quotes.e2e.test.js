@@ -10,6 +10,10 @@ const { MongoMemoryServer } = require("mongodb-memory-server-core");
 const mongoose = require("mongoose");
 
 process.env.JWT_SECRET = process.env.JWT_SECRET || "test-secret";
+// Fake postcode lookup: only M14 5TQ is real here (nothing reaches postcodes.io).
+const REAL_POSTCODES = new Set(["M145TQ"]);
+require("../../utils/geo").setGeoFetcherForTests(async (url, body) =>
+  body ? { result: body.postcodes.map((q) => ({ query: q, result: REAL_POSTCODES.has(q) ? { latitude: 53.45, longitude: -2.22 } : null })) } : { result: null });
 const sentEmails = [];
 const emailService = require("../../utils/emailService");
 emailService.sendEmail = async (msg) => {
@@ -171,4 +175,14 @@ test("dates in the customer's words are worked out by the server and read back",
   assert.equal(r.dateToReadBack, "Thursday 2 May 2030");
   const bad = await run("check_availability", { date: "sometime soon" });
   assert.match(bad.error, /couldn't work out the date/);
+});
+
+
+test("a postcode that doesn't exist is caught before quoting, and check_postcode reads it back", async () => {
+  const bad = await run("send_quote", { ...args, address: "3 Craven Street, Hawthorne, M54 EE" });
+  assert.match(bad.error, /isn't a complete UK postcode|isn't a real UK postcode/);
+  const unknown = await run("check_postcode", { postcode: "M5 4EE" }); // right shape, not in the (fake) list
+  assert.match(unknown.error, /M5 4EE isn't a real UK postcode.*letter by letter/);
+  const ok = await run("check_postcode", { postcode: "m14 5tq" });
+  assert.deepEqual(ok, { valid: true, postcode: "M14 5TQ", readBack: "M 1 4, 5 T Q" });
 });

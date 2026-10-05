@@ -8,6 +8,21 @@ const { toE164UK } = require("./phone");
 const { rateForFrequency, offeredFrequencies } = require("./pricing");
 const { resolveUkDate } = require("./ukDate");
 
+// Checks a postcode is real before it's used (UK postcodes end with a number and two letters,
+// e.g. M5 4EE). Returns an error for the AI to fix with the customer, or the tidy postcode.
+async function checkPostcode(text) {
+  const { postcodeStatus } = require("./geo");
+  const r = await postcodeStatus(text);
+  if (r.status === "invalid") {
+    return {
+      error: r.postcode
+        ? `${r.postcode} isn't a real UK postcode. Ask the customer to say it again slowly, letter by letter (UK postcodes end with a number and two letters, e.g. M5 4EE).`
+        : "That isn't a complete UK postcode. Ask for the full postcode — it ends with a number and two letters, e.g. M5 4EE.",
+    };
+  }
+  return { postcode: r.postcode, checked: r.status === "valid" };
+}
+
 // Same rule as the admin form, website and app: a service is only offered at its own frequencies
 // (Regular: weekly/fortnightly, Deep: monthly/every 3 months, others one-off — or whatever admin priced).
 const FREQ_LABEL = { Once: "one-off", Weekly: "weekly", Fortnightly: "fortnightly", Monthly: "monthly", Quarterly: "every 3 months" };
@@ -249,6 +264,8 @@ async function createAiBooking(args, ctx) {
   if (!args.time) problems.push("what time the cleaner should arrive");
   const frequency = FREQUENCIES.includes(args.frequency) ? args.frequency : "Once";
   if (problems.length) return { error: `Cannot book yet. Still needed: ${problems.join("; ")}.` };
+  const pcCheck = await checkPostcode(postcode);
+  if (pcCheck.error) return pcCheck;
 
   const recent = await Booking.countDocuments({
     "customer.phone": ctx.phone,
@@ -448,6 +465,8 @@ async function sendAiQuote(args, ctx) {
   if (!(args.services || []).length) problems.push("the service(s) and hours");
   if (!["Cleaniq", "Customer"].includes(args.suppliesProvidedBy)) problems.push("who provides the cleaning supplies and equipment");
   if (problems.length) return { error: `Cannot prepare the quote yet. Still needed: ${problems.join("; ")}.` };
+  const pcCheck = await checkPostcode(args.address);
+  if (pcCheck.error) return pcCheck;
 
   const settings = await AiSettings.get();
   const built = buildQuoteItems(await loadUkServices(), args, settings.suppliesFee);
@@ -640,6 +659,15 @@ const whenSchema = {
 
 const declarations = [
   {
+    name: "check_postcode",
+    description: "Check a UK postcode is real as soon as the customer gives it, before asking anything else. If it isn't, ask them to say it again slowly, letter by letter.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: { postcode: { type: "string", description: "The postcode as heard, e.g. M5 4EE" } },
+      required: ["postcode"],
+    },
+  },
+  {
     name: "get_quote",
     description: "Calculate the exact price using live prices, including extras and the supplies fee. Always use this for any total; never add up prices yourself.",
     parametersJsonSchema: {
@@ -798,6 +826,8 @@ function describeToolResult(name, args = {}, r = {}) {
   if (!r || r.error) return { name, ok: false, detail: `${name}: ${r?.error || "failed"}` };
   const money = (n) => (typeof n === "number" ? `£${n.toFixed(2)}` : "");
   switch (name) {
+    case "check_postcode":
+      return { name, ok: true, detail: `Postcode checked: ${r.postcode}` };
     case "get_quote":
       return { name, ok: true, detail: `Price check: ${r.service}, ${r.hours}h → ${money(r.total)}` };
     case "check_availability":
@@ -855,6 +885,10 @@ function makeToolRunner(ctx) {
       if (name === "get_quote") {
         const settings = await AiSettings.get();
         return calculateQuote(await loadUkServices(), args, settings.suppliesFee, await require("./tax").getTax());
+      }
+      if (name === "check_postcode") {
+        const r = await checkPostcode(args.postcode);
+        return r.error ? r : { valid: true, postcode: r.postcode, readBack: r.postcode.split("").join(" ").replace(/ {3}/g, ", ") };
       }
       if (name === "check_availability") return await getAvailability(args.date, { time: args.time, hours: args.hours });
       if (name === "create_booking") return await createAiBooking(args, ctx);

@@ -89,4 +89,15 @@ function travelMinutes(miles, mode = "car") {
   return Math.max(5, Math.round(((miles * 1.3) / (SPEED_MPH[mode] || SPEED_MPH.car)) * 60));
 }
 
-module.exports = { findPostcode, districtOf, normalise, lookup, pointFor, milesBetween, travelMinutes, setGeoFetcherForTests };
+// Is this a real UK postcode? "valid", "invalid" (wrong shape, or postcodes.io doesn't know it),
+// or "unchecked" (postcodes.io couldn't be reached — don't block anyone over that).
+async function postcodeStatus(text) {
+  const pc = findPostcode(text);
+  if (!pc) return { status: "invalid", postcode: "" };
+  const key = normalise(pc);
+  const out = await lookup([key]);
+  if (!(key in out)) return { status: "unchecked", postcode: pc };
+  return { status: out[key] ? "valid" : "invalid", postcode: pc };
+}
+
+module.exports = { findPostcode, districtOf, normalise, lookup, pointFor, milesBetween, travelMinutes, postcodeStatus, setGeoFetcherForTests };

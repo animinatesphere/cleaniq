@@ -15,7 +15,7 @@ const TOKEN_TTL_MS = 2 * 60 * 1000;
 const SETUP_TIMEOUT_MS = 15 * 1000;
 const MAX_TURNS_PER_CALL = 40; // protects AI credit from very long or looping calls
 // Callers can book and get a written quote on the phone too (after the details are read back).
-const VOICE_TOOL_NAMES = ["get_quote", "check_availability", "find_my_bookings", "save_enquiry", "create_booking", "send_quote"];
+const VOICE_TOOL_NAMES = ["check_postcode", "get_quote", "check_availability", "find_my_bookings", "save_enquiry", "create_booking", "send_quote"];
 
 const TRANSFER_TOOL = {
   name: "transfer_to_human",
