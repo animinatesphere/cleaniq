@@ -13,6 +13,11 @@ process.env.JWT_SECRET = process.env.JWT_SECRET || "test-secret";
 const emails = [];
 require("../../utils/emailService").sendEmail = async (m) => { emails.push(m); return true; };
 
+// Fake Stripe: payment links made when a quote is accepted.
+const checkouts = [];
+require("../../routes/quotes").setStripeForTests({
+  checkout: { sessions: { create: async (a) => { checkouts.push(a); return { id: `cs_${checkouts.length}`, url: `https://checkout.test/${checkouts.length}` }; } } },
+});
 const Booking = require("../../models/Booking");
 const Quote = require("../../models/Quote");
 const Service = require("../../models/Service");
@@ -221,4 +226,27 @@ test("dates in the past or today can't be chosen", async () => {
   assert.equal((await fetch(`${base}/${ref}/times?date=${day(0)}`)).status, 400);
   assert.equal(await accept(ref, day(-1), "10:00"), 400);
   assert.equal((await Quote.findOne({ quoteRef: ref })).status, "sent");
+});
+
+
+test("accepting emails the customer a payment link straight away; paying it is matched to the booking", async () => {
+  await send({ serviceDate: "", email: "payme@test.com" });
+  const ref = `CLQ-T${n}`;
+  emails.length = 0;
+  const before = checkouts.length;
+  assert.equal(await accept(ref, day(30), "08:30"), 200);
+  const b = await Booking.findOne({ bookingId: `Q-${ref}-1` }).lean();
+  assert.equal(checkouts.length, before + 1);
+  const session = checkouts.at(-1);
+  assert.equal(session.metadata.bookingId, String(b._id), "the Stripe webhook confirms this booking when paid");
+  assert.equal(session.line_items[0].price_data.unit_amount, 24500);
+  assert.equal(session.customer_email, "payme@test.com");
+  assert.equal(session.payment_intent_data.capture_method, "manual");
+  const pay = emails.find((m) => m.to === "payme@test.com" && /Payment Required/.test(m.subject));
+  assert.ok(pay, "payment email sent");
+  assert.match(pay.html, /checkout\.test/);
+  assert.match(pay.html, /8:30am/);
+  assert.ok(!/08:30 \(08:30\)/.test(pay.html));
+  assert.equal(b.meta.lastPaymentLinkUrl, `https://checkout.test/${checkouts.length}`);
+  assert.ok(emails.some((m) => /Quote Accepted/.test(m.subject) && /Payment link emailed/.test(m.html)));
 });

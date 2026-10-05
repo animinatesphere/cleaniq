@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,6 +7,7 @@ import {
   House, Building, Building2, DoorOpen, Warehouse, Bath, Sofa, Refrigerator, Footprints,
   CalendarDays, User, Mail, Phone, MapPin, ShieldCheck, BadgeCheck, Clock, Star,
   Minus, Plus, Check, Send, Loader2, AlertCircle, CheckCircle2, Lock, MessageCircle, ArrowRight,
+  ArrowLeft, CookingPot, WashingMachine, Sun, DoorClosed, PawPrint, SprayCan as Supplies, Zap,
 } from "lucide-react";
 import { PHONE_NUMBER, whatsappLink } from "../utils/contact";
 
@@ -45,9 +46,29 @@ const serviceIcon = (name) => {
   return SprayCan;
 };
 
+// Arrival times, like the admin booking form: 8am–8pm on the hour and half hour.
+const ARRIVAL_TIMES = Array.from({ length: 25 }, (_, i) => {
+  const mins = 8 * 60 + i * 30;
+  return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${mins % 60 ? "30" : "00"}`;
+});
+const ampm = (t) => {
+  const [h, m] = t.split(":").map(Number);
+  return `${h % 12 || 12}${m ? `:${String(m).padStart(2, "0")}` : ""}${h < 12 ? "am" : "pm"}`;
+};
+
+// The same four steps as Admin → New booking.
+const STEPS = [
+  { n: 1, label: "Location", icon: MapPin },
+  { n: 2, label: "Property", icon: House },
+  { n: 3, label: "Add-ons", icon: Zap },
+  { n: 4, label: "Schedule", icon: CalendarDays },
+];
+
 const EMPTY = {
   service: "", name: "", email: "", phone: "", postcode: "", address: "", hours: "", carpets: null,
+  supplies: "", time: "", hasPet: "",
   bedrooms: null, bathrooms: null, livingRooms: null, stairs: null, property: "",
+  kitchens: null, utilityRooms: null, conservatories: null, cloakrooms: null,
   date: "", notes: "", carpet: "",
   extras: { oven: false, ovenType: "", fridge: false, fridgeType: "" },
   consent: false, website: "",
@@ -79,7 +100,7 @@ function Section({ n, title, hint, children }) {
   );
 }
 
-function Choice({ selected, onClick, children, className = "" }) {
+function Choice({ selected, onClick, children, className = "", tick = true }) {
   return (
     <button
       type="button"
@@ -91,7 +112,7 @@ function Choice({ selected, onClick, children, className = "" }) {
           : "border-slate-200 bg-white hover:border-primary/40 hover:bg-slate-50"
       } ${className}`}
     >
-      {selected && (
+      {selected && tick && (
         <span className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white">
           <Check size={12} strokeWidth={3.5} />
         </span>
@@ -162,10 +183,12 @@ function SummaryRow({ label, value }) {
 const GetQuote = () => {
   const [form, setForm] = useState(EMPTY);
   const [services, setServices] = useState(FALLBACK_SERVICES);
+  const [step, setStep] = useState(1);
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [errorMsg, setErrorMsg] = useState("");
   const [sentTo, setSentTo] = useState("");
   const [instantQuote, setInstantQuote] = useState(false);
+  const cardRef = useRef(null);
 
   useEffect(() => {
     fetch(`${API}/services?region=UK`)
@@ -185,30 +208,71 @@ const GetQuote = () => {
   const set = (name, value) => setForm((f) => ({ ...f, [name]: value }));
   const setExtra = (patch) => setForm((f) => ({ ...f, extras: { ...f.extras, ...patch } }));
   const onChange = (e) => set(e.target.name, e.target.value);
-  const today = new Date().toISOString().slice(0, 10);
+  // Bookings start from tomorrow (same as the accept page).
+  const tomorrow = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })();
 
-  const checks = [
-    !!form.service,
-    !!form.hours,
-    form.address.trim().length >= 5,
-    form.name.trim().length > 1,
-    EMAIL_RE.test(form.email.trim()),
-    POSTCODE_RE.test(form.postcode.trim()),
-    form.consent,
+  const fail = (msg) => {
+    setErrorMsg(msg);
+    setStatus("error");
+    return false;
+  };
+
+  // What each step needs before moving on.
+  const checkStep = (n) => {
+    if (n === 1) {
+      if (!form.service) return fail("Please choose a service.");
+      if (!form.hours) return fail("Please choose how many hours you'd like.");
+      if (form.address.trim().length < 5) return fail("Please enter the full address of the property.");
+      if (!POSTCODE_RE.test(form.postcode.trim())) return fail("Please enter a valid UK postcode, e.g. M1 1AA.");
+      if (!form.supplies) return fail("Please choose who provides the cleaning supplies.");
+    }
+    if (n === 3) {
+      if (form.carpet === CARPET_WITH && !(form.carpets > 0)) return fail("Please tell us how many carpets to clean.");
+      if (form.extras.oven && !form.extras.ovenType) return fail("Please confirm the type of oven.");
+      if (form.extras.fridge && !form.extras.fridgeType) return fail("Please confirm the type of fridge.");
+    }
+    if (n === 4) {
+      if (form.name.trim().length < 2) return fail("Please enter your full name.");
+      if (!EMAIL_RE.test(form.email.trim())) return fail("Please enter a valid email address.");
+      if (!form.consent) return fail("Please tick the box so we can store your details and reply.");
+    }
+    setErrorMsg("");
+    if (status === "error") setStatus("idle");
+    return true;
+  };
+
+  const goTo = (n) => {
+    setStep(n);
+    requestAnimationFrame(() => cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
+  const next = () => { if (checkStep(step)) goTo(step + 1); };
+  const back = () => { setErrorMsg(""); setStatus("idle"); goTo(step - 1); };
+  // Chips: go back freely; forward only through steps that are complete.
+  const jump = (n) => {
+    if (n < step) { setErrorMsg(""); setStatus("idle"); return goTo(n); }
+    for (let i = step; i < n; i++) if (!checkStep(i)) return;
+    goTo(n);
+  };
+
+  const done = [
+    !!form.service, !!form.hours, form.address.trim().length >= 5, POSTCODE_RE.test(form.postcode.trim()), !!form.supplies,
+    form.name.trim().length > 1, EMAIL_RE.test(form.email.trim()), form.consent,
   ];
-  const progress = Math.round((checks.filter(Boolean).length / checks.length) * 100);
+  const progress = Math.round((done.filter(Boolean).length / done.length) * 100);
 
   const extrasText = useMemo(() => {
     const e = form.extras;
     return [
+      form.carpet === CARPET_WITH && form.carpets && `${form.carpets} carpet${form.carpets === 1 ? "" : "s"}`,
       e.oven && `Oven${e.ovenType ? ` (${e.ovenType.toLowerCase()})` : ""}`,
       e.fridge && `Fridge${e.fridgeType ? ` (${e.fridgeType.toLowerCase()})` : ""}`,
     ].filter(Boolean).join(", ");
-  }, [form.extras]);
+  }, [form.extras, form.carpet, form.carpets]);
 
   const rooms = [
     form.bedrooms !== null && `${form.bedrooms} bed`,
     form.bathrooms !== null && `${form.bathrooms} bath`,
+    form.kitchens !== null && `${form.kitchens} kitchen`,
     form.livingRooms !== null && `${form.livingRooms} living`,
     form.stairs !== null && `${form.stairs} stairs`,
   ].filter(Boolean).join(" · ");
@@ -217,21 +281,10 @@ const GetQuote = () => {
     ? new Date(`${form.date}T12:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
     : "";
 
-  const fail = (msg) => {
-    setErrorMsg(msg);
-    setStatus("error");
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.service) return fail("Please choose a service.");
-    if (!form.hours) return fail("Please choose how many hours you'd like.");
-    if (form.carpet === CARPET_WITH && !(form.carpets > 0)) return fail("Please tell us how many carpets to clean.");
-    if (form.extras.oven && !form.extras.ovenType) return fail("Please confirm the type of oven.");
-    if (form.extras.fridge && !form.extras.fridgeType) return fail("Please confirm the type of fridge.");
-    if (form.address.trim().length < 5) return fail("Please enter the full address of the property.");
-    if (!POSTCODE_RE.test(form.postcode.trim())) return fail("Please enter a valid UK postcode, e.g. M1 1AA.");
-    if (!form.consent) return fail("Please tick the box so we can store your details and reply.");
+    if (step < 4) return next();
+    for (const n of [1, 3, 4]) if (!checkStep(n)) { if (n !== 4) goTo(n); return; }
     setStatus("loading");
     setErrorMsg("");
     try {
@@ -246,6 +299,7 @@ const GetQuote = () => {
         setSentTo(form.email.trim());
         setStatus("success");
         setForm(EMPTY);
+        setStep(1);
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
         const data = await res.json().catch(() => ({}));
@@ -306,13 +360,25 @@ const GetQuote = () => {
     );
   };
 
+  const errorBox = (
+    <AnimatePresence>
+      {status === "error" && (
+        <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+          role="alert" className="mx-5 mb-2 flex items-start gap-3 rounded-2xl border border-rose-100 bg-rose-50 p-4 sm:mx-8">
+          <AlertCircle size={20} className="mt-0.5 shrink-0 text-rose-500" />
+          <p className="text-sm font-bold text-rose-700">{errorMsg}</p>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <div className="min-h-screen bg-[#F3F6F4]">
       <Helmet>
         <title>Get a Free Cleaning Quote | Cleaniq Services Manchester</title>
         <meta
           name="description"
-          content="Get a free, no-obligation cleaning quote from Cleaniq Services in Manchester. End of tenancy, deep, Airbnb, office, carpet and oven cleaning — tell us about your property and we'll reply within hours."
+          content="Get a free, no-obligation cleaning quote from Cleaniq Services in Manchester. End of tenancy, deep, Airbnb, office, carpet and oven cleaning — your quote is emailed straight away."
         />
         <link rel="canonical" href="https://www.cleaniqservices.com/get-a-quote" />
         <meta property="og:title" content="Get a Free Cleaning Quote | Cleaniq Services Manchester" />
@@ -335,7 +401,7 @@ const GetQuote = () => {
               Get your free <span className="text-emerald-300">cleaning quote</span>
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-base font-medium leading-relaxed text-white/70 md:text-lg">
-              Tell us about your property in under 2 minutes. Our Manchester team will send your quote within a few hours.
+              Four quick steps. Your quote lands in your inbox straight away — accept it, pick a time, and you're booked.
             </p>
           </motion.div>
           <motion.ul
@@ -347,7 +413,7 @@ const GetQuote = () => {
             {[
               [ShieldCheck, "Fully insured"],
               [BadgeCheck, "Vetted cleaners"],
-              [Clock, "Reply in hours"],
+              [Clock, "Instant quote"],
               [Star, "5-star rated"],
             ].map(([Icon, text]) => (
               <li key={text} className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.07] px-3 py-3 text-xs font-bold text-white/85 backdrop-blur sm:text-sm">
@@ -383,7 +449,7 @@ const GetQuote = () => {
                   ? [
                       "Open the email and check your quote.",
                       "Click “Accept This Quote” and choose the date and time for your cleaner.",
-                      "That's it: your clean is booked and we'll send your payment link.",
+                      "We email you a secure payment link — your clean is confirmed once it's paid.",
                     ]
                   : [
                       "Our team reviews your property details.",
@@ -405,152 +471,221 @@ const GetQuote = () => {
           ) : (
             <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
               className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-              <form onSubmit={handleSubmit} noValidate className="overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-slate-900/10">
-                {/* 1. Service */}
-                <Section n={1} title="What do you need?" hint="Choose the service you'd like a quote for.">
-                  <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
-                    {services.map((name) => {
-                      const Icon = serviceIcon(name);
-                      const on = form.service === name;
-                      return (
-                        <Choice key={name} selected={on} onClick={() => set("service", name)} className="flex min-h-[104px] flex-col justify-between p-3.5 sm:p-4">
-                          <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${on ? "bg-primary text-white" : "bg-primary/10 text-primary"}`}>
-                            <Icon size={20} />
-                          </span>
-                          <span className="mt-3 pr-5 text-[13px] font-black leading-snug text-slate-900 sm:text-sm">{name}</span>
-                        </Choice>
-                      );
-                    })}
-                  </div>
-                </Section>
-
-                {/* 2. Property */}
-                <Section n={2} title="About your property" hint="Roughly is fine — it helps us price it accurately.">
-                  <p className={fieldLabel}>How many hours would you like? *</p>
-                  <div className="mb-5 grid grid-cols-4 gap-2 sm:grid-cols-8">
-                    {HOUR_CHOICES.map((h) => (
-                      <Choice key={h} selected={Number(form.hours) === h} onClick={() => set("hours", h)} className="py-3 text-center">
-                        <span className="text-sm font-black text-slate-900">{h}h</span>
-                      </Choice>
-                    ))}
-                  </div>
-                  <p className={fieldLabel}>Property type</p>
-                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
-                    {PROPERTY_TYPES.map(({ name, icon: Icon }) => (
-                      <Choice key={name} selected={form.property === name} onClick={() => set("property", form.property === name ? "" : name)}
-                        className="flex flex-col items-center gap-2 px-2 py-4">
-                        <Icon size={22} className={form.property === name ? "text-primary" : "text-slate-500"} />
-                        <span className="text-xs font-black text-slate-800 sm:text-[13px]">{name}</span>
-                      </Choice>
-                    ))}
-                  </div>
-                  <div className="mt-5 grid gap-2.5 sm:grid-cols-2 sm:gap-3">
-                    <Stepper label="Bedrooms" icon={BedDouble} value={form.bedrooms} max={8} onChange={(v) => set("bedrooms", v)} />
-                    <Stepper label="Bathrooms" icon={Bath} value={form.bathrooms} max={8} onChange={(v) => set("bathrooms", v)} />
-                    <Stepper label="Living rooms" icon={Sofa} value={form.livingRooms} max={6} onChange={(v) => set("livingRooms", v)} />
-                    <Stepper label="Stairs / landings" icon={Footprints} value={form.stairs} max={6} onChange={(v) => set("stairs", v)} />
-                  </div>
-                </Section>
-
-                {/* 3. Carpets */}
-                <Section n={3} title="Carpet cleaning" hint="Add it to your clean and save.">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Choice selected={form.carpet === CARPET_WITH} onClick={() => set("carpet", form.carpet === CARPET_WITH ? "" : CARPET_WITH)} className="p-4 sm:p-5">
-                      <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-700">Save 60%</span>
-                      <span className="mt-3 block text-base font-black text-slate-900">With carpet cleaning</span>
-                    </Choice>
-                    <Choice selected={form.carpet === CARPET_WITHOUT} onClick={() => set("carpet", form.carpet === CARPET_WITHOUT ? "" : CARPET_WITHOUT)} className="flex items-end p-4 sm:p-5">
-                      <span className="text-base font-black text-slate-900">Without carpet cleaning</span>
-                    </Choice>
-                  </div>
-                  {form.carpet === CARPET_WITH && (
-                    <div className="mt-3 sm:max-w-sm">
-                      <Stepper label="How many carpets?" icon={Layers} value={form.carpets} max={20} onChange={(v) => set("carpets", v)} />
-                    </div>
-                  )}
-                </Section>
-
-                {/* 4. Extras */}
-                <Section n={4} title="Save 20% on additional services" hint="Optional — tick anything you'd like included.">
-                  <div className="grid gap-3">
-                    {extraCard("oven", "Oven Cleaning", Flame, "ovenType", OVEN_TYPES, "Type of oven")}
-                    {extraCard("fridge", "Fridge Cleaning", Refrigerator, "fridgeType", FRIDGE_TYPES, "Type of fridge")}
-                  </div>
-                </Section>
-
-                {/* 5. When */}
-                <Section n={5} title="When would you like it?">
-                  <div className="grid gap-4 sm:grid-cols-[220px_minmax(0,1fr)]">
-                    <label className="block">
-                      <span className={fieldLabel}>Preferred date</span>
-                      <span className="relative block">
-                        <CalendarDays size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input type="date" name="date" min={today} value={form.date} onChange={onChange}
-                          className={`${inputBase} min-h-[52px] appearance-none pl-11`} />
-                      </span>
-                    </label>
-                    <label className="block">
-                      <span className={fieldLabel}>Additional information</span>
-                      <textarea name="notes" rows={3} value={form.notes} onChange={onChange} maxLength={2000}
-                        placeholder="Condition of the property, parking, access, pets…"
-                        className={`${inputBase} resize-none px-4`} />
-                    </label>
-                  </div>
-                </Section>
-
-                {/* 6. Details */}
-                <Section n={6} title="Where should we send your quote?">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <IconInput icon={User} label="Full name *" name="name" value={form.name} onChange={onChange} placeholder="John Smith" autoComplete="name" required />
-                    <IconInput icon={Mail} label="Email address *" type="email" name="email" value={form.email} onChange={onChange} placeholder="you@example.com" autoComplete="email" inputMode="email" required />
-                    <IconInput icon={Phone} label="Phone number" type="tel" name="phone" value={form.phone} onChange={onChange} placeholder="07700 900000" autoComplete="tel" inputMode="tel" />
-                    <div className="sm:col-span-2">
-                      <IconInput icon={House} label="Full address *" name="address" value={form.address} onChange={onChange} placeholder="House number, street, town" autoComplete="street-address" required />
-                    </div>
-                    <IconInput icon={MapPin} label="Post code *" name="postcode" value={form.postcode} onChange={onChange} placeholder="M1 1AA" autoComplete="postal-code" className="uppercase" required />
-                  </div>
-
-                  {/* Hidden from people; only bots fill it in. */}
-                  <input type="text" name="website" value={form.website} onChange={onChange} tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
-
-                  <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl bg-slate-50 p-4">
-                    <input type="checkbox" checked={form.consent} onChange={(e) => set("consent", e.target.checked)}
-                      className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-primary" />
-                    <span className="text-sm font-medium leading-relaxed text-slate-600">
-                      I consent to having this website store my submitted information so they can respond to my enquiry.
-                    </span>
-                  </label>
-
-                  <AnimatePresence>
-                    {status === "error" && (
-                      <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                        role="alert" className="mt-4 flex items-start gap-3 rounded-2xl border border-rose-100 bg-rose-50 p-4">
-                        <AlertCircle size={20} className="mt-0.5 shrink-0 text-rose-500" />
-                        <p className="text-sm font-bold text-rose-700">{errorMsg}</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  {/* Progress (phones and tablets; desktop shows it in the summary) */}
-                  <div className="mt-6 lg:hidden">
-                    <div className="mb-1.5 flex justify-between text-xs font-bold text-slate-500">
-                      <span>{form.service || "No service chosen yet"}</span><span>{progress}%</span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
-                      <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
-                    </div>
-                  </div>
-
-                  <button type="submit" disabled={status === "loading"}
-                    className="group mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-primary/25 transition hover:bg-primary-dark active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:py-5">
-                    {status === "loading"
-                      ? <><Loader2 size={18} className="animate-spin" /> Sending…</>
-                      : <><Send size={18} /> Get my free quote <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" /></>}
-                  </button>
-                  <p className="mt-3 flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-400">
-                    <Lock size={12} /> Your details are only used to reply to your enquiry.
+              <form ref={cardRef} onSubmit={handleSubmit} noValidate className="scroll-mt-28 overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-slate-900/10">
+                {/* Step chips */}
+                <div className="border-b border-slate-100 px-4 py-4 sm:px-8">
+                  <p className="mb-3 text-center text-[11px] font-black uppercase tracking-widest text-slate-400 sm:text-left">
+                    Step {step} of {STEPS.length} — {STEPS[step - 1].label}
                   </p>
-                </Section>
+                  <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+                    {STEPS.map(({ n, label, icon: Icon }) => (
+                      <button key={n} type="button" onClick={() => jump(n)}
+                        className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2.5 text-[11px] font-black transition sm:flex-row sm:gap-2 sm:text-xs ${
+                          step === n ? "bg-primary text-white shadow-lg shadow-primary/25"
+                            : step > n ? "bg-primary/10 text-primary"
+                            : "bg-slate-50 text-slate-400"
+                        }`}>
+                        {step > n ? <CheckCircle2 size={15} /> : <Icon size={15} />}
+                        <span>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-3 h-1 overflow-hidden rounded-full bg-slate-100">
+                    <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${(step / STEPS.length) * 100}%` }} />
+                  </div>
+                </div>
+
+                <AnimatePresence mode="wait">
+                  <motion.div key={step} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.18 }}>
+                    {step === 1 && (
+                      <>
+                        <Section n={1} title="What do you need?" hint="Choose the service you'd like a quote for.">
+                          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
+                            {services.map((name) => {
+                              const Icon = serviceIcon(name);
+                              const on = form.service === name;
+                              return (
+                                <Choice key={name} selected={on} onClick={() => set("service", name)} className="flex min-h-[104px] flex-col justify-between p-3.5 sm:p-4">
+                                  <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${on ? "bg-primary text-white" : "bg-primary/10 text-primary"}`}>
+                                    <Icon size={20} />
+                                  </span>
+                                  <span className="mt-3 pr-5 text-[13px] font-black leading-snug text-slate-900 sm:text-sm">{name}</span>
+                                </Choice>
+                              );
+                            })}
+                          </div>
+                        </Section>
+                        <Section n={2} title="How many hours?" hint="How long you'd like your cleaner for. Prices are per hour.">
+                          <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+                            {HOUR_CHOICES.map((h) => (
+                              <Choice key={h} tick={false} selected={Number(form.hours) === h} onClick={() => set("hours", h)}
+                                className="flex h-14 items-center justify-center">
+                                <span className="text-base font-black text-slate-900">{h}h</span>
+                              </Choice>
+                            ))}
+                          </div>
+                        </Section>
+                        <Section n={3} title="Where is the property?">
+                          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
+                            <IconInput icon={House} label="Full address *" name="address" value={form.address} onChange={onChange} placeholder="House number, street, town" autoComplete="street-address" />
+                            <IconInput icon={MapPin} label="Post code *" name="postcode" value={form.postcode} onChange={onChange} placeholder="M1 1AA" autoComplete="postal-code" className="uppercase" />
+                          </div>
+                          <p className={`${fieldLabel} mt-5`}>Cleaning supplies & equipment *</p>
+                          <div className="grid gap-2.5 sm:grid-cols-2">
+                            {[["Cleaniq", "Cleaniq brings everything"], ["Customer", "I'll provide supplies"]].map(([v, text]) => (
+                              <Choice key={v} selected={form.supplies === v} onClick={() => set("supplies", v)} className="flex items-center gap-3 p-4">
+                                <Supplies size={20} className={form.supplies === v ? "text-primary" : "text-slate-400"} />
+                                <span className="text-sm font-black text-slate-900">{text}</span>
+                              </Choice>
+                            ))}
+                          </div>
+                        </Section>
+                      </>
+                    )}
+
+                    {step === 2 && (
+                      <Section n={2} title="About your property" hint="Count the rooms — leave at – if there are none.">
+                        <p className={fieldLabel}>Property type</p>
+                        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
+                          {PROPERTY_TYPES.map(({ name, icon: Icon }) => (
+                            <Choice key={name} selected={form.property === name} onClick={() => set("property", form.property === name ? "" : name)}
+                              className="flex flex-col items-center gap-2 px-2 py-4">
+                              <Icon size={22} className={form.property === name ? "text-primary" : "text-slate-500"} />
+                              <span className="text-xs font-black text-slate-800 sm:text-[13px]">{name}</span>
+                            </Choice>
+                          ))}
+                        </div>
+                        <div className="mt-5 grid gap-2.5 sm:grid-cols-2 sm:gap-3">
+                          <Stepper label="Bedrooms" icon={BedDouble} value={form.bedrooms} max={8} onChange={(v) => set("bedrooms", v)} />
+                          <Stepper label="Bathrooms" icon={Bath} value={form.bathrooms} max={8} onChange={(v) => set("bathrooms", v)} />
+                          <Stepper label="Kitchens" icon={CookingPot} value={form.kitchens} max={4} onChange={(v) => set("kitchens", v)} />
+                          <Stepper label="Living / reception" icon={Sofa} value={form.livingRooms} max={6} onChange={(v) => set("livingRooms", v)} />
+                          <Stepper label="Utility rooms" icon={WashingMachine} value={form.utilityRooms} max={4} onChange={(v) => set("utilityRooms", v)} />
+                          <Stepper label="Conservatories" icon={Sun} value={form.conservatories} max={4} onChange={(v) => set("conservatories", v)} />
+                          <Stepper label="Cloakrooms" icon={DoorClosed} value={form.cloakrooms} max={4} onChange={(v) => set("cloakrooms", v)} />
+                          <Stepper label="Stairs / landings" icon={Footprints} value={form.stairs} max={6} onChange={(v) => set("stairs", v)} />
+                        </div>
+                        <p className={`${fieldLabel} mt-5`}>Pets at the property?</p>
+                        <div className="grid grid-cols-2 gap-2.5 sm:max-w-sm">
+                          {["No", "Yes"].map((v) => (
+                            <Choice key={v} tick={false} selected={form.hasPet === v} onClick={() => set("hasPet", v)} className="flex items-center justify-center gap-2 py-3.5">
+                              {v === "Yes" && <PawPrint size={16} className="text-primary" />}
+                              <span className="text-sm font-black text-slate-900">{v}</span>
+                            </Choice>
+                          ))}
+                        </div>
+                      </Section>
+                    )}
+
+                    {step === 3 && (
+                      <>
+                        <Section n={1} title="Carpet cleaning" hint="Add it to your clean and save 60%.">
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <Choice selected={form.carpet === CARPET_WITH} onClick={() => set("carpet", form.carpet === CARPET_WITH ? "" : CARPET_WITH)} className="p-4 sm:p-5">
+                              <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-700">Save 60%</span>
+                              <span className="mt-3 block text-base font-black text-slate-900">With carpet cleaning</span>
+                            </Choice>
+                            <Choice selected={form.carpet === CARPET_WITHOUT} onClick={() => set("carpet", form.carpet === CARPET_WITHOUT ? "" : CARPET_WITHOUT)} className="flex items-end p-4 sm:p-5">
+                              <span className="text-base font-black text-slate-900">Without carpet cleaning</span>
+                            </Choice>
+                          </div>
+                          {form.carpet === CARPET_WITH && (
+                            <div className="mt-3 sm:max-w-sm">
+                              <Stepper label="How many carpets?" icon={Layers} value={form.carpets} max={20} onChange={(v) => set("carpets", v)} />
+                            </div>
+                          )}
+                        </Section>
+                        <Section n={2} title="Save 20% on additional services" hint="Optional — tick anything you'd like included.">
+                          <div className="grid gap-3">
+                            {extraCard("oven", "Oven Cleaning", Flame, "ovenType", OVEN_TYPES, "Type of oven")}
+                            {extraCard("fridge", "Fridge Cleaning", Refrigerator, "fridgeType", FRIDGE_TYPES, "Type of fridge")}
+                          </div>
+                        </Section>
+                      </>
+                    )}
+
+                    {step === 4 && (
+                      <>
+                        <Section n={1} title="When would you like us?" hint="You'll confirm the exact date and time when you accept your quote.">
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <label className="block">
+                              <span className={fieldLabel}>Preferred date</span>
+                              <span className="relative block">
+                                <CalendarDays size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <input type="date" name="date" min={tomorrow} value={form.date} onChange={onChange}
+                                  className={`${inputBase} min-h-[52px] appearance-none pl-11`} />
+                              </span>
+                            </label>
+                            <label className="block">
+                              <span className={fieldLabel}>Preferred arrival time</span>
+                              <span className="relative block">
+                                <Clock size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <select name="time" value={form.time} onChange={onChange} className={`${inputBase} min-h-[52px] appearance-none pl-11`}>
+                                  <option value="">Any time</option>
+                                  {ARRIVAL_TIMES.map((t) => <option key={t} value={t}>{ampm(t)}</option>)}
+                                </select>
+                              </span>
+                            </label>
+                          </div>
+                        </Section>
+                        <Section n={2} title="Where should we send your quote?">
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <IconInput icon={User} label="Full name *" name="name" value={form.name} onChange={onChange} placeholder="John Smith" autoComplete="name" />
+                            <IconInput icon={Mail} label="Email address *" type="email" name="email" value={form.email} onChange={onChange} placeholder="you@example.com" autoComplete="email" inputMode="email" />
+                            <IconInput icon={Phone} label="Phone number" type="tel" name="phone" value={form.phone} onChange={onChange} placeholder="07700 900000" autoComplete="tel" inputMode="tel" />
+                          </div>
+                          <label className="mt-4 block">
+                            <span className={fieldLabel}>Notes (optional)</span>
+                            <textarea name="notes" rows={3} value={form.notes} onChange={onChange} maxLength={2000}
+                              placeholder="Access instructions, parking, special requirements…"
+                              className={`${inputBase} resize-none px-4`} />
+                          </label>
+
+                          {/* Hidden from people; only bots fill it in. */}
+                          <input type="text" name="website" value={form.website} onChange={onChange} tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+
+                          <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl bg-slate-50 p-4">
+                            <input type="checkbox" checked={form.consent} onChange={(e) => set("consent", e.target.checked)}
+                              className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-primary" />
+                            <span className="text-sm font-medium leading-relaxed text-slate-600">
+                              I consent to having this website store my submitted information so they can respond to my enquiry.
+                            </span>
+                          </label>
+                        </Section>
+                      </>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+
+                {errorBox}
+
+                {/* Back / Next */}
+                <div className="flex gap-3 border-t border-slate-100 px-5 py-5 sm:px-8">
+                  {step > 1 && (
+                    <button type="button" onClick={back}
+                      className="flex items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 px-5 py-4 text-sm font-black text-slate-600 transition hover:bg-slate-50 sm:px-7">
+                      <ArrowLeft size={17} /> Back
+                    </button>
+                  )}
+                  {step < STEPS.length ? (
+                    <button type="button" onClick={next}
+                      className="group flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-primary/25 transition hover:bg-primary-dark active:scale-[0.99]">
+                      Next: {STEPS[step].label} <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                    </button>
+                  ) : (
+                    <button type="submit" disabled={status === "loading"}
+                      className="group flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-primary/25 transition hover:bg-primary-dark active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70">
+                      {status === "loading"
+                        ? <><Loader2 size={18} className="animate-spin" /> Sending…</>
+                        : <><Send size={18} /> Get my quote</>}
+                    </button>
+                  )}
+                </div>
+                {step === STEPS.length && (
+                  <p className="-mt-2 flex items-center justify-center gap-1.5 px-5 pb-5 text-xs font-semibold text-slate-400">
+                    <Lock size={12} /> Your details are only used for your quote and booking.
+                  </p>
+                )}
               </form>
 
               {/* Summary (desktop) */}
@@ -559,13 +694,12 @@ const GetQuote = () => {
                   <p className="text-[11px] font-black uppercase tracking-widest text-emerald-300">Your request</p>
                   <h3 className="mt-1 text-xl font-black tracking-tight">{form.service || "Choose a service"}</h3>
                   <div className="mt-4 divide-y divide-white/10 border-y border-white/10">
-                    <SummaryRow label="Property" value={form.property} />
-                    <SummaryRow label="Rooms" value={rooms} />
                     <SummaryRow label="Hours" value={form.hours ? `${form.hours} hours` : ""} />
-                    <SummaryRow label="Carpets" value={form.carpet === CARPET_WITH ? (form.carpets ? `${form.carpets} carpet${form.carpets === 1 ? "" : "s"}` : "Yes") : form.carpet ? "No" : ""} />
-                    <SummaryRow label="Extras" value={extrasText} />
-                    <SummaryRow label="Date" value={prettyDate} />
                     <SummaryRow label="Postcode" value={form.postcode.toUpperCase()} />
+                    <SummaryRow label="Supplies" value={form.supplies === "Cleaniq" ? "Cleaniq brings" : form.supplies === "Customer" ? "Your own" : ""} />
+                    <SummaryRow label="Property" value={[form.property, rooms].filter(Boolean).join(" · ")} />
+                    <SummaryRow label="Add-ons" value={extrasText} />
+                    <SummaryRow label="When" value={[prettyDate, form.time && ampm(form.time)].filter(Boolean).join(", ")} />
                   </div>
                   <div className="mt-5">
                     <div className="mb-1.5 flex justify-between text-xs font-bold text-white/60">

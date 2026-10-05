@@ -49,8 +49,21 @@ const fmtDate = (d) => {
     ? ""
     : dt.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 };
-const timeLabel = (s = {}) =>
-  [s.timeSlot, s.preferredTime && `(${s.preferredTime})`].filter(Boolean).join(" ");
+// "08:30" → "8:30am", "14:00" → "2pm"; anything else (e.g. "Morning (8am-12pm)") is kept as it is.
+const ampm = (t) => {
+  const m = String(t || "").trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return String(t || "").trim();
+  const h = Number(m[1]);
+  return `${h % 12 || 12}${m[2] !== "00" ? `:${m[2]}` : ""}${h < 12 ? "am" : "pm"}`;
+};
+// One readable time: the arrival time when there is one ("8:30am"), not "08:30 (08:30)".
+const timeLabel = (s = {}) => {
+  const slot = s.timeSlot && s.timeSlot !== "Flexible" ? ampm(s.timeSlot) : "";
+  const exact = s.preferredTime ? ampm(s.preferredTime) : "";
+  if (!exact) return slot || (s.timeSlot === "Flexible" ? "Flexible" : "");
+  if (!slot || slot === exact) return exact;
+  return `${slot}, arriving ${exact}`;
+};
 const fullAddress = (d = {}) => {
   const a = d.address || "";
   const pc = d.postcode || "";
@@ -620,7 +633,7 @@ const redesigned = {
         ${kv([
           ["Service", booking.service],
           ["Date", fmtDate(s.date)],
-          ["Time slot", s.timeSlot],
+          ["Time slot", timeLabel(s)],
           ["Duration", d.duration ? `${d.duration} hours` : ""],
           ["Location / area", area],
         ])}
@@ -648,7 +661,7 @@ const redesigned = {
         ${kv([
           ["Service", booking.service],
           ["Date", fmtDate(s.date)],
-          ["Time slot", s.timeSlot || "N/A"],
+          ["Time slot", timeLabel(s) || "N/A"],
           ["Your hours", `${booking.workerDuration || d.duration || "N/A"} hours`],
           ["Customer", [c.firstName, c.lastName].filter(Boolean).join(" ")],
           ["Address", d.address || "See app for details"],

@@ -1003,6 +1003,7 @@ module.exports = {
   sendAiQuote,
   quoteTaxSettings,
   loadUkServices,
+  SUPPLIES_LINE,
   QUOTE_DEFAULTS,
   saveEnquiry,
   describeToolResult,

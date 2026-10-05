@@ -134,6 +134,13 @@ function readQuoteRequest(body = {}) {
     bedrooms: count(body.bedrooms, 8),
     bathrooms: count(body.bathrooms, 8),
     livingRooms: count(body.livingRooms, 6),
+    kitchens: count(body.kitchens, 4),
+    utilityRooms: count(body.utilityRooms, 4),
+    conservatories: count(body.conservatories, 4),
+    cloakrooms: count(body.cloakrooms, 4),
+    hasPet: ["Yes", "No"].includes(body.hasPet) ? body.hasPet : "",
+    supplies: ["Cleaniq", "Customer"].includes(body.supplies) ? body.supplies : "",
+    time: /^([01]\d|20):(00|30)$/.test(String(body.time || "")) && String(body.time) >= "08:00" && String(body.time) <= "20:00" ? String(body.time) : "",
     stairs: count(body.stairs, 6),
     property: clean(body.property, 30),
     date: clean(body.date, 10),
@@ -148,6 +155,7 @@ function readQuoteRequest(body = {}) {
   if (!q.name) return { error: "Please enter your full name." };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(q.email)) return { error: "Please enter a valid email address." };
   if (q.address.length < 5) return { error: "Please enter the full address of the property." };
+  if (!q.supplies) return { error: "Please choose who provides the cleaning supplies." };
   if (!/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/.test(q.postcode)) return { error: "Please enter a valid UK postcode." };
   // Hours the customer wants, in half hours (prices are hourly).
   if (!(q.hours >= 1 && q.hours <= 12 && Number.isInteger(q.hours * 2))) return { error: "Please choose how many hours you'd like." };
@@ -188,8 +196,15 @@ function quoteRows(q) {
     ["Bedrooms", q.bedrooms],
     ["Bathrooms", q.bathrooms],
     ["Living / reception rooms", q.livingRooms],
+    ["Kitchens", q.kitchens],
+    ["Utility rooms", q.utilityRooms],
+    ["Conservatories", q.conservatories],
+    ["Cloakrooms", q.cloakrooms],
+    ["Pets", q.hasPet],
+    ["Cleaning supplies", q.supplies === "Cleaniq" ? "Brought by Cleaniq" : q.supplies === "Customer" ? "Customer's own" : ""],
     ["Stairs / landings", q.stairs],
     ["Preferred date", ukDate],
+    ["Preferred arrival time", q.time],
     ["Carpet cleaning", q.carpets ? `${q.carpet} — ${q.carpets} carpet${q.carpets === 1 ? "" : "s"}` : q.carpet],
     ["Additional services (20% off)", q.extras.join(", ")],
     ["Additional information", q.notes],
