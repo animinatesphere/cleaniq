@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
     if (booking.workerRate == null) booking.workerRate = await workerRateFor(booking.service);
 
     // Regular clean (Wecasa-style subscription): first visit paid now, card saved, later visits
-    // charged when the cleaner arrives. The client can't mark it paid; Stripe is checked below.
+    // charged 48 hours before each clean. The client can't mark it paid; Stripe is checked below.
     const wantsSubscription =
       req.body.subscribe === true && subscriptions.isSubscriptionFrequency(req.body.details?.frequency);
     const paidOnWebsite = wantsSubscription && Boolean(req.body.payment?.stripePaymentIntentId);
@@ -155,7 +155,7 @@ router.post('/', async (req, res) => {
               currency: (newBooking.payment?.currency || 'GBP').toLowerCase(),
               product_data: {
                 name: `Cleaniq - ${newBooking.service} (first clean)`,
-                description: `${subscription.frequency} regular clean ${subscription.subscriptionRef}. Later cleans £${subscription.pricePerVisit.toFixed(2)} each, charged when your cleaner arrives.`,
+                description: `${subscription.frequency} regular clean ${subscription.subscriptionRef}. Later cleans £${subscription.pricePerVisit.toFixed(2)} each, charged 48 hours before each clean.`,
               },
               unit_amount: Math.round(newBooking.payment.amount * 100),
             },
@@ -336,6 +336,23 @@ router.get('/', verifyCustomer, async (req, res) => {
   }
 });
 
+// GET /api/customer-bookings/:id/cancel-preview — what cancelling would refund (regular-clean visits
+// are charged 48h ahead, so a late cancellation keeps a fee from the refund).
+router.get('/:id/cancel-preview', verifyCustomer, async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id).lean();
+    if (!booking) return res.status(404).json({ message: 'Booking not found.' });
+    if ((booking.customer?.email || '').toLowerCase() !== req.customer.email.toLowerCase()) {
+      return res.status(403).json({ message: 'You can only cancel your own bookings.' });
+    }
+    if (!booking.meta?.subscriptionId) return res.json({ regular: false });
+    const q = require('../utils/subscriptions').visitCancellationQuote(booking);
+    res.json({ regular: true, paid: q.paid, fee: q.fee, refund: q.refund, rule: q.rule });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // PUT /api/customer-bookings/:id/cancel — cancel a booking (only if future + Confirmed)
 router.put('/:id/cancel', verifyCustomer, async (req, res) => {
   try {
@@ -352,8 +369,14 @@ router.put('/:id/cancel', verifyCustomer, async (req, res) => {
       return res.status(400).json({ message: `Booking cannot be cancelled (current status: ${booking.status}).` });
     }
 
+    // A visit of a regular clean: refunded under the late-notice rule (see utils/subscriptions.js).
+    let visitResult = null;
+    if (booking.meta?.subscriptionId) {
+      visitResult = await require('../utils/subscriptions').cancelVisitByCustomer(booking);
+    }
+
     // Trigger Stripe Refund if payment transaction exists
-    if (booking.payment && booking.payment.transactionId && !booking.payment.transactionId.startsWith('tok_bypass')) {
+    if (!visitResult && booking.payment && booking.payment.transactionId && !booking.payment.transactionId.startsWith('tok_bypass')) {
       try {
         await stripe.refunds.create({
           payment_intent: booking.payment.transactionId,
@@ -365,6 +388,7 @@ router.put('/:id/cancel', verifyCustomer, async (req, res) => {
       }
     }
 
+    if (visitResult) booking.set(await Booking.findById(booking._id).lean()); // keep refund/payment updates
     booking.status = 'Cancelled';
     if (booking.payment) booking.payment.chargeOnArrival = false; // regular-clean visit: never charge it
     await booking.save();
@@ -372,6 +396,15 @@ router.put('/:id/cancel', verifyCustomer, async (req, res) => {
     // SMS: booking cancelled (fire-and-forget)
     setImmediate(() => sms.triggerBookingCancelled(booking).catch(e => console.error("SMS cancel trigger error:", e.message)));
 
+    if (visitResult) {
+      const money = (n) => `£${Number(n).toFixed(2)}`;
+      const message = !visitResult.paid
+        ? 'This clean has been cancelled. You have not been charged.'
+        : visitResult.fee
+          ? `This clean has been cancelled. ${money(visitResult.refund)} will be refunded to your card (${money(visitResult.fee)} kept for ${visitResult.rule}).`
+          : `This clean has been cancelled and ${money(visitResult.refund)} will be refunded to your card.`;
+      return res.json({ message, booking, refund: visitResult.refund, fee: visitResult.fee });
+    }
     res.json({ message: 'Booking cancelled successfully and payment refunded.', booking });
   } catch (err) {
     res.status(500).json({ message: err.message });

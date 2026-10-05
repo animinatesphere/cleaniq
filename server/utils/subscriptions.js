@@ -2,9 +2,12 @@
 //  1. The customer books a weekly/fortnightly/monthly clean and pays for the FIRST visit at once;
 //     Stripe saves the card for later ("off-session") charges.
 //  2. Later visits are Bookings created a few weeks ahead on a rolling basis (topUpVisits).
-//  3. Each later visit is charged to the saved card when the cleaner arrives (chargeVisitOnArrival).
-//     If that fails the clean still goes ahead: the customer is emailed a payment link and admin alerted.
-//  4. Customer or admin can pause, resume or cancel; future visits are cancelled/recreated.
+//  3. Each later visit is charged to the saved card 48 hours before the clean (processDueCharges).
+//     If that fails: the customer is emailed a payment link and admin alerted; the card is tried
+//     again 24 hours before; still unpaid 12 hours before → that clean is cancelled (the regular
+//     clean carries on). Arrival still charges anything missed (chargeVisitOnArrival) as a safety net.
+//  4. Customer or admin can pause, resume or cancel; future visits are cancelled/recreated, and
+//     visits already paid are refunded (minus any late-notice fee).
 const Booking = require("../models/Booking");
 const Service = require("../models/Service");
 const Subscription = require("../models/Subscription");
@@ -47,6 +50,12 @@ const startOfTomorrow = (now = new Date()) => {
   return d;
 };
 const DAY_MS = 86400000;
+const HOUR_MS = 3600000;
+// When a visit is charged, retried and (if still unpaid) cancelled, in hours before the clean.
+const CHARGE_BEFORE_H = 48;
+const RETRY_BEFORE_H = 24;
+const CANCEL_UNPAID_BEFORE_H = 12;
+const MIN_RETRY_GAP_H = 6;
 const pence = (gbp) => Math.round(Number(gbp || 0) * 100);
 const ukDate = (d) =>
   new Date(d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/London" });
@@ -228,14 +237,13 @@ function applyPayment(booking, fields) {
   for (const [k, v] of Object.entries(fields)) booking.payment[k] = v;
 }
 
-// Charges a regular-clean visit to the saved card. Called when the cleaner arrives.
-// Never throws: the clean goes ahead either way.
-async function chargeVisitOnArrival(booking) {
+const isPaidVisit = (b) => ["Completed", "Paid"].includes(b.payment?.status);
+
+// Charges a visit to the saved card. Returns { charged, paymentIntentId } or { failed, reason }.
+// The idempotency key makes a repeated call return the same Stripe result instead of charging twice.
+async function chargeSavedCard(booking, idempotencyKey) {
   const p = booking.payment || {};
-  if (!p.chargeOnArrival || ["Completed", "Paid"].includes(p.status)) return { skipped: true };
-  if (!p.stripeCustomerId || !p.stripePaymentMethodId || !(p.amount > 0)) {
-    return markVisitPaymentFailed(booking, "No saved card on file");
-  }
+  if (!p.stripeCustomerId || !p.stripePaymentMethodId || !(p.amount > 0)) return { failed: true, reason: "No saved card on file" };
   try {
     const pi = await stripe().paymentIntents.create(
       {
@@ -248,26 +256,61 @@ async function chargeVisitOnArrival(booking) {
         description: `Cleaniq ${booking.service} – ${booking.bookingId}`,
         metadata: { bookingId: String(booking._id), bookingRef: booking.bookingId, subscriptionRef: booking.meta?.subscriptionRef || "", company: "Cleaniq Services" },
       },
-      { idempotencyKey: `visit-charge-${booking._id}` },
+      { idempotencyKey },
     );
-    if (pi.status !== "succeeded") return markVisitPaymentFailed(booking, `Payment ${pi.status}`);
-    const paid = { status: "Completed", capturedAt: new Date(), stripePaymentIntentId: pi.id };
-    await Booking.updateOne(
-      { _id: booking._id },
-      { $set: { "payment.status": paid.status, "payment.capturedAt": paid.capturedAt, "payment.stripePaymentIntentId": pi.id } },
-    );
-    applyPayment(booking, paid);
-    console.log(`[subscriptions] charged £${p.amount} for ${booking.bookingId} on arrival`);
+    if (pi.status !== "succeeded") return { failed: true, reason: `Payment ${pi.status}` };
     return { charged: true, paymentIntentId: pi.id };
   } catch (err) {
-    const reason = err.code === "authentication_required" ? "The bank asked the customer to approve the payment" : err.message;
-    return markVisitPaymentFailed(booking, reason);
+    return { failed: true, reason: err.code === "authentication_required" ? "The bank asked the customer to approve the payment" : err.message };
   }
 }
 
-async function markVisitPaymentFailed(booking, reason) {
+async function markVisitPaid(booking, paymentIntentId, note) {
+  const paid = { status: "Completed", capturedAt: new Date(), stripePaymentIntentId: paymentIntentId, failureReason: "" };
+  await Booking.updateOne(
+    { _id: booking._id },
+    { $set: { "payment.status": paid.status, "payment.capturedAt": paid.capturedAt, "payment.stripePaymentIntentId": paymentIntentId, "payment.failureReason": "" } },
+  );
+  applyPayment(booking, paid);
+  await expirePaymentLink(booking);
+  console.log(`[subscriptions] charged £${booking.payment?.amount} for ${booking.bookingId} ${note}`);
+  return { charged: true, paymentIntentId };
+}
+
+// Charges a regular-clean visit that wasn't paid in advance (safety net). Called when the cleaner
+// arrives. Never throws: the clean goes ahead either way.
+async function chargeVisitOnArrival(booking) {
+  const p = booking.payment || {};
+  if (!p.chargeOnArrival || ["Completed", "Paid"].includes(p.status)) return { skipped: true };
+  const r = await chargeSavedCard(booking, `visit-charge-${booking._id}`);
+  if (r.charged) return markVisitPaid(booking, r.paymentIntentId, "on arrival");
+  return markVisitPaymentFailed(booking, r.reason);
+}
+
+// A payment link we sent is no longer needed (paid another way, or the clean was cancelled).
+async function expirePaymentLink(booking) {
+  const id = booking.meta?.paymentLinkSessionId;
+  if (!id) return;
+  try {
+    await stripe().checkout.sessions.expire(id);
+  } catch (e) {
+    // Already paid/expired: nothing to do.
+  }
+  await Booking.updateOne({ _id: booking._id }, { $unset: { "meta.paymentLinkSessionId": "" } });
+}
+
+const visitWhen = (booking) => {
+  const start = visitStart(booking);
+  const time = start ? start.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }) : "";
+  return `${ukDate(booking.schedule?.date)}${time ? ` at ${time}` : ""}`;
+};
+
+// stage: "advance" (48h before), "retry" (24h before) or "arrival" (cleaner arrived, not paid).
+async function markVisitPaymentFailed(booking, reason, { stage = "arrival" } = {}) {
   const p = booking.payment || {};
   let url = "";
+  await expirePaymentLink(booking); // one live link at a time
+  let sessionId = "";
   try {
     const session = await stripe().checkout.sessions.create({
       mode: "payment",
@@ -289,45 +332,185 @@ async function markVisitPaymentFailed(booking, reason) {
       cancel_url: `${FRONTEND()}/`,
     });
     url = session.url || "";
+    sessionId = session.id || "";
   } catch (e) {
     console.error(`[subscriptions] couldn't create payment link for ${booking.bookingId}:`, e.message);
   }
   const failed = { status: "Failed", failedAt: new Date(), failureReason: reason, paymentLinkUrl: url };
   await Booking.updateOne(
     { _id: booking._id },
-    { $set: { "payment.status": failed.status, "payment.failedAt": failed.failedAt, "payment.failureReason": reason, "payment.paymentLinkUrl": url } },
+    {
+      $set: {
+        "payment.status": failed.status, "payment.failedAt": failed.failedAt, "payment.failureReason": reason, "payment.paymentLinkUrl": url,
+        ...(sessionId ? { "meta.paymentLinkSessionId": sessionId } : {}),
+      },
+    },
   );
   applyPayment(booking, failed);
-  console.warn(`[subscriptions] charge failed for ${booking.bookingId}: ${reason}`);
+  if (sessionId) booking.meta = { ...(booking.meta || {}), paymentLinkSessionId: sessionId };
+  console.warn(`[subscriptions] charge failed (${stage}) for ${booking.bookingId}: ${reason}`);
   const { sendEmail } = require("./emailService");
   const amount = `£${Number(p.amount || 0).toFixed(2)}`;
+  const when = visitWhen(booking);
+  const name = booking.customer?.firstName || "there";
+  const button = `<p><a href="${url}" style="display:inline-block;background:#0F6B4C;color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:bold">Pay ${amount} now</a></p>`;
+  const footer = `<p style="color:#64748b">The card you pay with will be used for your future cleans. Questions? Call or WhatsApp +44 7846 726428.</p>`;
+  const message = {
+    advance: {
+      subject: `Action needed: payment for your clean on ${ukDate(booking.schedule?.date)} – ${booking.bookingId}`,
+      title: "We couldn't take payment for your next clean",
+      body: `<p>We tried to charge your saved card ${amount} for your regular ${booking.service} on <strong>${when}</strong>, but the payment didn't go through.</p>
+        <p>Please pay using the button below. We'll try your card again 24 hours before the clean. If it's still unpaid 12 hours before, this clean will be cancelled (your regular clean carries on as normal).</p>`,
+      push: [`Payment needed for your clean on ${ukDate(booking.schedule?.date)}`, `We couldn't charge your saved card (${amount}). Check your email for a link to pay.`],
+      admin: "failed 48 hours before the clean",
+    },
+    retry: {
+      subject: `Reminder: payment still needed for your clean on ${ukDate(booking.schedule?.date)} – ${booking.bookingId}`,
+      title: "Your next clean is still unpaid",
+      body: `<p>We tried your saved card again for your regular ${booking.service} on <strong>${when}</strong> (${amount}), but it didn't go through.</p>
+        <p><strong>Please pay at least 12 hours before the clean</strong>, otherwise this clean will be cancelled. Your regular clean carries on as normal.</p>`,
+      push: [`Last reminder: pay for your clean on ${ukDate(booking.schedule?.date)}`, `Please pay ${amount} at least 12 hours before, or this clean will be cancelled.`],
+      admin: "failed again 24 hours before the clean (it will be cancelled 12 hours before if still unpaid)",
+    },
+    arrival: {
+      subject: `Payment needed for today's clean – ${booking.bookingId}`,
+      title: "We couldn't take today's payment",
+      body: `<p>Your cleaner has arrived for your regular ${booking.service}, but we couldn't charge your saved card (${amount}).</p>`,
+      push: ["Payment needed for today's clean", `We couldn't charge your saved card (${amount}). Check your email for a link to pay.`],
+      admin: "failed when the cleaner arrived",
+    },
+  }[stage];
   if (booking.customer?.email && url) {
     sendEmail({
       to: booking.customer.email,
-      subject: `Payment needed for today's clean – ${booking.bookingId}`,
-      html: `<div style="font-family:sans-serif;max-width:560px"><h2 style="color:#0F6B4C">We couldn't take today's payment</h2>
-        <p>Hi ${booking.customer.firstName || "there"},</p>
-        <p>Your cleaner has arrived for your regular ${booking.service}, but we couldn't charge your saved card (${amount}).</p>
-        <p><a href="${url}" style="display:inline-block;background:#0F6B4C;color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:bold">Pay ${amount} now</a></p>
-        <p style="color:#64748b">The card you pay with will be used for your future cleans. Questions? Call or WhatsApp +44 7846 726428.</p></div>`,
+      subject: message.subject,
+      html: `<div style="font-family:sans-serif;max-width:560px"><h2 style="color:#0F6B4C">${message.title}</h2>
+        <p>Hi ${name},</p>${message.body}${button}${footer}</div>`,
     }).catch(() => {});
   }
   if (url) {
-    require("./pushNotifications").pushToBookingCustomer(booking, "Payment needed for today's clean",
-      `We couldn't charge your saved card (${amount}). Check your email for a link to pay.`, { type: "payment" }).catch(() => {});
+    require("./pushNotifications").pushToBookingCustomer(booking, message.push[0], message.push[1], { type: "payment" }).catch(() => {});
   }
   sendEmail({
     to: ADMIN_EMAIL(),
     subject: `⚠️ Regular clean payment failed – ${booking.bookingId}`,
-    html: `<p>The automatic charge of ${amount} for ${booking.bookingId} (${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}, ${booking.customer?.email || ""}) failed when the cleaner arrived.</p><p>Reason: ${reason}</p><p>${url ? `The customer was emailed a payment link: ${url}` : "No payment link could be created: please contact the customer."}</p>`,
+    html: `<p>The automatic charge of ${amount} for ${booking.bookingId} on ${when} (${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}, ${booking.customer?.email || ""}) ${message.admin}.</p><p>Reason: ${reason}</p><p>${url ? `The customer was emailed a payment link: ${url}` : "No payment link could be created: please contact the customer."}</p>`,
   }).catch(() => {});
   return { failed: true, reason, paymentLinkUrl: url };
+}
+
+// Receipt for an advance charge (push + short email).
+function sendChargeReceipt(booking) {
+  const amount = `£${Number(booking.payment?.amount || 0).toFixed(2)}`;
+  const when = visitWhen(booking);
+  require("./pushNotifications").pushToBookingCustomer(booking, "Payment taken for your next clean",
+    `${amount} for your ${booking.service} on ${when}.`, { type: "payment" }).catch(() => {});
+  if (!booking.customer?.email) return;
+  const { sendEmail } = require("./emailService");
+  sendEmail({
+    to: booking.customer.email,
+    subject: `Payment received for your clean on ${ukDate(booking.schedule?.date)} – ${booking.bookingId}`,
+    html: `<div style="font-family:sans-serif;max-width:560px"><h2 style="color:#0F6B4C">Payment received</h2>
+      <p>Hi ${booking.customer.firstName || "there"},</p>
+      <p>We've taken <strong>${amount}</strong> from your saved card for your regular ${booking.service} on <strong>${when}</strong>.</p>
+      <p style="color:#64748b">Need to change or cancel? Do it from your account or call +44 7846 726428. With 24 hours' notice or more you get a full refund.<br>Reference: ${booking.bookingId}</p></div>`,
+  }).catch(() => {});
+}
+
+// Unpaid 12 hours before the clean: cancel that one visit. The regular clean carries on.
+async function cancelUnpaidVisit(booking) {
+  await expirePaymentLink(booking);
+  await Booking.updateOne(
+    { _id: booking._id },
+    { $set: { status: "Cancelled", "payment.chargeOnArrival": false, "meta.cancelledReason": "Not paid 12 hours before the clean" } },
+  );
+  const when = visitWhen(booking);
+  const amount = `£${Number(booking.payment?.amount || 0).toFixed(2)}`;
+  if (booking.assignedWorker) {
+    const message = `${booking.service} on ${when} (${booking.bookingId}) was cancelled.`;
+    await Notification.create({ workerId: booking.assignedWorker, title: "Job cancelled", message, type: "job", bookingId: booking.bookingId }).catch(() => {});
+    require("./pushNotifications").sendPushToUser("worker", booking.assignedWorker, "Job cancelled", message, { type: "job_cancelled" }).catch(() => {});
+  }
+  const { sendEmail } = require("./emailService");
+  if (booking.customer?.email) {
+    sendEmail({
+      to: booking.customer.email,
+      subject: `Your clean on ${ukDate(booking.schedule?.date)} has been cancelled – ${booking.bookingId}`,
+      html: `<div style="font-family:sans-serif;max-width:560px"><h2 style="color:#0F6B4C">This clean has been cancelled</h2>
+        <p>Hi ${booking.customer.firstName || "there"},</p>
+        <p>We couldn't take payment (${amount}) for your regular ${booking.service} on <strong>${when}</strong>, so this clean has been cancelled. You haven't been charged.</p>
+        <p>Your regular clean carries on as normal. To avoid this next time, please update your card by paying for your next clean from your account, or call us on +44 7846 726428.</p></div>`,
+    }).catch(() => {});
+  }
+  require("./pushNotifications").pushToBookingCustomer(booking, "Clean cancelled: payment not received",
+    `Your clean on ${when} was cancelled because we couldn't take payment. Your regular clean carries on.`, { type: "payment" }).catch(() => {});
+  sendEmail({
+    to: ADMIN_EMAIL(),
+    subject: `Regular clean visit cancelled (unpaid) – ${booking.bookingId}`,
+    html: `<p>${booking.bookingId} on ${when} (${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}, ${booking.customer?.email || ""}) was cancelled automatically: still unpaid 12 hours before the clean.${booking.assignedWorker ? " The cleaner has been told." : ""}</p>`,
+  }).catch(() => {});
+  console.warn(`[subscriptions] ${booking.bookingId} cancelled: unpaid 12h before`);
+}
+
+// Runs every 15 minutes: charges visits 48h ahead, retries failed ones 24h ahead, and cancels
+// visits still unpaid 12h ahead.
+async function processDueCharges(now = new Date()) {
+  const visits = await Booking.find({
+    "meta.subscriptionId": { $exists: true },
+    "payment.chargeOnArrival": true,
+    "payment.status": { $in: ["Pending", "Failed"] },
+    status: { $in: ["Pending", "Confirmed", "Assigned", "Accepted"] },
+    "schedule.date": { $gte: new Date(now.getTime() - DAY_MS), $lte: new Date(now.getTime() + 4 * DAY_MS) },
+  });
+  const done = { charged: 0, failed: 0, cancelled: 0 };
+  for (const visit of visits) {
+    try {
+      const start = visitStart(visit);
+      const hours = start ? (start - now) / HOUR_MS : NaN;
+      if (!(hours > 0)) continue; // started or past: arrival handles anything missed
+      const meta = visit.meta || {};
+      const attempts = Number(meta.chargeAttempts || 0);
+      const sinceLast = meta.lastChargeAttemptAt ? (now - new Date(meta.lastChargeAttemptAt)) / HOUR_MS : Infinity;
+
+      if (visit.payment.status === "Failed") {
+        // Cancel only if the customer had real time to pay (the first try was 12h+ before).
+        if (hours <= CANCEL_UNPAID_BEFORE_H) {
+          if (meta.canAutoCancel) { await cancelUnpaidVisit(visit); done.cancelled++; }
+          continue;
+        }
+        if (hours > RETRY_BEFORE_H || attempts >= 2 || sinceLast < MIN_RETRY_GAP_H) continue;
+      } else if (hours > CHARGE_BEFORE_H) {
+        continue;
+      }
+
+      const attempt = attempts + 1;
+      await Booking.updateOne(
+        { _id: visit._id },
+        { $set: { "meta.chargeAttempts": attempt, "meta.lastChargeAttemptAt": now, ...(attempt === 1 ? { "meta.canAutoCancel": hours > CANCEL_UNPAID_BEFORE_H } : {}) } },
+      );
+      visit.meta = { ...meta, chargeAttempts: attempt, lastChargeAttemptAt: now, ...(attempt === 1 ? { canAutoCancel: hours > CANCEL_UNPAID_BEFORE_H } : {}) };
+      const key = attempt === 1 ? `visit-charge-${visit._id}` : `visit-charge-${visit._id}-${attempt}`;
+      const r = await chargeSavedCard(visit, key);
+      if (r.charged) {
+        await markVisitPaid(visit, r.paymentIntentId, `${Math.round(hours)}h before the clean`);
+        sendChargeReceipt(visit);
+        done.charged++;
+      } else {
+        await markVisitPaymentFailed(visit, r.reason, { stage: attempt === 1 ? "advance" : "retry" });
+        done.failed++;
+      }
+    } catch (e) {
+      console.error(`[subscriptions] advance charge error for ${visit.bookingId}:`, e.message);
+    }
+  }
+  if (done.charged || done.failed || done.cancelled) console.log(`[subscriptions] advance charges: ${JSON.stringify(done)}`);
+  return done;
 }
 
 const visitStart = (b) => buildBookingDateTime(b.schedule?.date, b.schedule?.timeSlot, b.schedule?.preferredTime);
 const CANCELLABLE_STATUSES = ["Pending", "Confirmed", "Assigned"];
 
-// Visits that haven't started or been paid yet, soonest first.
+// Visits that haven't started yet (paid in advance or not), soonest first.
 async function upcomingVisits(sub, now = new Date()) {
   const dayStart = new Date(now);
   dayStart.setHours(0, 0, 0, 0);
@@ -335,7 +518,6 @@ async function upcomingVisits(sub, now = new Date()) {
     "meta.subscriptionId": sub._id,
     "schedule.date": { $gte: new Date(dayStart.getTime() - DAY_MS) },
     status: { $in: CANCELLABLE_STATUSES },
-    "payment.status": { $nin: ["Completed", "Paid"] },
   }).lean();
   return visits.filter((v) => visitStart(v) > now).sort((a, b) => visitStart(a) - visitStart(b));
 }
@@ -355,12 +537,45 @@ async function cancellationQuote(sub, now = new Date()) {
   const [next] = await upcomingVisits(sub, now);
   if (!next) return { fee: 0 };
   const { fee, hours, rule } = cancellationFeeFor(next, now);
+  const paid = isPaidVisit(next);
   return {
     fee,
     rule: rule || "",
     hoursUntilNextVisit: Math.round(hours * 10) / 10,
     nextVisit: { _id: next._id, bookingId: next.bookingId, start: visitStart(next) },
+    // Already paid in advance: the fee comes off the refund instead of being charged.
+    nextVisitPaid: paid,
+    refund: paid ? Math.max(0, Math.round((Number(next.payment?.amount || 0) - fee) * 100) / 100) : 0,
   };
+}
+
+// Refunds a visit paid in advance (amount = what goes back; the rest is kept as the late fee).
+async function refundVisit(visit, amount, reason) {
+  const full = Number(visit.payment?.amount || 0);
+  const value = Math.max(0, Math.min(full, Math.round(Number(amount) * 100) / 100));
+  const record = { amount: value, reason, at: new Date() };
+  if (value <= 0) {
+    Object.assign(record, { status: "None" });
+  } else {
+    try {
+      const r = await stripe().refunds.create(
+        { payment_intent: visit.payment.stripePaymentIntentId, amount: pence(value), metadata: { bookingRef: visit.bookingId, type: "visit_refund", company: "Cleaniq Services" } },
+        { idempotencyKey: `refund-visit-${visit._id}` },
+      );
+      Object.assign(record, { status: "Refunded", refundId: r.id });
+    } catch (err) {
+      Object.assign(record, { status: "Failed", error: err.message });
+      const { sendEmail } = require("./emailService");
+      sendEmail({
+        to: ADMIN_EMAIL(),
+        subject: `⚠️ Refund failed – ${visit.bookingId}`,
+        html: `<p>${visit.bookingId} (${visit.customer?.firstName || ""} ${visit.customer?.lastName || ""}, ${visit.customer?.email || ""}) was cancelled and £${value.toFixed(2)} should be refunded, but Stripe refused: ${err.message}. Please refund it from the Stripe dashboard.</p>`,
+      }).catch(() => {});
+    }
+  }
+  const status = record.status === "Refunded" ? (value >= full ? "Refunded" : "Partially refunded") : visit.payment?.status;
+  await Booking.updateOne({ _id: visit._id }, { $set: { "meta.refund": record, "payment.status": status } });
+  return record;
 }
 
 async function chargeCancellationFee(sub, quote) {
@@ -413,10 +628,24 @@ async function cancelFutureVisits(sub, reason, now = new Date()) {
   return visits.length;
 }
 
-// Customers pay the late-notice fee; admin actions are free (chargeFee false).
+// Customers pay the late-notice fee; admin actions are free (chargeFee false). Visits already paid
+// in advance are refunded; for the next visit the late fee is kept from that refund.
 async function stopSubscription(sub, next, by, { now, chargeFee }) {
   const quote = chargeFee ? await cancellationQuote(sub, now) : { fee: 0 };
-  const fee = quote.fee > 0 ? await chargeCancellationFee(sub, quote) : null;
+  let fee = null;
+  for (const visit of await upcomingVisits(sub, now)) {
+    const isNext = String(visit._id) === String(quote.nextVisit?._id);
+    const keep = isNext ? quote.fee : 0;
+    if (isPaidVisit(visit)) {
+      await refundVisit(visit, Number(visit.payment.amount) - keep, keep > 0 ? quote.rule : `Regular clean ${next}`);
+      if (keep > 0) fee = { amount: keep, reason: quote.rule, bookingId: visit.bookingId, status: "Kept from payment", at: now };
+      if (keep > 0) await Booking.updateOne({ _id: visit._id }, { $set: { "meta.cancellationFee": fee } });
+    } else {
+      await expirePaymentLink(visit);
+      // A visit whose card just failed isn't charged a fee on top.
+      if (keep > 0 && visit.payment?.status !== "Failed") fee = await chargeCancellationFee(sub, quote);
+    }
+  }
   const cancelled = await cancelFutureVisits(sub, next === "paused" ? "Regular clean paused" : "Regular clean cancelled", now);
   sub.status = next;
   if (next === "paused") sub.pausedAt = now;
@@ -450,6 +679,25 @@ async function cancelSubscription(sub, by, { now = new Date(), chargeFee = false
   return stopSubscription(sub, "cancelled", by, { now, chargeFee: chargeFee && sub.status === "active" });
 }
 
+// The customer cancels ONE visit of their regular clean. Visits are charged 48h ahead, so a paid
+// visit is refunded under the same late-notice rule (24h+ full refund; 2–24h £10 kept; under 2h
+// 80% kept). Unpaid visits are cancelled free.
+function visitCancellationQuote(visit, now = new Date()) {
+  const paid = isPaidVisit(visit);
+  const { fee, hours, rule } = cancellationFeeFor(visit, now);
+  const kept = paid ? Math.min(fee, Number(visit.payment?.amount || 0)) : 0;
+  return { paid, fee: kept, rule: kept ? rule : "", hours, refund: paid ? Math.round((Number(visit.payment.amount) - kept) * 100) / 100 : 0 };
+}
+
+async function cancelVisitByCustomer(visit, { now = new Date() } = {}) {
+  const q = visitCancellationQuote(visit, now);
+  let refund = null;
+  if (q.paid) refund = await refundVisit(visit, q.refund, q.fee ? q.rule : "Cancelled by customer");
+  else await expirePaymentLink(visit);
+  if (q.fee) await Booking.updateOne({ _id: visit._id }, { $set: { "meta.cancellationFee": { amount: q.fee, reason: q.rule, status: "Kept from payment", at: now } } });
+  return { ...q, refundStatus: refund?.status || null };
+}
+
 async function nextVisitFor(sub, now = new Date()) {
   return Booking.findOne({ "meta.subscriptionId": sub._id, status: { $ne: "Cancelled" }, "schedule.date": { $gte: new Date(now.getTime() - 12 * 3600000) } })
     .sort({ "schedule.date": 1 })
@@ -472,8 +720,8 @@ async function sendSetupEmail(sub) {
     html: `<div style="font-family:sans-serif;max-width:560px"><h2 style="color:#0F6B4C">Your regular clean is booked</h2>
       <p>Hi ${sub.customer?.firstName || "there"},</p>
       <p><strong>${sub.service}</strong>, ${every}${time ? ` at ${time}` : ""}, starting ${ukDate(sub.startDate)}.</p>
-      <ul><li>Your first clean is paid.</li><li>Each following clean is £${sub.pricePerVisit.toFixed(2)}, charged to your saved card on the day, when your cleaner arrives.</li>
-      <li>Pause or cancel any time, free of charge, from your account or by calling +44 7846 726428.</li></ul>
+      <ul><li>Your first clean is paid.</li><li>Each following clean is £${sub.pricePerVisit.toFixed(2)}, charged to your saved card 48 hours before the clean. We'll send you a receipt each time.</li>
+      <li>Pause or cancel any time from your account or by calling +44 7846 726428. With 24 hours' notice or more it's free, and any clean already paid is refunded in full.</li></ul>
       <p style="color:#64748b">Reference: ${sub.subscriptionRef}</p></div>`,
   });
 }
@@ -496,9 +744,16 @@ async function handleCheckoutCompleted(session) {
     const pi = await stripe().paymentIntents.retrieve(session.payment_intent);
     const customerId = typeof pi.customer === "string" ? pi.customer : pi.customer?.id;
     const paymentMethodId = typeof pi.payment_method === "string" ? pi.payment_method : pi.payment_method?.id;
+    if (booking.status === "Cancelled") {
+      // Paid just as the visit was cancelled for non-payment: give the money back.
+      await Booking.updateOne({ _id: booking._id }, { $set: { "payment.status": "Completed", "payment.stripePaymentIntentId": pi.id } });
+      await refundVisit(await Booking.findById(booking._id).lean(), booking.payment?.amount, "Paid after the visit was cancelled");
+      console.log(`[subscriptions] ${booking.bookingId} paid after cancellation: refunded`);
+      return true;
+    }
     await Booking.updateOne(
       { _id: booking._id },
-      { $set: { "payment.status": "Completed", "payment.capturedAt": new Date(), "payment.stripePaymentIntentId": pi.id, "payment.failureReason": "" } },
+      { $set: { "payment.status": "Completed", "payment.capturedAt": new Date(), "payment.stripePaymentIntentId": pi.id, "payment.failureReason": "" }, $unset: { "meta.paymentLinkSessionId": "" } },
     );
     const subId = booking.meta?.subscriptionId;
     if (subId && customerId && paymentMethodId) {
@@ -531,6 +786,9 @@ async function topUpAll(now = new Date()) {
 function startSubscriptionScheduler() {
   setTimeout(() => topUpAll().catch(() => {}), 60 * 1000);
   setInterval(() => topUpAll().catch(() => {}), 6 * 60 * 60 * 1000);
+  // Advance charges (48h before each clean), retries and unpaid cancellations.
+  setTimeout(() => processDueCharges().catch((e) => console.error("[subscriptions] charges:", e.message)), 90 * 1000);
+  setInterval(() => processDueCharges().catch((e) => console.error("[subscriptions] charges:", e.message)), 15 * 60 * 1000);
 }
 
 module.exports = {
@@ -543,6 +801,9 @@ module.exports = {
   topUpVisits,
   topUpAll,
   chargeVisitOnArrival,
+  processDueCharges,
+  visitCancellationQuote,
+  cancelVisitByCustomer,
   pauseSubscription,
   resumeSubscription,
   cancelSubscription,

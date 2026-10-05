@@ -62,15 +62,22 @@ export default function RegularCleansScreen({ navigation }) {
   const ask = async (sub, action) => {
     if (action === "resume") return run(sub, action);
     let fee = 0;
+    let paid = false;
+    let refund = 0;
     try {
-      fee = (await api(`/subscriptions/my/${sub._id}/cancellation-fee`)).fee || 0;
+      const q = await api(`/subscriptions/my/${sub._id}/cancellation-fee`);
+      fee = q.fee || 0;
+      paid = Boolean(q.nextVisitPaid);
+      refund = q.refund || 0;
     } catch { /* show without fee */ }
     const title = action === "pause" ? "Pause your regular clean?" : "Cancel your regular clean?";
     const body =
       (action === "pause" ? "Your upcoming cleans will be cancelled until you resume." : "All your upcoming cleans will be cancelled.") +
       (fee > 0
-        ? `\n\nYour next clean is soon, so a late-notice charge of ${money(fee)} will be taken from your saved card.`
-        : "\n\nNo charge: you're giving at least 24 hours' notice.");
+        ? paid
+          ? `\n\nYour next clean is soon, so a late-notice charge of ${money(fee)} applies. It's already paid, so ${money(refund)} will be refunded to your card.`
+          : `\n\nYour next clean is soon, so a late-notice charge of ${money(fee)} will be taken from your saved card.`
+        : `\n\nNo charge: you're giving at least 24 hours' notice.${paid && refund > 0 ? ` Your next clean is already paid, so ${money(refund)} will be refunded in full.` : ""}`);
     Alert.alert(title, body, [
       { text: "Keep it", style: "cancel" },
       { text: action === "pause" ? "Pause" : "Cancel it", style: "destructive", onPress: () => run(sub, action) },
@@ -121,7 +128,7 @@ export default function RegularCleansScreen({ navigation }) {
                   </View>
                 )}
                 <Text style={[styles.muted, { marginTop: 8 }]}>
-                  Charged to your saved card on the day, when your cleaner arrives. Ref {s.subscriptionRef}
+                  Charged to your saved card 48 hours before each clean. Ref {s.subscriptionRef}
                 </Text>
                 <View style={styles.actions}>
                   {s.status === "active" && (

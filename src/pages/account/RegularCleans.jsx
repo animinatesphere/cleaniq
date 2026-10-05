@@ -44,7 +44,7 @@ export default function RegularCleans({ authFetch, onChanged }) {
     try {
       const res = await authFetch(`${API}/subscriptions/my/${sub._id}/cancellation-fee`);
       const q = await res.json();
-      setConfirm({ sub, action, fee: q.fee || 0, rule: q.rule || "" });
+      setConfirm({ sub, action, fee: q.fee || 0, rule: q.rule || "", paid: Boolean(q.nextVisitPaid), refund: q.refund || 0 });
     } catch {
       setConfirm({ sub, action, fee: 0, rule: "" });
     }
@@ -112,7 +112,7 @@ export default function RegularCleans({ authFetch, onChanged }) {
               </p>
             )}
             <p className="text-xs text-slate-400 font-semibold mb-4">
-              Charged to your saved card on the day, when your cleaner arrives. Ref {s.subscriptionRef}
+              Charged to your saved card 48 hours before each clean. Ref {s.subscriptionRef}
             </p>
             <div className="flex flex-wrap gap-2">
               {s.status === "active" && (
@@ -152,10 +152,16 @@ export default function RegularCleans({ authFetch, onChanged }) {
               {confirm.fee > 0 ? (
                 <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 mb-5 text-sm text-amber-800 font-bold">
                   Your next clean is less than {confirm.rule.includes("2 hours") ? "2" : "24"} hours away, so a late-notice charge of{" "}
-                  {money(confirm.fee)} will be taken from your saved card.
+                  {money(confirm.fee)} applies
+                  {confirm.paid
+                    ? `. It's already paid, so ${money(confirm.refund)} will be refunded to your card.`
+                    : " and will be taken from your saved card."}
                 </div>
               ) : (
-                <p className="text-sm text-emerald-700 font-bold mb-5">No charge: you&apos;re giving at least 24 hours&apos; notice.</p>
+                <p className="text-sm text-emerald-700 font-bold mb-5">
+                  No charge: you&apos;re giving at least 24 hours&apos; notice.
+                  {confirm.paid && confirm.refund > 0 ? ` Your next clean is already paid, so ${money(confirm.refund)} will be refunded in full.` : ""}
+                </p>
               )}
               <div className="flex gap-3">
                 <button disabled={busy} onClick={() => setConfirm(null)} className="flex-1 py-3 rounded-xl border border-slate-200 font-black text-sm text-slate-600">

@@ -29,7 +29,7 @@ const money = (n) => `£${Number(n || 0).toFixed(2)}`;
 const day = (d) => (d ? new Date(d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/London" }) : "—");
 
 // Regular cleans (subscriptions): first clean paid at booking, later cleans charged to the
-// saved card when the cleaner arrives. Admin pause/resume/cancel never charges a fee.
+// saved card 48 hours before each clean. Admin pause/resume/cancel never charges a fee (paid cleans are refunded in full).
 export default function Subscriptions() {
   const [filter, setFilter] = useState("active");
   const [subs, setSubs] = useState(null);
@@ -81,7 +81,7 @@ export default function Subscriptions() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight">Regular Cleans</h1>
-            <p className="text-sm text-white/40">First clean paid at booking · later cleans charged to the saved card when the cleaner arrives</p>
+            <p className="text-sm text-white/40">First clean paid at booking · later cleans charged to the saved card 48h before · retried 24h before · cancelled if unpaid 12h before</p>
           </div>
         </div>
         <button onClick={load} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/60 text-sm font-semibold hover:bg-white/10">

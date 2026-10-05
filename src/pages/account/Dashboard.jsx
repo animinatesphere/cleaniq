@@ -38,6 +38,7 @@ export default function CustomerDashboard() {
   const [cancellingId, setCancellingId] = useState(null);
   const [cancelError, setCancelError] = useState('');
   const [cancelModal, setCancelModal] = useState(null); // booking to cancel
+  const [cancelPreview, setCancelPreview] = useState(null); // regular clean: refund / late fee
   const [successToast, setSuccessToast] = useState('');
 
   // Chat state
@@ -121,6 +122,16 @@ export default function CustomerDashboard() {
 
   const handleLogout = () => { logout(); navigate('/'); };
 
+  // Regular-clean visits are paid 48h ahead: show what cancelling would refund before confirming.
+  useEffect(() => {
+    setCancelPreview(null);
+    if (!cancelModal) return;
+    authFetch(`${API}/customer-bookings/${cancelModal._id}/cancel-preview`)
+      .then(r => r.json())
+      .then(p => { if (p?.regular) setCancelPreview(p); })
+      .catch(() => {});
+  }, [cancelModal]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleCancel = async () => {
     const booking = cancelModal;
     if (!booking) return;
@@ -132,7 +143,7 @@ export default function CustomerDashboard() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       await fetchBookings();
-      setSuccessToast(`Booking #${booking.bookingId} has been cancelled successfully.`);
+      setSuccessToast(data.refund != null || data.fee != null ? data.message : `Booking #${booking.bookingId} has been cancelled successfully.`);
       setTimeout(() => setSuccessToast(''), 5000);
     } catch (err) {
       setCancelError(err.message);
@@ -214,6 +225,15 @@ export default function CustomerDashboard() {
               <p className="text-slate-300 font-bold text-xs text-center mb-6">
                 #{cancelModal.bookingId} &bull; {formatDate(cancelModal.schedule?.date)}
               </p>
+              {cancelPreview?.paid && (
+                <div className={`rounded-2xl p-4 mb-3 border ${cancelPreview.fee > 0 ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-100'}`}>
+                  <p className={`font-bold text-sm text-center ${cancelPreview.fee > 0 ? 'text-amber-800' : 'text-emerald-700'}`}>
+                    {cancelPreview.fee > 0
+                      ? `This clean is already paid. £${Number(cancelPreview.refund).toFixed(2)} will be refunded (£${Number(cancelPreview.fee).toFixed(2)} kept for ${cancelPreview.rule}).`
+                      : `This clean is already paid. £${Number(cancelPreview.refund).toFixed(2)} will be refunded in full.`}
+                  </p>
+                </div>
+              )}
               <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4 mb-6">
                 <p className="text-rose-600 font-bold text-sm text-center">
                   ⚠️ This action cannot be undone. Your booking will be permanently cancelled.
