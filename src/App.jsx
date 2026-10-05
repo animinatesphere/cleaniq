@@ -12,6 +12,7 @@ import Booking from "./pages/Booking";
 import Recruitment from "./pages/Recruitment";
 import Services from "./pages/Services";
 import Contact from "./pages/Contact";
+import GetQuote from "./pages/GetQuote";
 import ServiceDetail from "./pages/ServiceDetail";
 import LocationDetail from "./pages/LocationDetail";
 import TermsAndConditions from "./pages/TermsAndConditions";
@@ -115,6 +116,7 @@ function App() {
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogDetail />} />
             <Route path="/cleaning/:city" element={<CityLanding />} />
+            <Route path="/get-a-quote" element={<GetQuote />} />
             <Route path="/pages/contact" element={<Contact />} />
             <Route path="/pages/:serviceSlug" element={<ServiceDetail />} />
             <Route path="/locations/:area" element={<LocationDetail />} />

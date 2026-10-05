@@ -103,6 +103,128 @@ router.post('/', async (req, res) => {
   }
 });
 
+// ── Website "Get a Quote" form ───────────────────────────────────────────────
+// Saved as a lead (Admin → Leads), emailed to the team, and the customer gets the usual
+// "we received your message" email. The team prices it in the Quote Builder.
+const QUOTE_OPTIONS = {
+  property: ["Studio", "Flat", "House", "Townhouse", "Bungalow"],
+  carpet: ["With Carpet Cleaning (Save 60%) — £75", "Without Carpet Cleaning"],
+  oven: ["Single oven", "Double oven", "Range cooker", "AGA"],
+  fridge: ["Standard fridge", "Fridge freezer", "American-style fridge freezer", "Under-counter fridge"],
+};
+const escHtml = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const clean = (v, max = 200) => String(v ?? "").trim().slice(0, max);
+const count = (v, max) => {
+  const n = Number(v);
+  return Number.isInteger(n) && n >= 0 && n <= max ? n : null;
+};
+
+// Checks the form; returns { quote } or { error }.
+function readQuoteRequest(body = {}) {
+  const q = {
+    service: clean(body.service, 100),
+    name: clean(body.name, 100),
+    email: clean(body.email, 150).toLowerCase(),
+    phone: clean(body.phone, 30),
+    postcode: clean(body.postcode, 10).toUpperCase(),
+    bedrooms: count(body.bedrooms, 8),
+    bathrooms: count(body.bathrooms, 8),
+    livingRooms: count(body.livingRooms, 6),
+    property: clean(body.property, 30),
+    date: clean(body.date, 10),
+    notes: clean(body.notes, 2000),
+    carpet: clean(body.carpet, 60),
+    extras: [],
+  };
+  if (!q.service) return { error: "Please choose a service." };
+  if (!q.name) return { error: "Please enter your full name." };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(q.email)) return { error: "Please enter a valid email address." };
+  if (!/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/.test(q.postcode)) return { error: "Please enter a valid UK postcode." };
+  if (q.property && !QUOTE_OPTIONS.property.includes(q.property)) return { error: "Please choose a property type from the list." };
+  if (q.carpet && !QUOTE_OPTIONS.carpet.includes(q.carpet)) return { error: "Please choose with or without carpet cleaning." };
+  if (q.date && (!/^\d{4}-\d{2}-\d{2}$/.test(q.date) || Number.isNaN(Date.parse(q.date)))) return { error: "Please choose a valid date." };
+
+  const extras = body.extras || {};
+  if (extras.oven) {
+    if (!QUOTE_OPTIONS.oven.includes(extras.ovenType)) return { error: "Please confirm the type of oven." };
+    q.extras.push(`Oven Cleaning (${extras.ovenType})`);
+  }
+  if (extras.fridge) {
+    if (!QUOTE_OPTIONS.fridge.includes(extras.fridgeType)) return { error: "Please confirm the type of fridge." };
+    q.extras.push(`Fridge Cleaning (${extras.fridgeType})`);
+  }
+  if (extras.clearance) q.extras.push("Clearance");
+  if (body.consent !== true) return { error: "Please tick the box to let us store your details so we can reply." };
+  return { quote: q };
+}
+
+function quoteRows(q) {
+  const ukDate = q.date ? new Date(`${q.date}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
+  return [
+    ["Service", q.service],
+    ["Name", q.name],
+    ["Email", q.email],
+    ["Phone", q.phone],
+    ["Postcode", q.postcode],
+    ["Property type", q.property],
+    ["Bedrooms", q.bedrooms],
+    ["Bathrooms", q.bathrooms],
+    ["Living / reception rooms", q.livingRooms],
+    ["Preferred date", ukDate],
+    ["Carpet cleaning", q.carpet],
+    ["Additional services (20% off)", q.extras.join(", ")],
+    ["Additional information", q.notes],
+  ].filter(([, v]) => v !== null && v !== undefined && v !== "");
+}
+
+router.post('/quote-request', async (req, res) => {
+  // Hidden field only bots fill in: pretend it worked and do nothing.
+  if (req.body?.website) return res.json({ message: 'Quote request sent.' });
+  const { quote: q, error } = readQuoteRequest(req.body);
+  if (error) return res.status(400).json({ message: error });
+
+  const rows = quoteRows(q);
+  const html = `
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;border:1px solid #e2e8f0;border-radius:20px;overflow:hidden;background:#fff;">
+  <div style="background:#0F172A;padding:28px 32px;">
+    <h1 style="color:#6EE7B7;margin:0;font-size:20px;">New Quote Request</h1>
+    <p style="color:#94a3b8;margin:6px 0 0;font-size:13px;">${escHtml(q.service)} · ${escHtml(q.postcode)}</p>
+  </div>
+  <table style="width:100%;border-collapse:collapse;">
+    ${rows.map(([k, v]) => `<tr><td style="padding:10px 32px;font-size:12px;font-weight:700;color:#64748b;border-bottom:1px solid #f1f5f9;width:40%;vertical-align:top;">${escHtml(k)}</td><td style="padding:10px 32px 10px 0;font-size:14px;color:#0F172A;border-bottom:1px solid #f1f5f9;white-space:pre-wrap;">${escHtml(v)}</td></tr>`).join("")}
+  </table>
+  <p style="margin:20px 32px 28px;font-size:12px;color:#059669;font-weight:700;">Reply to this email to answer ${escHtml(q.name)}, or send a quote from Admin → Quotes.</p>
+</div>`;
+
+  try {
+    const lead = await Lead.create({
+      name: q.name,
+      email: q.email,
+      phone: q.phone,
+      serviceInterest: q.service,
+      message: rows.map(([k, v]) => `${k}: ${v}`).join("\n"),
+      source: 'Quote Form',
+    });
+    await sendEmail({
+      to: process.env.EMAIL_USER || 'info@cleaniqservices.com',
+      subject: `🧾 Quote request: ${q.service} — ${q.name} (${q.postcode})`,
+      html,
+      replyTo: q.email,
+    });
+    try {
+      await sendEmail({ to: q.email, subject: 'We received your quote request — Cleaniq Services', html: templates.leadAcknowledgement(q.name) });
+      lead.acknowledged = true;
+      await lead.save();
+    } catch (ackErr) {
+      console.error('Quote acknowledgement email error:', ackErr.message);
+    }
+    res.json({ message: 'Quote request sent.' });
+  } catch (err) {
+    console.error('Quote request error:', err.message);
+    res.status(500).json({ message: 'Failed to send your request. Please try again.' });
+  }
+});
+
 /**
  * GET /api/contact/leads
  * List captured contact-form leads (for the admin Marketing/Leads view)
@@ -177,3 +299,5 @@ router.delete('/leads/:id', async (req, res) => {
 });
 
 module.exports = router;
+module.exports.readQuoteRequest = readQuoteRequest;
+module.exports.QUOTE_OPTIONS = QUOTE_OPTIONS;

@@ -230,7 +230,7 @@ const Home = () => {
                 />
               </Link>
               <Link
-                to="/pages/contact"
+                to="/get-a-quote"
                 className="btn-outline py-5 px-10 text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16px] group font-black uppercase tracking-widest"
               >
                 Get a Quote
