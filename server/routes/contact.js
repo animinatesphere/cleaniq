@@ -109,8 +109,10 @@ router.post('/', async (req, res) => {
 const QUOTE_OPTIONS = {
   property: ["Studio", "Flat", "House", "Townhouse", "Bungalow"],
   carpet: ["With Carpet Cleaning (Save 60%) — £75", "Without Carpet Cleaning"],
-  oven: ["Single oven", "Double oven", "Range cooker", "AGA"],
-  fridge: ["Standard fridge", "Fridge freezer", "American-style fridge freezer", "Under-counter fridge"],
+  // Same as the price list (Single/Double/Range Oven Cleaning; Single fridge, Fridge and freezer,
+  // American fridge freezer) so the team can price them straight in the Quote Builder.
+  oven: ["Single oven", "Double oven", "Range oven"],
+  fridge: ["Single fridge", "Fridge freezer", "American fridge freezer"],
 };
 const escHtml = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const clean = (v, max = 200) => String(v ?? "").trim().slice(0, max);
