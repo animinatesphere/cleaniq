@@ -146,3 +146,11 @@ test("phone calls can book and quote, with the address and email read back first
   assert.match(p, /postcode character by character/);
   assert.match(p, /Never call create_booking or send_quote until the caller has said yes to the read-back/);
 });
+
+
+test("quotes ask the type of cleaning, hours, when, name, email, address and supplies — then confirm", () => {
+  const p = buildInstructions({ channel: "whatsapp", settings, knowledge, services, now, canBook: true });
+  assert.match(p, /1\. Type of cleaning .*\n  2\. How many hours\n  3\. When they'd like it: the date, and what time the cleaner should arrive\n  4\. Full name\n  5\. Email address/);
+  assert.match(p, /Property address with postcode \(call check_postcode/);
+  assert.match(p, /CONFIRMATION STEP — never skip it: send ONE summary with the customer's name, email/);
+});
