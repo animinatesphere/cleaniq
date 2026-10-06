@@ -4,8 +4,19 @@ import { Repeat, PauseCircle, PlayCircle, XCircle, RefreshCw, AlertCircle, Calen
 
 const API = import.meta.env.VITE_API_URL;
 
+// Each clean's state (server: utils/subscriptions.js visitsFor), in plain words.
+const VISIT = {
+  confirmed: ["Paid · confirmed", "bg-emerald-50 text-emerald-700"],
+  done: ["Done", "bg-sky-50 text-sky-700"],
+  charged_48h_before: ["Charged 48h before", "bg-slate-100 text-slate-600"],
+  awaiting_first_payment: ["After your first payment", "bg-slate-100 text-slate-500"],
+  payment_needed: ["Payment needed", "bg-amber-50 text-amber-700"],
+  cancelled: ["Cancelled", "bg-slate-50 text-slate-400 line-through"],
+};
+
 const STATUS = {
   active: { label: "Active", cls: "bg-emerald-50 text-emerald-600 border-emerald-100" },
+  pending_payment: { label: "Awaiting first payment", cls: "bg-amber-50 text-amber-700 border-amber-100" },
   paused: { label: "Paused", cls: "bg-amber-50 text-amber-600 border-amber-100" },
   cancelled: { label: "Cancelled", cls: "bg-slate-50 text-slate-500 border-slate-100" },
 };
@@ -103,6 +114,9 @@ export default function RegularCleans({ authFetch, onChanged }) {
                 <p className="text-sm text-slate-500 font-semibold">
                   {every(s.frequency)} · {money(s.pricePerVisit)} per clean
                 </p>
+                {s.setupFee > 0 && (
+                  <p className="text-xs text-slate-400 font-semibold">First payment included a one-off {money(s.setupFee)} set-up fee</p>
+                )}
               </div>
               <span className={`px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${st.cls}`}>{st.label}</span>
             </div>
@@ -110,6 +124,27 @@ export default function RegularCleans({ authFetch, onChanged }) {
               <p className="flex items-center gap-2 text-sm font-bold text-slate-600 mb-4">
                 <Calendar size={15} className="text-primary" /> Next clean: {when(s.nextVisit.schedule.date)}
               </p>
+            )}
+            {s.status !== "cancelled" && s.visits?.some((v) => v.state !== "cancelled" && new Date(v.date) >= new Date(Date.now() - 86400000)) && (
+              <div className="mb-4 rounded-2xl border border-slate-100 divide-y divide-slate-100">
+                <p className="px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-400">Your upcoming cleans</p>
+                {s.visits
+                  .filter((v) => v.state !== "cancelled" && new Date(v.date) >= new Date(Date.now() - 86400000))
+                  .slice(0, 8)
+                  .map((v) => {
+                    const [label, cls] = VISIT[v.state] || [v.status, "bg-slate-100 text-slate-600"];
+                    return (
+                      <div key={v._id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
+                        <span className="text-sm font-bold text-slate-700">{when(v.date)}{v.time ? ` · ${v.time}` : ""}</span>
+                        <span className="flex items-center gap-2">
+                          <span className="text-sm font-semibold tabular-nums text-slate-500">{money(v.amount)}</span>
+                          <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${cls}`}>{label}</span>
+                          {v.payLink && <a href={v.payLink} target="_blank" rel="noopener noreferrer" className="text-xs font-black text-primary underline">Pay now</a>}
+                        </span>
+                      </div>
+                    );
+                  })}
+              </div>
             )}
             <p className="text-xs text-slate-400 font-semibold mb-4">
               Charged to your saved card 48 hours before each clean. Ref {s.subscriptionRef}

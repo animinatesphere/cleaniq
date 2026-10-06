@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity,
   ActivityIndicator, Alert, RefreshControl,
+  Linking,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { ArrowLeft, Repeat, CalendarDays, PauseCircle, PlayCircle, XCircle } from "lucide-react-native";
@@ -14,8 +15,18 @@ const money = (n) => `£${Number(n || 0).toFixed(2)}`;
 const every = (f) => ({ Weekly: "Every week", Fortnightly: "Every two weeks", Monthly: "Every month", Quarterly: "Every 3 months" }[f] || f);
 const when = (d) =>
   new Date(d).toLocaleString("en-GB", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+// Each clean's state (server: utils/subscriptions.js visitsFor): [label, text colour, background].
+const VISIT = {
+  confirmed: ["Paid · confirmed", "#047857", "#ECFDF5"],
+  done: ["Done", "#1D4ED8", "#EFF6FF"],
+  charged_48h_before: ["Charged 48h before", "#475569", "#F1F5F9"],
+  awaiting_first_payment: ["After your first payment", "#64748B", "#F1F5F9"],
+  payment_needed: ["Payment needed", "#B45309", "#FFFBEB"],
+};
+
 const STATUS = {
   active: { label: "Active", color: C.success, bg: C.successBg },
+  pending_payment: { label: "Awaiting first payment", color: "#B45309", bg: "#FFFBEB" },
   paused: { label: "Paused", color: C.warning, bg: C.warningBg },
   cancelled: { label: "Cancelled", color: C.textMuted, bg: C.surfaceAlt },
 };
@@ -116,6 +127,7 @@ export default function RegularCleansScreen({ navigation }) {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.service}>{s.service}</Text>
                     <Text style={styles.muted}>{every(s.frequency)} · {money(s.pricePerVisit)} per clean</Text>
+                    {s.setupFee > 0 && <Text style={styles.muted}>First payment included a one-off {money(s.setupFee)} set-up fee</Text>}
                   </View>
                   <View style={[styles.badge, ts({ backgroundColor: st.bg })]}>
                     <Text style={[styles.badgeTxt, ts({ color: st.color })]}>{st.label}</Text>
@@ -127,6 +139,32 @@ export default function RegularCleansScreen({ navigation }) {
                     <Text style={styles.nextTxt}>Next clean: {when(s.nextVisit.schedule.date)}</Text>
                   </View>
                 )}
+                {s.status !== "cancelled" && (() => {
+                  const upcoming = (s.visits || []).filter((v) => v.state !== "cancelled" && new Date(v.date) >= new Date(Date.now() - 86400000)).slice(0, 8);
+                  if (!upcoming.length) return null;
+                  return (
+                    <View style={styles.visits}>
+                      <Text style={styles.visitsTitle}>YOUR UPCOMING CLEANS</Text>
+                      {upcoming.map((v) => {
+                        const [label, color, bg] = VISIT[v.state] || [v.status, C.textMed, C.surfaceAlt];
+                        return (
+                          <View key={v._id} style={styles.visitRow}>
+                            <Text style={styles.visitDate}>{when(v.date)}{v.time ? ` · ${v.time}` : ""}</Text>
+                            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                              <Text style={styles.visitAmt}>{money(v.amount)}</Text>
+                              <View style={[styles.visitBadge, ts({ backgroundColor: bg })]}><Text style={[styles.visitBadgeTxt, ts({ color })]}>{label}</Text></View>
+                            </View>
+                            {!!v.payLink && (
+                              <TouchableOpacity onPress={() => Linking.openURL(v.payLink)} style={{ width: "100%", marginTop: 4 }}>
+                                <Text style={styles.payLink}>Pay now</Text>
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        );
+                      })}
+                    </View>
+                  );
+                })()}
                 <Text style={[styles.muted, { marginTop: 8 }]}>
                   Charged to your saved card 48 hours before each clean. Ref {s.subscriptionRef}
                 </Text>
@@ -174,4 +212,12 @@ const styles = themed(StyleSheet.create({
   actions: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8, marginTop: 14 },
   btn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, borderWidth: 1 },
   btnTxt: { fontSize: 13, fontWeight: "800" },
+  visits: { marginTop: 12, borderWidth: 1, borderColor: C.border, borderRadius: 14, overflow: "hidden" },
+  visitsTitle: { fontSize: 10, fontWeight: "900", color: C.textMuted, letterSpacing: 1, paddingHorizontal: 12, paddingTop: 10, paddingBottom: 4 },
+  visitRow: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 12, paddingVertical: 9, borderTopWidth: 1, borderTopColor: C.border },
+  visitDate: { fontSize: 13, fontWeight: "800", color: C.textDark },
+  visitAmt: { fontSize: 12, fontWeight: "700", color: C.textMed },
+  visitBadge: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3 },
+  visitBadgeTxt: { fontSize: 10, fontWeight: "800" },
+  payLink: { fontSize: 12, fontWeight: "900", color: C.primary, textDecorationLine: "underline" },
 }));
