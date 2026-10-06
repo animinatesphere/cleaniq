@@ -96,6 +96,7 @@ const adminBooking = (over = {}) => fetch(`${base}/bookings`, {
 
 test("admin weekly booking with a payment link: nothing is confirmed or sent to cleaners until paid", async () => {
   emails.length = 0;
+  await subs.saveSetupFee({ enabled: true, amount: 4, label: "Set-up fee" });
   const r = await adminBooking();
   assert.equal(r.status, 201);
   await settle();
@@ -108,15 +109,25 @@ test("admin weekly booking with a payment link: nothing is confirmed or sent to 
   const sub = await Subscription.findOne({ firstBooking: first._id });
   assert.ok(sub, "set up as a regular clean");
   assert.equal(sub.source, "Admin");
-  assert.equal(sub.pricePerVisit, 40);
+  assert.equal(sub.pricePerVisit, 40, "following cleans: normal price");
+  assert.equal(sub.setupFee, 4);
+  assert.equal(first.payment.amount, 44, "first payment = clean + £4 set-up fee");
+
+  // All the weekly visits show straight away, Pending, and can't be charged before the card is saved.
+  const ahead = await Booking.find({ "meta.subscriptionId": sub._id, _id: { $ne: first._id } }).lean();
+  assert.ok(ahead.length >= 5, `visits booked ahead: ${ahead.length}`);
+  assert.ok(ahead.every((v) => v.status === "Pending" && v.payment.amount === 40 && !v.payment.chargeOnArrival));
+  assert.ok(!(await feed()).some((ref) => ahead.map((v) => v.bookingId).includes(ref)));
+  assert.equal((await subs.processDueCharges(new Date(Date.now() + 5 * 86400000))).charged, 0, "nothing charged before the first payment");
   assert.equal(await Booking.countDocuments({ "customer.email": "jo@cust.uk", status: "Confirmed" }), 0);
   const link = stripeCalls.filter((c) => c[0] === "checkout").at(-1)[1];
   assert.equal(link.metadata.type, "subscription_first");
+  assert.equal(link.line_items[0].price_data.unit_amount, 4400);
   assert.equal(link.payment_intent_data.setup_future_usage, "off_session");
   assert.ok(emails.some((e) => e.to === "jo@cust.uk" && /Payment Required/.test(e.subject)));
 
   // Customer pays the first clean → first visit confirmed and announced once; the rest stay Pending.
-  intents.pi_first = { id: "pi_first", status: "succeeded", amount: 4000, customer: "cus_1", payment_method: "pm_1" };
+  intents.pi_first = { id: "pi_first", status: "succeeded", amount: 4400, customer: "cus_1", payment_method: "pm_1" };
   await subs.handleCheckoutCompleted({ metadata: link.metadata, payment_intent: "pi_first" });
   await settle();
   assert.equal((await Booking.findById(first._id)).status, "Confirmed");
@@ -125,6 +136,15 @@ test("admin weekly booking with a payment link: nothing is confirmed or sent to 
   const later = (await Booking.find({ "meta.subscriptionId": sub._id, _id: { $ne: first._id } }).sort({ "schedule.date": 1 }).lean());
   assert.ok(later.length >= 5);
   assert.ok(later.every((v) => v.status === "Pending"));
+  assert.ok(later.every((v) => v.payment.chargeOnArrival && v.payment.stripePaymentMethodId === "pm_1"), "now chargeable 48h before");
+  assert.equal(later.length, new Set(later.map((v) => String(v.schedule.date))).size, "no visit booked twice");
+
+  // The Regular Cleans pages list each visit with what's paid and what's next.
+  const visits = await subs.visitsFor(await Subscription.findById(sub._id));
+  assert.equal(visits[0].first, true);
+  assert.equal(visits[0].state, "confirmed");
+  assert.equal(visits[0].setupFee, 4);
+  assert.ok(visits.slice(1).every((v) => v.state === "charged_48h_before"));
   assert.ok(!(await feed()).some((ref) => later.map((v) => v.bookingId).includes(ref)), "unpaid visits hidden from cleaners");
   assert.equal((await alertsFor(later[0].bookingId)).notifications, 0);
 
@@ -142,6 +162,7 @@ test("admin weekly booking with a payment link: nothing is confirmed or sent to 
   await alertsBecome(next.bookingId, { notifications: 1, emails: 1 });
   assert.ok((await feed()).includes(next.bookingId));
   assert.equal((await Booking.findById(later[1]._id)).status, "Pending", "the visit after waits for its own payment");
+  await subs.saveSetupFee({ enabled: false, amount: 4 });
 });
 
 test("one-off booking with a payment link: cleaners told when it's paid, once", async () => {

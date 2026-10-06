@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Repeat, PauseCircle, PlayCircle, XCircle, RefreshCw, Search, CreditCard } from "lucide-react";
+import { Repeat, PauseCircle, PlayCircle, XCircle, RefreshCw, Search, CreditCard, ChevronDown, ChevronUp } from "lucide-react";
 
 const API = import.meta.env.VITE_API_URL || "https://api.cleaniqservices.com/api";
 const adminFetch = async (path, options = {}) => {
@@ -26,6 +26,15 @@ const STATUS = {
   cancelled: "bg-white/5 text-white/40 border-white/10",
 };
 const money = (n) => `£${Number(n || 0).toFixed(2)}`;
+// Each visit's state (server: utils/subscriptions.js visitsFor).
+const VISIT = {
+  confirmed: ["Paid & confirmed", "bg-emerald-500/15 text-emerald-300"],
+  done: ["Done", "bg-sky-500/15 text-sky-300"],
+  charged_48h_before: ["Charged 48h before", "bg-white/10 text-white/60"],
+  awaiting_first_payment: ["Awaiting first payment", "bg-amber-500/15 text-amber-300"],
+  payment_needed: ["Payment needed", "bg-rose-500/15 text-rose-300"],
+  cancelled: ["Cancelled", "bg-white/5 text-white/30 line-through"],
+};
 const day = (d) => (d ? new Date(d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/London" }) : "—");
 
 // Regular cleans (subscriptions): first clean paid at booking, later cleans charged to the
@@ -36,7 +45,7 @@ export default function Subscriptions() {
   const [q, setQ] = useState("");
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [busyId, setBusyId] = useState(null);
-  // One-off set-up fee added to the first clean's payment (later cleans are the normal price).
+  const [open, setOpen] = useState({}); // subscription id → visits shown  // One-off set-up fee added to the first clean's payment (later cleans are the normal price).
   const [fee, setFee] = useState(null);
   const [savingFee, setSavingFee] = useState(false);
   useEffect(() => {
@@ -70,7 +79,7 @@ export default function Subscriptions() {
 
   const act = async (sub, action) => {
     const verb = { pause: "Pause", resume: "Resume", cancel: "Cancel" }[action];
-    if (action !== "resume" && !window.confirm(`${verb} ${sub.subscriptionRef} for ${sub.customer?.firstName || "this customer"}? Upcoming unpaid cleans will be cancelled. No fee is charged when admin does this.`)) return;
+    if (action !== "resume" && !window.confirm(`${verb} ${sub.subscriptionRef} for ${sub.customer?.firstName || "this customer"}? Upcoming cleans will be cancelled, and any already paid are refunded in full. No fee is charged when admin does this.`)) return;
     setBusyId(sub._id);
     setMsg({ type: "", text: "" });
     try {
@@ -173,11 +182,14 @@ export default function Subscriptions() {
               </div>
               <div className="min-w-[180px]">
                 <p className="text-sm font-semibold text-white/80">{s.service}</p>
-                <p className="text-xs text-white/40">{s.frequency} · {money(s.pricePerVisit)} per clean{s.setupFee > 0 ? ` · ${money(s.setupFee)} set-up fee paid` : ""} · {s.source}</p>
+                <p className="text-xs text-white/40">{s.frequency} · {money(s.pricePerVisit)} per clean · {s.source}</p>
+                {s.setupFee > 0 && (
+                  <p className="text-xs text-white/40">First payment {money(s.pricePerVisit + s.setupFee)} (incl. {money(s.setupFee)} set-up fee)</p>
+                )}
               </div>
               <div className="min-w-[140px]">
                 <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">Next clean</p>
-                <p className="text-sm font-semibold text-white/80">{s.status === "active" ? day(s.nextVisit?.schedule?.date) : "—"}</p>
+                <p className="text-sm font-semibold text-white/80">{s.status === "cancelled" ? "—" : day(s.nextVisit?.schedule?.date)}</p>
               </div>
               <div className="flex items-center gap-1 text-xs text-white/40 min-w-[110px]">
                 <CreditCard size={13} /> {s.status === "pending_payment" ? "No card yet" : "Card saved"}
@@ -199,7 +211,39 @@ export default function Subscriptions() {
                   </button>
                 )}
               </div>
-              <p className="w-full text-[11px] text-white/25">Ref {s.subscriptionRef} · started {day(s.startDate)}{s.cancelledAt ? ` · cancelled ${day(s.cancelledAt)} by ${s.cancelledBy || "—"}` : ""}</p>
+              <div className="w-full flex flex-wrap items-center justify-between gap-2">
+                <p className="text-[11px] text-white/25">Ref {s.subscriptionRef} · started {day(s.startDate)}{s.cancelledAt ? ` · cancelled ${day(s.cancelledAt)} by ${s.cancelledBy || "—"}` : ""}</p>
+                {s.visits?.length > 0 && (
+                  <button onClick={() => setOpen((o) => ({ ...o, [s._id]: !o[s._id] }))} className="flex items-center gap-1 text-xs font-bold text-emerald-300 hover:text-emerald-200">
+                    {open[s._id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {open[s._id] ? "Hide" : "Show"} visits ({s.visits.length})
+                  </button>
+                )}
+              </div>
+              {open[s._id] && (
+                <div className="w-full overflow-x-auto rounded-xl border border-white/10">
+                  <table className="w-full min-w-[560px] text-xs">
+                    <thead>
+                      <tr className="text-left text-[10px] font-black uppercase tracking-wider text-white/30 border-b border-white/10">
+                        <th className="px-3 py-2">Date</th><th className="px-3 py-2">Booking</th><th className="px-3 py-2">Status</th><th className="px-3 py-2">Cleaner</th><th className="px-3 py-2 text-right">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {s.visits.map((v) => {
+                        const [label, cls] = VISIT[v.state] || [v.status, "bg-white/10 text-white/60"];
+                        return (
+                          <tr key={v._id} className="border-b border-white/5 last:border-0">
+                            <td className="px-3 py-2 text-white/80">{day(v.date)}{v.time ? ` · ${v.time}` : ""}{v.first ? <span className="ml-1.5 text-[10px] text-emerald-300/70">first clean</span> : null}</td>
+                            <td className="px-3 py-2 font-mono text-white/50">{v.bookingId}</td>
+                            <td className="px-3 py-2"><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${cls}`}>{label}</span></td>
+                            <td className="px-3 py-2 text-white/60">{v.cleaner || "—"}</td>
+                            <td className="px-3 py-2 text-right tabular-nums text-white/80">{money(v.amount)}{v.setupFee > 0 ? <span className="block text-[10px] text-white/35">incl. {money(v.setupFee)} fee</span> : null}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -133,7 +133,9 @@ async function saveSetupFee(input = {}) {
 }
 
 // trustPrice: admin set the price (no minimum applied); customers can't lower it.
-async function createSubscription(firstBooking, { visitPrice, source = "Website", status = "pending_payment", trustPrice = false } = {}) {
+// bookAhead: book the following visits now (Pending) — for payment by link (admin, app). The
+// website pays by card on the spot, so its visits are booked when that payment is confirmed.
+async function createSubscription(firstBooking, { visitPrice, source = "Website", status = "pending_payment", trustPrice = false, bookAhead = true } = {}) {
   const frequency = normaliseFrequency(firstBooking.details?.frequency);
   if (!isSubscriptionFrequency(frequency)) throw new Error(`Not a regular frequency: ${firstBooking.details?.frequency}`);
   // Only frequencies admin has priced for this service are offered (e.g. Deep Cleaning: monthly / every 3 months).
@@ -163,6 +165,9 @@ async function createSubscription(firstBooking, { visitPrice, source = "Website"
     { _id: firstBooking._id },
     { $set: { "meta.subscriptionId": sub._id, "meta.subscriptionRef": subscriptionRef, "meta.recurringGroup": subscriptionRef } },
   );
+  // The following visits are booked straight away so admin and the customer can see them
+  // (Pending). They can't be charged until the first payment has saved the card.
+  if (bookAhead) await topUpVisits(sub).catch((e) => console.error(`[subscriptions] booking visits ahead for ${subscriptionRef}:`, e.message));
   return sub;
 }
 
@@ -237,6 +242,11 @@ async function activateSubscription(sub, paymentIntentId, { now = new Date() } =
   sub.stripePaymentMethodId = paymentMethodId;
   sub.template = { ...sub.template, payment: { ...(sub.template?.payment || {}), stripeCustomerId: customerId, stripePaymentMethodId: paymentMethodId } };
   await sub.save();
+  // Visits booked before the card was saved can now be charged (48 hours before each clean).
+  await Booking.updateMany(
+    { "meta.subscriptionId": sub._id, _id: { $ne: first._id }, status: { $in: ["Pending", "Awaiting Payment"] }, "payment.status": "Pending" },
+    { $set: { "payment.chargeOnArrival": true, "payment.stripeCustomerId": customerId, "payment.stripePaymentMethodId": paymentMethodId } },
+  );
   const created = await topUpVisits(sub, { now });
   // The first clean is paid: cleaners are told about it now.
   Booking.findById(first._id).then((b) => b && require("./jobAnnounce").announceNewJob(b)).catch(() => {});
@@ -247,7 +257,9 @@ async function activateSubscription(sub, paymentIntentId, { now = new Date() } =
 
 // Creates the next visits up to the horizon. Skips dates before tomorrow (e.g. after a pause).
 async function topUpVisits(sub, { now = new Date() } = {}) {
-  if (sub.status !== "active") return 0;
+  // Waiting for the first payment: visits are booked (so they show) but can't be charged yet.
+  if (!["active", "pending_payment"].includes(sub.status)) return 0;
+  const chargeable = sub.status === "active" && Boolean(sub.stripePaymentMethodId);
   const horizon = new Date(now.getTime() + (HORIZON_DAYS[sub.frequency] || 56) * 86400000);
   const earliest = startOfTomorrow(now);
   let cursor = new Date(sub.lastVisitDate || sub.startDate);
@@ -279,9 +291,8 @@ async function topUpVisits(sub, { now = new Date() } = {}) {
         status: "Pending",
         method: "Card on file",
         billingType: t.payment?.billingType || "hourly",
-        chargeOnArrival: true,
-        stripeCustomerId: sub.stripeCustomerId,
-        stripePaymentMethodId: sub.stripePaymentMethodId,
+        chargeOnArrival: chargeable,
+        ...(chargeable ? { stripeCustomerId: sub.stripeCustomerId, stripePaymentMethodId: sub.stripePaymentMethodId } : {}),
       },
       meta: { subscriptionId: sub._id, subscriptionRef: sub.subscriptionRef, recurringGroup: sub.subscriptionRef },
     });
@@ -771,6 +782,34 @@ async function cancelVisitByCustomer(visit, { now = new Date() } = {}) {
   return { ...q, refundStatus: refund?.status || null };
 }
 
+// A regular clean's visits for the admin and customer pages: the first clean and everything
+// from yesterday on (up to 12), with a plain status.
+async function visitsFor(sub, now = new Date()) {
+  const from = new Date(now.getTime() - DAY_MS);
+  const rows = await Booking.find({
+    "meta.subscriptionId": sub._id,
+    $or: [{ _id: sub.firstBooking }, { "schedule.date": { $gte: from } }],
+  }).sort({ "schedule.date": 1 }).limit(14)
+    .select("bookingId schedule status payment.status payment.amount payment.chargeOnArrival payment.paymentLinkUrl assignedWorkerName meta.setupFee")
+    .lean();
+  return rows.map((b) => {
+    const waiting = ["Pending", "Awaiting Payment"].includes(b.status);
+    const paid = ["Completed", "Paid", "Authorized"].includes(b.payment?.status);
+    const state =
+      b.status === "Cancelled" ? "cancelled"
+      : waiting && b.payment?.status === "Failed" ? "payment_needed"
+      : waiting && !paid ? (b.payment?.chargeOnArrival ? "charged_48h_before" : "awaiting_first_payment")
+      : ["Completed", "Completed - Unpaid"].includes(b.status) ? "done"
+      : "confirmed";
+    return {
+      _id: b._id, bookingId: b.bookingId, date: b.schedule?.date, time: b.schedule?.preferredTime || b.schedule?.timeSlot || "",
+      status: b.status, state, amount: b.payment?.amount, setupFee: b.meta?.setupFee || 0,
+      cleaner: b.assignedWorkerName || "", payLink: state === "payment_needed" ? b.payment?.paymentLinkUrl || "" : "",
+      first: String(b._id) === String(sub.firstBooking),
+    };
+  });
+}
+
 async function nextVisitFor(sub, now = new Date()) {
   return Booking.findOne({ "meta.subscriptionId": sub._id, status: { $ne: "Cancelled" }, "schedule.date": { $gte: new Date(now.getTime() - 12 * 3600000) } })
     .sort({ "schedule.date": 1 })
@@ -884,6 +923,7 @@ module.exports = {
   resumeSubscription,
   cancelSubscription,
   nextVisitFor,
+  visitsFor,
   cancellationQuote,
   handleCheckoutCompleted,
   startSubscriptionScheduler,

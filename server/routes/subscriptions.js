@@ -10,6 +10,7 @@ const {
   resumeSubscription,
   cancelSubscription,
   nextVisitFor,
+  visitsFor,
   cancellationQuote,
 } = require("../utils/subscriptions");
 
@@ -22,7 +23,9 @@ async function withNextVisit(subs) {
       delete o.template;
       delete o.stripeCustomerId;
       delete o.stripePaymentMethodId;
-      return { ...o, nextVisit: await nextVisitFor(s) };
+      // Every visit from now on (and the first clean), so admin and the customer can see what's
+      // paid, what's charged 48 hours before, and when the next clean is.
+      return { ...o, nextVisit: await nextVisitFor(s), visits: await visitsFor(s) };
     }),
   );
 }
@@ -44,7 +47,8 @@ const mine = (req) => ({ "customer.email": String(req.customer?.email || "").toL
 
 router.get("/my", verifyCustomer, async (req, res) => {
   try {
-    const subs = await Subscription.find({ ...mine(req), status: { $ne: "pending_payment" } }).sort({ createdAt: -1 });
+    // Including ones waiting for their first payment (e.g. set up by our team with a payment link).
+    const subs = await Subscription.find({ ...mine(req) }).sort({ createdAt: -1 });
     res.json(await withNextVisit(subs));
   } catch (err) {
     res.status(500).json({ message: err.message });

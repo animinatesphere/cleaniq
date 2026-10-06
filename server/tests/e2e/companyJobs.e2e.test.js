@@ -117,8 +117,13 @@ test("admin confirming a pending company job from Bookings offers it and syncs t
   assert.equal(res.status, 200);
   assert.equal(await jobStatus(r.data.jobId), "approved");
   assert.ok((await offers()).includes(booking.bookingId));
-  await new Promise((res) => setTimeout(res, 100));
-  assert.equal(await Notification.countDocuments({ workerId: worker, title: "New Job Available!" }), 1);
+  // Cleaners are told in the background: wait up to 5s for it.
+  let told = 0;
+  for (let i = 0; i < 50 && !told; i++) {
+    told = await Notification.countDocuments({ workerId: worker, title: "New Job Available!" });
+    if (!told) await new Promise((res) => setTimeout(res, 100));
+  }
+  assert.equal(told, 1);
 });
 
 test("older bookings that stored the JOB- reference still sync", async () => {

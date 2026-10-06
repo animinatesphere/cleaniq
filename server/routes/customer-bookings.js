@@ -86,6 +86,7 @@ router.post('/', async (req, res) => {
         subscription = await subscriptions.createSubscription(newBooking, {
           visitPrice: req.body.subscription?.visitPrice,
           source: paidOnWebsite ? 'Website' : 'App',
+          bookAhead: !paidOnWebsite,
         });
         if (paidOnWebsite) {
           await subscriptions.activateSubscription(subscription, req.body.payment.stripePaymentIntentId);

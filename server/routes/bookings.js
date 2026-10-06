@@ -463,8 +463,17 @@ async function createBooking(body) {
     Number(newBooking.payment?.amount) > 0
   ) {
     try {
+      const visitPrice = Number(newBooking.payment.amount);
+      // The one-off set-up fee (admin → Regular Cleans) is added to the first payment only.
+      const fee = await subscriptions.getSetupFee();
+      if (fee.enabled) {
+        newBooking.payment.amount = Math.round((visitPrice + fee.amount) * 100) / 100;
+        newBooking.meta = { ...(newBooking.meta || {}), setupFee: fee.amount, setupFeeLabel: fee.label };
+        newBooking.markModified("meta");
+        await newBooking.save();
+      }
       regularClean = await subscriptions.createSubscription(newBooking, {
-        visitPrice: newBooking.payment.amount, source: "Admin", trustPrice: true,
+        visitPrice, source: "Admin", trustPrice: true,
       });
     } catch (subErr) {
       console.error(`Regular clean setup (admin) failed for ${newBooking.bookingId}, using a booking series:`, subErr.message);
