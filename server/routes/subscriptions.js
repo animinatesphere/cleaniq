@@ -24,7 +24,7 @@ async function withNextVisit(subs) {
       delete o.stripeCustomerId;
       delete o.stripePaymentMethodId;
       // Every visit from now on (and the first clean), so admin and the customer can see what's
-      // paid, what's charged 48 hours before, and when the next clean is.
+      // paid, what's charged 24 hours before, and when the next clean is.
       return { ...o, nextVisit: await nextVisitFor(s), visits: await visitsFor(s) };
     }),
   );
@@ -63,7 +63,7 @@ router.get("/my/:id/cancellation-fee", verifyCustomer, async (req, res) => {
     const q = await cancellationQuote(sub);
     res.json({
       fee: q.fee, rule: q.rule || "", hoursUntilNextVisit: q.hoursUntilNextVisit ?? null, nextVisitStart: q.nextVisit?.start || null,
-      // Next clean already paid (48h ahead): the fee is kept from its refund rather than charged.
+      // Next clean already paid (24h ahead): the fee is kept from its refund rather than charged.
       nextVisitPaid: Boolean(q.nextVisitPaid), refund: q.refund || 0,
     });
   } catch (err) {

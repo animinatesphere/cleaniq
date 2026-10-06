@@ -19,7 +19,7 @@ const when = (d) =>
 const VISIT = {
   confirmed: ["Paid · confirmed", "#047857", "#ECFDF5"],
   done: ["Done", "#1D4ED8", "#EFF6FF"],
-  charged_48h_before: ["Charged 48h before", "#475569", "#F1F5F9"],
+  charged_before: ["Charged 24h before", "#475569", "#F1F5F9"],
   awaiting_first_payment: ["After your first payment", "#64748B", "#F1F5F9"],
   payment_needed: ["Payment needed", "#B45309", "#FFFBEB"],
 };
@@ -166,7 +166,7 @@ export default function RegularCleansScreen({ navigation }) {
                   );
                 })()}
                 <Text style={[styles.muted, { marginTop: 8 }]}>
-                  Charged to your saved card 48 hours before each clean. Ref {s.subscriptionRef}
+                  Charged to your saved card 24 hours before each clean. Ref {s.subscriptionRef}
                 </Text>
                 <View style={styles.actions}>
                   {s.status === "active" && (

@@ -256,7 +256,7 @@ const NewBookingPage = () => {
   const [touched, setTouched] = useState({});
   const [createTotal, setCreateTotal] = useState(0);
   // Regular cleans with a payment link: one-off set-up fee on the first payment (Admin → Regular Cleans).
-  const [setupFee, setSetupFee] = useState({ enabled: false, amount: 0, label: "Set-up fee" });
+  const [setupFee, setSetupFee] = useState({ enabled: false, amount: 0, per: "hour", label: "Sign-up fee" });
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/subscriptions/setup-fee`).then((r) => r.json())
       .then((f) => { if (f && typeof f.amount === "number") setSetupFee(f); }).catch(() => {});
@@ -2080,10 +2080,14 @@ const NewBookingPage = () => {
                 </div>
                 {!noPaymentRequired && isRegularWithLink && (
                   <div className="mt-2 space-y-0.5 text-[11px] text-white/80">
-                    {setupFee.enabled && (
-                      <p>+ {setupFee.label} £{setupFee.amount.toFixed(2)} (first clean only) → first payment <b>£{(createTotal + setupFee.amount).toFixed(2)}</b></p>
-                    )}
-                    <p>Regular clean: the first payment saves their card; each following clean (£{createTotal.toFixed(2)}) is charged 48 hours before and confirmed then.</p>
+                    {setupFee.enabled && (() => {
+                      const hours = Number(data.details?.duration) || 1;
+                      const fee = Math.round((setupFee.per === "clean" ? setupFee.amount : setupFee.amount * hours) * 100) / 100;
+                      return (
+                        <p>+ {setupFee.label} £{fee.toFixed(2)}{setupFee.per === "clean" ? "" : ` (£${setupFee.amount.toFixed(2)}/hour × ${hours}h)`}, first clean only → first payment <b>£{(createTotal + fee).toFixed(2)}</b></p>
+                      );
+                    })()}
+                    <p>Regular clean: the first payment saves their card; each following clean (£{createTotal.toFixed(2)}) is charged 24 hours before and confirmed then.</p>
                   </div>
                 )}
                 {!noPaymentRequired && (

@@ -96,7 +96,7 @@ const adminBooking = (over = {}) => fetch(`${base}/bookings`, {
 
 test("admin weekly booking with a payment link: nothing is confirmed or sent to cleaners until paid", async () => {
   emails.length = 0;
-  await subs.saveSetupFee({ enabled: true, amount: 4, label: "Set-up fee" });
+  await subs.saveSetupFee({ enabled: true, amount: 4, per: "hour", label: "Sign-up fee" }); // £4 per hour
   const r = await adminBooking();
   assert.equal(r.status, 201);
   await settle();
@@ -110,8 +110,8 @@ test("admin weekly booking with a payment link: nothing is confirmed or sent to 
   assert.ok(sub, "set up as a regular clean");
   assert.equal(sub.source, "Admin");
   assert.equal(sub.pricePerVisit, 40, "following cleans: normal price");
-  assert.equal(sub.setupFee, 4);
-  assert.equal(first.payment.amount, 44, "first payment = clean + £4 set-up fee");
+  assert.equal(sub.setupFee, 8, "£4/hour × 2 hours");
+  assert.equal(first.payment.amount, 48, "first payment = clean + sign-up fee");
 
   // All the weekly visits show straight away, Pending, and can't be charged before the card is saved.
   const ahead = await Booking.find({ "meta.subscriptionId": sub._id, _id: { $ne: first._id } }).lean();
@@ -122,7 +122,7 @@ test("admin weekly booking with a payment link: nothing is confirmed or sent to 
   assert.equal(await Booking.countDocuments({ "customer.email": "jo@cust.uk", status: "Confirmed" }), 0);
   const link = stripeCalls.filter((c) => c[0] === "checkout").at(-1)[1];
   assert.equal(link.metadata.type, "subscription_first");
-  assert.equal(link.line_items[0].price_data.unit_amount, 4400);
+  assert.equal(link.line_items[0].price_data.unit_amount, 4800);
   assert.equal(link.payment_intent_data.setup_future_usage, "off_session");
   // The customer gets the full summary: dates, price, set-up fee, first payment, Pay button.
   const summary = emails.find((e) => e.to === "jo@cust.uk" && /regular clean — summary/.test(e.subject));
@@ -130,11 +130,11 @@ test("admin weekly booking with a payment link: nothing is confirmed or sent to 
   assert.match(summary.html, /Your upcoming cleans/);
   assert.match(summary.html, /first clean/);
   assert.match(summary.html, /Set-up fee/);
-  assert.match(summary.html, /Pay £44\.00 to confirm/);
+  assert.match(summary.html, /Pay £48\.00 to confirm/);
   assert.match(summary.html, /checkout\.test/);
 
   // Customer pays the first clean → first visit confirmed and announced once; the rest stay Pending.
-  intents.pi_first = { id: "pi_first", status: "succeeded", amount: 4400, customer: "cus_1", payment_method: "pm_1" };
+  intents.pi_first = { id: "pi_first", status: "succeeded", amount: 4800, customer: "cus_1", payment_method: "pm_1" };
   await subs.handleCheckoutCompleted({ metadata: link.metadata, payment_intent: "pi_first" });
   await settle();
   assert.equal((await Booking.findById(first._id)).status, "Confirmed");
@@ -150,8 +150,8 @@ test("admin weekly booking with a payment link: nothing is confirmed or sent to 
   const visits = await subs.visitsFor(await Subscription.findById(sub._id));
   assert.equal(visits[0].first, true);
   assert.equal(visits[0].state, "confirmed");
-  assert.equal(visits[0].setupFee, 4);
-  assert.ok(visits.slice(1).every((v) => v.state === "charged_48h_before"));
+  assert.equal(visits[0].setupFee, 8);
+  assert.ok(visits.slice(1).every((v) => v.state === "charged_before"));
   assert.ok(!(await feed()).some((ref) => later.map((v) => v.bookingId).includes(ref)), "unpaid visits hidden from cleaners");
   assert.equal((await alertsFor(later[0].bookingId)).notifications, 0);
 
@@ -159,7 +159,7 @@ test("admin weekly booking with a payment link: nothing is confirmed or sent to 
   await settle();
   emails.length = 0;
   const startOf = (b) => require("../../utils/bookingDateTime").buildBookingDateTime(b.schedule.date, b.schedule.timeSlot, b.schedule.preferredTime);
-  const at = new Date(startOf(later[0]).getTime() - 47 * 3600000);
+  const at = new Date(startOf(later[0]).getTime() - 23 * 3600000);
   await subs.processDueCharges(at);
   await subs.processDueCharges(new Date(at.getTime() + 15 * 60000));
   await settle();

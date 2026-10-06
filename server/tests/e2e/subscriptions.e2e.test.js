@@ -436,7 +436,7 @@ test("Deep Cleaning every 3 months: visits 3 months apart at the quarterly price
 });
 
 
-// ── Charged 48 hours before each clean ─────────────────────────────────────────
+// ── Charged 24 hours before each clean ─────────────────────────────────────────
 const startOfVisit = (b) => require("../../utils/bookingDateTime").buildBookingDateTime(b.schedule.date, b.schedule.timeSlot, b.schedule.preferredTime);
 const hoursBefore = (b, h) => new Date(startOfVisit(b).getTime() - h * 3600000);
 const callsOf = (name) => stripeCalls.filter((c) => c[0] === name);
@@ -451,18 +451,18 @@ async function newRegular(email) {
   return { s, second, third };
 }
 
-test("48h before: the next clean is charged once, the customer gets a receipt; later cleans wait", async () => {
+test("24h before: the next clean is charged once, the customer gets a receipt; later cleans wait", async () => {
   const { second, third } = await newRegular("adv-ok@test.com");
   emails.length = 0;
   // Other test customers' cleans may fall due too; count this customer's charges only.
   const chargesFor = (b) => callsOf("paymentIntents.create").filter((c) => c[1].metadata?.bookingId === String(b._id));
 
-  // 50h before: too early.
-  await subs.processDueCharges(hoursBefore(second, 50));
+  // 26h before: too early.
+  await subs.processDueCharges(hoursBefore(second, 26));
   assert.equal(chargesFor(second).length, 0);
 
-  // 47h before: charged.
-  const r = await subs.processDueCharges(hoursBefore(second, 47));
+  // 23h before: charged.
+  const r = await subs.processDueCharges(hoursBefore(second, 23));
   assert.ok(r.charged >= 1);
   assert.equal(chargesFor(second).length, 1);
   const charge = chargesFor(second)[0];
@@ -473,55 +473,55 @@ test("48h before: the next clean is charged once, the customer gets a receipt; l
   assert.equal(paid.payment.status, "Completed");
   assert.equal((await Booking.findById(third._id)).payment.status, "Pending", "the clean after waits its turn");
   await new Promise((res) => setTimeout(res, 20));
-  assert.ok(emails.some((e) => e.to === "adv-ok@test.com" && /Payment received/.test(e.subject)));
+  assert.ok(emails.some((e) => e.to === "adv-ok@test.com" && /Your clean is .* — confirmed/.test(e.subject) && /Payment received/.test(e.html)));
 
   // Runs again (every 15 min) and when the cleaner arrives: never charged twice.
-  await subs.processDueCharges(hoursBefore(second, 46.75));
+  await subs.processDueCharges(hoursBefore(second, 22.75));
   const arrive = await call("POST", `/workers/jobs/${second._id}/arrive`);
   assert.equal(arrive.data.visitPayment.skipped, true);
   assert.equal(chargesFor(second).length, 1, "charged exactly once");
   assert.equal(chargesFor(third).length, 0);
 });
 
-test("declined 48h before: payment link + admin alert; retried 24h before; still unpaid 12h before → that clean is cancelled", async () => {
+test("declined 24h before: payment link + admin alert; retried 12h before; still unpaid 6h before → that clean is cancelled", async () => {
   const { s, second, third } = await newRegular("adv-fail@test.com");
   await Booking.updateOne({ _id: second._id }, { $set: { assignedWorker: new mongoose.Types.ObjectId(), assignedWorkerName: "Kelvin Obi", status: "Assigned" } });
   nextCharge = () => ({ error: { code: "card_declined", message: "Your card was declined." } });
   emails.length = 0;
 
-  await subs.processDueCharges(hoursBefore(second, 47));
+  await subs.processDueCharges(hoursBefore(second, 23));
   let b = await Booking.findById(second._id).lean();
   assert.equal(b.payment.status, "Failed");
   assert.match(b.payment.paymentLinkUrl, /^https:\/\/checkout\.test\//);
   assert.equal(b.meta.chargeAttempts, 1);
   await new Promise((res) => setTimeout(res, 20));
   assert.ok(emails.some((e) => e.to === "adv-fail@test.com" && /Action needed: payment/.test(e.subject)));
-  assert.ok(emails.some((e) => /payment failed/i.test(e.subject) && /48 hours before/.test(e.html)));
+  assert.ok(emails.some((e) => /payment failed/i.test(e.subject) && /24 hours before/.test(e.html)));
 
-  // 30h before: not yet retried.
+  // 18h before: not yet retried.
   const tries = callsOf("paymentIntents.create").length;
-  await subs.processDueCharges(hoursBefore(second, 30));
+  await subs.processDueCharges(hoursBefore(second, 18));
   assert.equal(callsOf("paymentIntents.create").length, tries);
 
-  // 23h before: retried once with a new key; still declined → reminder, old link replaced.
+  // 11h before: retried once with a new key; still declined → reminder, old link replaced.
   emails.length = 0;
-  await subs.processDueCharges(hoursBefore(second, 23));
-  await subs.processDueCharges(hoursBefore(second, 22.75));
+  await subs.processDueCharges(hoursBefore(second, 11));
+  await subs.processDueCharges(hoursBefore(second, 10.75));
   assert.equal(callsOf("paymentIntents.create").length, tries + 1, "one retry only");
   assert.equal(callsOf("paymentIntents.create").at(-1)[2].idempotencyKey, `visit-charge-${second._id}-2`);
   assert.ok(callsOf("checkout.expire").length >= 1, "first link expired");
   await new Promise((res) => setTimeout(res, 20));
   assert.ok(emails.some((e) => /Reminder: payment still needed/.test(e.subject)));
 
-  // 11h before: cancelled; cleaner and customer told; regular clean continues.
+  // 5h before: cancelled; cleaner and customer told; regular clean continues.
   emails.length = 0;
   const expiredBefore = callsOf("checkout.expire").length;
-  const r = await subs.processDueCharges(hoursBefore(second, 11));
+  const r = await subs.processDueCharges(hoursBefore(second, 5));
   nextCharge = () => ({ status: "succeeded" });
   assert.equal(r.cancelled, 1);
   b = await Booking.findById(second._id).lean();
   assert.equal(b.status, "Cancelled");
-  assert.match(b.meta.cancelledReason, /Not paid 12 hours/);
+  assert.match(b.meta.cancelledReason, /Not paid 6 hours/);
   assert.equal(callsOf("checkout.expire").length, expiredBefore + 1, "payment link closed");
   assert.equal((await Subscription.findById(s._id)).status, "active");
   assert.equal((await Booking.findById(third._id)).status, "Pending", "next week's clean still on (paid nearer the time)");
@@ -538,26 +538,26 @@ test("declined 48h before: payment link + admin alert; retried 24h before; still
   assert.equal((await Booking.findById(second._id)).status, "Cancelled");
 });
 
-test("the retry 24h before can save the clean", async () => {
+test("the retry 12h before can save the clean", async () => {
   const { second } = await newRegular("adv-retry@test.com");
   nextCharge = () => ({ error: { code: "card_declined", message: "Your card was declined." } });
-  await subs.processDueCharges(hoursBefore(second, 47));
+  await subs.processDueCharges(hoursBefore(second, 23));
   nextCharge = () => ({ status: "succeeded" });
   const expired = callsOf("checkout.expire").length;
-  await subs.processDueCharges(hoursBefore(second, 23));
+  await subs.processDueCharges(hoursBefore(second, 11));
   const b = await Booking.findById(second._id).lean();
   assert.equal(b.payment.status, "Completed");
   assert.equal(b.status, "Confirmed");
   assert.equal(callsOf("checkout.expire").length, expired + 1, "the unpaid link is closed");
-  await subs.processDueCharges(hoursBefore(second, 11));
+  await subs.processDueCharges(hoursBefore(second, 5));
   assert.equal((await Booking.findById(second._id)).status, "Confirmed", "paid cleans are never cancelled");
 });
 
-test("a clean first charged under 12h before (e.g. booked late) isn't auto-cancelled", async () => {
+test("a clean first charged under 6h before (e.g. booked late) isn't auto-cancelled", async () => {
   const { second } = await newRegular("adv-late@test.com");
   nextCharge = () => ({ error: { code: "card_declined", message: "Your card was declined." } });
-  await subs.processDueCharges(hoursBefore(second, 8));
-  await subs.processDueCharges(hoursBefore(second, 7));
+  await subs.processDueCharges(hoursBefore(second, 5));
+  await subs.processDueCharges(hoursBefore(second, 4.5));
   nextCharge = () => ({ status: "succeeded" });
   const b = await Booking.findById(second._id).lean();
   assert.equal(b.payment.status, "Failed");
@@ -567,7 +567,7 @@ test("a clean first charged under 12h before (e.g. booked late) isn't auto-cance
 test("pausing/cancelling after the advance charge refunds it: 24h+ full; 2–24h £10 kept; admin full", async () => {
   // 30h notice: full refund.
   const a = await newRegular("ref-a@test.com");
-  await subs.processDueCharges(hoursBefore(a.second, 47));
+  await subs.processDueCharges(hoursBefore(a.second, 23));
   const q = await subs.cancellationQuote(a.s, hoursBefore(a.second, 30));
   assert.equal(q.nextVisitPaid, true);
   assert.equal(q.refund, 41);
@@ -582,7 +582,7 @@ test("pausing/cancelling after the advance charge refunds it: 24h+ full; 2–24h
 
   // 10h notice: £31 back, £10 kept; no separate fee charge.
   const c = await newRegular("ref-c@test.com");
-  await subs.processDueCharges(hoursBefore(c.second, 47));
+  await subs.processDueCharges(hoursBefore(c.second, 23));
   const charges = callsOf("paymentIntents.create").length;
   const res = await subs.cancelSubscription(c.s, "customer", { now: hoursBefore(c.second, 10), chargeFee: true });
   assert.equal(callsOf("paymentIntents.create").length, charges, "fee not charged on top");
@@ -595,14 +595,14 @@ test("pausing/cancelling after the advance charge refunds it: 24h+ full; 2–24h
 
   // Admin cancels with 1h notice: full refund.
   const d = await newRegular("ref-d@test.com");
-  await subs.processDueCharges(hoursBefore(d.second, 47));
+  await subs.processDueCharges(hoursBefore(d.second, 23));
   await subs.cancelSubscription(d.s, "staff1", { now: hoursBefore(d.second, 1) });
   assert.equal(callsOf("refunds.create").at(-1)[1].amount, 4100);
 });
 
 test("customer cancels one paid clean: preview and refund follow the same rule", async () => {
   const { second } = await newRegular("one@test.com");
-  await subs.processDueCharges(hoursBefore(second, 47));
+  await subs.processDueCharges(hoursBefore(second, 23));
   const token = customerToken("one@test.com");
   const p = await call("GET", `/customer-bookings/${second._id}/cancel-preview`, null, token);
   assert.equal(p.status, 200);
@@ -622,7 +622,7 @@ test("customer cancels one paid clean: preview and refund follow the same rule",
 // ── One-off set-up fee on the first clean ──────────────────────────────────────
 test("set-up fee: admin sets it; the app's first payment includes it; later cleans are the normal price", async () => {
   assert.equal((await call("PUT", "/subscriptions/setup-fee", { enabled: true, amount: 25 })).status, 401, "admin only");
-  const set = await call("PUT", "/subscriptions/setup-fee", { enabled: true, amount: 25, label: "Set-up fee" }, adminToken);
+  const set = await call("PUT", "/subscriptions/setup-fee", { enabled: true, amount: 25, per: "clean", label: "Set-up fee" }, adminToken);
   assert.equal(set.data.amount, 25);
   assert.equal((await call("GET", "/subscriptions/setup-fee")).data.enabled, true);
 

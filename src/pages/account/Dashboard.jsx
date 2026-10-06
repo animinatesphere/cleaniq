@@ -22,12 +22,12 @@ const STATUS_STYLES = {
 };
 
 // What a booking's status means for the customer. Regular-clean visits are Pending until they're
-// charged (48 hours before), which is normal — not something to worry about.
+// charged (24 hours before), which is normal — not something to worry about.
 function statusView(b) {
   const regular = Boolean(b.meta?.subscriptionId);
   const waiting = ['Pending', 'Awaiting Payment'].includes(b.status);
   if (waiting && b.payment?.status === 'Failed') return { label: 'Payment needed', cls: 'bg-amber-50 text-amber-700 border-amber-200' };
-  if (regular && waiting && b.payment?.chargeOnArrival) return { label: 'Booked · paid 48h before', cls: 'bg-sky-50 text-sky-700 border-sky-100' };
+  if (regular && waiting && b.payment?.chargeOnArrival) return { label: 'Booked · paid 24h before', cls: 'bg-sky-50 text-sky-700 border-sky-100' };
   if (waiting) return { label: 'Awaiting payment', cls: STATUS_STYLES.Pending };
   return { label: b.status, cls: STATUS_STYLES[b.status] || STATUS_STYLES.Pending };
 }
@@ -138,7 +138,7 @@ export default function CustomerDashboard() {
 
   const handleLogout = () => { logout(); navigate('/'); };
 
-  // Regular-clean visits are paid 48h ahead: show what cancelling would refund before confirming.
+  // Regular-clean visits are paid 24h ahead: show what cancelling would refund before confirming.
   useEffect(() => {
     setCancelPreview(null);
     if (!cancelModal) return;
@@ -406,7 +406,7 @@ export default function CustomerDashboard() {
                         <span className="font-black text-primary-dark">{region.symbol}{Number(b.payment?.amount || 0).toFixed(2)}</span>
                       </div>
                       {b.meta?.subscriptionId && ['Pending', 'Awaiting Payment'].includes(b.status) && b.payment?.chargeOnArrival && b.payment?.status !== 'Failed' && (
-                        <p className="text-xs font-semibold text-slate-500">Part of your regular clean — charged to your saved card 48 hours before, then confirmed.</p>
+                        <p className="text-xs font-semibold text-slate-500">Part of your regular clean — charged to your saved card 24 hours before, then confirmed.</p>
                       )}
                       {b.payment?.status === 'Failed' && ['Pending', 'Awaiting Payment'].includes(b.status) && (
                         <p className="text-xs font-bold text-amber-700">We couldn&apos;t take payment for this clean. Please pay before it, or it may be cancelled.</p>

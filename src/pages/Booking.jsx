@@ -272,7 +272,7 @@ const Booking = () => {
 
   const [totalPrice, setTotalPrice] = useState(0);
   // Regular cleans: one-off set-up fee added to the first payment (admin → Regular Cleans).
-  const [setupFee, setSetupFee] = useState({ enabled: false, amount: 0, label: "Set-up fee" });
+  const [setupFee, setSetupFee] = useState({ enabled: false, amount: 0, per: "hour", label: "Sign-up fee" });
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/subscriptions/setup-fee`)
       .then((r) => r.json())
@@ -855,7 +855,10 @@ const Booking = () => {
     ...(pricedFrequencies.length ? pricedFrequencies : defaultFrequencies(formData.serviceType)),
   ];
   const isRegular = formData.frequency !== "Once" && offeredFrequencies.includes(formData.frequency);
-  const feeToday = isRegular && setupFee.enabled ? setupFee.amount : 0;
+  // £ per hour of the first clean (or a flat amount), same as the server.
+  const feeToday = isRegular && setupFee.enabled
+    ? Math.round((setupFee.per === "clean" ? setupFee.amount : setupFee.amount * (Number(formData.duration) || 1)) * 100) / 100
+    : 0;
   // What the customer pays now: the clean, plus the set-up fee for a new regular clean.
   const amountToday = Math.round((Number(totalPrice || 0) + feeToday) * 100) / 100;
   const regularEvery = REGULAR_EVERY[formData.frequency] || "";
@@ -1084,7 +1087,7 @@ const Booking = () => {
           </h1>
           <p className="text-slate-500 font-bold mb-10 max-w-md mx-auto">
             {isRegular
-              ? `Your regular clean is set up ${regularEvery}. Your first clean is paid; each following clean is charged 48 hours before it. Check your email for the details.`
+              ? `Your regular clean is set up ${regularEvery}. Your first clean is paid; each following clean is charged 24 hours before it. Check your email for the details.`
               : "Check your email for confirmation."}
           </p>
           <Link
@@ -1471,7 +1474,7 @@ const Booking = () => {
                                   {regularEvery}
                                 </li>
                                 <li>Pay for your first clean today{feeToday > 0 ? ` (plus a one-off ${setupFee.label.toLowerCase()} of £${feeToday.toFixed(2)})` : ""}</li>
-                                <li>Each following clean is charged 48 hours before the clean</li>
+                                <li>Each following clean is charged 24 hours before the clean</li>
                                 <li>Pause or cancel free with 24 hours&apos; notice</li>
                               </ul>
                             </div>
@@ -2167,7 +2170,7 @@ const Booking = () => {
                                     </div>
                                     {feeToday > 0 && (
                                       <div className="flex justify-between text-sm font-bold text-slate-700">
-                                        <span>{setupFee.label} <span className="font-semibold text-slate-400">(first clean only)</span></span>
+                                        <span>{setupFee.label} <span className="font-semibold text-slate-400">({setupFee.per === "clean" ? "first clean only" : `£${setupFee.amount.toFixed(2)}/hour × ${formData.duration}h, first clean only`})</span></span>
                                         <span className="tabular-nums">£{feeToday.toFixed(2)}</span>
                                       </div>
                                     )}
@@ -2185,7 +2188,7 @@ const Booking = () => {
                                       <p className="text-[11px] text-slate-500 font-semibold">Prices include {tax.label} at {tax.rate}%.</p>
                                     )}
                                     <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
-                                      Following cleans are charged to this card 48 hours before each clean.
+                                      Following cleans are charged to this card 24 hours before each clean.
                                       Pause or cancel any time from your account: free with 24 hours&apos; notice, otherwise
                                       the late-notice charges in our{" "}
                                       <Link to="/terms" target="_blank" className="underline">
@@ -2202,7 +2205,7 @@ const Booking = () => {
                                       />
                                       <span className="text-xs font-bold text-slate-700 leading-relaxed">
                                         I agree that Cleaniq Services can save my card and charge £{visitPrice.toFixed(2)} for each
-                                        following clean 48 hours before the clean, until I pause or cancel.
+                                        following clean 24 hours before the clean, until I pause or cancel.
                                       </span>
                                     </label>
                                   </div>

@@ -2,9 +2,9 @@
 //  1. The customer books a weekly/fortnightly/monthly clean and pays for the FIRST visit at once;
 //     Stripe saves the card for later ("off-session") charges.
 //  2. Later visits are Bookings created a few weeks ahead on a rolling basis (topUpVisits).
-//  3. Each later visit is charged to the saved card 48 hours before the clean (processDueCharges).
+//  3. Each later visit is charged to the saved card 24 hours before the clean (processDueCharges).
 //     If that fails: the customer is emailed a payment link and admin alerted; the card is tried
-//     again 24 hours before; still unpaid 12 hours before → that clean is cancelled (the regular
+//     again 12 hours before; still unpaid 6 hours before → that clean is cancelled (the regular
 //     clean carries on). Arrival still charges anything missed (chargeVisitOnArrival) as a safety net.
 //  4. Customer or admin can pause, resume or cancel; future visits are cancelled/recreated, and
 //     visits already paid are refunded (minus any late-notice fee).
@@ -52,10 +52,10 @@ const startOfTomorrow = (now = new Date()) => {
 const DAY_MS = 86400000;
 const HOUR_MS = 3600000;
 // When a visit is charged, retried and (if still unpaid) cancelled, in hours before the clean.
-const CHARGE_BEFORE_H = 48;
-const RETRY_BEFORE_H = 24;
-const CANCEL_UNPAID_BEFORE_H = 12;
-const MIN_RETRY_GAP_H = 6;
+const CHARGE_BEFORE_H = 24;
+const RETRY_BEFORE_H = 12;
+const CANCEL_UNPAID_BEFORE_H = 6;
+const MIN_RETRY_GAP_H = 4;
 const pence = (gbp) => Math.round(Number(gbp || 0) * 100);
 const ukDate = (d) =>
   new Date(d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/London" });
@@ -115,17 +115,30 @@ function templateFrom(booking) {
 
 // One-off set-up fee added to the FIRST payment of a regular clean (admin → Regular Cleans).
 // Later cleans are the normal price.
-const SETUP_FEE_DEFAULTS = { enabled: false, amount: 0, label: "Set-up fee" };
+// per: "hour" = amount × the first clean's hours (e.g. £4/hour × 3h = £12); "clean" = a flat amount.
+const SETUP_FEE_DEFAULTS = { enabled: false, amount: 0, per: "hour", label: "Sign-up fee" };
 async function getSetupFee() {
   const row = await require("../models/SystemSetting").findOne({ key: "regularSetupFee" }).lean();
   const v = { ...SETUP_FEE_DEFAULTS, ...(row?.value || {}) };
   const amount = Math.max(0, Math.round(Number(v.amount || 0) * 100) / 100);
-  return { enabled: Boolean(v.enabled) && amount > 0, amount, label: String(v.label || SETUP_FEE_DEFAULTS.label).slice(0, 40) };
+  return {
+    enabled: Boolean(v.enabled) && amount > 0,
+    amount,
+    per: v.per === "clean" ? "clean" : "hour",
+    label: String(v.label || SETUP_FEE_DEFAULTS.label).slice(0, 40),
+  };
+}
+// The fee in £ for a first clean of `hours` hours.
+function setupFeeFor(fee, hours) {
+  if (!fee?.enabled) return 0;
+  const h = Number(hours) > 0 ? Number(hours) : 1;
+  return Math.round((fee.per === "hour" ? fee.amount * h : fee.amount) * 100) / 100;
 }
 async function saveSetupFee(input = {}) {
   const value = {
     enabled: Boolean(input.enabled),
     amount: Math.min(1000, Math.max(0, Math.round(Number(input.amount || 0) * 100) / 100)),
+    per: input.per === "clean" ? "clean" : "hour",
     label: String(input.label || SETUP_FEE_DEFAULTS.label).trim().slice(0, 40) || SETUP_FEE_DEFAULTS.label,
   };
   await require("../models/SystemSetting").updateOne({ key: "regularSetupFee" }, { $set: { value } }, { upsert: true });
@@ -190,7 +203,7 @@ async function sendFirstPaymentLink(booking, sub) {
         currency: (booking.payment?.currency || "GBP").toLowerCase(),
         product_data: {
           name: `Cleaniq - ${booking.service} (first clean${sub.setupFee > 0 ? " + set-up fee" : ""})`,
-          description: `${sub.frequency} regular clean ${sub.subscriptionRef}.${sub.setupFee > 0 ? ` Includes the one-off £${sub.setupFee.toFixed(2)} set-up fee.` : ""} Later cleans £${sub.pricePerVisit.toFixed(2)} each, charged 48 hours before each clean.`,
+          description: `${sub.frequency} regular clean ${sub.subscriptionRef}.${sub.setupFee > 0 ? ` Includes the one-off £${sub.setupFee.toFixed(2)} set-up fee.` : ""} Later cleans £${sub.pricePerVisit.toFixed(2)} each, charged 24 hours before each clean.`,
         },
         unit_amount: pence(booking.payment.amount),
       },
@@ -243,7 +256,7 @@ async function activateSubscription(sub, paymentIntentId, { now = new Date() } =
   sub.stripePaymentMethodId = paymentMethodId;
   sub.template = { ...sub.template, payment: { ...(sub.template?.payment || {}), stripeCustomerId: customerId, stripePaymentMethodId: paymentMethodId } };
   await sub.save();
-  // Visits booked before the card was saved can now be charged (48 hours before each clean).
+  // Visits booked before the card was saved can now be charged (24 hours before each clean).
   await Booking.updateMany(
     { "meta.subscriptionId": sub._id, _id: { $ne: first._id }, status: { $in: ["Pending", "Awaiting Payment"] }, "payment.status": "Pending" },
     { $set: { "payment.chargeOnArrival": true, "payment.stripeCustomerId": customerId, "payment.stripePaymentMethodId": paymentMethodId } },
@@ -282,7 +295,7 @@ async function topUpVisits(sub, { now = new Date() } = {}) {
       bookingId,
       schedule: { ...(t.schedule || {}), date: next },
       // Unpaid: not shown to cleaners. Becomes Confirmed (and announced) when it's charged,
-      // 48 hours before the clean.
+      // 24 hours before the clean.
       status: "Pending",
       skipConfirmationEmail: true,
       noPaymentRequired: false,
@@ -390,7 +403,7 @@ const visitWhen = (booking) => {
   return `${ukDate(booking.schedule?.date)}${time ? ` at ${time}` : ""}`;
 };
 
-// stage: "advance" (48h before), "retry" (24h before) or "arrival" (cleaner arrived, not paid).
+// stage: "advance" (24h before), "retry" (12h before) or "arrival" (cleaner arrived, not paid).
 async function markVisitPaymentFailed(booking, reason, { stage = "arrival" } = {}) {
   const p = booking.payment || {};
   let url = "";
@@ -445,17 +458,17 @@ async function markVisitPaymentFailed(booking, reason, { stage = "arrival" } = {
       subject: `Action needed: payment for your clean on ${ukDate(booking.schedule?.date)} – ${booking.bookingId}`,
       title: "We couldn't take payment for your next clean",
       body: `<p>We tried to charge your saved card ${amount} for your regular ${booking.service} on <strong>${when}</strong>, but the payment didn't go through.</p>
-        <p>Please pay using the button below. We'll try your card again 24 hours before the clean. If it's still unpaid 12 hours before, this clean will be cancelled (your regular clean carries on as normal).</p>`,
+        <p>Please pay using the button below. We'll try your card again 12 hours before the clean. If it's still unpaid 6 hours before, this clean will be cancelled (your regular clean carries on as normal).</p>`,
       push: [`Payment needed for your clean on ${ukDate(booking.schedule?.date)}`, `We couldn't charge your saved card (${amount}). Check your email for a link to pay.`],
-      admin: "failed 48 hours before the clean",
+      admin: "failed 24 hours before the clean",
     },
     retry: {
       subject: `Reminder: payment still needed for your clean on ${ukDate(booking.schedule?.date)} – ${booking.bookingId}`,
       title: "Your next clean is still unpaid",
       body: `<p>We tried your saved card again for your regular ${booking.service} on <strong>${when}</strong> (${amount}), but it didn't go through.</p>
-        <p><strong>Please pay at least 12 hours before the clean</strong>, otherwise this clean will be cancelled. Your regular clean carries on as normal.</p>`,
-      push: [`Last reminder: pay for your clean on ${ukDate(booking.schedule?.date)}`, `Please pay ${amount} at least 12 hours before, or this clean will be cancelled.`],
-      admin: "failed again 24 hours before the clean (it will be cancelled 12 hours before if still unpaid)",
+        <p><strong>Please pay at least 6 hours before the clean</strong>, otherwise this clean will be cancelled. Your regular clean carries on as normal.</p>`,
+      push: [`Last reminder: pay for your clean on ${ukDate(booking.schedule?.date)}`, `Please pay ${amount} at least 6 hours before, or this clean will be cancelled.`],
+      admin: "failed again 12 hours before the clean (it will be cancelled 6 hours before if still unpaid)",
     },
     arrival: {
       subject: `Payment needed for today's clean – ${booking.bookingId}`,
@@ -485,29 +498,43 @@ async function markVisitPaymentFailed(booking, reason, { stage = "arrival" } = {
 }
 
 // Receipt for an advance charge (push + short email).
+// Charged 24 hours before: one email that says the clean is tomorrow, the payment's been taken
+// and the booking is confirmed (plus a phone notification).
 function sendChargeReceipt(booking) {
-  const amount = `£${Number(booking.payment?.amount || 0).toFixed(2)}`;
-  const when = visitWhen(booking);
-  require("./pushNotifications").pushToBookingCustomer(booking, "Payment taken for your next clean",
-    `${amount} for your ${booking.service} on ${when}.`, { type: "payment" }).catch(() => {});
+  const amount = Number(booking.payment?.amount || 0);
+  const start = visitStart(booking);
+  const ukDay = (d) => new Date(d).toLocaleDateString("en-CA", { timeZone: "Europe/London" });
+  const today = ukDay(new Date());
+  const tomorrow = ukDay(new Date(Date.now() + DAY_MS));
+  const dayLabel = start && ukDay(start) === today ? "today" : start && ukDay(start) === tomorrow ? "tomorrow" : `on ${ukDate(booking.schedule?.date)}`;
+  const time = start ? start.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Europe/London" }).replace(":00", "").replace(" ", "") : "";
+  require("./pushNotifications").pushToBookingCustomer(booking, `Your clean is ${dayLabel} ✅`,
+    `${booking.service}${time ? ` at ${time}` : ""}. £${amount.toFixed(2)} paid — your clean is confirmed.`, { type: "status" }).catch(() => {});
   if (!booking.customer?.email) return;
-  const { sendEmail } = require("./emailService");
+  const { sendEmail, templates } = require("./emailService");
   sendEmail({
     to: booking.customer.email,
-    subject: `Payment received for your clean on ${ukDate(booking.schedule?.date)} – ${booking.bookingId}`,
-    html: `<div style="font-family:sans-serif;max-width:560px"><h2 style="color:#0F6B4C">Payment received</h2>
-      <p>Hi ${booking.customer.firstName || "there"},</p>
-      <p>We've taken <strong>${amount}</strong> from your saved card for your regular ${booking.service} on <strong>${when}</strong>.</p>
-      <p style="color:#64748b">Need to change or cancel? Do it from your account or call +44 7846 726428. With 24 hours' notice or more you get a full refund.<br>Reference: ${booking.bookingId}</p></div>`,
+    subject: `Your clean is ${dayLabel} — confirmed ✅ ${booking.bookingId}`,
+    html: templates.regularVisitConfirmed({
+      firstName: booking.customer.firstName,
+      service: booking.service,
+      dayLabel,
+      dateText: ukDate(booking.schedule?.date),
+      time,
+      address: booking.details?.address || "",
+      amount,
+      ref: booking.bookingId,
+      cleaner: booking.assignedWorkerName || "",
+    }),
   }).catch(() => {});
 }
 
-// Unpaid 12 hours before the clean: cancel that one visit. The regular clean carries on.
+// Unpaid 6 hours before the clean: cancel that one visit. The regular clean carries on.
 async function cancelUnpaidVisit(booking) {
   await expirePaymentLink(booking);
   await Booking.updateOne(
     { _id: booking._id },
-    { $set: { status: "Cancelled", "payment.chargeOnArrival": false, "meta.cancelledReason": "Not paid 12 hours before the clean" } },
+    { $set: { status: "Cancelled", "payment.chargeOnArrival": false, "meta.cancelledReason": "Not paid 6 hours before the clean" } },
   );
   const when = visitWhen(booking);
   const amount = `£${Number(booking.payment?.amount || 0).toFixed(2)}`;
@@ -532,12 +559,12 @@ async function cancelUnpaidVisit(booking) {
   sendEmail({
     to: ADMIN_EMAIL(),
     subject: `Regular clean visit cancelled (unpaid) – ${booking.bookingId}`,
-    html: `<p>${booking.bookingId} on ${when} (${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}, ${booking.customer?.email || ""}) was cancelled automatically: still unpaid 12 hours before the clean.${booking.assignedWorker ? " The cleaner has been told." : ""}</p>`,
+    html: `<p>${booking.bookingId} on ${when} (${booking.customer?.firstName || ""} ${booking.customer?.lastName || ""}, ${booking.customer?.email || ""}) was cancelled automatically: still unpaid 6 hours before the clean.${booking.assignedWorker ? " The cleaner has been told." : ""}</p>`,
   }).catch(() => {});
   console.warn(`[subscriptions] ${booking.bookingId} cancelled: unpaid 12h before`);
 }
 
-// Runs every 15 minutes: charges visits 48h ahead, retries failed ones 24h ahead, and cancels
+// Runs every 15 minutes: charges visits 24h ahead, retries failed ones 12h ahead, and cancels
 // visits still unpaid 12h ahead.
 async function processDueCharges(now = new Date()) {
   const visits = await Booking.find({
@@ -764,7 +791,7 @@ async function cancelSubscription(sub, by, { now = new Date(), chargeFee = false
   return stopSubscription(sub, "cancelled", by, { now, chargeFee: chargeFee && sub.status === "active" });
 }
 
-// The customer cancels ONE visit of their regular clean. Visits are charged 48h ahead, so a paid
+// The customer cancels ONE visit of their regular clean. Visits are charged 24h ahead, so a paid
 // visit is refunded under the same late-notice rule (24h+ full refund; 2–24h £10 kept; under 2h
 // 80% kept). Unpaid visits are cancelled free.
 function visitCancellationQuote(visit, now = new Date()) {
@@ -799,7 +826,7 @@ async function visitsFor(sub, now = new Date()) {
     const state =
       b.status === "Cancelled" ? "cancelled"
       : waiting && b.payment?.status === "Failed" ? "payment_needed"
-      : waiting && !paid ? (b.payment?.chargeOnArrival ? "charged_48h_before" : "awaiting_first_payment")
+      : waiting && !paid ? (b.payment?.chargeOnArrival ? "charged_before" : "awaiting_first_payment")
       : ["Completed", "Completed - Unpaid"].includes(b.status) ? "done"
       : "confirmed";
     return {
@@ -920,7 +947,7 @@ async function topUpAll(now = new Date()) {
 function startSubscriptionScheduler() {
   setTimeout(() => topUpAll().catch(() => {}), 60 * 1000);
   setInterval(() => topUpAll().catch(() => {}), 6 * 60 * 60 * 1000);
-  // Advance charges (48h before each clean), retries and unpaid cancellations.
+  // Advance charges (24h before each clean), retries and unpaid cancellations.
   setTimeout(() => processDueCharges().catch((e) => console.error("[subscriptions] charges:", e.message)), 90 * 1000);
   setInterval(() => processDueCharges().catch((e) => console.error("[subscriptions] charges:", e.message)), 15 * 60 * 1000);
 }
@@ -929,6 +956,7 @@ module.exports = {
   minimumVisitPrice,
   getSetupFee,
   saveSetupFee,
+  setupFeeFor,
   isSubscriptionFrequency,
   normaliseFrequency,
   getOrCreateStripeCustomer,

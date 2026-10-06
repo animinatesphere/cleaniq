@@ -30,7 +30,7 @@ const money = (n) => `£${Number(n || 0).toFixed(2)}`;
 const VISIT = {
   confirmed: ["Paid & confirmed", "bg-emerald-500/15 text-emerald-300"],
   done: ["Done", "bg-sky-500/15 text-sky-300"],
-  charged_48h_before: ["Charged 48h before", "bg-white/10 text-white/60"],
+  charged_before: ["Charged 24h before", "bg-white/10 text-white/60"],
   awaiting_first_payment: ["Awaiting first payment", "bg-amber-500/15 text-amber-300"],
   payment_needed: ["Payment needed", "bg-rose-500/15 text-rose-300"],
   cancelled: ["Cancelled", "bg-white/5 text-white/30 line-through"],
@@ -38,7 +38,7 @@ const VISIT = {
 const day = (d) => (d ? new Date(d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/London" }) : "—");
 
 // Regular cleans (subscriptions): first clean paid at booking, later cleans charged to the
-// saved card 48 hours before each clean. Admin pause/resume/cancel never charges a fee (paid cleans are refunded in full).
+// saved card 24 hours before each clean. Admin pause/resume/cancel never charges a fee (paid cleans are refunded in full).
 export default function Subscriptions() {
   const [filter, setFilter] = useState("active");
   const [subs, setSubs] = useState(null);
@@ -56,7 +56,7 @@ export default function Subscriptions() {
     try {
       const saved = await adminFetch("/subscriptions/setup-fee", { method: "PUT", body: JSON.stringify(fee) });
       setFee(saved);
-      setMsg({ type: "success", text: saved.enabled ? `Set-up fee saved: ${money(saved.amount)} on the first clean of new regular cleans.` : "Set-up fee switched off." });
+      setMsg({ type: "success", text: saved.enabled ? `${saved.label} saved: ${money(saved.amount)}${saved.per === "hour" ? " per hour of" : " on"} the first clean of new regular cleans.` : `${saved.label} switched off.` });
     } catch (e) {
       setMsg({ type: "error", text: e.message });
     } finally {
@@ -108,7 +108,7 @@ export default function Subscriptions() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight">Regular Cleans</h1>
-            <p className="text-sm text-white/40">First clean paid at booking · later cleans charged to the saved card 48h before · retried 24h before · cancelled if unpaid 12h before</p>
+            <p className="text-sm text-white/40">First clean paid at booking · later cleans charged to the saved card 24h before · retried 12h before · cancelled if unpaid 6h before</p>
           </div>
         </div>
         <button onClick={load} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/60 text-sm font-semibold hover:bg-white/10">
@@ -120,7 +120,7 @@ export default function Subscriptions() {
         <div className="rounded-2xl border border-white/10 bg-[#0B2D22] p-5">
           <div className="flex flex-wrap items-end gap-4">
             <div className="min-w-[220px] flex-1">
-              <p className="flex items-center gap-2 text-sm font-bold text-white"><CreditCard size={15} className="text-emerald-400" /> First-clean set-up fee</p>
+              <p className="flex items-center gap-2 text-sm font-bold text-white"><CreditCard size={15} className="text-emerald-400" /> First-clean sign-up fee</p>
               <p className="mt-1 text-xs text-white/40">Added once to the first payment of every new regular clean (weekly, fortnightly, monthly, every 3 months — incl. Deep Cleaning). Following cleans are the normal price.</p>
             </div>
             <label className="flex items-center gap-2 text-sm font-semibold text-white/70">
@@ -130,6 +130,14 @@ export default function Subscriptions() {
               <span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-white/40">Amount (£)</span>
               <input type="number" min="0" step="0.5" value={fee.amount} onChange={(e) => setFee({ ...fee, amount: e.target.value })}
                 className="w-28 rounded-xl border border-white/10 bg-[#071D16] px-3 py-2 text-sm font-bold text-white focus:border-emerald-500/50 focus:outline-none" />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-white/40">Charged</span>
+              <select value={fee.per || "hour"} onChange={(e) => setFee({ ...fee, per: e.target.value })}
+                className="rounded-xl border border-white/10 bg-[#071D16] px-3 py-2 text-sm font-semibold text-white focus:border-emerald-500/50 focus:outline-none">
+                <option value="hour">Per hour of the first clean</option>
+                <option value="clean">Once (flat amount)</option>
+              </select>
             </label>
             <label className="block">
               <span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-white/40">Shown to customers as</span>

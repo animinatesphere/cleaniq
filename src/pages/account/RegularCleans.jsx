@@ -8,7 +8,7 @@ const API = import.meta.env.VITE_API_URL;
 const VISIT = {
   confirmed: ["Paid · confirmed", "bg-emerald-50 text-emerald-700"],
   done: ["Done", "bg-sky-50 text-sky-700"],
-  charged_48h_before: ["Charged 48h before", "bg-slate-100 text-slate-600"],
+  charged_before: ["Charged 24h before", "bg-slate-100 text-slate-600"],
   awaiting_first_payment: ["After your first payment", "bg-slate-100 text-slate-500"],
   payment_needed: ["Payment needed", "bg-amber-50 text-amber-700"],
   cancelled: ["Cancelled", "bg-slate-50 text-slate-400 line-through"],
@@ -147,7 +147,7 @@ export default function RegularCleans({ authFetch, onChanged }) {
               </div>
             )}
             <p className="text-xs text-slate-400 font-semibold mb-4">
-              Charged to your saved card 48 hours before each clean. Ref {s.subscriptionRef}
+              Charged to your saved card 24 hours before each clean. Ref {s.subscriptionRef}
             </p>
             <div className="flex flex-wrap gap-2">
               {s.status === "active" && (

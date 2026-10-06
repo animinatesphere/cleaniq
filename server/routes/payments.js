@@ -21,7 +21,7 @@ router.post("/create-intent", async (req, res) => {
     // is captured for real later, when the job is marked Completed. Admin
     // payment links keep the existing immediate-capture behaviour.
     // Regular cleans (saveCard): charge the first visit now and save the card with a Stripe
-    // customer, so later visits can be charged 48 hours before each clean.
+    // customer, so later visits can be charged 24 hours before each clean.
     let savedCard = {};
     if (saveCard) {
       if (!customerEmail) return res.status(400).json({ message: "Email is needed to set up a regular clean." });
