@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useContext } from "react";
+import { statusView } from "../utils/bookingStatus";
 import {
   View, Text, StyleSheet, SafeAreaView, FlatList,
   TouchableOpacity, ActivityIndicator, Platform,
@@ -41,7 +42,7 @@ const fmtShort = (d) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "";
 
 const BookingCard = ({ booking, onPress }) => {
-  const meta = STATUS_MAP[booking.status] || { color: C.textMuted, bg: C.surfaceAlt };
+  const meta = statusView(booking);
   return (
     <TouchableOpacity style={[styles.card, cardShadow]} onPress={onPress} activeOpacity={0.88}>
       <View style={styles.cardHeader}>
@@ -50,7 +51,7 @@ const BookingCard = ({ booking, onPress }) => {
           <Text style={styles.cardRef}>{booking.bookingId || "—"}</Text>
         </View>
         <View style={[styles.statusBadge, ts({ backgroundColor: meta.bg })]}>
-          <Text style={[styles.statusTxt, ts({ color: meta.color })]}>{STATUS_LABEL[booking.status] || booking.status}</Text>
+          <Text style={[styles.statusTxt, ts({ color: meta.color })]}>{meta.label}</Text>
         </View>
       </View>
       <View style={styles.cardDivider} />

@@ -42,7 +42,17 @@ const Worker = require("../../models/Worker");
 const { confirmPaidBooking } = require("../../utils/bookingPayments");
 
 let mongod, server, base, adminToken, worker;
-const settle = () => new Promise((r) => setTimeout(r, 120));
+const settle = () => new Promise((r) => setTimeout(r, 400));
+// Alerts are sent in the background: wait (up to 5s) until they match, then compare.
+async function alertsBecome(ref, expected) {
+  let got;
+  for (let i = 0; i < 50; i++) {
+    got = await alertsFor(ref);
+    if (got.notifications === expected.notifications && got.emails === expected.emails) break;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  assert.deepEqual(got, expected);
+}
 const alertsFor = async (ref) => ({
   notifications: await Notification.countDocuments({ workerId: worker, title: "New Job Available!", bookingId: ref }),
   // Worker alert emails sent since the test cleared the list (each test checks one job at a time).
@@ -62,6 +72,7 @@ test.before(async () => {
   app.use(express.json());
   app.use("/api/bookings", require("../../routes/bookings"));
   app.use("/api/workers", require("../../routes/workers"));
+  app.use("/api/customer-bookings", require("../../routes/customer-bookings"));
   server = app.listen(0);
   base = `http://127.0.0.1:${server.address().port}/api`;
 });
@@ -109,7 +120,7 @@ test("admin weekly booking with a payment link: nothing is confirmed or sent to 
   await subs.handleCheckoutCompleted({ metadata: link.metadata, payment_intent: "pi_first" });
   await settle();
   assert.equal((await Booking.findById(first._id)).status, "Confirmed");
-  assert.deepEqual(await alertsFor(first.bookingId), { notifications: 1, emails: 1 });
+  await alertsBecome(first.bookingId, { notifications: 1, emails: 1 });
   assert.ok((await feed()).includes(first.bookingId));
   const later = (await Booking.find({ "meta.subscriptionId": sub._id, _id: { $ne: first._id } }).sort({ "schedule.date": 1 }).lean());
   assert.ok(later.length >= 5);
@@ -118,6 +129,7 @@ test("admin weekly booking with a payment link: nothing is confirmed or sent to 
   assert.equal((await alertsFor(later[0].bookingId)).notifications, 0);
 
   // 48h before the next visit it's charged → confirmed, shown and announced (once).
+  await settle();
   emails.length = 0;
   const startOf = (b) => require("../../utils/bookingDateTime").buildBookingDateTime(b.schedule.date, b.schedule.timeSlot, b.schedule.preferredTime);
   const at = new Date(startOf(later[0]).getTime() - 47 * 3600000);
@@ -127,12 +139,13 @@ test("admin weekly booking with a payment link: nothing is confirmed or sent to 
   const next = await Booking.findById(later[0]._id).lean();
   assert.equal(next.status, "Confirmed");
   assert.equal(next.payment.status, "Completed");
-  assert.deepEqual(await alertsFor(next.bookingId), { notifications: 1, emails: 1 });
+  await alertsBecome(next.bookingId, { notifications: 1, emails: 1 });
   assert.ok((await feed()).includes(next.bookingId));
   assert.equal((await Booking.findById(later[1]._id)).status, "Pending", "the visit after waits for its own payment");
 });
 
 test("one-off booking with a payment link: cleaners told when it's paid, once", async () => {
+  await settle();
   emails.length = 0;
   const r = await adminBooking({ details: { address: "2 High St, M1 1AA", duration: 2, frequency: "Once", extras: [] } });
   await settle();
@@ -142,7 +155,7 @@ test("one-off booking with a payment link: cleaners told when it's paid, once", 
   await confirmPaidBooking(r.data._id, { paymentIntentId: "pi_one", captured: false }); // Stripe resend
   await settle();
   assert.equal((await Booking.findById(r.data._id)).status, "Confirmed");
-  assert.deepEqual(await alertsFor(ref), { notifications: 1, emails: 1 });
+  await alertsBecome(ref, { notifications: 1, emails: 1 });
 });
 
 test("admin confirming by hand also tells cleaners once", async () => {
@@ -166,4 +179,17 @@ test("weekly booking marked 'already paid / no payment needed': visits confirmed
   assert.ok(series.length > 1);
   assert.ok(series.every((b) => b.status === "Confirmed" && b.noPaymentRequired));
   assert.equal((await alertsFor(r.data.bookingId)).notifications, 1);
+});
+
+test("customer can cancel a job a cleaner has accepted; the cleaner is told", async () => {
+  const b = await Booking.create({
+    bookingId: "BK-ASSIGNED", customer: { firstName: "Ann", lastName: "C", email: "ann@cust.uk" }, service: "Deep Cleaning",
+    schedule: { date: inDays(6), timeSlot: "10:00" }, payment: { amount: 80, status: "Pending" },
+    status: "Assigned", assignedWorker: worker, assignedWorkerName: "Kelvin Obi",
+  });
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), email: "ann@cust.uk", role: "customer" }, process.env.JWT_SECRET);
+  const r = await fetch(`${base}/customer-bookings/${b._id}/cancel`, { method: "PUT", headers: { Authorization: `Bearer ${token}` } });
+  assert.equal(r.status, 200);
+  assert.equal((await Booking.findById(b._id)).status, "Cancelled");
+  assert.ok(await Notification.exists({ workerId: worker, title: "Job cancelled", bookingId: "BK-ASSIGNED" }));
 });

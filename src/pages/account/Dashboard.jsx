@@ -21,6 +21,19 @@ const STATUS_STYLES = {
   Pending:      'bg-slate-50 text-slate-500 border-slate-100',
 };
 
+// What a booking's status means for the customer. Regular-clean visits are Pending until they're
+// charged (48 hours before), which is normal — not something to worry about.
+function statusView(b) {
+  const regular = Boolean(b.meta?.subscriptionId);
+  const waiting = ['Pending', 'Awaiting Payment'].includes(b.status);
+  if (waiting && b.payment?.status === 'Failed') return { label: 'Payment needed', cls: 'bg-amber-50 text-amber-700 border-amber-200' };
+  if (regular && waiting && b.payment?.chargeOnArrival) return { label: 'Booked · paid 48h before', cls: 'bg-sky-50 text-sky-700 border-sky-100' };
+  if (waiting) return { label: 'Awaiting payment', cls: STATUS_STYLES.Pending };
+  return { label: b.status, cls: STATUS_STYLES[b.status] || STATUS_STYLES.Pending };
+}
+const isPaid = (b) => b.noPaymentRequired || ['Completed', 'Paid', 'Authorized', 'Partially refunded'].includes(b.payment?.status);
+const payLink = (b) => (['Pending', 'Awaiting Payment'].includes(b.status) ? b.payment?.paymentLinkUrl || b.meta?.lastPaymentLinkUrl : '');
+
 function formatDate(d) {
   if (!d) return '—';
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -174,7 +187,7 @@ export default function CustomerDashboard() {
   };
 
   const canCancel = (b) => {
-    return b.status === 'Confirmed' || b.status === 'Pending';
+    return ['Confirmed', 'Pending', 'Assigned'].includes(b.status);
   };
 
   if (!customer) return null;
@@ -348,8 +361,8 @@ export default function CustomerDashboard() {
                     {/* Left info */}
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${STATUS_STYLES[b.status] || STATUS_STYLES.Pending}`}>
-                          {b.status}
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${statusView(b).cls}`}>
+                          {statusView(b).label}
                         </span>
                         <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">#{b.bookingId}</span>
                       </div>
@@ -389,9 +402,15 @@ export default function CustomerDashboard() {
 
                       {/* Amount */}
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount Paid:</span>
-                        <span className="font-black text-primary-dark">{region.symbol}{b.payment?.amount}</span>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{isPaid(b) ? 'Amount Paid:' : 'Price:'}</span>
+                        <span className="font-black text-primary-dark">{region.symbol}{Number(b.payment?.amount || 0).toFixed(2)}</span>
                       </div>
+                      {b.meta?.subscriptionId && ['Pending', 'Awaiting Payment'].includes(b.status) && b.payment?.chargeOnArrival && b.payment?.status !== 'Failed' && (
+                        <p className="text-xs font-semibold text-slate-500">Part of your regular clean — charged to your saved card 48 hours before, then confirmed.</p>
+                      )}
+                      {b.payment?.status === 'Failed' && ['Pending', 'Awaiting Payment'].includes(b.status) && (
+                        <p className="text-xs font-bold text-amber-700">We couldn&apos;t take payment for this clean. Please pay before it, or it may be cancelled.</p>
+                      )}
                     </div>
 
                     {/* Right actions */}
@@ -400,10 +419,22 @@ export default function CustomerDashboard() {
                         className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border-2 border-primary/20 text-primary font-black text-xs hover:bg-primary/5 transition-all">
                         <MessageCircle size={14} /> Chat
                       </button>
+                      {payLink(b) && (
+                        <a href={payLink(b)} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-primary text-white font-black text-xs hover:bg-primary/90 transition-all">
+                          <CheckCircle2 size={14} /> Pay now
+                        </a>
+                      )}
+                      {b.meta?.subscriptionId && b.status !== 'Cancelled' && (
+                        <button onClick={() => setTab('regular')}
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border-2 border-slate-100 text-slate-600 font-black text-xs hover:bg-slate-50 transition-all">
+                          <RefreshCw size={14} /> Pause / cancel regular clean
+                        </button>
+                      )}
                       {canCancel(b) && (
                         <button onClick={() => setCancelModal(b)} disabled={cancellingId === b._id}
                           className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border-2 border-rose-100 text-rose-500 font-black text-xs hover:bg-rose-50 transition-all disabled:opacity-50">
-                          <Trash2 size={14} /> {cancellingId === b._id ? 'Cancelling…' : 'Cancel'}
+                          <Trash2 size={14} /> {cancellingId === b._id ? 'Cancelling…' : b.meta?.subscriptionId ? 'Cancel this clean' : 'Cancel'}
                         </button>
                       )}
                       {b.status === 'Cancelled' && (
@@ -437,8 +468,8 @@ export default function CustomerDashboard() {
                       className={`w-full text-left p-4 border-b border-slate-50 transition-all hover:bg-slate-50 ${selectedBooking?._id === b._id ? 'bg-primary/5 border-l-4 border-l-primary' : ''}`}>
                       <p className="font-black text-primary-dark text-sm truncate">{b.service}</p>
                       <p className="text-[10px] font-bold text-slate-400 mt-0.5">{formatDate(b.schedule?.date)} • #{b.bookingId}</p>
-                      <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${STATUS_STYLES[b.status] || STATUS_STYLES.Pending}`}>
-                        {b.status}
+                      <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${statusView(b).cls}`}>
+                        {statusView(b).label}
                       </span>
                     </button>
                   ))

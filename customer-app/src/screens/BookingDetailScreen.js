@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { statusView, canCustomerCancel, isRegularVisit } from "../utils/bookingStatus";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
@@ -196,10 +197,24 @@ const BookingDetailScreen = ({ route, navigation }) => {
     return () => clearInterval(iv);
   }, [bookingId, booking?.status, booking?.assignedWorker]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    // Regular-clean visits are paid 48h ahead: say what will be refunded before confirming.
+    let message = "Are you sure you want to cancel this booking? If you've paid, a refund will be processed.";
+    try {
+      const token = await AsyncStorage.getItem("customerToken");
+      const r = await fetch(`${API_URL}/customer-bookings/${bookingId}/cancel-preview`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      const p = await r.json();
+      if (p?.regular) {
+        message = !p.paid
+          ? "Cancel this clean? It hasn't been paid yet, so there's no charge. Your regular clean carries on."
+          : p.fee > 0
+            ? `This clean is already paid. £${Number(p.refund).toFixed(2)} will be refunded (£${Number(p.fee).toFixed(2)} kept for ${p.rule}). Your regular clean carries on.`
+            : `This clean is already paid. £${Number(p.refund).toFixed(2)} will be refunded in full. Your regular clean carries on.`;
+      }
+    } catch { /* show the general message */ }
     Alert.alert(
       "Cancel Booking",
-      "Are you sure you want to cancel this booking? If you've paid, a refund will be processed.",
+      message,
       [
         { text: "Keep Booking", style: "cancel" },
         {
@@ -275,7 +290,8 @@ const BookingDetailScreen = ({ route, navigation }) => {
 
   const statusMeta   = STATUS_MAP[booking.status]   || { color: C.textMuted, bg: C.surfaceAlt, icon: Clock };
   const paymentMeta  = PAYMENT_STATUS_MAP[booking.payment?.status] || { color: C.textMuted, bg: C.surfaceAlt, label: booking.payment?.status || "—" };
-  const canCancel    = ["Confirmed", "Pending", "Assigned"].includes(booking.status);
+  const canCancel    = canCustomerCancel(booking);
+  const view         = statusView(booking);
   const isActive     = ![...DONE_STATUSES, "Cancelled"].includes(booking.status);
   const isCancelled  = booking.status === "Cancelled";
   const cleanerFirst = (booking.assignedWorkerName || "").split(" ")[0];
@@ -329,7 +345,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
         {/* Status pill */}
         <View style={[styles.statusPill, ts({ backgroundColor: statusMeta.bg })]}>
           <StatusIcon size={14} color={tc(statusMeta.color)} strokeWidth={2.5} />
-          <Text style={[styles.statusPillTxt, ts({ color: statusMeta.color })]}>{STATUS_LABEL[booking.status] || booking.status}</Text>
+          <Text style={[styles.statusPillTxt, ts({ color: view.color })]}>{view.label}</Text>
         </View>
         {!!headline && <Text style={styles.headline}>{headline}</Text>}
       </LinearGradient>
@@ -523,8 +539,16 @@ const BookingDetailScreen = ({ route, navigation }) => {
             <Text style={styles.contactBtnTxt}>Call Cleaniq Services</Text>
           </TouchableOpacity>
 
+          {/* Regular clean: pause or cancel the whole thing */}
+          {isRegularVisit(booking) && !isCancelled && (
+            <TouchableOpacity style={styles.contactBtn} onPress={() => navigation.navigate("RegularCleans")} activeOpacity={0.8}>
+              <RefreshCw size={16} color={tc(C.primary)} />
+              <Text style={styles.contactBtnTxt}>Pause / cancel regular clean</Text>
+            </TouchableOpacity>
+          )}
+
           {/* Reschedule */}
-          {canCancel && (
+          {canCancel && !isRegularVisit(booking) && (
             <TouchableOpacity
               style={styles.rescheduleBtn}
               onPress={() => setShowReschedule(true)}
@@ -545,7 +569,7 @@ const BookingDetailScreen = ({ route, navigation }) => {
             >
               {cancelling
                 ? <ActivityIndicator size="small" color={tc(C.error)} />
-                : <><XCircle size={16} color={tc(C.error)} /><Text style={styles.cancelBtnTxt}>Cancel Booking</Text></>}
+                : <><XCircle size={16} color={tc(C.error)} /><Text style={styles.cancelBtnTxt}>{isRegularVisit(booking) ? "Cancel this clean" : "Cancel Booking"}</Text></>}
             </TouchableOpacity>
           )}
         </View>

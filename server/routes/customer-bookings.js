@@ -352,8 +352,8 @@ router.put('/:id/cancel', verifyCustomer, async (req, res) => {
       return res.status(403).json({ message: 'You can only cancel your own bookings.' });
     }
 
-    // Only allow cancelling Confirmed or Pending bookings
-    if (booking.status !== 'Confirmed' && booking.status !== 'Pending') {
+    // Customers can cancel until the cleaner is on the way (Pending, Confirmed or Assigned)
+    if (!['Confirmed', 'Pending', 'Assigned'].includes(booking.status)) {
       return res.status(400).json({ message: `Booking cannot be cancelled (current status: ${booking.status}).` });
     }
 
@@ -383,6 +383,13 @@ router.put('/:id/cancel', verifyCustomer, async (req, res) => {
 
     // SMS: booking cancelled (fire-and-forget)
     setImmediate(() => sms.triggerBookingCancelled(booking).catch(e => console.error("SMS cancel trigger error:", e.message)));
+
+    // The cleaner who had this job is told straight away.
+    if (booking.assignedWorker) {
+      const msg = `${booking.service} on ${booking.schedule?.date ? new Date(booking.schedule.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : 'its date'} (${booking.bookingId}) was cancelled by the customer.`;
+      require('../models/Notification').create({ workerId: booking.assignedWorker, title: 'Job cancelled', message: msg, type: 'job', bookingId: booking.bookingId }).catch(() => {});
+      require('../utils/pushNotifications').sendPushToUser('worker', booking.assignedWorker, 'Job cancelled', msg, { type: 'job_cancelled', bookingId: booking.bookingId }).catch(() => {});
+    }
 
     if (visitResult) {
       const money = (n) => `£${Number(n).toFixed(2)}`;
