@@ -409,6 +409,12 @@ const JobsFeedScreen = ({ navigation }) => {
         <View style={styles.serviceBadge}>
           <Text style={styles.serviceText}>{item.service}</Text>
         </View>
+        {/* Regular clean: accepting it makes you the customer's regular cleaner. */}
+        {!!item.meta?.subscriptionId && (
+          <View style={[styles.serviceBadge, ts({ backgroundColor: "#EDE9FE", marginLeft: 6 })]}>
+            <Text style={[styles.serviceText, ts({ color: "#6D28D9" })]}>🔁 Regular · {item.details?.frequency || "repeat"}</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.cardBody}>

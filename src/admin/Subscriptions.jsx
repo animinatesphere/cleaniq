@@ -199,6 +199,10 @@ export default function Subscriptions() {
                 <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">Next clean</p>
                 <p className="text-sm font-semibold text-white/80">{s.status === "cancelled" ? "—" : day(s.nextVisit?.schedule?.date)}</p>
               </div>
+              <div className="min-w-[140px]">
+                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">Regular cleaner</p>
+                <p className="text-sm font-semibold text-white/80">{s.regularWorker?.name || <span className="text-white/35">Not yet — first to accept</span>}</p>
+              </div>
               <div className="flex items-center gap-1 text-xs text-white/40 min-w-[110px]">
                 <CreditCard size={13} /> {s.status === "pending_payment" ? "No card yet" : "Card saved"}
               </div>

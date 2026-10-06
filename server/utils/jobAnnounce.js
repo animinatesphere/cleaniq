@@ -8,6 +8,8 @@ async function announceNewJob(booking) {
     if (!booking || booking.isShift || booking.assignedWorker || booking.hiddenFromWorkers) return 0;
     if (!ANNOUNCE_STATUSES.includes(booking.status)) return 0;
     if (booking.payment?.method === "Dev Mode") return 0;
+    // A regular clean with a regular cleaner: the visit goes straight to them, not to everyone.
+    if (await require("./regularCleaner").giveToRegularWorker(booking)) return 0;
     const Booking = require("../models/Booking");
     // Claim it atomically so two triggers at once can't announce it twice.
     const claimed = await Booking.updateOne({ _id: booking._id, jobAnnouncedAt: null }, { $set: { jobAnnouncedAt: new Date() } });

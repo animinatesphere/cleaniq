@@ -366,6 +366,7 @@ router.get("/jobs/:id", async (req, res) => {
           : "open";
         return res.json({
           ...job.toObject(),
+          regular: await require("../utils/regularCleaner").regularInfo(job, workerId),
           offer: {
             availability,
             customerName: `${(job.customer?.firstName || "").trim() || "Customer"} ${(job.customer?.lastName || "").trim().slice(0, 1)}${(job.customer?.lastName || "").trim() ? "." : ""}`.trim(),
@@ -377,7 +378,9 @@ router.get("/jobs/:id", async (req, res) => {
         });
       }
     }
-    res.json(job);
+    // Regular clean: its schedule (dates, which are paid), for the job details screen.
+    const regular = await require("../utils/regularCleaner").regularInfo(job, job.assignedWorker);
+    res.json(regular ? { ...job.toObject(), regular } : job);
   } catch (error) {
     console.error("Error fetching job details:", error);
     res
@@ -427,6 +430,9 @@ router.post("/jobs/:id/accept", async (req, res) => {
       assignedWorkerName: workerName,
       jobAcceptedTime: booking.jobAcceptedTime,
     });
+    // A visit of a regular clean: this cleaner becomes its regular cleaner (if it has none), so
+    // each following paid visit comes straight to them.
+    await require("../utils/regularCleaner").claimRegular(booking, workerId, workerName).catch(() => {});
     sendAutoIntro(booking, workerId);
 
     // Create notification
@@ -497,6 +503,15 @@ router.put("/jobs/:id/assign", async (req, res) => {
     const worker = await Worker.findById(workerId);
     if (!worker) return res.status(404).json({ error: "Worker not found" });
 
+    // A regular clean: this cleaner becomes its regular cleaner (each paid visit goes to them).
+    // A visit that isn't paid yet stays Pending — it's given to them when it's paid.
+    if (booking.meta?.subscriptionId) {
+      await require("../utils/regularCleaner").claimRegular(booking, worker._id, `${worker.firstName} ${worker.lastName}`, { replace: true });
+      if (["Pending", "Awaiting Payment"].includes(booking.status)) {
+        return res.json({ message: `${worker.firstName} is now the regular cleaner. This visit goes to them once it's paid.`, booking, regularCleaner: true });
+      }
+    }
+
     booking.assignedWorker = worker._id;
     booking.assignedWorkerName = `${worker.firstName} ${worker.lastName}`;
     if (workerDuration != null && workerDuration !== "") {
@@ -560,6 +575,25 @@ router.put("/jobs/:id/assign", async (req, res) => {
 });
 
 // POST cancel accepted job
+// The regular cleaner stops looking after a regular clean: their future dates go to other cleaners.
+router.post("/jobs/:id/drop-regular", async (req, res) => {
+  try {
+    const booking = await findBookingByIdOrBookingId(req.params.id);
+    if (!booking) return res.status(404).json({ error: "Booking not found" });
+    const r = await require("../utils/regularCleaner").dropRegular(booking, req.body?.workerId);
+    if (r.error) return res.status(400).json({ error: r.error });
+    sendEmail({
+      to: process.env.EMAIL_USER || "admin@cleaniqservices.com",
+      subject: `Regular cleaner stopped: ${booking.meta?.subscriptionRef || booking.bookingId}`,
+      html: templates.staffActionAlert(booking, "Stopped being the regular cleaner", `<strong>${booking.assignedWorkerName || "The cleaner"}</strong> is no longer the regular cleaner for this regular clean. ${r.released} upcoming date(s) were offered to other cleaners.`),
+    }).catch(() => {});
+    res.json({ message: "You're no longer the regular cleaner. Upcoming dates go to other cleaners.", released: r.released });
+  } catch (error) {
+    console.error("Error dropping regular clean:", error);
+    res.status(500).json({ error: "Couldn't update the regular clean" });
+  }
+});
+
 router.post("/jobs/:id/cancel", async (req, res) => {
   try {
     const booking = await findBookingByIdOrBookingId(req.params.id);
@@ -578,9 +612,18 @@ router.post("/jobs/:id/cancel", async (req, res) => {
     booking.jobEndTime = null;
     booking.jobDurationActual = 0;
     await applyBonus(booking, null); // back to the job's base rate for the next cleaner
+    // A regular clean's date dropped by its cleaner: offer this one date to other cleaners (it
+    // isn't given back to the regular cleaner, who keeps the following dates).
+    const regularVisit = Boolean(booking.meta?.subscriptionId);
+    if (regularVisit) {
+      booking.meta = { ...(booking.meta || {}), regularDropped: true };
+      booking.markModified("meta");
+      booking.jobAnnouncedAt = null;
+    }
 
     await booking.save();
     await syncCompanyJob(booking, { assignedWorker: null, assignedWorkerName: null, jobAcceptedTime: null, jobArrivedTime: null, jobStartTime: null });
+    if (regularVisit) require("../utils/jobAnnounce").announceNewJob(booking);
 
     // Send email log to Admin
     await sendEmail({

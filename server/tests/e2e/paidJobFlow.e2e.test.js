@@ -221,3 +221,53 @@ test("customer can cancel a job a cleaner has accepted; the cleaner is told", as
   assert.equal((await Booking.findById(b._id)).status, "Cancelled");
   assert.ok(await Notification.exists({ workerId: worker, title: "Job cancelled", bookingId: "BK-ASSIGNED" }));
 });
+
+test("regular cleaner: accepting makes Kelvin the regular cleaner; each paid week goes straight to him", async () => {
+  const r = await adminBooking({ customer: { firstName: "Reg", lastName: "Ular", email: "reg@cust.uk", phone: "07700900002" } });
+  const sub = await Subscription.findOne({ firstBooking: r.data._id });
+  const link = stripeCalls.filter((c) => c[0] === "checkout").at(-1)[1];
+  intents.pi_reg = { id: "pi_reg", status: "succeeded", amount: Math.round(Number((await Booking.findById(r.data._id)).payment.amount) * 100), customer: "cus_1", payment_method: "pm_reg" };
+  await subs.handleCheckoutCompleted({ metadata: link.metadata, payment_intent: "pi_reg" });
+  await settle();
+
+  // First week is offered to cleaners; Kelvin accepts it.
+  const first = await Booking.findById(r.data._id);
+  assert.equal(first.status, "Confirmed");
+  const acc = await fetch(`${base}/workers/jobs/${first._id}/accept`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ workerId: String(worker), workerName: "Kelvin Obi" }) });
+  assert.equal(acc.status, 200);
+  assert.equal(String((await Subscription.findById(sub._id)).regularWorker.id), String(worker));
+
+  // Job details show the regular schedule.
+  const details = await (await fetch(`${base}/workers/jobs/${first._id}?workerId=${worker}`)).json();
+  assert.equal(details.regular.isRegularCleaner, true);
+  assert.match(details.regular.every, /^every /);
+  assert.ok(details.regular.visits.length >= 5);
+  assert.ok(details.regular.visits.find((v) => v.current && v.mine));
+  assert.ok(details.regular.visits.slice(1).every((v) => v.state === "charged_before"));
+
+  // Next week is charged 24h before → given straight to Kelvin, not offered to everyone.
+  const next = (await Booking.find({ "meta.subscriptionId": sub._id, _id: { $ne: first._id } }).sort({ "schedule.date": 1 }).lean())[0];
+  const startOf = (b) => require("../../utils/bookingDateTime").buildBookingDateTime(b.schedule.date, b.schedule.timeSlot, b.schedule.preferredTime);
+  await subs.processDueCharges(new Date(startOf(next).getTime() - 23 * 3600000));
+  await settle();
+  const given = await Booking.findById(next._id).lean();
+  assert.equal(given.status, "Assigned");
+  assert.equal(String(given.assignedWorker), String(worker));
+  assert.ok(await Notification.exists({ workerId: worker, title: "Your regular clean is confirmed", bookingId: given.bookingId }));
+  assert.equal(await Notification.countDocuments({ title: "New Job Available!", bookingId: given.bookingId }), 0, "not offered to everyone");
+  assert.ok(emails.some((e) => e.to === "reg@cust.uk" && /Your clean is .* — confirmed/.test(e.subject) && /Kelvin Obi/.test(e.html)), "customer told who's coming");
+
+  // Dropping one date: offered to other cleaners for that date only, Kelvin stays the regular cleaner.
+  await fetch(`${base}/workers/jobs/${next._id}/cancel`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+  await settle();
+  const dropped = await Booking.findById(next._id).lean();
+  assert.equal(dropped.status, "Confirmed");
+  assert.equal(dropped.assignedWorker, null, "not handed back to Kelvin");
+  assert.ok((await feed()).includes(dropped.bookingId), "back on the job feed");
+  assert.equal(String((await Subscription.findById(sub._id)).regularWorker.id), String(worker));
+
+  // Stop being the regular cleaner: his future dates go back to the feed.
+  const stop = await fetch(`${base}/workers/jobs/${first._id}/drop-regular`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ workerId: String(worker) }) });
+  assert.equal(stop.status, 200);
+  assert.equal((await Subscription.findById(sub._id)).regularWorker.id, null);
+});
