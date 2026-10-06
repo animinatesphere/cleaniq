@@ -200,11 +200,12 @@ async function sendFirstPaymentLink(booking, sub) {
     success_url: `${FRONTEND()}/payment/success?bookingId=${booking._id}`,
     cancel_url: `${FRONTEND()}/`,
   });
+  // The customer gets the full summary of their regular clean with the Pay button.
   const { sendEmail, templates } = require("./emailService");
   await sendEmail({
     to: booking.customer.email,
-    subject: `Payment Required: Cleaniq Booking ${booking.bookingId}`,
-    html: templates.paymentRequired(booking, session.url),
+    subject: `Your regular clean — summary & payment · ${sub.subscriptionRef}`,
+    html: templates.regularCleanSummary(await summaryFor(sub, { payUrl: session.url })),
   });
   await Booking.updateOne({ _id: booking._id }, { $set: { "meta.lastPaymentLinkUrl": session.url, "meta.paymentLinkSentAt": new Date() } }).catch(() => {});
   return session.url;
@@ -817,24 +818,45 @@ async function nextVisitFor(sub, now = new Date()) {
     .lean();
 }
 
-async function sendSetupEmail(sub) {
-  const { sendEmail } = require("./emailService");
+// Everything the regular-clean summary email shows (utils/cleaniqEmailTemplates regularCleanSummary).
+async function summaryFor(sub, { payUrl = "", paid = false } = {}) {
   const t = sub.template || {};
-  const time = t.schedule?.preferredTime || t.schedule?.timeSlot || "";
   const every =
     sub.frequency === "Weekly" ? `every ${ukWeekday(sub.startDate)}`
     : sub.frequency === "Fortnightly" ? `every other ${ukWeekday(sub.startDate)}`
     : sub.frequency === "Quarterly" ? "every 3 months"
     : "every month";
+  const first = await Booking.findById(sub.firstBooking).select("payment.amount schedule").lean();
+  const visits = (await visitsFor(sub)).filter((v) => v.state !== "cancelled");
+  const ampm = (x) => {
+    const m = String(x || "").match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return x || "";
+    const h = Number(m[1]);
+    return `${h % 12 || 12}${m[2] !== "00" ? `:${m[2]}` : ""}${h < 12 ? "am" : "pm"}`;
+  };
+  return {
+    firstName: sub.customer?.firstName,
+    service: sub.service,
+    every,
+    time: ampm(t.schedule?.preferredTime || t.schedule?.timeSlot || ""),
+    firstDate: ukDate(sub.startDate),
+    pricePerVisit: sub.pricePerVisit,
+    setupFee: sub.setupFee || 0,
+    firstPayment: first?.payment?.amount ?? sub.pricePerVisit + (sub.setupFee || 0),
+    dates: visits.slice(0, 8).map((v) => `${ukDate(v.date)}${v.first ? " — first clean" : ""}`),
+    payUrl,
+    ref: sub.subscriptionRef,
+    paid,
+  };
+}
+
+// Sent once the first payment is made: the full summary, confirmed.
+async function sendSetupEmail(sub) {
+  const { sendEmail, templates } = require("./emailService");
   await sendEmail({
     to: sub.customer?.email,
-    subject: `Your regular clean is set up – ${sub.subscriptionRef}`,
-    html: `<div style="font-family:sans-serif;max-width:560px"><h2 style="color:#0F6B4C">Your regular clean is booked</h2>
-      <p>Hi ${sub.customer?.firstName || "there"},</p>
-      <p><strong>${sub.service}</strong>, ${every}${time ? ` at ${time}` : ""}, starting ${ukDate(sub.startDate)}.</p>
-      <ul><li>Your first clean is paid${sub.setupFee > 0 ? ` (including the one-off £${Number(sub.setupFee).toFixed(2)} set-up fee)` : ""}.</li><li>Each following clean is £${sub.pricePerVisit.toFixed(2)}, charged to your saved card 48 hours before the clean. We'll send you a receipt each time.</li>
-      <li>Pause or cancel any time from your account or by calling +44 7846 726428. With 24 hours' notice or more it's free, and any clean already paid is refunded in full.</li></ul>
-      <p style="color:#64748b">Reference: ${sub.subscriptionRef}</p></div>`,
+    subject: `Your regular clean is confirmed – ${sub.subscriptionRef}`,
+    html: templates.regularCleanSummary(await summaryFor(sub, { paid: true })),
   });
 }
 

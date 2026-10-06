@@ -124,7 +124,14 @@ test("admin weekly booking with a payment link: nothing is confirmed or sent to 
   assert.equal(link.metadata.type, "subscription_first");
   assert.equal(link.line_items[0].price_data.unit_amount, 4400);
   assert.equal(link.payment_intent_data.setup_future_usage, "off_session");
-  assert.ok(emails.some((e) => e.to === "jo@cust.uk" && /Payment Required/.test(e.subject)));
+  // The customer gets the full summary: dates, price, set-up fee, first payment, Pay button.
+  const summary = emails.find((e) => e.to === "jo@cust.uk" && /regular clean — summary/.test(e.subject));
+  assert.ok(summary, "summary email sent");
+  assert.match(summary.html, /Your upcoming cleans/);
+  assert.match(summary.html, /first clean/);
+  assert.match(summary.html, /Set-up fee/);
+  assert.match(summary.html, /Pay £44\.00 to confirm/);
+  assert.match(summary.html, /checkout\.test/);
 
   // Customer pays the first clean → first visit confirmed and announced once; the rest stay Pending.
   intents.pi_first = { id: "pi_first", status: "succeeded", amount: 4400, customer: "cus_1", payment_method: "pm_1" };
