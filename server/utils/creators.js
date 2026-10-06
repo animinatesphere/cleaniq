@@ -95,7 +95,10 @@ async function checkCode(code, email = "") {
     valid: true,
     creator,
     discountPercent,
-    message: discountPercent > 0 ? `${discountPercent}% discount applied!` : `Code ${creator.creator.code} applied.`,
+    // The fan sees whose code it is.
+    message: discountPercent > 0
+      ? `Referral code from ${creator.firstName} applied — ${discountPercent}% off!`
+      : `Referral code from ${creator.firstName} applied.`,
   };
 }
 

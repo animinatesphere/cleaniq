@@ -465,7 +465,7 @@ const QuoteScreen = ({ navigation }) => {
               <Field Icon={User} label="Full name *" value={form.name} onChangeText={(v) => set("name", v)} placeholder="John Smith" autoCapitalize="words" textContentType="name" />
               <Field Icon={Mail} label="Email address *" value={form.email} onChangeText={(v) => set("email", v)} placeholder="you@example.com" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} textContentType="emailAddress" />
               <Field Icon={Phone} label="Phone number" value={form.phone} onChangeText={(v) => set("phone", v)} placeholder="07700 900000" keyboardType="phone-pad" textContentType="telephoneNumber" />
-              <Field label="Discount / creator code" value={form.ref} onChangeText={(v) => set("ref", v.toUpperCase().replace(/[^A-Z0-9]/g, ""))} placeholder="Optional" autoCapitalize="characters" autoCorrect={false} />
+              <Field label="Referral code" value={form.ref} onChangeText={(v) => set("ref", v.toUpperCase().replace(/[^A-Z0-9]/g, ""))} placeholder="Optional" autoCapitalize="characters" autoCorrect={false} />
               <Field label="Notes (optional)" value={form.notes} onChangeText={(v) => set("notes", v)} placeholder="Access instructions, parking, special requirements…" multiline maxLength={2000} />
 
               <TouchableOpacity style={styles.consent} onPress={() => set("consent", !form.consent)} activeOpacity={0.85}>

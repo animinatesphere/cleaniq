@@ -1995,7 +1995,7 @@ const NewBookingPage = () => {
 
               {/* Coupon */}
               <div className="px-4 py-4 border-t border-white/[0.06]">
-                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.12em] mb-2">Coupon Code</p>
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.12em] mb-2">Coupon / referral code</p>
                 {couponApplied ? (
                   <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2.5">
                     <div>

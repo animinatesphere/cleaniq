@@ -741,7 +741,7 @@ const Booking = () => {
       });
       const data = await res.json();
       if (data.valid) {
-        setCouponApplied({ code: code.toUpperCase(), discountPercent: data.discountPercent });
+        setCouponApplied({ code: code.toUpperCase(), discountPercent: data.discountPercent, message: data.message });
         setCouponError("");
       } else {
         setCouponError(data.message || "Invalid coupon");
@@ -2077,11 +2077,11 @@ const Booking = () => {
                         ) : (
                           <>
                           <div className="mb-4 bg-slate-50 border border-slate-200 rounded-[24px] p-5">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Have a Coupon Code?</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Referral or discount code</p>
                             {couponApplied ? (
                               <div className="flex items-center justify-between bg-[#10B981]/10 border border-[#10B981]/30 rounded-2xl px-4 py-3">
                                 <div>
-                                  <p className="font-black text-[#10B981] text-sm">{couponApplied.code} — {couponApplied.discountPercent}% off applied!</p>
+                                  <p className="font-black text-[#10B981] text-sm">{couponApplied.message || `${couponApplied.code} — ${couponApplied.discountPercent}% off applied!`}</p>
                                 </div>
                                 <button onClick={removeCoupon} className="text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors ml-4">Remove</button>
                               </div>
@@ -2092,7 +2092,7 @@ const Booking = () => {
                                   value={couponCode}
                                   onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
                                   onKeyDown={e => e.key === "Enter" && validateCoupon()}
-                                  placeholder="Enter code"
+                                  placeholder="e.g. AMAKA24"
                                   className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-black font-bold text-sm placeholder:text-slate-300 focus:outline-none focus:border-[#10B981]"
                                 />
                                 <button onClick={validateCoupon} disabled={couponLoading || !couponCode.trim()}
@@ -2374,9 +2374,9 @@ const Booking = () => {
                   <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">
                     Estimated Total
                   </p>
-                  {couponApplied && (
+                  {couponApplied?.discountPercent > 0 && (
                     <p className="text-sm text-[#10B981] font-black">
-                      {couponApplied.discountPercent}% coupon applied
+                      {couponApplied.discountPercent}% discount applied
                     </p>
                   )}
                   <p className="text-2xl font-black text-black">

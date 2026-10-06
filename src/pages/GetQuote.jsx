@@ -636,7 +636,7 @@ const GetQuote = () => {
                             <IconInput icon={Phone} label="Phone number" type="tel" name="phone" value={form.phone} onChange={onChange} placeholder="07700 900000" autoComplete="tel" inputMode="tel" />
                           </div>
                           <div className="mt-4 sm:max-w-xs">
-                            <IconInput icon={BadgeCheck} label="Discount / creator code" name="ref" value={form.ref}
+                            <IconInput icon={BadgeCheck} label="Referral code" name="ref" value={form.ref}
                               onChange={(e) => set("ref", e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))} placeholder="Optional" className="uppercase" />
                           </div>
                           <label className="mt-4 block">

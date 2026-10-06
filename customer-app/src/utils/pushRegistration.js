@@ -21,15 +21,21 @@ export async function savePushToken(pushToken) {
 }
 
 // Call BEFORE the login token is cleared (the server needs it to know whose phone this is).
-export async function removePushToken() {
+// authToken: pass it in when the login is being removed at the same time (logout).
+export async function removePushToken(authToken) {
   try {
-    const [pushToken, auth] = await Promise.all([AsyncStorage.getItem(KEY), AsyncStorage.getItem("customerToken")]);
+    const [pushToken, saved] = await Promise.all([AsyncStorage.getItem(KEY), AsyncStorage.getItem("customerToken")]);
+    const auth = authToken || saved;
     if (pushToken && auth) {
+      // Give up after 5 seconds: logging out must never hang on a slow connection.
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
       await fetch(`${API_URL}/customer-auth/push-token`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth}` },
         body: JSON.stringify({ token: pushToken }),
-      });
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timer));
     }
   } catch {}
   await AsyncStorage.removeItem(KEY).catch(() => {});
