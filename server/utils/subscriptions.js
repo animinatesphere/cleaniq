@@ -113,6 +113,25 @@ function templateFrom(booking) {
   };
 }
 
+// One-off set-up fee added to the FIRST payment of a regular clean (admin → Regular Cleans).
+// Later cleans are the normal price.
+const SETUP_FEE_DEFAULTS = { enabled: false, amount: 0, label: "Set-up fee" };
+async function getSetupFee() {
+  const row = await require("../models/SystemSetting").findOne({ key: "regularSetupFee" }).lean();
+  const v = { ...SETUP_FEE_DEFAULTS, ...(row?.value || {}) };
+  const amount = Math.max(0, Math.round(Number(v.amount || 0) * 100) / 100);
+  return { enabled: Boolean(v.enabled) && amount > 0, amount, label: String(v.label || SETUP_FEE_DEFAULTS.label).slice(0, 40) };
+}
+async function saveSetupFee(input = {}) {
+  const value = {
+    enabled: Boolean(input.enabled),
+    amount: Math.min(1000, Math.max(0, Math.round(Number(input.amount || 0) * 100) / 100)),
+    label: String(input.label || SETUP_FEE_DEFAULTS.label).trim().slice(0, 40) || SETUP_FEE_DEFAULTS.label,
+  };
+  await require("../models/SystemSetting").updateOne({ key: "regularSetupFee" }, { $set: { value } }, { upsert: true });
+  return getSetupFee();
+}
+
 async function createSubscription(firstBooking, { visitPrice, source = "Website", status = "pending_payment" } = {}) {
   const frequency = normaliseFrequency(firstBooking.details?.frequency);
   if (!isSubscriptionFrequency(frequency)) throw new Error(`Not a regular frequency: ${firstBooking.details?.frequency}`);
@@ -135,6 +154,7 @@ async function createSubscription(firstBooking, { visitPrice, source = "Website"
     currency: firstBooking.payment?.currency || "GBP",
     startDate: firstBooking.schedule?.date,
     firstBooking: firstBooking._id,
+    setupFee: Number(firstBooking.meta?.setupFee) || 0,
     template: templateFrom(firstBooking),
     source,
   });
@@ -720,7 +740,7 @@ async function sendSetupEmail(sub) {
     html: `<div style="font-family:sans-serif;max-width:560px"><h2 style="color:#0F6B4C">Your regular clean is booked</h2>
       <p>Hi ${sub.customer?.firstName || "there"},</p>
       <p><strong>${sub.service}</strong>, ${every}${time ? ` at ${time}` : ""}, starting ${ukDate(sub.startDate)}.</p>
-      <ul><li>Your first clean is paid.</li><li>Each following clean is £${sub.pricePerVisit.toFixed(2)}, charged to your saved card 48 hours before the clean. We'll send you a receipt each time.</li>
+      <ul><li>Your first clean is paid${sub.setupFee > 0 ? ` (including the one-off £${Number(sub.setupFee).toFixed(2)} set-up fee)` : ""}.</li><li>Each following clean is £${sub.pricePerVisit.toFixed(2)}, charged to your saved card 48 hours before the clean. We'll send you a receipt each time.</li>
       <li>Pause or cancel any time from your account or by calling +44 7846 726428. With 24 hours' notice or more it's free, and any clean already paid is refunded in full.</li></ul>
       <p style="color:#64748b">Reference: ${sub.subscriptionRef}</p></div>`,
   });
@@ -793,6 +813,8 @@ function startSubscriptionScheduler() {
 
 module.exports = {
   minimumVisitPrice,
+  getSetupFee,
+  saveSetupFee,
   isSubscriptionFrequency,
   normaliseFrequency,
   getOrCreateStripeCustomer,

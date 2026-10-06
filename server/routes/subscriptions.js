@@ -27,6 +27,18 @@ async function withNextVisit(subs) {
   );
 }
 
+// ── Set-up fee (first clean of a regular clean) ────────────────────────────────────
+router.get("/setup-fee", async (req, res) => {
+  res.json(await require("../utils/subscriptions").getSetupFee());
+});
+router.put("/setup-fee", adminAuth, async (req, res) => {
+  try {
+    res.json(await require("../utils/subscriptions").saveSetupFee(req.body || {}));
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // ── Customer ───────────────────────────────────────────────────────────────────
 const mine = (req) => ({ "customer.email": String(req.customer?.email || "").toLowerCase() });
 

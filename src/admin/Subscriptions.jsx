@@ -36,6 +36,24 @@ export default function Subscriptions() {
   const [q, setQ] = useState("");
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [busyId, setBusyId] = useState(null);
+  // One-off set-up fee added to the first clean's payment (later cleans are the normal price).
+  const [fee, setFee] = useState(null);
+  const [savingFee, setSavingFee] = useState(false);
+  useEffect(() => {
+    fetch(`${API}/subscriptions/setup-fee`).then((r) => r.json()).then(setFee).catch(() => setFee({ enabled: false, amount: 0, label: "Set-up fee" }));
+  }, []);
+  const saveFee = async () => {
+    setSavingFee(true);
+    try {
+      const saved = await adminFetch("/subscriptions/setup-fee", { method: "PUT", body: JSON.stringify(fee) });
+      setFee(saved);
+      setMsg({ type: "success", text: saved.enabled ? `Set-up fee saved: ${money(saved.amount)} on the first clean of new regular cleans.` : "Set-up fee switched off." });
+    } catch (e) {
+      setMsg({ type: "error", text: e.message });
+    } finally {
+      setSavingFee(false);
+    }
+  };
 
   const load = useCallback(async () => {
     try {
@@ -89,6 +107,33 @@ export default function Subscriptions() {
         </button>
       </div>
 
+      {fee && (
+        <div className="rounded-2xl border border-white/10 bg-[#0B2D22] p-5">
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="min-w-[220px] flex-1">
+              <p className="flex items-center gap-2 text-sm font-bold text-white"><CreditCard size={15} className="text-emerald-400" /> First-clean set-up fee</p>
+              <p className="mt-1 text-xs text-white/40">Added once to the first payment of every new regular clean (weekly, fortnightly, monthly, every 3 months — incl. Deep Cleaning). Following cleans are the normal price.</p>
+            </div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-white/70">
+              <input type="checkbox" checked={fee.enabled} onChange={(e) => setFee({ ...fee, enabled: e.target.checked })} className="h-4 w-4 accent-emerald-500" /> On
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-white/40">Amount (£)</span>
+              <input type="number" min="0" step="0.5" value={fee.amount} onChange={(e) => setFee({ ...fee, amount: e.target.value })}
+                className="w-28 rounded-xl border border-white/10 bg-[#071D16] px-3 py-2 text-sm font-bold text-white focus:border-emerald-500/50 focus:outline-none" />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[10px] font-black uppercase tracking-wider text-white/40">Shown to customers as</span>
+              <input value={fee.label} onChange={(e) => setFee({ ...fee, label: e.target.value })} maxLength={40}
+                className="w-44 rounded-xl border border-white/10 bg-[#071D16] px-3 py-2 text-sm font-semibold text-white focus:border-emerald-500/50 focus:outline-none" />
+            </label>
+            <button onClick={saveFee} disabled={savingFee} className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400 disabled:opacity-60">
+              {savingFee ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
         {FILTERS.map((f) => (
           <button key={f.id} onClick={() => setFilter(f.id)}
@@ -128,7 +173,7 @@ export default function Subscriptions() {
               </div>
               <div className="min-w-[180px]">
                 <p className="text-sm font-semibold text-white/80">{s.service}</p>
-                <p className="text-xs text-white/40">{s.frequency} · {money(s.pricePerVisit)} per clean · {s.source}</p>
+                <p className="text-xs text-white/40">{s.frequency} · {money(s.pricePerVisit)} per clean{s.setupFee > 0 ? ` · ${money(s.setupFee)} set-up fee paid` : ""} · {s.source}</p>
               </div>
               <div className="min-w-[140px]">
                 <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">Next clean</p>

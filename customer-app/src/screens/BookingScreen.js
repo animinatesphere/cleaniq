@@ -430,6 +430,14 @@ const BookingScreen = ({ navigation, route }) => {
     if (!frequencyOffered && Object.keys(regularRates).length) setForm((f) => ({ ...f, frequency: "Once" }));
   }, [frequencyOffered, regularRates]);
   const visitPrice = addTax(Math.round(rawTotal * 100) / 100);
+  // One-off set-up fee on the first payment of a new regular clean (admin → Regular Cleans).
+  const [setupFee, setSetupFee] = useState({ enabled: false, amount: 0, label: "Set-up fee" });
+  useEffect(() => {
+    fetch(`${API_URL}/subscriptions/setup-fee`).then((r) => r.json())
+      .then((f) => { if (f && typeof f.amount === "number") setSetupFee(f); }).catch(() => {});
+  }, []);
+  const feeToday = isRegular && setupFee.enabled ? setupFee.amount : 0;
+  const amountToday = Math.round((total + feeToday) * 100) / 100;
   const [regularConsent, setRegularConsent] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState("");
   const displayServices = liveServices.length > 0 ? liveServices : SERVICES;
@@ -564,13 +572,13 @@ const BookingScreen = ({ navigation, route }) => {
         schedule: { date: dateStr(form.date), timeSlot: form.timeSlot, preferredTime: form.timeSlot },
         suppliesProvidedBy: form.suppliesProvidedBy,
         payment: {
-          amount: total, method: "Invoice", status: "Pending", billingType: "hourly",
+          amount: amountToday, method: "Invoice", status: "Pending", billingType: "hourly",
           ...(tax.enabled ? { taxRate: tax.rate, taxAmount, taxLabel: tax.label } : {}),
         },
         status:  "Awaiting Payment",
         region:  "UK",
         meta:    { source: "Customer App" },
-        ...(isRegular ? { subscribe: true, subscription: { visitPrice } } : {}),
+        ...(isRegular ? { subscribe: true, subscription: { visitPrice, ...(feeToday ? { setupFee: feeToday } : {}) } } : {}),
       };
 
       const res = await fetch(`${API_URL}/customer-bookings`, {
@@ -827,7 +835,7 @@ const BookingScreen = ({ navigation, route }) => {
                 </Text>
                 {[
                   `${["Weekly", "Fortnightly"].includes(form.frequency) ? "Same day and time" : "Same date and time"} ${REGULAR_EVERY[form.frequency]}`,
-                  "Pay for your first clean today",
+                  feeToday > 0 ? `Pay for your first clean today, plus a one-off ${setupFee.label.toLowerCase()} of £${feeToday.toFixed(2)}` : "Pay for your first clean today",
                   "Each following clean is charged 48 hours before the clean",
                   "Pause or cancel free with 24 hours' notice",
                 ].map((t) => (
@@ -1222,9 +1230,21 @@ const BookingScreen = ({ navigation, route }) => {
                 <View style={styles.regularBox}>
                   <Text style={styles.regularTitle}>Your regular clean · {FREQUENCY_LABEL[form.frequency]}</Text>
                   <View style={styles.regularRow}>
-                    <Text style={styles.regularLbl}>First clean, paid today</Text>
+                    <Text style={styles.regularLbl}>First clean</Text>
                     <Text style={styles.regularAmt}>£{total.toFixed(2)}</Text>
                   </View>
+                  {feeToday > 0 && (
+                    <View style={styles.regularRow}>
+                      <Text style={styles.regularLbl}>{setupFee.label} (first clean only)</Text>
+                      <Text style={styles.regularAmt}>£{feeToday.toFixed(2)}</Text>
+                    </View>
+                  )}
+                  {feeToday > 0 && (
+                    <View style={styles.regularRow}>
+                      <Text style={[styles.regularLbl, { fontWeight: "900" }]}>Paid today</Text>
+                      <Text style={styles.regularAmt}>£{amountToday.toFixed(2)}</Text>
+                    </View>
+                  )}
                   <View style={styles.regularRow}>
                     <Text style={styles.regularLbl}>Each following clean</Text>
                     <Text style={styles.regularAmt}>£{visitPrice.toFixed(2)}</Text>
@@ -1256,7 +1276,12 @@ const BookingScreen = ({ navigation, route }) => {
                       {couponApplied.discountPercent}% discount applied
                     </Text>
                   )}
-                  <Text style={styles.summaryTotalAmt}>£{total.toFixed(2)}</Text>
+                  <Text style={styles.summaryTotalAmt}>£{amountToday.toFixed(2)}</Text>
+                  {feeToday > 0 && (
+                    <Text style={ts({ fontSize: 11, fontWeight: "700", color: C.textMuted, textAlign: "right" })}>
+                      Includes {setupFee.label.toLowerCase()} £{feeToday.toFixed(2)}
+                    </Text>
+                  )}
                   {tax.enabled && taxAmount > 0 && (
                     <Text style={ts({ fontSize: 11, fontWeight: "700", color: C.textMuted, textAlign: "right" })}>
                       Includes {tax.label} ({tax.rate}%) £{taxAmount.toFixed(2)}

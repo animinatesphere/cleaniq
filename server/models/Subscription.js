@@ -21,6 +21,7 @@ const subscriptionSchema = new mongoose.Schema(
     service: { type: String, required: true },
     // Price charged for every visit after the first (GBP, incl. extras and supplies).
     pricePerVisit: { type: Number, required: true, min: 0 },
+    setupFee: { type: Number, default: 0 }, // one-off fee paid with the first clean (admin → Regular Cleans)
     currency: { type: String, default: "GBP" },
     startDate: { type: Date, required: true }, // first visit; later visits keep its weekday/time
     lastVisitDate: { type: Date, default: null }, // latest visit created so far

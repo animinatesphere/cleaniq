@@ -32,6 +32,23 @@ router.post('/', async (req, res) => {
     const paidOnWebsite = wantsSubscription && Boolean(req.body.payment?.stripePaymentIntentId);
     if (paidOnWebsite) booking.payment.status = 'Processing';
 
+    // One-off set-up fee on the first clean of a regular clean (admin → Regular Cleans). The
+    // website adds it to the card payment it has just taken; for the app (pay by link) the
+    // server adds it here, so older app versions are charged it too.
+    if (wantsSubscription) {
+      const fee = await subscriptions.getSetupFee();
+      if (fee.enabled) {
+        const included = Number(req.body.subscription?.setupFee) === fee.amount;
+        if (!paidOnWebsite && !included) {
+          booking.payment.amount = Math.round((Number(booking.payment.amount || 0) + fee.amount) * 100) / 100;
+        }
+        if (!paidOnWebsite || included) {
+          booking.meta = { ...(booking.meta || {}), setupFee: fee.amount, setupFeeLabel: fee.label };
+          booking.markModified('meta');
+        }
+      }
+    }
+
     const newBooking = await booking.save();
     let subscription = null;
     let checkoutUrl = '';
@@ -154,8 +171,8 @@ router.post('/', async (req, res) => {
             price_data: {
               currency: (newBooking.payment?.currency || 'GBP').toLowerCase(),
               product_data: {
-                name: `Cleaniq - ${newBooking.service} (first clean)`,
-                description: `${subscription.frequency} regular clean ${subscription.subscriptionRef}. Later cleans £${subscription.pricePerVisit.toFixed(2)} each, charged 48 hours before each clean.`,
+                name: `Cleaniq - ${newBooking.service} (first clean${subscription.setupFee > 0 ? ' + set-up fee' : ''})`,
+                description: `${subscription.frequency} regular clean ${subscription.subscriptionRef}.${subscription.setupFee > 0 ? ` Includes the one-off £${subscription.setupFee.toFixed(2)} set-up fee.` : ''} Later cleans £${subscription.pricePerVisit.toFixed(2)} each, charged 48 hours before each clean.`,
               },
               unit_amount: Math.round(newBooking.payment.amount * 100),
             },
