@@ -6,7 +6,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
-import { Home, CalendarDays, User, Briefcase, LayoutDashboard, MessageCircle } from "lucide-react-native";
+import { Home, CalendarDays, User, Briefcase, LayoutDashboard, MessageCircle, BadgePercent } from "lucide-react-native";
 import CalendarScreen from "./src/screens/CalendarScreen";
 import { AuthProvider, AuthContext, API_URL } from "./src/context/AuthContext";
 import { savePushToken } from "./src/utils/pushRegistration";
@@ -27,6 +27,7 @@ import CompanyJobsScreen from "./src/screens/CompanyJobsScreen";
 import PostJobScreen from "./src/screens/PostJobScreen";
 import JobDetailScreen from "./src/screens/JobDetailScreen";
 import QuoteScreen from "./src/screens/QuoteScreen";
+import CreatorDashboardScreen from "./src/screens/CreatorDashboardScreen";
 import { C } from "./src/theme/flat";
 
 // Never import expo-notifications at module level — in Expo Go SDK 53 the module
@@ -110,6 +111,14 @@ const MainTabs = () => (
     <Tab.Screen name="Messages" component={MessagesScreen} options={{ title: "Messages" }} />
     <Tab.Screen name="Calendar" component={CalendarScreen} options={{ title: "Calendar" }} />
     <Tab.Screen name="Profile"  component={ProfileScreen}  options={{ title: "Profile" }} />
+  </Tab.Navigator>
+);
+
+// Creators / influencers: their earnings dashboard and their profile.
+const CreatorTabs = () => (
+  <Tab.Navigator screenOptions={(p) => tabScreenOptions({ ...p, iconMap: { Earnings: BadgePercent, Profile: User } })}>
+    <Tab.Screen name="Earnings" component={CreatorDashboardScreen} options={{ title: "Earnings" }} />
+    <Tab.Screen name="Profile"  component={ProfileScreen}          options={{ title: "Profile" }} />
   </Tab.Navigator>
 );
 
@@ -244,7 +253,7 @@ const AppNavigation = ({ dark }) => {
       <StatusBar style="light" />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {/* Main tabs are always accessible — no auth required to browse */}
-        <Stack.Screen name="Main"          component={userToken && customerInfo?.role === "company" ? CompanyTabs : MainTabs} />
+        <Stack.Screen name="Main"          component={userToken && customerInfo?.role === "company" ? CompanyTabs : userToken && customerInfo?.role === "creator" ? CreatorTabs : MainTabs} />
         <Stack.Screen name="Login"         component={LoginScreen} />
         <Stack.Screen name="Booking"       component={BookingScreen} />
         <Stack.Screen name="RegularCleans" component={RegularCleansScreen} />

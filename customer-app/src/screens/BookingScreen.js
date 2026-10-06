@@ -471,7 +471,7 @@ const BookingScreen = ({ navigation, route }) => {
       const res = await fetch(`${API_URL}/coupons/validate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponCode.trim() }),
+        body: JSON.stringify({ code: couponCode.trim(), email }),
       });
       const data = await res.json();
       if (data.valid) {
