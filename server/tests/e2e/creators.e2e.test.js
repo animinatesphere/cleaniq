@@ -235,6 +235,68 @@ test("sign-up with a referral code links the customer; a wrong code is caught be
   assert.equal((await call("GET", "/creators/my-referral", null, verified.data.token)).data.code, "AMAKA");
 });
 
+test("admin can leave the code and password empty: both are generated; the creator can log in with it", async () => {
+  emails.length = 0;
+  const sug = await call("GET", "/creators/admin/suggest-code?firstName=Tolu", null, adminToken);
+  assert.match(sug.data.code, /^TOLU\d{2}$/);
+  assert.match(sug.data.password, /^[A-Za-z2-9]{4}-[A-Za-z2-9]{4}-[A-Za-z2-9]{4}$/);
+
+  const r = await call("POST", "/creators/admin", { firstName: "Tolu", lastName: "Ade", email: "tolu@creator.uk" }, adminToken);
+  assert.equal(r.status, 201);
+  assert.match(r.data.code, /^TOLU\d{2}$/);
+  assert.ok(r.data.password, "password shown to admin once");
+  assert.equal(r.data.emailed, true);
+  const welcome = emails.find((e) => e.to === "tolu@creator.uk");
+  assert.match(welcome.subject, /creator programme/);
+  assert.ok(welcome.html.includes(r.data.password) && welcome.html.includes(r.data.code));
+
+  const login = await call("POST", "/customer-auth/login", { email: "tolu@creator.uk", password: r.data.password });
+  assert.equal(login.status, 200);
+  assert.equal(login.data.customer.role, "creator");
+
+  // Admin sets a new password (generated) and it's emailed.
+  emails.length = 0;
+  const np = await call("POST", `/creators/admin/${r.data._id}/password`, {}, adminToken);
+  assert.equal(np.status, 200);
+  assert.ok(emails.some((e) => e.to === "tolu@creator.uk" && e.html.includes(np.data.password)));
+  assert.equal((await call("POST", "/customer-auth/login", { email: "tolu@creator.uk", password: np.data.password })).status, 200);
+  assert.equal((await call("POST", `/creators/admin/${r.data._id}/password`, { password: "short" }, adminToken)).status, 400);
+
+  // Admin can see the password they set (and only admin).
+  assert.equal((await call("GET", `/creators/admin/${r.data._id}/password`, null, adminToken)).data.password, np.data.password);
+  assert.equal((await call("GET", `/creators/admin/${r.data._id}/password`)).status, 401);
+  const list = await call("GET", "/creators/admin", null, adminToken);
+  assert.ok(!JSON.stringify(list.data).includes(np.data.password), "never in the list itself");
+  const stored = (await Customer.findById(r.data._id).lean()).creator.adminPassword;
+  assert.ok(stored && !stored.includes(np.data.password), "kept encrypted");
+
+  // The creator picks their own password: admin can't see it any more.
+  await call("POST", "/customer-auth/forgot-password", { email: "tolu@creator.uk" });
+  const resetCode = emails.filter((e) => e.to === "tolu@creator.uk").at(-1).html.match(/>(\d{6})</)[1];
+  assert.equal((await call("POST", "/customer-auth/reset-password", { email: "tolu@creator.uk", code: resetCode, newPassword: "mine-only-123" })).status, 200);
+  const after = await call("GET", `/creators/admin/${r.data._id}/password`, null, adminToken);
+  assert.equal(after.data.password, null);
+  assert.match(after.data.note, /Changed by the creator/);
+});
+
+test("deleting a creator: code and login stop working, pending commission cancelled, earned kept", async () => {
+  const r = await call("POST", "/creators/admin", { firstName: "Del", lastName: "Me", email: "del@creator.uk", code: "DELME1" }, adminToken);
+  const pending = await book("delcust@cust.uk");
+  await creators.attributeSavedBooking(pending._id, { code: "DELME1" });
+  const earned = await book("delcust2@cust.uk");
+  await creators.attributeSavedBooking(earned._id, { code: "DELME1" });
+  await finish(earned);
+
+  const d = await call("DELETE", `/creators/admin/${r.data._id}`, null, adminToken);
+  assert.equal(d.status, 200);
+  assert.equal(d.data.owedStillToPay, 1);
+  assert.equal(await Customer.exists({ email: "del@creator.uk" }), null);
+  assert.equal((await call("POST", "/coupons/validate", { code: "DELME1" })).status, 404);
+  assert.equal((await Booking.findById(pending._id)).creatorCommission.status, "cancelled");
+  assert.equal((await Booking.findById(earned._id)).creatorCommission.status, "earned", "still owed, stays on record");
+  assert.equal(await require("../../models/CreatorCustomer").exists({ email: "delcust@cust.uk" }), null);
+});
+
 test("a paused (inactive) creator's code stops working", async () => {
   await call("PUT", `/creators/admin/${amaka._id}`, { active: false }, adminToken);
   assert.equal((await call("POST", "/coupons/validate", { code: "AMAKA" })).status, 404);

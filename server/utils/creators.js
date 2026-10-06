@@ -195,6 +195,27 @@ function startCreatorScheduler() {
   setInterval(() => settleAll().catch((e) => console.error("[creators] settle:", e.message)), 6 * 3600 * 1000);
 }
 
+// Passwords admin sets for creators are kept encrypted (AES-256-GCM, key from the server
+// secret) so admin can show them again. Never the creator's own password.
+const crypto = require("crypto");
+const pwKey = () => crypto.createHash("sha256").update(`creator-pw:${process.env.CREATOR_PASSWORD_KEY || process.env.JWT_SECRET || ""}`).digest();
+function sealPassword(plain) {
+  const iv = crypto.randomBytes(12);
+  const c = crypto.createCipheriv("aes-256-gcm", pwKey(), iv);
+  const data = Buffer.concat([c.update(String(plain), "utf8"), c.final()]);
+  return [iv, c.getAuthTag(), data].map((b) => b.toString("base64")).join(":");
+}
+function openPassword(sealed) {
+  try {
+    const [iv, tag, data] = String(sealed || "").split(":").map((x) => Buffer.from(x, "base64"));
+    const d = crypto.createDecipheriv("aes-256-gcm", pwKey(), iv);
+    d.setAuthTag(tag);
+    return Buffer.concat([d.update(data), d.final()]).toString("utf8");
+  } catch {
+    return null;
+  }
+}
+
 /** Numbers for a creator's dashboard / the admin list. */
 async function statsFor(creatorId) {
   const id = new mongoose.Types.ObjectId(String(creatorId));
@@ -220,5 +241,6 @@ async function statsFor(creatorId) {
 module.exports = {
   DEFAULTS, COUNT_RULES, CODE_RE,
   getSettings, saveSettings, effective, normaliseCode, findCreatorByCode, checkCode, linkCustomer,
+  sealPassword, openPassword,
   attributeBooking, attributeSavedBooking, settleCommission, settleAll, startCreatorScheduler, statsFor, creatorName,
 };

@@ -31,6 +31,9 @@ const customerSchema = new mongoose.Schema({
     clicks:            { type: Number, default: 0 },
     lastClickAt:       { type: Date, default: null },
     bank:              { accountName: String, sortCode: String, accountNumber: String },
+    // Encrypted copy of the password admin set, so admin can show it again (utils/creators.js).
+    // Removed when the creator changes their own password.
+    adminPassword:     { type: String, default: "" },
     notes:             { type: String, default: "" },
   },
   createdAt: { type: Date, default: Date.now }
