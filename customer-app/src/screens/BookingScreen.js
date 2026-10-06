@@ -476,10 +476,10 @@ const BookingScreen = ({ navigation, route }) => {
       });
       const data = await res.json();
       if (data.valid) {
-        setCouponApplied({ code: code.toUpperCase(), discountPercent: data.discountPercent });
+        setCouponApplied({ code: code.toUpperCase(), discountPercent: data.discountPercent, message: data.message });
         setCouponError("");
       } else {
-        setCouponError(data.message || "Invalid coupon code");
+        setCouponError(data.message || "Code not found");
         setCouponApplied(null);
       }
     } catch {
@@ -1183,11 +1183,11 @@ const BookingScreen = ({ navigation, route }) => {
               </View>
               {/* Coupon Code */}
               <View style={styles.couponSection}>
-                <Text style={styles.couponLabel}>Have a coupon code?</Text>
+                <Text style={styles.couponLabel}>Referral or discount code</Text>
                 {couponApplied ? (
                   <View style={styles.couponApplied}>
                     <Text style={styles.couponAppliedTxt}>
-                      {couponApplied.code} — {couponApplied.discountPercent}% off applied!
+                      {couponApplied.message || `${couponApplied.code} — ${couponApplied.discountPercent}% off applied!`}
                     </Text>
                     <TouchableOpacity onPress={() => { setCouponApplied(null); setCouponCode(""); setCouponError(""); }}>
                       <Text style={styles.couponRemoveTxt}>Remove</Text>
@@ -1199,7 +1199,7 @@ const BookingScreen = ({ navigation, route }) => {
                       style={styles.couponInput}
                       value={couponCode}
                       onChangeText={t => { setCouponCode(t.toUpperCase()); setCouponError(""); }}
-                      placeholder="Enter code"
+                      placeholder="e.g. AMAKA24"
                       placeholderTextColor={tc(C.textMuted)}
                       autoCapitalize="characters"
                     />
@@ -1251,7 +1251,7 @@ const BookingScreen = ({ navigation, route }) => {
               <View style={styles.summaryFooter}>
                 <Text style={styles.summaryTotalLbl}>Total due</Text>
                 <View>
-                  {couponApplied && (
+                  {couponApplied?.discountPercent > 0 && (
                     <Text style={ts({ fontSize: 11, fontWeight: "700", color: C.primary, textAlign: "right" })}>
                       {couponApplied.discountPercent}% discount applied
                     </Text>
