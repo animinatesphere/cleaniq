@@ -251,6 +251,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "");
 const Booking = require("./models/Booking");
 const { sendEmail, templates } = require("./utils/emailService");
 const { sendCapiEvent } = require("./utils/metaCapi");
+const { confirmPaidBooking, WAITING } = require("./utils/bookingPayments");
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || "";
 
 const applyAdditionalHoursPayment = async (
@@ -382,105 +383,15 @@ app.post(
                   `⚠️ Additional hours payment was not applied for booking ${bookingId}`,
                 );
               }
-            } else if (
-              // Already handled (Stripe can send the same event again), or the booking has moved
-              // on (confirmed by hand, cleaner on the way, done…): just keep the payment record,
-              // don't change the status back or email the customer again.
-              (booking.payment?.stripePaymentIntentId === session.payment_intent &&
-                ["Authorized", "Completed"].includes(booking.payment?.status)) ||
-              !["Pending", "Awaiting Payment"].includes(booking.status)
-            ) {
-              if (booking.payment?.stripePaymentIntentId !== session.payment_intent ||
-                  !["Authorized", "Completed"].includes(booking.payment?.status)) {
-                booking.payment = booking.payment || {};
-                booking.payment.stripePaymentIntentId = session.payment_intent;
-                booking.payment.status = "Authorized";
-                booking.payment.authorizedAt = booking.payment.authorizedAt || new Date();
-                await booking.save();
-              }
-              console.log(`💳 Payment recorded for ${booking.bookingId} (status left as ${booking.status})`);
             } else {
-              // Store payment intent for later capture
-              booking.payment = booking.payment || {};
-              booking.payment.stripePaymentIntentId = session.payment_intent;
-              booking.payment.status = "Authorized"; // Money is held, not yet captured
-              booking.payment.authorizedAt = new Date();
-              booking.status = "Confirmed"; // Booking is confirmed but cleaning not done yet
-              await booking.save();
-
-              // Fire Meta CAPI Purchase event (non-blocking)
-              sendCapiEvent("Purchase", {
-                email: booking.customer?.email,
-                phone: booking.customer?.phone,
-                value: session.amount_total ? session.amount_total / 100 : booking.payment?.amount,
-                currency: (session.currency || "gbp").toUpperCase(),
-                bookingId: booking._id,
-                sourceUrl: "https://cleaniqservices.com/book",
-              }).catch(() => {});
-
-              // SMS: booking confirmed (fire-and-forget)
-              setImmediate(() =>
-                sms
-                  .triggerBookingConfirmed(booking)
-                  .catch((e) =>
-                    console.error("SMS Stripe trigger error:", e.message),
-                  ),
-              );
-
-              // Send Authorization Email to Customer (payment held)
-              await sendEmail({
-                to: booking.customer.email,
-                subject: `✓ Payment Authorized: Cleaniq Booking ${booking.bookingId}`,
-                html: templates.adminBookingCreatedEmail1(booking), // Use success template
+              // Paid (card held until the clean is done): confirm the booking and send the
+              // confirmation email straight away — once, whichever Stripe event arrives first.
+              await confirmPaidBooking(booking._id, {
+                paymentIntentId: session.payment_intent,
+                captured: false, // booking payment links hold the card; it's taken when the clean is done
+                amount: session.amount_total ? session.amount_total / 100 : undefined,
+                currency: session.currency,
               });
-
-              // Schedule booking reminders now that payment is confirmed
-              try {
-                const bookingDate = booking.schedule?.date
-                  ? buildBookingDateTime(
-                      booking.schedule.date,
-                      booking.schedule.timeSlot,
-                      booking.schedule?.preferredTime,
-                    )
-                  : null;
-                if (bookingDate && bookingDate > new Date()) {
-                  const payload = {
-                    bookingId: booking._id.toString(),
-                    bookingRef: booking.bookingId,
-                    email: booking.customer?.email,
-                    firstName: booking.customer?.firstName,
-                    service: booking.service,
-                    date: bookingDate.toLocaleDateString("en-GB", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                    }),
-                    amount: booking.payment?.amount,
-                  };
-                  const ms24h = 24 * 60 * 60 * 1000;
-                  const ms3h = 3 * 60 * 60 * 1000;
-                  const soon = Date.now() + 2 * 60 * 1000;
-                  await scheduleTask(
-                    "booking_reminder_24h",
-                    new Date(Math.max(bookingDate.getTime() - ms24h, soon)),
-                    payload,
-                  );
-                  await scheduleTask(
-                    "booking_reminder_3h",
-                    new Date(Math.max(bookingDate.getTime() - ms3h, soon)),
-                    payload,
-                  );
-                }
-              } catch (schedErr) {
-                console.error(
-                  "⚠️ Failed to schedule Stripe booking reminders:",
-                  schedErr.message,
-                );
-              }
-
-              console.log(
-                `✅ Payment authorized for booking ${bookingId}, awaiting completion to capture`,
-              );
             }
           } else {
             console.warn(
@@ -488,6 +399,14 @@ app.post(
               bookingId,
             );
           }
+        }
+      } else if (event.type === "payment_intent.amount_capturable_updated") {
+        // The customer's card has been authorised (money held until the clean is done).
+        const pi = event.data.object;
+        const bookingId = pi.metadata && pi.metadata.bookingId;
+        if (bookingId && pi.metadata?.type !== "additional_hours") {
+          const r = await confirmPaidBooking(bookingId, { paymentIntentId: pi.id, captured: false, amount: pi.amount / 100, currency: pi.currency });
+          if (!r.found) console.warn("⚠️ Booking not found for authorised payment:", bookingId);
         }
       } else if (event.type === "payment_intent.succeeded") {
         const pi = event.data.object;
@@ -536,6 +455,13 @@ app.post(
                   `,
                 });
               }
+            } else if (
+              WAITING.includes(booking.status) &&
+              !pi.metadata?.subscriptionRef &&
+              !["subscription_first", "visit_payment", "cancellation_fee"].includes(pi.metadata?.type)
+            ) {
+              // Paid straight away (no hold) while still waiting for payment: confirm it now.
+              await confirmPaidBooking(booking._id, { paymentIntentId: pi.id, captured: true, amount: pi.amount_received / 100, currency: pi.currency });
             } else {
               // Regular payment completed
               booking.payment = booking.payment || {};
