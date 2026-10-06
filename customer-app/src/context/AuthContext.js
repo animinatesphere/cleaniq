@@ -148,14 +148,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    setIsLoading(true);
-    // Stop notifications to this phone (needs the login token, so before it's removed).
-    await require("../utils/pushRegistration").removePushToken();
-    await AsyncStorage.removeItem("customerToken");
-    await AsyncStorage.removeItem("customerInfo");
+    // Stop notifications to this phone in the background (it reads the login token now, before
+    // it's removed) — logging out never waits on the internet, so it can't get stuck loading.
+    const authToken = await AsyncStorage.getItem("customerToken").catch(() => null);
+    require("../utils/pushRegistration").removePushToken(authToken).catch(() => {});
+    try {
+      await AsyncStorage.multiRemove(["customerToken", "customerInfo"]);
+    } catch {}
     setUserToken(null);
     setCustomerInfo(null);
-    setIsLoading(false);
   };
 
   const checkLoginState = async () => {
