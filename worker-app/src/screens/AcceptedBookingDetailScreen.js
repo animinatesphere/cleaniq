@@ -73,6 +73,7 @@ const EXTRA_TIME_REASONS = [
   "Property not cleaned for a long time",
   "More rooms than specified at booking",
 ];
+import RegularCleanCard from "../components/RegularCleanCard";
 import axios from "axios";
 import { tc, themed, ts } from "../theme/dark";
 
@@ -750,6 +751,19 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
             </>
           )}
         </View>
+
+        {/* ── Regular clean: every date, and drop a date / stop being the regular cleaner ── */}
+        {booking.regular && (
+          <View style={{ marginHorizontal: 16, marginTop: 14 }}>
+            <RegularCleanCard
+              regular={booking.regular}
+              bookingId={booking._id}
+              workerId={workerInfo?.id}
+              mode="accepted"
+              onChanged={(kind) => (kind === "dropped" ? navigation.goBack() : fetchBookingDetails())}
+            />
+          </View>
+        )}
 
         {/* ── Main Action Button ── */}
         {statusCfg.next && (

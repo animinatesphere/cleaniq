@@ -152,8 +152,10 @@ async function createSubscription(firstBooking, { visitPrice, source = "Website"
   const frequency = normaliseFrequency(firstBooking.details?.frequency);
   if (!isSubscriptionFrequency(frequency)) throw new Error(`Not a regular frequency: ${firstBooking.details?.frequency}`);
   // Only frequencies admin has priced for this service are offered (e.g. Deep Cleaning: monthly / every 3 months).
+  // Admin-created (trustPrice): any service can be regular — admin set the price. Customers can
+  // only pick frequencies admin has priced for the service (Price List).
   const service = await findService(firstBooking.service);
-  if (service && !offeredFrequencies(service).includes(frequency)) {
+  if (!trustPrice && service && !offeredFrequencies(service).includes(frequency)) {
     throw new Error(`${firstBooking.service} isn't offered ${frequency.toLowerCase()}`);
   }
   const floor = await minimumVisitPrice(firstBooking.service, firstBooking.details?.duration, frequency);
@@ -368,7 +370,7 @@ async function markVisitPaid(booking, paymentIntentId, note) {
     const fresh = await Booking.findOneAndUpdate({ _id: booking._id, status: { $in: ["Pending", "Awaiting Payment"] } }, { $set: { status: "Confirmed" } }, { new: true });
     if (fresh) {
       booking.status = "Confirmed";
-      require("./jobAnnounce").announceNewJob(fresh);
+      await require("./jobAnnounce").announceNewJob(fresh); // regular cleaner first, else everyone
       require("./automationEngine").rescheduleBookingReminders(fresh).catch(() => {});
     }
   }
@@ -538,6 +540,10 @@ async function cancelUnpaidVisit(booking) {
   );
   const when = visitWhen(booking);
   const amount = `£${Number(booking.payment?.amount || 0).toFixed(2)}`;
+  if (!booking.assignedWorker && booking.meta?.subscriptionId) {
+    await require("./regularCleaner").tellRegularDontGo(booking.meta.subscriptionId,
+      `${booking.service} on ${when} is cancelled — the customer didn't pay. Don't go. Your other dates are unchanged.`);
+  }
   if (booking.assignedWorker) {
     const message = `${booking.service} on ${when} (${booking.bookingId}) was cancelled.`;
     await Notification.create({ workerId: booking.assignedWorker, title: "Job cancelled", message, type: "job", bookingId: booking.bookingId }).catch(() => {});
@@ -605,7 +611,8 @@ async function processDueCharges(now = new Date()) {
       const r = await chargeSavedCard(visit, key);
       if (r.charged) {
         await markVisitPaid(visit, r.paymentIntentId, `${Math.round(hours)}h before the clean`);
-        sendChargeReceipt(visit);
+        // Fresh copy: it may now have its regular cleaner's name for the email.
+        sendChargeReceipt((await Booking.findById(visit._id).lean()) || visit);
         done.charged++;
       } else {
         await markVisitPaymentFailed(visit, r.reason, { stage: attempt === 1 ? "advance" : "retry" });
@@ -759,6 +766,10 @@ async function stopSubscription(sub, next, by, { now, chargeFee }) {
     }
   }
   const cancelled = await cancelFutureVisits(sub, next === "paused" ? "Regular clean paused" : "Regular clean cancelled", now);
+  if (cancelled) {
+    await require("./regularCleaner").tellRegularDontGo(sub._id,
+      `${sub.customer?.firstName || "Your customer"}'s regular ${sub.service} is ${next === "paused" ? "paused" : "cancelled"}. Don't go on the upcoming dates — they've been removed from your jobs.`);
+  }
   sub.status = next;
   if (next === "paused") sub.pausedAt = now;
   else Object.assign(sub, { cancelledAt: now, cancelledBy: by });

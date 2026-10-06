@@ -35,6 +35,7 @@ import {
   AlertCircle,
   Navigation,
 } from "lucide-react-native";
+import RegularCleanCard from "../components/RegularCleanCard";
 import axios from "axios";
 import {
   NEU_BG,
@@ -436,6 +437,13 @@ const OfferDetailScreen = ({ route, navigation }) => {
             </View>
           )}
         </View>
+
+        {/* Regular clean: how often and every upcoming date */}
+        {offer.regular && (
+          <View style={styles.section}>
+            <RegularCleanCard regular={offer.regular} bookingId={offer._id} workerId={workerInfo?.id} mode="offer" />
+          </View>
+        )}
 
         {/* Location */}
         <View style={styles.section}>

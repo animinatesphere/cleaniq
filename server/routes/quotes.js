@@ -417,10 +417,23 @@ async function acceptQuote(quote) {
   if (reAccepted) quote.declinedAt = null;
   await require("../utils/automationEngine").cancelQuoteFollowups(quote.email).catch(() => {});
   await quote.save();
-  const { count: bookingsCreated, dateNote } = await generateBookingsFromQuote(quote);
+  // Weekly / fortnightly / monthly / every 3 months: a regular clean like any other booking —
+  // first payment saves the card, each following visit is charged 24h before and confirmed then,
+  // one regular cleaner. Other quotes: their booking(s) and a payment link as before.
+  const regular = ["weekly", "biweekly", "monthly", "quarterly"].includes(quote.frequency);
+  const { count: bookingsCreated, dateNote } = await generateBookingsFromQuote(quote, { onlyFirst: regular });
   let paymentLink = null;
   try {
-    paymentLink = await sendQuotePaymentLink(quote);
+    if (regular) {
+      const subscriptions = require("../utils/subscriptions");
+      const first = await Booking.findOne({ bookingId: `Q-${quote.quoteRef}-1` });
+      const sub = await subscriptions.createSubscription(first, {
+        visitPrice: Number(first.payment?.amount) || Number(quote.grandTotal) || 0, source: "Quote", trustPrice: true,
+      });
+      paymentLink = await subscriptions.sendFirstPaymentLink(first, sub);
+    } else {
+      paymentLink = await sendQuotePaymentLink(quote);
+    }
   } catch (e) {
     console.error(`Quote ${quote.quoteRef}: payment link not sent:`, e.message);
   }
@@ -1257,7 +1270,8 @@ function generateQuoteResponseAlert(quote, outcome, bookingsCreated = 0, dateNot
 // When a quote is accepted, automatically create the matching booking(s) so
 // they appear on the calendar. If no serviceDate is set on the quote the
 // booking is still created with a null date (admin can set it later).
-async function generateBookingsFromQuote(quote) {
+// onlyFirst: just the first visit (a regular clean books the following ones itself).
+async function generateBookingsFromQuote(quote, { onlyFirst = false } = {}) {
   // Guard against re-inserting bookings if this quote was already processed
   // (e.g. the customer declined then re-accepted). Duplicate bookingId values
   // would throw a unique-key error and show the customer an error page.
@@ -1274,7 +1288,7 @@ async function generateBookingsFromQuote(quote) {
     quarterly: 4,
     yearly: 2,
   };
-  const occurrenceCount = OCCURRENCES_BY_FREQUENCY[quote.frequency] || 1;
+  const occurrenceCount = onlyFirst ? 1 : OCCURRENCES_BY_FREQUENCY[quote.frequency] || 1;
 
   const addInterval = (date, frequency, index) => {
     const d = new Date(date);
