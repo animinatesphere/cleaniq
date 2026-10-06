@@ -30,7 +30,7 @@ const subscriptionSchema = new mongoose.Schema(
     template: { type: mongoose.Schema.Types.Mixed, default: {} },
     stripeCustomerId: { type: String, default: "" },
     stripePaymentMethodId: { type: String, default: "" },
-    source: { type: String, default: "Website" }, // Website | App
+    source: { type: String, default: "Website" }, // Website | App | Admin
     pausedAt: { type: Date, default: null },
     cancelledAt: { type: Date, default: null },
     cancelledBy: { type: String, default: "" }, // "customer" | admin username

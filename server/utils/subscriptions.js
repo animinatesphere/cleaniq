@@ -132,7 +132,8 @@ async function saveSetupFee(input = {}) {
   return getSetupFee();
 }
 
-async function createSubscription(firstBooking, { visitPrice, source = "Website", status = "pending_payment" } = {}) {
+// trustPrice: admin set the price (no minimum applied); customers can't lower it.
+async function createSubscription(firstBooking, { visitPrice, source = "Website", status = "pending_payment", trustPrice = false } = {}) {
   const frequency = normaliseFrequency(firstBooking.details?.frequency);
   if (!isSubscriptionFrequency(frequency)) throw new Error(`Not a regular frequency: ${firstBooking.details?.frequency}`);
   // Only frequencies admin has priced for this service are offered (e.g. Deep Cleaning: monthly / every 3 months).
@@ -142,7 +143,7 @@ async function createSubscription(firstBooking, { visitPrice, source = "Website"
   }
   const floor = await minimumVisitPrice(firstBooking.service, firstBooking.details?.duration, frequency);
   const claimed = Number(visitPrice ?? firstBooking.payment?.amount ?? 0);
-  const pricePerVisit = Math.round(Math.max(claimed, floor) * 100) / 100;
+  const pricePerVisit = Math.round((trustPrice && claimed > 0 ? claimed : Math.max(claimed, floor)) * 100) / 100;
   const subscriptionRef = await uniqueRef("SUB-", (ref) => Subscription.exists({ subscriptionRef: ref }));
   const sub = await Subscription.create({
     subscriptionRef,
@@ -163,6 +164,45 @@ async function createSubscription(firstBooking, { visitPrice, source = "Website"
     { $set: { "meta.subscriptionId": sub._id, "meta.subscriptionRef": subscriptionRef, "meta.recurringGroup": subscriptionRef } },
   );
   return sub;
+}
+
+// Payment link for the FIRST clean of a regular clean (app, or created by admin): the clean is paid
+// now (not a hold) and the card is saved for later visits. Emails the customer; returns the link.
+// Paying it activates the subscription (handleCheckoutCompleted → activateSubscription).
+async function sendFirstPaymentLink(booking, sub) {
+  const customerId = await getOrCreateStripeCustomer({
+    email: booking.customer.email,
+    name: `${booking.customer.firstName || ""} ${booking.customer.lastName || ""}`.trim(),
+    phone: booking.customer.phone,
+  });
+  const meta = { bookingId: booking._id.toString(), subscriptionId: sub._id.toString(), type: "subscription_first", company: "Cleaniq Services" };
+  const session = await stripe().checkout.sessions.create({
+    mode: "payment",
+    customer: customerId,
+    payment_intent_data: { setup_future_usage: "off_session", metadata: meta },
+    line_items: [{
+      price_data: {
+        currency: (booking.payment?.currency || "GBP").toLowerCase(),
+        product_data: {
+          name: `Cleaniq - ${booking.service} (first clean${sub.setupFee > 0 ? " + set-up fee" : ""})`,
+          description: `${sub.frequency} regular clean ${sub.subscriptionRef}.${sub.setupFee > 0 ? ` Includes the one-off £${sub.setupFee.toFixed(2)} set-up fee.` : ""} Later cleans £${sub.pricePerVisit.toFixed(2)} each, charged 48 hours before each clean.`,
+        },
+        unit_amount: pence(booking.payment.amount),
+      },
+      quantity: 1,
+    }],
+    metadata: meta,
+    success_url: `${FRONTEND()}/payment/success?bookingId=${booking._id}`,
+    cancel_url: `${FRONTEND()}/`,
+  });
+  const { sendEmail, templates } = require("./emailService");
+  await sendEmail({
+    to: booking.customer.email,
+    subject: `Payment Required: Cleaniq Booking ${booking.bookingId}`,
+    html: templates.paymentRequired(booking, session.url),
+  });
+  await Booking.updateOne({ _id: booking._id }, { $set: { "meta.lastPaymentLinkUrl": session.url, "meta.paymentLinkSentAt": new Date() } }).catch(() => {});
+  return session.url;
 }
 
 // Marks the first visit paid and the subscription active once Stripe has taken the first payment
@@ -198,6 +238,8 @@ async function activateSubscription(sub, paymentIntentId, { now = new Date() } =
   sub.template = { ...sub.template, payment: { ...(sub.template?.payment || {}), stripeCustomerId: customerId, stripePaymentMethodId: paymentMethodId } };
   await sub.save();
   const created = await topUpVisits(sub, { now });
+  // The first clean is paid: cleaners are told about it now.
+  Booking.findById(first._id).then((b) => b && require("./jobAnnounce").announceNewJob(b)).catch(() => {});
   sendSetupEmail(sub).catch((e) => console.error("[subscriptions] setup email failed:", e.message));
   console.log(`[subscriptions] ${sub.subscriptionRef} active (${sub.frequency}, £${sub.pricePerVisit}/visit), ${created} visits booked ahead`);
   return { sub, created };
@@ -226,7 +268,9 @@ async function topUpVisits(sub, { now = new Date() } = {}) {
       workerRate,
       bookingId,
       schedule: { ...(t.schedule || {}), date: next },
-      status: "Confirmed",
+      // Unpaid: not shown to cleaners. Becomes Confirmed (and announced) when it's charged,
+      // 48 hours before the clean.
+      status: "Pending",
       skipConfirmationEmail: true,
       noPaymentRequired: false,
       payment: {
@@ -294,6 +338,15 @@ async function markVisitPaid(booking, paymentIntentId, note) {
   applyPayment(booking, paid);
   await expirePaymentLink(booking);
   console.log(`[subscriptions] charged £${booking.payment?.amount} for ${booking.bookingId} ${note}`);
+  // Paid: the visit is confirmed and cleaners are told about it (once).
+  if (["Pending", "Awaiting Payment"].includes(booking.status)) {
+    const fresh = await Booking.findOneAndUpdate({ _id: booking._id, status: { $in: ["Pending", "Awaiting Payment"] } }, { $set: { status: "Confirmed" } }, { new: true });
+    if (fresh) {
+      booking.status = "Confirmed";
+      require("./jobAnnounce").announceNewJob(fresh);
+      require("./automationEngine").rescheduleBookingReminders(fresh).catch(() => {});
+    }
+  }
   return { charged: true, paymentIntentId };
 }
 
@@ -819,6 +872,7 @@ module.exports = {
   normaliseFrequency,
   getOrCreateStripeCustomer,
   createSubscription,
+  sendFirstPaymentLink,
   activateSubscription,
   topUpVisits,
   topUpAll,

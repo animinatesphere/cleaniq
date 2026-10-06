@@ -126,9 +126,10 @@ router.post('/', async (req, res) => {
               _id: undefined,
               bookingId: `BK-R${Math.floor(100000 + Math.random() * 900000)}`,
               schedule: { ...baseData.schedule, date: instanceDate },
-              status: 'Confirmed',
+              // Unpaid visits stay Pending (not shown to cleaners) unless no payment is needed.
+              status: baseData.noPaymentRequired ? 'Confirmed' : 'Pending',
               skipConfirmationEmail: true,
-              noPaymentRequired: true,
+              noPaymentRequired: Boolean(baseData.noPaymentRequired),
               payment: { ...baseData.payment, status: 'Pending', stripePaymentIntentId: null },
               meta: { recurringGroup: groupId },
               assignedWorker: null,
@@ -157,37 +158,7 @@ router.post('/', async (req, res) => {
     if (isInvoicePending && subscription) {
       // App regular clean: pay the first visit now (not a hold) and save the card for later visits
       try {
-        const customerId = await subscriptions.getOrCreateStripeCustomer({
-          email: newBooking.customer.email,
-          name: `${newBooking.customer.firstName || ''} ${newBooking.customer.lastName || ''}`.trim(),
-          phone: newBooking.customer.phone,
-        });
-        const meta = { bookingId: newBooking._id.toString(), subscriptionId: subscription._id.toString(), type: 'subscription_first', company: 'Cleaniq Services' };
-        const session = await subscriptions.stripe().checkout.sessions.create({
-          mode: 'payment',
-          customer: customerId,
-          payment_intent_data: { setup_future_usage: 'off_session', metadata: meta },
-          line_items: [{
-            price_data: {
-              currency: (newBooking.payment?.currency || 'GBP').toLowerCase(),
-              product_data: {
-                name: `Cleaniq - ${newBooking.service} (first clean${subscription.setupFee > 0 ? ' + set-up fee' : ''})`,
-                description: `${subscription.frequency} regular clean ${subscription.subscriptionRef}.${subscription.setupFee > 0 ? ` Includes the one-off £${subscription.setupFee.toFixed(2)} set-up fee.` : ''} Later cleans £${subscription.pricePerVisit.toFixed(2)} each, charged 48 hours before each clean.`,
-              },
-              unit_amount: Math.round(newBooking.payment.amount * 100),
-            },
-            quantity: 1,
-          }],
-          metadata: meta,
-          success_url: `${process.env.FRONTEND_URL || 'https://cleaniqservices.com'}/payment/success?bookingId=${newBooking._id}`,
-          cancel_url: `${process.env.FRONTEND_URL || 'https://cleaniqservices.com'}/`,
-        });
-        checkoutUrl = session.url;
-        await sendEmail({
-          to: newBooking.customer.email,
-          subject: `Payment Required: Cleaniq Booking ${newBooking.bookingId}`,
-          html: templates.paymentRequired(newBooking, session.url),
-        });
+        checkoutUrl = await subscriptions.sendFirstPaymentLink(newBooking, subscription);
       } catch (payErr) {
         console.error('❌ Failed to create regular clean payment link:', payErr.message);
       }

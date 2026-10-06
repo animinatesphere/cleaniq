@@ -197,35 +197,8 @@ router.post("/public", async (req, res) => {
         console.error("⚠️ Failed to send admin alert (public):", adminAlertErr.message);
       }
 
-      // Notify active staff (best-effort)
-      try {
-        // Only cleaners the job suits (services, hours, travel area, pets).
-        const { workersForJob } = require("../utils/offerMatching");
-        const suited = new Set((await workersForJob(newBooking, await Worker.find({ status: "Active", appAccessGranted: true }).select("_id").lean())).map((w) => String(w._id)));
-        const activeStaff = (await Worker.find({
-          status: "Active",
-          appAccessGranted: true,
-        })).filter((w) => suited.has(String(w._id)));
-        if (activeStaff && activeStaff.length > 0) {
-          for (const staff of activeStaff) {
-            await sendEmail({
-              to: staff.email,
-              subject: `🧹 New Job Alert: ${newBooking.service} is available!`,
-              html: templates.staffNewJobAlert(newBooking),
-            });
-          }
-          const dateStr = newBooking.schedule?.date
-            ? new Date(newBooking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
-            : "TBC";
-          await sendWorkersPush(activeStaff.flatMap(tokensOf), {
-            title: "New Job Available!",
-            body: `${newBooking.service} · ${dateStr}`,
-            data: { type: "new_job", bookingId: newBooking.bookingId },
-          });
-        }
-      } catch (staffEmailErr) {
-        console.error("❌ Failed to email staff new job notification (public):", staffEmailErr);
-      }
+      // Cleaners are told about the job once it's confirmed (paid) — never while unpaid.
+      require("../utils/jobAnnounce").announceNewJob(newBooking);
 
       // Schedule reminders if booking is confirmed or payment authorized
       try {
@@ -475,11 +448,34 @@ async function createBooking(body) {
     console.error("⚠️ Failed to capture booking lead:", leadErr.message);
   }
 
-  // ── Recurring series generation ──────────────────────────────────────────
-  // When frequency is not "Once", stamp a recurringGroup on the first booking
-  // and create all future instances silently (no emails, no payment links).
+  // ── Regular clean with a payment link (weekly / fortnightly / monthly / every 3 months) ──
+  // Becomes a regular clean like the website's: the first payment saves the card, each later
+  // visit is charged 48 hours before and only then confirmed and shown to cleaners.
   const recurFreq = newBooking.details?.frequency;
-  if (recurFreq && recurFreq !== "Once") {
+  const subscriptions = require("../utils/subscriptions");
+  let regularClean = null;
+  if (
+    subscriptions.isSubscriptionFrequency(recurFreq) &&
+    !newBooking.noPaymentRequired &&
+    newBooking.payment?.status === "Pending" &&
+    newBooking.payment?.billingType !== "flat" &&
+    newBooking.payment?.method !== "Dev Mode" &&
+    Number(newBooking.payment?.amount) > 0
+  ) {
+    try {
+      regularClean = await subscriptions.createSubscription(newBooking, {
+        visitPrice: newBooking.payment.amount, source: "Admin", trustPrice: true,
+      });
+    } catch (subErr) {
+      console.error(`Regular clean setup (admin) failed for ${newBooking.bookingId}, using a booking series:`, subErr.message);
+    }
+  }
+
+  // ── Recurring series generation ──────────────────────────────────────────
+  // When frequency is not "Once" (and it isn't a regular clean above), stamp a recurringGroup on
+  // the first booking and create the future visits silently (no emails, no payment links).
+  // Visits that need paying stay Pending — not confirmed, not shown to cleaners.
+  if (recurFreq && recurFreq !== "Once" && !regularClean) {
     const groupId = `RG-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 
     // Tag the first booking with the group ID
@@ -514,9 +510,9 @@ async function createBooking(body) {
             _id: undefined,
             bookingId: `BK-R${Math.floor(100000 + Math.random() * 900000)}`,
             schedule: { ...baseData.schedule, date: instanceDate },
-            status: "Confirmed",
+            status: baseData.noPaymentRequired ? "Confirmed" : "Pending",
             skipConfirmationEmail: true,
-            noPaymentRequired: true,
+            noPaymentRequired: Boolean(baseData.noPaymentRequired),
             payment: {
               ...baseData.payment,
               status: "Pending",
@@ -578,6 +574,11 @@ async function createBooking(body) {
       !isPaymentCompleted
     ) {
       try {
+        if (regularClean) {
+          // Regular clean: first clean paid now and the card saved for the following cleans.
+          await subscriptions.sendFirstPaymentLink(newBooking, regularClean);
+          console.log(`✅ Regular clean ${regularClean.subscriptionRef}: first payment link sent to ${newBooking.customer.email}`);
+        } else {
         // Generate Stripe Checkout Link with manual capture
         const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
         const session = await stripe.checkout.sessions.create({
@@ -625,6 +626,7 @@ async function createBooking(body) {
         console.log(
           `✅ Payment email sent to ${newBooking.customer.email} with checkout link`,
         );
+        }
       } catch (paymentEmailErr) {
         console.error(
           "❌ Failed to send payment email:",
@@ -667,30 +669,7 @@ async function createBooking(body) {
       html: templates.adminNewBookingAlert(newBooking),
     });
 
-    // Notify all active Staff members of a new available clean job in their feed
-    try {
-      const activeStaff = await Worker.find({
-        status: "Active",
-        appAccessGranted: true,
-      });
-      if (activeStaff && activeStaff.length > 0) {
-        console.log(
-          `📧 Notifying ${activeStaff.length} active staff members about booking ${newBooking.bookingId}...`,
-        );
-        for (const staff of activeStaff) {
-          await sendEmail({
-            to: staff.email,
-            subject: `🧹 New Job Alert: ${newBooking.service} is available!`,
-            html: templates.staffNewJobAlert(newBooking),
-          });
-        }
-      }
-    } catch (staffEmailErr) {
-      console.error(
-        "❌ Failed to email staff new job notification:",
-        staffEmailErr,
-      );
-    }
+    // Cleaners hear about the job when it's confirmed (see the end of createBooking).
   } else {
     // DEV MODE: Send dev mode success confirmation email to customer (without payment section)
     try {
@@ -774,45 +753,10 @@ async function createBooking(body) {
     }
   });
 
-  // Push + in-app notification: notify workers about the new available job
+  // Tell cleaners about the job — only when it's confirmed or needs no payment. Unpaid jobs are
+  // announced when they're paid (Stripe webhook / regular-clean charge) or admin confirms them.
   if (newBooking.status === "Confirmed" || newBooking.noPaymentRequired) {
-    setImmediate(async () => {
-      try {
-        const dateStr = newBooking.schedule?.date
-          ? new Date(newBooking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
-          : "TBC";
-        const notifTitle = "New Job Available!";
-        const notifBody  = `${newBooking.service} · ${dateStr}`;
-        const workers = await require("../utils/offerMatching").workersForJob(newBooking, await Worker.find({
-          $or: [{ region: newBooking.region }, { region: null }, { region: { $exists: false } }],
-          status: "Active",
-        }).select("_id").lean());
-
-        // Write a Notification record for each worker — the app polls this every 3s
-        await Notification.insertMany(
-          workers.map(w => ({
-            workerId: w._id,
-            title: notifTitle,
-            message: notifBody,
-            type: "job",
-            bookingId: newBooking.bookingId,
-          })),
-          { ordered: false }
-        ).catch(() => {});
-
-        // Also fire Expo push (best-effort — works when FCM is configured)
-        const tokens = workers.flatMap(tokensOf);
-        if (tokens.length) {
-          await sendWorkersPush(tokens, {
-            title: notifTitle,
-            body: notifBody,
-            data: { type: "new_job", bookingId: newBooking.bookingId },
-          });
-        }
-      } catch (err) {
-        console.error("Worker push notification error:", err.message);
-      }
-    });
+    require("../utils/jobAnnounce").announceNewJob(newBooking);
   }
 
   return newBooking;
@@ -1308,43 +1252,9 @@ router.put("/:id", async (req, res) => {
       }
     }
 
-    // ── Notify workers when a booking first becomes Confirmed ────────────────
+    // ── Tell cleaners when a booking first becomes Confirmed (once per job) ──
     if (prevStatus !== "Confirmed" && newStatus === "Confirmed" && !updatedBooking.assignedWorker) {
-      setImmediate(async () => {
-        try {
-          const dateStr = updatedBooking.schedule?.date
-            ? new Date(updatedBooking.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
-            : "TBC";
-          const notifTitle = "New Job Available!";
-          const notifBody  = `${updatedBooking.service} · ${dateStr}`;
-          const workers = await require("../utils/offerMatching").workersForJob(updatedBooking, await Worker.find({ status: "Active" }).select("_id").lean());
-
-          // Write a Notification record for each active worker — app polls this every 3s
-          await Notification.insertMany(
-            workers.map(w => ({
-              workerId: w._id,
-              title: notifTitle,
-              message: notifBody,
-              type: "job",
-              bookingId: updatedBooking.bookingId,
-            })),
-            { ordered: false }
-          ).catch(() => {});
-
-          // Also fire Expo push (best-effort)
-          const tokens = workers.flatMap(tokensOf);
-          if (tokens.length) {
-            await sendWorkersPush(tokens, {
-              title: notifTitle,
-              body: notifBody,
-              data: { type: "new_job", bookingId: updatedBooking.bookingId },
-            });
-          }
-          console.log(`📲 Notified ${workers.length} workers: New Job Available (${updatedBooking.bookingId})`);
-        } catch (err) {
-          console.error("Worker push (confirm) error:", err.message);
-        }
-      });
+      require("../utils/jobAnnounce").announceNewJob(updatedBooking);
     }
 
     // ── Status-change phone notification (customer app) ─────────────────────

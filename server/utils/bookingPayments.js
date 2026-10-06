@@ -88,6 +88,9 @@ async function afterConfirmed(booking, { amount, currency } = {}) {
     })?.catch?.(() => {});
   } catch {}
 
+  // Now it's paid, cleaners are told the job is available (once).
+  require("./jobAnnounce").announceNewJob(booking);
+
   // Reminders before the clean (replaces any from before it was paid).
   await require("./automationEngine").rescheduleBookingReminders(booking).catch((e) => console.error("Reminder error:", e.message));
 }
