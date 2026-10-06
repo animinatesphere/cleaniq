@@ -80,6 +80,7 @@ async function sendQuote(body) {
     keyAccess,
     hasPet,
     specialInstructions,
+    creatorCode,
   } = body;
 
   // Validation
@@ -120,6 +121,7 @@ async function sendQuote(body) {
     keyAccess,
     hasPet,
     specialInstructions,
+    creatorCode: creatorCode || "",
   };
 
   // Generate quote email HTML
@@ -1386,6 +1388,7 @@ async function generateBookingsFromQuote(quote) {
     },
     payment: {
       amount: quote.grandTotal || 0,
+      ...(quote.includeVat && Number(quote.vat) > 0 ? { taxAmount: Number(quote.vat), taxRate: Number(quote.vatRate) || 0 } : {}),
       currency: "GBP",
       status: "Pending",
       billingType: hourlyHours ? "hourly" : "flat",
@@ -1407,6 +1410,14 @@ async function generateBookingsFromQuote(quote) {
     // ordered:false lets non-duplicate docs insert even if one fails.
     // Log but don't surface to the customer — the accept page still shows.
     console.error("⚠️ generateBookingsFromQuote insertMany error:", insertErr.message);
+  }
+  // Creator / influencer: tag the bookings (insertMany skips the booking save hooks).
+  try {
+    const { attributeSavedBooking } = require("../utils/creators");
+    const made = await Booking.find({ bookingId: { $regex: `^Q-${quote.quoteRef}-` } }).sort({ "schedule.date": 1 }).select("_id").lean();
+    for (const b of made) await attributeSavedBooking(b._id, { code: quote.creatorCode || undefined });
+  } catch (e) {
+    console.error("Creator tagging (quote) error:", e.message);
   }
   return { count: bookings.length, dateNote };
 }

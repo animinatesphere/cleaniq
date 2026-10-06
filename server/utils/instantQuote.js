@@ -82,9 +82,21 @@ async function sendInstantQuote(request) {
   if (priced.skipped) return priced;
 
   const subtotal = money(priced.items.reduce((sum, i) => sum + i.subtotal, 0));
+  // Creator / influencer code: their customer discount (admin → Commission), shown on the quote.
+  let creatorCode = "";
+  let discount = 0;
+  if (q.ref) {
+    const r = await require("./creators").checkCode(q.ref, q.email);
+    if (r.valid) {
+      creatorCode = r.creator.creator.code;
+      discount = Number(r.discountPercent) || 0;
+    }
+  }
+  const discountAmount = money((subtotal * discount) / 100);
+  const afterDiscount = money(subtotal - discountAmount);
   const { includeVat, vatRate } = await quoteTaxSettings();
-  const vat = includeVat ? money(subtotal * (vatRate / 100)) : 0;
-  const grandTotal = money(subtotal + vat);
+  const vat = includeVat ? money(afterDiscount * (vatRate / 100)) : 0;
+  const grandTotal = money(afterDiscount + vat);
   const address = [q.address, q.postcode].filter(Boolean).join(", ");
 
   const { sendQuote } = require("../routes/quotes");
@@ -104,7 +116,8 @@ async function sendInstantQuote(request) {
     paymentTerms: QUOTE_DEFAULTS.paymentTerms,
     depositRequired: false,
     depositPercent: 0,
-    discount: 0,
+    discount,
+    creatorCode,
     notes: [QUOTE_DEFAULTS.notes, q.notes ? `Customer notes: ${q.notes}` : ""].filter(Boolean).join("\n"),
     quoteRef: `CLQ-${Date.now().toString().slice(-6)}`,
     date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" }),
@@ -124,8 +137,8 @@ async function sendInstantQuote(request) {
     hasPet: q.hasPet || "",
     specialInstructions: [q.property && `Property: ${q.property}`, q.notes].filter(Boolean).join(". "),
     subtotal,
-    discountAmount: 0,
-    subtotalAfterDiscount: subtotal,
+    discountAmount,
+    subtotalAfterDiscount: afterDiscount,
     vat,
     grandTotal,
     depositAmount: 0,

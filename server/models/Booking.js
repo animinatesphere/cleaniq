@@ -79,6 +79,20 @@ const bookingSchema = new mongoose.Schema({
   isShift: { type: Boolean, default: false, index: true }, // on each shift
   parentBooking: { type: mongoose.Schema.Types.ObjectId, ref: "Booking", default: null, index: true },
   shiftNumber: { type: Number, default: null },
+  // Booking that came through a creator / influencer (utils/creators.js).
+  creator: {
+    id:   { type: mongoose.Schema.Types.ObjectId, ref: "Customer", default: null, index: true },
+    code: { type: String, default: "" },
+    name: { type: String, default: "" },
+  },
+  creatorCommission: {
+    percent:  { type: Number, default: null },
+    amount:   { type: Number, default: 0 },
+    status:   { type: String, enum: ["pending", "earned", "paid", "cancelled", null], default: null }, // earned = done & paid, owed to the creator
+    earnedAt: { type: Date, default: null },
+    paidAt:   { type: Date, default: null },
+    payoutRef: { type: String, default: "" },
+  },
   photos: [{
     photoType: { type: String, enum: ["before", "after", "damage", "other"] },
     url: String,
@@ -109,5 +123,23 @@ async function cancelShiftsOf(doc) {
 }
 bookingSchema.post("save", (doc) => { cancelShiftsOf(doc).catch((e) => console.error("Shift cancel error:", e.message)); });
 bookingSchema.post("findOneAndUpdate", (doc) => { cancelShiftsOf(doc).catch((e) => console.error("Shift cancel error:", e.message)); });
+
+// Creators: a new booking from a customer a creator brought in is tagged to that creator (by the
+// admin's rule), and the commission follows the booking: earned once done and paid, cancelled
+// if the booking is cancelled. See utils/creators.js.
+bookingSchema.pre("save", async function tagCreator() {
+  if (!this.isNew || this.creator?.id || this.isShift) return;
+  try {
+    await require("../utils/creators").attributeBooking(this);
+  } catch (e) {
+    console.error("Creator tagging error:", e.message);
+  }
+});
+const settleCreator = (doc) => {
+  if (!doc?.creator?.id) return;
+  require("../utils/creators").settleCommission(doc).catch((e) => console.error("Creator commission error:", e.message));
+};
+bookingSchema.post("save", settleCreator);
+bookingSchema.post("findOneAndUpdate", settleCreator);
 
 module.exports = mongoose.model("Booking", bookingSchema);

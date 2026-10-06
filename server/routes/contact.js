@@ -140,6 +140,7 @@ function readQuoteRequest(body = {}) {
     cloakrooms: count(body.cloakrooms, 4),
     hasPet: ["Yes", "No"].includes(body.hasPet) ? body.hasPet : "",
     supplies: ["Cleaniq", "Customer"].includes(body.supplies) ? body.supplies : "",
+    ref: clean(body.ref, 20).toUpperCase().replace(/[^A-Z0-9]/g, ""), // creator / influencer code
     time: /^([01]\d|20):(00|30)$/.test(String(body.time || "")) && String(body.time) >= "08:00" && String(body.time) <= "20:00" ? String(body.time) : "",
     stairs: count(body.stairs, 6),
     property: clean(body.property, 30),
@@ -207,6 +208,7 @@ function quoteRows(q) {
     ["Preferred arrival time", q.time],
     ["Carpet cleaning", q.carpets ? `${q.carpet} — ${q.carpets} carpet${q.carpets === 1 ? "" : "s"}` : q.carpet],
     ["Additional services (20% off)", q.extras.join(", ")],
+    ["Creator code", q.ref],
     ["Additional information", q.notes],
   ].filter(([, v]) => v !== null && v !== undefined && v !== "");
 }
