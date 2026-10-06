@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { captureCreatorRef } from "./utils/creatorRef";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./component/Navbar";
 import TopNav from "./component/TopNav";
@@ -25,6 +26,7 @@ import CityLanding from "./pages/CityLanding";
 import CustomerLogin from "./pages/account/Login";
 import CustomerSignup from "./pages/account/Signup";
 import CustomerDashboard from "./pages/account/Dashboard";
+import CreatorDashboard from "./pages/account/CreatorDashboard";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import { CustomerAuthProvider } from "./context/CustomerAuthContext";
 
@@ -42,6 +44,7 @@ import Chat from "./admin/Chat";
 import AdminBlog from "./admin/Blog";
 import StaffPay from "./admin/StaffPay";
 import Subscriptions from "./admin/Subscriptions";
+import Commission from "./admin/Commission";
 import AdminWithdrawals from "./admin/AdminWithdrawals";
 import AdminPayments from "./admin/AdminPayments";
 import QuoteBuilder from "./admin/QuoteBuilder";
@@ -96,6 +99,9 @@ function App() {
   const isAccountPath = location.pathname.startsWith("/account");
   const isDevPanel    = location.pathname.startsWith("/devpanel");
 
+  // Creator / influencer links (?ref=CODE) are remembered for checkout and quotes.
+  useEffect(() => { captureCreatorRef(location.search); }, [location.search]);
+
   return (
     <CustomerAuthProvider>
       <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -127,6 +133,7 @@ function App() {
             <Route path="/account/login" element={<CustomerLogin />} />
             <Route path="/account/signup" element={<CustomerSignup />} />
             <Route path="/account/dashboard" element={<CustomerDashboard />} />
+            <Route path="/account/creator" element={<CreatorDashboard />} />
             <Route path="/payment/success" element={<PaymentSuccess />} />
 
             {/* Dev Panel — standalone, no admin layout, own login */}
@@ -161,6 +168,7 @@ function App() {
               <Route path="chat" element={<Chat />} />
               <Route path="staff-pay" element={<StaffPay />} />
               <Route path="subscriptions" element={<Subscriptions />} />
+              <Route path="commission" element={<Commission />} />
               <Route path="withdrawals" element={<AdminWithdrawals />} />
               <Route path="payments" element={<AdminPayments />} />
               <Route path="automations" element={<Automations />} />

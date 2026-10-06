@@ -28,6 +28,9 @@ function formatDate(d) {
 
 export default function CustomerDashboard() {
   const { customer, loading: authLoading, logout, authFetch } = useCustomerAuth();
+  const goTo = useNavigate();
+  // Creators have their own dashboard.
+  useEffect(() => { if (customer?.role === "creator") goTo("/account/creator", { replace: true }); }, [customer, goTo]);
   const { region } = useRegion();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

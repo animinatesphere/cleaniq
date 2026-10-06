@@ -27,7 +27,8 @@ export default function CustomerLogin() {
     setError("");
     setLoading(true);
     try {
-      await login({ email: form.email, password: form.password });
+      const me = await login({ email: form.email, password: form.password });
+      if (me?.role === "creator") return navigate("/account/creator");
       const finalPath = returnStep
         ? `${returnTo}?step=${returnStep}`
         : returnTo;
