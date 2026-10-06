@@ -246,6 +246,14 @@ test("regular cleaner: accepting makes Kelvin the regular cleaner; each paid wee
   assert.ok(details.regular.visits.length >= 5);
   assert.ok(details.regular.visits.find((v) => v.current && v.mine));
   assert.ok(details.regular.visits.slice(1).every((v) => v.state === "charged_before"));
+  assert.equal(String(details.regular.next._id), String(details.regular.visits[1]._id), "next date lined up");
+
+  // Kelvin finishes week 1: it's ticked off as done and the details point to the next date.
+  await fetch(`${base}/workers/jobs/${first._id}/complete`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+  const afterDone = await (await fetch(`${base}/workers/jobs/${first._id}?workerId=${worker}`)).json();
+  assert.equal(afterDone.regular.visits[0].state, "done");
+  assert.equal(afterDone.regular.done, 1);
+  assert.equal(String(afterDone.regular.next._id), String(afterDone.regular.visits[1]._id));
 
   // Next week is charged 24h before → given straight to Kelvin, not offered to everyone.
   const next = (await Booking.find({ "meta.subscriptionId": sub._id, _id: { $ne: first._id } }).sort({ "schedule.date": 1 }).lean())[0];

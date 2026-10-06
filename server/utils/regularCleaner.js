@@ -119,16 +119,44 @@ function everyText(sub) {
   return `${every}${time ? ` at ${time}` : ""}`;
 }
 
-/** The regular-clean part of a job's details, for the worker app. */
+/**
+ * The regular-clean part of a job's details, for the worker app: every date of the regular clean
+ * (done ones ticked off), which one this job is, and the next one to go to.
+ */
 async function regularInfo(booking, workerId) {
   const subId = subIdOf(booking);
   if (!subId) return null;
   const sub = await Subscription().findById(subId).lean();
   if (!sub) return null;
-  const visits = await require("./subscriptions").visitsFor(sub);
-  const assigned = await Booking().find({ _id: { $in: visits.map((v) => v._id) } }).select("assignedWorker").lean();
-  const byId = new Map(assigned.map((b) => [String(b._id), b.assignedWorker ? String(b.assignedWorker) : ""]));
+  const rows = await Booking().find({ "meta.subscriptionId": sub._id })
+    .sort({ "schedule.date": 1 }).limit(60)
+    .select("bookingId schedule status payment.status payment.chargeOnArrival assignedWorker assignedWorkerName")
+    .lean();
   const mineId = workerId ? String(workerId) : "";
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  const visits = rows.map((b) => {
+    const waiting = ["Pending", "Awaiting Payment"].includes(b.status);
+    const paid = ["Completed", "Paid", "Authorized"].includes(b.payment?.status);
+    const state =
+      b.status === "Cancelled" ? "cancelled"
+      : ["Completed", "Completed - Unpaid"].includes(b.status) ? "done"
+      : ["Arrived", "In Progress"].includes(b.status) ? "in_progress"
+      : waiting && b.payment?.status === "Failed" ? "payment_needed"
+      : waiting && !paid ? (b.payment?.chargeOnArrival ? "charged_before" : "awaiting_first_payment")
+      : "confirmed";
+    return {
+      _id: b._id,
+      bookingId: b.bookingId,
+      date: b.schedule?.date,
+      time: b.schedule?.preferredTime || b.schedule?.timeSlot || "",
+      state,
+      mine: Boolean(mineId && b.assignedWorker && String(b.assignedWorker) === mineId),
+      cleaner: b.assignedWorkerName || "",
+      current: String(b._id) === String(booking._id),
+    };
+  });
+  // The next date still to do (from today, not done or cancelled).
+  const next = visits.find((v) => !v.current && !["done", "cancelled"].includes(v.state) && new Date(v.date) >= todayStart) || null;
   return {
     subscriptionRef: sub.subscriptionRef,
     frequency: sub.frequency,
@@ -136,17 +164,9 @@ async function regularInfo(booking, workerId) {
     status: sub.status,
     regularWorker: sub.regularWorker?.id ? { id: String(sub.regularWorker.id), name: sub.regularWorker.name } : null,
     isRegularCleaner: Boolean(mineId && sub.regularWorker?.id && String(sub.regularWorker.id) === mineId),
-    visits: visits
-      .filter((v) => v.state !== "cancelled")
-      .map((v) => ({
-        bookingId: v.bookingId,
-        _id: v._id,
-        date: v.date,
-        time: v.time,
-        state: v.state, // confirmed (paid) | charged_before (paid 24h before) | awaiting_first_payment | payment_needed | done
-        mine: Boolean(mineId && byId.get(String(v._id)) === mineId),
-        current: String(v._id) === String(booking._id),
-      })),
+    done: visits.filter((v) => v.state === "done").length,
+    next: next ? { _id: next._id, bookingId: next.bookingId, date: next.date, time: next.time, state: next.state, mine: next.mine } : null,
+    visits,
   };
 }
 
