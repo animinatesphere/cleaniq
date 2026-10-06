@@ -12,13 +12,14 @@ import { tc, themed } from "../theme/dark";
 const GREEN = "#0F6B4C";
 const day = (d) => (d ? new Date(d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) : "—");
 
+// Only paid dates are jobs to go to. Unpaid ones become jobs once the customer pays (24h before).
 function label(v) {
   if (v.state === "done") return { text: "Done", color: "#1D4ED8", bg: "#EFF6FF", Icon: CheckCircle2 };
   if (v.state === "confirmed") return v.mine
-    ? { text: "Paid · yours", color: "#047857", bg: "#ECFDF5", Icon: CheckCircle2 }
-    : { text: "Paid", color: "#047857", bg: "#ECFDF5", Icon: CheckCircle2 };
-  if (v.state === "payment_needed") return { text: "Payment pending", color: "#B45309", bg: "#FFFBEB", Icon: CreditCard };
-  return { text: "Pays 24h before", color: "#64748B", bg: "#F1F5F9", Icon: Clock };
+    ? { text: "Paid · go", color: "#047857", bg: "#ECFDF5", Icon: CheckCircle2 }
+    : { text: "Paid · another cleaner", color: "#047857", bg: "#ECFDF5", Icon: CheckCircle2 };
+  if (v.state === "payment_needed") return { text: "Payment problem · don't go", color: "#B91C1C", bg: "#FEF2F2", Icon: CreditCard };
+  return { text: "Not paid yet · don't go", color: "#B45309", bg: "#FFFBEB", Icon: Clock };
 }
 
 export default function RegularCleanCard({ regular, bookingId, workerId, mode = "accepted", onChanged }) {
@@ -84,6 +85,11 @@ export default function RegularCleanCard({ regular, bookingId, workerId, mode = 
       </Text>
 
       {upcoming.length > 0 && (
+        <Text style={styles.rule}>
+          ⚠️ Only go on dates marked “Paid · go”. Unpaid dates are added to your jobs when the customer pays (24h before); if a date isn't paid it's cancelled and you'll be told.
+        </Text>
+      )}
+      {upcoming.length > 0 && (
         <View style={styles.list}>
           {upcoming.map((v) => {
             const l = label(v);
@@ -123,6 +129,7 @@ const styles = themed(StyleSheet.create({
   title: { fontSize: 15, fontWeight: "900", color: "#0F172A" },
   sub: { fontSize: 13, fontWeight: "700", color: "#475569", marginTop: 1 },
   note: { fontSize: 12.5, color: "#475569", lineHeight: 18, marginTop: 10 },
+  rule: { fontSize: 12, fontWeight: "700", color: "#92400E", backgroundColor: "#FFFBEB", borderRadius: 10, padding: 10, marginTop: 10, lineHeight: 17 },
   list: { marginTop: 10, borderWidth: 1, borderColor: "#EEF1F4", borderRadius: 12, overflow: "hidden" },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 12, paddingVertical: 9, borderTopWidth: 1, borderTopColor: "#EEF1F4" },
   rowCurrent: { backgroundColor: "#F0FDF4" },

@@ -128,15 +128,19 @@ test("offer page: open, taken by another cleaner, or mine", async () => {
 test("accepting sends the cleaner's automatic intro message (once), unless switched off", async () => {
   const b = await job();
   await call("POST", `/jobs/${b._id}/accept`, { workerId: String(worker._id), workerName: "Kelvin Obi" });
-  await new Promise((r) => setTimeout(r, 100));
-  const msgs = await WorkerCustomerMessage.find({ bookingId: b.bookingId }).lean();
+  // Sent in the background: wait up to 4s for it.
+  let msgs = [];
+  for (let i = 0; i < 40 && !msgs.length; i++) {
+    msgs = await WorkerCustomerMessage.find({ bookingId: b.bookingId }).lean();
+    if (!msgs.length) await new Promise((r) => setTimeout(r, 100));
+  }
   assert.equal(msgs.length, 1);
   assert.match(msgs[0].text, /^Hello, I'm Kelvin, your cleaner from Cleaniq\. Our clean is booked for Thursday 6 June at 10:00/);
 
   await call("PUT", `/${worker._id}/preferences`, { autoIntro: { enabled: false } });
   const b2 = await job();
   await call("POST", `/jobs/${b2._id}/accept`, { workerId: String(worker._id), workerName: "Kelvin Obi" });
-  await new Promise((r) => setTimeout(r, 100));
+  await new Promise((r) => setTimeout(r, 500));
   assert.equal(await WorkerCustomerMessage.countDocuments({ bookingId: b2.bookingId }), 0);
 });
 

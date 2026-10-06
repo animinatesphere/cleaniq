@@ -219,7 +219,9 @@ test("customer can cancel a job a cleaner has accepted; the cleaner is told", as
   const r = await fetch(`${base}/customer-bookings/${b._id}/cancel`, { method: "PUT", headers: { Authorization: `Bearer ${token}` } });
   assert.equal(r.status, 200);
   assert.equal((await Booking.findById(b._id)).status, "Cancelled");
-  assert.ok(await Notification.exists({ workerId: worker, title: "Job cancelled", bookingId: "BK-ASSIGNED" }));
+  let told = null;
+  for (let i = 0; i < 40 && !told; i++) { told = await Notification.exists({ workerId: worker, title: "Job cancelled", bookingId: "BK-ASSIGNED" }); if (!told) await settle(); }
+  assert.ok(told, "cleaner told");
 });
 
 test("regular cleaner: accepting makes Kelvin the regular cleaner; each paid week goes straight to him", async () => {
@@ -253,9 +255,23 @@ test("regular cleaner: accepting makes Kelvin the regular cleaner; each paid wee
   const given = await Booking.findById(next._id).lean();
   assert.equal(given.status, "Assigned");
   assert.equal(String(given.assignedWorker), String(worker));
-  assert.ok(await Notification.exists({ workerId: worker, title: "Your regular clean is confirmed", bookingId: given.bookingId }));
+  const goNote = await Notification.findOne({ workerId: worker, title: "Your regular clean is confirmed", bookingId: given.bookingId }).lean();
+  assert.ok(goNote);
+  assert.match(goNote.message, /^✅ Go:/, "tells the cleaner to go");
+  assert.ok(emails.some((e) => e.to === "kelvin@worker.uk" && /Confirmed — please go/.test(e.subject)));
   assert.equal(await Notification.countDocuments({ title: "New Job Available!", bookingId: given.bookingId }), 0, "not offered to everyone");
   assert.ok(emails.some((e) => e.to === "reg@cust.uk" && /Your clean is .* — confirmed/.test(e.subject) && /Kelvin Obi/.test(e.html)), "customer told who's coming");
+
+  // Only one cleaner per regular clean: Mary can't take Kelvin's customer, and doesn't see it.
+  const mary = (await Worker.collection.insertOne({ firstName: "Mary", lastName: "Ade", workerId: "W-2", region: "UK", email: "mary@worker.uk", status: "Active", appAccessGranted: true })).insertedId;
+  const later2 = (await Booking.find({ "meta.subscriptionId": sub._id, status: "Pending" }).sort({ "schedule.date": 1 }).lean())[0];
+  await Booking.updateOne({ _id: later2._id }, { $set: { status: "Confirmed" } }); // e.g. confirmed by admin
+  const maryTry = await fetch(`${base}/workers/jobs/${later2._id}/accept`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ workerId: String(mary), workerName: "Mary Ade" }) });
+  assert.equal(maryTry.status, 403);
+  assert.match((await maryTry.json()).error, /Kelvin Obi's regular clean/);
+  const maryFeed = (await (await fetch(`${base}/workers/jobs?workerId=${mary}`)).json()).map((j) => j.bookingId);
+  assert.ok(!maryFeed.includes(later2.bookingId), "not offered to other cleaners");
+  await Booking.updateOne({ _id: later2._id }, { $set: { status: "Pending" } });
 
   // Dropping one date: offered to other cleaners for that date only, Kelvin stays the regular cleaner.
   await fetch(`${base}/workers/jobs/${next._id}/cancel`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
@@ -264,6 +280,8 @@ test("regular cleaner: accepting makes Kelvin the regular cleaner; each paid wee
   assert.equal(dropped.status, "Confirmed");
   assert.equal(dropped.assignedWorker, null, "not handed back to Kelvin");
   assert.ok((await feed()).includes(dropped.bookingId), "back on the job feed");
+  const maryFeed2 = (await (await fetch(`${base}/workers/jobs?workerId=${mary}`)).json()).map((j) => j.bookingId);
+  assert.ok(maryFeed2.includes(dropped.bookingId), "a dropped date is open to other cleaners");
   assert.equal(String((await Subscription.findById(sub._id)).regularWorker.id), String(worker));
 
   // Stop being the regular cleaner: his future dates go back to the feed.

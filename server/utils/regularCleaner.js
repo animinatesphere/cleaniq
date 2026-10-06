@@ -48,14 +48,43 @@ async function giveToRegularWorker(booking) {
     await require("./topRatedBonus").applyBonus(given, worker._id);
     await given.save();
   } catch {}
-  const when = given.schedule?.date
-    ? new Date(given.schedule.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
-    : "";
-  const time = given.schedule?.preferredTime || given.schedule?.timeSlot || "";
-  const msg = `${given.service} ${when}${time ? ` at ${time}` : ""} — ${given.customer?.firstName || "your customer"}'s regular clean is paid and confirmed.`;
+  // Tell the cleaner to go: app notification, push and email.
+  const msg = `✅ Go: ${whenText(given)} — ${given.customer?.firstName || "your customer"}'s ${given.service}${areaOf(given) ? ` in ${areaOf(given)}` : ""}. Paid and confirmed.`;
   await mongoose.model("Notification").create({ workerId: worker._id, title: "Your regular clean is confirmed", message: msg, type: "job", bookingId: given.bookingId }).catch(() => {});
-  require("./pushNotifications").sendPushToUser("worker", worker._id, "Your regular clean is confirmed", msg, { type: "job_assigned", bookingId: given.bookingId }, { channelId: "cleaniq-jobs" }).catch(() => {});
+  require("./pushNotifications").sendPushToUser("worker", worker._id, "✅ Go — your regular clean is confirmed", msg, { type: "job_assigned", bookingId: given.bookingId }, { channelId: "cleaniq-jobs" }).catch(() => {});
+  if (worker.email) {
+    const { sendEmail, templates } = require("./emailService");
+    sendEmail({
+      to: worker.email,
+      subject: `✅ Confirmed — please go: ${given.service} ${whenText(given)}`,
+      html: templates.staffShiftAssigned(given, worker),
+    }).catch(() => {});
+  }
   console.log(`🔁 ${given.bookingId} given to regular cleaner ${name}`);
+  return true;
+}
+
+const whenText = (b) => {
+  const d = b.schedule?.date ? new Date(b.schedule.date) : null;
+  if (!d) return "";
+  const ukDay = (x) => new Date(x).toLocaleDateString("en-CA", { timeZone: "Europe/London" });
+  const rel = ukDay(d) === ukDay(new Date()) ? "today" : ukDay(d) === ukDay(new Date(Date.now() + 86400000)) ? "tomorrow" : "";
+  const date = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+  const time = b.schedule?.preferredTime || b.schedule?.timeSlot || "";
+  return `${rel ? `${rel} (${date})` : date}${time ? ` at ${time}` : ""}`;
+};
+const areaOf = (b) => {
+  const m = String(b.details?.address || "").match(/\b([A-Z]{1,2}\d[A-Z\d]?)\s*\d[A-Z]{2}\b/i);
+  return m ? m[1].toUpperCase() : "";
+};
+
+/** Tell a regular clean's cleaner NOT to go (a date cancelled, or the regular clean stopped). */
+async function tellRegularDontGo(subId, message) {
+  const sub = await Subscription().findById(subId).select("regularWorker").lean();
+  const id = sub?.regularWorker?.id;
+  if (!id) return false;
+  await mongoose.model("Notification").create({ workerId: id, title: "❌ Don't go", message, type: "job" }).catch(() => {});
+  require("./pushNotifications").sendPushToUser("worker", id, "❌ Don't go", message, { type: "job_cancelled" }).catch(() => {});
   return true;
 }
 
@@ -121,4 +150,4 @@ async function regularInfo(booking, workerId) {
   };
 }
 
-module.exports = { claimRegular, giveToRegularWorker, dropRegular, regularInfo };
+module.exports = { claimRegular, giveToRegularWorker, dropRegular, regularInfo, tellRegularDontGo, whenText };

@@ -18,6 +18,11 @@ const checkouts = [];
 require("../../routes/quotes").setStripeForTests({
   checkout: { sessions: { create: async (a) => { checkouts.push(a); return { id: `cs_${checkouts.length}`, url: `https://checkout.test/${checkouts.length}` }; } } },
 });
+// Fake Stripe for regular cleans made from accepted weekly quotes.
+require("../../utils/subscriptions").setStripeForTests({
+  customers: { list: async () => ({ data: [] }), create: async () => ({ id: "cus_q" }) },
+  checkout: { sessions: { create: async (a) => { checkouts.push(a); return { id: `cs_q${checkouts.length}`, url: `https://checkout.test/q${checkouts.length}` }; }, expire: async () => ({}) } },
+});
 const Booking = require("../../models/Booking");
 const Quote = require("../../models/Quote");
 const Service = require("../../models/Service");
@@ -249,4 +254,24 @@ test("accepting emails the customer a payment link straight away; paying it is m
   assert.ok(!/08:30 \(08:30\)/.test(pay.html));
   assert.equal(b.meta.lastPaymentLinkUrl, `https://checkout.test/${checkouts.length}`);
   assert.ok(emails.some((m) => /Quote Accepted/.test(m.subject) && /Payment link emailed/.test(m.html)));
+});
+
+
+test("an accepted weekly quote becomes a regular clean (not 12 separate jobs)", async () => {
+  await send({ serviceDate: "", frequency: "weekly", email: "weekly@test.com" });
+  const ref = `CLQ-T${n}`;
+  emails.length = 0;
+  assert.equal(await accept(ref, day(25), "09:00"), 200);
+  assert.equal(await Booking.countDocuments({ bookingId: { $regex: `^Q-${ref}-` } }), 1, "only the first visit as a quote booking");
+  const first = await Booking.findOne({ bookingId: `Q-${ref}-1` }).lean();
+  const Subscription = require("../../models/Subscription");
+  const sub = await Subscription.findOne({ firstBooking: first._id }).lean();
+  assert.ok(sub, "a regular clean");
+  assert.equal(sub.source, "Quote");
+  assert.equal(sub.frequency, "Weekly");
+  assert.equal(sub.pricePerVisit, 245);
+  const visits = await Booking.find({ "meta.subscriptionId": sub._id, _id: { $ne: first._id } }).lean();
+  assert.ok(visits.length >= 3 && visits.every((v) => v.status === "Pending"), "following weeks booked, Pending until paid");
+  assert.ok(emails.some((m) => m.to === "weekly@test.com" && /regular clean — summary/.test(m.subject) && /Your upcoming cleans/.test(m.html)));
+  assert.equal(checkouts.at(-1).metadata.type, "subscription_first", "first payment saves the card");
 });

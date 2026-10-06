@@ -540,6 +540,10 @@ async function cancelUnpaidVisit(booking) {
   );
   const when = visitWhen(booking);
   const amount = `£${Number(booking.payment?.amount || 0).toFixed(2)}`;
+  if (!booking.assignedWorker && booking.meta?.subscriptionId) {
+    await require("./regularCleaner").tellRegularDontGo(booking.meta.subscriptionId,
+      `${booking.service} on ${when} is cancelled — the customer didn't pay. Don't go. Your other dates are unchanged.`);
+  }
   if (booking.assignedWorker) {
     const message = `${booking.service} on ${when} (${booking.bookingId}) was cancelled.`;
     await Notification.create({ workerId: booking.assignedWorker, title: "Job cancelled", message, type: "job", bookingId: booking.bookingId }).catch(() => {});
@@ -762,6 +766,10 @@ async function stopSubscription(sub, next, by, { now, chargeFee }) {
     }
   }
   const cancelled = await cancelFutureVisits(sub, next === "paused" ? "Regular clean paused" : "Regular clean cancelled", now);
+  if (cancelled) {
+    await require("./regularCleaner").tellRegularDontGo(sub._id,
+      `${sub.customer?.firstName || "Your customer"}'s regular ${sub.service} is ${next === "paused" ? "paused" : "cancelled"}. Don't go on the upcoming dates — they've been removed from your jobs.`);
+  }
   sub.status = next;
   if (next === "paused") sub.pausedAt = now;
   else Object.assign(sub, { cancelledAt: now, cancelledBy: by });

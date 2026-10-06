@@ -272,7 +272,19 @@ router.get("/jobs", async (req, res) => {
       andClauses.push({ hiddenFromWorkers: { $ne: true } });
     }
 
-    const jobs = await Booking.find({ $and: andClauses }).sort({ createdAt: -1 });
+    let jobs = await Booking.find({ $and: andClauses }).sort({ createdAt: -1 });
+    // Regular cleans with a regular cleaner aren't offered to anyone else (except a dropped date).
+    if (!all) {
+      const subIds = [...new Set(jobs.filter((j) => j.meta?.subscriptionId && !j.meta?.regularDropped).map((j) => String(j.meta.subscriptionId)))];
+      if (subIds.length) {
+        const owned = await require("../models/Subscription").find({ _id: { $in: subIds }, "regularWorker.id": { $ne: null } }).select("regularWorker").lean();
+        const ownerOf = new Map(owned.map((x) => [String(x._id), String(x.regularWorker.id)]));
+        jobs = jobs.filter((j) => {
+          const owner = j.meta?.subscriptionId && !j.meta?.regularDropped ? ownerOf.get(String(j.meta.subscriptionId)) : null;
+          return !owner || owner === String(workerId || "");
+        });
+      }
+    }
     // A cleaner only sees offers that suit their services, hours, travel area and pets setting,
     // each with distance, travel time and pay.
     if (!all && workerId && mongoose.isValidObjectId(workerId)) {
@@ -405,6 +417,15 @@ router.post("/jobs/:id/accept", async (req, res) => {
       return res
         .status(400)
         .json({ error: "Job has already been accepted by someone else" });
+    }
+
+    // A regular clean belongs to its regular cleaner: other cleaners can only take a date the
+    // regular cleaner has dropped.
+    if (booking.meta?.subscriptionId && !booking.meta?.regularDropped) {
+      const sub = await require("../models/Subscription").findById(booking.meta.subscriptionId).select("regularWorker").lean();
+      if (sub?.regularWorker?.id && String(sub.regularWorker.id) !== String(workerId)) {
+        return res.status(403).json({ error: `This is ${sub.regularWorker.name || "another cleaner"}'s regular clean.` });
+      }
     }
 
     // Admin can switch a job off, or limit it to chosen workers (Job Visibility page).
