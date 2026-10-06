@@ -271,6 +271,14 @@ const Booking = () => {
   }, [customer]);
 
   const [totalPrice, setTotalPrice] = useState(0);
+  // Regular cleans: one-off set-up fee added to the first payment (admin → Regular Cleans).
+  const [setupFee, setSetupFee] = useState({ enabled: false, amount: 0, label: "Set-up fee" });
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/subscriptions/setup-fee`)
+      .then((r) => r.json())
+      .then((f) => { if (f && typeof f.amount === "number") setSetupFee(f); })
+      .catch(() => {});
+  }, []);
   // Regular cleans: price of each later visit (before any first-clean coupon) and the
   // customer's agreement to have later visits charged to their saved card.
   const [visitPrice, setVisitPrice] = useState(0);
@@ -847,6 +855,9 @@ const Booking = () => {
     ...(pricedFrequencies.length ? pricedFrequencies : defaultFrequencies(formData.serviceType)),
   ];
   const isRegular = formData.frequency !== "Once" && offeredFrequencies.includes(formData.frequency);
+  const feeToday = isRegular && setupFee.enabled ? setupFee.amount : 0;
+  // What the customer pays now: the clean, plus the set-up fee for a new regular clean.
+  const amountToday = Math.round((Number(totalPrice || 0) + feeToday) * 100) / 100;
   const regularEvery = REGULAR_EVERY[formData.frequency] || "";
   // Switching to a service that isn't offered at the chosen frequency goes back to one-off.
   const frequencyOffered = offeredFrequencies.includes(formData.frequency);
@@ -908,9 +919,9 @@ const Booking = () => {
       suppliesProvidedBy: formData.suppliesProvidedBy || "Cleaniq",
       // Regular clean: the first clean has been charged and the card saved; the server
       // checks the payment with Stripe and books the following visits.
-      ...(isRegular ? { subscribe: true, subscription: { visitPrice } } : {}),
+      ...(isRegular ? { subscribe: true, subscription: { visitPrice, ...(feeToday ? { setupFee: feeToday } : {}) } } : {}),
       payment: {
-        amount: totalPrice,
+        amount: amountToday,
         ...(tax.enabled ? { taxRate: tax.rate, taxAmount, taxLabel: tax.label } : {}),
         currency: "GBP",
         method: "Stripe",
@@ -1459,7 +1470,7 @@ const Booking = () => {
                                   {["Weekly", "Fortnightly"].includes(formData.frequency) ? "Same day and time" : "Same date and time"}{" "}
                                   {regularEvery}
                                 </li>
-                                <li>Pay for your first clean today</li>
+                                <li>Pay for your first clean today{feeToday > 0 ? ` (plus a one-off ${setupFee.label.toLowerCase()} of £${feeToday.toFixed(2)})` : ""}</li>
                                 <li>Each following clean is charged 48 hours before the clean</li>
                                 <li>Pause or cancel free with 24 hours&apos; notice</li>
                               </ul>
@@ -2151,9 +2162,21 @@ const Booking = () => {
                                       Your regular clean · {FREQUENCY_LABEL[formData.frequency]}
                                     </p>
                                     <div className="flex justify-between text-sm font-bold text-slate-700">
-                                      <span>First clean, paid today</span>
+                                      <span>First clean</span>
                                       <span className="tabular-nums">£{totalPrice.toFixed(2)}</span>
                                     </div>
+                                    {feeToday > 0 && (
+                                      <div className="flex justify-between text-sm font-bold text-slate-700">
+                                        <span>{setupFee.label} <span className="font-semibold text-slate-400">(first clean only)</span></span>
+                                        <span className="tabular-nums">£{feeToday.toFixed(2)}</span>
+                                      </div>
+                                    )}
+                                    {feeToday > 0 && (
+                                      <div className="flex justify-between border-t border-slate-100 pt-2 text-sm font-black text-slate-900">
+                                        <span>Paid today</span>
+                                        <span className="tabular-nums">£{amountToday.toFixed(2)}</span>
+                                      </div>
+                                    )}
                                     <div className="flex justify-between text-sm font-bold text-slate-700">
                                       <span>Each following clean</span>
                                       <span className="tabular-nums">£{visitPrice.toFixed(2)}</span>
@@ -2192,7 +2215,7 @@ const Booking = () => {
                                   <Elements stripe={stripePromise}>
                                     <StripePayment
                                       key={isRegular ? "regular" : "one-off"}
-                                      amount={totalPrice}
+                                      amount={amountToday}
                                       currency="GBP"
                                       customerInfo={formData}
                                       onPaymentSuccess={handlePaymentSuccess}
@@ -2381,8 +2404,13 @@ const Booking = () => {
                   )}
                   <p className="text-2xl font-black text-black">
                     {region.symbol}
-                    {Number(totalPrice || 0).toFixed(2)}
+                    {Number(amountToday || 0).toFixed(2)}
                   </p>
+                  {feeToday > 0 && (
+                    <p className="text-[11px] font-bold text-slate-500">
+                      Includes {setupFee.label.toLowerCase()} {region.symbol}{feeToday.toFixed(2)} (first clean only)
+                    </p>
+                  )}
                   {tax.enabled && taxAmount > 0 && (
                     <p className="text-[11px] font-bold text-slate-500">
                       Includes {tax.label} ({tax.rate}%) {region.symbol}{taxAmount.toFixed(2)}

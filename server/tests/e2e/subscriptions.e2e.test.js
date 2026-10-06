@@ -618,3 +618,52 @@ test("customer cancels one paid clean: preview and refund follow the same rule",
   assert.equal(b.payment.status, "Refunded");
   assert.equal(b.payment.chargeOnArrival, false);
 });
+
+// ── One-off set-up fee on the first clean ──────────────────────────────────────
+test("set-up fee: admin sets it; the app's first payment includes it; later cleans are the normal price", async () => {
+  assert.equal((await call("PUT", "/subscriptions/setup-fee", { enabled: true, amount: 25 })).status, 401, "admin only");
+  const set = await call("PUT", "/subscriptions/setup-fee", { enabled: true, amount: 25, label: "Set-up fee" }, adminToken);
+  assert.equal(set.data.amount, 25);
+  assert.equal((await call("GET", "/subscriptions/setup-fee")).data.enabled, true);
+
+  const r = await call("POST", "/customer-bookings", websiteBooking({
+    customer: { firstName: "Fee", lastName: "App", email: "fee-app@test.com", phone: "07700900555" },
+    payment: { amount: 41, currency: "GBP", method: "Invoice", status: "Pending" },
+    status: "Awaiting Payment",
+  }));
+  assert.equal(r.status, 201);
+  const checkout = stripeCalls.filter((c) => c[0] === "checkout.create").at(-1)[1];
+  assert.equal(checkout.line_items[0].price_data.unit_amount, 6600, "£41 clean + £25 fee");
+  assert.match(checkout.line_items[0].price_data.product_data.description, /set-up fee/);
+  const sub = await Subscription.findOne({ subscriptionRef: r.data.subscription.subscriptionRef });
+  assert.equal(sub.pricePerVisit, 41);
+  assert.equal(sub.setupFee, 25);
+
+  intents.pi_fee_app = { id: "pi_fee_app", status: "succeeded", amount: 6600, customer: "cus_1", payment_method: "pm_fee" };
+  await subs.handleCheckoutCompleted({ metadata: checkout.metadata, payment_intent: "pi_fee_app" });
+  const active = await Subscription.findById(sub._id);
+  assert.equal(active.status, "active");
+  const [first, second] = await visitsOf(active);
+  assert.equal(first.payment.amount, 66);
+  assert.equal(second.payment.amount, 41, "following cleans: normal price");
+});
+
+test("set-up fee: the website adds it to the card payment and it's recorded once", async () => {
+  intents.pi_fee_web = { id: "pi_fee_web", status: "succeeded", amount: 6600, customer: "cus_1", payment_method: "pm_fw" };
+  const r = await call("POST", "/customer-bookings", websiteBooking({
+    customer: { firstName: "Fee", lastName: "Web", email: "fee-web@test.com", phone: "07700900556" },
+    subscription: { visitPrice: 41, setupFee: 25 },
+    payment: { amount: 66, currency: "GBP", method: "Stripe", status: "Completed", stripePaymentIntentId: "pi_fee_web" },
+  }));
+  assert.equal(r.status, 201);
+  const sub = await Subscription.findOne({ subscriptionRef: r.data.subscription.subscriptionRef });
+  assert.equal(sub.status, "active");
+  assert.equal(sub.pricePerVisit, 41);
+  assert.equal(sub.setupFee, 25);
+  const [first, second] = await visitsOf(sub);
+  assert.equal(first.payment.amount, 66, "not charged twice");
+  assert.equal(second.payment.amount, 41);
+
+  await call("PUT", "/subscriptions/setup-fee", { enabled: false, amount: 25 }, adminToken);
+  assert.equal((await call("GET", "/subscriptions/setup-fee")).data.enabled, false);
+});

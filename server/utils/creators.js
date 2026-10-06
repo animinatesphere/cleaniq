@@ -176,7 +176,8 @@ async function settleCommission(doc) {
   if (cancelled) {
     if (c.status !== "cancelled") update = { "creatorCommission.status": "cancelled", "creatorCommission.amount": 0 };
   } else if (done) {
-    const base = Math.max(0, Number(pay.amount || 0) - Number(pay.taxAmount || 0));
+    // Before tax, and not on a regular clean's one-off set-up fee.
+    const base = Math.max(0, Number(pay.amount || 0) - Number(pay.taxAmount || 0) - Number(doc.meta?.setupFee || 0));
     const amount = money((base * Number(c.percent || 0)) / 100);
     if (c.status !== "earned" || money(c.amount) !== amount) {
       update = { "creatorCommission.status": "earned", "creatorCommission.amount": amount, "creatorCommission.earnedAt": c.earnedAt || new Date() };
@@ -190,7 +191,7 @@ async function settleCommission(doc) {
 // Safety net: settle anything a hook missed (bulk updates). Runs every 6 hours.
 async function settleAll() {
   const open = await Booking().find({ "creator.id": { $ne: null }, "creatorCommission.status": { $in: ["pending", "earned"] } })
-    .select("status payment creator creatorCommission").lean();
+    .select("status payment creator creatorCommission meta.setupFee").lean();
   for (const b of open) await settleCommission(b).catch(() => {});
   return open.length;
 }

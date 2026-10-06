@@ -1436,7 +1436,8 @@ router.put("/:id", async (req, res) => {
           const ok = await sendEmail({
             to: updatedBooking.customer.email,
             subject,
-            html: buildBookingStatusUpdateEmail(updatedBooking),
+            // Confirmed: the full booking confirmation (same as when a payment confirms it).
+            html: newStatus === "Confirmed" ? templates.bookingConfirmation(updatedBooking) : buildBookingStatusUpdateEmail(updatedBooking),
           });
           console.log(
             `📧 Status email ${ok ? "✅ sent" : "❌ failed"} → ${updatedBooking.customer.email} [${newStatus}]`,
