@@ -1119,4 +1119,48 @@ redesigned.creatorPassword = ({ firstName, email, password, loginUrl }) =>
     `,
   });
 
+// Regular clean summary. Sent when it's set up with a payment link (paid: false — has the Pay
+// button) and again once the first payment is made (paid: true — the confirmation).
+redesigned.regularCleanSummary = ({ firstName, service, every, time, firstDate, pricePerVisit, setupFee = 0, firstPayment, dates = [], payUrl = "", ref, paid = false }) => {
+  const gbp = (n) => `&pound;${Number(n || 0).toFixed(2)}`;
+  const rows = [
+    ["Service", service],
+    ["How often", raw(`${esc(every)}${time ? ` at ${esc(time)}` : ""}`)],
+    ["First clean", firstDate],
+    ["Each clean", raw(gbp(pricePerVisit))],
+  ];
+  if (setupFee > 0) rows.push(["Set-up fee", raw(`${gbp(setupFee)} <span style="color:#64748b;">(first clean only)</span>`)]);
+  rows.push([paid ? "First payment (paid)" : "First payment", raw(`<strong>${gbp(firstPayment)}</strong>`)]);
+  return layout({
+    title: paid ? "Your regular clean is confirmed" : "Your regular clean — summary",
+    preheader: paid
+      ? `${service}, ${every}. Your first clean is paid and confirmed.`
+      : `${service}, ${every}. Pay ${Number(firstPayment || 0).toFixed(2)} to confirm your first clean.`,
+    eyebrow: "Regular cleaning",
+    heading: paid ? "You're all set!" : "Your regular clean is booked",
+    sub: paid ? "Your first clean is paid and confirmed" : "Pay for your first clean to confirm it",
+    badge: every,
+    body: `
+      ${hello(firstName || "there")}
+      ${p(paid
+        ? `Thank you — your regular <strong>${esc(service)}</strong> is set up and your first clean is confirmed. Here's everything in one place.`
+        : `Your regular <strong>${esc(service)}</strong> has been booked. Here's a summary — pay for your first clean below to confirm it and save your card for the following cleans.`)}
+      ${refBadge("Regular clean reference", esc(ref))}
+      ${sectionTitle("Your booking")}
+      ${kv(rows)}
+      ${!paid && payUrl ? button(payUrl, `Pay £${Number(firstPayment || 0).toFixed(2)} to confirm`) : ""}
+      ${dates.length ? sectionTitle("Your upcoming cleans") : ""}
+      ${dates.length ? checkList(dates) : ""}
+      ${sectionTitle("How it works")}
+      ${steps([
+        paid ? "Your card is saved securely with Stripe." : "Your first payment confirms your first clean and saves your card securely with Stripe.",
+        `Each following clean is ${gbp(pricePerVisit)}, charged <strong>48 hours before</strong> the clean — it's confirmed once paid, and we send you a receipt.`,
+        "If a payment doesn't go through, we'll email you a link to pay and try again 24 hours before.",
+        "Pause or cancel any time from your account: free with 24 hours' notice (any clean already paid is refunded in full).",
+      ])}
+      ${small("Questions? Call or WhatsApp +44 7846 726428.")}
+    `,
+  });
+};
+
 module.exports = redesigned;

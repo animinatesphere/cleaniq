@@ -134,7 +134,7 @@ test("website: first clean paid + card saved → active regular clean with weekl
     assert.equal(v.payment.stripePaymentMethodId, "pm_1");
     assert.equal(v.schedule.preferredTime, "07:30");
   }
-  assert.ok(emails.some((e) => /Your regular clean is set up/.test(e.subject)));
+  assert.ok(emails.some((e) => /Your regular clean is confirmed/.test(e.subject) && /Your upcoming cleans/.test(e.html)));
   // Running the top-up again doesn't double-book.
   assert.equal(await subs.topUpAll(), 0);
 });
