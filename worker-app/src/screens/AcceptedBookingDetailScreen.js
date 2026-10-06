@@ -760,6 +760,7 @@ const AcceptedBookingDetailScreen = ({ route, navigation }) => {
               bookingId={booking._id}
               workerId={workerInfo?.id}
               mode="accepted"
+              navigation={navigation}
               onChanged={(kind) => (kind === "dropped" ? navigation.goBack() : fetchBookingDetails())}
             />
           </View>

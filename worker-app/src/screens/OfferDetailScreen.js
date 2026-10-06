@@ -441,7 +441,7 @@ const OfferDetailScreen = ({ route, navigation }) => {
         {/* Regular clean: how often and every upcoming date */}
         {offer.regular && (
           <View style={styles.section}>
-            <RegularCleanCard regular={offer.regular} bookingId={offer._id} workerId={workerInfo?.id} mode="offer" />
+            <RegularCleanCard regular={offer.regular} bookingId={offer._id} workerId={workerInfo?.id} mode="offer" navigation={navigation} />
           </View>
         )}
 
