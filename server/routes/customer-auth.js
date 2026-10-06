@@ -246,7 +246,7 @@ router.post('/logout', verifyCustomer, async (req, res) => {
 // GET /api/customer-auth/me  (verify token + return fresh profile)
 router.get('/me', verifyCustomer, async (req, res) => {
   try {
-    const customer = await Customer.findById(req.customer.id).select('-passwordHash');
+    const customer = await Customer.findById(req.customer.id).select('-passwordHash -creator.adminPassword');
     if (!customer) return res.status(404).json({ message: 'Customer not found' });
     res.json(customer);
   } catch (err) {
@@ -291,7 +291,7 @@ router.patch('/profile', verifyCustomer, async (req, res) => {
     const customer = await Customer.findByIdAndUpdate(
       req.customer.id,
       { $set: updates },
-      { new: true, select: '-passwordHash' },
+      { new: true, select: '-passwordHash -creator.adminPassword' },
     );
     if (!customer) return res.status(404).json({ message: 'Customer not found' });
     res.json({
@@ -418,7 +418,8 @@ router.post('/reset-password', async (req, res) => {
     const passwordHash = await bcrypt.hash(newPassword, 12);
     const customer = await Customer.findOneAndUpdate(
       { email: email.toLowerCase() },
-      { $set: { passwordHash } },
+      // A creator choosing their own password: admin no longer keeps a viewable copy.
+      { $set: { passwordHash }, $unset: { "creator.adminPassword": "" } },
       { new: true },
     );
     if (!customer) return res.status(404).json({ message: 'Account not found.' });

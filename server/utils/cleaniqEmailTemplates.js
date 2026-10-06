@@ -1073,4 +1073,50 @@ redesigned.invoiceAwaitingPayment = (booking) => {
   });
 };
 
+// Creator / influencer programme (server/routes/creators.js): account created by admin.
+redesigned.creatorWelcome = ({ firstName, email, password, code, link, commissionPercent, discountPercent, loginUrl }) =>
+  layout({
+    title: "Welcome to the Cleaniq creator programme",
+    preheader: `Your creator code is ${code}. Share it and earn ${commissionPercent}% on every booking.`,
+    eyebrow: "Creator programme",
+    heading: `Welcome, ${firstName}!`,
+    sub: "Share Cleaniq and earn on every booking you bring",
+    badge: `${commissionPercent}% commission`,
+    body: `
+      ${hello(firstName || "there")}
+      ${p(`Your Cleaniq creator account is ready. Share your link or your code — every booking that comes through you earns you <strong>${esc(commissionPercent)}% commission</strong> once the clean is done and paid.`)}
+      ${refBadge("Your referral code", esc(code))}
+      ${sectionTitle("Your link")}
+      ${box(`<p style="margin:0;font-size:14px;line-height:22px;word-break:break-all;"><a href="${esc(link)}" style="color:${BRAND.green};font-weight:700;text-decoration:none;">${esc(link)}</a></p>`, { bg: "#f8fafc", border: "#e2e8f0" })}
+      ${discountPercent > 0 ? p(`Your followers get <strong>${esc(discountPercent)}% off</strong> when they use your code.`) : ""}
+      ${sectionTitle("Your login")}
+      ${kv([["Email", email], ["Password", mono(password)]])}
+      ${button(loginUrl, "Log in to your dashboard")}
+      ${sectionTitle("How it works")}
+      ${steps([
+        "Share your link or code on your socials, WhatsApp and stories.",
+        "Customers book on our website or app with your code — or sign up with it as their referral code.",
+        `You earn ${esc(commissionPercent)}% of each booking once the clean is done and paid. Track everything in your dashboard (website or the Cleaniq app).`,
+        "Add your bank details in your dashboard so we can pay you.",
+      ])}
+      ${small("Keep your password private. You can change it any time with “Forgot password” on the login page. Questions? Call or WhatsApp +44 7846 726428.")}
+    `,
+  });
+
+redesigned.creatorPassword = ({ firstName, email, password, loginUrl }) =>
+  layout({
+    title: "Your new Cleaniq password",
+    preheader: "Your creator account password has been reset.",
+    eyebrow: "Creator programme",
+    heading: "Your new password",
+    sub: "Use it to log in to your creator dashboard",
+    body: `
+      ${hello(firstName || "there")}
+      ${p("We've set a new password for your Cleaniq creator account.")}
+      ${kv([["Email", email], ["Password", mono(password)]])}
+      ${button(loginUrl, "Log in")}
+      ${small("If you didn't ask for this, please contact us on +44 7846 726428.")}
+    `,
+  });
+
 module.exports = redesigned;

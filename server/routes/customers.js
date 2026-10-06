@@ -13,7 +13,7 @@ const generateTemporaryPassword = () => `Cq!${Math.random().toString(36).slice(2
 router.get("/", async (req, res) => {
   try {
     // Get all registered customers
-    const registeredCustomers = await Customer.find({}, { passwordHash: 0 });
+    const registeredCustomers = await Customer.find({}, { passwordHash: 0, "creator.adminPassword": 0 });
 
     // Get unique guest customers from bookings (those without registered accounts)
     const bookingCustomers = await Booking.aggregate([

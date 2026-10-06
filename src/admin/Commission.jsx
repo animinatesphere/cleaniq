@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BadgePercent, Copy, UserPlus, Pencil, Wallet, MousePointerClick, Users, CheckCircle2, X, RefreshCw, Save, Search,
+  Trash2, Wand2, KeyRound, Eye, EyeOff,
 } from "lucide-react";
 
 // Creator / influencer programme (server/utils/creators.js): programme rules, creators and the
@@ -46,6 +47,10 @@ export default function Commission() {
   const [picked, setPicked] = useState([]);
   const [payRef, setPayRef] = useState("");
   const [editing, setEditing] = useState(null); // creator object or {} for new
+  const [created, setCreated] = useState(null); // { name, email, code, link, password, emailed } after adding
+  const [showPw, setShowPw] = useState(true);
+  const [newPw, setNewPw] = useState("");
+  const [revealed, setRevealed] = useState({}); // creatorId → { password, note }
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState(null);
 
@@ -93,6 +98,76 @@ export default function Commission() {
     }
   };
 
+  // A free code from the name, and a fresh password (server: /creators/admin/suggest-code).
+  const suggest = async (firstName = "", lastName = "") => {
+    const qs = new URLSearchParams({ firstName, lastName });
+    return fetch(`${API}/creators/admin/suggest-code?${qs}`, { headers: headers() }).then((r) => r.json()).catch(() => ({}));
+  };
+  const openNew = async () => {
+    setShowPw(true);
+    setEditing({ firstName: "", lastName: "", email: "", phone: "", code: "", password: "", sendEmail: true, commissionPercent: "", discountPercent: "", countRule: "", countMonths: "" });
+    const s = await suggest();
+    setEditing((e) => (e && !e._id && !e.password ? { ...e, password: s.password || "" } : e));
+  };
+  const generateCode = async () => {
+    const s = await suggest(editing.firstName, editing.lastName);
+    if (s.code) setEditing((e) => ({ ...e, code: s.code }));
+  };
+  const generatePassword = async (target = "editing") => {
+    const s = await suggest();
+    if (!s.password) return;
+    if (target === "new") setNewPw(s.password);
+    else setEditing((e) => ({ ...e, password: s.password }));
+  };
+
+  const setPassword = async () => {
+    setBusy(true);
+    try {
+      const r = await fetch(`${API}/creators/admin/${editing._id}/password`, { method: "POST", headers: headers(), body: JSON.stringify({ password: newPw }) });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.message || "Couldn't set the password");
+      setNewPw(data.password);
+      setRevealed((v) => ({ ...v, [editing._id]: { password: data.password, note: "" } }));
+      show(data.emailed ? `New password set and emailed to ${editing.firstName}` : "New password set — the email couldn't be sent, pass it on yourself");
+    } catch (e) {
+      show(e.message, "err");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Show / hide the password admin set for a creator (kept encrypted on the server).
+  const togglePassword = async (id) => {
+    if (revealed[id]) return setRevealed(({ [id]: _, ...rest }) => rest);
+    const r = await fetch(`${API}/creators/admin/${id}/password`, { headers: headers() }).then((x) => x.json()).catch(() => ({}));
+    setRevealed((v) => ({ ...v, [id]: { password: r.password || "", note: r.note || "" } }));
+  };
+  const PasswordLine = ({ id }) => {
+    const r = revealed[id];
+    return (
+      <div className="mt-1 flex items-center gap-1.5 text-xs">
+        <span className="text-white/35">Password:</span>
+        {r ? (r.password
+          ? <span className="font-mono font-bold text-white/80">{r.password}</span>
+          : <span className="text-amber-300/80">{r.note}</span>)
+          : <span className="text-white/40">••••••••</span>}
+        <button type="button" onClick={() => togglePassword(id)} className="text-white/40 hover:text-white/80" title={r ? "Hide" : "Show password"}>
+          {r ? <EyeOff size={13} /> : <Eye size={13} />}
+        </button>
+        {r?.password && <button type="button" onClick={() => copy(r.password, "Password")} className="text-white/40 hover:text-white/80" title="Copy"><Copy size={12} /></button>}
+      </div>
+    );
+  };
+
+  const removeCreator = async (c) => {
+    if (!window.confirm(`Delete ${c.firstName} ${c.lastName} (${c.code})?\n\nTheir login and code stop working, their customers are unlinked and commissions not yet earned are cancelled. Commissions already earned stay on record so you can still pay them.`)) return;
+    const r = await fetch(`${API}/creators/admin/${c._id}`, { method: "DELETE", headers: headers() });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) return show(data.message || "Couldn't delete", "err");
+    show(data.owedStillToPay ? `Deleted — ${data.owedStillToPay} earned commission(s) still to pay (see Commissions)` : "Creator deleted");
+    load();
+  };
+
   const saveCreator = async () => {
     const isNew = !editing._id;
     setBusy(true);
@@ -105,8 +180,13 @@ export default function Commission() {
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.message || "Couldn't save");
-      show(isNew ? `Creator added — login details emailed to ${data.email}` : "Creator updated");
+      if (isNew) {
+        setCreated({ name: `${data.firstName} ${data.lastName}`, email: data.email, code: data.code, link: data.link, password: data.password, emailed: data.emailed });
+      } else {
+        show("Creator updated");
+      }
       setEditing(null);
+      setNewPw("");
       load();
     } catch (e) {
       show(e.message, "err");
@@ -172,7 +252,7 @@ export default function Commission() {
           <button onClick={() => { load(); if (tab === "commissions") loadRows(); }} className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/60 hover:bg-white/10">
             <RefreshCw size={14} /> Refresh
           </button>
-          <button onClick={() => setEditing({ firstName: "", lastName: "", email: "", phone: "", code: "", commissionPercent: "", discountPercent: "", countRule: "", countMonths: "" })}
+          <button onClick={openNew}
             className="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400">
             <UserPlus size={15} /> Add creator
           </button>
@@ -224,6 +304,7 @@ export default function Commission() {
                     <td className="px-4 py-3">
                       <p className="font-bold text-white">{c.firstName} {c.lastName}</p>
                       <p className="text-xs text-white/40">{c.email}</p>
+                      <PasswordLine id={c._id} />
                       {!c.active && <span className="mt-1 inline-block rounded-full bg-rose-500/15 px-2 py-0.5 text-[10px] font-bold text-rose-300">Paused</span>}
                     </td>
                     <td className="px-4 py-3">
@@ -242,11 +323,12 @@ export default function Commission() {
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
                         <button onClick={() => { setCreatorFilter(c._id); setStatusFilter(""); setTab("commissions"); }} className="rounded-lg bg-white/5 px-2.5 py-1.5 text-xs font-bold text-white/60 hover:bg-white/10">Bookings</button>
-                        <button onClick={() => setEditing({ ...c, commissionPercent: c.commissionPercent ?? "", discountPercent: c.discountPercent ?? "", countRule: c.countRule ?? "", countMonths: c.countMonths ?? "" })}
+                        <button onClick={() => { setNewPw(""); setEditing({ ...c, commissionPercent: c.commissionPercent ?? "", discountPercent: c.discountPercent ?? "", countRule: c.countRule ?? "", countMonths: c.countMonths ?? "" }); }}
                           className="rounded-lg bg-white/5 p-1.5 text-white/60 hover:bg-white/10" title="Edit"><Pencil size={14} /></button>
-                        <button onClick={() => toggleActive(c)} className={`rounded-lg px-2.5 py-1.5 text-xs font-bold ${c.active ? "bg-rose-500/10 text-rose-300 hover:bg-rose-500/20" : "bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25"}`}>
+                        <button onClick={() => toggleActive(c)} className={`rounded-lg px-2.5 py-1.5 text-xs font-bold ${c.active ? "bg-amber-500/10 text-amber-300 hover:bg-amber-500/20" : "bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25"}`}>
                           {c.active ? "Pause" : "Activate"}
                         </button>
+                        <button onClick={() => removeCreator(c)} className="rounded-lg bg-rose-500/10 p-1.5 text-rose-300 hover:bg-rose-500/20" title="Delete creator"><Trash2 size={14} /></button>
                       </div>
                     </td>
                   </tr>
@@ -395,10 +477,40 @@ export default function Commission() {
               )}
               <div className="grid grid-cols-2 gap-3">
                 <Field title="Phone"><input value={editing.phone || ""} onChange={(e) => setEditing({ ...editing, phone: e.target.value })} className={input} /></Field>
-                <Field title="Code *" hint="Letters/numbers, e.g. AMAKA10">
-                  <input value={editing.code || ""} onChange={(e) => setEditing({ ...editing, code: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "") })} className={`${input} font-mono`} />
+                <Field title="Referral code" hint={editing._id ? "Changing it stops the old code working." : "Leave empty to generate one from the name."}>
+                  <div className="flex gap-2">
+                    <input value={editing.code || ""} onChange={(e) => setEditing({ ...editing, code: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "") })} placeholder="e.g. AMAKA24" className={`${input} font-mono`} />
+                    <button type="button" onClick={generateCode} title="Generate from name" className="shrink-0 rounded-xl bg-white/10 px-3 text-white/70 hover:bg-white/20"><Wand2 size={15} /></button>
+                  </div>
                 </Field>
               </div>
+              {!editing._id && (
+                <>
+                  <Field title="Password" hint="Generated for you — or type your own (8+ characters).">
+                    <div className="flex gap-2">
+                      <input type={showPw ? "text" : "password"} value={editing.password || ""} onChange={(e) => setEditing({ ...editing, password: e.target.value })} className={`${input} font-mono`} />
+                      <button type="button" onClick={() => setShowPw((v) => !v)} className="shrink-0 rounded-xl bg-white/10 px-3 text-white/70 hover:bg-white/20">{showPw ? <EyeOff size={15} /> : <Eye size={15} />}</button>
+                      <button type="button" onClick={() => generatePassword()} title="Generate a new password" className="shrink-0 rounded-xl bg-white/10 px-3 text-white/70 hover:bg-white/20"><Wand2 size={15} /></button>
+                    </div>
+                  </Field>
+                  <label className="flex items-center gap-2.5 text-sm text-white/70">
+                    <input type="checkbox" checked={editing.sendEmail !== false} onChange={(e) => setEditing({ ...editing, sendEmail: e.target.checked })} className="h-4 w-4 accent-emerald-500" />
+                    Email the login details, code and link to the creator
+                  </label>
+                </>
+              )}
+              {editing._id && (
+                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                  <p className="text-xs font-bold text-white/70">Login: {editing.email}</p>
+                  <PasswordLine id={editing._id} />
+                  <p className="mb-2 mt-3 flex items-center gap-2 text-xs font-bold text-white/70"><KeyRound size={13} /> New password</p>
+                  <div className="flex gap-2">
+                    <input value={newPw} onChange={(e) => setNewPw(e.target.value)} placeholder="Type one or generate" className={`${input} font-mono`} />
+                    <button type="button" onClick={() => generatePassword("new")} title="Generate" className="shrink-0 rounded-xl bg-white/10 px-3 text-white/70 hover:bg-white/20"><Wand2 size={15} /></button>
+                    <button type="button" onClick={setPassword} disabled={busy || newPw.length < 8} className="shrink-0 rounded-xl bg-emerald-500 px-3 text-xs font-bold text-white disabled:opacity-40">Set &amp; email</button>
+                  </div>
+                </div>
+              )}
               <p className="pt-2 text-[11px] font-bold uppercase tracking-wider text-white/40">Own rules (leave empty to use the programme settings)</p>
               <div className="grid grid-cols-2 gap-3">
                 <Field title="Commission %"><input type="number" min="0" max="100" step="0.5" placeholder={`${settings?.commissionPercent ?? ""} (default)`} value={editing.commissionPercent} onChange={(e) => setEditing({ ...editing, commissionPercent: e.target.value })} className={input} /></Field>
@@ -420,9 +532,34 @@ export default function Commission() {
                 </div>
               )}
               <button onClick={saveCreator} disabled={busy} className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-bold text-white hover:bg-emerald-400 disabled:opacity-60">
-                {busy ? "Saving…" : editing._id ? "Save changes" : "Create & email login details"}
+                {busy ? "Saving…" : editing._id ? "Save changes" : "Create creator"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {created && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0B2D22] p-6 shadow-2xl">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20"><CheckCircle2 size={20} className="text-emerald-300" /></span>
+              <div>
+                <h3 className="font-bold text-white">{created.name} is set up</h3>
+                <p className="text-xs text-white/45">{created.emailed ? `Login details emailed to ${created.email}` : "Not emailed — pass these on yourself"}</p>
+              </div>
+            </div>
+            {[["Referral code", created.code], ["Link", created.link], ["Login email", created.email], ["Password", created.password]].map(([t, v]) => (
+              <div key={t} className="mb-2 flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3.5 py-2.5">
+                <span className="min-w-0">
+                  <span className="block text-[10px] font-black uppercase tracking-wider text-white/40">{t}</span>
+                  <span className="block break-all font-mono text-sm font-bold text-white">{v}</span>
+                </span>
+                <button onClick={() => copy(v, t)} className="shrink-0 rounded-lg bg-white/10 p-2 text-white/70 hover:bg-white/20"><Copy size={14} /></button>
+              </div>
+            ))}
+            <p className="mt-3 text-[11px] text-amber-300/80">The password isn't shown again. Use “New password” on the creator if it's lost.</p>
+            <button onClick={() => setCreated(null)} className="mt-4 w-full rounded-xl bg-emerald-500 py-3 text-sm font-bold text-white">Done</button>
           </div>
         </div>
       )}

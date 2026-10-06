@@ -14,11 +14,11 @@ const Coupon = require("../models/Coupon");
 const adminAuth = require("../middleware/adminAuth");
 const { verifyCustomer } = require("./customer-auth");
 const creators = require("../utils/creators");
-const { sendEmail } = require("../utils/emailService");
+const { sendEmail, templates } = require("../utils/emailService");
+const { moveToTrash } = require("../utils/trash");
 
 const SITE = () => process.env.FRONTEND_URL || "https://cleaniqservices.com";
 const linkFor = (code) => `${SITE()}/?ref=${encodeURIComponent(code)}`;
-const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const pctOrNull = (v) => (v === null || v === undefined || v === "" ? null : Math.min(100, Math.max(0, Number(v) || 0)));
 const firstNameOnly = (b) => [b.customer?.firstName, b.customer?.lastName ? `${b.customer.lastName[0]}.` : ""].filter(Boolean).join(" ");
 
@@ -124,6 +124,7 @@ const adminView = async (c, settings) => ({
   countRule: c.creator?.countRule ?? null,
   countMonths: c.creator?.countMonths ?? null,
   notes: c.creator?.notes || "",
+  hasPassword: Boolean(c.creator?.adminPassword),
   bank: c.creator?.bank || {},
   clicks: c.creator?.clicks || 0,
   rules: creators.effective(c, settings),
@@ -152,6 +153,27 @@ function readOverrides(body = {}) {
   return out;
 }
 
+// Readable passwords with no look-alike characters (0/O, 1/l/I), e.g. "Kp7T-m4xQ-z2Ab".
+const PW_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+function generatePassword() {
+  const bytes = crypto.randomBytes(12);
+  const chars = [...bytes].map((b) => PW_CHARS[b % PW_CHARS.length]).join("");
+  return `${chars.slice(0, 4)}-${chars.slice(4, 8)}-${chars.slice(8, 12)}`;
+}
+
+// A free code from the creator's name: AMAKA → AMAKA24 (adds numbers until it's unused).
+async function suggestCode(firstName, lastName = "") {
+  const base = (String(firstName || "") + (String(firstName || "").length < 3 ? String(lastName || "") : ""))
+    .toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10) || "CREATOR";
+  for (let i = 0; i < 50; i++) {
+    const code = `${base}${10 + Math.floor(Math.random() * 90)}`;
+    if (!(await codeTaken(code))) return code;
+  }
+  return `${base}${Date.now().toString().slice(-4)}`;
+}
+
+const loginUrl = () => `${SITE()}/account/login`;
+
 async function codeTaken(code, exceptId) {
   const [creator, coupon] = await Promise.all([
     Customer.exists({ "creator.code": code, ...(exceptId ? { _id: { $ne: exceptId } } : {}) }),
@@ -166,18 +188,21 @@ router.post("/admin", adminAuth, async (req, res) => {
     const firstName = String(b.firstName || "").trim();
     const lastName = String(b.lastName || "").trim();
     const email = String(b.email || "").trim().toLowerCase();
-    const code = creators.normaliseCode(b.code);
     if (!firstName || !lastName) return res.status(400).json({ message: "First and last name are required." });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ message: "A valid email is required." });
-    if (!creators.CODE_RE.test(code)) return res.status(400).json({ message: "Code must be 3–20 letters or numbers, e.g. AMAKA10." });
     if (await Customer.exists({ email })) return res.status(400).json({ message: "That email already has an account. Use another email for the creator account." });
+    // Referral code: what admin typed, or generated from the name.
+    const code = b.code ? creators.normaliseCode(b.code) : await suggestCode(firstName, lastName);
+    if (!creators.CODE_RE.test(code)) return res.status(400).json({ message: "Code must be 3–20 letters or numbers, e.g. AMAKA10." });
     if (await codeTaken(code)) return res.status(400).json({ message: `The code ${code} is already used (by a creator or a coupon).` });
+    // Password: what admin typed, or generated. Shown to admin once and emailed to the creator.
+    const password = String(b.password || "").trim() || generatePassword();
+    if (password.length < 8) return res.status(400).json({ message: "Password must be at least 8 characters." });
 
-    // A random password: the creator sets their own with "Forgot password".
-    const passwordHash = await bcrypt.hash(crypto.randomBytes(24).toString("hex"), 12);
+    const passwordHash = await bcrypt.hash(password, 12);
     const creator = await Customer.create({
       firstName, lastName, email, phone: String(b.phone || "").trim(), passwordHash, role: "creator",
-      creator: { code, active: true },
+      creator: { code, active: true, adminPassword: creators.sealPassword(password) },
     });
     const overrides = readOverrides(b);
     if (Object.keys(overrides).length) await Customer.updateOne({ _id: creator._id }, { $set: overrides });
@@ -185,21 +210,69 @@ router.post("/admin", adminAuth, async (req, res) => {
     const settings = await creators.getSettings();
     const fresh = await Customer.findById(creator._id).lean();
     const rules = creators.effective(fresh, settings);
-    sendEmail({
-      to: email,
-      subject: "Welcome to the Cleaniq creator programme",
-      html: `<div style="font-family:sans-serif;max-width:560px">
-        <h2 style="color:#0F6B4C">Welcome, ${esc(firstName)}!</h2>
-        <p>Your Cleaniq creator account is ready. Share your link or code — every booking that comes through you earns you <strong>${rules.commissionPercent}% commission</strong> once the clean is done and paid.</p>
-        <p style="background:#f1f5f9;border-radius:12px;padding:14px 16px;font-size:15px">
-          Your code: <strong style="font-size:18px">${esc(code)}</strong><br>
-          Your link: <a href="${esc(linkFor(code))}">${esc(linkFor(code))}</a>
-        </p>
-        ${rules.discountPercent > 0 ? `<p>Your followers get <strong>${rules.discountPercent}% off</strong> with your code.</p>` : ""}
-        <p><strong>To log in:</strong> open the Cleaniq app or <a href="${esc(SITE())}/account/login">${esc(SITE())}/account/login</a>, tap <em>Forgot password</em>, enter <strong>${esc(email)}</strong> and set your own password. You'll then see your clicks, bookings and earnings.</p>
-        <p style="color:#64748b">Questions? Call or WhatsApp +44 7846 726428.</p></div>`,
-    }).catch(() => {});
-    res.status(201).json(await adminView(fresh, settings));
+    const emailed = b.sendEmail !== false
+      ? await sendEmail({
+        to: email,
+        subject: "Welcome to the Cleaniq creator programme",
+        html: templates.creatorWelcome({
+          firstName, email, password, code, link: linkFor(code),
+          commissionPercent: rules.commissionPercent, discountPercent: rules.discountPercent, loginUrl: loginUrl(),
+        }),
+      }).catch(() => false)
+      : false;
+    // The password is only ever returned here, so admin can pass it on.
+    res.status(201).json({ ...(await adminView(fresh, settings)), password, emailed: Boolean(emailed) });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Show the password admin set (null once the creator has changed it themselves).
+router.get("/admin/:id/password", adminAuth, async (req, res) => {
+  const creator = await Customer.findOne({ _id: req.params.id, role: "creator" }).lean().catch(() => null);
+  if (!creator) return res.status(404).json({ message: "Creator not found" });
+  const password = creators.openPassword(creator.creator?.adminPassword);
+  res.json({ password, note: password ? "" : "Changed by the creator — set a new one to see it here." });
+});
+
+// A free code for the "Add creator" form.
+router.get("/admin/suggest-code", adminAuth, async (req, res) => {
+  res.json({ code: await suggestCode(req.query.firstName, req.query.lastName), password: generatePassword() });
+});
+
+// Set a new password (typed by admin, or generated) and email it to the creator.
+router.post("/admin/:id/password", adminAuth, async (req, res) => {
+  try {
+    const creator = await Customer.findOne({ _id: req.params.id, role: "creator" });
+    if (!creator) return res.status(404).json({ message: "Creator not found" });
+    const password = String(req.body?.password || "").trim() || generatePassword();
+    if (password.length < 8) return res.status(400).json({ message: "Password must be at least 8 characters." });
+    await Customer.updateOne({ _id: creator._id }, { $set: { passwordHash: await bcrypt.hash(password, 12), "creator.adminPassword": creators.sealPassword(password) } });
+    const emailed = req.body?.sendEmail !== false
+      ? await sendEmail({
+        to: creator.email,
+        subject: "Your new Cleaniq password",
+        html: templates.creatorPassword({ firstName: creator.firstName, email: creator.email, password, loginUrl: loginUrl() }),
+      }).catch(() => false)
+      : false;
+    res.json({ password, emailed: Boolean(emailed) });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Delete a creator: their login and code stop working, their customers are unlinked and
+// commissions not yet earned are cancelled. Earned and paid ones stay on record (to pay/settle).
+router.delete("/admin/:id", adminAuth, async (req, res) => {
+  try {
+    const creator = await Customer.findOne({ _id: req.params.id, role: "creator" });
+    if (!creator) return res.status(404).json({ message: "Creator not found" });
+    const owed = await Booking.countDocuments({ "creator.id": creator._id, "creatorCommission.status": "earned" });
+    await moveToTrash("Customer", creator, `Creator ${creators.creatorName(creator)} (${creator.creator?.code}) — ${creator.email}`).catch(() => {});
+    await Booking.updateMany({ "creator.id": creator._id, "creatorCommission.status": "pending" }, { $set: { "creatorCommission.status": "cancelled", "creatorCommission.amount": 0 } });
+    await require("../models/CreatorCustomer").deleteMany({ creatorId: creator._id });
+    await creator.deleteOne();
+    res.json({ deleted: true, owedStillToPay: owed });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
