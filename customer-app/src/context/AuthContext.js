@@ -42,11 +42,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const sendOtp = async (firstName, lastName, email, phone, password) => {
+  const sendOtp = async (firstName, lastName, email, phone, password, referralCode = "") => {
     try {
       await apiFetch(`${API_URL}/customer-auth/send-otp`, {
         method: "POST",
-        body: JSON.stringify({ firstName, lastName, email, phone, password }),
+        body: JSON.stringify({ firstName, lastName, email, phone, password, referralCode }),
       });
       return { success: true };
     } catch (error) {

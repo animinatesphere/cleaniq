@@ -23,11 +23,11 @@ export const CustomerAuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const sendOtp = async ({ firstName, lastName, email, phone, password }) => {
+  const sendOtp = async ({ firstName, lastName, email, phone, password, referralCode }) => {
     const res = await fetch(`${API}/customer-auth/send-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ firstName, lastName, email, phone, password })
+      body: JSON.stringify({ firstName, lastName, email, phone, password, referralCode })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Failed to send OTP');

@@ -72,7 +72,14 @@ router.post("/validate", async (req, res) => {
     if (!code) return res.status(400).json({ valid: false, message: "No code provided" });
 
     const coupon = await Coupon.findOne({ code: code.toUpperCase().trim() });
-    if (!coupon) return res.status(404).json({ valid: false, message: "Invalid coupon code" });
+    if (!coupon) {
+      // A creator / influencer code works in the same box (admin → Commission).
+      const creator = await require("../utils/creators").checkCode(code, req.body.email);
+      if (creator.valid) {
+        return res.json({ valid: true, discountPercent: creator.discountPercent, type: "creator", message: creator.message });
+      }
+      return res.status(404).json({ valid: false, message: creator.message || "Invalid coupon code" });
+    }
 
     if (!coupon.isActive) return res.json({ valid: false, message: "This coupon is no longer active" });
 
@@ -102,7 +109,19 @@ router.post("/apply", async (req, res) => {
     if (!code) return res.status(400).json({ error: "Code required" });
 
     const coupon = await Coupon.findOne({ code: code.toUpperCase().trim() });
-    if (!coupon) return res.status(404).json({ error: "Coupon not found" });
+    if (!coupon) {
+      // Creator code: tag the booking (and link this customer) to the creator.
+      const creators = require("../utils/creators");
+      if (!(await creators.findCreatorByCode(code))) return res.status(404).json({ error: "Coupon not found" });
+      const Booking = require("../models/Booking");
+      const mongoose = require("mongoose");
+      const booking = await Booking.findOne(mongoose.isValidObjectId(bookingId) ? { _id: bookingId } : { bookingId: String(bookingId || "") });
+      // Only the customer's own booking can be tagged.
+      if (booking && String(booking.customer?.email || "").toLowerCase() === String(customerEmail || "").trim().toLowerCase()) {
+        await creators.attributeSavedBooking(booking._id, { code });
+      }
+      return res.json({ success: true });
+    }
 
     coupon.usedCount += 1;
     coupon.usedBy.push({ email: customerEmail || "guest", bookingId: bookingId || "" });

@@ -10,6 +10,7 @@ import {
   ArrowLeft, CookingPot, WashingMachine, Sun, DoorClosed, PawPrint, SprayCan as Supplies, Zap,
 } from "lucide-react";
 import { PHONE_NUMBER, whatsappLink } from "../utils/contact";
+import { getCreatorRef } from "../utils/creatorRef";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -71,7 +72,7 @@ const EMPTY = {
   kitchens: null, utilityRooms: null, conservatories: null, cloakrooms: null,
   date: "", notes: "", carpet: "",
   extras: { oven: false, ovenType: "", fridge: false, fridgeType: "" },
-  consent: false, website: "",
+  consent: false, website: "", ref: "",
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -181,7 +182,7 @@ function SummaryRow({ label, value }) {
 // ── Page ──
 
 const GetQuote = () => {
-  const [form, setForm] = useState(EMPTY);
+  const [form, setForm] = useState(() => ({ ...EMPTY, ref: getCreatorRef() }));
   const [services, setServices] = useState(FALLBACK_SERVICES);
   const [step, setStep] = useState(1);
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
@@ -298,7 +299,7 @@ const GetQuote = () => {
         setInstantQuote(Boolean(data.instantQuote));
         setSentTo(form.email.trim());
         setStatus("success");
-        setForm(EMPTY);
+        setForm({ ...EMPTY, ref: getCreatorRef() });
         setStep(1);
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
@@ -633,6 +634,10 @@ const GetQuote = () => {
                             <IconInput icon={User} label="Full name *" name="name" value={form.name} onChange={onChange} placeholder="John Smith" autoComplete="name" />
                             <IconInput icon={Mail} label="Email address *" type="email" name="email" value={form.email} onChange={onChange} placeholder="you@example.com" autoComplete="email" inputMode="email" />
                             <IconInput icon={Phone} label="Phone number" type="tel" name="phone" value={form.phone} onChange={onChange} placeholder="07700 900000" autoComplete="tel" inputMode="tel" />
+                          </div>
+                          <div className="mt-4 sm:max-w-xs">
+                            <IconInput icon={BadgeCheck} label="Discount / creator code" name="ref" value={form.ref}
+                              onChange={(e) => set("ref", e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))} placeholder="Optional" className="uppercase" />
                           </div>
                           <label className="mt-4 block">
                             <span className={fieldLabel}>Notes (optional)</span>

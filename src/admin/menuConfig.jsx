@@ -1,4 +1,5 @@
 import {
+  BadgePercent,
   LayoutDashboard,
   UserCheck,
   Globe,
@@ -289,6 +290,12 @@ export const fullMenuGroups = [
     label: "Finance",
     groupIcon: <DollarSign size={14} />,
     items: [
+      {
+        name: "Commission",
+        path: "/admin/commission",
+        key: "commission",
+        icon: <BadgePercent size={20} />,
+      },
       {
         name: "Staff Pay",
         path: "/admin/staff-pay",

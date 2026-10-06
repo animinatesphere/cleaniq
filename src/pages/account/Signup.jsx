@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
+  Gift,
   Mail,
   Lock,
   Eye,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { useCustomerAuth } from "../../context/CustomerAuthContext";
+import { getCreatorRef } from "../../utils/creatorRef";
 import logoImg from "../../assets/logo DP.jpg";
 
 export default function CustomerSignup() {
@@ -29,6 +31,7 @@ export default function CustomerSignup() {
     phone: "",
     password: "",
     confirm: "",
+    referralCode: getCreatorRef(), // filled in when they came from a creator's link
   });
   const [otp, setOtp] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -54,6 +57,7 @@ export default function CustomerSignup() {
         email: form.email,
         phone: form.phone,
         password: form.password,
+        referralCode: form.referralCode.trim(),
       });
       setStep("otp");
     } catch (err) {
@@ -206,6 +210,22 @@ export default function CustomerSignup() {
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   className="w-full pl-12 pr-5 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm transition-all text-slate-900 placeholder:text-slate-400"
+                />
+              </div>
+
+              <div className="relative group">
+                <Gift
+                  className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors"
+                  size={18}
+                />
+                <input
+                  id="signup-referral"
+                  type="text"
+                  placeholder="Referral code (optional)"
+                  value={form.referralCode}
+                  onChange={(e) => setForm({ ...form, referralCode: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "") })}
+                  autoComplete="off"
+                  className="w-full pl-12 pr-5 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none font-bold text-sm uppercase transition-all text-slate-900 placeholder:text-slate-400 placeholder:normal-case"
                 />
               </div>
 

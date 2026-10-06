@@ -60,6 +60,7 @@ const quoteSchema = new mongoose.Schema({
   balanceDue: { type: Number, default: 0 },
   notes: String,
   status: { type: String, default: "sent" }, // sent | accepted | declined
+  creatorCode: { type: String, default: "" }, // creator / influencer code the customer came with
   acceptedAt: { type: Date, default: null },
   declinedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },

@@ -105,6 +105,7 @@ mongoose
     const { startAutomationEngine } = require("./utils/automationEngine");
     startAutomationEngine();
     require("./utils/subscriptions").startSubscriptionScheduler();
+    require("./utils/creators").startCreatorScheduler();
   })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
@@ -237,6 +238,7 @@ app.use("/api/guides", guidesRoutes);
 app.use("/api/cold-email", coldEmailRoutes);
 app.use("/api/devpanel", devpanelRoutes);
 app.use("/api/coupons", couponRoutes);
+app.use("/api/creators", require("./routes/creators"));
 app.use("/api/ai-receptionist", aiReceptionistRoutes);
 app.use("/api/whatsapp", whatsappRoutes);
 app.use("/api/voice", voiceRoutes);

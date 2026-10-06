@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getCreatorRef } from "../utils/creatorRef";
 import LoadingOverlay from "../component/LoadingOverlay";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRegion } from "../context/RegionContext";
@@ -726,19 +727,21 @@ const Booking = () => {
 
   // auth modal is derived from step/customer/isSubmitted
 
-  const validateCoupon = async () => {
-    if (!couponCode.trim()) return;
+  const validateCoupon = async (codeArg) => {
+    const code = (typeof codeArg === "string" ? codeArg : couponCode).trim();
+    if (!code) return;
     setCouponLoading(true);
     setCouponError("");
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/coupons/validate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponCode.trim() }),
+        // Email: creator-code discounts can be for a customer's first booking only.
+        body: JSON.stringify({ code, email: formData.email || customer?.email || "" }),
       });
       const data = await res.json();
       if (data.valid) {
-        setCouponApplied({ code: couponCode.trim().toUpperCase(), discountPercent: data.discountPercent });
+        setCouponApplied({ code: code.toUpperCase(), discountPercent: data.discountPercent });
         setCouponError("");
       } else {
         setCouponError(data.message || "Invalid coupon");
@@ -750,6 +753,21 @@ const Booking = () => {
       setCouponLoading(false);
     }
   };
+
+  // Came from a creator's link, or signed up with a referral code: the creator's code is
+  // filled in and applied (any discount follows the admin's Commission settings).
+  useEffect(() => {
+    if (couponApplied || couponCode) return;
+    const apply = (code) => { setCouponCode(code); validateCoupon(code); };
+    const ref = getCreatorRef();
+    if (ref) return apply(ref);
+    const token = localStorage.getItem("ciq_customer_token");
+    if (!token) return;
+    fetch(`${import.meta.env.VITE_API_URL}/creators/my-referral`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => { if (d?.code) apply(d.code); })
+      .catch(() => {});
+  }, [customer]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const removeCoupon = () => {
     setCouponApplied(null);
