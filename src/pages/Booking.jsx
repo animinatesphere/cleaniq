@@ -754,14 +754,20 @@ const Booking = () => {
     }
   };
 
-  // Came from a creator's link: their code is filled in and applied.
+  // Came from a creator's link, or signed up with a referral code: the creator's code is
+  // filled in and applied (any discount follows the admin's Commission settings).
   useEffect(() => {
+    if (couponApplied || couponCode) return;
+    const apply = (code) => { setCouponCode(code); validateCoupon(code); };
     const ref = getCreatorRef();
-    if (ref && !couponApplied && !couponCode) {
-      setCouponCode(ref);
-      validateCoupon(ref);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (ref) return apply(ref);
+    const token = localStorage.getItem("ciq_customer_token");
+    if (!token) return;
+    fetch(`${import.meta.env.VITE_API_URL}/creators/my-referral`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => { if (d?.code) apply(d.code); })
+      .catch(() => {});
+  }, [customer]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const removeCoupon = () => {
     setCouponApplied(null);

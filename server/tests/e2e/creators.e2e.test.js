@@ -58,6 +58,7 @@ test.before(async () => {
   app.use(express.json());
   app.use("/api/creators", require("../../routes/creators"));
   app.use("/api/coupons", require("../../routes/coupons"));
+  app.use("/api/customer-auth", require("../../routes/customer-auth"));
   server = app.listen(0);
   base = `http://127.0.0.1:${server.address().port}/api`;
 });
@@ -208,6 +209,30 @@ test("instant quote with the code: discount on the quote; accepting tags the boo
   const b = await Booking.findOne({ bookingId: `Q-${q.quoteRef}-1` }).lean();
   assert.equal(String(b.creator.id), String(amaka._id));
   assert.equal(b.creatorCommission.status, "pending");
+});
+
+test("sign-up with a referral code links the customer; a wrong code is caught before the email code", async () => {
+  const bad = await call("POST", "/customer-auth/register", { firstName: "Ref", lastName: "One", email: "ref1@cust.uk", password: "secret12", referralCode: "NOPE99" });
+  assert.equal(bad.status, 400);
+  assert.match(bad.data.message, /referral code/i);
+  assert.equal(await Customer.exists({ email: "ref1@cust.uk" }), null);
+
+  const ok = await call("POST", "/customer-auth/register", { firstName: "Ref", lastName: "One", email: "ref1@cust.uk", password: "secret12", referralCode: "amaka" });
+  assert.equal(ok.status, 201);
+  assert.equal((await call("GET", "/creators/my-referral", null, ok.data.token)).data.code, "AMAKA");
+
+  // Their bookings count for the creator, even without typing the code again.
+  await call("PUT", `/creators/admin/${amaka._id}`, { countRule: "forever" }, adminToken);
+  const b = await book("ref1@cust.uk");
+  assert.equal(String((await Booking.findById(b._id)).creator.id), String(amaka._id));
+
+  // Sign-up with email verification carries the code through too.
+  const otp = await call("POST", "/customer-auth/send-otp", { firstName: "Ref", lastName: "Two", email: "ref2@cust.uk", password: "secret12", referralCode: "AMAKA" });
+  assert.equal(otp.status, 200);
+  const code = emails.filter((e) => e.to === "ref2@cust.uk").at(-1).html.match(/>(\d{6})</)[1];
+  const verified = await call("POST", "/customer-auth/verify-otp", { email: "ref2@cust.uk", code });
+  assert.equal(verified.status, 201);
+  assert.equal((await call("GET", "/creators/my-referral", null, verified.data.token)).data.code, "AMAKA");
 });
 
 test("a paused (inactive) creator's code stops working", async () => {

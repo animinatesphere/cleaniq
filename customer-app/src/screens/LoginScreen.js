@@ -16,7 +16,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import {
   Mail, Lock, Eye, EyeOff, User, Phone, ChevronRight,
-  X, AlertCircle, ShieldCheck, CheckCircle2, KeyRound, ArrowLeft,
+  X, AlertCircle, ShieldCheck, CheckCircle2, KeyRound, ArrowLeft, Gift,
 } from "lucide-react-native";
 import { AuthContext } from "../context/AuthContext";
 import { C } from "../theme/flat";
@@ -96,6 +96,7 @@ const LoginScreen = ({ navigation, route }) => {
   const [lastName, setLastName]             = useState("");
   const [signupEmail, setSignupEmail]       = useState("");
   const [phone, setPhone]                   = useState("");
+  const [referralCode, setReferralCode]     = useState(""); // creator / influencer code (optional)
   const [signupPassword, setSignupPassword] = useState("");
   const [confirmPwd, setConfirmPwd]         = useState("");
   const [showSignupPwd, setShowSignupPwd]   = useState(false);
@@ -156,7 +157,7 @@ const LoginScreen = ({ navigation, route }) => {
     setLoading(true);
     const result = await sendOtp(
       firstName.trim(), lastName.trim(),
-      signupEmail.trim().toLowerCase(), phone.trim(), signupPassword,
+      signupEmail.trim().toLowerCase(), phone.trim(), signupPassword, referralCode.trim(),
     );
     setLoading(false);
     if (result.success) {
@@ -201,7 +202,7 @@ const LoginScreen = ({ navigation, route }) => {
 
   const handleResendOtp = async () => {
     setLoading(true);
-    await sendOtp(firstName.trim(), lastName.trim(), signupEmail.trim().toLowerCase(), phone.trim(), signupPassword);
+    await sendOtp(firstName.trim(), lastName.trim(), signupEmail.trim().toLowerCase(), phone.trim(), signupPassword, referralCode.trim());
     setLoading(false);
     setOtpDigits(["", "", "", "", "", ""]);
     otpRefs.current[0]?.focus();
@@ -622,6 +623,13 @@ const LoginScreen = ({ navigation, route }) => {
                     onChangeText={setPhone}
                     keyboardType="phone-pad"
                     autoCapitalize="none"
+                  />
+                  <Field
+                    icon={<Gift size={18} color={tc(C.textMuted)} />}
+                    placeholder="Referral code (optional)"
+                    value={referralCode}
+                    onChangeText={(v) => setReferralCode(v.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                    autoCapitalize="characters"
                   />
                   <Field
                     icon={<Lock size={18} color={tc(C.textMuted)} />}

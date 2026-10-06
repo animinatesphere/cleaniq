@@ -43,6 +43,18 @@ router.post("/click", async (req, res) => {
   }
 });
 
+// The creator code a signed-in customer was referred with (filled in at checkout).
+router.get("/my-referral", verifyCustomer, async (req, res) => {
+  try {
+    const link = await require("../models/CreatorCustomer").findOne({ email: String(req.customer?.email || "").toLowerCase() }).lean();
+    if (!link) return res.json({ code: null });
+    const creator = await Customer.findOne({ _id: link.creatorId, role: "creator", "creator.active": true }).lean();
+    res.json({ code: creator?.creator?.code || null });
+  } catch {
+    res.json({ code: null });
+  }
+});
+
 // ── Creator ──────────────────────────────────────────────────────────────────────────────
 async function loadCreator(req, res, next) {
   const me = await Customer.findById(req.customer?.id).catch(() => null);

@@ -463,19 +463,20 @@ const BookingScreen = ({ navigation, route }) => {
     return true;
   };
 
-  const validateCoupon = async () => {
-    if (!couponCode.trim()) return;
+  const validateCoupon = async (codeArg) => {
+    const code = (typeof codeArg === "string" ? codeArg : couponCode).trim();
+    if (!code) return;
     setCouponLoading(true);
     setCouponError("");
     try {
       const res = await fetch(`${API_URL}/coupons/validate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponCode.trim(), email }),
+        body: JSON.stringify({ code, email }),
       });
       const data = await res.json();
       if (data.valid) {
-        setCouponApplied({ code: couponCode.trim().toUpperCase(), discountPercent: data.discountPercent });
+        setCouponApplied({ code: code.toUpperCase(), discountPercent: data.discountPercent });
         setCouponError("");
       } else {
         setCouponError(data.message || "Invalid coupon code");
@@ -487,6 +488,25 @@ const BookingScreen = ({ navigation, route }) => {
       setCouponLoading(false);
     }
   };
+
+  // Signed up with a creator's referral code: their code is filled in and applied here.
+  useEffect(() => {
+    if (!email) return;
+    let live = true;
+    (async () => {
+      try {
+        const token = await AsyncStorage.getItem("customerToken");
+        if (!token) return;
+        const r = await fetch(`${API_URL}/creators/my-referral`, { headers: { Authorization: `Bearer ${token}` } });
+        const d = await r.json();
+        if (live && d?.code && !couponApplied && !couponCode) {
+          setCouponCode(d.code);
+          validateCoupon(d.code);
+        }
+      } catch { /* no referral */ }
+    })();
+    return () => { live = false; };
+  }, [email]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const nextStep = () => {
     if (!validate()) return;

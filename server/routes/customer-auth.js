@@ -48,6 +48,26 @@ const verifyCustomer = (req, res, next) => {
   }
 };
 
+// Referral codes at sign-up: a creator / influencer code links the new customer to that creator,
+// so their bookings count for the creator by the admin's rule (utils/creators.js).
+async function checkReferral(code, email) {
+  const c = String(code || '').trim();
+  if (!c) return {};
+  const r = await require('../utils/creators').checkCode(c, email);
+  if (!r.valid) return { error: r.message || "That referral code wasn't found. Check it, or leave it empty." };
+  return { code: r.creator.creator.code };
+}
+async function linkReferral(code, email) {
+  if (!code) return;
+  try {
+    const creators = require('../utils/creators');
+    const creator = await creators.findCreatorByCode(code);
+    if (creator) await creators.linkCustomer(email, creator);
+  } catch (e) {
+    console.error('Referral link error:', e.message);
+  }
+}
+
 // POST /api/customer-auth/send-otp  — generate & email a 6-digit OTP
 router.post('/send-otp', async (req, res) => {
   try {
@@ -59,13 +79,16 @@ router.post('/send-otp', async (req, res) => {
     if (existing) {
       return res.status(409).json({ message: 'An account with this email already exists.' });
     }
+    // Optional creator / influencer referral code: checked now so a typo can be fixed.
+    const referral = await checkReferral(req.body.referralCode, email);
+    if (referral.error) return res.status(400).json({ message: referral.error });
 
     // Generate 6-digit OTP
     const code = String(Math.floor(100000 + Math.random() * 900000));
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
     // Store pending registration data + OTP
-    otpStore.set(email.toLowerCase(), { code, expiresAt, pendingData: { firstName, lastName, email: email.toLowerCase(), phone: phone || '', password } });
+    otpStore.set(email.toLowerCase(), { code, expiresAt, pendingData: { firstName, lastName, email: email.toLowerCase(), phone: phone || '', password, referralCode: referral.code || '' } });
 
     // Send OTP email
     await sendEmail({
@@ -120,7 +143,7 @@ router.post('/verify-otp', async (req, res) => {
 
     // Code correct — create the account
     otpStore.delete(email.toLowerCase());
-    const { firstName, lastName, phone, password } = entry.pendingData;
+    const { firstName, lastName, phone, password, referralCode } = entry.pendingData;
 
     // Double-check email not taken while waiting
     const existing = await Customer.findOne({ email: email.toLowerCase() });
@@ -130,6 +153,7 @@ router.post('/verify-otp', async (req, res) => {
     const customer = new Customer({ firstName, lastName, email: email.toLowerCase(), phone, passwordHash });
     await customer.save();
     await captureCustomerLead(customer);
+    await linkReferral(referralCode, customer.email);
 
     const token = jwt.sign(
       { id: customer._id, email: customer.email, firstName: customer.firstName, lastName: customer.lastName, role: customer.role || 'customer' },
@@ -156,10 +180,13 @@ router.post('/register', async (req, res) => {
     if (existing) {
       return res.status(409).json({ message: 'An account with this email already exists.' });
     }
+    const referral = await checkReferral(req.body.referralCode, email);
+    if (referral.error) return res.status(400).json({ message: referral.error });
     const passwordHash = await bcrypt.hash(password, 12);
     const customer = new Customer({ firstName, lastName, email: email.toLowerCase(), phone: phone || '', passwordHash });
     await customer.save();
     await captureCustomerLead(customer);
+    await linkReferral(referral.code, customer.email);
 
     const token = jwt.sign(
       { id: customer._id, email: customer.email, firstName: customer.firstName, lastName: customer.lastName, role: customer.role || 'customer' },
