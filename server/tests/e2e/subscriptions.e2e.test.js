@@ -127,7 +127,7 @@ test("website: first clean paid + card saved → active regular clean with weekl
   const gaps = visits.map((v, i) => (i ? (new Date(v.schedule.date) - new Date(visits[i - 1].schedule.date)) / DAY : 7));
   assert.ok(gaps.every((g) => Math.round(g) === 7), "every visit is a week apart");
   for (const v of visits) {
-    assert.equal(v.status, "Confirmed");
+    assert.equal(v.status, "Pending", "unpaid visits aren't confirmed (or shown to cleaners) until charged");
     assert.equal(v.payment.status, "Pending");
     assert.equal(v.payment.chargeOnArrival, true);
     assert.equal(v.payment.amount, 41);
@@ -230,14 +230,14 @@ test("customer can see, pause, resume and cancel only their own regular clean", 
 
   const resumed = await call("POST", `/subscriptions/my/${sub._id}/resume`, null, jane);
   assert.equal(resumed.data.status, "active");
-  const active = (await visitsOf(sub)).filter((v) => v.status === "Confirmed" && v.payment.status === "Pending");
+  const active = (await visitsOf(sub)).filter((v) => v.status === "Pending" && v.payment.status === "Pending");
   assert.ok(active.length >= 5);
   const weekday = new Date(sub.startDate).getDay();
   assert.ok(active.every((v) => new Date(v.schedule.date).getDay() === weekday), "same weekday as before");
 
   const cancelled = await call("POST", `/subscriptions/my/${sub._id}/cancel`, null, jane);
   assert.equal(cancelled.data.status, "cancelled");
-  assert.equal((await visitsOf(sub)).filter((v) => v.status === "Confirmed" && v.payment.status === "Pending").length, 0);
+  assert.equal((await visitsOf(sub)).filter((v) => v.status === "Pending" && v.payment.status === "Pending").length, 0);
 });
 
 test("admin lists regular cleans (login required)", async () => {
@@ -524,7 +524,7 @@ test("declined 48h before: payment link + admin alert; retried 24h before; still
   assert.match(b.meta.cancelledReason, /Not paid 12 hours/);
   assert.equal(callsOf("checkout.expire").length, expiredBefore + 1, "payment link closed");
   assert.equal((await Subscription.findById(s._id)).status, "active");
-  assert.equal((await Booking.findById(third._id)).status, "Confirmed", "next week's clean still on");
+  assert.equal((await Booking.findById(third._id)).status, "Pending", "next week's clean still on (paid nearer the time)");
   assert.ok(await require("../../models/Notification").exists({ title: "Job cancelled", bookingId: b.bookingId }));
   await new Promise((res) => setTimeout(res, 20));
   assert.ok(emails.some((e) => e.to === "adv-fail@test.com" && /has been cancelled/.test(e.subject)));

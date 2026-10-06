@@ -79,6 +79,8 @@ const bookingSchema = new mongoose.Schema({
   isShift: { type: Boolean, default: false, index: true }, // on each shift
   parentBooking: { type: mongoose.Schema.Types.ObjectId, ref: "Booking", default: null, index: true },
   shiftNumber: { type: Number, default: null },
+  // When cleaners were told this job is available (utils/jobAnnounce.js) — only ever once.
+  jobAnnouncedAt: { type: Date, default: null },
   // Booking that came through a creator / influencer (utils/creators.js).
   creator: {
     id:   { type: mongoose.Schema.Types.ObjectId, ref: "Customer", default: null, index: true },
